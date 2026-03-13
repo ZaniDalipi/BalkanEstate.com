@@ -125,10 +125,14 @@ export interface IUser extends Document {
     externalSubscriptionId?: string;
 
     // Listing limits (for sellers: free/pro/agency)
-    listingsLimit: number; // 3 for free, 20 for pro/agency agents
+    listingsLimit: number; // 3 for free, 20 for pro, 30 for agency agents (per month)
     activeListingsCount: number; // Current active listings
     privateSellerCount: number; // Posted as private seller
     agentCount: number; // Posted as agent
+
+    // Monthly listing tracking (for agency agents - 30/month)
+    monthlyListingsCreated?: number; // Listings created this month (agency agents only)
+    listingsMonthResetDate?: Date; // When the monthly counter resets
 
     // Promotion Coupons (for Pro and Agency users)
     promotionCoupons?: {
@@ -622,6 +626,15 @@ const UserSchema: Schema = new Schema(
       agentCount: {
         type: Number,
         default: 0,
+      },
+
+      // Monthly listing tracking (for agency agents - 30/month)
+      monthlyListingsCreated: {
+        type: Number,
+        default: 0,
+      },
+      listingsMonthResetDate: {
+        type: Date,
       },
 
       // Promotion coupons

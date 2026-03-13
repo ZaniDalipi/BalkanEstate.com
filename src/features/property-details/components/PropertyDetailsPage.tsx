@@ -92,7 +92,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       // If the property being viewed was deleted, go back to the appropriate listing page
       if (data.propertyId === property.id) {
         const isRental = property.listingType === 'rent';
-        navigate(isRental ? '/rentals' : '/search');
+        navigate(isRental ? '/rentals' : '/search', { direction: 'back' });
       }
     },
   });
@@ -239,12 +239,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     // Use browser history for proper PWA back navigation
     // This preserves the user's navigation context (e.g., coming from saved properties, agents, etc.)
     if (window.history.length > 1) {
+      // popstate handler in NavigationProvider will auto-detect back direction
       window.history.back();
     } else {
       // Fallback for direct navigation (e.g., shared link with no history)
       dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
       const isRental = property.listingType === 'rent';
-      navigate(isRental ? '/rentals' : '/search');
+      navigate(isRental ? '/rentals' : '/search', { direction: 'back' });
     }
   };
 
@@ -821,12 +822,17 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             {/* 360 Virtual Tour is now shown as a badge in the gallery and can be opened from there */}
             {/* Video Tour (YouTube/Vimeo) is now integrated in the PropertyGallery as the first view */}
 
-            {/* Social Video Embed - TikTok, Instagram (these need special embed) */}
-            {property.tourUrl && (property.tourUrl.includes('tiktok.com') || property.tourUrl.includes('instagram.com')) && (
-              <div className="animate-slide-up" style={{ animationDelay: '125ms' }}>
-                <SocialVideoEmbed videoUrl={property.tourUrl} />
-              </div>
-            )}
+            {/* Social Video Embed - TikTok, Instagram (fallback embed below gallery) */}
+            {(() => {
+              const socialVideoUrl = [property.tourUrl, property.videoUrl].find(
+                url => url && (url.includes('tiktok.com') || url.includes('instagram.com'))
+              );
+              return socialVideoUrl ? (
+                <div className="animate-slide-up" style={{ animationDelay: '125ms' }}>
+                  <SocialVideoEmbed videoUrl={socialVideoUrl} />
+                </div>
+              ) : null;
+            })()}
 
             {/* Property Info (Desktop only - mobile version shown above) */}
             <div className="hidden lg:block animate-slide-up" style={{ animationDelay: '100ms' }}>

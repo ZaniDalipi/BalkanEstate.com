@@ -490,6 +490,35 @@ export const getAvailableOAuthProviders = async (): Promise<{ google: boolean; a
   }
 };
 
+/**
+ * Detects if the current browser is an embedded webview (in-app browser).
+ * Google blocks OAuth requests from embedded webviews (Error 403: disallowed_useragent).
+ */
+export const isEmbeddedWebView = (): boolean => {
+  const ua = navigator.userAgent || '';
+  const embeddedIndicators = [
+    'FBAN', 'FBAV',         // Facebook
+    'Instagram',             // Instagram
+    'BytedanceWebview',      // TikTok
+    'musical_ly',            // TikTok (older)
+    'Snapchat',              // Snapchat
+    'Twitter',               // Twitter/X
+    'Line/',                 // Line
+    'MicroMessenger',        // WeChat
+    'LinkedIn',              // LinkedIn
+  ];
+  if (embeddedIndicators.some(indicator => ua.includes(indicator))) {
+    return true;
+  }
+  if (/; wv\)/.test(ua)) {
+    return true;
+  }
+  if (/iPhone|iPad|iPod/.test(ua) && /AppleWebKit/.test(ua) && !/Safari/.test(ua)) {
+    return true;
+  }
+  return false;
+};
+
 export const getOAuthUrl = (provider: 'google' | 'apple'): string => {
   // Ensure we have a valid absolute URL for OAuth redirects
   let baseUrl = API_URL.replace('/api', '');
@@ -508,7 +537,7 @@ export const loginWithSocial = (provider: 'google' | 'apple'): void => {
 };
 
 // Email Verification Functions
-export const verifyEmail = async (token: string): Promise<{ success: boolean; message: string; user?: User }> => {
+export const verifyEmail = async (token: string): Promise<{ success: boolean; message: string; user?: User; accessToken?: string }> => {
   const response = await apiRequest<{ success: boolean; message: string; user?: User; accessToken?: string; refreshToken?: string }>('/auth/verify-email', {
     method: 'POST',
     body: { token },

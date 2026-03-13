@@ -8,7 +8,7 @@
     "asRole": "({{count}} si {{role}})",
     "listings": "Listime",
     "limitReachedShared": "Limiti i përbashkët u arrit për të dy rolet.",
-    "limitReachedUpgrade": "Limiti i listimeve u arrit. Përmirësohuni në Pro për 25 listime!",
+    "limitReachedUpgrade": "Limiti i listimeve u arrit. Përmirësohuni në Pro për 30 listime!",
     "remainingListings": "{{count}} listim(e) të mbetura",
     "availableListings": "{{count}} listim(e) të disponueshme",
     "shared": "(i përbashkët)",
@@ -277,9 +277,9 @@
       "listingFailed": "Dështoi dërgimi i listimit."
     },
     "limits": {
-      "freeReached": "Keni arritur limitin tuaj falas prej 3 listimesh aktive. Abonohuni në Pro për 25 listime aktive!",
+      "freeReached": "Keni arritur limitin tuaj falas prej 3 listimesh aktive. Abonohuni në Pro për 30 listime aktive!",
       "proReached": "Keni arritur limitin tuaj Pro të listimeve.",
-      "agentProRequired": "Agjentët duhet të kenë një abonim aktiv Pro për të postuar listime. Abonohuni tani për 25 listime aktive!",
+      "agentProRequired": "Agjentët duhet të kenë një abonim aktiv Pro për të postuar listime. Abonohuni tani për 30 listime aktive!",
       "buyerCannotCreate": "Blerësit nuk mund të krijojnë listime pronash. Ju lutem kaloni në rolin Shitës Privat ose Agjent për të krijuar listime."
     }
   },
@@ -374,10 +374,10 @@
     "listingLimitReached": "Limiti i Listimeve u Arrit",
     "listingLimitMessage": "Keni arritur limitin tuaj {{tierName}} prej {{limit}} listimesh.",
     "freeListingLimitReached": "Limiti i Listimeve Falas u Arrit",
-    "freeListingLimitMessage": "Keni arritur limitin falas prej 3 listimesh aktive. Abonohuni në Pro për 25 listime aktive!",
+    "freeListingLimitMessage": "Keni arritur limitin falas prej 3 listimesh aktive. Abonohuni në Pro për 30 listime aktive!",
     "proListingLimitReached": "Limiti i Listimeve Pro u Arrit",
     "proSubscriptionRequired": "Kërkohet Abonim Pro",
-    "agentProRequiredMessage": "Agjentët duhet të kenë një abonim aktiv Pro për të postuar listime. Abonohuni tani për 25 listime aktive!",
+    "agentProRequiredMessage": "Agjentët duhet të kenë një abonim aktiv Pro për të postuar listime. Abonohuni tani për 30 listime aktive!",
     "switchRoleRequired": "Kërkohet Ndërrimi i Rolit",
     "buyerCannotCreateListing": "Blerësit nuk mund të krijojnë listime pronash. Ju lutem kaloni në rolin Shitës Privat ose Agjent."
   },

@@ -94,6 +94,43 @@ export async function processSubscriptionPayment(
     // eslint-disable-next-line prefer-const
     let subscription!: NonNullable<typeof existingSubscription>;
 
+    // Cancel any active subscriptions for DIFFERENT products (plan upgrade/switch)
+    if (!existingSubscription) {
+      const otherActiveSubscriptions = await Subscription.find({
+        userId,
+        productId: { $ne: productId },
+        status: { $in: ['active', 'grace', 'pending_cancellation'] },
+      }).session(session);
+
+      for (const oldSub of otherActiveSubscriptions) {
+        if (!isProduction) paymentLogger.info('🔄 Canceling old subscription for plan switch:', oldSub.productId, '→', productId);
+        oldSub.status = 'canceled' as any;
+        oldSub.canceledAt = new Date();
+        oldSub.autoRenewing = false;
+        oldSub.lastUpdated = new Date();
+        await oldSub.save({ session });
+
+        // Log the upgrade event
+        await SubscriptionEvent.create(
+          [{
+            subscriptionId: oldSub._id,
+            userId,
+            eventType: 'subscription_canceled',
+            store,
+            hasFinancialImpact: false,
+            amount: 0,
+            currency,
+            productId: oldSub.productId,
+            metadata: {
+              reason: 'plan_upgrade',
+              newProductId: productId,
+            },
+          }],
+          { session }
+        );
+      }
+    }
+
     if (existingSubscription) {
       if (!isProduction) paymentLogger.info('🔄 Renewing existing subscription:', existingSubscription._id);
       // Renew existing subscription

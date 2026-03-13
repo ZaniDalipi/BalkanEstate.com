@@ -5,7 +5,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/src/shared/api/httpClient';
+import { apiRequest, uploadRequest } from '@/src/shared/api/httpClient';
 
 // ============================================================================
 // Types
@@ -39,6 +39,7 @@ export interface SiteSettings {
   companyName: string;
   companyNameFormatted: string;
   logoUrl: string;
+  logoPublicId?: string;
   faviconUrl: string;
   supportEmail: string;
   noReplyEmail: string;
@@ -49,7 +50,9 @@ export interface SiteSettings {
   backendUrl: string;
   socialLinks: SocialLinks;
   emailLogoUrl: string;
+  emailLogoPublicId?: string;
   emailBrandColors: EmailBrandColors;
+  emailBrandColorsDark: EmailBrandColors;
   emailFooterText: string;
   emailFooterLinks: EmailFooterLink[];
   siteTitle: string;
@@ -85,6 +88,28 @@ async function resetSiteSettings(): Promise<{ message: string; settings: SiteSet
     method: 'POST',
     requiresAuth: true,
   });
+}
+
+async function uploadSiteLogo(
+  file: File
+): Promise<{ message: string; settings: SiteSettings; uploadResult: { url: string; publicId: string } }> {
+  const formData = new FormData();
+  formData.append('logo', file);
+  return uploadRequest<{ message: string; settings: SiteSettings; uploadResult: { url: string; publicId: string } }>(
+    '/admin/site-settings/upload-logo',
+    formData
+  );
+}
+
+async function uploadEmailLogo(
+  file: File
+): Promise<{ message: string; settings: SiteSettings; uploadResult: { url: string; publicId: string } }> {
+  const formData = new FormData();
+  formData.append('logo', file);
+  return uploadRequest<{ message: string; settings: SiteSettings; uploadResult: { url: string; publicId: string } }>(
+    '/admin/site-settings/upload-email-logo',
+    formData
+  );
 }
 
 // ============================================================================
@@ -134,6 +159,34 @@ export function useResetSiteSettings() {
 
   return useMutation({
     mutationFn: resetSiteSettings,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: siteSettingsKeys.all });
+    },
+  });
+}
+
+/**
+ * useUploadSiteLogo - Mutation to upload site logo image
+ */
+export function useUploadSiteLogo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (file: File) => uploadSiteLogo(file),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: siteSettingsKeys.all });
+    },
+  });
+}
+
+/**
+ * useUploadEmailLogo - Mutation to upload email logo image
+ */
+export function useUploadEmailLogo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (file: File) => uploadEmailLogo(file),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: siteSettingsKeys.all });
     },

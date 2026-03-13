@@ -49,10 +49,10 @@ export const AGENCY_AGENT_PLAN: Plan = {
   id: 'agency_agent_yearly',
   name: 'Agency Pro',
   price: 0,
-  period: 'year',
-  periodMonths: 12,
-  features: ['25 active listings', 'Unlimited saved searches', 'Unlimited AI chat', 'Full analytics', 'Agency team support'],
-  listingLimit: 25, // Fallback — overridden by DB Product.listingsLimit when available
+  period: 'month',
+  periodMonths: 1,
+  features: ['30 active listings per month', 'Unlimited saved searches', 'Unlimited AI chat', 'Full analytics', 'Agency team support'],
+  listingLimit: 30, // Fallback — overridden by DB Product.listingsLimit when available
   color: 'from-emerald-500 to-teal-600',
   tier: 2,
   badge: 'Agency Member',
@@ -84,7 +84,7 @@ export const LISTING_LIMITS: Record<string, number> = {
   pro_yearly: 250,
   enterprise_yearly: 500,
   agency_yearly: 100,
-  agency_agent_yearly: 25, // Fallback — overridden by DB Product.listingsLimit when available
+  agency_agent_yearly: 30, // Fallback — overridden by DB Product.listingsLimit when available (30/month)
 };
 
 // Tier determination by product ID

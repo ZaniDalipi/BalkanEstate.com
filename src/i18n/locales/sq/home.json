@@ -47,6 +47,13 @@
     "baths": "{{count}} banjo",
     "baths_plural": "{{count}} banjo",
     "sqm": "{{count}} m²",
+    "bedsLabel": "Dhoma",
+    "bathsLabel": "Banjo",
+    "builtLabel": "Ndërtuar",
+    "viewProperty": "Shiko Pronën",
+    "forRent": "Me Qira",
+    "forSale": "Në Shitje",
+    "perMonth": "/muaj",
     "promoted": "E Promovuar",
     "new": "E Re",
     "priceReduced": "Çmim i Ulur"
@@ -67,18 +74,32 @@
     "title": "Eksploroni Qytete Popullar",
     "subtitle": "Zbuloni mundësi në qytetet më të kërkuara të Ballkanit",
     "viewAll": "Eksploroni Të Gjitha Qytetet",
-    "propertiesCount": "{{count}} prona"
+    "propertiesCount": "{{count}} prona",
+    "noData": "Nuk ka qytete të veçuara ende.",
+    "trend_rising": "Në Rritje",
+    "trend_stable": "Stabil",
+    "trend_declining": "Në Rënie"
   },
   "howItWorks": {
     "title": "Si Funksionon",
     "subtitle": "Të fillosh është e thjeshtë — pavarësisht nëse blini, shisni ose jepni me qira",
+    "stepLabel": "Hapi",
     "step1Title": "Kërko & Zbulo",
     "step1Desc": "Përdorni kërkimin tonë me AI ose filtrat për të gjetur prona në 11 vende të Ballkanit.",
     "step2Title": "Lidhuni me Agjentë",
     "step2Desc": "Dërgoni mesazhe direkt agjentëve, planifikoni vizita dhe merrni udhëzime lokale.",
     "step3Title": "Mbyllni Marrëveshjen",
     "step3Desc": "Përdorni mjetet tona — kalkulatorin e hipotekës, vlerësimin e pronës dhe udhëzuesit.",
-    "learnMore": "Mëso Më Shumë"
+    "learnMore": "Mëso Më Shumë",
+    "participant_buyer": "Blerës",
+    "participant_renter": "Qiramarrës",
+    "participant_investor": "Investitor",
+    "participant_agent": "Agjent",
+    "participant_seller": "Shitës",
+    "participant_negotiation": "Negociata",
+    "participant_contract": "Kontratë",
+    "participant_keys": "Çelësat",
+    "participant_moveIn": "Transferimi"
   },
   "cta": {
     "sellerTitle": "Gati të Shisni Pronën Tuaj?",
@@ -88,15 +109,67 @@
     "agentSubtitle": "Bashkohuni me rrjetin tonë të agjentëve. Merrni kontakte dhe rritni biznesin.",
     "agentButton": "Bashkohu si Agjent"
   },
+  "news": {
+    "badge": "Lajme të Pasurive",
+    "title": "Më të Fundit nga",
+    "titleHighlight": "Tregu Ballkanik",
+    "subtitle": "Lajme të kuruara me AI nga i gjithë rajoni. Klikoni çdo artikull për të lexuar historinë e plotë nga burimi origjinal.",
+    "readOriginal": "Lexo Origjinalin",
+    "filterAll": "Të Gjitha",
+    "noNews": "Nuk ka lajme për këtë vend ende.",
+    "category_market": "Tregu",
+    "category_investment": "Investim",
+    "category_regulation": "Rregullim",
+    "category_development": "Zhvillim",
+    "category_tourism": "Turizëm"
+  },
   "showcase": {
     "badge": "Si Funksionon",
     "title": "Gjithçka që Ju Duhet,",
     "titleHighlight": "Në Një Vend",
-    "subtitle": "Kërkim i fuqizuar nga AI, harta interaktive 3D, mesazhe në kohë reale, kalkulatorë financiarë dhe promovim listash — shikoni si funksionon platforma për blerës, shitës, agjentë dhe agjenci."
+    "subtitle": "Kërkim i fuqizuar nga AI, harta interaktive 3D, mesazhe në kohë reale, kalkulatorë financiarë dhe promovim listash — shikoni si funksionon platforma për blerës, shitës, agjentë dhe agjenci.",
+    "platformFeatures": "Veçoritë e Platformës",
+    "exploreGuide": "Eksploroni Udhëzuesin e Plotë",
+    "browseProperties": "Shfleto Pronat",
+    "viewFullGuide": "Shiko Udhëzuesin e Plotë",
+    "explore": "Eksploro",
+    "tabAll": "Të Gjitha",
+    "feature_aiSearch_title": "Kërkim me AI",
+    "feature_aiSearch_desc": "Përshkruani pronën tuaj të ëndrrave në gjuhë natyrale dhe lëreni AI të gjejë përputhje perfekte në 11 vende.",
+    "feature_3dMap_title": "Hartë Interaktive 3D",
+    "feature_3dMap_desc": "Eksploroni listat në një hartë 3D me dritë dielli në kohë reale, kërkim me vizatim dhe pika interesi.",
+    "feature_messaging_title": "Mesazhe në Kohë Reale",
+    "feature_messaging_desc": "Bisedoni direkt me agjentë dhe shitës të verifikuar. Planifikoni vizita dhe negocioni në aplikacion.",
+    "feature_valuation_title": "Vlerësim i Pronës",
+    "feature_valuation_desc": "Vlerësime çmimesh me AI, trende tregu, rezultate lagjesh dhe projeksione ROI investimi.",
+    "feature_calculators_title": "Kalkulatorë Financiarë",
+    "feature_calculators_desc": "Kalkulator hipoteke, krahasim qira vs blerje dhe mjete ROI investimi për vendime të informuara.",
+    "feature_promotions_title": "Promovime Listash",
+    "feature_promotions_desc": "Rritni dukshmërinë me nivelet Highlight, Featured ose Premium. Deri në 5x më shumë shikime.",
+    "feature_languages_title": "10 Gjuhë",
+    "feature_languages_desc": "Shfletoni të gjithë platformën në gjuhën tuaj amtare. Mbështetje e plotë për të gjitha gjuhët ballkanike.",
+    "feature_profiles_title": "Profile Agjencish & Agjentësh",
+    "feature_profiles_desc": "Bashkohuni si agjent i pavarur ose krijoni agjenci. Menaxhoni ekipe, kupona dhe analitikë."
+  },
+  "topAgents": {
+    "badge": "Agjentët Kryesorë të Javës",
+    "title": "Njihuni me Agjentët Tanë Më të Mirë",
+    "subtitle": "Renditur sipas shitjeve, vlerësimeve dhe kënaqësisë së klientëve këtë javë",
+    "sold": "shitur",
+    "active": "aktive"
+  },
+  "topAgencies": {
+    "badge": "Agjencitë e Muajit",
+    "title": "Agjencitë Kryesore të Pasurive",
+    "subtitle": "Agjencitë me performancën më të lartë me më shumë lista, agjentë dhe besim të klientëve",
+    "listings": "lista",
+    "agents": "agjentë",
+    "years": "vite"
   },
   "testimonials": {
     "title": "Çfarë Thonë Përdoruesit Tanë",
-    "subtitle": "I besuar nga mijëra blerës, shitës dhe agjentë në Ballkan"
+    "subtitle": "I besuar nga mijëra blerës, shitës dhe agjentë në Ballkan",
+    "emptyState": "Dëshmitë do të shfaqen këtu kur përdoruesit ndajnë përvojat e tyre."
   },
   "newsletter": {
     "title": "Qëndroni të Përditësuar",

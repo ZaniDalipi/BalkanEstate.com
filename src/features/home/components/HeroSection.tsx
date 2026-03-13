@@ -100,7 +100,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   // Reuse same query key as PopularCitiesSection to avoid duplicate requests
   const { data: featuredCities = [] } = useQuery({
     queryKey: ['featuredCities'],
-    queryFn: () => getFeaturedCities(6),
+    queryFn: () => getFeaturedCities(50),
     staleTime: 10 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     retry: 2,
@@ -128,7 +128,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     return city;
   }, [currentLang, CITY_NAMES_SQ]);
 
-  const displayCities = useMemo(() => featuredCities.map(c => ({
+  const displayCities = useMemo(() => featuredCities.slice(0, 6).map(c => ({
     original: c.city,
     display: localizeCityName(c.city),
   })), [featuredCities, localizeCityName]);
@@ -246,24 +246,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         initial="hidden"
         animate="visible"
       >
-        {/* Badge — liquid glass pill */}
-        <motion.div className="flex justify-center mb-4 sm:mb-6" variants={fadeUp}>
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: '6px',
-            padding: '6px 14px', borderRadius: '9999px',
-            fontSize: '11px', fontWeight: 600,
-            color: '#1d4ed8',
-            background: 'rgba(239,246,255,0.7)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            border: '1px solid rgba(59,130,246,0.15)',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 3px rgba(59,130,246,0.08)',
-          }}>
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34d399' }} className="animate-pulse" />
-            {t('home:hero.badge')}
-          </span>
-        </motion.div>
-
         {/* Title */}
         <motion.h1
           className="text-center text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-tight max-w-3xl mx-auto"
@@ -282,7 +264,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
               />
             </span>
           </span>
-          <span className="text-slate-600 text-xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold">
+          <span className="block text-slate-600 text-xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold">
             {t('home:hero.titleEnd')}
           </span>
         </motion.h1>
@@ -299,6 +281,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         <motion.div className="mt-8 sm:mt-10 max-w-2xl mx-auto relative z-20" variants={fadeUp} ref={wrapperRef}>
           <div style={{
             position: 'relative',
+            zIndex: 10,
             borderRadius: '20px',
             background: isFocused
               ? 'rgba(255,255,255,0.9)'
@@ -345,7 +328,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setTimeout(() => setIsFocused(false), 200)}
                 placeholder={t('home:hero.searchPlaceholder')}
-                className="flex-1 py-3.5 sm:py-5 px-3 text-sm sm:text-base text-slate-900 placeholder-slate-400 bg-transparent outline-none min-w-0"
+                className="flex-1 py-3.5 sm:py-5 px-3 text-sm sm:text-base text-slate-900 placeholder-slate-400 bg-transparent outline-none focus:outline-none focus:ring-0 min-w-0"
+                style={{ boxShadow: 'none' }}
                 aria-label={t('home:hero.searchPlaceholder')}
               />
 

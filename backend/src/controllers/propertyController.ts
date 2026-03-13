@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import { escapeRegex } from '../utils/escapeRegex';
 import Property from '../models/Property';
 import User, { IUser } from '../models/User';
@@ -15,7 +16,8 @@ import {
 import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/highlightingUtils';
 import { recordPriceChange, processInstantAlertsForProperty, processInstantPriceDropForProperty } from '../jobs/propertyAlertsJob';
 import { trackUserActivity } from '../services/proBuyerEmailService';
-import { FREE_TIER_LIMITS, PRO_TIER_LIMITS } from '../config/subscriptionConstants';
+import { FREE_TIER_LIMITS, PRO_TIER_LIMITS, AGENCY_AGENT_LIMITS } from '../config/subscriptionConstants';
+import ArchivedListing from '../models/ArchivedListing';
 import { sanitizeProperty } from '../utils/responseSanitizer';
 import {
   emitPropertyCreated,
@@ -84,6 +86,8 @@ export const getProperties = async (
       status,
       page = 1,
       limit = 20,
+      cursor, // Cursor-based pagination: pass last item's _id from previous page
+      cursorCreatedAt, // Companion to cursor: the createdAt of the last item
     } = req.query;
 
     // Build filter object
@@ -131,11 +135,13 @@ export const getProperties = async (
     }
 
     if (city) {
-      filter.city = new RegExp(escapeRegex(city as string), 'i');
+      // Case-insensitive exact match using collation (index-friendly, unlike $regex)
+      filter.city = city as string;
     }
 
     if (country) {
-      filter.country = new RegExp(escapeRegex(country as string), 'i');
+      // Case-insensitive exact match using collation (index-friendly, unlike $regex)
+      filter.country = country as string;
     }
 
     // Filter by listing type (sale vs rent)
@@ -198,24 +204,36 @@ export const getProperties = async (
       filter.sellerId = req.query.sellerId;
     }
 
-    // Handle query search - search only in address and city, NOT description
-    // Use $and to preserve other filters like status
+    // Handle query search using MongoDB text index for performance
+    // Falls back to regex for very short queries (single char)
     if (query) {
-      const queryRegex = new RegExp(escapeRegex(query as string), 'i');
-      const queryConditions = [
-        { address: queryRegex },
-        { city: queryRegex },
-      ];
-
-      // If we already have $or (for status), use $and to combine them
-      if (filter.$or) {
-        filter.$and = [
-          { $or: filter.$or },
-          { $or: queryConditions }
-        ];
-        delete filter.$or;
+      const queryStr = query as string;
+      // Use $text search for multi-word or full-word queries (much faster with text index)
+      if (queryStr.trim().length >= 2) {
+        filter.$text = { $search: queryStr };
+        // Combine with existing $or for status conditions
+        if (filter.$or) {
+          filter.$and = filter.$and || [];
+          filter.$and.push({ $or: filter.$or });
+          delete filter.$or;
+        }
       } else {
-        filter.$or = queryConditions;
+        // Short single-char queries: fall back to regex
+        const queryRegex = new RegExp(escapeRegex(queryStr), 'i');
+        const queryConditions = [
+          { address: queryRegex },
+          { city: queryRegex },
+        ];
+
+        if (filter.$or) {
+          filter.$and = [
+            { $or: filter.$or },
+            { $or: queryConditions }
+          ];
+          delete filter.$or;
+        } else {
+          filter.$or = queryConditions;
+        }
       }
     }
 
@@ -245,39 +263,82 @@ export const getProperties = async (
     // Pagination
     const pageNum = Number(page);
     const limitNum = Number(limit);
-    const skip = (pageNum - 1) * limitNum;
+    const useCursor = cursor && cursorCreatedAt;
 
-    // Execute query with seller population
+    // Cursor-based pagination: more efficient for deep pages
+    // Instead of skip(N), we filter by "createdAt < cursorCreatedAt OR (createdAt == cursorCreatedAt AND _id < cursor)"
+    if (useCursor) {
+      const cursorDate = new Date(cursorCreatedAt as string);
+      const cursorId = new (mongoose.Types.ObjectId as any)(cursor as string);
+      const cursorCondition = {
+        $or: [
+          { createdAt: { $lt: cursorDate } },
+          { createdAt: cursorDate, _id: { $lt: cursorId } },
+        ],
+      };
+      // Merge cursor condition with existing filters
+      if (filter.$and) {
+        filter.$and.push(cursorCondition);
+      } else if (filter.$or) {
+        filter.$and = [{ $or: filter.$or }, cursorCondition];
+        delete filter.$or;
+      } else {
+        filter.$and = [cursorCondition];
+      }
+    }
+
+    const skip = useCursor ? 0 : (pageNum - 1) * limitNum;
+
+    // List-view projection: exclude heavy fields not needed in listings
+    const LIST_PROJECTION = {
+      description: 0,
+      rentalHistory: 0,
+      priceIntervals: 0,
+      tenantRequirements: 0,
+      visitAvailability: 0,
+      specialFeatures: 0,
+      materials: 0,
+      'images.publicId': 0,
+    };
+
+    // Execute query with .lean() for 5-10x faster reads (plain JS objects, no Mongoose overhead)
     // Fetch more than needed to allow for promoted property sorting
-    const fetchLimit = limitNum * 2; // Fetch 2x to ensure we have enough promoted properties
-    let properties = await Property.find(filter)
-      .populate('sellerId', 'name email phone avatarUrl role agencyName agencyId')
-      .sort(sort)
-      .skip(skip)
-      .limit(fetchLimit);
+    const fetchLimit = Math.min(limitNum + 20, limitNum * 2); // Fetch slightly extra for promotion sort, capped
+    const [rawProperties, total] = await Promise.all([
+      Property.find(filter)
+        .select(LIST_PROJECTION)
+        .populate('sellerId', 'name email phone avatarUrl role agencyName agencyId')
+        .collation({ locale: 'en', strength: 2 }) // Case-insensitive matching for city/country
+        .sort(sort)
+        .skip(skip)
+        .limit(fetchLimit)
+        .lean(),
+      // Run count in parallel — skip for cursor mode (expensive on large datasets)
+      // For offset pagination on first page, use faster estimatedDocumentCount when no filters applied
+      useCursor
+        ? Promise.resolve(undefined)
+        : (Object.keys(filter).length <= 1 && filter.$or && !filter.$and && !filter.$text && pageNum === 1)
+          ? Property.estimatedDocumentCount()
+          : Property.countDocuments(filter),
+    ]);
+
+    let properties = rawProperties as any[];
 
     // Use centralized highlighting utility for sorting
-    // This handles:
-    // - Priority order: Premium > Highlight > Featured > Standard
-    // - Hourly rotation within same tier for fair exposure
-    // - Urgent badge bonus points
     const currentHour = new Date().getHours();
     properties = sortPropertiesWithHighlighting(properties, currentHour);
 
     // Log highlighting stats for monitoring
     const stats = getHighlightingStats(properties);
     if (stats.activePromotions > 0) {
-      propertyLogger.info(`📊 Highlighting stats: ${stats.premium} premium, ${stats.highlight} highlight, ${stats.featured} featured (rotation hour: ${currentHour})`);
+      propertyLogger.info(`Highlighting stats: ${stats.premium} premium, ${stats.highlight} highlight, ${stats.featured} featured (rotation hour: ${currentHour})`);
     }
 
     // Trim to requested limit after sorting
     properties = properties.slice(0, limitNum);
 
-    // Convert all properties to plain objects first (required for sanitizer)
-    const plainProperties = properties.map(p => p.toObject ? p.toObject() : p);
-
-    // Enrich properties with agency logos for agent sellers
-    const agencyIds = plainProperties
+    // Enrich properties with agency logos for agent sellers (already plain objects from .lean())
+    const agencyIds = properties
       .map(p => (p.sellerId as any)?.agencyId)
       .filter(Boolean);
 
@@ -291,8 +352,7 @@ export const getProperties = async (
         agencies.map(a => [String(a._id), a.logo])
       );
 
-      // Add agencyLogo to each property's seller
-      for (const prop of plainProperties) {
+      for (const prop of properties) {
         const seller = prop.sellerId as any;
         if (seller?.agencyId) {
           seller.agencyLogo = agencyLogoMap.get(String(seller.agencyId));
@@ -300,10 +360,7 @@ export const getProperties = async (
       }
     }
 
-    const enrichedProperties = plainProperties;
-
-    // Get total count for pagination
-    const total = await Property.countDocuments(filter);
+    const enrichedProperties = properties;
 
     // Track user activity for pro buyer email recommendations
     // Only track if user is authenticated (req.user from auth middleware)
@@ -322,13 +379,19 @@ export const getProperties = async (
     // Sanitize: strip PII (email, phone, license) from list responses
     const sanitizedProperties = enrichedProperties.map((p: any) => sanitizeProperty(p, 'list'));
 
+    // Build cursor for next page (last item in current results)
+    const lastItem = sanitizedProperties[sanitizedProperties.length - 1];
+    const nextCursor = lastItem ? { id: String(lastItem._id), createdAt: lastItem.createdAt } : null;
+
     res.json({
       properties: sanitizedProperties,
       pagination: {
-        page: pageNum,
+        page: useCursor ? undefined : pageNum,
         limit: limitNum,
-        total,
-        pages: Math.ceil(total / limitNum),
+        total: total as number | undefined,
+        pages: total ? Math.ceil((total as number) / limitNum) : undefined,
+        nextCursor,
+        hasMore: sanitizedProperties.length === limitNum,
       },
     });
   } catch (error: any) {
@@ -601,6 +664,41 @@ export const createProperty = async (
     // Check listing limits based on subscription tier
     const limit = user.subscription.listingsLimit || FREE_TIER_LIMITS.LISTINGS;
     const tier = user.subscription.tier || 'free';
+    const isAgencyAgent = tier === 'agency_agent';
+
+    // For agency agents: check and reset monthly listing counter
+    // Agency agents get 30 active listings per month, resetting from their subscription start date
+    if (isAgencyAgent) {
+      const now = new Date();
+      const resetDate = user.subscription.listingsMonthResetDate;
+      if (!resetDate || now >= resetDate) {
+        // Reset monthly counter and set next reset date (30 days from now)
+        const nextReset = new Date(now);
+        nextReset.setDate(nextReset.getDate() + 30);
+        nextReset.setHours(0, 0, 0, 0);
+        await User.findByIdAndUpdate(user._id, {
+          'subscription.monthlyListingsCreated': 0,
+          'subscription.listingsMonthResetDate': nextReset,
+        });
+        user.subscription.monthlyListingsCreated = 0;
+        user.subscription.listingsMonthResetDate = nextReset;
+      }
+
+      // Check monthly limit for agency agents (30 per month)
+      const monthlyLimit = AGENCY_AGENT_LIMITS.LISTINGS_PER_MONTH;
+      const monthlyCreated = user.subscription.monthlyListingsCreated || 0;
+      if (monthlyCreated >= monthlyLimit) {
+        res.status(403).json({
+          message: `You have reached your monthly limit of ${monthlyLimit} listings. Your limit resets on ${user.subscription.listingsMonthResetDate?.toLocaleDateString() || 'next month'}.`,
+          code: 'MONTHLY_LISTING_LIMIT_REACHED',
+          tier,
+          limit: monthlyLimit,
+          current: monthlyCreated,
+          resetDate: user.subscription.listingsMonthResetDate,
+        });
+        return;
+      }
+    }
 
     // ATOMIC check-and-increment: Use findOneAndUpdate to prevent race conditions.
     // Without this, concurrent requests could all read the same count (e.g. 2),
@@ -609,18 +707,25 @@ export const createProperty = async (
       ? 'subscription.agentCount'
       : 'subscription.privateSellerCount';
 
+    const incrementFields: Record<string, number> = {
+      'subscription.activeListingsCount': 1,
+      [roleCountField]: 1,
+      listingsCount: 1,
+      totalListingsCreated: 1,
+    };
+
+    // For agency agents, also increment the monthly counter
+    if (isAgencyAgent) {
+      incrementFields['subscription.monthlyListingsCreated'] = 1;
+    }
+
     const atomicResult = await User.findOneAndUpdate(
       {
         _id: user._id,
         'subscription.activeListingsCount': { $lt: limit },
       },
       {
-        $inc: {
-          'subscription.activeListingsCount': 1,
-          [roleCountField]: 1,
-          listingsCount: 1,
-          totalListingsCreated: 1,
-        },
+        $inc: incrementFields,
       },
       { new: true }
     );
@@ -689,6 +794,7 @@ export const createProperty = async (
       createdAsRole,
       ...(createdAsRole === 'agent' && {
         createdByAgencyName: user.agencyName,
+        createdByAgencyId: user.agencyId || undefined,
         createdByLicenseNumber: user.licenseNumber,
       }),
       // Override with geocoded coordinates if geocoding succeeded, otherwise keep frontend values
@@ -808,6 +914,7 @@ export const updateProperty = async (
       'createdByName',
       'createdByEmail',
       'createdByAgencyName',
+      'createdByAgencyId',
       'createdByLicenseNumber',
     ];
 
@@ -1070,6 +1177,46 @@ export const deleteProperty = async (
       }
     }
 
+    // Archive the listing before deletion (keep one photo and details)
+    try {
+      const daysOnMarket = Math.floor((Date.now() - property.createdAt.getTime()) / (1000 * 60 * 60 * 24));
+      await ArchivedListing.create({
+        originalPropertyId: property._id,
+        sellerId: property.sellerId,
+        sellerName: property.createdByName || 'Unknown',
+        sellerEmail: property.createdByEmail || '',
+        createdAsRole: property.createdAsRole || 'private_seller',
+        createdByAgencyName: property.createdByAgencyName,
+        createdByAgencyId: property.createdByAgencyId,
+        archiveReason: 'deleted',
+        archivedAt: new Date(),
+        title: property.title,
+        listingType: property.listingType || 'sale',
+        status: 'deleted',
+        price: property.price,
+        address: property.address,
+        city: property.city,
+        country: property.country,
+        propertyType: property.propertyType,
+        beds: property.beds,
+        baths: property.baths,
+        livingRooms: property.livingRooms,
+        sqft: property.sqft,
+        yearBuilt: property.yearBuilt,
+        description: property.description,
+        thumbnailUrl: property.imageUrl || (property.images?.[0]?.url),
+        thumbnailPublicId: property.imagePublicId || (property.images?.[0]?.publicId),
+        totalViews: (property as any).views || 0,
+        totalSaves: (property as any).saves || 0,
+        daysOnMarket,
+        originalCreatedAt: property.createdAt,
+      });
+      propertyLogger.info(`📦 Archived deleted listing ${property._id}`);
+    } catch (archiveError: any) {
+      propertyLogger.error('⚠️  Error archiving listing:', archiveError);
+      // Continue with deletion even if archival fails
+    }
+
     // Store property ID before deletion for emit
     const deletedPropertyId = String(property._id);
 
@@ -1189,9 +1336,25 @@ export const uploadImages = async (
       }
     }
 
-    // Upload images using the centralized service
+    // Look up user's agency for watermarking
+    let watermarkOptions: { agencyLogoUrl?: string } | undefined;
+    const agent = await Agent.findOne({ userId });
+    if (agent?.agencyId) {
+      const agency = await Agency.findById(agent.agencyId).select('logo');
+      if (agency?.logo) {
+        watermarkOptions = { agencyLogoUrl: agency.logo };
+      } else {
+        // Still apply BalkanEstate watermark even without agency logo
+        watermarkOptions = {};
+      }
+    } else {
+      // Non-agency users still get BalkanEstate watermark
+      watermarkOptions = {};
+    }
+
+    // Upload images using the centralized service (with watermarking)
     // Images will be organized in: balkan-estate/properties/user-{userId}/listing-{propertyId}/
-    const uploadedImages = await uploadPropertyImages(files, userId, propertyId);
+    const uploadedImages = await uploadPropertyImages(files, userId, propertyId, watermarkOptions);
 
     res.json({
       images: uploadedImages,
@@ -1292,6 +1455,46 @@ export const markAsSold = async (
       });
 
       propertyLogger.info(`📊 Sales history record created for property ${property._id}`);
+
+      // Archive the sold listing (keep one photo and details)
+      try {
+        await ArchivedListing.create({
+          originalPropertyId: property._id,
+          sellerId: property.sellerId,
+          sellerName: property.createdByName || user.name,
+          sellerEmail: property.createdByEmail || user.email,
+          createdAsRole: property.createdAsRole || 'private_seller',
+          createdByAgencyName: property.createdByAgencyName,
+          createdByAgencyId: property.createdByAgencyId,
+          archiveReason: 'sold',
+          archivedAt: soldDate,
+          title: property.title,
+          listingType: property.listingType || 'sale',
+          status: 'sold',
+          price: property.price,
+          address: property.address,
+          city: property.city,
+          country: property.country,
+          propertyType: property.propertyType,
+          beds: property.beds,
+          baths: property.baths,
+          livingRooms: property.livingRooms,
+          sqft: property.sqft,
+          yearBuilt: property.yearBuilt,
+          description: property.description,
+          thumbnailUrl: property.imageUrl || (property.images?.[0]?.url),
+          thumbnailPublicId: property.imagePublicId || (property.images?.[0]?.publicId),
+          soldAt: soldDate,
+          salePrice: property.price || 0,
+          totalViews: (property as any).views || 0,
+          totalSaves: (property as any).saves || 0,
+          daysOnMarket,
+          originalCreatedAt: property.createdAt,
+        });
+        propertyLogger.info(`📦 Archived sold listing ${property._id}`);
+      } catch (archiveError: any) {
+        propertyLogger.error('⚠️  Error archiving sold listing:', archiveError);
+      }
     }
 
     // Invalidate properties cache so sold status appears immediately in search
@@ -1358,6 +1561,46 @@ export const markAsRented = async (
     }
 
     await property.save();
+
+    // Archive the rented listing (keep one photo and details)
+    try {
+      const daysOnMarket = Math.floor((rentedDate.getTime() - property.createdAt.getTime()) / (1000 * 60 * 60 * 24));
+      await ArchivedListing.create({
+        originalPropertyId: property._id,
+        sellerId: property.sellerId,
+        sellerName: property.createdByName || '',
+        sellerEmail: property.createdByEmail || '',
+        createdAsRole: property.createdAsRole || 'private_seller',
+        createdByAgencyName: property.createdByAgencyName,
+        createdByAgencyId: property.createdByAgencyId,
+        archiveReason: 'rented',
+        archivedAt: rentedDate,
+        title: property.title,
+        listingType: property.listingType || 'rent',
+        status: 'rented',
+        price: property.price,
+        address: property.address,
+        city: property.city,
+        country: property.country,
+        propertyType: property.propertyType,
+        beds: property.beds,
+        baths: property.baths,
+        livingRooms: property.livingRooms,
+        sqft: property.sqft,
+        yearBuilt: property.yearBuilt,
+        description: property.description,
+        thumbnailUrl: property.imageUrl || (property.images?.[0]?.url),
+        thumbnailPublicId: property.imagePublicId || (property.images?.[0]?.publicId),
+        rentedAt: rentedDate,
+        totalViews: (property as any).views || 0,
+        totalSaves: (property as any).saves || 0,
+        daysOnMarket,
+        originalCreatedAt: property.createdAt,
+      });
+      propertyLogger.info(`📦 Archived rented listing ${property._id}`);
+    } catch (archiveError: any) {
+      propertyLogger.error('⚠️  Error archiving rented listing:', archiveError);
+    }
 
     // Invalidate properties cache
     invalidateCache('/api/properties');

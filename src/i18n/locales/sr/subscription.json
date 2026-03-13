@@ -107,7 +107,7 @@
     "features": {
       "prioritySupport": "Приоритетна Подршка",
       "advancedAnalytics": "Напредна Аналитика",
-      "listings25": "25 Огласа",
+      "listings25": "30 Огласа",
       "premiumPlacement": "Премијум Позиција"
     },
     "cancelModal": {
@@ -144,7 +144,7 @@
       "verifiedBadgeDesc": "Покажите купцима да сте поуздан продавац",
       "noBadgeDesc": "Надоградите да добијете Pro значку",
       "wantMoreFeatures": "Желите више функција?",
-      "upgradeToProDesc": "Надоградите на Pro за 25 огласа, промоције и више!"
+      "upgradeToProDesc": "Надоградите на Pro за 30 огласа, промоције и више!"
     },
     "validation": {
       "confirmCancel": "Да ли сте сигурни да желите да откажете вашу претплату?",

@@ -422,11 +422,19 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                 })}
                                             >
                                                 <Popup>
-                                                    <div className="min-w-[200px]">
+                                                    <div
+                                                        className="w-[220px] cursor-pointer"
+                                                        onClick={() => {
+                                                            const propertyId = property.id || (property as any)._id;
+                                                            onViewProperty(propertyId);
+                                                        }}
+                                                    >
                                                         {property.imageUrl && (
-                                                            <img src={property.imageUrl} alt={property.address} className="w-full h-32 object-cover rounded-lg mb-2" loading="lazy" decoding="async" />
+                                                            <div className="w-full h-[130px] rounded-lg overflow-hidden mb-2">
+                                                                <img src={property.imageUrl} alt={property.address} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                                                            </div>
                                                         )}
-                                                        <p className="font-bold text-sm mb-1">{property.address}</p>
+                                                        <p className="font-bold text-sm mb-1 truncate">{property.address}</p>
                                                         <p className="text-xs text-gray-600 mb-2">{property.city}, {property.country}</p>
                                                         <p className="font-bold text-blue-600 mb-2">{formatPrice(property.price, property.country)}</p>
                                                         <div className="flex gap-2 text-xs text-gray-600 mb-3">
@@ -437,10 +445,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                             <span>{property.sqft} m²</span>
                                                         </div>
                                                         <button
-                                                            onClick={() => {
-                                                                const propertyId = property.id || (property as any)._id;
-                                                                onViewProperty(propertyId);
-                                                            }}
+                                                            type="button"
                                                             className={`w-full text-white px-3 py-2 rounded-lg font-semibold text-sm ${property.status === 'sold' ? 'bg-red-600 hover:bg-red-700' : property.status === 'rented' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'}`}
                                                         >
                                                             {property.status === 'sold' ? t('profilePage.propertiesMap.viewSoldProperty') : property.status === 'rented' ? t('profilePage.propertiesMap.viewRentedProperty', 'View Rented Property') : t('profilePage.propertiesMap.viewDetails')}

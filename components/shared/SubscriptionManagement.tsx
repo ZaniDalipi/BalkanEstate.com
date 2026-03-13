@@ -116,10 +116,10 @@ const AGENCY_AGENT_PLAN: Plan = {
   id: 'agency_agent_yearly',
   name: 'Agency Pro',
   price: 0,
-  period: 'year',
-  periodMonths: 12,
-  features: ['25 active listings', 'Unlimited saved searches', 'Unlimited AI chat', 'Full analytics', 'Agency team support'],
-  listingLimit: 25,
+  period: 'month',
+  periodMonths: 1,
+  features: ['30 active listings per month', 'Unlimited saved searches', 'Unlimited AI chat', 'Full analytics', 'Agency team support'],
+  listingLimit: 30,
   color: 'linear-gradient(135deg, #10b981 0%, #0d9488 100%)',
   tier: 2,
   badge: 'Agency Member',
@@ -154,7 +154,7 @@ const LISTING_LIMITS: Record<string, number> = {
   agency_yearly: 750,  // 750 listings for enterprise
   buyer_monthly: 0,  // Buyers don't create listings
   // Agency agent tier (joined via coupon)
-  agency_agent_yearly: 25,  // 25 listings per year for agency agents (fallback; real value comes from DB)
+  agency_agent_yearly: 30,  // 30 listings per month for agency agents (fallback; real value comes from DB)
 };
 
 // Map product IDs to CSS gradient strings (inline styles to avoid Tailwind purge)
@@ -710,7 +710,15 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         // Hide Enterprise plan if user already owns/manages an agency
         if (key === 'agency_yearly' && user?.agencyId) return false;
         if (key === subscriptionDetails.currentPlanKey) return false;
+        // Allow monthly → yearly upgrade within the same plan family
         if (subscriptionDetails.currentPlanKey === 'seller_pro_monthly' && key === 'seller_pro_yearly') return true;
+        if (subscriptionDetails.currentPlanKey === 'buyer_pro_monthly' && key === 'buyer_pro_yearly') return true;
+        if (subscriptionDetails.currentPlanKey === 'buyer_monthly' && key === 'buyer_pro_yearly') return true;
+        // Allow switching between different plan families at the same or higher tier
+        // (e.g., buyer_pro → seller_pro, buyer_pro → enterprise)
+        const currentFamily = subscriptionDetails.currentPlanKey.startsWith('buyer') ? 'buyer' : 'seller';
+        const targetFamily = key.startsWith('buyer') ? 'buyer' : 'seller';
+        if (currentFamily !== targetFamily && plan.tier >= subscriptionDetails.currentPlan.tier) return true;
         return plan.tier > subscriptionDetails.currentPlan.tier;
       })
       .map(([key, plan]) => ({
@@ -1210,8 +1218,8 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               <p className="font-semibold text-neutral-800">{t('management.listingLimit', 'Listing Limit')}</p>
               <p className="text-sm text-neutral-500">
                 {t('management.listingUsage', { used: user.subscription?.activeListingsCount || user.listingsCount || 0, limit: currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit, defaultValue: '{{used}} of {{limit}} used' })}
-                {(user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner') && (
-                  <span className="ml-1 text-neutral-400">· {t('management.perMonth', 'per month')}</span>
+                {subscriptionDetails && subscriptionDetails.currentPlan.period && subscriptionDetails.currentPlan.period !== 'forever' && (
+                  <span className="ml-1 text-neutral-400">· {subscriptionDetails.currentPlan.period === 'month' ? t('management.perMonth', 'per month') : t('management.perYear', 'per year')}</span>
                 )}
               </p>
             </div>
@@ -1631,7 +1639,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           <div className="mt-4 pt-4 border-t border-neutral-100">
             <div className="bg-purple-50 rounded-lg p-3">
               <p className="text-xs text-purple-700">
-                <strong>{t('management.agentBenefits', 'Agent Benefits:')}</strong> {t('management.agentBenefitsDesc', 'Each agent gets {{count}} active listings per year with their subscription coupon. Agents can use the agency promotion pool for featured listings.', { count: agentProductFromDB?.listingsLimit ?? 25 })}
+                <strong>{t('management.agentBenefits', 'Agent Benefits:')}</strong> {t('management.agentBenefitsDesc', 'Each agent gets {{count}} active listings per month with their subscription coupon. Agents can use the agency promotion pool for featured listings.', { count: agentProductFromDB?.listingsLimit ?? 30 })}
               </p>
             </div>
           </div>

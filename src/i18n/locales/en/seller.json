@@ -12,7 +12,7 @@
     "asRole": "({{count}} as {{role}})",
     "listings": "Listings",
     "limitReachedShared": "Shared limit reached across both roles.",
-    "limitReachedUpgrade": "Listing limit reached. Upgrade to Pro for 25 listings!",
+    "limitReachedUpgrade": "Listing limit reached. Upgrade to Pro for 30 listings!",
     "remainingListings": "{{count}} listing(s) remaining",
     "availableListings": "{{count}} listing(s) available",
     "shared": "(shared)",
@@ -285,9 +285,9 @@
       "listingFailed": "Failed to submit listing."
     },
     "limits": {
-      "freeReached": "You have reached your free limit of 3 active listings. Subscribe to Pro for 25 active listings!",
+      "freeReached": "You have reached your free limit of 3 active listings. Subscribe to Pro for 30 active listings!",
       "proReached": "You have reached your Pro listing limit.",
-      "agentProRequired": "Agents must have an active Pro subscription to post listings. Subscribe now to get 25 active listings!",
+      "agentProRequired": "Agents must have an active Pro subscription to post listings. Subscribe now to get 30 active listings!",
       "buyerCannotCreate": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings."
     }
   },
@@ -621,10 +621,10 @@
     "listingLimitReached": "Listing Limit Reached",
     "listingLimitMessage": "You've reached your {{tierName}} listing limit of {{limit}}.",
     "freeListingLimitReached": "Free Listing Limit Reached",
-    "freeListingLimitMessage": "You have reached your free limit of 3 active listings. Subscribe to Pro for 25 active listings!",
+    "freeListingLimitMessage": "You have reached your free limit of 3 active listings. Subscribe to Pro for 30 active listings!",
     "proListingLimitReached": "Pro Listing Limit Reached",
     "proSubscriptionRequired": "Pro Subscription Required",
-    "agentProRequiredMessage": "Agents must have an active Pro subscription to post listings. Subscribe now to get 25 active listings!",
+    "agentProRequiredMessage": "Agents must have an active Pro subscription to post listings. Subscribe now to get 30 active listings!",
     "switchRoleRequired": "Switch Role Required",
     "buyerCannotCreateListing": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings."
   },

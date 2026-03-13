@@ -28,6 +28,21 @@ export const BRAND_COLORS = {
   error: '#ef4444',
 };
 
+export const BRAND_COLORS_DARK = {
+  primary: '#3b82f6',
+  primaryDark: '#2563eb',
+  accent: '#34d399',
+  text: '#ffffff',
+  textMuted: '#ffffff',
+  textLight: '#ffffff',
+  background: '#111827',
+  backgroundAlt: '#1f2937',
+  border: '#374151',
+  success: '#34d399',
+  warning: '#fbbf24',
+  error: '#f87171',
+};
+
 const FONTS = {
   primary: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   mono: "'SF Mono', 'Monaco', 'Consolas', monospace",
@@ -300,8 +315,14 @@ export const getBaseTemplate = (options: {
   content: string;
   preheader?: string;
   backgroundColor?: string;
+  darkColors?: typeof BRAND_COLORS_DARK;
 }): string => {
-  const { content, preheader = '', backgroundColor = '#f9fafb' } = options;
+  const {
+    content,
+    preheader = '',
+    backgroundColor = '#f9fafb',
+    darkColors = BRAND_COLORS_DARK,
+  } = options;
 
   return `
 <!DOCTYPE html>
@@ -311,7 +332,7 @@ export const getBaseTemplate = (options: {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
-  <title>BalkanEstate</title>
+  <title>BalkanEstateAI</title>
   <!--[if mso]>
   <noscript>
     <xml>
@@ -336,13 +357,27 @@ export const getBaseTemplate = (options: {
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Dark mode */
+    /* Dark mode — colors driven by SiteSettings.emailBrandColorsDark */
     @media (prefers-color-scheme: dark) {
-      .email-bg { background-color: #111827 !important; }
-      .email-card { background-color: #1f2937 !important; }
-      .text-primary { color: #f9fafb !important; }
-      .text-muted { color: #9ca3af !important; }
-      .border-light { border-color: #374151 !important; }
+      .email-bg { background-color: ${darkColors.background} !important; }
+      .email-card { background-color: ${darkColors.backgroundAlt} !important; color: #ffffff !important; }
+      .email-card p, .email-card li, .email-card td, .email-card h1, .email-card h2, .email-card h3,
+      .email-card span, .email-card div, .email-card ul, .email-card ol, .email-card strong { color: #ffffff !important; }
+      .text-primary { color: ${darkColors.text} !important; }
+      .text-muted { color: ${darkColors.textMuted} !important; }
+      .text-light { color: ${darkColors.textLight} !important; }
+      .border-light { border-color: ${darkColors.border} !important; }
+      .bg-alt { background-color: ${darkColors.background} !important; }
+      .link-primary { color: ${darkColors.primary} !important; }
+      .btn-primary { background-color: ${darkColors.primary} !important; }
+      .btn-primary-dark { background: linear-gradient(135deg, ${darkColors.primary} 0%, ${darkColors.primaryDark} 100%) !important; }
+      .badge-accent { background-color: ${darkColors.accent} !important; }
+      .stat-bg { background-color: ${darkColors.background} !important; }
+      .stat-value { color: ${darkColors.primary} !important; }
+      .stat-success { color: ${darkColors.success} !important; }
+      .stat-error { color: ${darkColors.error} !important; }
+      .property-border { border-color: ${darkColors.border} !important; }
+      .price-color { color: ${darkColors.primary} !important; }
     }
 
     /* Mobile responsive */
@@ -384,7 +419,7 @@ export const getCardContainer = (content: string, options: {
   return `
 <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width: ${maxWidth}px;" class="container">
   <tr>
-    <td style="background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); padding: ${padding};" class="email-card">
+    <td style="background-color: ${BRAND_COLORS.background}; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); padding: ${padding};" class="email-card">
       ${content}
     </td>
   </tr>
@@ -520,7 +555,7 @@ export const getCtaButton = (options: {
 <table role="presentation" cellpadding="0" cellspacing="0" width="${fullWidth ? '100%' : 'auto'}" style="margin: 24px 0;">
   <tr>
     <td align="center">
-      <a href="${url}" target="_blank" style="display: inline-block; background-color: ${s.bg}; color: ${s.text}; text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; border-radius: 8px; ${borderStyle} transition: background-color 0.2s;">
+      <a href="${url}" target="_blank" style="display: inline-block; background-color: ${s.bg}; color: ${s.text}; text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; border-radius: 8px; ${borderStyle} transition: background-color 0.2s;" class="${style === 'primary' ? 'btn-primary' : style === 'success' ? 'badge-accent' : ''}">
         ${text}
       </a>
     </td>
@@ -542,15 +577,15 @@ export const getStatsGrid = (stats: Array<{
   <tr>
     ${stats.map((stat, index) => `
     <td style="width: ${100 / stats.length}%; padding: ${index > 0 ? '0 0 0 8px' : '0 8px 0 0'}; vertical-align: top;" class="stack-cell">
-      <div style="background-color: ${BRAND_COLORS.backgroundAlt}; border-radius: 12px; padding: 20px; text-align: center;">
-        <div style="font-size: 28px; font-weight: 700; color: ${stat.color || BRAND_COLORS.primary}; margin-bottom: 4px;">
+      <div style="background-color: ${BRAND_COLORS.backgroundAlt}; border-radius: 12px; padding: 20px; text-align: center;" class="stat-bg">
+        <div style="font-size: 28px; font-weight: 700; color: ${stat.color || BRAND_COLORS.primary}; margin-bottom: 4px;" class="stat-value">
           ${stat.value}
         </div>
-        <div style="font-size: 12px; color: ${BRAND_COLORS.textMuted}; text-transform: uppercase; letter-spacing: 0.5px;">
+        <div style="font-size: 12px; color: ${BRAND_COLORS.textMuted}; text-transform: uppercase; letter-spacing: 0.5px;" class="text-muted">
           ${stat.label}
         </div>
         ${stat.change !== undefined ? `
-        <div style="font-size: 12px; color: ${stat.change >= 0 ? BRAND_COLORS.success : BRAND_COLORS.error}; margin-top: 4px;">
+        <div style="font-size: 12px; color: ${stat.change >= 0 ? BRAND_COLORS.success : BRAND_COLORS.error}; margin-top: 4px;" class="${stat.change >= 0 ? 'stat-success' : 'stat-error'}">
           ${stat.change >= 0 ? '+' : ''}${stat.change}%
         </div>
         ` : ''}
@@ -576,7 +611,7 @@ export const getPropertyCard = (property: {
   badge?: string;
 }): string => {
   return `
-<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin: 16px 0; border: 1px solid ${BRAND_COLORS.border}; border-radius: 12px; overflow: hidden;">
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin: 16px 0; border: 1px solid ${BRAND_COLORS.border}; border-radius: 12px; overflow: hidden;" class="property-border">
   <tr>
     ${property.imageUrl ? `
     <td style="width: 140px; vertical-align: top;">
@@ -585,23 +620,23 @@ export const getPropertyCard = (property: {
       </a>
     </td>
     ` : ''}
-    <td style="padding: 16px; vertical-align: top;">
+    <td style="padding: 16px; vertical-align: top;" class="email-card">
       ${property.badge ? `
-      <span style="display: inline-block; background-color: ${BRAND_COLORS.accent}; color: #ffffff; font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-bottom: 8px;">
+      <span style="display: inline-block; background-color: ${BRAND_COLORS.accent}; color: #ffffff; font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-bottom: 8px;" class="badge-accent">
         ${property.badge}
       </span>
       ` : ''}
-      <div style="font-size: 16px; font-weight: 600; color: ${BRAND_COLORS.text}; margin-bottom: 4px;">
+      <div style="font-size: 16px; font-weight: 600; color: ${BRAND_COLORS.text}; margin-bottom: 4px;" class="text-primary">
         <a href="${property.url}" target="_blank" style="color: inherit; text-decoration: none;">${property.title}</a>
       </div>
-      <div style="font-size: 13px; color: ${BRAND_COLORS.textMuted}; margin-bottom: 8px;">
+      <div style="font-size: 13px; color: ${BRAND_COLORS.textMuted}; margin-bottom: 8px;" class="text-muted">
         ${property.address}
       </div>
-      <div style="font-size: 18px; font-weight: 700; color: ${BRAND_COLORS.primary};">
+      <div style="font-size: 18px; font-weight: 700; color: ${BRAND_COLORS.primary};" class="price-color">
         ${typeof property.price === 'number' ? `€${property.price.toLocaleString()}` : property.price}
       </div>
       ${property.beds || property.baths || property.sqft ? `
-      <div style="font-size: 12px; color: ${BRAND_COLORS.textMuted}; margin-top: 8px;">
+      <div style="font-size: 12px; color: ${BRAND_COLORS.textMuted}; margin-top: 8px;" class="text-muted">
         ${property.beds ? `${property.beds} beds` : ''}
         ${property.baths ? `· ${property.baths} baths` : ''}
         ${property.sqft ? `· ${property.sqft.toLocaleString()} sqft` : ''}
@@ -630,27 +665,27 @@ export const getMinimalFooter = (options: {
   <tr>
     <td align="center">
       ${reason ? `
-      <p style="margin: 0 0 16px 0; font-size: 12px; color: ${BRAND_COLORS.textLight};">
+      <p style="margin: 0 0 16px 0; font-size: 12px; color: ${BRAND_COLORS.textLight};" class="text-light">
         ${reason}
       </p>
       ` : ''}
 
-      <p style="margin: 0 0 8px 0; font-size: 12px; color: ${BRAND_COLORS.textLight};">
-        ${unsubscribeUrl ? `<a href="${unsubscribeUrl}" style="color: ${BRAND_COLORS.textLight};">Unsubscribe</a>` : ''}
+      <p style="margin: 0 0 8px 0; font-size: 12px; color: ${BRAND_COLORS.textLight};" class="text-light">
+        ${unsubscribeUrl ? `<a href="${unsubscribeUrl}" style="color: ${BRAND_COLORS.textLight};" class="text-light">Unsubscribe</a>` : ''}
         ${unsubscribeUrl && preferencesUrl ? ' · ' : ''}
-        ${preferencesUrl ? `<a href="${preferencesUrl}" style="color: ${BRAND_COLORS.textLight};">Manage preferences</a>` : ''}
+        ${preferencesUrl ? `<a href="${preferencesUrl}" style="color: ${BRAND_COLORS.textLight};" class="text-light">Manage preferences</a>` : ''}
       </p>
 
       ${showSocial ? `
       <p style="margin: 16px 0 0 0;">
-        <a href="https://twitter.com/balkanestate" style="margin: 0 8px; color: ${BRAND_COLORS.textLight};">Twitter</a>
-        <a href="https://instagram.com/balkanestate" style="margin: 0 8px; color: ${BRAND_COLORS.textLight};">Instagram</a>
-        <a href="https://facebook.com/balkanestate" style="margin: 0 8px; color: ${BRAND_COLORS.textLight};">Facebook</a>
+        <a href="https://twitter.com/balkanestate" style="margin: 0 8px; color: ${BRAND_COLORS.textLight};" class="text-light">Twitter</a>
+        <a href="https://instagram.com/balkanestate" style="margin: 0 8px; color: ${BRAND_COLORS.textLight};" class="text-light">Instagram</a>
+        <a href="https://facebook.com/balkanestate" style="margin: 0 8px; color: ${BRAND_COLORS.textLight};" class="text-light">Facebook</a>
       </p>
       ` : ''}
 
-      <p style="margin: 16px 0 0 0; font-size: 11px; color: ${BRAND_COLORS.textLight};">
-        © ${year} BalkanEstate<sup>AI</sup> · <a href="${frontendUrl}" style="color: ${BRAND_COLORS.textLight};">balkanestate.com</a>
+      <p style="margin: 16px 0 0 0; font-size: 11px; color: ${BRAND_COLORS.textLight};" class="text-light">
+        © ${year} BalkanEstate<sup>AI</sup> · <a href="${frontendUrl}" style="color: ${BRAND_COLORS.textLight};" class="text-light">balkanestate.com</a>
       </p>
     </td>
   </tr>
@@ -697,7 +732,7 @@ export const getPromoTemplate = (options: {
     ${getMinimalFooter({
       unsubscribeUrl: options.unsubscribeUrl,
       preferencesUrl: options.preferencesUrl,
-      reason: "You're receiving this because you signed up for BalkanEstate.",
+      reason: "You're receiving this because you signed up for BalkanEstateAI.",
     })}
   `;
 
@@ -788,7 +823,7 @@ export const getReportTemplate = (options: {
     ` : ''}
 
     ${getCtaButton({ text: options.ctaText, url: options.ctaUrl })}
-    ${getMinimalFooter({ unsubscribeUrl: options.unsubscribeUrl, reason: "You're receiving this because you're a member of BalkanEstate." })}
+    ${getMinimalFooter({ unsubscribeUrl: options.unsubscribeUrl, reason: "You're receiving this because you're a member of BalkanEstateAI." })}
   `;
 
   return getBaseTemplate({
@@ -877,4 +912,5 @@ export default {
   getReportTemplate,
   getPropertyAlertTemplate,
   BRAND_COLORS,
+  BRAND_COLORS_DARK,
 };

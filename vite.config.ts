@@ -60,6 +60,10 @@ export default defineConfig(({ mode }) => {
         react(),
         VitePWA({
           registerType: 'autoUpdate',
+          // Don't inject a render-blocking <script> in <head>.
+          // We register the SW manually after page load in index.tsx
+          // to keep it out of the critical rendering path.
+          injectRegister: null,
           includeAssets: ['icons/*.svg', 'icons/*.png', 'og-image.png', 'og-image.svg', 'robots.txt'],
           manifest: {
             name: 'BalkanEstateAI',

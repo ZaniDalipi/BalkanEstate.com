@@ -160,7 +160,14 @@
       "website": "Website URL",
       "license": "Agent License Number",
       "yearsInBusiness": "Years in Business",
-      "languages": "Languages Spoken"
+      "languages": "Languages Spoken",
+      "logo": "Agency Logo",
+      "logoPreview": "Logo preview",
+      "registrationNumber": "Business Registration / Tax ID",
+      "agencyType": "Agency Type",
+      "specializations": "Specializations",
+      "serviceAreas": "Service Areas / Regions",
+      "zipCode": "Zip / Postal Code"
     },
     "placeholders": {
       "agencyName": "e.g., Premier Real Estate Agency",
@@ -172,12 +179,25 @@
       "email": "contact@agency.com",
       "phone": "+381 11 123 4567",
       "website": "https://yourwebsite.com",
-      "license": "e.g., RE-123456"
+      "license": "e.g., RE-123456",
+      "registrationNumber": "e.g., PIB 123456789, OIB 12345678901",
+      "zipCode": "e.g., 11000",
+      "serviceAreas": "e.g., Belgrade, Novi Sad, Nis (comma-separated)"
     },
     "hints": {
       "agencyName": "Choose a professional name that represents your brand",
       "description": "A compelling description helps clients understand your value",
-      "address": "Optional: Full street address for office location"
+      "address": "Optional: Full street address for office location",
+      "logo": "JPEG, PNG, WebP or SVG. Max 5MB.",
+      "registrationNumber": "Your official business registration or tax identification number",
+      "specializations": "Select all areas your agency specializes in",
+      "serviceAreas": "List the cities or regions where your agency operates",
+      "agencyType": "Select the type that best describes your agency"
+    },
+    "buttons": {
+      "uploadLogo": "Upload Logo",
+      "changeLogo": "Change Logo",
+      "removeLogo": "Remove logo"
     },
     "days": {
       "monday": "Monday",
@@ -204,7 +224,9 @@
     "errors": {
       "nameRequired": "Agency name is required",
       "locationRequired": "City and country are required",
-      "emailRequired": "Email is required"
+      "emailRequired": "Email is required",
+      "logoInvalidType": "Please upload a JPEG, PNG, WebP, or SVG image",
+      "logoTooLarge": "Logo must be under 5MB"
     },
     "becomeAgent": "Become an Agent First",
     "upgradeToPro": "Upgrade to Pro",
@@ -343,7 +365,7 @@
     "agentCouponBenefits": "Agent Coupon Benefits",
     "benefitInstantJoin": "Instantly join the agency (no approval needed)",
     "benefitProSubscription": "Get a Pro subscription for 1 year",
-    "benefitListings": "Up to 25 active listings",
+    "benefitListings": "Up to 30 active listings per month",
     "benefitBranding": "Agency branding on your listings",
     "agentCouponCode": "Agent Coupon Code",
     "agentCouponCodePlaceholder": "e.g., ABC-XXXXXXXX",

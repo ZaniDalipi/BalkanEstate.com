@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
+import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 import LegalFooter from './LegalFooter';
 
@@ -14,13 +15,16 @@ const ArrowLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
 const CookiePolicyPage: React.FC = () => {
   const { t } = useTranslation(['legal', 'common']);
   const { dispatch } = useAppContext();
+  const { setDirection } = useNavigationDirection();
 
   const handleBack = () => {
+    setDirection('back');
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
     window.history.pushState({}, '', '/');
   };
 
   const handleNavigate = (view: string) => {
+    setDirection('forward');
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: view as any });
     window.history.pushState({}, '', `/${view}`);
   };

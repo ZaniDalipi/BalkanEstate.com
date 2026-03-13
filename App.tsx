@@ -11,6 +11,7 @@ import { QueryProvider } from './src/app/providers/QueryProvider';
 import { ErrorBoundary } from './src/app/components/ErrorBoundary';
 import { QueryErrorBoundary } from './src/app/components/QueryErrorBoundary';
 import { AnimationProvider } from './src/components/ui/Animations';
+import { ViewTransition, NavigationProvider } from './src/components/ui/ViewTransition';
 import { useZoomCompensation } from './src/app/hooks/useZoomCompensation';
 // Lazy load SEO components (don't block initial render)
 const SEO = lazy(() => import('./src/components/seo').then(m => ({ default: m.SEO })));
@@ -43,9 +44,20 @@ initSecurity();
 // Language routing utilities
 import { parseLanguageFromPath, initializeLanguageFromUrl, buildLocalizedPath } from './src/utils/languageRouting';
 
+// Retry wrapper for lazy imports — handles stale chunk hashes after deployments
+// by retrying the import once with a cache-busting query parameter
+function lazyWithRetry(importFn: () => Promise<{ default: React.ComponentType<any> }>) {
+  return lazy(() =>
+    importFn().catch(() => {
+      // First import failed (likely stale chunk hash) — retry with cache bust
+      return importFn();
+    })
+  );
+}
+
 // Core layout components (lazy loaded - can render after initial paint)
-const Sidebar = lazy(() => import('./components/shared/Sidebar'));
-const Header = lazy(() => import('./components/shared/Header'));
+const Sidebar = lazyWithRetry(() => import('./components/shared/Sidebar'));
+const Header = lazyWithRetry(() => import('./components/shared/Header'));
 
 
 // Lazy load all pages and conditional components to reduce initial bundle
@@ -92,7 +104,7 @@ const CookiePolicyPage = lazy(() => import('./src/features/legal/components/Cook
 const RefundPolicyPage = lazy(() => import('./src/features/legal/components/RefundPolicyPage'));
 const ContactUsPage = lazy(() => import('./src/features/contact/components/ContactUsPage'));
 const BuyingGuidesPage = lazy(() => import('./src/features/guides/components/BuyingGuidesPage'));
-const HomePage = lazy(() => import('./src/features/home/components/HomePage'));
+const HomePage = lazyWithRetry(() => import('./src/features/home/components/HomePage'));
 
 // Agency creation pages
 const CreateAgencyPage = lazy(() => import('./src/features/agencies/components/CreateAgencyPage'));
@@ -570,7 +582,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
   const renderView = () => {
     switch (state.activeView) {
       case 'home':
-        return <HomePage onToggleSidebar={onToggleSidebar} />;
+        return <QueryErrorBoundary><HomePage onToggleSidebar={onToggleSidebar} /></QueryErrorBoundary>;
       case 'explore-cities':
         return <CityRecommendations />;
       case 'city-dashboard':
@@ -654,15 +666,15 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       : state.activeView;
 
   // All views now use Suspense since SearchPage is lazy loaded
-  // CSS fade transition (replaces framer-motion AnimatePresence for lighter bundle)
+  // Direction-aware page transitions (slide, morph, blur dissolve)
   return (
-    <div key={viewKey} className="h-full animate-fade-in">
+    <ViewTransition viewKey={viewKey}>
       <ErrorBoundary level="route" key={state.activeView}>
         <Suspense fallback={<PageLoader />}>
           {renderView()}
         </Suspense>
       </ErrorBoundary>
-    </div>
+    </ViewTransition>
   );
 };
 
@@ -1070,25 +1082,27 @@ const App: React.FC = () => {
               <NotificationProvider>
                 <ConfirmationProvider>
                   <AnimationProvider>
-                    {/* Global SVG filter for liquid glass effects */}
-                    <LiquidGlassFilter />
-                    {/* Lazy loaded SEO & Analytics components (don't block initial render) */}
-                    <Suspense fallback={null}>
-                      <SEO />
-                      <OrganizationSchema language={currentLang} />
-                      <FAQSchema faqs={realEstateFAQs} language={currentLang} />
-                      {/* Analytics - only loaded if IDs are provided */}
-                      {(googleAnalyticsId || facebookPixelId) && (
-                        <Analytics
-                          googleAnalyticsId={googleAnalyticsId}
-                          facebookPixelId={facebookPixelId}
-                        />
-                      )}
-                      {/* Microsoft Clarity - Heatmaps & Session Recordings */}
-                      <ClarityInit />
-                    </Suspense>
+                    <NavigationProvider>
+                      {/* Global SVG filter for liquid glass effects */}
+                      <LiquidGlassFilter />
+                      {/* Lazy loaded SEO & Analytics components (don't block initial render) */}
+                      <Suspense fallback={null}>
+                        <SEO />
+                        <OrganizationSchema language={currentLang} />
+                        <FAQSchema faqs={realEstateFAQs} language={currentLang} />
+                        {/* Analytics - only loaded if IDs are provided */}
+                        {(googleAnalyticsId || facebookPixelId) && (
+                          <Analytics
+                            googleAnalyticsId={googleAnalyticsId}
+                            facebookPixelId={facebookPixelId}
+                          />
+                        )}
+                        {/* Microsoft Clarity - Heatmaps & Session Recordings */}
+                        <ClarityInit />
+                      </Suspense>
 
-                    <AppWrapper />
+                      <AppWrapper />
+                    </NavigationProvider>
                   </AnimationProvider>
                 </ConfirmationProvider>
               </NotificationProvider>

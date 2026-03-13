@@ -367,7 +367,7 @@ export function useActivityLog(filters?: { limit?: number; offset?: number }) {
       const params = new URLSearchParams();
       if (filters?.limit) params.append('limit', String(filters.limit));
       if (filters?.offset) params.append('offset', String(filters.offset));
-      return apiRequest(`/analytics/activity-log?${params.toString()}`, { requiresAuth: true, encryptResponse: true });
+      return apiRequest(`/analytics/activity-log?${params.toString()}`, { requiresAuth: true });
     },
     staleTime: 30 * 1000, // 30 seconds
     gcTime: 5 * 60 * 1000, // 5 minutes
@@ -379,7 +379,7 @@ export function useActivityLog(filters?: { limit?: number; offset?: number }) {
 export function useDashboardStats() {
   return useQuery({
     queryKey: adminKeys.dashboardStats(),
-    queryFn: () => apiRequest('/analytics/dashboard-stats', { requiresAuth: true, encryptResponse: true }),
+    queryFn: () => apiRequest('/analytics/dashboard-stats', { requiresAuth: true }),
     staleTime: 30 * 1000, // 30 seconds
     gcTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: true,
@@ -390,7 +390,7 @@ export function useDashboardStats() {
 export function useHeatmapData(days: number = 30) {
   return useQuery({
     queryKey: adminKeys.heatmapData(days),
-    queryFn: () => apiRequest(`/analytics/heatmap-data?days=${days}`, { requiresAuth: true, encryptResponse: true }),
+    queryFn: () => apiRequest(`/analytics/heatmap-data?days=${days}`, { requiresAuth: true }),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: true,
@@ -400,7 +400,7 @@ export function useHeatmapData(days: number = 30) {
 export function useRecentSubscriptions(limit: number = 10) {
   return useQuery({
     queryKey: adminKeys.recentSubscriptions(limit),
-    queryFn: () => apiRequest(`/analytics/subscriptions/recent?limit=${limit}`, { requiresAuth: true, encryptResponse: true }),
+    queryFn: () => apiRequest(`/analytics/subscriptions/recent?limit=${limit}`, { requiresAuth: true }),
     staleTime: 30 * 1000, // 30 seconds
     gcTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: true,
@@ -423,7 +423,7 @@ export function useAdminPayments(filters?: { page?: number; limit?: number; stat
       if (filters?.page) params.append('page', String(filters.page));
       if (filters?.limit) params.append('limit', String(filters.limit));
       if (filters?.status) params.append('status', filters.status);
-      return apiRequest(`/admin/payments?${params.toString()}`, { requiresAuth: true, encryptResponse: true });
+      return apiRequest(`/admin/payments?${params.toString()}`, { requiresAuth: true });
     },
     staleTime: 30 * 1000, // 30 seconds
     gcTime: 5 * 60 * 1000, // 5 minutes
@@ -437,7 +437,7 @@ export function useAdminPayments(filters?: { page?: number; limit?: number; stat
 export function usePaymentStats() {
   return useQuery({
     queryKey: adminKeys.paymentStats(),
-    queryFn: () => apiRequest('/admin/payments/stats', { requiresAuth: true, encryptResponse: true }),
+    queryFn: () => apiRequest('/admin/payments/stats', { requiresAuth: true }),
     staleTime: 60 * 1000, // 1 minute
     gcTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: true,
@@ -456,7 +456,7 @@ export function useAdminInquiries(filters?: { page?: number; limit?: number; sta
       if (filters?.page) params.append('page', String(filters.page));
       if (filters?.limit) params.append('limit', String(filters.limit));
       if (filters?.status) params.append('status', filters.status);
-      return apiRequest(`/admin/inquiries?${params.toString()}`, { requiresAuth: true, encryptResponse: true });
+      return apiRequest(`/admin/inquiries?${params.toString()}`, { requiresAuth: true });
     },
     staleTime: 30 * 1000, // 30 seconds
     gcTime: 5 * 60 * 1000, // 5 minutes
@@ -473,7 +473,6 @@ export function useUpdateInquiryStatus() {
         method: 'PATCH',
         body: { status },
         requiresAuth: true,
-        encryptResponse: true,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.inquiries() });
@@ -493,7 +492,7 @@ export function useAdminAgentRequests(filters?: { page?: number; limit?: number;
       if (filters?.page) params.append('page', String(filters.page));
       if (filters?.limit) params.append('limit', String(filters.limit));
       if (filters?.status) params.append('status', filters.status);
-      return apiRequest(`/agent-requests?${params.toString()}`, { requiresAuth: true, encryptResponse: true });
+      return apiRequest(`/agent-requests?${params.toString()}`, { requiresAuth: true });
     },
     staleTime: 30 * 1000, // 30 seconds
     gcTime: 5 * 60 * 1000, // 5 minutes
@@ -509,7 +508,6 @@ export function useApproveAgentRequest() {
       apiRequest(`/agent-requests/${requestId}/approve`, {
         method: 'POST',
         requiresAuth: true,
-        encryptResponse: true,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.agentRequests() });
@@ -527,7 +525,6 @@ export function useRejectAgentRequest() {
         method: 'POST',
         body: { reason },
         requiresAuth: true,
-        encryptResponse: true,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.agentRequests() });
@@ -546,7 +543,7 @@ export function useAdminAgencies(filters?: { page?: number; limit?: number }) {
       const params = new URLSearchParams();
       if (filters?.page) params.append('page', String(filters.page));
       if (filters?.limit) params.append('limit', String(filters.limit));
-      return apiRequest(`/admin/agencies?${params.toString()}`, { requiresAuth: true, encryptResponse: true });
+      return apiRequest(`/admin/agencies?${params.toString()}`, { requiresAuth: true });
     },
     staleTime: 30 * 1000, // 30 seconds
     gcTime: 5 * 60 * 1000, // 5 minutes

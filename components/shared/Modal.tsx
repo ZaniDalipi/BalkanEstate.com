@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback, memo } from 'react';
+import { createPortal } from 'react-dom';
 import { XMarkIcon } from '../../constants';
 
 interface ModalProps {
@@ -63,7 +64,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
 
   const titleId = title ? 'modal-title' : undefined;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 bg-black/30 backdrop-blur-md z-[5000] flex items-stretch sm:items-center justify-center p-0 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto"
       onClick={handleBackdropClick}
@@ -82,7 +83,8 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
         {title && <h2 id={titleId} className="text-base sm:text-lg md:text-xl font-bold text-neutral-800 mb-3 text-center pr-10">{title}</h2>}
         <div className="overflow-x-hidden">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

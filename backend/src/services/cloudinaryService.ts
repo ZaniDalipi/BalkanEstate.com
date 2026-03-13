@@ -3,6 +3,7 @@ import sharp from 'sharp';
 import cloudinary from '../config/cloudinary';
 import { mediaLogger } from '../utils/logger';
 import { registerFileUpload, removeFileRecord, removeAllUserFileRecords } from './storageAccessPolicy';
+import { applyWatermark, WatermarkOptions } from './watermarkService';
 
 /**
  * Cloudinary Service - Efficient image upload and management
@@ -46,13 +47,15 @@ export interface CloudinaryUploadResult {
  *         └── cover/
  */
 type UploadType =
-  | 'property'      // User listing photos
-  | 'floorplan'     // User listing floorplans
-  | 'avatar'        // User profile avatar
-  | 'license'       // Agent license document
-  | 'credential'    // Agent credential document
-  | 'agency-logo'   // Agency logo
-  | 'agency-cover'; // Agency cover image
+  | 'property'          // User listing photos
+  | 'floorplan'         // User listing floorplans
+  | 'avatar'            // User profile avatar
+  | 'license'           // Agent license document
+  | 'credential'        // Agent credential document
+  | 'agency-logo'       // Agency logo
+  | 'agency-cover'      // Agency cover image
+  | 'site-logo'         // Site branding logo
+  | 'site-email-logo';  // Site email branding logo
 
 interface UploadOptions {
   userId: string;
@@ -113,6 +116,14 @@ const buildFolderPath = (options: UploadOptions): string => {
     case 'agency-cover':
       // balkan-estate/agencies/{agencyId}/cover
       return `${ROOT}/agencies/${agencyId || userId}/cover`;
+
+    case 'site-logo':
+      // balkan-estate/site/logo
+      return `${ROOT}/site/logo`;
+
+    case 'site-email-logo':
+      // balkan-estate/site/email-logo
+      return `${ROOT}/site/email-logo`;
 
     default:
       return `${ROOT}/misc/${userId}`;
@@ -254,20 +265,28 @@ export const uploadImage = async (
 };
 
 /**
- * Upload multiple images for a property listing
+ * Upload multiple images for a property listing.
+ * If watermarkOptions is provided, applies agency logo + BalkanEstate branding.
  */
 export const uploadPropertyImages = async (
   files: Express.Multer.File[],
   userId: string,
-  propertyId?: string
+  propertyId?: string,
+  watermarkOptions?: WatermarkOptions
 ): Promise<Array<{ url: string; publicId: string; tag: string }>> => {
   const uploadedImages: Array<{ url: string; publicId: string; tag: string }> = [];
 
-  mediaLogger.info(`📤 Uploading ${files.length} images for user ${userId}${propertyId ? `, property ${propertyId}` : ''}`);
+  mediaLogger.info(`📤 Uploading ${files.length} images for user ${userId}${propertyId ? `, property ${propertyId}` : ''}${watermarkOptions ? ' (with watermark)' : ''}`);
 
   for (const file of files) {
     try {
-      const result = await uploadImage(file.buffer, {
+      // Apply watermark before upload if options provided
+      let buffer = file.buffer;
+      if (watermarkOptions) {
+        buffer = await applyWatermark(buffer, watermarkOptions);
+      }
+
+      const result = await uploadImage(buffer, {
         userId,
         propertyId,
         type: 'property',

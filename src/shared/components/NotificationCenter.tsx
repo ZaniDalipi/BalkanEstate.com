@@ -6,6 +6,7 @@ import {
   CheckCircle, XCircle,
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
+import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 import { apiRequest } from '@/src/shared/api';
 
 interface NotificationData {
@@ -35,6 +36,7 @@ interface Notification {
 const NotificationCenter: React.FC = () => {
   const { t } = useTranslation(['common']);
   const { state, dispatch } = useAppContext();
+  const { setDirection } = useNavigationDirection();
   const { isAuthenticated } = state;
 
   const [isOpen, setIsOpen] = useState(false);
@@ -125,6 +127,7 @@ const NotificationCenter: React.FC = () => {
     // Navigate to agency detail page for join request (opens join requests view)
     if (data.agencyId && notification.type === 'agency_join_request') {
       setIsOpen(false);
+      setDirection('up');
       dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agencySlug || data.agencyId });
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
       return;
@@ -138,6 +141,7 @@ const NotificationCenter: React.FC = () => {
       notification.type === 'agency_coupon_redeemed'
     )) {
       setIsOpen(false);
+      setDirection('up');
       dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agencySlug || data.agencyId });
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
       return;
@@ -150,6 +154,7 @@ const NotificationCenter: React.FC = () => {
       notification.type === 'viewing_declined'
     ) {
       setIsOpen(false);
+      setDirection('morph');
       dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'viewings' });
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
       return;
@@ -158,6 +163,7 @@ const NotificationCenter: React.FC = () => {
     // Navigate to property detail
     if (data.propertyId) {
       setIsOpen(false);
+      setDirection('up');
       dispatch({ type: 'SET_SELECTED_PROPERTY', payload: data.propertyId });
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
       return;
@@ -166,6 +172,7 @@ const NotificationCenter: React.FC = () => {
     // Navigate to conversations
     if (data.conversationId) {
       setIsOpen(false);
+      setDirection('morph');
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
       return;
     }

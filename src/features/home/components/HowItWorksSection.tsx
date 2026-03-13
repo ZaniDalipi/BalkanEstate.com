@@ -19,7 +19,7 @@ const STEPS = [
     gradient: 'bg-gradient-to-br from-blue-500 to-blue-600',
     iconBg: 'bg-blue-50',
     accentColor: '#3b82f6',
-    participants: ['Buyer', 'Renter', 'Investor'],
+    participantKeys: ['buyer', 'renter', 'investor'],
   },
   {
     number: '02',
@@ -33,7 +33,7 @@ const STEPS = [
     gradient: 'bg-gradient-to-br from-emerald-500 to-emerald-600',
     iconBg: 'bg-emerald-50',
     accentColor: '#10b981',
-    participants: ['Agent', 'Seller', 'Negotiation'],
+    participantKeys: ['agent', 'seller', 'negotiation'],
   },
   {
     number: '03',
@@ -47,7 +47,7 @@ const STEPS = [
     gradient: 'bg-gradient-to-br from-violet-500 to-violet-600',
     iconBg: 'bg-violet-50',
     accentColor: '#8b5cf6',
-    participants: ['Contract', 'Keys', 'Move In'],
+    participantKeys: ['contract', 'keys', 'moveIn'],
   },
 ] as const;
 
@@ -89,7 +89,7 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ onLearnMore }) =>
 
                 {/* Step number */}
                 <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-300">
-                  Step {step.number}
+                  {t('home:howItWorks.stepLabel', 'Step')} {step.number}
                 </span>
 
                 {/* Icon */}
@@ -109,9 +109,9 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ onLearnMore }) =>
 
                 {/* Participant pills */}
                 <div className="mt-4 flex flex-wrap gap-1.5">
-                  {step.participants.map((p) => (
+                  {step.participantKeys.map((key) => (
                     <span
-                      key={p}
+                      key={key}
                       className="text-[10px] font-semibold px-2.5 py-1 rounded-full border"
                       style={{
                         color: step.accentColor,
@@ -119,7 +119,7 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ onLearnMore }) =>
                         backgroundColor: `${step.accentColor}08`,
                       }}
                     >
-                      {p}
+                      {t(`home:howItWorks.participant_${key}`)}
                     </span>
                   ))}
                 </div>

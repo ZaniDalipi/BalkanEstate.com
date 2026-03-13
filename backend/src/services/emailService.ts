@@ -3,7 +3,7 @@ import { Resend } from 'resend';
 import User from '../models/User';
 import { getPromoTemplate, BRAND_COLORS } from '../templates/emailTemplates';
 import { emailLogger } from '../utils/logger';
-import { getActiveEmailConfig, renderEmailWithSiteSettings, buildCouponCodesHtml } from '../utils/emailTemplateRenderer';
+import { getActiveEmailConfig, renderEmailWithSiteSettings, buildCouponCodesHtml, getSiteSettingsForEmail } from '../utils/emailTemplateRenderer';
 
 // =============================================================================
 // Security Utilities
@@ -194,6 +194,31 @@ class EmailService {
   }
 
   /**
+   * Get company branding from SiteSettings (cached).
+   * All email methods should use this instead of hardcoding company names.
+   */
+  async getBranding(): Promise<{
+    name: string;
+    nameFormatted: string;
+    namePlain: string;
+    frontendUrl: string;
+    supportEmail: string;
+  }> {
+    const s = await getSiteSettingsForEmail();
+    const name = s?.companyName || 'BalkanEstateAI';
+    const nameFormatted = s?.companyNameFormatted || 'BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>';
+    // Plain text version with Unicode superscript for email subjects/text
+    const namePlain = name.includes('AI') ? name.replace('AI', '\u1d2c\u1d35') : `${name}\u1d2c\u1d35`;
+    return {
+      name,
+      nameFormatted,
+      namePlain,
+      frontendUrl: s?.frontendUrl || process.env.FRONTEND_URL || 'https://balkanestateai.com',
+      supportEmail: s?.supportEmail || 'support@balkanestateai.com',
+    };
+  }
+
+  /**
    * Get the appropriate "from" address for an email category
    */
   getFromAddress(category: EmailCategory = 'noreply'): string {
@@ -293,6 +318,64 @@ class EmailService {
   }
 
   /**
+   * Wrap inner email content with a full HTML document that includes
+   * dark-mode support via @media (prefers-color-scheme: dark).
+   *
+   * Inline styles use light-theme colors; the CSS block overrides them
+   * for clients that support prefers-color-scheme.
+   *
+   * Classes used in templates:
+   *   .ec-body      – outer body background
+   *   .ec-card      – main card container
+   *   .ec-header    – gradient header bar
+   *   .ec-text      – primary text
+   *   .ec-text-muted – secondary / muted text
+   *   .ec-footer    – footer section
+   *   .ec-link      – accent-colored links
+   *   .ec-cta       – call-to-action button
+   *   .ec-border    – bordered elements
+   *   .ec-stat-card – stat cards with light backgrounds
+   */
+  wrapEmailHtml(innerContent: string, preheaderText?: string): string {
+    return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background-color:#f3f4f6;-webkit-font-smoothing:antialiased;" class="ec-body">
+  ${preheaderText ? `<div style="display:none;max-height:0;overflow:hidden;">${preheaderText}</div>` : ''}
+  ${innerContent}
+</body>
+</html>`;
+  }
+
+  /**
    * Helper to format numbers with + or - prefix for changes
    */
   private formatChange(change: number): string {
@@ -359,9 +442,15 @@ class EmailService {
    * @param emailType - Type of email for specific unsubscribe (weeklyStats, propertyAlerts, priceDrops, messages, marketing)
    * @param reason - Reason shown to user why they're receiving this email
    */
-  generateEmailFooter(unsubscribeToken: string | undefined, emailType: string = 'all', reason: string = ''): string {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
-    const backendUrl = process.env.BACKEND_URL || 'https://api.balkanestate.com';
+  generateEmailFooter(
+    unsubscribeToken: string | undefined,
+    emailType: string = 'all',
+    reason: string = '',
+    branding?: { nameFormatted: string; frontendUrl: string },
+  ): string {
+    const frontendUrl = branding?.frontendUrl || process.env.FRONTEND_URL || 'https://balkanestateai.com';
+    const backendUrl = process.env.BACKEND_URL || 'https://api.balkanestateai.com';
+    const companyNameFormatted = branding?.nameFormatted || 'BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>';
     const year = new Date().getFullYear();
 
     const unsubscribeUrl = unsubscribeToken
@@ -374,15 +463,15 @@ class EmailService {
 
     return `
     <!-- Footer -->
-    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
-      ${reason ? `<p style="color: #6b7280; font-size: 12px; margin: 0 0 12px 0;">${escapeHtml(reason)}</p>` : ''}
-      <p style="color: #9ca3af; font-size: 11px; margin: 0 0 8px 0;">
-        <a href="${unsubscribeUrl}" style="color: #9ca3af; text-decoration: underline;">Unsubscribe from these emails</a>
-        ${emailType !== 'all' ? ` · <a href="${unsubscribeAllUrl}" style="color: #9ca3af; text-decoration: underline;">Unsubscribe from all</a>` : ''}
-        · <a href="${frontendUrl}/settings/notifications" style="color: #9ca3af; text-decoration: underline;">Manage preferences</a>
+    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;" class="ec-footer">
+      ${reason ? `<p style="color: #6b7280; font-size: 12px; margin: 0 0 12px 0;" class="ec-text-muted">${escapeHtml(reason)}</p>` : ''}
+      <p style="color: #9ca3af; font-size: 11px; margin: 0 0 8px 0;" class="ec-text-muted">
+        <a href="${unsubscribeUrl}" style="color: #9ca3af; text-decoration: underline;" class="ec-text-muted">Unsubscribe from these emails</a>
+        ${emailType !== 'all' ? ` · <a href="${unsubscribeAllUrl}" style="color: #9ca3af; text-decoration: underline;" class="ec-text-muted">Unsubscribe from all</a>` : ''}
+        · <a href="${frontendUrl}/settings/notifications" style="color: #9ca3af; text-decoration: underline;" class="ec-text-muted">Manage preferences</a>
       </p>
-      <p style="color: #9ca3af; font-size: 11px; margin: 8px 0 0 0;">
-        © ${year} BalkanEstate<sup>AI</sup>. All rights reserved.
+      <p style="color: #9ca3af; font-size: 11px; margin: 8px 0 0 0;" class="ec-text-muted">
+        © ${year} ${companyNameFormatted}. All rights reserved.
       </p>
     </div>`;
   }
@@ -398,7 +487,7 @@ class EmailService {
       return;
     }
 
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('weekly-stats');
@@ -407,41 +496,41 @@ class EmailService {
       const statsSection = `
       <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 8px;">
         <div style="display: table-row;">
-          <div style="display: table-cell; width: 50%; background: #f0f9ff; border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="display: table-cell; width: 50%; background: #f0f9ff; border-radius: 12px; padding: 16px; text-align: center;" class="ec-stat-card ec-text">
             <div style="font-size: 32px; font-weight: 700; color: #0369a1;">${data.totalViews.toLocaleString()}</div>
-            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;">Total Views</div>
+            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;" class="ec-text-muted">Total Views</div>
             <div style="font-size: 12px;">${this.formatChange(data.viewsChange)} vs last week</div>
           </div>
-          <div style="display: table-cell; width: 50%; background: #f0fdf4; border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="display: table-cell; width: 50%; background: #f0fdf4; border-radius: 12px; padding: 16px; text-align: center;" class="ec-stat-card ec-text">
             <div style="font-size: 32px; font-weight: 700; color: #16a34a;">${data.totalInquiries}</div>
-            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;">Inquiries</div>
+            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;" class="ec-text-muted">Inquiries</div>
             <div style="font-size: 12px;">${this.formatChange(data.inquiriesChange)} vs last week</div>
           </div>
         </div>
       </div>
       <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 8px; margin-top: 8px;">
         <div style="display: table-row;">
-          <div style="display: table-cell; width: 50%; background: #fef3c7; border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="display: table-cell; width: 50%; background: #fef3c7; border-radius: 12px; padding: 16px; text-align: center;" class="ec-stat-card ec-text">
             <div style="font-size: 32px; font-weight: 700; color: #d97706;">${data.totalSaves}</div>
-            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;">Saves</div>
+            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;" class="ec-text-muted">Saves</div>
             <div style="font-size: 12px;">${this.formatChange(data.savesChange)} vs last week</div>
           </div>
-          <div style="display: table-cell; width: 50%; background: #faf5ff; border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="display: table-cell; width: 50%; background: #faf5ff; border-radius: 12px; padding: 16px; text-align: center;" class="ec-stat-card ec-text">
             <div style="font-size: 32px; font-weight: 700; color: #7c3aed;">${data.activeListings}</div>
-            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;">Active Listings</div>
+            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;" class="ec-text-muted">Active Listings</div>
           </div>
         </div>
       </div>`;
 
       // Build top property section HTML
       const topPropertySection = data.topPerformingProperty ? `
-      <div style="margin-top: 24px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 16px;">
+      <div style="margin-top: 24px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 16px;" class="ec-highlight ec-text">
         <div style="display: flex; align-items: center; margin-bottom: 8px;">
           <span style="font-size: 18px; margin-right: 8px;">🏆</span>
           <span style="font-weight: 600; color: #92400e;">Top Performing Property</span>
         </div>
         <div style="color: #374151; font-weight: 600; font-size: 14px;">${escapeHtml(data.topPerformingProperty.title)}</div>
-        <div style="color: #6b7280; font-size: 12px; margin-top: 2px;">${escapeHtml(data.topPerformingProperty.address)}</div>
+        <div style="color: #6b7280; font-size: 12px; margin-top: 2px;" class="ec-text-muted">${escapeHtml(data.topPerformingProperty.address)}</div>
         <div style="display: flex; gap: 16px; margin-top: 8px;">
           <span style="font-size: 12px; color: #6b7280;">👁 ${data.topPerformingProperty.views} views</span>
           <span style="font-size: 12px; color: #6b7280;">💬 ${data.topPerformingProperty.inquiries} inquiries</span>
@@ -482,21 +571,46 @@ class EmailService {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;" class="ec-body">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;" class="ec-card">
     <!-- Header -->
-    <div style="background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); padding: 32px 24px; text-align: center;">
+    <div style="background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); padding: 32px 24px; text-align: center;" class="ec-header">
       <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">📊 Your Weekly Report</h1>
       <p style="color: #bfdbfe; margin: 8px 0 0 0; font-size: 14px;">${safePeriod}</p>
     </div>
 
     <!-- Greeting -->
     <div style="padding: 24px;">
-      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;" class="ec-text">
         Hi <strong>${safeUserName}</strong>,
       </p>
-      <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;">
+      <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;" class="ec-text-muted">
         Here's how your properties performed this week:
       </p>
 
@@ -504,15 +618,15 @@ class EmailService {
       <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 8px;">
         <div style="display: table-row;">
           <!-- Views -->
-          <div style="display: table-cell; width: 50%; background: #f0f9ff; border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="display: table-cell; width: 50%; background: #f0f9ff; border-radius: 12px; padding: 16px; text-align: center;" class="ec-stat-card ec-text">
             <div style="font-size: 32px; font-weight: 700; color: #0369a1;">${data.totalViews.toLocaleString()}</div>
-            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;">Total Views</div>
+            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;" class="ec-text-muted">Total Views</div>
             <div style="font-size: 12px;">${this.formatChange(data.viewsChange)} vs last week</div>
           </div>
           <!-- Inquiries -->
-          <div style="display: table-cell; width: 50%; background: #f0fdf4; border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="display: table-cell; width: 50%; background: #f0fdf4; border-radius: 12px; padding: 16px; text-align: center;" class="ec-stat-card ec-text">
             <div style="font-size: 32px; font-weight: 700; color: #16a34a;">${data.totalInquiries}</div>
-            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;">Inquiries</div>
+            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;" class="ec-text-muted">Inquiries</div>
             <div style="font-size: 12px;">${this.formatChange(data.inquiriesChange)} vs last week</div>
           </div>
         </div>
@@ -521,28 +635,28 @@ class EmailService {
       <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 8px; margin-top: 8px;">
         <div style="display: table-row;">
           <!-- Saves -->
-          <div style="display: table-cell; width: 50%; background: #fef3c7; border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="display: table-cell; width: 50%; background: #fef3c7; border-radius: 12px; padding: 16px; text-align: center;" class="ec-stat-card ec-text">
             <div style="font-size: 32px; font-weight: 700; color: #d97706;">${data.totalSaves}</div>
-            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;">Saves</div>
+            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;" class="ec-text-muted">Saves</div>
             <div style="font-size: 12px;">${this.formatChange(data.savesChange)} vs last week</div>
           </div>
           <!-- Active Listings -->
-          <div style="display: table-cell; width: 50%; background: #faf5ff; border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="display: table-cell; width: 50%; background: #faf5ff; border-radius: 12px; padding: 16px; text-align: center;" class="ec-stat-card ec-text">
             <div style="font-size: 32px; font-weight: 700; color: #7c3aed;">${data.activeListings}</div>
-            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;">Active Listings</div>
+            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;" class="ec-text-muted">Active Listings</div>
           </div>
         </div>
       </div>
 
       ${data.topPerformingProperty ? `
       <!-- Top Performing Property -->
-      <div style="margin-top: 24px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 16px;">
+      <div style="margin-top: 24px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 16px;" class="ec-highlight ec-text">
         <div style="display: flex; align-items: center; margin-bottom: 8px;">
           <span style="font-size: 18px; margin-right: 8px;">🏆</span>
           <span style="font-weight: 600; color: #92400e;">Top Performing Property</span>
         </div>
         <div style="color: #374151; font-weight: 600; font-size: 14px;">${safeTopPropertyTitle}</div>
-        <div style="color: #6b7280; font-size: 12px; margin-top: 2px;">${safeTopPropertyAddress}</div>
+        <div style="color: #6b7280; font-size: 12px; margin-top: 2px;" class="ec-text-muted">${safeTopPropertyAddress}</div>
         <div style="display: flex; gap: 16px; margin-top: 8px;">
           <span style="font-size: 12px; color: #6b7280;">👁 ${data.topPerformingProperty.views} views</span>
           <span style="font-size: 12px; color: #6b7280;">💬 ${data.topPerformingProperty.inquiries} inquiries</span>
@@ -560,11 +674,11 @@ class EmailService {
         <div style="display: flex; justify-content: space-between;">
           <div>
             <div style="font-size: 24px; font-weight: 700; color: #166534;">${data.propertiesSold}</div>
-            <div style="font-size: 12px; color: #6b7280;">Properties Sold</div>
+            <div style="font-size: 12px; color: #6b7280;" class="ec-text-muted">Properties Sold</div>
           </div>
           <div style="text-align: right;">
             <div style="font-size: 24px; font-weight: 700; color: #166534;">${this.formatCurrency(data.totalSalesValue)}</div>
-            <div style="font-size: 12px; color: #6b7280;">Total Value</div>
+            <div style="font-size: 12px; color: #6b7280;" class="ec-text-muted">Total Value</div>
           </div>
         </div>
       </div>
@@ -572,7 +686,7 @@ class EmailService {
 
       <!-- CTA -->
       <div style="margin-top: 32px; text-align: center;">
-        <a href="${process.env.FRONTEND_URL || 'https://balkanestate.com'}/dashboard"
+        <a href="${process.env.FRONTEND_URL || 'https://balkanestateai.com'}/dashboard"
            style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 14px;">
           View Full Analytics →
         </a>
@@ -589,7 +703,7 @@ class EmailService {
       </div>
     </div>
 
-    ${this.generateEmailFooter(unsubscribeToken, 'weeklyStats', "You're receiving this email because you're a Pro member of BalkanEstate.")}
+    ${this.generateEmailFooter(unsubscribeToken, 'weeklyStats', "You're receiving this email because you're a Pro member of BalkanEstateAI.")}
   </div>
 </body>
 </html>`;
@@ -614,7 +728,7 @@ class EmailService {
       return;
     }
 
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const agencyConfig = await getActiveEmailConfig('agency-weekly-stats');
@@ -626,35 +740,35 @@ class EmailService {
           <div style="display: table-row;">
             <div style="display: table-cell; width: 50%; text-align: center; padding: 8px;">
               <div style="font-size: 28px; font-weight: 700; color: #7c3aed;">${data.profileViews.toLocaleString()}</div>
-              <div style="font-size: 11px; color: #6b7280;">Profile Views</div>
+              <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Profile Views</div>
               <div style="font-size: 11px;">${this.formatChange(data.profileViewsChange)}</div>
             </div>
             <div style="display: table-cell; width: 50%; text-align: center; padding: 8px;">
               <div style="font-size: 28px; font-weight: 700; color: #7c3aed;">${data.uniqueProfileViews.toLocaleString()}</div>
-              <div style="font-size: 11px; color: #6b7280;">Unique Visitors</div>
+              <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Unique Visitors</div>
             </div>
           </div>
         </div>
       </div>
       <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 8px;">
         <div style="display: table-row;">
-          <div style="display: table-cell; width: 33%; background: #f0f9ff; border-radius: 12px; padding: 12px; text-align: center;">
+          <div style="display: table-cell; width: 33%; background: #f0f9ff; border-radius: 12px; padding: 12px; text-align: center;" class="ec-highlight ec-text">
             <div style="font-size: 24px; font-weight: 700; color: #0369a1;">${data.totalAgents}</div>
-            <div style="font-size: 11px; color: #6b7280;">Agents</div>
+            <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Agents</div>
           </div>
-          <div style="display: table-cell; width: 33%; background: #f0fdf4; border-radius: 12px; padding: 12px; text-align: center;">
+          <div style="display: table-cell; width: 33%; background: #f0fdf4; border-radius: 12px; padding: 12px; text-align: center;" class="ec-highlight ec-text">
             <div style="font-size: 24px; font-weight: 700; color: #16a34a;">${data.activeListings}</div>
-            <div style="font-size: 11px; color: #6b7280;">Active Listings</div>
+            <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Active Listings</div>
           </div>
           <div style="display: table-cell; width: 33%; background: #fef3c7; border-radius: 12px; padding: 12px; text-align: center;">
             <div style="font-size: 24px; font-weight: 700; color: #d97706;">${data.totalInquiries}</div>
-            <div style="font-size: 11px; color: #6b7280;">Inquiries</div>
+            <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Inquiries</div>
             <div style="font-size: 10px;">${this.formatChange(data.inquiriesChange)}</div>
           </div>
         </div>
       </div>`;
       const topAgentSection = data.topAgent ? `
-      <div style="margin-top: 16px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 16px;">
+      <div style="margin-top: 16px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 16px;" class="ec-highlight ec-text">
         <div style="display: flex; align-items: center; margin-bottom: 8px;">
           <span style="font-size: 18px; margin-right: 8px;">⭐</span>
           <span style="font-weight: 600; color: #92400e;">Top Performing Agent</span>
@@ -672,7 +786,7 @@ class EmailService {
           <span style="font-weight: 600; color: #166534;">Top Property</span>
         </div>
         <div style="color: #374151; font-weight: 600; font-size: 14px;">${escapeHtml(data.topProperty.title)}</div>
-        <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">👁 ${data.topProperty.views} views this week</div>
+        <div style="font-size: 12px; color: #6b7280; margin-top: 4px;" class="ec-text-muted">👁 ${data.topProperty.views} views this week</div>
       </div>` : '';
       const variables: Record<string, string> = {
         agencyName:         escapeHtml(data.agencyName) || 'there',
@@ -707,21 +821,46 @@ class EmailService {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;" class="ec-body">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;" class="ec-card">
     <!-- Header -->
-    <div style="background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); padding: 32px 24px; text-align: center;">
+    <div style="background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); padding: 32px 24px; text-align: center;" class="ec-header">
       <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">🏢 Agency Weekly Report</h1>
       <p style="color: #ddd6fe; margin: 8px 0 0 0; font-size: 14px;">${safePeriod}</p>
     </div>
 
     <!-- Greeting -->
     <div style="padding: 24px;">
-      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;" class="ec-text">
         Hi <strong>${safeAgencyName}</strong>,
       </p>
-      <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;">
+      <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;" class="ec-text-muted">
         Here's how your agency performed this week:
       </p>
 
@@ -732,12 +871,12 @@ class EmailService {
           <div style="display: table-row;">
             <div style="display: table-cell; width: 50%; text-align: center; padding: 8px;">
               <div style="font-size: 28px; font-weight: 700; color: #7c3aed;">${data.profileViews.toLocaleString()}</div>
-              <div style="font-size: 11px; color: #6b7280;">Profile Views</div>
+              <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Profile Views</div>
               <div style="font-size: 11px;">${this.formatChange(data.profileViewsChange)}</div>
             </div>
             <div style="display: table-cell; width: 50%; text-align: center; padding: 8px;">
               <div style="font-size: 28px; font-weight: 700; color: #7c3aed;">${data.uniqueProfileViews.toLocaleString()}</div>
-              <div style="font-size: 11px; color: #6b7280;">Unique Visitors</div>
+              <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Unique Visitors</div>
             </div>
           </div>
         </div>
@@ -747,19 +886,19 @@ class EmailService {
       <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 8px;">
         <div style="display: table-row;">
           <!-- Agents -->
-          <div style="display: table-cell; width: 33%; background: #f0f9ff; border-radius: 12px; padding: 12px; text-align: center;">
+          <div style="display: table-cell; width: 33%; background: #f0f9ff; border-radius: 12px; padding: 12px; text-align: center;" class="ec-highlight ec-text">
             <div style="font-size: 24px; font-weight: 700; color: #0369a1;">${data.totalAgents}</div>
-            <div style="font-size: 11px; color: #6b7280;">Agents</div>
+            <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Agents</div>
           </div>
           <!-- Listings -->
-          <div style="display: table-cell; width: 33%; background: #f0fdf4; border-radius: 12px; padding: 12px; text-align: center;">
+          <div style="display: table-cell; width: 33%; background: #f0fdf4; border-radius: 12px; padding: 12px; text-align: center;" class="ec-highlight ec-text">
             <div style="font-size: 24px; font-weight: 700; color: #16a34a;">${data.activeListings}</div>
-            <div style="font-size: 11px; color: #6b7280;">Active Listings</div>
+            <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Active Listings</div>
           </div>
           <!-- Inquiries -->
           <div style="display: table-cell; width: 33%; background: #fef3c7; border-radius: 12px; padding: 12px; text-align: center;">
             <div style="font-size: 24px; font-weight: 700; color: #d97706;">${data.totalInquiries}</div>
-            <div style="font-size: 11px; color: #6b7280;">Inquiries</div>
+            <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Inquiries</div>
             <div style="font-size: 10px;">${this.formatChange(data.inquiriesChange)}</div>
           </div>
         </div>
@@ -767,7 +906,7 @@ class EmailService {
 
       ${data.topAgent ? `
       <!-- Top Agent -->
-      <div style="margin-top: 16px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 16px;">
+      <div style="margin-top: 16px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 16px;" class="ec-highlight ec-text">
         <div style="display: flex; align-items: center; margin-bottom: 8px;">
           <span style="font-size: 18px; margin-right: 8px;">⭐</span>
           <span style="font-weight: 600; color: #92400e;">Top Performing Agent</span>
@@ -788,20 +927,20 @@ class EmailService {
           <span style="font-weight: 600; color: #166534;">Top Property</span>
         </div>
         <div style="color: #374151; font-weight: 600; font-size: 14px;">${safeTopPropertyTitle}</div>
-        <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">👁 ${data.topProperty.views} views this week</div>
+        <div style="font-size: 12px; color: #6b7280; margin-top: 4px;" class="ec-text-muted">👁 ${data.topProperty.views} views this week</div>
       </div>
       ` : ''}
 
       <!-- CTA -->
       <div style="margin-top: 32px; text-align: center;">
-        <a href="${process.env.FRONTEND_URL || 'https://balkanestate.com'}/agency/dashboard"
+        <a href="${process.env.FRONTEND_URL || 'https://balkanestateai.com'}/agency/dashboard"
            style="display: inline-block; background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 14px;">
           View Agency Dashboard →
         </a>
       </div>
     </div>
 
-    ${this.generateEmailFooter(unsubscribeToken, 'weeklyStats', "You're receiving this email as an agency owner on BalkanEstate.")}
+    ${this.generateEmailFooter(unsubscribeToken, 'weeklyStats', "You're receiving this email as an agency owner on BalkanEstateAI.")}
   </div>
 </body>
 </html>`;
@@ -826,7 +965,7 @@ class EmailService {
       return;
     }
 
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const msgConfig = await getActiveEmailConfig('new-message');
@@ -863,8 +1002,33 @@ class EmailService {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;" class="ec-body">
   <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff;">
     <!-- Header -->
     <div style="background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); padding: 24px; text-align: center;">
@@ -880,13 +1044,13 @@ class EmailService {
         }
         <div>
           <div style="font-weight: 600; color: #374151; font-size: 16px;">${safeSenderName}</div>
-          <div style="font-size: 12px; color: #6b7280;">sent you a message</div>
+          <div style="font-size: 12px; color: #6b7280;" class="ec-text-muted">sent you a message</div>
         </div>
       </div>
 
       <!-- Message Preview -->
       <div style="background: #f3f4f6; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-        <p style="color: #374151; font-size: 14px; margin: 0; line-height: 1.5;">"${safeMessagePreview}"</p>
+        <p style="color: #374151; font-size: 14px; margin: 0; line-height: 1.5;" class="ec-text">"${safeMessagePreview}"</p>
       </div>
 
       ${safePropertyTitle ? `
@@ -895,7 +1059,7 @@ class EmailService {
         ${safePropertyImageUrl ? `<img src="${safePropertyImageUrl}" alt="${safePropertyTitle}" style="width: 100%; height: 120px; object-fit: cover;">` : ''}
         <div style="padding: 12px;">
           <div style="font-weight: 600; color: #374151; font-size: 14px;">${safePropertyTitle}</div>
-          <div style="font-size: 12px; color: #6b7280;">${safePropertyAddress}${safePropertyCity ? `, ${safePropertyCity}` : ''}</div>
+          <div style="font-size: 12px; color: #6b7280;" class="ec-text-muted">${safePropertyAddress}${safePropertyCity ? `, ${safePropertyCity}` : ''}</div>
         </div>
       </div>
       ` : ''}
@@ -907,7 +1071,7 @@ class EmailService {
       </a>
     </div>
 
-    ${this.generateEmailFooter(unsubscribeToken, 'messages', "You received this message through BalkanEstate.")}
+    ${this.generateEmailFooter(unsubscribeToken, 'messages', "You received this message through BalkanEstateAI.")}
   </div>
 </body>
 </html>`;
@@ -923,7 +1087,7 @@ class EmailService {
 
   async sendWelcomeCoupon(email: string, agencyName: string, couponCode: string, expiryDate: Date): Promise<void> {
     const expiryDateStr = expiryDate.toLocaleDateString();
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
     const daysUntilExpiry = Math.max(1, Math.ceil((expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
 
     // Try admin-editable template first
@@ -949,10 +1113,10 @@ class EmailService {
 
     const html = getPromoTemplate({
       title: '1 Week FREE Featured Listing',
-      subtitle: 'Welcome to BalkanEstate! Start showcasing your properties today.',
+      subtitle: 'Welcome to BalkanEstateAI! Start showcasing your properties today.',
       greeting: `Hi ${safeAgencyName},`,
       bodyParagraphs: [
-        'Thank you for joining BalkanEstate! To help you get started, we\'re giving you a special welcome gift.',
+        'Thank you for joining BalkanEstateAI! To help you get started, we\'re giving you a special welcome gift.',
         `Use code <strong style="font-family: monospace; background: #f3f4f6; padding: 4px 8px; border-radius: 4px; color: ${BRAND_COLORS.primary};">${safeCouponCode}</strong> to get 1 week of featured listing absolutely free.`,
         `This offer is valid until ${expiryDateStr}. Don\'t miss out!`,
       ],
@@ -972,7 +1136,7 @@ class EmailService {
 
   async sendExpiryReminder(email: string, agencyName: string, expiryDate: Date, couponCode: string, discount: number): Promise<void> {
     const expiryDateStr = expiryDate.toLocaleDateString();
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('expiry-reminder');
@@ -1019,7 +1183,7 @@ class EmailService {
 
   async sendSubscriptionConfirmation(email: string, agencyName: string, details: { interval: string; price: number; endDate: Date }): Promise<void> {
     const renewsDate = details.endDate.toLocaleDateString();
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('subscription-confirmation');
@@ -1094,7 +1258,7 @@ class EmailService {
       return;
     }
 
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const alertConfig = await getActiveEmailConfig('property-alert');
@@ -1107,21 +1271,21 @@ class EmailService {
         ${safeImgUrl ? `<img src="${safeImgUrl}" alt="${escapeHtml(params.property.title)}" style="width: 100%; height: 180px; object-fit: cover;">` : '<div style="width: 100%; height: 120px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); display: flex; align-items: center; justify-content: center;"><span style="font-size: 48px;">🏠</span></div>'}
         <div style="padding: 16px;">
           <div style="font-weight: 700; color: #1f2937; font-size: 17px; margin-bottom: 6px;">${escapeHtml(params.property.title)}</div>
-          <div style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">📍 ${escapeHtml(params.property.address)}, ${escapeHtml(params.property.city)}</div>
+          <div style="font-size: 13px; color: #6b7280; margin-bottom: 12px;" class="ec-text-muted">📍 ${escapeHtml(params.property.address)}, ${escapeHtml(params.property.city)}</div>
           <div style="font-size: 28px; font-weight: 700; color: #059669; margin-bottom: 14px;">€${params.property.price.toLocaleString()}</div>
           <div style="display: table; width: 100%; background: #f9fafb; border-radius: 8px; padding: 10px;">
             <div style="display: table-row;">
               <div style="display: table-cell; text-align: center; padding: 4px;">
                 <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.beds}</div>
-                <div style="font-size: 11px; color: #6b7280;">Beds</div>
+                <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Beds</div>
               </div>
               <div style="display: table-cell; text-align: center; padding: 4px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
                 <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.baths}</div>
-                <div style="font-size: 11px; color: #6b7280;">Baths</div>
+                <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Baths</div>
               </div>
               <div style="display: table-cell; text-align: center; padding: 4px;">
                 <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.sqft.toLocaleString()}</div>
-                <div style="font-size: 11px; color: #6b7280;">Sqft</div>
+                <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Sqft</div>
               </div>
             </div>
           </div>
@@ -1169,8 +1333,33 @@ class EmailService {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;" class="ec-body">
   <!-- Preview text -->
   <div style="display: none; max-height: 0; overflow: hidden;">
     New listing in ${safeCity}! ${safeTitle} for €${params.property.price.toLocaleString()} - matches your "${safeSearchName}" search.
@@ -1178,16 +1367,16 @@ class EmailService {
 
   <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
     <!-- Header with urgency -->
-    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 28px 24px; text-align: center;">
+    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 28px 24px; text-align: center;" class="ec-header">
       <div style="display: inline-block; background: rgba(255,255,255,0.2); border-radius: 20px; padding: 4px 12px; margin-bottom: 12px;">
-        <span style="color: #ffffff; font-size: 12px; font-weight: 600;">✨ JUST LISTED</span>
+        <span style="color: #ffffff; font-size: 12px; font-weight: 600;" class="ec-text">✨ JUST LISTED</span>
       </div>
       <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">New Property Match!</h1>
       <p style="color: #d1fae5; margin: 8px 0 0 0; font-size: 13px;">From your search: "${safeSearchName}"</p>
     </div>
 
     <div style="padding: 24px;">
-      <p style="color: #374151; font-size: 15px; margin: 0 0 20px 0;">
+      <p style="color: #374151; font-size: 15px; margin: 0 0 20px 0;" class="ec-text">
         Hey <strong>${safeRecipientName}</strong>! We found something you might love:
       </p>
 
@@ -1196,21 +1385,21 @@ class EmailService {
         ${safeImageUrl ? `<img src="${safeImageUrl}" alt="${safeTitle}" style="width: 100%; height: 180px; object-fit: cover;">` : '<div style="width: 100%; height: 120px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); display: flex; align-items: center; justify-content: center;"><span style="font-size: 48px;">🏠</span></div>'}
         <div style="padding: 16px;">
           <div style="font-weight: 700; color: #1f2937; font-size: 17px; margin-bottom: 6px;">${safeTitle}</div>
-          <div style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">📍 ${safeAddress}, ${safeCity}</div>
+          <div style="font-size: 13px; color: #6b7280; margin-bottom: 12px;" class="ec-text-muted">📍 ${safeAddress}, ${safeCity}</div>
           <div style="font-size: 28px; font-weight: 700; color: #059669; margin-bottom: 14px;">€${params.property.price.toLocaleString()}</div>
           <div style="display: table; width: 100%; background: #f9fafb; border-radius: 8px; padding: 10px;">
             <div style="display: table-row;">
               <div style="display: table-cell; text-align: center; padding: 4px;">
                 <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.beds}</div>
-                <div style="font-size: 11px; color: #6b7280;">Beds</div>
+                <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Beds</div>
               </div>
               <div style="display: table-cell; text-align: center; padding: 4px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
                 <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.baths}</div>
-                <div style="font-size: 11px; color: #6b7280;">Baths</div>
+                <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Baths</div>
               </div>
               <div style="display: table-cell; text-align: center; padding: 4px;">
                 <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.sqft.toLocaleString()}</div>
-                <div style="font-size: 11px; color: #6b7280;">Sqft</div>
+                <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Sqft</div>
               </div>
             </div>
           </div>
@@ -1218,7 +1407,7 @@ class EmailService {
       </div>
 
       <!-- Urgency note -->
-      <div style="background: #fffbeb; border-radius: 8px; padding: 12px; margin-bottom: 20px; text-align: center;">
+      <div style="background: #fffbeb; border-radius: 8px; padding: 12px; margin-bottom: 20px; text-align: center;" class="ec-highlight ec-text">
         <p style="color: #92400e; font-size: 13px; margin: 0;">
           ⚡ <strong>Hot properties go fast!</strong> Be the first to schedule a viewing.
         </p>
@@ -1277,7 +1466,7 @@ class EmailService {
       return;
     }
 
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
     const frequencyLabel = params.frequency === 'daily' ? 'Daily' : params.frequency === 'weekly' ? 'Weekly' : '';
 
     // Sanitize user inputs
@@ -1294,7 +1483,7 @@ class EmailService {
           ${safeImageUrl ? `<img src="${safeImageUrl}" alt="${safeTitle}" style="width: 100px; height: 80px; object-fit: cover;">` : '<div style="width: 100px; height: 80px; background: #e5e7eb;"></div>'}
           <div style="padding: 10px; flex: 1;">
             <div style="font-weight: 600; color: #374151; font-size: 13px; margin-bottom: 2px;">${safeTitle}</div>
-            <div style="font-size: 11px; color: #6b7280; margin-bottom: 4px;">${safeCity}</div>
+            <div style="font-size: 11px; color: #6b7280; margin-bottom: 4px;" class="ec-text-muted">${safeCity}</div>
             <div style="font-size: 14px; font-weight: 700; color: #059669;">€${p.price.toLocaleString()}</div>
           </div>
         </div>
@@ -1331,8 +1520,33 @@ class EmailService {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;" class="ec-body">
   <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff;">
     <!-- Header -->
     <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 24px; text-align: center;">
@@ -1341,14 +1555,14 @@ class EmailService {
     </div>
 
     <div style="padding: 24px;">
-      <p style="color: #374151; font-size: 14px; margin: 0 0 16px 0;">
+      <p style="color: #374151; font-size: 14px; margin: 0 0 16px 0;" class="ec-text">
         Hi <strong>${safeRecipientName}</strong>, we found ${params.properties.length} new properties matching your search!
       </p>
 
       <!-- Property Cards -->
       ${propertyCards}
 
-      ${params.properties.length > 5 ? `<p style="color: #6b7280; font-size: 13px; text-align: center; margin: 12px 0;">+${params.properties.length - 5} more properties</p>` : ''}
+      ${params.properties.length > 5 ? `<p style="color: #6b7280; font-size: 13px; text-align: center; margin: 12px 0;" class="ec-text-muted">+${params.properties.length - 5} more properties</p>` : ''}
 
       <!-- CTA -->
       <a href="${frontendUrl}/search"
@@ -1399,7 +1613,7 @@ class EmailService {
       return;
     }
 
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
     const isIncrease = !!params.property.isPriceIncrease;
     const priceDiff = Math.abs(params.property.previousPrice - params.property.newPrice);
 
@@ -1446,12 +1660,12 @@ class EmailService {
         ${safePropertyImageUrl ? `<img src="${safePropertyImageUrl}" alt="${safePropertyTitle}" style="width: 100%; height: 180px; object-fit: cover;">` : '<div style="width: 100%; height: 120px; background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%); display: flex; align-items: center; justify-content: center;"><span style="font-size: 48px;">🏠</span></div>'}
         <div style="padding: 16px;">
           <div style="font-weight: 700; color: #1f2937; font-size: 17px; margin-bottom: 6px;">${safePropertyTitle}</div>
-          <div style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">📍 ${safePropertyAddress}, ${safePropertyCity}</div>
+          <div style="font-size: 13px; color: #6b7280; margin-bottom: 16px;" class="ec-text-muted">📍 ${safePropertyAddress}, ${safePropertyCity}</div>
           <div style="background: ${priceBoxBg}; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
             <div style="display: table; width: 100%;">
               <div style="display: table-cell; text-align: center; width: 40%;">
-                <div style="font-size: 11px; color: #6b7280; text-transform: uppercase; margin-bottom: 4px;">Was</div>
-                <div style="font-size: 18px; color: #6b7280; text-decoration: line-through;">€${params.property.previousPrice.toLocaleString()}</div>
+                <div style="font-size: 11px; color: #6b7280; text-transform: uppercase; margin-bottom: 4px;" class="ec-text-muted">Was</div>
+                <div style="font-size: 18px; color: #6b7280; text-decoration: line-through;" class="ec-text-muted">€${params.property.previousPrice.toLocaleString()}</div>
               </div>
               <div style="display: table-cell; text-align: center; width: 20%; vertical-align: middle;">
                 <div style="font-size: 24px; color: ${arrowColor};">→</div>
@@ -1466,15 +1680,15 @@ class EmailService {
             <div style="display: table-row;">
               <div style="display: table-cell; text-align: center; padding: 4px;">
                 <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.beds}</div>
-                <div style="font-size: 11px; color: #6b7280;">Beds</div>
+                <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Beds</div>
               </div>
               <div style="display: table-cell; text-align: center; padding: 4px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
                 <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.baths}</div>
-                <div style="font-size: 11px; color: #6b7280;">Baths</div>
+                <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Baths</div>
               </div>
               <div style="display: table-cell; text-align: center; padding: 4px;">
                 <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.sqft.toLocaleString()}</div>
-                <div style="font-size: 11px; color: #6b7280;">Sqft</div>
+                <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Sqft</div>
               </div>
             </div>
           </div>
@@ -1528,8 +1742,33 @@ class EmailService {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;" class="ec-body">
   <!-- Preview text -->
   <div style="display: none; max-height: 0; overflow: hidden;">
     ${isIncrease ? `Price up ${params.property.percentageDrop}%!` : `Save €${priceDiff.toLocaleString()}!`} ${params.property.title} - now €${params.property.newPrice.toLocaleString()}
@@ -1539,14 +1778,14 @@ class EmailService {
     <!-- Header -->
     <div style="background: ${headerGradient}; padding: 32px 24px; text-align: center;">
       <div style="display: inline-block; background: rgba(255,255,255,0.2); border-radius: 20px; padding: 6px 16px; margin-bottom: 12px;">
-        <span style="color: #ffffff; font-size: 14px; font-weight: 700;">${badgeText}</span>
+        <span style="color: #ffffff; font-size: 14px; font-weight: 700;" class="ec-text">${badgeText}</span>
       </div>
       <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700;">${headlineText}</h1>
       <p style="color: ${subHeadlineColor}; margin: 12px 0 0 0; font-size: 18px; font-weight: 600;">${subHeadline}</p>
     </div>
 
     <div style="padding: 24px;">
-      <p style="color: #374151; font-size: 15px; margin: 0 0 20px 0;">
+      <p style="color: #374151; font-size: 15px; margin: 0 0 20px 0;" class="ec-text">
         ${introText}
       </p>
 
@@ -1555,14 +1794,14 @@ class EmailService {
         ${params.property.imageUrl ? `<img src="${params.property.imageUrl}" alt="${params.property.title}" style="width: 100%; height: 180px; object-fit: cover;">` : '<div style="width: 100%; height: 120px; background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%); display: flex; align-items: center; justify-content: center;"><span style="font-size: 48px;">🏠</span></div>'}
         <div style="padding: 16px;">
           <div style="font-weight: 700; color: #1f2937; font-size: 17px; margin-bottom: 6px;">${params.property.title}</div>
-          <div style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">📍 ${params.property.address}, ${params.property.city}</div>
+          <div style="font-size: 13px; color: #6b7280; margin-bottom: 16px;" class="ec-text-muted">📍 ${params.property.address}, ${params.property.city}</div>
 
           <!-- Price comparison -->
           <div style="background: ${priceBoxBg}; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
             <div style="display: table; width: 100%;">
               <div style="display: table-cell; text-align: center; width: 40%;">
-                <div style="font-size: 11px; color: #6b7280; text-transform: uppercase; margin-bottom: 4px;">Was</div>
-                <div style="font-size: 18px; color: #6b7280; text-decoration: line-through;">€${params.property.previousPrice.toLocaleString()}</div>
+                <div style="font-size: 11px; color: #6b7280; text-transform: uppercase; margin-bottom: 4px;" class="ec-text-muted">Was</div>
+                <div style="font-size: 18px; color: #6b7280; text-decoration: line-through;" class="ec-text-muted">€${params.property.previousPrice.toLocaleString()}</div>
               </div>
               <div style="display: table-cell; text-align: center; width: 20%; vertical-align: middle;">
                 <div style="font-size: 24px; color: ${arrowColor};">→</div>
@@ -1579,15 +1818,15 @@ class EmailService {
             <div style="display: table-row;">
               <div style="display: table-cell; text-align: center; padding: 4px;">
                 <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.beds}</div>
-                <div style="font-size: 11px; color: #6b7280;">Beds</div>
+                <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Beds</div>
               </div>
               <div style="display: table-cell; text-align: center; padding: 4px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
                 <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.baths}</div>
-                <div style="font-size: 11px; color: #6b7280;">Baths</div>
+                <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Baths</div>
               </div>
               <div style="display: table-cell; text-align: center; padding: 4px;">
                 <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.sqft.toLocaleString()}</div>
-                <div style="font-size: 11px; color: #6b7280;">Sqft</div>
+                <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Sqft</div>
               </div>
             </div>
           </div>
@@ -1627,8 +1866,8 @@ class EmailService {
       subject,
       html,
       text: isIncrease
-        ? `Heads up, ${params.recipientName}!\n\nA property you saved just went up in price.\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n\nWas: €${params.property.previousPrice.toLocaleString()}\nNow: €${params.property.newPrice.toLocaleString()}\nIncrease: €${priceDiff.toLocaleString()} (${params.property.percentageDrop}% up)\n\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nAct now before the price rises further.\n\nView property: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} BalkanEstate`
-        : `Great news, ${params.recipientName}!\n\nA property you saved just dropped in price!\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n\nWas: €${params.property.previousPrice.toLocaleString()}\nNow: €${params.property.newPrice.toLocaleString()}\nYou save: €${priceDiff.toLocaleString()} (${params.property.percentageDrop}% off)\n\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nPrice drops attract buyers fast. Don't miss this opportunity!\n\nView property: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} BalkanEstate`,
+        ? `Heads up, ${params.recipientName}!\n\nA property you saved just went up in price.\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n\nWas: €${params.property.previousPrice.toLocaleString()}\nNow: €${params.property.newPrice.toLocaleString()}\nIncrease: €${priceDiff.toLocaleString()} (${params.property.percentageDrop}% up)\n\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nAct now before the price rises further.\n\nView property: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} BalkanEstateᴬᴵ`
+        : `Great news, ${params.recipientName}!\n\nA property you saved just dropped in price!\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n\nWas: €${params.property.previousPrice.toLocaleString()}\nNow: €${params.property.newPrice.toLocaleString()}\nYou save: €${priceDiff.toLocaleString()} (${params.property.percentageDrop}% off)\n\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nPrice drops attract buyers fast. Don't miss this opportunity!\n\nView property: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} BalkanEstateᴬᴵ`,
       category: 'alerts',
     });
   }
@@ -1663,7 +1902,7 @@ class EmailService {
       return;
     }
 
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
     const isIncrease = !!params.property.isPriceIncrease;
     const priceDiff = Math.abs(params.property.previousPrice - params.property.newPrice);
 
@@ -1714,12 +1953,12 @@ class EmailService {
         ${safeImageUrl ? `<img src="${safeImageUrl}" alt="${safeTitle}" style="width: 100%; height: 180px; object-fit: cover;">` : '<div style="width: 100%; height: 120px; background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%); display: flex; align-items: center; justify-content: center;"><span style="font-size: 48px;">🏠</span></div>'}
         <div style="padding: 16px;">
           <div style="font-weight: 700; color: #1f2937; font-size: 17px; margin-bottom: 6px;">${safeTitle}</div>
-          <div style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">📍 ${safeAddress}, ${safeCity}</div>
+          <div style="font-size: 13px; color: #6b7280; margin-bottom: 16px;" class="ec-text-muted">📍 ${safeAddress}, ${safeCity}</div>
           <div style="background: ${priceBoxBg}; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
             <div style="display: table; width: 100%;">
               <div style="display: table-cell; text-align: center; width: 40%;">
-                <div style="font-size: 11px; color: #6b7280; text-transform: uppercase; margin-bottom: 4px;">Was</div>
-                <div style="font-size: 18px; color: #6b7280; text-decoration: line-through;">€${params.property.previousPrice.toLocaleString()}</div>
+                <div style="font-size: 11px; color: #6b7280; text-transform: uppercase; margin-bottom: 4px;" class="ec-text-muted">Was</div>
+                <div style="font-size: 18px; color: #6b7280; text-decoration: line-through;" class="ec-text-muted">€${params.property.previousPrice.toLocaleString()}</div>
               </div>
               <div style="display: table-cell; text-align: center; width: 20%; vertical-align: middle;">
                 <div style="font-size: 24px; color: ${arrowColor};">→</div>
@@ -1734,15 +1973,15 @@ class EmailService {
             <div style="display: table-row;">
               <div style="display: table-cell; text-align: center; padding: 4px;">
                 <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.beds}</div>
-                <div style="font-size: 11px; color: #6b7280;">Beds</div>
+                <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Beds</div>
               </div>
               <div style="display: table-cell; text-align: center; padding: 4px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
                 <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.baths}</div>
-                <div style="font-size: 11px; color: #6b7280;">Baths</div>
+                <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Baths</div>
               </div>
               <div style="display: table-cell; text-align: center; padding: 4px;">
                 <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.sqft.toLocaleString()}</div>
-                <div style="font-size: 11px; color: #6b7280;">Sqft</div>
+                <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Sqft</div>
               </div>
             </div>
           </div>
@@ -1807,8 +2046,33 @@ class EmailService {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;" class="ec-body">
   <!-- Preview text -->
   <div style="display: none; max-height: 0; overflow: hidden;">
     ${isIncrease ? `Price up ${params.property.percentageDrop}%!` : `Save €${priceDiff.toLocaleString()}!`} ${safeTitle} - now €${params.property.newPrice.toLocaleString()} (from "${safeSearchName}")
@@ -1818,7 +2082,7 @@ class EmailService {
     <!-- Header -->
     <div style="background: ${headerGradient}; padding: 32px 24px; text-align: center;">
       <div style="display: inline-block; background: rgba(255,255,255,0.2); border-radius: 20px; padding: 6px 16px; margin-bottom: 12px;">
-        <span style="color: #ffffff; font-size: 14px; font-weight: 700;">${badgeText}</span>
+        <span style="color: #ffffff; font-size: 14px; font-weight: 700;" class="ec-text">${badgeText}</span>
       </div>
       <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700;">${headlineText}</h1>
       <p style="color: ${subHeadlineColor}; margin: 12px 0 0 0; font-size: 18px; font-weight: 600;">${subHeadline}</p>
@@ -1826,12 +2090,12 @@ class EmailService {
     </div>
 
     <div style="padding: 24px;">
-      <p style="color: #374151; font-size: 15px; margin: 0 0 20px 0;">
+      <p style="color: #374151; font-size: 15px; margin: 0 0 20px 0;" class="ec-text">
         ${introText}
       </p>
 
       <!-- Saved Search Context -->
-      <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 10px 14px; margin-bottom: 20px;">
+      <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 10px 14px; margin-bottom: 20px;" class="ec-highlight ec-text">
         <p style="color: #0369a1; font-size: 12px; margin: 0; font-weight: 600;">
           🔍 Saved Search: "${safeSearchName}"
         </p>
@@ -1842,14 +2106,14 @@ class EmailService {
         ${safeImageUrl ? `<img src="${safeImageUrl}" alt="${safeTitle}" style="width: 100%; height: 180px; object-fit: cover;">` : '<div style="width: 100%; height: 120px; background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%); display: flex; align-items: center; justify-content: center;"><span style="font-size: 48px;">🏠</span></div>'}
         <div style="padding: 16px;">
           <div style="font-weight: 700; color: #1f2937; font-size: 17px; margin-bottom: 6px;">${safeTitle}</div>
-          <div style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">📍 ${safeAddress}, ${safeCity}</div>
+          <div style="font-size: 13px; color: #6b7280; margin-bottom: 16px;" class="ec-text-muted">📍 ${safeAddress}, ${safeCity}</div>
 
           <!-- Price comparison -->
           <div style="background: ${priceBoxBg}; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
             <div style="display: table; width: 100%;">
               <div style="display: table-cell; text-align: center; width: 40%;">
-                <div style="font-size: 11px; color: #6b7280; text-transform: uppercase; margin-bottom: 4px;">Was</div>
-                <div style="font-size: 18px; color: #6b7280; text-decoration: line-through;">€${params.property.previousPrice.toLocaleString()}</div>
+                <div style="font-size: 11px; color: #6b7280; text-transform: uppercase; margin-bottom: 4px;" class="ec-text-muted">Was</div>
+                <div style="font-size: 18px; color: #6b7280; text-decoration: line-through;" class="ec-text-muted">€${params.property.previousPrice.toLocaleString()}</div>
               </div>
               <div style="display: table-cell; text-align: center; width: 20%; vertical-align: middle;">
                 <div style="font-size: 24px; color: ${arrowColor};">→</div>
@@ -1866,15 +2130,15 @@ class EmailService {
             <div style="display: table-row;">
               <div style="display: table-cell; text-align: center; padding: 4px;">
                 <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.beds}</div>
-                <div style="font-size: 11px; color: #6b7280;">Beds</div>
+                <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Beds</div>
               </div>
               <div style="display: table-cell; text-align: center; padding: 4px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
                 <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.baths}</div>
-                <div style="font-size: 11px; color: #6b7280;">Baths</div>
+                <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Baths</div>
               </div>
               <div style="display: table-cell; text-align: center; padding: 4px;">
                 <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.sqft.toLocaleString()}</div>
-                <div style="font-size: 11px; color: #6b7280;">Sqft</div>
+                <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Sqft</div>
               </div>
             </div>
           </div>
@@ -1924,7 +2188,7 @@ class EmailService {
    * Send subscription renewal reminder (for non-auto-renewing subscriptions)
    */
   async sendSubscriptionRenewalReminder(email: string, userName: string, expiryDate: Date, planName: string): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('subscription-renewal-reminder');
@@ -1945,28 +2209,26 @@ class EmailService {
     }
 
     // Fallback: inline HTML
-    const html = `
-      <html>
-        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #2563eb;">Subscription Expiring Soon</h1>
-          <p>Hi ${userName},</p>
-          <p>Your <strong>${planName}</strong> subscription will expire on <strong>${expiryDate.toLocaleDateString()}</strong>.</p>
-          <p>Don't lose access to your premium features! Renew your subscription to continue enjoying:</p>
-          <ul>
+    const html = this.wrapEmailHtml(`
+      <div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;" class="ec-card">
+          <h1 style="color: #2563eb;" class="ec-text">Subscription Expiring Soon</h1>
+          <p class="ec-text">Hi ${userName},</p>
+          <p class="ec-text">Your <strong>${planName}</strong> subscription will expire on <strong>${expiryDate.toLocaleDateString()}</strong>.</p>
+          <p class="ec-text">Don't lose access to your premium features! Renew your subscription to continue enjoying:</p>
+          <ul class="ec-text">
             <li>Unlimited saved searches</li>
             <li>Priority property notifications</li>
             <li>Market insights and analytics</li>
             <li>Ad-free experience</li>
           </ul>
           <p style="margin-top: 20px;">
-            <a href="${frontendUrl}/account" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Renew Subscription</a>
+            <a href="${frontendUrl}/account" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;" class="ec-cta">Renew Subscription</a>
           </p>
-          <p style="color: #666; font-size: 12px; margin-top: 30px;">
+          <p style="color: #666; font-size: 12px; margin-top: 30px;" class="ec-text-muted">
             If you have any questions, please contact our support team.
           </p>
-        </body>
-      </html>
-    `;
+      </div>
+    `);
     await this.sendEmail({
       to: email,
       subject: `Your ${planName} subscription expires soon`,
@@ -1979,7 +2241,7 @@ class EmailService {
    * Send auto-renewal reminder (7 days before renewal for auto-renewing subscriptions)
    */
   async sendAutoRenewalReminder(email: string, userName: string, renewalDate: Date, planName: string): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
     const formattedDate = renewalDate.toLocaleDateString();
 
     // Try admin-editable template first
@@ -1997,29 +2259,27 @@ class EmailService {
     }
 
     // Fallback: inline HTML
-    const html = `
-      <html>
-        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
-          <div style="background-color: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    const html = this.wrapEmailHtml(`
+          <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);" class="ec-card">
             <!-- Header -->
             <div style="text-align: center; margin-bottom: 24px;">
-              <div style="width: 60px; height: 60px; background-color: #eff6ff; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+              <div style="width: 60px; height: 60px; background-color: #eff6ff; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;" class="ec-highlight">
                 <span style="font-size: 28px;">🔔</span>
               </div>
-              <h1 style="color: #1e40af; margin: 0 0 8px 0; font-size: 24px;">Subscription Renewal Notice</h1>
-              <p style="color: #6b7280; margin: 0; font-size: 14px;">7 days until your renewal</p>
+              <h1 style="color: #1e40af; margin: 0 0 8px 0; font-size: 24px;" class="ec-text">Subscription Renewal Notice</h1>
+              <p style="color: #6b7280; margin: 0; font-size: 14px;" class="ec-text-muted">7 days until your renewal</p>
             </div>
 
             <!-- Main Content -->
-            <p style="color: #374151;">Hi ${userName},</p>
-            <p style="color: #374151;">
+            <p style="color: #374151;" class="ec-text">Hi ${userName},</p>
+            <p style="color: #374151;" class="ec-text">
               This is a friendly reminder that your <strong>${planName}</strong> subscription will automatically renew on <strong>${formattedDate}</strong>.
             </p>
 
             <!-- Info Box -->
-            <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin: 24px 0;">
-              <h3 style="color: #1e40af; margin: 0 0 12px 0; font-size: 16px;">What happens next?</h3>
-              <ul style="color: #1e3a8a; margin: 0; padding-left: 20px; line-height: 1.8;">
+            <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin: 24px 0;" class="ec-highlight">
+              <h3 style="color: #1e40af; margin: 0 0 12px 0; font-size: 16px;" class="ec-text">What happens next?</h3>
+              <ul style="color: #1e3a8a; margin: 0; padding-left: 20px; line-height: 1.8;" class="ec-text">
                 <li>Your payment method will be charged on ${formattedDate}</li>
                 <li>Your subscription will continue uninterrupted</li>
                 <li>You'll receive an invoice/receipt via email</li>
@@ -2027,27 +2287,25 @@ class EmailService {
             </div>
 
             <!-- Don't want to renew? -->
-            <div style="background-color: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 16px; margin: 24px 0;">
-              <p style="color: #92400e; margin: 0; font-size: 14px;">
+            <div style="background-color: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 16px; margin: 24px 0;" class="ec-highlight">
+              <p style="color: #92400e; margin: 0; font-size: 14px;" class="ec-text">
                 <strong>Don't want to renew?</strong> You can cancel your subscription anytime from your account settings. Your access will continue until the end of the current billing period.
               </p>
             </div>
 
             <!-- CTA Button -->
             <div style="text-align: center; margin: 28px 0;">
-              <a href="${frontendUrl}/account" style="background-color: #2563eb; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">Manage Subscription</a>
+              <a href="${frontendUrl}/account" style="background-color: #2563eb; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;" class="ec-cta">Manage Subscription</a>
             </div>
 
             <!-- Footer -->
-            <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 24px; text-align: center;">
-              <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                Questions? Contact us at <a href="mailto:support@balkanestate.com" style="color: #2563eb;">support@balkanestate.com</a>
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 24px; text-align: center;" class="ec-border">
+              <p style="color: #9ca3af; font-size: 12px; margin: 0;" class="ec-text-muted">
+                Questions? Contact us at <a href="mailto:support@balkanestate.com" style="color: #2563eb;" class="ec-link">support@balkanestate.com</a>
               </p>
             </div>
           </div>
-        </body>
-      </html>
-    `;
+    `);
 
     await this.sendEmail({
       to: email,
@@ -2067,7 +2325,7 @@ class EmailService {
     expiresAt: Date;
     transactionId?: string;
   }): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('payment-confirmation');
@@ -2088,26 +2346,24 @@ class EmailService {
     }
 
     // Fallback: inline HTML
-    const html = `
-      <html>
-        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #16a34a;">Payment Confirmed!</h1>
-          <p>Hi ${userName},</p>
-          <p>Thank you for your payment. Your subscription is now active.</p>
-          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0;">Payment Details</h3>
-            <p><strong>Plan:</strong> ${details.planName}</p>
-            <p><strong>Amount:</strong> ${details.currency}${details.amount.toFixed(2)}</p>
-            <p><strong>Valid Until:</strong> ${details.expiresAt.toLocaleDateString()}</p>
-            ${details.transactionId ? `<p><strong>Transaction ID:</strong> ${details.transactionId}</p>` : ''}
+    const html = this.wrapEmailHtml(`
+      <div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;" class="ec-card">
+          <h1 style="color: #16a34a;" class="ec-text">Payment Confirmed!</h1>
+          <p class="ec-text">Hi ${userName},</p>
+          <p class="ec-text">Thank you for your payment. Your subscription is now active.</p>
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;" class="ec-highlight">
+            <h3 style="margin-top: 0;" class="ec-text">Payment Details</h3>
+            <p class="ec-text"><strong>Plan:</strong> ${details.planName}</p>
+            <p class="ec-text"><strong>Amount:</strong> ${details.currency}${details.amount.toFixed(2)}</p>
+            <p class="ec-text"><strong>Valid Until:</strong> ${details.expiresAt.toLocaleDateString()}</p>
+            ${details.transactionId ? `<p class="ec-text"><strong>Transaction ID:</strong> ${details.transactionId}</p>` : ''}
           </div>
-          <p>You now have access to all premium features. Enjoy!</p>
+          <p class="ec-text">You now have access to all premium features. Enjoy!</p>
           <p style="margin-top: 20px;">
-            <a href="${frontendUrl}/account" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Go to My Account</a>
+            <a href="${frontendUrl}/account" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;" class="ec-cta">Go to My Account</a>
           </p>
-        </body>
-      </html>
-    `;
+      </div>
+    `);
     await this.sendEmail({
       to: email,
       subject: `Payment confirmed - ${details.planName} subscription active`,
@@ -2123,7 +2379,7 @@ class EmailService {
     planName: string;
     expiresAt: Date;
   }): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('subscription-cancelled');
@@ -2141,26 +2397,24 @@ class EmailService {
     }
 
     // Fallback: inline HTML
-    const html = `
-      <html>
-        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #dc2626;">Subscription Cancelled</h1>
-          <p>Hi ${userName},</p>
-          <p>We're sorry to see you go. Your <strong>${details.planName}</strong> subscription has been cancelled.</p>
-          <p>You'll continue to have access to premium features until <strong>${details.expiresAt.toLocaleDateString()}</strong>.</p>
-          <p>Changed your mind? You can resubscribe anytime to regain access to:</p>
-          <ul>
+    const html = this.wrapEmailHtml(`
+      <div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;" class="ec-card">
+          <h1 style="color: #dc2626;" class="ec-text">Subscription Cancelled</h1>
+          <p class="ec-text">Hi ${userName},</p>
+          <p class="ec-text">We're sorry to see you go. Your <strong>${details.planName}</strong> subscription has been cancelled.</p>
+          <p class="ec-text">You'll continue to have access to premium features until <strong>${details.expiresAt.toLocaleDateString()}</strong>.</p>
+          <p class="ec-text">Changed your mind? You can resubscribe anytime to regain access to:</p>
+          <ul class="ec-text">
             <li>Unlimited saved searches</li>
             <li>Priority property notifications</li>
             <li>Market insights and analytics</li>
             <li>Ad-free experience</li>
           </ul>
           <p style="margin-top: 20px;">
-            <a href="${frontendUrl}/account" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Resubscribe</a>
+            <a href="${frontendUrl}/account" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;" class="ec-cta">Resubscribe</a>
           </p>
-        </body>
-      </html>
-    `;
+      </div>
+    `);
     await this.sendEmail({
       to: email,
       subject: `Subscription cancelled - access until ${details.expiresAt.toLocaleDateString()}`,
@@ -2182,7 +2436,7 @@ class EmailService {
     nextBillingDate: Date;
     autoRenewing: boolean;
   }): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
     const currencySymbol = details.currency === 'EUR' ? '€' : details.currency;
     const billingText = details.billingPeriod === 'yearly' ? 'year' : 'month';
     const renewalDate = new Date(details.nextBillingDate);
@@ -2207,37 +2461,35 @@ class EmailService {
     }
 
     // Fallback: inline HTML
-    const html = `
-      <html>
-        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
-          <div style="background-color: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    const html = this.wrapEmailHtml(`
+          <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);" class="ec-card">
             <!-- Header -->
             <div style="text-align: center; margin-bottom: 30px;">
-              <h1 style="color: #16a34a; margin-bottom: 10px;">Invoice & Receipt</h1>
-              <p style="color: #6b7280; font-size: 14px;">Thank you for subscribing to BalkanEstate</p>
+              <h1 style="color: #16a34a; margin-bottom: 10px;" class="ec-text">Invoice & Receipt</h1>
+              <p style="color: #6b7280; font-size: 14px;" class="ec-text-muted">Thank you for subscribing to BalkanEstateAI</p>
             </div>
 
             <!-- Invoice Details Box -->
-            <div style="background-color: #f3f4f6; padding: 24px; border-radius: 8px; margin: 20px 0;">
+            <div style="background-color: #f3f4f6; padding: 24px; border-radius: 8px; margin: 20px 0;" class="ec-highlight">
               <table style="width: 100%; border-collapse: collapse;">
                 <tr>
-                  <td style="padding: 8px 0; color: #6b7280;">Invoice Number:</td>
-                  <td style="padding: 8px 0; text-align: right; font-weight: bold;">#${details.orderId}</td>
+                  <td style="padding: 8px 0; color: #6b7280;" class="ec-text-muted">Invoice Number:</td>
+                  <td style="padding: 8px 0; text-align: right; font-weight: bold;" class="ec-text">#${details.orderId}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 8px 0; color: #6b7280;">Plan:</td>
-                  <td style="padding: 8px 0; text-align: right; font-weight: bold;">${details.planName}</td>
+                  <td style="padding: 8px 0; color: #6b7280;" class="ec-text-muted">Plan:</td>
+                  <td style="padding: 8px 0; text-align: right; font-weight: bold;" class="ec-text">${details.planName}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 8px 0; color: #6b7280;">Billing Period:</td>
-                  <td style="padding: 8px 0; text-align: right;">${details.billingPeriod === 'yearly' ? 'Annual' : 'Monthly'}</td>
+                  <td style="padding: 8px 0; color: #6b7280;" class="ec-text-muted">Billing Period:</td>
+                  <td style="padding: 8px 0; text-align: right;" class="ec-text">${details.billingPeriod === 'yearly' ? 'Annual' : 'Monthly'}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 8px 0; color: #6b7280;">Start Date:</td>
-                  <td style="padding: 8px 0; text-align: right;">${details.subscriptionStartDate.toLocaleDateString()}</td>
+                  <td style="padding: 8px 0; color: #6b7280;" class="ec-text-muted">Start Date:</td>
+                  <td style="padding: 8px 0; text-align: right;" class="ec-text">${details.subscriptionStartDate.toLocaleDateString()}</td>
                 </tr>
-                <tr style="border-top: 2px solid #e5e7eb;">
-                  <td style="padding: 16px 0 8px 0; color: #111827; font-weight: bold; font-size: 18px;">Amount Paid:</td>
+                <tr style="border-top: 2px solid #e5e7eb;" class="ec-border">
+                  <td style="padding: 16px 0 8px 0; color: #111827; font-weight: bold; font-size: 18px;" class="ec-text">Amount Paid:</td>
                   <td style="padding: 16px 0 8px 0; text-align: right; font-weight: bold; font-size: 18px; color: #16a34a;">${currencySymbol}${details.amount.toFixed(2)}</td>
                 </tr>
               </table>
@@ -2245,20 +2497,20 @@ class EmailService {
 
             <!-- Auto-Renewal Notice -->
             ${details.autoRenewing ? `
-            <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; padding: 16px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="color: #1e40af; margin-top: 0; font-size: 14px;">Auto-Renewal Information</h3>
-              <p style="color: #1e3a8a; font-size: 13px; margin-bottom: 8px;">
+            <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; padding: 16px; border-radius: 8px; margin: 20px 0;" class="ec-highlight">
+              <h3 style="color: #1e40af; margin-top: 0; font-size: 14px;" class="ec-text">Auto-Renewal Information</h3>
+              <p style="color: #1e3a8a; font-size: 13px; margin-bottom: 8px;" class="ec-text">
                 Your subscription will automatically renew on <strong>${renewalDate.toLocaleDateString()}</strong>.
               </p>
-              <ul style="color: #1e3a8a; font-size: 12px; margin: 0; padding-left: 20px;">
+              <ul style="color: #1e3a8a; font-size: 12px; margin: 0; padding-left: 20px;" class="ec-text">
                 <li>You will be charged <strong>${currencySymbol}${details.amount.toFixed(2)}/${billingText}</strong></li>
                 <li>We'll send you a reminder email 7 days before renewal</li>
                 <li>You can cancel anytime from your account settings</li>
               </ul>
             </div>
             ` : `
-            <div style="background-color: #fef3c7; border: 1px solid #fcd34d; padding: 16px; border-radius: 8px; margin: 20px 0;">
-              <p style="color: #92400e; font-size: 13px; margin: 0;">
+            <div style="background-color: #fef3c7; border: 1px solid #fcd34d; padding: 16px; border-radius: 8px; margin: 20px 0;" class="ec-highlight">
+              <p style="color: #92400e; font-size: 13px; margin: 0;" class="ec-text">
                 Your subscription is set to expire on <strong>${renewalDate.toLocaleDateString()}</strong>.
                 Visit your account to enable auto-renewal if you'd like to continue your subscription.
               </p>
@@ -2267,8 +2519,8 @@ class EmailService {
 
             <!-- What's Included -->
             <div style="margin: 24px 0;">
-              <h3 style="color: #111827; font-size: 16px; margin-bottom: 12px;">What's Included:</h3>
-              <ul style="color: #4b5563; font-size: 14px; line-height: 1.8;">
+              <h3 style="color: #111827; font-size: 16px; margin-bottom: 12px;" class="ec-text">What's Included:</h3>
+              <ul style="color: #4b5563; font-size: 14px; line-height: 1.8;" class="ec-text">
                 <li>Premium property listings</li>
                 <li>Priority in search results</li>
                 <li>Unlimited saved searches</li>
@@ -2280,25 +2532,23 @@ class EmailService {
 
             <!-- CTA Button -->
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${frontendUrl}/account" style="background-color: #2563eb; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">Go to My Account</a>
+              <a href="${frontendUrl}/account" style="background-color: #2563eb; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;" class="ec-cta">Go to My Account</a>
             </div>
 
             <!-- Footer -->
-            <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 20px; text-align: center;">
-              <p style="color: #9ca3af; font-size: 12px; margin-bottom: 8px;">
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 20px; text-align: center;" class="ec-border">
+              <p style="color: #9ca3af; font-size: 12px; margin-bottom: 8px;" class="ec-text-muted">
                 This receipt was sent to ${email}
               </p>
-              <p style="color: #9ca3af; font-size: 11px;">
-                Questions? Contact us at <a href="mailto:support@balkanestate.com" style="color: #2563eb;">support@balkanestate.com</a>
+              <p style="color: #9ca3af; font-size: 11px;" class="ec-text-muted">
+                Questions? Contact us at <a href="mailto:support@balkanestate.com" style="color: #2563eb;" class="ec-link">support@balkanestate.com</a>
               </p>
-              <p style="color: #9ca3af; font-size: 11px; margin-top: 12px;">
-                BalkanEstate • Secure Payment Processing
+              <p style="color: #9ca3af; font-size: 11px; margin-top: 12px;" class="ec-text-muted">
+                BalkanEstateAI • Secure Payment Processing
               </p>
             </div>
           </div>
-        </body>
-      </html>
-    `;
+    `);
 
     await this.sendEmail({
       to: email,
@@ -2317,7 +2567,7 @@ class EmailService {
     reason?: string;
     transactionId?: string;
   }): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('refund-notification');
@@ -2336,23 +2586,21 @@ class EmailService {
     }
 
     // Fallback: inline HTML
-    const html = `
-      <html>
-        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #2563eb;">Refund Processed</h1>
-          <p>Hi ${userName},</p>
-          <p>Your refund has been processed.</p>
-          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0;">Refund Details</h3>
-            <p><strong>Amount:</strong> ${details.currency}${details.amount.toFixed(2)}</p>
-            ${details.reason ? `<p><strong>Reason:</strong> ${details.reason}</p>` : ''}
-            ${details.transactionId ? `<p><strong>Transaction ID:</strong> ${details.transactionId}</p>` : ''}
+    const html = this.wrapEmailHtml(`
+      <div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;" class="ec-card">
+          <h1 style="color: #2563eb;" class="ec-text">Refund Processed</h1>
+          <p class="ec-text">Hi ${userName},</p>
+          <p class="ec-text">Your refund has been processed.</p>
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;" class="ec-highlight">
+            <h3 style="margin-top: 0;" class="ec-text">Refund Details</h3>
+            <p class="ec-text"><strong>Amount:</strong> ${details.currency}${details.amount.toFixed(2)}</p>
+            ${details.reason ? `<p class="ec-text"><strong>Reason:</strong> ${details.reason}</p>` : ''}
+            ${details.transactionId ? `<p class="ec-text"><strong>Transaction ID:</strong> ${details.transactionId}</p>` : ''}
           </div>
-          <p>The refund should appear in your account within 5-10 business days, depending on your payment method.</p>
-          <p>If you have any questions, please contact our support team.</p>
-        </body>
-      </html>
-    `;
+          <p class="ec-text">The refund should appear in your account within 5-10 business days, depending on your payment method.</p>
+          <p class="ec-text-muted">If you have any questions, please contact our support team.</p>
+      </div>
+    `);
     await this.sendEmail({
       to: email,
       subject: `Refund processed - ${details.currency}${details.amount.toFixed(2)}`,
@@ -2422,16 +2670,41 @@ class EmailService {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;" class="ec-body">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;" class="ec-card">
     <!-- Header -->
     <div style="background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); padding: 24px; text-align: center;">
       <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 600;">📨 New ${inquiryTypeLabels[params.inquiryType]}</h1>
     </div>
 
     <div style="padding: 24px;">
-      <p style="color: #374151; font-size: 14px; margin: 0 0 16px 0;">
+      <p style="color: #374151; font-size: 14px; margin: 0 0 16px 0;" class="ec-text">
         Hi <strong>${safeAgentName}</strong>, you've received a new inquiry!
       </p>
 
@@ -2439,10 +2712,10 @@ class EmailService {
       <div style="background: #f3f4f6; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
         <div style="font-weight: 600; color: #374151; margin-bottom: 8px;">👤 From:</div>
         <div style="font-size: 16px; font-weight: 600; color: #1f2937;">${safeBuyerName}</div>
-        <div style="font-size: 14px; color: #6b7280; margin-top: 4px;">
+        <div style="font-size: 14px; color: #6b7280; margin-top: 4px;" class="ec-text-muted">
           📧 <a href="mailto:${safeBuyerEmail}" style="color: #7c3aed;">${safeBuyerEmail}</a>
         </div>
-        ${safeBuyerPhone ? `<div style="font-size: 14px; color: #6b7280; margin-top: 4px;">📱 ${safeBuyerPhone}</div>` : ''}
+        ${safeBuyerPhone ? `<div style="font-size: 14px; color: #6b7280; margin-top: 4px;" class="ec-text-muted">📱 ${safeBuyerPhone}</div>` : ''}
       </div>
 
       ${safePropertyTitle ? `
@@ -2450,7 +2723,7 @@ class EmailService {
       <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
         <div style="font-weight: 600; color: #374151; margin-bottom: 8px;">🏠 Property:</div>
         <div style="font-size: 14px; color: #1f2937;">${safePropertyTitle}</div>
-        ${safeLocation ? `<div style="font-size: 12px; color: #6b7280; margin-top: 4px;">📍 ${safeLocation}</div>` : ''}
+        ${safeLocation ? `<div style="font-size: 12px; color: #6b7280; margin-top: 4px;" class="ec-text-muted">📍 ${safeLocation}</div>` : ''}
         ${safePropertyId ? `<a href="${frontendUrl}/property/${safePropertyId}" style="display: inline-block; margin-top: 8px; font-size: 12px; color: #7c3aed;">View Property →</a>` : ''}
       </div>
       ` : ''}
@@ -2466,7 +2739,7 @@ class EmailService {
       <!-- Message Card -->
       <div style="background: #faf5ff; border-left: 4px solid #7c3aed; padding: 16px; margin-bottom: 16px;">
         <div style="font-weight: 600; color: #374151; margin-bottom: 8px;">💬 Message:</div>
-        <p style="color: #374151; font-size: 14px; margin: 0; line-height: 1.6; white-space: pre-wrap;">${safeMessage}</p>
+        <p style="color: #374151; font-size: 14px; margin: 0; line-height: 1.6; white-space: pre-wrap;" class="ec-text">${safeMessage}</p>
       </div>
 
       <!-- Reply CTA -->
@@ -2477,12 +2750,12 @@ class EmailService {
     </div>
 
     <!-- Footer -->
-    <div style="background: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;">
-        This inquiry was sent through BalkanEstate<sup>AI</sup>
+    <div style="background: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;" class="ec-footer">
+      <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;" class="ec-text-muted">
+        This inquiry was sent through BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>
       </p>
-      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;" class="ec-text-muted">
+        © ${new Date().getFullYear()} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>
       </p>
     </div>
   </div>
@@ -2532,28 +2805,53 @@ class EmailService {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;" class="ec-body">
   <!-- Preview text -->
   <div style="display: none; max-height: 0; overflow: hidden;">
     Reset your password to get back to finding your dream property. Link expires in 1 hour.
   </div>
 
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);" class="ec-card">
     <!-- Header -->
-    <div style="background: linear-gradient(135deg, #374151 0%, #1f2937 100%); padding: 40px 24px; text-align: center;">
+    <div style="background: linear-gradient(135deg, #374151 0%, #1f2937 100%); padding: 40px 24px; text-align: center;" class="ec-header">
       <div style="margin-bottom: 16px;">
         <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; line-height: 60px; font-size: 28px;">🔐</span>
       </div>
       <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">Password Reset</h1>
-      <p style="color: #9ca3af; margin: 8px 0 0 0; font-size: 14px;">Let's get you back into your account</p>
+      <p style="color: #9ca3af; margin: 8px 0 0 0; font-size: 14px;" class="ec-text-muted">Let's get you back into your account</p>
     </div>
 
     <div style="padding: 32px 24px;">
-      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;" class="ec-text">
         Hey ${safeUserName},
       </p>
-      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;" class="ec-text-muted">
         We received a request to reset your password. No worries—it happens to the best of us! Click the button below to create a new password:
       </p>
 
@@ -2566,7 +2864,7 @@ class EmailService {
       </div>
 
       <!-- Security notice -->
-      <div style="background: #fef2f2; border-radius: 8px; padding: 16px; margin: 24px 0;">
+      <div style="background: #fef2f2; border-radius: 8px; padding: 16px; margin: 24px 0;" class="ec-highlight ec-text">
         <div style="display: table; width: 100%;">
           <div style="display: table-cell; width: 40px; vertical-align: top;">
             <span style="font-size: 20px;">⚠️</span>
@@ -2581,7 +2879,7 @@ class EmailService {
       </div>
 
       <!-- Link fallback -->
-      <p style="color: #6b7280; font-size: 12px; margin: 20px 0 8px 0;">
+      <p style="color: #6b7280; font-size: 12px; margin: 20px 0 8px 0;" class="ec-text-muted">
         Button not working? Copy and paste this link:
       </p>
       <div style="word-break: break-all; color: #0252CD; font-size: 12px; background: #f3f4f6; padding: 12px; border-radius: 8px; border: 1px dashed #d1d5db;">
@@ -2589,7 +2887,7 @@ class EmailService {
       </div>
 
       <!-- Tips -->
-      <div style="background: #f0f9ff; border-radius: 8px; padding: 16px; margin: 24px 0;">
+      <div style="background: #f0f9ff; border-radius: 8px; padding: 16px; margin: 24px 0;" class="ec-highlight ec-text">
         <p style="color: #0369a1; font-size: 13px; margin: 0 0 8px 0; font-weight: 600;">💡 Password tips:</p>
         <ul style="color: #374151; font-size: 13px; margin: 0; padding-left: 20px; line-height: 1.6;">
           <li>Use at least 8 characters</li>
@@ -2600,12 +2898,12 @@ class EmailService {
     </div>
 
     <!-- Footer -->
-    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;">
-        Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
+    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;" class="ec-footer">
+      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;" class="ec-text-muted">
+        Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;" class="ec-link">support@balkanestateai.com</a>
       </p>
-      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup> · Your security is our priority
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;" class="ec-text-muted">
+        © ${new Date().getFullYear()} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> · Your security is our priority
       </p>
     </div>
   </div>
@@ -2616,7 +2914,7 @@ class EmailService {
       to: params.email,
       subject: 'Reset your BalkanEstateᴬᴵ password',
       html,
-      text: `Hey ${params.userName},\n\nWe received a request to reset your password. No worries—it happens to the best of us!\n\nReset your password here:\n${params.resetUrl}\n\nThis link expires in 1 hour.\n\nPassword tips:\n- Use at least 8 characters\n- Mix uppercase, lowercase, and numbers\n- Avoid using common words or personal info\n\nIf you didn't request this reset, you can safely ignore this email.\n\nNeed help? Contact us at support@balkanestateai.com\n\n© ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>`,
+      text: `Hey ${params.userName},\n\nWe received a request to reset your password. No worries—it happens to the best of us!\n\nReset your password here:\n${params.resetUrl}\n\nThis link expires in 1 hour.\n\nPassword tips:\n- Use at least 8 characters\n- Mix uppercase, lowercase, and numbers\n- Avoid using common words or personal info\n\nIf you didn't request this reset, you can safely ignore this email.\n\nNeed help? Contact us at support@balkanestateai.com\n\n© ${new Date().getFullYear()} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>`,
       category: 'noreply',
     });
   }
@@ -2662,38 +2960,46 @@ class EmailService {
   </style>
   <![endif]-->
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;" class="ec-body">
   <!-- Preview text (hidden) -->
   <div style="display: none; max-height: 0; overflow: hidden;">
     One click away from finding your dream property in the Balkans! Verify your email to get started.
   </div>
 
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);" class="ec-card">
     <!-- Header with Logo -->
-    <div style="background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); padding: 40px 24px; text-align: center;">
+    <div style="background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); padding: 40px 24px; text-align: center;" class="ec-header">
       <div style="margin-bottom: 16px;">
         <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.15); border-radius: 16px; line-height: 60px; font-size: 32px;">🏠</span>
       </div>
-      <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.5px;">Welcome to BalkanEstate<sup>AI</sup>!</h1>
+      <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.5px;">Welcome to BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>!</h1>
       <p style="color: #ffffff; margin: 8px 0 0 0; font-size: 15px; opacity: 0.9;">Your journey to the perfect property starts here</p>
     </div>
 
     <div style="padding: 32px 24px;">
       <!-- Personalized greeting -->
-      <p style="color: #1f2937; font-size: 18px; margin: 0 0 8px 0; font-weight: 600;">
+      <p style="color: #1f2937; font-size: 18px; margin: 0 0 8px 0; font-weight: 600;" class="ec-text">
         Hey ${safeUserName}! 👋
       </p>
-      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
-        Thanks for joining BalkanEstate<sup>AI</sup>! We're excited to help you discover amazing properties across the Balkans. Just one quick step to get started:
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;" class="ec-text-muted">
+        Thanks for joining BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>! We're excited to help you discover amazing properties across the Balkans. Just one quick step to get started:
       </p>
 
       <!-- CTA Button -->
       <div style="text-align: center; margin: 32px 0;">
+        <!--[if mso]>
+        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${safeVerificationUrl}" style="height:48px;v-text-anchor:middle;width:240px;" arcsize="21%" fillcolor="#0252CD">
+          <w:anchorlock/>
+          <center style="color:#ffffff;font-family:'Segoe UI',Tahoma,sans-serif;font-size:16px;font-weight:bold;">✓ Verify My Email</center>
+        </v:roundrect>
+        <![endif]-->
+        <!--[if !mso]><!-->
         <a href="${safeVerificationUrl}"
            class="button"
-           style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.4); transition: transform 0.2s;">
+           style="display: inline-block; background-color: #0252CD; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.4);">
           ✓ Verify My Email
         </a>
+        <!--<![endif]-->
       </div>
 
       <!-- What's next section -->
@@ -2724,7 +3030,7 @@ class EmailService {
       </div>
 
       <!-- Link fallback -->
-      <p style="color: #6b7280; font-size: 12px; margin: 20px 0 8px 0;">
+      <p style="color: #6b7280; font-size: 12px; margin: 20px 0 8px 0;" class="ec-text-muted">
         Button not working? Copy and paste this link:
       </p>
       <div style="word-break: break-all; color: #0252CD; font-size: 12px; background: #f3f4f6; padding: 12px; border-radius: 8px; border: 1px dashed #d1d5db;">
@@ -2732,7 +3038,7 @@ class EmailService {
       </div>
 
       <!-- Expiry notice -->
-      <div style="background: #fffbeb; border-radius: 8px; padding: 12px 16px; margin: 24px 0; display: table; width: 100%;">
+      <div style="background: #fffbeb; border-radius: 8px; padding: 12px 16px; margin: 24px 0; display: table; width: 100%;" class="ec-highlight ec-text">
         <div style="display: table-cell; vertical-align: middle; width: 30px;">
           <span style="font-size: 18px;">⏰</span>
         </div>
@@ -2743,18 +3049,18 @@ class EmailService {
         </div>
       </div>
 
-      <p style="color: #6b7280; font-size: 12px; margin: 0; text-align: center;">
-        Didn't sign up for BalkanEstate<sup>AI</sup>? No worries—just ignore this email.
+      <p style="color: #6b7280; font-size: 12px; margin: 0; text-align: center;" class="ec-text-muted">
+        Didn't sign up for BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>? No worries—just ignore this email.
       </p>
     </div>
 
     <!-- Footer -->
-    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #4b5563; font-size: 12px; margin: 0 0 8px 0;">
-        Questions? We're here to help at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
+    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;" class="ec-footer">
+      <p style="color: #4b5563; font-size: 12px; margin: 0 0 8px 0;" class="ec-text-muted">
+        Questions? We're here to help at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;" class="ec-link">support@balkanestateai.com</a>
       </p>
-      <p style="color: #6b7280; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
+      <p style="color: #6b7280; font-size: 11px; margin: 0;" class="ec-text-muted">
+        © ${new Date().getFullYear()} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> · Find your place in the Balkans
       </p>
     </div>
   </div>
@@ -2805,7 +3111,7 @@ class EmailService {
   </style>
   <![endif]-->
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;" class="ec-body">
   <!-- Preview text -->
   <div style="display: none; max-height: 0; overflow: hidden;">
     Welcome to BalkanEstateᴬᴵ! Your gateway to properties across 8 Balkan countries. Search, save, compare, and connect with agents.
@@ -2813,11 +3119,11 @@ class EmailService {
 
   <div style="max-width: 640px; margin: 0 auto; background-color: #ffffff;">
     <!-- Professional Header -->
-    <div style="background: linear-gradient(135deg, #0252CD 0%, #1e40af 50%, #0369a1 100%); padding: 48px 32px; text-align: center;">
+    <div style="background: linear-gradient(135deg, #0252CD 0%, #1e40af 50%, #0369a1 100%); padding: 48px 32px; text-align: center;" class="ec-header">
       <div style="margin-bottom: 20px;">
         <div style="display: inline-block; background: rgba(255,255,255,0.15); border-radius: 16px; padding: 12px 20px;">
           <span style="font-size: 32px; vertical-align: middle;">🏠</span>
-          <span style="color: #ffffff; font-size: 24px; font-weight: 700; vertical-align: middle; margin-left: 8px;">BalkanEstate<sup>AI</sup></span>
+          <span style="color: #ffffff; font-size: 24px; font-weight: 700; vertical-align: middle; margin-left: 8px;" class="ec-text">BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span></span>
         </div>
       </div>
       <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">Welcome, ${params.userName}!</h1>
@@ -2828,14 +3134,14 @@ class EmailService {
     <div style="padding: 40px 32px;">
 
       <!-- Introduction -->
-      <p style="color: #374151; font-size: 16px; line-height: 1.7; margin: 0 0 24px 0;">
-        Thank you for joining <strong>BalkanEstate<sup>AI</sup></strong> — the premier real estate platform connecting buyers, sellers, and agents across the Balkans. Whether you're searching for your dream home or looking to list a property, we've got you covered.
+      <p style="color: #374151; font-size: 16px; line-height: 1.7; margin: 0 0 24px 0;" class="ec-text">
+        Thank you for joining <strong>BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span></strong> — the premier real estate platform connecting buyers, sellers, and agents across the Balkans. Whether you're searching for your dream home or looking to list a property, we've got you covered.
       </p>
 
       <!-- Countries Coverage -->
       <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-radius: 12px; padding: 20px; margin: 24px 0; text-align: center;">
         <p style="color: #1e40af; font-weight: 600; font-size: 14px; margin: 0 0 12px 0;">🌍 Properties across 8 Balkan countries</p>
-        <p style="color: #374151; font-size: 13px; margin: 0; line-height: 1.6;">
+        <p style="color: #374151; font-size: 13px; margin: 0; line-height: 1.6;" class="ec-text">
           Croatia · Serbia · Montenegro · Bosnia · Albania · Kosovo · North Macedonia · Romania
         </p>
       </div>
@@ -2857,7 +3163,7 @@ class EmailService {
               </div>
               <div style="display: table-cell; vertical-align: top;">
                 <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Advanced Property Search</div>
-                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Filter by location, price, property type, bedrooms, amenities, and more</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;" class="ec-text-muted">Filter by location, price, property type, bedrooms, amenities, and more</div>
               </div>
             </div>
           </div>
@@ -2865,11 +3171,11 @@ class EmailService {
           <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
             <div style="display: table; width: 100%;">
               <div style="display: table-cell; width: 44px; vertical-align: top;">
-                <div style="width: 36px; height: 36px; background: #fef2f2; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">❤️</div>
+                <div style="width: 36px; height: 36px; background: #fef2f2; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;" class="ec-highlight ec-text">❤️</div>
               </div>
               <div style="display: table-cell; vertical-align: top;">
                 <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Save & Compare Properties</div>
-                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Bookmark favorites and compare up to 5 properties side-by-side</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;" class="ec-text-muted">Bookmark favorites and compare up to 5 properties side-by-side</div>
               </div>
             </div>
           </div>
@@ -2877,11 +3183,11 @@ class EmailService {
           <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
             <div style="display: table; width: 100%;">
               <div style="display: table-cell; width: 44px; vertical-align: top;">
-                <div style="width: 36px; height: 36px; background: #f0fdf4; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">🔔</div>
+                <div style="width: 36px; height: 36px; background: #f0fdf4; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;" class="ec-highlight ec-text">🔔</div>
               </div>
               <div style="display: table-cell; vertical-align: top;">
                 <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Smart Alerts & Notifications</div>
-                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Get instant alerts for new listings and price drops on saved properties</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;" class="ec-text-muted">Get instant alerts for new listings and price drops on saved properties</div>
               </div>
             </div>
           </div>
@@ -2889,11 +3195,11 @@ class EmailService {
           <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
             <div style="display: table; width: 100%;">
               <div style="display: table-cell; width: 44px; vertical-align: top;">
-                <div style="width: 36px; height: 36px; background: #faf5ff; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">💬</div>
+                <div style="width: 36px; height: 36px; background: #faf5ff; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;" class="ec-highlight ec-text">💬</div>
               </div>
               <div style="display: table-cell; vertical-align: top;">
                 <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Direct Messaging</div>
-                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Chat directly with agents and sellers — no phone calls needed</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;" class="ec-text-muted">Chat directly with agents and sellers — no phone calls needed</div>
               </div>
             </div>
           </div>
@@ -2905,7 +3211,7 @@ class EmailService {
               </div>
               <div style="display: table-cell; vertical-align: top;">
                 <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Property Valuation Tool</div>
-                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Get AI-powered estimates to understand fair market prices</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;" class="ec-text-muted">Get AI-powered estimates to understand fair market prices</div>
               </div>
             </div>
           </div>
@@ -2917,7 +3223,7 @@ class EmailService {
               </div>
               <div style="display: table-cell; vertical-align: top;">
                 <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Mortgage Calculator</div>
-                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Calculate monthly payments and plan your budget with ease</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;" class="ec-text-muted">Calculate monthly payments and plan your budget with ease</div>
               </div>
             </div>
           </div>
@@ -2937,11 +3243,11 @@ class EmailService {
           <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
             <div style="display: table; width: 100%;">
               <div style="display: table-cell; width: 44px; vertical-align: top;">
-                <div style="width: 36px; height: 36px; background: #f0fdf4; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">✨</div>
+                <div style="width: 36px; height: 36px; background: #f0fdf4; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;" class="ec-highlight ec-text">✨</div>
               </div>
               <div style="display: table-cell; vertical-align: top;">
                 <div style="font-weight: 600; color: #1f2937; font-size: 14px;">List Properties for Free</div>
-                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Create beautiful listings with photos, virtual tours, and detailed descriptions</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;" class="ec-text-muted">Create beautiful listings with photos, virtual tours, and detailed descriptions</div>
               </div>
             </div>
           </div>
@@ -2953,7 +3259,7 @@ class EmailService {
               </div>
               <div style="display: table-cell; vertical-align: top;">
                 <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Promote Your Listings</div>
-                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Boost visibility with featured placements and premium badges</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;" class="ec-text-muted">Boost visibility with featured placements and premium badges</div>
               </div>
             </div>
           </div>
@@ -2965,7 +3271,7 @@ class EmailService {
               </div>
               <div style="display: table-cell; vertical-align: top;">
                 <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Performance Analytics</div>
-                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Track views, inquiries, saves, and engagement metrics in real-time</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;" class="ec-text-muted">Track views, inquiries, saves, and engagement metrics in real-time</div>
               </div>
             </div>
           </div>
@@ -2973,11 +3279,11 @@ class EmailService {
           <div style="padding: 16px 20px;">
             <div style="display: table; width: 100%;">
               <div style="display: table-cell; width: 44px; vertical-align: top;">
-                <div style="width: 36px; height: 36px; background: #faf5ff; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">🏢</div>
+                <div style="width: 36px; height: 36px; background: #faf5ff; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;" class="ec-highlight ec-text">🏢</div>
               </div>
               <div style="display: table-cell; vertical-align: top;">
                 <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Agency Dashboard</div>
-                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Manage team members, track performance, and grow your agency</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;" class="ec-text-muted">Manage team members, track performance, and grow your agency</div>
               </div>
             </div>
           </div>
@@ -2986,7 +3292,7 @@ class EmailService {
 
       <!-- Quick Links -->
       <div style="margin: 32px 0;">
-        <p style="color: #374151; font-weight: 600; font-size: 15px; margin: 0 0 16px 0;">Quick Links to Get Started:</p>
+        <p style="color: #374151; font-weight: 600; font-size: 15px; margin: 0 0 16px 0;" class="ec-text">Quick Links to Get Started:</p>
         <div style="display: table; width: 100%;">
           <div style="display: table-row;">
             <div style="display: table-cell; width: 50%; padding: 6px;">
@@ -3046,11 +3352,11 @@ class EmailService {
     </div>
 
     <!-- Footer -->
-    <div style="background: #1f2937; padding: 32px; text-align: center;">
+    <div style="background: #1f2937; padding: 32px; text-align: center;" class="ec-footer">
       <div style="margin-bottom: 20px;">
-        <span style="color: #ffffff; font-size: 18px; font-weight: 600;">🏠 BalkanEstate<sup>AI</sup></span>
+        <span style="color: #ffffff; font-size: 18px; font-weight: 600;" class="ec-text">🏠 BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span></span>
       </div>
-      <p style="color: #9ca3af; font-size: 13px; margin: 0 0 16px 0;">
+      <p style="color: #9ca3af; font-size: 13px; margin: 0 0 16px 0;" class="ec-text-muted">
         The premier real estate platform for the Balkans
       </p>
       <div style="margin: 20px 0;">
@@ -3061,8 +3367,8 @@ class EmailService {
         <a href="mailto:support@balkanestateai.com" style="color: #60a5fa; text-decoration: none; font-size: 13px; margin: 0 12px;">Contact Support</a>
       </div>
       <div style="border-top: 1px solid #374151; padding-top: 20px; margin-top: 20px;">
-        <p style="color: #6b7280; font-size: 11px; margin: 0;">
-          © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>. All rights reserved.<br>
+        <p style="color: #6b7280; font-size: 11px; margin: 0;" class="ec-text-muted">
+          © ${new Date().getFullYear()} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>. All rights reserved.<br>
           You're receiving this email because you created an account at balkanestateai.com
         </p>
       </div>
@@ -3208,15 +3514,40 @@ Questions? Contact us at support@balkanestateai.com
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;" class="ec-body">
   <div style="display: none; max-height: 0; overflow: hidden;">
     Your ${currentMonth} promotion coupons are ready! ${params.totalCoupons} coupons available.
   </div>
 
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);" class="ec-card">
     <!-- Header -->
-    <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 32px 24px; text-align: center;">
+    <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 32px 24px; text-align: center;" class="ec-header">
       <div style="margin-bottom: 12px;">
         <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; line-height: 60px; font-size: 28px;">🎟️</span>
       </div>
@@ -3225,11 +3556,11 @@ Questions? Contact us at support@balkanestateai.com
     </div>
 
     <div style="padding: 28px 24px;">
-      <p style="color: #374151; font-size: 16px; margin: 0 0 20px 0;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 20px 0;" class="ec-text">
         Hey ${safeUserName}! 👋
       </p>
 
-      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;" class="ec-text-muted">
         ${params.isAgentNotification
           ? `Great news! Your agency <strong>${safeAgencyName}</strong> has received fresh promotion coupons for ${currentMonth}. These are shared across your team.`
           : `Your <strong>${safePlanName}</strong> subscription includes fresh promotion coupons for ${currentMonth}. Time to boost your listings!`
@@ -3237,7 +3568,7 @@ Questions? Contact us at support@balkanestateai.com
       </p>
 
       <!-- Coupon Summary Card -->
-      <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 2px solid #f59e0b;">
+      <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 2px solid #f59e0b;" class="ec-highlight ec-text">
         <div style="text-align: center; margin-bottom: 16px;">
           <div style="font-size: 48px; font-weight: 700; color: #111827;">${params.totalCoupons}</div>
           <div style="font-size: 14px; color: #111827; font-weight: 600;">Total Coupons Available</div>
@@ -3282,7 +3613,7 @@ Questions? Contact us at support@balkanestateai.com
 
       <!-- Coupon Codes -->
       ${params.couponCodes && params.couponCodes.length > 0 ? `
-      <div style="background: #f0fdf4; border-radius: 8px; padding: 16px; margin-bottom: 20px; border: 1px solid #86efac;">
+      <div style="background: #f0fdf4; border-radius: 8px; padding: 16px; margin-bottom: 20px; border: 1px solid #86efac;" class="ec-highlight ec-text">
         <p style="color: #166534; font-size: 13px; font-weight: 600; margin: 0 0 10px 0;">🎫 Your coupon codes — copy and use when promoting a listing:</p>
         ${params.couponCodes.map(c => {
           const label = c.tier === 'highlight' ? '✨ Highlighted' : c.tier === 'premium' ? '💎 Premium' : '🔥 Featured';
@@ -3317,12 +3648,12 @@ Questions? Contact us at support@balkanestateai.com
     </div>
 
     <!-- Footer -->
-    <div style="background: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;">
+    <div style="background: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;" class="ec-footer">
+      <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;" class="ec-text-muted">
         ${params.isAgency ? `${safeAgencyName} · Enterprise Plan` : `${safePlanName} Subscription`}
       </p>
-      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${currentYear} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;" class="ec-text-muted">
+        © ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> · Find your place in the Balkans
       </p>
     </div>
   </div>
@@ -3357,7 +3688,7 @@ Questions? Contact us at support@balkanestateai.com
     // Try admin-editable template first
     const regConfig = await getActiveEmailConfig('agent-registration-coupons');
     if (regConfig) {
-      const agentLimit = params.agentListingsLimit ?? 25;
+      const agentLimit = params.agentListingsLimit ?? 30;
       // Build coupon rows HTML for the template
       const couponRowsHtml = params.coupons.map((coupon, index) => `
       <tr>
@@ -3395,7 +3726,7 @@ Questions? Contact us at support@balkanestateai.com
     // Sanitize user inputs
     const safeOwnerName = escapeHtml(params.ownerName);
     const safeAgencyName = escapeHtml(params.agencyName);
-    const agentListingsLimit = params.agentListingsLimit ?? 25;
+    const agentListingsLimit = params.agentListingsLimit ?? 30;
 
     const currentYear = new Date().getFullYear();
 
@@ -3421,28 +3752,53 @@ Questions? Contact us at support@balkanestateai.com
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;" class="ec-body">
   <div style="display: none; max-height: 0; overflow: hidden;">
     Your Enterprise subscription is active! Here are your ${params.coupons.length} agent registration codes.
   </div>
 
   <div style="max-width: 650px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
     <!-- Header -->
-    <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 32px 24px; text-align: center;">
+    <div style="background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); padding: 32px 24px; text-align: center;" class="ec-header">
       <div style="margin-bottom: 12px;">
-        <span style="display: inline-block; width: 60px; height: 60px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 50%; line-height: 60px; font-size: 28px;">🏢</span>
+        <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; line-height: 60px; font-size: 28px;">🏢</span>
       </div>
       <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">Enterprise Plan Activated!</h1>
-      <p style="color: #94a3b8; margin: 8px 0 0 0; font-size: 14px;">Welcome to BalkanEstate<sup>AI</sup> Enterprise</p>
+      <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0 0; font-size: 14px;">Welcome to BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> Enterprise</p>
     </div>
 
     <div style="padding: 28px 24px;">
-      <p style="color: #374151; font-size: 16px; margin: 0 0 20px 0;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 20px 0;" class="ec-text">
         Hello ${safeOwnerName}! 🎉
       </p>
 
-      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;" class="ec-text-muted">
         Congratulations! Your Enterprise subscription for <strong>${safeAgencyName}</strong> is now active.
         Below are <strong>${params.coupons.length} agent registration codes</strong> that your team members can use to join with a full <strong>yearly Pro subscription</strong> included!
       </p>
@@ -3471,7 +3827,7 @@ Questions? Contact us at support@balkanestateai.com
         <h3 style="color: #ffffff; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">📋 How to Use These Codes</h3>
         <ol style="color: #e2e8f0; font-size: 13px; margin: 0; padding-left: 20px; line-height: 1.6;">
           <li>Share a code with each team member you want to invite</li>
-          <li>They register on BalkanEstate<sup>AI</sup> (or log in if already registered)</li>
+          <li>They register on BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> (or log in if already registered)</li>
           <li>Go to <strong style="color: #60a5fa;">Agency → Redeem Code</strong> and enter the code</li>
           <li>They'll automatically get a yearly Pro subscription and join your agency!</li>
         </ol>
@@ -3481,8 +3837,8 @@ Questions? Contact us at support@balkanestateai.com
       <div style="background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); border-radius: 8px; padding: 16px; margin-bottom: 24px; border: 2px solid #f59e0b;">
         <h3 style="color: #fbbf24; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">✨ What Each Agent Gets</h3>
         <ul style="color: #e2e8f0; font-size: 13px; margin: 0; padding-left: 20px; line-height: 1.6;">
-          <li><strong style="color: #fbbf24;">Full Year</strong> of Pro features included</li>
-          <li><strong style="color: #fbbf24;">${agentListingsLimit} listings per year</strong> under your agency</li>
+          <li><strong style="color: #fbbf24;">Pro features</strong> included with your agency membership</li>
+          <li><strong style="color: #fbbf24;">${agentListingsLimit} listings per month</strong> under your agency</li>
           <li><strong style="color: #fbbf24;">Monthly promotion coupons</strong> shared with the team</li>
           <li><strong style="color: #fbbf24;">Priority support</strong> and agency branding</li>
         </ul>
@@ -3491,7 +3847,8 @@ Questions? Contact us at support@balkanestateai.com
       <!-- CTA Button -->
       <div style="text-align: center; margin: 28px 0;">
         <a href="${frontendUrl}/agency/dashboard"
-           style="display: inline-block; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.3);">
+           style="display: inline-block; background-color: #0252CD; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.3);"
+           class="ec-cta">
           Go to Agency Dashboard →
         </a>
       </div>
@@ -3502,12 +3859,12 @@ Questions? Contact us at support@balkanestateai.com
     </div>
 
     <!-- Footer -->
-    <div style="background: #0f172a; padding: 20px; text-align: center; border-top: 1px solid #334155;">
+    <div style="background: #0f172a; padding: 20px; text-align: center; border-top: 1px solid #334155;" class="ec-footer">
       <p style="color: #ffffff; font-size: 11px; margin: 0 0 4px 0;">
         ${safeAgencyName} · Enterprise Plan
       </p>
       <p style="color: #64748b; font-size: 11px; margin: 0;">
-        © ${currentYear} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
+        © ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> · Find your place in the Balkans
       </p>
     </div>
   </div>
@@ -3598,15 +3955,40 @@ Questions? Contact us at support@balkanestateai.com
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;" class="ec-body">
   <div style="display: none; max-height: 0; overflow: hidden;">
     Thank you for choosing BalkanEstateᴬᴵ Enterprise! Your journey starts now.
   </div>
 
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);" class="ec-card">
     <!-- Header -->
-    <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 40px 24px; text-align: center;">
+    <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 40px 24px; text-align: center;" class="ec-header">
       <div style="margin-bottom: 16px;">
         <span style="display: inline-block; width: 80px; height: 80px; background: rgba(255,255,255,0.2); border-radius: 50%; line-height: 80px; font-size: 40px;">🎉</span>
       </div>
@@ -3615,16 +3997,16 @@ Questions? Contact us at support@balkanestateai.com
     </div>
 
     <div style="padding: 32px 24px;">
-      <p style="color: #374151; font-size: 18px; margin: 0 0 24px 0;">
+      <p style="color: #374151; font-size: 18px; margin: 0 0 24px 0;" class="ec-text">
         Dear ${safeOwnerName},
       </p>
 
-      <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin: 0 0 20px 0;">
-        We're thrilled to have <strong>${safeAgencyName}</strong> join the BalkanEstate<sup>AI</sup> Enterprise program!
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin: 0 0 20px 0;" class="ec-text-muted">
+        We're thrilled to have <strong>${safeAgencyName}</strong> join the BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> Enterprise program!
         Your trust in our platform means the world to us, and we're committed to helping your agency succeed.
       </p>
 
-      <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin: 0 0 28px 0;">
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin: 0 0 28px 0;" class="ec-text-muted">
         As an Enterprise subscriber, you now have access to our most powerful features designed specifically for
         growing real estate agencies like yours.
       </p>
@@ -3691,11 +4073,11 @@ Questions? Contact us at support@balkanestateai.com
       <!-- Personal Note -->
       <div style="background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); border-radius: 8px; padding: 20px; margin-bottom: 28px; border-left: 4px solid #f59e0b;">
         <p style="color: #f1f5f9; font-size: 14px; margin: 0; line-height: 1.6; font-style: italic;">
-          "We built BalkanEstate<sup>AI</sup> to empower real estate professionals across the Balkans.
+          "We built BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> to empower real estate professionals across the Balkans.
           Your success is our success. If you ever need anything, don't hesitate to reach out!"
         </p>
         <p style="color: #ffffff; font-size: 13px; margin: 12px 0 0 0; font-weight: 600;">
-          — The BalkanEstate<sup>AI</sup> Team
+          — The BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> Team
         </p>
       </div>
 
@@ -3714,7 +4096,7 @@ Questions? Contact us at support@balkanestateai.com
     </div>
 
     <!-- Footer -->
-    <div style="background: #0f172a; padding: 24px; text-align: center; border-top: 1px solid #334155;">
+    <div style="background: #0f172a; padding: 24px; text-align: center; border-top: 1px solid #334155;" class="ec-footer">
       <p style="color: #ffffff; font-size: 13px; margin: 0 0 8px 0; font-weight: 600;">
         ${safeAgencyName}
       </p>
@@ -3722,7 +4104,7 @@ Questions? Contact us at support@balkanestateai.com
         Enterprise Subscriber · €999/year
       </p>
       <p style="color: #94a3b8; font-size: 11px; margin: 12px 0 0 0;">
-        © ${currentYear} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
+        © ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> · Find your place in the Balkans
       </p>
     </div>
   </div>
@@ -3789,15 +4171,40 @@ Questions? Contact us at support@balkanestateai.com
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1a2e; -webkit-font-smoothing: antialiased;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1a2e; -webkit-font-smoothing: antialiased;" class="ec-body">
   <div style="display: none; max-height: 0; overflow: hidden;">
     Welcome to ${safeAgencyName}! Your Pro subscription is now active.
   </div>
 
-  <div style="max-width: 600px; margin: 0 auto; background-color: #16213e; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #16213e; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);" class="ec-card">
     <!-- Header -->
-    <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 40px 24px; text-align: center;">
+    <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 40px 24px; text-align: center;" class="ec-header">
       <div style="margin-bottom: 16px;">
         <span style="display: inline-block; width: 80px; height: 80px; background: rgba(255,255,255,0.2); border-radius: 50%; line-height: 80px; font-size: 40px;">🎉</span>
       </div>
@@ -3832,7 +4239,7 @@ Questions? Contact us at support@balkanestateai.com
               <span style="color: #94a3b8; font-size: 14px;">Listings Limit</span>
             </td>
             <td style="padding: 10px 0; border-bottom: 1px solid #334155; text-align: right;">
-              <span style="color: #ffffff; font-size: 14px; font-weight: 600;">${params.listingsLimit} listings</span>
+              <span style="color: #ffffff; font-size: 14px; font-weight: 600;" class="ec-text">${params.listingsLimit} listings</span>
             </td>
           </tr>
           <tr>
@@ -3840,7 +4247,7 @@ Questions? Contact us at support@balkanestateai.com
               <span style="color: #94a3b8; font-size: 14px;">Valid Until</span>
             </td>
             <td style="padding: 10px 0; border-bottom: 1px solid #334155; text-align: right;">
-              <span style="color: #ffffff; font-size: 14px; font-weight: 600;">${expiryDate}</span>
+              <span style="color: #ffffff; font-size: 14px; font-weight: 600;" class="ec-text">${expiryDate}</span>
             </td>
           </tr>
           <tr>
@@ -3880,12 +4287,12 @@ Questions? Contact us at support@balkanestateai.com
     </div>
 
     <!-- Footer -->
-    <div style="background: #0f172a; padding: 20px; text-align: center; border-top: 1px solid #334155;">
+    <div style="background: #0f172a; padding: 20px; text-align: center; border-top: 1px solid #334155;" class="ec-footer">
       <p style="color: #94a3b8; font-size: 11px; margin: 0 0 4px 0;">
         ${safeAgencyName} · Pro Agent
       </p>
       <p style="color: #64748b; font-size: 11px; margin: 0;">
-        © ${currentYear} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
+        © ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> · Find your place in the Balkans
       </p>
     </div>
   </div>
@@ -3958,15 +4365,40 @@ Questions? Contact us at support@balkanestateai.com
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1a2e; -webkit-font-smoothing: antialiased;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1a2e; -webkit-font-smoothing: antialiased;" class="ec-body">
   <div style="display: none; max-height: 0; overflow: hidden;">
     New team member joined ${safeAgencyName}!
   </div>
 
-  <div style="max-width: 600px; margin: 0 auto; background-color: #16213e; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #16213e; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);" class="ec-card">
     <!-- Header -->
-    <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 32px 24px; text-align: center;">
+    <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 32px 24px; text-align: center;" class="ec-header">
       <div style="margin-bottom: 12px;">
         <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; line-height: 60px; font-size: 28px;">👥</span>
       </div>
@@ -3992,7 +4424,7 @@ Questions? Contact us at support@balkanestateai.com
               <span style="color: #6b7280; font-size: 14px;">Name</span>
             </td>
             <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
-              <span style="color: #1f2937; font-size: 14px; font-weight: 600;">${safeNewAgentName}</span>
+              <span style="color: #1f2937; font-size: 14px; font-weight: 600;" class="ec-text">${safeNewAgentName}</span>
             </td>
           </tr>
           <tr>
@@ -4018,7 +4450,7 @@ Questions? Contact us at support@balkanestateai.com
               <span style="color: #6b7280; font-size: 14px;">Team Size</span>
             </td>
             <td style="padding: 10px 0; text-align: right;">
-              <span style="color: #1f2937; font-size: 14px; font-weight: 600;">${params.totalAgents} agent${params.totalAgents > 1 ? 's' : ''}</span>
+              <span style="color: #1f2937; font-size: 14px; font-weight: 600;" class="ec-text">${params.totalAgents} agent${params.totalAgents > 1 ? 's' : ''}</span>
             </td>
           </tr>
         </table>
@@ -4046,12 +4478,12 @@ Questions? Contact us at support@balkanestateai.com
     </div>
 
     <!-- Footer -->
-    <div style="background: #0f172a; padding: 20px; text-align: center; border-top: 1px solid #334155;">
+    <div style="background: #0f172a; padding: 20px; text-align: center; border-top: 1px solid #334155;" class="ec-footer">
       <p style="color: #94a3b8; font-size: 11px; margin: 0 0 4px 0;">
         ${safeAgencyName} · Enterprise Plan
       </p>
       <p style="color: #64748b; font-size: 11px; margin: 0;">
-        © ${currentYear} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
+        © ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> · Find your place in the Balkans
       </p>
     </div>
   </div>
@@ -4080,7 +4512,7 @@ Questions? Contact us at support@balkanestateai.com
     sellerName: string;
     propertyId: string;
   }): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('viewing-confirmation');
@@ -4115,13 +4547,38 @@ Questions? Contact us at support@balkanestateai.com
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;" class="ec-body">
   <div style="display: none; max-height: 0; overflow: hidden;">
     Your viewing has been scheduled for ${safeDate} at ${safeTime}
   </div>
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
-    <div style="background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); padding: 40px 24px; text-align: center;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);" class="ec-card">
+    <div style="background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); padding: 40px 24px; text-align: center;" class="ec-header">
       <div style="margin-bottom: 16px;">
         <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; line-height: 60px; font-size: 28px;">📅</span>
       </div>
@@ -4129,13 +4586,13 @@ Questions? Contact us at support@balkanestateai.com
       <p style="color: #bfdbfe; margin: 8px 0 0 0; font-size: 14px;">Your property viewing has been scheduled</p>
     </div>
     <div style="padding: 32px 24px;">
-      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;" class="ec-text">
         Hello ${safeName},
       </p>
-      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;" class="ec-text-muted">
         Your viewing request has been submitted. The property owner will review and confirm your appointment.
       </p>
-      <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 24px; margin: 0 0 24px 0;">
+      <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 24px; margin: 0 0 24px 0;" class="ec-highlight ec-text">
         <h2 style="color: #0369a1; font-size: 16px; margin: 0 0 16px 0;">Viewing Details</h2>
         <table style="width: 100%; border-collapse: collapse;">
           <tr>
@@ -4172,12 +4629,12 @@ Questions? Contact us at support@balkanestateai.com
         </p>
       </div>
     </div>
-    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;">
-        Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
+    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;" class="ec-footer">
+      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;" class="ec-text-muted">
+        Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;" class="ec-link">support@balkanestateai.com</a>
       </p>
-      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        &copy; ${currentYear} BalkanEstate<sup>AI</sup>
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;" class="ec-text-muted">
+        &copy; ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>
       </p>
     </div>
   </div>
@@ -4209,7 +4666,7 @@ Questions? Contact us at support@balkanestateai.com
     timeSlot: string;
     propertyId: string;
   }): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('viewing-notification');
@@ -4217,7 +4674,7 @@ Questions? Contact us at support@balkanestateai.com
       const safePhone = escapeHtml(params.visitorPhone);
       const safeMsg   = escapeHtml(params.visitorMessage);
       const visitorPhoneRow = safePhone
-        ? `<tr><td style="padding:8px 0;color:#6b7280;font-size:14px;">Phone:</td><td style="padding:8px 0;color:#111827;font-size:14px;"><a href="tel:${safePhone}" style="color:#0252CD;text-decoration:none;">${safePhone}</a></td></tr>`
+        ? `<tr><td style="padding:8px 0;color:#6b7280;font-size:14px;">Phone:</td><td style="padding:8px 0;color:#111827;font-size:14px;"><a href="tel:${safePhone}" style="color:#0252CD;text-decoration:none;" class="ec-link">${safePhone}</a></td></tr>`
         : '';
       const visitorMessageRow = safeMsg
         ? `<tr><td style="padding:8px 0;color:#6b7280;font-size:14px;vertical-align:top;">Message:</td><td style="padding:8px 0;color:#111827;font-size:14px;font-style:italic;">"${safeMsg}"</td></tr>`
@@ -4258,13 +4715,38 @@ Questions? Contact us at support@balkanestateai.com
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;" class="ec-body">
   <div style="display: none; max-height: 0; overflow: hidden;">
     New viewing request from ${safeVisitorName} for ${safeDate} at ${safeTime}
   </div>
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
-    <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 40px 24px; text-align: center;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);" class="ec-card">
+    <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 40px 24px; text-align: center;" class="ec-header">
       <div style="margin-bottom: 16px;">
         <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.15); border-radius: 50%; line-height: 60px; font-size: 28px;">🏠</span>
       </div>
@@ -4272,13 +4754,13 @@ Questions? Contact us at support@balkanestateai.com
       <p style="color: #fef3c7; margin: 8px 0 0 0; font-size: 14px;">${safeTitle}</p>
     </div>
     <div style="padding: 32px 24px;">
-      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;" class="ec-text">
         Hello ${safeSellerName},
       </p>
-      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;" class="ec-text-muted">
         Someone wants to view your property. Here are the details:
       </p>
-      <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 24px; margin: 0 0 24px 0;">
+      <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 24px; margin: 0 0 24px 0;" class="ec-highlight ec-text">
         <h2 style="color: #92400e; font-size: 16px; margin: 0 0 16px 0;">Viewing Details</h2>
         <table style="width: 100%; border-collapse: collapse;">
           <tr>
@@ -4305,13 +4787,13 @@ Questions? Contact us at support@balkanestateai.com
           <tr>
             <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Email:</td>
             <td style="padding: 8px 0; color: #111827; font-size: 14px;">
-              <a href="mailto:${safeVisitorEmail}" style="color: #0252CD; text-decoration: none;">${safeVisitorEmail}</a>
+              <a href="mailto:${safeVisitorEmail}" style="color: #0252CD; text-decoration: none;" class="ec-link">${safeVisitorEmail}</a>
             </td>
           </tr>
           ${safeVisitorPhone ? `<tr>
             <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Phone:</td>
             <td style="padding: 8px 0; color: #111827; font-size: 14px;">
-              <a href="tel:${safeVisitorPhone}" style="color: #0252CD; text-decoration: none;">${safeVisitorPhone}</a>
+              <a href="tel:${safeVisitorPhone}" style="color: #0252CD; text-decoration: none;" class="ec-link">${safeVisitorPhone}</a>
             </td>
           </tr>` : ''}
           ${safeVisitorMessage ? `<tr>
@@ -4338,9 +4820,9 @@ Questions? Contact us at support@balkanestateai.com
         </p>
       </div>
     </div>
-    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        &copy; ${currentYear} BalkanEstate<sup>AI</sup>
+    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;" class="ec-footer">
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;" class="ec-text-muted">
+        &copy; ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>
       </p>
     </div>
   </div>
@@ -4369,14 +4851,14 @@ Questions? Contact us at support@balkanestateai.com
     sellerPhone?: string;
     propertyId: string;
   }): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('viewing-approved');
     if (config) {
       const safePhone = escapeHtml(params.sellerPhone);
       const sellerPhoneHtml = safePhone
-        ? ` &mdash; <a href="tel:${safePhone}" style="color:#0252CD;text-decoration:none;">${safePhone}</a>`
+        ? ` &mdash; <a href="tel:${safePhone}" style="color:#0252CD;text-decoration:none;" class="ec-link">${safePhone}</a>`
         : '';
       const variables: Record<string, string> = {
         visitorName:     escapeHtml(params.visitorName),
@@ -4410,13 +4892,38 @@ Questions? Contact us at support@balkanestateai.com
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;" class="ec-body">
   <div style="display: none; max-height: 0; overflow: hidden;">
     Great news! Your viewing has been confirmed for ${safeDate} at ${safeTime}
   </div>
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
-    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 24px; text-align: center;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);" class="ec-card">
+    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 24px; text-align: center;" class="ec-header">
       <div style="margin-bottom: 16px;">
         <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.15); border-radius: 50%; line-height: 60px; font-size: 28px;">&#10003;</span>
       </div>
@@ -4424,10 +4931,10 @@ Questions? Contact us at support@balkanestateai.com
       <p style="color: #d1fae5; margin: 8px 0 0 0; font-size: 14px;">The property owner has approved your visit</p>
     </div>
     <div style="padding: 32px 24px;">
-      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;" class="ec-text">
         Hello ${safeName},
       </p>
-      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;" class="ec-text-muted">
         Great news! Your viewing request has been <strong style="color: #059669;">approved</strong>. You're all set to visit the property.
       </p>
       <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 24px; margin: 0 0 24px 0;">
@@ -4451,7 +4958,7 @@ Questions? Contact us at support@balkanestateai.com
           </tr>
           <tr>
             <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Contact:</td>
-            <td style="padding: 8px 0; color: #111827; font-size: 14px;">${safeSellerName}${safeSellerPhone ? ` &mdash; <a href="tel:${safeSellerPhone}" style="color: #0252CD; text-decoration: none;">${safeSellerPhone}</a>` : ''}</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px;">${safeSellerName}${safeSellerPhone ? ` &mdash; <a href="tel:${safeSellerPhone}" style="color: #0252CD; text-decoration: none;" class="ec-link">${safeSellerPhone}</a>` : ''}</td>
           </tr>
         </table>
       </div>
@@ -4467,12 +4974,12 @@ Questions? Contact us at support@balkanestateai.com
         </p>
       </div>
     </div>
-    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;">
-        Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
+    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;" class="ec-footer">
+      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;" class="ec-text-muted">
+        Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;" class="ec-link">support@balkanestateai.com</a>
       </p>
-      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        &copy; ${currentYear} BalkanEstate<sup>AI</sup>
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;" class="ec-text-muted">
+        &copy; ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>
       </p>
     </div>
   </div>
@@ -4502,7 +5009,7 @@ Questions? Contact us at support@balkanestateai.com
     cancelReason?: string;
     propertyId: string;
   }): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('viewing-rejected');
@@ -4539,13 +5046,38 @@ Questions? Contact us at support@balkanestateai.com
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;" class="ec-body">
   <div style="display: none; max-height: 0; overflow: hidden;">
     Unfortunately, your viewing for ${safeDate} at ${safeTime} could not be confirmed
   </div>
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
-    <div style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); padding: 40px 24px; text-align: center;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);" class="ec-card">
+    <div style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); padding: 40px 24px; text-align: center;" class="ec-header">
       <div style="margin-bottom: 16px;">
         <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.15); border-radius: 50%; line-height: 60px; font-size: 28px;">📋</span>
       </div>
@@ -4553,10 +5085,10 @@ Questions? Contact us at support@balkanestateai.com
       <p style="color: #d1d5db; margin: 8px 0 0 0; font-size: 14px;">Your viewing request status has changed</p>
     </div>
     <div style="padding: 32px 24px;">
-      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;" class="ec-text">
         Hello ${safeName},
       </p>
-      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;" class="ec-text-muted">
         Unfortunately, the property owner was unable to confirm your viewing request for the selected date and time. We apologize for any inconvenience.
       </p>
       <div style="background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; margin: 0 0 24px 0;">
@@ -4592,12 +5124,12 @@ Questions? Contact us at support@balkanestateai.com
         </a>
       </div>
     </div>
-    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;">
-        Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
+    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;" class="ec-footer">
+      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;" class="ec-text-muted">
+        Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;" class="ec-link">support@balkanestateai.com</a>
       </p>
-      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        &copy; ${currentYear} BalkanEstate<sup>AI</sup>
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;" class="ec-text-muted">
+        &copy; ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>
       </p>
     </div>
   </div>
@@ -4652,9 +5184,9 @@ Questions? Contact us at support@balkanestateai.com
 
     // Build coupon codes HTML section
     const couponCodesHtml = params.couponCodes && params.couponCodes.length > 0 ? `
-      <div style="background: #f0fdf4; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #86efac;">
+      <div style="background: #f0fdf4; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #86efac;" class="ec-highlight ec-text">
         <p style="color: #166534; font-size: 14px; font-weight: 700; margin: 0 0 12px 0;">🎫 Your Coupon Codes</p>
-        <p style="color: #4b5563; font-size: 12px; margin: 0 0 12px 0;">Copy and use these codes when promoting a listing:</p>
+        <p style="color: #4b5563; font-size: 12px; margin: 0 0 12px 0;" class="ec-text-muted">Copy and use these codes when promoting a listing:</p>
         ${params.couponCodes.map(c => {
           const label = c.tier === 'highlight' ? '✨ Highlighted' : c.tier === 'premium' ? '💎 Premium' : '🔥 Featured';
           const bg = c.tier === 'highlight' ? '#059669' : c.tier === 'premium' ? '#7c3aed' : '#dc2626';
@@ -4676,15 +5208,40 @@ Questions? Contact us at support@balkanestateai.com
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;" class="ec-body">
   <div style="display: none; max-height: 0; overflow: hidden;">
     Your promotion coupons summary for ${safeAgencyName}.
   </div>
 
   <div style="max-width: 650px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
     <!-- Header -->
-    <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 32px 24px; text-align: center;">
+    <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 32px 24px; text-align: center;" class="ec-header">
       <div style="margin-bottom: 12px;">
         <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; line-height: 60px; font-size: 28px;">🎁</span>
       </div>
@@ -4693,11 +5250,11 @@ Questions? Contact us at support@balkanestateai.com
     </div>
 
     <div style="padding: 28px 24px;">
-      <p style="color: #374151; font-size: 16px; margin: 0 0 20px 0;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 20px 0;" class="ec-text">
         Hello ${safeOwnerName}! 👋
       </p>
 
-      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;" class="ec-text-muted">
         Here's your current promotion coupons summary for <strong>${safeAgencyName}</strong>.
         Use these coupons to highlight, feature, or boost your agency's property listings!
       </p>
@@ -4714,8 +5271,8 @@ Questions? Contact us at support@balkanestateai.com
             <p style="color: #065f46; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Available</p>
           </td>
           <td style="width: 33%; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; text-align: center;">
-            <p style="color: #374151; font-size: 28px; font-weight: 700; margin: 0;">${used}</p>
-            <p style="color: #6b7280; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Used</p>
+            <p style="color: #374151; font-size: 28px; font-weight: 700; margin: 0;" class="ec-text">${used}</p>
+            <p style="color: #6b7280; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;" class="ec-text-muted">Used</p>
           </td>
         </tr>
       </table>
@@ -4744,9 +5301,9 @@ Questions? Contact us at support@balkanestateai.com
     </div>
 
     <!-- Footer -->
-    <div style="background: #0f172a; padding: 20px; text-align: center; border-top: 1px solid #334155;">
+    <div style="background: #0f172a; padding: 20px; text-align: center; border-top: 1px solid #334155;" class="ec-footer">
       <p style="color: #64748b; font-size: 12px; margin: 0;">
-        &copy; ${currentYear} BalkanEstate<sup>AI</sup> • Promotion coupons refresh monthly
+        &copy; ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> • Promotion coupons refresh monthly
       </p>
     </div>
   </div>
@@ -4831,15 +5388,40 @@ Questions? Contact us at support@balkanestateai.com
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;" class="ec-body">
   <div style="display: none; max-height: 0; overflow: hidden;">
     Welcome to ${safePlanName}! Here's everything you get with your new subscription.
   </div>
 
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);" class="ec-card">
     <!-- Header -->
-    <div style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); padding: 40px 24px; text-align: center;">
+    <div style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); padding: 40px 24px; text-align: center;" class="ec-header">
       <div style="margin-bottom: 16px;">
         <span style="display: inline-block; width: 80px; height: 80px; background: rgba(255,255,255,0.2); border-radius: 50%; line-height: 80px; font-size: 40px;">🎉</span>
       </div>
@@ -4848,11 +5430,11 @@ Questions? Contact us at support@balkanestateai.com
     </div>
 
     <div style="padding: 32px 24px;">
-      <p style="color: #374151; font-size: 17px; margin: 0 0 20px 0;">
+      <p style="color: #374151; font-size: 17px; margin: 0 0 20px 0;" class="ec-text">
         Hi ${safeUserName}! 👋
       </p>
 
-      <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin: 0 0 28px 0;">
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin: 0 0 28px 0;" class="ec-text-muted">
         Thank you for subscribing to <strong>${safePlanName}</strong>. Your account is now fully activated and you have access to all Pro features. Here's a summary of everything included in your plan.
       </p>
 
@@ -4912,7 +5494,7 @@ Questions? Contact us at support@balkanestateai.com
       </div>
 
       <!-- Promotion Coupons -->
-      <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 10px; padding: 20px; margin-bottom: 24px; border: 2px solid #f59e0b;">
+      <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 10px; padding: 20px; margin-bottom: 24px; border: 2px solid #f59e0b;" class="ec-highlight ec-text">
         <p style="color: #92400e; font-size: 14px; font-weight: 600; margin: 0 0 10px 0;">🎟️ Your first ${params.promotionCoupons.total} promotion coupons are ready! (${couponBreakdown})</p>
         ${params.couponCodes && params.couponCodes.length > 0 ? `
         <div style="margin-bottom: 10px;">
@@ -4948,9 +5530,9 @@ Questions? Contact us at support@balkanestateai.com
     </div>
 
     <!-- Footer -->
-    <div style="background: #0f172a; padding: 20px; text-align: center; border-top: 1px solid #334155;">
+    <div style="background: #0f172a; padding: 20px; text-align: center; border-top: 1px solid #334155;" class="ec-footer">
       <p style="color: #64748b; font-size: 12px; margin: 0 0 8px 0;">
-        &copy; ${currentYear} BalkanEstate<sup>AI</sup> • All rights reserved
+        &copy; ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> • All rights reserved
       </p>
       <p style="color: #475569; font-size: 11px; margin: 0;">
         If you have any questions, contact us at <a href="mailto:support@balkanestateai.com" style="color: #f59e0b;">support@balkanestateai.com</a>
@@ -4992,7 +5574,7 @@ Questions? Contact us at support@balkanestateai.com
 
     const reasonBlock = safeReason
       ? `
-      <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; border-radius: 0 8px 8px 0; margin-bottom: 24px;">
+      <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; border-radius: 0 8px 8px 0; margin-bottom: 24px;" class="ec-highlight ec-text">
         <p style="color: #991b1b; font-size: 13px; font-weight: 600; margin: 0 0 4px 0;">Reason for rejection:</p>
         <p style="color: #b91c1c; font-size: 14px; margin: 0;">${safeReason}</p>
       </div>`
@@ -5004,15 +5586,40 @@ Questions? Contact us at support@balkanestateai.com
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: #111827 !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
+      .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
+      .ec-link { color: #60a5fa !important; }
+      .ec-card a { color: #60a5fa !important; }
+      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-border { border-color: #374151 !important; }
+      .ec-stat-card { background-color: #374151 !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
+      .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
+      .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;" class="ec-body">
   <div style="display: none; max-height: 0; overflow: hidden;">
     Your license verification was not approved. You can resubmit with correct details.
   </div>
 
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);" class="ec-card">
     <!-- Header -->
-    <div style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); padding: 40px 24px; text-align: center;">
+    <div style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); padding: 40px 24px; text-align: center;" class="ec-header">
       <div style="margin-bottom: 16px;">
         <span style="display: inline-block; width: 80px; height: 80px; background: rgba(255,255,255,0.2); border-radius: 50%; line-height: 80px; font-size: 40px;">&#9888;</span>
       </div>
@@ -5021,17 +5628,17 @@ Questions? Contact us at support@balkanestateai.com
     </div>
 
     <div style="padding: 32px 24px;">
-      <p style="color: #374151; font-size: 17px; margin: 0 0 20px 0;">
+      <p style="color: #374151; font-size: 17px; margin: 0 0 20px 0;" class="ec-text">
         Hi ${safeUserName},
       </p>
 
-      <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin: 0 0 24px 0;">
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin: 0 0 24px 0;" class="ec-text-muted">
         We have reviewed your license submission${safeLicenseNumber ? ` (<strong style="font-family: monospace;">${safeLicenseNumber}</strong>)` : ''} and unfortunately it could not be verified at this time.
       </p>
 
       ${reasonBlock}
 
-      <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin: 0 0 24px 0;">
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin: 0 0 24px 0;" class="ec-text-muted">
         Don't worry — you can resubmit your license with the correct details. Please ensure the license number and country match your official real estate license.
       </p>
 
@@ -5042,7 +5649,7 @@ Questions? Contact us at support@balkanestateai.com
         </a>
       </div>
 
-      <div style="background: #f0f9ff; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+      <div style="background: #f0f9ff; border-radius: 8px; padding: 16px; margin-bottom: 24px;" class="ec-highlight ec-text">
         <p style="color: #1e40af; font-size: 13px; font-weight: 600; margin: 0 0 8px 0;">Tips for resubmission:</p>
         <ul style="color: #1e3a5f; font-size: 13px; line-height: 1.8; margin: 0; padding-left: 20px;">
           <li>Double-check that your license number is typed correctly</li>
@@ -5053,12 +5660,12 @@ Questions? Contact us at support@balkanestateai.com
     </div>
 
     <!-- Footer -->
-    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;">
-        Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
+    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;" class="ec-footer">
+      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;" class="ec-text-muted">
+        Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;" class="ec-link">support@balkanestateai.com</a>
       </p>
-      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        &copy; ${currentYear} BalkanEstate<sup>AI</sup>
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;" class="ec-text-muted">
+        &copy; ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>
       </p>
     </div>
   </div>

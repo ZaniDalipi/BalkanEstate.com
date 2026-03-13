@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import SiteSettings from '../models/SiteSettings';
 import { apiLogger } from '../utils/logger';
 import { clearSiteSettingsCache } from '../utils/emailTemplateRenderer';
+import { uploadImage, deleteImage } from '../services/cloudinaryService';
 
 // Get site settings (singleton)
 export const getSiteSettings = async (_req: Request, res: Response): Promise<void> => {
@@ -73,22 +74,36 @@ export const resetSiteSettings = async (_req: Request, res: Response): Promise<v
   }
 };
 
-// Upload email logo (placeholder)
-export const uploadEmailLogo = async (req: Request, res: Response): Promise<void> => {
+// Upload site logo (file upload to Cloudinary)
+export const uploadSiteLogo = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { logoUrl } = req.body;
     const userId = (req as any).user?._id;
+    const file = req.file;
 
-    if (!logoUrl) {
-      res.status(400).json({ message: 'Logo URL is required' });
+    if (!file) {
+      res.status(400).json({ message: 'No image file provided' });
       return;
     }
+
+    // Get current settings to clean up old logo if it has a publicId
+    const currentSettings = await SiteSettings.getSettings();
+    if (currentSettings.logoPublicId) {
+      await deleteImage(currentSettings.logoPublicId).catch(() => {});
+    }
+
+    const result = await uploadImage(file.buffer, {
+      userId: String(userId),
+      type: 'site-logo',
+      maxWidth: 600,
+      maxHeight: 200,
+    });
 
     const settings = await SiteSettings.findOneAndUpdate(
       {},
       {
         $set: {
-          emailLogoUrl: logoUrl,
+          logoUrl: result.url,
+          logoPublicId: result.publicId,
           lastModified: new Date(),
           ...(userId && { modifiedBy: userId }),
         },
@@ -96,14 +111,62 @@ export const uploadEmailLogo = async (req: Request, res: Response): Promise<void
       { new: true, runValidators: true }
     );
 
-    if (!settings) {
-      res.status(404).json({ message: 'Site settings not found' });
+    clearSiteSettingsCache();
+
+    res.json({
+      message: 'Site logo updated successfully',
+      settings,
+      uploadResult: { url: result.url, publicId: result.publicId },
+    });
+  } catch (error) {
+    apiLogger.error('Error uploading site logo:', error);
+    res.status(500).json({ message: 'Failed to upload site logo' });
+  }
+};
+
+// Upload email logo (file upload to Cloudinary)
+export const uploadEmailLogo = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user?._id;
+    const file = req.file;
+
+    if (!file) {
+      res.status(400).json({ message: 'No image file provided' });
       return;
     }
+
+    // Get current settings to clean up old email logo if it has a publicId
+    const currentSettings = await SiteSettings.getSettings();
+    if (currentSettings.emailLogoPublicId) {
+      await deleteImage(currentSettings.emailLogoPublicId).catch(() => {});
+    }
+
+    const result = await uploadImage(file.buffer, {
+      userId: String(userId),
+      type: 'site-email-logo',
+      maxWidth: 600,
+      maxHeight: 200,
+    });
+
+    const settings = await SiteSettings.findOneAndUpdate(
+      {},
+      {
+        $set: {
+          emailLogoUrl: result.url,
+          emailLogoPublicId: result.publicId,
+          lastModified: new Date(),
+          ...(userId && { modifiedBy: userId }),
+        },
+      },
+      { new: true, runValidators: true }
+    );
+
+    clearSiteSettingsCache();
 
     res.json({
       message: 'Email logo updated successfully',
       settings,
+      uploadResult: { url: result.url, publicId: result.publicId },
     });
   } catch (error) {
     apiLogger.error('Error uploading email logo:', error);

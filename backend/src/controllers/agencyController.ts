@@ -73,6 +73,7 @@ export const createAgency = async (
       country: req.body.country,
       zipCode: req.body.zipCode,
       website: req.body.website,
+      registrationNumber: req.body.registrationNumber,
       specialties: req.body.specialties,
       certifications: req.body.certifications,
       languages: req.body.languages,
@@ -338,7 +339,7 @@ export const createAgency = async (
             ownerName: user.name || 'Agency Owner',
             agencyName: agency.name,
             coupons: generatedCoupons,
-            agentListingsLimit: agentProduct?.listingsLimit ?? 25,
+            agentListingsLimit: agentProduct?.listingsLimit ?? 30,
           });
 
           // Send welcome/thank you email with promotion coupon breakdown
@@ -873,7 +874,7 @@ export const updateAgency = async (
       name, description, website, phone, email, address,
       city, country, zipCode, lat, lng,
       facebookUrl, instagramUrl, linkedinUrl, twitterUrl,
-      yearsInBusiness, specialties,
+      yearsInBusiness, specialties, registrationNumber,
       certifications, languages, businessHours,
       coverGradient, coverImage,
       logoPosition, coverPosition,
@@ -942,6 +943,7 @@ export const updateAgency = async (
     if (twitterUrl !== undefined) agency.twitterUrl = twitterUrl;
     if (yearsInBusiness !== undefined) agency.yearsInBusiness = Number(yearsInBusiness);
     if (specialties !== undefined) agency.specialties = specialties;
+    if (registrationNumber !== undefined) (agency as any).registrationNumber = typeof registrationNumber === 'string' ? registrationNumber.trim() : registrationNumber;
     if (certifications !== undefined) agency.certifications = certifications;
     if (languages !== undefined) agency.languages = languages;
     if (businessHours !== undefined) agency.businessHours = businessHours;
@@ -1571,7 +1573,7 @@ export const joinAgencyByInvitationCode = async (
 
     // Get agent product limits from DB, fallback to defaults
     const agentProduct = await Product.findOne({ productId: 'agency_agent_yearly' }).lean();
-    const agentListingsLimit = agentProduct?.listingsLimit ?? 25;
+    const agentListingsLimit = agentProduct?.listingsLimit ?? 30;
 
     // Determine subscription expiration from the agency's subscription
     const agencyExpiresAt = agency.subscription?.expiresAt ||
@@ -1629,6 +1631,12 @@ export const joinAgencyByInvitationCode = async (
     user.subscription.status = 'active';
     user.subscription.listingsLimit = agentListingsLimit;
     user.subscription.expiresAt = agencyExpiresAt;
+    // Initialize monthly listing tracking (30 per month, resets from subscription start)
+    user.subscription.monthlyListingsCreated = 0;
+    const nextReset = new Date();
+    nextReset.setDate(nextReset.getDate() + 30);
+    nextReset.setHours(0, 0, 0, 0);
+    user.subscription.listingsMonthResetDate = nextReset;
     if (user.subscription.promotionCoupons) {
       user.subscription.promotionCoupons.monthly = 0; // Agency agents share the agency pool
     }
@@ -2431,7 +2439,7 @@ export const redeemAgentCoupon = async (
     }
 
     // Dynamic limits from DB product, fallback to constants
-    const agentListingsLimit = agentProduct?.listingsLimit ?? 25;
+    const agentListingsLimit = agentProduct?.listingsLimit ?? 30;
 
     // Initialize subscription if doesn't exist
     if (!user.subscription) {
@@ -2534,6 +2542,12 @@ export const redeemAgentCoupon = async (
     user.subscription.tier = 'agency_agent';
     user.subscription.status = 'active';
     user.subscription.listingsLimit = agentListingsLimit;
+    // Initialize monthly listing tracking (30 per month, resets from subscription start)
+    user.subscription.monthlyListingsCreated = 0;
+    const couponNextReset = new Date();
+    couponNextReset.setDate(couponNextReset.getDate() + 30);
+    couponNextReset.setHours(0, 0, 0, 0);
+    user.subscription.listingsMonthResetDate = couponNextReset;
     if (user.subscription.promotionCoupons) {
       user.subscription.promotionCoupons.monthly = 0; // Agency agents share the agency pool
     }
@@ -3236,7 +3250,7 @@ export const migrateAgentSubscriptions = async (
 
     // Get agent listings limit from DB product (configurable in admin)
     const agentProduct = await Product.findOne({ productId: 'agency_agent_yearly' }).lean();
-    const agentListingsLimit = agentProduct?.listingsLimit ?? 25;
+    const agentListingsLimit = agentProduct?.listingsLimit ?? 30;
 
     for (const agency of agencies) {
       const agencyExpiresAt = agency.subscription?.expiresAt ||
@@ -3255,6 +3269,9 @@ export const migrateAgentSubscriptions = async (
 
         // Update user's subscription if needed
         if (!user.subscription || user.subscription.tier === 'free') {
+          const migrationNextReset = new Date();
+          migrationNextReset.setDate(migrationNextReset.getDate() + 30);
+          migrationNextReset.setHours(0, 0, 0, 0);
           user.subscription = {
             tier: 'agency_agent',
             status: 'active',
@@ -3262,6 +3279,8 @@ export const migrateAgentSubscriptions = async (
             activeListingsCount: user.subscription?.activeListingsCount || 0,
             privateSellerCount: user.subscription?.privateSellerCount || 0,
             agentCount: user.subscription?.agentCount || 0,
+            monthlyListingsCreated: 0,
+            listingsMonthResetDate: migrationNextReset,
             promotionCoupons: { monthly: 0, available: 0, used: 0, rollover: 0, lastRefresh: new Date() },
             savedSearchesLimit: -1,
             totalPaid: user.subscription?.totalPaid || 0,

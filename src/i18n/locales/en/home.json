@@ -47,6 +47,13 @@
     "baths": "{{count}} bath",
     "baths_plural": "{{count}} baths",
     "sqm": "{{count}} m²",
+    "bedsLabel": "Beds",
+    "bathsLabel": "Baths",
+    "builtLabel": "Built",
+    "viewProperty": "View Property",
+    "forRent": "For Rent",
+    "forSale": "For Sale",
+    "perMonth": "/mo",
     "promoted": "Promoted",
     "new": "New",
     "priceReduced": "Price Reduced"
@@ -76,13 +83,23 @@
   "howItWorks": {
     "title": "How It Works",
     "subtitle": "Getting started is simple — whether you're buying, selling, or renting",
+    "stepLabel": "Step",
     "step1Title": "Search & Discover",
     "step1Desc": "Use our AI-powered search or filters to find properties that match your criteria across 11 Balkan countries.",
     "step2Title": "Connect with Agents",
     "step2Desc": "Message verified agents directly, schedule viewings, and get expert local guidance.",
     "step3Title": "Close the Deal",
     "step3Desc": "Use our tools — mortgage calculator, property valuation, and guides — to make informed decisions.",
-    "learnMore": "Learn More"
+    "learnMore": "Learn More",
+    "participant_buyer": "Buyer",
+    "participant_renter": "Renter",
+    "participant_investor": "Investor",
+    "participant_agent": "Agent",
+    "participant_seller": "Seller",
+    "participant_negotiation": "Negotiation",
+    "participant_contract": "Contract",
+    "participant_keys": "Keys",
+    "participant_moveIn": "Move In"
   },
   "cta": {
     "sellerTitle": "Ready to Sell Your Property?",
@@ -114,7 +131,25 @@
     "platformFeatures": "Platform Features",
     "exploreGuide": "Explore Full Guide",
     "browseProperties": "Browse Properties",
-    "viewFullGuide": "View Full Guide"
+    "viewFullGuide": "View Full Guide",
+    "explore": "Explore",
+    "tabAll": "All",
+    "feature_aiSearch_title": "AI-Powered Search",
+    "feature_aiSearch_desc": "Describe your dream property in natural language and let AI find perfect matches across 11 countries.",
+    "feature_3dMap_title": "3D Interactive Map",
+    "feature_3dMap_desc": "Explore listings on a 3D map with real-time sunlight, draw-to-search, and points of interest.",
+    "feature_messaging_title": "Real-Time Messaging",
+    "feature_messaging_desc": "Chat directly with verified agents and sellers. Schedule viewings and negotiate in-app.",
+    "feature_valuation_title": "Property Valuation",
+    "feature_valuation_desc": "AI-powered price estimates, market trends, neighbourhood scores, and investment ROI projections.",
+    "feature_calculators_title": "Financial Calculators",
+    "feature_calculators_desc": "Mortgage calculator, rent vs buy comparison, and investment ROI tools to make informed decisions.",
+    "feature_promotions_title": "Listing Promotions",
+    "feature_promotions_desc": "Boost visibility with Highlight, Featured, or Premium tiers. Up to 5x more views.",
+    "feature_languages_title": "10 Languages",
+    "feature_languages_desc": "Browse the entire platform in your native language. Full support for all Balkan languages.",
+    "feature_profiles_title": "Agency & Agent Profiles",
+    "feature_profiles_desc": "Join as independent agent or create an agency. Manage teams, coupons, and analytics."
   },
   "topAgents": {
     "badge": "Top Agents of the Week",
@@ -133,7 +168,8 @@
   },
   "testimonials": {
     "title": "What Our Users Say",
-    "subtitle": "Trusted by thousands of buyers, sellers, and agents across the Balkans"
+    "subtitle": "Trusted by thousands of buyers, sellers, and agents across the Balkans",
+    "emptyState": "Testimonials will appear here as users share their experiences."
   },
   "newsletter": {
     "title": "Stay Updated",

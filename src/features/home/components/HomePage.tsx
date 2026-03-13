@@ -13,12 +13,12 @@ import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import HeroSection from './HeroSection';
 import AppShowcaseSection from './AppShowcaseSection';
 import QuickAccessSection from './QuickAccessSection';
-import { StackedCards } from '@/src/components/ui/glass-cards';
-import TopAgentsSection from './TopAgentsSection';
-import TopAgenciesSection from './TopAgenciesSection';
 import Footer from '@/components/shared/Footer';
 
 // Lazy-load below-fold sections to reduce initial bundle
+const StackedCards = lazy(() => import('@/src/components/ui/glass-cards').then(m => ({ default: m.StackedCards })));
+const TopAgentsSection = lazy(() => import('./TopAgentsSection'));
+const TopAgenciesSection = lazy(() => import('./TopAgenciesSection'));
 const CategoriesSection = lazy(() => import('./CategoriesSection'));
 const PopularCitiesSection = lazy(() => import('./PopularCitiesSection'));
 const HowItWorksSection = lazy(() => import('./HowItWorksSection'));
@@ -48,8 +48,8 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
   const { data: featuredProperties = [] } = useQuery<Property[]>({
     queryKey: ['featuredProperties'],
     queryFn: async () => {
-      // Fetch more to have a good pool for sorting
-      const properties = await getProperties({ sortBy: 'newest' } as any, { limit: 50 });
+      // Fetch a reasonable pool for scoring (20 is plenty to pick 6)
+      const properties = await getProperties({ sortBy: 'newest' } as any, { limit: 20 });
       const active = properties.filter(p => p.status === 'active');
 
       // Score each property: premium first, then ones with good images
@@ -104,7 +104,7 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
     });
     queryClient.prefetchQuery({
       queryKey: ['featuredCities'],
-      queryFn: () => getFeaturedCities(6),
+      queryFn: () => getFeaturedCities(50),
       ...opts,
     });
     queryClient.prefetchQuery({
@@ -152,17 +152,17 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
       },
     });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-    navigate(query ? `/search?q=${encodeURIComponent(query)}` : '/search');
+    navigate(query ? `/search?q=${encodeURIComponent(query)}` : '/search', { direction: 'forward' });
   }, [dispatch, state.searchPageState.filters, navigate]);
 
   const handleNavigate = useCallback((view: string, path: string) => {
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: view as any });
-    navigate(path);
+    navigate(path, { direction: 'forward' });
   }, [dispatch, navigate]);
 
   const handlePropertyClick = useCallback((property: Property) => {
     dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-    navigate(`/property/${property.id}`);
+    navigate(`/property/${property.id}`, { direction: 'up' });
   }, [dispatch, navigate]);
 
   const handleCategoryClick = useCallback((propertyType: string, listingType?: string) => {
@@ -178,7 +178,7 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
       payload: { filters, activeFilters: filters },
     });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: listingType === 'rent' ? 'rentals' : 'search' });
-    navigate(listingType === 'rent' ? '/rent' : '/search');
+    navigate(listingType === 'rent' ? '/rent' : '/search', { direction: 'forward' });
   }, [dispatch, state.searchPageState, navigate]);
 
   const isAuthenticated = state.isAuthenticated;
@@ -226,15 +226,21 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
         />
       )}
 
-      <StackedCards
-        properties={featuredProperties}
-        onPropertyClick={handlePropertyClick}
-        onViewAll={() => handleNavigate('search', '/search')}
-      />
+      <Suspense fallback={<SectionFallback />}>
+        <StackedCards
+          properties={featuredProperties}
+          onPropertyClick={handlePropertyClick}
+          onViewAll={() => handleNavigate('search', '/search')}
+        />
+      </Suspense>
 
-      <TopAgentsSection />
+      <Suspense fallback={<SectionFallback />}>
+        <TopAgentsSection />
+      </Suspense>
 
-      <TopAgenciesSection />
+      <Suspense fallback={<SectionFallback />}>
+        <TopAgenciesSection />
+      </Suspense>
 
       <Suspense fallback={<SectionFallback />}>
         <CategoriesSection onCategoryClick={handleCategoryClick} />

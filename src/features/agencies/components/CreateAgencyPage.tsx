@@ -19,6 +19,7 @@ import {
   ShieldCheckIcon,
 } from '@/constants';
 import { API_URL } from '@/src/shared/api/config';
+import { Upload, ImageIcon, X } from 'lucide-react';
 
 const AGENCY_TYPES = [
   { value: 'standard', label: 'Standard' },
@@ -53,6 +54,7 @@ interface AgencyFormData {
   email: string;
   website: string;
   licenseNumber: string;
+  registrationNumber: string;
   yearsInBusiness: string;
   languages: string[];
   specializations: string[];
@@ -86,6 +88,8 @@ const CreateAgencyPage: React.FC = () => {
   const { state, dispatch } = useAppContext();
   const [error, setError] = useState('');
   const [availableCities, setAvailableCities] = useState<string[]>([]);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
 
@@ -101,6 +105,7 @@ const CreateAgencyPage: React.FC = () => {
     email: '',
     website: '',
     licenseNumber: '',
+    registrationNumber: '',
     yearsInBusiness: '',
     languages: [],
     specializations: [],
@@ -157,6 +162,7 @@ const CreateAgencyPage: React.FC = () => {
         email: pendingData.email || '',
         website: pendingData.website || '',
         licenseNumber: pendingData.licenseNumber || '',
+        registrationNumber: pendingData.registrationNumber || '',
         yearsInBusiness: pendingData.yearsInBusiness?.toString() || '',
         languages: pendingData.languages || [],
         specializations: pendingData.specializations || [],
@@ -238,6 +244,34 @@ const CreateAgencyPage: React.FC = () => {
     }));
   }, []);
 
+  const MAX_LOGO_SIZE = 5 * 1024 * 1024; // 5MB
+  const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'];
+
+  const handleLogoChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      setError(t('create.errors.logoInvalidType', 'Please upload a JPEG, PNG, WebP, or SVG image'));
+      return;
+    }
+    if (file.size > MAX_LOGO_SIZE) {
+      setError(t('create.errors.logoTooLarge', 'Logo must be under 5MB'));
+      return;
+    }
+
+    setLogoFile(file);
+    setError('');
+    const reader = new FileReader();
+    reader.onloadend = () => setLogoPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  }, [t]);
+
+  const removeLogo = useCallback(() => {
+    setLogoFile(null);
+    setLogoPreview(null);
+  }, []);
+
   const validateStep = (step: number): boolean => {
     setError('');
 
@@ -295,7 +329,8 @@ const CreateAgencyPage: React.FC = () => {
     };
 
     // Save to context and navigate to payment
-    dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: agencyData });
+    // Note: logoFile cannot be serialized to context - it's handled by the confirmation page or modal
+    dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: { ...agencyData, _hasLogoFile: !!logoFile } });
 
     if (canSkipPayment) {
       // User has enterprise subscription, redirect to confirmation/creation
@@ -501,6 +536,70 @@ const CreateAgencyPage: React.FC = () => {
                   />
                   <p className="text-xs text-neutral-500 mt-2">
                     {t('create.hints.description', 'A compelling description helps clients understand your value')}
+                  </p>
+                </div>
+
+                {/* Logo Upload */}
+                <div>
+                  <label className={labelClasses}>
+                    {t('create.fields.logo', 'Agency Logo')}
+                  </label>
+                  <div className="flex items-center gap-4">
+                    {logoPreview ? (
+                      <div className="relative group">
+                        <img
+                          src={logoPreview}
+                          alt={t('create.fields.logoPreview', 'Logo preview')}
+                          className="w-20 h-20 rounded-xl object-cover border border-neutral-200 shadow-sm"
+                        />
+                        <button
+                          type="button"
+                          onClick={removeLogo}
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          aria-label={t('create.buttons.removeLogo', 'Remove logo')}
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-20 h-20 rounded-xl border-2 border-dashed border-neutral-300 flex items-center justify-center bg-neutral-50">
+                        <ImageIcon className="w-8 h-8 text-neutral-400" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <label className="inline-flex items-center gap-2 px-4 py-2.5 border border-neutral-300 rounded-xl text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition-colors cursor-pointer">
+                        <Upload className="w-4 h-4" />
+                        {logoFile ? t('create.buttons.changeLogo', 'Change Logo') : t('create.buttons.uploadLogo', 'Upload Logo')}
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                          onChange={handleLogoChange}
+                          className="hidden"
+                        />
+                      </label>
+                      <p className="text-xs text-neutral-500 mt-2">
+                        {t('create.hints.logo', 'JPEG, PNG, WebP or SVG. Max 5MB.')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Registration Number */}
+                <div>
+                  <label htmlFor="registrationNumber" className={labelClasses}>
+                    {t('create.fields.registrationNumber', 'Business Registration / Tax ID')}
+                  </label>
+                  <input
+                    type="text"
+                    id="registrationNumber"
+                    name="registrationNumber"
+                    value={formData.registrationNumber}
+                    onChange={handleInputChange}
+                    placeholder={t('create.placeholders.registrationNumber', 'e.g., PIB 123456789, OIB 12345678901')}
+                    className={inputClasses}
+                  />
+                  <p className="text-xs text-neutral-500 mt-2">
+                    {t('create.hints.registrationNumber', 'Your official business registration or tax identification number')}
                   </p>
                 </div>
 

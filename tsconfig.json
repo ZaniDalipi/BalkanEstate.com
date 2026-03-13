@@ -22,7 +22,7 @@
     },
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "types": ["leaflet"]
+    "types": ["leaflet", "vite-plugin-pwa/client"]
   },
   "include": ["**/*.ts", "**/*.tsx", "vite-env.d.ts"]
 }

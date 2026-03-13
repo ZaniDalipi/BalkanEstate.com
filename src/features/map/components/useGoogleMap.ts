@@ -185,6 +185,9 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   // Ref to store promoted markers separately (not clustered)
   const promotedMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
 
+  // Track whether we've already played the entrance fly-in animation
+  const hasAnimatedEntranceRef = useRef(false);
+
   // Debounce timer for marker creation to avoid rapid clear/recreate cycles
   const markerCreationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -896,9 +899,9 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
     if (props.length === 0) return;
 
-    // Check if splash screen just completed — play entrance fly-in animation
-    const splashDone = (window as any).__balkanestateSplashDone;
-    const shouldAnimateEntrance = !!(splashDone && Date.now() - splashDone < 5000);
+    // Play entrance fly-in animation on first marker load
+    const shouldAnimateEntrance = !hasAnimatedEntranceRef.current;
+    if (shouldAnimateEntrance) hasAnimatedEntranceRef.current = true;
     const goldenAngle = 137.508 * (Math.PI / 180);
     const maxStagger = 2000;
 
@@ -1016,8 +1019,8 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     clustererRef.current.addMarkers(regularMarkers);
     promotedMarkersRef.current = promotedMarkers;
 
-    // Clean up splash flag after entrance animation
-    if (shouldAnimateEntrance) {
+    // Clean up splash flag if it exists (may have been set by SplashScreen)
+    if (shouldAnimateEntrance && (window as any).__balkanestateSplashDone) {
       setTimeout(() => {
         delete (window as any).__balkanestateSplashDone;
       }, 3500);

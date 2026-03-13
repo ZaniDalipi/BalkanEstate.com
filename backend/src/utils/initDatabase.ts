@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import CityMarketData from '../models/CityMarketData';
 import EmailConfig from '../models/EmailConfig';
-import { updateAllCityMarketData } from '../services/cityMarketDataService';
+import { updateAllCityMarketData, ensureAllFeaturedCitiesExist } from '../services/cityMarketDataService';
 import { seedEmailConfigs } from '../seeds/emailConfigSeed';
 import { ensurePropertySchemaSync } from './migratePropertySchema';
 import { dbLogger } from './logger';
@@ -179,12 +179,22 @@ export const initializeDatabase = async (): Promise<void> => {
             dbLogger.info('✅ City market data initialized successfully!');
             dbLogger.info('   Data will be refreshed automatically on 1st and 15th of each month.');
           } catch (error) {
-            dbLogger.error('❌ Failed to initialize city data:', error);
-            dbLogger.warn('   City data will be populated during next scheduled update.');
+            dbLogger.error('❌ Failed to initialize city data via API:', error);
+            // Seed all cities with fallback data so the landing page is diverse
+            try {
+              await ensureAllFeaturedCitiesExist();
+              dbLogger.info('✅ Seeded featured cities with fallback data.');
+            } catch (seedErr) {
+              dbLogger.error('❌ Failed to seed fallback city data:', seedErr);
+            }
           }
         }, 5000); // 5 second delay to let server fully start first
       } else {
         dbLogger.info(`✅ City market data loaded (${cityCount} cities)`);
+        // Ensure all countries are represented even if some cities were missed
+        ensureAllFeaturedCitiesExist().catch(err =>
+          dbLogger.error('❌ Error ensuring all featured cities exist:', err)
+        );
       }
     } catch (error) {
       dbLogger.error('❌ Error checking city market data:', error);

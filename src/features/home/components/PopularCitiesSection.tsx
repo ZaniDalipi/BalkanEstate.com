@@ -1,40 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { getFeaturedCities } from '@/src/features/cities/api/cityApi';
 import type { CityMarketData } from '@/src/shared/types';
-
-// Fetch city thumbnail from Wikipedia REST API (CORS-enabled)
-async function fetchCityImage(cityName: string): Promise<string | null> {
-  try {
-    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cityName)}`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    // Use original image for better quality, fall back to thumbnail
-    return data.originalimage?.source || data.thumbnail?.source || null;
-  } catch {
-    return null;
-  }
-}
-
-function useCityImages(cities: CityMarketData[]) {
-  return useQuery({
-    queryKey: ['cityImages', cities.map(c => c.city).join(',')],
-    queryFn: async () => {
-      const entries = await Promise.all(
-        cities.map(async (c) => {
-          const url = await fetchCityImage(c.city);
-          return [c.city, url] as const;
-        })
-      );
-      return Object.fromEntries(entries) as Record<string, string | null>;
-    },
-    enabled: cities.length > 0,
-    staleTime: 24 * 60 * 60 * 1000, // Cache for 24h
-    gcTime: 48 * 60 * 60 * 1000,
-  });
-}
 
 interface PopularCitiesSectionProps {
   onNavigate: (view: string, path: string) => void;
@@ -103,13 +72,15 @@ const PopularCitiesSection: React.FC<PopularCitiesSectionProps> = ({ onNavigate 
     retry: 2,
   });
 
-  // Pick 6 diverse cities once per mount (randomized across countries)
+  // Unique id per mount so cities re-shuffle every time the section appears
+  const mountId = useRef(Math.random());
+
+  // Pick 6 diverse cities, re-shuffled on every mount
   const cities = useMemo(
     () => pickDiverseCities(allCities, 6),
-    [allCities]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allCities, mountId.current]
   );
-
-  const { data: cityImages = {} } = useCityImages(cities);
 
   if (isError && cities.length === 0) return null;
 
@@ -166,12 +137,12 @@ const PopularCitiesSection: React.FC<PopularCitiesSectionProps> = ({ onNavigate 
                 onClick={() => onNavigate('explore-cities', `/explore-cities/${encodeURIComponent(city.city)}/${encodeURIComponent(city.country)}`)}
                 className={`group relative overflow-hidden rounded-xl ${i < 2 ? 'sm:col-span-2 lg:col-span-2 aspect-[16/9]' : 'aspect-[4/3]'}`}
               >
-                {cityImages[city.city] ? (
+                {city.imageUrl ? (
                   <img
-                    src={cityImages[city.city]!}
+                    src={city.imageUrl}
                     alt={city.city}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
+                    loading="eager"
                   />
                 ) : (
                   <div className={`w-full h-full bg-gradient-to-br ${CITY_GRADIENTS[i % CITY_GRADIENTS.length]} group-hover:scale-105 transition-transform duration-500`} />

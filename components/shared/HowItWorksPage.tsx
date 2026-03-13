@@ -227,6 +227,9 @@ const HowItWorksPage: React.FC = () => {
     return undefined;
   };
 
+  // Get all videos as a flat array for dynamic rendering
+  const allVideos: SiteVideo[] = Object.values(videos).flat();
+
   // Navigation helper
   const navigateTo = (path: string) => {
     window.location.href = buildLocalizedPath(path);
@@ -320,11 +323,11 @@ const HowItWorksPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Main Video Embed */}
+        {/* Main Video Embed - uses first DB video or fallback */}
         <div className="max-w-4xl mx-auto mb-12">
           {(() => {
-            // Check database first, then fall back to i18n
-            const dbVideo = findVideoByKey('main-video');
+            // Use first database video as the main/hero video
+            const dbVideo = allVideos[0];
             const dbEmbedUrl = dbVideo?.url;
             const i18nEmbedUrl = t('howItWorks:videoTutorials.mainVideo.embedUrl');
             const embedUrl = dbEmbedUrl || (i18nEmbedUrl && !i18nEmbedUrl.includes('videoTutorials.mainVideo') ? i18nEmbedUrl : '');
@@ -371,79 +374,77 @@ const HowItWorksPage: React.FC = () => {
             );
           })()}
           <p className="text-center text-neutral-500 mt-3 text-sm">
-            {findVideoByKey('main-video')?.description || t('howItWorks:videoTutorials.mainVideo.description')}
+            {allVideos[0]?.description || t('howItWorks:videoTutorials.mainVideo.description')}
           </p>
         </div>
 
-        {/* Short Tutorial Videos Grid */}
-        <div className="mb-8">
-          <h3 className="text-2xl font-bold text-neutral-800 mb-6 text-center">
-            {t('howItWorks:videoTutorials.shortVideos.title')}
-          </h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {([
-              { key: 'proMonthly', dbKey: 'short-pro-monthly', icon: <StarIcon className="w-5 h-5" /> },
-              { key: 'proYearly', dbKey: 'short-pro-yearly', icon: <SparklesIcon className="w-5 h-5" /> },
-              { key: 'createAgency', dbKey: 'short-create-agency', icon: <BuildingIcon className="w-5 h-5" /> },
-              { key: 'joinAgency', dbKey: 'short-join-agency', icon: <UserGroupIcon className="w-5 h-5" /> },
-              { key: 'createListing', dbKey: 'short-create-listing', icon: <HomeIcon className="w-5 h-5" /> },
-              { key: 'promoteListing', dbKey: 'short-promote-listing', icon: <FireIcon className="w-5 h-5" /> },
-            ] as const).map((tutorial) => {
-              // Check database first, then fall back to i18n
-              const dbVideo = findVideoByKey(tutorial.dbKey);
-              const dbEmbedUrl = dbVideo?.url;
-              const i18nEmbedUrl = t(`howItWorks:videoTutorials.shortVideos.${tutorial.key}.embedUrl`);
-              const embedUrl = dbEmbedUrl || (i18nEmbedUrl && !i18nEmbedUrl.includes('videoTutorials.shortVideos') ? i18nEmbedUrl : '');
-              const isYouTubeEmbed = embedUrl && (embedUrl.includes('youtube.com/embed') || embedUrl.includes('youtu.be'));
-              const isDirectVideo = embedUrl && !isYouTubeEmbed;
+        {/* Additional Tutorial Videos Grid - dynamically from database */}
+        {allVideos.length > 1 && (
+          <div className="mb-8">
+            <h3 className="text-2xl font-bold text-neutral-800 mb-6 text-center">
+              {t('howItWorks:videoTutorials.shortVideos.title')}
+            </h3>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {allVideos.slice(1).map((dbVideo) => {
+                const embedUrl = dbVideo.url;
+                const isYouTubeEmbed = embedUrl && (embedUrl.includes('youtube.com/embed') || embedUrl.includes('youtu.be'));
+                const isDirectVideo = embedUrl && !isYouTubeEmbed;
 
-              return (
-                <div key={tutorial.key} className="bg-white rounded-xl shadow-md overflow-hidden border border-neutral-100 hover:shadow-lg transition-shadow">
-                  {isYouTubeEmbed ? (
-                    <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                      <iframe
-                        className="absolute top-0 left-0 w-full h-full"
-                        src={embedUrl}
-                        title={dbVideo?.title || t(`howItWorks:videoTutorials.shortVideos.${tutorial.key}.title`)}
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                      />
-                    </div>
-                  ) : isDirectVideo ? (
-                    <video
-                      src={embedUrl}
-                      className="w-full aspect-video object-cover"
-                      controls
-                      preload="metadata"
-                    />
-                  ) : (
-                    <div className="relative w-full bg-gradient-to-br from-neutral-100 to-neutral-50 flex items-center justify-center" style={{ paddingBottom: '56.25%' }}>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-neutral-400">
-                        <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span className="text-sm">{t('howItWorks:videoTutorials.comingSoon')}</span>
+                return (
+                  <div key={dbVideo._id} className="bg-white rounded-xl shadow-md overflow-hidden border border-neutral-100 hover:shadow-lg transition-shadow">
+                    {isYouTubeEmbed ? (
+                      <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                        <iframe
+                          className="absolute top-0 left-0 w-full h-full"
+                          src={embedUrl}
+                          title={dbVideo.title}
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                        />
                       </div>
+                    ) : isDirectVideo ? (
+                      <video
+                        src={embedUrl}
+                        className="w-full aspect-video object-cover"
+                        controls
+                        preload="metadata"
+                      />
+                    ) : (
+                      <div className="relative w-full bg-gradient-to-br from-neutral-100 to-neutral-50 flex items-center justify-center" style={{ paddingBottom: '56.25%' }}>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-neutral-400">
+                          <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="text-sm">{t('howItWorks:videoTutorials.comingSoon')}</span>
+                        </div>
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-primary">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </span>
+                        <h4 className="font-semibold text-neutral-800">
+                          {dbVideo.title}
+                        </h4>
+                      </div>
+                      {dbVideo.description && (
+                        <p className="text-sm text-neutral-500">
+                          {dbVideo.description}
+                        </p>
+                      )}
                     </div>
-                  )}
-                  <div className="p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-primary">{tutorial.icon}</span>
-                      <h4 className="font-semibold text-neutral-800">
-                        {dbVideo?.title || t(`howItWorks:videoTutorials.shortVideos.${tutorial.key}.title`)}
-                      </h4>
-                    </div>
-                    <p className="text-sm text-neutral-500">
-                      {dbVideo?.description || t(`howItWorks:videoTutorials.shortVideos.${tutorial.key}.description`)}
-                    </p>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Tab Navigation */}

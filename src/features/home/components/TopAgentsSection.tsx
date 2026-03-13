@@ -24,7 +24,8 @@ const AgentPodiumCard: React.FC<{
   rank: number; // 0=1st, 1=2nd, 2=3rd
   podiumHeight: number;
   onAgentClick?: (agent: Agent) => void;
-}> = ({ agent, rank, podiumHeight, onAgentClick }) => {
+  t: (key: string, fallback?: string) => string;
+}> = ({ agent, rank, podiumHeight, onAgentClick, t }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const medal = MEDAL_COLORS[rank as keyof typeof MEDAL_COLORS];
@@ -126,7 +127,7 @@ const AgentPodiumCard: React.FC<{
               src={optimizeCloudinaryUrl(agent.avatarUrl, { width: 160, quality: 'auto', crop: 'fill' })}
               alt={agentName}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              loading="lazy"
+              loading="eager"
             />
           ) : (
             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -172,7 +173,7 @@ const AgentPodiumCard: React.FC<{
             border: '1px solid rgba(226,232,240,0.6)',
           }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{agent.propertiesSold || 0}</span>
-            <span style={{ fontSize: '0.65rem', color: '#94a3b8', marginLeft: '3px' }}>sold</span>
+            <span style={{ fontSize: '0.65rem', color: '#94a3b8', marginLeft: '3px' }}>{t('topAgents.sold', 'sold')}</span>
           </div>
           <div style={{
             padding: '0.3rem 0.6rem',
@@ -181,7 +182,7 @@ const AgentPodiumCard: React.FC<{
             border: '1px solid rgba(226,232,240,0.6)',
           }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{agent.activeListings || 0}</span>
-            <span style={{ fontSize: '0.65rem', color: '#94a3b8', marginLeft: '3px' }}>active</span>
+            <span style={{ fontSize: '0.65rem', color: '#94a3b8', marginLeft: '3px' }}>{t('topAgents.active', 'active')}</span>
           </div>
         </div>
       </div>
@@ -242,7 +243,7 @@ const TopAgentsSection: React.FC = () => {
   const handleAgentClick = useCallback((agent: Agent) => {
     const agentIdentifier = agent.agentId || agent.id;
     dispatch({ type: 'SET_SELECTED_AGENT', payload: agentIdentifier });
-    navigate(`/agents/${agentIdentifier}`);
+    navigate(`/agents/${agentIdentifier}`, { direction: 'up' });
   }, [dispatch, navigate]);
 
   const { data: agents = [], isLoading } = useQuery<Agent[]>({
@@ -347,12 +348,13 @@ const TopAgentsSection: React.FC = () => {
                 rank={dataIndex}
                 podiumHeight={PODIUM_HEIGHTS[visualIndex]}
                 onAgentClick={handleAgentClick}
+                t={t}
               />
             ))}
           </div>
 
           {/* Mobile: vertical stack */}
-          <div className="sm:hidden flex flex-col items-center gap-16 px-4 pb-6">
+          <div className="sm:hidden flex flex-col items-center gap-24 px-4 pb-6">
             {[0, 1, 2].map((dataIndex) => (
               <AgentPodiumCard
                 key={podiumAgents[dataIndex].id}
@@ -360,6 +362,7 @@ const TopAgentsSection: React.FC = () => {
                 rank={dataIndex}
                 podiumHeight={60}
                 onAgentClick={handleAgentClick}
+                t={t}
               />
             ))}
           </div>
@@ -384,6 +387,7 @@ const TopAgentsSection: React.FC = () => {
               rank={i}
               podiumHeight={200}
               onAgentClick={handleAgentClick}
+              t={t}
             />
           ))}
         </div>

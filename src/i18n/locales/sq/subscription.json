@@ -107,7 +107,7 @@
     "features": {
       "prioritySupport": "Mbështetje Prioritare",
       "advancedAnalytics": "Analitika të Avancuara",
-      "listings25": "25 Listime",
+      "listings25": "30 Listime",
       "premiumPlacement": "Vendosje Premium"
     },
     "cancelModal": {
@@ -144,7 +144,7 @@
       "verifiedBadgeDesc": "Tregoni blerësve se jeni një shitës i besuar",
       "noBadgeDesc": "Përmirësohu për të marrë distinktiv Pro",
       "wantMoreFeatures": "Dëshironi më shumë veçori?",
-      "upgradeToProDesc": "Përmirësohu në Pro për 25 listime, promocione dhe më shumë!"
+      "upgradeToProDesc": "Përmirësohu në Pro për 30 listime, promocione dhe më shumë!"
     },
     "validation": {
       "confirmCancel": "Jeni i sigurt që dëshironi të anuloni abonimin tuaj?",

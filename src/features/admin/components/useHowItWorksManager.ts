@@ -17,7 +17,7 @@ export interface FAQ {
 }
 
 export interface SiteContent {
-  _id: string;
+  id: string;
   key: string;
   type: 'video' | 'image';
   contentType: 'video' | 'guide' | 'faq' | 'feature';
@@ -174,9 +174,9 @@ export function useHowItWorksManager() {
     try {
       const data = await apiRequest<SiteContent[]>('/admin/site-content', {
         requiresAuth: true,
-        encryptResponse: true,
       });
       setContent(data.filter((item: SiteContent) => item.section === 'how-it-works'));
+      setError(null);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -214,7 +214,7 @@ export function useHowItWorksManager() {
     e.preventDefault();
     try {
       const endpoint = editingItem
-        ? `/admin/site-content/${editingItem._id}`
+        ? `/admin/site-content/${editingItem.id}`
         : '/admin/site-content';
 
       // For guides, we don't need URL; set a placeholder
@@ -231,7 +231,6 @@ export function useHowItWorksManager() {
         method: editingItem ? 'PATCH' : 'POST',
         body: submitData,
         requiresAuth: true,
-        encryptResponse: true,
       });
 
       setShowModal(false);
@@ -270,7 +269,6 @@ export function useHowItWorksManager() {
       await apiRequest(`/admin/site-content/${id}`, {
         method: 'DELETE',
         requiresAuth: true,
-        encryptResponse: true,
       });
       fetchContent();
     } catch (err: any) {
@@ -280,11 +278,10 @@ export function useHowItWorksManager() {
 
   const handleToggleActive = async (item: SiteContent) => {
     try {
-      await apiRequest(`/admin/site-content/${item._id}`, {
+      await apiRequest(`/admin/site-content/${item.id}`, {
         method: 'PATCH',
         body: { isActive: !item.isActive },
         requiresAuth: true,
-        encryptResponse: true,
       });
       fetchContent();
     } catch (err: any) {

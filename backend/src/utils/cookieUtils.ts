@@ -1,4 +1,5 @@
 import { Response, Request } from 'express';
+import { REFRESH_TOKEN_TTL_MS } from '../config/authConstants';
 
 /**
  * Utility for managing httpOnly refresh token cookies.
@@ -16,7 +17,7 @@ const isProduction = process.env.NODE_ENV === 'production';
  * Set the refresh token as an httpOnly cookie on the response.
  */
 export const setRefreshTokenCookie = (res: Response, refreshToken: string): void => {
-  const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days (matches JWT refresh expiry)
+  const maxAge = REFRESH_TOKEN_TTL_MS;
 
   res.cookie(REFRESH_COOKIE_NAME, refreshToken, {
     httpOnly: true,

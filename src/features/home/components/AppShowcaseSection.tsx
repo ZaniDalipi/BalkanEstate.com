@@ -13,8 +13,8 @@ interface AppShowcaseSectionProps {
 /* ─── Route config for each static feature ─── */
 const STATIC_FEATURES = [
   {
-    title: 'AI-Powered Search',
-    desc: 'Describe your dream property in natural language and let AI find perfect matches across 11 countries.',
+    titleKey: 'showcase.feature_aiSearch_title',
+    descKey: 'showcase.feature_aiSearch_desc',
     gradient: 'from-blue-500 to-cyan-400',
     iconBg: 'bg-blue-500/10',
     route: { view: 'search', path: '/search' },
@@ -27,8 +27,8 @@ const STATIC_FEATURES = [
     ),
   },
   {
-    title: '3D Interactive Map',
-    desc: 'Explore listings on a 3D map with real-time sunlight, draw-to-search, and points of interest.',
+    titleKey: 'showcase.feature_3dMap_title',
+    descKey: 'showcase.feature_3dMap_desc',
     gradient: 'from-emerald-500 to-teal-400',
     iconBg: 'bg-emerald-500/10',
     route: { view: 'search', path: '/search?view=map' },
@@ -41,8 +41,8 @@ const STATIC_FEATURES = [
     ),
   },
   {
-    title: 'Real-Time Messaging',
-    desc: 'Chat directly with verified agents and sellers. Schedule viewings and negotiate in-app.',
+    titleKey: 'showcase.feature_messaging_title',
+    descKey: 'showcase.feature_messaging_desc',
     gradient: 'from-violet-500 to-purple-400',
     iconBg: 'bg-violet-500/10',
     route: { view: 'messages', path: '/messages' },
@@ -57,8 +57,8 @@ const STATIC_FEATURES = [
     ),
   },
   {
-    title: 'Property Valuation',
-    desc: 'AI-powered price estimates, market trends, neighbourhood scores, and investment ROI projections.',
+    titleKey: 'showcase.feature_valuation_title',
+    descKey: 'showcase.feature_valuation_desc',
     gradient: 'from-amber-500 to-orange-400',
     iconBg: 'bg-amber-500/10',
     route: { view: 'search', path: '/search' },
@@ -71,8 +71,8 @@ const STATIC_FEATURES = [
     ),
   },
   {
-    title: 'Financial Calculators',
-    desc: 'Mortgage calculator, rent vs buy comparison, and investment ROI tools to make informed decisions.',
+    titleKey: 'showcase.feature_calculators_title',
+    descKey: 'showcase.feature_calculators_desc',
     gradient: 'from-rose-500 to-pink-400',
     iconBg: 'bg-rose-500/10',
     route: { view: 'how-it-works', path: '/how-it-works' },
@@ -84,8 +84,8 @@ const STATIC_FEATURES = [
     ),
   },
   {
-    title: 'Listing Promotions',
-    desc: 'Boost visibility with Highlight, Featured, or Premium tiers. Up to 5x more views.',
+    titleKey: 'showcase.feature_promotions_title',
+    descKey: 'showcase.feature_promotions_desc',
     gradient: 'from-indigo-500 to-blue-400',
     iconBg: 'bg-indigo-500/10',
     route: { view: 'create-listing', path: '/create-listing' },
@@ -96,8 +96,8 @@ const STATIC_FEATURES = [
     ),
   },
   {
-    title: '10 Languages',
-    desc: 'Browse the entire platform in your native language. Full support for all Balkan languages.',
+    titleKey: 'showcase.feature_languages_title',
+    descKey: 'showcase.feature_languages_desc',
     gradient: 'from-sky-500 to-blue-400',
     iconBg: 'bg-sky-500/10',
     route: { view: 'settings', path: '/settings' },
@@ -110,8 +110,8 @@ const STATIC_FEATURES = [
     ),
   },
   {
-    title: 'Agency & Agent Profiles',
-    desc: 'Join as independent agent or create an agency. Manage teams, coupons, and analytics.',
+    titleKey: 'showcase.feature_profiles_title',
+    descKey: 'showcase.feature_profiles_desc',
     gradient: 'from-teal-500 to-cyan-400',
     iconBg: 'bg-teal-500/10',
     route: { view: 'agents', path: '/agents' },
@@ -523,7 +523,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
                           : 'bg-neutral-100 text-slate-600 hover:bg-neutral-200'
                       }`}
                     >
-                      {tab.id === 'all' ? 'All' : t(`howItWorks:tabs.${tab.labelKey}`, tab.labelKey)}
+                      {tab.id === 'all' ? t('home:showcase.tabAll', 'All') : t(`howItWorks:tabs.${tab.labelKey}`, tab.labelKey)}
                     </motion.button>
                   );
                 })}
@@ -583,13 +583,13 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
                       {feature.icon}
                     </div>
                     <h4 className="text-[10px] md:text-xs font-semibold text-slate-800 leading-tight">
-                      {feature.title}
+                      {t(`home:${feature.titleKey}`)}
                     </h4>
                     <p className="text-[9px] md:text-[10px] text-slate-400 mt-0.5 leading-relaxed line-clamp-2">
-                      {feature.desc}
+                      {t(`home:${feature.descKey}`)}
                     </p>
                     <span className="text-[8px] md:text-[9px] text-slate-500 font-medium mt-1.5 inline-flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      Explore <span className="text-[10px]">&rarr;</span>
+                      {t('home:showcase.explore', 'Explore')} <span className="text-[10px]">&rarr;</span>
                     </span>
                   </div>
                 ))}

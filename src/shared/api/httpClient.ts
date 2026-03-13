@@ -2,7 +2,7 @@
 // Core HTTP client used by all feature API modules
 
 import { API_URL } from './config';
-import { tokenService } from './tokenService';
+import { tokenService, hasLikelyValidSession } from './tokenService';
 import {
   generateResponseKey,
   decryptResponse,
@@ -57,6 +57,13 @@ export interface RequestOptions {
 
 // Refresh the access token using the refresh token (sent via httpOnly cookie)
 const refreshAccessToken = async (): Promise<string | null> => {
+  // Skip the network call if the session hint has expired —
+  // the httpOnly cookie is almost certainly gone too, and the
+  // request would just produce a noisy 400 in the console.
+  if (!hasLikelyValidSession()) {
+    return null;
+  }
+
   try {
     const response = await fetch(`${API_URL}/auth/refresh-token`, {
       method: 'POST',

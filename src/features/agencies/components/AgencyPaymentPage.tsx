@@ -211,8 +211,16 @@ const AgencyPaymentPage: React.FC = () => {
 
       const data = await createAgency(agencyData);
 
-      // Clear pending data and show success
+      // Clear pending data
       dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: null });
+
+      // Immediately refresh user data so the creator has access to the dashboard right away
+      try {
+        const userData = await apiRequest<any>('/auth/me', { requiresAuth: true });
+        dispatch({ type: 'SET_CURRENT_USER', payload: userData });
+      } catch {
+        // Non-critical - still show success
+      }
 
       let msg = `Your agency "${pendingAgencyData.name}" has been created successfully!`;
       if (data.agentCoupons?.generated) {
@@ -225,17 +233,18 @@ const AgencyPaymentPage: React.FC = () => {
       }
       setSuccessMessage(msg);
 
-      // Refresh user data
-      setTimeout(async () => {
-        try {
-          const userData = await apiRequest<any>('/auth/me', { requiresAuth: true });
-          dispatch({ type: 'SET_CURRENT_USER', payload: userData });
-        } catch {
-          // Non-critical
+      // Navigate to agency details after a brief moment to show success message
+      const agencySlug = data.agency?.slug;
+      setTimeout(() => {
+        if (agencySlug) {
+          dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencySlug });
+          dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
+          window.history.pushState({}, '', `/agencies/${agencySlug}`);
+        } else {
+          dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
+          window.history.pushState({}, '', '/agency-dashboard');
         }
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
-        window.history.pushState({}, '', '/agencies');
-      }, 3000);
+      }, 2000);
     } catch (err: any) {
       setError(err.message || 'Failed to create agency. Please try again.');
     } finally {

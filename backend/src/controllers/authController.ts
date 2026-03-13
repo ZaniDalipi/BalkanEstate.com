@@ -639,8 +639,11 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         } else {
           // Regular agency agent
           const agentProduct = await Product.findOne({ productId: 'agency_agent_yearly' }).lean();
-          const agentListingsLimit = agentProduct?.listingsLimit ?? 25;
+          const agentListingsLimit = agentProduct?.listingsLimit ?? 30;
 
+          const authNextReset = new Date();
+          authNextReset.setDate(authNextReset.getDate() + 30);
+          authNextReset.setHours(0, 0, 0, 0);
           user.subscription = {
             tier: 'agency_agent',
             status: 'active',
@@ -648,6 +651,8 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
             activeListingsCount: user.subscription?.activeListingsCount || 0,
             privateSellerCount: user.subscription?.privateSellerCount || 0,
             agentCount: user.subscription?.agentCount || 0,
+            monthlyListingsCreated: 0,
+            listingsMonthResetDate: authNextReset,
             promotionCoupons: { monthly: 0, available: 0, used: 0, rollover: 0, lastRefresh: new Date() },
             savedSearchesLimit: -1,
             totalPaid: user.subscription?.totalPaid || 0,
@@ -774,6 +779,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     let savedSearchesLimit = FREE_TIER_LIMITS.SAVED_SEARCHES;
     let subscriptionExpiresAt: Date | undefined;
     let subscriptionStatus: string = 'active';
+    let subscriptionProductId: string | undefined;
 
     // **CRITICAL: Check Subscriptions collection - this is the source of truth**
     // Handle both ObjectId and string userId formats for compatibility
@@ -812,6 +818,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
 
     if (dbSubscription) {
       const productId = dbSubscription.productId;
+      subscriptionProductId = productId;
       subscriptionStatus = dbSubscription.status;
 
       // Look up product limits from DB - single source of truth
@@ -906,7 +913,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         user.subscription.expiresAt = subscriptionExpiresAt;
       } else if (tier === 'agency_owner' && user.subscription.tier !== 'agency_owner') {
         user.subscription.tier = 'agency_owner';
-        user.subscription.listingsLimit = ENTERPRISE_TIER_LIMITS.LISTINGS; // Enterprise
+        user.subscription.listingsLimit = listingsLimit; // Use DB Product value (falls back to ENTERPRISE_TIER_LIMITS.LISTINGS)
         user.subscription.expiresAt = subscriptionExpiresAt;
       }
 
@@ -927,8 +934,8 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         }
       }
 
-      // Sync listingsLimit for Pro users based on their actual plan
-      if (user.subscription.tier === 'pro' && listingsLimit > 0 && user.subscription.listingsLimit !== listingsLimit) {
+      // Sync listingsLimit for all paid tiers based on their actual DB Product value
+      if (listingsLimit > 0 && user.subscription.listingsLimit !== listingsLimit && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer') {
         user.subscription.listingsLimit = listingsLimit;
       }
 
@@ -968,6 +975,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         subscription: user.subscription ? {
           tier: user.subscription.tier,
           status: user.subscription.status,
+          productId: subscriptionProductId,
           listingsLimit: user.subscription.listingsLimit,
           activeListingsCount: user.subscription.activeListingsCount,
           privateSellerCount: user.subscription.privateSellerCount,
@@ -1881,14 +1889,28 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
       }
     }
 
+    // Generate tokens so user is automatically logged in after verification
+    let accessToken: string | undefined;
+    if (result.user) {
+      try {
+        const deviceInfo = {
+          userAgent: req.headers['user-agent'],
+          ipAddress: req.ip || req.socket.remoteAddress,
+        };
+        const tokens = await generateTokenPair(result.user, deviceInfo);
+        accessToken = tokens.accessToken;
+        setRefreshTokenCookie(res, tokens.refreshToken);
+      } catch {
+        // Don't block verification if token generation fails
+      }
+    }
+
     res.json({
       success: true,
       message: result.message,
+      accessToken,
       user: result.user ? {
-        id: String(result.user._id),
-        email: result.user.email,
-        name: result.user.name,
-        isEmailVerified: result.user.isEmailVerified,
+        ...buildSafeUserResponse(result.user),
       } : undefined,
     });
   } catch (error: any) {
@@ -2042,6 +2064,40 @@ export const getLoginHistory = async (req: Request, res: Response): Promise<void
     });
   } catch (error: any) {
     res.status(500).json({ message: 'Error fetching login history' });
+  }
+};
+
+// @desc    Verify current user's password (for sensitive admin actions)
+// @route   POST /api/auth/verify-password
+// @access  Private
+export const verifyPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const { password } = req.body;
+    if (!password) {
+      res.status(400).json({ message: 'Password is required' });
+      return;
+    }
+
+    const user = await User.findById((req.user as IUser)._id);
+    if (!user || !user.password) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      res.status(401).json({ message: 'Incorrect password' });
+      return;
+    }
+
+    res.json({ verified: true });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Password verification failed' });
   }
 };
 

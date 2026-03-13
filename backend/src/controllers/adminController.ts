@@ -149,14 +149,15 @@ export const updateUserAdmin = async (req: Request, res: Response): Promise<void
 
     // SECURITY: Whitelist allowed fields to prevent mass assignment.
     // Fields like password, refreshTokens, loginHistory, etc. can never be set here.
+    // Sensitive fields like email, subscription, and enterprise tier are managed
+    // through dedicated endpoints (subscription management, user self-service).
     const ALLOWED_ADMIN_UPDATE_FIELDS = [
-      'name', 'email', 'phone', 'city', 'country',
+      'name', 'phone', 'city', 'country',
       'role', 'activeRole', 'primaryRole',
       'availableRoles', 'status', 'isEmailVerified', 'licenseVerified',
       'licenseNumber', 'bio', 'languages', 'specializations',
       'serviceAreas', 'avatarUrl', 'avatarOptions',
-      'agencyName', 'isSubscribed', 'subscriptionPlan',
-      'subscriptionStatus', 'isEnterpriseTier',
+      'agencyName',
     ];
 
     const updates: Record<string, any> = {};
@@ -544,6 +545,9 @@ export const updateProperty = async (req: Request, res: Response): Promise<void>
     delete updates.sellerId;
     delete updates.createdByName;
     delete updates.createdByEmail;
+    // Price can only be changed by the property owner, not admin
+    delete updates.price;
+    delete updates.priceType;
 
     const property = await Property.findByIdAndUpdate(id, updates, {
       new: true,
