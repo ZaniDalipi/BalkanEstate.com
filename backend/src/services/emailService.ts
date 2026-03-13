@@ -260,11 +260,27 @@ class EmailService {
   /**
    * Enqueue an email. Returns a promise that resolves once the email is sent.
    */
+  /**
+   * Whether an email provider (Resend or SMTP) is configured.
+   * When false, emails are logged but never actually delivered.
+   */
+  get isConfigured(): boolean {
+    return this.provider !== 'none';
+  }
+
   async sendEmail(config: EmailConfig): Promise<void> {
     return new Promise((resolve, reject) => {
       this.sendQueue.push({ config, resolve, reject });
       this.processQueue().catch(err => emailLogger.error('Queue processor error:', err));
     });
+  }
+
+  /**
+   * Send an email immediately, bypassing the rate-limited queue.
+   * Use for admin test emails where the user is waiting for a response.
+   */
+  async sendEmailDirect(config: EmailConfig): Promise<void> {
+    return this.dispatchEmail(config);
   }
 
   /**

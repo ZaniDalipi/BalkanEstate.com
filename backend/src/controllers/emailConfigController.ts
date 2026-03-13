@@ -261,8 +261,16 @@ export const sendTestEmail = async (req: Request, res: Response): Promise<void> 
     // Generate email HTML from template (with SiteSettings brand colors)
     const rendered = await generateEmailHtml(config, variables);
 
-    // Send test email
-    await emailService.sendEmail({
+    // Check if email provider is configured
+    if (!emailService.isConfigured) {
+      res.status(503).json({
+        message: 'No email provider configured. Set RESEND_API_KEY or SMTP credentials in your environment variables.',
+      });
+      return;
+    }
+
+    // Send test email directly (bypass queue so admin doesn't wait)
+    await emailService.sendEmailDirect({
       to: testEmail,
       subject: `[TEST] ${rendered.subject}`,
       html: rendered.html,
