@@ -29,7 +29,8 @@ let onSessionExpired: (() => void) | null = null;
 // refresh cookie exists (the refresh call fails, but there was no session).
 let hadActiveSession = false;
 
-// Must match the backend cookie maxAge (7 days) in cookieUtils.ts
+// Must match REFRESH_TOKEN_TTL_MS in backend/src/config/authConstants.ts
+// That file is the single source of truth — update there first if the TTL changes.
 const SESSION_HINT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 /**

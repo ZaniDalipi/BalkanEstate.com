@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import { REFRESH_TOKEN_EXPIRES_IN } from '../config/authConstants';
 
 // Get JWT secret - MUST be set in environment variables
 const getJwtSecret = (): string => {
@@ -29,7 +30,7 @@ export const generateAccessToken = (userId: string): string => {
 // Refresh token: Long-lived (7 days)
 export const generateRefreshToken = (userId: string): string => {
   const secret: string = getJwtRefreshSecret();
-  const expiresIn = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
+  const expiresIn = REFRESH_TOKEN_EXPIRES_IN;
 
   // Generate a unique token identifier to allow revocation
   const tokenId = crypto.randomBytes(32).toString('hex');
