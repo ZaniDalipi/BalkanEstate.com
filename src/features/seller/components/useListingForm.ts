@@ -146,6 +146,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     const [uploadProgress, setUploadProgress] = useState<number>(0);
     const [isCompressing, setIsCompressing] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
 
     // Drag & Drop State
     const dragItem = useRef<number | null>(null);
@@ -525,18 +526,19 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             showError(t('validation:imagesRequired'), t('newListing:validation.imagesRequired'));
             return;
         }
-        setStep('loading');
-        // Scroll to top when entering loading state
+        // Scroll to top and show generating modal
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        setIsGenerating(true);
         try {
             const imageFiles = images.map(img => img.file).filter((f): f is File => f !== null);
             if (imageFiles.length === 0) {
                 if (images.some(img => img.previewUrl)) {
+                    setIsGenerating(false);
                     setStep('form');
                     return;
                 }
                 showError(t('newListing:errors.noNewImages'), t('newListing:errors.noNewImagesMessage'));
-                setStep('init');
+                setIsGenerating(false);
                 return;
             }
 
@@ -575,11 +577,12 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 floorNumber: result.floor_number || 0,
                 totalFloors: result.total_floors || 0,
             }));
+            setIsGenerating(false);
             setStep('form');
             // Scroll to top after generation completes
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (e) {
-            // Error removed
+            setIsGenerating(false);
             if (e instanceof Error) {
                 showWarning(t('newListing:errors.aiGenerationFailed'), `${e.message}. ${t('newListing:errors.continueManualEntry')}`);
             } else {
@@ -1208,6 +1211,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         language, setLanguage,
         aiPropertyType, setAiPropertyType,
         isSubmitting,
+        isGenerating,
         wantToPromote, setWantToPromote,
         pendingPropertyData,
         selectedRole, setSelectedRole,
