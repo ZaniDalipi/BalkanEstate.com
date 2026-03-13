@@ -1929,7 +1929,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
             {/* Featured Badge */}
             {agencyData.isFeatured && (
-              <div className="absolute -top-2 -right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-lg flex items-center gap-1">
+              <div className="absolute -top-3 -right-3 z-20 bg-gradient-to-r from-amber-400 to-orange-500 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-lg flex items-center gap-1">
                 <StarIcon className="w-3 h-3 fill-current" />
                 {t('common.featured')}
               </div>
