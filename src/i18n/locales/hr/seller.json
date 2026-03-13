@@ -8,7 +8,7 @@
     "asRole": "({{count}} kao {{role}})",
     "listings": "Oglasi",
     "limitReachedShared": "Dijeljeni limit dosegnut za obje uloge.",
-    "limitReachedUpgrade": "Limit oglasa dosegnut. Nadogradite na Pro za 25 oglasa!",
+    "limitReachedUpgrade": "Limit oglasa dosegnut. Nadogradite na Pro za 30 oglasa!",
     "remainingListings": "{{count}} preostalih oglasa",
     "availableListings": "{{count}} dostupnih oglasa",
     "shared": "(dijeljeno)",
@@ -270,9 +270,9 @@
       "listingFailed": "Failed to submit listing."
     },
     "limits": {
-      "freeReached": "You have reached your free limit of 3 active listings. Subscribe to Pro for 25 active listings!",
+      "freeReached": "You have reached your free limit of 3 active listings. Subscribe to Pro for 30 active listings!",
       "proReached": "You have reached your Pro listing limit.",
-      "agentProRequired": "Agents must have an active Pro subscription to post listings. Subscribe now to get 25 active listings!",
+      "agentProRequired": "Agents must have an active Pro subscription to post listings. Subscribe now to get 30 active listings!",
       "buyerCannotCreate": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings."
     },
     "video": {
@@ -613,10 +613,10 @@
     "listingLimitReached": "Dosegnut Limit Oglasa",
     "listingLimitMessage": "Dosegli ste svoj {{tierName}} limit od {{limit}} oglasa.",
     "freeListingLimitReached": "Dosegnut Limit Besplatnih Oglasa",
-    "freeListingLimitMessage": "Dosegli ste besplatni limit od 3 aktivna oglasa. Pretplatite se na Pro za 25 aktivnih oglasa!",
+    "freeListingLimitMessage": "Dosegli ste besplatni limit od 3 aktivna oglasa. Pretplatite se na Pro za 30 aktivnih oglasa!",
     "proListingLimitReached": "Dosegnut Pro Limit Oglasa",
     "proSubscriptionRequired": "Potrebna Pro Pretplata",
-    "agentProRequiredMessage": "Agenti moraju imati aktivnu Pro pretplatu za objavljivanje oglasa. Pretplatite se sada za 25 aktivnih oglasa!",
+    "agentProRequiredMessage": "Agenti moraju imati aktivnu Pro pretplatu za objavljivanje oglasa. Pretplatite se sada za 30 aktivnih oglasa!",
     "switchRoleRequired": "Potrebna Promjena Uloge",
     "buyerCannotCreateListing": "Kupci ne mogu kreirati oglase za nekretnine. Molimo prebacite se na ulogu Privatnog Prodavača ili Agenta."
   },

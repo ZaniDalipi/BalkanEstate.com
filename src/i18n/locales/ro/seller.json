@@ -8,7 +8,7 @@
     "asRole": "({{count}} ca {{role}})",
     "listings": "Anunțuri",
     "limitReachedShared": "Limita partajată atinsă pentru ambele roluri.",
-    "limitReachedUpgrade": "Limita anunțurilor atinsă. Fă upgrade la Pro pentru 25 anunțuri!",
+    "limitReachedUpgrade": "Limita anunțurilor atinsă. Fă upgrade la Pro pentru 30 anunțuri!",
     "remainingListings": "{{count}} anunțuri rămase",
     "availableListings": "{{count}} anunțuri disponibile",
     "shared": "(partajat)",
@@ -270,9 +270,9 @@
       "listingFailed": "Trimiterea anunțului a eșuat."
     },
     "limits": {
-      "freeReached": "Ai atins limita gratuită de 3 anunțuri active. Abonează-te la Pro pentru 25 anunțuri active!",
+      "freeReached": "Ai atins limita gratuită de 3 anunțuri active. Abonează-te la Pro pentru 30 anunțuri active!",
       "proReached": "Ai atins limita de anunțuri Pro.",
-      "agentProRequired": "Agenții trebuie să aibă un abonament Pro activ pentru a posta anunțuri. Abonează-te acum pentru 25 anunțuri active!",
+      "agentProRequired": "Agenții trebuie să aibă un abonament Pro activ pentru a posta anunțuri. Abonează-te acum pentru 30 anunțuri active!",
       "buyerCannotCreate": "Cumpărătorii nu pot crea anunțuri de proprietăți. Te rugăm să treci la rolul de Vânzător Privat sau Agent."
     },
     "video": {
@@ -613,10 +613,10 @@
     "listingLimitReached": "Limita de Anunțuri Atinsă",
     "listingLimitMessage": "Ați atins limita {{tierName}} de {{limit}} anunțuri.",
     "freeListingLimitReached": "Limita de Anunțuri Gratuite Atinsă",
-    "freeListingLimitMessage": "Ați atins limita gratuită de 3 anunțuri active. Abonați-vă la Pro pentru 25 de anunțuri active!",
+    "freeListingLimitMessage": "Ați atins limita gratuită de 3 anunțuri active. Abonați-vă la Pro pentru 30 de anunțuri active!",
     "proListingLimitReached": "Limita de Anunțuri Pro Atinsă",
     "proSubscriptionRequired": "Abonament Pro Necesar",
-    "agentProRequiredMessage": "Agenții trebuie să aibă un abonament Pro activ pentru a posta anunțuri. Abonați-vă acum pentru 25 de anunțuri active!",
+    "agentProRequiredMessage": "Agenții trebuie să aibă un abonament Pro activ pentru a posta anunțuri. Abonați-vă acum pentru 30 de anunțuri active!",
     "switchRoleRequired": "Schimbare de Rol Necesară",
     "buyerCannotCreateListing": "Cumpărătorii nu pot crea anunțuri de proprietăți. Vă rugăm treceți la rolul de Vânzător Privat sau Agent."
   },

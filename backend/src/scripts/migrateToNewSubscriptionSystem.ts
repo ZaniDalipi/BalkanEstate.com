@@ -65,7 +65,7 @@ async function migrateToNewSubscriptionSystem() {
 
     // Get agent listings limit from DB product (configurable in admin)
     const agentProduct = await Product.findOne({ productId: 'agency_agent_yearly' }).lean();
-    const agentListingsLimit = agentProduct?.listingsLimit ?? 25;
+    const agentListingsLimit = agentProduct?.listingsLimit ?? 30;
 
     // Get all users
     const users = await User.find({});

@@ -639,8 +639,11 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         } else {
           // Regular agency agent
           const agentProduct = await Product.findOne({ productId: 'agency_agent_yearly' }).lean();
-          const agentListingsLimit = agentProduct?.listingsLimit ?? 25;
+          const agentListingsLimit = agentProduct?.listingsLimit ?? 30;
 
+          const authNextReset = new Date();
+          authNextReset.setDate(authNextReset.getDate() + 30);
+          authNextReset.setHours(0, 0, 0, 0);
           user.subscription = {
             tier: 'agency_agent',
             status: 'active',
@@ -648,6 +651,8 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
             activeListingsCount: user.subscription?.activeListingsCount || 0,
             privateSellerCount: user.subscription?.privateSellerCount || 0,
             agentCount: user.subscription?.agentCount || 0,
+            monthlyListingsCreated: 0,
+            listingsMonthResetDate: authNextReset,
             promotionCoupons: { monthly: 0, available: 0, used: 0, rollover: 0, lastRefresh: new Date() },
             savedSearchesLimit: -1,
             totalPaid: user.subscription?.totalPaid || 0,

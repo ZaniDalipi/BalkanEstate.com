@@ -147,6 +147,13 @@ export const AGENCY_TIER_LIMITS = {
   },
 };
 
+// Agency agent limits (per agent, monthly)
+export const AGENCY_AGENT_LIMITS = {
+  LISTINGS_PER_MONTH: 30, // 30 active listings per month per agent
+  BILLING_PERIOD: 'monthly' as const,
+  DURATION_DAYS: 30,
+};
+
 // Pro buyer limits
 export const PRO_BUYER_LIMITS = {
   LISTINGS: 0, // Buyers don't create listings
