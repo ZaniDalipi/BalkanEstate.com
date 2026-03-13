@@ -11,6 +11,7 @@ import { QueryProvider } from './src/app/providers/QueryProvider';
 import { ErrorBoundary } from './src/app/components/ErrorBoundary';
 import { QueryErrorBoundary } from './src/app/components/QueryErrorBoundary';
 import { AnimationProvider } from './src/components/ui/Animations';
+import { ViewTransition, NavigationProvider } from './src/components/ui/ViewTransition';
 import { useZoomCompensation } from './src/app/hooks/useZoomCompensation';
 // Lazy load SEO components (don't block initial render)
 const SEO = lazy(() => import('./src/components/seo').then(m => ({ default: m.SEO })));
@@ -665,15 +666,15 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       : state.activeView;
 
   // All views now use Suspense since SearchPage is lazy loaded
-  // CSS fade transition (replaces framer-motion AnimatePresence for lighter bundle)
+  // Direction-aware page transitions (slide, morph, blur dissolve)
   return (
-    <div key={viewKey} className="h-full animate-fade-in">
+    <ViewTransition viewKey={viewKey}>
       <ErrorBoundary level="route" key={state.activeView}>
         <Suspense fallback={<PageLoader />}>
           {renderView()}
         </Suspense>
       </ErrorBoundary>
-    </div>
+    </ViewTransition>
   );
 };
 
@@ -1081,25 +1082,27 @@ const App: React.FC = () => {
               <NotificationProvider>
                 <ConfirmationProvider>
                   <AnimationProvider>
-                    {/* Global SVG filter for liquid glass effects */}
-                    <LiquidGlassFilter />
-                    {/* Lazy loaded SEO & Analytics components (don't block initial render) */}
-                    <Suspense fallback={null}>
-                      <SEO />
-                      <OrganizationSchema language={currentLang} />
-                      <FAQSchema faqs={realEstateFAQs} language={currentLang} />
-                      {/* Analytics - only loaded if IDs are provided */}
-                      {(googleAnalyticsId || facebookPixelId) && (
-                        <Analytics
-                          googleAnalyticsId={googleAnalyticsId}
-                          facebookPixelId={facebookPixelId}
-                        />
-                      )}
-                      {/* Microsoft Clarity - Heatmaps & Session Recordings */}
-                      <ClarityInit />
-                    </Suspense>
+                    <NavigationProvider>
+                      {/* Global SVG filter for liquid glass effects */}
+                      <LiquidGlassFilter />
+                      {/* Lazy loaded SEO & Analytics components (don't block initial render) */}
+                      <Suspense fallback={null}>
+                        <SEO />
+                        <OrganizationSchema language={currentLang} />
+                        <FAQSchema faqs={realEstateFAQs} language={currentLang} />
+                        {/* Analytics - only loaded if IDs are provided */}
+                        {(googleAnalyticsId || facebookPixelId) && (
+                          <Analytics
+                            googleAnalyticsId={googleAnalyticsId}
+                            facebookPixelId={facebookPixelId}
+                          />
+                        )}
+                        {/* Microsoft Clarity - Heatmaps & Session Recordings */}
+                        <ClarityInit />
+                      </Suspense>
 
-                    <AppWrapper />
+                      <AppWrapper />
+                    </NavigationProvider>
                   </AnimationProvider>
                 </ConfirmationProvider>
               </NotificationProvider>

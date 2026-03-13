@@ -152,17 +152,17 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
       },
     });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-    navigate(query ? `/search?q=${encodeURIComponent(query)}` : '/search');
+    navigate(query ? `/search?q=${encodeURIComponent(query)}` : '/search', { direction: 'forward' });
   }, [dispatch, state.searchPageState.filters, navigate]);
 
   const handleNavigate = useCallback((view: string, path: string) => {
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: view as any });
-    navigate(path);
+    navigate(path, { direction: 'forward' });
   }, [dispatch, navigate]);
 
   const handlePropertyClick = useCallback((property: Property) => {
     dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-    navigate(`/property/${property.id}`);
+    navigate(`/property/${property.id}`, { direction: 'up' });
   }, [dispatch, navigate]);
 
   const handleCategoryClick = useCallback((propertyType: string, listingType?: string) => {
@@ -178,7 +178,7 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
       payload: { filters, activeFilters: filters },
     });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: listingType === 'rent' ? 'rentals' : 'search' });
-    navigate(listingType === 'rent' ? '/rent' : '/search');
+    navigate(listingType === 'rent' ? '/rent' : '/search', { direction: 'forward' });
   }, [dispatch, state.searchPageState, navigate]);
 
   const isAuthenticated = state.isAuthenticated;

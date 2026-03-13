@@ -2,6 +2,7 @@ import React, { useCallback, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Menu, User } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
+import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 import NotificationCenter from '../NotificationCenter';
 import UserAvatar from '@/components/shared/UserAvatar';
 
@@ -28,10 +29,12 @@ const authButtonClassName = `${authBaseClasses} relative overflow-hidden backdro
 const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   const { t } = useTranslation(['nav']);
   const { state, dispatch } = useAppContext();
+  const { setDirection } = useNavigationDirection();
   const { isAuthenticated, currentUser } = state;
 
   const handleAccountClick = useCallback(() => {
     if (isAuthenticated) {
+      setDirection('morph');
       dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
       dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
@@ -39,10 +42,11 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
     } else {
       dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
     }
-  }, [isAuthenticated, dispatch]);
+  }, [isAuthenticated, dispatch, setDirection]);
 
   const handleNewListingClick = useCallback(() => {
     if (isAuthenticated) {
+      setDirection('morph');
       dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
       dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
@@ -50,9 +54,10 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
     } else {
       dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
     }
-  }, [isAuthenticated, dispatch]);
+  }, [isAuthenticated, dispatch, setDirection]);
 
   const handleSubscribeClick = useCallback(() => {
+    setDirection('forward');
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
     dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
@@ -60,7 +65,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
     const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
     const lang = validLangs.includes(currentLang) ? currentLang : 'en';
     window.history.pushState({}, '', `/${lang}/subscribe`);
-  }, [dispatch]);
+  }, [dispatch, setDirection]);
 
   // Inline auth button JSX - NOT defined as a component to avoid remount on every render
   const authButtonContent = useMemo(() => {

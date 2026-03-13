@@ -3,10 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { AppView } from '@/types';
 import { SearchIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, PencilIcon } from '@/constants';
+import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 
 const BottomNav: React.FC = () => {
     const { t } = useTranslation(['nav']);
     const { state, dispatch } = useAppContext();
+    const { setDirection } = useNavigationDirection();
     const { activeView, isAuthenticated, currentUser, conversations } = state;
 
     // Calculate total unread messages
@@ -22,23 +24,26 @@ const BottomNav: React.FC = () => {
         if (needsAuth && !isAuthenticated) {
             dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
         } else {
+            // Set transition direction before navigation
+            setDirection('morph');
             dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
 
             const route = view === 'search' ? '/' : `/${view}`;
             window.history.pushState({}, '', route);
         }
-    }, [dispatch, isAuthenticated]);
+    }, [dispatch, isAuthenticated, setDirection]);
 
     const handleNewListingClick = useCallback(() => {
         if (isAuthenticated) {
+            setDirection('morph');
             dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
             window.history.pushState({}, '', '/create-listing');
         } else {
             dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
         }
-    }, [dispatch, isAuthenticated]);
+    }, [dispatch, isAuthenticated, setDirection]);
 
     const navItems = useMemo(() => [
         { view: 'search' as AppView, label: t('nav:search'), icon: SearchIcon },
@@ -108,6 +113,9 @@ const BottomNav: React.FC = () => {
                             <span className={`text-[10px] landscape:text-[9px] font-medium mt-0.5 transition-colors ${isActive ? 'text-primary' : 'text-neutral-600'}`}>
                                 {item.label}
                             </span>
+                            {isActive && (
+                                <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-primary animate-tab-slide" />
+                            )}
                         </button>
                     );
                 })}

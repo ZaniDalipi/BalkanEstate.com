@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
+import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 import { UserRole } from '@/types';
 import { usePricingPageData, type Product } from '../hooks/usePricingData';
@@ -30,6 +31,7 @@ export const formatLimit = (value?: number): string => {
 export function usePricingPage() {
   const { t } = useTranslation(['pricing', 'common']);
   const { state, dispatch, checkAuthStatus } = useAppContext();
+  const { setDirection } = useNavigationDirection();
   const [activeTab, setActiveTab] = useState<'seller' | 'buyer' | 'listing' | 'agency'>('seller');
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{
@@ -100,6 +102,7 @@ export function usePricingPage() {
   };
 
   const handleBack = () => {
+    setDirection('back');
     window.history.pushState({}, '', buildLocalizedPath('/'));
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
   };
