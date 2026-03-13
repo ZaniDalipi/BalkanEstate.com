@@ -268,7 +268,9 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
             isAgencyAgent: true,
             agencyId: user.agencyId,
             agencyName: user.agencyName,
-            listingsLimit: user.subscription.listingsLimit || 25,
+            listingsLimit: user.subscription.listingsLimit || 30,
+            monthlyListingsCreated: user.subscription.monthlyListingsCreated || 0,
+            listingsMonthResetDate: user.subscription.listingsMonthResetDate,
           },
         });
         return;

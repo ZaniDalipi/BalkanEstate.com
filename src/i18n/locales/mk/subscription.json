@@ -107,7 +107,7 @@
     "features": {
       "prioritySupport": "Приоритетна Поддршка",
       "advancedAnalytics": "Напредна Аналитика",
-      "listings25": "25 Огласи",
+      "listings25": "30 Огласи",
       "premiumPlacement": "Премиум Позиција"
     },
     "cancelModal": {
@@ -144,7 +144,7 @@
       "verifiedBadgeDesc": "Show buyers you're a trusted seller",
       "noBadgeDesc": "Upgrade to get the Pro badge",
       "wantMoreFeatures": "Want more features?",
-      "upgradeToProDesc": "Upgrade to Pro for 25 listings, promotions, and more!"
+      "upgradeToProDesc": "Upgrade to Pro for 30 listings, promotions, and more!"
     },
     "validation": {
       "confirmCancel": "Are you sure you want to cancel your subscription?",

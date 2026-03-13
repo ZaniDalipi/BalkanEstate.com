@@ -43,7 +43,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
-  const [agentListingsLimit, setAgentListingsLimit] = useState<number>(25);
+  const [agentListingsLimit, setAgentListingsLimit] = useState<number>(30);
 
   // Coupon redemption state
   const [joinMethod, setJoinMethod] = useState<'invitation' | 'coupon'>('invitation');
@@ -659,7 +659,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                         <ul className="text-sm text-amber-700 mt-1 space-y-1">
                           <li>• {t('agencies:management.benefitInstantJoin', 'Instantly join the agency (no approval needed)')}</li>
                           <li>• {t('agencies:management.benefitProSubscription', 'Get a Pro subscription for 1 year')}</li>
-                          <li>• {t('agencies:management.benefitListings', 'Up to 25 active listings')}</li>
+                          <li>• {t('agencies:management.benefitListings', 'Up to 30 active listings per month')}</li>
                           <li>• {t('agencies:management.benefitBranding', 'Agency branding on your listings')}</li>
                         </ul>
                       </div>

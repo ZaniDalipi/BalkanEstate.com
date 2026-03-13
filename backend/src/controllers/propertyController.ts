@@ -16,7 +16,8 @@ import {
 import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/highlightingUtils';
 import { recordPriceChange, processInstantAlertsForProperty, processInstantPriceDropForProperty } from '../jobs/propertyAlertsJob';
 import { trackUserActivity } from '../services/proBuyerEmailService';
-import { FREE_TIER_LIMITS, PRO_TIER_LIMITS } from '../config/subscriptionConstants';
+import { FREE_TIER_LIMITS, PRO_TIER_LIMITS, AGENCY_AGENT_LIMITS } from '../config/subscriptionConstants';
+import ArchivedListing from '../models/ArchivedListing';
 import { sanitizeProperty } from '../utils/responseSanitizer';
 import {
   emitPropertyCreated,
@@ -663,6 +664,41 @@ export const createProperty = async (
     // Check listing limits based on subscription tier
     const limit = user.subscription.listingsLimit || FREE_TIER_LIMITS.LISTINGS;
     const tier = user.subscription.tier || 'free';
+    const isAgencyAgent = tier === 'agency_agent';
+
+    // For agency agents: check and reset monthly listing counter
+    // Agency agents get 30 active listings per month, resetting from their subscription start date
+    if (isAgencyAgent) {
+      const now = new Date();
+      const resetDate = user.subscription.listingsMonthResetDate;
+      if (!resetDate || now >= resetDate) {
+        // Reset monthly counter and set next reset date (30 days from now)
+        const nextReset = new Date(now);
+        nextReset.setDate(nextReset.getDate() + 30);
+        nextReset.setHours(0, 0, 0, 0);
+        await User.findByIdAndUpdate(user._id, {
+          'subscription.monthlyListingsCreated': 0,
+          'subscription.listingsMonthResetDate': nextReset,
+        });
+        user.subscription.monthlyListingsCreated = 0;
+        user.subscription.listingsMonthResetDate = nextReset;
+      }
+
+      // Check monthly limit for agency agents (30 per month)
+      const monthlyLimit = AGENCY_AGENT_LIMITS.LISTINGS_PER_MONTH;
+      const monthlyCreated = user.subscription.monthlyListingsCreated || 0;
+      if (monthlyCreated >= monthlyLimit) {
+        res.status(403).json({
+          message: `You have reached your monthly limit of ${monthlyLimit} listings. Your limit resets on ${user.subscription.listingsMonthResetDate?.toLocaleDateString() || 'next month'}.`,
+          code: 'MONTHLY_LISTING_LIMIT_REACHED',
+          tier,
+          limit: monthlyLimit,
+          current: monthlyCreated,
+          resetDate: user.subscription.listingsMonthResetDate,
+        });
+        return;
+      }
+    }
 
     // ATOMIC check-and-increment: Use findOneAndUpdate to prevent race conditions.
     // Without this, concurrent requests could all read the same count (e.g. 2),
@@ -671,18 +707,25 @@ export const createProperty = async (
       ? 'subscription.agentCount'
       : 'subscription.privateSellerCount';
 
+    const incrementFields: Record<string, number> = {
+      'subscription.activeListingsCount': 1,
+      [roleCountField]: 1,
+      listingsCount: 1,
+      totalListingsCreated: 1,
+    };
+
+    // For agency agents, also increment the monthly counter
+    if (isAgencyAgent) {
+      incrementFields['subscription.monthlyListingsCreated'] = 1;
+    }
+
     const atomicResult = await User.findOneAndUpdate(
       {
         _id: user._id,
         'subscription.activeListingsCount': { $lt: limit },
       },
       {
-        $inc: {
-          'subscription.activeListingsCount': 1,
-          [roleCountField]: 1,
-          listingsCount: 1,
-          totalListingsCreated: 1,
-        },
+        $inc: incrementFields,
       },
       { new: true }
     );
@@ -1134,6 +1177,46 @@ export const deleteProperty = async (
       }
     }
 
+    // Archive the listing before deletion (keep one photo and details)
+    try {
+      const daysOnMarket = Math.floor((Date.now() - property.createdAt.getTime()) / (1000 * 60 * 60 * 24));
+      await ArchivedListing.create({
+        originalPropertyId: property._id,
+        sellerId: property.sellerId,
+        sellerName: property.createdByName || 'Unknown',
+        sellerEmail: property.createdByEmail || '',
+        createdAsRole: property.createdAsRole || 'private_seller',
+        createdByAgencyName: property.createdByAgencyName,
+        createdByAgencyId: property.createdByAgencyId,
+        archiveReason: 'deleted',
+        archivedAt: new Date(),
+        title: property.title,
+        listingType: property.listingType || 'sale',
+        status: 'deleted',
+        price: property.price,
+        address: property.address,
+        city: property.city,
+        country: property.country,
+        propertyType: property.propertyType,
+        beds: property.beds,
+        baths: property.baths,
+        livingRooms: property.livingRooms,
+        sqft: property.sqft,
+        yearBuilt: property.yearBuilt,
+        description: property.description,
+        thumbnailUrl: property.imageUrl || (property.images?.[0]?.url),
+        thumbnailPublicId: property.imagePublicId || (property.images?.[0]?.publicId),
+        totalViews: (property as any).views || 0,
+        totalSaves: (property as any).saves || 0,
+        daysOnMarket,
+        originalCreatedAt: property.createdAt,
+      });
+      propertyLogger.info(`📦 Archived deleted listing ${property._id}`);
+    } catch (archiveError: any) {
+      propertyLogger.error('⚠️  Error archiving listing:', archiveError);
+      // Continue with deletion even if archival fails
+    }
+
     // Store property ID before deletion for emit
     const deletedPropertyId = String(property._id);
 
@@ -1372,6 +1455,46 @@ export const markAsSold = async (
       });
 
       propertyLogger.info(`📊 Sales history record created for property ${property._id}`);
+
+      // Archive the sold listing (keep one photo and details)
+      try {
+        await ArchivedListing.create({
+          originalPropertyId: property._id,
+          sellerId: property.sellerId,
+          sellerName: property.createdByName || user.name,
+          sellerEmail: property.createdByEmail || user.email,
+          createdAsRole: property.createdAsRole || 'private_seller',
+          createdByAgencyName: property.createdByAgencyName,
+          createdByAgencyId: property.createdByAgencyId,
+          archiveReason: 'sold',
+          archivedAt: soldDate,
+          title: property.title,
+          listingType: property.listingType || 'sale',
+          status: 'sold',
+          price: property.price,
+          address: property.address,
+          city: property.city,
+          country: property.country,
+          propertyType: property.propertyType,
+          beds: property.beds,
+          baths: property.baths,
+          livingRooms: property.livingRooms,
+          sqft: property.sqft,
+          yearBuilt: property.yearBuilt,
+          description: property.description,
+          thumbnailUrl: property.imageUrl || (property.images?.[0]?.url),
+          thumbnailPublicId: property.imagePublicId || (property.images?.[0]?.publicId),
+          soldAt: soldDate,
+          salePrice: property.price || 0,
+          totalViews: (property as any).views || 0,
+          totalSaves: (property as any).saves || 0,
+          daysOnMarket,
+          originalCreatedAt: property.createdAt,
+        });
+        propertyLogger.info(`📦 Archived sold listing ${property._id}`);
+      } catch (archiveError: any) {
+        propertyLogger.error('⚠️  Error archiving sold listing:', archiveError);
+      }
     }
 
     // Invalidate properties cache so sold status appears immediately in search
@@ -1438,6 +1561,46 @@ export const markAsRented = async (
     }
 
     await property.save();
+
+    // Archive the rented listing (keep one photo and details)
+    try {
+      const daysOnMarket = Math.floor((rentedDate.getTime() - property.createdAt.getTime()) / (1000 * 60 * 60 * 24));
+      await ArchivedListing.create({
+        originalPropertyId: property._id,
+        sellerId: property.sellerId,
+        sellerName: property.createdByName || '',
+        sellerEmail: property.createdByEmail || '',
+        createdAsRole: property.createdAsRole || 'private_seller',
+        createdByAgencyName: property.createdByAgencyName,
+        createdByAgencyId: property.createdByAgencyId,
+        archiveReason: 'rented',
+        archivedAt: rentedDate,
+        title: property.title,
+        listingType: property.listingType || 'rent',
+        status: 'rented',
+        price: property.price,
+        address: property.address,
+        city: property.city,
+        country: property.country,
+        propertyType: property.propertyType,
+        beds: property.beds,
+        baths: property.baths,
+        livingRooms: property.livingRooms,
+        sqft: property.sqft,
+        yearBuilt: property.yearBuilt,
+        description: property.description,
+        thumbnailUrl: property.imageUrl || (property.images?.[0]?.url),
+        thumbnailPublicId: property.imagePublicId || (property.images?.[0]?.publicId),
+        rentedAt: rentedDate,
+        totalViews: (property as any).views || 0,
+        totalSaves: (property as any).saves || 0,
+        daysOnMarket,
+        originalCreatedAt: property.createdAt,
+      });
+      propertyLogger.info(`📦 Archived rented listing ${property._id}`);
+    } catch (archiveError: any) {
+      propertyLogger.error('⚠️  Error archiving rented listing:', archiveError);
+    }
 
     // Invalidate properties cache
     invalidateCache('/api/properties');

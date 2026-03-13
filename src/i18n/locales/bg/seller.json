@@ -8,7 +8,7 @@
     "asRole": "({{count}} като {{role}})",
     "listings": "Обяви",
     "limitReachedShared": "Общият лимит е достигнат за двете роли.",
-    "limitReachedUpgrade": "Достигнат е лимитът за обяви. Актуализирайте до Pro за 25 обяви!",
+    "limitReachedUpgrade": "Достигнат е лимитът за обяви. Актуализирайте до Pro за 30 обяви!",
     "remainingListings": "Остават {{count}} обяви",
     "availableListings": "Налични {{count}} обяви",
     "shared": "(общо)",
@@ -277,7 +277,7 @@
       "listingFailed": "Подаването на обявата не бе успешно."
     },
     "limits": {
-      "freeReached": "Достигнали сте безплатния лимит от 3 активни обяви. Абонирайте се за Pro за 25 обяви!",
+      "freeReached": "Достигнали сте безплатния лимит от 3 активни обяви. Абонирайте се за Pro за 30 обяви!",
       "proReached": "Достигнали сте Pro лимита си за обяви.",
       "agentProRequired": "Агентите трябва да имат активен Pro абонамент за публикуване на обяви.",
       "buyerCannotCreate": "Купувачите не могат да създават обяви за имоти. Моля, превключете на роля Частен Продавач или Агент."
@@ -617,10 +617,10 @@
     "listingLimitReached": "Listing Limit Reached",
     "listingLimitMessage": "You've reached your {{tierName}} listing limit of {{limit}}.",
     "freeListingLimitReached": "Free Listing Limit Reached",
-    "freeListingLimitMessage": "You have reached your free limit of 3 active listings. Subscribe to Pro for 25 active listings!",
+    "freeListingLimitMessage": "You have reached your free limit of 3 active listings. Subscribe to Pro for 30 active listings!",
     "proListingLimitReached": "Pro Listing Limit Reached",
     "proSubscriptionRequired": "Pro Subscription Required",
-    "agentProRequiredMessage": "Agents must have an active Pro subscription to post listings. Subscribe now to get 25 active listings!",
+    "agentProRequiredMessage": "Agents must have an active Pro subscription to post listings. Subscribe now to get 30 active listings!",
     "switchRoleRequired": "Switch Role Required",
     "buyerCannotCreateListing": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings."
   },

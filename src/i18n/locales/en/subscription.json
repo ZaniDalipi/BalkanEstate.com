@@ -155,7 +155,7 @@
     "refreshesMonthly": "Refreshes monthly",
     "lastRefresh": "Last refresh: {{date}}",
     "agentBenefits": "Agent Benefits:",
-    "agentBenefitsDesc": "Each agent gets 25 active listings per year with their subscription coupon. Agents can use the agency promotion pool for featured listings.",
+    "agentBenefitsDesc": "Each agent gets 30 active listings per month with their subscription coupon. Agents can use the agency promotion pool for featured listings.",
     "couponTitle": "Coupon Subscription",
     "couponDescription": "You're enjoying this plan for free through a coupon code. When your free period ends, you can continue by subscribing to a paid plan.",
     "couponValue": "Coupon value: FREE",
@@ -209,7 +209,7 @@
     "features": {
       "prioritySupport": "Priority Support",
       "advancedAnalytics": "Advanced Analytics",
-      "listings25": "25 Listings",
+      "listings25": "30 Listings",
       "premiumPlacement": "Premium Placement"
     },
     "cancelModal": {
@@ -274,7 +274,7 @@
       "verifiedBadgeDesc": "Show buyers you're a trusted seller",
       "noBadgeDesc": "Upgrade to get the Pro badge",
       "wantMoreFeatures": "Want more features?",
-      "upgradeToProDesc": "Upgrade to Pro for 25 listings, promotions, and more!"
+      "upgradeToProDesc": "Upgrade to Pro for 30 listings, promotions, and more!"
     },
     "validation": {
       "confirmCancel": "Are you sure you want to cancel your subscription?",

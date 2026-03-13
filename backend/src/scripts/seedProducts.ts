@@ -360,10 +360,10 @@ const PRODUCTS = [
     tier: 'pro' as const,
     price: 0,
     currency: 'EUR',
-    billingPeriod: 'yearly' as const,
-    durationDays: 365,
+    billingPeriod: 'monthly' as const,
+    durationDays: 30,
     features: [
-      '{listingsLimit} active listings per year',
+      '{listingsLimit} active listings per month',
       'Unlimited saved searches',
       'Unlimited AI chat',
       'Unlimited generate insights',
@@ -384,7 +384,7 @@ const PRODUCTS = [
     hasFreeTrial: false,
     gracePeriodDays: 7,
     // Limits — admin can update these via admin panel
-    listingsLimit: 25, // 25 listings per year for agency agents
+    listingsLimit: 30, // 30 active listings per month for agency agents
     promotionCoupons: 0, // Shared with agency pool, not individual
     premiumCoupons: 0,
     highlightedCoupons: 0,
@@ -997,7 +997,7 @@ async function seedProducts() {
     log.info('   Pro Monthly: €25 (20 listings/mo, 3 promo coupons/mo, 20 insights/mo, unlimited AI & searches)');
     log.info('   Pro Yearly: €200 (250 listings/year, 3 promo coupons/mo, 20 insights/mo, unlimited AI & searches)');
     log.info('   Enterprise: €1000/year (750 listings, 5 team members, 5 promo coupons, unlimited everything)');
-    log.info('   Agency Agent: €0 (granted via agent registration code, 25 listings/year, unlimited AI & searches)');
+    log.info('   Agency Agent: €0 (granted via agent registration code, 30 listings/month, unlimited AI & searches)');
     log.info('   Buyer Pro: €3/month (unlimited searches, instant alerts, early access, market insights)');
 
   } catch (error) {

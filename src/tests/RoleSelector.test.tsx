@@ -37,7 +37,7 @@ vi.mock('react-i18next', () => {
     'seller:roleSelector.sharedLimit': 'Shared Limit: {{used}}/{{limit}} total listings',
     'seller:roleSelector.asRole': '({{count}} as {{role}})',
     'seller:roleSelector.limitReachedShared': 'Shared limit reached across both roles.',
-    'seller:roleSelector.limitReachedUpgrade': 'Listing limit reached. Upgrade to Pro for 25 listings!',
+    'seller:roleSelector.limitReachedUpgrade': 'Listing limit reached. Upgrade to Pro for 30 listings!',
     'seller:roleSelector.remainingListings': '{{count}} listing(s) remaining',
     'seller:roleSelector.availableListings': '{{count}} listing(s) available',
     'seller:roleSelector.shared': '(shared)',
@@ -323,7 +323,7 @@ describe('RoleSelector Component', () => {
       );
 
       // Should show "Listing limit reached" warning with upgrade message
-      // The full text is: "Listing limit reached. Upgrade to Pro for 25 listings!"
+      // The full text is: "Listing limit reached. Upgrade to Pro for 30 listings!"
       expect(screen.getByText(/listing limit reached/i, { selector: 'p' })).toBeInTheDocument();
       expect(screen.getByText(/upgrade to pro/i, { selector: 'p' })).toBeInTheDocument();
     });
