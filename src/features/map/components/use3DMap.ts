@@ -529,7 +529,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
           }
         }
 
-        if (closestFeature) {
+        // Only accept the building if it's close enough to the property coordinates
+        // ~0.0005 degrees ≈ 55 meters - beyond this the building is likely not the right one
+        const maxAcceptableDistance = 0.0005;
+        if (closestFeature && minDistance < maxAcceptableDistance) {
           buildingFeature = closestFeature;
         }
       }

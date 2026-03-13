@@ -82,12 +82,20 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
   );
 };
 
+// No-op fallback so components don't crash if rendered outside the provider
+// (e.g. during error-boundary recovery or lazy-load race conditions)
+const noopPromise = async () => {};
+const fallback: NotificationContextValue = {
+  notify: noopPromise,
+  success: noopPromise,
+  error: noopPromise,
+  warning: noopPromise,
+  info: noopPromise,
+};
+
 export const useNotification = (): NotificationContextValue => {
   const context = useContext(NotificationContext);
-  if (!context) {
-    throw new Error('useNotification must be used within a NotificationProvider');
-  }
-  return context;
+  return context ?? fallback;
 };
 
 export default useNotification;

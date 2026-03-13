@@ -154,8 +154,8 @@ export function renderEmailConfig(
   // Brand colors from SiteSettings — dark theme (CSS media query)
   const darkPrimary = variables.darkBrandPrimary || '#3b82f6';
   const darkPrimaryDark = variables.darkBrandPrimaryDark || '#2563eb';
-  const darkText = variables.darkBrandText || '#f9fafb';
-  const darkTextMuted = variables.darkBrandTextMuted || '#9ca3af';
+  const darkText = variables.darkBrandText || '#ffffff';
+  const darkTextMuted = variables.darkBrandTextMuted || '#ffffff';
   const darkBackground = variables.darkBrandBackground || '#111827';
   const darkBackgroundAlt = variables.darkBrandBackgroundAlt || '#1f2937';
 
@@ -182,13 +182,18 @@ export function renderEmailConfig(
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: ${darkBackground} !important; }
-      .ec-card { background-color: ${darkBackgroundAlt} !important; }
+      .ec-card { background-color: ${darkBackgroundAlt} !important; color: ${darkText} !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: ${darkText} !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: ${darkGradient} !important; }
       .ec-text { color: ${darkText} !important; }
       .ec-text-muted { color: ${darkTextMuted} !important; }
-      .ec-footer { background: ${darkBackground} !important; border-color: ${darkBackgroundAlt} !important; }
+      .ec-footer { background: ${darkBackground} !important; border-color: ${darkBackgroundAlt} !important; color: ${darkTextMuted} !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: ${darkTextMuted} !important; }
       .ec-link { color: ${darkPrimary} !important; }
-      .ec-cta { background: ${darkGradient} !important; }
+      .ec-card a { color: ${darkPrimary} !important; }
+      .ec-cta, .ec-cta center { background: ${darkGradient} !important; color: #ffffff !important; }
       .ec-border { border-color: ${darkBackgroundAlt} !important; }
     }
   </style>
@@ -221,11 +226,19 @@ export function renderEmailConfig(
 
       ${config.ctaEnabled && ctaText && ctaUrl ? `
       <div style="margin-top:28px;text-align:center;">
+        <!--[if mso]>
+        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${ctaUrl}" style="height:48px;v-text-anchor:middle;width:220px;" arcsize="21%" fillcolor="${brandPrimary}">
+          <w:anchorlock/>
+          <center style="color:#ffffff;font-family:'Segoe UI',Tahoma,sans-serif;font-size:15px;font-weight:bold;">${ctaText}</center>
+        </v:roundrect>
+        <![endif]-->
+        <!--[if !mso]><!-->
         <a href="${ctaUrl}"
-           style="display:inline-block;background:${replaceVariables(config.headerGradient || defaultGradient, variables)};color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:10px;font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(0,0,0,0.15);"
+           style="display:inline-block;background-color:${brandPrimary};background:linear-gradient(135deg, ${brandPrimary} 0%, ${brandPrimaryDark} 100%);color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:10px;font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(0,0,0,0.15);"
            class="ec-cta">
           ${ctaText}
         </a>
+        <!--<![endif]-->
       </div>` : ''}
     </div>
 
@@ -240,7 +253,7 @@ export function renderEmailConfig(
         Need help? <a href="mailto:${supportEmail}" style="color:${brandPrimary};text-decoration:none;" class="ec-link">${supportEmail}</a>
       </p>
       <p style="color:${brandTextMuted};font-size:11px;margin:4px 0 0 0;" class="ec-text-muted">
-        &copy; ${year} ${companyNameFormatted}. ${emailFooterText}
+        &copy; ${year} ${companyNameFormatted.replace(/<sup>/gi, '<span style="font-size:0.7em;vertical-align:super;line-height:0;">').replace(/<\/sup>/gi, '</span>')}. ${emailFooterText}
       </p>
     </div>
   </div>

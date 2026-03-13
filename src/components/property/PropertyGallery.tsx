@@ -328,28 +328,38 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
-      <div className="relative w-full h-[280px] xs:h-[340px] sm:h-[420px] md:h-[500px] lg:h-[560px] landscape:h-[60vh] landscape:min-h-[280px] bg-black">
+      <div className="relative w-full h-[280px] xs:h-[340px] sm:h-[420px] md:h-[500px] lg:h-[560px] landscape:h-[60vh] landscape:min-h-[280px] bg-neutral-900 overflow-hidden">
         {viewMode === 'photos' ? (
           <button
             onClick={onOpenViewer}
-            className="relative w-full h-full flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-t-xl bg-black"
+            className="relative w-full h-full flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-t-xl overflow-hidden"
           >
             {mainImageError ? (
               <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
                 <BuildingOfficeIcon className="w-24 h-24 text-neutral-400" />
               </div>
             ) : (
-              <img
-                key={currentImageUrl}
-                src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
-                srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 1200, 1920])}
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
-                alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} for ${property.listingType === 'rent' ? 'rent' : 'sale'} in ${property.city}, ${property.country} - ${property.address}`}
-                width={1200}
-                height={800}
-                className="max-w-full max-h-full object-contain animate-image-fade"
-                onError={() => setMainImageError(true)}
-              />
+              <>
+                {/* Blurred background image to fill black bars */}
+                <img
+                  src={optimizeCloudinaryUrl(currentImageUrl, { width: 200, quality: 30 })}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-60"
+                />
+                {/* Main sharp image */}
+                <img
+                  key={currentImageUrl}
+                  src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
+                  srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 1200, 1920])}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
+                  alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} for ${property.listingType === 'rent' ? 'rent' : 'sale'} in ${property.city}, ${property.country} - ${property.address}`}
+                  width={1200}
+                  height={800}
+                  className="relative max-w-full max-h-full object-contain animate-image-fade"
+                  onError={() => setMainImageError(true)}
+                />
+              </>
             )}
           </button>
         ) : viewMode === 'video' && hasVideo ? (
