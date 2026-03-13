@@ -6,6 +6,7 @@ import {
   verifyRefreshToken,
   getTokenExpirationDate,
 } from '../utils/jwt';
+import { REFRESH_TOKEN_EXPIRES_IN } from '../config/authConstants';
 
 /**
  * Refresh Token Service
@@ -20,7 +21,7 @@ import {
  */
 
 const MAX_REFRESH_TOKENS_PER_USER = 10; // Maximum devices/sessions
-const REFRESH_TOKEN_EXPIRY = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
+const REFRESH_TOKEN_EXPIRY = REFRESH_TOKEN_EXPIRES_IN;
 
 interface TokenPair {
   accessToken: string;
