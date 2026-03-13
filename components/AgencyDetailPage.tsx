@@ -1927,9 +1927,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               )}
             </div>
 
-            {/* Featured Badge */}
+            {/* Featured Badge - centered above logo */}
             {agencyData.isFeatured && (
-              <div className="absolute -top-4 -right-4 z-50 bg-gradient-to-r from-amber-400 to-orange-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xl flex items-center gap-1 ring-2 ring-white/30">
+              <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-50 bg-gradient-to-r from-amber-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-xl flex items-center gap-1 whitespace-nowrap">
                 <StarIcon className="w-3 h-3 fill-current" />
                 {t('common.featured')}
               </div>
