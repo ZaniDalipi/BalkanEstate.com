@@ -29,15 +29,28 @@ let onSessionExpired: (() => void) | null = null;
 // refresh cookie exists (the refresh call fails, but there was no session).
 let hadActiveSession = false;
 
+// Must match the backend cookie maxAge (7 days) in cookieUtils.ts
+const SESSION_HINT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
 /**
- * Check if the user has ever logged in on this browser.
- * Uses a non-sensitive localStorage flag (not a token) to avoid
- * making a pointless refresh-token POST that returns 400 for
- * users who have never authenticated.
+ * Check if the user has a likely-valid refresh cookie.
+ * Stores a timestamp alongside the hint so we can skip the refresh
+ * call once the httpOnly cookie has almost certainly expired,
+ * preventing the 400 "Refresh token is required" console error.
  */
+export const hasLikelyValidSession = (): boolean => hasSessionHint();
+
 const hasSessionHint = (): boolean => {
   try {
-    return localStorage.getItem(SESSION_HINT_KEY) === '1';
+    const raw = localStorage.getItem(SESSION_HINT_KEY);
+    if (!raw) return false;
+    const ts = Number(raw);
+    if (Number.isNaN(ts)) {
+      // Legacy '1' value — clear it and don't attempt refresh
+      localStorage.removeItem(SESSION_HINT_KEY);
+      return false;
+    }
+    return Date.now() - ts < SESSION_HINT_MAX_AGE_MS;
   } catch {
     return false;
   }
@@ -45,7 +58,7 @@ const hasSessionHint = (): boolean => {
 
 const setSessionHint = (): void => {
   try {
-    localStorage.setItem(SESSION_HINT_KEY, '1');
+    localStorage.setItem(SESSION_HINT_KEY, String(Date.now()));
   } catch {
     // Ignore storage errors
   }

@@ -56,3 +56,17 @@ root.render(
     <App />
   </React.StrictMode>
 );
+
+// Register the service worker AFTER the page has loaded so it doesn't
+// block the critical rendering path (LCP/FCP). VitePWA's injectRegister
+// is set to null so we handle it manually here.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const { registerSW } = await import('virtual:pwa-register');
+      registerSW({ immediate: true });
+    } catch {
+      // SW registration is non-critical — silently ignore errors
+    }
+  });
+}
