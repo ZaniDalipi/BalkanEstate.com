@@ -50,6 +50,12 @@
   --animate-float: float 6s ease-in-out infinite;
   --animate-bounce-soft: bounceSoft 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   --animate-aurora: aurora 60s linear infinite;
+
+  /* Page Transition Animations */
+  --animate-page-enter: pageEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-page-enter-back: pageEnterBack 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-page-enter-up: pageEnterUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-page-morph: pageMorph 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Aurora background color variables */
@@ -538,6 +544,112 @@ html[data-zoom] #root {
   75%, 100% {
     transform: scale(2);
     opacity: 0;
+  }
+}
+
+/* ============================================================================
+   Page Transition Keyframes — Cool navigation animations
+   ============================================================================ */
+
+/* Forward navigation: slide in from right with scale + blur */
+@keyframes pageEnter {
+  0% {
+    opacity: 0;
+    transform: translateX(60px) scale(0.97);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* Back navigation: slide in from left with scale + blur */
+@keyframes pageEnterBack {
+  0% {
+    opacity: 0;
+    transform: translateX(-60px) scale(0.97);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* Vertical enter: slide up with scale (for detail pages) */
+@keyframes pageEnterUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.96);
+    filter: blur(6px);
+  }
+  50% {
+    filter: blur(1px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* Morph transition: scale from center with blur dissolve */
+@keyframes pageMorph {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+    filter: blur(8px);
+  }
+  60% {
+    opacity: 1;
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+/* Page exit: quick fade out with slight scale */
+@keyframes pageExit {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+/* Page transition utility classes */
+.animate-page-enter {
+  animation: pageEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-page-enter-back {
+  animation: pageEnterBack 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-page-enter-up {
+  animation: pageEnterUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-page-morph {
+  animation: pageMorph 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Reduced motion: instant transition with no movement */
+@media (prefers-reduced-motion: reduce) {
+  .animate-page-enter,
+  .animate-page-enter-back,
+  .animate-page-enter-up,
+  .animate-page-morph {
+    animation: fadeIn 0.15s ease-out both !important;
   }
 }
 
