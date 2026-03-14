@@ -110,12 +110,20 @@ export async function getSiteSettingsVariables(): Promise<Record<string, string>
 
 /**
  * Replace {{variable}} placeholders in a template string.
+ * Handles optional whitespace inside braces (e.g. {{ variable }})
+ * and HTML-encoded curly braces (&#123; / &#125;).
  * Unknown placeholders are left as-is so admins can spot missing variables.
  */
 export function replaceVariables(template: string, variables: Record<string, string>): string {
   let result = template;
+
+  // Decode HTML-encoded curly braces so variable placeholders are normalised
+  result = result.replace(/&#123;/g, '{').replace(/&#125;/g, '}');
+  result = result.replace(/&lbrace;/g, '{').replace(/&rbrace;/g, '}');
+
   for (const [key, value] of Object.entries(variables)) {
-    const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+    // Allow optional whitespace inside braces: {{ key }} or {{key}}
+    const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
     result = result.replace(regex, value ?? '');
   }
   // Strip any leftover {{#if ...}}...{{/if}} conditional blocks
