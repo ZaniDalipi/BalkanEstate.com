@@ -37,6 +37,7 @@ import MapLocationPicker from '../src/features/seller/components/MapLocationPick
 import { searchLocation } from '../services/osmService';
 import { toggleAgencyFavorite, checkAgencyFavorite } from '../src/features/saved/api/savedApi';
 import { SocialShare } from '../src/components/marketing/SocialShare';
+import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 
 // Map icon SVG for section headers
 const MapIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -151,6 +152,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const { t } = useTranslation(['agencyDetails', 'nav', 'common']);
   const { state, dispatch } = useAppContext();
   const { currentUser, isAuthenticated } = state;
+  const { getLocalizedPath } = useLocalizedNavigation();
   const { confirm } = useConfirmation();
   const { success, error, warning, info } = useNotification();
 
@@ -3127,8 +3129,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         className="w-[220px] cursor-pointer"
                         onClick={() => {
                           const propertyId = property.id || property._id;
-                          dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
-                          window.history.pushState({}, '', `/property/${propertyId}`);
+                          dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: { ...property, id: propertyId } });
+                          window.history.pushState({}, '', getLocalizedPath(`/property/${propertyId}`));
                         }}
                       >
                         {property.imageUrl && (
