@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
 import { Property } from '@/types';
+import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
 
 interface FeaturedPropertiesSectionProps {
   properties: Property[];
@@ -29,10 +29,15 @@ const PropertyCard: React.FC<{
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-neutral-100">
         <img
-          src={property.imageUrl}
+          src={optimizeCloudinaryUrl(property.imageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill' })}
+          srcSet={cloudinarySrcSet(property.imageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill' })}
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
           alt={property.address}
+          width={400}
+          height={300}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
+          decoding="async"
         />
         {/* Badges */}
         <div className="absolute top-2.5 left-2.5 flex gap-1.5">
@@ -108,12 +113,7 @@ const FeaturedPropertiesSection: React.FC<FeaturedPropertiesSectionProps> = ({
     <section className="py-12 sm:py-16 bg-white">
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex items-end justify-between mb-8"
-        >
+        <div className="flex items-end justify-between mb-8">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
               {t('home:featured.title')}
@@ -122,8 +122,7 @@ const FeaturedPropertiesSection: React.FC<FeaturedPropertiesSectionProps> = ({
               {t('home:featured.subtitle')}
             </p>
           </div>
-          <motion.button
-            whileHover={{ x: 3 }}
+          <button
             onClick={onViewAll}
             className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
           >
@@ -131,33 +130,25 @@ const FeaturedPropertiesSection: React.FC<FeaturedPropertiesSectionProps> = ({
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
             </svg>
-          </motion.button>
-        </motion.div>
+          </button>
+        </div>
 
         {/* Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
           {properties.slice(0, 6).map((property, i) => (
-            <motion.div
-              key={property.id}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.45, delay: i * 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
-            >
+            <div key={property.id}>
               <PropertyCard
                 property={property}
                 onClick={() => onPropertyClick(property)}
                 index={i}
               />
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {/* Mobile view all */}
         <div className="mt-6 text-center sm:hidden">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <button
             onClick={onViewAll}
             className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-neutral-100 hover:bg-neutral-200 transition-colors"
           >
@@ -165,7 +156,7 @@ const FeaturedPropertiesSection: React.FC<FeaturedPropertiesSectionProps> = ({
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
             </svg>
-          </motion.button>
+          </button>
         </div>
       </div>
     </section>

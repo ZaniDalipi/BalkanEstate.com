@@ -525,7 +525,7 @@ const AuthPage: React.FC = () => {
                             {/* Phone number field (signup only, required) */}
                             {state.authModalView === 'signup' && (
                                 <div>
-                                    <div className={`flex items-center rounded-2xl border-2 transition-all duration-300 bg-white/50 backdrop-blur-sm ${
+                                    <div className={`flex items-center rounded-2xl border-2 transition-all duration-300 bg-white/50 backdrop-blur-sm overflow-hidden ${
                                         fieldErrors.phone && touched.phone
                                             ? 'border-red-300 focus-within:border-red-400 focus-within:ring-4 focus-within:ring-red-100'
                                             : 'border-white/60 hover:border-white/80 focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10'
@@ -545,7 +545,7 @@ const AuthPage: React.FC = () => {
                                                     setFieldErrors(prev => ({ ...prev, phone: err || undefined }));
                                                 }
                                             }}
-                                            className="bg-transparent text-sm text-neutral-700 font-medium pl-4 pr-1 py-4 border-none focus:outline-none focus:ring-0 cursor-pointer"
+                                            className="bg-transparent text-sm text-neutral-700 font-medium pl-4 pr-1 py-4 border-none focus:outline-none focus:ring-0 cursor-pointer max-w-[140px] flex-shrink-0"
                                         >
                                             {ALL_PHONE_COUNTRY_CODES.map((cc, i) => (
                                                 <React.Fragment key={`${cc.country}-${cc.code}`}>
@@ -574,7 +574,7 @@ const AuthPage: React.FC = () => {
                                                 }
                                             }}
                                             onBlur={() => handleBlur('phone')}
-                                            className="flex-1 bg-transparent text-base text-neutral-900 px-3 py-4 border-none focus:outline-none focus:ring-0 placeholder:text-neutral-400"
+                                            className="flex-1 min-w-0 bg-transparent text-base text-neutral-900 px-3 py-4 border-none focus:outline-none focus:ring-0 placeholder:text-neutral-400"
                                             placeholder={getPhonePlaceholder(phoneCountryCode)}
                                             autoComplete="tel-national"
                                         />
@@ -851,7 +851,7 @@ const AuthPage: React.FC = () => {
 
             {/* Backdrop with animated gradient */}
             <div
-                className="fixed inset-0 z-[5000] flex justify-center items-start md:items-center p-0 md:p-4 overflow-y-auto"
+                className="fixed inset-0 z-[5000] flex justify-center items-start md:items-center p-0 md:p-4 overflow-y-auto overflow-x-hidden"
                 onClick={handleClose}
             >
                 {/* Glassmorphism backdrop */}
@@ -890,7 +890,7 @@ const AuthPage: React.FC = () => {
                     </button>
 
                     {/* Content */}
-                    <div className="relative p-6 sm:p-8 w-full max-w-md mx-auto pb-8">
+                    <div className="relative p-6 sm:p-8 w-full max-w-md mx-auto pb-16 md:pb-8">
                         {/* Magical Logo Container */}
                         <div className="flex justify-center items-center mb-6 pt-4 md:pt-0">
                             <div className="relative group">

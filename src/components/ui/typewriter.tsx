@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 interface TypewriterProps {
   words: string[]
@@ -18,15 +18,26 @@ export function Typewriter({
   cursorChar = "|",
   className,
 }: TypewriterProps) {
-  const [displayText, setDisplayText] = useState("")
+  // Show the first word immediately to avoid blank text during LCP
+  const [displayText, setDisplayText] = useState(words[0] || "")
   const [isDeleting, setIsDeleting] = useState(false)
   const [wordIndex, setWordIndex] = useState(0)
-  const [charIndex, setCharIndex] = useState(0)
+  const [charIndex, setCharIndex] = useState(words[0]?.length || 0)
   const [showCursor, setShowCursor] = useState(true)
+  const isFirstRender = useRef(true)
 
   const currentWord = words[wordIndex]
 
   useEffect(() => {
+    // On first render, wait for delayBetweenWords before starting to delete
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      const initialDelay = setTimeout(() => {
+        setIsDeleting(true)
+      }, delayBetweenWords)
+      return () => clearTimeout(initialDelay)
+    }
+
     const timeout = setTimeout(
       () => {
         if (!isDeleting) {

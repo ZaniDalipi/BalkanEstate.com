@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion, useInView } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { Typewriter } from '@/src/components/ui/typewriter';
 import { apiRequest } from '@/src/shared/api';
@@ -22,45 +21,42 @@ interface PlatformStats {
   languages: number;
 }
 
-/* ─── Animated number counter ─── */
+/* ─── Animated number counter (no framer-motion) ─── */
 const AnimatedNumber: React.FC<{ value: string; delay?: number }> = ({ value, delay = 0 }) => {
   const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true });
   const [display, setDisplay] = useState('0');
+  const hasAnimated = useRef(false);
 
   const numericMatch = value.match(/^([\d,]+)(.*)$/);
   const targetNum = numericMatch ? parseInt(numericMatch[1].replace(/,/g, ''), 10) : 0;
   const suffix = numericMatch ? numericMatch[2] : value;
 
   React.useEffect(() => {
-    if (!isInView) return;
-    const timeout = setTimeout(() => {
-      const duration = 1500;
-      const start = Date.now();
-      const tick = () => {
-        const elapsed = Date.now() - start;
-        const progress = Math.min(elapsed / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        setDisplay(Math.floor(eased * targetNum).toLocaleString());
-        if (progress < 1) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    }, delay);
-    return () => clearTimeout(timeout);
-  }, [isInView, targetNum, delay]);
+    const el = ref.current;
+    if (!el || hasAnimated.current) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting || hasAnimated.current) return;
+      hasAnimated.current = true;
+      observer.disconnect();
+      const timeout = setTimeout(() => {
+        const duration = 1500;
+        const start = Date.now();
+        const tick = () => {
+          const elapsed = Date.now() - start;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          setDisplay(Math.floor(eased * targetNum).toLocaleString());
+          if (progress < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }, delay);
+      return () => clearTimeout(timeout);
+    }, { threshold: 0.1 });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [targetNum, delay]);
 
   return <span ref={ref}>{display}{suffix}</span>;
-};
-
-/* ─── Simple fade-in variants ─── */
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
-};
-
-const stagger = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
 };
 
 const HeroSection: React.FC<HeroSectionProps> = ({
@@ -217,39 +213,24 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     <section className="relative overflow-hidden" style={{
       background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 50%, #ffffff 100%)',
     }}>
-      {/* Liquid glass background orbs */}
+      {/* Lightweight decorative background (no blur filters for better paint performance) */}
       <div style={{
         position: 'absolute', top: '-80px', right: '-60px',
         width: '400px', height: '400px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(59,130,246,0.08) 0%, rgba(59,130,246,0.03) 50%, transparent 70%)',
-        filter: 'blur(40px)',
+        background: 'radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 60%)',
         pointerEvents: 'none',
       }} />
       <div style={{
         position: 'absolute', bottom: '-40px', left: '-80px',
         width: '350px', height: '350px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(139,92,246,0.06) 0%, rgba(139,92,246,0.02) 50%, transparent 70%)',
-        filter: 'blur(40px)',
-        pointerEvents: 'none',
-      }} />
-      <div style={{
-        position: 'absolute', top: '30%', left: '50%', transform: 'translateX(-50%)',
-        width: '600px', height: '200px', borderRadius: '50%',
-        background: 'radial-gradient(ellipse, rgba(14,165,233,0.04) 0%, transparent 70%)',
-        filter: 'blur(60px)',
+        background: 'radial-gradient(circle, rgba(139,92,246,0.04) 0%, transparent 60%)',
         pointerEvents: 'none',
       }} />
 
-      <motion.div
-        className="relative z-10 max-w-6xl mx-auto px-4 pt-12 pb-16 sm:pt-24 sm:pb-28"
-        variants={stagger}
-        initial="hidden"
-        animate="visible"
-      >
+      <div className="relative z-10 max-w-6xl mx-auto px-4 pt-12 pb-16 sm:pt-24 sm:pb-28 hero-stagger">
         {/* Title */}
-        <motion.h1
-          className="text-center text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-tight max-w-3xl mx-auto"
-          variants={fadeUp}
+        <h1
+          className="text-center text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-tight max-w-3xl mx-auto hero-fade-up"
           style={{ minHeight: '2.6em' }}
         >
           <span className="block">
@@ -267,18 +248,18 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           <span className="block text-slate-600 text-xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold">
             {t('home:hero.titleEnd')}
           </span>
-        </motion.h1>
+        </h1>
 
         {/* Subtitle */}
-        <motion.p
-          className="mt-4 sm:mt-5 text-center text-sm sm:text-base md:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed px-2"
-          variants={fadeUp}
+        <p
+          className="mt-4 sm:mt-5 text-center text-sm sm:text-base md:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed px-2 hero-fade-up"
+          style={{ animationDelay: '0.08s' }}
         >
           {t('home:hero.subtitle')}
-        </motion.p>
+        </p>
 
         {/* Search Bar — liquid glass */}
-        <motion.div className="mt-8 sm:mt-10 max-w-2xl mx-auto relative z-20" variants={fadeUp} ref={wrapperRef}>
+        <div className="mt-8 sm:mt-10 max-w-2xl mx-auto relative z-20 hero-fade-up" style={{ animationDelay: '0.16s' }} ref={wrapperRef}>
           <div style={{
             position: 'relative',
             zIndex: 10,
@@ -438,10 +419,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({
               ))}
             </div>
           )}
-        </motion.div>
+        </div>
 
         {/* CTA Buttons — liquid glass */}
-        <motion.div className="mt-6 sm:mt-8 flex flex-wrap justify-center gap-2 sm:gap-3" variants={fadeUp}>
+        <div className="mt-6 sm:mt-8 flex flex-wrap justify-center gap-2 sm:gap-3 hero-fade-up" style={{ animationDelay: '0.24s' }}>
           <button
             onClick={() => onNavigate('search', '/search')}
             style={{
@@ -483,10 +464,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({
               {btn.label}
             </button>
           ))}
-        </motion.div>
+        </div>
 
         {/* Stats Strip — liquid glass card */}
-        <motion.div className="mt-10 sm:mt-14 max-w-3xl mx-auto" variants={fadeUp}>
+        <div className="mt-10 sm:mt-14 max-w-3xl mx-auto hero-fade-up" style={{ animationDelay: '0.32s' }}>
           <div style={{
             borderRadius: '20px',
             padding: '1rem 1.5rem',
@@ -518,8 +499,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({
               ))}
             </div>
           </div>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </section>
   );
 };

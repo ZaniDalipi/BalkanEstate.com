@@ -28,7 +28,7 @@ interface OrganizationSchemaProps {
 export const OrganizationSchema: React.FC<OrganizationSchemaProps> = ({
   name = 'BalkanEstateAI',
   url = 'https://balkanestateai.com',
-  logo = 'https://balkanestateai.com/logo.png',
+  logo = 'https://balkanestateai.com/icons/icon-512x512.png',
   description = 'BalkanEstateAI is the leading AI-powered real estate platform covering all 11 Balkan countries. Find property for sale in Montenegro, Albania, Kosovo, North Macedonia, Serbia, Croatia, Bosnia, Bulgaria, Romania, and Greece. AI-powered search, valuations, and 10 languages.',
   email = CONTACT_CONFIG.email.info,
   phone,
@@ -63,6 +63,7 @@ export const OrganizationSchema: React.FC<OrganizationSchemaProps> = ({
       { '@type': 'Country', name: 'Bulgaria' },
       { '@type': 'Country', name: 'Romania' },
       { '@type': 'Country', name: 'Greece' },
+      { '@type': 'Country', name: 'Slovenia' },
     ],
     knowsLanguage: ['en', 'sq', 'sr', 'bg', 'hr', 'bs', 'mk', 'me', 'ro', 'el'],
     inLanguage: language,

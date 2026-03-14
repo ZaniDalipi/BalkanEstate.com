@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, Component, ErrorInfo } from 'react';
 import { MapContainer, TileLayer, Rectangle, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 // Import GoogleMapComponent directly for immediate display (not lazy loaded)
 import GoogleMapComponent from './GoogleMapComponent';
