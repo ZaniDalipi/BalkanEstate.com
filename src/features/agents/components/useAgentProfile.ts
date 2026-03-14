@@ -769,6 +769,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
     const handleViewProperty = useCallback((propertyId: string) => {
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
         window.history.pushState({}, '', `/property/${propertyId}`);
+        window.dispatchEvent(new PopStateEvent('popstate'));
     }, [dispatch]);
 
     // ─── Return ──────────────────────────────────────────────────────────────
