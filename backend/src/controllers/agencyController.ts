@@ -1761,6 +1761,36 @@ export const joinAgencyByInvitationCode = async (
       agencyLogger.error('Error sending in-app notifications:', notifError);
     }
 
+    // Send email notifications (non-blocking)
+    try {
+      const { sendAgentJoinedAgencyEmail, sendAgencyNewMemberEmail } = await import('../services/emailService');
+      await sendAgentJoinedAgencyEmail({
+        agentEmail: user.email,
+        agentName: user.name || 'Agent',
+        agencyName: agency.name,
+        agencyId: String(agency._id),
+        subscriptionTier: user.subscription?.tier || 'pro',
+        listingsLimit: user.subscription?.listingsLimit || 50,
+        expiresAt: user.subscription?.expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      });
+
+      const owner = await User.findById(agency.ownerId);
+      if (owner) {
+        await sendAgencyNewMemberEmail({
+          ownerEmail: owner.email,
+          ownerName: owner.name || 'Agency Owner',
+          newAgentName: user.name || 'Agent',
+          newAgentEmail: user.email,
+          agencyName: agency.name,
+          agencyId: String(agency._id),
+          couponCode: '',
+          totalAgents: agency.agents.length,
+        });
+      }
+    } catch (emailError) {
+      agencyLogger.error('Error sending join emails:', emailError);
+    }
+
     // Return complete user and agency data
     res.json({
       message: `Successfully joined ${agency.name}!`,
@@ -2680,6 +2710,36 @@ export const redeemAgentCoupon = async (
     } catch (notifError) {
       // Don't fail the redemption if notifications fail
       agencyLogger.error('Error sending in-app notifications:', notifError);
+    }
+
+    // Send email notifications (non-blocking)
+    try {
+      const { sendAgentJoinedAgencyEmail, sendAgencyNewMemberEmail } = await import('../services/emailService');
+      await sendAgentJoinedAgencyEmail({
+        agentEmail: user.email,
+        agentName: user.name || 'Agent',
+        agencyName: agency.name,
+        agencyId: String(agency._id),
+        subscriptionTier: user.subscription?.tier || 'pro',
+        listingsLimit: user.subscription?.listingsLimit || 50,
+        expiresAt: user.subscription?.expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      });
+
+      const owner = await User.findById(agency.ownerId);
+      if (owner) {
+        await sendAgencyNewMemberEmail({
+          ownerEmail: owner.email,
+          ownerName: owner.name || 'Agency Owner',
+          newAgentName: user.name || 'Agent',
+          newAgentEmail: user.email,
+          agencyName: agency.name,
+          agencyId: String(agency._id),
+          couponCode: couponCode || '',
+          totalAgents: agency.agents.length,
+        });
+      }
+    } catch (emailError) {
+      agencyLogger.error('Error sending coupon join emails:', emailError);
     }
 
     res.status(200).json({

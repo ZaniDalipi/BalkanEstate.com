@@ -982,6 +982,7 @@ export const defaultEmailConfigs = [
     subject: 'Welcome to {{agencyName}}!',
     preheaderText: 'You are now a member of {{agencyName}}',
     headerTitle: 'Welcome to the Team!',
+    headerSubtitle: 'You are now a member of {{agencyName}}',
     headerEmoji: '🤝',
     headerGradient: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
     bodyTemplate: `
