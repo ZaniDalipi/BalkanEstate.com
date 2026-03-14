@@ -9,6 +9,7 @@ import AnimatedTooltip, { type AnimatedTooltipItem } from '@/src/components/ui/A
 import { BUSINESS_CATEGORIES, type BusinessCategory, type BusinessListing, type ListingType } from '@/src/shared/types/businessListing.types';
 import { SearchIcon, PlusIcon, BuildingStorefrontIcon, WrenchScrewdriverIcon, SparklesIcon, UserGroupIcon, UserIcon } from '@/constants';
 import { Animated, StaggeredList } from '@/src/components/ui/Animations';
+import { useAuthModal } from '@/src/app/store/uiStore';
 import Footer from '@/components/shared/Footer';
 
 type SubView = 'list' | 'detail' | 'create';
@@ -40,6 +41,7 @@ const CATEGORY_ICONS: Record<string, string> = {
 const BusinessDirectoryPage: React.FC = () => {
   const { t } = useTranslation('businessDirectory');
   const { state } = useAppContext();
+  const { open: openAuthModal } = useAuthModal();
 
   const [subView, setSubView] = useState<SubView>('list');
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
@@ -118,9 +120,12 @@ const BusinessDirectoryPage: React.FC = () => {
   }, []);
 
   const handleCreateClick = useCallback(() => {
-    if (!state.currentUser) return;
+    if (!state.currentUser) {
+      openAuthModal('login');
+      return;
+    }
     setSubView('create');
-  }, [state.currentUser]);
+  }, [state.currentUser, openAuthModal]);
 
   const handleCreateSuccess = useCallback(() => {
     setSubView('list');
