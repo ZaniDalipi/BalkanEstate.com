@@ -7,6 +7,7 @@ import {
   createBusinessListing,
   updateBusinessListing,
   deleteBusinessListing,
+  uploadBusinessLogo,
 } from '../api';
 import type { BusinessListingFilters, CreateBusinessListingData } from '@/src/shared/types/businessListing.types';
 
@@ -101,6 +102,26 @@ export function useDeleteBusinessListing() {
 
   return {
     deleteListing: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error,
+  };
+}
+
+export function useUploadBusinessLogo() {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: ({ id, file }: { id: string; file: File }) =>
+      uploadBusinessLogo(id, file),
+    onSuccess: (_result, { id }) => {
+      queryClient.invalidateQueries({ queryKey: businessDirectoryKeys.detail(id) });
+      queryClient.invalidateQueries({ queryKey: businessDirectoryKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: businessDirectoryKeys.myListings() });
+    },
+  });
+
+  return {
+    uploadLogo: mutation.mutateAsync,
     isLoading: mutation.isPending,
     error: mutation.error,
   };

@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useCreateBusinessListing } from '../hooks';
+import { useCreateBusinessListing, useUploadBusinessLogo } from '../hooks';
 import { BUSINESS_CATEGORIES, type BusinessCategory, type CreateBusinessListingData, type ListingType } from '@/src/shared/types/businessListing.types';
 import { Animated } from '@/src/components/ui/Animations';
 import { BuildingStorefrontIcon, UserIcon } from '@/constants';
@@ -38,8 +38,11 @@ const CATEGORY_ICONS: Record<string, string> = {
 const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ onBack, onSuccess }) => {
   const { t } = useTranslation('businessDirectory');
   const { createListing, isLoading, error } = useCreateBusinessListing();
+  const { uploadLogo } = useUploadBusinessLogo();
 
   const [listingType, setListingType] = useState<ListingType>('business');
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [formData, setFormData] = useState<CreateBusinessListingData>({
     name: '',
     description: '',
@@ -100,6 +103,34 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
     }));
   }, []);
 
+  const MAX_LOGO_SIZE = 5 * 1024 * 1024; // 5MB
+  const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+  const handleLogoChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!ACCEPTED_TYPES.includes(file.type)) {
+      setFormError(t('form.errors.logoInvalidType'));
+      return;
+    }
+    if (file.size > MAX_LOGO_SIZE) {
+      setFormError(t('form.errors.logoTooLarge'));
+      return;
+    }
+
+    setLogoFile(file);
+    setFormError(null);
+    const reader = new FileReader();
+    reader.onloadend = () => setLogoPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  }, [t]);
+
+  const removeLogo = useCallback(() => {
+    setLogoFile(null);
+    setLogoPreview(null);
+  }, []);
+
   const handleServiceKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -147,12 +178,22 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
         cleanData.businessHours = hours;
       }
 
-      await createListing(cleanData);
+      const result = await createListing(cleanData);
+
+      // Upload logo after listing is created
+      if (logoFile && result.listing?.id) {
+        try {
+          await uploadLogo({ id: result.listing.id, file: logoFile });
+        } catch {
+          // Logo upload failure shouldn't block listing creation
+        }
+      }
+
       onSuccess();
     } catch (err: any) {
       setFormError(err?.message || t('form.errors.generic'));
     }
-  }, [formData, listingType, createListing, onSuccess, t]);
+  }, [formData, listingType, logoFile, createListing, uploadLogo, onSuccess, t]);
 
   const displayError = formError || (error as Error)?.message;
 
@@ -241,6 +282,53 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
                   </span>
                   <span className="text-xs text-neutral-400 text-center">{t('form.typeDescIndividual')}</span>
                 </button>
+              </div>
+            </div>
+          </Animated>
+
+          {/* Logo / Avatar upload */}
+          <Animated variant="fadeInUp" delay={30}>
+            <div className="bg-white rounded-2xl border border-neutral-200 p-6 shadow-sm">
+              <h2 className="text-lg font-semibold text-neutral-900 mb-4">
+                {listingType === 'individual' ? t('form.fields.avatar') : t('form.fields.logo')}
+              </h2>
+              <div className="flex items-center gap-5">
+                {/* Preview */}
+                <div className="w-20 h-20 rounded-2xl bg-neutral-100 flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-dashed border-neutral-300">
+                  {logoPreview ? (
+                    <img src={logoPreview} alt="Preview" className="w-full h-full object-cover rounded-xl" />
+                  ) : (
+                    <div className="text-center">
+                      <svg className="w-8 h-8 mx-auto text-neutral-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1">
+                  <div className="flex gap-2">
+                    <label className="px-4 py-2 bg-primary/10 text-primary rounded-xl text-sm font-medium cursor-pointer hover:bg-primary/20 transition-colors">
+                      {logoFile ? t('form.logoChange') : t('form.logoUpload')}
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={handleLogoChange}
+                        className="hidden"
+                      />
+                    </label>
+                    {logoFile && (
+                      <button
+                        type="button"
+                        onClick={removeLogo}
+                        className="px-4 py-2 text-red-500 hover:bg-red-50 rounded-xl text-sm font-medium transition-colors"
+                      >
+                        {t('form.logoRemove')}
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-xs text-neutral-400 mt-2">{t('form.logoHint')}</p>
+                </div>
               </div>
             </div>
           </Animated>

@@ -115,7 +115,9 @@
       "website": "Website",
       "city": "City",
       "country": "Country",
-      "address": "Address"
+      "address": "Address",
+      "logo": "Logo",
+      "avatar": "Profile Photo"
     },
     "placeholders": {
       "name": "Enter your business name",
@@ -132,6 +134,10 @@
       "hours": "e.g. 09:00 - 17:00"
     },
     "addService": "Add",
+    "logoUpload": "Upload Image",
+    "logoChange": "Change Image",
+    "logoRemove": "Remove",
+    "logoHint": "JPG, PNG, or WebP. Max 5MB.",
     "submit": "Create Listing",
     "submitting": "Creating...",
     "errors": {
@@ -140,7 +146,9 @@
       "phoneRequired": "Contact phone number is required",
       "cityRequired": "City is required",
       "countryRequired": "Country is required",
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "logoInvalidType": "Please upload a JPG, PNG, or WebP image",
+      "logoTooLarge": "Image must be under 5MB"
     }
   }
 }

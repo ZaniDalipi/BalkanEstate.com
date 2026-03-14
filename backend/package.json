@@ -43,6 +43,7 @@
     "set-admin": "ts-node src/scripts/setAdminRole.ts",
     "seed:dev-admin": "ts-node src/scripts/seedDevAdmin.ts",
     "seed:dev": "npm run seed:products && npm run seed:dev-admin",
+    "seed:business-listings": "ts-node src/scripts/seedBusinessListings.ts",
     "seed:coupons": "ts-node src/scripts/seedPromotionCoupons.ts",
     "seed:promotion-plans": "ts-node src/scripts/seedPromotionPlans.ts",
     "seed:promotion-plans:staging": "NODE_ENV=staging ts-node src/scripts/seedPromotionPlans.ts",

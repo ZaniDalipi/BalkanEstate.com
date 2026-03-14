@@ -5,4 +5,5 @@ export {
   useCreateBusinessListing,
   useUpdateBusinessListing,
   useDeleteBusinessListing,
+  useUploadBusinessLogo,
 } from './useBusinessListings';
