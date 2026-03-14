@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Helmet } from 'react-helmet-async';
 import { useAppContext } from '@/context/AppContext';
+import { SEO, OrganizationSchema, FAQSchema, realEstateFAQs } from '@/src/components/seo';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { Property } from '@/types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -196,10 +196,14 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      <Helmet>
-        <title>{t('home:seo.title')}</title>
-        <meta name="description" content={t('home:seo.description')} />
-      </Helmet>
+      <SEO
+        title={t('home:seo.title')}
+        description={t('home:seo.description')}
+        canonical="https://balkanestateai.com"
+        type="website"
+      />
+      <OrganizationSchema />
+      <FAQSchema faqs={realEstateFAQs} />
 
       {/* Mobile hamburger menu button */}
       {onToggleSidebar && (

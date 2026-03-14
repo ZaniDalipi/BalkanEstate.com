@@ -67,6 +67,17 @@ interface SEOProps {
     agencyName?: string;
     agencySlug?: string;
   };
+  // Search results for ItemList schema (Zillow-style)
+  searchResults?: Array<{
+    id: string;
+    title: string;
+    url: string;
+    image?: string;
+    price?: number;
+    currency?: string;
+    city?: string;
+    country?: string;
+  }>;
 }
 
 const SITE_NAME = 'BalkanEstateAI';
@@ -109,6 +120,7 @@ export const SEO: React.FC<SEOProps> = ({
   property,
   agency,
   agent,
+  searchResults,
 }) => {
   const { i18n } = useTranslation();
   const currentLang = (i18n.language || 'en').split('-')[0];
@@ -116,7 +128,7 @@ export const SEO: React.FC<SEOProps> = ({
 
   const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
   const fullImage = image.startsWith('http') ? image : `${BASE_URL}${image}`;
-  const canonicalUrl = canonical || (typeof window !== 'undefined' ? window.location.href : BASE_URL);
+  const canonicalUrl = canonical || (typeof window !== 'undefined' ? window.location.href.split('#')[0].split('?')[0] : BASE_URL);
 
   return (
     <Helmet>
@@ -124,14 +136,19 @@ export const SEO: React.FC<SEOProps> = ({
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
       <link rel="canonical" href={canonicalUrl} />
-      {noindex && <meta name="robots" content="noindex, nofollow" />}
+      {noindex ? (
+        <meta name="robots" content="noindex, nofollow" />
+      ) : (
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+      )}
 
       {/* Open Graph / Facebook */}
-      <meta property="og:type" content={type} />
+      <meta property="og:type" content={property ? 'product' : type} />
       <meta property="og:site_name" content={SITE_NAME} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={fullImage} />
+      <meta property="og:image:alt" content={title || 'BalkanEstateAI - Property for sale in the Balkans'} />
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:locale" content={ogLocale} />
       {/* Alternate locales for Facebook to discover other language versions */}
@@ -144,12 +161,7 @@ export const SEO: React.FC<SEOProps> = ({
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={fullImage} />
-
-      {/* Additional SEO Meta Tags */}
-      <meta name="theme-color" content="#0252CD" />
-      <meta name="mobile-web-app-capable" content="yes" />
-      <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-      <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
+      <meta name="twitter:image:alt" content={title || 'BalkanEstateAI - Property for sale in the Balkans'} />
 
       {/* Geo Meta Tags for Balkans */}
       <meta name="geo.region" content="RS" />
@@ -161,17 +173,16 @@ export const SEO: React.FC<SEOProps> = ({
           key={lang}
           rel="alternate"
           hrefLang={lang}
-          href={`${BASE_URL}/${lang}${getPathWithoutLang() === '/' ? '' : getPathWithoutLang()}${typeof window !== 'undefined' ? window.location.search : ''}`}
+          href={`${BASE_URL}/${lang}${getPathWithoutLang() === '/' ? '' : getPathWithoutLang()}`}
         />
       ))}
-      <link rel="alternate" hrefLang="x-default" href={`${BASE_URL}${getPathWithoutLang()}${typeof window !== 'undefined' ? window.location.search : ''}`} />
+      <link rel="alternate" hrefLang="x-default" href={`${BASE_URL}${getPathWithoutLang()}`} />
 
       {/* Open Graph product price tags for property pages */}
       {property?.price && (
         <>
           <meta property="product:price:amount" content={String(property.price)} />
           <meta property="product:price:currency" content={property.currency || 'EUR'} />
-          {property.bedrooms && <meta property="product:bedrooms" content={String(property.bedrooms)} />}
           {property.city && <meta property="og:locality" content={property.city} />}
           {property.country && <meta property="og:country-name" content={property.country} />}
         </>
@@ -205,8 +216,15 @@ export const SEO: React.FC<SEOProps> = ({
         </script>
       )}
 
+      {/* ItemList schema for search results pages (Zillow-style) */}
+      {searchResults && searchResults.length > 0 && (
+        <script type="application/ld+json">
+          {JSON.stringify(generateItemListSchema(searchResults, fullTitle, description, canonicalUrl))}
+        </script>
+      )}
+
       {/* Website-level JSON-LD */}
-      {!property && !agency && !agent && (
+      {!property && !agency && !agent && !searchResults && (
         <script type="application/ld+json">
           {JSON.stringify(generateWebsiteSchema(currentLang))}
         </script>
@@ -248,11 +266,12 @@ function generatePropertySchema(
       floorSize: {
         '@type': 'QuantitativeValue',
         value: property.sqft,
-        unitCode: 'FTK' // Square feet
+        unitCode: 'MTK', // Square meters (Balkan standard)
+        unitText: 'm²'
       }
     }),
 
-    // Price with optional PriceSpecification for price drops
+    // Price with Offer schema
     ...(property.price && {
       offers: {
         '@type': 'Offer',
@@ -260,6 +279,14 @@ function generatePropertySchema(
         priceCurrency: property.currency || 'EUR',
         availability: 'https://schema.org/InStock',
         url: url,
+        validFrom: property.datePosted
+          ? new Date(typeof property.datePosted === 'number' ? property.datePosted : property.datePosted).toISOString()
+          : new Date().toISOString(),
+        seller: {
+          '@type': 'Organization',
+          name: 'BalkanEstateAI',
+          url: 'https://balkanestateai.com'
+        },
         // If price was reduced, include original price for price drop rich results
         ...(property.originalPrice && property.originalPrice > property.price && {
           priceSpecification: {
@@ -277,7 +304,8 @@ function generatePropertySchema(
         '@type': 'PostalAddress',
         streetAddress: property.address,
         addressLocality: property.city,
-        addressCountry: property.country
+        addressCountry: property.country,
+        addressRegion: property.city
       }
     }),
 
@@ -293,7 +321,19 @@ function generatePropertySchema(
     // Property Type
     ...(property.propertyType && {
       '@type': ['RealEstateListing', getSchemaPropertyType(property.propertyType)]
-    })
+    }),
+
+    // Category for listing type
+    ...(property.listingType && {
+      category: property.listingType === 'rent' ? 'Rental' : 'For Sale'
+    }),
+
+    // Provider info
+    provider: {
+      '@type': 'Organization',
+      name: 'BalkanEstateAI',
+      url: 'https://balkanestateai.com'
+    }
   };
 
   return schema;
@@ -324,6 +364,15 @@ function generateAgencySchema(agency: SEOProps['agency'], lang: string) {
     ...(agency.website && { url: agency.website }),
     ...(agency.yearsFounded && { foundingDate: String(agency.yearsFounded) }),
     ...(agency.totalAgents && { numberOfEmployees: agency.totalAgents }),
+    ...(agency.totalProperties && {
+      makesOffer: {
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Service',
+          name: `${agency.totalProperties} Active Property Listings`,
+        },
+      },
+    }),
     areaServed: {
       '@type': 'GeoCircle',
       geoMidpoint: {
@@ -332,7 +381,8 @@ function generateAgencySchema(agency: SEOProps['agency'], lang: string) {
         longitude: 21.0059
       },
       geoRadius: '500'
-    }
+    },
+    priceRange: '€€-€€€€',
   };
 
   // AggregateRating - critical for rich snippets with stars in SERPs
@@ -393,6 +443,7 @@ function generateAgentSchema(agent: SEOProps['agent'], lang: string) {
         },
       },
     }),
+    priceRange: '€€-€€€€',
   };
 
   // AggregateRating for agent - enables star ratings in search results
@@ -442,12 +493,59 @@ function generateVideoSchema(
   };
 }
 
+// Generate ItemList schema for search results pages (like Zillow)
+function generateItemListSchema(
+  results: NonNullable<SEOProps['searchResults']>,
+  title: string,
+  description: string,
+  url: string
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: title,
+    description: description,
+    url: url,
+    numberOfItems: results.length,
+    itemListElement: results.slice(0, 20).map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      url: item.url.startsWith('http') ? item.url : `${BASE_URL}${item.url}`,
+      name: item.title,
+      ...(item.image && { image: item.image }),
+      ...(item.price && {
+        item: {
+          '@type': 'RealEstateListing',
+          name: item.title,
+          url: item.url.startsWith('http') ? item.url : `${BASE_URL}${item.url}`,
+          ...(item.image && { image: item.image }),
+          offers: {
+            '@type': 'Offer',
+            price: item.price,
+            priceCurrency: item.currency || 'EUR',
+            availability: 'https://schema.org/InStock',
+          },
+          ...(item.city && item.country && {
+            address: {
+              '@type': 'PostalAddress',
+              addressLocality: item.city,
+              addressCountry: item.country,
+            }
+          }),
+        }
+      }),
+    })),
+  };
+}
+
 // Generate Website-level JSON-LD Schema
 function generateWebsiteSchema(lang: string) {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
+    '@id': `${BASE_URL}/#website`,
     name: SITE_NAME,
+    alternateName: ['Balkan Estate AI', 'BalkanEstate'],
     description: DEFAULT_DESCRIPTION,
     url: BASE_URL,
     inLanguage: lang,
@@ -461,10 +559,14 @@ function generateWebsiteSchema(lang: string) {
     },
     publisher: {
       '@type': 'Organization',
+      '@id': `${BASE_URL}/#organization`,
       name: SITE_NAME,
+      url: BASE_URL,
       logo: {
         '@type': 'ImageObject',
-        url: `${BASE_URL}/logo.png`
+        url: `${BASE_URL}/icons/icon-512x512.png`,
+        width: 512,
+        height: 512
       }
     }
   };
