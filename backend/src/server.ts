@@ -108,6 +108,7 @@ import fileRoutes from './routes/fileRoutes';
 import mapProxyRoutes from './routes/mapProxyRoutes';
 import newsRoutes from './routes/newsRoutes';
 import testimonialRoutes from './routes/testimonialRoutes';
+import businessListingRoutes from './routes/businessListingRoutes';
 
 // Import services
 import { initializeGooglePlayService } from './services/googlePlayService';
@@ -325,6 +326,7 @@ app.use('/api/map', mapProxyRoutes); // Weather tile & FIRMS WMS proxy (API keys
 app.use('/api/files', fileRoutes); // File access with storage access policy (ownership-based)
 app.use('/api/news', newsRoutes); // Public real estate news
 app.use('/api/testimonials', testimonialRoutes); // User testimonials (submit + public list)
+app.use('/api/business-listings', businessListingRoutes); // Business directory listings
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

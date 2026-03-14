@@ -105,6 +105,7 @@ const RefundPolicyPage = lazy(() => import('./src/features/legal/components/Refu
 const ContactUsPage = lazy(() => import('./src/features/contact/components/ContactUsPage'));
 const BuyingGuidesPage = lazy(() => import('./src/features/guides/components/BuyingGuidesPage'));
 const HomePage = lazyWithRetry(() => import('./src/features/home/components/HomePage'));
+const BusinessDirectoryPage = lazy(() => import('./src/features/business-directory/components/BusinessDirectoryPage'));
 
 // Agency creation pages
 const CreateAgencyPage = lazy(() => import('./src/features/agencies/components/CreateAgencyPage'));
@@ -375,6 +376,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/refund-policy': 'refund',
         '/contact': 'contact',
         '/guides': 'guides',
+        '/business-directory': 'business-directory',
         '/rent': 'rentals',
         '/rentals': 'rentals',
         '/create-agency': 'createAgency',
@@ -605,6 +607,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return <QueryErrorBoundary><AgentsPage /></QueryErrorBoundary>;
       case 'agencies':
         return <QueryErrorBoundary><AgenciesListPage /></QueryErrorBoundary>;
+      case 'business-directory':
+        return <QueryErrorBoundary><BusinessDirectoryPage /></QueryErrorBoundary>;
       case 'admin':
         // Only load admin dashboard for admin/super_admin users
         if (state.currentUser?.role === UserRole.ADMIN || state.currentUser?.role === UserRole.SUPER_ADMIN) {
@@ -710,7 +714,7 @@ const MainLayout: React.FC = () => {
   // Main tab views show hamburger menu; detail views show back button
   const isMainTabView = !state.selectedAgentId && !state.selectedAgencyId && [
     'agents', 'agencies', 'saved-properties', 'saved-searches', 'explore-cities', 'city-dashboard',
-    'inbox', 'pricing', 'how-it-works', 'valuation', 'mortgage-calculator', 'analytics', 'admin', 'agency-dashboard',
+    'inbox', 'pricing', 'how-it-works', 'valuation', 'mortgage-calculator', 'analytics', 'admin', 'agency-dashboard', 'business-directory',
   ].includes(state.activeView);
 
   // Map activeView to readable page title
@@ -727,6 +731,7 @@ const MainLayout: React.FC = () => {
       'saved-searches': 'nav:pageTitles.savedSearches',
       agents: 'nav:pageTitles.agents',
       agencies: 'nav:pageTitles.agencies',
+      'business-directory': 'nav:pageTitles.businessDirectory',
       pricing: 'nav:pageTitles.pricing',
       'create-listing': 'nav:pageTitles.createListing',
       'edit-listing': 'nav:pageTitles.editListing',

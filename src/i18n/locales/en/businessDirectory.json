@@ -1,0 +1,122 @@
+{
+  "hero": {
+    "badge": "Business Directory",
+    "title": "Find Trusted Real Estate Professionals",
+    "subtitle": "Browse verified construction, renovation, cleaning, and other real estate service providers in the Balkans."
+  },
+  "search": {
+    "placeholder": "Search businesses by name, service, or keyword...",
+    "button": "Search"
+  },
+  "filters": {
+    "all": "All"
+  },
+  "categories": {
+    "construction": "Construction",
+    "renovation": "Renovation",
+    "cleaning": "Cleaning",
+    "moving": "Moving",
+    "interior_design": "Interior Design",
+    "architecture": "Architecture",
+    "plumbing": "Plumbing",
+    "electrical": "Electrical",
+    "landscaping": "Landscaping",
+    "security": "Security",
+    "real_estate_law": "Real Estate Law",
+    "insurance": "Insurance",
+    "home_inspection": "Home Inspection",
+    "pest_control": "Pest Control",
+    "painting": "Painting",
+    "roofing": "Roofing",
+    "hvac": "HVAC",
+    "furniture": "Furniture",
+    "appliances": "Appliances",
+    "other": "Other"
+  },
+  "cta": {
+    "listBusiness": "List Your Business",
+    "beFirst": "Be the First to List"
+  },
+  "results": {
+    "showing": "{{count}} businesses found"
+  },
+  "empty": {
+    "title": "No businesses found",
+    "description": "Be the first to list your business in this category and reach thousands of potential customers."
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {{page}} of {{totalPages}}"
+  },
+  "verified": "Verified business",
+  "detail": {
+    "backToDirectory": "Back to Directory",
+    "services": "Services Offered",
+    "businessHours": "Business Hours",
+    "closed": "Closed",
+    "contactInfo": "Contact Information",
+    "phone": "Phone",
+    "email": "Email",
+    "website": "Website",
+    "location": "Location",
+    "socialMedia": "Social Media",
+    "views": "{{count}} views",
+    "notFound": "Business listing not found"
+  },
+  "days": {
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday"
+  },
+  "form": {
+    "title": "List Your Business",
+    "sections": {
+      "basicInfo": "Basic Information",
+      "contact": "Contact Information",
+      "location": "Location",
+      "social": "Social Media",
+      "hours": "Business Hours"
+    },
+    "fields": {
+      "name": "Business Name",
+      "category": "Category",
+      "description": "Description",
+      "services": "Services",
+      "phone": "Phone Number",
+      "email": "Email Address",
+      "website": "Website",
+      "city": "City",
+      "country": "Country",
+      "address": "Address"
+    },
+    "placeholders": {
+      "name": "Enter your business name",
+      "category": "Select a category",
+      "description": "Describe your business, what you offer, and why clients should choose you...",
+      "service": "Type a service and press Enter",
+      "phone": "+389 XX XXX XXX",
+      "email": "contact@yourbusiness.com",
+      "website": "https://yourbusiness.com",
+      "city": "e.g. Skopje",
+      "country": "e.g. North Macedonia",
+      "address": "Street address",
+      "hours": "e.g. 09:00 - 17:00"
+    },
+    "addService": "Add",
+    "submit": "Create Listing",
+    "submitting": "Creating...",
+    "errors": {
+      "nameRequired": "Business name is required",
+      "categoryRequired": "Please select a category",
+      "phoneRequired": "Contact phone number is required",
+      "cityRequired": "City is required",
+      "countryRequired": "Country is required",
+      "generic": "Something went wrong. Please try again."
+    }
+  }
+}

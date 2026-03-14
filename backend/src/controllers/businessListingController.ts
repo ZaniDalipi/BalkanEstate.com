@@ -1,0 +1,381 @@
+import { Request, Response } from 'express';
+import mongoose from 'mongoose';
+import { escapeRegex } from '../utils/escapeRegex';
+import BusinessListing, { BUSINESS_CATEGORIES } from '../models/BusinessListing';
+import { IUser } from '../models/User';
+import { uploadImage, deleteImage } from '../services/cloudinaryService';
+import { getParam, getObjectIdParam } from '../utils/validateParams';
+
+// @desc    Get all business listings (public, with filtering & pagination)
+// @route   GET /api/business-listings
+// @access  Public
+export const getBusinessListings = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 20));
+    const skip = (page - 1) * limit;
+
+    // Build filter
+    const filter: Record<string, any> = { isActive: true };
+
+    // Category filter
+    const category = req.query.category as string;
+    if (category && BUSINESS_CATEGORIES.includes(category as any)) {
+      filter.category = category;
+    }
+
+    // City filter
+    const city = req.query.city as string;
+    if (city) {
+      filter.city = { $regex: new RegExp(`^${escapeRegex(city)}$`, 'i') };
+    }
+
+    // Country filter
+    const country = req.query.country as string;
+    if (country) {
+      filter.country = { $regex: new RegExp(`^${escapeRegex(country)}$`, 'i') };
+    }
+
+    // Text search
+    const search = req.query.search as string;
+    if (search) {
+      const searchRegex = new RegExp(escapeRegex(search), 'i');
+      filter.$or = [
+        { name: searchRegex },
+        { description: searchRegex },
+        { services: searchRegex },
+      ];
+    }
+
+    const [listings, total] = await Promise.all([
+      BusinessListing.find(filter)
+        .sort({ isVerified: -1, views: -1, createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('owner', 'name avatarUrl')
+        .lean(),
+      BusinessListing.countDocuments(filter),
+    ]);
+
+    res.status(200).json({
+      listings,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to fetch business listings', error: error.message });
+  }
+};
+
+// @desc    Get single business listing (public)
+// @route   GET /api/business-listings/:id
+// @access  Public
+export const getBusinessListing = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const idOrSlug = getParam(req, 'id');
+    if (!idOrSlug) {
+      res.status(400).json({ message: 'Invalid ID or slug' });
+      return;
+    }
+
+    let listing;
+
+    // Try finding by ObjectId first, then by slug
+    if (mongoose.Types.ObjectId.isValid(idOrSlug) && /^[a-fA-F0-9]{24}$/.test(idOrSlug)) {
+      listing = await BusinessListing.findById(idOrSlug)
+        .populate('owner', 'name avatarUrl email')
+        .lean();
+    }
+
+    if (!listing) {
+      listing = await BusinessListing.findOne({ slug: idOrSlug.toLowerCase() })
+        .populate('owner', 'name avatarUrl email')
+        .lean();
+    }
+
+    if (!listing) {
+      res.status(404).json({ message: 'Business listing not found' });
+      return;
+    }
+
+    // Increment view count (fire-and-forget)
+    BusinessListing.updateOne({ _id: listing._id }, { $inc: { views: 1 } }).catch(() => {});
+
+    res.status(200).json({ listing });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to fetch business listing', error: error.message });
+  }
+};
+
+// @desc    Create a business listing
+// @route   POST /api/business-listings
+// @access  Private
+export const createBusinessListing = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+
+    // Limit: max 3 business listings per user
+    const existingCount = await BusinessListing.countDocuments({ owner: currentUser._id });
+    if (existingCount >= 3) {
+      res.status(400).json({ message: 'Maximum of 3 business listings allowed per user' });
+      return;
+    }
+
+    // Validate required fields
+    const { name, category, contactPhone, city, country } = req.body;
+    if (!name || !category || !contactPhone || !city || !country) {
+      res.status(400).json({ message: 'Name, category, contact phone, city, and country are required' });
+      return;
+    }
+
+    if (!BUSINESS_CATEGORIES.includes(category)) {
+      res.status(400).json({ message: `Invalid category. Must be one of: ${BUSINESS_CATEGORIES.join(', ')}` });
+      return;
+    }
+
+    // Whitelist allowed fields to prevent mass assignment
+    const listingData = {
+      owner: currentUser._id,
+      name: req.body.name,
+      description: req.body.description,
+      category: req.body.category,
+      services: Array.isArray(req.body.services) ? req.body.services.slice(0, 20) : [],
+      contactPhone: req.body.contactPhone,
+      contactEmail: req.body.contactEmail,
+      website: req.body.website,
+      address: req.body.address,
+      city: req.body.city,
+      country: req.body.country,
+      socialMedia: {
+        facebook: req.body.socialMedia?.facebook,
+        instagram: req.body.socialMedia?.instagram,
+        linkedin: req.body.socialMedia?.linkedin,
+      },
+      businessHours: req.body.businessHours,
+    };
+
+    const listing = await BusinessListing.create(listingData);
+
+    res.status(201).json({ listing, message: 'Business listing created successfully' });
+  } catch (error: any) {
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((e: any) => e.message);
+      res.status(400).json({ message: messages.join('. ') });
+      return;
+    }
+    res.status(500).json({ message: 'Failed to create business listing', error: error.message });
+  }
+};
+
+// @desc    Update a business listing
+// @route   PUT /api/business-listings/:id
+// @access  Private (owner only)
+export const updateBusinessListing = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const currentUser = req.user as IUser;
+    const listing = await BusinessListing.findById(id);
+
+    if (!listing) {
+      res.status(404).json({ message: 'Business listing not found' });
+      return;
+    }
+
+    if (String(listing.owner) !== String(currentUser._id)) {
+      res.status(403).json({ message: 'Not authorized to update this listing' });
+      return;
+    }
+
+    // Whitelist updateable fields
+    const allowedFields = [
+      'name', 'description', 'category', 'services', 'contactPhone',
+      'contactEmail', 'website', 'address', 'city', 'country',
+      'socialMedia', 'businessHours', 'isActive',
+    ];
+
+    const updates: Record<string, any> = {};
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    }
+
+    // Validate category if provided
+    if (updates.category && !BUSINESS_CATEGORIES.includes(updates.category)) {
+      res.status(400).json({ message: `Invalid category. Must be one of: ${BUSINESS_CATEGORIES.join(', ')}` });
+      return;
+    }
+
+    // Limit services array length
+    if (updates.services && Array.isArray(updates.services)) {
+      updates.services = updates.services.slice(0, 20);
+    }
+
+    Object.assign(listing, updates);
+    await listing.save();
+
+    res.status(200).json({ listing, message: 'Business listing updated successfully' });
+  } catch (error: any) {
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((e: any) => e.message);
+      res.status(400).json({ message: messages.join('. ') });
+      return;
+    }
+    res.status(500).json({ message: 'Failed to update business listing', error: error.message });
+  }
+};
+
+// @desc    Delete a business listing
+// @route   DELETE /api/business-listings/:id
+// @access  Private (owner only)
+export const deleteBusinessListing = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const currentUser = req.user as IUser;
+    const listing = await BusinessListing.findById(id);
+
+    if (!listing) {
+      res.status(404).json({ message: 'Business listing not found' });
+      return;
+    }
+
+    if (String(listing.owner) !== String(currentUser._id)) {
+      res.status(403).json({ message: 'Not authorized to delete this listing' });
+      return;
+    }
+
+    // Clean up logo from Cloudinary
+    if (listing.logoPublicId) {
+      await deleteImage(listing.logoPublicId).catch(() => {});
+    }
+
+    await BusinessListing.deleteOne({ _id: listing._id });
+
+    res.status(200).json({ message: 'Business listing deleted successfully' });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to delete business listing', error: error.message });
+  }
+};
+
+// @desc    Upload business logo
+// @route   POST /api/business-listings/:id/upload-logo
+// @access  Private (owner only)
+export const uploadBusinessLogo = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    if (!req.file) {
+      res.status(400).json({ message: 'No file uploaded' });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+    const listing = await BusinessListing.findById(id);
+
+    if (!listing) {
+      res.status(404).json({ message: 'Business listing not found' });
+      return;
+    }
+
+    if (String(listing.owner) !== String(currentUser._id)) {
+      res.status(403).json({ message: 'Not authorized to update this listing' });
+      return;
+    }
+
+    // Delete old logo if exists
+    if (listing.logoPublicId) {
+      await deleteImage(listing.logoPublicId).catch(() => {});
+    }
+
+    const userId = String(currentUser._id);
+
+    // Upload new logo using centralized cloudinaryService
+    // Reuses 'agency-logo' type for similar folder structure
+    const result = await uploadImage(req.file.buffer, {
+      userId,
+      agencyId: id, // Reuse agencyId param for folder organization
+      type: 'agency-logo',
+      maxWidth: 400,
+      maxHeight: 400,
+    });
+
+    listing.logoUrl = result.url;
+    listing.logoPublicId = result.publicId;
+    await listing.save();
+
+    res.status(200).json({
+      logoUrl: result.url,
+      message: 'Logo uploaded successfully',
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to upload logo', error: error.message });
+  }
+};
+
+// @desc    Get business listings owned by current user
+// @route   GET /api/business-listings/my-listings
+// @access  Private
+export const getMyBusinessListings = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+    const listings = await BusinessListing.find({ owner: currentUser._id })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.status(200).json({ listings });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to fetch your business listings', error: error.message });
+  }
+};

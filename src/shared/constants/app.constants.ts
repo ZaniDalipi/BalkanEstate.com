@@ -65,6 +65,7 @@ export const ROUTES = {
   ACCOUNT: '/account',
   CREATE_LISTING: '/create-listing',
   CONTACT: '/contact',
+  BUSINESS_DIRECTORY: '/business-directory',
   PAYMENT_SUCCESS: '/payment/success',
   PAYMENT_CANCEL: '/payment/cancel',
   LOGIN: '/login',
