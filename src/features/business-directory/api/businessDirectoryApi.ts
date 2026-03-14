@@ -11,6 +11,7 @@ export const getBusinessListings = async (
 ): Promise<BusinessListingsResponse> => {
   const params = new URLSearchParams();
   if (filters?.category) params.append('category', filters.category);
+  if (filters?.listingType) params.append('listingType', filters.listingType);
   if (filters?.city) params.append('city', filters.city);
   if (filters?.country) params.append('country', filters.country);
   if (filters?.search) params.append('search', filters.search);

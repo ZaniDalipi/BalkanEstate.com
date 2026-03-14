@@ -2,11 +2,26 @@
   "hero": {
     "badge": "Business Directory",
     "title": "Find Trusted Real Estate Professionals",
-    "subtitle": "Browse verified construction, renovation, cleaning, and other real estate service providers in the Balkans."
+    "titleHighlight": "& Service Providers",
+    "subtitle": "Browse verified construction, renovation, cleaning, and other real estate service providers in the Balkans.",
+    "popularCategories": "Popular categories"
   },
   "search": {
     "placeholder": "Search businesses by name, service, or keyword...",
     "button": "Search"
+  },
+  "tabs": {
+    "all": "All",
+    "businesses": "Businesses",
+    "individuals": "Individuals"
+  },
+  "types": {
+    "business": "Business",
+    "individual": "Individual"
+  },
+  "individuals": {
+    "title": "Featured Professionals",
+    "subtitle": "Connect with skilled individuals offering their expertise in the real estate sector"
   },
   "filters": {
     "all": "All"
@@ -49,12 +64,15 @@
     "next": "Next",
     "pageOf": "Page {{page}} of {{totalPages}}"
   },
-  "verified": "Verified business",
+  "verified": "Verified",
   "detail": {
     "backToDirectory": "Back to Directory",
     "services": "Services Offered",
     "businessHours": "Business Hours",
     "closed": "Closed",
+    "openNow": "Open now",
+    "closedNow": "Closed now",
+    "today": "Today",
     "contactInfo": "Contact Information",
     "phone": "Phone",
     "email": "Email",
@@ -75,15 +93,20 @@
   },
   "form": {
     "title": "List Your Business",
+    "subtitle": "Reach thousands of potential customers in the Balkans",
     "sections": {
+      "type": "Listing Type",
       "basicInfo": "Basic Information",
       "contact": "Contact Information",
       "location": "Location",
       "social": "Social Media",
       "hours": "Business Hours"
     },
+    "typeDescBusiness": "Company or registered business",
+    "typeDescIndividual": "Freelancer or independent professional",
     "fields": {
       "name": "Business Name",
+      "fullName": "Full Name",
       "category": "Category",
       "description": "Description",
       "services": "Services",
@@ -96,6 +119,7 @@
     },
     "placeholders": {
       "name": "Enter your business name",
+      "fullName": "Enter your full name",
       "category": "Select a category",
       "description": "Describe your business, what you offer, and why clients should choose you...",
       "service": "Type a service and press Enter",

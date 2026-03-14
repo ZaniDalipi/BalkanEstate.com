@@ -23,6 +23,9 @@ export const BUSINESS_CATEGORIES = [
 
 export type BusinessCategory = typeof BUSINESS_CATEGORIES[number];
 
+export const LISTING_TYPES = ['business', 'individual'] as const;
+export type ListingType = typeof LISTING_TYPES[number];
+
 export interface BusinessListing {
   id: string;
   owner: {
@@ -30,6 +33,7 @@ export interface BusinessListing {
     name?: string;
     avatarUrl?: string;
   };
+  listingType: ListingType;
   name: string;
   slug: string;
   description?: string;
@@ -65,6 +69,7 @@ export interface BusinessListing {
 
 export interface BusinessListingFilters {
   category?: BusinessCategory;
+  listingType?: ListingType;
   city?: string;
   country?: string;
   search?: string;
@@ -80,6 +85,7 @@ export interface BusinessListingsResponse {
 }
 
 export interface CreateBusinessListingData {
+  listingType?: ListingType;
   name: string;
   description?: string;
   category: BusinessCategory;

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import { escapeRegex } from '../utils/escapeRegex';
-import BusinessListing, { BUSINESS_CATEGORIES } from '../models/BusinessListing';
+import BusinessListing, { BUSINESS_CATEGORIES, LISTING_TYPES } from '../models/BusinessListing';
 import { IUser } from '../models/User';
 import { uploadImage, deleteImage } from '../services/cloudinaryService';
 import { getParam, getObjectIdParam } from '../utils/validateParams';
@@ -37,6 +37,12 @@ export const getBusinessListings = async (
     const country = req.query.country as string;
     if (country) {
       filter.country = { $regex: new RegExp(`^${escapeRegex(country)}$`, 'i') };
+    }
+
+    // Listing type filter
+    const listingType = req.query.listingType as string;
+    if (listingType && LISTING_TYPES.includes(listingType as any)) {
+      filter.listingType = listingType;
     }
 
     // Text search
@@ -151,6 +157,7 @@ export const createBusinessListing = async (
     // Whitelist allowed fields to prevent mass assignment
     const listingData = {
       owner: currentUser._id,
+      listingType: LISTING_TYPES.includes(req.body.listingType) ? req.body.listingType : 'business',
       name: req.body.name,
       description: req.body.description,
       category: req.body.category,
@@ -213,7 +220,7 @@ export const updateBusinessListing = async (
 
     // Whitelist updateable fields
     const allowedFields = [
-      'name', 'description', 'category', 'services', 'contactPhone',
+      'name', 'description', 'category', 'listingType', 'services', 'contactPhone',
       'contactEmail', 'website', 'address', 'city', 'country',
       'socialMedia', 'businessHours', 'isActive',
     ];

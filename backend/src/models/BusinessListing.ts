@@ -26,8 +26,12 @@ export const BUSINESS_CATEGORIES = [
 
 export type BusinessCategory = typeof BUSINESS_CATEGORIES[number];
 
+export const LISTING_TYPES = ['business', 'individual'] as const;
+export type ListingType = typeof LISTING_TYPES[number];
+
 export interface IBusinessListing extends Document {
   owner: mongoose.Types.ObjectId;
+  listingType: ListingType;
   name: string;
   slug: string;
   description?: string;
@@ -88,6 +92,15 @@ const BusinessListingSchema: Schema = new Schema(
       type: String,
       trim: true,
       maxlength: [2000, 'Description cannot exceed 2000 characters'],
+    },
+    listingType: {
+      type: String,
+      enum: {
+        values: LISTING_TYPES,
+        message: 'Invalid listing type: {VALUE}',
+      },
+      default: 'business',
+      index: true,
     },
     category: {
       type: String,
