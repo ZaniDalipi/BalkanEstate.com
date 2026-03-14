@@ -855,7 +855,13 @@ const PropertyPopup: React.FC<{
         )}
 
         {/* CTA Button - touch-friendly */}
-        <button className="w-full py-1.5 rounded-lg bg-primary hover:bg-primary-dark active:bg-primary-dark text-white text-[10px] font-semibold transition-colors flex items-center justify-center gap-1 touch-manipulation">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onPopupClick(property.id);
+          }}
+          className="w-full py-1.5 rounded-lg bg-primary hover:bg-primary-dark active:bg-primary-dark text-white text-[10px] font-semibold transition-colors flex items-center justify-center gap-1 touch-manipulation"
+        >
           <span>{t('map.popup.viewDetails')}</span>
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />

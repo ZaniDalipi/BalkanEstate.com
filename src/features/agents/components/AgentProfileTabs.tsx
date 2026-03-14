@@ -446,6 +446,11 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                         </div>
                                                         <button
                                                             type="button"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                const propertyId = property.id || (property as any)._id;
+                                                                onViewProperty(propertyId);
+                                                            }}
                                                             className={`w-full text-white px-3 py-2 rounded-lg font-semibold text-sm ${property.status === 'sold' ? 'bg-red-600 hover:bg-red-700' : property.status === 'rented' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'}`}
                                                         >
                                                             {property.status === 'sold' ? t('profilePage.propertiesMap.viewSoldProperty') : property.status === 'rented' ? t('profilePage.propertiesMap.viewRentedProperty', 'View Rented Property') : t('profilePage.propertiesMap.viewDetails')}
