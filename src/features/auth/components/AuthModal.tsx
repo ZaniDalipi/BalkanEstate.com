@@ -851,7 +851,7 @@ const AuthPage: React.FC = () => {
 
             {/* Backdrop with animated gradient */}
             <div
-                className="fixed inset-0 z-[5000] flex justify-center items-start md:items-center p-0 md:p-4 overflow-y-auto"
+                className="fixed inset-0 z-[5000] flex justify-center items-start md:items-center p-0 md:p-4 overflow-y-auto overflow-x-hidden"
                 onClick={handleClose}
             >
                 {/* Glassmorphism backdrop */}
@@ -890,7 +890,7 @@ const AuthPage: React.FC = () => {
                     </button>
 
                     {/* Content */}
-                    <div className="relative p-6 sm:p-8 w-full max-w-md mx-auto pb-8">
+                    <div className="relative p-6 sm:p-8 w-full max-w-md mx-auto pb-16 md:pb-8">
                         {/* Magical Logo Container */}
                         <div className="flex justify-center items-center mb-6 pt-4 md:pt-0">
                             <div className="relative group">
