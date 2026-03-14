@@ -146,16 +146,12 @@ export function renderEmailConfig(
   // Brand colors from SiteSettings — light theme (inline styles)
   const brandPrimary = variables.brandPrimary || '#0252CD';
   const brandPrimaryDark = variables.brandPrimaryDark || '#0142a8';
-  const brandText = variables.brandText || '#1f2937';
-  const brandTextMuted = variables.brandTextMuted || '#6b7280';
   const brandBackground = variables.brandBackground || '#ffffff';
   const brandBackgroundAlt = variables.brandBackgroundAlt || '#f9fafb';
 
   // Brand colors from SiteSettings — dark theme (CSS media query)
   const darkPrimary = variables.darkBrandPrimary || '#3b82f6';
   const darkPrimaryDark = variables.darkBrandPrimaryDark || '#2563eb';
-  const darkText = variables.darkBrandText || '#ffffff';
-  const darkTextMuted = variables.darkBrandTextMuted || '#ffffff';
   const darkBackground = variables.darkBrandBackground || '#111827';
   const darkBackgroundAlt = variables.darkBrandBackgroundAlt || '#1f2937';
 
@@ -180,17 +176,25 @@ export function renderEmailConfig(
   <meta name="supported-color-schemes" content="light dark">
   ${config.preheaderText ? '<meta name="x-apple-data-detectors" content="none">' : ''}
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+
+    /* Dark mode (device preference): white text everywhere */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: ${darkBackground} !important; }
-      .ec-card { background-color: ${darkBackgroundAlt} !important; color: ${darkText} !important; }
+      .ec-body { background-color: ${darkBackground} !important; color: #ffffff !important; }
+      .ec-card { background-color: ${darkBackgroundAlt} !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: ${darkText} !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: ${darkGradient} !important; }
-      .ec-text { color: ${darkText} !important; }
-      .ec-text-muted { color: ${darkTextMuted} !important; }
-      .ec-footer { background: ${darkBackground} !important; border-color: ${darkBackgroundAlt} !important; color: ${darkTextMuted} !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: ${darkTextMuted} !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background: ${darkBackground} !important; border-color: ${darkBackgroundAlt} !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: ${darkPrimary} !important; }
       .ec-card a { color: ${darkPrimary} !important; }
       .ec-cta, .ec-cta center { background: ${darkGradient} !important; color: #ffffff !important; }
@@ -221,7 +225,7 @@ export function renderEmailConfig(
     </div>
 
     <!-- Body -->
-    <div style="padding:28px 24px;color:${brandText};" class="ec-text">
+    <div style="padding:28px 24px;color:#000000;" class="ec-text">
       ${bodyContent}
 
       ${config.ctaEnabled && ctaText && ctaUrl ? `
@@ -244,15 +248,15 @@ export function renderEmailConfig(
 
     <!-- Footer -->
     <div style="background:${brandBackgroundAlt};padding:20px;text-align:center;border-top:1px solid #e5e7eb;" class="ec-footer">
-      ${footerReason ? `<p style="color:${brandTextMuted};font-size:12px;margin:0 0 8px 0;" class="ec-text-muted">${footerReason}</p>` : ''}
+      ${footerReason ? `<p style="color:#000000;font-size:12px;margin:0 0 8px 0;" class="ec-text-muted">${footerReason}</p>` : ''}
       ${config.showUnsubscribe ? `
-      <p style="color:${brandTextMuted};font-size:11px;margin:0 0 6px 0;" class="ec-text-muted">
-        <a href="${frontendUrl}/settings/notifications" style="color:${brandTextMuted};text-decoration:underline;" class="ec-text-muted">Manage email preferences</a>
+      <p style="color:#000000;font-size:11px;margin:0 0 6px 0;" class="ec-text-muted">
+        <a href="${frontendUrl}/settings/notifications" style="color:#000000;text-decoration:underline;" class="ec-text-muted">Manage email preferences</a>
       </p>` : ''}
-      <p style="color:${brandTextMuted};font-size:12px;margin:4px 0 4px 0;" class="ec-text-muted">
+      <p style="color:#000000;font-size:12px;margin:4px 0 4px 0;" class="ec-text-muted">
         Need help? <a href="mailto:${supportEmail}" style="color:${brandPrimary};text-decoration:none;" class="ec-link">${supportEmail}</a>
       </p>
-      <p style="color:${brandTextMuted};font-size:11px;margin:4px 0 0 0;" class="ec-text-muted">
+      <p style="color:#000000;font-size:11px;margin:4px 0 0 0;" class="ec-text-muted">
         &copy; ${year} ${companyNameFormatted.replace(/<sup>/gi, '<span style="font-size:0.7em;vertical-align:super;line-height:0;">').replace(/<\/sup>/gi, '</span>')}. ${emailFooterText}
       </p>
     </div>

@@ -361,8 +361,19 @@ class EmailService {
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -590,8 +601,19 @@ class EmailService {
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -840,8 +862,19 @@ class EmailService {
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -1021,8 +1054,19 @@ class EmailService {
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -1352,8 +1396,19 @@ class EmailService {
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -1539,8 +1594,19 @@ class EmailService {
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -1761,8 +1827,19 @@ class EmailService {
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -2065,8 +2142,19 @@ class EmailService {
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -2689,8 +2777,19 @@ class EmailService {
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -2824,8 +2923,19 @@ class EmailService {
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -3533,8 +3643,19 @@ Questions? Contact us at support@balkanestateai.com
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -3771,8 +3892,19 @@ Questions? Contact us at support@balkanestateai.com
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -3974,8 +4106,19 @@ Questions? Contact us at support@balkanestateai.com
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -4190,8 +4333,19 @@ Questions? Contact us at support@balkanestateai.com
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -4384,8 +4538,19 @@ Questions? Contact us at support@balkanestateai.com
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -4566,8 +4731,19 @@ Questions? Contact us at support@balkanestateai.com
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -4734,8 +4910,19 @@ Questions? Contact us at support@balkanestateai.com
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -4911,8 +5098,19 @@ Questions? Contact us at support@balkanestateai.com
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -5065,8 +5263,19 @@ Questions? Contact us at support@balkanestateai.com
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -5227,8 +5436,19 @@ Questions? Contact us at support@balkanestateai.com
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -5407,8 +5627,19 @@ Questions? Contact us at support@balkanestateai.com
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
@@ -5605,8 +5836,19 @@ Questions? Contact us at support@balkanestateai.com
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <style>
+    /* Light mode: black text everywhere */
+    .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-text, .ec-text-muted,
+    .ec-footer p, .ec-footer span, .ec-footer div,
+    .ec-stat-card div, .ec-stat-card span,
+    .ec-highlight p, .ec-highlight li, .ec-highlight h3,
+    .ec-highlight span, .ec-highlight ul, .ec-highlight div, .ec-highlight td,
+    .ec-highlight strong { color: #000000 !important; }
+    .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
-      .ec-body { background-color: #111827 !important; }
+      .ec-body { background-color: #111827 !important; color: #ffffff !important; }
       .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
       .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }

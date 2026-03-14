@@ -357,15 +357,20 @@ export const getBaseTemplate = (options: {
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Dark mode — colors driven by SiteSettings.emailBrandColorsDark */
+    /* Light mode: black text everywhere */
+    .email-card p, .email-card li, .email-card td, .email-card h1, .email-card h2, .email-card h3,
+    .email-card span, .email-card div, .email-card ul, .email-card ol, .email-card strong,
+    .text-primary, .text-muted, .text-light { color: #000000 !important; }
+
+    /* Dark mode (device preference): white text everywhere */
     @media (prefers-color-scheme: dark) {
       .email-bg { background-color: ${darkColors.background} !important; }
       .email-card { background-color: ${darkColors.backgroundAlt} !important; color: #ffffff !important; }
       .email-card p, .email-card li, .email-card td, .email-card h1, .email-card h2, .email-card h3,
       .email-card span, .email-card div, .email-card ul, .email-card ol, .email-card strong { color: #ffffff !important; }
-      .text-primary { color: ${darkColors.text} !important; }
-      .text-muted { color: ${darkColors.textMuted} !important; }
-      .text-light { color: ${darkColors.textLight} !important; }
+      .text-primary { color: #ffffff !important; }
+      .text-muted { color: #ffffff !important; }
+      .text-light { color: #ffffff !important; }
       .border-light { border-color: ${darkColors.border} !important; }
       .bg-alt { background-color: ${darkColors.background} !important; }
       .link-primary { color: ${darkColors.primary} !important; }
