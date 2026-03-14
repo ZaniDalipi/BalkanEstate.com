@@ -36,6 +36,7 @@ import AchievementsSection from '@/components/shared/AchievementsSection';
 import { Achievement } from '@/components/shared/AchievementsSection';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { AgentStats, MarketInsights } from './useAgentProfile';
 import { Credential } from '@/src/features/credentials/api/credentialApi';
 import CredentialsSection from '@/src/features/credentials/components/CredentialsSection';
