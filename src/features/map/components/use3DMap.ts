@@ -1103,7 +1103,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
       // Add 360 tour door marker for properties without floor visualization
       // (properties with floor data get the door marker via addCustomBuilding3D instead)
-      const willHaveFloorViz = propertyType === 'apartment' && floorNumber != null && totalFloors != null && totalFloors > 0;
+      const willHaveFloorViz = floorNumber != null && totalFloors != null && totalFloors > 0;
       if (!willHaveFloorViz && virtualTour360Url) {
         const doorEl = document.createElement('div');
         doorEl.className = 'apartment-door-marker';
@@ -1150,9 +1150,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
         doorMarkerRef.current = doorMarker;
       }
 
-      // Add custom 3D building with floor slices only for apartments with floor data
+      // Add custom 3D building with floor slices for properties with floor data
       // Wait for tiles to fully load before querying building geometry
-      if (propertyType === 'apartment' && floorNumber != null && totalFloors != null && totalFloors > 0) {
+      if (floorNumber != null && totalFloors != null && totalFloors > 0) {
         // Retry mechanism to ensure building tiles are loaded
         let retryCount = 0;
         const maxRetries = 5;
