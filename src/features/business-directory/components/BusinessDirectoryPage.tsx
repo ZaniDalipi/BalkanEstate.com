@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { useBusinessListings } from '../hooks';
@@ -7,8 +7,8 @@ import BusinessDetailPage from './BusinessDetailPage';
 import CreateBusinessListingForm from './CreateBusinessListingForm';
 import AnimatedTooltip, { type AnimatedTooltipItem } from '@/src/components/ui/AnimatedTooltip';
 import { BUSINESS_CATEGORIES, type BusinessCategory, type BusinessListing, type ListingType } from '@/src/shared/types/businessListing.types';
-import { SearchIcon, PlusIcon, BuildingStorefrontIcon, WrenchScrewdriverIcon, SparklesIcon, UserGroupIcon, UserIcon } from '@/constants';
-import { Animated, StaggeredList } from '@/src/components/ui/Animations';
+import { SearchIcon, PlusIcon, BuildingStorefrontIcon, WrenchScrewdriverIcon, SparklesIcon, UserGroupIcon, UserIcon, MicrophoneIcon, ArrowPathIcon, BoltIcon, ChartBarIcon } from '@/constants';
+import { Animated, AnimatedNumber, StaggeredList } from '@/src/components/ui/Animations';
 import { useAuthModal } from '@/src/app/store/uiStore';
 import Footer from '@/components/shared/Footer';
 
@@ -52,6 +52,53 @@ const BusinessDirectoryPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<BusinessCategory | ''>('');
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [page, setPage] = useState(1);
+
+  // Voice search
+  const [isListening, setIsListening] = useState(false);
+  const [voiceSupported] = useState(() =>
+    typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
+  );
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  const startVoiceSearch = useCallback(() => {
+    if (!voiceSupported) return;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      const transcript = event.results[0][0].transcript;
+      setSearchInput(transcript);
+      setSearch(transcript);
+      setPage(1);
+      setIsListening(false);
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+  }, [voiceSupported]);
+
+  const stopVoiceSearch = useCallback(() => {
+    recognitionRef.current?.stop();
+    setIsListening(false);
+  }, []);
+
+  // Surprise Me - random business discovery
+  const [surpriseAnim, setSurpriseAnim] = useState(false);
+  const handleSurpriseMe = useCallback(() => {
+    if (listings.length === 0) return;
+    setSurpriseAnim(true);
+    // Animate for 800ms then pick a random listing
+    setTimeout(() => {
+      const randomListing = listings[Math.floor(Math.random() * listings.length)];
+      setSelectedListingId(randomListing.id);
+      setSubView('detail');
+      setSurpriseAnim(false);
+    }, 800);
+  }, [listings]);
 
   const listingTypeFilter: ListingType | undefined = useMemo(() => {
     if (activeTab === 'businesses') return 'business';
@@ -137,6 +184,12 @@ const BusinessDirectoryPage: React.FC = () => {
   const popularCategories = useMemo(() =>
     BUSINESS_CATEGORIES.filter(c => ['construction', 'renovation', 'cleaning', 'moving', 'architecture', 'plumbing'].includes(c)),
   []);
+
+  // Stats derived from listings
+  const businessCount = useMemo(() => listings.filter(l => l.listingType === 'business').length, [listings]);
+  const individualCount = useMemo(() => individualListings.length, [individualListings]);
+  const categoryCount = useMemo(() => new Set(listings.map(l => l.category)).size, [listings]);
+  const cityCount = useMemo(() => new Set(listings.map(l => l.city)).size, [listings]);
 
   // Sub-view routing
   if (subView === 'detail' && selectedListingId) {
@@ -224,15 +277,40 @@ const BusinessDirectoryPage: React.FC = () => {
                       type="text"
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
-                      placeholder={t('search.placeholder')}
-                      className="w-full pl-10 sm:pl-12 pr-24 sm:pr-28 py-3 sm:py-4 bg-white/10 border border-white/20 rounded-xl sm:rounded-2xl text-white placeholder-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all text-sm sm:text-base"
+                      placeholder={isListening ? t('voiceSearch.listening') : t('search.placeholder')}
+                      className={`w-full pl-10 sm:pl-12 pr-36 sm:pr-40 py-3 sm:py-4 bg-white/10 border rounded-xl sm:rounded-2xl text-white placeholder-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all text-sm sm:text-base ${isListening ? 'border-red-400/60 ring-2 ring-red-400/20' : 'border-white/20'}`}
                     />
-                    <button
-                      type="submit"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-primary to-blue-600 hover:from-primary hover:to-blue-700 text-white font-bold rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all hover:shadow-lg active:scale-95"
-                    >
-                      {t('search.button')}
-                    </button>
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                      {/* Voice search button */}
+                      {voiceSupported && (
+                        <button
+                          type="button"
+                          onClick={isListening ? stopVoiceSearch : startVoiceSearch}
+                          className={`relative w-9 h-9 rounded-lg flex items-center justify-center transition-all ${
+                            isListening
+                              ? 'bg-red-500 text-white animate-pulse'
+                              : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
+                          }`}
+                          aria-label={isListening ? t('voiceSearch.stop') : t('voiceSearch.start')}
+                          title={isListening ? t('voiceSearch.stop') : t('voiceSearch.start')}
+                        >
+                          <MicrophoneIcon className="w-4 h-4" />
+                          {/* Pulsing ring when listening */}
+                          {isListening && (
+                            <>
+                              <span className="absolute inset-0 rounded-lg border-2 border-red-400 animate-ping opacity-40" />
+                              <span className="absolute -inset-1 rounded-xl border border-red-400/30 animate-pulse" />
+                            </>
+                          )}
+                        </button>
+                      )}
+                      <button
+                        type="submit"
+                        className="px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-primary to-blue-600 hover:from-primary hover:to-blue-700 text-white font-bold rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all hover:shadow-lg active:scale-95"
+                      >
+                        {t('search.button')}
+                      </button>
+                    </div>
                   </div>
                 </form>
 
@@ -267,9 +345,57 @@ const BusinessDirectoryPage: React.FC = () => {
         </div>
       </div>
 
+      {/* === ANIMATED STATS BAR === */}
+      {!isLoading && total > 0 && (
+        <Animated variant="fadeInUp">
+          <div className="max-w-7xl mx-auto px-4 -mt-6 mb-6 relative z-10">
+            <div className="bg-white rounded-2xl shadow-xl border border-neutral-100 p-4 sm:p-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-1.5 mb-1">
+                    <ChartBarIcon className="w-4 h-4 text-primary" />
+                    <span className="text-2xl sm:text-3xl font-black text-neutral-900">
+                      <AnimatedNumber value={total} duration={1200} />
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-neutral-500 font-medium">{t('stats.totalListings')}</p>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-1.5 mb-1">
+                    <BuildingStorefrontIcon className="w-4 h-4 text-blue-500" />
+                    <span className="text-2xl sm:text-3xl font-black text-neutral-900">
+                      <AnimatedNumber value={businessCount} duration={1200} />
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-neutral-500 font-medium">{t('stats.businesses')}</p>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-1.5 mb-1">
+                    <UserIcon className="w-4 h-4 text-violet-500" />
+                    <span className="text-2xl sm:text-3xl font-black text-neutral-900">
+                      <AnimatedNumber value={individualCount} duration={1200} />
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-neutral-500 font-medium">{t('stats.professionals')}</p>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-1.5 mb-1">
+                    <BoltIcon className="w-4 h-4 text-amber-500" />
+                    <span className="text-2xl sm:text-3xl font-black text-neutral-900">
+                      <AnimatedNumber value={categoryCount} duration={1200} />
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-neutral-500 font-medium">{t('stats.categories')}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Animated>
+      )}
+
       {/* === MAIN CONTENT === */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Tabs: All / Businesses / Individuals */}
+        {/* Tabs + Actions bar */}
         <Animated variant="fadeInUp">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div className="flex items-center gap-1 p-1 bg-white rounded-xl border border-neutral-200 shadow-sm">
@@ -290,14 +416,31 @@ const BusinessDirectoryPage: React.FC = () => {
               ))}
             </div>
 
-            <button
-              type="button"
-              onClick={handleCreateClick}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 active:scale-[0.98] transition-all flex-shrink-0"
-            >
-              <PlusIcon className="w-4 h-4" />
-              {t('cta.listBusiness')}
-            </button>
+            <div className="flex items-center gap-2">
+              {/* Surprise Me button */}
+              {listings.length > 1 && (
+                <button
+                  type="button"
+                  onClick={handleSurpriseMe}
+                  disabled={surpriseAnim}
+                  className={`flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-amber-500/25 active:scale-[0.98] transition-all flex-shrink-0 text-sm ${
+                    surpriseAnim ? 'animate-pulse' : ''
+                  }`}
+                >
+                  <ArrowPathIcon className={`w-4 h-4 ${surpriseAnim ? 'animate-spin' : ''}`} />
+                  {surpriseAnim ? t('surpriseMe.loading') : t('surpriseMe.button')}
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={handleCreateClick}
+                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 active:scale-[0.98] transition-all flex-shrink-0"
+              >
+                <PlusIcon className="w-4 h-4" />
+                {t('cta.listBusiness')}
+              </button>
+            </div>
           </div>
         </Animated>
 

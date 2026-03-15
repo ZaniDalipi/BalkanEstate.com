@@ -48,6 +48,26 @@
     "appliances": "Appliances",
     "other": "Other"
   },
+  "voiceSearch": {
+    "start": "Search by voice",
+    "stop": "Stop listening",
+    "listening": "Listening... speak now"
+  },
+  "stats": {
+    "totalListings": "Total Listings",
+    "businesses": "Businesses",
+    "professionals": "Professionals",
+    "categories": "Categories"
+  },
+  "surpriseMe": {
+    "button": "Surprise Me",
+    "loading": "Discovering..."
+  },
+  "quickActions": {
+    "call": "Quick call",
+    "email": "Send email",
+    "website": "Visit website"
+  },
   "cta": {
     "listBusiness": "List Your Business",
     "beFirst": "Be the First to List"
