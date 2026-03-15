@@ -8,7 +8,7 @@ import BusinessDetailPage from './BusinessDetailPage';
 import CreateBusinessListingForm from './CreateBusinessListingForm';
 import AnimatedTooltip, { type AnimatedTooltipItem } from '@/src/components/ui/AnimatedTooltip';
 import { BUSINESS_CATEGORIES, type BusinessCategory, type BusinessListing, type ListingType } from '@/src/shared/types/businessListing.types';
-import { SearchIcon, PlusIcon, BuildingStorefrontIcon, WrenchScrewdriverIcon, SparklesIcon, UserGroupIcon, UserIcon, MicrophoneIcon, ArrowPathIcon, BoltIcon, ChartBarIcon } from '@/constants';
+import { SearchIcon, PlusIcon, BuildingStorefrontIcon, WrenchScrewdriverIcon, UserGroupIcon, UserIcon, MicrophoneIcon, ArrowPathIcon, BoltIcon, ChartBarIcon } from '@/constants';
 import { AnimatedNumber } from '@/src/components/ui/Animations';
 import { useAuthModal } from '@/src/app/store/uiStore';
 import Footer from '@/components/shared/Footer';
