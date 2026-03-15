@@ -100,7 +100,26 @@
     "location": "Location",
     "socialMedia": "Social Media",
     "views": "{{count}} views",
-    "notFound": "Business listing not found"
+    "notFound": "Business listing not found",
+    "notFoundDesc": "The listing you're looking for may have been removed or doesn't exist.",
+    "share": "Share",
+    "linkCopied": "Link copied to clipboard!",
+    "getInTouch": "Reach out to get started",
+    "callNow": "Call Now",
+    "owner": "About the Owner",
+    "ownerIndividual": "Independent Professional",
+    "ownerBusiness": "Business Owner",
+    "stats": {
+      "services": "Services",
+      "views": "Views",
+      "memberSince": "Member since"
+    },
+    "cta": {
+      "title": "Ready to work with {{name}}?",
+      "subtitle": "Get in touch today to discuss your project and get a free consultation.",
+      "callNow": "Call {{phone}}",
+      "sendEmail": "Send Email"
+    }
   },
   "days": {
     "monday": "Monday",
