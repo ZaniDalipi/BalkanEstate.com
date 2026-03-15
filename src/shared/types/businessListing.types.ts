@@ -45,6 +45,8 @@ export interface BusinessListing {
   address?: string;
   city: string;
   country: string;
+  latitude?: number;
+  longitude?: number;
   logoUrl?: string;
   socialMedia?: {
     facebook?: string;
@@ -96,6 +98,8 @@ export interface CreateBusinessListingData {
   address?: string;
   city: string;
   country: string;
+  latitude?: number;
+  longitude?: number;
   socialMedia?: {
     facebook?: string;
     instagram?: string;

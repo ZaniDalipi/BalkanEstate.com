@@ -5,16 +5,18 @@ import { useAppContext } from '@/context/AppContext';
 import { useBusinessListings } from '../hooks';
 import BusinessCard from './BusinessCard';
 import BusinessDetailPage from './BusinessDetailPage';
+import BusinessDirectoryMap from './BusinessDirectoryMap';
 import CreateBusinessListingForm from './CreateBusinessListingForm';
 import AnimatedTooltip, { type AnimatedTooltipItem } from '@/src/components/ui/AnimatedTooltip';
 import { BUSINESS_CATEGORIES, type BusinessCategory, type BusinessListing, type ListingType } from '@/src/shared/types/businessListing.types';
-import { SearchIcon, PlusIcon, BuildingStorefrontIcon, WrenchScrewdriverIcon, UserGroupIcon, UserIcon, MicrophoneIcon, ArrowPathIcon, BoltIcon, ChartBarIcon } from '@/constants';
+import { SearchIcon, PlusIcon, BuildingStorefrontIcon, WrenchScrewdriverIcon, UserGroupIcon, UserIcon, MicrophoneIcon, ArrowPathIcon, BoltIcon, ChartBarIcon, MapIcon } from '@/constants';
 import { AnimatedNumber } from '@/src/components/ui/Animations';
 import { useAuthModal } from '@/src/app/store/uiStore';
 import Footer from '@/components/shared/Footer';
 
 type SubView = 'list' | 'detail' | 'create';
 type TabType = 'all' | 'businesses' | 'individuals';
+type ViewMode = 'grid' | 'map';
 
 const CATEGORY_ICONS: Record<string, string> = {
   construction: '\u{1F3D7}',
@@ -82,6 +84,7 @@ const BusinessDirectoryPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<BusinessCategory | ''>('');
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [page, setPage] = useState(1);
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
   // Voice search
   const [isListening, setIsListening] = useState(false);
@@ -502,6 +505,33 @@ const BusinessDirectoryPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Map / Grid toggle */}
+            <motion.button
+              type="button"
+              onClick={() => setViewMode(v => v === 'grid' ? 'map' : 'grid')}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold transition-all text-sm ${
+                viewMode === 'map'
+                  ? 'bg-primary text-white shadow-lg shadow-primary/25'
+                  : 'bg-white text-neutral-600 border border-neutral-200 hover:border-primary/30 hover:shadow-md'
+              }`}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              {viewMode === 'map' ? (
+                <>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+                  </svg>
+                  {t('viewMode.grid', 'Grid')}
+                </>
+              ) : (
+                <>
+                  <MapIcon className="w-4 h-4" />
+                  {t('viewMode.map', 'Map')}
+                </>
+              )}
+            </motion.button>
+
             {/* Surprise Me button - requires auth */}
             {listings.length > 1 && (
               <motion.button
@@ -661,9 +691,9 @@ const BusinessDirectoryPage: React.FC = () => {
           )}
         </AnimatePresence>
 
-        {/* Listings grid */}
+        {/* Listings grid or map */}
         <AnimatePresence mode="wait">
-          {!isLoading && listings.length > 0 && (
+          {!isLoading && listings.length > 0 && viewMode === 'grid' && (
             <motion.div
               key={`listings-${selectedCategory}-${activeTab}-${page}`}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
@@ -679,6 +709,25 @@ const BusinessDirectoryPage: React.FC = () => {
                   />
                 </motion.div>
               ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Map view */}
+        <AnimatePresence mode="wait">
+          {!isLoading && listings.length > 0 && viewMode === 'map' && (
+            <motion.div
+              key="map-view"
+              className="h-[500px] sm:h-[600px] lg:h-[700px]"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.3 }}
+            >
+              <BusinessDirectoryMap
+                listings={listings}
+                onListingClick={handleCardClick}
+              />
             </motion.div>
           )}
         </AnimatePresence>
