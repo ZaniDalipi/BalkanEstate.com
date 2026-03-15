@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import { PhoneIcon, MapPinIcon, CheckBadgeIcon, UserIcon, BuildingStorefrontIcon, EnvelopeIcon, GlobeAltIcon, EyeIcon } from '@/constants';
 import MagneticTiltCard from './MagneticTiltCard';
@@ -57,60 +58,70 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick }) => {
       <button
         type="button"
         onClick={() => onClick(listing)}
-        className="w-full text-left bg-white rounded-2xl sm:rounded-3xl shadow-lg overflow-hidden border border-gray-100/80 group transition-all duration-300"
+        className="w-full text-left bg-white rounded-2xl sm:rounded-3xl shadow-md shadow-neutral-200/60 hover:shadow-xl hover:shadow-neutral-300/50 overflow-hidden border border-neutral-100/80 group transition-all duration-500"
       >
         {/* Category gradient banner */}
         <div className={`h-20 sm:h-24 bg-gradient-to-r ${gradient} relative overflow-hidden`}>
-          {/* Subtle pattern overlay */}
-          <div className="absolute inset-0 opacity-20">
+          {/* Animated mesh pattern overlay */}
+          <div className="absolute inset-0 opacity-[0.15]">
             <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
               <defs>
-                <pattern id={`card-dots-${listing.id}`} width="16" height="16" patternUnits="userSpaceOnUse">
-                  <circle cx="2" cy="2" r="1" fill="white" />
+                <pattern id={`card-mesh-${listing.id}`} width="20" height="20" patternUnits="userSpaceOnUse">
+                  <circle cx="3" cy="3" r="1.5" fill="white" />
+                  <circle cx="13" cy="13" r="0.8" fill="white" />
                 </pattern>
               </defs>
-              <rect width="100%" height="100%" fill={`url(#card-dots-${listing.id})`} />
+              <rect width="100%" height="100%" fill={`url(#card-mesh-${listing.id})`} />
             </svg>
           </div>
 
-          {/* Quick contact actions - slide in from right on hover */}
-          <div className="absolute bottom-2 right-3 flex items-center gap-1.5 translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 z-10">
-            <button
+          {/* Shine sweep on hover */}
+          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+          {/* Quick contact actions - slide up from bottom on hover */}
+          <div className="absolute bottom-2 right-3 flex items-center gap-1.5 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out z-10">
+            <motion.button
               type="button"
               onClick={handleQuickCall}
-              className="w-7 h-7 rounded-full bg-white/25 backdrop-blur-md border border-white/30 flex items-center justify-center hover:bg-white/40 transition-all hover:scale-110 active:scale-95"
+              className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center hover:bg-white/40 transition-colors"
+              whileHover={{ scale: 1.15 }}
+              whileTap={{ scale: 0.9 }}
               aria-label={t('quickActions.call')}
               title={t('quickActions.call')}
             >
               <PhoneIcon className="w-3.5 h-3.5 text-white" />
-            </button>
+            </motion.button>
             {listing.contactEmail && (
-              <button
+              <motion.button
                 type="button"
                 onClick={handleQuickEmail}
-                className="w-7 h-7 rounded-full bg-white/25 backdrop-blur-md border border-white/30 flex items-center justify-center hover:bg-white/40 transition-all hover:scale-110 active:scale-95"
+                className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center hover:bg-white/40 transition-colors"
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.9 }}
                 aria-label={t('quickActions.email')}
                 title={t('quickActions.email')}
               >
                 <EnvelopeIcon className="w-3.5 h-3.5 text-white" />
-              </button>
+              </motion.button>
             )}
             {listing.website && (
-              <button
+              <motion.button
                 type="button"
                 onClick={handleQuickWebsite}
-                className="w-7 h-7 rounded-full bg-white/25 backdrop-blur-md border border-white/30 flex items-center justify-center hover:bg-white/40 transition-all hover:scale-110 active:scale-95"
+                className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center hover:bg-white/40 transition-colors"
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.9 }}
                 aria-label={t('quickActions.website')}
                 title={t('quickActions.website')}
               >
                 <GlobeAltIcon className="w-3.5 h-3.5 text-white" />
-              </button>
+              </motion.button>
             )}
           </div>
 
           {/* Listing type badge */}
           <div className="absolute top-3 right-3">
-            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider backdrop-blur-md ${
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider backdrop-blur-md shadow-sm ${
               isIndividual
                 ? 'bg-violet-500/30 text-white border border-violet-300/30'
                 : 'bg-white/20 text-white border border-white/20'
@@ -123,7 +134,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick }) => {
           {/* Verified badge on banner */}
           {listing.isVerified && (
             <div className="absolute top-3 left-3">
-              <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-500/30 backdrop-blur-md rounded-lg text-white text-[10px] font-bold border border-emerald-300/30">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-500/30 backdrop-blur-md rounded-lg text-white text-[10px] font-bold border border-emerald-300/30 shadow-sm">
                 <CheckBadgeIcon className="w-3 h-3" />
                 {t('verified')}
               </span>
@@ -133,7 +144,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick }) => {
 
         {/* Overlapping logo */}
         <div className="px-4 sm:px-5 -mt-8 relative z-10">
-          <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center flex-shrink-0 overflow-hidden border-4 border-white shadow-lg group-hover:shadow-xl transition-shadow">
+          <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center flex-shrink-0 overflow-hidden border-[3px] border-white shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 ring-1 ring-neutral-100/50">
             {listing.logoUrl ? (
               <img
                 src={listing.logoUrl}
@@ -143,7 +154,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick }) => {
               />
             ) : (
               <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center rounded-lg`}>
-                <span className="text-xl font-bold text-white">
+                <span className="text-xl font-bold text-white drop-shadow-sm">
                   {listing.name.charAt(0).toUpperCase()}
                 </span>
               </div>
@@ -154,14 +165,17 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick }) => {
         {/* Content */}
         <div className="p-4 pt-3 sm:px-5">
           {/* Name */}
-          <div className="flex items-center gap-1.5 mb-1">
-            <h3 className="font-bold text-neutral-900 truncate group-hover:text-primary transition-colors text-[15px]">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <h3 className="font-bold text-neutral-900 truncate group-hover:text-primary transition-colors duration-300 text-[15px]">
               {listing.name}
             </h3>
+            {listing.isVerified && (
+              <CheckBadgeIcon className="w-4 h-4 text-primary flex-shrink-0" />
+            )}
           </div>
 
           {/* Category chip */}
-          <span className="inline-block px-2.5 py-0.5 text-xs font-semibold bg-primary/10 text-primary rounded-full mb-2">
+          <span className="inline-block px-2.5 py-0.5 text-xs font-semibold bg-primary/8 text-primary rounded-full mb-2.5 border border-primary/10">
             {t(`categories.${listing.category}`)}
           </span>
 
@@ -178,13 +192,13 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick }) => {
               {listing.services.slice(0, 3).map((service) => (
                 <span
                   key={service}
-                  className="px-2 py-0.5 text-[11px] font-medium bg-neutral-100 text-neutral-600 rounded-md"
+                  className="px-2 py-0.5 text-[11px] font-medium bg-neutral-50 text-neutral-600 rounded-md border border-neutral-100"
                 >
                   {service}
                 </span>
               ))}
               {listing.services.length > 3 && (
-                <span className="px-2 py-0.5 text-[11px] text-neutral-400">
+                <span className="px-2 py-0.5 text-[11px] text-neutral-400 font-medium">
                   +{listing.services.length - 3}
                 </span>
               )}
@@ -193,10 +207,10 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick }) => {
         </div>
 
         {/* Footer */}
-        <div className="px-4 sm:px-5 py-3 border-t border-neutral-100 flex items-center justify-between text-sm text-neutral-500 bg-neutral-50/50">
+        <div className="px-4 sm:px-5 py-3 border-t border-neutral-100/80 flex items-center justify-between text-sm text-neutral-500 bg-gradient-to-r from-neutral-50/80 to-neutral-50/30">
           <span className="flex items-center gap-1.5 truncate">
             <MapPinIcon className="w-3.5 h-3.5 flex-shrink-0 text-neutral-400" />
-            <span className="truncate">{listing.city}, {listing.country}</span>
+            <span className="truncate text-xs">{listing.city}, {listing.country}</span>
           </span>
           {listing.views != null && listing.views > 0 ? (
             <span className="flex items-center gap-1 flex-shrink-0 text-neutral-400 text-xs">
@@ -204,7 +218,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick }) => {
               {listing.views}
             </span>
           ) : (
-            <span className="flex items-center gap-1.5 flex-shrink-0 text-primary font-medium">
+            <span className="flex items-center gap-1.5 flex-shrink-0 text-primary font-medium text-xs">
               <PhoneIcon className="w-3.5 h-3.5" />
               {listing.contactPhone}
             </span>

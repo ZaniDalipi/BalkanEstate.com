@@ -1,5 +1,6 @@
-import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
 import { useBusinessListings } from '../hooks';
 import BusinessCard from './BusinessCard';
@@ -8,7 +9,7 @@ import CreateBusinessListingForm from './CreateBusinessListingForm';
 import AnimatedTooltip, { type AnimatedTooltipItem } from '@/src/components/ui/AnimatedTooltip';
 import { BUSINESS_CATEGORIES, type BusinessCategory, type BusinessListing, type ListingType } from '@/src/shared/types/businessListing.types';
 import { SearchIcon, PlusIcon, BuildingStorefrontIcon, WrenchScrewdriverIcon, SparklesIcon, UserGroupIcon, UserIcon, MicrophoneIcon, ArrowPathIcon, BoltIcon, ChartBarIcon } from '@/constants';
-import { Animated, AnimatedNumber, StaggeredList } from '@/src/components/ui/Animations';
+import { AnimatedNumber } from '@/src/components/ui/Animations';
 import { useAuthModal } from '@/src/app/store/uiStore';
 import Footer from '@/components/shared/Footer';
 
@@ -36,6 +37,35 @@ const CATEGORY_ICONS: Record<string, string> = {
   furniture: '\u{1FA91}',
   appliances: '\u{1F4FA}',
   other: '\u{1F4CB}',
+};
+
+// Framer-motion variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.06 },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: 'spring', stiffness: 260, damping: 24 },
+  },
+};
+
+const fadeUpVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } },
+};
+
+const scaleInVariants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: { opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 200, damping: 20 } },
 };
 
 const BusinessDirectoryPage: React.FC = () => {
@@ -122,7 +152,6 @@ const BusinessDirectoryPage: React.FC = () => {
   [listings]);
 
   const tooltipItems: AnimatedTooltipItem[] = useMemo(() => {
-    // Shuffle individuals for variety
     const shuffled = [...individualListings].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, 12).map((l, i) => ({
       id: i,
@@ -166,13 +195,18 @@ const BusinessDirectoryPage: React.FC = () => {
     setSelectedListingId(null);
   }, []);
 
-  const handleCreateClick = useCallback(() => {
+  // Auth-guarded create click - require login for any create/list action
+  const requireAuth = useCallback((action: () => void) => {
     if (!state.currentUser) {
       openAuthModal('login');
       return;
     }
-    setSubView('create');
+    action();
   }, [state.currentUser, openAuthModal]);
+
+  const handleCreateClick = useCallback(() => {
+    requireAuth(() => setSubView('create'));
+  }, [requireAuth]);
 
   const handleCreateSuccess = useCallback(() => {
     setSubView('list');
@@ -189,7 +223,6 @@ const BusinessDirectoryPage: React.FC = () => {
   const businessCount = useMemo(() => listings.filter(l => l.listingType === 'business').length, [listings]);
   const individualCount = useMemo(() => individualListings.length, [individualListings]);
   const categoryCount = useMemo(() => new Set(listings.map(l => l.category)).size, [listings]);
-  const cityCount = useMemo(() => new Set(listings.map(l => l.city)).size, [listings]);
 
   // Sub-view routing
   if (subView === 'detail' && selectedListingId) {
@@ -225,115 +258,180 @@ const BusinessDirectoryPage: React.FC = () => {
           </svg>
         </div>
 
-        {/* Floating blur orbs */}
-        <div className="absolute top-10 left-[10%] w-72 h-72 bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-10 right-[10%] w-96 h-96 bg-violet-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        {/* Floating blur orbs with motion */}
+        <motion.div
+          className="absolute top-10 left-[10%] w-72 h-72 bg-blue-500/20 rounded-full blur-3xl"
+          animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.35, 0.2] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute bottom-10 right-[10%] w-96 h-96 bg-violet-500/20 rounded-full blur-3xl"
+          animate={{ scale: [1.1, 1, 1.1], opacity: [0.15, 0.3, 0.15] }}
+          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+        />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl" />
 
         {/* Floating decorative icons */}
-        <div className="absolute top-20 left-[5%] opacity-20 hidden lg:block animate-float">
+        <motion.div
+          className="absolute top-20 left-[5%] opacity-20 hidden lg:block"
+          animate={{ y: [-10, 10, -10], rotate: [0, 5, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+        >
           <WrenchScrewdriverIcon className="w-16 h-16 text-white" />
-        </div>
-        <div className="absolute bottom-32 right-[8%] opacity-15 hidden lg:block animate-float" style={{ animationDelay: '1.5s' }}>
+        </motion.div>
+        <motion.div
+          className="absolute bottom-32 right-[8%] opacity-15 hidden lg:block"
+          animate={{ y: [10, -10, 10], rotate: [0, -5, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
+        >
           <BuildingStorefrontIcon className="w-20 h-20 text-white" />
-        </div>
+        </motion.div>
 
         {/* Main hero content */}
         <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
           <div className="max-w-7xl mx-auto">
             {/* Glass badge */}
-            <div className="flex justify-center mb-6">
+            <motion.div
+              className="flex justify-center mb-6"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-                <SparklesIcon className="w-4 h-4 text-amber-400" />
+                <motion.span animate={{ rotate: [0, 15, -15, 0] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}>
+                  <SparklesIcon className="w-4 h-4 text-amber-400" />
+                </motion.span>
                 <span className="text-white/90 font-semibold text-sm uppercase tracking-wider">
                   {t('hero.badge')}
                 </span>
-                <SparklesIcon className="w-4 h-4 text-amber-400" />
+                <motion.span animate={{ rotate: [0, -15, 15, 0] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, delay: 0.3 }}>
+                  <SparklesIcon className="w-4 h-4 text-amber-400" />
+                </motion.span>
               </div>
-            </div>
+            </motion.div>
 
             {/* Heading */}
-            <div className="text-center mb-8 sm:mb-10">
+            <motion.div
+              className="text-center mb-8 sm:mb-10"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+            >
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 sm:mb-6 leading-tight">
                 {t('hero.title')}
-                <span className="block mt-2 bg-gradient-to-r from-blue-400 via-violet-400 to-purple-400 bg-clip-text text-transparent">
+                <motion.span
+                  className="block mt-2 bg-gradient-to-r from-blue-400 via-violet-400 to-purple-400 bg-clip-text text-transparent"
+                  initial={{ backgroundPosition: '0% 50%' }}
+                  animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
+                  transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
+                  style={{ backgroundSize: '200% auto' }}
+                >
                   {t('hero.titleHighlight')}
-                </span>
+                </motion.span>
               </h1>
               <p className="text-base sm:text-lg lg:text-xl text-white/70 max-w-3xl mx-auto leading-relaxed">
                 {t('hero.subtitle')}
               </p>
-            </div>
+            </motion.div>
 
             {/* Glass search box */}
-            <div className="max-w-2xl mx-auto">
-              <div className="relative bg-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/20 shadow-2xl">
+            <motion.div
+              className="max-w-2xl mx-auto"
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.4, type: 'spring', stiffness: 200, damping: 22 }}
+            >
+              <div className="relative bg-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/20 shadow-2xl shadow-black/20">
                 <form onSubmit={handleSearch}>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-3 sm:left-4 flex items-center pointer-events-none">
-                      <SearchIcon className={`w-5 h-5 transition-colors ${searchInput ? 'text-primary' : 'text-white/50'}`} />
+                      <SearchIcon className={`w-5 h-5 transition-colors duration-300 ${searchInput ? 'text-primary' : 'text-white/50'}`} />
                     </div>
                     <input
                       type="text"
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
                       placeholder={isListening ? t('voiceSearch.listening') : t('search.placeholder')}
-                      className={`w-full pl-10 sm:pl-12 pr-36 sm:pr-40 py-3 sm:py-4 bg-white/10 border rounded-xl sm:rounded-2xl text-white placeholder-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all text-sm sm:text-base ${isListening ? 'border-red-400/60 ring-2 ring-red-400/20' : 'border-white/20'}`}
+                      className={`w-full pl-10 sm:pl-12 pr-36 sm:pr-40 py-3 sm:py-4 bg-white/10 border rounded-xl sm:rounded-2xl text-white placeholder-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-300 text-sm sm:text-base ${isListening ? 'border-red-400/60 ring-2 ring-red-400/20' : 'border-white/20'}`}
                     />
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
                       {/* Voice search button */}
                       {voiceSupported && (
-                        <button
+                        <motion.button
                           type="button"
                           onClick={isListening ? stopVoiceSearch : startVoiceSearch}
-                          className={`relative w-9 h-9 rounded-lg flex items-center justify-center transition-all ${
+                          className={`relative w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${
                             isListening
-                              ? 'bg-red-500 text-white animate-pulse'
+                              ? 'bg-red-500 text-white'
                               : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
                           }`}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
                           aria-label={isListening ? t('voiceSearch.stop') : t('voiceSearch.start')}
                           title={isListening ? t('voiceSearch.stop') : t('voiceSearch.start')}
                         >
                           <MicrophoneIcon className="w-4 h-4" />
-                          {/* Pulsing ring when listening */}
                           {isListening && (
                             <>
-                              <span className="absolute inset-0 rounded-lg border-2 border-red-400 animate-ping opacity-40" />
-                              <span className="absolute -inset-1 rounded-xl border border-red-400/30 animate-pulse" />
+                              <motion.span
+                                className="absolute inset-0 rounded-lg border-2 border-red-400"
+                                animate={{ scale: [1, 1.4], opacity: [0.6, 0] }}
+                                transition={{ duration: 1, repeat: Infinity }}
+                              />
+                              <motion.span
+                                className="absolute inset-0 rounded-lg border-2 border-red-400"
+                                animate={{ scale: [1, 1.6], opacity: [0.4, 0] }}
+                                transition={{ duration: 1, repeat: Infinity, delay: 0.3 }}
+                              />
                             </>
                           )}
-                        </button>
+                        </motion.button>
                       )}
-                      <button
+                      <motion.button
                         type="submit"
-                        className="px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-primary to-blue-600 hover:from-primary hover:to-blue-700 text-white font-bold rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all hover:shadow-lg active:scale-95"
+                        className="px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-primary to-blue-600 hover:from-primary hover:to-blue-700 text-white font-bold rounded-lg sm:rounded-xl text-xs sm:text-sm transition-colors hover:shadow-lg hover:shadow-primary/30"
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.95 }}
                       >
                         {t('search.button')}
-                      </button>
+                      </motion.button>
                     </div>
                   </div>
                 </form>
 
                 {/* Popular categories */}
-                {!searchInput && (
-                  <div className="text-center mt-4">
-                    <p className="text-white/50 text-xs mb-2">{t('hero.popularCategories')}</p>
-                    <div className="flex flex-wrap justify-center gap-2">
-                      {popularCategories.map((cat) => (
-                        <button
-                          key={cat}
-                          type="button"
-                          onClick={() => { handleCategoryClick(cat); }}
-                          className="px-3 py-1.5 text-xs bg-white/10 hover:bg-white/20 border border-white/10 hover:border-white/30 text-white/70 hover:text-white rounded-lg transition-all"
-                        >
-                          {CATEGORY_ICONS[cat]} {t(`categories.${cat}`)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <AnimatePresence>
+                  {!searchInput && (
+                    <motion.div
+                      className="text-center mt-4"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <p className="text-white/50 text-xs mb-2">{t('hero.popularCategories')}</p>
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {popularCategories.map((cat, i) => (
+                          <motion.button
+                            key={cat}
+                            type="button"
+                            onClick={() => handleCategoryClick(cat)}
+                            className="px-3 py-1.5 text-xs bg-white/10 hover:bg-white/20 border border-white/10 hover:border-white/30 text-white/70 hover:text-white rounded-lg transition-colors"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5 + i * 0.05 }}
+                            whileHover={{ scale: 1.05, y: -1 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            {CATEGORY_ICONS[cat]} {t(`categories.${cat}`)}
+                          </motion.button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
 
@@ -347,109 +445,133 @@ const BusinessDirectoryPage: React.FC = () => {
 
       {/* === ANIMATED STATS BAR === */}
       {!isLoading && total > 0 && (
-        <Animated variant="fadeInUp">
-          <div className="max-w-7xl mx-auto px-4 -mt-6 mb-6 relative z-10">
-            <div className="bg-white rounded-2xl shadow-xl border border-neutral-100 p-4 sm:p-6">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
-                <div className="text-center">
+        <motion.div
+          className="max-w-7xl mx-auto px-4 -mt-6 mb-6 relative z-10"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.5 }}
+          variants={scaleInVariants}
+        >
+          <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl shadow-neutral-200/50 border border-neutral-100/80 p-4 sm:p-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+              {[
+                { icon: <ChartBarIcon className="w-5 h-5 text-primary" />, value: total, label: t('stats.totalListings'), color: 'from-primary/10 to-blue-500/10' },
+                { icon: <BuildingStorefrontIcon className="w-5 h-5 text-blue-500" />, value: businessCount, label: t('stats.businesses'), color: 'from-blue-500/10 to-cyan-500/10' },
+                { icon: <UserIcon className="w-5 h-5 text-violet-500" />, value: individualCount, label: t('stats.professionals'), color: 'from-violet-500/10 to-purple-500/10' },
+                { icon: <BoltIcon className="w-5 h-5 text-amber-500" />, value: categoryCount, label: t('stats.categories'), color: 'from-amber-500/10 to-orange-500/10' },
+              ].map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  className={`text-center p-3 rounded-xl bg-gradient-to-br ${stat.color}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, type: 'spring', stiffness: 200, damping: 20 }}
+                >
                   <div className="flex items-center justify-center gap-1.5 mb-1">
-                    <ChartBarIcon className="w-4 h-4 text-primary" />
+                    {stat.icon}
                     <span className="text-2xl sm:text-3xl font-black text-neutral-900">
-                      <AnimatedNumber value={total} duration={1200} />
+                      <AnimatedNumber value={stat.value} duration={1200} />
                     </span>
                   </div>
-                  <p className="text-xs sm:text-sm text-neutral-500 font-medium">{t('stats.totalListings')}</p>
-                </div>
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1.5 mb-1">
-                    <BuildingStorefrontIcon className="w-4 h-4 text-blue-500" />
-                    <span className="text-2xl sm:text-3xl font-black text-neutral-900">
-                      <AnimatedNumber value={businessCount} duration={1200} />
-                    </span>
-                  </div>
-                  <p className="text-xs sm:text-sm text-neutral-500 font-medium">{t('stats.businesses')}</p>
-                </div>
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1.5 mb-1">
-                    <UserIcon className="w-4 h-4 text-violet-500" />
-                    <span className="text-2xl sm:text-3xl font-black text-neutral-900">
-                      <AnimatedNumber value={individualCount} duration={1200} />
-                    </span>
-                  </div>
-                  <p className="text-xs sm:text-sm text-neutral-500 font-medium">{t('stats.professionals')}</p>
-                </div>
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1.5 mb-1">
-                    <BoltIcon className="w-4 h-4 text-amber-500" />
-                    <span className="text-2xl sm:text-3xl font-black text-neutral-900">
-                      <AnimatedNumber value={categoryCount} duration={1200} />
-                    </span>
-                  </div>
-                  <p className="text-xs sm:text-sm text-neutral-500 font-medium">{t('stats.categories')}</p>
-                </div>
-              </div>
+                  <p className="text-xs sm:text-sm text-neutral-500 font-medium">{stat.label}</p>
+                </motion.div>
+              ))}
             </div>
           </div>
-        </Animated>
+        </motion.div>
       )}
 
       {/* === MAIN CONTENT === */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Tabs + Actions bar */}
-        <Animated variant="fadeInUp">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div className="flex items-center gap-1 p-1 bg-white rounded-xl border border-neutral-200 shadow-sm">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => handleTabChange(tab.key)}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    activeTab === tab.key
-                      ? 'bg-gradient-to-r from-primary to-blue-600 text-white shadow-md shadow-primary/25'
-                      : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50'
-                  }`}
-                >
+        <motion.div
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6"
+          variants={fadeUpVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          <div className="flex items-center gap-1 p-1 bg-white rounded-xl border border-neutral-200/80 shadow-sm">
+            {tabs.map((tab) => (
+              <motion.button
+                key={tab.key}
+                type="button"
+                onClick={() => handleTabChange(tab.key)}
+                className={`relative flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                  activeTab === tab.key
+                    ? 'text-white'
+                    : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50'
+                }`}
+                whileHover={activeTab !== tab.key ? { scale: 1.02 } : {}}
+                whileTap={{ scale: 0.97 }}
+              >
+                {activeTab === tab.key && (
+                  <motion.div
+                    layoutId="activeTab"
+                    className="absolute inset-0 bg-gradient-to-r from-primary to-blue-600 rounded-lg shadow-md shadow-primary/25"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-1.5">
                   {tab.icon}
                   {tab.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-2">
-              {/* Surprise Me button */}
-              {listings.length > 1 && (
-                <button
-                  type="button"
-                  onClick={handleSurpriseMe}
-                  disabled={surpriseAnim}
-                  className={`flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-amber-500/25 active:scale-[0.98] transition-all flex-shrink-0 text-sm ${
-                    surpriseAnim ? 'animate-pulse' : ''
-                  }`}
-                >
-                  <ArrowPathIcon className={`w-4 h-4 ${surpriseAnim ? 'animate-spin' : ''}`} />
-                  {surpriseAnim ? t('surpriseMe.loading') : t('surpriseMe.button')}
-                </button>
-              )}
-
-              <button
-                type="button"
-                onClick={handleCreateClick}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 active:scale-[0.98] transition-all flex-shrink-0"
-              >
-                <PlusIcon className="w-4 h-4" />
-                {t('cta.listBusiness')}
-              </button>
-            </div>
+                </span>
+              </motion.button>
+            ))}
           </div>
-        </Animated>
+
+          <div className="flex items-center gap-2">
+            {/* Surprise Me button - requires auth */}
+            {listings.length > 1 && (
+              <motion.button
+                type="button"
+                onClick={() => requireAuth(handleSurpriseMe)}
+                disabled={surpriseAnim}
+                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-amber-500/25 transition-shadow flex-shrink-0 text-sm disabled:opacity-70"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                <motion.span
+                  animate={surpriseAnim ? { rotate: 360 } : {}}
+                  transition={surpriseAnim ? { duration: 0.6, repeat: Infinity, ease: 'linear' } : {}}
+                >
+                  <ArrowPathIcon className="w-4 h-4" />
+                </motion.span>
+                {surpriseAnim ? t('surpriseMe.loading') : t('surpriseMe.button')}
+              </motion.button>
+            )}
+
+            {/* List Your Business - requires auth */}
+            <motion.button
+              type="button"
+              onClick={handleCreateClick}
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-shadow flex-shrink-0"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              <PlusIcon className="w-4 h-4" />
+              {t('cta.listBusiness')}
+            </motion.button>
+          </div>
+        </motion.div>
 
         {/* Individuals AnimatedTooltip showcase */}
-        {(activeTab === 'all' || activeTab === 'individuals') && tooltipItems.length > 0 && (
-          <Animated variant="fadeInUp">
-            <div className="mb-8 p-6 bg-gradient-to-r from-slate-900 via-blue-900/95 to-indigo-900 rounded-2xl border border-white/10 shadow-xl overflow-hidden relative">
+        <AnimatePresence>
+          {(activeTab === 'all' || activeTab === 'individuals') && tooltipItems.length > 0 && (
+            <motion.div
+              className="mb-8 p-6 bg-gradient-to-r from-slate-900 via-blue-900/95 to-indigo-900 rounded-2xl border border-white/10 shadow-xl overflow-hidden relative"
+              initial={{ opacity: 0, y: 20, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: 'auto' }}
+              exit={{ opacity: 0, y: -10, height: 0 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+            >
               {/* Subtle decorative orb */}
-              <div className="absolute -top-10 -right-10 w-40 h-40 bg-violet-500/20 rounded-full blur-3xl" />
+              <motion.div
+                className="absolute -top-10 -right-10 w-40 h-40 bg-violet-500/20 rounded-full blur-3xl"
+                animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.4, 0.2] }}
+                transition={{ duration: 4, repeat: Infinity }}
+              />
 
               <div className="relative z-10">
                 <div className="flex items-center gap-2 mb-1">
@@ -461,143 +583,210 @@ const BusinessDirectoryPage: React.FC = () => {
                   <AnimatedTooltip items={tooltipItems} onItemClick={handleTooltipClick} />
                 </div>
               </div>
-            </div>
-          </Animated>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Category filters */}
-        <Animated variant="fadeInUp">
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide mb-4">
-            <button
+        <motion.div
+          className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide mb-4"
+          variants={fadeUpVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          <motion.button
+            type="button"
+            onClick={() => handleCategoryClick('')}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex-shrink-0 ${
+              selectedCategory === ''
+                ? 'bg-primary text-white shadow-lg shadow-primary/25'
+                : 'bg-white text-neutral-600 border border-neutral-200 hover:border-primary/30 hover:shadow-md'
+            }`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            {t('filters.all')}
+          </motion.button>
+          {BUSINESS_CATEGORIES.filter(c => c !== 'other').slice(0, 10).map((category) => (
+            <motion.button
+              key={category}
               type="button"
-              onClick={() => handleCategoryClick('')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex-shrink-0 ${
-                selectedCategory === ''
+              onClick={() => handleCategoryClick(category)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex-shrink-0 whitespace-nowrap ${
+                selectedCategory === category
                   ? 'bg-primary text-white shadow-lg shadow-primary/25'
                   : 'bg-white text-neutral-600 border border-neutral-200 hover:border-primary/30 hover:shadow-md'
               }`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              {t('filters.all')}
-            </button>
-            {BUSINESS_CATEGORIES.filter(c => c !== 'other').slice(0, 10).map((category) => (
-              <button
-                key={category}
-                type="button"
-                onClick={() => handleCategoryClick(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex-shrink-0 whitespace-nowrap ${
-                  selectedCategory === category
-                    ? 'bg-primary text-white shadow-lg shadow-primary/25'
-                    : 'bg-white text-neutral-600 border border-neutral-200 hover:border-primary/30 hover:shadow-md'
-                }`}
-              >
-                <span className="mr-1">{CATEGORY_ICONS[category]}</span>
-                {t(`categories.${category}`)}
-              </button>
-            ))}
-          </div>
-        </Animated>
+              <span className="mr-1">{CATEGORY_ICONS[category]}</span>
+              {t(`categories.${category}`)}
+            </motion.button>
+          ))}
+        </motion.div>
 
         {/* Results info */}
-        {!isLoading && (
-          <Animated variant="fadeIn">
-            <p className="text-sm text-neutral-500 mb-4">
+        <AnimatePresence mode="wait">
+          {!isLoading && (
+            <motion.p
+              key={`results-${total}`}
+              className="text-sm text-neutral-500 mb-4"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              transition={{ duration: 0.3 }}
+            >
               {t('results.showing', { count: total })}
-            </p>
-          </Animated>
-        )}
+            </motion.p>
+          )}
+        </AnimatePresence>
 
-        {/* Loading state */}
-        {isLoading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl sm:rounded-3xl shadow-lg overflow-hidden border border-gray-100/80 animate-pulse">
-                <div className="h-20 sm:h-24 bg-neutral-200" />
-                <div className="px-4 sm:px-5 -mt-8">
-                  <div className="w-14 h-14 rounded-xl bg-neutral-200 border-4 border-white" />
+        {/* Loading state - shimmer skeletons */}
+        <AnimatePresence>
+          {isLoading && (
+            <motion.div
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl sm:rounded-3xl shadow-lg overflow-hidden border border-gray-100/80">
+                  <div className="h-20 sm:h-24 relative overflow-hidden bg-neutral-200">
+                    <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+                  </div>
+                  <div className="px-4 sm:px-5 -mt-8">
+                    <div className="w-14 h-14 rounded-xl bg-neutral-200 border-4 border-white relative overflow-hidden">
+                      <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" style={{ animationDelay: `${i * 150}ms` }} />
+                    </div>
+                  </div>
+                  <div className="p-4 pt-3 space-y-2.5">
+                    <div className="h-5 bg-neutral-200 rounded-lg w-3/4 relative overflow-hidden">
+                      <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" style={{ animationDelay: `${i * 150 + 100}ms` }} />
+                    </div>
+                    <div className="h-3 bg-neutral-100 rounded w-1/2" />
+                    <div className="h-3 bg-neutral-100 rounded w-full" />
+                    <div className="h-3 bg-neutral-100 rounded w-2/3" />
+                  </div>
+                  <div className="px-4 py-3 border-t border-neutral-100 flex justify-between">
+                    <div className="h-3 bg-neutral-100 rounded w-1/3" />
+                    <div className="h-3 bg-neutral-100 rounded w-1/4" />
+                  </div>
                 </div>
-                <div className="p-4 pt-3 space-y-2">
-                  <div className="h-5 bg-neutral-200 rounded w-3/4" />
-                  <div className="h-3 bg-neutral-200 rounded w-1/2" />
-                  <div className="h-3 bg-neutral-200 rounded w-full" />
-                  <div className="h-3 bg-neutral-200 rounded w-2/3" />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Listings grid */}
-        {!isLoading && listings.length > 0 && (
-          <StaggeredList
-            variant="fadeInUp"
-            staggerDelay={80}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
-          >
-            {listings.map((listing) => (
-              <BusinessCard
-                key={listing.id}
-                listing={listing}
-                onClick={handleCardClick}
-              />
-            ))}
-          </StaggeredList>
-        )}
+        <AnimatePresence mode="wait">
+          {!isLoading && listings.length > 0 && (
+            <motion.div
+              key={`listings-${selectedCategory}-${activeTab}-${page}`}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              {listings.map((listing) => (
+                <motion.div key={listing.id} variants={cardVariants}>
+                  <BusinessCard
+                    listing={listing}
+                    onClick={handleCardClick}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Empty state */}
-        {!isLoading && listings.length === 0 && (
-          <Animated variant="scaleIn">
-            <div className="text-center py-16 relative">
-              <div className="absolute top-8 left-1/4 w-20 h-20 bg-primary/5 rounded-full blur-xl animate-pulse" />
-              <div className="absolute bottom-8 right-1/4 w-16 h-16 bg-violet-500/5 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <AnimatePresence>
+          {!isLoading && listings.length === 0 && (
+            <motion.div
+              className="text-center py-16 relative"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+            >
+              <motion.div
+                className="absolute top-8 left-1/4 w-20 h-20 bg-primary/5 rounded-full blur-xl"
+                animate={{ scale: [1, 1.4, 1], opacity: [0.3, 0.6, 0.3] }}
+                transition={{ duration: 3, repeat: Infinity }}
+              />
+              <motion.div
+                className="absolute bottom-8 right-1/4 w-16 h-16 bg-violet-500/5 rounded-full blur-xl"
+                animate={{ scale: [1.2, 1, 1.2], opacity: [0.2, 0.5, 0.2] }}
+                transition={{ duration: 4, repeat: Infinity, delay: 1 }}
+              />
 
               <div className="relative">
-                <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-primary/10 to-violet-500/10 rounded-3xl flex items-center justify-center">
+                <motion.div
+                  className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-primary/10 to-violet-500/10 rounded-3xl flex items-center justify-center"
+                  animate={{ rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                >
                   <BuildingStorefrontIcon className="w-10 h-10 text-primary/50" />
-                </div>
+                </motion.div>
                 <h3 className="text-xl font-bold text-neutral-800 mb-2">
                   {t('empty.title')}
                 </h3>
                 <p className="text-neutral-500 mb-6 max-w-md mx-auto">
                   {t('empty.description')}
                 </p>
-                <button
+                {/* Be First button - requires auth */}
+                <motion.button
                   type="button"
                   onClick={handleCreateClick}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 active:scale-[0.98] transition-all"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-shadow"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   <PlusIcon className="w-4 h-4" />
                   {t('cta.beFirst')}
-                </button>
+                </motion.button>
               </div>
-            </div>
-          </Animated>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <Animated variant="fadeInUp">
-            <div className="flex justify-center items-center gap-3 mt-10">
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page <= 1}
-                className="px-5 py-2.5 rounded-xl bg-white/80 backdrop-blur-sm border border-neutral-200 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
-              >
-                {t('pagination.previous')}
-              </button>
-              <span className="text-sm text-neutral-500 font-medium">
-                {t('pagination.pageOf', { page, totalPages })}
-              </span>
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
-                className="px-5 py-2.5 rounded-xl bg-white/80 backdrop-blur-sm border border-neutral-200 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
-              >
-                {t('pagination.next')}
-              </button>
-            </div>
-          </Animated>
+          <motion.div
+            className="flex justify-center items-center gap-3 mt-10"
+            variants={fadeUpVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            <motion.button
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              className="px-5 py-2.5 rounded-xl bg-white/80 backdrop-blur-sm border border-neutral-200 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
+              whileHover={page > 1 ? { scale: 1.03 } : {}}
+              whileTap={page > 1 ? { scale: 0.97 } : {}}
+            >
+              {t('pagination.previous')}
+            </motion.button>
+            <span className="text-sm text-neutral-500 font-medium">
+              {t('pagination.pageOf', { page, totalPages })}
+            </span>
+            <motion.button
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              className="px-5 py-2.5 rounded-xl bg-white/80 backdrop-blur-sm border border-neutral-200 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
+              whileHover={page < totalPages ? { scale: 1.03 } : {}}
+              whileTap={page < totalPages ? { scale: 0.97 } : {}}
+            >
+              {t('pagination.next')}
+            </motion.button>
+          </motion.div>
         )}
       </div>
 
