@@ -3,6 +3,7 @@
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 import { PropertyFilters } from '../../domain/entities/PropertyFilters';
 
 interface FilterState {
@@ -72,19 +73,19 @@ export const useFilterStore = create<FilterState>()(
 );
 
 // Selector hooks
-export const usePropertyFilters = () => useFilterStore((state) => ({
+export const usePropertyFilters = () => useFilterStore(useShallow((state) => ({
   filters: state.filters,
   activeFilters: state.activeFilters,
   setFilters: state.setFilters,
   setActiveFilters: state.setActiveFilters,
   resetFilters: state.resetFilters,
-}));
+})));
 
-export const useMapState = () => useFilterStore((state) => ({
+export const useMapState = () => useFilterStore(useShallow((state) => ({
   mapBounds: state.mapBoundsJSON,
   drawnBounds: state.drawnBoundsJSON,
   focusProperty: state.focusMapOnProperty,
   setMapBounds: state.setMapBounds,
   setDrawnBounds: state.setDrawnBounds,
   setFocusProperty: state.setFocusMapOnProperty,
-}));
+})));

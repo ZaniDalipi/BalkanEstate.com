@@ -3,6 +3,7 @@
 
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 
 export type AuthModalView = 'login' | 'signup' | 'forgotPassword' | 'forgotPasswordSuccess' | 'phoneCode' | 'phoneDetails';
 export type AppView = 'search' | 'explore-cities' | 'city-dashboard' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'analytics' | 'reset-password' | 'verify-email' | 'valuation' | 'mortgage-calculator' | 'pricing' | 'how-it-works' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'createAgency' | 'createAgencyPayment' | 'createAgencyConfirm' | 'not-found';
@@ -120,21 +121,21 @@ export const useUIStore = create<UIState>()(
 );
 
 // Selector hooks for better performance
-export const useAuthModal = () => useUIStore((state) => ({
+export const useAuthModal = () => useUIStore(useShallow((state) => ({
   isOpen: state.isAuthModalOpen,
   view: state.authModalView,
   open: state.openAuthModal,
   close: state.closeAuthModal,
   setView: state.setAuthModalView,
-}));
+})));
 
-export const usePricingModal = () => useUIStore((state) => ({
+export const usePricingModal = () => useUIStore(useShallow((state) => ({
   isOpen: state.isPricingModalOpen,
   open: state.openPricingModal,
   close: state.closePricingModal,
-}));
+})));
 
-export const useSelectedProperty = () => useUIStore((state) => ({
+export const useSelectedProperty = () => useUIStore(useShallow((state) => ({
   id: state.selectedPropertyId,
   setId: state.setSelectedProperty,
-}));
+})));
