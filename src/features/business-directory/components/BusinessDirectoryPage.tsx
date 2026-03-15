@@ -86,19 +86,7 @@ const BusinessDirectoryPage: React.FC = () => {
     setIsListening(false);
   }, []);
 
-  // Surprise Me - random business discovery
   const [surpriseAnim, setSurpriseAnim] = useState(false);
-  const handleSurpriseMe = useCallback(() => {
-    if (listings.length === 0) return;
-    setSurpriseAnim(true);
-    // Animate for 800ms then pick a random listing
-    setTimeout(() => {
-      const randomListing = listings[Math.floor(Math.random() * listings.length)];
-      setSelectedListingId(randomListing.id);
-      setSubView('detail');
-      setSurpriseAnim(false);
-    }, 800);
-  }, [listings]);
 
   const listingTypeFilter: ListingType | undefined = useMemo(() => {
     if (activeTab === 'businesses') return 'business';
@@ -115,6 +103,18 @@ const BusinessDirectoryPage: React.FC = () => {
   }), [search, selectedCategory, listingTypeFilter, page]);
 
   const { listings, total, totalPages, isLoading } = useBusinessListings(filters);
+
+  // Surprise Me - random business discovery
+  const handleSurpriseMe = useCallback(() => {
+    if (listings.length === 0) return;
+    setSurpriseAnim(true);
+    setTimeout(() => {
+      const randomListing = listings[Math.floor(Math.random() * listings.length)];
+      setSelectedListingId(randomListing.id);
+      setSubView('detail');
+      setSurpriseAnim(false);
+    }, 800);
+  }, [listings]);
 
   // Derive individuals for AnimatedTooltip row
   const individualListings = useMemo(() =>
