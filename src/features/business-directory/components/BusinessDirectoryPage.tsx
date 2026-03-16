@@ -161,6 +161,12 @@ const BusinessDirectoryPage: React.FC = () => {
       name: l.name,
       designation: t(`categories.${l.category}`),
       image: l.logoUrl || '',
+      location: `${l.city}, ${l.country}`,
+      phone: l.contactPhone,
+      email: l.contactEmail,
+      services: l.services,
+      isVerified: l.isVerified,
+      listingId: l.id,
     }));
   }, [individualListings, t]);
 
@@ -186,12 +192,30 @@ const BusinessDirectoryPage: React.FC = () => {
   }, []);
 
   const handleTooltipClick = useCallback((item: AnimatedTooltipItem) => {
-    const match = individualListings.find(l => l.name === item.name);
-    if (match) {
-      setSelectedListingId(match.id);
+    if (item.listingId) {
+      setSelectedListingId(item.listingId);
       setSubView('detail');
+    } else {
+      const match = individualListings.find(l => l.name === item.name);
+      if (match) {
+        setSelectedListingId(match.id);
+        setSubView('detail');
+      }
     }
   }, [individualListings]);
+
+  const handleQuoteRequest = useCallback((item: AnimatedTooltipItem) => {
+    // Build pre-filled message for requesting a quote
+    const subject = encodeURIComponent(`Quote Request - ${item.name}`);
+    const body = encodeURIComponent(
+      `Hi ${item.name},\n\nI found your profile on BalkanEstate and I'm interested in your ${item.designation} services.\n\nCould you please provide me with a quote?\n\nThank you!`
+    );
+    if (item.email) {
+      window.open(`mailto:${item.email}?subject=${subject}&body=${body}`, '_self');
+    } else if (item.phone) {
+      window.open(`tel:${item.phone}`, '_self');
+    }
+  }, []);
 
   const handleBackToList = useCallback(() => {
     setSubView('list');
@@ -590,7 +614,7 @@ const BusinessDirectoryPage: React.FC = () => {
                 </div>
                 <p className="text-white/50 text-sm mb-5">{t('individuals.subtitle')}</p>
                 <div className="flex justify-center">
-                  <AnimatedTooltip items={tooltipItems} onItemClick={handleTooltipClick} />
+                  <AnimatedTooltip items={tooltipItems} onItemClick={handleTooltipClick} onQuoteRequest={handleQuoteRequest} />
                 </div>
               </div>
             </motion.div>

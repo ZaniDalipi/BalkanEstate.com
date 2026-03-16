@@ -8,6 +8,7 @@ import MagneticTiltCard from './MagneticTiltCard';
 interface BusinessCardProps {
   listing: BusinessListing;
   onClick: (listing: BusinessListing) => void;
+  onQuoteRequest?: (listing: BusinessListing) => void;
 }
 
 // Category gradient banners
@@ -34,7 +35,7 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   other: 'from-primary to-blue-600',
 };
 
-const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick }) => {
+const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRequest }) => {
   const { t } = useTranslation('businessDirectory');
   const gradient = CATEGORY_GRADIENTS[listing.category] || CATEGORY_GRADIENTS.other;
   const isIndividual = listing.listingType === 'individual';
@@ -51,6 +52,23 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick }) => {
   const handleQuickWebsite = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (listing.website) window.open(listing.website, '_blank', 'noopener,noreferrer');
+  };
+  const handleQuoteRequest = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onQuoteRequest) {
+      onQuoteRequest(listing);
+    } else {
+      // Fallback: open email or phone
+      const subject = encodeURIComponent(`Quote Request - ${listing.name}`);
+      const body = encodeURIComponent(
+        `Hi ${listing.name},\n\nI found your profile on BalkanEstate and I'm interested in your services.\n\nCould you please provide me with a quote?\n\nThank you!`
+      );
+      if (listing.contactEmail) {
+        window.open(`mailto:${listing.contactEmail}?subject=${subject}&body=${body}`, '_self');
+      } else {
+        window.open(`tel:${listing.contactPhone}`, '_self');
+      }
+    }
   };
 
   return (
@@ -204,6 +222,19 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick }) => {
               )}
             </div>
           )}
+          {/* Get Quote CTA */}
+          <motion.button
+            type="button"
+            onClick={handleQuoteRequest}
+            className="w-full py-2 mt-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-bold rounded-xl hover:shadow-lg hover:shadow-emerald-200/50 transition-all duration-300 flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+            </svg>
+            {t('quickActions.getQuote', 'Get a Free Quote')}
+          </motion.button>
         </div>
 
         {/* Footer */}
