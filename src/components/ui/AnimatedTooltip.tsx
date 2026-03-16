@@ -75,7 +75,7 @@ const AnimatedTooltip: React.FC<AnimatedTooltipProps> = ({ items, onItemClick, o
                   exit={{ opacity: 0, y: 20, scale: 0.6 }}
                   style={hasRichData ? { whiteSpace: 'normal' } : { translateX, rotate, whiteSpace: 'nowrap' }}
                   className={`absolute left-1/2 -translate-x-1/2 z-50 ${
-                    hasRichData ? '-top-[220px] w-56' : '-top-16'
+                    hasRichData ? 'bottom-full mb-2 w-56' : '-top-16'
                   }`}
                 >
                   {hasRichData ? (

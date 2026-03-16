@@ -594,18 +594,20 @@ const BusinessDirectoryPage: React.FC = () => {
         <AnimatePresence>
           {(activeTab === 'all' || activeTab === 'individuals') && tooltipItems.length > 0 && (
             <motion.div
-              className="mb-8 p-6 bg-gradient-to-r from-slate-900 via-blue-900/95 to-indigo-900 rounded-2xl border border-white/10 shadow-xl overflow-hidden relative"
+              className="mb-8 p-6 bg-gradient-to-r from-slate-900 via-blue-900/95 to-indigo-900 rounded-2xl border border-white/10 shadow-xl overflow-visible relative"
               initial={{ opacity: 0, y: 20, height: 0 }}
               animate={{ opacity: 1, y: 0, height: 'auto' }}
               exit={{ opacity: 0, y: -10, height: 0 }}
               transition={{ type: 'spring', stiffness: 200, damping: 25 }}
             >
-              {/* Subtle decorative orb */}
-              <motion.div
-                className="absolute -top-10 -right-10 w-40 h-40 bg-violet-500/20 rounded-full blur-3xl"
-                animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.4, 0.2] }}
-                transition={{ duration: 4, repeat: Infinity }}
-              />
+              {/* Subtle decorative orb (clipped so it doesn't bleed) */}
+              <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+                <motion.div
+                  className="absolute -top-10 -right-10 w-40 h-40 bg-violet-500/20 rounded-full blur-3xl"
+                  animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.4, 0.2] }}
+                  transition={{ duration: 4, repeat: Infinity }}
+                />
+              </div>
 
               <div className="relative z-10">
                 <div className="flex items-center gap-2 mb-1">
@@ -613,7 +615,7 @@ const BusinessDirectoryPage: React.FC = () => {
                   <h3 className="text-white font-bold text-lg">{t('individuals.title')}</h3>
                 </div>
                 <p className="text-white/50 text-sm mb-5">{t('individuals.subtitle')}</p>
-                <div className="flex justify-center">
+                <div className="flex justify-center overflow-visible">
                   <AnimatedTooltip items={tooltipItems} onItemClick={handleTooltipClick} onQuoteRequest={handleQuoteRequest} />
                 </div>
               </div>
