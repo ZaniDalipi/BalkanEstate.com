@@ -68,6 +68,7 @@ const initialState: AppState = {
   selectedAgentId: null,
   selectedAgencyId: null,
   selectedBusinessListingId: null,
+  businessDirectoryTab: 'all',
   pendingProperty: null,
   pendingSubscription: null,
   pendingAgencyData: null,
@@ -137,6 +138,8 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
       return { ...state, selectedAgencyId: action.payload };
     case 'SET_SELECTED_BUSINESS_LISTING':
       return { ...state, selectedBusinessListingId: action.payload };
+    case 'SET_BUSINESS_DIRECTORY_TAB':
+      return { ...state, businessDirectoryTab: action.payload };
     case 'PROPERTIES_LOADING':
         return { ...state, isLoadingProperties: true, propertiesError: null };
     case 'PROPERTIES_SUCCESS':

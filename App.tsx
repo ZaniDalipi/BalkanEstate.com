@@ -269,6 +269,24 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return;
       }
 
+      // Business directory tab routes: /business-directory/businesses, /business-directory/individuals
+      if (path === '/business-directory/businesses') {
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
+        dispatch({ type: 'SET_BUSINESS_DIRECTORY_TAB', payload: 'businesses' });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'business-directory' });
+        return;
+      }
+      if (path === '/business-directory/individuals') {
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
+        dispatch({ type: 'SET_BUSINESS_DIRECTORY_TAB', payload: 'individuals' });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'business-directory' });
+        return;
+      }
+
       // Business directory detail route: /business-directory/:id
       const businessMatch = path.match(/^\/business-directory\/(.+)$/);
       if (businessMatch) {

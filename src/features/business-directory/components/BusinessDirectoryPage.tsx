@@ -98,9 +98,17 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<BusinessCategory | ''>('');
-  const [activeTab, setActiveTab] = useState<TabType>('all');
+  const [activeTab, setActiveTab] = useState<TabType>(state.businessDirectoryTab || 'all');
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
+
+  // Sync tab from context (URL-based navigation)
+  useEffect(() => {
+    if (state.businessDirectoryTab && state.businessDirectoryTab !== activeTab) {
+      setActiveTab(state.businessDirectoryTab);
+      setPage(1);
+    }
+  }, [state.businessDirectoryTab]);
 
   // Voice search
   const [isListening, setIsListening] = useState(false);
@@ -200,7 +208,10 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
   const handleTabChange = useCallback((tab: TabType) => {
     setActiveTab(tab);
     setPage(1);
-  }, []);
+    dispatch({ type: 'SET_BUSINESS_DIRECTORY_TAB', payload: tab });
+    const tabPath = tab === 'all' ? '/business-directory' : `/business-directory/${tab}`;
+    window.history.pushState({}, '', buildLocalizedPath(tabPath));
+  }, [dispatch]);
 
   const navigateToListing = useCallback((id: string) => {
     setSelectedListingId(id);
@@ -241,8 +252,9 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
     setSubView('list');
     setSelectedListingId(null);
     dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
-    window.history.pushState({}, '', buildLocalizedPath('/business-directory'));
-  }, [dispatch]);
+    const tabPath = activeTab === 'all' ? '/business-directory' : `/business-directory/${activeTab}`;
+    window.history.pushState({}, '', buildLocalizedPath(tabPath));
+  }, [dispatch, activeTab]);
 
   // Auth-guarded create click - require login for any create/list action
   const requireAuth = useCallback((action: () => void) => {
