@@ -67,6 +67,7 @@ const initialState: AppState = {
   activeConversationId: null,
   selectedAgentId: null,
   selectedAgencyId: null,
+  selectedBusinessListingId: null,
   pendingProperty: null,
   pendingSubscription: null,
   pendingAgencyData: null,
@@ -102,6 +103,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         const newState: AppState = { ...state, activeView: action.payload, selectedProperty: null };
         if (action.payload !== 'create-listing') newState.propertyToEdit = null;
         if (action.payload !== 'agents') newState.selectedAgentId = null;
+        if (action.payload !== 'business-directory') newState.selectedBusinessListingId = null;
         return newState;
     }
     case 'TOGGLE_PRICING_MODAL':
@@ -133,6 +135,8 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
       return { ...state, selectedAgentId: action.payload };
     case 'SET_SELECTED_AGENCY':
       return { ...state, selectedAgencyId: action.payload };
+    case 'SET_SELECTED_BUSINESS_LISTING':
+      return { ...state, selectedBusinessListingId: action.payload };
     case 'PROPERTIES_LOADING':
         return { ...state, isLoadingProperties: true, propertiesError: null };
     case 'PROPERTIES_SUCCESS':

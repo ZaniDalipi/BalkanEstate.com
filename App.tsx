@@ -269,6 +269,17 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return;
       }
 
+      // Business directory detail route: /business-directory/:id
+      const businessMatch = path.match(/^\/business-directory\/(.+)$/);
+      if (businessMatch) {
+        const listingId = decodeURIComponent(businessMatch[1]);
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: listingId });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'business-directory' });
+        return;
+      }
+
       // Create listing route (new listing, not edit)
       if (path === '/create-listing') {
         dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
@@ -608,7 +619,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       case 'agencies':
         return <QueryErrorBoundary><AgenciesListPage /></QueryErrorBoundary>;
       case 'business-directory':
-        return <QueryErrorBoundary><BusinessDirectoryPage /></QueryErrorBoundary>;
+        return <QueryErrorBoundary><BusinessDirectoryPage selectedListingId={state.selectedBusinessListingId} /></QueryErrorBoundary>;
       case 'admin':
         // Only load admin dashboard for admin/super_admin users
         if (state.currentUser?.role === UserRole.ADMIN || state.currentUser?.role === UserRole.SUPER_ADMIN) {
@@ -712,7 +723,7 @@ const MainLayout: React.FC = () => {
   const showPWATopBar = isMobile && !state.selectedProperty && !isHomePage;
 
   // Main tab views show hamburger menu; detail views show back button
-  const isMainTabView = !state.selectedAgentId && !state.selectedAgencyId && [
+  const isMainTabView = !state.selectedAgentId && !state.selectedAgencyId && !state.selectedBusinessListingId && [
     'agents', 'agencies', 'saved-properties', 'saved-searches', 'explore-cities', 'city-dashboard',
     'inbox', 'pricing', 'how-it-works', 'valuation', 'mortgage-calculator', 'analytics', 'admin', 'agency-dashboard', 'business-directory',
   ].includes(state.activeView);
@@ -762,6 +773,12 @@ const MainLayout: React.FC = () => {
       window.history.pushState({}, '', buildLocalizedPath('/agents'));
       return;
     }
+    if (state.selectedBusinessListingId) {
+      dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'business-directory' });
+      window.history.pushState({}, '', buildLocalizedPath('/business-directory'));
+      return;
+    }
     // Use browser history for proper back navigation
     if (window.history.length > 1) {
       window.history.back();
@@ -770,7 +787,7 @@ const MainLayout: React.FC = () => {
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
       window.history.pushState({}, '', buildLocalizedPath('/search'));
     }
-  }, [state.selectedAgencyId, state.selectedAgentId, dispatch]);
+  }, [state.selectedAgencyId, state.selectedAgentId, state.selectedBusinessListingId, dispatch]);
 
   const anyNonAuthModalOpen = state.isListingLimitWarningOpen || state.isDiscountGameOpen;
 

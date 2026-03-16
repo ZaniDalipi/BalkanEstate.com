@@ -733,6 +733,7 @@ export interface AppState {
     activeConversationId: string | null;
     selectedAgentId: string | null;
     selectedAgencyId: string | Agency | null;
+    selectedBusinessListingId: string | null;
     pendingProperty: Property | null;
     pendingSubscription: PendingSubscription | null;
     pendingAgencyData: any | null; // Agency form data to be created after payment
@@ -782,6 +783,7 @@ export type AppAction =
     | { type: 'SET_PROPERTY_TO_EDIT', payload: Property | null }
     | { type: 'SET_SELECTED_AGENT', payload: string | null }
     | { type: 'SET_SELECTED_AGENCY', payload: string | Agency | null }
+    | { type: 'SET_SELECTED_BUSINESS_LISTING', payload: string | null }
     | { type: 'PROPERTIES_LOADING' }
     | { type: 'PROPERTIES_SUCCESS', payload: Property[] }
     | { type: 'PROPERTIES_ERROR', payload: string }

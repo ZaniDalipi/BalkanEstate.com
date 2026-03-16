@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
@@ -12,7 +12,12 @@ import { BUSINESS_CATEGORIES, type BusinessCategory, type BusinessListing, type 
 import { SearchIcon, PlusIcon, BuildingStorefrontIcon, WrenchScrewdriverIcon, UserGroupIcon, UserIcon, MicrophoneIcon, ArrowPathIcon, BoltIcon, ChartBarIcon, MapIcon } from '@/constants';
 import { AnimatedNumber } from '@/src/components/ui/Animations';
 import { useAuthModal } from '@/src/app/store/uiStore';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import Footer from '@/components/shared/Footer';
+
+interface BusinessDirectoryPageProps {
+  selectedListingId?: string | null;
+}
 
 type SubView = 'list' | 'detail' | 'create';
 type TabType = 'all' | 'businesses' | 'individuals';
@@ -70,13 +75,24 @@ const scaleInVariants = {
   visible: { opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 200, damping: 20 } },
 };
 
-const BusinessDirectoryPage: React.FC = () => {
+const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedListingId: propListingId }) => {
   const { t } = useTranslation('businessDirectory');
-  const { state } = useAppContext();
+  const { state, dispatch } = useAppContext();
   const { open: openAuthModal } = useAuthModal();
 
-  const [subView, setSubView] = useState<SubView>('list');
-  const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
+  const [subView, setSubView] = useState<SubView>(propListingId ? 'detail' : 'list');
+  const [selectedListingId, setSelectedListingId] = useState<string | null>(propListingId ?? null);
+
+  // Sync with prop when URL-based navigation changes the prop
+  useEffect(() => {
+    if (propListingId) {
+      setSelectedListingId(propListingId);
+      setSubView('detail');
+    } else if (propListingId === null && subView === 'detail') {
+      setSubView('list');
+      setSelectedListingId(null);
+    }
+  }, [propListingId]);
 
   // Filters
   const [searchInput, setSearchInput] = useState('');
@@ -186,23 +202,27 @@ const BusinessDirectoryPage: React.FC = () => {
     setPage(1);
   }, []);
 
-  const handleCardClick = useCallback((listing: BusinessListing) => {
-    setSelectedListingId(listing.id);
+  const navigateToListing = useCallback((id: string) => {
+    setSelectedListingId(id);
     setSubView('detail');
-  }, []);
+    dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: id });
+    window.history.pushState({}, '', buildLocalizedPath(`/business-directory/${id}`));
+  }, [dispatch]);
+
+  const handleCardClick = useCallback((listing: BusinessListing) => {
+    navigateToListing(listing.id);
+  }, [navigateToListing]);
 
   const handleTooltipClick = useCallback((item: AnimatedTooltipItem) => {
     if (item.listingId) {
-      setSelectedListingId(item.listingId);
-      setSubView('detail');
+      navigateToListing(item.listingId);
     } else {
       const match = individualListings.find(l => l.name === item.name);
       if (match) {
-        setSelectedListingId(match.id);
-        setSubView('detail');
+        navigateToListing(match.id);
       }
     }
-  }, [individualListings]);
+  }, [individualListings, navigateToListing]);
 
   const handleQuoteRequest = useCallback((item: AnimatedTooltipItem) => {
     // Build pre-filled message for requesting a quote
@@ -220,7 +240,9 @@ const BusinessDirectoryPage: React.FC = () => {
   const handleBackToList = useCallback(() => {
     setSubView('list');
     setSelectedListingId(null);
-  }, []);
+    dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
+    window.history.pushState({}, '', buildLocalizedPath('/business-directory'));
+  }, [dispatch]);
 
   // Auth-guarded create click - require login for any create/list action
   const requireAuth = useCallback((action: () => void) => {
@@ -594,7 +616,7 @@ const BusinessDirectoryPage: React.FC = () => {
         <AnimatePresence>
           {(activeTab === 'all' || activeTab === 'individuals') && tooltipItems.length > 0 && (
             <motion.div
-              className="mb-8 p-6 bg-gradient-to-r from-slate-900 via-blue-900/95 to-indigo-900 rounded-2xl border border-white/10 shadow-xl overflow-visible relative"
+              className="mb-8 p-6 bg-gradient-to-r from-slate-900 via-blue-900/95 to-indigo-900 rounded-2xl border border-white/10 shadow-xl overflow-hidden relative"
               initial={{ opacity: 0, y: 20, height: 0 }}
               animate={{ opacity: 1, y: 0, height: 'auto' }}
               exit={{ opacity: 0, y: -10, height: 0 }}
