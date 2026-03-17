@@ -196,5 +196,18 @@
       "logoInvalidType": "Molimo učitajte sliku u JPG, PNG ili WebP formatu",
       "logoTooLarge": "Slika mora biti manja od 5MB"
     }
+  },
+  "edit": {
+    "title": "Uredite svoj oglas",
+    "subtitle": "Ažurirajte podatke o svojoj tvrtki",
+    "button": "Uredi",
+    "backToListing": "Povratak na oglas",
+    "save": "Spremi promjene",
+    "saving": "Spremanje...",
+    "cancel": "Odustani",
+    "status": "Status oglasa",
+    "statusActiveDesc": "Vaš oglas je vidljiv svima",
+    "statusInactiveDesc": "Vaš oglas je skriven iz imenika",
+    "success": "Vaš oglas je uspješno ažuriran"
   }
 }

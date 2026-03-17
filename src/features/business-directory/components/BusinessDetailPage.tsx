@@ -2,8 +2,10 @@ import React, { useState, useCallback, useEffect, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useBusinessListing } from '../hooks';
+import { useAppContext } from '@/context/AppContext';
 
 const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
+const EditBusinessListingForm = lazy(() => import('./EditBusinessListingForm'));
 import {
   PhoneIcon,
   MapPinIcon,
@@ -16,6 +18,7 @@ import {
   ShareIcon,
   EyeIcon,
   ArrowLeftIcon,
+  PencilIcon,
 } from '@/constants';
 import Footer from '@/components/shared/Footer';
 
@@ -95,7 +98,12 @@ const staggerContainerVariants = {
 const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBack }) => {
   const { t } = useTranslation('businessDirectory');
   const { listing, isLoading, error } = useBusinessListing(listingId);
+  const { state } = useAppContext();
   const [showShareToast, setShowShareToast] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const currentUser = state.currentUser;
+  const isOwner = !!(currentUser?.id && listing?.owner?.id && currentUser.id === listing.owner.id);
 
   // Scroll to top when detail page mounts or listing changes
   useEffect(() => {
@@ -204,6 +212,31 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
     );
   }
 
+  // Show edit form if owner is editing
+  if (isEditing && isOwner && listing) {
+    return (
+      <Suspense fallback={
+        <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+          <div className="flex items-center gap-2 text-neutral-400">
+            <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          </div>
+        </div>
+      }>
+        <EditBusinessListingForm
+          listing={listing}
+          onBack={() => setIsEditing(false)}
+          onSuccess={() => {
+            setIsEditing(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        />
+      </Suspense>
+    );
+  }
+
   const gradient = CATEGORY_GRADIENTS[listing.category] || CATEGORY_GRADIENTS.other;
   const isIndividual = listing.listingType === 'individual';
   const categoryIcon = CATEGORY_ICONS[listing.category] || CATEGORY_ICONS.other;
@@ -257,6 +290,19 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
 
             {/* Right actions */}
             <div className="flex items-center gap-1.5">
+              {isOwner && (
+                <motion.button
+                  type="button"
+                  onClick={() => setIsEditing(true)}
+                  className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl transition-all border border-white/10"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  title={t('edit.button', { defaultValue: 'Edit Listing' })}
+                >
+                  <PencilIcon className="w-4 h-4" />
+                  <span className="hidden md:inline text-xs font-medium">{t('edit.button', { defaultValue: 'Edit' })}</span>
+                </motion.button>
+              )}
               <motion.button
                 type="button"
                 onClick={handleShare}

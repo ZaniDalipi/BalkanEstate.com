@@ -196,5 +196,18 @@
       "logoInvalidType": "Vă rugăm încărcați o imagine JPG, PNG sau WebP",
       "logoTooLarge": "Imaginea trebuie să fie sub 5MB"
     }
+  },
+  "edit": {
+    "title": "Editează anunțul tău",
+    "subtitle": "Actualizează informațiile afacerii tale",
+    "button": "Editează",
+    "backToListing": "Înapoi la anunț",
+    "save": "Salvează modificările",
+    "saving": "Se salvează...",
+    "cancel": "Anulează",
+    "status": "Starea anunțului",
+    "statusActiveDesc": "Anunțul tău este vizibil pentru toți",
+    "statusInactiveDesc": "Anunțul tău este ascuns din director",
+    "success": "Anunțul tău a fost actualizat cu succes"
   }
 }

@@ -196,5 +196,18 @@
       "logoInvalidType": "Please upload a JPG, PNG, or WebP image",
       "logoTooLarge": "Image must be under 5MB"
     }
+  },
+  "edit": {
+    "title": "Edit Your Listing",
+    "subtitle": "Update your business information",
+    "button": "Edit",
+    "backToListing": "Back to Listing",
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "status": "Listing Status",
+    "statusActiveDesc": "Your listing is visible to everyone",
+    "statusInactiveDesc": "Your listing is hidden from the directory",
+    "success": "Your listing has been updated successfully"
   }
 }

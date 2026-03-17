@@ -196,5 +196,18 @@
       "logoInvalidType": "Ju lutem ngarkoni një imazh JPG, PNG ose WebP",
       "logoTooLarge": "Imazhi duhet të jetë nën 5MB"
     }
+  },
+  "edit": {
+    "title": "Ndryshoni Listimin Tuaj",
+    "subtitle": "Përditësoni informacionet e biznesit tuaj",
+    "button": "Ndrysho",
+    "backToListing": "Kthehu te Listimi",
+    "save": "Ruaj Ndryshimet",
+    "saving": "Duke ruajtur...",
+    "cancel": "Anulo",
+    "status": "Statusi i Listimit",
+    "statusActiveDesc": "Listimi juaj është i dukshëm për të gjithë",
+    "statusInactiveDesc": "Listimi juaj është i fshehur nga drejtoria",
+    "success": "Listimi juaj u përditësua me sukses"
   }
 }
