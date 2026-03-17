@@ -11,7 +11,8 @@ import AnimatedTooltip, { type AnimatedTooltipItem } from '@/src/components/ui/A
 import { BUSINESS_CATEGORIES, type BusinessCategory, type BusinessListing, type ListingType } from '@/src/shared/types/businessListing.types';
 import { SearchIcon, PlusIcon, BuildingStorefrontIcon, WrenchScrewdriverIcon, UserGroupIcon, UserIcon, MicrophoneIcon, ArrowPathIcon, BoltIcon, ChartBarIcon, MapIcon } from '@/constants';
 import { AnimatedNumber } from '@/src/components/ui/Animations';
-import { useAuthModal } from '@/src/app/store/uiStore';
+
+
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import Footer from '@/components/shared/Footer';
 
@@ -78,7 +79,7 @@ const scaleInVariants = {
 const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedListingId: propListingId }) => {
   const { t } = useTranslation('businessDirectory');
   const { state, dispatch } = useAppContext();
-  const { open: openAuthModal } = useAuthModal();
+
 
   const [subView, setSubView] = useState<SubView>(propListingId ? 'detail' : 'list');
   const [selectedListingId, setSelectedListingId] = useState<string | null>(propListingId ?? null);
@@ -259,11 +260,11 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
   // Auth-guarded create click - require login for any create/list action
   const requireAuth = useCallback((action: () => void) => {
     if (!state.currentUser) {
-      openAuthModal('login');
+      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
       return;
     }
     action();
-  }, [state.currentUser, openAuthModal]);
+  }, [state.currentUser, dispatch]);
 
   const handleCreateClick = useCallback(() => {
     requireAuth(() => setSubView('create'));
