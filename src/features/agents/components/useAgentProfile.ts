@@ -18,6 +18,7 @@ import { Credential, getCredentials, getAgentPublicCredentials } from '@/src/fea
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import { sendMessage } from '@/src/features/conversations/api/conversationApi';
 import { API_URL } from '@/src/shared/api/config';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
 
 // ─── Shared Types ────────────────────────────────────────────────────────────
 
@@ -768,7 +769,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
     // Handler for viewing a property from the map popup
     const handleViewProperty = useCallback((propertyId: string) => {
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
-        window.history.pushState({}, '', `/property/${propertyId}`);
+        window.history.pushState({}, '', buildLocalizedPath(`/property/${propertyId}`));
         window.dispatchEvent(new PopStateEvent('popstate'));
     }, [dispatch]);
 

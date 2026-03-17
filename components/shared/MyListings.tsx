@@ -10,6 +10,7 @@ import ListingCardSkeleton from './ListingCardSkeleton';
 import * as api from '../../services/apiService';
 import PromotionModal from '../../src/features/promotions/components/PromotionModal';
 import { VideoGenerator } from '../../src/features/videos';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
 
 // Video Icon component
 const VideoIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -84,7 +85,7 @@ const ListingCard: React.FC<{
     const handleCardClick = () => {
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property.id });
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
-        window.history.pushState({}, '', `/property/${property.id}`);
+        window.history.pushState({}, '', buildLocalizedPath(`/property/${property.id}`));
         window.dispatchEvent(new PopStateEvent('popstate'));
     };
 

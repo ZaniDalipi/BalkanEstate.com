@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import {
   useDashboardOverview,
   useMyPropertiesViewStats,
@@ -113,12 +114,12 @@ const AnalyticsPage: React.FC = () => {
 
   // Navigation helpers
   const navigateToProperty = (propertyId: string) => {
-    window.history.pushState({}, '', `/property/${propertyId}`);
+    window.history.pushState({}, '', buildLocalizedPath(`/property/${propertyId}`));
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
   };
 
   const navigateToView = (view: AppView) => {
-    window.history.pushState({}, '', `/${view}`);
+    window.history.pushState({}, '', buildLocalizedPath(`/${view}`));
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
   };
 

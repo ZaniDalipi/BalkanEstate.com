@@ -1,4 +1,4 @@
-import React, { useState, useCallback, lazy, Suspense } from 'react';
+import React, { useState, useCallback, useEffect, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useBusinessListing } from '../hooks';
@@ -96,6 +96,15 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
   const { t } = useTranslation('businessDirectory');
   const { listing, isLoading, error } = useBusinessListing(listingId);
   const [showShareToast, setShowShareToast] = useState(false);
+
+  // Scroll to top when detail page mounts or listing changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+      mainContent.scrollTop = 0;
+    }
+  }, [listingId]);
 
   const handleShare = useCallback(() => {
     const url = window.location.href;

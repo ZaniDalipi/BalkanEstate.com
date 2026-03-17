@@ -4,6 +4,7 @@ import { useAppContext } from '../../context/AppContext';
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 import { tokenService } from '../../src/shared/api/tokenService';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
 
 type ViewingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
 type StatusFilter = ViewingStatus | 'all';
@@ -174,7 +175,7 @@ const ViewingRequestsTab: React.FC = () => {
 
   const navigateToProperty = (propertyId: string) => {
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-    window.history.pushState({}, '', `/property/${propertyId}`);
+    window.history.pushState({}, '', buildLocalizedPath(`/property/${propertyId}`));
     window.dispatchEvent(new PopStateEvent('popstate'));
   };
 

@@ -536,9 +536,9 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     });
   }, [state.activeView]);
 
-  // Also scroll to top when selected property or agency changes
+  // Also scroll to top when selected property, agency, or business listing changes
   useEffect(() => {
-    if (state.selectedProperty || state.selectedAgencyId) {
+    if (state.selectedProperty || state.selectedAgencyId || state.selectedBusinessListingId) {
       window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
 
       // Also scroll main content container
@@ -547,7 +547,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         mainContent.scrollTop = 0;
       }
     }
-  }, [state.selectedProperty, state.selectedAgencyId]);
+  }, [state.selectedProperty, state.selectedAgencyId, state.selectedBusinessListingId]);
 
   // Payment callback routes (highest priority)
   const path = window.location.pathname;
@@ -885,6 +885,7 @@ const MainLayout: React.FC = () => {
                     onClick={() => {
                       dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
                       dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
+                      dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
                       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'home' });
                       window.history.pushState({}, '', buildLocalizedPath('/'));
                     }}

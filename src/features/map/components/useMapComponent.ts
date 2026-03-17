@@ -6,6 +6,7 @@ import { useAppContext } from '@/context/AppContext';
 import { type Season } from './SunArcAnimation';
 import { MapOptionType, ClimateRiskType } from './MapOptionsPanel';
 import { MAP_TILE_LAYERS } from '@/config/mapStyles';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
 
 // CSS for 3D perspective camera effect
 const inject3DPerspectiveStyles = () => {
@@ -332,7 +333,7 @@ export function useMapComponent(props: MapComponentProps) {
   const handlePopupClick = (propertyId: string) => {
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
-    window.history.pushState({}, '', `/property/${propertyId}`);
+    window.history.pushState({}, '', buildLocalizedPath(`/property/${propertyId}`));
     window.dispatchEvent(new PopStateEvent('popstate'));
   };
 
