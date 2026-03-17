@@ -649,7 +649,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
                   <h3 className="text-white font-bold text-base sm:text-lg">{t('individuals.title')}</h3>
                 </div>
                 <p className="text-white/50 text-xs sm:text-sm mb-4 sm:mb-5 leading-relaxed">{t('individuals.subtitle')}</p>
-                <div className="flex justify-center overflow-hidden">
+                <div className="flex justify-center overflow-visible">
                   <AnimatedTooltip items={tooltipItems} onItemClick={handleTooltipClick} onQuoteRequest={handleQuoteRequest} />
                 </div>
               </div>

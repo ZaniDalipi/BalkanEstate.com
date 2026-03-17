@@ -21,9 +21,6 @@ import {
   PencilIcon,
 } from '@/constants';
 import Footer from '@/components/shared/Footer';
-import NotificationCenter from '@/src/shared/components/NotificationCenter';
-import UserAvatar from '@/components/shared/UserAvatar';
-import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 
 interface BusinessDetailPageProps {
   listingId: string;
@@ -99,51 +96,14 @@ const staggerContainerVariants = {
 };
 
 const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBack }) => {
-  const { t } = useTranslation(['businessDirectory', 'nav']);
+  const { t } = useTranslation('businessDirectory');
   const { listing, isLoading, error } = useBusinessListing(listingId);
-  const { state, dispatch } = useAppContext();
-  const { setDirection } = useNavigationDirection();
+  const { state } = useAppContext();
   const [showShareToast, setShowShareToast] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   const currentUser = state.currentUser;
-  const { isAuthenticated } = state;
   const isOwner = !!(currentUser?.id && listing?.owner?.id && currentUser.id === listing.owner.id);
-
-  const handleSubscribeClick = useCallback(() => {
-    setDirection('forward');
-    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-    const currentLang = window.location.pathname.split('/')[1] || 'en';
-    const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
-    const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-    window.history.pushState({}, '', `/${lang}/subscribe`);
-  }, [dispatch, setDirection]);
-
-  const handleNewListingClick = useCallback(() => {
-    if (isAuthenticated) {
-      setDirection('morph');
-      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-      dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
-      window.history.pushState({}, '', '/create-listing');
-    } else {
-      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
-    }
-  }, [isAuthenticated, dispatch, setDirection]);
-
-  const handleAccountClick = useCallback(() => {
-    if (isAuthenticated) {
-      setDirection('morph');
-      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-      dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-      window.history.pushState({}, '', '/account');
-    } else {
-      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
-    }
-  }, [isAuthenticated, dispatch, setDirection]);
 
   // Scroll to top when detail page mounts or listing changes
   useEffect(() => {
@@ -353,43 +313,6 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                 <ShareIcon className="w-4 h-4" />
                 <span className="hidden md:inline text-xs font-medium">{t('detail.share')}</span>
               </motion.button>
-
-              {/* Divider */}
-              <div className="hidden sm:block w-px h-6 bg-neutral-200 mx-0.5" />
-
-              {/* Integrated nav buttons (previously floating) */}
-              <button
-                onClick={handleSubscribeClick}
-                className="hidden sm:flex items-center min-h-[36px] bg-primary text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"
-              >
-                {t('nav:subscribe')}
-              </button>
-              <button
-                onClick={handleNewListingClick}
-                className="hidden md:flex items-center min-h-[36px] bg-secondary text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-orange-600 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
-              >
-                + {t('nav:newListing')}
-              </button>
-              <NotificationCenter />
-              <button
-                onClick={handleAccountClick}
-                className="flex items-center gap-1.5 min-h-[36px] px-2.5 py-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200/80 border border-neutral-200/80 transition-all"
-                aria-label={isAuthenticated ? t('nav:myAccount') : t('nav:loginRegister')}
-              >
-                {isAuthenticated && currentUser ? (
-                  <>
-                    <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
-                      <UserAvatar src={currentUser.avatarUrl} gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
-                    </div>
-                    <span className="hidden lg:inline text-xs font-medium text-neutral-700">{t('nav:myAccount')}</span>
-                  </>
-                ) : (
-                  <>
-                    <UserIcon className="w-4 h-4 text-neutral-600" />
-                    <span className="hidden sm:inline text-xs font-medium text-neutral-700">{t('nav:loginRegister')}</span>
-                  </>
-                )}
-              </button>
             </div>
           </div>
         </div>
@@ -566,7 +489,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                     <svg className="absolute -left-2.5 -top-1 w-5 h-5 text-primary/30" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983z" />
                     </svg>
-                    <p className="text-neutral-600 leading-relaxed text-sm sm:text-base whitespace-pre-line break-words overflow-wrap-anywhere">
+                    <p className="text-neutral-600 leading-relaxed text-sm sm:text-base whitespace-pre-line">
                       {listing.description}
                     </p>
                   </div>

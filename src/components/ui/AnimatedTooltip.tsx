@@ -27,17 +27,17 @@ interface AnimatedTooltipProps {
   onQuoteRequest?: (item: AnimatedTooltipItem) => void;
 }
 
-const AnimatedTooltip: React.FC<AnimatedTooltipProps> = ({ items, onItemClick }) => {
+const AnimatedTooltip: React.FC<AnimatedTooltipProps> = ({ items, onItemClick, onQuoteRequest }) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const springConfig = { stiffness: 80, damping: 15 };
+  const springConfig = { stiffness: 100, damping: 5 };
   const x = useMotionValue(0);
 
   const rotate = useSpring(
-    useTransform(x, [-100, 100], [-15, 15]),
+    useTransform(x, [-100, 100], [-45, 45]),
     springConfig
   );
   const translateX = useSpring(
-    useTransform(x, [-100, 100], [-20, 20]),
+    useTransform(x, [-100, 100], [-50, 50]),
     springConfig
   );
 
@@ -47,10 +47,10 @@ const AnimatedTooltip: React.FC<AnimatedTooltipProps> = ({ items, onItemClick })
   };
 
   return (
-    <div className="flex flex-row items-center justify-center gap-3">
+    <div className="flex flex-row items-center justify-center gap-[-8px]">
       {items.map((item) => (
           <div
-            className="relative group"
+            className="-mr-3 relative group"
             key={item.id}
             onMouseEnter={() => setHoveredIndex(item.id)}
             onMouseLeave={() => setHoveredIndex(null)}
@@ -58,20 +58,20 @@ const AnimatedTooltip: React.FC<AnimatedTooltipProps> = ({ items, onItemClick })
             <AnimatePresence mode="popLayout">
               {hoveredIndex === item.id && (
                 <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.85 }}
+                  initial={{ opacity: 0, y: 20, scale: 0.6 }}
                   animate={{
                     opacity: 1,
                     y: 0,
                     scale: 1,
                     transition: {
                       type: 'spring',
-                      stiffness: 150,
-                      damping: 18,
+                      stiffness: 260,
+                      damping: 10,
                     },
                   }}
-                  exit={{ opacity: 0, y: 10, scale: 0.85, transition: { duration: 0.2 } }}
+                  exit={{ opacity: 0, y: 20, scale: 0.6 }}
                   style={{ translateX, rotate, whiteSpace: 'nowrap' }}
-                  className="absolute left-1/2 -translate-x-1/2 z-50 -top-16 pointer-events-none"
+                  className="absolute left-1/2 -translate-x-1/2 z-50 -top-16"
                 >
                   <div className="flex text-xs flex-col items-center justify-center rounded-md bg-black shadow-xl px-4 py-2">
                     <div className="absolute inset-x-10 z-30 w-[20%] -bottom-px bg-gradient-to-r from-transparent via-emerald-500 to-transparent h-px" />
