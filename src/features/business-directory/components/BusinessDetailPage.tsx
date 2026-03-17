@@ -1,7 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useBusinessListing } from '../hooks';
+
+const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
 import {
   PhoneIcon,
   MapPinIcon,
@@ -688,6 +690,46 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                         </motion.a>
                       );
                     })}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Map Section - when lat/lng available */}
+            {listing.latitude && listing.longitude && (
+              <motion.div
+                className="bg-white rounded-2xl border border-neutral-200 shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+                variants={fadeUpVariants}
+              >
+                <div className="p-5 sm:p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                      <MapPinIcon className="w-4 h-4 text-emerald-600" />
+                    </div>
+                    <h2 className="text-lg font-bold text-neutral-900">{t('detail.location')}</h2>
+                  </div>
+                  <div className="rounded-xl overflow-hidden border border-neutral-200 h-[250px]">
+                    <Suspense fallback={
+                      <div className="h-full bg-neutral-100 flex items-center justify-center">
+                        <div className="flex items-center gap-2 text-neutral-400">
+                          <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                          </svg>
+                        </div>
+                      </div>
+                    }>
+                      <MapLocationPicker
+                        lat={listing.latitude}
+                        lng={listing.longitude}
+                        address={listing.address || ''}
+                        zoom={15}
+                        country={listing.country}
+                        city={listing.city}
+                        onLocationChange={() => {}}
+                        onAddressChange={() => {}}
+                      />
+                    </Suspense>
                   </div>
                 </div>
               </motion.div>

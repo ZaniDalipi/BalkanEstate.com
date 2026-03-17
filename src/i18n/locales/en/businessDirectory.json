@@ -106,6 +106,7 @@
     "linkCopied": "Link copied to clipboard!",
     "getInTouch": "Reach out to get started",
     "callNow": "Call Now",
+    "getDirections": "Get Directions",
     "owner": "About the Owner",
     "ownerIndividual": "Independent Professional",
     "ownerBusiness": "Business Owner",
@@ -138,9 +139,14 @@
       "basicInfo": "Basic Information",
       "contact": "Contact Information",
       "location": "Location",
+      "businessLocation": "Business Location",
       "social": "Social Media",
       "hours": "Business Hours"
     },
+    "locationHint": "Add your business location so clients can find you easily.",
+    "pinOnMap": "Pin Your Business Location on Map",
+    "loadingMap": "Loading map...",
+    "locationSet": "Location pinned",
     "typeDescBusiness": "Company or registered business",
     "typeDescIndividual": "Freelancer or independent professional",
     "fields": {
@@ -156,7 +162,8 @@
       "country": "Country",
       "address": "Address",
       "logo": "Logo",
-      "avatar": "Profile Photo"
+      "avatar": "Profile Photo",
+      "pinLocation": "Pin Location on Map"
     },
     "placeholders": {
       "name": "Enter your business name",

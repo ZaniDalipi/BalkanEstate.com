@@ -1,9 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCreateBusinessListing, useUploadBusinessLogo } from '../hooks';
 import { BUSINESS_CATEGORIES, type BusinessCategory, type CreateBusinessListingData, type ListingType } from '@/src/shared/types/businessListing.types';
 import { Animated } from '@/src/components/ui/Animations';
-import { BuildingStorefrontIcon, UserIcon } from '@/constants';
+import { BuildingStorefrontIcon, UserIcon, MapPinIcon } from '@/constants';
+
+const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
 
 interface CreateBusinessListingFormProps {
   onBack: () => void;
@@ -61,6 +63,9 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
   const [serviceInput, setServiceInput] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
   const [showHours, setShowHours] = useState(false);
+  const [lat, setLat] = useState(0);
+  const [lng, setLng] = useState(0);
+  const [showMap, setShowMap] = useState(false);
 
   const handleChange = useCallback((
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -131,6 +136,15 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
     setLogoPreview(null);
   }, []);
 
+  const handleMapLocationChange = useCallback((newLat: number, newLng: number) => {
+    setLat(newLat);
+    setLng(newLng);
+  }, []);
+
+  const handleMapAddressChange = useCallback((searchedAddress: string) => {
+    setFormData(prev => ({ ...prev, address: searchedAddress }));
+  }, []);
+
   const handleServiceKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -163,6 +177,10 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
       if (formData.contactEmail?.trim()) cleanData.contactEmail = formData.contactEmail.trim();
       if (formData.website?.trim()) cleanData.website = formData.website.trim();
       if (formData.address?.trim()) cleanData.address = formData.address.trim();
+      if (lat !== 0 && lng !== 0) {
+        cleanData.latitude = lat;
+        cleanData.longitude = lng;
+      }
 
       const social = formData.socialMedia;
       if (social?.facebook || social?.instagram || social?.linkedin) {
@@ -500,7 +518,11 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
           {/* Location */}
           <Animated variant="fadeInUp" delay={150}>
             <div className="bg-white rounded-2xl border border-neutral-200 p-6 shadow-sm space-y-4">
-              <h2 className="text-lg font-semibold text-neutral-900">{t('form.sections.location')}</h2>
+              <div className="flex items-center gap-2">
+                <MapPinIcon className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-semibold text-neutral-900">{t('form.sections.businessLocation')}</h2>
+              </div>
+              <p className="text-sm text-neutral-500">{t('form.locationHint')}</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="city" className="block text-sm font-medium text-neutral-700 mb-1">
@@ -546,6 +568,56 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
                   placeholder={t('form.placeholders.address')}
                 />
               </div>
+
+              {/* Map location picker */}
+              {!showMap ? (
+                <button
+                  type="button"
+                  onClick={() => setShowMap(true)}
+                  className="flex items-center gap-2 w-full py-3 px-4 border-2 border-dashed border-primary/30 rounded-xl text-primary font-medium hover:bg-primary/5 hover:border-primary/50 transition-all text-sm"
+                >
+                  <MapPinIcon className="w-4 h-4" />
+                  {t('form.pinOnMap')}
+                </button>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-sm font-medium text-neutral-700">
+                      {t('form.fields.pinLocation')}
+                    </label>
+                    {lat !== 0 && lng !== 0 && (
+                      <span className="text-xs text-emerald-600 font-medium bg-emerald-50 px-2 py-1 rounded-full">
+                        {t('form.locationSet')}
+                      </span>
+                    )}
+                  </div>
+                  <div className="rounded-xl overflow-hidden border border-neutral-200">
+                    <Suspense fallback={
+                      <div className="h-[300px] bg-neutral-100 flex items-center justify-center">
+                        <div className="flex items-center gap-2 text-neutral-400">
+                          <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                          </svg>
+                          <span className="text-sm">{t('form.loadingMap')}</span>
+                        </div>
+                      </div>
+                    }>
+                      <MapLocationPicker
+                        lat={lat || 41.9981}
+                        lng={lng || 21.4254}
+                        address={formData.address || ''}
+                        zoom={lat !== 0 ? 15 : 8}
+                        country={formData.country}
+                        city={formData.city}
+                        onLocationChange={handleMapLocationChange}
+                        onAddressChange={handleMapAddressChange}
+                        autoDetectLocation={lat === 0 && lng === 0}
+                      />
+                    </Suspense>
+                  </div>
+                </div>
+              )}
             </div>
           </Animated>
 
