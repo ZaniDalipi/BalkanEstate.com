@@ -162,6 +162,14 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
 
   const { listings, total, totalPages, isLoading } = useBusinessListings(filters);
 
+  const navigateToListing = useCallback((listing: BusinessListing) => {
+    const identifier = listing.slug || listing.id;
+    setSelectedListingId(identifier);
+    setSubView('detail');
+    dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: identifier });
+    window.history.pushState({}, '', buildLocalizedPath(`/business-directory/${identifier}`));
+  }, [dispatch]);
+
   // Surprise Me - random business discovery
   const handleSurpriseMe = useCallback(() => {
     if (listings.length === 0) return;
@@ -211,14 +219,6 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
     dispatch({ type: 'SET_BUSINESS_DIRECTORY_TAB', payload: tab });
     const tabPath = tab === 'all' ? '/business-directory' : `/business-directory/${tab}`;
     window.history.pushState({}, '', buildLocalizedPath(tabPath));
-  }, [dispatch]);
-
-  const navigateToListing = useCallback((listing: BusinessListing) => {
-    const identifier = listing.slug || listing.id;
-    setSelectedListingId(identifier);
-    setSubView('detail');
-    dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: identifier });
-    window.history.pushState({}, '', buildLocalizedPath(`/business-directory/${identifier}`));
   }, [dispatch]);
 
   const handleCardClick = useCallback((listing: BusinessListing) => {
