@@ -40,7 +40,7 @@ export interface Product {
 }
 
 export interface PromotionPlan {
-  _id: string;
+  id: string;
   name: string;
   tier: string;
   category: 'listing' | 'agency';

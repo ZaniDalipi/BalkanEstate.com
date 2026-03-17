@@ -359,8 +359,16 @@ export function useCreatePromotionPlan() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: Omit<PromotionPlan, '_id' | 'createdAt' | 'updatedAt'>) =>
+    mutationFn: (data: Omit<PromotionPlan, 'id' | 'createdAt' | 'updatedAt'>) =>
       createPromotionPlan(data),
+    onSuccess: (response) => {
+      // Add the newly created plan to the cache immediately
+      if (response?.plan) {
+        queryClient.setQueryData(adminKeys.promotionPlans(), (old: PromotionPlan[] | undefined) =>
+          old ? [...old, response.plan] : [response.plan]
+        );
+      }
+    },
     onSettled: () => {
       invalidateAllPromotionPlanCaches(queryClient);
     },
@@ -376,6 +384,14 @@ export function useUpdatePromotionPlan() {
   return useMutation({
     mutationFn: ({ planId, data }: { planId: string; data: Partial<PromotionPlan> }) =>
       updatePromotionPlan(planId, data),
+    onSuccess: (response, { planId }) => {
+      // Update the plan in the cache immediately
+      if (response?.plan) {
+        queryClient.setQueryData(adminKeys.promotionPlans(), (old: PromotionPlan[] | undefined) =>
+          old?.map((plan) => plan.id === planId ? response.plan : plan)
+        );
+      }
+    },
     onSettled: () => {
       invalidateAllPromotionPlanCaches(queryClient);
     },

@@ -80,13 +80,16 @@ const PromotionPlanSchema: Schema = new Schema(
     },
 
     pricing: {
-      duration7: { type: Number },
-      duration14: { type: Number },
-      duration28: { type: Number },
-      duration30: { type: Number },
-      duration90: { type: Number },
-      fixedPrice: { type: Number },
-      fixedDuration: { type: String },
+      type: {
+        duration7: { type: Number },
+        duration14: { type: Number },
+        duration28: { type: Number },
+        duration30: { type: Number },
+        duration90: { type: Number },
+        fixedPrice: { type: Number },
+        fixedDuration: { type: String },
+      },
+      _id: false,
     },
 
     isAddOn: {
@@ -126,6 +129,7 @@ const PromotionPlanSchema: Schema = new Schema(
         iconBgColor: String,
         priceColor: String,
       },
+      _id: false,
       default: undefined,
     },
 

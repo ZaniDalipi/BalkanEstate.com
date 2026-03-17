@@ -57,13 +57,15 @@ export function usePromotionPlansManager() {
     try {
       const isNew = !editingPlan.id;
 
+      // Strip id and timestamps before sending to backend
+      const { id: planId, createdAt, updatedAt, ...planData } = editingPlan as PromotionPlan & { createdAt?: string; updatedAt?: string };
+
       if (isNew) {
-        const { id, createdAt, updatedAt, ...createData } = editingPlan as PromotionPlan & { createdAt?: string; updatedAt?: string };
-        await createPlanMutation.mutateAsync(createData);
+        await createPlanMutation.mutateAsync(planData);
       } else {
         await updatePlanMutation.mutateAsync({
-          planId: editingPlan.id,
-          data: editingPlan,
+          planId,
+          data: planData,
         });
       }
 
