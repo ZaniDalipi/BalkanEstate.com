@@ -167,6 +167,7 @@ export const ADMIN_SECTIONS = [
   'settings',
   'how-it-works',
   'email-templates',
+  'business-listings',
 ] as const;
 
 /**

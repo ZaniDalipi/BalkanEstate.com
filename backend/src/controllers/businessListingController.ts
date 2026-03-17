@@ -6,6 +6,13 @@ import { IUser } from '../models/User';
 import { uploadImage, deleteImage } from '../services/cloudinaryService';
 import { getParam, getObjectIdParam } from '../utils/validateParams';
 
+/** Transform lean document: map _id → id, strip internals */
+const transformLean = (doc: any) => {
+  if (!doc) return doc;
+  const { _id, __v, logoPublicId, ...rest } = doc;
+  return { id: _id?.toString(), ...rest };
+};
+
 // @desc    Get all business listings (public, with filtering & pagination)
 // @route   GET /api/business-listings
 // @access  Public
@@ -67,7 +74,7 @@ export const getBusinessListings = async (
     ]);
 
     res.status(200).json({
-      listings,
+      listings: listings.map(transformLean),
       total,
       page,
       totalPages: Math.ceil(total / limit),
@@ -381,8 +388,83 @@ export const getMyBusinessListings = async (
       .sort({ createdAt: -1 })
       .lean();
 
-    res.status(200).json({ listings });
+    res.status(200).json({ listings: listings.map(transformLean) });
   } catch (error: any) {
     res.status(500).json({ message: 'Failed to fetch your business listings', error: error.message });
+  }
+};
+
+// @desc    Get all business listings (admin, with owner info)
+// @route   GET /api/admin/business-listings
+// @access  Admin
+export const getAllBusinessListingsAdmin = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 20));
+    const skip = (page - 1) * limit;
+
+    const filter: Record<string, any> = {};
+    if (req.query.category) filter.category = req.query.category;
+    if (req.query.listingType) filter.listingType = req.query.listingType;
+    if (req.query.search) {
+      const escaped = escapeRegex(req.query.search as string);
+      filter.$or = [
+        { name: { $regex: escaped, $options: 'i' } },
+        { city: { $regex: escaped, $options: 'i' } },
+        { country: { $regex: escaped, $options: 'i' } },
+      ];
+    }
+
+    const [listings, total] = await Promise.all([
+      BusinessListing.find(filter)
+        .populate('owner', 'name email avatarUrl')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      BusinessListing.countDocuments(filter),
+    ]);
+
+    res.status(200).json({
+      listings: listings.map(transformLean),
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to fetch business listings', error: error.message });
+  }
+};
+
+// @desc    Admin delete any business listing
+// @route   DELETE /api/admin/business-listings/:id
+// @access  Admin
+export const adminDeleteBusinessListing = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const listing = await BusinessListing.findById(id);
+    if (!listing) {
+      res.status(404).json({ message: 'Business listing not found' });
+      return;
+    }
+
+    // Clean up logo from Cloudinary
+    if (listing.logoPublicId) {
+      await deleteImage(listing.logoPublicId).catch(() => {});
+    }
+
+    await BusinessListing.deleteOne({ _id: listing._id });
+
+    res.status(200).json({ message: 'Business listing deleted successfully' });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to delete business listing', error: error.message });
   }
 };

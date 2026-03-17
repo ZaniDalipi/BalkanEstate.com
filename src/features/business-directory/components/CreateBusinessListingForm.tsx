@@ -1,9 +1,11 @@
-import React, { useState, useCallback, lazy, Suspense } from 'react';
+import React, { useState, useCallback, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCreateBusinessListing, useUploadBusinessLogo } from '../hooks';
 import { BUSINESS_CATEGORIES, type BusinessCategory, type CreateBusinessListingData, type ListingType } from '@/src/shared/types/businessListing.types';
 import { Animated } from '@/src/components/ui/Animations';
 import { BuildingStorefrontIcon, UserIcon, MapPinIcon } from '@/constants';
+import { BALKAN_LOCATIONS, type CityData } from '@/utils/balkanLocations';
+import { useAppContext } from '@/context/AppContext';
 
 const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
 
@@ -11,6 +13,8 @@ interface CreateBusinessListingFormProps {
   onBack: () => void;
   onSuccess: () => void;
 }
+
+type FieldErrorKey = 'name' | 'category' | 'contactPhone' | 'country' | 'city';
 
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
 
@@ -39,8 +43,19 @@ const CATEGORY_ICONS: Record<string, string> = {
 
 const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ onBack, onSuccess }) => {
   const { t } = useTranslation('businessDirectory');
+  const { state } = useAppContext();
   const { createListing, isLoading, error } = useCreateBusinessListing();
   const { uploadLogo } = useUploadBusinessLogo();
+  const currentUser = state.currentUser;
+
+  // Refs for scroll-to-error
+  const fieldRefs = {
+    name: useRef<HTMLInputElement>(null),
+    category: useRef<HTMLDivElement>(null),
+    contactPhone: useRef<HTMLInputElement>(null),
+    country: useRef<HTMLSelectElement>(null),
+    city: useRef<HTMLSelectElement>(null),
+  };
 
   const [listingType, setListingType] = useState<ListingType>('business');
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -50,8 +65,8 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
     description: '',
     category: '' as BusinessCategory,
     services: [],
-    contactPhone: '',
-    contactEmail: '',
+    contactPhone: currentUser?.phone || '',
+    contactEmail: currentUser?.email || '',
     website: '',
     address: '',
     city: '',
@@ -62,18 +77,86 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
 
   const [serviceInput, setServiceInput] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
+  const [fieldError, setFieldError] = useState<FieldErrorKey | null>(null);
   const [showHours, setShowHours] = useState(false);
   const [lat, setLat] = useState(0);
   const [lng, setLng] = useState(0);
   const [showMap, setShowMap] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [availableCities, setAvailableCities] = useState<CityData[]>([]);
+
+  const inputClasses = (field?: FieldErrorKey) =>
+    `w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors ${
+      fieldError === field ? 'border-red-500 ring-2 ring-red-100' : 'border-neutral-300'
+    }`;
+
+  const selectClasses = (field?: FieldErrorKey) =>
+    `w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors bg-white appearance-none ${
+      fieldError === field ? 'border-red-500 ring-2 ring-red-100' : 'border-neutral-300'
+    }`;
+
+  const clearErrors = useCallback(() => {
+    setFormError(null);
+    setFieldError(null);
+  }, []);
+
+  const setValidationError = useCallback((field: FieldErrorKey, message: string) => {
+    setFormError(message);
+    setFieldError(field);
+    // Scroll to the errored field
+    const ref = fieldRefs[field];
+    if (ref.current) {
+      ref.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Focus the field after scroll
+      setTimeout(() => ref.current?.focus?.(), 400);
+    }
+  }, [fieldRefs]);
 
   const handleChange = useCallback((
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setFormError(null);
-  }, []);
+    clearErrors();
+  }, [clearErrors]);
+
+  const handleCountryChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    const countryName = e.target.value;
+    setSelectedCountry(countryName);
+    setSelectedCity('');
+    setFormData(prev => ({ ...prev, country: countryName, city: '' }));
+    clearErrors();
+
+    const country = BALKAN_LOCATIONS.find(c => c.name === countryName);
+    if (country) {
+      setAvailableCities(country.cities);
+      setLat(0);
+      setLng(0);
+      setShowMap(false);
+    } else {
+      setAvailableCities([]);
+    }
+  }, [clearErrors]);
+
+  const handleCityChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    const cityName = e.target.value;
+    setSelectedCity(cityName);
+    setFormData(prev => ({ ...prev, city: cityName }));
+    clearErrors();
+
+    const city = availableCities.find(c => c.name === cityName);
+    if (city) {
+      setLat(city.lat);
+      setLng(city.lng);
+      setFormData(prev => ({
+        ...prev,
+        city: cityName,
+        address: `${cityName}, ${selectedCountry}`,
+      }));
+      setShowMap(true);
+    }
+  }, [availableCities, selectedCountry, clearErrors]);
 
   const handleSocialChange = useCallback((field: string, value: string) => {
     setFormData((prev) => ({
@@ -125,11 +208,11 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
     }
 
     setLogoFile(file);
-    setFormError(null);
+    clearErrors();
     const reader = new FileReader();
     reader.onloadend = () => setLogoPreview(reader.result as string);
     reader.readAsDataURL(file);
-  }, [t]);
+  }, [t, clearErrors]);
 
   const removeLogo = useCallback(() => {
     setLogoFile(null);
@@ -154,13 +237,14 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError(null);
+    clearErrors();
 
-    if (!formData.name.trim()) { setFormError(t('form.errors.nameRequired')); return; }
-    if (!formData.category) { setFormError(t('form.errors.categoryRequired')); return; }
-    if (!formData.contactPhone.trim()) { setFormError(t('form.errors.phoneRequired')); return; }
-    if (!formData.city.trim()) { setFormError(t('form.errors.cityRequired')); return; }
-    if (!formData.country.trim()) { setFormError(t('form.errors.countryRequired')); return; }
+    // Validate with scroll-to-error
+    if (!formData.name.trim()) { setValidationError('name', t('form.errors.nameRequired')); return; }
+    if (!formData.category) { setValidationError('category', t('form.errors.categoryRequired')); return; }
+    if (!formData.contactPhone.trim()) { setValidationError('contactPhone', t('form.errors.phoneRequired')); return; }
+    if (!formData.country.trim()) { setValidationError('country', t('form.errors.countryRequired')); return; }
+    if (!formData.city.trim()) { setValidationError('city', t('form.errors.cityRequired')); return; }
 
     try {
       const cleanData: CreateBusinessListingData = {
@@ -211,7 +295,7 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
     } catch (err: any) {
       setFormError(err?.message || t('form.errors.generic'));
     }
-  }, [formData, listingType, logoFile, createListing, uploadLogo, onSuccess, t]);
+  }, [formData, listingType, lat, lng, logoFile, createListing, uploadLogo, onSuccess, t, clearErrors, setValidationError]);
 
   const displayError = formError || (error as Error)?.message;
 
@@ -248,10 +332,23 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 -mt-4 relative z-10">
+        {/* Sticky error toast */}
         {displayError && (
           <Animated variant="scaleIn">
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-              {displayError}
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-3 sticky top-4 z-50 shadow-lg shadow-red-100/50">
+              <svg className="w-5 h-5 flex-shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              </svg>
+              <span className="flex-1">{displayError}</span>
+              <button
+                type="button"
+                onClick={clearErrors}
+                className="text-red-400 hover:text-red-600 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
           </Animated>
         )}
@@ -311,7 +408,6 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
                 {listingType === 'individual' ? t('form.fields.avatar') : t('form.fields.logo')}
               </h2>
               <div className="flex items-center gap-5">
-                {/* Preview */}
                 <div className="w-20 h-20 rounded-2xl bg-neutral-100 flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-dashed border-neutral-300">
                   {logoPreview ? (
                     <img src={logoPreview} alt="Preview" className="w-full h-full object-cover rounded-xl" />
@@ -323,7 +419,6 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
                     </div>
                   )}
                 </div>
-
                 <div className="flex-1">
                   <div className="flex gap-2">
                     <label className="px-4 py-2 bg-primary/10 text-primary rounded-xl text-sm font-medium cursor-pointer hover:bg-primary/20 transition-colors">
@@ -362,13 +457,14 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
                   {listingType === 'individual' ? t('form.fields.fullName') : t('form.fields.name')} <span className="text-red-500">*</span>
                 </label>
                 <input
+                  ref={fieldRefs.name}
                   id="name"
                   name="name"
                   type="text"
                   value={formData.name}
                   onChange={handleChange}
                   maxLength={100}
-                  className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                  className={inputClasses('name')}
                   placeholder={listingType === 'individual' ? t('form.placeholders.fullName') : t('form.placeholders.name')}
                 />
               </div>
@@ -378,12 +474,17 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
                 <label className="block text-sm font-medium text-neutral-700 mb-2">
                   {t('form.fields.category')} <span className="text-red-500">*</span>
                 </label>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                <div
+                  ref={fieldRefs.category}
+                  className={`grid grid-cols-3 sm:grid-cols-4 gap-2 p-1 rounded-xl ${
+                    fieldError === 'category' ? 'ring-2 ring-red-200 bg-red-50/30' : ''
+                  }`}
+                >
                   {BUSINESS_CATEGORIES.map((cat) => (
                     <button
                       key={cat}
                       type="button"
-                      onClick={() => { setFormData(prev => ({ ...prev, category: cat })); setFormError(null); }}
+                      onClick={() => { setFormData(prev => ({ ...prev, category: cat })); clearErrors(); }}
                       className={`flex flex-col items-center gap-1 p-2.5 rounded-xl text-xs font-medium transition-all duration-200 border ${
                         formData.category === cat
                           ? 'border-primary bg-primary/5 text-primary shadow-sm'
@@ -471,13 +572,14 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
                     {t('form.fields.phone')} <span className="text-red-500">*</span>
                   </label>
                   <input
+                    ref={fieldRefs.contactPhone}
                     id="contactPhone"
                     name="contactPhone"
                     type="tel"
                     value={formData.contactPhone}
                     onChange={handleChange}
                     maxLength={30}
-                    className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                    className={inputClasses('contactPhone')}
                     placeholder={t('form.placeholders.phone')}
                   />
                 </div>
@@ -523,36 +625,51 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
                 <h2 className="text-lg font-semibold text-neutral-900">{t('form.sections.businessLocation')}</h2>
               </div>
               <p className="text-sm text-neutral-500">{t('form.locationHint')}</p>
+
+              {/* Country & City dropdowns */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="city" className="block text-sm font-medium text-neutral-700 mb-1">
-                    {t('form.fields.city')} <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="city"
-                    name="city"
-                    type="text"
-                    value={formData.city}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
-                    placeholder={t('form.placeholders.city')}
-                  />
-                </div>
                 <div>
                   <label htmlFor="country" className="block text-sm font-medium text-neutral-700 mb-1">
                     {t('form.fields.country')} <span className="text-red-500">*</span>
                   </label>
-                  <input
+                  <select
+                    ref={fieldRefs.country}
                     id="country"
-                    name="country"
-                    type="text"
-                    value={formData.country}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
-                    placeholder={t('form.placeholders.country')}
-                  />
+                    value={selectedCountry}
+                    onChange={handleCountryChange}
+                    className={selectClasses('country')}
+                  >
+                    <option value="">{t('form.placeholders.selectCountry')}</option>
+                    {BALKAN_LOCATIONS.map(country => (
+                      <option key={country.code} value={country.name}>
+                        {country.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="city" className="block text-sm font-medium text-neutral-700 mb-1">
+                    {t('form.fields.city')} <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    ref={fieldRefs.city}
+                    id="city"
+                    value={selectedCity}
+                    onChange={handleCityChange}
+                    className={selectClasses('city')}
+                    disabled={!selectedCountry}
+                  >
+                    <option value="">{t('form.placeholders.selectCity')}</option>
+                    {availableCities.map(city => (
+                      <option key={city.name} value={city.name}>
+                        {city.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
+
+              {/* Address */}
               <div>
                 <label htmlFor="address" className="block text-sm font-medium text-neutral-700 mb-1">
                   {t('form.fields.address')}
@@ -569,54 +686,58 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
                 />
               </div>
 
-              {/* Map location picker */}
-              {!showMap ? (
-                <button
-                  type="button"
-                  onClick={() => setShowMap(true)}
-                  className="flex items-center gap-2 w-full py-3 px-4 border-2 border-dashed border-primary/30 rounded-xl text-primary font-medium hover:bg-primary/5 hover:border-primary/50 transition-all text-sm"
-                >
-                  <MapPinIcon className="w-4 h-4" />
-                  {t('form.pinOnMap')}
-                </button>
-              ) : (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-sm font-medium text-neutral-700">
-                      {t('form.fields.pinLocation')}
-                    </label>
-                    {lat !== 0 && lng !== 0 && (
-                      <span className="text-xs text-emerald-600 font-medium bg-emerald-50 px-2 py-1 rounded-full">
-                        {t('form.locationSet')}
-                      </span>
-                    )}
-                  </div>
-                  <div className="rounded-xl overflow-hidden border border-neutral-200">
-                    <Suspense fallback={
-                      <div className="h-[300px] bg-neutral-100 flex items-center justify-center">
-                        <div className="flex items-center gap-2 text-neutral-400">
-                          <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                          </svg>
-                          <span className="text-sm">{t('form.loadingMap')}</span>
-                        </div>
+              {/* Map location picker - auto-shows when city selected */}
+              {selectedCity && (
+                <>
+                  {!showMap ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowMap(true)}
+                      className="flex items-center gap-2 w-full py-3 px-4 border-2 border-dashed border-primary/30 rounded-xl text-primary font-medium hover:bg-primary/5 hover:border-primary/50 transition-all text-sm"
+                    >
+                      <MapPinIcon className="w-4 h-4" />
+                      {t('form.pinOnMap')}
+                    </button>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-sm font-medium text-neutral-700">
+                          {t('form.fields.pinLocation')}
+                        </label>
+                        {lat !== 0 && lng !== 0 && (
+                          <span className="text-xs text-emerald-600 font-medium bg-emerald-50 px-2 py-1 rounded-full">
+                            {t('form.locationSet')}
+                          </span>
+                        )}
                       </div>
-                    }>
-                      <MapLocationPicker
-                        lat={lat || 41.9981}
-                        lng={lng || 21.4254}
-                        address={formData.address || ''}
-                        zoom={lat !== 0 ? 15 : 8}
-                        country={formData.country}
-                        city={formData.city}
-                        onLocationChange={handleMapLocationChange}
-                        onAddressChange={handleMapAddressChange}
-                        autoDetectLocation={lat === 0 && lng === 0}
-                      />
-                    </Suspense>
-                  </div>
-                </div>
+                      <div className="rounded-xl overflow-hidden border border-neutral-200">
+                        <Suspense fallback={
+                          <div className="h-[300px] bg-neutral-100 flex items-center justify-center">
+                            <div className="flex items-center gap-2 text-neutral-400">
+                              <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                              </svg>
+                              <span className="text-sm">{t('form.loadingMap')}</span>
+                            </div>
+                          </div>
+                        }>
+                          <MapLocationPicker
+                            lat={lat || 41.9981}
+                            lng={lng || 21.4254}
+                            address={formData.address || ''}
+                            zoom={lat !== 0 ? 15 : 8}
+                            country={formData.country}
+                            city={formData.city}
+                            onLocationChange={handleMapLocationChange}
+                            onAddressChange={handleMapAddressChange}
+                            autoDetectLocation={lat === 0 && lng === 0}
+                          />
+                        </Suspense>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </Animated>

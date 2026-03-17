@@ -68,6 +68,10 @@ import {
   getAgencySubscriptionHistory,
 } from '../controllers/adminSubscriptionController';
 import {
+  getAllBusinessListingsAdmin,
+  adminDeleteBusinessListing,
+} from '../controllers/businessListingController';
+import {
   getAllContent,
   createContent,
   updateContent,
@@ -142,6 +146,10 @@ router.get('/properties-missing-coords', logAdminAction('VIEW_MISSING_COORDS'), 
 router.post('/fix-coordinates', logAdminAction('FIX_COORDINATES'), fixPropertyCoordinates);
 router.post('/fix-coordinates/:propertyId', logAdminAction('FIX_SINGLE_COORDINATES'), fixSinglePropertyCoordinates);
 router.post('/sync-property-schema', logAdminAction('SYNC_PROPERTY_SCHEMA'), syncPropertySchema);
+
+// ===== Business Listing Management =====
+router.get('/business-listings', logAdminAction('VIEW_BUSINESS_LISTINGS'), getAllBusinessListingsAdmin);
+router.delete('/business-listings/:id', logAdminAction('DELETE_BUSINESS_LISTING'), adminDeleteBusinessListing);
 
 // ===== Discount Code Management =====
 router.get('/discount-codes', logAdminAction('VIEW_DISCOUNT_CODES'), getAllDiscountCodes);

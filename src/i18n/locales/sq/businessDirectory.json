@@ -1,0 +1,200 @@
+{
+  "hero": {
+    "badge": "Drejtoria e Bizneseve",
+    "title": "Gjeni Profesionistë të Besueshëm të Pasurive të Paluajtshme",
+    "titleHighlight": "dhe Ofrues Shërbimesh",
+    "subtitle": "Shfletoni ofruesit e verifikuar të shërbimeve të ndërtimit, rinovimit, pastrimit dhe shërbimeve të tjera të pasurive të paluajtshme në Ballkan.",
+    "popularCategories": "Kategoritë populare"
+  },
+  "search": {
+    "placeholder": "Kërkoni biznese sipas emrit, shërbimit ose fjalës kyçe...",
+    "button": "Kërko"
+  },
+  "tabs": {
+    "all": "Të gjitha",
+    "businesses": "Biznese",
+    "individuals": "Individë"
+  },
+  "types": {
+    "business": "Biznes",
+    "individual": "Individ"
+  },
+  "individuals": {
+    "title": "Profesionistë të Veçantë",
+    "subtitle": "Lidhuni me individë të aftë që ofrojnë ekspertizën e tyre në sektorin e pasurive të paluajtshme"
+  },
+  "filters": {
+    "all": "Të gjitha"
+  },
+  "categories": {
+    "construction": "Ndërtim",
+    "renovation": "Rinovim",
+    "cleaning": "Pastrim",
+    "moving": "Shpërngulje",
+    "interior_design": "Dizajn Enterieri",
+    "architecture": "Arkitekturë",
+    "plumbing": "Hidraulikë",
+    "electrical": "Elektrikë",
+    "landscaping": "Rregullim Peizazhi",
+    "security": "Siguri",
+    "real_estate_law": "E Drejtë Pronësore",
+    "insurance": "Sigurim",
+    "home_inspection": "Inspektim Shtëpie",
+    "pest_control": "Kontroli i Dëmtuesve",
+    "painting": "Lyerje",
+    "roofing": "Çati",
+    "hvac": "Ngrohje dhe Klimatizim",
+    "furniture": "Mobilje",
+    "appliances": "Pajisje Shtëpiake",
+    "other": "Tjetër"
+  },
+  "voiceSearch": {
+    "start": "Kërko me zë",
+    "stop": "Ndalo dëgjimin",
+    "listening": "Po dëgjoj... flisni tani"
+  },
+  "stats": {
+    "totalListings": "Gjithsej Listime",
+    "businesses": "Biznese",
+    "professionals": "Profesionistë",
+    "categories": "Kategori"
+  },
+  "surpriseMe": {
+    "button": "Më Surprizo",
+    "loading": "Duke zbuluar..."
+  },
+  "quickActions": {
+    "call": "Thirrje e shpejtë",
+    "email": "Dërgo email",
+    "website": "Vizito faqen"
+  },
+  "cta": {
+    "listBusiness": "Listoni Biznesin Tuaj",
+    "beFirst": "Bëhuni i Pari që Liston"
+  },
+  "results": {
+    "showing": "{{count}} biznese u gjetën"
+  },
+  "empty": {
+    "title": "Nuk u gjetën biznese",
+    "description": "Bëhuni i pari që liston biznesin tuaj në këtë kategori dhe arrini mijëra klientë të mundshëm."
+  },
+  "pagination": {
+    "previous": "E mëparshme",
+    "next": "Tjetra",
+    "pageOf": "Faqja {{page}} nga {{totalPages}}"
+  },
+  "verified": "I verifikuar",
+  "detail": {
+    "backToDirectory": "Kthehu te Drejtoria",
+    "services": "Shërbimet e Ofruara",
+    "businessHours": "Orari i Punës",
+    "closed": "Mbyllur",
+    "openNow": "Hapur tani",
+    "closedNow": "Mbyllur tani",
+    "today": "Sot",
+    "contactInfo": "Informacione Kontakti",
+    "phone": "Telefon",
+    "email": "Email",
+    "website": "Faqja e internetit",
+    "location": "Vendndodhja",
+    "socialMedia": "Rrjetet Sociale",
+    "views": "{{count}} shikime",
+    "notFound": "Listimi i biznesit nuk u gjet",
+    "notFoundDesc": "Listimi që po kërkoni mund të jetë hequr ose nuk ekziston.",
+    "share": "Ndaj",
+    "linkCopied": "Linku u kopjua!",
+    "getInTouch": "Na kontaktoni për të filluar",
+    "callNow": "Thirr Tani",
+    "getDirections": "Merr Udhëzime",
+    "owner": "Rreth Pronarit",
+    "ownerIndividual": "Profesionist i Pavarur",
+    "ownerBusiness": "Pronar Biznesi",
+    "stats": {
+      "services": "Shërbime",
+      "views": "Shikime",
+      "memberSince": "Anëtar që nga"
+    },
+    "cta": {
+      "title": "Gati të punoni me {{name}}?",
+      "subtitle": "Na kontaktoni sot për të diskutuar projektin tuaj dhe merrni një konsultim falas.",
+      "callNow": "Thirr {{phone}}",
+      "sendEmail": "Dërgo Email"
+    }
+  },
+  "days": {
+    "monday": "E hënë",
+    "tuesday": "E martë",
+    "wednesday": "E mërkurë",
+    "thursday": "E enjte",
+    "friday": "E premte",
+    "saturday": "E shtunë",
+    "sunday": "E diel"
+  },
+  "form": {
+    "title": "Listoni Biznesin Tuaj",
+    "subtitle": "Arrini mijëra klientë të mundshëm në Ballkan",
+    "sections": {
+      "type": "Lloji i Listimit",
+      "basicInfo": "Informacione Bazë",
+      "contact": "Informacione Kontakti",
+      "location": "Vendndodhja",
+      "businessLocation": "Vendndodhja e Biznesit",
+      "social": "Rrjetet Sociale",
+      "hours": "Orari i Punës"
+    },
+    "locationHint": "Shtoni vendndodhjen e biznesit tuaj që klientët t'ju gjejnë lehtë.",
+    "pinOnMap": "Vendosni Vendndodhjen e Biznesit në Hartë",
+    "loadingMap": "Duke ngarkuar hartën...",
+    "locationSet": "Vendndodhja u vendos",
+    "typeDescBusiness": "Kompani ose biznes i regjistruar",
+    "typeDescIndividual": "Punëtor i pavarur ose profesionist i lirë",
+    "fields": {
+      "name": "Emri i Biznesit",
+      "fullName": "Emri i Plotë",
+      "category": "Kategoria",
+      "description": "Përshkrimi",
+      "services": "Shërbimet",
+      "phone": "Numri i Telefonit",
+      "email": "Adresa e Emailit",
+      "website": "Faqja e internetit",
+      "city": "Qyteti",
+      "country": "Shteti",
+      "address": "Adresa",
+      "logo": "Logo",
+      "avatar": "Foto Profili",
+      "pinLocation": "Vendos Vendndodhjen në Hartë"
+    },
+    "placeholders": {
+      "name": "Shkruani emrin e biznesit tuaj",
+      "fullName": "Shkruani emrin tuaj të plotë",
+      "category": "Zgjidhni një kategori",
+      "description": "Përshkruani biznesin tuaj, çfarë ofroni dhe pse klientët duhet t'ju zgjedhin...",
+      "service": "Shkruani një shërbim dhe shtypni Enter",
+      "phone": "+355 XX XXX XXXX",
+      "email": "kontakt@biznesiyt.com",
+      "website": "https://biznesiyt.com",
+      "selectCountry": "Zgjidhni një shtet",
+      "selectCity": "Zgjidhni një qytet",
+      "address": "Adresa e rrugës",
+      "hours": "p.sh. 09:00 - 17:00"
+    },
+    "addService": "Shto",
+    "logoUpload": "Ngarko Imazh",
+    "logoChange": "Ndrysho Imazhin",
+    "logoRemove": "Hiq",
+    "logoHint": "JPG, PNG ose WebP. Maksimumi 5MB.",
+    "submit": "Krijo Listimin",
+    "submitting": "Duke krijuar...",
+    "errors": {
+      "nameRequired": "Emri i biznesit është i detyrueshëm",
+      "categoryRequired": "Ju lutem zgjidhni një kategori",
+      "phoneRequired": "Numri i telefonit të kontaktit është i detyrueshëm",
+      "cityRequired": "Qyteti është i detyrueshëm",
+      "countryRequired": "Shteti është i detyrueshëm",
+      "generic": "Diçka shkoi keq. Ju lutem provoni përsëri.",
+      "logoInvalidType": "Ju lutem ngarkoni një imazh JPG, PNG ose WebP",
+      "logoTooLarge": "Imazhi duhet të jetë nën 5MB"
+    }
+  }
+}

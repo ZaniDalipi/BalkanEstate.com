@@ -1,0 +1,200 @@
+{
+  "hero": {
+    "badge": "Poslovni imenik",
+    "title": "Pronađite pouzdane stručnjake za nekretnine",
+    "titleHighlight": "i pružatelje usluga",
+    "subtitle": "Pregledajte provjerene pružatelje građevinskih, renovacijskih, usluga čišćenja i drugih usluga za nekretnine na Balkanu.",
+    "popularCategories": "Popularne kategorije"
+  },
+  "search": {
+    "placeholder": "Pretražite tvrtke po imenu, usluzi ili ključnoj riječi...",
+    "button": "Pretraži"
+  },
+  "tabs": {
+    "all": "Sve",
+    "businesses": "Tvrtke",
+    "individuals": "Pojedinci"
+  },
+  "types": {
+    "business": "Tvrtka",
+    "individual": "Pojedinac"
+  },
+  "individuals": {
+    "title": "Istaknuti stručnjaci",
+    "subtitle": "Povežite se s kvalificiranim stručnjacima koji nude svoju stručnost u sektoru nekretnina"
+  },
+  "filters": {
+    "all": "Sve"
+  },
+  "categories": {
+    "construction": "Građevinarstvo",
+    "renovation": "Renoviranje",
+    "cleaning": "Čišćenje",
+    "moving": "Selidbe",
+    "interior_design": "Dizajn interijera",
+    "architecture": "Arhitektura",
+    "plumbing": "Vodoinstalacije",
+    "electrical": "Elektroinstalacije",
+    "landscaping": "Uređenje krajolika",
+    "security": "Zaštita",
+    "real_estate_law": "Pravo nekretnina",
+    "insurance": "Osiguranje",
+    "home_inspection": "Inspekcija nekretnine",
+    "pest_control": "Dezinsekcija",
+    "painting": "Ličenje",
+    "roofing": "Krovopokrivački radovi",
+    "hvac": "Grijanje i klimatizacija",
+    "furniture": "Namještaj",
+    "appliances": "Kućanski aparati",
+    "other": "Ostalo"
+  },
+  "voiceSearch": {
+    "start": "Glasovno pretraživanje",
+    "stop": "Prestani slušati",
+    "listening": "Slušam... govorite sada"
+  },
+  "stats": {
+    "totalListings": "Ukupno oglasa",
+    "businesses": "Tvrtke",
+    "professionals": "Stručnjaci",
+    "categories": "Kategorije"
+  },
+  "surpriseMe": {
+    "button": "Iznenadi me",
+    "loading": "Otkrivam..."
+  },
+  "quickActions": {
+    "call": "Brzi poziv",
+    "email": "Pošalji e-mail",
+    "website": "Posjeti web stranicu"
+  },
+  "cta": {
+    "listBusiness": "Dodajte svoju tvrtku",
+    "beFirst": "Budite prvi na popisu"
+  },
+  "results": {
+    "showing": "Pronađeno {{count}} tvrtki"
+  },
+  "empty": {
+    "title": "Nisu pronađene tvrtke",
+    "description": "Budite prvi koji će dodati svoju tvrtku u ovu kategoriju i doseći tisuće potencijalnih klijenata."
+  },
+  "pagination": {
+    "previous": "Prethodna",
+    "next": "Sljedeća",
+    "pageOf": "Stranica {{page}} od {{totalPages}}"
+  },
+  "verified": "Provjereno",
+  "detail": {
+    "backToDirectory": "Povratak na imenik",
+    "services": "Ponuđene usluge",
+    "businessHours": "Radno vrijeme",
+    "closed": "Zatvoreno",
+    "openNow": "Otvoreno",
+    "closedNow": "Zatvoreno",
+    "today": "Danas",
+    "contactInfo": "Kontakt podaci",
+    "phone": "Telefon",
+    "email": "E-mail",
+    "website": "Web stranica",
+    "location": "Lokacija",
+    "socialMedia": "Društvene mreže",
+    "views": "{{count}} pregleda",
+    "notFound": "Oglas nije pronađen",
+    "notFoundDesc": "Oglas koji tražite možda je uklonjen ili ne postoji.",
+    "share": "Podijeli",
+    "linkCopied": "Poveznica kopirana u međuspremnik!",
+    "getInTouch": "Javite se da započnete",
+    "callNow": "Nazovite odmah",
+    "getDirections": "Upute za dolazak",
+    "owner": "O vlasniku",
+    "ownerIndividual": "Nezavisni stručnjak",
+    "ownerBusiness": "Vlasnik tvrtke",
+    "stats": {
+      "services": "Usluge",
+      "views": "Pregledi",
+      "memberSince": "Član od"
+    },
+    "cta": {
+      "title": "Spremni za suradnju s {{name}}?",
+      "subtitle": "Javite se danas kako biste razgovarali o svom projektu i dobili besplatne savjete.",
+      "callNow": "Nazovite {{phone}}",
+      "sendEmail": "Pošalji e-mail"
+    }
+  },
+  "days": {
+    "monday": "Ponedjeljak",
+    "tuesday": "Utorak",
+    "wednesday": "Srijeda",
+    "thursday": "Četvrtak",
+    "friday": "Petak",
+    "saturday": "Subota",
+    "sunday": "Nedjelja"
+  },
+  "form": {
+    "title": "Dodajte svoju tvrtku",
+    "subtitle": "Doseznite tisuće potencijalnih klijenata na Balkanu",
+    "sections": {
+      "type": "Vrsta oglasa",
+      "basicInfo": "Osnovne informacije",
+      "contact": "Kontakt podaci",
+      "location": "Lokacija",
+      "businessLocation": "Lokacija tvrtke",
+      "social": "Društvene mreže",
+      "hours": "Radno vrijeme"
+    },
+    "locationHint": "Dodajte lokaciju svoje tvrtke kako bi vas klijenti lako pronašli.",
+    "pinOnMap": "Označite lokaciju tvrtke na karti",
+    "loadingMap": "Učitavanje karte...",
+    "locationSet": "Lokacija označena",
+    "typeDescBusiness": "Tvrtka ili registrirani obrt",
+    "typeDescIndividual": "Freelancer ili nezavisni stručnjak",
+    "fields": {
+      "name": "Naziv tvrtke",
+      "fullName": "Ime i prezime",
+      "category": "Kategorija",
+      "description": "Opis",
+      "services": "Usluge",
+      "phone": "Broj telefona",
+      "email": "E-mail adresa",
+      "website": "Web stranica",
+      "city": "Grad",
+      "country": "Država",
+      "address": "Adresa",
+      "logo": "Logotip",
+      "avatar": "Profilna fotografija",
+      "pinLocation": "Označite lokaciju na karti"
+    },
+    "placeholders": {
+      "name": "Unesite naziv svoje tvrtke",
+      "fullName": "Unesite svoje ime i prezime",
+      "category": "Odaberite kategoriju",
+      "description": "Opišite svoju tvrtku, što nudite i zašto bi vas klijenti trebali odabrati...",
+      "service": "Upišite uslugu i pritisnite Enter",
+      "phone": "+389 XX XXX XXX",
+      "email": "contact@yourbusiness.com",
+      "website": "https://yourbusiness.com",
+      "selectCountry": "Odaberite državu",
+      "selectCity": "Odaberite grad",
+      "address": "Ulica i kućni broj",
+      "hours": "npr. 09:00 - 17:00"
+    },
+    "addService": "Dodaj",
+    "logoUpload": "Učitaj sliku",
+    "logoChange": "Promijeni sliku",
+    "logoRemove": "Ukloni",
+    "logoHint": "JPG, PNG ili WebP. Maksimalno 5MB.",
+    "submit": "Kreiraj oglas",
+    "submitting": "Kreiranje...",
+    "errors": {
+      "nameRequired": "Naziv tvrtke je obavezan",
+      "categoryRequired": "Molimo odaberite kategoriju",
+      "phoneRequired": "Kontakt broj telefona je obavezan",
+      "cityRequired": "Grad je obavezan",
+      "countryRequired": "Država je obavezna",
+      "generic": "Nešto je pošlo po krivu. Molimo pokušajte ponovo.",
+      "logoInvalidType": "Molimo učitajte sliku u JPG, PNG ili WebP formatu",
+      "logoTooLarge": "Slika mora biti manja od 5MB"
+    }
+  }
+}

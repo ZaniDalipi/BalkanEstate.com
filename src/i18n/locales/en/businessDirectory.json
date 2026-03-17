@@ -174,8 +174,8 @@
       "phone": "+389 XX XXX XXX",
       "email": "contact@yourbusiness.com",
       "website": "https://yourbusiness.com",
-      "city": "e.g. Skopje",
-      "country": "e.g. North Macedonia",
+      "selectCountry": "Select a country",
+      "selectCity": "Select a city",
       "address": "Street address",
       "hours": "e.g. 09:00 - 17:00"
     },

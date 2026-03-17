@@ -168,11 +168,10 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
     setSurpriseAnim(true);
     setTimeout(() => {
       const randomListing = listings[Math.floor(Math.random() * listings.length)];
-      setSelectedListingId(randomListing.id);
-      setSubView('detail');
+      navigateToListing(randomListing);
       setSurpriseAnim(false);
     }, 800);
-  }, [listings]);
+  }, [listings, navigateToListing]);
 
   // Derive individuals for AnimatedTooltip row
   const individualListings = useMemo(() =>
@@ -214,25 +213,24 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
     window.history.pushState({}, '', buildLocalizedPath(tabPath));
   }, [dispatch]);
 
-  const navigateToListing = useCallback((id: string) => {
-    setSelectedListingId(id);
+  const navigateToListing = useCallback((listing: BusinessListing) => {
+    const identifier = listing.slug || listing.id;
+    setSelectedListingId(identifier);
     setSubView('detail');
-    dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: id });
-    window.history.pushState({}, '', buildLocalizedPath(`/business-directory/${id}`));
+    dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: identifier });
+    window.history.pushState({}, '', buildLocalizedPath(`/business-directory/${identifier}`));
   }, [dispatch]);
 
   const handleCardClick = useCallback((listing: BusinessListing) => {
-    navigateToListing(listing.id);
+    navigateToListing(listing);
   }, [navigateToListing]);
 
   const handleTooltipClick = useCallback((item: AnimatedTooltipItem) => {
-    if (item.listingId) {
-      navigateToListing(item.listingId);
-    } else {
-      const match = individualListings.find(l => l.name === item.name);
-      if (match) {
-        navigateToListing(match.id);
-      }
+    const match = individualListings.find(l =>
+      (item.listingId && (l.id === item.listingId || l.slug === item.listingId)) || l.name === item.name
+    );
+    if (match) {
+      navigateToListing(match);
     }
   }, [individualListings, navigateToListing]);
 
