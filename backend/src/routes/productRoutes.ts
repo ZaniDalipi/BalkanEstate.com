@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import Product from '../models/Product';
 import { protect, restrictTo } from '../middleware/auth';
 import { apiLogger } from '../utils/logger';
+import { resolveId } from '../utils/idObfuscation';
 
 const router = express.Router();
 
@@ -157,7 +158,11 @@ router.post('/admin', protect, restrictTo('admin', 'super_admin'), async (req: R
  */
 router.put('/admin/:id', protect, restrictTo('admin', 'super_admin'), async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = resolveId(req.params.id as string);
+    if (!id) {
+      res.status(400).json({ success: false, message: 'Invalid product ID' });
+      return;
+    }
     const updateData = req.body;
 
     // Log the update attempt for debugging
@@ -210,7 +215,11 @@ router.put('/admin/:id', protect, restrictTo('admin', 'super_admin'), async (req
  */
 router.delete('/admin/:id', protect, restrictTo('admin', 'super_admin'), async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = resolveId(req.params.id as string);
+    if (!id) {
+      res.status(400).json({ success: false, message: 'Invalid product ID' });
+      return;
+    }
 
     const product = await Product.findByIdAndDelete(id);
 
@@ -243,7 +252,11 @@ router.delete('/admin/:id', protect, restrictTo('admin', 'super_admin'), async (
  */
 router.patch('/admin/:id/visibility', protect, restrictTo('admin', 'super_admin'), async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = resolveId(req.params.id as string);
+    if (!id) {
+      res.status(400).json({ success: false, message: 'Invalid product ID' });
+      return;
+    }
 
     const product = await Product.findById(id);
 
@@ -280,7 +293,11 @@ router.patch('/admin/:id/visibility', protect, restrictTo('admin', 'super_admin'
  */
 router.patch('/admin/:id/status', protect, restrictTo('admin', 'super_admin'), async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = resolveId(req.params.id as string);
+    if (!id) {
+      res.status(400).json({ success: false, message: 'Invalid product ID' });
+      return;
+    }
 
     const product = await Product.findById(id);
 
