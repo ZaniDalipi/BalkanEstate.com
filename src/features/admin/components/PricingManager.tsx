@@ -144,7 +144,7 @@ const PricingManager: React.FC = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
               {products.map((product) => (
-                <tr key={product._id} className={`transition-colors hover:bg-blue-50/50 ${!product.isActive ? 'bg-gray-50/50 opacity-60' : ''}`}>
+                <tr key={product.id} className={`transition-colors hover:bg-blue-50/50 ${!product.isActive ? 'bg-gray-50/50 opacity-60' : ''}`}>
                   <td className="px-6 py-4">
                     <div className="flex items-center">
                       <div>
@@ -189,14 +189,14 @@ const PricingManager: React.FC = () => {
                     <div className="flex flex-col gap-1.5">
                       <button
                         onClick={() => handleToggleStatus(product)}
-                        disabled={mutatingProductId === product._id}
+                        disabled={mutatingProductId === product.id}
                         className={`px-2.5 py-1 text-xs font-medium rounded-full transition-all ${
                           product.isActive
                             ? 'bg-green-100 text-green-700 hover:bg-green-200'
                             : 'bg-red-100 text-red-700 hover:bg-red-200'
-                        } ${mutatingProductId === product._id ? 'opacity-50 cursor-wait' : ''}`}
+                        } ${mutatingProductId === product.id ? 'opacity-50 cursor-wait' : ''}`}
                       >
-                        {mutatingProductId === product._id ? (
+                        {mutatingProductId === product.id ? (
                           <span className="flex items-center gap-1">
                             <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
                             {t('common:updating', 'Updating...')}
@@ -207,14 +207,14 @@ const PricingManager: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleToggleVisibility(product)}
-                        disabled={mutatingProductId === product._id}
+                        disabled={mutatingProductId === product.id}
                         className={`px-2.5 py-1 text-xs font-medium rounded-full transition-all ${
                           product.isVisible
                             ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        } ${mutatingProductId === product._id ? 'opacity-50 cursor-wait' : ''}`}
+                        } ${mutatingProductId === product.id ? 'opacity-50 cursor-wait' : ''}`}
                       >
-                        {mutatingProductId === product._id ? (
+                        {mutatingProductId === product.id ? (
                           <span className="flex items-center gap-1">
                             <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
                             {t('common:updating', 'Updating...')}
