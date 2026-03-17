@@ -127,9 +127,7 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
 
     // Use AppContext avatar if this agent is the current user (immediate propagation)
     const isCurrentUser = state.currentUser && (
-        agent.userId === state.currentUser.id ||
-        agent.id === state.currentUser.id ||
-        agent._id === state.currentUser._id
+        agent.userId === state.currentUser.id
     );
     const resolvedAvatarUrl = isCurrentUser && state.currentUser?.avatarUrl
         ? state.currentUser.avatarUrl
