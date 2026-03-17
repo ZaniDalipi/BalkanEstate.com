@@ -1,11 +1,14 @@
 import React, { useState, useCallback, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useCreateBusinessListing, useUploadBusinessLogo } from '../hooks';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useCreateBusinessListing, useUploadBusinessLogo, useMyBusinessListings } from '../hooks';
 import { BUSINESS_CATEGORIES, type BusinessCategory, type CreateBusinessListingData, type ListingType } from '@/src/shared/types/businessListing.types';
 import { Animated } from '@/src/components/ui/Animations';
 import { BuildingStorefrontIcon, UserIcon, MapPinIcon } from '@/constants';
 import { BALKAN_LOCATIONS, type CityData } from '@/utils/balkanLocations';
 import { useAppContext } from '@/context/AppContext';
+
+const MAX_LISTINGS_PER_USER = 3;
 
 const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
 
@@ -14,7 +17,7 @@ interface CreateBusinessListingFormProps {
   onSuccess: () => void;
 }
 
-type FieldErrorKey = 'name' | 'category' | 'contactPhone' | 'country' | 'city';
+type FieldErrorKey = 'name' | 'category' | 'contactPhone' | 'contactEmail' | 'website' | 'country' | 'city';
 
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
 
@@ -46,13 +49,20 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
   const { state } = useAppContext();
   const { createListing, isLoading, error } = useCreateBusinessListing();
   const { uploadLogo } = useUploadBusinessLogo();
+  const { listings: myListings, isLoading: isLoadingMyListings } = useMyBusinessListings();
   const currentUser = state.currentUser;
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCreatingModal, setShowCreatingModal] = useState(false);
+
+  const hasReachedLimit = myListings.length >= MAX_LISTINGS_PER_USER;
 
   // Refs for scroll-to-error
   const fieldRefs = {
     name: useRef<HTMLInputElement>(null),
     category: useRef<HTMLDivElement>(null),
     contactPhone: useRef<HTMLInputElement>(null),
+    contactEmail: useRef<HTMLInputElement>(null),
+    website: useRef<HTMLInputElement>(null),
     country: useRef<HTMLSelectElement>(null),
     city: useRef<HTMLSelectElement>(null),
   };
@@ -237,16 +247,44 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     clearErrors();
+
+    // Check listing limit
+    if (hasReachedLimit) {
+      setFormError(t('form.errors.maxListingsReached', { defaultValue: `You can create a maximum of ${MAX_LISTINGS_PER_USER} business listings.` }));
+      return;
+    }
 
     // Validate with scroll-to-error
     if (!formData.name.trim()) { setValidationError('name', t('form.errors.nameRequired')); return; }
+    if (formData.name.trim().length < 2) { setValidationError('name', t('form.errors.nameTooShort', { defaultValue: 'Name must be at least 2 characters.' })); return; }
     if (!formData.category) { setValidationError('category', t('form.errors.categoryRequired')); return; }
     if (!formData.contactPhone.trim()) { setValidationError('contactPhone', t('form.errors.phoneRequired')); return; }
+    // Phone: allow digits, spaces, +, -, (, )
+    const phoneRegex = /^[+]?[\d\s\-()]{6,30}$/;
+    if (!phoneRegex.test(formData.contactPhone.trim())) { setValidationError('contactPhone', t('form.errors.phoneInvalid', { defaultValue: 'Please enter a valid phone number.' })); return; }
+    // Email validation (optional field, but validate format if provided)
+    if (formData.contactEmail?.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.contactEmail.trim())) { setValidationError('contactEmail', t('form.errors.emailInvalid', { defaultValue: 'Please enter a valid email address.' })); return; }
+    }
+    // Website validation (optional, but validate if provided)
+    if (formData.website?.trim()) {
+      try {
+        const urlStr = formData.website.trim().startsWith('http') ? formData.website.trim() : `https://${formData.website.trim()}`;
+        new URL(urlStr);
+      } catch {
+        setValidationError('website', t('form.errors.websiteInvalid', { defaultValue: 'Please enter a valid website URL.' })); return;
+      }
+    }
     if (!formData.country.trim()) { setValidationError('country', t('form.errors.countryRequired')); return; }
     if (!formData.city.trim()) { setValidationError('city', t('form.errors.cityRequired')); return; }
 
     try {
+      setIsSubmitting(true);
+      setShowCreatingModal(true);
+
       const cleanData: CreateBusinessListingData = {
         listingType,
         name: formData.name.trim(),
@@ -291,11 +329,15 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
         }
       }
 
+      setShowCreatingModal(false);
       onSuccess();
     } catch (err: any) {
+      setShowCreatingModal(false);
       setFormError(err?.message || t('form.errors.generic'));
+    } finally {
+      setIsSubmitting(false);
     }
-  }, [formData, listingType, lat, lng, logoFile, createListing, uploadLogo, onSuccess, t, clearErrors, setValidationError]);
+  }, [formData, listingType, lat, lng, logoFile, createListing, uploadLogo, onSuccess, t, clearErrors, setValidationError, isSubmitting, hasReachedLimit]);
 
   const displayError = formError || (error as Error)?.message;
 
@@ -588,13 +630,14 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
                     {t('form.fields.email')}
                   </label>
                   <input
+                    ref={fieldRefs.contactEmail}
                     id="contactEmail"
                     name="contactEmail"
                     type="email"
                     value={formData.contactEmail}
                     onChange={handleChange}
                     maxLength={100}
-                    className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                    className={inputClasses('contactEmail')}
                     placeholder={t('form.placeholders.email')}
                   />
                 </div>
@@ -604,13 +647,14 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
                   {t('form.fields.website')}
                 </label>
                 <input
+                  ref={fieldRefs.website}
                   id="website"
                   name="website"
                   type="url"
                   value={formData.website}
                   onChange={handleChange}
                   maxLength={200}
-                  className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                  className={inputClasses('website')}
                   placeholder={t('form.placeholders.website')}
                 />
               </div>
@@ -822,18 +866,78 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
             </div>
           </Animated>
 
+          {/* Max listings warning */}
+          {hasReachedLimit && (
+            <Animated variant="scaleIn">
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-700 text-sm flex items-center gap-3">
+                <svg className="w-5 h-5 flex-shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+                <span>{t('form.errors.maxListingsReached', { defaultValue: `You have reached the maximum of ${MAX_LISTINGS_PER_USER} business listings.` })}</span>
+              </div>
+            </Animated>
+          )}
+
+          {/* Listing count indicator */}
+          {!isLoadingMyListings && myListings.length > 0 && !hasReachedLimit && (
+            <div className="text-center text-xs text-neutral-400">
+              {t('form.listingsCount', { current: myListings.length, max: MAX_LISTINGS_PER_USER, defaultValue: `${myListings.length} of ${MAX_LISTINGS_PER_USER} listings used` })}
+            </div>
+          )}
+
           {/* Submit */}
           <Animated variant="fadeInUp" delay={300}>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isSubmitting || hasReachedLimit}
               className="w-full py-3.5 bg-gradient-to-r from-primary to-blue-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.99] text-base"
             >
-              {isLoading ? t('form.submitting') : t('form.submit')}
+              {isLoading || isSubmitting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  {t('form.submitting')}
+                </span>
+              ) : t('form.submit')}
             </button>
           </Animated>
         </form>
       </div>
+
+      {/* Creation in progress modal */}
+      <AnimatePresence>
+        {showCreatingModal && (
+          <motion.div
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-white rounded-2xl p-8 shadow-2xl max-w-sm mx-4 text-center"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            >
+              <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-neutral-900 mb-2">
+                {t('form.creatingTitle', { defaultValue: 'Creating your listing...' })}
+              </h3>
+              <p className="text-sm text-neutral-500">
+                {t('form.creatingDesc', { defaultValue: 'Please wait while we set up your business listing. This may take a moment.' })}
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
