@@ -76,10 +76,10 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
       <button
         type="button"
         onClick={() => onClick(listing)}
-        className="w-full text-left bg-white rounded-2xl sm:rounded-3xl shadow-md shadow-neutral-200/60 hover:shadow-xl hover:shadow-neutral-300/50 overflow-hidden border border-neutral-100/80 group transition-all duration-500"
+        className="w-full text-left bg-white rounded-2xl shadow-md shadow-neutral-200/60 hover:shadow-xl hover:shadow-neutral-300/50 overflow-hidden border border-neutral-100/80 group transition-all duration-500"
       >
         {/* Category gradient banner */}
-        <div className={`h-20 sm:h-24 bg-gradient-to-r ${gradient} relative overflow-hidden`}>
+        <div className={`h-20 sm:h-22 bg-gradient-to-r ${gradient} relative overflow-hidden`}>
           {/* Animated mesh pattern overlay */}
           <div className="absolute inset-0 opacity-[0.15]">
             <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -183,40 +183,40 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
         {/* Content */}
         <div className="p-4 pt-3 sm:px-5">
           {/* Name */}
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <h3 className="font-bold text-neutral-900 truncate group-hover:text-primary transition-colors duration-300 text-[15px]">
+          <div className="flex items-start gap-1.5 mb-1.5">
+            <h3 className="font-bold text-neutral-900 line-clamp-1 group-hover:text-primary transition-colors duration-300 text-sm sm:text-[15px] leading-snug">
               {listing.name}
             </h3>
             {listing.isVerified && (
-              <CheckBadgeIcon className="w-4 h-4 text-primary flex-shrink-0" />
+              <CheckBadgeIcon className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
             )}
           </div>
 
           {/* Category chip */}
-          <span className="inline-block px-2.5 py-0.5 text-xs font-semibold bg-primary/8 text-primary rounded-full mb-2.5 border border-primary/10">
+          <span className="inline-block px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-semibold bg-primary/8 text-primary rounded-full mb-2 border border-primary/10">
             {t(`categories.${listing.category}`)}
           </span>
 
           {/* Description */}
           {listing.description && (
-            <p className="text-sm text-neutral-500 line-clamp-2 mb-3 leading-relaxed">
+            <p className="text-xs sm:text-sm text-neutral-500 line-clamp-2 mb-3 leading-relaxed">
               {listing.description}
             </p>
           )}
 
           {/* Services tags */}
           {listing.services.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-3">
+            <div className="flex flex-wrap gap-1 sm:gap-1.5 mb-3">
               {listing.services.slice(0, 3).map((service) => (
                 <span
                   key={service}
-                  className="px-2 py-0.5 text-[11px] font-medium bg-neutral-50 text-neutral-600 rounded-md border border-neutral-100"
+                  className="px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-[11px] font-medium bg-neutral-50 text-neutral-600 rounded-md border border-neutral-100 truncate max-w-[120px] sm:max-w-none"
                 >
                   {service}
                 </span>
               ))}
               {listing.services.length > 3 && (
-                <span className="px-2 py-0.5 text-[11px] text-neutral-400 font-medium">
+                <span className="px-1.5 py-0.5 text-[10px] sm:text-[11px] text-neutral-400 font-medium">
                   +{listing.services.length - 3}
                 </span>
               )}
@@ -226,31 +226,31 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
           <motion.button
             type="button"
             onClick={handleQuoteRequest}
-            className="w-full py-2 mt-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-bold rounded-xl hover:shadow-lg hover:shadow-emerald-200/50 transition-all duration-300 flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0"
+            className="w-full py-2 mt-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-[11px] sm:text-xs font-bold rounded-xl hover:shadow-lg hover:shadow-emerald-200/50 transition-all duration-300 flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
             </svg>
-            {t('quickActions.getQuote', 'Get a Free Quote')}
+            {t('quickActions.getQuote', 'Request a Quote')}
           </motion.button>
         </div>
 
         {/* Footer */}
-        <div className="px-4 sm:px-5 py-3 border-t border-neutral-100/80 flex items-center justify-between text-sm text-neutral-500 bg-gradient-to-r from-neutral-50/80 to-neutral-50/30">
-          <span className="flex items-center gap-1.5 truncate">
-            <MapPinIcon className="w-3.5 h-3.5 flex-shrink-0 text-neutral-400" />
-            <span className="truncate text-xs">{listing.city}, {listing.country}</span>
+        <div className="px-4 sm:px-5 py-2.5 sm:py-3 border-t border-neutral-100/80 flex items-center justify-between bg-gradient-to-r from-neutral-50/80 to-neutral-50/30">
+          <span className="flex items-center gap-1 sm:gap-1.5 truncate min-w-0">
+            <MapPinIcon className="w-3 sm:w-3.5 h-3 sm:h-3.5 flex-shrink-0 text-neutral-400" />
+            <span className="truncate text-[11px] sm:text-xs text-neutral-500">{listing.city}, {listing.country}</span>
           </span>
           {listing.views != null && listing.views > 0 ? (
-            <span className="flex items-center gap-1 flex-shrink-0 text-neutral-400 text-xs">
-              <EyeIcon className="w-3.5 h-3.5" />
+            <span className="flex items-center gap-1 flex-shrink-0 text-neutral-400 text-[11px] sm:text-xs ml-2">
+              <EyeIcon className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
               {listing.views}
             </span>
           ) : (
-            <span className="flex items-center gap-1.5 flex-shrink-0 text-primary font-medium text-xs">
-              <PhoneIcon className="w-3.5 h-3.5" />
+            <span className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0 text-primary font-medium text-[11px] sm:text-xs ml-2">
+              <PhoneIcon className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
               {listing.contactPhone}
             </span>
           )}

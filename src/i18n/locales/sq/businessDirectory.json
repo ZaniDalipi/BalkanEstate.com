@@ -1,13 +1,13 @@
 {
   "hero": {
     "badge": "Drejtoria e Bizneseve",
-    "title": "Gjeni Profesionistë të Besueshëm të Pasurive të Paluajtshme",
-    "titleHighlight": "dhe Ofrues Shërbimesh",
-    "subtitle": "Shfletoni ofruesit e verifikuar të shërbimeve të ndërtimit, rinovimit, pastrimit dhe shërbimeve të tjera të pasurive të paluajtshme në Ballkan.",
+    "title": "Zbuloni Profesionistë të Besueshëm",
+    "titleHighlight": "dhe Ofrues Premium Shërbimesh",
+    "subtitle": "Lidhuni me ofruesit e verifikuar të shërbimeve të ndërtimit, rinovimit, pastrimit dhe shërbimeve të pasurive të paluajtshme në Ballkan — të gjitha në një vend.",
     "popularCategories": "Kategoritë populare"
   },
   "search": {
-    "placeholder": "Kërkoni biznese sipas emrit, shërbimit ose fjalës kyçe...",
+    "placeholder": "Kërkoni sipas emrit, shërbimit ose vendndodhjes...",
     "button": "Kërko"
   },
   "tabs": {
@@ -21,7 +21,7 @@
   },
   "individuals": {
     "title": "Profesionistë të Veçantë",
-    "subtitle": "Lidhuni me individë të aftë që ofrojnë ekspertizën e tyre në sektorin e pasurive të paluajtshme"
+    "subtitle": "Lidhuni me individë të aftë që ofrojnë ekspertizë në të gjithë sektorin e pasurive të paluajtshme"
   },
   "filters": {
     "all": "Të gjitha"
@@ -51,7 +51,7 @@
   "voiceSearch": {
     "start": "Kërko me zë",
     "stop": "Ndalo dëgjimin",
-    "listening": "Po dëgjoj... flisni tani"
+    "listening": "Po dëgjoj — flisni tani"
   },
   "stats": {
     "totalListings": "Gjithsej Listime",
@@ -66,7 +66,8 @@
   "quickActions": {
     "call": "Thirrje e shpejtë",
     "email": "Dërgo email",
-    "website": "Vizito faqen"
+    "website": "Vizito faqen",
+    "getQuote": "Kërkoni një ofertë"
   },
   "cta": {
     "listBusiness": "Listoni Biznesin Tuaj",
@@ -77,7 +78,7 @@
   },
   "empty": {
     "title": "Nuk u gjetën biznese",
-    "description": "Bëhuni i pari që liston biznesin tuaj në këtë kategori dhe arrini mijëra klientë të mundshëm."
+    "description": "Bëhuni i pari që liston biznesin tuaj në këtë kategori dhe arrini mijëra klientë të mundshëm në të gjithë Ballkanin."
   },
   "pagination": {
     "previous": "E mëparshme",
@@ -87,10 +88,12 @@
   "verified": "I verifikuar",
   "detail": {
     "backToDirectory": "Kthehu te Drejtoria",
+    "about": "Rreth nesh",
+    "aboutSubtitle": "Kush jemi dhe çfarë bëjmë",
     "services": "Shërbimet e Ofruara",
     "businessHours": "Orari i Punës",
     "closed": "Mbyllur",
-    "openNow": "Hapur tani",
+    "openNow": "Hapur Tani",
     "closedNow": "Mbyllur tani",
     "today": "Sot",
     "contactInfo": "Informacione Kontakti",
@@ -101,7 +104,7 @@
     "socialMedia": "Rrjetet Sociale",
     "views": "{{count}} shikime",
     "notFound": "Listimi i biznesit nuk u gjet",
-    "notFoundDesc": "Listimi që po kërkoni mund të jetë hequr ose nuk ekziston.",
+    "notFoundDesc": "Listimi që po kërkoni mund të jetë hequr ose nuk është më i disponueshëm.",
     "share": "Ndaj",
     "linkCopied": "Linku u kopjua!",
     "getInTouch": "Na kontaktoni për të filluar",
@@ -117,7 +120,7 @@
     },
     "cta": {
       "title": "Gati të punoni me {{name}}?",
-      "subtitle": "Na kontaktoni sot për të diskutuar projektin tuaj dhe merrni një konsultim falas.",
+      "subtitle": "Na kontaktoni sot për të diskutuar projektin tuaj dhe përfitoni një konsultim falas.",
       "callNow": "Thirr {{phone}}",
       "sendEmail": "Dërgo Email"
     }
@@ -133,7 +136,7 @@
   },
   "form": {
     "title": "Listoni Biznesin Tuaj",
-    "subtitle": "Arrini mijëra klientë të mundshëm në Ballkan",
+    "subtitle": "Arrini mijëra klientë të mundshëm në të gjithë Ballkanin",
     "sections": {
       "type": "Lloji i Listimit",
       "basicInfo": "Informacione Bazë",

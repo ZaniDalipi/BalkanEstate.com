@@ -1,13 +1,13 @@
 {
   "hero": {
     "badge": "Poslovni imenik",
-    "title": "Pronađite pouzdane stručnjake za nekretnine",
-    "titleHighlight": "i pružatelje usluga",
-    "subtitle": "Pregledajte provjerene pružatelje građevinskih, renovacijskih, usluga čišćenja i drugih usluga za nekretnine na Balkanu.",
+    "title": "Otkrijte pouzdane stručnjake",
+    "titleHighlight": "i vrhunske pružatelje usluga",
+    "subtitle": "Povežite se s provjerenim pružateljima građevinskih, renovacijskih, usluga čišćenja i usluga za nekretnine diljem Balkana — sve na jednom mjestu.",
     "popularCategories": "Popularne kategorije"
   },
   "search": {
-    "placeholder": "Pretražite tvrtke po imenu, usluzi ili ključnoj riječi...",
+    "placeholder": "Pretražite po imenu, usluzi ili lokaciji...",
     "button": "Pretraži"
   },
   "tabs": {
@@ -21,7 +21,7 @@
   },
   "individuals": {
     "title": "Istaknuti stručnjaci",
-    "subtitle": "Povežite se s kvalificiranim stručnjacima koji nude svoju stručnost u sektoru nekretnina"
+    "subtitle": "Povežite se s kvalificiranim stručnjacima koji nude stručnost u cijelom sektoru nekretnina"
   },
   "filters": {
     "all": "Sve"
@@ -51,7 +51,7 @@
   "voiceSearch": {
     "start": "Glasovno pretraživanje",
     "stop": "Prestani slušati",
-    "listening": "Slušam... govorite sada"
+    "listening": "Slušam — govorite sada"
   },
   "stats": {
     "totalListings": "Ukupno oglasa",
@@ -66,7 +66,8 @@
   "quickActions": {
     "call": "Brzi poziv",
     "email": "Pošalji e-mail",
-    "website": "Posjeti web stranicu"
+    "website": "Posjeti web stranicu",
+    "getQuote": "Zatražite ponudu"
   },
   "cta": {
     "listBusiness": "Dodajte svoju tvrtku",
@@ -77,7 +78,7 @@
   },
   "empty": {
     "title": "Nisu pronađene tvrtke",
-    "description": "Budite prvi koji će dodati svoju tvrtku u ovu kategoriju i doseći tisuće potencijalnih klijenata."
+    "description": "Budite prvi koji će dodati svoju tvrtku u ovu kategoriju i doseći tisuće potencijalnih klijenata diljem Balkana."
   },
   "pagination": {
     "previous": "Prethodna",
@@ -87,10 +88,12 @@
   "verified": "Provjereno",
   "detail": {
     "backToDirectory": "Povratak na imenik",
+    "about": "O nama",
+    "aboutSubtitle": "Tko smo i čime se bavimo",
     "services": "Ponuđene usluge",
     "businessHours": "Radno vrijeme",
     "closed": "Zatvoreno",
-    "openNow": "Otvoreno",
+    "openNow": "Otvoreno Sada",
     "closedNow": "Zatvoreno",
     "today": "Danas",
     "contactInfo": "Kontakt podaci",
@@ -101,7 +104,7 @@
     "socialMedia": "Društvene mreže",
     "views": "{{count}} pregleda",
     "notFound": "Oglas nije pronađen",
-    "notFoundDesc": "Oglas koji tražite možda je uklonjen ili ne postoji.",
+    "notFoundDesc": "Oglas koji tražite možda je uklonjen ili više nije dostupan.",
     "share": "Podijeli",
     "linkCopied": "Poveznica kopirana u međuspremnik!",
     "getInTouch": "Javite se da započnete",
@@ -117,7 +120,7 @@
     },
     "cta": {
       "title": "Spremni za suradnju s {{name}}?",
-      "subtitle": "Javite se danas kako biste razgovarali o svom projektu i dobili besplatne savjete.",
+      "subtitle": "Javite se danas kako biste razgovarali o svom projektu i dobili besplatnu konzultaciju.",
       "callNow": "Nazovite {{phone}}",
       "sendEmail": "Pošalji e-mail"
     }
@@ -133,7 +136,7 @@
   },
   "form": {
     "title": "Dodajte svoju tvrtku",
-    "subtitle": "Doseznite tisuće potencijalnih klijenata na Balkanu",
+    "subtitle": "Dosegnite tisuće potencijalnih klijenata diljem Balkana",
     "sections": {
       "type": "Vrsta oglasa",
       "basicInfo": "Osnovne informacije",

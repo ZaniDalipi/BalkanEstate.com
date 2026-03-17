@@ -349,7 +349,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
         </motion.div>
 
         {/* Main hero content */}
-        <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+        <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-20">
           <div className="max-w-7xl mx-auto">
             {/* Heading */}
             <motion.div
@@ -358,10 +358,10 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 sm:mb-6 leading-tight">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white mb-3 sm:mb-5 leading-[1.15] tracking-tight px-2 sm:px-0">
                 {t('hero.title')}
                 <motion.span
-                  className="block mt-2 bg-gradient-to-r from-blue-400 via-violet-400 to-purple-400 bg-clip-text text-transparent"
+                  className="block mt-1 sm:mt-2 bg-gradient-to-r from-blue-400 via-violet-400 to-purple-400 bg-clip-text text-transparent"
                   initial={{ backgroundPosition: '0% 50%' }}
                   animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
                   transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
@@ -370,7 +370,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
                   {t('hero.titleHighlight')}
                 </motion.span>
               </h1>
-              <p className="text-base sm:text-lg lg:text-xl text-white/70 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/70 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0">
                 {t('hero.subtitle')}
               </p>
             </motion.div>
@@ -382,7 +382,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.4, type: 'spring', stiffness: 200, damping: 22 }}
             >
-              <div className="relative bg-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/20 shadow-2xl shadow-black/20">
+              <div className="relative bg-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-5 md:p-6 border border-white/20 shadow-2xl shadow-black/20">
                 <form onSubmit={handleSearch}>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-3 sm:left-4 flex items-center pointer-events-none">
@@ -487,7 +487,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
       {/* === ANIMATED STATS BAR === */}
       {!isLoading && total > 0 && (
         <motion.div
-          className="max-w-7xl mx-auto px-4 -mt-6 mb-6 relative z-10"
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4 sm:-mt-6 mb-6 relative z-10"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.5 }}
@@ -524,10 +524,10 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
       )}
 
       {/* === MAIN CONTENT === */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Tabs + Actions bar */}
         <motion.div
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6"
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6"
           variants={fadeUpVariants}
           initial="hidden"
           whileInView="visible"
@@ -562,12 +562,12 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-visible">
             {/* Map / Grid toggle */}
             <motion.button
               type="button"
               onClick={() => setViewMode(v => v === 'grid' ? 'map' : 'grid')}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold transition-all text-sm ${
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-semibold transition-all text-xs sm:text-sm flex-shrink-0 ${
                 viewMode === 'map'
                   ? 'bg-primary text-white shadow-lg shadow-primary/25'
                   : 'bg-white text-neutral-600 border border-neutral-200 hover:border-primary/30 hover:shadow-md'
@@ -596,7 +596,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
                 type="button"
                 onClick={() => requireAuth(handleSurpriseMe)}
                 disabled={surpriseAnim}
-                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-amber-500/25 transition-shadow flex-shrink-0 text-sm disabled:opacity-70"
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-amber-500/25 transition-shadow flex-shrink-0 text-xs sm:text-sm disabled:opacity-70"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
               >
@@ -614,7 +614,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
             <motion.button
               type="button"
               onClick={handleCreateClick}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-shadow flex-shrink-0"
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-shadow flex-shrink-0 text-xs sm:text-sm"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
             >
@@ -628,7 +628,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
         <AnimatePresence>
           {(activeTab === 'all' || activeTab === 'individuals') && tooltipItems.length > 0 && (
             <motion.div
-              className="mb-8 p-6 bg-gradient-to-r from-slate-900 via-blue-900/95 to-indigo-900 rounded-2xl border border-white/10 shadow-xl overflow-hidden relative"
+              className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-r from-slate-900 via-blue-900/95 to-indigo-900 rounded-xl sm:rounded-2xl border border-white/10 shadow-xl overflow-hidden relative"
               initial={{ opacity: 0, y: 20, height: 0 }}
               animate={{ opacity: 1, y: 0, height: 'auto' }}
               exit={{ opacity: 0, y: -10, height: 0 }}
@@ -646,9 +646,9 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
               <div className="relative z-10">
                 <div className="flex items-center gap-2 mb-1">
                   <UserGroupIcon className="w-5 h-5 text-violet-400" />
-                  <h3 className="text-white font-bold text-lg">{t('individuals.title')}</h3>
+                  <h3 className="text-white font-bold text-base sm:text-lg">{t('individuals.title')}</h3>
                 </div>
-                <p className="text-white/50 text-sm mb-5">{t('individuals.subtitle')}</p>
+                <p className="text-white/50 text-xs sm:text-sm mb-4 sm:mb-5 leading-relaxed">{t('individuals.subtitle')}</p>
                 <div className="flex justify-center overflow-visible">
                   <AnimatedTooltip items={tooltipItems} onItemClick={handleTooltipClick} onQuoteRequest={handleQuoteRequest} />
                 </div>
@@ -659,7 +659,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
 
         {/* Category filters */}
         <motion.div
-          className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide mb-4"
+          className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 scrollbar-hide mb-4 -mx-4 px-4 sm:mx-0 sm:px-0"
           variants={fadeUpVariants}
           initial="hidden"
           whileInView="visible"
@@ -668,7 +668,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
           <motion.button
             type="button"
             onClick={() => handleCategoryClick('')}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex-shrink-0 ${
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 flex-shrink-0 ${
               selectedCategory === ''
                 ? 'bg-primary text-white shadow-lg shadow-primary/25'
                 : 'bg-white text-neutral-600 border border-neutral-200 hover:border-primary/30 hover:shadow-md'
@@ -683,7 +683,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
               key={category}
               type="button"
               onClick={() => handleCategoryClick(category)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex-shrink-0 whitespace-nowrap ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 flex-shrink-0 whitespace-nowrap ${
                 selectedCategory === category
                   ? 'bg-primary text-white shadow-lg shadow-primary/25'
                   : 'bg-white text-neutral-600 border border-neutral-200 hover:border-primary/30 hover:shadow-md'
@@ -702,7 +702,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
           {!isLoading && (
             <motion.p
               key={`results-${total}`}
-              className="text-sm text-neutral-500 mb-4"
+              className="text-xs sm:text-sm text-neutral-500 mb-4"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 10 }}
@@ -846,7 +846,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
         {/* Pagination */}
         {totalPages > 1 && (
           <motion.div
-            className="flex justify-center items-center gap-3 mt-10"
+            className="flex justify-center items-center gap-2 sm:gap-3 mt-8 sm:mt-10"
             variants={fadeUpVariants}
             initial="hidden"
             whileInView="visible"
@@ -856,20 +856,20 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
               type="button"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="px-5 py-2.5 rounded-xl bg-white/80 backdrop-blur-sm border border-neutral-200 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
+              className="px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-white/80 backdrop-blur-sm border border-neutral-200 text-xs sm:text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
               whileHover={page > 1 ? { scale: 1.03 } : {}}
               whileTap={page > 1 ? { scale: 0.97 } : {}}
             >
               {t('pagination.previous')}
             </motion.button>
-            <span className="text-sm text-neutral-500 font-medium">
+            <span className="text-xs sm:text-sm text-neutral-500 font-medium whitespace-nowrap">
               {t('pagination.pageOf', { page, totalPages })}
             </span>
             <motion.button
               type="button"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
-              className="px-5 py-2.5 rounded-xl bg-white/80 backdrop-blur-sm border border-neutral-200 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
+              className="px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-white/80 backdrop-blur-sm border border-neutral-200 text-xs sm:text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
               whileHover={page < totalPages ? { scale: 1.03 } : {}}
               whileTap={page < totalPages ? { scale: 0.97 } : {}}
             >

@@ -1,13 +1,13 @@
 {
   "hero": {
     "badge": "Director de afaceri",
-    "title": "Găsiți profesioniști imobiliari de încredere",
-    "titleHighlight": "și furnizori de servicii",
-    "subtitle": "Răsfoiți furnizori verificați de construcții, renovări, curățenie și alte servicii imobiliare din Balcani.",
+    "title": "Descoperiți profesioniști de încredere",
+    "titleHighlight": "și furnizori premium de servicii",
+    "subtitle": "Conectați-vă cu furnizori verificați de construcții, renovări, curățenie și servicii imobiliare din Balcani — totul într-un singur loc.",
     "popularCategories": "Categorii populare"
   },
   "search": {
-    "placeholder": "Căutați afaceri după nume, serviciu sau cuvânt cheie...",
+    "placeholder": "Căutați după nume, serviciu sau locație...",
     "button": "Caută"
   },
   "tabs": {
@@ -21,7 +21,7 @@
   },
   "individuals": {
     "title": "Profesioniști recomandați",
-    "subtitle": "Conectați-vă cu persoane calificate care oferă expertiză în sectorul imobiliar"
+    "subtitle": "Conectați-vă cu persoane calificate care oferă expertiză în întregul sector imobiliar"
   },
   "filters": {
     "all": "Toate"
@@ -51,7 +51,7 @@
   "voiceSearch": {
     "start": "Căutare vocală",
     "stop": "Oprește ascultarea",
-    "listening": "Ascult... vorbiți acum"
+    "listening": "Ascult — vorbiți acum"
   },
   "stats": {
     "totalListings": "Total anunțuri",
@@ -66,7 +66,8 @@
   "quickActions": {
     "call": "Apel rapid",
     "email": "Trimite email",
-    "website": "Vizitează site-ul"
+    "website": "Vizitează site-ul",
+    "getQuote": "Solicitați o ofertă"
   },
   "cta": {
     "listBusiness": "Adaugă afacerea ta",
@@ -77,7 +78,7 @@
   },
   "empty": {
     "title": "Nu au fost găsite afaceri",
-    "description": "Fii primul care își listează afacerea în această categorie și ajunge la mii de clienți potențiali."
+    "description": "Fii primul care își listează afacerea în această categorie și ajunge la mii de clienți potențiali din întreaga regiune a Balcanilor."
   },
   "pagination": {
     "previous": "Anterioară",
@@ -87,10 +88,12 @@
   "verified": "Verificat",
   "detail": {
     "backToDirectory": "Înapoi la director",
+    "about": "Despre",
+    "aboutSubtitle": "Cine suntem și ce facem",
     "services": "Servicii oferite",
     "businessHours": "Program de lucru",
     "closed": "Închis",
-    "openNow": "Deschis acum",
+    "openNow": "Deschis Acum",
     "closedNow": "Închis acum",
     "today": "Astăzi",
     "contactInfo": "Informații de contact",
@@ -101,7 +104,7 @@
     "socialMedia": "Rețele sociale",
     "views": "{{count}} vizualizări",
     "notFound": "Anunțul nu a fost găsit",
-    "notFoundDesc": "Anunțul pe care îl căutați a fost posibil eliminat sau nu există.",
+    "notFoundDesc": "Anunțul pe care îl căutați a fost posibil eliminat sau nu mai este disponibil.",
     "share": "Distribuie",
     "linkCopied": "Link copiat în clipboard!",
     "getInTouch": "Contactați-ne pentru a începe",
@@ -117,7 +120,7 @@
     },
     "cta": {
       "title": "Pregătit să lucrezi cu {{name}}?",
-      "subtitle": "Contactați-ne astăzi pentru a discuta proiectul dumneavoastră și a obține o consultație gratuită.",
+      "subtitle": "Contactați-ne astăzi pentru a discuta proiectul dumneavoastră și a primi o consultație gratuită.",
       "callNow": "Sună la {{phone}}",
       "sendEmail": "Trimite email"
     }
@@ -133,7 +136,7 @@
   },
   "form": {
     "title": "Adaugă afacerea ta",
-    "subtitle": "Ajunge la mii de clienți potențiali din Balcani",
+    "subtitle": "Ajungeți la mii de clienți potențiali din întreaga regiune a Balcanilor",
     "sections": {
       "type": "Tip anunț",
       "basicInfo": "Informații de bază",

@@ -1,13 +1,13 @@
 {
   "hero": {
     "badge": "Business Directory",
-    "title": "Find Trusted Real Estate Professionals",
-    "titleHighlight": "& Service Providers",
-    "subtitle": "Browse verified construction, renovation, cleaning, and other real estate service providers in the Balkans.",
+    "title": "Discover Trusted Professionals",
+    "titleHighlight": "& Premium Service Providers",
+    "subtitle": "Connect with verified construction, renovation, cleaning, and real estate service providers across the Balkans — all in one place.",
     "popularCategories": "Popular categories"
   },
   "search": {
-    "placeholder": "Search businesses by name, service, or keyword...",
+    "placeholder": "Search by name, service, or location...",
     "button": "Search"
   },
   "tabs": {
@@ -21,7 +21,7 @@
   },
   "individuals": {
     "title": "Featured Professionals",
-    "subtitle": "Connect with skilled individuals offering their expertise in the real estate sector"
+    "subtitle": "Connect with skilled individuals offering expertise across the real estate sector"
   },
   "filters": {
     "all": "All"
@@ -51,7 +51,7 @@
   "voiceSearch": {
     "start": "Search by voice",
     "stop": "Stop listening",
-    "listening": "Listening... speak now"
+    "listening": "Listening — speak now"
   },
   "stats": {
     "totalListings": "Total Listings",
@@ -64,9 +64,10 @@
     "loading": "Discovering..."
   },
   "quickActions": {
-    "call": "Quick call",
+    "call": "Call now",
     "email": "Send email",
-    "website": "Visit website"
+    "website": "Visit website",
+    "getQuote": "Request a Quote"
   },
   "cta": {
     "listBusiness": "List Your Business",
@@ -77,7 +78,7 @@
   },
   "empty": {
     "title": "No businesses found",
-    "description": "Be the first to list your business in this category and reach thousands of potential customers."
+    "description": "Be the first to list your business in this category and reach thousands of potential customers across the Balkans."
   },
   "pagination": {
     "previous": "Previous",
@@ -87,11 +88,13 @@
   "verified": "Verified",
   "detail": {
     "backToDirectory": "Back to Directory",
+    "about": "About",
+    "aboutSubtitle": "Who we are & what we do",
     "services": "Services Offered",
     "businessHours": "Business Hours",
     "closed": "Closed",
-    "openNow": "Open now",
-    "closedNow": "Closed now",
+    "openNow": "Open Now",
+    "closedNow": "Closed",
     "today": "Today",
     "contactInfo": "Contact Information",
     "phone": "Phone",
@@ -100,8 +103,8 @@
     "location": "Location",
     "socialMedia": "Social Media",
     "views": "{{count}} views",
-    "notFound": "Business listing not found",
-    "notFoundDesc": "The listing you're looking for may have been removed or doesn't exist.",
+    "notFound": "Listing Not Found",
+    "notFoundDesc": "The listing you're looking for may have been removed or is no longer available.",
     "share": "Share",
     "linkCopied": "Link copied to clipboard!",
     "getInTouch": "Reach out to get started",
@@ -117,7 +120,7 @@
     },
     "cta": {
       "title": "Ready to work with {{name}}?",
-      "subtitle": "Get in touch today to discuss your project and get a free consultation.",
+      "subtitle": "Get in touch today to discuss your project and receive a free consultation.",
       "callNow": "Call {{phone}}",
       "sendEmail": "Send Email"
     }
@@ -133,7 +136,7 @@
   },
   "form": {
     "title": "List Your Business",
-    "subtitle": "Reach thousands of potential customers in the Balkans",
+    "subtitle": "Reach thousands of potential customers across the Balkans",
     "sections": {
       "type": "Listing Type",
       "basicInfo": "Basic Information",
