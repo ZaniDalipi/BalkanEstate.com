@@ -81,6 +81,7 @@
     "midRange": "Mid-Range (€150K-€500K)",
     "luxury": "Luxury (>€500K)",
     "clearAllFilters": "Clear all filters",
+    "myAgentProfile": "My Agent Profile",
     "types": {
       "luxury": "Luxury",
       "commercial": "Commercial",

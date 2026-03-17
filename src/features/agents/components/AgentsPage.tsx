@@ -8,7 +8,7 @@ import { getAgent } from '../api/agentApi';
 import AgentCard from './AgentCard';
 import AgentProfilePage from './AgentProfilePage';
 import AgencyBadge from '@/components/shared/AgencyBadge';
-import { MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon, PhoneIcon, BuildingOfficeIcon, HomeIcon, UsersIcon } from '@/constants';
+import { MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon, PhoneIcon, BuildingOfficeIcon, HomeIcon, UsersIcon, UserCircleIcon } from '@/constants';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
@@ -578,6 +578,21 @@ const AgentsPage: React.FC = () => {
                     <option value="name">{t('agents:filters.nameAZ')}</option>
                   </select>
                 </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* My Agent Profile button - shown when current user is an agent */}
+                  {state.currentUser?.role === 'agent' && state.currentUser?.agentId && (
+                    <button
+                      onClick={() => {
+                        const agentId = state.currentUser!.agentId!;
+                        dispatch({ type: 'SET_SELECTED_AGENT', payload: agentId });
+                        window.history.pushState({}, '', `/agents/${agentId}`);
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium shadow-sm"
+                    >
+                      <UserCircleIcon className="w-4 h-4" />
+                      {t('agents:filters.myAgentProfile', 'My Agent Profile')}
+                    </button>
+                  )}
                 <button
                   onClick={() => setShowFilters(!showFilters)}
                   className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-sm font-medium"
@@ -592,6 +607,7 @@ const AgentsPage: React.FC = () => {
                     </span>
                   )}
                 </button>
+                </div>
               </div>
 
               {/* Advanced Filters Panel */}
