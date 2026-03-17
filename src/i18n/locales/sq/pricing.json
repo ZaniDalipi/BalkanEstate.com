@@ -46,7 +46,8 @@
       "name": "Pro Vjetor",
       "description": "Kurse {{percent}}% me faturim vjetor",
       "badge": "MË POPULLORI",
-      "saveVsMonthly": "Kurse 33% krahasuar me mujorin"
+      "saveVsMonthly": "Kurse 33% krahasuar me mujorin",
+      "saveVsMonthlyDynamic": "Kurseni {{percent}}% krahasuar me mujorin"
     },
     "enterprise": {
       "name": "Plani Ndërmarrje",

@@ -46,7 +46,8 @@
       "name": "Про Годишен",
       "description": "Спестете {{percent}}% с годишно таксуване",
       "badge": "НАЙ-ПОПУЛЯРЕН",
-      "saveVsMonthly": "Спестете 33% спрямо месечния"
+      "saveVsMonthly": "Спестете 33% спрямо месечния",
+      "saveVsMonthlyDynamic": "Спестете {{percent}}% спрямо месечния"
     },
     "enterprise": {
       "name": "Корпоративен План",
