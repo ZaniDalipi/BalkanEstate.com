@@ -350,7 +350,7 @@ export const toggleProductVisibility = async (productId: string): Promise<{ prod
 // --- Admin Promotion Plans ---
 
 export interface PromotionPlan {
-  _id: string;
+  id: string;
   category: 'listing' | 'agency';
   tier: string;
   name: string;
@@ -399,7 +399,7 @@ export const getPublicPromotionPlans = async (category?: string): Promise<{ plan
 };
 
 export const createPromotionPlan = async (
-  data: Omit<PromotionPlan, '_id' | 'createdAt' | 'updatedAt'>
+  data: Omit<PromotionPlan, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<{ plan: PromotionPlan }> => {
   return apiRequest('/promotion-plans', {
     method: 'POST',

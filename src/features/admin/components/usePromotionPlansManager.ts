@@ -55,14 +55,14 @@ export function usePromotionPlansManager() {
     if (!hasAnyPrice) return;
 
     try {
-      const isNew = !editingPlan._id;
+      const isNew = !editingPlan.id;
 
       if (isNew) {
-        const { _id, createdAt, updatedAt, ...createData } = editingPlan as PromotionPlan & { createdAt?: string; updatedAt?: string };
+        const { id, createdAt, updatedAt, ...createData } = editingPlan as PromotionPlan & { createdAt?: string; updatedAt?: string };
         await createPlanMutation.mutateAsync(createData);
       } else {
         await updatePlanMutation.mutateAsync({
-          planId: editingPlan._id,
+          planId: editingPlan.id,
           data: editingPlan,
         });
       }
@@ -88,9 +88,9 @@ export function usePromotionPlansManager() {
   };
 
   const handleToggleStatus = async (plan: PromotionPlan) => {
-    setMutatingPlanId(plan._id);
+    setMutatingPlanId(plan.id);
     try {
-      const response = await toggleStatusMutation.mutateAsync(plan._id);
+      const response = await toggleStatusMutation.mutateAsync(plan.id);
       const newStatus = response?.plan?.isActive;
       setSuccessMessage(`Plan ${newStatus ? 'activated' : 'deactivated'} successfully`);
       setTimeout(() => setSuccessMessage(null), 3000);
@@ -122,7 +122,7 @@ export function usePromotionPlansManager() {
       : isAddOn ? colorPresets.cyan : colorPresets.amber;
 
     setEditingPlan({
-      _id: '',
+      id: '',
       category,
       tier: category === 'listing' ? 'featured' : (isAddOn ? 'addon' : 'featured'),
       name: '',

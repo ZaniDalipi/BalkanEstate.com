@@ -397,7 +397,7 @@ export function useDeletePromotionPlan() {
       const previousPlans = queryClient.getQueryData(adminKeys.promotionPlans());
 
       queryClient.setQueryData(adminKeys.promotionPlans(), (old: PromotionPlan[] | undefined) =>
-        old?.filter((plan) => plan._id !== planId)
+        old?.filter((plan) => plan.id !== planId)
       );
 
       return { previousPlans };
@@ -432,7 +432,7 @@ export function useTogglePromotionPlanStatus() {
 
       queryClient.setQueryData(adminKeys.promotionPlans(), (old: PromotionPlan[] | undefined) =>
         old?.map((plan) =>
-          plan._id === planId ? { ...plan, isActive: !plan.isActive } : plan
+          plan.id === planId ? { ...plan, isActive: !plan.isActive } : plan
         )
       );
 
