@@ -1,16 +1,17 @@
 import { Request, Response } from 'express';
-import mongoose from 'mongoose';
 import { escapeRegex } from '../utils/escapeRegex';
 import BusinessListing, { BUSINESS_CATEGORIES, LISTING_TYPES } from '../models/BusinessListing';
 import { IUser } from '../models/User';
 import { uploadImage, deleteImage } from '../services/cloudinaryService';
 import { getParam, getObjectIdParam } from '../utils/validateParams';
+import { encodeId, resolveId } from '../utils/idObfuscation';
 
-/** Transform lean document: map _id → id, strip internals */
+/** Transform lean document: map _id → obfuscated id, strip internals */
 const transformLean = (doc: any) => {
   if (!doc) return doc;
   const { _id, __v, logoPublicId, ...rest } = doc;
-  return { id: _id?.toString(), ...rest };
+  const hex = _id?.toString();
+  return { id: hex ? encodeId(hex) : hex, ...rest };
 };
 
 // @desc    Get all business listings (public, with filtering & pagination)
@@ -100,13 +101,15 @@ export const getBusinessListing = async (
 
     let listing;
 
-    // Try finding by ObjectId first, then by slug
-    if (mongoose.Types.ObjectId.isValid(idOrSlug) && /^[a-fA-F0-9]{24}$/.test(idOrSlug)) {
-      listing = await BusinessListing.findById(idOrSlug)
+    // 1. Try resolving as encoded/obfuscated ID (supports raw hex, base64url, and slug_EncodedId)
+    const resolvedId = resolveId(idOrSlug);
+    if (resolvedId) {
+      listing = await BusinessListing.findById(resolvedId)
         .populate('owner', 'name avatarUrl email')
         .lean();
     }
 
+    // 2. Fallback: try finding by slug field directly
     if (!listing) {
       listing = await BusinessListing.findOne({ slug: idOrSlug.toLowerCase() })
         .populate('owner', 'name avatarUrl email')
@@ -121,7 +124,7 @@ export const getBusinessListing = async (
     // Increment view count (fire-and-forget)
     BusinessListing.updateOne({ _id: listing._id }, { $inc: { views: 1 } }).catch(() => {});
 
-    res.status(200).json({ listing });
+    res.status(200).json({ listing: transformLean(listing) });
   } catch (error: any) {
     res.status(500).json({ message: 'Failed to fetch business listing', error: error.message });
   }
@@ -184,8 +187,9 @@ export const createBusinessListing = async (
     };
 
     const listing = await BusinessListing.create(listingData);
+    const leanListing = listing.toObject();
 
-    res.status(201).json({ listing, message: 'Business listing created successfully' });
+    res.status(201).json({ listing: transformLean(leanListing), message: 'Business listing created successfully' });
   } catch (error: any) {
     if (error.name === 'ValidationError') {
       const messages = Object.values(error.errors).map((e: any) => e.message);
@@ -252,8 +256,9 @@ export const updateBusinessListing = async (
 
     Object.assign(listing, updates);
     await listing.save();
+    const updatedLean = listing.toObject();
 
-    res.status(200).json({ listing, message: 'Business listing updated successfully' });
+    res.status(200).json({ listing: transformLean(updatedLean), message: 'Business listing updated successfully' });
   } catch (error: any) {
     if (error.name === 'ValidationError') {
       const messages = Object.values(error.errors).map((e: any) => e.message);

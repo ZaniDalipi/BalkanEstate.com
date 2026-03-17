@@ -287,10 +287,14 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return;
       }
 
-      // Business directory detail route: /business-directory/:id
+      // Business directory detail route: /business-directory/:slugOrId
+      // Supports SEO slugs like "company-name-category-in-city_EncodedId" and plain encoded IDs
       const businessMatch = path.match(/^\/business-directory\/(.+)$/);
       if (businessMatch) {
-        const listingId = decodeURIComponent(businessMatch[1]);
+        const rawParam = decodeURIComponent(businessMatch[1]);
+        // Extract the encoded ID from slug suffix (after last underscore), or use the full param
+        const underscoreIdx = rawParam.lastIndexOf('_');
+        const listingId = underscoreIdx > 0 ? rawParam.slice(underscoreIdx + 1) : rawParam;
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: listingId });

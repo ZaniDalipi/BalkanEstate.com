@@ -393,12 +393,6 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                 </motion.div>
               </div>
 
-              {/* Description */}
-              {listing.description && (
-                <p className="text-neutral-600 leading-relaxed text-sm sm:text-base max-w-2xl">
-                  {listing.description}
-                </p>
-              )}
             </motion.div>
           </motion.div>
         </div>
@@ -415,6 +409,62 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
             viewport={{ once: true, amount: 0.1 }}
             variants={staggerContainerVariants}
           >
+            {/* About / Description section */}
+            {listing.description && (
+              <motion.div
+                className="bg-white rounded-2xl border border-neutral-200 shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+                variants={fadeUpVariants}
+              >
+                {/* Gradient accent bar */}
+                <div className={`h-1 bg-gradient-to-r ${gradient}`} />
+                <div className="p-5 sm:p-6 lg:p-8">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-sm`}>
+                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold text-neutral-900">{t('detail.about', { defaultValue: 'About' })}</h2>
+                      <p className="text-xs text-neutral-400">{t('detail.aboutSubtitle', { defaultValue: 'Who we are & what we do' })}</p>
+                    </div>
+                  </div>
+
+                  {/* Quote-style description */}
+                  <div className="relative pl-5 border-l-[3px] border-primary/20">
+                    <svg className="absolute -left-2.5 -top-1 w-5 h-5 text-primary/30" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983z" />
+                    </svg>
+                    <p className="text-neutral-600 leading-relaxed text-sm sm:text-base whitespace-pre-line">
+                      {listing.description}
+                    </p>
+                  </div>
+
+                  {/* Quick info badges */}
+                  <div className="flex flex-wrap items-center gap-2 mt-5 pt-5 border-t border-neutral-100">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-neutral-50 rounded-lg text-xs font-medium text-neutral-500">
+                      <MapPinIcon className="w-3.5 h-3.5" />
+                      {listing.city}, {listing.country}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-neutral-50 rounded-lg text-xs font-medium text-neutral-500">
+                      <span>{categoryIcon}</span>
+                      {t(`categories.${listing.category}`)}
+                    </span>
+                    {listing.isVerified && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 rounded-lg text-xs font-medium text-emerald-600">
+                        <CheckBadgeIcon className="w-3.5 h-3.5" />
+                        {t('verified')}
+                      </span>
+                    )}
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-neutral-50 rounded-lg text-xs font-medium text-neutral-500">
+                      <EyeIcon className="w-3.5 h-3.5" />
+                      {listing.views} {t('detail.stats.views')}
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             {/* Services section */}
             {listing.services.length > 0 && (
               <motion.div

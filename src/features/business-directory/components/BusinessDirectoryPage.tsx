@@ -12,8 +12,8 @@ import { BUSINESS_CATEGORIES, type BusinessCategory, type BusinessListing, type 
 import { SearchIcon, PlusIcon, BuildingStorefrontIcon, WrenchScrewdriverIcon, UserGroupIcon, UserIcon, MicrophoneIcon, ArrowPathIcon, BoltIcon, ChartBarIcon, MapIcon } from '@/constants';
 import { AnimatedNumber } from '@/src/components/ui/Animations';
 
-
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import { generateBusinessSlug } from '@/utils/slug';
 import Footer from '@/components/shared/Footer';
 
 interface BusinessDirectoryPageProps {
@@ -163,11 +163,12 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
   const { listings, total, totalPages, isLoading } = useBusinessListings(filters);
 
   const navigateToListing = useCallback((listing: BusinessListing) => {
-    const identifier = listing.slug || listing.id;
+    const identifier = listing.id;
+    const urlSlug = generateBusinessSlug(listing);
     setSelectedListingId(identifier);
     setSubView('detail');
     dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: identifier });
-    window.history.pushState({}, '', buildLocalizedPath(`/business-directory/${identifier}`));
+    window.history.pushState({}, '', buildLocalizedPath(`/business-directory/${urlSlug}`));
   }, [dispatch]);
 
   // Surprise Me - random business discovery
