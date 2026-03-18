@@ -210,8 +210,8 @@ export const EditPlanModal: React.FC<{
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
           <h3 className="text-xl font-bold flex items-center gap-2">
-            {plan._id ? <PencilIcon className="w-5 h-5" /> : <PlusIcon className="w-5 h-5" />}
-            {plan._id ? t('admin:promotionPlans.editPlan', 'Edit Plan') : t('admin:promotionPlans.createPlan', 'Create Plan')}
+            {plan.id ? <PencilIcon className="w-5 h-5" /> : <PlusIcon className="w-5 h-5" />}
+            {plan.id ? t('admin:promotionPlans.editPlan', 'Edit Plan') : t('admin:promotionPlans.createPlan', 'Create Plan')}
           </h3>
           <div className="flex items-center gap-2">
             <button

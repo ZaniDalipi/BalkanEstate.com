@@ -172,12 +172,12 @@ const PromotionPlansManager: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPlans.map((plan) => (
           <PlanCard
-            key={plan._id}
+            key={plan.id}
             plan={plan}
             onEdit={() => handleEdit(plan)}
-            onDelete={() => handleDelete(plan._id)}
+            onDelete={() => handleDelete(plan.id)}
             onToggleStatus={() => handleToggleStatus(plan)}
-            isMutating={mutatingPlanId === plan._id}
+            isMutating={mutatingPlanId === plan.id}
           />
         ))}
         {filteredPlans.length === 0 && (
