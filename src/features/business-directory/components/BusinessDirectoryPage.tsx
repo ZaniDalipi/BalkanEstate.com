@@ -245,7 +245,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
   }), [search, selectedCategory, listingTypeFilter, page]);
 
   const { listings: allListings, total, totalPages, isLoading } = useBusinessListings(filters);
-  const { listings: myListings, isLoading: myListingsLoading } = useMyBusinessListings();
+  const { listings: myListings, isLoading: myListingsLoading } = useMyBusinessListings(!!state.currentUser);
 
   const listings = activeTab === 'mine' ? myListings : allListings;
   const effectiveLoading = activeTab === 'mine' ? myListingsLoading : isLoading;

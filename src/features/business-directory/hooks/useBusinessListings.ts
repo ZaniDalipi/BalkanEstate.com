@@ -42,11 +42,12 @@ export function useBusinessListing(id: string | null) {
   return { listing: data?.listing || null, isLoading, error };
 }
 
-export function useMyBusinessListings() {
+export function useMyBusinessListings(enabled = true) {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: businessDirectoryKeys.myListings(),
     queryFn: getMyBusinessListings,
     staleTime: 1 * 60 * 1000,
+    enabled,
   });
 
   return { listings: data?.listings || [], isLoading, error, refetch };
