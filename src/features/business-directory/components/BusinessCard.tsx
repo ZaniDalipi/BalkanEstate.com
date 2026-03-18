@@ -1,6 +1,5 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import { PhoneIcon, MapPinIcon, CheckBadgeIcon, UserIcon, BuildingStorefrontIcon, EnvelopeIcon, GlobeAltIcon, EyeIcon } from '@/constants';
 import MagneticTiltCard from './MagneticTiltCard';
@@ -107,42 +106,36 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
 
           {/* Quick contact actions - slide up from bottom on hover */}
           <div className="absolute bottom-2 right-3 flex items-center gap-1.5 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out z-10">
-            <motion.button
+            <button
               type="button"
               onClick={handleQuickCall}
-              className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center hover:bg-white/40 transition-colors"
-              whileHover={{ scale: 1.15 }}
-              whileTap={{ scale: 0.9 }}
+              className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center hover:bg-white/40 hover:scale-110 active:scale-90 transition-all"
               aria-label={t('quickActions.call')}
               title={t('quickActions.call')}
             >
               <PhoneIcon className="w-3.5 h-3.5 text-white" />
-            </motion.button>
+            </button>
             {listing.contactEmail && (
-              <motion.button
+              <button
                 type="button"
                 onClick={handleQuickEmail}
-                className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center hover:bg-white/40 transition-colors"
-                whileHover={{ scale: 1.15 }}
-                whileTap={{ scale: 0.9 }}
+                className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center hover:bg-white/40 hover:scale-110 active:scale-90 transition-all"
                 aria-label={t('quickActions.email')}
                 title={t('quickActions.email')}
               >
                 <EnvelopeIcon className="w-3.5 h-3.5 text-white" />
-              </motion.button>
+              </button>
             )}
             {listing.website && (
-              <motion.button
+              <button
                 type="button"
                 onClick={handleQuickWebsite}
-                className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center hover:bg-white/40 transition-colors"
-                whileHover={{ scale: 1.15 }}
-                whileTap={{ scale: 0.9 }}
+                className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center hover:bg-white/40 hover:scale-110 active:scale-90 transition-all"
                 aria-label={t('quickActions.website')}
                 title={t('quickActions.website')}
               >
                 <GlobeAltIcon className="w-3.5 h-3.5 text-white" />
-              </motion.button>
+              </button>
             )}
           </div>
 
@@ -232,18 +225,16 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
             </div>
           )}
           {/* Get Quote CTA */}
-          <motion.button
+          <button
             type="button"
             onClick={handleQuoteRequest}
-            className="w-full py-2 mt-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-[11px] sm:text-xs font-bold rounded-xl hover:shadow-lg hover:shadow-emerald-200/50 transition-all duration-300 flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            className="w-full py-2 mt-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-[11px] sm:text-xs font-bold rounded-xl hover:shadow-lg hover:shadow-emerald-200/50 transition-all duration-300 flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 hover:scale-[1.02] active:scale-[0.98]"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
             </svg>
             {t('quickActions.getQuote', 'Request a Quote')}
-          </motion.button>
+          </button>
         </div>
 
         {/* Footer */}
