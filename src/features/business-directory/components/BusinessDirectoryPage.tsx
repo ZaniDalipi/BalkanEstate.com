@@ -700,7 +700,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
         <AnimatePresence>
           {(activeTab === 'all' || activeTab === 'individuals') && tooltipItems.length > 0 && (
             <motion.div
-              className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-r from-slate-900 via-blue-900/95 to-indigo-900 rounded-xl sm:rounded-2xl border border-white/10 shadow-xl overflow-hidden relative"
+              className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-r from-slate-900 via-blue-900/95 to-indigo-900 rounded-xl sm:rounded-2xl border border-white/10 shadow-xl overflow-visible relative"
               initial={{ opacity: 0, y: 20, height: 0 }}
               animate={{ opacity: 1, y: 0, height: 'auto' }}
               exit={{ opacity: 0, y: -10, height: 0 }}
