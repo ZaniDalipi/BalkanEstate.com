@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUpdateBusinessListing, useUploadBusinessLogo, useUploadBusinessBanner } from '../hooks';
-import { BUSINESS_CATEGORIES, type BusinessCategory, type CreateBusinessListingData, type ListingType, type BusinessListing } from '@/src/shared/types/businessListing.types';
+import { BUSINESS_CATEGORIES, type BusinessCategory, type CreateBusinessListingData, type ListingType, type BusinessListing, PRICE_RANGES, PAYMENT_METHODS, BALKAN_LANGUAGES, type PriceRange, type PaymentMethod } from '@/src/shared/types/businessListing.types';
 import { Animated } from '@/src/components/ui/Animations';
 import { BuildingStorefrontIcon, UserIcon, MapPinIcon } from '@/constants';
 import { BALKAN_LOCATIONS, type CityData } from '@/utils/balkanLocations';
@@ -72,15 +72,26 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
     address: listing.address || '',
     city: listing.city,
     country: listing.country,
+    whatsapp: listing.whatsapp || '',
+    viber: listing.viber || '',
+    languages: listing.languages || [],
+    yearEstablished: listing.yearEstablished,
+    licenseNumber: listing.licenseNumber || '',
+    serviceAreas: listing.serviceAreas || [],
+    priceRange: listing.priceRange,
+    paymentMethods: listing.paymentMethods || [],
     socialMedia: {
       facebook: listing.socialMedia?.facebook || '',
       instagram: listing.socialMedia?.instagram || '',
       linkedin: listing.socialMedia?.linkedin || '',
+      tiktok: listing.socialMedia?.tiktok || '',
     },
     businessHours: listing.businessHours || {},
   });
 
   const [serviceInput, setServiceInput] = useState('');
+  const [languageInput, setLanguageInput] = useState('');
+  const [serviceAreaInput, setServiceAreaInput] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
   const [fieldError, setFieldError] = useState<FieldErrorKey | null>(null);
   const [showHours, setShowHours] = useState(
@@ -205,6 +216,43 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
     }));
   }, []);
 
+  const addLanguage = useCallback(() => {
+    const trimmed = languageInput.trim();
+    if (!trimmed) return;
+    if ((formData.languages?.length || 0) >= 10) return;
+    if (formData.languages?.includes(trimmed)) return;
+    setFormData((prev) => ({ ...prev, languages: [...(prev.languages || []), trimmed] }));
+    setLanguageInput('');
+  }, [languageInput, formData.languages]);
+
+  const removeLanguage = useCallback((lang: string) => {
+    setFormData((prev) => ({ ...prev, languages: prev.languages?.filter((l) => l !== lang) || [] }));
+  }, []);
+
+  const addServiceArea = useCallback(() => {
+    const trimmed = serviceAreaInput.trim();
+    if (!trimmed) return;
+    if ((formData.serviceAreas?.length || 0) >= 20) return;
+    if (formData.serviceAreas?.includes(trimmed)) return;
+    setFormData((prev) => ({ ...prev, serviceAreas: [...(prev.serviceAreas || []), trimmed] }));
+    setServiceAreaInput('');
+  }, [serviceAreaInput, formData.serviceAreas]);
+
+  const removeServiceArea = useCallback((area: string) => {
+    setFormData((prev) => ({ ...prev, serviceAreas: prev.serviceAreas?.filter((a) => a !== area) || [] }));
+  }, []);
+
+  const togglePaymentMethod = useCallback((method: PaymentMethod) => {
+    setFormData((prev) => {
+      const current = prev.paymentMethods || [];
+      if (current.includes(method)) {
+        return { ...prev, paymentMethods: current.filter((m) => m !== method) };
+      }
+      if (current.length >= 10) return prev;
+      return { ...prev, paymentMethods: [...current, method] };
+    });
+  }, []);
+
   const MAX_LOGO_SIZE = 5 * 1024 * 1024;
   const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -310,11 +358,21 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
         cleanData.longitude = lng;
       }
 
+      cleanData.whatsapp = formData.whatsapp?.trim() || '';
+      cleanData.viber = formData.viber?.trim() || '';
+      cleanData.languages = formData.languages && formData.languages.length > 0 ? formData.languages : [];
+      cleanData.yearEstablished = formData.yearEstablished || undefined;
+      cleanData.licenseNumber = formData.licenseNumber?.trim() || '';
+      cleanData.serviceAreas = formData.serviceAreas && formData.serviceAreas.length > 0 ? formData.serviceAreas : [];
+      cleanData.priceRange = formData.priceRange || undefined;
+      cleanData.paymentMethods = formData.paymentMethods && formData.paymentMethods.length > 0 ? formData.paymentMethods : [];
+
       const social = formData.socialMedia;
       cleanData.socialMedia = {
         ...(social?.facebook && { facebook: social.facebook }),
         ...(social?.instagram && { instagram: social.instagram }),
         ...(social?.linkedin && { linkedin: social.linkedin }),
+        ...(social?.tiktok && { tiktok: social.tiktok }),
       };
 
       const hours = formData.businessHours;
@@ -738,6 +796,38 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
                   placeholder={t('form.placeholders.website')}
                 />
               </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="edit-whatsapp" className="block text-sm font-medium text-neutral-700 mb-1">
+                    {t('form.fields.whatsapp', 'WhatsApp')}
+                  </label>
+                  <input
+                    id="edit-whatsapp"
+                    name="whatsapp"
+                    type="tel"
+                    value={formData.whatsapp}
+                    onChange={handleChange}
+                    maxLength={30}
+                    className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                    placeholder={t('form.placeholders.whatsapp', '+383 44 123 456')}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="edit-viber" className="block text-sm font-medium text-neutral-700 mb-1">
+                    {t('form.fields.viber', 'Viber')}
+                  </label>
+                  <input
+                    id="edit-viber"
+                    name="viber"
+                    type="tel"
+                    value={formData.viber}
+                    onChange={handleChange}
+                    maxLength={30}
+                    className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                    placeholder={t('form.placeholders.viber', '+383 44 123 456')}
+                  />
+                </div>
+              </div>
             </div>
           </Animated>
 
@@ -903,6 +993,193 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
                     className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
                     placeholder="https://linkedin.com/..."
                   />
+                </div>
+                <div>
+                  <label htmlFor="edit-tiktok" className="block text-sm font-medium text-neutral-700 mb-1">TikTok</label>
+                  <input
+                    id="edit-tiktok"
+                    type="url"
+                    value={formData.socialMedia?.tiktok || ''}
+                    onChange={(e) => handleSocialChange('tiktok', e.target.value)}
+                    className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                    placeholder="https://tiktok.com/@..."
+                  />
+                </div>
+              </div>
+            </div>
+          </Animated>
+
+          {/* Languages */}
+          <Animated variant="fadeInUp" delay={210}>
+            <div className="bg-white rounded-2xl border border-neutral-200 p-6 shadow-sm space-y-4">
+              <h2 className="text-lg font-semibold text-neutral-900">{t('form.sections.languages', 'Languages Spoken')}</h2>
+              <div className="flex gap-2">
+                <select
+                  value={languageInput}
+                  onChange={(e) => setLanguageInput(e.target.value)}
+                  className="flex-1 px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors bg-white"
+                >
+                  <option value="">{t('form.placeholders.selectLanguage', 'Select a language')}</option>
+                  {BALKAN_LANGUAGES.filter(l => !formData.languages?.includes(l)).map(lang => (
+                    <option key={lang} value={lang}>{lang}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={addLanguage}
+                  className="px-4 py-2.5 bg-neutral-100 text-neutral-700 rounded-xl hover:bg-neutral-200 transition-colors font-medium"
+                >
+                  {t('form.addLanguage', 'Add')}
+                </button>
+              </div>
+              {formData.languages && formData.languages.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {formData.languages.map((lang) => (
+                    <span key={lang} className="inline-flex items-center gap-1 px-3 py-1 bg-violet-50 text-violet-700 rounded-lg text-sm font-medium border border-violet-100">
+                      {lang}
+                      <button type="button" onClick={() => removeLanguage(lang)} className="hover:text-red-500 transition-colors">&times;</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Animated>
+
+          {/* Business Details */}
+          <Animated variant="fadeInUp" delay={220}>
+            <div className="bg-white rounded-2xl border border-neutral-200 p-6 shadow-sm space-y-4">
+              <h2 className="text-lg font-semibold text-neutral-900">{t('form.sections.businessDetails', 'Business Details')}</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="edit-yearEstablished" className="block text-sm font-medium text-neutral-700 mb-1">
+                    {t('form.fields.yearEstablished', 'Year Established')}
+                  </label>
+                  <input
+                    id="edit-yearEstablished"
+                    type="number"
+                    min={1900}
+                    max={new Date().getFullYear()}
+                    value={formData.yearEstablished || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, yearEstablished: e.target.value ? parseInt(e.target.value) : undefined }))}
+                    className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                    placeholder={t('form.placeholders.yearEstablished', 'e.g. 2015')}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="edit-licenseNumber" className="block text-sm font-medium text-neutral-700 mb-1">
+                    {t('form.fields.licenseNumber', 'License / Certification #')}
+                  </label>
+                  <input
+                    id="edit-licenseNumber"
+                    name="licenseNumber"
+                    type="text"
+                    value={formData.licenseNumber}
+                    onChange={handleChange}
+                    maxLength={100}
+                    className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                    placeholder={t('form.placeholders.licenseNumber', 'e.g. LIC-2024-1234')}
+                  />
+                </div>
+              </div>
+            </div>
+          </Animated>
+
+          {/* Service Areas */}
+          <Animated variant="fadeInUp" delay={230}>
+            <div className="bg-white rounded-2xl border border-neutral-200 p-6 shadow-sm space-y-4">
+              <h2 className="text-lg font-semibold text-neutral-900">{t('form.sections.serviceAreas', 'Service Areas')}</h2>
+              <p className="text-sm text-neutral-500">{t('form.serviceAreasHint', 'Cities or regions where you provide services')}</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={serviceAreaInput}
+                  onChange={(e) => setServiceAreaInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addServiceArea(); } }}
+                  maxLength={100}
+                  className="flex-1 px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                  placeholder={t('form.placeholders.serviceArea', 'e.g. Pristina, Prizren...')}
+                />
+                <button
+                  type="button"
+                  onClick={addServiceArea}
+                  className="px-4 py-2.5 bg-neutral-100 text-neutral-700 rounded-xl hover:bg-neutral-200 transition-colors font-medium"
+                >
+                  {t('form.addServiceArea', 'Add')}
+                </button>
+              </div>
+              {formData.serviceAreas && formData.serviceAreas.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {formData.serviceAreas.map((area) => (
+                    <span key={area} className="inline-flex items-center gap-1 px-3 py-1 bg-orange-50 text-orange-700 rounded-lg text-sm font-medium border border-orange-100">
+                      {area}
+                      <button type="button" onClick={() => removeServiceArea(area)} className="hover:text-red-500 transition-colors">&times;</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Animated>
+
+          {/* Pricing & Payment */}
+          <Animated variant="fadeInUp" delay={240}>
+            <div className="bg-white rounded-2xl border border-neutral-200 p-6 shadow-sm space-y-4">
+              <h2 className="text-lg font-semibold text-neutral-900">{t('form.sections.pricing', 'Pricing & Payment')}</h2>
+
+              {/* Price Range */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  {t('form.fields.priceRange', 'Price Range')}
+                </label>
+                <div className="flex gap-2">
+                  {PRICE_RANGES.map((range) => (
+                    <button
+                      key={range}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, priceRange: prev.priceRange === range ? undefined : range as PriceRange }))}
+                      className={`flex-1 py-2.5 rounded-xl text-sm font-bold border-2 transition-all duration-200 ${
+                        formData.priceRange === range
+                          ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-sm'
+                          : 'border-neutral-200 text-neutral-500 hover:border-neutral-300'
+                      }`}
+                    >
+                      {range}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-neutral-400 mt-1.5">
+                  {t('form.priceRangeHint', '$ = Budget  |  $$ = Mid-range  |  $$$ = Premium')}
+                </p>
+              </div>
+
+              {/* Payment Methods */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  {t('form.fields.paymentMethods', 'Payment Methods Accepted')}
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {PAYMENT_METHODS.map((method) => (
+                    <button
+                      key={method}
+                      type="button"
+                      onClick={() => togglePaymentMethod(method)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border transition-all duration-200 ${
+                        formData.paymentMethods?.includes(method)
+                          ? 'border-primary bg-primary/5 text-primary'
+                          : 'border-neutral-200 text-neutral-600 hover:border-neutral-300'
+                      }`}
+                    >
+                      <span className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                        formData.paymentMethods?.includes(method) ? 'border-primary bg-primary' : 'border-neutral-300'
+                      }`}>
+                        {formData.paymentMethods?.includes(method) && (
+                          <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </span>
+                      {t(`paymentMethods.${method}`, method.replace('_', ' '))}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>

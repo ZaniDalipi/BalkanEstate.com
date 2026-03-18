@@ -167,6 +167,7 @@ const SOCIAL_BRANDS: Record<string, { label: string; color: string; hoverColor: 
   facebook: { label: 'Facebook', color: 'text-blue-600', hoverColor: 'hover:bg-blue-50', icon: 'f' },
   instagram: { label: 'Instagram', color: 'text-pink-600', hoverColor: 'hover:bg-pink-50', icon: 'ig' },
   linkedin: { label: 'LinkedIn', color: 'text-blue-700', hoverColor: 'hover:bg-blue-50', icon: 'in' },
+  tiktok: { label: 'TikTok', color: 'text-neutral-900', hoverColor: 'hover:bg-neutral-50', icon: 'tt' },
 };
 
 const fadeUpVariants = {
@@ -860,6 +861,25 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                       <EyeIcon className="w-3.5 h-3.5" />
                       {listing.views} {t('detail.stats.views')}
                     </span>
+                    {listing.yearEstablished && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 rounded-lg text-xs font-medium text-blue-600">
+                        <ClockIcon className="w-3.5 h-3.5" />
+                        {t('detail.established', { year: listing.yearEstablished, defaultValue: `Est. ${listing.yearEstablished}` })}
+                      </span>
+                    )}
+                    {listing.priceRange && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 rounded-lg text-xs font-bold text-emerald-600 border border-emerald-100">
+                        {listing.priceRange}
+                      </span>
+                    )}
+                    {listing.licenseNumber && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 rounded-lg text-xs font-medium text-amber-700 border border-amber-100">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+                        </svg>
+                        {t('detail.licensed', 'Licensed')}
+                      </span>
+                    )}
                   </div>
                 </div>
               </motion.div>
@@ -890,6 +910,82 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                       >
                         {service}
                       </motion.span>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Languages section */}
+            {listing.languages && listing.languages.length > 0 && (
+              <motion.div
+                className="bg-white rounded-2xl border border-neutral-200 shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+                variants={fadeUpVariants}
+              >
+                <div className="p-5 sm:p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                      <svg className="w-4 h-4 text-violet-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m10.5 21 5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 0 1 6-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364V3m0 2.364a48.016 48.016 0 0 1 3.413.235M15 3v2.25m-6 0a48.667 48.667 0 0 0-3.413.235m0 0V3" />
+                      </svg>
+                    </div>
+                    <h2 className="text-lg font-bold text-neutral-900">{t('detail.languages', 'Languages')}</h2>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {listing.languages.map((lang) => (
+                      <span key={lang} className="px-3.5 py-2 bg-violet-50 text-violet-700 rounded-xl text-sm border border-violet-100 font-medium">
+                        {lang}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Service Areas section */}
+            {listing.serviceAreas && listing.serviceAreas.length > 0 && (
+              <motion.div
+                className="bg-white rounded-2xl border border-neutral-200 shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+                variants={fadeUpVariants}
+              >
+                <div className="p-5 sm:p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                      <MapPinIcon className="w-4 h-4 text-orange-600" />
+                    </div>
+                    <h2 className="text-lg font-bold text-neutral-900">{t('detail.serviceAreas', 'Service Areas')}</h2>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {listing.serviceAreas.map((area) => (
+                      <span key={area} className="px-3.5 py-2 bg-orange-50 text-orange-700 rounded-xl text-sm border border-orange-100 font-medium">
+                        {area}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Payment Methods section */}
+            {listing.paymentMethods && listing.paymentMethods.length > 0 && (
+              <motion.div
+                className="bg-white rounded-2xl border border-neutral-200 shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+                variants={fadeUpVariants}
+              >
+                <div className="p-5 sm:p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center">
+                      <svg className="w-4 h-4 text-teal-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+                      </svg>
+                    </div>
+                    <h2 className="text-lg font-bold text-neutral-900">{t('detail.paymentMethods', 'Payment Methods')}</h2>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {listing.paymentMethods.map((method) => (
+                      <span key={method} className="px-3.5 py-2 bg-teal-50 text-teal-700 rounded-xl text-sm border border-teal-100 font-medium">
+                        {t(`paymentMethods.${method}`, method.replace('_', ' '))}
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -1053,6 +1149,48 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                     <div className="min-w-0">
                       <div className="text-xs text-neutral-500 font-medium">{t('detail.website')}</div>
                       <div className="font-medium text-neutral-700 truncate">{listing.website}</div>
+                    </div>
+                  </motion.a>
+                )}
+
+                {/* WhatsApp */}
+                {listing.whatsapp && (
+                  <motion.a
+                    href={`https://wa.me/${listing.whatsapp.replace(/[^0-9+]/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-3 hover:bg-green-50 rounded-xl transition-all group"
+                    whileHover={{ scale: 1.01, x: 2 }}
+                    whileTap={{ scale: 0.99 }}
+                  >
+                    <div className="w-11 h-11 rounded-xl bg-green-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-green-500/20 transition-colors">
+                      <svg className="w-5 h-5 text-green-600" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                      </svg>
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-xs text-neutral-500 font-medium">WhatsApp</div>
+                      <div className="font-medium text-green-700 truncate">{listing.whatsapp}</div>
+                    </div>
+                  </motion.a>
+                )}
+
+                {/* Viber */}
+                {listing.viber && (
+                  <motion.a
+                    href={`viber://chat?number=${listing.viber.replace(/[^0-9+]/g, '')}`}
+                    className="flex items-center gap-3 p-3 hover:bg-purple-50 rounded-xl transition-all group"
+                    whileHover={{ scale: 1.01, x: 2 }}
+                    whileTap={{ scale: 0.99 }}
+                  >
+                    <div className="w-11 h-11 rounded-xl bg-purple-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-purple-500/20 transition-colors">
+                      <svg className="w-5 h-5 text-purple-600" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11.398.002C9.473.028 5.331.344 3.014 2.467 1.294 4.177.518 6.77.399 9.932c-.12 3.163-.27 9.093 5.567 10.714l.004.002.002.004s-.037 1.654-.04 2.243c-.003.59.258 1.34.979.737 0 0 .862-.809 1.769-1.754.498-.519.934-.99 1.255-1.35 3.467.294 6.13-.375 6.434-.482.703-.247 4.674-.737 5.32-6.016.667-5.442-.314-8.881-2.07-10.436C17.727.908 14.082-.04 11.398.002zm.297 1.904c2.289-.042 5.54.717 7.164 2.098 1.49 1.32 2.275 4.278 1.725 8.766-.534 4.372-3.753 4.677-4.35 4.886-.253.088-2.547.66-5.456.509 0 0-2.16 2.606-2.834 3.292-.105.107-.24.151-.326.131-.121-.028-.154-.158-.152-.348.003-.255.02-3.146.02-3.146C2.36 16.752 2.487 11.59 2.586 8.924c.1-2.667.736-4.855 2.158-6.244 1.793-1.607 5.235-2.05 6.95-2.086v.312zm-.26 2.706c-.087.002-.174.018-.254.054-.313.14-.455.506-.319.816.136.31.51.453.826.32.1-.043.19-.108.26-.19.137-.163.189-.39.137-.6a.642.642 0 00-.65-.4zm3.053.952c-.16.008-.317.07-.433.196-.263.284-.244.726.04.986.744.683 1.319 1.51 1.689 2.43.173.428.297.874.369 1.33.032.204.05.41.055.617.01.373.31.672.686.666.374-.007.672-.306.666-.679a6.693 6.693 0 00-.077-.855 7.862 7.862 0 00-.505-1.82 7.991 7.991 0 00-2.05-2.68.684.684 0 00-.44-.19zm-4.46.397c-.357-.065-.725.005-1.058.195-.31.19-.58.477-.764.826-.265.501-.173.985.102 1.437l.027.046c.259.406.606.793.95 1.117l.013.012.014.012c.335.337.734.701 1.15.97l.05.03c.332.199.707.356 1.161.208a1.66 1.66 0 00.824-.684c.285-.443.232-.988-.204-1.389l-.01-.009a12.505 12.505 0 00-.695-.503c-.207-.139-.455-.121-.654.03-.139.104-.23.24-.371.368l-.006.005-.023.014c-.022.012-.047.015-.074-.002a5.602 5.602 0 01-1.26-1.028 4.93 4.93 0 01-.795-1.22c-.013-.027-.008-.046.005-.066.007-.013.012-.024.027-.04.143-.153.3-.268.414-.42.168-.222.19-.481.045-.723a22.7 22.7 0 00-.42-.743c-.104-.165-.27-.273-.446-.305zm5.962.752a.676.676 0 00-.473.213c-.257.27-.243.699.028.953.5.47.869 1.056 1.078 1.712.098.305.156.622.17.942.012.373.318.665.694.653.375-.012.668-.316.656-.688a4.85 4.85 0 00-.247-1.36c-.3-.95-.831-1.794-1.546-2.462a.687.687 0 00-.36-.163zm-1.434.963a.676.676 0 00-.468.198.672.672 0 00-.006.955c.278.282.442.625.488 1.015a.68.68 0 00.752.595.681.681 0 00.6-.75 2.906 2.906 0 00-.905-1.82.677.677 0 00-.461-.193z"/>
+                      </svg>
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-xs text-neutral-500 font-medium">Viber</div>
+                      <div className="font-medium text-purple-700 truncate">{listing.viber}</div>
                     </div>
                   </motion.a>
                 )}

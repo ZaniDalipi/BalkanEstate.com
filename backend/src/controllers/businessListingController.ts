@@ -180,10 +180,19 @@ export const createBusinessListing = async (
       country: req.body.country,
       latitude: req.body.latitude != null ? Number(req.body.latitude) : undefined,
       longitude: req.body.longitude != null ? Number(req.body.longitude) : undefined,
+      whatsapp: req.body.whatsapp,
+      viber: req.body.viber,
+      languages: Array.isArray(req.body.languages) ? req.body.languages.slice(0, 10) : [],
+      yearEstablished: req.body.yearEstablished != null ? Number(req.body.yearEstablished) : undefined,
+      licenseNumber: req.body.licenseNumber,
+      serviceAreas: Array.isArray(req.body.serviceAreas) ? req.body.serviceAreas.slice(0, 20) : [],
+      priceRange: req.body.priceRange,
+      paymentMethods: Array.isArray(req.body.paymentMethods) ? req.body.paymentMethods.slice(0, 10) : [],
       socialMedia: {
         facebook: req.body.socialMedia?.facebook,
         instagram: req.body.socialMedia?.instagram,
         linkedin: req.body.socialMedia?.linkedin,
+        tiktok: req.body.socialMedia?.tiktok,
       },
       businessHours: req.body.businessHours,
     };
@@ -235,7 +244,8 @@ export const updateBusinessListing = async (
     const allowedFields = [
       'name', 'description', 'category', 'listingType', 'services', 'contactPhone',
       'contactEmail', 'website', 'address', 'city', 'country', 'latitude', 'longitude',
-      'socialMedia', 'businessHours', 'isActive',
+      'socialMedia', 'businessHours', 'isActive', 'whatsapp', 'viber', 'languages',
+      'yearEstablished', 'licenseNumber', 'serviceAreas', 'priceRange', 'paymentMethods',
     ];
 
     const updates: Record<string, any> = {};
@@ -251,9 +261,18 @@ export const updateBusinessListing = async (
       return;
     }
 
-    // Limit services array length
+    // Limit array lengths
     if (updates.services && Array.isArray(updates.services)) {
       updates.services = updates.services.slice(0, 20);
+    }
+    if (updates.languages && Array.isArray(updates.languages)) {
+      updates.languages = updates.languages.slice(0, 10);
+    }
+    if (updates.serviceAreas && Array.isArray(updates.serviceAreas)) {
+      updates.serviceAreas = updates.serviceAreas.slice(0, 20);
+    }
+    if (updates.paymentMethods && Array.isArray(updates.paymentMethods)) {
+      updates.paymentMethods = updates.paymentMethods.slice(0, 10);
     }
 
     Object.assign(listing, updates);

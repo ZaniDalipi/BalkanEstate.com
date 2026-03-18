@@ -26,6 +26,22 @@ export type BusinessCategory = typeof BUSINESS_CATEGORIES[number];
 export const LISTING_TYPES = ['business', 'individual'] as const;
 export type ListingType = typeof LISTING_TYPES[number];
 
+export const PRICE_RANGES = ['$', '$$', '$$$'] as const;
+export type PriceRange = typeof PRICE_RANGES[number];
+
+export const PAYMENT_METHODS = [
+  'cash', 'credit_card', 'debit_card', 'bank_transfer',
+  'paypal', 'crypto', 'invoice',
+] as const;
+export type PaymentMethod = typeof PAYMENT_METHODS[number];
+
+export const BALKAN_LANGUAGES = [
+  'Albanian', 'Bosnian', 'Bulgarian', 'Croatian', 'English',
+  'German', 'Greek', 'Hungarian', 'Italian', 'Macedonian',
+  'Montenegrin', 'Romanian', 'Serbian', 'Slovenian', 'Turkish',
+  'French', 'Russian', 'Arabic',
+] as const;
+
 export interface BusinessListing {
   id: string;
   owner: {
@@ -49,10 +65,19 @@ export interface BusinessListing {
   longitude?: number;
   logoUrl?: string;
   bannerUrl?: string;
+  whatsapp?: string;
+  viber?: string;
+  languages?: string[];
+  yearEstablished?: number;
+  licenseNumber?: string;
+  serviceAreas?: string[];
+  priceRange?: PriceRange;
+  paymentMethods?: PaymentMethod[];
   socialMedia?: {
     facebook?: string;
     instagram?: string;
     linkedin?: string;
+    tiktok?: string;
   };
   businessHours?: {
     monday?: string;
@@ -101,10 +126,19 @@ export interface CreateBusinessListingData {
   country: string;
   latitude?: number;
   longitude?: number;
+  whatsapp?: string;
+  viber?: string;
+  languages?: string[];
+  yearEstablished?: number;
+  licenseNumber?: string;
+  serviceAreas?: string[];
+  priceRange?: PriceRange;
+  paymentMethods?: PaymentMethod[];
   socialMedia?: {
     facebook?: string;
     instagram?: string;
     linkedin?: string;
+    tiktok?: string;
   };
   businessHours?: Record<string, string>;
 }

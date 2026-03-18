@@ -49,10 +49,19 @@ export interface IBusinessListing extends Document {
   logoPublicId?: string;
   bannerUrl?: string;
   bannerPublicId?: string;
+  whatsapp?: string;
+  viber?: string;
+  languages?: string[];
+  yearEstablished?: number;
+  licenseNumber?: string;
+  serviceAreas?: string[];
+  priceRange?: string;
+  paymentMethods?: string[];
   socialMedia?: {
     facebook?: string;
     instagram?: string;
     linkedin?: string;
+    tiktok?: string;
   };
   businessHours?: {
     monday?: string;
@@ -164,10 +173,55 @@ const BusinessListingSchema: Schema = new Schema(
     logoPublicId: { type: String },
     bannerUrl: { type: String },
     bannerPublicId: { type: String },
+    whatsapp: {
+      type: String,
+      trim: true,
+      maxlength: [30, 'WhatsApp number cannot exceed 30 characters'],
+    },
+    viber: {
+      type: String,
+      trim: true,
+      maxlength: [30, 'Viber number cannot exceed 30 characters'],
+    },
+    languages: [{
+      type: String,
+      trim: true,
+      maxlength: [50, 'Language name cannot exceed 50 characters'],
+    }],
+    yearEstablished: {
+      type: Number,
+      min: [1900, 'Year must be 1900 or later'],
+      max: [new Date().getFullYear(), 'Year cannot be in the future'],
+    },
+    licenseNumber: {
+      type: String,
+      trim: true,
+      maxlength: [100, 'License number cannot exceed 100 characters'],
+    },
+    serviceAreas: [{
+      type: String,
+      trim: true,
+      maxlength: [100, 'Service area name cannot exceed 100 characters'],
+    }],
+    priceRange: {
+      type: String,
+      enum: {
+        values: ['$', '$$', '$$$'],
+        message: 'Invalid price range: {VALUE}',
+      },
+    },
+    paymentMethods: [{
+      type: String,
+      enum: {
+        values: ['cash', 'credit_card', 'debit_card', 'bank_transfer', 'paypal', 'crypto', 'invoice'],
+        message: 'Invalid payment method: {VALUE}',
+      },
+    }],
     socialMedia: {
       facebook: { type: String, trim: true },
       instagram: { type: String, trim: true },
       linkedin: { type: String, trim: true },
+      tiktok: { type: String, trim: true },
     },
     businessHours: {
       monday: { type: String, trim: true },
