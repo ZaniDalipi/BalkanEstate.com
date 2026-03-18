@@ -379,6 +379,13 @@ export interface PromotionPlan {
     iconBgColor?: string;
     priceColor?: string;
   };
+  // Special Offer fields
+  isSpecialOffer?: boolean;
+  availableFrom?: string;
+  availableTo?: string;
+  originalPriceMultiplier?: number;
+  offerLabel?: string;
+
   isActive: boolean;
   isVisible: boolean;
   createdAt?: string;

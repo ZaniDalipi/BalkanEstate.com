@@ -56,6 +56,7 @@ export function usePricingPage() {
     productsError,
     listingPromotionPlans,
     agencyFeaturePlans,
+    specialOffers,
     isLoadingPromotionPlans: loadingPlans,
     userListings,
     isLoadingUserListings: loadingListings,
@@ -589,6 +590,7 @@ export function usePricingPage() {
     sellerProducts,
     // Promotion plans data
     agencyFeaturePlans,
+    specialOffers,
     // Helper functions
     getPromotionPrice,
     getAgencyPrice,

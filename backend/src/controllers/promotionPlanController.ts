@@ -5,16 +5,32 @@ import { invalidateCache } from '../middleware/cache';
 import { getObjectIdParam } from '../utils/validateParams';
 
 // Get all promotion plans (public)
+// Filters out expired special offers and plans outside their availability window
 export const getPromotionPlans = async (req: Request, res: Response) => {
   try {
     const { category } = req.query;
+    const now = new Date();
 
-    const filter: any = { isActive: true, isVisible: true };
+    const filter: any = {
+      isActive: true,
+      isVisible: true,
+      // Exclude special offers that haven't started yet or have expired
+      $or: [
+        { isSpecialOffer: { $ne: true } },
+        {
+          isSpecialOffer: true,
+          $and: [
+            { $or: [{ availableFrom: { $exists: false } }, { availableFrom: null }, { availableFrom: { $lte: now } }] },
+            { $or: [{ availableTo: { $exists: false } }, { availableTo: null }, { availableTo: { $gte: now } }] },
+          ],
+        },
+      ],
+    };
     if (category) {
       filter.category = category;
     }
 
-    const plans = await PromotionPlan.find(filter).sort({ category: 1, displayOrder: 1 });
+    const plans = await PromotionPlan.find(filter).sort({ isSpecialOffer: -1, category: 1, displayOrder: 1 });
 
     res.json({ plans });
   } catch (error) {
@@ -37,6 +53,16 @@ export const getAdminPromotionPlans = async (req: Request, res: Response) => {
 // Create a new promotion plan (admin only)
 export const createPromotionPlan = async (req: Request, res: Response) => {
   try {
+    // Validate special offer date range
+    if (req.body.isSpecialOffer && req.body.availableFrom && req.body.availableTo) {
+      const from = new Date(req.body.availableFrom);
+      const to = new Date(req.body.availableTo);
+      if (to <= from) {
+        res.status(400).json({ message: 'End date must be after start date' });
+        return;
+      }
+    }
+
     const plan = new PromotionPlan(req.body);
     await plan.save();
 
@@ -56,6 +82,17 @@ export const updatePromotionPlan = async (req: Request, res: Response): Promise<
   try {
     const id = getObjectIdParam(req, res, 'id');
     if (!id) return;
+
+    // Validate special offer date range
+    if (req.body.isSpecialOffer && req.body.availableFrom && req.body.availableTo) {
+      const from = new Date(req.body.availableFrom);
+      const to = new Date(req.body.availableTo);
+      if (to <= from) {
+        res.status(400).json({ message: 'End date must be after start date' });
+        return;
+      }
+    }
+
     const plan = await PromotionPlan.findByIdAndUpdate(
       id,
       { $set: req.body },

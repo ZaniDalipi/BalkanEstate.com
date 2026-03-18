@@ -65,6 +65,7 @@ const PricingPage: React.FC = () => {
     proMonthlyProduct,
     buyerProduct,
     agencyFeaturePlans,
+    specialOffers,
     loadingPlans,
     getPromotionPrice,
     getAgencyPrice,
@@ -364,11 +365,61 @@ const PricingPage: React.FC = () => {
             />
           )}
 
+          {/* Special Offers Banner */}
+          {specialOffers.length > 0 && activeTab === 'listing' && (
+            <Animated variant="fadeInUp" className="mt-12">
+              <div className="bg-gradient-to-r from-rose-500 to-pink-500 rounded-2xl p-6 text-white mb-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <BoltIcon className="w-7 h-7" />
+                  <h3 className="text-xl font-bold">{t('pricing:specialOffers.title', 'Special Offers')}</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {specialOffers.map((offer) => {
+                    const timeLeft = offer.availableTo ? Math.max(0, Math.ceil((new Date(offer.availableTo).getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : null;
+                    return (
+                      <div key={offer.id} className="bg-white/15 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-2xl">{offer.icon}</span>
+                          {offer.offerLabel && (
+                            <span className="px-2 py-0.5 bg-white/20 text-xs font-bold rounded-full">{offer.offerLabel}</span>
+                          )}
+                        </div>
+                        <h4 className="font-bold text-lg">{offer.name}</h4>
+                        <p className="text-white/80 text-sm mb-2">{offer.description}</p>
+                        <div className="flex items-baseline gap-2">
+                          {offer.originalPriceMultiplier && offer.pricing.duration30 ? (
+                            <>
+                              <span className="text-xs line-through text-white/60">&euro;{Math.round(offer.pricing.duration30 * offer.originalPriceMultiplier)}</span>
+                              <span className="text-2xl font-extrabold">&euro;{offer.pricing.duration30}</span>
+                              <span className="text-white/80 text-sm">/30 days</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-2xl font-extrabold">&euro;{offer.pricing.duration7 || offer.pricing.duration30 || 0}</span>
+                              <span className="text-white/80 text-sm">/{offer.pricing.duration7 ? '7' : '30'} days</span>
+                            </>
+                          )}
+                        </div>
+                        {timeLeft !== null && timeLeft > 0 && (
+                          <div className="mt-2 text-xs font-medium text-white/70">
+                            {timeLeft === 1
+                              ? t('pricing:specialOffers.lastDay', 'Last day!')
+                              : t('pricing:specialOffers.daysLeft', '{{days}} days left', { days: timeLeft })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </Animated>
+          )}
+
           {/* No Products */}
           {!loading && !error && products.length === 0 && (
             <div className="text-center py-20">
               <div className="bg-gray-50 rounded-2xl p-8 max-w-md mx-auto">
-                <p className="text-gray-600">{t('pricing:noPlans', 'No pricing plans available. Please run the seed script.')}</p>
+                <p className="text-gray-600">{t('pricing:noPlans', 'No pricing plans available at the moment.')}</p>
               </div>
             </div>
           )}
