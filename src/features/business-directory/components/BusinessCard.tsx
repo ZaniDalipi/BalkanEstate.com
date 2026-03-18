@@ -199,7 +199,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
 
           {/* Description */}
           {listing.description && (
-            <p className="text-xs sm:text-sm text-neutral-500 line-clamp-2 mb-3 leading-relaxed">
+            <p className="text-xs sm:text-sm text-neutral-500 line-clamp-2 mb-3 leading-relaxed break-words" style={{ overflowWrap: 'anywhere' }}>
               {listing.description}
             </p>
           )}

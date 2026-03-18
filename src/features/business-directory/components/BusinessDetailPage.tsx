@@ -485,11 +485,11 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                   </div>
 
                   {/* Quote-style description */}
-                  <div className="relative pl-5 border-l-[3px] border-primary/20">
+                  <div className="relative pl-5 border-l-[3px] border-primary/20 overflow-hidden">
                     <svg className="absolute -left-2.5 -top-1 w-5 h-5 text-primary/30" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983z" />
                     </svg>
-                    <p className="text-neutral-600 leading-relaxed text-sm sm:text-base whitespace-pre-line">
+                    <p className="text-neutral-600 leading-relaxed text-sm sm:text-base whitespace-pre-line break-words" style={{ overflowWrap: 'anywhere' }}>
                       {listing.description}
                     </p>
                   </div>
