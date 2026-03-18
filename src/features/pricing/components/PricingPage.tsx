@@ -82,6 +82,10 @@ const PricingPage: React.FC = () => {
     handleAgencyFeature,
     isActivePlan,
     isPlanDisabled,
+    selectedOfferId,
+    setSelectedOfferId,
+    handleSelectOffer,
+    handlePurchaseSpecialOffer,
   } = usePricingPage();
 
   return (
@@ -368,7 +372,23 @@ const PricingPage: React.FC = () => {
 
           {/* Special Offers */}
           {specialOffers.length > 0 && activeTab === 'listing' && (
-            <SpecialOffersSection t={t} specialOffers={specialOffers} />
+            <SpecialOffersSection
+              t={t}
+              dispatch={dispatch}
+              isAuthenticated={state.isAuthenticated}
+              specialOffers={specialOffers}
+              selectedOfferId={selectedOfferId}
+              setSelectedOfferId={setSelectedOfferId}
+              selectedListing={selectedListing}
+              setSelectedListing={setSelectedListing}
+              selectedDuration={selectedDuration}
+              setSelectedDuration={setSelectedDuration}
+              loadingListings={loadingListings}
+              userListings={userListings}
+              onSelectOffer={handleSelectOffer}
+              onSelectListingForPromotion={handleSelectListingForPromotion}
+              onPurchasePromotion={handlePurchaseSpecialOffer}
+            />
           )}
 
           {/* No Products */}

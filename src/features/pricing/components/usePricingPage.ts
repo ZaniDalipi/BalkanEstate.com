@@ -49,6 +49,9 @@ export function usePricingPage() {
   const [selectedAgencyDuration, setSelectedAgencyDuration] = useState<7 | 14 | 28 | 90>(28);
   const [includeMapMarker, setIncludeMapMarker] = useState(false);
 
+  // Special offer states
+  const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
+
   // Use React Query for real-time data fetching
   const {
     products,
@@ -419,6 +422,34 @@ export function usePricingPage() {
     });
   };
 
+  // Special offer handlers
+  const handleSelectOffer = (offerId: string) => {
+    if (!state.isAuthenticated) {
+      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
+      return;
+    }
+    setSelectedOfferId(offerId);
+    setSelectedListing(null);
+  };
+
+  const handlePurchaseSpecialOffer = () => {
+    if (!selectedListing || !selectedOfferId) return;
+    const offer = specialOffers.find((o) => o.id === selectedOfferId);
+    if (!offer) return;
+
+    const durationKey = `duration${selectedDuration}` as keyof typeof offer.pricing;
+    const price = offer.pricing[durationKey] ?? offer.pricing.duration30 ?? offer.pricing.duration7 ?? 0;
+
+    // Open PaymentWindow for special offer promotion
+    setSelectedPlan({
+      name: `${offer.name} - ${selectedDuration} days`,
+      price,
+      interval: 'once' as const,
+      productId: `special_offer_${offer.id}_${selectedDuration}days`,
+    });
+    setShowPaymentWindow(true);
+  };
+
   const handleAgencyFeature = (tier: string) => {
     if (!state.isAuthenticated) {
       dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
@@ -610,5 +641,10 @@ export function usePricingPage() {
     handleSelectListingForPromotion,
     handlePurchasePromotion,
     handleAgencyFeature,
+    // Special offer state & handlers
+    selectedOfferId,
+    setSelectedOfferId,
+    handleSelectOffer,
+    handlePurchaseSpecialOffer,
   };
 }
