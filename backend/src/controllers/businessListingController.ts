@@ -300,9 +300,12 @@ export const deleteBusinessListing = async (
       return;
     }
 
-    // Clean up logo from Cloudinary
+    // Clean up images from Cloudinary
     if (listing.logoPublicId) {
       await deleteImage(listing.logoPublicId).catch(() => {});
+    }
+    if (listing.bannerPublicId) {
+      await deleteImage(listing.bannerPublicId).catch(() => {});
     }
 
     await BusinessListing.deleteOne({ _id: listing._id });
@@ -353,13 +356,14 @@ export const uploadBusinessLogo = async (
     }
 
     const userId = String(currentUser._id);
+    const userEmail = currentUser.email;
 
-    // Upload new logo using centralized cloudinaryService
-    // Reuses 'agency-logo' type for similar folder structure
+    // Upload new logo with organized path: businesses/{email}/{listingId}/logo
     const result = await uploadImage(req.file.buffer, {
       userId,
-      agencyId: id, // Reuse agencyId param for folder organization
-      type: 'agency-logo',
+      userEmail,
+      businessListingId: id,
+      type: 'business-logo',
       maxWidth: 400,
       maxHeight: 400,
     });
@@ -417,12 +421,14 @@ export const uploadBusinessBanner = async (
     }
 
     const userId = String(currentUser._id);
+    const userEmail = currentUser.email;
 
-    // Upload new banner
+    // Upload new banner with organized path: businesses/{email}/{listingId}/banner
     const result = await uploadImage(req.file.buffer, {
       userId,
-      agencyId: id,
-      type: 'agency-logo',
+      userEmail,
+      businessListingId: id,
+      type: 'business-banner',
       maxWidth: 1200,
       maxHeight: 400,
     });
@@ -526,9 +532,12 @@ export const adminDeleteBusinessListing = async (
       return;
     }
 
-    // Clean up logo from Cloudinary
+    // Clean up images from Cloudinary
     if (listing.logoPublicId) {
       await deleteImage(listing.logoPublicId).catch(() => {});
+    }
+    if (listing.bannerPublicId) {
+      await deleteImage(listing.bannerPublicId).catch(() => {});
     }
 
     await BusinessListing.deleteOne({ _id: listing._id });

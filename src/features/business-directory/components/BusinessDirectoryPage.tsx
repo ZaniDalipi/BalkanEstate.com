@@ -344,14 +344,8 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
     setSubView('list');
     setSelectedListingId(null);
     dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
-    // Use history.back() if there's history to go back to (preserves proper back stack)
-    // Otherwise fallback to pushState
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      const tabPath = activeTab === 'all' ? '/business-directory' : `/business-directory/${activeTab}`;
-      window.history.pushState({}, '', buildLocalizedPath(tabPath));
-    }
+    const tabPath = activeTab === 'all' ? '/business-directory' : `/business-directory/${activeTab}`;
+    window.history.pushState({}, '', buildLocalizedPath(tabPath));
   }, [dispatch, activeTab]);
 
   // Auth-guarded create click - require login for any create/list action

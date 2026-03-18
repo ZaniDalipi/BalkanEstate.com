@@ -41,10 +41,15 @@ export interface CloudinaryUploadResult {
  * │           └── {propertyId}/
  * │               ├── photos/
  * │               └── floorplans/
- * └── agencies/
- *     └── {agencyId}/
- *         ├── logo/
- *         └── cover/
+ * ├── agencies/
+ * │   └── {agencyId}/
+ * │       ├── logo/
+ * │       └── cover/
+ * └── businesses/
+ *     └── {userEmail}/
+ *         └── {businessListingId}/
+ *             ├── logo/
+ *             └── banner/
  */
 type UploadType =
   | 'property'          // User listing photos
@@ -54,19 +59,35 @@ type UploadType =
   | 'credential'        // Agent credential document
   | 'agency-logo'       // Agency logo
   | 'agency-cover'      // Agency cover image
+  | 'business-logo'     // Business listing logo
+  | 'business-banner'   // Business listing banner
   | 'site-logo'         // Site branding logo
   | 'site-email-logo';  // Site email branding logo
 
 interface UploadOptions {
   userId: string;
+  userEmail?: string;
   propertyId?: string;
   agencyId?: string;
+  businessListingId?: string;
   credentialId?: string;
   type: UploadType;
   maxWidth?: number;
   maxHeight?: number;
   quality?: number;
 }
+
+/**
+ * Sanitize email for use as a Cloudinary folder name.
+ * Replaces @ and dots with underscores, strips unsafe chars.
+ * e.g. "john.doe@gmail.com" → "john_doe_at_gmail_com"
+ */
+const sanitizeEmailForFolder = (email: string): string => {
+  return email
+    .toLowerCase()
+    .replace('@', '_at_')
+    .replace(/[^a-z0-9_-]/g, '_');
+};
 
 /**
  * Build organized folder path based on upload type
@@ -76,7 +97,7 @@ interface UploadOptions {
  * - Agencies: balkan-estate/agencies/{agencyId}/{subfolder}
  */
 const buildFolderPath = (options: UploadOptions): string => {
-  const { userId, propertyId, agencyId, credentialId, type } = options;
+  const { userId, userEmail, propertyId, agencyId, businessListingId, credentialId, type } = options;
   const ROOT = 'balkan-estate';
 
   switch (type) {
@@ -116,6 +137,20 @@ const buildFolderPath = (options: UploadOptions): string => {
     case 'agency-cover':
       // balkan-estate/agencies/{agencyId}/cover
       return `${ROOT}/agencies/${agencyId || userId}/cover`;
+
+    case 'business-logo': {
+      // balkan-estate/businesses/{userEmail}/{businessListingId}/logo
+      const emailFolder = userEmail ? sanitizeEmailForFolder(userEmail) : userId;
+      const listingId = businessListingId || userId;
+      return `${ROOT}/businesses/${emailFolder}/${listingId}/logo`;
+    }
+
+    case 'business-banner': {
+      // balkan-estate/businesses/{userEmail}/{businessListingId}/banner
+      const emailFolder = userEmail ? sanitizeEmailForFolder(userEmail) : userId;
+      const listingId = businessListingId || userId;
+      return `${ROOT}/businesses/${emailFolder}/${listingId}/banner`;
+    }
 
     case 'site-logo':
       // balkan-estate/site/logo
@@ -519,6 +554,19 @@ export const deleteAllUserImages = async (userId: string): Promise<void> => {
  */
 export const deleteAgencyImages = async (agencyId: string): Promise<void> => {
   const folderPath = `balkan-estate/agencies/${agencyId}`;
+  await deleteFolder(folderPath);
+};
+
+/**
+ * Delete all images for a business listing
+ * Path: balkan-estate/businesses/{userEmail}/{businessListingId}/
+ */
+export const deleteBusinessListingImages = async (
+  userEmail: string,
+  businessListingId: string
+): Promise<void> => {
+  const emailFolder = sanitizeEmailForFolder(userEmail);
+  const folderPath = `balkan-estate/businesses/${emailFolder}/${businessListingId}`;
   await deleteFolder(folderPath);
 };
 
