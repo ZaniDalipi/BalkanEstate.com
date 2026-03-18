@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMyBusinessListings, useDeleteBusinessListing } from '@/src/features/business-directory/hooks';
 import { useAppContext } from '@/context/AppContext';
@@ -14,7 +14,10 @@ import {
   EyeIcon,
   PencilIcon,
   CheckBadgeIcon,
+  ArrowLeftIcon,
 } from '@/constants';
+
+const EditBusinessListingForm = lazy(() => import('@/src/features/business-directory/components/EditBusinessListingForm'));
 
 const CATEGORY_GRADIENTS: Record<string, string> = {
   construction: 'from-amber-500 to-orange-600',
@@ -42,10 +45,11 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
 const MyBusinessListings: React.FC = () => {
   const { t } = useTranslation(['businessDirectory', 'account']);
   const { dispatch } = useAppContext();
-  const { listings, isLoading, error } = useMyBusinessListings(true);
+  const { listings, isLoading, error, refetch } = useMyBusinessListings(true);
   const { deleteListing } = useDeleteBusinessListing();
   const { confirm } = useConfirmation();
   const { success, error: notifyError } = useNotification();
+  const [editingListing, setEditingListing] = useState<BusinessListing | null>(null);
 
   const navigateToListing = useCallback((listing: BusinessListing) => {
     const urlSlug = generateBusinessSlug(listing);
@@ -55,9 +59,21 @@ const MyBusinessListings: React.FC = () => {
   }, [dispatch]);
 
   const handleEdit = useCallback((listing: BusinessListing) => {
-    // Navigate to detail page which has edit capability
-    navigateToListing(listing);
-  }, [navigateToListing]);
+    setEditingListing(listing);
+  }, []);
+
+  const handleEditBack = useCallback(() => {
+    setEditingListing(null);
+  }, []);
+
+  const handleEditSuccess = useCallback(() => {
+    setEditingListing(null);
+    refetch();
+    success(
+      t('businessDirectory:myBusinesses.editSuccessTitle', 'Updated'),
+      t('businessDirectory:myBusinesses.editSuccessMessage', 'Business listing has been updated.'),
+    );
+  }, [refetch, success, t]);
 
   const handleDelete = useCallback(async (listing: BusinessListing) => {
     const confirmed = await confirm(
@@ -115,6 +131,29 @@ const MyBusinessListings: React.FC = () => {
         <p className="text-neutral-500 text-sm">
           {t('businessDirectory:myBusinesses.errorMessage', 'Something went wrong. Please try again later.')}
         </p>
+      </div>
+    );
+  }
+
+  // Edit mode - show the edit form inline
+  if (editingListing) {
+    return (
+      <div>
+        {/* Back to list header */}
+        <button
+          onClick={handleEditBack}
+          className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-600 hover:text-primary transition-colors mb-4"
+        >
+          <ArrowLeftIcon className="w-4 h-4" />
+          {t('businessDirectory:myBusinesses.backToList', 'Back to My Businesses')}
+        </button>
+        <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+          <EditBusinessListingForm
+            listing={editingListing}
+            onBack={handleEditBack}
+            onSuccess={handleEditSuccess}
+          />
+        </Suspense>
       </div>
     );
   }
