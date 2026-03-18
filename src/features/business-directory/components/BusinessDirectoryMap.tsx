@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GoogleMap, OverlayViewF, OverlayView } from '@react-google-maps/api';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,28 +18,10 @@ interface BusinessDirectoryMapProps {
   onListingClick: (listing: BusinessListing) => void;
 }
 
-const CATEGORY_ICONS: Record<string, string> = {
-  construction: '\u{1F3D7}',
-  renovation: '\u{1F528}',
-  cleaning: '\u{2728}',
-  moving: '\u{1F69A}',
-  interior_design: '\u{1F3A8}',
-  architecture: '\u{1F4D0}',
-  plumbing: '\u{1F6BF}',
-  electrical: '\u{26A1}',
-  landscaping: '\u{1F333}',
-  security: '\u{1F512}',
-  real_estate_law: '\u{2696}',
-  insurance: '\u{1F6E1}',
-  home_inspection: '\u{1F50D}',
-  pest_control: '\u{1F41B}',
-  painting: '\u{1F58C}',
-  roofing: '\u{1F3E0}',
-  hvac: '\u{2744}',
-  furniture: '\u{1FA91}',
-  appliances: '\u{1F4FA}',
-  other: '\u{1F4CB}',
-};
+interface GeocodedListing extends BusinessListing {
+  _geocodedLat?: number;
+  _geocodedLng?: number;
+}
 
 // Balkan region center
 const BALKAN_CENTER = { lat: 42.5, lng: 21.0 };
@@ -64,50 +46,144 @@ const mapOptions: google.maps.MapOptions = {
   ],
 };
 
+// Cache geocode results across renders to avoid re-geocoding
+const geocodeCache = new Map<string, { lat: number; lng: number }>();
+
 const BusinessDirectoryMap: React.FC<BusinessDirectoryMapProps> = ({ listings, onListingClick }) => {
   const { t } = useTranslation('businessDirectory');
   const { isLoaded, loadError } = useGoogleMapLoader();
   const mapRef = useRef<google.maps.Map | null>(null);
   const [selectedListing, setSelectedListing] = useState<BusinessListing | null>(null);
+  const [geocodedListings, setGeocodedListings] = useState<GeocodedListing[]>([]);
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  const geocoderRef = useRef<google.maps.Geocoder | null>(null);
 
-  // Only show listings that have coordinates
+  // Geocode listings that don't have coordinates
+  useEffect(() => {
+    if (!isLoaded || listings.length === 0) return;
+
+    if (!geocoderRef.current) {
+      geocoderRef.current = new google.maps.Geocoder();
+    }
+
+    const geocoder = geocoderRef.current;
+    let cancelled = false;
+
+    const geocodeAll = async () => {
+      setIsGeocoding(true);
+      const results: GeocodedListing[] = [];
+
+      for (const listing of listings) {
+        if (cancelled) break;
+
+        // Already has coordinates
+        if (listing.latitude != null && listing.longitude != null) {
+          results.push(listing);
+          continue;
+        }
+
+        // Build address string for geocoding
+        const addressParts: string[] = [];
+        if (listing.address) addressParts.push(listing.address);
+        if (listing.city) addressParts.push(listing.city);
+        if (listing.country) addressParts.push(listing.country);
+        const addressStr = addressParts.join(', ');
+
+        if (!addressStr) continue;
+
+        // Check cache
+        const cached = geocodeCache.get(addressStr);
+        if (cached) {
+          results.push({ ...listing, _geocodedLat: cached.lat, _geocodedLng: cached.lng });
+          continue;
+        }
+
+        // Geocode using Google Maps
+        try {
+          const response = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
+            geocoder.geocode({ address: addressStr }, (res, status) => {
+              if (status === google.maps.GeocoderStatus.OK && res && res.length > 0) {
+                resolve(res);
+              } else {
+                reject(new Error(status));
+              }
+            });
+          });
+
+          const location = response[0].geometry.location;
+          const coords = { lat: location.lat(), lng: location.lng() };
+          geocodeCache.set(addressStr, coords);
+          results.push({ ...listing, _geocodedLat: coords.lat, _geocodedLng: coords.lng });
+        } catch {
+          // Skip listings that can't be geocoded
+        }
+      }
+
+      if (!cancelled) {
+        setGeocodedListings(results);
+        setIsGeocoding(false);
+      }
+    };
+
+    geocodeAll();
+
+    return () => { cancelled = true; };
+  }, [isLoaded, listings]);
+
+  // Get effective lat/lng for a listing (prefer stored, fallback to geocoded)
+  const getCoords = useCallback((listing: GeocodedListing): { lat: number; lng: number } | null => {
+    if (listing.latitude != null && listing.longitude != null) {
+      return { lat: listing.latitude, lng: listing.longitude };
+    }
+    if (listing._geocodedLat != null && listing._geocodedLng != null) {
+      return { lat: listing._geocodedLat, lng: listing._geocodedLng };
+    }
+    return null;
+  }, []);
+
+  // Filter to only listings with coordinates (stored or geocoded)
   const mappableListings = useMemo(
-    () => listings.filter(l => l.latitude != null && l.longitude != null),
-    [listings]
+    () => geocodedListings.filter(l => getCoords(l) !== null),
+    [geocodedListings, getCoords]
   );
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
-
-    // Fit bounds to show all markers
-    if (mappableListings.length > 0) {
-      const bounds = new google.maps.LatLngBounds();
-      mappableListings.forEach(l => {
-        bounds.extend({ lat: l.latitude!, lng: l.longitude! });
-      });
-      map.fitBounds(bounds, { top: 50, right: 50, bottom: 50, left: 50 });
-
-      // Don't zoom in too much for a single marker
-      const listener = google.maps.event.addListener(map, 'idle', () => {
-        if (map.getZoom()! > 15) map.setZoom(15);
-        google.maps.event.removeListener(listener);
-      });
-    }
-  }, [mappableListings]);
-
-  const handleMarkerClick = useCallback((listing: BusinessListing) => {
-    setSelectedListing(listing);
-    if (mapRef.current && listing.latitude && listing.longitude) {
-      mapRef.current.panTo({ lat: listing.latitude, lng: listing.longitude });
-    }
   }, []);
 
-  const getDirectionsUrl = useCallback((listing: BusinessListing) => {
-    const destination = listing.latitude && listing.longitude
-      ? `${listing.latitude},${listing.longitude}`
+  // Fit bounds when mappable listings change
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || mappableListings.length === 0) return;
+
+    const bounds = new google.maps.LatLngBounds();
+    mappableListings.forEach(l => {
+      const coords = getCoords(l);
+      if (coords) bounds.extend(coords);
+    });
+    map.fitBounds(bounds, { top: 50, right: 50, bottom: 50, left: 50 });
+
+    const listener = google.maps.event.addListener(map, 'idle', () => {
+      if (map.getZoom()! > 15) map.setZoom(15);
+      google.maps.event.removeListener(listener);
+    });
+  }, [mappableListings, getCoords]);
+
+  const handleMarkerClick = useCallback((listing: GeocodedListing) => {
+    setSelectedListing(listing);
+    const coords = getCoords(listing);
+    if (mapRef.current && coords) {
+      mapRef.current.panTo(coords);
+    }
+  }, [getCoords]);
+
+  const getDirectionsUrl = useCallback((listing: GeocodedListing) => {
+    const coords = getCoords(listing);
+    const destination = coords
+      ? `${coords.lat},${coords.lng}`
       : encodeURIComponent(`${listing.address || ''} ${listing.city}, ${listing.country}`);
     return `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
-  }, []);
+  }, [getCoords]);
 
   if (loadError) {
     return (
@@ -120,12 +196,14 @@ const BusinessDirectoryMap: React.FC<BusinessDirectoryMapProps> = ({ listings, o
     );
   }
 
-  if (!isLoaded) {
+  if (!isLoaded || isGeocoding) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-neutral-100 rounded-2xl">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-neutral-500 mt-3 text-sm">{t('map.loading', 'Loading map...')}</p>
+          <p className="text-neutral-500 mt-3 text-sm">
+            {!isLoaded ? t('map.loading', 'Loading map...') : t('map.geocoding', 'Locating businesses...')}
+          </p>
         </div>
       </div>
     );
@@ -143,6 +221,8 @@ const BusinessDirectoryMap: React.FC<BusinessDirectoryMapProps> = ({ listings, o
     );
   }
 
+  const selectedCoords = selectedListing ? getCoords(selectedListing as GeocodedListing) : null;
+
   return (
     <div className="w-full h-full relative rounded-2xl overflow-hidden shadow-lg border border-neutral-200">
       <GoogleMap
@@ -154,46 +234,50 @@ const BusinessDirectoryMap: React.FC<BusinessDirectoryMapProps> = ({ listings, o
         onClick={() => setSelectedListing(null)}
       >
         {/* Custom markers */}
-        {mappableListings.map(listing => (
-          <OverlayViewF
-            key={listing.id}
-            position={{ lat: listing.latitude!, lng: listing.longitude! }}
-            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-          >
-            <div
-              className="relative cursor-pointer group"
-              style={{ transform: 'translate(-50%, -100%)' }}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleMarkerClick(listing);
-              }}
+        {mappableListings.map(listing => {
+          const coords = getCoords(listing);
+          if (!coords) return null;
+          return (
+            <OverlayViewF
+              key={listing.id}
+              position={coords}
+              mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
             >
-              {/* Marker pin */}
-              <div className={`
-                relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-full shadow-lg border-2 border-white
-                transition-all duration-200 group-hover:scale-110 group-hover:shadow-xl
-                ${selectedListing?.id === listing.id
-                  ? 'bg-primary text-white scale-110'
-                  : 'bg-white text-neutral-800 hover:bg-primary hover:text-white'
-                }
-              `}>
-                <span className="text-sm">{CATEGORY_ICONS[listing.category] || CATEGORY_ICONS.other}</span>
-                <span className="text-xs font-bold max-w-[80px] truncate hidden sm:inline">{listing.name}</span>
-              </div>
-              {/* Pin tail */}
               <div
-                className={`w-3 h-3 rotate-45 mx-auto -mt-1.5 border-r-2 border-b-2 border-white
-                  ${selectedListing?.id === listing.id ? 'bg-primary' : 'bg-white group-hover:bg-primary'}
-                `}
-              />
-            </div>
-          </OverlayViewF>
-        ))}
+                className="relative cursor-pointer group"
+                style={{ transform: 'translate(-50%, -100%)' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleMarkerClick(listing);
+                }}
+              >
+                {/* Marker pin */}
+                <div className={`
+                  relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-full shadow-lg border-2 border-white
+                  transition-all duration-200 group-hover:scale-110 group-hover:shadow-xl
+                  ${selectedListing?.id === listing.id
+                    ? 'bg-primary text-white scale-110'
+                    : 'bg-white text-neutral-800 hover:bg-primary hover:text-white'
+                  }
+                `}>
+                  <MapPinIcon className="w-3.5 h-3.5" />
+                  <span className="text-xs font-bold max-w-[80px] truncate hidden sm:inline">{listing.name}</span>
+                </div>
+                {/* Pin tail */}
+                <div
+                  className={`w-3 h-3 rotate-45 mx-auto -mt-1.5 border-r-2 border-b-2 border-white
+                    ${selectedListing?.id === listing.id ? 'bg-primary' : 'bg-white group-hover:bg-primary'}
+                  `}
+                />
+              </div>
+            </OverlayViewF>
+          );
+        })}
 
         {/* Selected listing popup */}
-        {selectedListing && selectedListing.latitude && selectedListing.longitude && (
+        {selectedListing && selectedCoords && (
           <OverlayViewF
-            position={{ lat: selectedListing.latitude, lng: selectedListing.longitude }}
+            position={selectedCoords}
             mapPaneName={OverlayView.FLOAT_PANE}
           >
             <div style={{ transform: 'translate(-50%, calc(-100% - 55px))' }}>
@@ -282,7 +366,7 @@ const BusinessDirectoryMap: React.FC<BusinessDirectoryMapProps> = ({ listings, o
                       {t('map.viewDetails', 'View Details')}
                     </button>
                     <a
-                      href={getDirectionsUrl(selectedListing)}
+                      href={getDirectionsUrl(selectedListing as GeocodedListing)}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
