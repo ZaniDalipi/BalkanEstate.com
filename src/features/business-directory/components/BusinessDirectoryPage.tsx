@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
-import { useBusinessListings } from '../hooks';
+import { useBusinessListings, useMyBusinessListings } from '../hooks';
 import BusinessCard from './BusinessCard';
 import BusinessDetailPage from './BusinessDetailPage';
 import BusinessDirectoryMap from './BusinessDirectoryMap';
@@ -21,7 +21,7 @@ interface BusinessDirectoryPageProps {
 }
 
 type SubView = 'list' | 'detail' | 'create';
-type TabType = 'all' | 'businesses' | 'individuals';
+type TabType = 'all' | 'businesses' | 'individuals' | 'mine';
 type ViewMode = 'grid' | 'map';
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -160,7 +160,11 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
     limit: 20,
   }), [search, selectedCategory, listingTypeFilter, page]);
 
-  const { listings, total, totalPages, isLoading } = useBusinessListings(filters);
+  const { listings: allListings, total, totalPages, isLoading } = useBusinessListings(filters);
+  const { listings: myListings, isLoading: myListingsLoading } = useMyBusinessListings();
+
+  const listings = activeTab === 'mine' ? myListings : allListings;
+  const effectiveLoading = activeTab === 'mine' ? myListingsLoading : isLoading;
 
   const navigateToListing = useCallback((listing: BusinessListing) => {
     const identifier = listing.id;
@@ -215,12 +219,16 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
   }, []);
 
   const handleTabChange = useCallback((tab: TabType) => {
+    if (tab === 'mine' && !state.currentUser) {
+      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
+      return;
+    }
     setActiveTab(tab);
     setPage(1);
     dispatch({ type: 'SET_BUSINESS_DIRECTORY_TAB', payload: tab });
     const tabPath = tab === 'all' ? '/business-directory' : `/business-directory/${tab}`;
     window.history.pushState({}, '', buildLocalizedPath(tabPath));
-  }, [dispatch]);
+  }, [dispatch, state.currentUser]);
 
   const handleCardClick = useCallback((listing: BusinessListing) => {
     navigateToListing(listing);
@@ -298,6 +306,9 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
     { key: 'all', label: t('tabs.all'), icon: null },
     { key: 'businesses', label: t('tabs.businesses'), icon: <BuildingStorefrontIcon className="w-4 h-4" /> },
     { key: 'individuals', label: t('tabs.individuals'), icon: <UserIcon className="w-4 h-4" /> },
+    ...(state.currentUser
+      ? [{ key: 'mine' as TabType, label: t('tabs.mine', 'My Businesses'), icon: <UserGroupIcon className="w-4 h-4" /> }]
+      : []),
   ];
 
   return (
@@ -485,7 +496,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
       </div>
 
       {/* === ANIMATED STATS BAR === */}
-      {!isLoading && total > 0 && (
+      {!effectiveLoading && total > 0 && activeTab !== 'mine' && (
         <motion.div
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4 sm:-mt-6 mb-6 relative z-10"
           initial="hidden"
@@ -699,7 +710,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
 
         {/* Results info */}
         <AnimatePresence mode="wait">
-          {!isLoading && (
+          {!effectiveLoading && (
             <motion.p
               key={`results-${total}`}
               className="text-xs sm:text-sm text-neutral-500 mb-4"
@@ -708,14 +719,16 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
               exit={{ opacity: 0, x: 10 }}
               transition={{ duration: 0.3 }}
             >
-              {t('results.showing', { count: total })}
+              {activeTab === 'mine'
+                ? t('results.showing', { count: myListings.length })
+                : t('results.showing', { count: total })}
             </motion.p>
           )}
         </AnimatePresence>
 
         {/* Loading state - shimmer skeletons */}
         <AnimatePresence>
-          {isLoading && (
+          {effectiveLoading && (
             <motion.div
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
               initial={{ opacity: 0 }}
@@ -753,7 +766,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
 
         {/* Listings grid or map */}
         <AnimatePresence mode="wait">
-          {!isLoading && listings.length > 0 && viewMode === 'grid' && (
+          {!effectiveLoading && listings.length > 0 && viewMode === 'grid' && (
             <motion.div
               key={`listings-${selectedCategory}-${activeTab}-${page}`}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
@@ -775,7 +788,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
 
         {/* Map view */}
         <AnimatePresence mode="wait">
-          {!isLoading && listings.length > 0 && viewMode === 'map' && (
+          {!effectiveLoading && listings.length > 0 && viewMode === 'map' && (
             <motion.div
               key="map-view"
               className="h-[500px] sm:h-[600px] lg:h-[700px]"
@@ -794,7 +807,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
 
         {/* Empty state */}
         <AnimatePresence>
-          {!isLoading && listings.length === 0 && (
+          {!effectiveLoading && listings.length === 0 && (
             <motion.div
               className="text-center py-16 relative"
               initial={{ opacity: 0, scale: 0.9 }}
@@ -844,7 +857,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
         </AnimatePresence>
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {totalPages > 1 && activeTab !== 'mine' && (
           <motion.div
             className="flex justify-center items-center gap-2 sm:gap-3 mt-8 sm:mt-10"
             variants={fadeUpVariants}
