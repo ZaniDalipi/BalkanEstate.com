@@ -208,6 +208,9 @@
       "weekly": "Përmbledhje Javore",
       "never": "Asnjëherë"
     },
+    "pushEnabled": "Duke marrë njoftime push",
+    "pushDisabled": "Aktivizo për të marrë njoftime të menjëhershme",
+    "pushDenied": "Bllokuar në cilësimet e shfletuesit",
     "savePreferences": "Ruaj Preferencat",
     "preferencesSaved": "Preferencat e njoftimeve u ruajtën"
   },

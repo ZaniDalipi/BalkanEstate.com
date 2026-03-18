@@ -60,6 +60,14 @@
     "propertyViewed": "Your listing was viewed {{count}} times",
     "newInquiry": "New inquiry on your listing"
   },
+  "pushPrompt": {
+    "title": "Uključi obavještenja",
+    "description": "Primajte trenutna obavještenja o porukama, pregledima i oglasima za nekretnine.",
+    "enable": "Uključi",
+    "enabling": "Uključivanje...",
+    "later": "Kasnije",
+    "dismiss": "Odbaci"
+  },
   "toast": {
     "success": "Success!",
     "error": "Error",

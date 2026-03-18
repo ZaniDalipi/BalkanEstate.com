@@ -208,6 +208,9 @@
       "weekly": "Nedeljni Pregled",
       "never": "Nikada"
     },
+    "pushEnabled": "Примате пуш обавештења",
+    "pushDisabled": "Укључите за тренутна обавештења",
+    "pushDenied": "Блокирано у подешавањима прегледача",
     "savePreferences": "Sačuvaj Podešavanja",
     "preferencesSaved": "Podešavanja obaveštenja sačuvana"
   },

@@ -17,7 +17,7 @@ import { ENTERPRISE_TIER_LIMITS, FREE_TIER_LIMITS } from '../config/subscription
 import { revokeAgencyCouponSubscription } from '../services/subscriptionPaymentService';
 import { getSocketInstance } from '../utils/socketInstance';
 import { agencyLogger } from '../utils/logger';
-import Notification from '../models/Notification';
+import { createNotificationWithPush } from '../services/engagementService';
 import { syncAgentAttributesToAgency, recalculateAgencyAttributes } from '../services/agencyAttributeSyncService';
 
 // Helper function to generate unique Agent ID using secure random
@@ -1237,7 +1237,7 @@ export const removeAgentFromAgency = async (
 
     // Notify the removed agent
     if (agentUser) {
-      Notification.create({
+      createNotificationWithPush({
         userId: agentUser._id,
         type: 'agent_left_agency',
         title: 'Removed from Agency',
@@ -1718,7 +1718,7 @@ export const joinAgencyByInvitationCode = async (
     // Send in-app notifications (non-blocking)
     try {
       // Notify agency owner: new agent joined
-      await Notification.create({
+      await createNotificationWithPush({
         userId: agency.ownerId,
         type: 'agent_joined_agency',
         title: 'New Agent Joined',
@@ -1738,7 +1738,7 @@ export const joinAgencyByInvitationCode = async (
       });
 
       // Notify the joining agent: welcome to agency
-      await Notification.create({
+      await createNotificationWithPush({
         userId: user._id,
         type: 'agency_join_welcome',
         title: `Welcome to ${agency.name}!`,
@@ -2191,7 +2191,7 @@ export const leaveAgency = async (
     }
 
     // Notify agency owner that an agent left
-    Notification.create({
+    createNotificationWithPush({
       userId: agency.ownerId,
       type: 'agent_left_agency',
       title: 'Agent Left Agency',
@@ -2667,7 +2667,7 @@ export const redeemAgentCoupon = async (
     // Send email notifications (non-blocking)
     try {
       // Notify agency owner: agent redeemed coupon
-      await Notification.create({
+      await createNotificationWithPush({
         userId: agency.ownerId,
         type: 'agency_coupon_redeemed',
         title: 'Agent Coupon Redeemed',
@@ -2688,7 +2688,7 @@ export const redeemAgentCoupon = async (
       });
 
       // Notify the joining agent: welcome to agency
-      await Notification.create({
+      await createNotificationWithPush({
         userId: user._id,
         type: 'agency_join_welcome',
         title: `Welcome to ${agency.name}!`,

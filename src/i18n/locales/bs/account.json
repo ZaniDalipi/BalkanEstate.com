@@ -208,6 +208,9 @@
       "weekly": "Sedmični Pregled",
       "never": "Nikad"
     },
+    "pushEnabled": "Primate push obavještenja",
+    "pushDisabled": "Uključite za trenutna obavještenja",
+    "pushDenied": "Blokirano u postavkama preglednika",
     "savePreferences": "Sačuvaj Postavke",
     "preferencesSaved": "Postavke obavještenja sačuvane"
   },

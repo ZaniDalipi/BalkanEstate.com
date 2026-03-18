@@ -60,6 +60,14 @@
     "propertyViewed": "Vaš oglas je pregledan {{count}} puta",
     "newInquiry": "Novi upit za vaš oglas"
   },
+  "pushPrompt": {
+    "title": "Uključi obavijesti",
+    "description": "Primajte trenutne obavijesti o porukama, pregledima i oglasima za nekretnine.",
+    "enable": "Uključi",
+    "enabling": "Uključivanje...",
+    "later": "Kasnije",
+    "dismiss": "Odbaci"
+  },
   "toast": {
     "success": "Uspješno!",
     "error": "Greška",
