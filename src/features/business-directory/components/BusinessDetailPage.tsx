@@ -1,8 +1,11 @@
-import React, { useState, useCallback, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+import { User } from 'lucide-react';
 import { useBusinessListing } from '../hooks';
 import { useAppContext } from '@/context/AppContext';
+import NotificationCenter from '@/shared/components/NotificationCenter';
+import DefaultAvatar from '@/components/shared/DefaultAvatar';
 
 const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
 const EditBusinessListingForm = lazy(() => import('./EditBusinessListingForm'));
@@ -180,13 +183,14 @@ const staggerContainerVariants = {
 };
 
 const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBack }) => {
-  const { t } = useTranslation('businessDirectory');
+  const { t } = useTranslation(['businessDirectory', 'nav']);
   const { listing, isLoading, error } = useBusinessListing(listingId);
-  const { state } = useAppContext();
+  const { state, dispatch } = useAppContext();
   const [showShareToast, setShowShareToast] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   const currentUser = state.currentUser;
+  const isAuthenticated = state.isAuthenticated;
   const isOwner = !!(currentUser?.id && listing?.owner?.id && currentUser.id === listing.owner.id);
 
   // Scroll to top when detail page mounts or listing changes
@@ -209,21 +213,86 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
     }
   }, [listing?.name]);
 
+  // Global nav handlers (matching AgentProfileHeader pattern)
+  const handleAccountClick = useCallback(() => {
+    if (isAuthenticated) {
+      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+      dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+      window.history.pushState({}, '', '/account');
+    } else {
+      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
+    }
+  }, [isAuthenticated, dispatch]);
+
+  const handleNewListingClick = useCallback(() => {
+    if (isAuthenticated) {
+      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+      dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
+      window.history.pushState({}, '', '/create-listing');
+    } else {
+      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
+    }
+  }, [isAuthenticated, dispatch]);
+
+  const handleSubscribeClick = useCallback(() => {
+    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+    const currentLang = window.location.pathname.split('/')[1] || 'en';
+    const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+    const lang = validLangs.includes(currentLang) ? currentLang : 'en';
+    window.history.pushState({}, '', `/${lang}/subscribe`);
+  }, [dispatch]);
+
+  const accountButton = useMemo(() => {
+    if (isAuthenticated && currentUser) {
+      return (
+        <button
+          onClick={handleAccountClick}
+          className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-white/80 hover:text-white bg-white/[0.06] hover:bg-white/[0.12] rounded-xl transition-all border border-white/[0.08]"
+          aria-label={t('nav:myAccount')}
+        >
+          <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
+            {currentUser.avatarUrl ? (
+              <img src={currentUser.avatarUrl} alt="" className="w-full h-full object-cover" aria-hidden="true" />
+            ) : (
+              <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
+            )}
+          </div>
+          <span className="hidden lg:inline text-xs font-medium">{t('nav:myAccount')}</span>
+        </button>
+      );
+    }
+    return (
+      <button
+        onClick={handleAccountClick}
+        className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-white/80 hover:text-white bg-white/[0.06] hover:bg-white/[0.12] rounded-xl transition-all border border-white/[0.08]"
+        aria-label={t('nav:loginRegister')}
+      >
+        <User className="w-4 h-4" aria-hidden="true" />
+        <span className="hidden lg:inline text-xs font-medium">{t('nav:loginRegister')}</span>
+      </button>
+    );
+  }, [isAuthenticated, currentUser, handleAccountClick, t]);
+
   // --- Loading skeleton ---
   if (isLoading) {
     return (
       <div className="min-h-screen bg-neutral-50">
         {/* Sticky header skeleton */}
-        <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-neutral-200/60 h-14" />
+        <div className="sticky top-0 z-40 bg-gradient-to-r from-gray-800 to-gray-900 h-14" />
 
         {/* Banner skeleton */}
-        <div className="w-full h-40 sm:h-52 lg:h-64 bg-neutral-200 relative overflow-hidden">
+        <div className="w-full h-36 sm:h-44 lg:h-56 bg-neutral-200 relative overflow-hidden">
           <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white to-transparent" />
         </div>
 
         {/* Hero skeleton */}
         <div className="bg-white border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 -mt-16 sm:-mt-20 relative z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8 -mt-14 sm:-mt-18 lg:-mt-20 relative z-10">
             <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6">
               <div className="w-28 h-28 sm:w-36 sm:h-36 lg:w-44 lg:h-44 rounded-2xl bg-neutral-200 relative overflow-hidden flex-shrink-0 border-4 border-white shadow-xl">
                 <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
@@ -343,72 +412,82 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      {/* === FLOATING STICKY NAVIGATION HEADER (Agent-style) === */}
-      <motion.div
-        className="sticky top-0 z-40"
-        initial={{ y: -60 }}
-        animate={{ y: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      >
-        <div className="relative bg-white/80 backdrop-blur-xl border-b border-neutral-200/60 shadow-sm shadow-neutral-200/40">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
-            {/* Back button */}
-            <motion.button
-              type="button"
-              onClick={onBack}
-              className="flex items-center gap-1.5 text-neutral-600 hover:text-neutral-900 font-medium transition-all group bg-neutral-100 hover:bg-neutral-200/80 px-3 py-1.5 sm:py-2 rounded-xl border border-neutral-200/80"
-              whileHover={{ x: -2 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <ArrowLeftIcon className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-              <span className="hidden sm:inline text-sm">{t('detail.backToDirectory')}</span>
-            </motion.button>
-
-            {/* Center - Business type badge */}
-            <div className="hidden sm:flex items-center gap-2.5">
-              <div className="bg-neutral-50 backdrop-blur-sm px-4 py-1.5 rounded-full border border-neutral-200">
-                <span className="text-neutral-700 font-semibold text-sm flex items-center gap-1.5">
-                  {isIndividual ? <UserIcon className="w-3.5 h-3.5" /> : <BuildingStorefrontIcon className="w-3.5 h-3.5" />}
-                  {isIndividual ? t('types.individual') : t('types.business')}
-                </span>
-              </div>
-            </div>
-
-            {/* Right actions */}
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              {isOwner && (
-                <motion.button
-                  type="button"
-                  onClick={() => setIsEditing(true)}
-                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-neutral-600 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200/80 rounded-xl transition-all border border-neutral-200/80"
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.95 }}
-                  title={t('edit.button', { defaultValue: 'Edit Listing' })}
-                >
-                  <PencilIcon className="w-4 h-4" />
-                  <span className="hidden md:inline text-xs font-medium">{t('edit.button', { defaultValue: 'Edit' })}</span>
-                </motion.button>
-              )}
-              <motion.button
+      {/* === STICKY NAVIGATION HEADER (dark gradient, matches AgentProfileHeader) === */}
+      <div className="sticky top-0 z-40">
+        <div className="relative bg-gradient-to-r from-gray-800 to-gray-900">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-0 sm:h-14">
+            <div className="flex items-center justify-between sm:h-full gap-2">
+              {/* Back button */}
+              <button
                 type="button"
-                onClick={handleShare}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-neutral-600 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200/80 rounded-xl transition-all border border-neutral-200/80"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.95 }}
-                title={t('detail.share')}
+                onClick={onBack}
+                className="flex items-center gap-1.5 sm:gap-2 text-white/90 hover:text-white font-medium transition-colors group flex-shrink-0"
               >
-                <ShareIcon className="w-4 h-4" />
-                <span className="hidden md:inline text-xs font-medium">{t('detail.share')}</span>
-              </motion.button>
+                <ArrowLeftIcon className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" />
+                <span className="text-sm sm:text-base">{t('detail.backToDirectory')}</span>
+              </button>
+
+              {/* Center - Business type badge (desktop) */}
+              <div className="hidden sm:flex items-center gap-3">
+                <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                  <span className="text-white font-semibold text-sm flex items-center gap-1.5">
+                    {isIndividual ? <UserIcon className="w-3.5 h-3.5" /> : <BuildingStorefrontIcon className="w-3.5 h-3.5" />}
+                    {isIndividual ? t('types.individual') : t('types.business')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Right actions */}
+              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                {isOwner && (
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(true)}
+                    className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-white/80 hover:text-white bg-white/[0.06] hover:bg-white/[0.12] rounded-xl transition-all border border-white/[0.08]"
+                    title={t('edit.button', { defaultValue: 'Edit Listing' })}
+                  >
+                    <PencilIcon className="w-4 h-4" />
+                    <span className="hidden md:inline text-xs font-medium">{t('edit.button', { defaultValue: 'Edit' })}</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-white/80 hover:text-white bg-white/[0.06] hover:bg-white/[0.12] rounded-xl transition-all border border-white/[0.08]"
+                  title={t('detail.share')}
+                >
+                  <ShareIcon className="w-4 h-4" />
+                  <span className="hidden md:inline text-xs font-medium">{t('detail.share')}</span>
+                </button>
+
+                {/* Divider */}
+                <div className="hidden sm:block w-px h-6 bg-white/20 mx-0.5" />
+
+                {/* Global Nav Actions */}
+                <button
+                  onClick={handleSubscribeClick}
+                  className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/80 hover:bg-primary text-white rounded-xl transition-all text-xs font-semibold border border-white/[0.08]"
+                >
+                  {t('nav:subscribe')}
+                </button>
+                <button
+                  onClick={handleNewListingClick}
+                  className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 bg-secondary/80 hover:bg-secondary text-white rounded-xl transition-all text-xs font-semibold border border-white/[0.08]"
+                >
+                  + {t('nav:newListing')}
+                </button>
+                <NotificationCenter />
+                {accountButton}
+              </div>
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
 
-      {/* === HERO SECTION - Agent profile style === */}
+      {/* === HERO SECTION === */}
       <div className="bg-white border-b border-gray-200">
         {/* Banner area - always shown */}
-        <div className="relative w-full h-40 sm:h-52 lg:h-64 overflow-hidden">
+        <div className="relative w-full h-36 sm:h-44 lg:h-56 overflow-hidden">
           {listing.bannerUrl ? (
             <img
               src={listing.bannerUrl}
@@ -418,8 +497,8 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
           ) : (
             <div className={`w-full h-full bg-gradient-to-br ${gradient}`} />
           )}
-          {/* Overlay for readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
+          {/* Bottom fade into white */}
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white to-transparent" />
           {/* Decorative pattern */}
           <div className="absolute inset-0 opacity-[0.07]">
             <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -432,17 +511,19 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
             </svg>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 -mt-16 sm:-mt-20 relative z-10">
+
+        {/* Profile info - logo overlaps banner, text on white */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8 -mt-14 sm:-mt-18 lg:-mt-20 relative z-10">
           <motion.div
             className="flex flex-col lg:flex-row items-center lg:items-start gap-4 sm:gap-6 lg:gap-8"
             initial="hidden"
             animate="visible"
             variants={staggerContainerVariants}
           >
-            {/* Logo / Avatar - Large, like agent photo */}
+            {/* Logo / Avatar - overlaps banner */}
             <motion.div className="relative flex-shrink-0" variants={fadeUpVariants}>
               <div className={`w-28 h-28 sm:w-36 sm:h-36 lg:w-44 lg:h-44 rounded-xl sm:rounded-2xl overflow-hidden shadow-xl border-4 border-white bg-gradient-to-br ${gradient}`}
-                style={{ boxShadow: '0 10px 25px rgba(0,0,0,0.12), inset 2px 2px 2px 0 rgba(255,255,255,0.5)' }}
+                style={{ boxShadow: '0 10px 25px rgba(0,0,0,0.12)' }}
               >
                 {listing.logoUrl ? (
                   <img src={listing.logoUrl} alt={listing.name} className="w-full h-full object-cover" />
@@ -468,8 +549,8 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
               )}
             </motion.div>
 
-            {/* Info section */}
-            <motion.div className="flex-1 text-center lg:text-left min-w-0" variants={fadeUpVariants}>
+            {/* Info section - always on white background */}
+            <motion.div className="flex-1 text-center lg:text-left min-w-0 pt-2 sm:pt-6 lg:pt-8" variants={fadeUpVariants}>
               {/* Name + badges row */}
               <div className="flex flex-col lg:flex-row items-center lg:items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
                 <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-neutral-900 leading-tight">{listing.name}</h1>
