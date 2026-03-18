@@ -1,8 +1,8 @@
-import React, { useState, useCallback, useEffect, useMemo, lazy, Suspense } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User } from 'lucide-react';
-import { useBusinessListing } from '../hooks';
+import { useBusinessListing, useUploadBusinessBanner } from '../hooks';
 import { useAppContext } from '@/context/AppContext';
 import NotificationCenter from '@/shared/components/NotificationCenter';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
@@ -277,6 +277,40 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
     );
   }, [isAuthenticated, currentUser, handleAccountClick, t]);
 
+  // Banner upload (owner only)
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+  const { uploadBanner, isLoading: isBannerUploading } = useUploadBusinessBanner();
+  const [bannerError, setBannerError] = useState<string | null>(null);
+
+  const handleBannerUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !listing) return;
+
+    // Reset input so same file can be re-selected
+    e.target.value = '';
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      setBannerError(t('form.bannerInvalidType', 'Please upload a JPEG, PNG, or WebP image'));
+      return;
+    }
+
+    // Validate file size (5MB max)
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      setBannerError(t('form.bannerTooLarge', 'Image must be under 5MB'));
+      return;
+    }
+
+    setBannerError(null);
+    try {
+      await uploadBanner({ id: listing.id, file });
+    } catch {
+      setBannerError(t('form.bannerUploadError', 'Failed to upload banner. Please try again.'));
+    }
+  }, [listing, uploadBanner, t]);
+
   // --- Loading skeleton ---
   if (isLoading) {
     return (
@@ -487,7 +521,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
       {/* === HERO SECTION === */}
       <div className="bg-white border-b border-gray-200">
         {/* Banner area - always shown */}
-        <div className="relative w-full h-36 sm:h-44 lg:h-56 overflow-hidden">
+        <div className="relative w-full h-36 sm:h-44 lg:h-56 overflow-hidden group">
           {listing.bannerUrl ? (
             <img
               src={listing.bannerUrl}
@@ -510,6 +544,44 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
               <rect width="100%" height="100%" fill="url(#banner-dots)" />
             </svg>
           </div>
+
+          {/* Owner: banner upload button */}
+          {isOwner && (
+            <>
+              <input
+                ref={bannerInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleBannerUpload}
+                className="hidden"
+                aria-label={t('form.bannerUpload', 'Upload Banner')}
+              />
+              <button
+                type="button"
+                onClick={() => bannerInputRef.current?.click()}
+                disabled={isBannerUploading}
+                className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2 px-3 py-2 bg-black/50 hover:bg-black/70 text-white text-xs sm:text-sm font-medium rounded-xl backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 border border-white/20 disabled:opacity-50"
+              >
+                {isBannerUploading ? (
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+                  </svg>
+                )}
+                {listing.bannerUrl ? t('form.bannerChange', 'Change Banner') : t('form.bannerUpload', 'Upload Banner')}
+              </button>
+              {bannerError && (
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-red-500/90 text-white text-xs font-medium px-4 py-2 rounded-lg backdrop-blur-sm">
+                  {bannerError}
+                </div>
+              )}
+            </>
+          )}
         </div>
 
         {/* Profile info - logo overlaps banner, text on white */}
