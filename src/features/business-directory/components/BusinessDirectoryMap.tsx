@@ -57,10 +57,21 @@ const BusinessDirectoryMap: React.FC<BusinessDirectoryMapProps> = ({ listings, o
   const [geocodedListings, setGeocodedListings] = useState<GeocodedListing[]>([]);
   const [isGeocoding, setIsGeocoding] = useState(false);
   const geocoderRef = useRef<google.maps.Geocoder | null>(null);
+  const lastGeocodedKeyRef = useRef<string>('');
 
-  // Geocode listings that don't have coordinates
+  // Create a stable key from listing IDs to avoid re-geocoding on every render
+  const listingsKey = useMemo(
+    () => listings.map(l => l.id).sort().join(','),
+    [listings]
+  );
+
+  // Geocode listings that don't have coordinates - only runs when listing IDs actually change
   useEffect(() => {
     if (!isLoaded || listings.length === 0) return;
+
+    // Skip if we already geocoded this exact set of listings
+    if (lastGeocodedKeyRef.current === listingsKey) return;
+    lastGeocodedKeyRef.current = listingsKey;
 
     if (!geocoderRef.current) {
       geocoderRef.current = new google.maps.Geocoder();
@@ -128,7 +139,7 @@ const BusinessDirectoryMap: React.FC<BusinessDirectoryMapProps> = ({ listings, o
     geocodeAll();
 
     return () => { cancelled = true; };
-  }, [isLoaded, listings]);
+  }, [isLoaded, listingsKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Get effective lat/lng for a listing (prefer stored, fallback to geocoded)
   const getCoords = useCallback((listing: GeocodedListing): { lat: number; lng: number } | null => {
@@ -233,10 +244,11 @@ const BusinessDirectoryMap: React.FC<BusinessDirectoryMapProps> = ({ listings, o
         options={mapOptions}
         onClick={() => setSelectedListing(null)}
       >
-        {/* Custom markers */}
+        {/* Circular photo markers */}
         {mappableListings.map(listing => {
           const coords = getCoords(listing);
           if (!coords) return null;
+          const isSelected = selectedListing?.id === listing.id;
           return (
             <OverlayViewF
               key={listing.id}
@@ -244,31 +256,55 @@ const BusinessDirectoryMap: React.FC<BusinessDirectoryMapProps> = ({ listings, o
               mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
             >
               <div
-                className="relative cursor-pointer group"
+                className="relative cursor-pointer group flex flex-col items-center"
                 style={{ transform: 'translate(-50%, -100%)' }}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleMarkerClick(listing);
                 }}
               >
-                {/* Marker pin */}
+                {/* Hover/selected tooltip card */}
                 <div className={`
-                  relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-full shadow-lg border-2 border-white
-                  transition-all duration-200 group-hover:scale-110 group-hover:shadow-xl
-                  ${selectedListing?.id === listing.id
-                    ? 'bg-primary text-white scale-110'
-                    : 'bg-white text-neutral-800 hover:bg-primary hover:text-white'
+                  mb-2 px-3 py-2 rounded-xl shadow-xl text-center whitespace-nowrap
+                  transition-all duration-200 pointer-events-none
+                  ${isSelected
+                    ? 'opacity-100 scale-100 bg-neutral-900 text-white'
+                    : 'opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 bg-neutral-900 text-white'
                   }
                 `}>
-                  <MapPinIcon className="w-3.5 h-3.5" />
-                  <span className="text-xs font-bold max-w-[80px] truncate hidden sm:inline">{listing.name}</span>
+                  <p className="text-sm font-bold leading-tight">{listing.name}</p>
+                  <p className="text-xs text-neutral-400 mt-0.5">{t(`categories.${listing.category}`)}</p>
+                  {/* Tooltip arrow */}
+                  <div className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 rotate-45 bg-neutral-900" />
                 </div>
-                {/* Pin tail */}
-                <div
-                  className={`w-3 h-3 rotate-45 mx-auto -mt-1.5 border-r-2 border-b-2 border-white
-                    ${selectedListing?.id === listing.id ? 'bg-primary' : 'bg-white group-hover:bg-primary'}
-                  `}
-                />
+
+                {/* Circular avatar */}
+                <div className={`
+                  relative w-14 h-14 rounded-full border-[3px] shadow-lg
+                  transition-all duration-200 group-hover:scale-110 group-hover:shadow-xl
+                  ${isSelected
+                    ? 'border-primary scale-110 shadow-xl shadow-primary/30'
+                    : 'border-white'
+                  }
+                `}>
+                  <div className="w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-primary to-blue-600">
+                    {listing.logoUrl ? (
+                      <img
+                        src={listing.logoUrl}
+                        alt={listing.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="text-white font-bold text-lg">{listing.name.charAt(0)}</span>
+                      </div>
+                    )}
+                  </div>
+                  {/* Online/verified indicator dot */}
+                  {listing.isVerified && (
+                    <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white" />
+                  )}
+                </div>
               </div>
             </OverlayViewF>
           );
