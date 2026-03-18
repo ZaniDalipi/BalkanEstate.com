@@ -554,13 +554,13 @@ class EmailService {
       <div style="margin-top: 24px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 16px;" class="ec-highlight ec-text">
         <div style="display: flex; align-items: center; margin-bottom: 8px;">
           <span style="font-size: 18px; margin-right: 8px;">🏆</span>
-          <span style="font-weight: 600; color: #92400e;">Top Performing Property</span>
+          <span style="font-weight: 600; color: #92400e;" class="ec-text">Top Performing Property</span>
         </div>
-        <div style="color: #374151; font-weight: 600; font-size: 14px;">${escapeHtml(data.topPerformingProperty.title)}</div>
+        <div style="color: #374151; font-weight: 600; font-size: 14px;" class="ec-text">${escapeHtml(data.topPerformingProperty.title)}</div>
         <div style="color: #6b7280; font-size: 12px; margin-top: 2px;" class="ec-text-muted">${escapeHtml(data.topPerformingProperty.address)}</div>
         <div style="display: flex; gap: 16px; margin-top: 8px;">
-          <span style="font-size: 12px; color: #6b7280;">👁 ${data.topPerformingProperty.views} views</span>
-          <span style="font-size: 12px; color: #6b7280;">💬 ${data.topPerformingProperty.inquiries} inquiries</span>
+          <span style="font-size: 12px; color: #6b7280;" class="ec-text-muted">👁 ${data.topPerformingProperty.views} views</span>
+          <span style="font-size: 12px; color: #6b7280;" class="ec-text-muted">💬 ${data.topPerformingProperty.inquiries} inquiries</span>
         </div>
       </div>` : '';
 
@@ -691,31 +691,31 @@ class EmailService {
       <div style="margin-top: 24px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 16px;" class="ec-highlight ec-text">
         <div style="display: flex; align-items: center; margin-bottom: 8px;">
           <span style="font-size: 18px; margin-right: 8px;">🏆</span>
-          <span style="font-weight: 600; color: #92400e;">Top Performing Property</span>
+          <span style="font-weight: 600; color: #92400e;" class="ec-text">Top Performing Property</span>
         </div>
-        <div style="color: #374151; font-weight: 600; font-size: 14px;">${safeTopPropertyTitle}</div>
+        <div style="color: #374151; font-weight: 600; font-size: 14px;" class="ec-text">${safeTopPropertyTitle}</div>
         <div style="color: #6b7280; font-size: 12px; margin-top: 2px;" class="ec-text-muted">${safeTopPropertyAddress}</div>
         <div style="display: flex; gap: 16px; margin-top: 8px;">
-          <span style="font-size: 12px; color: #6b7280;">👁 ${data.topPerformingProperty.views} views</span>
-          <span style="font-size: 12px; color: #6b7280;">💬 ${data.topPerformingProperty.inquiries} inquiries</span>
+          <span style="font-size: 12px; color: #6b7280;" class="ec-text-muted">👁 ${data.topPerformingProperty.views} views</span>
+          <span style="font-size: 12px; color: #6b7280;" class="ec-text-muted">💬 ${data.topPerformingProperty.inquiries} inquiries</span>
         </div>
       </div>
       ` : ''}
 
       ${data.propertiesSold > 0 ? `
       <!-- Sales Summary -->
-      <div style="margin-top: 24px; background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border-radius: 12px; padding: 16px;">
+      <div style="margin-top: 24px; background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border-radius: 12px; padding: 16px;" class="ec-highlight ec-text">
         <div style="display: flex; align-items: center; margin-bottom: 8px;">
           <span style="font-size: 18px; margin-right: 8px;">🎉</span>
-          <span style="font-weight: 600; color: #166534;">Sales This Week</span>
+          <span style="font-weight: 600; color: #166534;" class="ec-text">Sales This Week</span>
         </div>
         <div style="display: flex; justify-content: space-between;">
           <div>
-            <div style="font-size: 24px; font-weight: 700; color: #166534;">${data.propertiesSold}</div>
+            <div style="font-size: 24px; font-weight: 700; color: #166534;" class="ec-text">${data.propertiesSold}</div>
             <div style="font-size: 12px; color: #6b7280;" class="ec-text-muted">Properties Sold</div>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 24px; font-weight: 700; color: #166534;">${this.formatCurrency(data.totalSalesValue)}</div>
+            <div style="font-size: 24px; font-weight: 700; color: #166534;" class="ec-text">${this.formatCurrency(data.totalSalesValue)}</div>
             <div style="font-size: 12px; color: #6b7280;" class="ec-text-muted">Total Value</div>
           </div>
         </div>
@@ -731,9 +731,9 @@ class EmailService {
       </div>
 
       <!-- Tips Section -->
-      <div style="margin-top: 32px; padding: 16px; background: #f9fafb; border-radius: 8px;">
-        <div style="font-weight: 600; color: #374151; margin-bottom: 8px;">💡 Pro Tips</div>
-        <ul style="color: #6b7280; font-size: 13px; margin: 0; padding-left: 20px;">
+      <div style="margin-top: 32px; padding: 16px; background: #f9fafb; border-radius: 8px;" class="ec-highlight ec-text">
+        <div style="font-weight: 600; color: #374151; margin-bottom: 8px;" class="ec-text">💡 Pro Tips</div>
+        <ul style="color: #6b7280; font-size: 13px; margin: 0; padding-left: 20px;" class="ec-text-muted">
           <li style="margin-bottom: 4px;">Respond to inquiries within 1 hour to increase conversion by 50%</li>
           <li style="margin-bottom: 4px;">Properties with 10+ photos get 3x more views</li>
           <li>Consider promoting your top property for more visibility</li>
@@ -772,17 +772,17 @@ class EmailService {
     const agencyConfig = await getActiveEmailConfig('agency-weekly-stats');
     if (agencyConfig) {
       const statsSection = `
-      <div style="background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-        <div style="font-weight: 600; color: #5b21b6; margin-bottom: 12px;">📍 Agency Profile Performance</div>
+      <div style="background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border-radius: 12px; padding: 16px; margin-bottom: 16px;" class="ec-highlight ec-text">
+        <div style="font-weight: 600; color: #5b21b6; margin-bottom: 12px;" class="ec-text">📍 Agency Profile Performance</div>
         <div style="display: table; width: 100%;">
           <div style="display: table-row;">
             <div style="display: table-cell; width: 50%; text-align: center; padding: 8px;">
-              <div style="font-size: 28px; font-weight: 700; color: #7c3aed;">${data.profileViews.toLocaleString()}</div>
+              <div style="font-size: 28px; font-weight: 700; color: #7c3aed;" class="ec-text">${data.profileViews.toLocaleString()}</div>
               <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Profile Views</div>
               <div style="font-size: 11px;">${this.formatChange(data.profileViewsChange)}</div>
             </div>
             <div style="display: table-cell; width: 50%; text-align: center; padding: 8px;">
-              <div style="font-size: 28px; font-weight: 700; color: #7c3aed;">${data.uniqueProfileViews.toLocaleString()}</div>
+              <div style="font-size: 28px; font-weight: 700; color: #7c3aed;" class="ec-text">${data.uniqueProfileViews.toLocaleString()}</div>
               <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Unique Visitors</div>
             </div>
           </div>
@@ -790,15 +790,15 @@ class EmailService {
       </div>
       <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 8px;">
         <div style="display: table-row;">
-          <div style="display: table-cell; width: 33%; background: #f0f9ff; border-radius: 12px; padding: 12px; text-align: center;" class="ec-highlight ec-text">
+          <div style="display: table-cell; width: 33%; background: #f0f9ff; border-radius: 12px; padding: 12px; text-align: center;" class="ec-stat-card ec-text">
             <div style="font-size: 24px; font-weight: 700; color: #0369a1;">${data.totalAgents}</div>
             <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Agents</div>
           </div>
-          <div style="display: table-cell; width: 33%; background: #f0fdf4; border-radius: 12px; padding: 12px; text-align: center;" class="ec-highlight ec-text">
+          <div style="display: table-cell; width: 33%; background: #f0fdf4; border-radius: 12px; padding: 12px; text-align: center;" class="ec-stat-card ec-text">
             <div style="font-size: 24px; font-weight: 700; color: #16a34a;">${data.activeListings}</div>
             <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Active Listings</div>
           </div>
-          <div style="display: table-cell; width: 33%; background: #fef3c7; border-radius: 12px; padding: 12px; text-align: center;">
+          <div style="display: table-cell; width: 33%; background: #fef3c7; border-radius: 12px; padding: 12px; text-align: center;" class="ec-stat-card ec-text">
             <div style="font-size: 24px; font-weight: 700; color: #d97706;">${data.totalInquiries}</div>
             <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Inquiries</div>
             <div style="font-size: 10px;">${this.formatChange(data.inquiriesChange)}</div>
@@ -809,21 +809,21 @@ class EmailService {
       <div style="margin-top: 16px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 16px;" class="ec-highlight ec-text">
         <div style="display: flex; align-items: center; margin-bottom: 8px;">
           <span style="font-size: 18px; margin-right: 8px;">⭐</span>
-          <span style="font-weight: 600; color: #92400e;">Top Performing Agent</span>
+          <span style="font-weight: 600; color: #92400e;" class="ec-text">Top Performing Agent</span>
         </div>
-        <div style="color: #374151; font-weight: 600; font-size: 14px;">${escapeHtml(data.topAgent.name)}</div>
+        <div style="color: #374151; font-weight: 600; font-size: 14px;" class="ec-text">${escapeHtml(data.topAgent.name)}</div>
         <div style="display: flex; gap: 16px; margin-top: 8px;">
-          <span style="font-size: 12px; color: #6b7280;">👁 ${data.topAgent.views} views</span>
-          <span style="font-size: 12px; color: #6b7280;">💬 ${data.topAgent.inquiries} inquiries</span>
+          <span style="font-size: 12px; color: #6b7280;" class="ec-text-muted">👁 ${data.topAgent.views} views</span>
+          <span style="font-size: 12px; color: #6b7280;" class="ec-text-muted">💬 ${data.topAgent.inquiries} inquiries</span>
         </div>
       </div>` : '';
       const topPropertySection = data.topProperty ? `
-      <div style="margin-top: 16px; background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border-radius: 12px; padding: 16px;">
+      <div style="margin-top: 16px; background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border-radius: 12px; padding: 16px;" class="ec-highlight ec-text">
         <div style="display: flex; align-items: center; margin-bottom: 8px;">
           <span style="font-size: 18px; margin-right: 8px;">🏠</span>
-          <span style="font-weight: 600; color: #166534;">Top Property</span>
+          <span style="font-weight: 600; color: #166534;" class="ec-text">Top Property</span>
         </div>
-        <div style="color: #374151; font-weight: 600; font-size: 14px;">${escapeHtml(data.topProperty.title)}</div>
+        <div style="color: #374151; font-weight: 600; font-size: 14px;" class="ec-text">${escapeHtml(data.topProperty.title)}</div>
         <div style="font-size: 12px; color: #6b7280; margin-top: 4px;" class="ec-text-muted">👁 ${data.topProperty.views} views this week</div>
       </div>` : '';
       const variables: Record<string, string> = {
@@ -914,17 +914,17 @@ class EmailService {
       </p>
 
       <!-- Agency Profile Stats -->
-      <div style="background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-        <div style="font-weight: 600; color: #5b21b6; margin-bottom: 12px;">📍 Agency Profile Performance</div>
+      <div style="background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border-radius: 12px; padding: 16px; margin-bottom: 16px;" class="ec-highlight ec-text">
+        <div style="font-weight: 600; color: #5b21b6; margin-bottom: 12px;" class="ec-text">📍 Agency Profile Performance</div>
         <div style="display: table; width: 100%;">
           <div style="display: table-row;">
             <div style="display: table-cell; width: 50%; text-align: center; padding: 8px;">
-              <div style="font-size: 28px; font-weight: 700; color: #7c3aed;">${data.profileViews.toLocaleString()}</div>
+              <div style="font-size: 28px; font-weight: 700; color: #7c3aed;" class="ec-text">${data.profileViews.toLocaleString()}</div>
               <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Profile Views</div>
               <div style="font-size: 11px;">${this.formatChange(data.profileViewsChange)}</div>
             </div>
             <div style="display: table-cell; width: 50%; text-align: center; padding: 8px;">
-              <div style="font-size: 28px; font-weight: 700; color: #7c3aed;">${data.uniqueProfileViews.toLocaleString()}</div>
+              <div style="font-size: 28px; font-weight: 700; color: #7c3aed;" class="ec-text">${data.uniqueProfileViews.toLocaleString()}</div>
               <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Unique Visitors</div>
             </div>
           </div>
@@ -935,17 +935,17 @@ class EmailService {
       <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 8px;">
         <div style="display: table-row;">
           <!-- Agents -->
-          <div style="display: table-cell; width: 33%; background: #f0f9ff; border-radius: 12px; padding: 12px; text-align: center;" class="ec-highlight ec-text">
+          <div style="display: table-cell; width: 33%; background: #f0f9ff; border-radius: 12px; padding: 12px; text-align: center;" class="ec-stat-card ec-text">
             <div style="font-size: 24px; font-weight: 700; color: #0369a1;">${data.totalAgents}</div>
             <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Agents</div>
           </div>
           <!-- Listings -->
-          <div style="display: table-cell; width: 33%; background: #f0fdf4; border-radius: 12px; padding: 12px; text-align: center;" class="ec-highlight ec-text">
+          <div style="display: table-cell; width: 33%; background: #f0fdf4; border-radius: 12px; padding: 12px; text-align: center;" class="ec-stat-card ec-text">
             <div style="font-size: 24px; font-weight: 700; color: #16a34a;">${data.activeListings}</div>
             <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Active Listings</div>
           </div>
           <!-- Inquiries -->
-          <div style="display: table-cell; width: 33%; background: #fef3c7; border-radius: 12px; padding: 12px; text-align: center;">
+          <div style="display: table-cell; width: 33%; background: #fef3c7; border-radius: 12px; padding: 12px; text-align: center;" class="ec-stat-card ec-text">
             <div style="font-size: 24px; font-weight: 700; color: #d97706;">${data.totalInquiries}</div>
             <div style="font-size: 11px; color: #6b7280;" class="ec-text-muted">Inquiries</div>
             <div style="font-size: 10px;">${this.formatChange(data.inquiriesChange)}</div>
@@ -958,24 +958,24 @@ class EmailService {
       <div style="margin-top: 16px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 16px;" class="ec-highlight ec-text">
         <div style="display: flex; align-items: center; margin-bottom: 8px;">
           <span style="font-size: 18px; margin-right: 8px;">⭐</span>
-          <span style="font-weight: 600; color: #92400e;">Top Performing Agent</span>
+          <span style="font-weight: 600; color: #92400e;" class="ec-text">Top Performing Agent</span>
         </div>
-        <div style="color: #374151; font-weight: 600; font-size: 14px;">${safeTopAgentName}</div>
+        <div style="color: #374151; font-weight: 600; font-size: 14px;" class="ec-text">${safeTopAgentName}</div>
         <div style="display: flex; gap: 16px; margin-top: 8px;">
-          <span style="font-size: 12px; color: #6b7280;">👁 ${data.topAgent.views} views</span>
-          <span style="font-size: 12px; color: #6b7280;">💬 ${data.topAgent.inquiries} inquiries</span>
+          <span style="font-size: 12px; color: #6b7280;" class="ec-text-muted">👁 ${data.topAgent.views} views</span>
+          <span style="font-size: 12px; color: #6b7280;" class="ec-text-muted">💬 ${data.topAgent.inquiries} inquiries</span>
         </div>
       </div>
       ` : ''}
 
       ${data.topProperty ? `
       <!-- Top Property -->
-      <div style="margin-top: 16px; background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border-radius: 12px; padding: 16px;">
+      <div style="margin-top: 16px; background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border-radius: 12px; padding: 16px;" class="ec-highlight ec-text">
         <div style="display: flex; align-items: center; margin-bottom: 8px;">
           <span style="font-size: 18px; margin-right: 8px;">🏠</span>
-          <span style="font-weight: 600; color: #166534;">Top Property</span>
+          <span style="font-weight: 600; color: #166534;" class="ec-text">Top Property</span>
         </div>
-        <div style="color: #374151; font-weight: 600; font-size: 14px;">${safeTopPropertyTitle}</div>
+        <div style="color: #374151; font-weight: 600; font-size: 14px;" class="ec-text">${safeTopPropertyTitle}</div>
         <div style="font-size: 12px; color: #6b7280; margin-top: 4px;" class="ec-text-muted">👁 ${data.topProperty.views} views this week</div>
       </div>
       ` : ''}
