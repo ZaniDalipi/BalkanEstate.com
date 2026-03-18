@@ -798,7 +798,11 @@ const MainLayout: React.FC = () => {
     if (state.selectedBusinessListingId) {
       dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'business-directory' });
-      window.history.pushState({}, '', buildLocalizedPath('/business-directory'));
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.history.pushState({}, '', buildLocalizedPath('/business-directory'));
+      }
       return;
     }
     // Use browser history for proper back navigation
