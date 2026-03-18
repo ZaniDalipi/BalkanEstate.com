@@ -43,6 +43,8 @@ export interface IBusinessListing extends Document {
   address?: string;
   city: string;
   country: string;
+  latitude?: number;
+  longitude?: number;
   logoUrl?: string;
   logoPublicId?: string;
   socialMedia?: {
@@ -149,6 +151,12 @@ const BusinessListingSchema: Schema = new Schema(
       required: [true, 'Country is required'],
       trim: true,
       index: true,
+    },
+    latitude: {
+      type: Number,
+    },
+    longitude: {
+      type: Number,
     },
     logoUrl: { type: String },
     logoPublicId: { type: String },

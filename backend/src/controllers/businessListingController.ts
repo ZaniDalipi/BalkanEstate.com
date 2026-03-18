@@ -178,6 +178,8 @@ export const createBusinessListing = async (
       address: req.body.address,
       city: req.body.city,
       country: req.body.country,
+      latitude: req.body.latitude != null ? Number(req.body.latitude) : undefined,
+      longitude: req.body.longitude != null ? Number(req.body.longitude) : undefined,
       socialMedia: {
         facebook: req.body.socialMedia?.facebook,
         instagram: req.body.socialMedia?.instagram,
@@ -232,7 +234,7 @@ export const updateBusinessListing = async (
     // Whitelist updateable fields
     const allowedFields = [
       'name', 'description', 'category', 'listingType', 'services', 'contactPhone',
-      'contactEmail', 'website', 'address', 'city', 'country',
+      'contactEmail', 'website', 'address', 'city', 'country', 'latitude', 'longitude',
       'socialMedia', 'businessHours', 'isActive',
     ];
 
