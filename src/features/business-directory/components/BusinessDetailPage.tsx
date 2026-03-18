@@ -732,7 +732,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
               <div className="mb-3 sm:mb-4">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold bg-primary/10 text-primary rounded-full border border-primary/15">
                   <CategoryIcon category={categoryKey} className="w-4 h-4" />
-                  {t(`categories.${listing.category}`)}
+                  {listing.category === 'other' && listing.customCategory ? listing.customCategory : t(`categories.${listing.category}`)}
                 </span>
               </div>
 
@@ -849,7 +849,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                     </span>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-neutral-50 rounded-lg text-xs font-medium text-neutral-500">
                       <CategoryIcon category={categoryKey} className="w-4 h-4" />
-                      {t(`categories.${listing.category}`)}
+                      {listing.category === 'other' && listing.customCategory ? listing.customCategory : t(`categories.${listing.category}`)}
                     </span>
                     {listing.isVerified && (
                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 rounded-lg text-xs font-medium text-emerald-600">

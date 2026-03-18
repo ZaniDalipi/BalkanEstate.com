@@ -36,6 +36,7 @@ export interface IBusinessListing extends Document {
   slug: string;
   description?: string;
   category: BusinessCategory;
+  customCategory?: string;
   services: string[];
   contactPhone: string;
   contactEmail?: string;
@@ -123,6 +124,11 @@ const BusinessListingSchema: Schema = new Schema(
         message: 'Invalid category: {VALUE}',
       },
       index: true,
+    },
+    customCategory: {
+      type: String,
+      trim: true,
+      maxlength: [100, 'Custom category cannot exceed 100 characters'],
     },
     services: [{
       type: String,

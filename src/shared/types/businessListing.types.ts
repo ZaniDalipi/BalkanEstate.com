@@ -54,6 +54,7 @@ export interface BusinessListing {
   slug: string;
   description?: string;
   category: BusinessCategory;
+  customCategory?: string;
   services: string[];
   contactPhone: string;
   contactEmail?: string;
@@ -117,6 +118,7 @@ export interface CreateBusinessListingData {
   name: string;
   description?: string;
   category: BusinessCategory;
+  customCategory?: string;
   services?: string[];
   contactPhone: string;
   contactEmail?: string;

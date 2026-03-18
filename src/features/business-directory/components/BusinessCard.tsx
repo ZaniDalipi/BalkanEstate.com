@@ -214,7 +214,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
           {/* Category chip + price range */}
           <div className="flex items-center gap-1.5 mb-2 flex-wrap">
             <span className="inline-block px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-semibold bg-primary/8 text-primary rounded-full border border-primary/10">
-              {t(`categories.${listing.category}`)}
+              {listing.category === 'other' && listing.customCategory ? listing.customCategory : t(`categories.${listing.category}`)}
             </span>
             {listing.priceRange && (
               <span className="inline-block px-2 py-0.5 text-[10px] sm:text-xs font-bold bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100">

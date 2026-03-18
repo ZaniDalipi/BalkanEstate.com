@@ -171,6 +171,7 @@ export const createBusinessListing = async (
       name: req.body.name,
       description: req.body.description,
       category: req.body.category,
+      customCategory: req.body.category === 'other' ? req.body.customCategory : undefined,
       services: Array.isArray(req.body.services) ? req.body.services.slice(0, 20) : [],
       contactPhone: req.body.contactPhone,
       contactEmail: req.body.contactEmail,
@@ -242,7 +243,7 @@ export const updateBusinessListing = async (
 
     // Whitelist updateable fields
     const allowedFields = [
-      'name', 'description', 'category', 'listingType', 'services', 'contactPhone',
+      'name', 'description', 'category', 'customCategory', 'listingType', 'services', 'contactPhone',
       'contactEmail', 'website', 'address', 'city', 'country', 'latitude', 'longitude',
       'socialMedia', 'businessHours', 'isActive', 'whatsapp', 'viber', 'languages',
       'yearEstablished', 'licenseNumber', 'serviceAreas', 'priceRange', 'paymentMethods',

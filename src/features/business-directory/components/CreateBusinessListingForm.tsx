@@ -331,6 +331,9 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
         country: formData.country.trim(),
       };
 
+      if (formData.category === 'other' && formData.customCategory?.trim()) {
+        cleanData.customCategory = formData.customCategory.trim();
+      }
       if (formData.description?.trim()) cleanData.description = formData.description.trim();
       if (formData.services && formData.services.length > 0) cleanData.services = formData.services;
       if (formData.contactEmail?.trim()) cleanData.contactEmail = formData.contactEmail.trim();
@@ -633,6 +636,23 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
                     </button>
                   ))}
                 </div>
+                {formData.category === 'other' && (
+                  <div className="mt-3">
+                    <label htmlFor="customCategory" className="block text-sm font-medium text-neutral-700 mb-1">
+                      {t('form.fields.customCategory', 'Specify your category')} <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="customCategory"
+                      name="customCategory"
+                      type="text"
+                      value={formData.customCategory || ''}
+                      onChange={handleChange}
+                      maxLength={100}
+                      className={inputClasses()}
+                      placeholder={t('form.placeholders.customCategory', 'e.g. Property Management, Solar Energy...')}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Description */}

@@ -65,6 +65,7 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
     name: listing.name,
     description: listing.description || '',
     category: listing.category,
+    customCategory: listing.customCategory || '',
     services: listing.services || [],
     contactPhone: listing.contactPhone,
     contactEmail: listing.contactEmail || '',
@@ -343,6 +344,9 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
         isActive,
       };
 
+      cleanData.customCategory = formData.category === 'other' && formData.customCategory?.trim()
+        ? formData.customCategory.trim()
+        : '';
       if (formData.description?.trim()) cleanData.description = formData.description.trim();
       else cleanData.description = '';
       if (formData.services && formData.services.length > 0) cleanData.services = formData.services;
@@ -678,6 +682,23 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
                     </button>
                   ))}
                 </div>
+                {formData.category === 'other' && (
+                  <div className="mt-3">
+                    <label htmlFor="edit-customCategory" className="block text-sm font-medium text-neutral-700 mb-1">
+                      {t('form.fields.customCategory', 'Specify your category')} <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="edit-customCategory"
+                      name="customCategory"
+                      type="text"
+                      value={formData.customCategory || ''}
+                      onChange={handleChange}
+                      maxLength={100}
+                      className={inputClasses()}
+                      placeholder={t('form.placeholders.customCategory', 'e.g. Property Management, Solar Energy...')}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Description */}
