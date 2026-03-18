@@ -7,4 +7,5 @@ export {
   updateBusinessListing,
   deleteBusinessListing,
   uploadBusinessLogo,
+  uploadBusinessBanner,
 } from './businessDirectoryApi';

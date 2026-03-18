@@ -47,6 +47,8 @@ export interface IBusinessListing extends Document {
   longitude?: number;
   logoUrl?: string;
   logoPublicId?: string;
+  bannerUrl?: string;
+  bannerPublicId?: string;
   socialMedia?: {
     facebook?: string;
     instagram?: string;
@@ -160,6 +162,8 @@ const BusinessListingSchema: Schema = new Schema(
     },
     logoUrl: { type: String },
     logoPublicId: { type: String },
+    bannerUrl: { type: String },
+    bannerPublicId: { type: String },
     socialMedia: {
       facebook: { type: String, trim: true },
       instagram: { type: String, trim: true },
@@ -196,6 +200,7 @@ const BusinessListingSchema: Schema = new Schema(
         delete ret._id;
         delete ret.__v;
         delete ret.logoPublicId;
+        delete ret.bannerPublicId;
         return ret;
       },
     },

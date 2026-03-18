@@ -78,20 +78,29 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
         onClick={() => onClick(listing)}
         className="w-full text-left bg-white rounded-2xl shadow-md shadow-neutral-200/60 hover:shadow-xl hover:shadow-neutral-300/50 overflow-hidden border border-neutral-100/80 group transition-all duration-500"
       >
-        {/* Category gradient banner */}
-        <div className={`h-20 sm:h-22 bg-gradient-to-r ${gradient} relative overflow-hidden`}>
-          {/* Animated mesh pattern overlay */}
-          <div className="absolute inset-0 opacity-[0.15]">
-            <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <pattern id={`card-mesh-${listing.id}`} width="20" height="20" patternUnits="userSpaceOnUse">
-                  <circle cx="3" cy="3" r="1.5" fill="white" />
-                  <circle cx="13" cy="13" r="0.8" fill="white" />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill={`url(#card-mesh-${listing.id})`} />
-            </svg>
-          </div>
+        {/* Category gradient banner / uploaded banner image */}
+        <div className={`h-20 sm:h-22 ${listing.bannerUrl ? '' : `bg-gradient-to-r ${gradient}`} relative overflow-hidden`}>
+          {listing.bannerUrl ? (
+            <img
+              src={listing.bannerUrl}
+              alt={`${listing.name} banner`}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          ) : (
+            /* Animated mesh pattern overlay */
+            <div className="absolute inset-0 opacity-[0.15]">
+              <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id={`card-mesh-${listing.id}`} width="20" height="20" patternUnits="userSpaceOnUse">
+                    <circle cx="3" cy="3" r="1.5" fill="white" />
+                    <circle cx="13" cy="13" r="0.8" fill="white" />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill={`url(#card-mesh-${listing.id})`} />
+              </svg>
+            </div>
+          )}
 
           {/* Shine sweep on hover */}
           <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />

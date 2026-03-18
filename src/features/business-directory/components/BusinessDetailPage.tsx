@@ -402,7 +402,19 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
 
       {/* === HERO SECTION - Agent profile style === */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+        {/* Banner image */}
+        {listing.bannerUrl && (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+            <div className="w-full h-36 sm:h-48 lg:h-56 rounded-2xl overflow-hidden shadow-md">
+              <img
+                src={listing.bannerUrl}
+                alt={`${listing.name} banner`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+        )}
+        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${listing.bannerUrl ? 'py-4 sm:py-6 -mt-12 sm:-mt-16 relative z-10' : 'py-6 sm:py-8 lg:py-10'}`}>
           <motion.div
             className="flex flex-col lg:flex-row items-center lg:items-start gap-4 sm:gap-6 lg:gap-8"
             initial="hidden"

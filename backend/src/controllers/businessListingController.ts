@@ -377,6 +377,69 @@ export const uploadBusinessLogo = async (
   }
 };
 
+// @desc    Upload business banner
+// @route   POST /api/business-listings/:id/upload-banner
+// @access  Private (owner only)
+export const uploadBusinessBanner = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    if (!req.file) {
+      res.status(400).json({ message: 'No file uploaded' });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+    const listing = await BusinessListing.findById(id);
+
+    if (!listing) {
+      res.status(404).json({ message: 'Business listing not found' });
+      return;
+    }
+
+    if (String(listing.owner) !== String(currentUser._id)) {
+      res.status(403).json({ message: 'Not authorized to update this listing' });
+      return;
+    }
+
+    // Delete old banner if exists
+    if (listing.bannerPublicId) {
+      await deleteImage(listing.bannerPublicId).catch(() => {});
+    }
+
+    const userId = String(currentUser._id);
+
+    // Upload new banner
+    const result = await uploadImage(req.file.buffer, {
+      userId,
+      agencyId: id,
+      type: 'agency-logo',
+      maxWidth: 1200,
+      maxHeight: 400,
+    });
+
+    listing.bannerUrl = result.url;
+    listing.bannerPublicId = result.publicId;
+    await listing.save();
+
+    res.status(200).json({
+      bannerUrl: result.url,
+      message: 'Banner uploaded successfully',
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to upload banner', error: error.message });
+  }
+};
+
 // @desc    Get business listings owned by current user
 // @route   GET /api/business-listings/my-listings
 // @access  Private

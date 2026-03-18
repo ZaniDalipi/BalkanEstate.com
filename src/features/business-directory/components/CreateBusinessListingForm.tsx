@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useCreateBusinessListing, useUploadBusinessLogo } from '../hooks';
+import { useCreateBusinessListing, useUploadBusinessLogo, useUploadBusinessBanner } from '../hooks';
 import { BUSINESS_CATEGORIES, type BusinessCategory, type CreateBusinessListingData, type ListingType } from '@/src/shared/types/businessListing.types';
 import { Animated } from '@/src/components/ui/Animations';
 import { BuildingStorefrontIcon, UserIcon, MapPinIcon } from '@/constants';
@@ -46,6 +46,7 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
   const { state } = useAppContext();
   const { createListing, isLoading, error } = useCreateBusinessListing();
   const { uploadLogo } = useUploadBusinessLogo();
+  const { uploadBanner } = useUploadBusinessBanner();
   const currentUser = state.currentUser;
 
   // Refs for scroll-to-error
@@ -60,6 +61,8 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
   const [listingType, setListingType] = useState<ListingType>('business');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
   const [formData, setFormData] = useState<CreateBusinessListingData>({
     name: '',
     description: '',
@@ -219,6 +222,31 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
     setLogoPreview(null);
   }, []);
 
+  const handleBannerChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!ACCEPTED_TYPES.includes(file.type)) {
+      setFormError(t('form.errors.logoInvalidType'));
+      return;
+    }
+    if (file.size > MAX_LOGO_SIZE) {
+      setFormError(t('form.errors.logoTooLarge'));
+      return;
+    }
+
+    setBannerFile(file);
+    clearErrors();
+    const reader = new FileReader();
+    reader.onloadend = () => setBannerPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  }, [t, clearErrors]);
+
+  const removeBanner = useCallback(() => {
+    setBannerFile(null);
+    setBannerPreview(null);
+  }, []);
+
   const handleMapLocationChange = useCallback((newLat: number, newLng: number) => {
     setLat(newLat);
     setLng(newLng);
@@ -282,12 +310,21 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
 
       const result = await createListing(cleanData);
 
-      // Upload logo after listing is created
-      if (logoFile && result.listing?.id) {
-        try {
-          await uploadLogo({ id: result.listing.id, file: logoFile });
-        } catch {
-          // Logo upload failure shouldn't block listing creation
+      // Upload logo and banner after listing is created
+      if (result.listing?.id) {
+        if (logoFile) {
+          try {
+            await uploadLogo({ id: result.listing.id, file: logoFile });
+          } catch {
+            // Logo upload failure shouldn't block listing creation
+          }
+        }
+        if (bannerFile) {
+          try {
+            await uploadBanner({ id: result.listing.id, file: bannerFile });
+          } catch {
+            // Banner upload failure shouldn't block listing creation
+          }
         }
       }
 
@@ -295,7 +332,7 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
     } catch (err: any) {
       setFormError(err?.message || t('form.errors.generic'));
     }
-  }, [formData, listingType, lat, lng, logoFile, createListing, uploadLogo, onSuccess, t, clearErrors, setValidationError]);
+  }, [formData, listingType, lat, lng, logoFile, bannerFile, createListing, uploadLogo, uploadBanner, onSuccess, t, clearErrors, setValidationError]);
 
   const displayError = formError || (error as Error)?.message;
 
@@ -441,6 +478,49 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
                     )}
                   </div>
                   <p className="text-xs text-neutral-400 mt-2">{t('form.logoHint')}</p>
+                </div>
+              </div>
+            </div>
+          </Animated>
+
+          {/* Banner upload */}
+          <Animated variant="fadeInUp" delay={40}>
+            <div className="bg-white rounded-2xl border border-neutral-200 p-6 shadow-sm">
+              <h2 className="text-lg font-semibold text-neutral-900 mb-4">
+                {t('form.fields.banner', 'Cover Banner')}
+              </h2>
+              <div className="space-y-3">
+                <div className="w-full h-32 rounded-xl bg-neutral-100 flex items-center justify-center overflow-hidden border-2 border-dashed border-neutral-300">
+                  {bannerPreview ? (
+                    <img src={bannerPreview} alt="Banner preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-center">
+                      <svg className="w-10 h-10 mx-auto text-neutral-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                      </svg>
+                      <p className="text-xs text-neutral-400 mt-1">{t('form.bannerHint', '1200 x 400px recommended')}</p>
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <label className="px-4 py-2 bg-primary/10 text-primary rounded-xl text-sm font-medium cursor-pointer hover:bg-primary/20 transition-colors">
+                    {bannerFile ? t('form.bannerChange', 'Change Banner') : t('form.bannerUpload', 'Upload Banner')}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={handleBannerChange}
+                      className="hidden"
+                    />
+                  </label>
+                  {bannerFile && (
+                    <button
+                      type="button"
+                      onClick={removeBanner}
+                      className="px-4 py-2 text-red-500 hover:bg-red-50 rounded-xl text-sm font-medium transition-colors"
+                    >
+                      {t('form.bannerRemove', 'Remove')}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

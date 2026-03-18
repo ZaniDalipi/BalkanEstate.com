@@ -75,3 +75,16 @@ export const uploadBusinessLogo = async (
     formData
   );
 };
+
+export const uploadBusinessBanner = async (
+  id: string,
+  file: File
+): Promise<{ bannerUrl: string; message: string }> => {
+  const formData = new FormData();
+  formData.append('banner', file);
+
+  return uploadRequest<{ bannerUrl: string; message: string }>(
+    `/business-listings/${id}/upload-banner`,
+    formData
+  );
+};

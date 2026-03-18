@@ -6,4 +6,5 @@ export {
   useUpdateBusinessListing,
   useDeleteBusinessListing,
   useUploadBusinessLogo,
+  useUploadBusinessBanner,
 } from './useBusinessListings';

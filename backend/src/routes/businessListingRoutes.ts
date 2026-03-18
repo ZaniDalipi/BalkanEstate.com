@@ -7,6 +7,7 @@ import {
   updateBusinessListing,
   deleteBusinessListing,
   uploadBusinessLogo,
+  uploadBusinessBanner,
   getMyBusinessListings,
 } from '../controllers/businessListingController';
 import { protect } from '../middleware/auth';
@@ -45,5 +46,6 @@ router.get('/:id', getBusinessListing);
 router.put('/:id', protect, updateBusinessListing);
 router.delete('/:id', protect, deleteBusinessListing);
 router.post('/:id/upload-logo', protect, upload.single('logo'), uploadBusinessLogo);
+router.post('/:id/upload-banner', protect, upload.single('banner'), uploadBusinessBanner);
 
 export default router;

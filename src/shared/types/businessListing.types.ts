@@ -48,6 +48,7 @@ export interface BusinessListing {
   latitude?: number;
   longitude?: number;
   logoUrl?: string;
+  bannerUrl?: string;
   socialMedia?: {
     facebook?: string;
     instagram?: string;
