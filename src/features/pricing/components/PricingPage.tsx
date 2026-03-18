@@ -30,6 +30,7 @@ import SellerPlansSection from './SellerPlansSection';
 import BuyerPlansSection from './BuyerPlansSection';
 import ListingPromotionSection from './ListingPromotionSection';
 import AgencyFeatureSection from './AgencyFeatureSection';
+import SpecialOffersSection from './SpecialOffersSection';
 
 const PricingPage: React.FC = () => {
   const {
@@ -65,6 +66,7 @@ const PricingPage: React.FC = () => {
     proMonthlyProduct,
     buyerProduct,
     agencyFeaturePlans,
+    specialOffers,
     loadingPlans,
     getPromotionPrice,
     getAgencyPrice,
@@ -80,6 +82,10 @@ const PricingPage: React.FC = () => {
     handleAgencyFeature,
     isActivePlan,
     isPlanDisabled,
+    selectedOfferId,
+    setSelectedOfferId,
+    handleSelectOffer,
+    handlePurchaseSpecialOffer,
   } = usePricingPage();
 
   return (
@@ -364,11 +370,32 @@ const PricingPage: React.FC = () => {
             />
           )}
 
+          {/* Special Offers */}
+          {specialOffers.length > 0 && activeTab === 'listing' && (
+            <SpecialOffersSection
+              t={t}
+              dispatch={dispatch}
+              isAuthenticated={state.isAuthenticated}
+              specialOffers={specialOffers}
+              selectedOfferId={selectedOfferId}
+              setSelectedOfferId={setSelectedOfferId}
+              selectedListing={selectedListing}
+              setSelectedListing={setSelectedListing}
+              selectedDuration={selectedDuration}
+              setSelectedDuration={setSelectedDuration}
+              loadingListings={loadingListings}
+              userListings={userListings}
+              onSelectOffer={handleSelectOffer}
+              onSelectListingForPromotion={handleSelectListingForPromotion}
+              onPurchasePromotion={handlePurchaseSpecialOffer}
+            />
+          )}
+
           {/* No Products */}
           {!loading && !error && products.length === 0 && (
             <div className="text-center py-20">
               <div className="bg-gray-50 rounded-2xl p-8 max-w-md mx-auto">
-                <p className="text-gray-600">{t('pricing:noPlans', 'No pricing plans available. Please run the seed script.')}</p>
+                <p className="text-gray-600">{t('pricing:noPlans', 'No pricing plans available at the moment.')}</p>
               </div>
             </div>
           )}

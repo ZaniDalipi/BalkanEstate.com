@@ -31,6 +31,7 @@ import {
 import SimilarProperties from '@/src/components/property/SimilarProperties';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { useTrackView } from '@/src/features/view-stats/hooks';
+import { useRecentlyViewed } from '@/src/hooks/useRecentlyViewed';
 import PromotionModal from '@/src/features/promotions/components/PromotionModal';
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import Footer from '@/components/shared/Footer';
@@ -79,6 +80,12 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     entityId: property.id,
     enabled: !!property.id,
   });
+
+  // Track recently viewed for homepage carousel
+  const { trackView } = useRecentlyViewed();
+  useEffect(() => {
+    if (property?.id) trackView(property);
+  }, [property?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Enable real-time updates - refresh when this property is updated
   useRealtimeProperties({

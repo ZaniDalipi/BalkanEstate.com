@@ -46,7 +46,8 @@
       "name": "Про годишно",
       "description": "Заштедете {{percent}}% со годишна наплата",
       "badge": "НАЈПОПУЛАРНО",
-      "saveVsMonthly": "Заштедете 33% споредено со месечно"
+      "saveVsMonthly": "Заштедете 33% споредено со месечно",
+      "saveVsMonthlyDynamic": "Заштедете {{percent}}% споредено со месечно"
     },
     "enterprise": {
       "name": "Enterprise план",

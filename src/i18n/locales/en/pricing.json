@@ -46,7 +46,8 @@
       "name": "Pro Yearly",
       "description": "Save {{percent}}% with annual billing",
       "badge": "MOST POPULAR",
-      "saveVsMonthly": "Save 33% vs monthly"
+      "saveVsMonthly": "Save 33% vs monthly",
+      "saveVsMonthlyDynamic": "Save {{percent}}% vs monthly"
     },
     "enterprise": {
       "name": "Enterprise Plan",

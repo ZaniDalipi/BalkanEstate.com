@@ -46,7 +46,8 @@
       "name": "Pro Ετήσιο",
       "description": "Εξοικονομήστε {{percent}}% με ετήσια χρέωση",
       "badge": "ΠΙΟ ΔΗΜΟΦΙΛΕΣ",
-      "saveVsMonthly": "Εξοικονομήστε 33% σε σχέση με το μηνιαίο"
+      "saveVsMonthly": "Εξοικονομήστε 33% σε σχέση με το μηνιαίο",
+      "saveVsMonthlyDynamic": "Εξοικονομήστε {{percent}}% σε σχέση με το μηνιαίο"
     },
     "enterprise": {
       "name": "Πλάνο Enterprise",
