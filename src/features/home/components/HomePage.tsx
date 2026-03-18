@@ -17,6 +17,7 @@ import Footer from '@/components/shared/Footer';
 
 // Lazy-load below-fold sections to reduce initial bundle
 const StackedCards = lazy(() => import('@/src/components/ui/glass-cards').then(m => ({ default: m.StackedCards })));
+const HomeSpecialOffersSection = lazy(() => import('./HomeSpecialOffersSection'));
 const TopAgentsSection = lazy(() => import('./TopAgentsSection'));
 const TopAgenciesSection = lazy(() => import('./TopAgenciesSection'));
 const CategoriesSection = lazy(() => import('./CategoriesSection'));
@@ -246,6 +247,10 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
           onPropertyClick={handlePropertyClick}
           onViewAll={() => handleNavigate('search', '/search')}
         />
+      </Suspense>
+
+      <Suspense fallback={<SectionFallback />}>
+        <HomeSpecialOffersSection onNavigate={handleNavigate} />
       </Suspense>
 
       <Suspense fallback={<SectionFallback />}>

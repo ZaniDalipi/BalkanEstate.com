@@ -411,15 +411,17 @@ export function usePricingPage() {
 
   const handlePurchasePromotion = () => {
     if (!selectedListing || !selectedPromoTier) return;
-    // Payment integration pending
-    dispatch({
-      type: 'SHOW_ALERT',
-      payload: {
-        type: 'info',
-        title: t('pricing:listing.comingSoon', 'Coming Soon'),
-        message: t('pricing:listing.promotionComingSoon', 'Listing promotion will be available soon!'),
-      },
+
+    const price = getPromotionPrice(selectedPromoTier, selectedDuration);
+    const tierLabel = selectedPromoTier.charAt(0).toUpperCase() + selectedPromoTier.slice(1);
+
+    setSelectedPlan({
+      name: `${tierLabel} Promotion - ${selectedDuration} days`,
+      price,
+      interval: 'once' as const,
+      productId: `listing_promo_${selectedPromoTier}_${selectedDuration}days`,
     });
+    setShowPaymentWindow(true);
   };
 
   // Special offer handlers
