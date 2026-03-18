@@ -47,10 +47,10 @@ const AnimatedTooltip: React.FC<AnimatedTooltipProps> = ({ items, onItemClick, o
   };
 
   return (
-    <div className="flex flex-row items-center justify-center gap-[-8px]">
+    <div className="flex flex-row items-center justify-center gap-3">
       {items.map((item) => (
           <div
-            className="-mr-3 relative group"
+            className="relative group"
             key={item.id}
             onMouseEnter={() => setHoveredIndex(item.id)}
             onMouseLeave={() => setHoveredIndex(null)}
