@@ -214,16 +214,21 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
     return (
       <div className="min-h-screen bg-neutral-50">
         {/* Sticky header skeleton */}
-        <div className="sticky top-0 z-40 bg-gradient-to-r from-gray-800 to-gray-900 h-14" />
+        <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-neutral-200/60 h-14" />
+
+        {/* Banner skeleton */}
+        <div className="w-full h-40 sm:h-52 lg:h-64 bg-neutral-200 relative overflow-hidden">
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+        </div>
 
         {/* Hero skeleton */}
         <div className="bg-white border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 -mt-16 sm:-mt-20 relative z-10">
             <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6">
-              <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl bg-neutral-200 relative overflow-hidden flex-shrink-0">
+              <div className="w-28 h-28 sm:w-36 sm:h-36 lg:w-44 lg:h-44 rounded-2xl bg-neutral-200 relative overflow-hidden flex-shrink-0 border-4 border-white shadow-xl">
                 <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
               </div>
-              <div className="flex-1 space-y-3 w-full text-center lg:text-left">
+              <div className="flex-1 space-y-3 w-full text-center lg:text-left pt-4 sm:pt-8">
                 <div className="h-9 bg-neutral-200 rounded-lg w-72 mx-auto lg:mx-0 relative overflow-hidden">
                   <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
                 </div>
@@ -402,19 +407,32 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
 
       {/* === HERO SECTION - Agent profile style === */}
       <div className="bg-white border-b border-gray-200">
-        {/* Banner image */}
-        {listing.bannerUrl && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
-            <div className="w-full h-36 sm:h-48 lg:h-56 rounded-2xl overflow-hidden shadow-md">
-              <img
-                src={listing.bannerUrl}
-                alt={`${listing.name} banner`}
-                className="w-full h-full object-cover"
-              />
-            </div>
+        {/* Banner area - always shown */}
+        <div className="relative w-full h-40 sm:h-52 lg:h-64 overflow-hidden">
+          {listing.bannerUrl ? (
+            <img
+              src={listing.bannerUrl}
+              alt={`${listing.name} banner`}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className={`w-full h-full bg-gradient-to-br ${gradient}`} />
+          )}
+          {/* Overlay for readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
+          {/* Decorative pattern */}
+          <div className="absolute inset-0 opacity-[0.07]">
+            <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="banner-dots" width="24" height="24" patternUnits="userSpaceOnUse">
+                  <circle cx="2" cy="2" r="1" fill="white" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#banner-dots)" />
+            </svg>
           </div>
-        )}
-        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${listing.bannerUrl ? 'py-4 sm:py-6 -mt-12 sm:-mt-16 relative z-10' : 'py-6 sm:py-8 lg:py-10'}`}>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 -mt-16 sm:-mt-20 relative z-10">
           <motion.div
             className="flex flex-col lg:flex-row items-center lg:items-start gap-4 sm:gap-6 lg:gap-8"
             initial="hidden"

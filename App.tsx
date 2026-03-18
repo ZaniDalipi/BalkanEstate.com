@@ -736,13 +736,13 @@ const MainLayout: React.FC = () => {
   const isFullHeightView = isSearchPage || isRentalPage || state.activeView === 'inbox' || !!state.selectedProperty;
   // On mobile: floating header hidden, PWA top bar handles navigation
   // On desktop: floating header shown (except property details which has its own)
-  const showHeader = !isMobile && !state.selectedProperty && !state.selectedAgentId && !state.selectedAgencyId;
+  const showHeader = !isMobile && !state.selectedProperty && !state.selectedAgentId && !state.selectedAgencyId && !state.selectedBusinessListingId;
 
   // PWA top bar: shown on mobile for internal pages only
   // NOT shown on: search/rental (have their own search headers), property details (has its own header)
   const isHomeView = state.activeView === 'home';
   const isHomePage = isSearchPage || isRentalPage || isHomeView;
-  const showPWATopBar = isMobile && !state.selectedProperty && !isHomePage;
+  const showPWATopBar = isMobile && !state.selectedProperty && !state.selectedBusinessListingId && !isHomePage;
 
   // Main tab views show hamburger menu; detail views show back button
   const isMainTabView = !state.selectedAgentId && !state.selectedAgencyId && !state.selectedBusinessListingId && [
