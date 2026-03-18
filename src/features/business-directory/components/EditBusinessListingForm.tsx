@@ -952,7 +952,8 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
               <button
                 type="button"
                 onClick={onBack}
-                className="flex-1 py-3.5 border-2 border-neutral-300 text-neutral-700 font-bold rounded-xl hover:bg-neutral-50 transition-all text-base"
+                disabled={isLoading}
+                className="flex-1 py-3.5 border-2 border-neutral-300 text-neutral-700 font-bold rounded-xl hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-base"
               >
                 {t('edit.cancel', { defaultValue: 'Cancel' })}
               </button>
