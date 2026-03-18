@@ -136,27 +136,28 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.03 },
+    transition: { staggerChildren: 0.05 },
   },
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 24, scale: 0.97 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] },
+    scale: 1,
+    transition: { type: 'spring', stiffness: 300, damping: 28 },
   },
 };
 
 const fadeUpVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } },
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 28 } },
 };
 
 const scaleInVariants = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: { opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 200, damping: 20 } },
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: { opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 300, damping: 28 } },
 };
 
 const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedListingId: propListingId }) => {
@@ -432,7 +433,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
               className="text-center mb-8 sm:mb-10"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+              transition={{ delay: 0.15, type: 'spring', stiffness: 300, damping: 28 }}
             >
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white mb-3 sm:mb-5 leading-[1.15] tracking-tight px-2 sm:px-0">
                 {t('hero.title')}
@@ -450,9 +451,9 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
             {/* Glass search box */}
             <motion.div
               className="max-w-2xl mx-auto"
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              initial={{ opacity: 0, y: 24, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.4, type: 'spring', stiffness: 200, damping: 22 }}
+              transition={{ delay: 0.35, type: 'spring', stiffness: 300, damping: 28 }}
             >
               <div className="relative bg-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-5 md:p-6 border border-white/20 shadow-2xl shadow-black/20">
                 <form onSubmit={handleSearch}>
