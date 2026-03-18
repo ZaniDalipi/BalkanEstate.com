@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useMemo, useRef, lazy, Suspens
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User } from 'lucide-react';
-import { useBusinessListing, useUploadBusinessBanner } from '../hooks';
+import { useBusinessListing, useUploadBusinessBanner, useUploadBusinessLogo } from '../hooks';
 import { useAppContext } from '@/context/AppContext';
 import NotificationCenter from '@/shared/components/NotificationCenter';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
@@ -277,39 +277,72 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
     );
   }, [isAuthenticated, currentUser, handleAccountClick, t]);
 
-  // Banner upload (owner only)
+  // Image upload (owner only) - banner + logo
   const bannerInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const { uploadBanner, isLoading: isBannerUploading } = useUploadBusinessBanner();
-  const [bannerError, setBannerError] = useState<string | null>(null);
+  const { uploadLogo, isLoading: isLogoUploading } = useUploadBusinessLogo();
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [showCustomizeMenu, setShowCustomizeMenu] = useState(false);
+  const customizeRef = useRef<HTMLDivElement>(null);
+
+  // Close customize menu on outside click
+  useEffect(() => {
+    if (!showCustomizeMenu) return;
+    const handleClick = (e: MouseEvent) => {
+      if (customizeRef.current && !customizeRef.current.contains(e.target as Node)) {
+        setShowCustomizeMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showCustomizeMenu]);
+
+  const validateImageFile = useCallback((file: File): string | null => {
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      return t('form.bannerInvalidType', 'Please upload a JPEG, PNG, or WebP image');
+    }
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      return t('form.bannerTooLarge', 'Image must be under 5MB');
+    }
+    return null;
+  }, [t]);
 
   const handleBannerUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !listing) return;
-
-    // Reset input so same file can be re-selected
     e.target.value = '';
 
-    // Validate file type
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!validTypes.includes(file.type)) {
-      setBannerError(t('form.bannerInvalidType', 'Please upload a JPEG, PNG, or WebP image'));
-      return;
-    }
+    const error = validateImageFile(file);
+    if (error) { setUploadError(error); return; }
 
-    // Validate file size (5MB max)
-    const MAX_SIZE = 5 * 1024 * 1024;
-    if (file.size > MAX_SIZE) {
-      setBannerError(t('form.bannerTooLarge', 'Image must be under 5MB'));
-      return;
-    }
-
-    setBannerError(null);
+    setUploadError(null);
+    setShowCustomizeMenu(false);
     try {
       await uploadBanner({ id: listing.id, file });
     } catch {
-      setBannerError(t('form.bannerUploadError', 'Failed to upload banner. Please try again.'));
+      setUploadError(t('form.bannerUploadError', 'Failed to upload banner. Please try again.'));
     }
-  }, [listing, uploadBanner, t]);
+  }, [listing, uploadBanner, validateImageFile, t]);
+
+  const handleLogoUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !listing) return;
+    e.target.value = '';
+
+    const error = validateImageFile(file);
+    if (error) { setUploadError(error); return; }
+
+    setUploadError(null);
+    setShowCustomizeMenu(false);
+    try {
+      await uploadLogo({ id: listing.id, file });
+    } catch {
+      setUploadError(t('form.logoUploadError', 'Failed to upload logo. Please try again.'));
+    }
+  }, [listing, uploadLogo, validateImageFile, t]);
 
   // --- Loading skeleton ---
   if (isLoading) {
@@ -521,7 +554,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
       {/* === HERO SECTION === */}
       <div className="bg-white border-b border-gray-200">
         {/* Banner area - always shown */}
-        <div className="relative w-full h-36 sm:h-44 lg:h-56 overflow-hidden group">
+        <div className="relative w-full h-36 sm:h-44 lg:h-56 overflow-hidden">
           {listing.bannerUrl ? (
             <img
               src={listing.bannerUrl}
@@ -545,43 +578,93 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
             </svg>
           </div>
 
-          {/* Owner: banner upload button */}
+          {/* Upload progress overlay */}
+          {(isBannerUploading || isLogoUploading) && (
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-20">
+              <div className="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2.5 rounded-xl shadow-lg">
+                <svg className="w-5 h-5 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                <span className="text-sm font-medium text-neutral-700">
+                  {isBannerUploading ? t('form.bannerUploading', 'Uploading banner...') : t('form.logoUploading', 'Uploading logo...')}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Owner: Customize button + dropdown (always visible, like agencies) */}
           {isOwner && (
-            <>
-              <input
-                ref={bannerInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={handleBannerUpload}
-                className="hidden"
-                aria-label={t('form.bannerUpload', 'Upload Banner')}
-              />
+            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20" ref={customizeRef}>
+              <input ref={bannerInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleBannerUpload} className="hidden" />
+              <input ref={logoInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleLogoUpload} className="hidden" />
+
               <button
                 type="button"
-                onClick={() => bannerInputRef.current?.click()}
-                disabled={isBannerUploading}
-                className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2 px-3 py-2 bg-black/50 hover:bg-black/70 text-white text-xs sm:text-sm font-medium rounded-xl backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 border border-white/20 disabled:opacity-50"
+                onClick={() => setShowCustomizeMenu(!showCustomizeMenu)}
+                className={`inline-flex items-center gap-1.5 px-3 py-2 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 transition-all duration-300 ${
+                  showCustomizeMenu ? 'bg-white/30' : 'bg-black/40 hover:bg-black/60'
+                }`}
               >
-                {isBannerUploading ? (
-                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                ) : (
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
-                  </svg>
-                )}
-                {listing.bannerUrl ? t('form.bannerChange', 'Change Banner') : t('form.bannerUpload', 'Upload Banner')}
+                <PencilIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">{t('banner.customize', 'Customize')}</span>
               </button>
-              {bannerError && (
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-red-500/90 text-white text-xs font-medium px-4 py-2 rounded-lg backdrop-blur-sm">
-                  {bannerError}
-                </div>
-              )}
-            </>
+
+              {/* Dropdown menu */}
+              <AnimatePresence>
+                {showCustomizeMenu && (
+                  <motion.div
+                    className="absolute top-full right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-neutral-200 z-50 overflow-hidden min-w-[200px]"
+                    initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    {/* Upload / Change Banner */}
+                    <button
+                      type="button"
+                      onClick={() => bannerInputRef.current?.click()}
+                      disabled={isBannerUploading}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors disabled:opacity-50"
+                    >
+                      <svg className="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      {listing.bannerUrl ? t('form.bannerChange', 'Change Banner') : t('form.bannerUpload', 'Upload Banner')}
+                    </button>
+
+                    {/* Upload / Change Logo */}
+                    <button
+                      type="button"
+                      onClick={() => logoInputRef.current?.click()}
+                      disabled={isLogoUploading}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors border-t border-neutral-100 disabled:opacity-50"
+                    >
+                      <svg className="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      {listing.logoUrl ? t('form.logoChange', 'Change Logo') : t('form.logoUpload', 'Upload Logo')}
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           )}
+
+          {/* Upload error toast */}
+          <AnimatePresence>
+            {uploadError && (
+              <motion.div
+                className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-red-500/90 text-white text-xs font-medium px-4 py-2 rounded-lg backdrop-blur-sm z-20"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+              >
+                {uploadError}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Profile info - logo overlaps banner, text on white */}
