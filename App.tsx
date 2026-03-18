@@ -442,6 +442,10 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         if (view === 'agents') {
           dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
         }
+        // Clear selected business listing when navigating to directory list (not detail)
+        if (view === 'business-directory') {
+          dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
+        }
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
       } else {
         // Unknown route - redirect to landing page
