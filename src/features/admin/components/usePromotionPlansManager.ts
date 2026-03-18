@@ -35,7 +35,7 @@ export function usePromotionPlansManager() {
   const [editingPlan, setEditingPlan] = useState<PromotionPlan | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newFeature, setNewFeature] = useState('');
-  const [activeTab, setActiveTab] = useState<'listing' | 'agency'>('listing');
+  const [activeTab, setActiveTab] = useState<'listing' | 'agency' | 'special-offers'>('listing');
   const [showPreview, setShowPreview] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [mutatingPlanId, setMutatingPlanId] = useState<string | null>(null);
@@ -54,16 +54,23 @@ export function usePromotionPlansManager() {
       editingPlan.pricing.duration28 || editingPlan.pricing.duration30 || editingPlan.pricing.duration90;
     if (!hasAnyPrice) return;
 
+    // Validate special offer date range
+    if (editingPlan.isSpecialOffer && editingPlan.availableFrom && editingPlan.availableTo) {
+      if (new Date(editingPlan.availableTo) <= new Date(editingPlan.availableFrom)) return;
+    }
+
     try {
       const isNew = !editingPlan.id;
 
+      // Strip id and timestamps before sending to backend
+      const { id: planId, createdAt, updatedAt, ...planData } = editingPlan as PromotionPlan & { createdAt?: string; updatedAt?: string };
+
       if (isNew) {
-        const { id, createdAt, updatedAt, ...createData } = editingPlan as PromotionPlan & { createdAt?: string; updatedAt?: string };
-        await createPlanMutation.mutateAsync(createData);
+        await createPlanMutation.mutateAsync(planData);
       } else {
         await updatePlanMutation.mutateAsync({
-          planId: editingPlan.id,
-          data: editingPlan,
+          planId,
+          data: planData,
         });
       }
 
@@ -116,10 +123,16 @@ export function usePromotionPlansManager() {
     setIsModalOpen(true);
   };
 
-  const handleCreate = (category: 'listing' | 'agency', isAddOn: boolean = false) => {
-    const defaultCardStyle = category === 'listing'
-      ? colorPresets.purple
-      : isAddOn ? colorPresets.cyan : colorPresets.amber;
+  const handleCreate = (category: 'listing' | 'agency', isAddOn: boolean = false, isSpecialOffer: boolean = false) => {
+    const defaultCardStyle = isSpecialOffer
+      ? colorPresets.slate
+      : category === 'listing'
+        ? colorPresets.purple
+        : isAddOn ? colorPresets.cyan : colorPresets.amber;
+
+    // Special offers default to 7 days from now
+    const now = new Date();
+    const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
     setEditingPlan({
       id: '',
@@ -127,17 +140,23 @@ export function usePromotionPlansManager() {
       tier: category === 'listing' ? 'featured' : (isAddOn ? 'addon' : 'featured'),
       name: '',
       description: '',
-      icon: category === 'listing' ? '⭐' : (isAddOn ? '📍' : '🏢'),
+      icon: isSpecialOffer ? '🔥' : (category === 'listing' ? '⭐' : (isAddOn ? '📍' : '🏢')),
       pricing: category === 'agency'
         ? { duration7: 0, duration14: 0, duration28: 0, duration90: 0 }
         : { duration7: 0, duration30: 0, duration90: 0 },
       features: [],
       displayOrder: plans.filter(p => p.category === category).length + 1,
-      highlighted: false,
+      highlighted: isSpecialOffer,
       isAddOn,
       isActive: true,
       isVisible: true,
       cardStyle: defaultCardStyle,
+      isSpecialOffer,
+      ...(isSpecialOffer && {
+        availableFrom: now.toISOString().slice(0, 16),
+        availableTo: weekFromNow.toISOString().slice(0, 16),
+        offerLabel: '',
+      }),
     });
     setIsModalOpen(true);
   };
@@ -166,7 +185,9 @@ export function usePromotionPlansManager() {
     });
   };
 
-  const filteredPlans = plans.filter(p => p.category === activeTab).sort((a, b) => a.displayOrder - b.displayOrder);
+  const filteredPlans = activeTab === 'special-offers'
+    ? plans.filter(p => p.isSpecialOffer).sort((a, b) => a.displayOrder - b.displayOrder)
+    : plans.filter(p => p.category === activeTab && !p.isSpecialOffer).sort((a, b) => a.displayOrder - b.displayOrder);
 
   return {
     plans,

@@ -195,6 +195,7 @@ const ProductSchema: Schema = new Schema(
         borderColor: String,
         textColor: String,
       },
+      _id: false,
       default: undefined,
     },
 

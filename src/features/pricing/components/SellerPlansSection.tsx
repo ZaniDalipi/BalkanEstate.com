@@ -51,7 +51,13 @@ const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
               <span className="text-5xl font-extrabold text-gray-900">€{proYearlyProduct.price}</span>
               <span className="text-lg text-gray-600">/year</span>
             </div>
-            <p className="mt-2 text-sm text-emerald-600 font-medium">{t('pricing:plans.proYearly.saveVsMonthly', 'Save 33% vs monthly')}</p>
+            {proMonthlyProduct && proMonthlyProduct.price > 0 && (
+              <p className="mt-2 text-sm text-emerald-600 font-medium">
+                {t('pricing:plans.proYearly.saveVsMonthlyDynamic', 'Save {{percent}}% vs monthly', {
+                  percent: Math.round(((proMonthlyProduct.price * 12 - proYearlyProduct.price) / (proMonthlyProduct.price * 12)) * 100)
+                })}
+              </p>
+            )}
           </div>
 
           {/* Key Metrics */}

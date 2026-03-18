@@ -46,7 +46,8 @@
       "name": "Pro godišnje",
       "description": "Uštedite {{percent}}% s godišnjom naplatom",
       "badge": "NAJPOPULARNIJE",
-      "saveVsMonthly": "Uštedite 33% u odnosu na mjesečno"
+      "saveVsMonthly": "Uštedite 33% u odnosu na mjesečno",
+      "saveVsMonthlyDynamic": "Uštedite {{percent}}% u odnosu na mjesečno"
     },
     "enterprise": {
       "name": "Enterprise plan",

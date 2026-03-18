@@ -46,7 +46,8 @@
       "name": "Pro Anual",
       "description": "Economisiți {{percent}}% cu facturarea anuală",
       "badge": "CEL MAI POPULAR",
-      "saveVsMonthly": "Economisiți 33% față de lunar"
+      "saveVsMonthly": "Economisiți 33% față de lunar",
+      "saveVsMonthlyDynamic": "Economisiți {{percent}}% față de lunar"
     },
     "enterprise": {
       "name": "Plan Enterprise",

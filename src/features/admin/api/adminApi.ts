@@ -379,6 +379,13 @@ export interface PromotionPlan {
     iconBgColor?: string;
     priceColor?: string;
   };
+  // Special Offer fields
+  isSpecialOffer?: boolean;
+  availableFrom?: string;
+  availableTo?: string;
+  originalPriceMultiplier?: number;
+  offerLabel?: string;
+
   isActive: boolean;
   isVisible: boolean;
   createdAt?: string;
@@ -412,9 +419,11 @@ export const updatePromotionPlan = async (
   planId: string,
   data: Partial<PromotionPlan>
 ): Promise<{ plan: PromotionPlan }> => {
+  // Strip id and any nested subdocument ids before sending to backend
+  const { id: _stripId, ...cleanData } = data as any;
   return apiRequest(`/promotion-plans/${planId}`, {
     method: 'PUT',
-    body: data,
+    body: cleanData,
     requiresAuth: true,
   });
 };

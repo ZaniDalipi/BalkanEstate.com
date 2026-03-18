@@ -193,7 +193,7 @@ const AgencyFeatureSection: React.FC<AgencyFeatureSectionProps> = ({
 
             return (
               <div
-                key={plan._id}
+                key={plan.id}
                 className={`relative rounded-3xl p-8 bg-gradient-to-br ${colors.gradient} border-2 ${
                   plan.highlighted ? colors.borderHighlighted : colors.border
                 } shadow-xl flex flex-col`}
