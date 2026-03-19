@@ -290,7 +290,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
 
   // Banner repositioning
   const [isRepositioning, setIsRepositioning] = useState(false);
-  const [bannerPosY, setBannerPosY] = useState(listing.bannerPosition ?? 50);
+  const [bannerPosY, setBannerPosY] = useState(listing?.bannerPosition ?? 50);
   const [dragStartY, setDragStartY] = useState<number | null>(null);
   const [dragStartPos, setDragStartPos] = useState(50);
   const bannerContainerRef = useRef<HTMLDivElement>(null);
@@ -298,15 +298,16 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
   const handleRepositionStart = useCallback(() => {
     setIsRepositioning(true);
     setShowCustomizeMenu(false);
-    setBannerPosY(listing.bannerPosition ?? 50);
-  }, [listing.bannerPosition]);
+    setBannerPosY(listing?.bannerPosition ?? 50);
+  }, [listing?.bannerPosition]);
 
   const handleRepositionCancel = useCallback(() => {
     setIsRepositioning(false);
-    setBannerPosY(listing.bannerPosition ?? 50);
-  }, [listing.bannerPosition]);
+    setBannerPosY(listing?.bannerPosition ?? 50);
+  }, [listing?.bannerPosition]);
 
   const handleRepositionSave = useCallback(async () => {
+    if (!listing) return;
     try {
       await updateListingData({ id: listing.id, data: { bannerPosition: Math.round(bannerPosY) } as any });
       setIsRepositioning(false);
