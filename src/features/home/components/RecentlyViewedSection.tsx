@@ -45,7 +45,7 @@ const RecentlyViewedSection: React.FC<Props> = ({ onPropertyClick }) => {
   if (recentlyViewed.length === 0) return null;
 
   return (
-    <section className="py-10 sm:py-14 bg-gradient-to-b from-slate-50/80 to-white overflow-hidden">
+    <section className="py-10 sm:py-14 bg-gradient-to-b from-slate-50 to-white">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -94,19 +94,19 @@ const RecentlyViewedSection: React.FC<Props> = ({ onPropertyClick }) => {
         <div className="relative">
           {/* Left fade */}
           {canScrollLeft && (
-            <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-slate-50/80 to-transparent z-10 pointer-events-none" />
+            <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none" />
           )}
 
           <div
             ref={scrollRef}
-            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2 -mx-1 px-1"
+            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2 -mx-1 px-1 isolate"
             style={{ scrollSnapType: 'x mandatory' }}
           >
             {recentlyViewed.map((property) => (
               <div
                 key={property.id}
-                className="rv-card flex-shrink-0 w-[280px] sm:w-[310px]"
-                style={{ scrollSnapAlign: 'start', transform: 'translateZ(0)' }}
+                className="rv-card flex-shrink-0 w-[280px] sm:w-[310px] bg-white rounded-2xl"
+                style={{ scrollSnapAlign: 'start', willChange: 'transform', backfaceVisibility: 'hidden' }}
               >
                 <PropertyCard property={property} />
               </div>
@@ -115,7 +115,7 @@ const RecentlyViewedSection: React.FC<Props> = ({ onPropertyClick }) => {
 
           {/* Right fade */}
           {canScrollRight && (
-            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-slate-50/80 to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
           )}
         </div>
       </div>
