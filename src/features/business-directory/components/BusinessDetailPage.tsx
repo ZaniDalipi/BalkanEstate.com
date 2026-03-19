@@ -314,7 +314,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
     } catch {
       setUploadError(t('banner.repositionError', 'Failed to save banner position'));
     }
-  }, [bannerPosY, listing.id, updateListingData, t]);
+  }, [bannerPosY, listing?.id, updateListingData, t]);
 
   const handleDragMove = useCallback((clientY: number) => {
     if (dragStartY === null || !bannerContainerRef.current) return;
