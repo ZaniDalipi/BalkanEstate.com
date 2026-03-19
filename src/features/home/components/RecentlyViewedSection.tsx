@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
 import { Property } from '@/types';
 import { useRecentlyViewed } from '@/src/hooks/useRecentlyViewed';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
@@ -46,16 +45,10 @@ const RecentlyViewedSection: React.FC<Props> = ({ onPropertyClick }) => {
   if (recentlyViewed.length === 0) return null;
 
   return (
-    <section className="py-10 sm:py-14 bg-gradient-to-b from-slate-50/80 to-white overflow-hidden">
+    <section className="py-10 sm:py-14 bg-gradient-to-b from-slate-50 to-white">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.4 }}
-          className="flex items-center justify-between mb-6"
-        >
+        <div className="flex items-center justify-between mb-6">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
@@ -95,38 +88,34 @@ const RecentlyViewedSection: React.FC<Props> = ({ onPropertyClick }) => {
               </svg>
             </button>
           </div>
-        </motion.div>
+        </div>
 
         {/* Horizontal carousel */}
         <div className="relative">
           {/* Left fade */}
           {canScrollLeft && (
-            <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-slate-50/80 to-transparent z-10 pointer-events-none" />
+            <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none" />
           )}
 
           <div
             ref={scrollRef}
-            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2 -mx-1 px-1"
+            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2 -mx-1 px-1 no-backdrop-blur"
             style={{ scrollSnapType: 'x mandatory' }}
           >
-            {recentlyViewed.map((property, i) => (
-              <motion.div
+            {recentlyViewed.map((property) => (
+              <div
                 key={property.id}
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: Math.min(i * 0.05, 0.3) }}
-                className="rv-card flex-shrink-0 w-[280px] sm:w-[310px]"
-                style={{ scrollSnapAlign: 'start' }}
+                className="rv-card flex-shrink-0 w-[280px] sm:w-[310px] bg-white rounded-2xl"
+                style={{ scrollSnapAlign: 'start', willChange: 'transform', backfaceVisibility: 'hidden' }}
               >
                 <PropertyCard property={property} />
-              </motion.div>
+              </div>
             ))}
           </div>
 
           {/* Right fade */}
           {canScrollRight && (
-            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-slate-50/80 to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
           )}
         </div>
       </div>
