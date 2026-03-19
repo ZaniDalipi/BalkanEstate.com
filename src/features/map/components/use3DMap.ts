@@ -1155,10 +1155,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
       if (floorNumber != null && totalFloors != null && totalFloors > 0) {
         // Retry mechanism to ensure building tiles are loaded
         let retryCount = 0;
-        const maxRetries = 5;
+        const maxRetries = 8;
 
         const tryAddCustomBuilding = () => {
-          // First zoom to the building location to ensure tiles load
+          // Zoom to the building location to ensure tiles load
           mapInstance.flyTo({
             center: [lng, lat],
             zoom: Math.max(mapInstance.getZoom(), 17),
@@ -1166,8 +1166,11 @@ export function use3DMap(props: Map3DBuildingsProps) {
             duration: 1500,
           });
 
-          // Wait for the fly animation and tiles to load
-          setTimeout(() => {
+          // Wait for map to become idle (all tiles loaded and rendered) after flyTo
+          // This is more reliable than a fixed timeout, especially on slow connections
+          const onIdleAfterFly = () => {
+            mapInstance.off('idle', onIdleAfterFly);
+
             addCustomBuilding3D(
               mapInstance,
               lat,
@@ -1181,9 +1184,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
             // Check if source was added successfully - if not, retry
             if (!mapInstance.getSource('custom-building') && retryCount < maxRetries) {
               retryCount++;
-              setTimeout(tryAddCustomBuilding, 1000);
+              setTimeout(tryAddCustomBuilding, 1500);
             }
-          }, 2000);
+          };
+          mapInstance.on('idle', onIdleAfterFly);
         };
 
         // Start the process after initial load
