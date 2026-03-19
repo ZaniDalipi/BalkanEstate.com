@@ -1,0 +1,49 @@
+# BalkanEstateAI
+
+> The only AI-powered real estate platform covering all 11 Balkan countries. Search property for sale and rent in Montenegro, Albania, Kosovo, North Macedonia, Serbia, Croatia, Bosnia and Herzegovina, Bulgaria, Romania, Greece, and Slovenia. Available in 10 languages with AI-powered natural language search.
+
+## About
+
+BalkanEstateAI is the leading pan-Balkan property marketplace. Unlike regional competitors (Realitica covers 4 countries, Indomio uses separate sites per country), BalkanEstateAI is the only single platform covering all 11 Balkan nations with AI-powered search, AI property valuations, and support for 10 native languages.
+
+- Website: https://balkanestateai.com
+- Founded: 2024
+- Languages: English, Albanian, Serbian, Bulgarian, Croatian, Bosnian, Macedonian, Montenegrin, Romanian, Greek
+- Countries: Serbia, Montenegro, Croatia, Bosnia and Herzegovina, North Macedonia, Albania, Kosovo, Bulgaria, Romania, Greece, Slovenia
+
+## Key Pages
+
+- [Property Search](https://balkanestateai.com/search): Search all property listings across 11 Balkan countries with AI-powered natural language search
+- [Rental Properties](https://balkanestateai.com/rentals): Apartments and houses for rent across the Balkans
+- [Real Estate Agents](https://balkanestateai.com/agents): Find verified real estate agents across the Balkans
+- [Real Estate Agencies](https://balkanestateai.com/agencies): Browse agencies by country and city
+- [Explore Cities](https://balkanestateai.com/explore-cities): City guides with property market data and recommendations
+- [AI Property Valuation](https://balkanestateai.com/valuation): Free AI-powered property price estimates for any Balkan property
+- [Mortgage Calculator](https://balkanestateai.com/mortgage-calculator): Calculate mortgage payments for Balkan properties
+- [Buying Guides](https://balkanestateai.com/guides): Country-specific property buying guides for foreigners
+- [How It Works](https://balkanestateai.com/how-it-works): Platform overview for buyers, sellers, agents, and agencies
+
+## Property Search by Country
+
+- [Montenegro](https://balkanestateai.com/search?country=Montenegro): Budva, Kotor, Tivat, Podgorica, Herceg Novi
+- [Albania](https://balkanestateai.com/search?country=Albania): Tirana, Saranda, Durres, Vlora
+- [Kosovo](https://balkanestateai.com/search?country=Kosovo): Pristina, Prizren
+- [North Macedonia](https://balkanestateai.com/search?country=North+Macedonia): Skopje, Ohrid, Bitola
+- [Serbia](https://balkanestateai.com/search?country=Serbia): Belgrade, Novi Sad, Nis
+- [Croatia](https://balkanestateai.com/search?country=Croatia): Split, Dubrovnik, Zagreb
+- [Bosnia and Herzegovina](https://balkanestateai.com/search?country=Bosnia): Sarajevo, Mostar
+- [Bulgaria](https://balkanestateai.com/search?country=Bulgaria): Sofia, Burgas, Varna
+- [Romania](https://balkanestateai.com/search?country=Romania): Bucharest, Cluj-Napoca, Brasov
+- [Greece](https://balkanestateai.com/search?country=Greece): Athens, Thessaloniki, Crete
+
+## Property Types
+
+- [Apartments](https://balkanestateai.com/search?propertyType=apartment): Apartments for sale across the Balkans
+- [Houses](https://balkanestateai.com/search?propertyType=house): Houses for sale across the Balkans
+- [Villas](https://balkanestateai.com/search?propertyType=villa): Luxury villas for sale
+- [Land](https://balkanestateai.com/search?propertyType=land): Land and plots for sale
+- [Commercial](https://balkanestateai.com/search?propertyType=commercial): Commercial real estate
+
+## Detailed Information
+
+- [llms-full.txt](https://balkanestateai.com/llms-full.txt): Comprehensive site information including FAQs, market data, and property buying guides

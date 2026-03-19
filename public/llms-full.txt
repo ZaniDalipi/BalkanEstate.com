@@ -1,0 +1,127 @@
+# BalkanEstateAI
+
+> The only AI-powered real estate platform covering all 11 Balkan countries. Search property for sale and rent in Montenegro, Albania, Kosovo, North Macedonia, Serbia, Croatia, Bosnia and Herzegovina, Bulgaria, Romania, Greece, and Slovenia. Available in 10 languages with AI-powered natural language search.
+
+## About
+
+BalkanEstateAI is the leading pan-Balkan property marketplace. Unlike regional competitors (Realitica covers 4 countries, Indomio uses separate sites per country), BalkanEstateAI is the only single platform covering all 11 Balkan nations with AI-powered search, AI property valuations, and support for 10 native languages.
+
+- Website: https://balkanestateai.com
+- Founded: 2024
+- Languages: English, Albanian, Serbian, Bulgarian, Croatian, Bosnian, Macedonian, Montenegrin, Romanian, Greek
+- Countries: Serbia, Montenegro, Croatia, Bosnia and Herzegovina, North Macedonia, Albania, Kosovo, Bulgaria, Romania, Greece, Slovenia
+
+## Key Pages
+
+- [Property Search](https://balkanestateai.com/search): Search all property listings across 11 Balkan countries with AI-powered natural language search
+- [Rental Properties](https://balkanestateai.com/rentals): Apartments and houses for rent across the Balkans
+- [Real Estate Agents](https://balkanestateai.com/agents): Find verified real estate agents across the Balkans
+- [Real Estate Agencies](https://balkanestateai.com/agencies): Browse agencies by country and city
+- [Explore Cities](https://balkanestateai.com/explore-cities): City guides with property market data and recommendations
+- [AI Property Valuation](https://balkanestateai.com/valuation): Free AI-powered property price estimates for any Balkan property
+- [Mortgage Calculator](https://balkanestateai.com/mortgage-calculator): Calculate mortgage payments for Balkan properties
+- [Buying Guides](https://balkanestateai.com/guides): Country-specific property buying guides for foreigners
+- [How It Works](https://balkanestateai.com/how-it-works): Platform overview for buyers, sellers, agents, and agencies
+
+## Property Search by Country
+
+- [Montenegro](https://balkanestateai.com/search?country=Montenegro): Budva, Kotor, Tivat, Podgorica, Herceg Novi
+- [Albania](https://balkanestateai.com/search?country=Albania): Tirana, Saranda, Durres, Vlora
+- [Kosovo](https://balkanestateai.com/search?country=Kosovo): Pristina, Prizren
+- [North Macedonia](https://balkanestateai.com/search?country=North+Macedonia): Skopje, Ohrid, Bitola
+- [Serbia](https://balkanestateai.com/search?country=Serbia): Belgrade, Novi Sad, Nis
+- [Croatia](https://balkanestateai.com/search?country=Croatia): Split, Dubrovnik, Zagreb
+- [Bosnia and Herzegovina](https://balkanestateai.com/search?country=Bosnia): Sarajevo, Mostar
+- [Bulgaria](https://balkanestateai.com/search?country=Bulgaria): Sofia, Burgas, Varna
+- [Romania](https://balkanestateai.com/search?country=Romania): Bucharest, Cluj-Napoca, Brasov
+- [Greece](https://balkanestateai.com/search?country=Greece): Athens, Thessaloniki, Crete
+
+## Property Types
+
+- [Apartments for Sale](https://balkanestateai.com/search?propertyType=apartment): Apartments across the Balkans
+- [Houses for Sale](https://balkanestateai.com/search?propertyType=house): Houses across the Balkans
+- [Luxury Villas](https://balkanestateai.com/search?propertyType=villa): Villas for sale
+- [Land for Sale](https://balkanestateai.com/search?propertyType=land): Land and plots
+- [Commercial Property](https://balkanestateai.com/search?propertyType=commercial): Commercial real estate
+
+## Rental Properties by Country
+
+- [Rentals in Montenegro](https://balkanestateai.com/rentals?country=Montenegro)
+- [Rentals in Albania](https://balkanestateai.com/rentals?country=Albania)
+- [Rentals in Serbia](https://balkanestateai.com/rentals?country=Serbia)
+- [Rentals in Croatia](https://balkanestateai.com/rentals?country=Croatia)
+- [Rentals in North Macedonia](https://balkanestateai.com/rentals?country=North+Macedonia)
+- [Rentals in Kosovo](https://balkanestateai.com/rentals?country=Kosovo)
+- [Rentals in Bosnia](https://balkanestateai.com/rentals?country=Bosnia)
+- [Rentals in Bulgaria](https://balkanestateai.com/rentals?country=Bulgaria)
+- [Rentals in Romania](https://balkanestateai.com/rentals?country=Romania)
+- [Rentals in Greece](https://balkanestateai.com/rentals?country=Greece)
+
+## Frequently Asked Questions
+
+### Which countries does BalkanEstateAI cover for property search?
+
+BalkanEstateAI is the only platform covering all 11 Balkan countries: Kosovo, Albania, North Macedonia, Montenegro, Serbia, Bosnia and Herzegovina, Croatia, Bulgaria, Romania, Greece, and Slovenia. We support property searches in 10 languages including Albanian, Serbian, Macedonian, Croatian, Bosnian, Bulgarian, Romanian, and Greek.
+
+### Can foreigners buy property in the Balkans?
+
+Yes, foreigners can buy property in most Balkan countries, though rules vary. In Montenegro, foreigners can buy apartments freely. Albania allows foreign property ownership except agricultural land. Serbia allows EU citizens to buy freely, while others need reciprocity agreements. Kosovo, North Macedonia, and Croatia have specific conditions. BalkanEstateAI provides country-specific buying guides and connects you with local agents who specialize in foreign purchases.
+
+### What is the cheapest Balkan country to buy property?
+
+North Macedonia and Albania generally offer the lowest property prices in the Balkans. In Skopje, apartments start from €600-800/sqm, while Tirana averages €800-1,200/sqm. Kosovo (Pristina) offers apartments from €700-1,000/sqm. For comparison, Montenegro coastal cities like Budva average €2,000-3,500/sqm, and Croatian cities like Dubrovnik can exceed €4,000/sqm. Use BalkanEstateAI to compare prices across all 11 countries.
+
+### How does the AI-powered property search work?
+
+BalkanEstateAI uses artificial intelligence to match you with properties based on your preferences, budget, and lifestyle needs. Simply describe what you're looking for in natural language — for example, "seaside apartment in Montenegro under €100,000" or "family house near schools in Skopje" — and our AI finds the best matches across all 11 Balkan countries. No other Balkan property platform offers AI-powered search.
+
+### What is the best area to invest in Balkan real estate?
+
+Top investment areas include: Montenegro's coast (Budva, Kotor, Tivat) for tourism rental yields of 5-8%; Albania's Riviera (Saranda, Vlora) for rapid price growth; Tirana for capital appreciation; Belgrade for stable rental income; and Pristina (Kosovo) as an emerging market. BalkanEstateAI's AI valuation tool helps you assess investment potential across all markets.
+
+### Can I get a residence permit by buying property in Montenegro?
+
+Yes, Montenegro offers a temporary residence permit for property owners. By purchasing property in Montenegro, you can apply for a one-year renewable residence permit. The process is straightforward and BalkanEstateAI connects you with agents and legal professionals experienced in the residency-through-property process.
+
+### How do I list my property on BalkanEstateAI?
+
+To list your property, create a free account, verify your email, and click "Create Listing" in your dashboard. Add photos, descriptions in any of our 10 supported languages, and set your price in Euros. Free accounts can list up to 3 properties. Pro subscribers get 20 listings with promotion coupons and priority visibility.
+
+### What makes BalkanEstateAI different from Realitica or Indomio?
+
+BalkanEstateAI is the only platform that covers all 11 Balkan countries on a single platform with AI-powered search. Unlike Realitica (4 countries, outdated mobile experience) or Indomio (separate sites per country, no AI), BalkanEstateAI offers: AI property matching, AI-powered valuations, 10 native languages, a modern mobile-first PWA, virtual property tours, and comprehensive agent/agency directories — all in one place.
+
+### What are property taxes like in the Balkans?
+
+Property tax rates vary across the Balkans. Montenegro: 0.25-1% annually. Serbia: 0.4-2% based on value. Croatia: no annual property tax, but 3% transfer tax. Albania: low annual property tax (0.05-0.2%). North Macedonia: 0.1-0.2%. Bulgaria: 0.01-0.45%. Romania: varies by location. Greece: ENFIA tax 0.1-1.15%. Always consult local experts — BalkanEstateAI connects you with agents in each country.
+
+### What is the rental yield for property in Montenegro and Albania?
+
+Montenegro coastal properties achieve gross rental yields of 5-8% annually, with premium locations like Budva and Kotor performing best during the May-September tourist season. In Albania, Tirana apartments yield 5-7%, while Saranda and the Albanian Riviera offer 6-9% during peak tourist months. These are among the highest rental yields in Europe, making the Balkans attractive for property investors.
+
+## Platform Features
+
+- **AI-Powered Search**: Describe what you want in natural language (e.g., "2-bedroom apartment in Budva near the beach under €150,000") and get instant results
+- **AI Property Valuation**: Get free AI-generated price estimates for any property in the Balkans
+- **10 Languages**: Full platform available in English, Albanian, Serbian, Bulgarian, Croatian, Bosnian, Macedonian, Montenegrin, Romanian, and Greek
+- **Virtual Tours**: View properties remotely with 360° tours and video showcases
+- **Verified Agents**: Browse and contact verified real estate agents and agencies across all 11 countries
+- **Mortgage Calculator**: Calculate monthly payments with country-specific interest rates
+- **City Guides**: Explore neighborhoods with market data, amenities, and property trends
+- **Saved Searches**: Save search criteria and get notifications when matching properties are listed
+- **Real-Time Messaging**: Communicate directly with sellers and agents through the platform
+
+## Property Price Ranges by Country (approximate, in EUR/sqm)
+
+- Montenegro (coast): €2,000–3,500/sqm
+- Montenegro (inland): €800–1,500/sqm
+- Albania (Tirana): €800–1,200/sqm
+- Albania (coast): €1,000–2,000/sqm
+- Kosovo (Pristina): €700–1,000/sqm
+- North Macedonia (Skopje): €600–800/sqm
+- Serbia (Belgrade): €1,500–2,500/sqm
+- Croatia (coast): €2,500–4,000+/sqm
+- Bosnia (Sarajevo): €1,000–1,800/sqm
+- Bulgaria (Sofia): €1,000–1,800/sqm
+- Romania (Bucharest): €1,200–2,000/sqm
+- Greece (Athens): €1,500–3,000/sqm
