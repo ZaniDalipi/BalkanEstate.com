@@ -344,10 +344,11 @@ function prerenderPage(route, lang) {
     `\n    <!-- Hreflang for Multi-Region SEO -->\n${buildHreflangTags(route.path)}`
   );
 
-  // Add prerender status indicator before </head>
+  // Add prerender status indicator and build date (freshness signal for AI engines) before </head>
+  const buildDate = new Date().toISOString();
   html = html.replace(
     '</head>',
-    `  <meta name="prerender-status" content="200" />\n  </head>`
+    `  <meta property="article:modified_time" content="${buildDate}" />\n  <meta name="prerender-status" content="200" />\n  </head>`
   );
 
   // Determine output path

@@ -88,21 +88,128 @@ User-agent: DuckDuckBot
 Allow: /
 Crawl-delay: 1
 
-# Block AI training crawlers from scraping content
+# AI Search Crawlers - Allow public content for AI search visibility
+# Private/authenticated areas remain blocked for all AI crawlers
+
 User-agent: GPTBot
-Disallow: /
+Allow: /
+Disallow: /account
+Disallow: /inbox
+Disallow: /admin
+Disallow: /saved-properties
+Disallow: /saved-searches
+Disallow: /create-listing
+Disallow: /edit-listing
+Disallow: /create-rental
+Disallow: /create-agency
+Disallow: /agency-dashboard
+Disallow: /analytics
+Disallow: /payment/
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /login
+Disallow: /register
+Crawl-delay: 2
 
 User-agent: ChatGPT-User
-Disallow: /
+Allow: /
+Disallow: /account
+Disallow: /inbox
+Disallow: /admin
+Disallow: /saved-properties
+Disallow: /saved-searches
+Disallow: /create-listing
+Disallow: /edit-listing
+Disallow: /create-rental
+Disallow: /create-agency
+Disallow: /agency-dashboard
+Disallow: /analytics
+Disallow: /payment/
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /login
+Disallow: /register
+Crawl-delay: 2
 
 User-agent: CCBot
-Disallow: /
+Allow: /
+Disallow: /account
+Disallow: /inbox
+Disallow: /admin
+Disallow: /saved-properties
+Disallow: /saved-searches
+Disallow: /create-listing
+Disallow: /edit-listing
+Disallow: /create-rental
+Disallow: /create-agency
+Disallow: /agency-dashboard
+Disallow: /analytics
+Disallow: /payment/
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /login
+Disallow: /register
+Crawl-delay: 2
 
 User-agent: anthropic-ai
-Disallow: /
+Allow: /
+Disallow: /account
+Disallow: /inbox
+Disallow: /admin
+Disallow: /saved-properties
+Disallow: /saved-searches
+Disallow: /create-listing
+Disallow: /edit-listing
+Disallow: /create-rental
+Disallow: /create-agency
+Disallow: /agency-dashboard
+Disallow: /analytics
+Disallow: /payment/
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /login
+Disallow: /register
+Crawl-delay: 2
 
 User-agent: Google-Extended
-Disallow: /
+Allow: /
+Disallow: /account
+Disallow: /inbox
+Disallow: /admin
+Disallow: /saved-properties
+Disallow: /saved-searches
+Disallow: /create-listing
+Disallow: /edit-listing
+Disallow: /create-rental
+Disallow: /create-agency
+Disallow: /agency-dashboard
+Disallow: /analytics
+Disallow: /payment/
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /login
+Disallow: /register
+Crawl-delay: 2
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /account
+Disallow: /inbox
+Disallow: /admin
+Disallow: /saved-properties
+Disallow: /saved-searches
+Disallow: /create-listing
+Disallow: /edit-listing
+Disallow: /create-rental
+Disallow: /create-agency
+Disallow: /agency-dashboard
+Disallow: /analytics
+Disallow: /payment/
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /login
+Disallow: /register
+Crawl-delay: 2
 
 # Sitemap location
 Sitemap: https://balkanestateai.com/sitemap.xml
