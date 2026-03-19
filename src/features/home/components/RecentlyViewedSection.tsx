@@ -109,18 +109,14 @@ const RecentlyViewedSection: React.FC<Props> = ({ onPropertyClick }) => {
             className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2 -mx-1 px-1"
             style={{ scrollSnapType: 'x mandatory' }}
           >
-            {recentlyViewed.map((property, i) => (
-              <motion.div
+            {recentlyViewed.map((property) => (
+              <div
                 key={property.id}
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: Math.min(i * 0.05, 0.3) }}
                 className="rv-card flex-shrink-0 w-[280px] sm:w-[310px]"
                 style={{ scrollSnapAlign: 'start' }}
               >
                 <PropertyCard property={property} />
-              </motion.div>
+              </div>
             ))}
           </div>
 
