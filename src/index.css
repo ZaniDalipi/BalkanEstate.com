@@ -911,6 +911,19 @@ html[data-zoom] #root {
   display: none;
 }
 
+/* Disable backdrop-blur inside horizontal scroll carousels to prevent
+   browser compositing bugs that cause text to become invisible */
+.no-backdrop-blur * {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+.no-backdrop-blur .bg-white\/80 {
+  background-color: rgb(255 255 255) !important;
+}
+.no-backdrop-blur .bg-white\/60 {
+  background-color: rgb(255 255 255 / 0.95) !important;
+}
+
 /* Custom Media Query Variants for landscape modes */
 @custom-variant landscape (@media (orientation: landscape) and (max-height: 500px));
 @custom-variant tablet-landscape (@media (orientation: landscape) and (min-width: 768px) and (max-width: 1024px));

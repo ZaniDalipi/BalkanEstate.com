@@ -99,7 +99,7 @@ const RecentlyViewedSection: React.FC<Props> = ({ onPropertyClick }) => {
 
           <div
             ref={scrollRef}
-            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2 -mx-1 px-1 isolate"
+            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2 -mx-1 px-1 no-backdrop-blur"
             style={{ scrollSnapType: 'x mandatory' }}
           >
             {recentlyViewed.map((property) => (
