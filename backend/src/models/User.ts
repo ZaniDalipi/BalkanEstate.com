@@ -921,6 +921,20 @@ const UserSchema: Schema = new Schema(
   },
   {
     timestamps: true,
+    toJSON: {
+      transform(_doc: any, ret: any) {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+        delete ret.password;
+        delete ret.refreshTokens;
+        delete ret.resetPasswordToken;
+        delete ret.resetPasswordExpires;
+        delete ret.emailVerificationToken;
+        delete ret.emailVerificationExpires;
+        return ret;
+      },
+    },
   }
 );
 
