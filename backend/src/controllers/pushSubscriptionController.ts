@@ -3,6 +3,9 @@ import { IUser } from '../models/User';
 import pushService from '../services/pushNotificationService';
 import { apiLogger } from '../utils/logger';
 
+// Maximum push subscriptions per user (prevents device-spam abuse)
+const MAX_SUBSCRIPTIONS_PER_USER = 5;
+
 /**
  * @desc    Get VAPID public key for client-side push subscription
  * @route   GET /api/push/vapid-public-key
@@ -42,6 +45,16 @@ export const subscribe = async (req: Request, res: Response): Promise<void> => {
       new URL(subscription.endpoint);
     } catch {
       res.status(400).json({ message: 'Invalid push subscription endpoint URL' });
+      return;
+    }
+
+    // Enforce max subscriptions per user (skip check if updating existing endpoint)
+    const existingSubs = await pushService.getUserSubscriptions(userId);
+    const isUpdatingExisting = existingSubs.some(s => s.endpoint === subscription.endpoint);
+    if (!isUpdatingExisting && existingSubs.length >= MAX_SUBSCRIPTIONS_PER_USER) {
+      res.status(409).json({
+        message: `Maximum of ${MAX_SUBSCRIPTIONS_PER_USER} devices allowed. Please remove an existing device first.`,
+      });
       return;
     }
 

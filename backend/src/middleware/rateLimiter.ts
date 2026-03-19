@@ -70,6 +70,18 @@ const RATE_LIMIT_CONFIG = {
     windowMs: 15 * 60 * 1000, // 15 minutes
     blockDurationMs: isProduction ? 5 * 60 * 1000 : 60 * 1000, // 5min prod, 1min dev
   },
+  // Push subscribe/unsubscribe: per-IP limits (prevent subscription spam)
+  PUSH_SUBSCRIBE_IP: {
+    maxAttempts: isProduction ? 10 : 50,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    blockDurationMs: isProduction ? 10 * 60 * 1000 : 60 * 1000, // 10min prod, 1min dev
+  },
+  // VAPID public key fetch: per-IP limits (prevent enumeration/scraping)
+  PUSH_VAPID_KEY_IP: {
+    maxAttempts: isProduction ? 30 : 100,
+    windowMs: 15 * 60 * 1000,
+    blockDurationMs: isProduction ? 5 * 60 * 1000 : 30 * 1000,
+  },
 };
 
 /**
@@ -269,6 +281,53 @@ export const couponValidationRateLimiterIP = (
   if (!result.allowed) {
     res.status(429).json({
       message: 'Too many validation attempts. Please try again later.',
+      retryAfter: result.retryAfter,
+    });
+    return;
+  }
+
+  next();
+};
+
+/**
+ * Push subscribe/unsubscribe rate limiter (IP-based)
+ * Prevents subscription spam and abuse
+ */
+export const pushSubscribeRateLimiterIP = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (!isProduction) return next();
+  const ip = getClientIp(req);
+  const result = checkRateLimit(`push_subscribe_ip_${ip}`, ipLimitStore, RATE_LIMIT_CONFIG.PUSH_SUBSCRIBE_IP);
+
+  if (!result.allowed) {
+    res.status(429).json({
+      message: 'Too many push subscription requests. Please try again later.',
+      retryAfter: result.retryAfter,
+    });
+    return;
+  }
+
+  next();
+};
+
+/**
+ * VAPID public key fetch rate limiter (IP-based)
+ */
+export const pushVapidKeyRateLimiterIP = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (!isProduction) return next();
+  const ip = getClientIp(req);
+  const result = checkRateLimit(`push_vapid_ip_${ip}`, ipLimitStore, RATE_LIMIT_CONFIG.PUSH_VAPID_KEY_IP);
+
+  if (!result.allowed) {
+    res.status(429).json({
+      message: 'Too many requests. Please try again later.',
       retryAfter: result.retryAfter,
     });
     return;
