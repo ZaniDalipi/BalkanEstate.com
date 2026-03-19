@@ -628,13 +628,16 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
           onTouchStart={isRepositioning ? (e) => { setDragStartY(e.touches[0].clientY); setDragStartPos(bannerPosY); } : undefined}
         >
           {listing.bannerUrl ? (
-            <img
-              src={listing.bannerUrl}
-              alt={`${listing.name} banner`}
-              className={`w-full h-full object-cover ${isRepositioning ? 'select-none pointer-events-none' : ''}`}
-              style={{ objectPosition: `center ${bannerPosY}%` }}
-              draggable={false}
-            />
+            <>
+              <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
+              <img
+                src={listing.bannerUrl}
+                alt={`${listing.name} banner`}
+                className={`relative w-full h-full object-contain ${isRepositioning ? 'select-none pointer-events-none' : ''}`}
+                style={{ objectPosition: `center ${bannerPosY}%` }}
+                draggable={false}
+              />
+            </>
           ) : (
             <div className={`w-full h-full bg-gradient-to-br ${gradient}`} />
           )}
