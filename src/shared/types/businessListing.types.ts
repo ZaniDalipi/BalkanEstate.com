@@ -66,6 +66,7 @@ export interface BusinessListing {
   longitude?: number;
   logoUrl?: string;
   bannerUrl?: string;
+  bannerPosition?: number;
   whatsapp?: string;
   viber?: string;
   languages?: string[];

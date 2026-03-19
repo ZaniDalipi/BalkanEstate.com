@@ -88,6 +88,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
               src={listing.bannerUrl}
               alt={`${listing.name} banner`}
               className="w-full h-full object-cover"
+              style={{ objectPosition: `center ${listing.bannerPosition ?? 50}%` }}
               loading="lazy"
             />
           ) : (

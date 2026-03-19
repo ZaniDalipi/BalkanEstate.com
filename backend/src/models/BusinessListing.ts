@@ -50,6 +50,7 @@ export interface IBusinessListing extends Document {
   logoPublicId?: string;
   bannerUrl?: string;
   bannerPublicId?: string;
+  bannerPosition?: number;
   whatsapp?: string;
   viber?: string;
   languages?: string[];
@@ -179,6 +180,7 @@ const BusinessListingSchema: Schema = new Schema(
     logoPublicId: { type: String },
     bannerUrl: { type: String },
     bannerPublicId: { type: String },
+    bannerPosition: { type: Number, default: 50, min: 0, max: 100 },
     whatsapp: {
       type: String,
       trim: true,

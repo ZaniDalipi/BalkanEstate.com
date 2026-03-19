@@ -245,7 +245,7 @@ export const updateBusinessListing = async (
     const allowedFields = [
       'name', 'description', 'category', 'customCategory', 'listingType', 'services', 'contactPhone',
       'contactEmail', 'website', 'address', 'city', 'country', 'latitude', 'longitude',
-      'socialMedia', 'businessHours', 'isActive', 'whatsapp', 'viber', 'languages',
+      'socialMedia', 'businessHours', 'isActive', 'whatsapp', 'viber', 'languages', 'bannerPosition',
       'yearEstablished', 'licenseNumber', 'serviceAreas', 'priceRange', 'paymentMethods',
     ];
 

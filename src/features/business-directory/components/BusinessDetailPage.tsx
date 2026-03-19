@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useMemo, useRef, lazy, Suspens
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User } from 'lucide-react';
-import { useBusinessListing, useUploadBusinessBanner, useUploadBusinessLogo } from '../hooks';
+import { useBusinessListing, useUpdateBusinessListing, useUploadBusinessBanner, useUploadBusinessLogo } from '../hooks';
 import { useAppContext } from '@/context/AppContext';
 import NotificationCenter from '@/shared/components/NotificationCenter';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
@@ -283,9 +283,67 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
   const logoInputRef = useRef<HTMLInputElement>(null);
   const { uploadBanner, isLoading: isBannerUploading } = useUploadBusinessBanner();
   const { uploadLogo, isLoading: isLogoUploading } = useUploadBusinessLogo();
+  const { updateListing: updateListingData } = useUpdateBusinessListing();
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [showCustomizeMenu, setShowCustomizeMenu] = useState(false);
   const customizeRef = useRef<HTMLDivElement>(null);
+
+  // Banner repositioning
+  const [isRepositioning, setIsRepositioning] = useState(false);
+  const [bannerPosY, setBannerPosY] = useState(listing.bannerPosition ?? 50);
+  const [dragStartY, setDragStartY] = useState<number | null>(null);
+  const [dragStartPos, setDragStartPos] = useState(50);
+  const bannerContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleRepositionStart = useCallback(() => {
+    setIsRepositioning(true);
+    setShowCustomizeMenu(false);
+    setBannerPosY(listing.bannerPosition ?? 50);
+  }, [listing.bannerPosition]);
+
+  const handleRepositionCancel = useCallback(() => {
+    setIsRepositioning(false);
+    setBannerPosY(listing.bannerPosition ?? 50);
+  }, [listing.bannerPosition]);
+
+  const handleRepositionSave = useCallback(async () => {
+    try {
+      await updateListingData({ id: listing.id, data: { bannerPosition: Math.round(bannerPosY) } as any });
+      setIsRepositioning(false);
+    } catch {
+      setUploadError(t('banner.repositionError', 'Failed to save banner position'));
+    }
+  }, [bannerPosY, listing.id, updateListingData, t]);
+
+  const handleDragMove = useCallback((clientY: number) => {
+    if (dragStartY === null || !bannerContainerRef.current) return;
+    const rect = bannerContainerRef.current.getBoundingClientRect();
+    const deltaPixels = clientY - dragStartY;
+    // Moving mouse down => image should show higher part => decrease position
+    const deltaPct = (deltaPixels / rect.height) * 100;
+    const newPos = Math.max(0, Math.min(100, dragStartPos - deltaPct));
+    setBannerPosY(newPos);
+  }, [dragStartY, dragStartPos]);
+
+  // Mouse events for banner dragging
+  useEffect(() => {
+    if (!isRepositioning || dragStartY === null) return;
+    const handleMouseMove = (e: MouseEvent) => { e.preventDefault(); handleDragMove(e.clientY); };
+    const handleMouseUp = () => setDragStartY(null);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => { window.removeEventListener('mousemove', handleMouseMove); window.removeEventListener('mouseup', handleMouseUp); };
+  }, [isRepositioning, dragStartY, handleDragMove]);
+
+  // Touch events for banner dragging
+  useEffect(() => {
+    if (!isRepositioning || dragStartY === null) return;
+    const handleTouchMove = (e: TouchEvent) => { e.preventDefault(); handleDragMove(e.touches[0].clientY); };
+    const handleTouchEnd = () => setDragStartY(null);
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('touchend', handleTouchEnd);
+    return () => { window.removeEventListener('touchmove', handleTouchMove); window.removeEventListener('touchend', handleTouchEnd); };
+  }, [isRepositioning, dragStartY, handleDragMove]);
 
   // Close customize menu on outside click
   useEffect(() => {
@@ -555,19 +613,59 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
       {/* === HERO SECTION === */}
       <div className="bg-white border-b border-gray-200">
         {/* Banner area - always shown */}
-        <div className="relative w-full h-36 sm:h-44 lg:h-56 overflow-hidden">
+        <div
+          ref={bannerContainerRef}
+          className={`relative w-full h-36 sm:h-44 lg:h-56 overflow-hidden ${isRepositioning ? 'cursor-grab active:cursor-grabbing' : ''}`}
+          onMouseDown={isRepositioning ? (e) => { e.preventDefault(); setDragStartY(e.clientY); setDragStartPos(bannerPosY); } : undefined}
+          onTouchStart={isRepositioning ? (e) => { setDragStartY(e.touches[0].clientY); setDragStartPos(bannerPosY); } : undefined}
+        >
           {listing.bannerUrl ? (
             <img
               src={listing.bannerUrl}
               alt={`${listing.name} banner`}
-              className="w-full h-full object-cover"
+              className={`w-full h-full object-cover ${isRepositioning ? 'select-none pointer-events-none' : ''}`}
+              style={{ objectPosition: `center ${bannerPosY}%` }}
+              draggable={false}
             />
           ) : (
             <div className={`w-full h-full bg-gradient-to-br ${gradient}`} />
           )}
+
+          {/* Reposition mode overlay */}
+          {isRepositioning && (
+            <div className="absolute inset-0 ring-2 ring-inset ring-primary/60">
+              <div className="absolute inset-x-0 top-0 flex items-center justify-center gap-2 py-2 bg-black/50 backdrop-blur-sm z-30">
+                <svg className="w-4 h-4 text-white animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                </svg>
+                <span className="text-white text-sm font-medium">{t('banner.dragToReposition', 'Drag to reposition')}</span>
+                <svg className="w-4 h-4 text-white animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 13l-5 5m0 0l-5-5m5 5V6" />
+                </svg>
+              </div>
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-30">
+                <button
+                  type="button"
+                  onClick={handleRepositionCancel}
+                  className="px-4 py-2 bg-white/90 backdrop-blur-sm text-neutral-700 text-sm font-medium rounded-lg shadow-lg hover:bg-white transition-colors"
+                >
+                  {t('common:cancel', 'Cancel')}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRepositionSave}
+                  className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg shadow-lg hover:bg-primary/90 transition-colors"
+                >
+                  {t('common:save', 'Save')}
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Bottom fade into white */}
-          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white to-transparent" />
+          {!isRepositioning && <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white to-transparent" />}
           {/* Decorative pattern */}
+          {!isRepositioning && (
           <div className="absolute inset-0 opacity-[0.07]">
             <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
               <defs>
@@ -578,6 +676,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
               <rect width="100%" height="100%" fill="url(#banner-dots)" />
             </svg>
           </div>
+          )}
 
           {/* Upload progress overlay */}
           {(isBannerUploading || isLogoUploading) && (
@@ -594,8 +693,8 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
             </div>
           )}
 
-          {/* Owner: Customize button + dropdown (always visible, like agencies) */}
-          {isOwner && (
+          {/* Owner: Customize button + dropdown (hidden during reposition) */}
+          {isOwner && !isRepositioning && (
             <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20" ref={customizeRef}>
               <input ref={bannerInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleBannerUpload} className="hidden" />
               <input ref={logoInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleLogoUpload} className="hidden" />
@@ -633,6 +732,20 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                       </svg>
                       {listing.bannerUrl ? t('form.bannerChange', 'Change Banner') : t('form.bannerUpload', 'Upload Banner')}
                     </button>
+
+                    {/* Reposition Banner - only if banner exists */}
+                    {listing.bannerUrl && (
+                      <button
+                        type="button"
+                        onClick={handleRepositionStart}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors border-t border-neutral-100"
+                      >
+                        <svg className="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                        </svg>
+                        {t('banner.reposition', 'Reposition Banner')}
+                      </button>
+                    )}
 
                     {/* Upload / Change Logo */}
                     <button
