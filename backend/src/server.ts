@@ -109,6 +109,7 @@ import mapProxyRoutes from './routes/mapProxyRoutes';
 import newsRoutes from './routes/newsRoutes';
 import testimonialRoutes from './routes/testimonialRoutes';
 import pushRoutes from './routes/pushRoutes';
+import businessListingRoutes from './routes/businessListingRoutes';
 
 // Import services
 import { initializeGooglePlayService } from './services/googlePlayService';
@@ -331,6 +332,7 @@ app.use('/api/files', fileRoutes); // File access with storage access policy (ow
 app.use('/api/news', newsRoutes); // Public real estate news
 app.use('/api/testimonials', testimonialRoutes); // User testimonials (submit + public list)
 app.use('/api/push', pushRoutes); // Push notification subscriptions
+app.use('/api/business-listings', businessListingRoutes); // Business directory listings
 
 // 404 handler
 app.use((_req: Request, res: Response) => {
