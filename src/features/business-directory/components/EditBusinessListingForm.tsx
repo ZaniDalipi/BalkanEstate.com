@@ -5,6 +5,7 @@ import { BUSINESS_CATEGORIES, type BusinessCategory, type CreateBusinessListingD
 import { Animated } from '@/src/components/ui/Animations';
 import { BuildingStorefrontIcon, UserIcon, MapPinIcon } from '@/constants';
 import { BALKAN_LOCATIONS, type CityData } from '@/utils/balkanLocations';
+import { ALL_PHONE_COUNTRY_CODES, BALKAN_PHONE_CODES, formatPhoneNumber, getPhonePlaceholder } from '@/constants/phoneCountryCodes';
 
 const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
 
@@ -93,6 +94,32 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
   const [serviceInput, setServiceInput] = useState('');
   const [languageInput, setLanguageInput] = useState('');
   const [serviceAreaInput, setServiceAreaInput] = useState('');
+
+  // Parse existing phone into country code + digits
+  const parsePhone = (phone: string) => {
+    if (!phone) return { code: '+383', digits: '' };
+    // Try matching known country codes (longest first)
+    const sorted = ALL_PHONE_COUNTRY_CODES.map(c => c.code).sort((a, b) => b.length - a.length);
+    for (const code of sorted) {
+      if (phone.startsWith(code)) {
+        const rest = phone.slice(code.length);
+        return { code, digits: formatPhoneNumber(code, rest) };
+      }
+    }
+    return { code: '+383', digits: phone };
+  };
+
+  const parsedPhone = parsePhone(listing.contactPhone);
+  const parsedWhatsapp = parsePhone(listing.whatsapp || '');
+  const parsedViber = parsePhone(listing.viber || '');
+
+  const [phoneCountryCode, setPhoneCountryCode] = useState(parsedPhone.code);
+  const [phoneDigits, setPhoneDigits] = useState(parsedPhone.digits);
+  const [whatsappCountryCode, setWhatsappCountryCode] = useState(parsedWhatsapp.code);
+  const [whatsappDigits, setWhatsappDigits] = useState(parsedWhatsapp.digits);
+  const [viberCountryCode, setViberCountryCode] = useState(parsedViber.code);
+  const [viberDigits, setViberDigits] = useState(parsedViber.digits);
+
   const [formError, setFormError] = useState<string | null>(null);
   const [fieldError, setFieldError] = useState<FieldErrorKey | null>(null);
   const [showHours, setShowHours] = useState(
@@ -329,16 +356,21 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
 
     if (!formData.name.trim()) { setValidationError('name', t('form.errors.nameRequired')); return; }
     if (!formData.category) { setValidationError('category', t('form.errors.categoryRequired')); return; }
-    if (!formData.contactPhone.trim()) { setValidationError('contactPhone', t('form.errors.phoneRequired')); return; }
+    const phoneClean = phoneDigits.replace(/\D/g, '');
+    if (!phoneClean || phoneClean.length < 6) { setValidationError('contactPhone', t('form.errors.phoneRequired')); return; }
     if (!formData.country.trim()) { setValidationError('country', t('form.errors.countryRequired')); return; }
     if (!formData.city.trim()) { setValidationError('city', t('form.errors.cityRequired')); return; }
 
     try {
+      const fullPhone = `${phoneCountryCode}${phoneClean}`;
+      const whatsappClean = whatsappDigits.replace(/\D/g, '');
+      const viberClean = viberDigits.replace(/\D/g, '');
+
       const cleanData: Partial<CreateBusinessListingData & { isActive: boolean }> = {
         listingType,
         name: formData.name.trim(),
         category: formData.category,
-        contactPhone: formData.contactPhone.trim(),
+        contactPhone: fullPhone,
         city: formData.city.trim(),
         country: formData.country.trim(),
         isActive,
@@ -362,8 +394,8 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
         cleanData.longitude = lng;
       }
 
-      cleanData.whatsapp = formData.whatsapp?.trim() || '';
-      cleanData.viber = formData.viber?.trim() || '';
+      cleanData.whatsapp = whatsappClean ? `${whatsappCountryCode}${whatsappClean}` : '';
+      cleanData.viber = viberClean ? `${viberCountryCode}${viberClean}` : '';
       cleanData.languages = formData.languages && formData.languages.length > 0 ? formData.languages : [];
       cleanData.yearEstablished = formData.yearEstablished || undefined;
       cleanData.licenseNumber = formData.licenseNumber?.trim() || '';
@@ -774,17 +806,36 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
                   <label htmlFor="edit-contactPhone" className="block text-sm font-medium text-neutral-700 mb-1">
                     {t('form.fields.phone')} <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    ref={fieldRefs.contactPhone}
-                    id="edit-contactPhone"
-                    name="contactPhone"
-                    type="tel"
-                    value={formData.contactPhone}
-                    onChange={handleChange}
-                    maxLength={30}
-                    className={inputClasses('contactPhone')}
-                    placeholder={t('form.placeholders.phone')}
-                  />
+                  <div ref={fieldRefs.contactPhone} className={`flex items-center border rounded-xl focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-colors ${fieldError === 'contactPhone' ? 'border-red-500 ring-2 ring-red-100' : 'border-neutral-300'}`}>
+                    <select
+                      value={phoneCountryCode}
+                      onChange={(e) => {
+                        const newCode = e.target.value;
+                        setPhoneCountryCode(newCode);
+                        if (phoneDigits) setPhoneDigits(formatPhoneNumber(newCode, phoneDigits.replace(/\D/g, '')));
+                      }}
+                      className="bg-transparent text-sm text-neutral-700 font-medium pl-3 pr-1 py-2.5 border-none focus:outline-none focus:ring-0 cursor-pointer"
+                    >
+                      {ALL_PHONE_COUNTRY_CODES.map((cc, i) => (
+                        <React.Fragment key={`phone-${cc.country}-${cc.code}`}>
+                          {i === BALKAN_PHONE_CODES.length && <option disabled>──────────</option>}
+                          <option value={cc.code}>{cc.flag} {cc.code}</option>
+                        </React.Fragment>
+                      ))}
+                    </select>
+                    <div className="w-px h-5 bg-neutral-200 flex-shrink-0" />
+                    <input
+                      id="edit-contactPhone"
+                      type="tel"
+                      value={phoneDigits}
+                      onChange={(e) => {
+                        const digits = e.target.value.replace(/\D/g, '');
+                        setPhoneDigits(formatPhoneNumber(phoneCountryCode, digits));
+                      }}
+                      placeholder={getPhonePlaceholder(phoneCountryCode)}
+                      className="flex-1 bg-transparent text-sm text-neutral-900 px-3 py-2.5 border-none focus:outline-none focus:ring-0 placeholder:text-neutral-400 min-w-0"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label htmlFor="edit-contactEmail" className="block text-sm font-medium text-neutral-700 mb-1">
@@ -822,31 +873,71 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
                   <label htmlFor="edit-whatsapp" className="block text-sm font-medium text-neutral-700 mb-1">
                     {t('form.fields.whatsapp', 'WhatsApp')}
                   </label>
-                  <input
-                    id="edit-whatsapp"
-                    name="whatsapp"
-                    type="tel"
-                    value={formData.whatsapp}
-                    onChange={handleChange}
-                    maxLength={30}
-                    className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
-                    placeholder={t('form.placeholders.whatsapp', '+383 44 123 456')}
-                  />
+                  <div className="flex items-center border border-neutral-300 rounded-xl focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-colors">
+                    <select
+                      value={whatsappCountryCode}
+                      onChange={(e) => {
+                        const newCode = e.target.value;
+                        setWhatsappCountryCode(newCode);
+                        if (whatsappDigits) setWhatsappDigits(formatPhoneNumber(newCode, whatsappDigits.replace(/\D/g, '')));
+                      }}
+                      className="bg-transparent text-sm text-neutral-700 font-medium pl-3 pr-1 py-2.5 border-none focus:outline-none focus:ring-0 cursor-pointer"
+                    >
+                      {ALL_PHONE_COUNTRY_CODES.map((cc, i) => (
+                        <React.Fragment key={`wa-${cc.country}-${cc.code}`}>
+                          {i === BALKAN_PHONE_CODES.length && <option disabled>──────────</option>}
+                          <option value={cc.code}>{cc.flag} {cc.code}</option>
+                        </React.Fragment>
+                      ))}
+                    </select>
+                    <div className="w-px h-5 bg-neutral-200 flex-shrink-0" />
+                    <input
+                      id="edit-whatsapp"
+                      type="tel"
+                      value={whatsappDigits}
+                      onChange={(e) => {
+                        const digits = e.target.value.replace(/\D/g, '');
+                        setWhatsappDigits(formatPhoneNumber(whatsappCountryCode, digits));
+                      }}
+                      placeholder={getPhonePlaceholder(whatsappCountryCode)}
+                      className="flex-1 bg-transparent text-sm text-neutral-900 px-3 py-2.5 border-none focus:outline-none focus:ring-0 placeholder:text-neutral-400 min-w-0"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label htmlFor="edit-viber" className="block text-sm font-medium text-neutral-700 mb-1">
                     {t('form.fields.viber', 'Viber')}
                   </label>
-                  <input
-                    id="edit-viber"
-                    name="viber"
-                    type="tel"
-                    value={formData.viber}
-                    onChange={handleChange}
-                    maxLength={30}
-                    className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
-                    placeholder={t('form.placeholders.viber', '+383 44 123 456')}
-                  />
+                  <div className="flex items-center border border-neutral-300 rounded-xl focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-colors">
+                    <select
+                      value={viberCountryCode}
+                      onChange={(e) => {
+                        const newCode = e.target.value;
+                        setViberCountryCode(newCode);
+                        if (viberDigits) setViberDigits(formatPhoneNumber(newCode, viberDigits.replace(/\D/g, '')));
+                      }}
+                      className="bg-transparent text-sm text-neutral-700 font-medium pl-3 pr-1 py-2.5 border-none focus:outline-none focus:ring-0 cursor-pointer"
+                    >
+                      {ALL_PHONE_COUNTRY_CODES.map((cc, i) => (
+                        <React.Fragment key={`vb-${cc.country}-${cc.code}`}>
+                          {i === BALKAN_PHONE_CODES.length && <option disabled>──────────</option>}
+                          <option value={cc.code}>{cc.flag} {cc.code}</option>
+                        </React.Fragment>
+                      ))}
+                    </select>
+                    <div className="w-px h-5 bg-neutral-200 flex-shrink-0" />
+                    <input
+                      id="edit-viber"
+                      type="tel"
+                      value={viberDigits}
+                      onChange={(e) => {
+                        const digits = e.target.value.replace(/\D/g, '');
+                        setViberDigits(formatPhoneNumber(viberCountryCode, digits));
+                      }}
+                      placeholder={getPhonePlaceholder(viberCountryCode)}
+                      className="flex-1 bg-transparent text-sm text-neutral-900 px-3 py-2.5 border-none focus:outline-none focus:ring-0 placeholder:text-neutral-400 min-w-0"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

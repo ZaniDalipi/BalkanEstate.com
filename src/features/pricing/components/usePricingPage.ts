@@ -32,7 +32,12 @@ export function usePricingPage() {
   const { t } = useTranslation(['pricing', 'common']);
   const { state, dispatch, checkAuthStatus } = useAppContext();
   const { setDirection } = useNavigationDirection();
-  const [activeTab, setActiveTab] = useState<'seller' | 'buyer' | 'listing' | 'agency'>('seller');
+  const [activeTab, setActiveTab] = useState<'seller' | 'buyer' | 'listing' | 'agency'>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'listing' || tab === 'buyer' || tab === 'agency' || tab === 'seller') return tab;
+    return 'seller';
+  });
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{
     name: string;
@@ -49,8 +54,11 @@ export function usePricingPage() {
   const [selectedAgencyDuration, setSelectedAgencyDuration] = useState<7 | 14 | 28 | 90>(28);
   const [includeMapMarker, setIncludeMapMarker] = useState(false);
 
-  // Special offer states
-  const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
+  // Special offer states - auto-select from URL param
+  const [selectedOfferId, setSelectedOfferId] = useState<string | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('offer') || null;
+  });
 
   // Use React Query for real-time data fetching
   const {

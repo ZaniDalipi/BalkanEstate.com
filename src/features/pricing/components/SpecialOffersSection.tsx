@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Animated } from '@/src/components/ui/Animations';
 import { BoltIcon, CheckIcon, SparklesIcon } from '@/constants';
 import { type PromotionPlan } from '../hooks/usePricingData';
@@ -156,11 +156,24 @@ const SpecialOffersSection: React.FC<SpecialOffersSectionProps> = ({
   onSelectListingForPromotion,
   onPurchasePromotion,
 }) => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to this section when arriving with a pre-selected offer (e.g. from home page)
+  useEffect(() => {
+    if (selectedOfferId && specialOffers.length > 0 && sectionRef.current) {
+      const timer = setTimeout(() => {
+        sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedOfferId, specialOffers.length]);
+
   if (specialOffers.length === 0) return null;
 
   const selectedOffer = specialOffers.find((o) => o.id === selectedOfferId);
 
   return (
+    <div ref={sectionRef}>
     <Animated variant="fadeInUp" className="max-w-5xl mx-auto mt-12">
       {/* Section Header */}
       <div className="text-center mb-8">
@@ -384,6 +397,7 @@ const SpecialOffersSection: React.FC<SpecialOffersSectionProps> = ({
         })}
       </div>
     </Animated>
+    </div>
   );
 };
 

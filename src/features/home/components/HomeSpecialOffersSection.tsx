@@ -103,7 +103,7 @@ const HomeSpecialOffersSection: React.FC<Props> = ({ onNavigate }) => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.1 }}
-                onClick={() => onNavigate('pricing', '/pricing')}
+                onClick={() => onNavigate('pricing', `/pricing?tab=listing&offer=${offer.id}`)}
                 className={`relative rounded-3xl p-6 flex flex-col cursor-pointer bg-gradient-to-br ${c.cardBg} border ${c.border} hover:shadow-xl hover:scale-[1.02] transition-all duration-300`}
               >
                 {/* Badge */}
@@ -179,7 +179,7 @@ const HomeSpecialOffersSection: React.FC<Props> = ({ onNavigate }) => {
           className="text-center mt-8"
         >
           <button
-            onClick={() => onNavigate('pricing', '/pricing')}
+            onClick={() => onNavigate('pricing', `/pricing?tab=listing&offer=${offer.id}`)}
             className="inline-flex items-center gap-2 text-sm font-semibold text-rose-600 hover:text-rose-700 transition-colors"
           >
             {t('pricing:specialOffers.viewAllDeals', 'View All Promotion Plans')}
