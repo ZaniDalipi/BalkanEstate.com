@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
 import { Property } from '@/types';
 import { useRecentlyViewed } from '@/src/hooks/useRecentlyViewed';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
@@ -49,13 +48,7 @@ const RecentlyViewedSection: React.FC<Props> = ({ onPropertyClick }) => {
     <section className="py-10 sm:py-14 bg-gradient-to-b from-slate-50/80 to-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.4 }}
-          className="flex items-center justify-between mb-6"
-        >
+        <div className="flex items-center justify-between mb-6">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
@@ -95,7 +88,7 @@ const RecentlyViewedSection: React.FC<Props> = ({ onPropertyClick }) => {
               </svg>
             </button>
           </div>
-        </motion.div>
+        </div>
 
         {/* Horizontal carousel */}
         <div className="relative">
@@ -113,7 +106,7 @@ const RecentlyViewedSection: React.FC<Props> = ({ onPropertyClick }) => {
               <div
                 key={property.id}
                 className="rv-card flex-shrink-0 w-[280px] sm:w-[310px]"
-                style={{ scrollSnapAlign: 'start' }}
+                style={{ scrollSnapAlign: 'start', transform: 'translateZ(0)' }}
               >
                 <PropertyCard property={property} />
               </div>
