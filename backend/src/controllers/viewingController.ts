@@ -3,7 +3,7 @@ import Property from '../models/Property';
 import User from '../models/User';
 import Viewing from '../models/Viewing';
 import { sendViewingConfirmation, sendViewingNotification, sendViewingApproved, sendViewingRejected } from '../services/emailService';
-import Notification from '../models/Notification';
+import { createNotificationWithPush } from '../services/engagementService';
 import { apiLogger } from '../utils/logger';
 import { getObjectIdParam, isValidObjectId } from '../utils/validateParams';
 import { resolveId } from '../utils/idObfuscation';
@@ -245,8 +245,8 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
     const location = [property.address, property.city, property.country].filter(Boolean).join(', ');
     const propertyTitle = property.title || `${property.propertyType} in ${property.city}`;
 
-    // ── Create in-app notification for the seller ──
-    Notification.create({
+    // ── Create in-app notification + push for the seller ──
+    createNotificationWithPush({
       userId: property.sellerId,
       type: 'new_viewing',
       title: 'New Viewing Request',
@@ -463,9 +463,9 @@ export const updateViewingStatus = async (req: Request, res: Response): Promise<
 
     const sellerName = req.user?.name || 'Property Owner';
 
-    // ── Create in-app notification for the seller ──
+    // ── Create in-app notification + push for the seller ──
     if (status === 'confirmed' || status === 'cancelled') {
-      Notification.create({
+      createNotificationWithPush({
         userId: sellerId,
         type: status === 'confirmed' ? 'viewing_approved' : 'viewing_declined',
         title: status === 'confirmed' ? 'Viewing Approved' : 'Viewing Declined',

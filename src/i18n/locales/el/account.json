@@ -275,6 +275,9 @@
       "weekly": "Weekly Summary",
       "never": "Never"
     },
+    "pushEnabled": "Λαμβάνετε push ειδοποιήσεις",
+    "pushDisabled": "Ενεργοποιήστε για άμεσες ειδοποιήσεις",
+    "pushDenied": "Αποκλεισμένο στις ρυθμίσεις του προγράμματος περιήγησης",
     "savePreferences": "Save Preferences",
     "preferencesSaved": "Notification preferences saved"
   },

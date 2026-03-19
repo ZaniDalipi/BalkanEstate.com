@@ -26,6 +26,7 @@ import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 import { apiLogger } from '../../src/shared/utils/logger';
 import { tokenService } from '../../src/shared/api/tokenService';
+import PushNotificationToggle from '../../src/features/notifications/components/PushNotificationToggle';
 
 // Common languages spoken in the Balkan region
 const BALKAN_LANGUAGES = [
@@ -1886,6 +1887,12 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                 </button>
             </div>
         </form>
+
+        {/* Push Notifications */}
+        <div className="mt-8 border-t border-white/30 pt-6">
+            <h3 className="text-sm font-semibold text-neutral-700 mb-2">{t('account:notifications.title', 'Notification Settings')}</h3>
+            <PushNotificationToggle />
+        </div>
 
         {/* Change Password Section */}
         <div className="mt-8 border-t border-white/30 pt-8">
