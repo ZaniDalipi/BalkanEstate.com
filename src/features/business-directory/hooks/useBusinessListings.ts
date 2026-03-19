@@ -75,7 +75,7 @@ export function useUpdateBusinessListing() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<CreateBusinessListingData & { isActive: boolean }> }) =>
+    mutationFn: ({ id, data }: { id: string; data: Partial<CreateBusinessListingData & { isActive: boolean; bannerPosition: number }> }) =>
       updateBusinessListing(id, data),
     onSuccess: (_result, { id }) => {
       queryClient.invalidateQueries({ queryKey: businessDirectoryKeys.detail(id) });

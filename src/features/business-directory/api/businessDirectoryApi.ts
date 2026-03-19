@@ -45,7 +45,7 @@ export const createBusinessListing = async (
 
 export const updateBusinessListing = async (
   id: string,
-  data: Partial<CreateBusinessListingData & { isActive: boolean }>
+  data: Partial<CreateBusinessListingData & { isActive: boolean; bannerPosition: number }>
 ): Promise<{ listing: BusinessListing; message: string }> => {
   return apiRequest(`/business-listings/${id}`, {
     method: 'PUT',

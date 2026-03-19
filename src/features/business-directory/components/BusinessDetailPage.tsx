@@ -295,6 +295,13 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
   const [dragStartPos, setDragStartPos] = useState(50);
   const bannerContainerRef = useRef<HTMLDivElement>(null);
 
+  // Sync bannerPosY when listing data loads or updates (e.g. after save + refetch)
+  useEffect(() => {
+    if (!isRepositioning && listing?.bannerPosition != null) {
+      setBannerPosY(listing.bannerPosition);
+    }
+  }, [listing?.bannerPosition, isRepositioning]);
+
   const handleRepositionStart = useCallback(() => {
     setIsRepositioning(true);
     setShowCustomizeMenu(false);
@@ -309,7 +316,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
   const handleRepositionSave = useCallback(async () => {
     if (!listing) return;
     try {
-      await updateListingData({ id: listing.id, data: { bannerPosition: Math.round(bannerPosY) } as any });
+      await updateListingData({ id: listing.id, data: { bannerPosition: Math.round(bannerPosY) } });
       setIsRepositioning(false);
     } catch {
       setUploadError(t('banner.repositionError', 'Failed to save banner position'));
