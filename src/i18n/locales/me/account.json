@@ -208,6 +208,9 @@
       "weekly": "Weekly Summary",
       "never": "Never"
     },
+    "pushEnabled": "Primate push obavještenja",
+    "pushDisabled": "Uključite za trenutna obavještenja",
+    "pushDenied": "Blokirano u postavkama preglednika",
     "savePreferences": "Save Preferences",
     "preferencesSaved": "Notification preferences saved"
   },

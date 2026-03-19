@@ -208,6 +208,9 @@
       "weekly": "Rezumat Săptămânal",
       "never": "Niciodată"
     },
+    "pushEnabled": "Primești notificări push",
+    "pushDisabled": "Activează pentru alerte instantanee",
+    "pushDenied": "Blocat în setările browserului",
     "savePreferences": "Salvează Preferințele",
     "preferencesSaved": "Preferințele de notificare au fost salvate"
   },

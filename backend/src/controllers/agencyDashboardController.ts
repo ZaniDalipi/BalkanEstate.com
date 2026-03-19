@@ -5,6 +5,7 @@ import Property from '../models/Property';
 import User, { IUser } from '../models/User';
 import Inquiry from '../models/Inquiry';
 import Notification from '../models/Notification';
+import { createNotificationWithPush } from '../services/engagementService';
 import PromotionCoupon from '../models/PromotionCoupon';
 import { getObjectIdParam } from '../utils/validateParams';
 import { agencyLogger } from '../utils/logger';
@@ -1303,7 +1304,7 @@ export const createTeamNote = async (
 
     // Create the team note as a Notification document
     // The note is created under the author's userId, with agency context in data
-    const note = await Notification.create({
+    const note = await createNotificationWithPush({
       userId: currentUser._id,
       type: 'system',
       title: title.trim(),
@@ -1316,7 +1317,6 @@ export const createTeamNote = async (
         authorId: String(currentUser._id),
         authorName: currentUser.name,
       },
-      isRead: false,
     });
 
     agencyLogger.info(

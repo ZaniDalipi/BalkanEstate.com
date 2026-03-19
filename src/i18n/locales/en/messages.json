@@ -60,6 +60,14 @@
     "propertyViewed": "Your listing was viewed {{count}} times",
     "newInquiry": "New inquiry on your listing"
   },
+  "pushPrompt": {
+    "title": "Enable Notifications",
+    "description": "Get instant updates about messages, viewings, and property alerts.",
+    "enable": "Enable",
+    "enabling": "Enabling...",
+    "later": "Later",
+    "dismiss": "Dismiss"
+  },
   "toast": {
     "success": "Success!",
     "error": "Error",

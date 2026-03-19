@@ -279,6 +279,9 @@
       "weekly": "Weekly Summary",
       "never": "Never"
     },
+    "pushEnabled": "Receiving push notifications",
+    "pushDisabled": "Enable to receive instant alerts",
+    "pushDenied": "Blocked in browser settings",
     "savePreferences": "Save Preferences",
     "preferencesSaved": "Notification preferences saved"
   },

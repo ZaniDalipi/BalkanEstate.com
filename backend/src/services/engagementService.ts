@@ -6,10 +6,11 @@
  */
 
 import mongoose from 'mongoose';
-import Notification, { NotificationType, NotificationPriority } from '../models/Notification';
+import Notification, { NotificationType, NotificationPriority, INotification } from '../models/Notification';
 import Property from '../models/Property';
 import User from '../models/User';
 import emailService from './emailService';
+import { sendPushToUser } from './pushNotificationService';
 import { apiLogger } from '../utils/logger';
 
 // ============================================================================
@@ -247,6 +248,11 @@ export async function checkViewMilestone(
     // Send email notification (if user has email notifications enabled)
     await sendMilestoneEmail(user, property, template, currentViews, milestone, isPromoted);
 
+    // Send push notification (non-blocking)
+    sendPushToUser(String(property.sellerId), notification as INotification).catch((err) => {
+      apiLogger.error('Push notification failed for milestone:', err);
+    });
+
     apiLogger.info(`🎉 Milestone notification sent: ${milestone} views for property ${propertyId}`);
 
     return {
@@ -428,8 +434,35 @@ export async function getUnreadCount(userId: string): Promise<number> {
   return Notification.countDocuments({ userId, isRead: false });
 }
 
+/**
+ * Create a notification and automatically send a push notification to the user.
+ * Use this instead of Notification.create() directly to ensure push is triggered.
+ */
+export async function createNotificationWithPush(
+  data: {
+    userId: mongoose.Types.ObjectId | string;
+    type: NotificationType;
+    title: string;
+    message: string;
+    icon?: string;
+    priority?: NotificationPriority;
+    data?: Record<string, any>;
+    expiresAt?: Date;
+  }
+): Promise<INotification> {
+  const notification = await Notification.create(data);
+
+  // Send push notification (non-blocking, fire-and-forget)
+  sendPushToUser(String(data.userId), notification).catch((err) => {
+    apiLogger.error('Push notification failed:', err);
+  });
+
+  return notification;
+}
+
 export default {
   checkViewMilestone,
+  createNotificationWithPush,
   getUnreadNotifications,
   getNotifications,
   markAsRead,

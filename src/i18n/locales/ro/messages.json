@@ -60,6 +60,14 @@
     "propertyViewed": "Anunțul dvs. a fost vizualizat de {{count}} ori",
     "newInquiry": "Întrebare nouă la anunțul dvs."
   },
+  "pushPrompt": {
+    "title": "Activează notificările",
+    "description": "Primește actualizări instantanee despre mesaje, vizionări și alerte de proprietăți.",
+    "enable": "Activează",
+    "enabling": "Se activează...",
+    "later": "Mai târziu",
+    "dismiss": "Închide"
+  },
   "toast": {
     "success": "Succes!",
     "error": "Eroare",

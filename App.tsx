@@ -115,6 +115,7 @@ const AgencyPaymentPage = lazy(() => import('./src/features/agencies/components/
 
 // Cookie Consent Banner (lazy loaded - shown after initial render)
 const CookieConsent = lazy(() => import('./src/shared/components/CookieConsent'));
+const PushNotificationPrompt = lazy(() => import('./src/features/notifications/components/PushNotificationPrompt'));
 
 // Splash screen (lazy loaded - shown on initial app load to hide loading)
 const SplashScreen = lazy(() => import('./src/components/ui/SplashScreen'));
@@ -1110,6 +1111,7 @@ const AppWrapper: React.FC = () => {
                 {state.isAuthModalOpen && <AuthPage />}
                 <CookieConsent />
                 <PWAInstallPrompt />
+                <PushNotificationPrompt />
             </Suspense>
         </>
     );
