@@ -58,7 +58,6 @@ function lazyWithRetry(importFn: () => Promise<{ default: React.ComponentType<an
 // Core layout components (lazy loaded - can render after initial paint)
 const Sidebar = lazyWithRetry(() => import('./components/shared/Sidebar'));
 const Header = lazyWithRetry(() => import('./components/shared/Header'));
-const BottomNav = lazy(() => import('./components/shared/BottomNav'));
 
 
 // Lazy load all pages and conditional components to reduce initial bundle
@@ -757,8 +756,6 @@ const MainLayout: React.FC = () => {
     'account',
   ].includes(state.activeView);
 
-  // Show bottom nav on mobile for main navigable views
-  const showBottomNav = isMobile && !state.selectedProperty && !state.selectedBusinessListingId && !state.selectedAgencyId;
 
   // Map activeView to readable page title
   const pageTitle = useMemo(() => {
@@ -914,16 +911,10 @@ const MainLayout: React.FC = () => {
               </div>
             )}
 
-            <main id="main-content" data-scroll-container className={`flex flex-col flex-1 overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden h-full min-h-0' : 'overflow-y-auto'} ${showBottomNav ? 'pb-16' : ''}`}>
+            <main id="main-content" data-scroll-container className={`flex flex-col flex-1 overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden h-full min-h-0' : 'overflow-y-auto'}`}>
                 <AppContent onToggleSidebar={() => setIsSidebarOpen(true)} />
             </main>
 
-            {/* Bottom navigation for mobile */}
-            {showBottomNav && (
-              <Suspense fallback={null}>
-                <BottomNav />
-              </Suspense>
-            )}
         </div>
 
         {/* Lazy loaded modals - only render when open */}
