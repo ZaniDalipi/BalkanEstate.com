@@ -600,33 +600,36 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
           whileInView="visible"
           viewport={{ once: true }}
         >
-          <div className="flex items-center gap-1 p-1 bg-white rounded-xl border border-neutral-200/80 shadow-sm">
-            {tabs.map((tab) => (
-              <motion.button
-                key={tab.key}
-                type="button"
-                onClick={() => handleTabChange(tab.key)}
-                className={`relative flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                  activeTab === tab.key
-                    ? 'text-white'
-                    : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50'
-                }`}
-                whileHover={activeTab !== tab.key ? { scale: 1.02 } : {}}
-                whileTap={{ scale: 0.97 }}
-              >
-                {activeTab === tab.key && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute inset-0 bg-gradient-to-r from-primary to-blue-600 rounded-lg shadow-md shadow-primary/25"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
-                )}
-                <span className="relative z-10 flex items-center gap-1.5">
-                  {tab.icon}
-                  {tab.label}
-                </span>
-              </motion.button>
-            ))}
+          {/* Scrollable tabs wrapper on mobile */}
+          <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div className="flex items-center gap-1 p-1 bg-white rounded-xl border border-neutral-200/80 shadow-sm min-w-max">
+              {tabs.map((tab) => (
+                <motion.button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => handleTabChange(tab.key)}
+                  className={`relative flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 whitespace-nowrap ${
+                    activeTab === tab.key
+                      ? 'text-white'
+                      : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50'
+                  }`}
+                  whileHover={activeTab !== tab.key ? { scale: 1.02 } : {}}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  {activeTab === tab.key && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute inset-0 bg-gradient-to-r from-primary to-blue-600 rounded-lg shadow-md shadow-primary/25"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-1.5">
+                    {tab.icon}
+                    {tab.label}
+                  </span>
+                </motion.button>
+              ))}
+            </div>
           </div>
 
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-visible">
