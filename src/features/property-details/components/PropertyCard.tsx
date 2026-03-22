@@ -110,8 +110,16 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   const isNew = property?.createdAt && (Date.now() - property.createdAt < 3 * 24 * 60 * 60 * 1000);
   const isPriceReduced = property?.originalPrice !== undefined && property?.originalPrice > property?.price;
   const isSold = property?.status === 'sold';
-  // Treat rental as expired (property available) if rentedUntil date has passed
-  const isRentalExpired = property?.status === 'rented' && property?.rentedUntil && new Date(property.rentedUntil) <= new Date();
+  // Treat rental as expired (property available) if rentedUntil date has fully passed
+  // e.g. rentedUntil = March 22 → stays rented on March 22, becomes active on March 23
+  const isRentalExpired = (() => {
+    if (property?.status !== 'rented' || !property?.rentedUntil) return false;
+    const rentedEnd = new Date(property.rentedUntil);
+    rentedEnd.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return rentedEnd < today;
+  })();
   const isRented = property?.status === 'rented' && !isRentalExpired;
   const isRental = (property?.listingType || 'sale') === 'rent';
 

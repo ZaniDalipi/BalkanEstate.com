@@ -16,12 +16,16 @@ import { invalidateCache } from '../middleware/cache';
  * 4. Cache is invalidated for immediate visibility
  */
 export const processExpiredRentals = async (): Promise<number> => {
-  const now = new Date();
+  // Use start of today so properties rented until today stay rented all day
+  // and only get released the next day
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  // Find all rented properties where the rental period has expired
+  // Find all rented properties where the rental period ended before today
+  // (rentedUntil < today means the date has fully passed)
   const expiredRentals = await Property.find({
     status: 'rented',
-    rentedUntil: { $lte: now },
+    rentedUntil: { $lt: today },
   });
 
   if (expiredRentals.length === 0) {
@@ -58,7 +62,7 @@ export const processExpiredRentals = async (): Promise<number> => {
         {
           $set: {
             status: 'active',
-            availableFrom: now,
+            availableFrom: new Date(),
           },
           $unset: {
             rentedAt: 1,

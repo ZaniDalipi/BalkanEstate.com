@@ -126,15 +126,25 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   const [showRentedModal, setShowRentedModal] = useState(false);
   const [showAvailableConfirm, setShowAvailableConfirm] = useState(false);
   const [rentedUntilDate, setRentedUntilDate] = useState('');
-  // Auto-release: if rentedUntil date has passed, treat property as active on the client side
-  const isRentalExpired = property.status === 'rented' &&
-    property.rentedUntil &&
-    new Date(property.rentedUntil) <= new Date();
+  // Auto-release: if rentedUntil date has fully passed (the day after), treat as active
+  // e.g. rentedUntil = March 22 → stays rented on March 22, becomes active on March 23
+  const isRentalExpired = (() => {
+    if (property.status !== 'rented' || !property.rentedUntil) return false;
+    const rentedEnd = new Date(property.rentedUntil);
+    rentedEnd.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return rentedEnd < today;
+  })();
   const [localStatus, setLocalStatus] = useState(isRentalExpired ? 'active' : property.status);
   // Sync if the property prop is updated externally (re-fetch / real-time update)
   useEffect(() => {
-    if (property.status === 'rented' && property.rentedUntil && new Date(property.rentedUntil) <= new Date()) {
-      setLocalStatus('active');
+    if (property.status === 'rented' && property.rentedUntil) {
+      const rentedEnd = new Date(property.rentedUntil);
+      rentedEnd.setHours(0, 0, 0, 0);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      setLocalStatus(rentedEnd < today ? 'active' : 'rented');
     } else {
       setLocalStatus(property.status);
     }

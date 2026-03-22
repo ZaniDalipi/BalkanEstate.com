@@ -421,11 +421,13 @@ export const getProperty = async (
       return;
     }
 
-    // Auto-release expired rental: if rentedUntil date has passed, mark as available
+    // Auto-release expired rental: if rentedUntil date has fully passed (the day after), mark as available
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     if (
       property.status === 'rented' &&
       property.rentedUntil &&
-      new Date(property.rentedUntil) <= new Date()
+      new Date(property.rentedUntil) < today
     ) {
       if (property.rentedAt) {
         let monthlyRent = property.price;
