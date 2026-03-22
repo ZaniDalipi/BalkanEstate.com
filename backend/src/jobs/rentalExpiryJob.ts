@@ -50,6 +50,8 @@ export const processExpiredRentals = async (): Promise<number> => {
                 startDate: property.rentedAt,
                 endDate: property.rentedUntil,
                 monthlyRent,
+                ...(property.currentTenantName && { tenantName: property.currentTenantName }),
+                ...(property.currentRentalNotes && { notes: property.currentRentalNotes }),
               },
             },
           }
@@ -67,6 +69,8 @@ export const processExpiredRentals = async (): Promise<number> => {
           $unset: {
             rentedAt: 1,
             rentedUntil: 1,
+            currentTenantName: 1,
+            currentRentalNotes: 1,
           },
         }
       );

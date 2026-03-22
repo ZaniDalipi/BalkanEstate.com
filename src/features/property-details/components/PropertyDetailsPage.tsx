@@ -126,6 +126,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   const [showRentedModal, setShowRentedModal] = useState(false);
   const [showAvailableConfirm, setShowAvailableConfirm] = useState(false);
   const [rentedUntilDate, setRentedUntilDate] = useState('');
+  const [tenantName, setTenantName] = useState('');
+  const [rentalNotes, setRentalNotes] = useState('');
   // Auto-release: if rentedUntil date has fully passed (the day after), treat as active
   // e.g. rentedUntil = March 22 → stays rented on March 22, becomes active on March 23
   const isRentalExpired = (() => {
@@ -368,22 +370,35 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
   // Rental status handlers
   const handleMarkAsRented = useCallback(async () => {
+    // Validate date is not in the past
+    if (rentedUntilDate) {
+      const selected = new Date(rentedUntilDate);
+      selected.setHours(0, 0, 0, 0);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selected < today) return;
+    }
+
     setShowRentedModal(false);
     setLocalStatus('rented');
     const rentedAt = Date.now();
     const until = rentedUntilDate ? new Date(rentedUntilDate).getTime() : undefined;
     dispatch({ type: 'MARK_PROPERTY_RENTED', payload: { id: property.id, rentedAt, rentedUntil: until } });
     window.dispatchEvent(new CustomEvent('property-status-update', { detail: { id: property.id, status: 'rented', rentedAt, rentedUntil: until } }));
+    const savedTenantName = tenantName.trim();
+    const savedNotes = rentalNotes.trim();
     setRentedUntilDate('');
+    setTenantName('');
+    setRentalNotes('');
     try {
-      await api.markPropertyAsRented(property.id, rentedUntilDate || undefined);
+      await api.markPropertyAsRented(property.id, rentedUntilDate || undefined, savedTenantName || undefined, savedNotes || undefined);
       fetchProperties?.();
       window.dispatchEvent(new CustomEvent('property-status-changed'));
     } catch {
       setLocalStatus('active');
       dispatch({ type: 'MARK_PROPERTY_AVAILABLE', payload: property.id });
     }
-  }, [property.id, rentedUntilDate, fetchProperties, dispatch]);
+  }, [property.id, rentedUntilDate, tenantName, rentalNotes, fetchProperties, dispatch]);
 
   const handleMarkAsAvailable = useCallback(async () => {
     setShowAvailableConfirm(false);
@@ -543,7 +558,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       {/* Mark as Rented Modal */}
       <Modal
         isOpen={showRentedModal}
-        onClose={() => { setShowRentedModal(false); setRentedUntilDate(''); }}
+        onClose={() => { setShowRentedModal(false); setRentedUntilDate(''); setTenantName(''); setRentalNotes(''); }}
         title={t('rental:status.markAsRented')}
       >
         <div className="space-y-4">
@@ -557,13 +572,48 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               value={rentedUntilDate}
               onChange={(e) => setRentedUntilDate(e.target.value)}
               min={new Date().toISOString().split('T')[0]}
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm ${
+                rentedUntilDate && new Date(rentedUntilDate) < new Date(new Date().toISOString().split('T')[0])
+                  ? 'border-red-400 bg-red-50'
+                  : 'border-neutral-300'
+              }`}
+            />
+            {rentedUntilDate && new Date(rentedUntilDate) < new Date(new Date().toISOString().split('T')[0]) ? (
+              <p className="text-xs text-red-500 mt-1">{t('rental:status.dateInPastError')}</p>
+            ) : (
+              <p className="text-xs text-neutral-400 mt-1">{t('rental:status.leaveEmptyHint')}</p>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-1">{t('rental:status.tenantNameLabel')}</label>
+            <input
+              type="text"
+              value={tenantName}
+              onChange={(e) => setTenantName(e.target.value)}
+              placeholder={t('rental:status.tenantNamePlaceholder')}
               className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm"
             />
-            <p className="text-xs text-neutral-400 mt-1">{t('rental:status.leaveEmptyHint')}</p>
+            <p className="text-xs text-neutral-400 mt-1">{t('rental:status.tenantNameHint')}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-1">{t('rental:status.rentalNotesLabel')}</label>
+            <textarea
+              value={rentalNotes}
+              onChange={(e) => setRentalNotes(e.target.value)}
+              placeholder={t('rental:status.rentalNotesPlaceholder')}
+              rows={2}
+              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm resize-none"
+            />
           </div>
           <div className="flex justify-center gap-4 pt-2">
-            <button onClick={() => { setShowRentedModal(false); setRentedUntilDate(''); }} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">{t('common:cancel')}</button>
-            <button onClick={handleMarkAsRented} className="px-6 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600">{t('rental:status.markAsRented')}</button>
+            <button onClick={() => { setShowRentedModal(false); setRentedUntilDate(''); setTenantName(''); setRentalNotes(''); }} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">{t('common:cancel')}</button>
+            <button
+              onClick={handleMarkAsRented}
+              disabled={!!(rentedUntilDate && new Date(rentedUntilDate) < new Date(new Date().toISOString().split('T')[0]))}
+              className="px-6 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {t('rental:status.markAsRented')}
+            </button>
           </div>
         </div>
       </Modal>

@@ -436,7 +436,13 @@ export const getProperty = async (
 
         await Property.updateOne(
           { _id: property._id },
-          { $push: { rentalHistory: { startDate: property.rentedAt, endDate: property.rentedUntil, monthlyRent } } }
+          { $push: { rentalHistory: {
+            startDate: property.rentedAt,
+            endDate: property.rentedUntil,
+            monthlyRent,
+            ...(property.currentTenantName && { tenantName: property.currentTenantName }),
+            ...(property.currentRentalNotes && { notes: property.currentRentalNotes }),
+          } } }
         );
       }
 
@@ -444,7 +450,7 @@ export const getProperty = async (
         { _id: property._id },
         {
           $set: { status: 'active', availableFrom: new Date() },
-          $unset: { rentedAt: 1, rentedUntil: 1 },
+          $unset: { rentedAt: 1, rentedUntil: 1, currentTenantName: 1, currentRentalNotes: 1 },
         }
       );
 
@@ -1614,6 +1620,14 @@ export const markAsRented = async (
       property.rentedUntil = new Date(req.body.rentedUntil);
     }
 
+    // Store optional tenant info (private, owner-only)
+    if (req.body?.tenantName) {
+      property.currentTenantName = req.body.tenantName;
+    }
+    if (req.body?.notes) {
+      property.currentRentalNotes = req.body.notes;
+    }
+
     await property.save();
 
     // Archive the rented listing (keep one photo and details)
@@ -1723,6 +1737,8 @@ export const markAsAvailable = async (
               startDate: property.rentedAt,
               endDate,
               monthlyRent,
+              ...(property.currentTenantName && { tenantName: property.currentTenantName }),
+              ...(property.currentRentalNotes && { notes: property.currentRentalNotes }),
             },
           },
         }
@@ -1743,6 +1759,8 @@ export const markAsAvailable = async (
         $unset: {
           rentedAt: 1,
           rentedUntil: 1,
+          currentTenantName: 1,
+          currentRentalNotes: 1,
         },
       }
     );
