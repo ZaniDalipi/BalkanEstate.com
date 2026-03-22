@@ -112,42 +112,7 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
     };
   }, [platform, tiktokInfo.id]);
 
-  // Load Instagram embed script with retry
-  useEffect(() => {
-    if (platform !== 'instagram' || !instagramId) return;
-
-    const existingScript = document.querySelector('script[src*="instagram.com/embed.js"]');
-    if (!existingScript) {
-      const script = document.createElement('script');
-      script.src = 'https://www.instagram.com/embed.js';
-      script.async = true;
-      script.onerror = () => setEmbedFailed(true);
-      document.body.appendChild(script);
-    }
-
-    // Process embeds after delays with retries
-    const retries = [500, 1500, 3000, 5000];
-    const timers = retries.map(delay =>
-      setTimeout(() => {
-        if ((window as any).instgrm?.Embeds?.process) {
-          (window as any).instgrm.Embeds.process();
-        }
-      }, delay)
-    );
-
-    // If still not rendered after 8s, show fallback
-    const fallbackTimer = setTimeout(() => {
-      if (containerRef.current) {
-        const iframe = containerRef.current.querySelector('iframe');
-        if (!iframe) setEmbedFailed(true);
-      }
-    }, 8000);
-
-    return () => {
-      timers.forEach(clearTimeout);
-      clearTimeout(fallbackTimer);
-    };
-  }, [platform, instagramId]);
+  // Instagram uses direct iframe embed - no script needed
 
   // Don't render if no valid platform or ID
   if (!platform) return null;
@@ -251,57 +216,37 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
           </div>
         )}
 
-        {/* Instagram Embed - Using official blockquote */}
+        {/* Instagram Embed - Direct iframe for zoomed-in view like TikTok */}
         {platform === 'instagram' && !embedFailed && (
-          <blockquote
-            className="instagram-media"
-            data-instgrm-captioned
-            data-instgrm-permalink={instagramPermalink}
-            data-instgrm-version="14"
-            style={{
-              background: '#FFF',
-              border: 0,
-              borderRadius: '3px',
-              boxShadow: '0 0 1px 0 rgba(0,0,0,0.5), 0 1px 10px 0 rgba(0,0,0,0.15)',
-              margin: '1px',
-              maxWidth: '540px',
-              minWidth: '326px',
-              padding: 0,
-              width: '99.375%',
-            }}
-          >
-            <div style={{ padding: '16px' }}>
-              <a
-                href={instagramPermalink}
-                style={{
-                  background: '#FFFFFF',
-                  lineHeight: 0,
-                  padding: 0,
-                  textAlign: 'center',
-                  textDecoration: 'none',
-                  width: '100%',
-                }}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-neutral-200 rounded-full" />
-                  <div className="flex-1">
-                    <div className="h-3 bg-neutral-200 rounded w-24 mb-2" />
-                    <div className="h-3 bg-neutral-200 rounded w-16" />
-                  </div>
-                </div>
-                <div className="aspect-square bg-neutral-100 rounded flex items-center justify-center mb-4">
-                  <svg className="w-16 h-16 text-neutral-300" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M8 5v14l11-7z"/>
-                  </svg>
-                </div>
-                <div className="text-center text-blue-500 font-medium">
-                  View this post on Instagram
-                </div>
-              </a>
+          <div className="w-full flex justify-center">
+            <div
+              style={{
+                maxWidth: '540px',
+                minWidth: '326px',
+                width: '100%',
+                position: 'relative',
+              }}
+            >
+              <div style={{ position: 'relative', paddingBottom: '125%', height: 0, overflow: 'hidden', borderRadius: '8px' }}>
+                <iframe
+                  src={`${instagramPermalink}embed/`}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    border: 0,
+                  }}
+                  allowFullScreen
+                  scrolling="no"
+                  allow="autoplay; encrypted-media"
+                  title="Instagram video"
+                  onError={() => setEmbedFailed(true)}
+                />
+              </div>
             </div>
-          </blockquote>
+          </div>
         )}
       </div>
     </div>
