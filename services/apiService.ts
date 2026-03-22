@@ -1157,6 +1157,7 @@ function transformBackendProperty(backendProp: any): Property {
       agencyLogo: seller.agencyLogo,
       agencyId: seller.agencyId,
     },
+    propertyId: backendProp.propertyId,
     propertyType: backendProp.propertyType,
     floorNumber: backendProp.floorNumber,
     totalFloors: backendProp.totalFloors,
