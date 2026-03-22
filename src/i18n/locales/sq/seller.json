@@ -108,6 +108,9 @@
     "fields": {
       "listingTitle": "Titulli i Listimit",
       "titleHint": "Titull i shkurtër dhe tërheqës (p.sh., \"Vilë Luksoze me Pamje Deti\", \"Studio Komode në Qendër\")",
+      "propertyId": "ID e Pronës",
+      "propertyIdPlaceholder": "p.sh., AP-2024-001, VILLA-123",
+      "propertyIdHint": "Opsionale. ID-ja juaj e brendshme e referencës për këtë pronë.",
       "price": "Çmimi",
       "bedrooms": "Dhoma Gjumi",
       "bathrooms": "Banjo",
@@ -392,6 +395,8 @@
     "noListings": "Nuk keni krijuar ende asnjë listim.",
     "createFirst": "Krijoni listimin tuaj të parë",
     "addNewListing": "Shto Listim të Ri",
+    "searchByPropertyId": "Kërko sipas ID së pronës...",
+    "propertyIdLabel": "ID e Pronës",
     "active": "Aktive",
     "pending": "Në Pritje",
     "sold": "Shitur",

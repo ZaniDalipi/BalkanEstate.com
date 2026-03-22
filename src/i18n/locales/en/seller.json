@@ -108,6 +108,9 @@
     "fields": {
       "listingTitle": "Listing Title",
       "titleHint": "Short, catchy title (e.g., \"Luxury Sea View Villa\", \"Cozy Studio Downtown\")",
+      "propertyId": "Property ID",
+      "propertyIdPlaceholder": "e.g., AP-2024-001, VILLA-123",
+      "propertyIdHint": "Optional. Your own internal reference ID for this property.",
       "price": "Price",
       "bedrooms": "Bedrooms",
       "bathrooms": "Bathrooms",
@@ -297,6 +300,8 @@
     "noListings": "You haven't created any listings yet.",
     "createFirst": "Create your first listing",
     "addNewListing": "Add New Listing",
+    "searchByPropertyId": "Search by Property ID...",
+    "propertyIdLabel": "Property ID",
     "active": "Active",
     "pending": "Pending",
     "sold": "Sold",

@@ -108,6 +108,9 @@
     "fields": {
       "listingTitle": "Listing Title",
       "titleHint": "Short, catchy title (e.g., \"Luxury Sea View Villa\", \"Cozy Studio Downtown\")",
+      "propertyId": "ID Nekretnine",
+      "propertyIdPlaceholder": "npr., AP-2024-001, VILLA-123",
+      "propertyIdHint": "Neobavezno. Vaš interni referentni broj za ovu nekretninu.",
       "price": "Price",
       "bedrooms": "Bedrooms",
       "bathrooms": "Bathrooms",
@@ -289,6 +292,8 @@
     "noListings": "Još niste kreirali nijedan oglas.",
     "createFirst": "Kreirajte svoj prvi oglas",
     "addNewListing": "Dodaj Novi Oglas",
+    "searchByPropertyId": "Pretraži po ID nekretnine...",
+    "propertyIdLabel": "ID Nekretnine",
     "active": "Aktivno",
     "pending": "Na Čekanju",
     "sold": "Prodano",

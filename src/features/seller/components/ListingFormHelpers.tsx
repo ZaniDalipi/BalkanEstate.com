@@ -9,6 +9,7 @@ export type Step = 'init' | 'loading' | 'form' | 'preview' | 'floorplan' | 'paym
 export type Mode = 'ai' | 'manual';
 
 export interface ListingData {
+    propertyId: string;
     title: string;
     listingType: ListingType;
     streetAddress: string;
@@ -66,6 +67,7 @@ export interface ImageData {
 }
 
 export const initialListingData: ListingData = {
+    propertyId: '',
     title: '',
     listingType: 'sale',
     streetAddress: '',

@@ -33,6 +33,7 @@ export function buildPreviewProperty(
 
     return {
         id: propertyToEdit?.id || `preview-${Date.now()}`,
+        propertyId: listingData.propertyId.trim() || undefined,
         sellerId: currentUser?.id || '',
         listingType: listingData.listingType || 'sale',
         status: propertyToEdit?.status || 'active',
@@ -181,6 +182,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             setStep('form');
 
             setListingData({
+                propertyId: propertyToEdit.propertyId || '',
                 title: propertyToEdit.title || '',
                 listingType: propertyToEdit.listingType || 'sale',
                 streetAddress: propertyToEdit.address,
@@ -855,6 +857,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
 
             const newProperty: Property = {
                 id: propertyToEdit ? propertyToEdit.id : `prop-${Date.now()}`,
+                propertyId: listingData.propertyId.trim() || undefined,
                 sellerId: currentUser.id,
                 listingType: listingData.listingType || 'sale',
                 status: propertyToEdit ? propertyToEdit.status : 'active',

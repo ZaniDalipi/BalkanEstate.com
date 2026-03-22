@@ -108,6 +108,9 @@
     "fields": {
       "listingTitle": "Naslov Oglasa",
       "titleHint": "Kratak, privlačan naslov (npr., \"Luksuzna Vila sa Pogledom na More\", \"Udoban Studio u Centru\")",
+      "propertyId": "ID Nekretnine",
+      "propertyIdPlaceholder": "npr., AP-2024-001, VILLA-123",
+      "propertyIdHint": "Opcionalno. Vaš interni referentni broj za ovu nekretninu.",
       "price": "Cijena",
       "bedrooms": "Spavaće Sobe",
       "bathrooms": "Kupatila",
@@ -289,6 +292,8 @@
     "noListings": "Još niste kreirali nijedan oglas.",
     "createFirst": "Kreirajte svoj prvi oglas",
     "addNewListing": "Dodajte Novi Oglas",
+    "searchByPropertyId": "Pretraži po ID nekretnine...",
+    "propertyIdLabel": "ID Nekretnine",
     "active": "Aktivno",
     "pending": "Na Čekanju",
     "sold": "Prodato",

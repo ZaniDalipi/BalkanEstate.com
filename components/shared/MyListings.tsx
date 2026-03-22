@@ -140,6 +140,11 @@ const ListingCard: React.FC<{
                             </span>
                         )}
                     </div>
+                    {property.propertyId && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono font-medium bg-gray-100 text-gray-600" title={t('seller:myListings.propertyIdLabel', 'Property ID')}>
+                            ID: {property.propertyId}
+                        </span>
+                    )}
                     {property.title && (
                         <p className="font-bold text-lg sm:text-xl text-neutral-900 mt-1 line-clamp-1">{property.title}</p>
                     )}
@@ -296,6 +301,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const [statusFilter, setStatusFilter] = useState<PropertyStatus | 'all'>('all');
     const [roleFilter, setRoleFilter] = useState<'all' | 'private_seller' | 'agent'>('all');
     const [listingTypeFilter, setListingTypeFilter] = useState<'all' | 'sale' | 'rent'>('all');
+    const [propertyIdSearch, setPropertyIdSearch] = useState('');
     const [showPromotionModal, setShowPromotionModal] = useState(false);
     const [propertyToPromote, setPropertyToPromote] = useState<Property | null>(null);
     const [isExtensionMode, setIsExtensionMode] = useState(false);
@@ -420,6 +426,14 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const filteredAndSortedProperties = useMemo(() => {
         let filtered = myProperties;
 
+        // Apply property ID search
+        if (propertyIdSearch.trim()) {
+            const searchTerm = propertyIdSearch.trim().toLowerCase();
+            filtered = filtered.filter(p =>
+                p.propertyId?.toLowerCase().includes(searchTerm)
+            );
+        }
+
         // Apply listing type filter
         if (listingTypeFilter !== 'all') {
             filtered = filtered.filter(p => (p.listingType || 'sale') === listingTypeFilter);
@@ -468,7 +482,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             const bTime = Math.max(bRenewed, bCreated);
             return bTime - aTime;
         });
-    }, [myProperties, statusFilter, roleFilter, listingTypeFilter]);
+    }, [myProperties, statusFilter, roleFilter, listingTypeFilter, propertyIdSearch]);
 
     const handleRenew = async (id: string) => {
         // Optimistic: update UI immediately
@@ -846,6 +860,32 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                       <span>New Rental Listing</span>
                     </button>
                 </div>
+            </div>
+
+            {/* Property ID Search */}
+            <div className="relative max-w-sm">
+                <input
+                    type="text"
+                    value={propertyIdSearch}
+                    onChange={(e) => setPropertyIdSearch(e.target.value)}
+                    placeholder={t('seller:myListings.searchByPropertyId', 'Search by Property ID...')}
+                    className="w-full pl-10 pr-4 py-2.5 text-sm border border-neutral-200 rounded-lg bg-white focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                    aria-label={t('seller:myListings.searchByPropertyId', 'Search by Property ID')}
+                />
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                {propertyIdSearch && (
+                    <button
+                        onClick={() => setPropertyIdSearch('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                        aria-label={t('common:clear', 'Clear')}
+                    >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                )}
             </div>
 
             {/* Listing Type Filter (Sale / Rent) */}

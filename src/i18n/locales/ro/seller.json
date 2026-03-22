@@ -108,6 +108,9 @@
     "fields": {
       "listingTitle": "Titlul Anunțului",
       "titleHint": "Titlu scurt și atractiv (ex., \"Vilă de Lux cu Vedere la Mare\", \"Studio Confortabil în Centru\")",
+      "propertyId": "ID Proprietate",
+      "propertyIdPlaceholder": "ex., AP-2024-001, VILLA-123",
+      "propertyIdHint": "Opțional. Numărul dvs. intern de referință pentru această proprietate.",
       "price": "Preț",
       "bedrooms": "Dormitoare",
       "bathrooms": "Băi",
@@ -289,6 +292,8 @@
     "noListings": "Nu ați creat încă niciun anunț.",
     "createFirst": "Creați primul dvs. anunț",
     "addNewListing": "Adaugă Anunț Nou",
+    "searchByPropertyId": "Caută după ID proprietate...",
+    "propertyIdLabel": "ID Proprietate",
     "active": "Activ",
     "pending": "În Așteptare",
     "sold": "Vândut",

@@ -108,6 +108,9 @@
     "fields": {
       "listingTitle": "Заглавие на обявата",
       "titleHint": "Кратко и привлекателно заглавие (напр. 'Луксозна вила с морска гледка', 'Уютно студио в центъра')",
+      "propertyId": "ID на имота",
+      "propertyIdPlaceholder": "напр., AP-2024-001, VILLA-123",
+      "propertyIdHint": "По избор. Вашият вътрешен референтен номер за този имот.",
       "price": "Цена",
       "bedrooms": "Спални",
       "bathrooms": "Бани",
@@ -293,6 +296,8 @@
     "noListings": "You haven't created any listings yet.",
     "createFirst": "Create your first listing",
     "addNewListing": "Add New Listing",
+    "searchByPropertyId": "Търсене по ID на имота...",
+    "propertyIdLabel": "ID на имота",
     "active": "Active",
     "pending": "Pending",
     "sold": "Sold",
