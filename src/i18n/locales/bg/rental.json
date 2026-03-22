@@ -170,7 +170,13 @@
     "availableBadge": "СВОБОДЕН {{date}}",
     "inquireAvailability": "Запитване за наличност",
     "rentedNotice": "Този имот в момента е отдаден под наем",
-    "availableFromNotice": "Очаква се да бъде свободен от {{date}}"
+    "availableFromNotice": "Очаква се да бъде свободен от {{date}}",
+    "dateInPastError": "Датата не може да бъде в миналото.",
+    "tenantNameLabel": "Име на наемател",
+    "tenantNamePlaceholder": "напр. Иван Иванов",
+    "tenantNameHint": "По избор. Видимо само за вас.",
+    "rentalNotesLabel": "Бележки",
+    "rentalNotesPlaceholder": "напр. Месечно плащане на 1-во число, депозит платен..."
   },
   "rules": {
     "title": "Правила за наемане — {{country}}",

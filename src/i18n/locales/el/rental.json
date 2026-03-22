@@ -170,7 +170,13 @@
     "availableBadge": "ΔΙΑΘΕΣΙΜΟ {{date}}",
     "inquireAvailability": "Ερώτηση για Διαθεσιμότητα",
     "rentedNotice": "Αυτό το ακίνητο είναι αυτή τη στιγμή ενοικιασμένο",
-    "availableFromNotice": "Αναμένεται να είναι διαθέσιμο από {{date}}"
+    "availableFromNotice": "Αναμένεται να είναι διαθέσιμο από {{date}}",
+    "dateInPastError": "Η ημερομηνία δεν μπορεί να είναι στο παρελθόν.",
+    "tenantNameLabel": "Όνομα Ενοικιαστή",
+    "tenantNamePlaceholder": "π.χ. Γιώργος Παπαδόπουλος",
+    "tenantNameHint": "Προαιρετικό. Ορατό μόνο σε εσάς.",
+    "rentalNotesLabel": "Σημειώσεις",
+    "rentalNotesPlaceholder": "π.χ. Μηνιαία πληρωμή την 1η, εγγύηση πληρωμένη..."
   },
   "rules": {
     "title": "Κανόνες Ενοικίασης — {{country}}",
