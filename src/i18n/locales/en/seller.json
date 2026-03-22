@@ -300,6 +300,9 @@
     "noListings": "You haven't created any listings yet.",
     "createFirst": "Create your first listing",
     "addNewListing": "Add New Listing",
+    "newSaleListing": "New Sale Listing",
+    "newRentalListing": "New Rental Listing",
+    "searchListings": "Search by ID, title, address...",
     "searchByPropertyId": "Search by Property ID...",
     "propertyIdLabel": "Property ID",
     "active": "Active",
@@ -354,7 +357,14 @@
       "priceHigh": "Price: High to Low",
       "priceLow": "Price: Low to High",
       "mostViews": "Most Views"
-    }
+    },
+    "video": "Video",
+    "createVideo": "Create Video",
+    "forRent": "For Rent",
+    "forSale": "For Sale",
+    "noMapLocation": "No Map Location",
+    "rentedUntil": "Rented until {{date}}",
+    "canRenewIn": "Can renew in {{hours}}h {{minutes}}m"
   },
   "form": {
     "basicInfo": "Basic Information",

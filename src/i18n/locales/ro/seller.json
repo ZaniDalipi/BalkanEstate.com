@@ -346,7 +346,17 @@
       "priceHigh": "Preț: Descrescător",
       "priceLow": "Preț: Crescător",
       "mostViews": "Cele Mai Vizualizate"
-    }
+    },
+    "newSaleListing": "Anunț nou de vânzare",
+    "newRentalListing": "Anunț nou de închiriere",
+    "searchListings": "Caută după ID, titlu, adresă...",
+    "video": "Video",
+    "createVideo": "Creează video",
+    "forRent": "De închiriat",
+    "forSale": "De vânzare",
+    "noMapLocation": "Fără locație pe hartă",
+    "rentedUntil": "Închiriat până la {{date}}",
+    "canRenewIn": "Poate fi reînnoit în {{hours}}o {{minutes}}m"
   },
   "form": {
     "basicInfo": "Informații de Bază",

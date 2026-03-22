@@ -350,7 +350,17 @@
       "priceHigh": "Price: High to Low",
       "priceLow": "Price: Low to High",
       "mostViews": "Most Views"
-    }
+    },
+    "newSaleListing": "Нова обява за продажба",
+    "newRentalListing": "Нова обява за наем",
+    "searchListings": "Търси по ID, заглавие, адрес...",
+    "video": "Видео",
+    "createVideo": "Създай видео",
+    "forRent": "Под наем",
+    "forSale": "За продажба",
+    "noMapLocation": "Няма местоположение на картата",
+    "rentedUntil": "Отдадено до {{date}}",
+    "canRenewIn": "Може да се поднови след {{hours}}ч {{minutes}}м"
   },
   "form": {
     "basicInfo": "Basic Information",

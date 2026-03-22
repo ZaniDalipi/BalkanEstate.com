@@ -449,7 +449,17 @@
       "priceHigh": "Çmimi: Lartë në Ulët",
       "priceLow": "Çmimi: Ulët në Lartë",
       "mostViews": "Më Shumë Shikime"
-    }
+    },
+    "newSaleListing": "Listim i ri për shitje",
+    "newRentalListing": "Listim i ri për qira",
+    "searchListings": "Kërko sipas ID, titullit, adresës...",
+    "video": "Video",
+    "createVideo": "Krijo video",
+    "forRent": "Me qira",
+    "forSale": "Për shitje",
+    "noMapLocation": "Pa vendndodhje në hartë",
+    "rentedUntil": "E dhënë me qira deri {{date}}",
+    "canRenewIn": "Mund të rinovohet për {{hours}}o {{minutes}}m"
   },
   "form": {
     "basicInfo": "Informacione Bazë",

@@ -346,7 +346,17 @@
       "priceHigh": "Τιμή: Φθίνουσα",
       "priceLow": "Τιμή: Αύξουσα",
       "mostViews": "Περισσότερες Προβολές"
-    }
+    },
+    "newSaleListing": "Νέα αγγελία πώλησης",
+    "newRentalListing": "Νέα αγγελία ενοικίασης",
+    "searchListings": "Αναζήτηση με ID, τίτλο, διεύθυνση...",
+    "video": "Βίντεο",
+    "createVideo": "Δημιουργία βίντεο",
+    "forRent": "Προς ενοικίαση",
+    "forSale": "Προς πώληση",
+    "noMapLocation": "Χωρίς τοποθεσία στον χάρτη",
+    "rentedUntil": "Ενοικιασμένο μέχρι {{date}}",
+    "canRenewIn": "Ανανέωση σε {{hours}}ω {{minutes}}λ"
   },
   "form": {
     "basicInfo": "Βασικές Πληροφορίες",

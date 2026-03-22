@@ -21,6 +21,7 @@ const VideoIcon: React.FC<{ className?: string }> = ({ className }) => (
 
 // Role badge component to show which role created the listing
 const RoleBadge: React.FC<{ role?: UserRole | string }> = ({ role }) => {
+    const { t } = useTranslation(['seller', 'account']);
     if (!role) return null;
 
     const isAgent = role === 'agent' || role === UserRole.AGENT;
@@ -36,14 +37,14 @@ const RoleBadge: React.FC<{ role?: UserRole | string }> = ({ role }) => {
                     <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd"/>
                     </svg>
-                    Agent
+                    {t('account:roles.agent', 'Agent')}
                 </>
             ) : (
                 <>
                     <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
                     </svg>
-                    Private Seller
+                    {t('account:roles.privateSeller', 'Private Seller')}
                 </>
             )}
         </span>
@@ -51,6 +52,7 @@ const RoleBadge: React.FC<{ role?: UserRole | string }> = ({ role }) => {
 };
 
 const StatusBadge: React.FC<{ status: PropertyStatus }> = ({ status }) => {
+    const { t } = useTranslation(['seller']);
     const statusStyles: Record<string, { bg: string, text: string, icon?: React.ReactNode }> = {
         active: { bg: 'bg-green-100', text: 'text-green-800', icon: <CheckCircleIcon className="w-4 h-4"/> },
         draft: { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: <PencilIcon className="w-4 h-4" /> },
@@ -62,7 +64,7 @@ const StatusBadge: React.FC<{ status: PropertyStatus }> = ({ status }) => {
     return (
         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${style.bg} ${style.text}`}>
             {style.icon}
-            <span className="capitalize">{status}</span>
+            <span className="capitalize">{t(`seller:myListings.${status}`, status)}</span>
         </span>
     );
 };
@@ -134,7 +136,7 @@ const ListingCard: React.FC<{
                                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
                                 </svg>
-                                No Map Location
+                                {t('seller:myListings.noMapLocation', 'No Map Location')}
                             </span>
                         )}
                     </div>
@@ -177,7 +179,7 @@ const ListingCard: React.FC<{
                     <div className="flex items-center gap-1.5 text-orange-600" title="Rented until">
                         <CalendarIcon className="w-4 h-4"/>
                         <span className="text-xs font-medium">
-                            Rented until {new Date(property.rentedUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            {t('seller:myListings.rentedUntil', 'Rented until {{date}}', { date: new Date(property.rentedUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) })}
                         </span>
                     </div>
                 )}
@@ -191,7 +193,7 @@ const ListingCard: React.FC<{
                         className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg hover:from-amber-600 hover:to-orange-600 shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <ClockIcon className="w-4 h-4" />
-                        Extend Promotion
+                        {t('seller:myListings.extendPromotion', 'Extend Promotion')}
                     </button>
                 ) : (
                     <button
@@ -200,7 +202,7 @@ const ListingCard: React.FC<{
                         className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-violet-600 to-purple-600 rounded-lg hover:from-violet-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <SparklesIcon className="w-4 h-4" />
-                        Promote
+                        {t('seller:myListings.promote', 'Promote')}
                     </button>
                 )}
                 <button
@@ -210,7 +212,7 @@ const ListingCard: React.FC<{
                     className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <VideoIcon className="w-4 h-4" />
-                    {property.videoUrl ? 'Video' : 'Create Video'}
+                    {property.videoUrl ? t('seller:myListings.video', 'Video') : t('seller:myListings.createVideo', 'Create Video')}
                 </button>
                 <button
                     onClick={(e) => { e.stopPropagation(); onRenew(property.id); }}
@@ -219,7 +221,7 @@ const ListingCard: React.FC<{
                     className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-neutral-700 bg-neutral-100 border border-neutral-200 rounded-lg hover:bg-neutral-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <ArrowPathIcon className="w-4 h-4" />
-                    {!canRenew && renewalStatus ? `${renewalStatus.hoursRemaining}h ${renewalStatus.minutesRemaining}m` : 'Renew'}
+                    {!canRenew && renewalStatus ? `${renewalStatus.hoursRemaining}h ${renewalStatus.minutesRemaining}m` : t('seller:myListings.renew', 'Renew')}
                 </button>
                 {property.status === 'rented' ? (
                     <button
@@ -265,6 +267,7 @@ const FilterPill: React.FC<{
 
 
 const ListingTypeBadge: React.FC<{ listingType?: string }> = ({ listingType }) => {
+    const { t } = useTranslation(['seller']);
     const isRent = listingType === 'rent';
     return (
         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${
@@ -273,12 +276,12 @@ const ListingTypeBadge: React.FC<{ listingType?: string }> = ({ listingType }) =
             {isRent ? (
                 <>
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
-                    For Rent
+                    {t('seller:myListings.forRent', 'For Rent')}
                 </>
             ) : (
                 <>
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    For Sale
+                    {t('seller:myListings.forSale', 'For Sale')}
                 </>
             )}
         </span>
@@ -286,7 +289,7 @@ const ListingTypeBadge: React.FC<{ listingType?: string }> = ({ listingType }) =
 };
 
 const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
-    const { t } = useTranslation(['rental', 'common', 'seller']);
+    const { t } = useTranslation(['rental', 'common', 'seller', 'account']);
     const { state, dispatch } = useAppContext();
     const [showSoldConfirm, setShowSoldConfirm] = useState(false);
     const [showRentedModal, setShowRentedModal] = useState(false);
@@ -847,7 +850,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                       className="flex-1 sm:flex-initial px-4 py-2.5 bg-primary text-white font-semibold rounded-lg shadow-sm hover:bg-primary-dark transition-colors flex items-center justify-center gap-2 text-sm"
                     >
                       <PencilIcon className="w-4 h-4"/>
-                      <span>New Sale Listing</span>
+                      <span>{t('seller:myListings.newSaleListing', 'New Sale Listing')}</span>
                     </button>
                     <button
                       onClick={() => {
@@ -858,7 +861,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                       className="flex-1 sm:flex-initial px-4 py-2.5 bg-blue-600 text-white font-semibold rounded-lg shadow-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm"
                     >
                       <PencilIcon className="w-4 h-4"/>
-                      <span>New Rental Listing</span>
+                      <span>{t('seller:myListings.newRentalListing', 'New Rental Listing')}</span>
                     </button>
                 </div>
             </div>
@@ -932,7 +935,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                                     : 'bg-white/50 text-neutral-600 hover:bg-white/80'
                             }`}
                         >
-                            All Listings ({roleCounts.all})
+                            {t('seller:myListings.postingRole.all', 'All Listings')} ({roleCounts.all})
                         </button>
                         <button
                             onClick={() => setRoleFilter('private_seller')}
@@ -945,7 +948,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
                             </svg>
-                            Private Seller ({roleCounts.private_seller})
+                            {t('account:roles.privateSeller', 'Private Seller')} ({roleCounts.private_seller})
                         </button>
                         <button
                             onClick={() => setRoleFilter('agent')}
@@ -958,7 +961,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd"/>
                             </svg>
-                            Agent ({roleCounts.agent})
+                            {t('account:roles.agent', 'Agent')} ({roleCounts.agent})
                         </button>
                     </div>
                 </div>

@@ -346,7 +346,17 @@
       "priceHigh": "Цена: Опадајуће",
       "priceLow": "Цена: Растуће",
       "mostViews": "Највише Прегледа"
-    }
+    },
+    "newSaleListing": "Нови оглас за продају",
+    "newRentalListing": "Нови оглас за изнајмљивање",
+    "searchListings": "Претражи по ID, наслову, адреси...",
+    "video": "Видео",
+    "createVideo": "Креирај видео",
+    "forRent": "За изнајмљивање",
+    "forSale": "За продају",
+    "noMapLocation": "Нема локације на мапи",
+    "rentedUntil": "Издато до {{date}}",
+    "canRenewIn": "Може се обновити за {{hours}}ч {{minutes}}м"
   },
   "form": {
     "basicInfo": "Основне Информације",
