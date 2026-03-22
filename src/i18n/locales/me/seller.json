@@ -253,7 +253,8 @@
       "publishListing": "Publish Listing",
       "updateListing": "Update Listing",
       "continueToPayment": "Continue to Payment",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "previewListing": "Pregled Oglasa"
     },
     "success": {
       "title": "Listing {{action}} Successfully!",
@@ -279,11 +280,20 @@
       "buyerCannotCreate": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings."
     },
     "video": {
-      "title": "Property Video (Optional)",
-      "description": "Add a video to showcase your property! Videos auto-play when visitors view your listing, creating an engaging first impression.",
-      "label": "Video URL",
+      "title": "Video Nekretnine (Opciono)",
+      "description": "Dodajte video da prikažete vašu nekretninu! Video snimci se automatski puštaju kada posjetioci pregledaju vaš oglas.",
+      "label": "URL Videa",
       "placeholder": "https://youtube.com/watch?v=... or https://tiktok.com/...",
-      "hint": "Paste a link from YouTube, TikTok, Instagram Reels, or Vimeo. The video will auto-play when visitors open your listing!"
+      "hint": "Zalijepite link sa YouTube, TikTok, Instagram Reels ili Vimeo. Video će se automatski pokrenuti kada posjetioci otvore vaš oglas!"
+    },
+    "listingType": {
+      "sale": "Na Prodaju",
+      "rent": "Za Iznajmljivanje"
+    },
+    "triState": {
+      "no": "Ne",
+      "any": "Bilo koji",
+      "yes": "Da"
     }
   },
   "myListings": {
@@ -356,7 +366,9 @@
     "forSale": "Za prodaju",
     "noMapLocation": "Nema lokacije na mapi",
     "rentedUntil": "Izdato do {{date}}",
-    "canRenewIn": "Može se obnoviti za {{hours}}č {{minutes}}m"
+    "canRenewIn": "Može se obnoviti za {{hours}}č {{minutes}}m",
+    "forSaleCount": "Na Prodaju ({{count}})",
+    "forRentCount": "Za Iznajmljivanje ({{count}})"
   },
   "form": {
     "basicInfo": "Basic Information",

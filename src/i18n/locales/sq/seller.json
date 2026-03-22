@@ -260,7 +260,8 @@
       "publishListing": "Publiko Listimin",
       "updateListing": "Përditëso Listimin",
       "continueToPayment": "Vazhdo te Pagesa",
-      "saving": "Duke ruajtur..."
+      "saving": "Duke ruajtur...",
+      "previewListing": "Shiko Listimin"
     },
     "success": {
       "title": "Listimi u {{action}} me Sukses!",
@@ -284,6 +285,15 @@
       "proReached": "Keni arritur limitin tuaj Pro të listimeve.",
       "agentProRequired": "Agjentët duhet të kenë një abonim aktiv Pro për të postuar listime. Abonohuni tani për 30 listime aktive!",
       "buyerCannotCreate": "Blerësit nuk mund të krijojnë listime pronash. Ju lutem kaloni në rolin Shitës Privat ose Agjent për të krijuar listime."
+    },
+    "listingType": {
+      "sale": "Për Shitje",
+      "rent": "Me Qira"
+    },
+    "triState": {
+      "no": "Jo",
+      "any": "Çfarëdo",
+      "yes": "Po"
     }
   },
   "propertyTypes": {
@@ -459,7 +469,9 @@
     "forSale": "Për shitje",
     "noMapLocation": "Pa vendndodhje në hartë",
     "rentedUntil": "E dhënë me qira deri {{date}}",
-    "canRenewIn": "Mund të rinovohet për {{hours}}o {{minutes}}m"
+    "canRenewIn": "Mund të rinovohet për {{hours}}o {{minutes}}m",
+    "forSaleCount": "Për Shitje ({{count}})",
+    "forRentCount": "Me Qira ({{count}})"
   },
   "form": {
     "basicInfo": "Informacione Bazë",

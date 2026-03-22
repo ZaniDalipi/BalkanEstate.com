@@ -283,6 +283,7 @@ export const TriStateCheckbox: React.FC<{
     value: boolean | undefined;
     onChange: (value: boolean | undefined) => void;
 }> = ({ label, value, onChange }) => {
+    const { t } = useTranslation(['seller']);
     const handleClick = () => {
         if (value === undefined) {
             onChange(true); // undefined -> Yes (true)
@@ -304,7 +305,7 @@ export const TriStateCheckbox: React.FC<{
                     onClick={() => onChange(false)}
                     className="text-xs font-medium rounded-lg"
                 >
-                    No
+                    {t('seller:createListing.triState.no', 'No')}
                 </Button>
                 <Button
                     type="button"
@@ -313,7 +314,7 @@ export const TriStateCheckbox: React.FC<{
                     onClick={() => onChange(undefined)}
                     className="text-xs font-medium rounded-lg"
                 >
-                    Any
+                    {t('seller:createListing.triState.any', 'Any')}
                 </Button>
                 <Button
                     type="button"
@@ -322,7 +323,7 @@ export const TriStateCheckbox: React.FC<{
                     onClick={() => onChange(true)}
                     className="text-xs font-medium rounded-lg"
                 >
-                    Yes
+                    {t('seller:createListing.triState.yes', 'Yes')}
                 </Button>
             </div>
         </div>

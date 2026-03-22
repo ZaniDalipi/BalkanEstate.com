@@ -253,7 +253,8 @@
       "publishListing": "Publică Anunțul",
       "updateListing": "Actualizează Anunțul",
       "continueToPayment": "Continuă la Plată",
-      "saving": "Se salvează..."
+      "saving": "Se salvează...",
+      "previewListing": "Previzualizare Anunț"
     },
     "success": {
       "title": "Anunțul a fost {{action}} cu Succes!",
@@ -279,11 +280,20 @@
       "buyerCannotCreate": "Cumpărătorii nu pot crea anunțuri de proprietăți. Te rugăm să treci la rolul de Vânzător Privat sau Agent."
     },
     "video": {
-      "title": "Property Video (Optional)",
-      "description": "Add a video to showcase your property! Videos auto-play when visitors view your listing, creating an engaging first impression.",
-      "label": "Video URL",
+      "title": "Video Proprietate (Opțional)",
+      "description": "Adaugă un video pentru a-ți prezenta proprietatea! Videoclipurile se redau automat când vizitatorii îți văd anunțul.",
+      "label": "URL Video",
       "placeholder": "https://youtube.com/watch?v=... or https://tiktok.com/...",
-      "hint": "Paste a link from YouTube, TikTok, Instagram Reels, or Vimeo. The video will auto-play when visitors open your listing!"
+      "hint": "Lipește un link de pe YouTube, TikTok, Instagram Reels sau Vimeo. Videoclipul se va reda automat când vizitatorii vor deschide anunțul tău!"
+    },
+    "listingType": {
+      "sale": "De Vânzare",
+      "rent": "De Închiriat"
+    },
+    "triState": {
+      "no": "Nu",
+      "any": "Oricare",
+      "yes": "Da"
     }
   },
   "myListings": {
@@ -356,7 +366,9 @@
     "forSale": "De vânzare",
     "noMapLocation": "Fără locație pe hartă",
     "rentedUntil": "Închiriat până la {{date}}",
-    "canRenewIn": "Poate fi reînnoit în {{hours}}o {{minutes}}m"
+    "canRenewIn": "Poate fi reînnoit în {{hours}}o {{minutes}}m",
+    "forSaleCount": "De Vânzare ({{count}})",
+    "forRentCount": "De Închiriat ({{count}})"
   },
   "form": {
     "basicInfo": "Informații de Bază",

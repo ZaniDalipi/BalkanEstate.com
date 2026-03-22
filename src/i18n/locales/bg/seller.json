@@ -260,7 +260,8 @@
       "publishListing": "Публикувай обява",
       "updateListing": "Актуализирай обява",
       "continueToPayment": "Продължи към плащане",
-      "saving": "Запазване..."
+      "saving": "Запазване...",
+      "previewListing": "Преглед на обявата"
     },
     "success": {
       "title": "Обявата е {{action}} успешно!",
@@ -284,6 +285,15 @@
       "proReached": "Достигнали сте Pro лимита си за обяви.",
       "agentProRequired": "Агентите трябва да имат активен Pro абонамент за публикуване на обяви.",
       "buyerCannotCreate": "Купувачите не могат да създават обяви за имоти. Моля, превключете на роля Частен Продавач или Агент."
+    },
+    "listingType": {
+      "sale": "За Продажба",
+      "rent": "Под Наем"
+    },
+    "triState": {
+      "no": "Не",
+      "any": "Всяко",
+      "yes": "Да"
     }
   },
   "listings": {
@@ -360,7 +370,9 @@
     "forSale": "За продажба",
     "noMapLocation": "Няма местоположение на картата",
     "rentedUntil": "Отдадено до {{date}}",
-    "canRenewIn": "Може да се поднови след {{hours}}ч {{minutes}}м"
+    "canRenewIn": "Може да се поднови след {{hours}}ч {{minutes}}м",
+    "forSaleCount": "За Продажба ({{count}})",
+    "forRentCount": "Под Наем ({{count}})"
   },
   "form": {
     "basicInfo": "Basic Information",

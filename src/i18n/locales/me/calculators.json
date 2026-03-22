@@ -1,24 +1,24 @@
 {
   "property": {
-    "title": "Property Value Calculator",
-    "description": "Estimate your property's value",
+    "title": "Kalkulator Vrijednosti Nekretnine",
+    "description": "Procijenite vrijednost vaše nekretnine",
     "fields": {
-      "location": "Location",
-      "area": "Area (m²)"
+      "location": "Lokacija",
+      "area": "Površina (m²)"
     },
-    "calculating": "Calculating...",
+    "calculating": "Izračunavanje...",
     "results": {
-      "estimatedValue": "Estimated Value",
-      "lowEstimate": "Low",
-      "highEstimate": "High",
-      "pricePerSqm": "Price/m²",
+      "estimatedValue": "Procijenjena Vrijednost",
+      "lowEstimate": "Nisko",
+      "highEstimate": "Visoko",
+      "pricePerSqm": "Cijena/m²",
       "valueRange": "Value Range"
     },
     "errors": {
-      "selectLocation": "Please select a valid location from the suggestions.",
-      "locationNotDetermined": "Could not determine city and country from selected location.",
+      "selectLocation": "Izaberite važeću lokaciju iz prijedloga.",
+      "locationNotDetermined": "Nije bilo moguće odrediti grad i državu.",
       "insufficientData": "Sorry, we don't have enough data for {{city}} to provide a reliable estimate.",
-      "calculationFailed": "Failed to calculate property value. Please try again."
+      "calculationFailed": "Greška pri izračunavanju vrijednosti. Pokušajte ponovo."
     }
   },
   "mortgage": {
@@ -146,7 +146,7 @@
     "disclaimer": "This is an estimate for informational purposes. Many factors can influence the costs of buying and renting. Consider consulting with a financial advisor for major decisions."
   },
   "common": {
-    "calculate": "Calculate",
+    "calculate": "Izračunaj",
     "reset": "Reset",
     "perMonth": "/month",
     "perYear": "/year",

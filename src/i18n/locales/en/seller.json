@@ -50,7 +50,14 @@
       "location": "Location",
       "review": "Review"
     },
-    "progress": "Step {{current}} of {{total}}",
+    "progress": {
+      "compressing": "Compressing images...",
+      "compressingHint": "Optimizing your images for the best quality...",
+      "uploading": "Uploading to cloud...",
+      "uploadingHint": "Securely uploading your photos...",
+      "creating": "Creating listing...",
+      "creatingHint": "Almost there! Saving your listing..."
+    },
     "nextStep": "Next Step",
     "previousStep": "Previous Step",
     "skipToManual": "Skip to Manual Entry",
@@ -248,14 +255,6 @@
       "placeholder": "https://youtube.com/watch?v=... or https://tiktok.com/...",
       "hint": "Paste a link from YouTube, TikTok, Instagram Reels, or Vimeo. The video will auto-play when visitors open your listing!"
     },
-    "progress": {
-      "compressing": "Compressing images...",
-      "compressingHint": "Optimizing your images for the best quality...",
-      "uploading": "Uploading to cloud...",
-      "uploadingHint": "Securely uploading your photos...",
-      "creating": "Creating listing...",
-      "creatingHint": "Almost there! Saving your listing..."
-    },
     "promotion": {
       "title": "Promote Your Listing",
       "description": "Get more visibility and inquiries with promoted placement",
@@ -268,7 +267,8 @@
       "publishListing": "Publish Listing",
       "updateListing": "Update Listing",
       "continueToPayment": "Continue to Payment",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "previewListing": "Preview Listing"
     },
     "success": {
       "title": "Listing {{action}} Successfully!",
@@ -292,6 +292,15 @@
       "proReached": "You have reached your Pro listing limit.",
       "agentProRequired": "Agents must have an active Pro subscription to post listings. Subscribe now to get 30 active listings!",
       "buyerCannotCreate": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings."
+    },
+    "listingType": {
+      "sale": "For Sale",
+      "rent": "For Rent"
+    },
+    "triState": {
+      "no": "No",
+      "any": "Any",
+      "yes": "Yes"
     }
   },
   "myListings": {
@@ -364,7 +373,9 @@
     "forSale": "For Sale",
     "noMapLocation": "No Map Location",
     "rentedUntil": "Rented until {{date}}",
-    "canRenewIn": "Can renew in {{hours}}h {{minutes}}m"
+    "canRenewIn": "Can renew in {{hours}}h {{minutes}}m",
+    "forSaleCount": "For Sale ({{count}})",
+    "forRentCount": "For Rent ({{count}})"
   },
   "form": {
     "basicInfo": "Basic Information",

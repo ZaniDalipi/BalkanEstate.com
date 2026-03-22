@@ -253,7 +253,8 @@
       "publishListing": "Δημοσίευση Αγγελίας",
       "updateListing": "Ενημέρωση Αγγελίας",
       "continueToPayment": "Συνέχεια στην Πληρωμή",
-      "saving": "Αποθήκευση..."
+      "saving": "Αποθήκευση...",
+      "previewListing": "Προεπισκόπηση Αγγελίας"
     },
     "success": {
       "title": "Η Αγγελία {{action}} Επιτυχώς!",
@@ -279,11 +280,20 @@
       "buyerCannotCreate": "Οι αγοραστές δεν μπορούν να δημιουργήσουν αγγελίες ακινήτων. Παρακαλώ αλλάξτε σε ρόλο Ιδιώτη Πωλητή ή Πράκτορα."
     },
     "video": {
-      "title": "Property Video (Optional)",
-      "description": "Add a video to showcase your property! Videos auto-play when visitors view your listing, creating an engaging first impression.",
-      "label": "Video URL",
+      "title": "Βίντεο Ακινήτου (Προαιρετικό)",
+      "description": "Προσθέστε ένα βίντεο για να παρουσιάσετε το ακίνητό σας! Τα βίντεο αναπαράγονται αυτόματα όταν οι επισκέπτες βλέπουν την αγγελία σας.",
+      "label": "URL Βίντεο",
       "placeholder": "https://youtube.com/watch?v=... or https://tiktok.com/...",
-      "hint": "Paste a link from YouTube, TikTok, Instagram Reels, or Vimeo. The video will auto-play when visitors open your listing!"
+      "hint": "Επικολλήστε έναν σύνδεσμο από YouTube, TikTok, Instagram Reels ή Vimeo. Το βίντεο θα αναπαράγεται αυτόματα όταν οι επισκέπτες ανοίξουν την αγγελία σας!"
+    },
+    "listingType": {
+      "sale": "Πώληση",
+      "rent": "Ενοικίαση"
+    },
+    "triState": {
+      "no": "Όχι",
+      "any": "Οποιοδήποτε",
+      "yes": "Ναι"
     }
   },
   "myListings": {
@@ -356,7 +366,9 @@
     "forSale": "Προς πώληση",
     "noMapLocation": "Χωρίς τοποθεσία στον χάρτη",
     "rentedUntil": "Ενοικιασμένο μέχρι {{date}}",
-    "canRenewIn": "Ανανέωση σε {{hours}}ω {{minutes}}λ"
+    "canRenewIn": "Ανανέωση σε {{hours}}ω {{minutes}}λ",
+    "forSaleCount": "Πώληση ({{count}})",
+    "forRentCount": "Ενοικίαση ({{count}})"
   },
   "form": {
     "basicInfo": "Βασικές Πληροφορίες",

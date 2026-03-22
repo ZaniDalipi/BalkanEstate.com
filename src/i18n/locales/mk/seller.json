@@ -253,7 +253,8 @@
       "publishListing": "Објави оглас",
       "updateListing": "Ажурирај оглас",
       "continueToPayment": "Продолжи кон плаќање",
-      "saving": "Зачувување..."
+      "saving": "Зачувување...",
+      "previewListing": "Преглед на оглас"
     },
     "success": {
       "title": "Огласот е {{action}} успешно!",
@@ -279,11 +280,20 @@
       "buyerCannotCreate": "Купувачите не можат да креираат огласи за имоти. Ве молиме префрлете се на улога Приватен продавач или Агент за да креирате огласи."
     },
     "video": {
-      "title": "Property Video (Optional)",
-      "description": "Add a video to showcase your property! Videos auto-play when visitors view your listing, creating an engaging first impression.",
-      "label": "Video URL",
+      "title": "Видео на имот (Опционално)",
+      "description": "Додадете видео за да го прикажете вашиот имот! Видеата автоматски се пуштаат кога посетителите го прегледуваат вашиот оглас.",
+      "label": "URL на видео",
       "placeholder": "https://youtube.com/watch?v=... or https://tiktok.com/...",
-      "hint": "Paste a link from YouTube, TikTok, Instagram Reels, or Vimeo. The video will auto-play when visitors open your listing!"
+      "hint": "Залепете линк од YouTube, TikTok, Instagram Reels или Vimeo. Видеото ќе се пушта автоматски кога посетителите ќе го отворат вашиот оглас!"
+    },
+    "listingType": {
+      "sale": "За Продажба",
+      "rent": "За Изнајмување"
+    },
+    "triState": {
+      "no": "Не",
+      "any": "Било кој",
+      "yes": "Да"
     }
   },
   "myListings": {
@@ -356,7 +366,9 @@
     "forSale": "За продажба",
     "noMapLocation": "Нема локација на мапа",
     "rentedUntil": "Издадено до {{date}}",
-    "canRenewIn": "Може да се обнови за {{hours}}ч {{minutes}}м"
+    "canRenewIn": "Може да се обнови за {{hours}}ч {{minutes}}м",
+    "forSaleCount": "За Продажба ({{count}})",
+    "forRentCount": "За Изнајмување ({{count}})"
   },
   "form": {
     "basicInfo": "Основни информации",

@@ -909,7 +909,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                             listingTypeFilter === 'sale' ? 'bg-emerald-600 text-white shadow' : 'text-emerald-700 hover:bg-emerald-100'
                         }`}
                     >
-                        For Sale ({listingTypeCounts.sale})
+                        {t('seller:myListings.forSaleCount', 'For Sale ({{count}})', { count: listingTypeCounts.sale })}
                     </button>
                     <button
                         onClick={() => setListingTypeFilter('rent')}
@@ -917,7 +917,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                             listingTypeFilter === 'rent' ? 'bg-blue-600 text-white shadow' : 'text-blue-700 hover:bg-blue-100'
                         }`}
                     >
-                        For Rent ({listingTypeCounts.rent})
+                        {t('seller:myListings.forRentCount', 'For Rent ({{count}})', { count: listingTypeCounts.rent })}
                     </button>
                 </div>
             )}
