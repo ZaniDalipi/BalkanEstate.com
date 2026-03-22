@@ -1235,6 +1235,7 @@ function transformToBackendProperty(frontendProp: Property): any {
     images: frontendProp.images,
     lat: frontendProp.lat,
     lng: frontendProp.lng,
+    propertyId: frontendProp.propertyId,
     propertyType: frontendProp.propertyType,
     listingType: frontendProp.listingType || 'sale',
     createdAsRole: frontendProp.createdAsRole,
