@@ -170,7 +170,13 @@
     "availableBadge": "ДОСТАПНО {{date}}",
     "inquireAvailability": "Прашајте за достапност",
     "rentedNotice": "Овој имот моментално е издаден",
-    "availableFromNotice": "Се очекува да биде достапен од {{date}}"
+    "availableFromNotice": "Се очекува да биде достапен од {{date}}",
+    "dateInPastError": "Датумот не може да биде во минатото.",
+    "tenantNameLabel": "Име на закупец",
+    "tenantNamePlaceholder": "пр. Марко Марковски",
+    "tenantNameHint": "Опционално. Видливо само за вас.",
+    "rentalNotesLabel": "Белешки",
+    "rentalNotesPlaceholder": "пр. Месечна уплата на 1-ви, депозит платен..."
   },
   "rules": {
     "title": "Правила за издавање — {{country}}",

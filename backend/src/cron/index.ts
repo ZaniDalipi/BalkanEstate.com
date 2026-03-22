@@ -15,6 +15,7 @@ import { sendHotHourRecommendations, cleanupOldPatterns } from '../services/proB
 import { processMonthlyCouponRefresh } from '../services/monthlyCouponService';
 import { fetchAndStoreNews, cleanupOldNews } from '../services/newsService';
 import { startPropertyStatsJob, stopPropertyStatsJob } from '../jobs/computePropertyStatsJob';
+import { processExpiredRentals } from '../jobs/rentalExpiryJob';
 
 // Helper to check if MongoDB is connected before running a job
 const isMongoConnected = (): boolean => {
@@ -45,6 +46,7 @@ let proBuyerHotHoursTask: cron.ScheduledTask | null = null;
 let activityCleanupTask: cron.ScheduledTask | null = null;
 let newsFetchTask: cron.ScheduledTask | null = null;
 let newsCleanupTask: cron.ScheduledTask | null = null;
+let rentalExpiryTask: cron.ScheduledTask | null = null;
 
 export const startCronJobs = () => {
   // Check for subscriptions expiring in 1 day - runs daily at 10 AM
@@ -410,10 +412,30 @@ export const startCronJobs = () => {
     });
   });
 
+  // ===============================
+  // RENTAL EXPIRY AUTO-RELEASE
+  // ===============================
+
+  // Auto-release expired rentals - runs hourly at minute 45
+  // When a property's rentedUntil date has passed, automatically marks it as available for rent
+  rentalExpiryTask = cron.schedule('45 * * * *', async () => {
+    await withDbConnection('rental expiry check', async () => {
+      try {
+        cronLogger.info('🏠 Checking for expired rentals to auto-release...');
+        const count = await processExpiredRentals();
+        if (count > 0) {
+          cronLogger.info(`✅ Auto-released ${count} expired rental(s)`);
+        }
+      } catch (error) {
+        cronLogger.error('Rental expiry cron error:', error);
+      }
+    });
+  });
+
   // Pre-computed property stats (hourly)
   startPropertyStatsJob();
 
-  cronLogger.info('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails, monthly coupons, news fetch, property stats)');
+  cronLogger.info('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails, monthly coupons, news fetch, property stats, rental expiry)');
 };
 
 export const stopCronJobs = () => {
@@ -432,6 +454,7 @@ export const stopCronJobs = () => {
   if (monthlyCouponTask) monthlyCouponTask.stop();
   if (newsFetchTask) newsFetchTask.stop();
   if (newsCleanupTask) newsCleanupTask.stop();
+  if (rentalExpiryTask) rentalExpiryTask.stop();
   stopPropertyStatsJob();
   cronLogger.info('🛑 All cron jobs stopped');
 };

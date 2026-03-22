@@ -127,6 +127,8 @@ export interface IProperty extends Document {
   maxOccupants?: number; // Maximum number of occupants allowed
   rentedAt?: Date; // When the property was rented
   rentedUntil?: Date; // When the rental period ends
+  currentTenantName?: string; // Name of current tenant (private, owner-only)
+  currentRentalNotes?: string; // Private notes about the current rental
   rentalHistory?: IRentalHistoryEntry[]; // Past rental periods for income tracking
   // Visit/viewing availability
   visitAvailability?: IVisitAvailability;
@@ -518,6 +520,12 @@ const PropertySchema: Schema = new Schema(
     },
     rentedUntil: {
       type: Date,
+    },
+    currentTenantName: {
+      type: String,
+    },
+    currentRentalNotes: {
+      type: String,
     },
     rentalHistory: [
       {

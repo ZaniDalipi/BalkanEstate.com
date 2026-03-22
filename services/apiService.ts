@@ -746,11 +746,16 @@ export const markPropertyAsSold = async (propertyId: string): Promise<Property> 
   return transformBackendProperty(response.property);
 };
 
-export const markPropertyAsRented = async (propertyId: string, rentedUntil?: string): Promise<Property> => {
+export const markPropertyAsRented = async (propertyId: string, rentedUntil?: string, tenantName?: string, notes?: string): Promise<Property> => {
+  const body: Record<string, string> = {};
+  if (rentedUntil) body.rentedUntil = rentedUntil;
+  if (tenantName) body.tenantName = tenantName;
+  if (notes) body.notes = notes;
+
   const response = await apiRequest<{ property: any }>(`/properties/${propertyId}/mark-rented`, {
     method: 'PATCH',
     requiresAuth: true,
-    body: rentedUntil ? { rentedUntil } : undefined,
+    body: Object.keys(body).length > 0 ? body : undefined,
   });
 
   return transformBackendProperty(response.property);

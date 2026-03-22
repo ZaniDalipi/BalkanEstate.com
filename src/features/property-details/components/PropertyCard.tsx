@@ -110,7 +110,17 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   const isNew = property?.createdAt && (Date.now() - property.createdAt < 3 * 24 * 60 * 60 * 1000);
   const isPriceReduced = property?.originalPrice !== undefined && property?.originalPrice > property?.price;
   const isSold = property?.status === 'sold';
-  const isRented = property?.status === 'rented';
+  // Treat rental as expired (property available) if rentedUntil date has fully passed
+  // e.g. rentedUntil = March 22 → stays rented on March 22, becomes active on March 23
+  const isRentalExpired = (() => {
+    if (property?.status !== 'rented' || !property?.rentedUntil) return false;
+    const rentedEnd = new Date(property.rentedUntil);
+    rentedEnd.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return rentedEnd < today;
+  })();
+  const isRented = property?.status === 'rented' && !isRentalExpired;
   const isRental = (property?.listingType || 'sale') === 'rent';
 
   // Check if property has an active promotion
@@ -213,7 +223,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               <div className="bg-orange-500/85 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-white rounded-full" />
                 {property?.rentedUntil ? (
-                  t('rental:status.availableBadge', { date: new Date(property.rentedUntil).toLocaleDateString(i18n.language === 'me' ? 'sr-Latn-ME' : i18n.language === 'sq' ? 'sq-AL' : i18n.language, { month: 'short', year: 'numeric' }).toUpperCase() })
+                  t('rental:status.availableBadge', { date: new Date(property.rentedUntil).toLocaleDateString(i18n.language === 'me' ? 'sr-Latn-ME' : i18n.language === 'sq' ? 'sq-AL' : i18n.language, { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase() })
                 ) : (
                   t('property:rented', 'RENTED').toUpperCase()
                 )}

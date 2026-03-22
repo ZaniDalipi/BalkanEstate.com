@@ -170,7 +170,13 @@
     "availableBadge": "E DISPONUESHME {{date}}",
     "inquireAvailability": "Pyesni per Disponueshmerine",
     "rentedNotice": "Kjo prone eshte aktualisht e dhene me qira",
-    "availableFromNotice": "Pritet te jete e disponueshme nga {{date}}"
+    "availableFromNotice": "Pritet te jete e disponueshme nga {{date}}",
+    "dateInPastError": "Data nuk mund te jete ne te kaluaren.",
+    "tenantNameLabel": "Emri i qiramarresit",
+    "tenantNamePlaceholder": "p.sh. Arben Hoxha",
+    "tenantNameHint": "Opsionale. E dukshme vetem per ju.",
+    "rentalNotesLabel": "Shenime",
+    "rentalNotesPlaceholder": "p.sh. Pagesa mujore me 1 te muajit, depozita e paguar..."
   },
   "rules": {
     "title": "Rregullat e Qirase — {{country}}",
