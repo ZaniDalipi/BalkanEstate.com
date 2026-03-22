@@ -13,7 +13,8 @@
   "tabs": {
     "all": "All",
     "businesses": "Businesses",
-    "individuals": "Individuals"
+    "individuals": "Individuals",
+    "mine": "My Businesses"
   },
   "types": {
     "business": "Business",
@@ -85,6 +86,19 @@
     "next": "Next",
     "pageOf": "Page {{page}} of {{totalPages}}"
   },
+  "viewMode": {
+    "grid": "Grid",
+    "map": "Map"
+  },
+  "map": {
+    "loading": "Loading map...",
+    "loadError": "Could not load map",
+    "geocoding": "Locating businesses...",
+    "noLocations": "No locations to display",
+    "noLocationsHint": "Businesses with addresses will appear here on the map",
+    "viewDetails": "View Details",
+    "directions": "Directions"
+  },
   "verified": "Verified",
   "detail": {
     "backToDirectory": "Back to Directory",
@@ -118,6 +132,10 @@
       "views": "Views",
       "memberSince": "Member since"
     },
+    "licensed": "Licensed",
+    "languages": "Languages",
+    "serviceAreas": "Service Areas",
+    "paymentMethods": "Payment Methods",
     "cta": {
       "title": "Ready to work with {{name}}?",
       "subtitle": "Get in touch today to discuss your project and receive a free consultation.",
@@ -144,7 +162,11 @@
       "location": "Location",
       "businessLocation": "Business Location",
       "social": "Social Media",
-      "hours": "Business Hours"
+      "hours": "Business Hours",
+      "languages": "Languages Spoken",
+      "businessDetails": "Business Details",
+      "serviceAreas": "Service Areas",
+      "pricing": "Pricing & Payment"
     },
     "locationHint": "Add your business location so clients can find you easily.",
     "pinOnMap": "Pin Your Business Location on Map",
@@ -166,7 +188,15 @@
       "address": "Address",
       "logo": "Logo",
       "avatar": "Profile Photo",
-      "pinLocation": "Pin Location on Map"
+      "pinLocation": "Pin Location on Map",
+      "banner": "Cover Banner",
+      "whatsapp": "WhatsApp",
+      "viber": "Viber",
+      "customCategory": "Specify your category",
+      "yearEstablished": "Year Established",
+      "licenseNumber": "License / Certification #",
+      "priceRange": "Price Range",
+      "paymentMethods": "Payment Methods Accepted"
     },
     "placeholders": {
       "name": "Enter your business name",
@@ -180,13 +210,32 @@
       "selectCountry": "Select a country",
       "selectCity": "Select a city",
       "address": "Street address",
-      "hours": "e.g. 09:00 - 17:00"
+      "hours": "e.g. 09:00 - 17:00",
+      "customCategory": "e.g. Property Management, Solar Energy...",
+      "selectLanguage": "Select a language",
+      "yearEstablished": "e.g. 2015",
+      "licenseNumber": "e.g. LIC-2024-1234",
+      "serviceArea": "e.g. Pristina, Prizren..."
     },
     "addService": "Add",
+    "addLanguage": "Add",
+    "addServiceArea": "Add",
+    "serviceAreasHint": "Cities or regions where you provide services",
+    "priceRangeHint": "$ = Budget  |  $$ = Mid-range  |  $$$ = Premium",
+    "logoUploadError": "Failed to upload logo. Please try again.",
+    "bannerHint": "1200 x 400px recommended",
+    "bannerRemove": "Remove",
+    "bannerUpload": "Upload Banner",
+    "bannerChange": "Change Banner",
+    "bannerUploading": "Uploading banner...",
+    "bannerUploadError": "Failed to upload banner. Please try again.",
+    "bannerInvalidType": "Please upload a JPEG, PNG, or WebP image",
+    "bannerTooLarge": "Image must be under 5MB",
     "logoUpload": "Upload Image",
     "logoChange": "Change Image",
     "logoRemove": "Remove",
     "logoHint": "JPG, PNG, or WebP. Max 5MB.",
+    "logoUploading": "Uploading logo...",
     "submit": "Create Listing",
     "submitting": "Creating...",
     "errors": {
@@ -199,6 +248,12 @@
       "logoInvalidType": "Please upload a JPG, PNG, or WebP image",
       "logoTooLarge": "Image must be under 5MB"
     }
+  },
+  "banner": {
+    "customize": "Customize",
+    "dragToReposition": "Drag to reposition",
+    "reposition": "Reposition Banner",
+    "repositionError": "Failed to save banner position"
   },
   "edit": {
     "title": "Edit Your Listing",
