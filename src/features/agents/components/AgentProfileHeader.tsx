@@ -145,30 +145,32 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
             {/* Agency Agent Header - Liquid Glass Banner */}
             {isAgencyAgent && (
                 <div className="sticky top-0 z-40">
-                    <div className="relative h-16 sm:h-[4.5rem] overflow-hidden">
+                    <div className="relative h-16 sm:h-[4.5rem]">
                         {/* Background Layer - Blurred cover image extending to edges */}
-                        {hasCoverImage ? (
-                            <>
-                                {/* Heavily blurred background fill for sides */}
-                                <img
-                                    src={agent.agencyCoverImage}
-                                    alt=""
-                                    className="absolute inset-0 w-full h-full object-cover scale-110 blur-md"
-                                />
-                                {/* Glass overlay */}
-                                <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xl" />
-                                {/* Subtle gradient shimmer */}
-                                <div className="absolute inset-0 bg-gradient-to-r from-white/[0.03] via-white/[0.08] to-white/[0.03]" />
-                            </>
-                        ) : (
-                            <>
-                                <div className={`absolute inset-0 ${headerGradient}`} />
-                                <div className="absolute inset-0 backdrop-blur-sm bg-black/10" />
-                            </>
-                        )}
+                        <div className="absolute inset-0 overflow-hidden">
+                            {hasCoverImage ? (
+                                <>
+                                    {/* Heavily blurred background fill for sides */}
+                                    <img
+                                        src={agent.agencyCoverImage}
+                                        alt=""
+                                        className="absolute inset-0 w-full h-full object-cover scale-110 blur-md"
+                                    />
+                                    {/* Glass overlay */}
+                                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xl" />
+                                    {/* Subtle gradient shimmer */}
+                                    <div className="absolute inset-0 bg-gradient-to-r from-white/[0.03] via-white/[0.08] to-white/[0.03]" />
+                                </>
+                            ) : (
+                                <>
+                                    <div className={`absolute inset-0 ${headerGradient}`} />
+                                    <div className="absolute inset-0 backdrop-blur-sm bg-black/10" />
+                                </>
+                            )}
 
-                        {/* Bottom border glow */}
-                        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                            {/* Bottom border glow */}
+                            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                        </div>
 
                         {/* Navigation Content */}
                         <div className="relative h-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">

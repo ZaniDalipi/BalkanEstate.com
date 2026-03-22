@@ -129,7 +129,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   }
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-20 flex-shrink-0" role="banner">
+    <header className="bg-white shadow-sm sticky top-0 z-[1000] flex-shrink-0" role="banner">
       <div className="max-w-screen-xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="flex justify-between items-center py-1.5 sm:py-2 landscape:py-1">
           <div className="flex items-center">

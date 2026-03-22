@@ -21,6 +21,20 @@ const parsePagination = (query: any): { page: number; limit: number; skip: numbe
   return { page, limit, skip };
 };
 
+/**
+ * Format a duration in milliseconds into a human-readable response time string.
+ * Returns '-' if no data is available.
+ */
+const formatResponseTime = (ms: number | undefined): string => {
+  if (!ms || ms <= 0) return '-';
+  const minutes = ms / (1000 * 60);
+  if (minutes < 60) return `${Math.round(minutes)} min`;
+  const hours = minutes / 60;
+  if (hours < 24) return `${Math.round(hours)} hr`;
+  const days = hours / 24;
+  return `${Math.round(days)} day${Math.round(days) !== 1 ? 's' : ''}`;
+};
+
 // ---------------------------------------------------------------------------
 // 1. GET /:agencyId/overview
 // ---------------------------------------------------------------------------
@@ -213,6 +227,29 @@ export const getAgents = async (
     const allAgents = (populatedAgency.agents as any[]) || [];
     const total = allAgents.length;
 
+    // Calculate average response time per agent from replied inquiries
+    const allAgentObjectIds = allAgents.map((a) => new mongoose.Types.ObjectId(String(a._id)));
+    const responseTimeAgg = await Inquiry.aggregate([
+      {
+        $match: {
+          recipientId: { $in: allAgentObjectIds },
+          repliedAt: { $exists: true, $ne: null },
+        },
+      },
+      {
+        $group: {
+          _id: '$recipientId',
+          avgMs: { $avg: { $subtract: ['$repliedAt', '$createdAt'] } },
+        },
+      },
+    ]);
+    const responseTimeMap = new Map<string, number>(
+      responseTimeAgg.map((r: { _id: mongoose.Types.ObjectId; avgMs: number }) => [
+        String(r._id),
+        r.avgMs,
+      ])
+    );
+
     // Apply pagination to the populated array
     const paginatedAgents = allAgents.slice(skip, skip + limit).map((agent) => {
       const agentDetail = populatedAgency.agentDetails?.find(
@@ -233,6 +270,7 @@ export const getAgents = async (
         joinedAt: agentDetail?.joinedAt,
         isActive: agentDetail?.isActive ?? true,
         couponCode: agentDetail?.couponCode,
+        avgResponseTime: formatResponseTime(responseTimeMap.get(String(agent._id))),
       };
     });
 
@@ -823,6 +861,28 @@ export const getAnalytics = async (
       inquiries: number;
     }>;
 
+    // Pre-calculate avg response times for all agents in this agency
+    const analyticsResponseTimeAgg = await Inquiry.aggregate([
+      {
+        $match: {
+          recipientId: { $in: agentUserIds },
+          repliedAt: { $exists: true, $ne: null },
+        },
+      },
+      {
+        $group: {
+          _id: '$recipientId',
+          avgMs: { $avg: { $subtract: ['$repliedAt', '$createdAt'] } },
+        },
+      },
+    ]);
+    const analyticsResponseTimeMap = new Map<string, number>(
+      analyticsResponseTimeAgg.map((r: { _id: mongoose.Types.ObjectId; avgMs: number }) => [
+        String(r._id),
+        r.avgMs,
+      ])
+    );
+
     const agentComparison = await Promise.all(
       agentComparisonRaw.map(async (stat) => {
         const agent = await User.findById(stat._id).select('name').lean();
@@ -836,7 +896,7 @@ export const getAnalytics = async (
           listings: stat.listings,
           inquiries: agentInquiries,
           views: stat.views,
-          responseTime: '-',
+          responseTime: formatResponseTime(analyticsResponseTimeMap.get(String(stat._id))),
         };
       })
     );

@@ -303,7 +303,7 @@ const NotificationCenter: React.FC = () => {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 border border-white/30 z-50 max-h-[70vh] flex flex-col overflow-hidden">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 border border-white/30 z-[999] max-h-[70vh] flex flex-col overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/20 bg-white/50">
             <h3 className="font-semibold text-gray-900">
