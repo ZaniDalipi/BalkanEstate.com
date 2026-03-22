@@ -216,7 +216,7 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
           </div>
         )}
 
-        {/* Instagram Embed - Direct iframe for zoomed-in view like TikTok */}
+        {/* Instagram Embed - 9:16 zoomed-in view matching TikTok style */}
         {platform === 'instagram' && !embedFailed && (
           <div className="w-full flex justify-center">
             <div
@@ -227,14 +227,37 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
                 position: 'relative',
               }}
             >
-              <div style={{ position: 'relative', paddingBottom: '125%', height: 0, overflow: 'hidden', borderRadius: '8px' }}>
+              {/* 9:16 aspect ratio container */}
+              <div style={{ position: 'relative', paddingBottom: '177.78%', height: 0, overflow: 'hidden', borderRadius: '8px', background: '#000' }}>
+                {/* Blurred background iframe layer */}
                 <iframe
                   src={`${instagramPermalink}embed/`}
                   style={{
                     position: 'absolute',
-                    top: 0,
-                    left: 0,
+                    top: '-10%',
+                    left: '-10%',
+                    width: '120%',
+                    height: '120%',
+                    border: 0,
+                    filter: 'blur(20px) brightness(0.6)',
+                    transform: 'scale(1.2)',
+                    pointerEvents: 'none',
+                  }}
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  scrolling="no"
+                  title=""
+                />
+                {/* Main iframe centered */}
+                <iframe
+                  src={`${instagramPermalink}embed/`}
+                  style={{
+                    position: 'absolute',
+                    top: '0',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
                     width: '100%',
+                    maxWidth: '100%',
                     height: '100%',
                     border: 0,
                   }}
