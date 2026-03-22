@@ -170,7 +170,13 @@
     "availableBadge": "DOSTUPNO {{date}}",
     "inquireAvailability": "Raspitajte se o dostupnosti",
     "rentedNotice": "Ova nekretnina je trenutno iznajmljena",
-    "availableFromNotice": "Očekuje se da će biti dostupna od {{date}}"
+    "availableFromNotice": "Očekuje se da će biti dostupna od {{date}}",
+    "dateInPastError": "Datum ne može biti u prošlosti.",
+    "tenantNameLabel": "Ime zakupca",
+    "tenantNamePlaceholder": "npr. Marko Marković",
+    "tenantNameHint": "Opcionalno. Vidljivo samo vama.",
+    "rentalNotesLabel": "Napomene",
+    "rentalNotesPlaceholder": "npr. Mjesečna uplata 1. u mjesecu, depozit plaćen..."
   },
   "rules": {
     "title": "Pravila najma — {{country}}",
