@@ -13,7 +13,8 @@
   "tabs": {
     "all": "Sve",
     "businesses": "Tvrtke",
-    "individuals": "Pojedinci"
+    "individuals": "Pojedinci",
+    "mine": "Moji oglasi"
   },
   "types": {
     "business": "Tvrtka",
@@ -85,6 +86,19 @@
     "next": "Sljedeća",
     "pageOf": "Stranica {{page}} od {{totalPages}}"
   },
+  "viewMode": {
+    "grid": "Mreža",
+    "map": "Karta"
+  },
+  "map": {
+    "loading": "Učitavanje karte...",
+    "loadError": "Nije moguće učitati kartu",
+    "geocoding": "Lociranje tvrtki...",
+    "noLocations": "Nema lokacija za prikaz",
+    "noLocationsHint": "Tvrtke s adresama pojavit će se ovdje na karti",
+    "viewDetails": "Pogledaj detalje",
+    "directions": "Upute"
+  },
   "verified": "Provjereno",
   "detail": {
     "backToDirectory": "Povratak na imenik",
@@ -113,6 +127,10 @@
     "owner": "O vlasniku",
     "ownerIndividual": "Nezavisni stručnjak",
     "ownerBusiness": "Vlasnik tvrtke",
+    "licensed": "Licenciran",
+    "languages": "Jezici",
+    "serviceAreas": "Područja usluga",
+    "paymentMethods": "Načini plaćanja",
     "stats": {
       "services": "Usluge",
       "views": "Pregledi",
@@ -144,7 +162,11 @@
       "location": "Lokacija",
       "businessLocation": "Lokacija tvrtke",
       "social": "Društvene mreže",
-      "hours": "Radno vrijeme"
+      "hours": "Radno vrijeme",
+      "languages": "Govoreni jezici",
+      "businessDetails": "Detalji o tvrtki",
+      "serviceAreas": "Područja usluga",
+      "pricing": "Cijene i plaćanje"
     },
     "locationHint": "Dodajte lokaciju svoje tvrtke kako bi vas klijenti lako pronašli.",
     "pinOnMap": "Označite lokaciju tvrtke na karti",
@@ -166,7 +188,15 @@
       "address": "Adresa",
       "logo": "Logotip",
       "avatar": "Profilna fotografija",
-      "pinLocation": "Označite lokaciju na karti"
+      "pinLocation": "Označite lokaciju na karti",
+      "banner": "Baner za naslovnu",
+      "whatsapp": "WhatsApp",
+      "viber": "Viber",
+      "customCategory": "Navedite svoju kategoriju",
+      "yearEstablished": "Godina osnivanja",
+      "licenseNumber": "Licenca / Certifikat #",
+      "priceRange": "Raspon cijena",
+      "paymentMethods": "Prihvaćeni načini plaćanja"
     },
     "placeholders": {
       "name": "Unesite naziv svoje tvrtke",
@@ -180,13 +210,32 @@
       "selectCountry": "Odaberite državu",
       "selectCity": "Odaberite grad",
       "address": "Ulica i kućni broj",
-      "hours": "npr. 09:00 - 17:00"
+      "hours": "npr. 09:00 - 17:00",
+      "customCategory": "npr. Upravljanje nekretninama, Solarna energija...",
+      "selectLanguage": "Odaberite jezik",
+      "yearEstablished": "npr. 2015",
+      "licenseNumber": "npr. LIC-2024-1234",
+      "serviceArea": "npr. Zagreb, Split..."
     },
     "addService": "Dodaj",
+    "bannerHint": "Preporučeno 1200 x 400px",
+    "bannerRemove": "Ukloni",
+    "addLanguage": "Dodaj",
+    "addServiceArea": "Dodaj",
+    "serviceAreasHint": "Gradovi ili regije gdje pružate usluge",
+    "priceRangeHint": "$ = Budžet  |  $$ = Srednje  |  $$$ = Premium",
+    "logoUploadError": "Učitavanje slike nije uspjelo. Molimo pokušajte ponovo.",
+    "bannerUpload": "Učitaj baner",
+    "bannerChange": "Promijeni baner",
+    "bannerUploading": "Učitavanje banera...",
+    "bannerUploadError": "Učitavanje banera nije uspjelo. Molimo pokušajte ponovo.",
+    "bannerInvalidType": "Molimo učitajte JPEG, PNG ili WebP sliku",
+    "bannerTooLarge": "Slika mora biti manja od 5MB",
     "logoUpload": "Učitaj sliku",
     "logoChange": "Promijeni sliku",
     "logoRemove": "Ukloni",
     "logoHint": "JPG, PNG ili WebP. Maksimalno 5MB.",
+    "logoUploading": "Učitavanje slike...",
     "submit": "Kreiraj oglas",
     "submitting": "Kreiranje...",
     "errors": {
@@ -199,6 +248,12 @@
       "logoInvalidType": "Molimo učitajte sliku u JPG, PNG ili WebP formatu",
       "logoTooLarge": "Slika mora biti manja od 5MB"
     }
+  },
+  "banner": {
+    "customize": "Prilagodi",
+    "dragToReposition": "Povucite za premještanje",
+    "reposition": "Premjesti baner",
+    "repositionError": "Spremanje pozicije banera nije uspjelo"
   },
   "edit": {
     "title": "Uredite svoj oglas",

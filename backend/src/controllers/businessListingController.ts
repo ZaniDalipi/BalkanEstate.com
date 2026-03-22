@@ -262,6 +262,16 @@ export const updateBusinessListing = async (
       return;
     }
 
+    // Validate bannerPosition range (0-100)
+    if (updates.bannerPosition !== undefined) {
+      const pos = Number(updates.bannerPosition);
+      if (isNaN(pos) || pos < 0 || pos > 100) {
+        res.status(400).json({ message: 'Banner position must be a number between 0 and 100' });
+        return;
+      }
+      updates.bannerPosition = Math.round(pos);
+    }
+
     // Limit array lengths
     if (updates.services && Array.isArray(updates.services)) {
       updates.services = updates.services.slice(0, 20);
