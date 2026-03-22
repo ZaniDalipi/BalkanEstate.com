@@ -716,12 +716,12 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     };
 
     const statusFilterOptions: { label: string, value: PropertyStatus | 'all' }[] = [
-        { label: 'All', value: 'all' },
-        { label: 'Active', value: 'active' },
-        { label: 'Pending', value: 'pending' },
-        { label: 'Sold', value: 'sold' },
-        { label: 'Rented', value: 'rented' as PropertyStatus },
-        { label: 'Draft', value: 'draft' },
+        { label: t('seller:myListings.filters.all', 'All'), value: 'all' },
+        { label: t('seller:myListings.filters.active', 'Active'), value: 'active' },
+        { label: t('seller:myListings.filters.pending', 'Pending'), value: 'pending' },
+        { label: t('seller:myListings.filters.sold', 'Sold'), value: 'sold' },
+        { label: t('seller:myListings.filters.rented', 'Rented'), value: 'rented' as PropertyStatus },
+        { label: t('seller:myListings.filters.draft', 'Draft'), value: 'draft' },
     ];
 
     // Only show role filter if user has listings in both roles
@@ -839,7 +839,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             </Modal>
 
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">My Listings ({myProperties.length})</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">{t('seller:myListings.titleWithCount', 'My Listings ({{count}})', { count: myProperties.length })}</h3>
                 <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => {
