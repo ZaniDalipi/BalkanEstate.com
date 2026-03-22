@@ -421,6 +421,58 @@ export const getProperty = async (
       return;
     }
 
+    // Auto-release expired rental: if rentedUntil date has passed, mark as available
+    if (
+      property.status === 'rented' &&
+      property.rentedUntil &&
+      new Date(property.rentedUntil) <= new Date()
+    ) {
+      if (property.rentedAt) {
+        let monthlyRent = property.price;
+        if (property.rentPeriod === 'weekly') monthlyRent = property.price * 4.33;
+        else if (property.rentPeriod === 'daily') monthlyRent = property.price * 30;
+
+        await Property.updateOne(
+          { _id: property._id },
+          { $push: { rentalHistory: { startDate: property.rentedAt, endDate: property.rentedUntil, monthlyRent } } }
+        );
+      }
+
+      await Property.updateOne(
+        { _id: property._id },
+        {
+          $set: { status: 'active', availableFrom: new Date() },
+          $unset: { rentedAt: 1, rentedUntil: 1 },
+        }
+      );
+
+      await User.updateOne({ _id: property.sellerId }, { $inc: { listingsCount: 1 } });
+
+      // Reload the now-active property
+      const refreshed = await Property.findById(id).populate(
+        'sellerId',
+        'name email phone avatarUrl role agencyName agencyId licenseNumber'
+      );
+      if (!refreshed) {
+        res.status(404).json({ message: 'Property not found' });
+        return;
+      }
+
+      refreshed.views += 1;
+      await refreshed.save();
+      await incrementViewCount(String(refreshed.sellerId._id || refreshed.sellerId));
+
+      let enrichedProperty = refreshed.toObject();
+      const seller = enrichedProperty.sellerId as any;
+      if (seller?.agencyId) {
+        const agency = await Agency.findById(seller.agencyId, { logo: 1 }).lean();
+        if (agency) seller.agencyLogo = agency.logo;
+      }
+
+      res.json({ property: sanitizeProperty(enrichedProperty, 'detail') });
+      return;
+    }
+
     // Increment views on property
     property.views += 1;
     await property.save();

@@ -126,9 +126,19 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   const [showRentedModal, setShowRentedModal] = useState(false);
   const [showAvailableConfirm, setShowAvailableConfirm] = useState(false);
   const [rentedUntilDate, setRentedUntilDate] = useState('');
-  const [localStatus, setLocalStatus] = useState(property.status);
+  // Auto-release: if rentedUntil date has passed, treat property as active on the client side
+  const isRentalExpired = property.status === 'rented' &&
+    property.rentedUntil &&
+    new Date(property.rentedUntil) <= new Date();
+  const [localStatus, setLocalStatus] = useState(isRentalExpired ? 'active' : property.status);
   // Sync if the property prop is updated externally (re-fetch / real-time update)
-  useEffect(() => { setLocalStatus(property.status); }, [property.status]);
+  useEffect(() => {
+    if (property.status === 'rented' && property.rentedUntil && new Date(property.rentedUntil) <= new Date()) {
+      setLocalStatus('active');
+    } else {
+      setLocalStatus(property.status);
+    }
+  }, [property.status, property.rentedUntil]);
 
   // State for mobile breadcrumb collapse on scroll
   const [isBreadcrumbCollapsed, setIsBreadcrumbCollapsed] = useState(false);

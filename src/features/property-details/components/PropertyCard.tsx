@@ -110,7 +110,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   const isNew = property?.createdAt && (Date.now() - property.createdAt < 3 * 24 * 60 * 60 * 1000);
   const isPriceReduced = property?.originalPrice !== undefined && property?.originalPrice > property?.price;
   const isSold = property?.status === 'sold';
-  const isRented = property?.status === 'rented';
+  // Treat rental as expired (property available) if rentedUntil date has passed
+  const isRentalExpired = property?.status === 'rented' && property?.rentedUntil && new Date(property.rentedUntil) <= new Date();
+  const isRented = property?.status === 'rented' && !isRentalExpired;
   const isRental = (property?.listingType || 'sale') === 'rent';
 
   // Check if property has an active promotion

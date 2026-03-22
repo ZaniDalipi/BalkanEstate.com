@@ -377,8 +377,8 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
             </div>
           )}
 
-          {/* Rented availability notice */}
-          {property.status === 'rented' && property.rentedUntil && (
+          {/* Rented availability notice - hide if rental period has already expired */}
+          {property.status === 'rented' && property.rentedUntil && new Date(property.rentedUntil) > new Date() && (
             <div className="w-full p-3 bg-orange-50 border border-orange-200 rounded-xl text-center mb-1">
               <p className="text-xs font-semibold text-orange-700">
                 {t('rental:status.availableFromNotice', { date: new Date(property.rentedUntil).toLocaleDateString(i18n.language === 'me' ? 'sr-Latn-ME' : i18n.language === 'sq' ? 'sq-AL' : i18n.language, { day: 'numeric', month: 'long', year: 'numeric' }) })}

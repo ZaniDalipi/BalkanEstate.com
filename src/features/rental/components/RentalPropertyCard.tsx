@@ -23,7 +23,9 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
     const formattedPrice = new Intl.NumberFormat('de-DE').format(property.price);
     const rentPeriodLabel = property.rentPeriod === 'weekly' ? t('rental:perWeek') : property.rentPeriod === 'daily' ? t('rental:perDay') : t('rental:perMonth');
 
-    const isRented = property.status === 'rented';
+    // Treat rental as expired (property available) if rentedUntil date has passed
+    const isRentalExpired = property.status === 'rented' && property.rentedUntil && new Date(property.rentedUntil) <= new Date();
+    const isRented = property.status === 'rented' && !isRentalExpired;
 
     return (
         <article
