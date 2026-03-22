@@ -83,10 +83,8 @@ const ListingCard: React.FC<{
     const [imageError, setImageError] = useState(false);
 
     const handleCardClick = () => {
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property.id });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
+        dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
         window.history.pushState({}, '', buildLocalizedPath(`/property/${property.id}`));
-        window.dispatchEvent(new PopStateEvent('popstate'));
     };
 
     const handleEditClick = (e: React.MouseEvent) => {
