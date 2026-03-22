@@ -7,8 +7,11 @@
     "promotions": "My Promotions",
     "performance": "Performance",
     "subscription": "Subscription",
-    "profileSettings": "Profile Settings",
-    "security": "Security"
+    "viewings": "Zahtjevi za razgledanje",
+    "myBusinesses": "Moji biznisi",
+    "measurements": "Mjerenja",
+    "profileSettings": "Podešavanja profila",
+    "security": "Sigurnost"
   },
   "promotions": {
     "title": "My Promotions",

@@ -267,5 +267,17 @@
     "statusActiveDesc": "Listimi juaj është i dukshëm për të gjithë",
     "statusInactiveDesc": "Listimi juaj është i fshehur nga drejtoria",
     "success": "Listimi juaj u përditësua me sukses"
+  },
+  "myBusinesses": {
+    "title": "Bizneset e mia",
+    "subtitle_one": "{{count}} listim biznesi",
+    "subtitle_other": "{{count}} listime biznesesh",
+    "createNew": "Biznes i ri",
+    "view": "Shiko",
+    "edit": "Ndrysho",
+    "delete": "Fshi",
+    "emptyTitle": "Asnjë biznes ende",
+    "emptyMessage": "Krijoni listimin tuaj të parë të biznesit për të shfaqur shërbimet tuaja në drejtori.",
+    "createFirst": "Krijo listim biznesi"
   }
 }

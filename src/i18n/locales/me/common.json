@@ -449,30 +449,30 @@
     "offlineMessage": "Sada možeš koristiti BalkanEstate i bez internet konekcije."
   },
   "measurements": {
-    "title": "My Measurements",
-    "usageCount": "{{count}} of {{max}} measurements used",
+    "title": "Moja mjerenja",
+    "usageCount": "{{count}} od {{max}} mjerenja iskorišćeno",
     "planPro": "Pro",
-    "planFree": "Free",
-    "maxAllowed": "{{count}} max",
-    "emptyTitle": "No Measurements Yet",
-    "emptyDescription": "Use the measurement tool on the map to measure land distances and areas.",
-    "openMap": "Open Map",
-    "allMeasurements": "All Measurements",
-    "showAll": "Show All",
-    "typeArea": "Area",
-    "typeDistance": "Distance",
-    "typeDistShort": "Dist",
-    "viewOnMap": "View on map",
-    "deleteConfirmation": "Delete \"{{name}}\"?",
-    "deleting": "Deleting...",
+    "planFree": "Besplatno",
+    "maxAllowed": "{{count}} maks",
+    "emptyTitle": "Još nema mjerenja",
+    "emptyDescription": "Koristite alat za mjerenje na mapi za mjerenje rastojanja i površina.",
+    "openMap": "Otvori mapu",
+    "allMeasurements": "Sva mjerenja",
+    "showAll": "Prikaži sve",
+    "typeArea": "Površina",
+    "typeDistance": "Rastojanje",
+    "typeDistShort": "Rast",
+    "viewOnMap": "Prikaži na mapi",
+    "deleteConfirmation": "Obriši \"{{name}}\"?",
+    "deleting": "Brisanje...",
     "form": {
-      "namePlaceholder": "Name",
-      "addressPlaceholder": "Address"
+      "namePlaceholder": "Ime",
+      "addressPlaceholder": "Adresa"
     },
     "errors": {
-      "loadFailed": "Failed to load measurements",
-      "updateFailed": "Failed to update measurement",
-      "deleteFailed": "Failed to delete measurement"
+      "loadFailed": "Neuspješno učitavanje mjerenja",
+      "updateFailed": "Neuspješno ažuriranje mjerenja",
+      "deleteFailed": "Neuspješno brisanje mjerenja"
     }
   },
   "splash": {

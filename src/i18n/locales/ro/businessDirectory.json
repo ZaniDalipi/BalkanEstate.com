@@ -267,5 +267,17 @@
     "statusActiveDesc": "Anunțul tău este vizibil pentru toți",
     "statusInactiveDesc": "Anunțul tău este ascuns din director",
     "success": "Anunțul tău a fost actualizat cu succes"
+  },
+  "myBusinesses": {
+    "title": "Afacerile mele",
+    "subtitle_one": "{{count}} anunț de afacere",
+    "subtitle_other": "{{count}} anunțuri de afaceri",
+    "createNew": "Afacere nouă",
+    "view": "Vizualizare",
+    "edit": "Editează",
+    "delete": "Șterge",
+    "emptyTitle": "Nu există afaceri încă",
+    "emptyMessage": "Creează primul tău anunț de afacere pentru a-ți prezenta serviciile în director.",
+    "createFirst": "Creează anunț de afacere"
   }
 }

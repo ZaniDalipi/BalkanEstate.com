@@ -8,7 +8,10 @@
     "subscription": "Абонамент",
     "profileSettings": "Настройки на Профила",
     "security": "Сигурност",
-    "promotions": "My Promotions"
+    "viewings": "Заявки за оглед",
+    "myBusinesses": "Моите бизнеси",
+    "measurements": "Измервания",
+    "promotions": "Моите промоции"
   },
   "roles": {
     "buyer": "Купувач",

@@ -267,5 +267,17 @@
     "statusActiveDesc": "Vaš oglas je vidljiv svima",
     "statusInactiveDesc": "Vaš oglas je sakriven iz imenika",
     "success": "Vaš oglas je uspješno ažuriran"
+  },
+  "myBusinesses": {
+    "title": "Moji biznisi",
+    "subtitle_one": "{{count}} poslovni oglas",
+    "subtitle_other": "{{count}} poslovnih oglasa",
+    "createNew": "Novi biznis",
+    "view": "Pogledaj",
+    "edit": "Uredi",
+    "delete": "Obriši",
+    "emptyTitle": "Još nema biznisa",
+    "emptyMessage": "Kreirajte svoj prvi poslovni oglas da prikažete usluge u imeniku.",
+    "createFirst": "Kreiraj poslovni oglas"
   }
 }

@@ -267,5 +267,17 @@
     "statusActiveDesc": "Your listing is visible to everyone",
     "statusInactiveDesc": "Your listing is hidden from the directory",
     "success": "Your listing has been updated successfully"
+  },
+  "myBusinesses": {
+    "title": "My Businesses",
+    "subtitle_one": "{{count}} business listing",
+    "subtitle_other": "{{count}} business listings",
+    "createNew": "New Business",
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete",
+    "emptyTitle": "No businesses yet",
+    "emptyMessage": "Create your first business listing to showcase your services in the directory.",
+    "createFirst": "Create Business Listing"
   }
 }
