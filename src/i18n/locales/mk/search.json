@@ -191,7 +191,7 @@
     "poi": "POI",
     "pointsOfInterest": "Точки на Интерес",
     "landmarks": "Знаменитости",
-    "measure": "Измери",
+    "measure": "Мери",
     "measureDistance": "Измери Растојание",
     "landParcels": "Земјишни Парцели",
     "save": "Зачувај",
@@ -260,7 +260,8 @@
       "autumn": "Есен",
       "winter": "Зима"
     },
-    "promoted": "Промовирани"
+    "promoted": "Промовирани",
+    "cadastre": "Катастар"
   },
   "newsletter": {
     "title": "Останете Ажурирани со Нови Недвижности",

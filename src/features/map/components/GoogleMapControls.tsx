@@ -285,7 +285,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               aria-pressed={showMeasurement}
             >
               <span className="text-xs xl:text-sm">📏</span>
-              <span className="hidden xl:inline">Measure</span>
+              <span className="hidden xl:inline">{t('search:map.measure', 'Measure')}</span>
             </button>
 
             {/* Cadastre Layer Toggle */}
@@ -298,7 +298,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               aria-pressed={showCadastre}
             >
               <span className="text-xs xl:text-sm">📐</span>
-              <span className="hidden xl:inline">Cadastre</span>
+              <span className="hidden xl:inline">{t('search:map.cadastre', 'Cadastre')}</span>
             </button>
 
             {/* Legend Toggle */}

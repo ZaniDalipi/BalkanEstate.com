@@ -191,7 +191,7 @@
     "poi": "POI",
     "pointsOfInterest": "Točke Interesa",
     "landmarks": "Znamenitosti",
-    "measure": "Mjeri",
+    "measure": "Izmjeri",
     "measureDistance": "Mjeri Udaljenost",
     "landParcels": "Zemljišne Čestice",
     "save": "Spremi",
@@ -260,7 +260,8 @@
       "autumn": "Jesen",
       "winter": "Zima"
     },
-    "promoted": "Promovirani"
+    "promoted": "Promovirani",
+    "cadastre": "Kataststar"
   },
   "newsletter": {
     "title": "Ostanite Ažurirani s Novim Nekretninama",

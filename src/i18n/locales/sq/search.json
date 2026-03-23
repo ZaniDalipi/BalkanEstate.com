@@ -191,7 +191,7 @@
     "poi": "POI",
     "pointsOfInterest": "Pikat e Interesit",
     "landmarks": "Objekte të Rëndësishme",
-    "measure": "Mat",
+    "measure": "Matje",
     "measureDistance": "Mat Distancën",
     "landParcels": "Parcelat e Tokës",
     "save": "Ruaj",
@@ -260,7 +260,8 @@
       "autumn": "Vjeshtë",
       "winter": "Dimër"
     },
-    "promoted": "Të promovuara"
+    "promoted": "Të promovuara",
+    "cadastre": "Katastër"
   },
   "newsletter": {
     "title": "Qëndro i Përditësuar me Prona të Reja",

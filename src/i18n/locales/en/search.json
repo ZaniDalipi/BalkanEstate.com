@@ -275,7 +275,8 @@
       "autumn": "Autumn",
       "winter": "Winter"
     },
-    "promoted": "Premium"
+    "promoted": "Premium",
+    "cadastre": "Cadastre"
   },
   "newsletter": {
     "title": "Stay Updated with New Properties",

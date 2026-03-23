@@ -191,7 +191,7 @@
     "poi": "POI",
     "pointsOfInterest": "Puncte de Interes",
     "landmarks": "Repere",
-    "measure": "Măsoară",
+    "measure": "Măsura",
     "measureDistance": "Măsoară Distanța",
     "parcels": "Parcele",
     "landParcels": "Parcele de Teren",
@@ -260,7 +260,8 @@
       "autumn": "Toamnă",
       "winter": "Iarnă"
     },
-    "promoted": "Promovate"
+    "promoted": "Promovate",
+    "cadastre": "Cadastru"
   },
   "newsletter": {
     "title": "Fiți la Curent cu Proprietăți Noi",
