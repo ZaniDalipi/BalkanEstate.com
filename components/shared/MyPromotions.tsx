@@ -19,6 +19,8 @@ import {
   useRefreshPromotions,
   type PromotionFilter,
 } from '../../src/features/promotions/hooks/usePromotionData';
+import { useMyListings } from '../../src/features/properties/hooks/useMyListings';
+import { formatPrice } from '../../utils/currency';
 
 const MyPromotions: React.FC = () => {
   const { t } = useTranslation(['account', 'property']);
@@ -37,10 +39,16 @@ const MyPromotions: React.FC = () => {
   const autoExtendCheckoutMutation = useAutoExtendCheckout();
   const refreshPromotions = useRefreshPromotions();
 
+  // Fetch user's own listings for the listing picker
+  const { listings: myListings, isLoading: isLoadingListings } = useMyListings({ enablePolling: false });
+
   // Local state
   const [filter, setFilter] = useState<PromotionFilter>('active');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+  const [showListingPicker, setShowListingPicker] = useState(false);
+  const [propertyToPromote, setPropertyToPromote] = useState<Property | null>(null);
+  const [showPromoteModal, setShowPromoteModal] = useState(false);
 
   // Auto-hide toast after 4 seconds
   React.useEffect(() => {
@@ -87,6 +95,18 @@ const MyPromotions: React.FC = () => {
   };
 
   // Handlers
+  const handleSelectListingToPromote = (property: Property) => {
+    setPropertyToPromote(property);
+    setShowListingPicker(false);
+    setShowPromoteModal(true);
+  };
+
+  const handlePromoteSuccess = async () => {
+    setShowPromoteModal(false);
+    setPropertyToPromote(null);
+    refreshPromotions();
+  };
+
   const handleViewProperty = (propertyId: string) => {
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
@@ -332,9 +352,7 @@ const MyPromotions: React.FC = () => {
           </p>
           {filter === 'active' && (
             <button
-              onClick={() => {
-                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'my-listings' });
-              }}
+              onClick={() => setShowListingPicker(true)}
               className="bg-primary text-white font-semibold px-6 py-2 rounded-lg hover:bg-primary-dark transition-colors"
             >
               {t('account:promotions.promoteButton')}
@@ -387,6 +405,103 @@ const MyPromotions: React.FC = () => {
           }}
           propertyId={propertyForHistory.id}
           propertyTitle={propertyForHistory.title || `${propertyForHistory.address}, ${propertyForHistory.city}`}
+        />
+      )}
+
+      {/* Listing Picker Modal */}
+      {showListingPicker && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between p-5 border-b border-neutral-200">
+              <h3 className="text-lg font-bold text-neutral-800">
+                {t('account:promotions.promoteButton')}
+              </h3>
+              <button
+                onClick={() => setShowListingPicker(false)}
+                className="p-2 rounded-full hover:bg-neutral-100 transition-colors"
+              >
+                <svg className="w-5 h-5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="overflow-y-auto flex-1 p-4">
+              {isLoadingListings ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="flex gap-3 p-3 rounded-xl animate-pulse">
+                      <div className="w-16 h-16 bg-neutral-200 rounded-lg flex-shrink-0" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-neutral-200 rounded w-3/4" />
+                        <div className="h-3 bg-neutral-200 rounded w-1/2" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : myListings.length === 0 ? (
+                <div className="text-center py-8 text-neutral-500">
+                  <p>{t('account:listings.noListings', 'You don\'t have any listings yet.')}</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {myListings
+                    .filter(p => p.status === 'active')
+                    .map(property => (
+                    <button
+                      key={property.id}
+                      onClick={() => handleSelectListingToPromote(property)}
+                      className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-primary/5 border border-transparent hover:border-primary/20 transition-all text-left group"
+                    >
+                      <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-neutral-100">
+                        {property.imageUrl ? (
+                          <img
+                            src={property.imageUrl}
+                            alt={property.title || property.address}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-neutral-400">
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-neutral-800 truncate group-hover:text-primary transition-colors">
+                          {property.title || property.address}
+                        </p>
+                        <p className="text-sm text-neutral-500 truncate">{property.city}, {property.country}</p>
+                        <p className="text-sm font-bold text-primary">{formatPrice(property.price, property.country)}</p>
+                      </div>
+                      {property.promotionTier && (
+                        <span className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700 flex-shrink-0">
+                          {TIER_CONFIG[property.promotionTier as keyof typeof TIER_CONFIG]?.icon} {property.promotionTier}
+                        </span>
+                      )}
+                      <svg className="w-5 h-5 text-neutral-300 group-hover:text-primary flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Promote Listing Modal */}
+      {propertyToPromote && showPromoteModal && (
+        <PromotionModal
+          isOpen={showPromoteModal}
+          onClose={() => {
+            setShowPromoteModal(false);
+            setPropertyToPromote(null);
+          }}
+          propertyId={propertyToPromote.id}
+          propertyTitle={propertyToPromote.title || `${propertyToPromote.address}, ${propertyToPromote.city}`}
+          onSuccess={handlePromoteSuccess}
         />
       )}
 
