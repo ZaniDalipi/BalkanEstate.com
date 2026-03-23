@@ -14,7 +14,7 @@
     "emailAddress": "Имейл Адрес",
     "emailPlaceholder": "you@example.com",
     "continueToPayment": "Продължи към Плащането",
-    "securePayment": "Сигурно плащане чрез Stripe",
+    "securePayment": "Сигурно плащане чрез Braintree",
     "loadingPlans": "Зареждане на планове...",
     "sellerPromotion": {
       "title": "Listing Promotion Plans",

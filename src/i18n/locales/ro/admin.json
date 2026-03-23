@@ -581,11 +581,11 @@
       "agentCouponsHelp": "Cupoane pentru invitarea agenților în agenție",
       "maxSubscriptions": "Abonamente Max",
       "maxSubscriptionsHelp": "0 = nelimitat",
-      "stripeSection": "Integrare Stripe",
-      "stripeProductId": "ID Produs Stripe",
-      "stripeProductPlaceholder": "prod_...",
-      "stripePriceId": "ID Preț Stripe",
-      "stripePricePlaceholder": "price_..."
+      "braintreeSection": "Integrare Braintree",
+      "braintreeProductId": "ID Produs Braintree",
+      "braintreeProductPlaceholder": "prod_...",
+      "braintreePriceId": "ID Preț Braintree",
+      "braintreePricePlaceholder": "price_..."
     },
     "placeholders": {
       "title": "Placeholdere Disponibile",

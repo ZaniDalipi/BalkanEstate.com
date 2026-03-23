@@ -1,23 +1,23 @@
 # Payment System Setup Guide
 
-This application uses **external payment processing** to ensure security and PCI compliance. All sensitive payment information (credit card details, bank accounts, etc.) is handled by third-party payment providers like Stripe.
+This application uses **external payment processing** to ensure security and PCI compliance. All sensitive payment information (credit card details, bank accounts, etc.) is handled by third-party payment providers like Braintree.
 
 ## Overview
 
 **How External Payments Work:**
 1. User clicks "Pay" in the app
-2. App creates a payment session with Stripe (backend API call)
-3. User is **redirected to Stripe's secure external payment page**
-4. User completes payment on Stripe's website (we never see card details)
-5. Stripe redirects back to our app with success/cancel status
-6. Stripe sends webhook confirmation to our backend
+2. App requests a client token from the backend (which fetches it from Braintree)
+3. User completes payment using the **Braintree Drop-in UI or hosted fields** (we never see card details)
+4. Braintree returns a payment method nonce to the frontend
+5. Frontend sends the nonce to our backend to create the transaction
+6. Braintree sends webhook confirmation to our backend
 7. Backend updates subscription/payment status in database
 
 **Security Benefits:**
 - ✅ **No credit card data stored in our database**
-- ✅ **PCI DSS compliance handled entirely by Stripe**
+- ✅ **PCI DSS compliance handled entirely by Braintree**
 - ✅ Secure payment processing infrastructure
-- ✅ Fraud detection and prevention by Stripe
+- ✅ Fraud detection and prevention by Braintree
 - ✅ Multiple payment methods supported
 - ✅ Automatic invoicing and receipts
 

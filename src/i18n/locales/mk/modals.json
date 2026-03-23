@@ -14,7 +14,7 @@
     "emailAddress": "Е-пошта адреса",
     "emailPlaceholder": "вие@пример.мк",
     "continueToPayment": "Продолжете со плаќање",
-    "securePayment": "Безбедно плаќање овозможено од Stripe",
+    "securePayment": "Безбедно плаќање овозможено од Braintree",
     "loadingPlans": "Вчитување на планови...",
     "buyerPro": {
       "name": "Купувач Про",

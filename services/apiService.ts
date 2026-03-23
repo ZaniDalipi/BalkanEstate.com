@@ -1749,7 +1749,7 @@ export const purchasePromotion = async (params: PurchasePromotionParams): Promis
 };
 
 /**
- * Create Stripe checkout session for promotion purchase
+ * Create checkout session for promotion purchase
  */
 export const createPromotionCheckout = async (params: {
   propertyId: string;
@@ -1778,7 +1778,7 @@ export const createPromotionCheckout = async (params: {
 };
 
 /**
- * Confirm promotion payment after Stripe checkout
+ * Confirm promotion payment after checkout
  */
 export const confirmPromotionPayment = async (sessionId: string): Promise<{
   success: boolean;
@@ -1890,7 +1890,7 @@ export const extendPromotion = async (params: {
 };
 
 /**
- * Confirm extension payment after Stripe checkout
+ * Confirm extension payment after checkout
  */
 export const confirmExtensionPayment = async (sessionId: string): Promise<{
   success: boolean;
@@ -1927,7 +1927,7 @@ export const addUrgentBadge = async (promotionId: string, couponCode?: string): 
 };
 
 /**
- * Confirm urgent badge payment after Stripe checkout
+ * Confirm urgent badge payment after checkout
  */
 export const confirmUrgentBadgePayment = async (sessionId: string): Promise<{
   success: boolean;
@@ -2225,7 +2225,7 @@ export const cancelFeaturedSubscription = async (
 
 export const confirmFeaturedPayment = async (
   agencyId: string,
-  data: { stripeSubscriptionId: string; stripeCustomerId: string }
+  data: { subscriptionId: string; customerId: string }
 ): Promise<any> => {
   return await apiRequest(`/agencies/${agencyId}/featured-subscription/confirm-payment`, {
     method: 'POST',

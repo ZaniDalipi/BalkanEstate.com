@@ -238,7 +238,7 @@
     "termsOfService": "Terms of Service",
     "privacyPolicy": "Privacy Policy",
     "refundPolicy": "Refund Policy",
-    "providerNote": "Payments handled securely via Stripe and PayPal. VAT/taxes included where applicable."
+    "providerNote": "Payments handled securely via Braintree and PayPal. VAT/taxes included where applicable."
   },
   "duration": {
     "7days": "7 days",

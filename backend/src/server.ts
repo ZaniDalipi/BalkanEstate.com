@@ -219,10 +219,6 @@ initializePushService();
 // ============================================================================
 applySecurityMiddleware(app);
 
-// Stripe webhook needs raw body BEFORE json parser (for signature verification)
-import { handleWebhook as handleStripeWebhook } from './controllers/paymentController';
-app.post('/api/payments/stripe/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook);
-
 // Body parser & cookie parser
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));

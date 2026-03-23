@@ -21,7 +21,7 @@
       "emailLabel": "Adresa Email",
       "emailPlaceholder": "ju@shembull.com",
       "continueToPayment": "Vazhdo te Pagesa",
-      "securePayment": "Pagesë e sigurt e mundësuar nga Stripe"
+      "securePayment": "Pagesë e sigurt e mundësuar nga Braintree"
     }
   },
   "sellerPlan": {
@@ -253,7 +253,7 @@
     "processing": "Duke përpunuar pagesën...",
     "success": "Pagesa u krye me sukses!",
     "error": "Pagesa dështoi",
-    "securePayment": "Pagesë e sigurt e mundësuar nga Stripe",
+    "securePayment": "Pagesë e sigurt e mundësuar nga Braintree",
     "cardDetails": "Detajet e Kartës",
     "payNow": "Paguaj Tani",
     "cancel": "Anulo"

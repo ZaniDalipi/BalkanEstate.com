@@ -580,11 +580,11 @@
       "agentCouponsHelp": "Kuponë për të ftuar agjentë në agjenci",
       "maxSubscriptions": "Abonime Maks",
       "maxSubscriptionsHelp": "0 = pa limit",
-      "stripeSection": "Integrimi Stripe",
-      "stripeProductId": "ID e Produktit Stripe",
-      "stripeProductPlaceholder": "prod_...",
-      "stripePriceId": "ID e Çmimit Stripe",
-      "stripePricePlaceholder": "price_..."
+      "braintreeSection": "Integrimi Braintree",
+      "braintreeProductId": "ID e Produktit Braintree",
+      "braintreeProductPlaceholder": "prod_...",
+      "braintreePriceId": "ID e Çmimit Braintree",
+      "braintreePricePlaceholder": "price_..."
     },
     "placeholders": {
       "title": "Placeholderët e Disponueshëm",

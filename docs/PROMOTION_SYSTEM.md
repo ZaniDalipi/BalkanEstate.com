@@ -804,7 +804,7 @@ curl http://localhost:5001/api/coupons \
 
 ## Future Enhancements
 
-1. **Payment Gateway Integration**: Currently `paymentStatus` is set to 'pending' or 'paid' manually. Integrate with Stripe/PayPal for real payments.
+1. **Payment Gateway Integration**: Currently `paymentStatus` is set to 'pending' or 'paid' manually. Integrate with Braintree/PayPal for real payments.
 
 2. **Analytics Dashboard**: Build comprehensive analytics showing:
    - View trends over time

@@ -14,7 +14,7 @@
     "emailAddress": "Adresă Email",
     "emailPlaceholder": "dvs@exemplu.com",
     "continueToPayment": "Continuă către Plată",
-    "securePayment": "Plată securizată prin Stripe",
+    "securePayment": "Plată securizată prin Braintree",
     "loadingPlans": "Se încarcă planurile...",
     "sellerPromotion": {
       "title": "Listing Promotion Plans",

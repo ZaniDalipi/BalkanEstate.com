@@ -581,11 +581,11 @@
       "agentCouponsHelp": "Kuponi za pozivanje agenata u agenciju",
       "maxSubscriptions": "Maks Pretplata",
       "maxSubscriptionsHelp": "0 = neograničeno",
-      "stripeSection": "Stripe Integracija",
-      "stripeProductId": "Stripe ID Proizvoda",
-      "stripeProductPlaceholder": "prod_...",
-      "stripePriceId": "Stripe ID Cijene",
-      "stripePricePlaceholder": "price_..."
+      "braintreeSection": "Braintree Integracija",
+      "braintreeProductId": "Braintree ID Proizvoda",
+      "braintreeProductPlaceholder": "prod_...",
+      "braintreePriceId": "Braintree ID Cijene",
+      "braintreePricePlaceholder": "price_..."
     },
     "placeholders": {
       "title": "Dostupni Placeholderi",

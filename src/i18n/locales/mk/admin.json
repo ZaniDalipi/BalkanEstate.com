@@ -318,11 +318,11 @@
       "agentCouponsHelp": "Купони за покана на агенти во агенцијата",
       "maxSubscriptions": "Макс Претплати",
       "maxSubscriptionsHelp": "0 = неограничено",
-      "stripeSection": "Stripe Интеграција",
-      "stripeProductId": "Stripe ID на Производ",
-      "stripeProductPlaceholder": "prod_...",
-      "stripePriceId": "Stripe ID на Цена",
-      "stripePricePlaceholder": "price_..."
+      "braintreeSection": "Braintree Интеграција",
+      "braintreeProductId": "Braintree ID на Производ",
+      "braintreeProductPlaceholder": "prod_...",
+      "braintreePriceId": "Braintree ID на Цена",
+      "braintreePricePlaceholder": "price_..."
     },
     "placeholders": {
       "title": "Достапни Плејсхолдери",

@@ -34,7 +34,7 @@ const SUPPORTED_INTERVALS = ['month', 'year', 'one_time'];
 /**
  * Supported payment providers
  */
-const SUPPORTED_PROVIDERS = ['stripe', 'paypal', 'braintree', 'web'];
+const SUPPORTED_PROVIDERS = ['paypal', 'braintree', 'web'];
 
 /**
  * Run validations and return 400 on failure

@@ -78,7 +78,7 @@ Your app is a **comprehensive, enterprise-grade real estate platform** covering 
 | **Saved Searches & Alerts** | Saved searches with frequency settings (instant/daily/weekly) | Matches Tier 1 requirement |
 | **Property Comparison** | Side-by-side comparison up to 5 properties | Present in top apps |
 | **Seller Dashboard & Analytics** | Views, saves, inquiries, weekly/monthly breakdowns, performance trends | Matches Zillow/Redfin seller tools |
-| **Monetization System** | 5 subscription tiers, 4 promotion levels, Stripe/Paddle/Paysera, App Store/Play Store | Well-developed |
+| **Monetization System** | 5 subscription tiers, 4 promotion levels, Braintree/Paddle/Paysera, App Store/Play Store | Well-developed |
 | **Admin Panel** | Full user/property/payment/coupon/content management | Comprehensive |
 | **PWA Support** | Offline-capable with Workbox | Present |
 | **SEO** | Multi-language hreflang, structured data, sitemaps, Open Graph | Strong |

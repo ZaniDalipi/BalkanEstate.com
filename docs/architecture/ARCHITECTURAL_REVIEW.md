@@ -665,8 +665,8 @@ server/
 │   │   ├── external-services/
 │   │   │   ├── cloudinary/
 │   │   │   │   └── CloudinaryService.ts
-│   │   │   ├── stripe/
-│   │   │   │   └── StripeService.ts
+│   │   │   ├── braintree/
+│   │   │   │   └── BraintreeService.ts
 │   │   │   ├── sendgrid/
 │   │   │   │   └── EmailService.ts
 │   │   │   └── gemini/

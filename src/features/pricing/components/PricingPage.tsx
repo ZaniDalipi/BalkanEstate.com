@@ -469,7 +469,7 @@ const PricingPage: React.FC = () => {
                 </button>
               </div>
               <p className="text-xs text-gray-500 text-center mt-4">
-                {t('pricing:legal.providerNote', 'Payments handled securely via Stripe and PayPal. VAT/taxes included where applicable.')}
+                {t('pricing:legal.providerNote', 'Payments handled securely via Braintree and PayPal. VAT/taxes included where applicable.')}
               </p>
             </div>
           </div>

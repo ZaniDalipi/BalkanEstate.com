@@ -643,27 +643,27 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
             </div>
           </div>
 
-          {/* Stripe */}
+          {/* Braintree */}
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <h4 className="font-semibold text-gray-900 mb-3">{t('admin:pricing.form.stripeSection', 'Stripe Integration')}</h4>
+            <h4 className="font-semibold text-gray-900 mb-3">{t('admin:pricing.form.braintreeSection', 'Braintree Integration')}</h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.stripeProductId', 'Stripe Product ID')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.braintreeProductId', 'Product ID')}</label>
                 <input
                   type="text"
                   value={editingProduct.externalProductId || ''}
                   onChange={(e) => setEditingProduct({ ...editingProduct, externalProductId: e.target.value })}
-                  placeholder={t('admin:pricing.form.stripeProductPlaceholder', 'prod_...')}
+                  placeholder={t('admin:pricing.form.braintreeProductPlaceholder', 'product_id')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.stripePriceId', 'Stripe Price ID')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.braintreePriceId', 'Price ID')}</label>
                 <input
                   type="text"
                   value={editingProduct.externalPriceId || ''}
                   onChange={(e) => setEditingProduct({ ...editingProduct, externalPriceId: e.target.value })}
-                  placeholder={t('admin:pricing.form.stripePricePlaceholder', 'price_...')}
+                  placeholder={t('admin:pricing.form.braintreePricePlaceholder', 'price_id')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                 />
               </div>

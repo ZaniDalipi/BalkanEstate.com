@@ -14,7 +14,7 @@
     "emailAddress": "Διεύθυνση Email",
     "emailPlaceholder": "you@example.com",
     "continueToPayment": "Συνέχεια στην Πληρωμή",
-    "securePayment": "Ασφαλής πληρωμή μέσω Stripe",
+    "securePayment": "Ασφαλής πληρωμή μέσω Braintree",
     "loadingPlans": "Φόρτωση πλάνων...",
     "sellerPromotion": {
       "title": "Listing Promotion Plans",

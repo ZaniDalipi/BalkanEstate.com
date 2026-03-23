@@ -581,11 +581,11 @@
       "agentCouponsHelp": "Κουπόνια για πρόσκληση πρακτόρων στο πρακτορείο",
       "maxSubscriptions": "Μέγ. Συνδρομές",
       "maxSubscriptionsHelp": "0 = απεριόριστο",
-      "stripeSection": "Ενσωμάτωση Stripe",
-      "stripeProductId": "Stripe ID Προϊόντος",
-      "stripeProductPlaceholder": "prod_...",
-      "stripePriceId": "Stripe ID Τιμής",
-      "stripePricePlaceholder": "price_..."
+      "braintreeSection": "Ενσωμάτωση Braintree",
+      "braintreeProductId": "Braintree ID Προϊόντος",
+      "braintreeProductPlaceholder": "prod_...",
+      "braintreePriceId": "Braintree ID Τιμής",
+      "braintreePricePlaceholder": "price_..."
     },
     "placeholders": {
       "title": "Διαθέσιμα Placeholders",

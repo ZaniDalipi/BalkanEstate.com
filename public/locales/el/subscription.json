@@ -21,7 +21,7 @@
       "emailLabel": "Διεύθυνση Email",
       "emailPlaceholder": "εσείς@παράδειγμα.com",
       "continueToPayment": "Συνέχεια στην Πληρωμή",
-      "securePayment": "Ασφαλής πληρωμή μέσω Stripe"
+      "securePayment": "Ασφαλής πληρωμή μέσω Braintree"
     }
   },
   "sellerPlan": {
@@ -212,7 +212,7 @@
     "processing": "Επεξεργασία πληρωμής...",
     "success": "Πληρωμή επιτυχής!",
     "error": "Η πληρωμή απέτυχε",
-    "securePayment": "Ασφαλής πληρωμή μέσω Stripe",
+    "securePayment": "Ασφαλής πληρωμή μέσω Braintree",
     "cardDetails": "Στοιχεία Κάρτας",
     "payNow": "Πληρώστε Τώρα",
     "cancel": "Ακύρωση"

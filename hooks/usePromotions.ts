@@ -145,7 +145,7 @@ export const usePromotionActions = (): UsePromotionActionsReturn => {
         // Free urgent badge - reload to show the change
         window.location.reload();
       } else if (result.url) {
-        // Redirect to Stripe checkout
+        // Redirect to payment checkout
         window.location.href = result.url;
       } else {
         // Fallback: should not happen, but handle gracefully

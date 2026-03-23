@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import Stripe from 'stripe';
 import User from '../models/User';
 import Product from '../models/Product';
 import Subscription from '../models/Subscription';
@@ -8,80 +7,10 @@ import PaymentRecord from '../models/PaymentRecord';
 import SubscriptionEvent from '../models/SubscriptionEvent';
 import { processSubscriptionPayment } from '../services/subscriptionPaymentService';
 import { paymentProviderFactory } from '../services/paymentProviderFactory';
-import { stripeService } from '../services/stripeService';
 import { paypalService } from '../services/paypalService';
 import { braintreeService } from '../services/braintreeService';
 import emailService from '../services/emailService';
 import { paymentLogger } from '../utils/logger';
-
-// Get Stripe instance from the service for webhook handling
-const stripe = stripeService.getStripeInstance();
-
-/**
- * @desc    Create a Stripe Checkout Session for external payment
- * @route   POST /api/payment/create-checkout-session
- * @access  Private
- */
-export const createCheckoutSession = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { planName, planInterval, amount, productId, countryCode } = req.body;
-    const userId = (req as any).user?._id;
-
-    if (!userId) {
-      res.status(401).json({ message: 'User not authenticated' });
-      return;
-    }
-
-    const user = await User.findById(userId);
-    if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return;
-    }
-
-    if (!amount || amount <= 0) {
-      res.status(400).json({ message: 'Invalid amount' });
-      return;
-    }
-
-    // SECURITY: Validate amount against product price to prevent client-side manipulation
-    if (productId) {
-      const product = await Product.findOne({ productId });
-      if (product && Math.abs(amount - product.price) > 0.50) {
-        paymentLogger.warn(`Price mismatch: client sent ${amount}, product price is ${product.price} (user ${userId})`);
-        res.status(400).json({ message: 'Amount does not match product price' });
-        return;
-      }
-    }
-
-    // Use Stripe service for real checkout session
-    const result = await stripeService.createCheckoutSession({
-      userId: userId.toString(),
-      userEmail: user.email,
-      amount,
-      currency: 'EUR',
-      productId: productId || 'default',
-      planName,
-      planInterval: planInterval || 'month',
-      countryCode: countryCode || user.country || 'GR',
-      firstName: user.name?.split(' ')[0],
-      lastName: user.name?.split(' ').slice(1).join(' '),
-    });
-
-    if (!result.success) {
-      res.status(500).json({ message: result.error || 'Failed to create checkout session' });
-      return;
-    }
-
-    res.status(200).json({
-      success: true,
-      sessionId: result.sessionId,
-      url: result.paymentUrl,
-    });
-  } catch (error: any) {
-    paymentLogger.error('Error creating checkout session:', error);
-    res.status(500).json({ message: 'Error creating checkout session' });
-  }
-};
 
 /**
  * @desc    Create a unified payment session (routes to appropriate provider based on country)
@@ -90,8 +19,8 @@ export const createCheckoutSession = async (req: Request, res: Response): Promis
  *
  * This is the recommended endpoint for creating payments. It automatically
  * selects the best payment provider based on the user's country:
- * - Stripe for EU countries (Greece, Croatia, Bulgaria, Romania, Slovenia)
- * - PaySera for non-EU Balkans (Serbia, Albania, Bosnia, N. Macedonia, Montenegro, Kosovo)
+ * - Braintree for EU countries (Greece, Croatia, Bulgaria, Romania, Slovenia, Serbia)
+ * - PayPal for non-EU Balkans (Albania, Bosnia, N. Macedonia, Montenegro, Kosovo)
  */
 export const createUnifiedPayment = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -135,7 +64,7 @@ export const createUnifiedPayment = async (req: Request, res: Response): Promise
 
     // Check if country is supported
     if (!paymentProviderFactory.isCountrySupported(userCountry)) {
-      console.warn(`⚠️ Country ${userCountry} not in our primary list, defaulting to Stripe`);
+      console.warn(`⚠️ Country ${userCountry} not in our primary list, defaulting to Braintree`);
     }
 
     // Create payment using the factory
@@ -206,9 +135,7 @@ export const getPaymentProviders = async (req: Request, res: Response): Promise<
       isEU: mapping?.isEU || false,
       isSEPA: mapping?.isSEPA || false,
       currency: mapping?.currency || 'EUR',
-      supportedMethods: provider === 'stripe'
-        ? ['card', 'sepa_debit', 'apple_pay', 'google_pay']
-        : ['card', 'bank_transfer', 'wallet'],
+      supportedMethods: paymentProviderFactory.getAvailablePaymentMethods(code.toUpperCase()),
     });
   } catch (error: any) {
     console.error('Error getting payment providers:', error);
@@ -231,7 +158,7 @@ export const getSupportedCountries = async (_req: Request, res: Response): Promi
         ...c,
         providerInfo: paymentProviderFactory.getProviderInfo(c.provider),
       })),
-      stripeCountries: paymentProviderFactory.getCountriesByProvider('stripe'),
+      braintreeCountries: paymentProviderFactory.getCountriesByProvider('braintree'),
       paypalCountries: paymentProviderFactory.getCountriesByProvider('paypal'),
     });
   } catch (error: any) {
@@ -247,7 +174,7 @@ export const getSupportedCountries = async (_req: Request, res: Response): Promi
  */
 export const processPayment = async (_req: Request, res: Response): Promise<void> => {
   res.status(400).json({
-    message: 'Direct payment processing is disabled. Please use /api/payments/create-payment to create a real payment session via Stripe or PayPal.',
+    message: 'Direct payment processing is disabled. Please use /api/payments/create-payment to create a real payment session via Braintree or PayPal.',
   });
 };
 
@@ -347,358 +274,9 @@ export const cancelSubscription = async (req: Request, res: Response): Promise<v
   }
 };
 
-/**
- * @desc    Handle Stripe webhook events
- * @route   POST /api/payment/webhook
- * @access  Public (but verified with Stripe signature)
- *
- * Stripe webhooks are the ONLY way we confirm payments.
- * Subscriptions are NEVER activated from client-side data.
- */
-export const handleWebhook = async (req: Request, res: Response): Promise<void> => {
-  const sig = req.headers['stripe-signature'] as string;
 
-  if (!stripeService.getWebhookSecret()) {
-    paymentLogger.error('Stripe webhook secret not configured');
-    res.status(400).send('Webhook secret not configured');
-    return;
-  }
 
-  let event: Stripe.Event;
 
-  try {
-    // Verify webhook signature — rejects forged webhooks
-    event = stripeService.constructWebhookEvent(req.body, sig);
-  } catch (err: any) {
-    paymentLogger.error('Stripe webhook signature verification failed:', err.message);
-    res.status(400).send(`Webhook Error: ${err.message}`);
-    return;
-  }
-
-  // Handle the event
-  try {
-    switch (event.type) {
-      case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
-        await handleSuccessfulCheckout(session);
-        break;
-      }
-
-      case 'customer.subscription.updated': {
-        const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionUpdated(subscription);
-        break;
-      }
-
-      case 'customer.subscription.deleted': {
-        const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionDeleted(subscription);
-        break;
-      }
-
-      case 'invoice.payment_succeeded': {
-        const invoice = event.data.object as Stripe.Invoice;
-        await handleRecurringPaymentSucceeded(invoice);
-        break;
-      }
-
-      case 'invoice.payment_failed': {
-        const invoice = event.data.object as Stripe.Invoice;
-        await handlePaymentFailed(invoice);
-        break;
-      }
-
-      case 'charge.refunded': {
-        const charge = event.data.object as Stripe.Charge;
-        await handleChargeRefunded(charge);
-        break;
-      }
-
-      case 'charge.dispute.created': {
-        const dispute = event.data.object as Stripe.Dispute;
-        await handleDisputeCreated(dispute);
-        break;
-      }
-
-      default:
-        console.log(`Unhandled event type: ${event.type}`);
-    }
-
-    res.json({ received: true });
-  } catch (error: any) {
-    console.error('Error handling webhook:', error);
-    res.status(500).json({ error: 'Webhook handler failed' });
-  }
-};
-
-/**
- * Helper function to process successful checkout
- */
-async function handleSuccessfulCheckout(session: Stripe.Checkout.Session) {
-  const userId = session.metadata?.userId;
-  const planName = session.metadata?.planName;
-  const planInterval = session.metadata?.planInterval;
-  const productId = session.metadata?.productId;
-
-  if (!userId) {
-    console.error('No userId in session metadata');
-    return;
-  }
-
-  console.log(`✅ Processing successful payment for user ${userId}`);
-
-  try {
-    // Find or create product
-    let product = await Product.findOne({ productId });
-
-    if (!product) {
-      // Create a default product
-      product = await Product.create({
-        productId: productId || 'default',
-        name: planName || 'Subscription',
-        description: `${planName} subscription`,
-        price: (session.amount_total || 0) / 100, // Convert from cents
-        currency: (session.currency || 'eur').toUpperCase(),
-        billingPeriod: planInterval === 'year' ? 'yearly' : 'monthly',
-        isActive: true,
-      });
-    }
-
-    // Process the subscription payment and get the result
-    const result = await processSubscriptionPayment({
-      userId,
-      productId: productId || 'default',
-      store: 'stripe',
-      amount: product.price,
-      currency: product.currency,
-    });
-
-    // Store Stripe subscription ID if this is a subscription (not one-time payment)
-    if (session.subscription && result.subscription) {
-      const subscription = await Subscription.findById(result.subscription._id);
-      if (subscription) {
-        subscription.stripeSubscriptionId = session.subscription as string;
-        await subscription.save();
-      }
-    }
-
-    console.log(`✅ Subscription activated for user ${userId}`);
-  } catch (error) {
-    console.error('Error processing successful checkout:', error);
-    throw error;
-  }
-}
-
-/**
- * Handle subscription updated event from Stripe
- */
-async function handleSubscriptionUpdated(stripeSubscription: Stripe.Subscription) {
-  try {
-    const userId = stripeSubscription.metadata?.userId;
-    if (!userId) {
-      console.error('No userId in subscription metadata');
-      return;
-    }
-
-    console.log(`📝 Updating subscription for user ${userId}`);
-
-    const user = await User.findById(userId);
-    if (!user || !user.activeSubscriptionId) {
-      console.error(`User or subscription not found for user ${userId}`);
-      return;
-    }
-
-    // Update subscription expiration date if changed
-    const subscription = await Subscription.findById(user.activeSubscriptionId);
-    if (subscription && (stripeSubscription as any).current_period_end) {
-      const newExpirationDate = new Date((stripeSubscription as any).current_period_end * 1000);
-      subscription.expirationDate = newExpirationDate;
-      subscription.renewalDate = newExpirationDate;
-      subscription.status = stripeSubscription.status === 'active' ? 'active' : 'canceled';
-      subscription.autoRenewing = !(stripeSubscription as any).cancel_at_period_end;
-      await subscription.save();
-
-      // Update user
-      user.subscriptionExpiresAt = newExpirationDate;
-      user.subscriptionStatus = stripeSubscription.status === 'active' ? 'active' : 'canceled';
-      await user.save();
-
-      console.log(`✅ Subscription updated for user ${userId}`);
-    }
-  } catch (error) {
-    console.error('Error handling subscription update:', error);
-  }
-}
-
-/**
- * Handle subscription deleted event from Stripe
- */
-async function handleSubscriptionDeleted(stripeSubscription: Stripe.Subscription) {
-  try {
-    const userId = stripeSubscription.metadata?.userId;
-    if (!userId) {
-      console.error('No userId in subscription metadata');
-      return;
-    }
-
-    console.log(`🗑️ Canceling subscription for user ${userId}`);
-
-    const user = await User.findById(userId);
-    if (!user) {
-      console.error(`User not found: ${userId}`);
-      return;
-    }
-
-    // Mark subscription as canceled
-    if (user.activeSubscriptionId) {
-      const subscription = await Subscription.findById(user.activeSubscriptionId);
-      if (subscription) {
-        subscription.status = 'canceled';
-        subscription.autoRenewing = false;
-        subscription.canceledAt = new Date();
-        await subscription.save();
-      }
-    }
-
-    // Update user
-    user.subscriptionStatus = 'canceled';
-    user.isSubscribed = false;
-    await user.save();
-
-    console.log(`✅ Subscription canceled for user ${userId}`);
-  } catch (error) {
-    console.error('Error handling subscription deletion:', error);
-  }
-}
-
-/**
- * Handle recurring payment succeeded (monthly/yearly renewals)
- */
-async function handleRecurringPaymentSucceeded(invoice: Stripe.Invoice) {
-  try {
-    const subscription = (invoice as any).subscription;
-    if (!subscription || typeof subscription !== 'string') {
-      console.log('No subscription ID in invoice');
-      return;
-    }
-
-    // Get the full subscription object (server-side verification)
-    const stripeSubscription = await stripeService.retrieveSubscription(subscription);
-    const userId = stripeSubscription.metadata?.userId;
-    const productId = stripeSubscription.metadata?.productId;
-
-    if (!userId || !productId) {
-      console.error('Missing userId or productId in subscription metadata');
-      return;
-    }
-
-    console.log(`💰 Processing recurring payment for user ${userId}`);
-
-    // Find product
-    const product = await Product.findOne({ productId });
-    if (!product) {
-      console.error(`Product not found: ${productId}`);
-      return;
-    }
-
-    // Process the renewal payment
-    await processSubscriptionPayment({
-      userId,
-      productId,
-      store: 'stripe',
-      amount: (invoice.amount_paid || 0) / 100, // Convert from cents
-      currency: (invoice.currency || 'eur').toUpperCase(),
-    });
-
-    console.log(`✅ Recurring payment processed for user ${userId}`);
-  } catch (error) {
-    console.error('Error handling recurring payment:', error);
-  }
-}
-
-/**
- * Handle payment failed event
- */
-async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  try {
-    const subscription = (invoice as any).subscription;
-    if (!subscription || typeof subscription !== 'string') {
-      return;
-    }
-
-    const stripeSubscription = await stripe.subscriptions.retrieve(subscription);
-    const userId = stripeSubscription.metadata?.userId;
-
-    if (!userId) {
-      console.error('No userId in subscription metadata');
-      return;
-    }
-
-    console.log(`❌ Payment failed for user ${userId}`);
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return;
-    }
-
-    // Update user subscription status to grace period
-    user.subscriptionStatus = 'grace';
-    await user.save();
-
-    // Update subscription to grace status
-    if (user.activeSubscriptionId) {
-      const subscription = await Subscription.findById(user.activeSubscriptionId);
-      if (subscription) {
-        subscription.status = 'grace';
-        // Set grace period for 7 days
-        const graceEnd = new Date();
-        graceEnd.setDate(graceEnd.getDate() + 7);
-        subscription.graceExpirationDate = graceEnd;
-        await subscription.save();
-      }
-    }
-
-    console.log(`✅ User ${userId} moved to grace period`);
-  } catch (error) {
-    console.error('Error handling payment failure:', error);
-  }
-}
-
-/**
- * @desc    Verify payment session and return status
- * @route   GET /api/payment/verify-session/:sessionId
- * @access  Private
- */
-export const verifySession = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const sessionId = req.params.sessionId as string;
-    const userId = (req as any).user?._id;
-
-    if (!userId) {
-      res.status(401).json({ message: 'User not authenticated' });
-      return;
-    }
-
-    // Retrieve the session from Stripe (server-side verification)
-    const session = await stripeService.retrieveSession(sessionId);
-
-    // Verify this session belongs to the current user
-    if (session.client_reference_id !== userId.toString()) {
-      res.status(403).json({ message: 'Session does not belong to current user' });
-      return;
-    }
-
-    res.status(200).json({
-      success: true,
-      paymentStatus: session.payment_status,
-      customerEmail: session.customer_email,
-      amountTotal: session.amount_total ? session.amount_total / 100 : 0,
-    });
-  } catch (error: any) {
-    console.error('Error verifying session:', error);
-    res.status(500).json({ message: 'Error verifying session' });
-  }
-};
 
 /**
  * @desc    Apply free subscription with 100% off coupon
@@ -840,139 +418,6 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
   }
 };
 
-/**
- * Handle refund from Stripe charge.refunded webhook
- */
-async function handleChargeRefunded(charge: Stripe.Charge) {
-  try {
-    console.log(`💰 Processing refund for charge: ${charge.id}`);
-
-    // Get refund details
-    const refundAmount = charge.amount_refunded / 100; // Convert from cents
-    const currency = charge.currency.toUpperCase();
-    const isFullRefund = charge.refunded;
-
-    // Try to find the payment record by transaction ID
-    const paymentRecord = await PaymentRecord.findOne({
-      storeTransactionId: charge.payment_intent || charge.id,
-      store: 'stripe',
-    });
-
-    if (!paymentRecord) {
-      console.warn(`⚠️ Payment record not found for charge: ${charge.id}`);
-      return;
-    }
-
-    // Update payment record with refund info
-    paymentRecord.status = isFullRefund ? 'refunded' : 'partially_refunded';
-    paymentRecord.refundAmount = refundAmount;
-    paymentRecord.refundDate = new Date();
-    paymentRecord.refundReason = 'customer_request';
-    await paymentRecord.save();
-
-    // Find user
-    const user = await User.findById(paymentRecord.userId);
-    if (!user) {
-      console.error(`User not found for refund: ${paymentRecord.userId}`);
-      return;
-    }
-
-    // If full refund, cancel the subscription
-    if (isFullRefund && paymentRecord.subscriptionId) {
-      const subscription = await Subscription.findById(paymentRecord.subscriptionId);
-      if (subscription) {
-        subscription.status = 'refunded';
-        subscription.canceledAt = new Date();
-        subscription.refundedAt = new Date();
-        await subscription.save();
-
-        // Update user - use 'canceled' since 'refunded' is not a valid user status
-        user.isSubscribed = false;
-        user.subscriptionStatus = 'canceled';
-        await user.save();
-
-        // Create subscription event
-        await SubscriptionEvent.create({
-          subscriptionId: subscription._id,
-          userId: user._id,
-          eventType: 'subscription_refunded',
-          store: 'stripe',
-          hasFinancialImpact: true,
-          amount: refundAmount,
-          currency,
-        });
-      }
-    }
-
-    // Send refund notification email
-    await emailService.sendRefundNotification(user.email, user.name || 'Customer', {
-      amount: refundAmount,
-      currency: currency === 'EUR' ? '€' : currency,
-      transactionId: charge.id,
-    });
-
-    // Refund processed successfully
-  } catch (error) {
-    console.error('❌ Error handling refund:', error);
-  }
-}
-
-/**
- * Handle dispute/chargeback from Stripe
- */
-async function handleDisputeCreated(dispute: Stripe.Dispute) {
-  try {
-    console.log(`⚠️ Dispute/chargeback created: ${dispute.id}`);
-
-    const chargeId = typeof dispute.charge === 'string' ? dispute.charge : dispute.charge?.id;
-    if (!chargeId) {
-      console.error('No charge ID in dispute');
-      return;
-    }
-
-    // Find the payment record
-    const paymentRecord = await PaymentRecord.findOne({
-      storeTransactionId: chargeId,
-      store: 'stripe',
-    });
-
-    if (!paymentRecord) {
-      console.warn(`⚠️ Payment record not found for dispute: ${chargeId}`);
-      return;
-    }
-
-    // Update payment record
-    paymentRecord.status = 'disputed';
-    await paymentRecord.save();
-
-    // Find user
-    const user = await User.findById(paymentRecord.userId);
-    if (!user) {
-      return;
-    }
-
-    // Dispute logged
-
-    // Create subscription event for tracking
-    if (paymentRecord.subscriptionId) {
-      await SubscriptionEvent.create({
-        subscriptionId: paymentRecord.subscriptionId,
-        userId: user._id,
-        eventType: 'chargeback_initiated',
-        store: 'stripe',
-        hasFinancialImpact: true,
-        amount: dispute.amount / 100,
-        currency: dispute.currency.toUpperCase(),
-        metadata: {
-          disputeId: dispute.id,
-          reason: dispute.reason,
-        },
-      });
-    }
-  } catch (error) {
-    console.error('❌ Error handling dispute:', error);
-  }
-}
 
 /**
  * @desc    Verify a PayPal order by checking its status server-side
@@ -1119,7 +564,7 @@ export const getAvailablePaymentMethods = async (req: Request, res: Response): P
       success: true,
       countryCode: code,
       methods,
-      provider: mapping?.provider || 'stripe',
+      provider: mapping?.provider || 'braintree',
       isEU: mapping?.isEU || false,
       isSEPA: mapping?.isSEPA || false,
     });

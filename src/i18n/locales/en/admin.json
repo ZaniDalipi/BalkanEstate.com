@@ -596,11 +596,11 @@
       "agentCouponsHelp": "Coupons to invite agents to the agency",
       "maxSubscriptions": "Max Subscriptions",
       "maxSubscriptionsHelp": "0 = unlimited",
-      "stripeSection": "Stripe Integration",
-      "stripeProductId": "Stripe Product ID",
-      "stripeProductPlaceholder": "prod_...",
-      "stripePriceId": "Stripe Price ID",
-      "stripePricePlaceholder": "price_..."
+      "braintreeSection": "Braintree Integration",
+      "braintreeProductId": "Braintree Product ID",
+      "braintreeProductPlaceholder": "prod_...",
+      "braintreePriceId": "Braintree Price ID",
+      "braintreePricePlaceholder": "price_..."
     },
     "placeholders": {
       "title": "Available Placeholders",

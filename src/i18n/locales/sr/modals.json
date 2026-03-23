@@ -14,7 +14,7 @@
     "emailAddress": "Email Adresa",
     "emailPlaceholder": "vi@primer.com",
     "continueToPayment": "Nastavi na Plaćanje",
-    "securePayment": "Sigurno plaćanje putem Stripe",
+    "securePayment": "Sigurno plaćanje putem Braintree",
     "loadingPlans": "Učitavanje planova...",
     "sellerPromotion": {
       "title": "Planovi za Promociju Oglasa",

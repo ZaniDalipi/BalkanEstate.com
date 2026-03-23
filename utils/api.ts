@@ -25,7 +25,7 @@ export interface Product {
   store?: {
     google?: string;
     apple?: string;
-    stripe?: string;
+    braintree?: string;
   };
 }
 

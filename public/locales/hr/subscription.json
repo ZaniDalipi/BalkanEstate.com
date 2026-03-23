@@ -21,7 +21,7 @@
       "emailLabel": "E-pošta",
       "emailPlaceholder": "vi@primjer.com",
       "continueToPayment": "Nastavi na Plaćanje",
-      "securePayment": "Sigurno plaćanje putem Stripe"
+      "securePayment": "Sigurno plaćanje putem Braintree"
     }
   },
   "sellerPlan": {
@@ -212,7 +212,7 @@
     "processing": "Obrada plaćanja...",
     "success": "Plaćanje uspješno!",
     "error": "Plaćanje neuspješno",
-    "securePayment": "Sigurno plaćanje putem Stripe",
+    "securePayment": "Sigurno plaćanje putem Braintree",
     "cardDetails": "Detalji Kartice",
     "payNow": "Plati Sada",
     "cancel": "Otkaži"

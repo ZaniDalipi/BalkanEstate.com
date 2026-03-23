@@ -14,7 +14,7 @@
     "emailAddress": "Adresa Email",
     "emailPlaceholder": "ju@shembull.com",
     "continueToPayment": "Vazhdo te Pagesa",
-    "securePayment": "Pagesë e sigurt nga Stripe",
+    "securePayment": "Pagesë e sigurt nga Braintree",
     "loadingPlans": "Duke ngarkuar planet...",
     "buyerPro": {
       "name": "Blerës Pro",

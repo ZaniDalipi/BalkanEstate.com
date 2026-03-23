@@ -14,7 +14,7 @@
     "emailAddress": "Email Adresa",
     "emailPlaceholder": "vi@primjer.com",
     "continueToPayment": "Nastavite na Plaćanje",
-    "securePayment": "Sigurno plaćanje putem Stripe-a",
+    "securePayment": "Sigurno plaćanje putem Braintree",
     "loadingPlans": "Učitavanje paketa...",
     "buyerPro": {
       "name": "Kupac Pro",

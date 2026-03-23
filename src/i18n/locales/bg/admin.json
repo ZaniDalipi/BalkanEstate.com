@@ -581,11 +581,11 @@
       "agentCouponsHelp": "Купони за покана на агенти в агенцията",
       "maxSubscriptions": "Макс Абонаменти",
       "maxSubscriptionsHelp": "0 = неограничено",
-      "stripeSection": "Stripe Интеграция",
-      "stripeProductId": "Stripe ID на Продукт",
-      "stripeProductPlaceholder": "prod_...",
-      "stripePriceId": "Stripe ID на Цена",
-      "stripePricePlaceholder": "price_..."
+      "braintreeSection": "Braintree Интеграция",
+      "braintreeProductId": "Braintree ID на Продукт",
+      "braintreeProductPlaceholder": "prod_...",
+      "braintreePriceId": "Braintree ID на Цена",
+      "braintreePricePlaceholder": "price_..."
     },
     "placeholders": {
       "title": "Налични Плейсхолдери",

@@ -2,14 +2,14 @@
  * Payment Configuration
  *
  * This file contains all payment-related configuration including:
- * - Supported payment providers (Stripe + PayPal)
+ * - Supported payment providers (Braintree + PayPal)
  * - Supported payment methods per provider
  * - Payment method priorities for different user types
  * - Country to provider routing
  *
  * Provider Selection Strategy:
- * - Stripe: GR, HR, BG, RO, SI, RS (6 countries)
- *   Supports card, Apple Pay, Google Pay, SEPA.
+ * - Braintree: GR, HR, BG, RO, SI, RS (6 countries)
+ *   Supports card, Apple Pay, Google Pay.
  * - PayPal: AL, BA, MK, ME, XK (5 countries)
  *   Supports PayPal account and card payments.
  *
@@ -18,7 +18,7 @@
 
 // ====== PAYMENT PROVIDERS ======
 
-export type PaymentProvider = 'stripe' | 'paypal' | 'braintree' | 'web';
+export type PaymentProvider = 'paypal' | 'braintree' | 'web';
 
 export interface PaymentProviderInfo {
   id: PaymentProvider;
@@ -31,22 +31,13 @@ export interface PaymentProviderInfo {
 }
 
 export const PAYMENT_PROVIDERS: Record<PaymentProvider, PaymentProviderInfo> = {
-  stripe: {
-    id: 'stripe',
-    name: 'Stripe',
-    description: 'Secure payments with card, Apple Pay, and Google Pay',
-    fees: '~1.5-3% for card payments',
-    logo: 'stripe',
-    supportedCountries: ['GR', 'HR', 'BG', 'RO', 'SI', 'RS'],
-    supportedMethods: ['card', 'apple_pay', 'google_pay', 'sepa_debit'],
-  },
   paypal: {
     id: 'paypal',
     name: 'PayPal',
     description: 'Secure payments with PayPal account or card',
     fees: '~2.9% + €0.35 per transaction',
     logo: 'paypal',
-    supportedCountries: ['AL', 'BA', 'MK', 'ME', 'XK'],
+    supportedCountries: ['GR', 'HR', 'BG', 'RO', 'SI', 'RS', 'AL', 'BA', 'MK', 'ME', 'XK'],
     supportedMethods: ['paypal', 'card'],
   },
   braintree: {
@@ -55,7 +46,7 @@ export const PAYMENT_PROVIDERS: Record<PaymentProvider, PaymentProviderInfo> = {
     description: 'Secure card payments with Apple Pay, Google Pay, and 3D Secure',
     fees: '~1.9% + €0.30 per transaction',
     logo: 'braintree',
-    supportedCountries: ['AL', 'BA', 'MK', 'ME', 'XK'],
+    supportedCountries: ['GR', 'HR', 'BG', 'RO', 'SI', 'RS', 'AL', 'BA', 'MK', 'ME', 'XK'],
     supportedMethods: ['card', 'apple_pay', 'google_pay'],
   },
   web: {
@@ -81,16 +72,16 @@ export interface CountryPaymentInfo {
   flag: string;
 }
 
-// Stripe for EU + Serbia, PayPal for remaining Balkans
+// Braintree for EU + Serbia, PayPal for remaining Balkans
 export const COUNTRY_PAYMENT_MAP: Record<string, CountryPaymentInfo> = {
-  // Stripe countries (EU + Serbia)
-  GR: { countryCode: 'GR', countryName: 'Greece', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇬🇷' },
-  HR: { countryCode: 'HR', countryName: 'Croatia', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇭🇷' },
-  BG: { countryCode: 'BG', countryName: 'Bulgaria', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇧🇬' },
-  RO: { countryCode: 'RO', countryName: 'Romania', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇷🇴' },
-  SI: { countryCode: 'SI', countryName: 'Slovenia', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇸🇮' },
-  RS: { countryCode: 'RS', countryName: 'Serbia', provider: 'stripe', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇷🇸' },
-  // PayPal countries (non-Stripe Balkans)
+  // Braintree countries (EU + Serbia)
+  GR: { countryCode: 'GR', countryName: 'Greece', provider: 'braintree', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇬🇷' },
+  HR: { countryCode: 'HR', countryName: 'Croatia', provider: 'braintree', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇭🇷' },
+  BG: { countryCode: 'BG', countryName: 'Bulgaria', provider: 'braintree', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇧🇬' },
+  RO: { countryCode: 'RO', countryName: 'Romania', provider: 'braintree', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇷🇴' },
+  SI: { countryCode: 'SI', countryName: 'Slovenia', provider: 'braintree', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇸🇮' },
+  RS: { countryCode: 'RS', countryName: 'Serbia', provider: 'braintree', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇷🇸' },
+  // PayPal countries
   AL: { countryCode: 'AL', countryName: 'Albania', provider: 'paypal', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇦🇱' },
   BA: { countryCode: 'BA', countryName: 'Bosnia and Herzegovina', provider: 'paypal', currency: 'EUR', isEU: false, isSEPA: false, flag: '🇧🇦' },
   MK: { countryCode: 'MK', countryName: 'North Macedonia', provider: 'paypal', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇰' },
@@ -103,7 +94,7 @@ export const COUNTRY_PAYMENT_MAP: Record<string, CountryPaymentInfo> = {
  */
 export function getProviderForCountry(countryCode: string): PaymentProvider {
   const info = COUNTRY_PAYMENT_MAP[countryCode.toUpperCase()];
-  return info?.provider || 'stripe';
+  return info?.provider || 'braintree';
 }
 
 /**

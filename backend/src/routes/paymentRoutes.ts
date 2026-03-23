@@ -10,7 +10,6 @@ import {
   applyFreeSubscription,
   getCustomerPortal,
   getAvailablePaymentMethods,
-  verifySession,
   verifyPayPalPayment,
 } from '../controllers/paymentController';
 import { handlePayseraWebhook, verifyPayseraPayment } from '../controllers/payseraWebhookController';
@@ -41,7 +40,7 @@ const router = express.Router();
  * Body: { planName, planInterval, amount, productId, countryCode, language, preferredProvider? }
  *
  * Routes to:
- * - Stripe for GR, HR, BG, RO, SI, RS
+ * - Braintree for GR, HR, BG, RO, SI, RS
  * - PayPal for AL, BA, MK, ME, XK
  */
 router.post('/create-payment', protect, decryptPayload, validateCreatePayment, createUnifiedPayment);
@@ -79,20 +78,6 @@ router.post('/cancel-subscription', protect, cancelSubscription);
 
 /** Get customer portal URL (update payment method, view invoices) */
 router.get('/customer-portal', protect, getCustomerPortal);
-
-// ============================================================
-// STRIPE ENDPOINTS (real payment verification)
-// ============================================================
-
-/**
- * Stripe webhook — signature-verified, no auth required.
- * This is the ONLY way Stripe payments are confirmed.
- * Raw body is required for signature verification.
- */
-// Stripe webhook mounted at server level (before json parser) for raw body access
-
-/** Verify Stripe checkout session by session ID */
-router.get('/verify-session/:sessionId', protect, verifySession);
 
 // ============================================================
 // PAYPAL ENDPOINTS (real payment verification)

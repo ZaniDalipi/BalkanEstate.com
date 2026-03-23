@@ -407,7 +407,7 @@ const PaymentSuccess: React.FC = () => {
                   <div className="flex justify-between">
                     <span className="text-neutral-600">Provider:</span>
                     <span className="font-medium text-neutral-800 capitalize">
-                      {paymentDetails.provider === 'stripe' ? 'Stripe' : paymentDetails.provider === 'paypal' ? 'PayPal' : 'Online Payment'}
+                      {paymentDetails.provider === 'braintree' ? 'Braintree' : paymentDetails.provider === 'paypal' ? 'PayPal' : 'Online Payment'}
                     </span>
                   </div>
                 )}

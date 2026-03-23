@@ -53,7 +53,7 @@ const parseCookie = (req: Request, name: string): string | undefined => {
 /**
  * Paths that are exempt from CSRF validation.
  * - Auth endpoints: user doesn't have a CSRF cookie yet during login/register
- * - Webhook endpoints: called by external services (Paysera, Stripe) with their own signature verification
+ * - Webhook endpoints: called by external services (Paysera, PayPal, Braintree) with their own signature verification
  * - Health check: monitoring probes
  * - GET/HEAD/OPTIONS: safe methods that don't modify state
  */

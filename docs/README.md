@@ -61,7 +61,7 @@ docs/
 #### Integrations
 - [Cadastre Integration](./guides/CADASTRE_INTEGRATION.md) - Property data
 - [OAuth Integration](./guides/OAUTH_INTEGRATION.md) - Social login
-- [Payment Integration](./guides/PAYMENT_INTEGRATION.md) - Stripe/PayPal
+- [Payment Integration](./guides/PAYMENT_INTEGRATION.md) - Braintree/PayPal
 - [Subscription System](./guides/SUBSCRIPTION_GUIDE.md) - Pricing plans
 
 #### Migration

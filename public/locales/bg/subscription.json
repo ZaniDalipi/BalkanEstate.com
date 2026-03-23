@@ -21,7 +21,7 @@
       "emailLabel": "Имейл Адрес",
       "emailPlaceholder": "вие@пример.com",
       "continueToPayment": "Продължи към Плащане",
-      "securePayment": "Сигурно плащане чрез Stripe"
+      "securePayment": "Сигурно плащане чрез Braintree"
     }
   },
   "sellerPlan": {
@@ -212,7 +212,7 @@
     "processing": "Обработка на плащане...",
     "success": "Плащането успешно!",
     "error": "Плащането неуспешно",
-    "securePayment": "Сигурно плащане чрез Stripe",
+    "securePayment": "Сигурно плащане чрез Braintree",
     "cardDetails": "Данни за Карта",
     "payNow": "Плати Сега",
     "cancel": "Отмени"

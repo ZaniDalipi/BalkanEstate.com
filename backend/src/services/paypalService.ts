@@ -1,7 +1,7 @@
 /**
  * PayPal Payment Service
  *
- * Handles payment processing for countries not supported by Stripe:
+ * Handles PayPal payment processing for supported countries:
  * - Albania (AL)
  * - Bosnia and Herzegovina (BA)
  * - North Macedonia (MK)

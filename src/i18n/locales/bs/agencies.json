@@ -218,7 +218,7 @@
     "fullAnalytics": "Full Analytics",
     "payNow": "Pay",
     "processing": "Processing...",
-    "stripeSecure": "Payments are securely processed by Stripe",
+    "braintreeSecure": "Payments are securely processed by Braintree",
     "error": "Failed to initiate payment. Please try again."
   },
   "coupon": {

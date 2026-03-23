@@ -93,7 +93,7 @@
     "thirdParty": {
       "title": "Usluge trećih strana",
       "text": "Koristimo sljedeće usluge trećih strana koje mogu obrađivati vaše podatke:",
-      "stripe": "Obrada plaćanja. Naš procesor plaćanja sigurno obrađuje vaše podatke o plaćanju. Mi ne pohranjujemo potpune podatke vaše kreditne kartice.",
+      "braintree": "Obrada plaćanja. Naš procesor plaćanja sigurno obrađuje vaše podatke o plaćanju. Mi ne pohranjujemo potpune podatke vaše kreditne kartice.",
       "analytics": "Web analitika za razumijevanje ponašanja korisnika i poboljšanje naših usluga. Koristimo IP anonimizaciju.",
       "cloudflare": "Sigurnosne i performansne usluge uključujući DDoS zaštitu i isporuku sadržaja.",
       "aws": "Cloud hosting i usluge pohrane. Podaci se pohranjuju u EU podatkovnim centrima."

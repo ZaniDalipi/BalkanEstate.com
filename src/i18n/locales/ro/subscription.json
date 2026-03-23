@@ -21,7 +21,7 @@
       "emailLabel": "Adresa de Email",
       "emailPlaceholder": "dvs@exemplu.com",
       "continueToPayment": "Continuați către Plată",
-      "securePayment": "Plată securizată prin Stripe"
+      "securePayment": "Plată securizată prin Braintree"
     }
   },
   "sellerPlan": {
@@ -253,7 +253,7 @@
     "processing": "Procesare plată...",
     "success": "Plată reușită!",
     "error": "Plată eșuată",
-    "securePayment": "Plată securizată prin Stripe",
+    "securePayment": "Plată securizată prin Braintree",
     "cardDetails": "Detalii Card",
     "payNow": "Plătiți Acum",
     "cancel": "Anulează"

@@ -93,7 +93,7 @@
     "thirdParty": {
       "title": "Shërbimet e Palëve të Treta",
       "text": "Përdorim shërbimet e mëposhtme të palëve të treta që mund të përpunojnë të dhënat tuaja:",
-      "stripe": "Përpunimi i pagesave. Procesori ynë i pagesave përpunon informacionin tuaj të pagesës në mënyrë të sigurt. Ne nuk ruajmë detajet e plota të kartës suaj të kreditit.",
+      "braintree": "Përpunimi i pagesave. Procesori ynë i pagesave përpunon informacionin tuaj të pagesës në mënyrë të sigurt. Ne nuk ruajmë detajet e plota të kartës suaj të kreditit.",
       "analytics": "Analitika e faqes për të kuptuar sjelljen e përdoruesve dhe përmirësuar shërbimet tona. Përdorim anonimizimin e IP.",
       "cloudflare": "Shërbime sigurie dhe performancë duke përfshirë mbrojtjen DDoS dhe shpërndarjen e përmbajtjes.",
       "aws": "Shërbime pritjeje dhe ruajtjeje në cloud. Të dhënat ruhen në qendrat e të dhënave të BE."

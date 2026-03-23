@@ -236,18 +236,19 @@ const AdminFeaturedSubscriptions = () => {
 
 Currently, payment is simulated. To integrate real payments:
 
-1. Add Stripe SDK
-2. Create payment intent in `confirmPayment` controller
-3. Handle webhook events
+1. Add Braintree SDK
+2. Create transaction in `confirmPayment` controller
+3. Handle webhook notifications
 4. Update subscription with payment details
 
 Example:
 ```typescript
 // In confirmPayment controller
-const paymentIntent = await stripe.paymentIntents.create({
-  amount: subscription.price * 100, // cents
-  currency: 'eur',
-  customer: stripeCustomerId,
+const result = await gateway.transaction.sale({
+  amount: subscription.price.toFixed(2),
+  merchantAccountId: 'your_eur_merchant_account',
+  customerId: braintreeCustomerId,
+  options: { submitForSettlement: true },
 });
 ```
 

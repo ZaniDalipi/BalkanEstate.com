@@ -99,7 +99,7 @@ export interface User {
     subscriptionExpiresAt?: string | Date;
     subscriptionStartedAt?: string | Date;
     subscriptionRenewalDate?: string | Date;
-    subscriptionSource?: 'google' | 'apple' | 'stripe' | 'web';
+    subscriptionSource?: 'google' | 'apple' | 'web' | 'paypal' | 'braintree';
     subscriptionPrice?: number; // 0 = coupon/free trial
     subscriptionAutoRenewing?: boolean;
     subscriptionCurrency?: string;

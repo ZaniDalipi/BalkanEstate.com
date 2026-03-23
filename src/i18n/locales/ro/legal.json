@@ -93,7 +93,7 @@
     "thirdParty": {
       "title": "Servicii ale terților",
       "text": "Utilizăm următoarele servicii ale terților:",
-      "stripe": "Procesare plăți prin procesatorul nostru de plăți.",
+      "braintree": "Procesare plăți prin procesatorul nostru de plăți.",
       "analytics": "Analiză web pentru înțelegerea comportamentului utilizatorilor.",
       "cloudflare": "Servicii de securitate și performanță.",
       "aws": "Găzduire cloud și servicii de stocare."

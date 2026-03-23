@@ -93,7 +93,7 @@
     "thirdParty": {
       "title": "Third-Party Services",
       "text": "We use the following third-party services that may process your data:",
-      "stripe": "Payment processing. Our payment processor processes your payment information securely. We do not store your full credit card details.",
+      "braintree": "Payment processing. Our payment processor processes your payment information securely. We do not store your full credit card details.",
       "analytics": "Website analytics to understand user behavior and improve our services. We use IP anonymization.",
       "cloudflare": "Security and performance services including DDoS protection and content delivery.",
       "aws": "Cloud hosting and storage services. Data is stored in EU data centers."

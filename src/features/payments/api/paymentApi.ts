@@ -156,9 +156,9 @@ export async function getPaymentProvider(countryCode: string): Promise<PaymentPr
   } catch (error: any) {
     const info = getCountryPaymentInfo(countryCode);
     if (info) {
-      const providerName = info.provider === 'stripe' ? 'Stripe' : info.provider === 'paypal' ? 'PayPal' : 'Online Payment';
-      const methods = info.provider === 'stripe'
-        ? ['card', 'apple_pay', 'google_pay', 'sepa_debit']
+      const providerName = info.provider === 'braintree' ? 'Braintree' : info.provider === 'paypal' ? 'PayPal' : 'Online Payment';
+      const methods = info.provider === 'braintree'
+        ? ['card', 'apple_pay', 'google_pay']
         : ['paypal', 'card'];
       return {
         success: true,
@@ -168,7 +168,7 @@ export async function getPaymentProvider(countryCode: string): Promise<PaymentPr
         providerInfo: {
           name: providerName,
           description: 'Secure online payments',
-          fees: info.provider === 'stripe' ? '~1.5-3%' : '~2.9% + €0.35',
+          fees: info.provider === 'braintree' ? '~1.9% + €0.30' : '~2.9% + €0.35',
         },
         isEU: info.isEU,
         isSEPA: info.isSEPA,
@@ -197,9 +197,9 @@ export async function getSupportedCountries(): Promise<SupportedCountriesRespons
       countries: countries.map(c => ({
         ...c,
         providerInfo: {
-          name: c.provider === 'stripe' ? 'Stripe' : c.provider === 'paypal' ? 'PayPal' : 'Online Payment',
+          name: c.provider === 'braintree' ? 'Braintree' : c.provider === 'paypal' ? 'PayPal' : 'Online Payment',
           description: 'Secure online payments',
-          fees: c.provider === 'stripe' ? '~1.5-3%' : '~2.9% + €0.35',
+          fees: c.provider === 'braintree' ? '~1.9% + €0.30' : '~2.9% + €0.35',
         },
       })),
     };
@@ -223,7 +223,7 @@ export async function getPaymentMethods(countryCode: string): Promise<PaymentMet
 /**
  * Verify a payment (auto-detects provider from URL params).
  * Routes to the correct verification endpoint based on provider:
- * - Stripe: /payments/verify-session/:sessionId
+ * - Braintree: verified synchronously (no session endpoint needed)
  * - PayPal: /payments/paypal/verify/:orderId
  * - Paysera (legacy): /payments/paysera/verify/:orderId
  */
@@ -232,24 +232,6 @@ export async function verifyPayment(params: URLSearchParams): Promise<VerifyPaym
   const orderId = params.get('order_id');
   const token = params.get('token'); // PayPal token param
   const provider = params.get('provider') as PaymentProvider | null;
-
-  // Stripe verification — uses session_id
-  if (provider === 'stripe' && sessionId) {
-    try {
-      const response = await apiRequest<VerifyPaymentResponse>(
-        `/payments/verify-session/${sessionId}`,
-        { method: 'GET', requiresAuth: true, encryptResponse: true }
-      );
-      return { ...response, provider: 'stripe' };
-    } catch {
-      return {
-        success: true,
-        paymentStatus: 'pending_confirmation',
-        provider: 'stripe',
-        message: 'Payment received! Your subscription will be activated shortly.',
-      };
-    }
-  }
 
   // PayPal verification — uses order_id or token
   if (provider === 'paypal') {
@@ -299,24 +281,6 @@ export async function verifyPayment(params: URLSearchParams): Promise<VerifyPaym
         success: true,
         paymentStatus: 'pending_confirmation',
         provider: provider || 'web',
-        message: 'Payment received! Your subscription will be activated shortly.',
-      };
-    }
-  }
-
-  // Stripe fallback — session_id without explicit provider
-  if (sessionId) {
-    try {
-      const response = await apiRequest<VerifyPaymentResponse>(
-        `/payments/verify-session/${sessionId}`,
-        { method: 'GET', requiresAuth: true, encryptResponse: true }
-      );
-      return { ...response, provider: 'stripe' };
-    } catch {
-      return {
-        success: true,
-        paymentStatus: 'pending_confirmation',
-        provider: 'stripe',
         message: 'Payment received! Your subscription will be activated shortly.',
       };
     }
@@ -423,7 +387,7 @@ export function redirectToPayment(paymentUrl: string): void {
 
 /**
  * Initiate payment flow
- * Creates payment session and redirects to Stripe/PayPal checkout
+ * Creates payment session and redirects to PayPal checkout or renders Braintree inline
  */
 export async function initiatePayment(request: CreatePaymentRequest): Promise<{
   success: boolean;
