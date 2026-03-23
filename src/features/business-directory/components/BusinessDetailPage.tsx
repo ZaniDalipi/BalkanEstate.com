@@ -623,7 +623,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
         {/* Banner area - always shown */}
         <div
           ref={bannerContainerRef}
-          className={`relative w-full h-36 sm:h-44 lg:h-56 overflow-hidden ${isRepositioning ? 'cursor-grab active:cursor-grabbing' : ''}`}
+          className={`relative w-full h-44 sm:h-52 md:h-60 lg:h-72 overflow-hidden ${isRepositioning ? 'cursor-grab active:cursor-grabbing' : ''}`}
           onMouseDown={isRepositioning ? (e) => { e.preventDefault(); setDragStartY(e.clientY); setDragStartPos(bannerPosY); } : undefined}
           onTouchStart={isRepositioning ? (e) => { setDragStartY(e.touches[0].clientY); setDragStartPos(bannerPosY); } : undefined}
         >
@@ -633,7 +633,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
               <img
                 src={listing.bannerUrl}
                 alt={`${listing.name} banner`}
-                className={`relative w-full h-full object-contain ${isRepositioning ? 'select-none pointer-events-none' : ''}`}
+                className={`relative w-full h-full object-cover ${isRepositioning ? 'select-none pointer-events-none' : ''}`}
                 style={{ objectPosition: `center ${bannerPosY}%` }}
                 draggable={false}
               />

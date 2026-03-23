@@ -128,6 +128,15 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
                     </div>
                 </div>
 
+                {/* Property ID (optional, for agency/agent internal tracking) */}
+                <div className="md:col-span-2">
+                    <label htmlFor="propertyId" className={labelClasses}>{t('seller:createListing.fields.propertyId')}</label>
+                    <input type="text" id="propertyId" name="propertyId" value={listingData.propertyId} onChange={handleInputChange} className={inputBaseClasses} placeholder={t('seller:createListing.fields.propertyIdPlaceholder')} maxLength={50} aria-describedby="propertyIdHint" />
+                    <p id="propertyIdHint" className="mt-1 text-xs text-gray-400">
+                        {t('seller:createListing.fields.propertyIdHint')}
+                    </p>
+                </div>
+
                 {/* Address */}
                 <div className="md:col-span-2">
                     <label htmlFor="streetAddress" className={labelClasses}>{t('seller:createListing.location.address')}</label>

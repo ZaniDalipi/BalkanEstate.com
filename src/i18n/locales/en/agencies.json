@@ -7,7 +7,7 @@
   },
   "search": {
     "title": "Find Your Ideal Agency",
-    "subtitle": "Search {count}+ professional agencies across the Balkans",
+    "subtitle": "Search {{count}}+ professional agencies across the Balkans",
     "tabs": {
       "city": "City",
       "agencyName": "Agency Name"
@@ -39,7 +39,7 @@
     "title": "Top Real Estate Agencies",
     "featuredTitle": "Featured Agencies",
     "yourAgencyTitle": "Your Agency",
-    "showingMatching": "Showing {count} agencies matching \"{query}\"",
+    "showingMatching": "Showing {{count}} agencies matching \"{{query}}\"",
     "browseAgencies": "Browse professional agencies with experienced teams",
     "agenciesFound": "agencies found",
     "moreAgencies": "More Agencies"
@@ -53,7 +53,7 @@
     "certs": "Certs",
     "viewProfile": "View Profile",
     "view": "View",
-    "more": "+{count} more"
+    "more": "+{{count}} more"
   },
   "statsCards": {
     "mostProperties": "Most Properties",

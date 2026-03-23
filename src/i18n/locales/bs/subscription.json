@@ -8,7 +8,7 @@
   },
   "buyerPlan": {
     "title": "Buyer Pro",
-    "price": "€{price}",
+    "price": "€{{price}}",
     "perMonth": "/mjesec",
     "description": "Nikada ne propustite novi oglas! Primite obavještenje čim nekretnina koja odgovara Vašim kriterijima bude objavljena.",
     "features": {
@@ -192,10 +192,10 @@
     },
     "trial": {
       "title": "Probni Period Aktivan",
-      "description": "Vaš probni period završava {date}"
+      "description": "Vaš probni period završava {{date}}"
     },
     "coupon": {
-      "applied": "Kupon {code} primijenjen"
+      "applied": "Kupon {{code}} primijenjen"
     },
     "cancelNotice": "Pretplata će biti otkazana na kraju trenutnog perioda",
     "renewStatus": {

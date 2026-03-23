@@ -1,10 +1,10 @@
 {
   "agencyDuration": {
-    "1week": "1 Sedmica",
-    "2weeks": "2 Sedmice",
-    "4weeks": "4 Sedmice",
+    "1week": "1 Nedelja",
+    "2weeks": "2 Nedelje",
+    "4weeks": "4 Nedelje",
     "90days": "90 Dana",
-    "bestValue": "NAJBOLJA VRIJEDNOST",
+    "bestValue": "NAJBOLJA VREDNOST",
     "selectDuration": "Odaberite trajanje:",
     "noPlansAvailable": "Trenutno nema dostupnih planova za isticanje agencije."
   },
@@ -268,7 +268,8 @@
     "featureComingSoon": "Isticanje agencije biće uskoro dostupno!",
     "oneWeek": "1 WEEK",
     "perWeek": "per week",
-    "showsEverywhere": "Shows everywhere!"
+    "showsEverywhere": "Shows everywhere!",
+    "selectDuration": "Izaberite trajanje:"
   },
   "contact": {
     "haveQuestions": "Imate pitanja?",
@@ -290,9 +291,15 @@
     "90days": "90 days"
   },
   "coupon": {
-    "title": "Do you have a coupon from the seller?",
-    "description": "Select any plan above and use your coupon code to activate your subscription instantly.",
-    "selectPlan": "Select a plan to use your coupon",
+    "title": "Imate li kupon od prodavca?",
+    "description": "Izaberite bilo koji plan iznad i koristite kod kupona da aktivirate vašu pretplatu odmah.",
+    "selectPlan": "Izaberite plan da koristite vaš kupon",
     "haveDiscountCode": "Have a discount code?"
+  },
+  "specialOffers": {
+    "title": "Posebne Ponude",
+    "subtitle": "Ograničene ponude za promociju oglasa",
+    "selectOffer": "Izaberi Ponudu",
+    "daysLeft": "{{days}} dana preostaje"
   }
 }

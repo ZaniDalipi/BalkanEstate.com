@@ -204,7 +204,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                       selectedClimateRisk === risk ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50 text-gray-700'
                     }`}
                   >
-                    {risk === 'none' ? '✕ None' : risk === 'flood' ? '💧 Flood' : risk === 'fire' ? '🔥 Fire' : risk === 'wind' ? '💨 Wind' : risk === 'air' ? '🌬️ Air Quality' : '☀️ Heat'}
+                    {risk === 'none' ? `✕ ${t('search:map.climateRisks.none', 'None')}` : risk === 'flood' ? `💧 ${t('search:map.climateRisks.flood', 'Flood')}` : risk === 'fire' ? `🔥 ${t('search:map.climateRisks.fire', 'Fire')}` : risk === 'wind' ? `💨 ${t('search:map.climateRisks.wind', 'Wind')}` : risk === 'air' ? `🌬️ ${t('search:map.climateRisks.airQuality', 'Air Quality')}` : `☀️ ${t('search:map.climateRisks.heat', 'Heat')}`}
                   </button>
                 ))}
               </div>
@@ -285,7 +285,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               aria-pressed={showMeasurement}
             >
               <span className="text-xs xl:text-sm">📏</span>
-              <span className="hidden xl:inline">Measure</span>
+              <span className="hidden xl:inline">{t('search:map.measure', 'Measure')}</span>
             </button>
 
             {/* Cadastre Layer Toggle */}
@@ -298,7 +298,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               aria-pressed={showCadastre}
             >
               <span className="text-xs xl:text-sm">📐</span>
-              <span className="hidden xl:inline">Cadastre</span>
+              <span className="hidden xl:inline">{t('search:map.cadastre', 'Cadastre')}</span>
             </button>
 
             {/* Legend Toggle */}

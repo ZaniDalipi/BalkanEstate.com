@@ -302,6 +302,7 @@ export interface VisitAvailability {
 
 export interface Property {
     id: string;
+    propertyId?: string; // Custom property ID assigned by agency/agent
     title?: string;
     sellerId: string;
     listingType: ListingType;

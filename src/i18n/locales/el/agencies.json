@@ -11,7 +11,7 @@
     "button": "Αναζήτηση",
     "clear": "Καθαρισμός",
     "title": "Find Your Ideal Agency",
-    "subtitle": "Search {count}+ professional agencies across the Balkans",
+    "subtitle": "Search {{count}}+ professional agencies across the Balkans",
     "tabs": {
       "city": "City",
       "agencyName": "Agency Name"
@@ -61,7 +61,7 @@
     "title": "Top Real Estate Agencies",
     "featuredTitle": "Featured Agencies",
     "yourAgencyTitle": "Your Agency",
-    "showingMatching": "Showing {count} agencies matching \"{query}\"",
+    "showingMatching": "Showing {{count}} agencies matching \"{{query}}\"",
     "browseAgencies": "Browse professional agencies with experienced teams",
     "agenciesFound": "agencies found",
     "moreAgencies": "More Agencies"
@@ -77,7 +77,7 @@
     "years": "Years",
     "certs": "Certs",
     "view": "View",
-    "more": "+{count} more"
+    "more": "+{{count}} more"
   },
   "empty": {
     "title": "Δεν Βρέθηκαν Γραφεία",

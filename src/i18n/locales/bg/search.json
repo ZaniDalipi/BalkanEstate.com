@@ -191,7 +191,7 @@
     "poi": "POI",
     "pointsOfInterest": "Забележителности",
     "landmarks": "Забележителности",
-    "measure": "Измервай",
+    "measure": "Измери",
     "measureDistance": "Измери Разстояние",
     "landParcels": "Земелни Парцели",
     "save": "Запази",
@@ -224,7 +224,8 @@
       "fire": "Пожар",
       "wind": "Вятър",
       "air": "Въздух",
-      "heat": "Горещина"
+      "heat": "Горещина",
+      "airQuality": "Качество на въздуха"
     },
     "nightMode": "Night Mode",
     "dayMode": "Day Mode",
@@ -260,7 +261,8 @@
       "autumn": "Есен",
       "winter": "Зима"
     },
-    "promoted": "Промотирани"
+    "promoted": "Промотирани",
+    "cadastre": "Кадастър"
   },
   "newsletter": {
     "title": "Бъдете в течение с нови имоти",

@@ -13,7 +13,8 @@
   "tabs": {
     "all": "Të gjitha",
     "businesses": "Biznese",
-    "individuals": "Individë"
+    "individuals": "Individë",
+    "mine": "Bizneset e Mia"
   },
   "types": {
     "business": "Biznes",
@@ -85,6 +86,19 @@
     "next": "Tjetra",
     "pageOf": "Faqja {{page}} nga {{totalPages}}"
   },
+  "viewMode": {
+    "grid": "Rrjetë",
+    "map": "Hartë"
+  },
+  "map": {
+    "loading": "Duke ngarkuar hartën...",
+    "loadError": "Harta nuk u ngarkua",
+    "geocoding": "Duke lokalizuar bizneset...",
+    "noLocations": "Nuk ka vendndodhje për shfaqje",
+    "noLocationsHint": "Bizneset me adresa do të shfaqen këtu në hartë",
+    "viewDetails": "Shiko Detajet",
+    "directions": "Drejtimet"
+  },
   "verified": "I verifikuar",
   "detail": {
     "backToDirectory": "Kthehu te Drejtoria",
@@ -118,6 +132,10 @@
       "views": "Shikime",
       "memberSince": "Anëtar që nga"
     },
+    "licensed": "I licensuar",
+    "languages": "Gjuhët",
+    "serviceAreas": "Zonat e Shërbimit",
+    "paymentMethods": "Metodat e Pagesës",
     "cta": {
       "title": "Gati të punoni me {{name}}?",
       "subtitle": "Na kontaktoni sot për të diskutuar projektin tuaj dhe përfitoni një konsultim falas.",
@@ -144,7 +162,11 @@
       "location": "Vendndodhja",
       "businessLocation": "Vendndodhja e Biznesit",
       "social": "Rrjetet Sociale",
-      "hours": "Orari i Punës"
+      "hours": "Orari i Punës",
+      "languages": "Gjuhët e Folura",
+      "businessDetails": "Detajet e Biznesit",
+      "serviceAreas": "Zonat e Shërbimit",
+      "pricing": "Çmimet dhe Pagesa"
     },
     "locationHint": "Shtoni vendndodhjen e biznesit tuaj që klientët t'ju gjejnë lehtë.",
     "pinOnMap": "Vendosni Vendndodhjen e Biznesit në Hartë",
@@ -166,7 +188,15 @@
       "address": "Adresa",
       "logo": "Logo",
       "avatar": "Foto Profili",
-      "pinLocation": "Vendos Vendndodhjen në Hartë"
+      "pinLocation": "Vendos Vendndodhjen në Hartë",
+      "banner": "Baneri i Kopertinës",
+      "whatsapp": "WhatsApp",
+      "viber": "Viber",
+      "customCategory": "Specifikoni kategorinë tuaj",
+      "yearEstablished": "Viti i Themelimit",
+      "licenseNumber": "Licensa / Certifikata #",
+      "priceRange": "Gama e Çmimeve",
+      "paymentMethods": "Metodat e Pagesës të Pranuara"
     },
     "placeholders": {
       "name": "Shkruani emrin e biznesit tuaj",
@@ -180,13 +210,32 @@
       "selectCountry": "Zgjidhni një shtet",
       "selectCity": "Zgjidhni një qytet",
       "address": "Adresa e rrugës",
-      "hours": "p.sh. 09:00 - 17:00"
+      "hours": "p.sh. 09:00 - 17:00",
+      "customCategory": "p.sh. Menaxhimi i Pronave, Energjia Diellore...",
+      "selectLanguage": "Zgjidhni një gjuhë",
+      "yearEstablished": "p.sh. 2015",
+      "licenseNumber": "p.sh. LIC-2024-1234",
+      "serviceArea": "p.sh. Prishtinë, Prizren..."
     },
     "addService": "Shto",
+    "bannerHint": "1200 x 400px e rekomanduar",
+    "bannerRemove": "Hiq",
+    "addLanguage": "Shto",
+    "addServiceArea": "Shto",
+    "serviceAreasHint": "Qytetet ose rajonet ku ofroni shërbime",
+    "priceRangeHint": "$ = Buxhet  |  $$ = Mesatar  |  $$$ = Premium",
+    "logoUploadError": "Ngarkimi i imazhit dështoi. Ju lutem provoni përsëri.",
+    "bannerUpload": "Ngarko Banerin",
+    "bannerChange": "Ndrysho Banerin",
+    "bannerUploading": "Duke ngarkuar banerin...",
+    "bannerUploadError": "Ngarkimi i banerit dështoi. Ju lutem provoni përsëri.",
+    "bannerInvalidType": "Ju lutem ngarkoni një imazh JPEG, PNG ose WebP",
+    "bannerTooLarge": "Imazhi duhet të jetë nën 5MB",
     "logoUpload": "Ngarko Imazh",
     "logoChange": "Ndrysho Imazhin",
     "logoRemove": "Hiq",
     "logoHint": "JPG, PNG ose WebP. Maksimumi 5MB.",
+    "logoUploading": "Duke ngarkuar imazhin...",
     "submit": "Krijo Listimin",
     "submitting": "Duke krijuar...",
     "errors": {
@@ -200,6 +249,12 @@
       "logoTooLarge": "Imazhi duhet të jetë nën 5MB"
     }
   },
+  "banner": {
+    "customize": "Personalizo",
+    "dragToReposition": "Tërhiq për të ripozicionuar",
+    "reposition": "Ripoziciono Banerin",
+    "repositionError": "Ruajtja e pozicionit të banerit dështoi"
+  },
   "edit": {
     "title": "Ndryshoni Listimin Tuaj",
     "subtitle": "Përditësoni informacionet e biznesit tuaj",
@@ -212,5 +267,17 @@
     "statusActiveDesc": "Listimi juaj është i dukshëm për të gjithë",
     "statusInactiveDesc": "Listimi juaj është i fshehur nga drejtoria",
     "success": "Listimi juaj u përditësua me sukses"
+  },
+  "myBusinesses": {
+    "title": "Bizneset e mia",
+    "subtitle_one": "{{count}} listim biznesi",
+    "subtitle_other": "{{count}} listime biznesesh",
+    "createNew": "Biznes i ri",
+    "view": "Shiko",
+    "edit": "Ndrysho",
+    "delete": "Fshi",
+    "emptyTitle": "Asnjë biznes ende",
+    "emptyMessage": "Krijoni listimin tuaj të parë të biznesit për të shfaqur shërbimet tuaja në drejtori.",
+    "createFirst": "Krijo listim biznesi"
   }
 }

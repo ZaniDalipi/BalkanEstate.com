@@ -7,7 +7,7 @@
   },
   "search": {
     "title": "Pronađite Vašu Idealnu Agenciju",
-    "subtitle": "Pretražite {count}+ profesionalnih agencija širom Balkana",
+    "subtitle": "Pretražite {{count}}+ profesionalnih agencija širom Balkana",
     "tabs": {
       "city": "Grad",
       "agencyName": "Naziv Agencije"
@@ -39,7 +39,7 @@
     "title": "Najbolje Agencije za Nekretnine",
     "featuredTitle": "Istaknute Agencije",
     "yourAgencyTitle": "Vaša Agencija",
-    "showingMatching": "Prikazuje se {count} agencija koje odgovaraju \"{query}\"",
+    "showingMatching": "Prikazuje se {{count}} agencija koje odgovaraju \"{{query}}\"",
     "browseAgencies": "Pregledajte profesionalne agencije sa iskusnim timovima",
     "agenciesFound": "agencija pronađeno",
     "moreAgencies": "Više Agencija"
@@ -53,7 +53,7 @@
     "certs": "Certifikati",
     "viewProfile": "Pogledaj Profil",
     "view": "Pogledaj",
-    "more": "+{count} više"
+    "more": "+{{count}} više"
   },
   "statsCards": {
     "mostProperties": "Najviše Nekretnina",

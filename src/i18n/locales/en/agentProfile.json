@@ -89,7 +89,7 @@
   },
   "similarAgents": {
     "title": "Similar Agents",
-    "inArea": "in {area}",
+    "inArea": "in {{area}}",
     "viewAll": "View All Agents"
   },
   "actions": {

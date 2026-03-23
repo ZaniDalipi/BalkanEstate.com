@@ -449,30 +449,30 @@
     "offlineMessage": "Acum poți folosi BalkanEstate chiar și fără conexiune la internet."
   },
   "measurements": {
-    "title": "My Measurements",
-    "usageCount": "{{count}} of {{max}} measurements used",
+    "title": "Măsurătorile mele",
+    "usageCount": "{{count}} din {{max}} măsurători folosite",
     "planPro": "Pro",
-    "planFree": "Free",
+    "planFree": "Gratuit",
     "maxAllowed": "{{count}} max",
-    "emptyTitle": "No Measurements Yet",
-    "emptyDescription": "Use the measurement tool on the map to measure land distances and areas.",
-    "openMap": "Open Map",
-    "allMeasurements": "All Measurements",
-    "showAll": "Show All",
-    "typeArea": "Area",
-    "typeDistance": "Distance",
+    "emptyTitle": "Nu există măsurători încă",
+    "emptyDescription": "Folosiți instrumentul de măsurare pe hartă pentru a măsura distanțe și suprafețe.",
+    "openMap": "Deschide harta",
+    "allMeasurements": "Toate măsurătorile",
+    "showAll": "Afișează tot",
+    "typeArea": "Suprafață",
+    "typeDistance": "Distanță",
     "typeDistShort": "Dist",
-    "viewOnMap": "View on map",
-    "deleteConfirmation": "Delete \"{{name}}\"?",
-    "deleting": "Deleting...",
+    "viewOnMap": "Vizualizare pe hartă",
+    "deleteConfirmation": "Șterge \"{{name}}\"?",
+    "deleting": "Se șterge...",
     "form": {
-      "namePlaceholder": "Name",
-      "addressPlaceholder": "Address"
+      "namePlaceholder": "Nume",
+      "addressPlaceholder": "Adresă"
     },
     "errors": {
-      "loadFailed": "Failed to load measurements",
-      "updateFailed": "Failed to update measurement",
-      "deleteFailed": "Failed to delete measurement"
+      "loadFailed": "Eroare la încărcarea măsurătorilor",
+      "updateFailed": "Eroare la actualizarea măsurătorii",
+      "deleteFailed": "Eroare la ștergerea măsurătorii"
     }
   },
   "splash": {

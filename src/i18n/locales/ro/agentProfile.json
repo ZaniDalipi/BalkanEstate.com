@@ -118,7 +118,7 @@
   "similarAgents": {
     "title": "Agenți Similari",
     "viewAll": "Vezi Toți",
-    "inArea": "in {area}"
+    "inArea": "in {{area}}"
   },
   "actions": {
     "share": "Distribuie Profilul",

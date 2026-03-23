@@ -522,5 +522,36 @@
     "skipVideo": "Skip Video",
     "videoTour": "Video Tour",
     "enter3DTour": "Enter 3D Tour"
+  },
+  "viewings": {
+    "title": "Барања за преглед",
+    "subtitle": "Управувајте со барањата за преглед на имоти од потенцијални купувачи. Одобрете или одбијте за да ги известите преку е-пошта.",
+    "status": {
+      "pending": "Во чекање",
+      "approved": "Одобрено",
+      "declined": "Одбиено",
+      "completed": "Завршено"
+    },
+    "empty": {
+      "title": "Нема барања за преглед",
+      "description": "Кога некој ќе закаже преглед на вашиот имот, ќе се појави тука.",
+      "filtered": "Нема {{status}} барања за преглед."
+    },
+    "relative": {
+      "past": "Минато",
+      "inDays": "За {{count}} дена"
+    },
+    "reason": "Причина:",
+    "declineReason": "Причина за одбивање (опционално)",
+    "declineReasonPlaceholder": "пр., Терминот повеќе не е достапен...",
+    "declining": "Се одбива...",
+    "confirmDecline": "Потврди одбивање",
+    "approving": "Се одобрува...",
+    "approve": "Одобри",
+    "decline": "Одбиј",
+    "markCompleted": "Означи како завршено",
+    "updating": "Се ажурира...",
+    "cancelViewing": "Откажи преглед",
+    "requested": "Побарано"
   }
 }

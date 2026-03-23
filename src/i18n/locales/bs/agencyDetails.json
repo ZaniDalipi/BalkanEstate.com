@@ -40,12 +40,13 @@
     "averagePrice": "Prosječna cijena"
   },
   "about": {
-    "title": "O {agencyName}",
+    "title": "O {{agencyName}}",
     "contactInfo": "Kontakt Informacije",
     "specialties": "Specijalnosti",
     "specializations": "Specijalizacije",
     "serviceAreas": "Područja Djelovanja",
-    "languagesSpoken": "Jezici Kojima Govorimo"
+    "languagesSpoken": "Jezici Kojima Govorimo",
+    "yearsOfExcellence": "{{years}}+ Godina izvrsnosti"
   },
   "invitationCode": {
     "title": "Pozivni Kod Agencije",
@@ -92,7 +93,7 @@
     "soldProperties": "PRODATE NEKRETNINE",
     "activeListingsTitle": "Aktivni Oglasi",
     "soldPropertiesTitle": "Prodate Nekretnine",
-    "propertiesCount": "{count} nekretnina",
+    "propertiesCount": "{{count}} nekretnina",
     "noActiveListings": "Trenutno nema aktivnih oglasa",
     "noSoldProperties": "Još nema prodatih nekretnina",
     "checkBackSoon": "Vratite se uskoro za nove nekretnine",

@@ -273,7 +273,8 @@
     "needAgencyDescription": "Abonohu në planin tonë Ndërmarrje për të krijuar agjencin tënde dhe për të zhbllokuar këto veçori.",
     "viewEnterprise": "Shiko Planin Ndërmarrje",
     "comingSoon": "Së Shpejti",
-    "featureComingSoon": "Veçoritë e agjencisë do të jenë të disponueshme së shpejti!"
+    "featureComingSoon": "Veçoritë e agjencisë do të jenë të disponueshme së shpejti!",
+    "selectDuration": "Zgjidh kohëzgjatjen:"
   },
   "contact": {
     "haveQuestions": "Keni pyetje?",
@@ -290,9 +291,15 @@
     "providerNote": "Pagesat menaxhohen nga Paysera. TVSH/taksat janë përfshirë ku aplikohen."
   },
   "coupon": {
-    "title": "Do you have a coupon from the seller?",
-    "description": "Select any plan above and use your coupon code to activate your subscription instantly.",
-    "selectPlan": "Select a plan to use your coupon",
+    "title": "A keni një kupon nga shitësi?",
+    "description": "Zgjidhni çdo plan më lart dhe përdorni kodin e kuponit tuaj për të aktivizuar abonimin tuaj menjëherë.",
+    "selectPlan": "Zgjidh një plan për të përdorur kuponin tuaj",
     "haveDiscountCode": "Have a discount code?"
+  },
+  "specialOffers": {
+    "title": "Ofertat Spesiale",
+    "subtitle": "Marrëveshje me kohë të limituar për promovimin e listimeve",
+    "selectOffer": "Zgjidh Ofertën",
+    "daysLeft": "{{days}} ditë të mbetura"
   }
 }

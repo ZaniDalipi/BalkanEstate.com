@@ -40,12 +40,13 @@
     "averagePrice": "Просечна цена"
   },
   "about": {
-    "title": "За агенцијата {agencyName}",
+    "title": "За агенцијата {{agencyName}}",
     "contactInfo": "Контакт информации",
     "specialties": "Области на експертиза",
     "specializations": "Специјализации",
     "serviceAreas": "Области на работа",
-    "languagesSpoken": "Јазици"
+    "languagesSpoken": "Јазици",
+    "yearsOfExcellence": "{{years}}+ Години на извонредност"
   },
   "invitationCode": {
     "title": "Код за покана",
@@ -92,7 +93,7 @@
     "soldProperties": "ПРОДАДЕНИ НЕДВИЖНОСТИ",
     "activeListingsTitle": "Активни огласи",
     "soldPropertiesTitle": "Продадени недвижности",
-    "propertiesCount": "{count} недвижности",
+    "propertiesCount": "{{count}} недвижности",
     "noActiveListings": "Моментално нема активни огласи",
     "noSoldProperties": "Сè уште нема продадени недвижности",
     "checkBackSoon": "Проверете повторно наскоро",

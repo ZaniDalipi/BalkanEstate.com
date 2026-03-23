@@ -47,6 +47,7 @@ export function transformBackendProperty(backendProp: any): Property {
       agencyLogo: typeof seller === 'object' ? seller.agencyLogo : undefined,
       agencyId: typeof seller === 'object' ? seller.agencyId : undefined,
     },
+    propertyId: backendProp.propertyId,
     propertyType: backendProp.propertyType,
     floorNumber: backendProp.floorNumber,
     totalFloors: backendProp.totalFloors,

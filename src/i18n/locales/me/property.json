@@ -522,5 +522,36 @@
     "skipVideo": "Skip Video",
     "videoTour": "Video Tour",
     "enter3DTour": "Enter 3D Tour"
+  },
+  "viewings": {
+    "title": "Zahtjevi za razgledanje",
+    "subtitle": "Upravljajte zahtjevima za razgledanje nekretnina od potencijalnih kupaca. Odobrite ili odbijte da ih obavijestite putem e-pošte.",
+    "status": {
+      "pending": "Na čekanju",
+      "approved": "Odobreno",
+      "declined": "Odbijeno",
+      "completed": "Završeno"
+    },
+    "empty": {
+      "title": "Nema zahtjeva za razgledanje",
+      "description": "Kada neko zakaže razgledanje vaše nekretnine, pojaviće se ovdje.",
+      "filtered": "Nema {{status}} zahtjeva za razgledanje."
+    },
+    "relative": {
+      "past": "Prošlo",
+      "inDays": "Za {{count}} dana"
+    },
+    "reason": "Razlog:",
+    "declineReason": "Razlog za odbijanje (opcionalno)",
+    "declineReasonPlaceholder": "npr., Termin više nije dostupan...",
+    "declining": "Odbijanje...",
+    "confirmDecline": "Potvrdi odbijanje",
+    "approving": "Odobravanje...",
+    "approve": "Odobri",
+    "decline": "Odbij",
+    "markCompleted": "Označi kao završeno",
+    "updating": "Ažuriranje...",
+    "cancelViewing": "Otkaži razgledanje",
+    "requested": "Zatraženo"
   }
 }

@@ -108,6 +108,9 @@
     "fields": {
       "listingTitle": "Titlul Anunțului",
       "titleHint": "Titlu scurt și atractiv (ex., \"Vilă de Lux cu Vedere la Mare\", \"Studio Confortabil în Centru\")",
+      "propertyId": "ID Proprietate",
+      "propertyIdPlaceholder": "ex., AP-2024-001, VILLA-123",
+      "propertyIdHint": "Opțional. Numărul dvs. intern de referință pentru această proprietate.",
       "price": "Preț",
       "bedrooms": "Dormitoare",
       "bathrooms": "Băi",
@@ -250,7 +253,8 @@
       "publishListing": "Publică Anunțul",
       "updateListing": "Actualizează Anunțul",
       "continueToPayment": "Continuă la Plată",
-      "saving": "Se salvează..."
+      "saving": "Se salvează...",
+      "previewListing": "Previzualizare Anunț"
     },
     "success": {
       "title": "Anunțul a fost {{action}} cu Succes!",
@@ -276,11 +280,35 @@
       "buyerCannotCreate": "Cumpărătorii nu pot crea anunțuri de proprietăți. Te rugăm să treci la rolul de Vânzător Privat sau Agent."
     },
     "video": {
-      "title": "Property Video (Optional)",
-      "description": "Add a video to showcase your property! Videos auto-play when visitors view your listing, creating an engaging first impression.",
-      "label": "Video URL",
+      "title": "Video Proprietate (Opțional)",
+      "description": "Adaugă un video pentru a-ți prezenta proprietatea! Videoclipurile se redau automat când vizitatorii îți văd anunțul.",
+      "label": "URL Video",
       "placeholder": "https://youtube.com/watch?v=... or https://tiktok.com/...",
-      "hint": "Paste a link from YouTube, TikTok, Instagram Reels, or Vimeo. The video will auto-play when visitors open your listing!"
+      "hint": "Lipește un link de pe YouTube, TikTok, Instagram Reels sau Vimeo. Videoclipul se va reda automat când vizitatorii vor deschide anunțul tău!"
+    },
+    "listingType": {
+      "sale": "De Vânzare",
+      "rent": "De Închiriat"
+    },
+    "triState": {
+      "no": "Nu",
+      "any": "Oricare",
+      "yes": "Da"
+    },
+    "visitAvailability": {
+      "title": "Disponibilitate Vizite",
+      "enable": "Activează Programarea",
+      "description": "Permite vizitatorilor să programeze vizite online. Definește zilele și orele tale disponibile.",
+      "availableDays": "Zile Disponibile"
+    },
+    "imageTags": {
+      "exterior": "Exterior",
+      "livingRoom": "Cameră de Zi",
+      "kitchen": "Bucătărie",
+      "bedroom": "Dormitor",
+      "bathroom": "Baie",
+      "other": "Altele",
+      "selectTag": "Alege Etichetă"
     }
   },
   "myListings": {
@@ -289,6 +317,8 @@
     "noListings": "Nu ați creat încă niciun anunț.",
     "createFirst": "Creați primul dvs. anunț",
     "addNewListing": "Adaugă Anunț Nou",
+    "searchByPropertyId": "Caută după ID proprietate...",
+    "propertyIdLabel": "ID Proprietate",
     "active": "Activ",
     "pending": "În Așteptare",
     "sold": "Vândut",
@@ -341,7 +371,19 @@
       "priceHigh": "Preț: Descrescător",
       "priceLow": "Preț: Crescător",
       "mostViews": "Cele Mai Vizualizate"
-    }
+    },
+    "newSaleListing": "Anunț nou de vânzare",
+    "newRentalListing": "Anunț nou de închiriere",
+    "searchListings": "Caută după ID, titlu, adresă...",
+    "video": "Video",
+    "createVideo": "Creează video",
+    "forRent": "De închiriat",
+    "forSale": "De vânzare",
+    "noMapLocation": "Fără locație pe hartă",
+    "rentedUntil": "Închiriat până la {{date}}",
+    "canRenewIn": "Poate fi reînnoit în {{hours}}o {{minutes}}m",
+    "forSaleCount": "De Vânzare ({{count}})",
+    "forRentCount": "De Închiriat ({{count}})"
   },
   "form": {
     "basicInfo": "Informații de Bază",

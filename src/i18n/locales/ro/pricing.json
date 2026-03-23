@@ -268,7 +268,8 @@
     "featureComingSoon": "Recomandarea agenției va fi disponibilă în curând!",
     "oneWeek": "1 WEEK",
     "perWeek": "per week",
-    "showsEverywhere": "Shows everywhere!"
+    "showsEverywhere": "Shows everywhere!",
+    "selectDuration": "Selectați durata:"
   },
   "contact": {
     "haveQuestions": "Aveți întrebări?",
@@ -290,9 +291,15 @@
     "90days": "90 days"
   },
   "coupon": {
-    "title": "Do you have a coupon from the seller?",
-    "description": "Select any plan above and use your coupon code to activate your subscription instantly.",
-    "selectPlan": "Select a plan to use your coupon",
+    "title": "Aveți un cupon de la vânzător?",
+    "description": "Selectați orice plan de mai sus și utilizați codul cuponului pentru a activa abonamentul dvs. instantaneu.",
+    "selectPlan": "Selectați un plan pentru a utiliza cuponul dvs.",
     "haveDiscountCode": "Have a discount code?"
+  },
+  "specialOffers": {
+    "title": "Oferte Speciale",
+    "subtitle": "Oferte cu timp limitat pentru promovarea anunțurilor",
+    "selectOffer": "Alege Oferta",
+    "daysLeft": "{{days}} zile rămase"
   }
 }

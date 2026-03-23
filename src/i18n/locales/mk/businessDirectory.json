@@ -13,7 +13,8 @@
   "tabs": {
     "all": "Сите",
     "businesses": "Бизниси",
-    "individuals": "Поединци"
+    "individuals": "Поединци",
+    "mine": "Мои Бизниси"
   },
   "types": {
     "business": "Бизнис",
@@ -85,6 +86,19 @@
     "next": "Следна",
     "pageOf": "Страница {{page}} од {{totalPages}}"
   },
+  "viewMode": {
+    "grid": "Мрежа",
+    "map": "Мапа"
+  },
+  "map": {
+    "loading": "Вчитување на мапата...",
+    "loadError": "Не може да се вчита мапата",
+    "geocoding": "Лоцирање на бизниси...",
+    "noLocations": "Нема локации за прикажување",
+    "noLocationsHint": "Бизниси со адреси ќе се појават тука на мапата",
+    "viewDetails": "Погледни детали",
+    "directions": "Насоки"
+  },
   "verified": "Верифициран",
   "detail": {
     "backToDirectory": "Назад кон именикот",
@@ -118,6 +132,10 @@
       "views": "Прегледи",
       "memberSince": "Член од"
     },
+    "licensed": "Лиценциран",
+    "languages": "Јазици",
+    "serviceAreas": "Области на услуга",
+    "paymentMethods": "Начини на плаќање",
     "cta": {
       "title": "Подготвени да работите со {{name}}?",
       "subtitle": "Контактирајте денес за да го дискутирате вашиот проект и добиете бесплатна консултација.",
@@ -144,7 +162,11 @@
       "location": "Локација",
       "businessLocation": "Локација на бизнисот",
       "social": "Социјални мрежи",
-      "hours": "Работно време"
+      "hours": "Работно време",
+      "languages": "Говорени јазици",
+      "businessDetails": "Детали за бизнисот",
+      "serviceAreas": "Области на услуга",
+      "pricing": "Цени и плаќање"
     },
     "locationHint": "Додајте ја локацијата на вашиот бизнис за клиентите лесно да ве најдат.",
     "pinOnMap": "Означете ја локацијата на бизнисот на мапа",
@@ -166,7 +188,15 @@
       "address": "Адреса",
       "logo": "Лого",
       "avatar": "Профилна слика",
-      "pinLocation": "Означи локација на мапа"
+      "pinLocation": "Означи локација на мапа",
+      "banner": "Банер за корица",
+      "whatsapp": "WhatsApp",
+      "viber": "Viber",
+      "customCategory": "Наведете ја вашата категорија",
+      "yearEstablished": "Година на основање",
+      "licenseNumber": "Лиценца / Сертификат #",
+      "priceRange": "Ценовен ранг",
+      "paymentMethods": "Прифатени начини на плаќање"
     },
     "placeholders": {
       "name": "Внесете го името на вашиот бизнис",
@@ -180,13 +210,32 @@
       "selectCountry": "Изберете држава",
       "selectCity": "Изберете град",
       "address": "Улична адреса",
-      "hours": "пр. 09:00 - 17:00"
+      "hours": "пр. 09:00 - 17:00",
+      "customCategory": "пр. Управување со имот, Соларна енергија...",
+      "selectLanguage": "Изберете јазик",
+      "yearEstablished": "пр. 2015",
+      "licenseNumber": "пр. LIC-2024-1234",
+      "serviceArea": "пр. Скопје, Битола..."
     },
     "addService": "Додај",
+    "bannerHint": "Препорачано 1200 x 400px",
+    "bannerRemove": "Отстрани",
+    "addLanguage": "Додај",
+    "addServiceArea": "Додај",
+    "serviceAreasHint": "Градови или региони каде нудите услуги",
+    "priceRangeHint": "$ = Буџет  |  $$ = Средно  |  $$$ = Премиум",
+    "logoUploadError": "Прикачувањето на сликата не успеа. Обидете се повторно.",
+    "bannerUpload": "Прикачи банер",
+    "bannerChange": "Промени банер",
+    "bannerUploading": "Прикачување на банер...",
+    "bannerUploadError": "Прикачувањето на банерот не успеа. Обидете се повторно.",
+    "bannerInvalidType": "Ве молиме прикачете JPEG, PNG или WebP слика",
+    "bannerTooLarge": "Сликата мора да биде под 5MB",
     "logoUpload": "Прикачи слика",
     "logoChange": "Промени слика",
     "logoRemove": "Отстрани",
     "logoHint": "JPG, PNG или WebP. Максимум 5MB.",
+    "logoUploading": "Прикачување на слика...",
     "submit": "Креирај оглас",
     "submitting": "Креирање...",
     "errors": {
@@ -200,6 +249,12 @@
       "logoTooLarge": "Сликата мора да биде под 5MB"
     }
   },
+  "banner": {
+    "customize": "Прилагоди",
+    "dragToReposition": "Повлечете за да го преместите",
+    "reposition": "Премести банер",
+    "repositionError": "Зачувувањето на позицијата на банерот не успеа"
+  },
   "edit": {
     "title": "Уредете го вашиот оглас",
     "subtitle": "Ажурирајте ги информациите за вашиот бизнис",
@@ -212,5 +267,17 @@
     "statusActiveDesc": "Вашиот оглас е видлив за сите",
     "statusInactiveDesc": "Вашиот оглас е скриен од именикот",
     "success": "Вашиот оглас беше успешно ажуриран"
+  },
+  "myBusinesses": {
+    "title": "Мои бизниси",
+    "subtitle_one": "{{count}} бизнис оглас",
+    "subtitle_other": "{{count}} бизнис огласи",
+    "createNew": "Нов бизнис",
+    "view": "Прегледај",
+    "edit": "Уреди",
+    "delete": "Избриши",
+    "emptyTitle": "Сè уште нема бизниси",
+    "emptyMessage": "Креирајте го вашиот прв бизнис оглас за да ги прикажете вашите услуги во именикот.",
+    "createFirst": "Креирај бизнис оглас"
   }
 }

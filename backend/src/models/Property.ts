@@ -41,6 +41,7 @@ export interface IProperty extends Document {
   createdByAgencyName?: string; // If created as agent, store agency name
   createdByAgencyId?: mongoose.Types.ObjectId; // If created as agent, direct reference to Agency document
   createdByLicenseNumber?: string; // If created as agent, store license number
+  propertyId?: string; // Custom property ID assigned by the agency/agent for internal tracking
   listingType: 'sale' | 'rent'; // Whether this property is for sale or rent
   title?: string; // Optional title/headline for the property listing
   status: 'active' | 'pending' | 'sold' | 'rented' | 'draft';
@@ -174,6 +175,13 @@ const PropertySchema: Schema = new Schema(
     createdByLicenseNumber: {
       type: String,
       required: false,
+    },
+    propertyId: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: 50,
+      index: true,
     },
     listingType: {
       type: String,

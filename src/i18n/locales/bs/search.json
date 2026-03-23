@@ -191,7 +191,7 @@
     "poi": "POI",
     "pointsOfInterest": "Tačke Interesa",
     "landmarks": "Znamenitosti",
-    "measure": "Mjeri",
+    "measure": "Izmjeri",
     "measureDistance": "Mjeri Udaljenost",
     "landParcels": "Zemljišne Parcele",
     "save": "Sačuvaj",
@@ -236,7 +236,8 @@
       "fire": "Požar",
       "wind": "Vjetar",
       "air": "Zrak",
-      "heat": "Vrućina"
+      "heat": "Vrućina",
+      "airQuality": "Kvalitet zraka"
     },
     "dawn": "Zora",
     "morning": "Jutro",
@@ -260,7 +261,8 @@
       "autumn": "Jesen",
       "winter": "Zima"
     },
-    "promoted": "Promovirani"
+    "promoted": "Promovirani",
+    "cadastre": "Kataststar"
   },
   "newsletter": {
     "title": "Budite ažurirani sa novim nekretninama",

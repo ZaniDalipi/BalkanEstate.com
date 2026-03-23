@@ -494,7 +494,7 @@
     "featuresDescription": "Карактеристике приказане на страници цена",
     "noFeatures": "Још нема додатих карактеристика",
     "addFeature": "Додај карактеристику",
-    "featurePlaceholder": "нпр., {listingsLimit} огласа месечно",
+    "featurePlaceholder": "нпр., {{listingsLimit}} огласа месечно",
     "moveUp": "Помери горе",
     "moveDown": "Помери доле",
     "preview": "Преглед",

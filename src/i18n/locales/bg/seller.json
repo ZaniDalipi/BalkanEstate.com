@@ -108,6 +108,9 @@
     "fields": {
       "listingTitle": "Заглавие на обявата",
       "titleHint": "Кратко и привлекателно заглавие (напр. 'Луксозна вила с морска гледка', 'Уютно студио в центъра')",
+      "propertyId": "ID на имота",
+      "propertyIdPlaceholder": "напр., AP-2024-001, VILLA-123",
+      "propertyIdHint": "По избор. Вашият вътрешен референтен номер за този имот.",
       "price": "Цена",
       "bedrooms": "Спални",
       "bathrooms": "Бани",
@@ -257,7 +260,8 @@
       "publishListing": "Публикувай обява",
       "updateListing": "Актуализирай обява",
       "continueToPayment": "Продължи към плащане",
-      "saving": "Запазване..."
+      "saving": "Запазване...",
+      "previewListing": "Преглед на обявата"
     },
     "success": {
       "title": "Обявата е {{action}} успешно!",
@@ -281,6 +285,30 @@
       "proReached": "Достигнали сте Pro лимита си за обяви.",
       "agentProRequired": "Агентите трябва да имат активен Pro абонамент за публикуване на обяви.",
       "buyerCannotCreate": "Купувачите не могат да създават обяви за имоти. Моля, превключете на роля Частен Продавач или Агент."
+    },
+    "listingType": {
+      "sale": "За Продажба",
+      "rent": "Под Наем"
+    },
+    "triState": {
+      "no": "Не",
+      "any": "Всяко",
+      "yes": "Да"
+    },
+    "visitAvailability": {
+      "title": "Наличност на Посещения",
+      "enable": "Активирай резервирането",
+      "description": "Позволи на посетителите да резервират прегледи онлайн. Определи своите достъпни дни и часове.",
+      "availableDays": "Налични Дни"
+    },
+    "imageTags": {
+      "exterior": "Екстериор",
+      "livingRoom": "Хол",
+      "kitchen": "Кухня",
+      "bedroom": "Спалня",
+      "bathroom": "Баня",
+      "other": "Други",
+      "selectTag": "Избери Етикет"
     }
   },
   "listings": {
@@ -293,6 +321,8 @@
     "noListings": "You haven't created any listings yet.",
     "createFirst": "Create your first listing",
     "addNewListing": "Add New Listing",
+    "searchByPropertyId": "Търсене по ID на имота...",
+    "propertyIdLabel": "ID на имота",
     "active": "Active",
     "pending": "Pending",
     "sold": "Sold",
@@ -345,7 +375,19 @@
       "priceHigh": "Price: High to Low",
       "priceLow": "Price: Low to High",
       "mostViews": "Most Views"
-    }
+    },
+    "newSaleListing": "Нова обява за продажба",
+    "newRentalListing": "Нова обява за наем",
+    "searchListings": "Търси по ID, заглавие, адрес...",
+    "video": "Видео",
+    "createVideo": "Създай видео",
+    "forRent": "Под наем",
+    "forSale": "За продажба",
+    "noMapLocation": "Няма местоположение на картата",
+    "rentedUntil": "Отдадено до {{date}}",
+    "canRenewIn": "Може да се поднови след {{hours}}ч {{minutes}}м",
+    "forSaleCount": "За Продажба ({{count}})",
+    "forRentCount": "Под Наем ({{count}})"
   },
   "form": {
     "basicInfo": "Basic Information",

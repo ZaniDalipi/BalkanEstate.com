@@ -108,6 +108,9 @@
     "fields": {
       "listingTitle": "Titulli i Listimit",
       "titleHint": "Titull i shkurtër dhe tërheqës (p.sh., \"Vilë Luksoze me Pamje Deti\", \"Studio Komode në Qendër\")",
+      "propertyId": "ID e Pronës",
+      "propertyIdPlaceholder": "p.sh., AP-2024-001, VILLA-123",
+      "propertyIdHint": "Opsionale. ID-ja juaj e brendshme e referencës për këtë pronë.",
       "price": "Çmimi",
       "bedrooms": "Dhoma Gjumi",
       "bathrooms": "Banjo",
@@ -257,7 +260,8 @@
       "publishListing": "Publiko Listimin",
       "updateListing": "Përditëso Listimin",
       "continueToPayment": "Vazhdo te Pagesa",
-      "saving": "Duke ruajtur..."
+      "saving": "Duke ruajtur...",
+      "previewListing": "Shiko Listimin"
     },
     "success": {
       "title": "Listimi u {{action}} me Sukses!",
@@ -281,6 +285,30 @@
       "proReached": "Keni arritur limitin tuaj Pro të listimeve.",
       "agentProRequired": "Agjentët duhet të kenë një abonim aktiv Pro për të postuar listime. Abonohuni tani për 30 listime aktive!",
       "buyerCannotCreate": "Blerësit nuk mund të krijojnë listime pronash. Ju lutem kaloni në rolin Shitës Privat ose Agjent për të krijuar listime."
+    },
+    "listingType": {
+      "sale": "Për Shitje",
+      "rent": "Me Qira"
+    },
+    "triState": {
+      "no": "Jo",
+      "any": "Çfarëdo",
+      "yes": "Po"
+    },
+    "visitAvailability": {
+      "title": "Disponibiliteti i Vizitave",
+      "enable": "Aktivizo planifikimin",
+      "description": "Lejoji vizitorët të planifikojnë vizita online. Përcaktoni ditët dhe orët tuaja të disponueshme.",
+      "availableDays": "Ditët e Disponueshme"
+    },
+    "imageTags": {
+      "exterior": "Jashtë",
+      "livingRoom": "Dhoma e Ngrënies",
+      "kitchen": "Kuzhinë",
+      "bedroom": "Dhoma e Gjumit",
+      "bathroom": "Banja",
+      "other": "Tjetër",
+      "selectTag": "Zgjidh Etiketën"
     }
   },
   "propertyTypes": {
@@ -392,6 +420,8 @@
     "noListings": "Nuk keni krijuar ende asnjë listim.",
     "createFirst": "Krijoni listimin tuaj të parë",
     "addNewListing": "Shto Listim të Ri",
+    "searchByPropertyId": "Kërko sipas ID së pronës...",
+    "propertyIdLabel": "ID e Pronës",
     "active": "Aktive",
     "pending": "Në Pritje",
     "sold": "Shitur",
@@ -444,7 +474,19 @@
       "priceHigh": "Çmimi: Lartë në Ulët",
       "priceLow": "Çmimi: Ulët në Lartë",
       "mostViews": "Më Shumë Shikime"
-    }
+    },
+    "newSaleListing": "Listim i ri për shitje",
+    "newRentalListing": "Listim i ri për qira",
+    "searchListings": "Kërko sipas ID, titullit, adresës...",
+    "video": "Video",
+    "createVideo": "Krijo video",
+    "forRent": "Me qira",
+    "forSale": "Për shitje",
+    "noMapLocation": "Pa vendndodhje në hartë",
+    "rentedUntil": "E dhënë me qira deri {{date}}",
+    "canRenewIn": "Mund të rinovohet për {{hours}}o {{minutes}}m",
+    "forSaleCount": "Për Shitje ({{count}})",
+    "forRentCount": "Me Qira ({{count}})"
   },
   "form": {
     "basicInfo": "Informacione Bazë",

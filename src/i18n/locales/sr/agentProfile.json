@@ -89,7 +89,7 @@
   },
   "similarAgents": {
     "title": "Слични Агенти",
-    "inArea": "у {area}",
+    "inArea": "у {{area}}",
     "viewAll": "Погледај Све Агенте"
   },
   "actions": {

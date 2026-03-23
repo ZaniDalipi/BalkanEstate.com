@@ -108,6 +108,9 @@
     "fields": {
       "listingTitle": "Наслов Огласа",
       "titleHint": "Кратак, привлачан наслов (нпр., \"Луксузна Вила са Погледом на Море\", \"Уютан Студио у Центру\")",
+      "propertyId": "ID Некретнине",
+      "propertyIdPlaceholder": "нпр., AP-2024-001, VILLA-123",
+      "propertyIdHint": "Опционално. Ваш интерни референтни број за ову некретнину.",
       "price": "Цена",
       "bedrooms": "Спаваће Собе",
       "bathrooms": "Купатила",
@@ -250,7 +253,8 @@
       "publishListing": "Објави Оглас",
       "updateListing": "Ажурирај Оглас",
       "continueToPayment": "Настави на Плаћање",
-      "saving": "Чување..."
+      "saving": "Чување...",
+      "previewListing": "Преглед огласа"
     },
     "success": {
       "title": "Оглас {{action}} Успешно!",
@@ -276,11 +280,35 @@
       "buyerCannotCreate": "Купци не могу креирати огласе за некретнине. Молимо пређите на улогу Приватног Продавца или Агента."
     },
     "video": {
-      "title": "Property Video (Optional)",
-      "description": "Add a video to showcase your property! Videos auto-play when visitors view your listing, creating an engaging first impression.",
-      "label": "Video URL",
+      "title": "Видео некретнине (Опционално)",
+      "description": "Додајте видео да прикажете вашу некретнину! Видео снимци се аутоматски покрећу када посетиоци прегледају ваш оглас.",
+      "label": "URL видеа",
       "placeholder": "https://youtube.com/watch?v=... or https://tiktok.com/...",
-      "hint": "Paste a link from YouTube, TikTok, Instagram Reels, or Vimeo. The video will auto-play when visitors open your listing!"
+      "hint": "Налепите линк са YouTube, TikTok, Instagram Reels или Vimeo. Видео ће се аутоматски покренути када посетиоци отворе ваш оглас!"
+    },
+    "listingType": {
+      "sale": "На Продају",
+      "rent": "За Изнајмљивање"
+    },
+    "triState": {
+      "no": "Не",
+      "any": "Било који",
+      "yes": "Да"
+    },
+    "visitAvailability": {
+      "title": "Доступност Посета",
+      "enable": "Омогући заказивање",
+      "description": "Дозволите посетиоцима да заказују прегледе онлајн. Дефинишите своје расположиве дане и време.",
+      "availableDays": "Расположиви Дани"
+    },
+    "imageTags": {
+      "exterior": "Екстеријер",
+      "livingRoom": "Дневни Боравак",
+      "kitchen": "Кухиња",
+      "bedroom": "Спаваћа Соба",
+      "bathroom": "Купатило",
+      "other": "Остало",
+      "selectTag": "Изабери Ознаку"
     }
   },
   "myListings": {
@@ -289,6 +317,8 @@
     "noListings": "Још нисте креирали ниједан оглас.",
     "createFirst": "Креирајте свој први оглас",
     "addNewListing": "Додај Нови Оглас",
+    "searchByPropertyId": "Претражи по ID некретнине...",
+    "propertyIdLabel": "ID Некретнине",
     "active": "Активно",
     "pending": "На Чекању",
     "sold": "Продато",
@@ -341,7 +371,19 @@
       "priceHigh": "Цена: Опадајуће",
       "priceLow": "Цена: Растуће",
       "mostViews": "Највише Прегледа"
-    }
+    },
+    "newSaleListing": "Нови оглас за продају",
+    "newRentalListing": "Нови оглас за изнајмљивање",
+    "searchListings": "Претражи по ID, наслову, адреси...",
+    "video": "Видео",
+    "createVideo": "Креирај видео",
+    "forRent": "За изнајмљивање",
+    "forSale": "За продају",
+    "noMapLocation": "Нема локације на мапи",
+    "rentedUntil": "Издато до {{date}}",
+    "canRenewIn": "Може се обновити за {{hours}}ч {{minutes}}м",
+    "forSaleCount": "На Продају ({{count}})",
+    "forRentCount": "За Изнајмљивање ({{count}})"
   },
   "form": {
     "basicInfo": "Основне Информације",
