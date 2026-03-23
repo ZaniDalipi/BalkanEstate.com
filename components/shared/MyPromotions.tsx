@@ -502,6 +502,7 @@ const MyPromotions: React.FC = () => {
           propertyId={propertyToPromote.id}
           propertyTitle={propertyToPromote.title || `${propertyToPromote.address}, ${propertyToPromote.city}`}
           onSuccess={handlePromoteSuccess}
+          elevated
         />
       )}
 
