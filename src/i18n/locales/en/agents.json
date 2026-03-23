@@ -735,12 +735,20 @@
       "recently": "Recently",
       "responseFrom": "Response from {{name}}",
       "noReviews": "No reviews yet",
-      "beFirstToReview": "Be the first to review {{name}}'s services"
+      "beFirstToReview": "Be the first to review {{name}}'s services",
+      "ratedTopPerformer": "{{name}} is rated as a Top Performer Agent",
+      "ratedReliable": "{{name}} is rated as a Reliable Agent"
     },
     "contact": {
       "title": "Contact {{name}}",
       "callDirect": "Call Direct",
-      "sendEmail": "Send Email"
+      "sendEmail": "Send Email",
+      "whatsapp": "WhatsApp",
+      "whatsappDesc": "Chat or call via WhatsApp",
+      "viber": "Viber",
+      "viberDesc": "Chat or call via Viber",
+      "sendInquiry": "Send Inquiry",
+      "whatsappMessage": "Hi {{name}}, I found your profile on BalkanEstate and would like to discuss real estate opportunities."
     },
     "appraisal": {
       "title": "Get a Free Property Appraisal",
@@ -825,7 +833,12 @@
       "instagram": "Instagram",
       "linkedin": "LinkedIn"
     },
-    "editButton": "Edit Profile"
+    "editButton": "Edit Profile",
+    "contactInfo": "Contact Information",
+    "phone": "Phone",
+    "email": "Email",
+    "officeAddress": "Office Address",
+    "website": "Website"
   },
   "languages": {
     "english": "English",

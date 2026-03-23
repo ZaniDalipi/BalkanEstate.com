@@ -706,12 +706,20 @@
       "recently": "Наскоро",
       "responseFrom": "Отговор от {{name}}",
       "noReviews": "Все още няма отзиви",
-      "beFirstToReview": "Бъдете първият, който ще остави отзив за услугите на {{name}}"
+      "beFirstToReview": "Бъдете първият, който ще остави отзив за услугите на {{name}}",
+      "ratedTopPerformer": "{{name}} е оценен като Топ Агент",
+      "ratedReliable": "{{name}} е оценен като Надежден Агент"
     },
     "contact": {
-      "title": "Свържи се с {{name}}",
-      "callDirect": "Обади се директно",
-      "sendEmail": "Изпрати имейл"
+      "title": "Свържете се с {{name}}",
+      "callDirect": "Директно обаждане",
+      "sendEmail": "Изпрати имейл",
+      "whatsapp": "WhatsApp",
+      "whatsappDesc": "Чат или обаждане чрез WhatsApp",
+      "viber": "Viber",
+      "viberDesc": "Чат или обаждане чрез Viber",
+      "sendInquiry": "Изпрати запитване",
+      "whatsappMessage": "Здравейте {{name}}, намерих профила ви в BalkanEstate и бих искал да обсъдим възможности за недвижими имоти."
     },
     "appraisal": {
       "title": "Получете безплатна оценка на имот",
@@ -792,7 +800,12 @@
       "saving": "Saving...",
       "saveChanges": "Save Changes"
     },
-    "editButton": "Edit Profile"
+    "editButton": "Edit Profile",
+    "contactInfo": "Информация за контакт",
+    "phone": "Телефон",
+    "email": "Имейл",
+    "officeAddress": "Адрес на офиса",
+    "website": "Уебсайт"
   },
   "badges": {
     "verifiedAgents": "Verified Agents",

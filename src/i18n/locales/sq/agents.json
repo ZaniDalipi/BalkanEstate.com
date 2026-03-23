@@ -638,12 +638,20 @@
       "recently": "Recently",
       "responseFrom": "Response from {{name}}",
       "noReviews": "No reviews yet",
-      "beFirstToReview": "Be the first to review {{name}}'s services"
+      "beFirstToReview": "Be the first to review {{name}}'s services",
+      "ratedTopPerformer": "{{name}} është vlerësuar si Agjent i Shkëlqyer",
+      "ratedReliable": "{{name}} është vlerësuar si Agjent i Besueshëm"
     },
     "contact": {
-      "title": "Contact {{name}}",
-      "callDirect": "Call Direct",
-      "sendEmail": "Send Email"
+      "title": "Kontakto {{name}}",
+      "callDirect": "Thirr Direkt",
+      "sendEmail": "Dërgo Email",
+      "whatsapp": "WhatsApp",
+      "whatsappDesc": "Bisedo ose thirr përmes WhatsApp",
+      "viber": "Viber",
+      "viberDesc": "Bisedo ose thirr përmes Viber",
+      "sendInquiry": "Dërgo Kërkesë",
+      "whatsappMessage": "Përshëndetje {{name}}, e gjeta profilin tuaj në BalkanEstate dhe do të doja të diskutoja për mundësi të pasurive të paluajtshme."
     },
     "appraisal": {
       "title": "Get a Free Property Appraisal",
@@ -724,7 +732,12 @@
       "saving": "Saving...",
       "saveChanges": "Save Changes"
     },
-    "editButton": "Edit Profile"
+    "editButton": "Edit Profile",
+    "contactInfo": "Informacione Kontakti",
+    "phone": "Telefon",
+    "email": "Email",
+    "officeAddress": "Adresa e Zyrës",
+    "website": "Faqja e Internetit"
   },
   "verification": {
     "title": "Verifikimi i Agjentit",

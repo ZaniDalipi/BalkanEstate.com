@@ -791,7 +791,9 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         <span className="text-gray-600">({stats.reviews} {t('profilePage.reviewsTab.verifiedReviews')})</span>
                                     </div>
                                     <p className="text-gray-700">
-                                        {firstName} is rated as a {agent.rating && agent.rating >= 4.5 ? 'Top Performer' : 'Reliable'} Agent
+                                        {agent.rating && agent.rating >= 4.5
+                                            ? t('profilePage.reviewsTab.ratedTopPerformer', '{{name}} is rated as a Top Performer Agent', { name: firstName })
+                                            : t('profilePage.reviewsTab.ratedReliable', '{{name}} is rated as a Reliable Agent', { name: firstName })}
                                     </p>
                                 </div>
 

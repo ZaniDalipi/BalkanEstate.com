@@ -706,12 +706,20 @@
       "recently": "Недавно",
       "responseFrom": "Одговор од {{name}}",
       "noReviews": "Још нема рецензија",
-      "beFirstToReview": "Будите први који ће рецензирати услуге од {{name}}"
+      "beFirstToReview": "Будите први који ће рецензирати услуге од {{name}}",
+      "ratedTopPerformer": "{{name}} je ocenjen kao Vrhunski Agent",
+      "ratedReliable": "{{name}} je ocenjen kao Pouzdan Agent"
     },
     "contact": {
-      "title": "Контактирајте {{name}}",
-      "callDirect": "Директан Позив",
-      "sendEmail": "Пошаљи Имејл"
+      "title": "Kontaktiraj {{name}}",
+      "callDirect": "Direktan poziv",
+      "sendEmail": "Pošalji e-mail",
+      "whatsapp": "WhatsApp",
+      "whatsappDesc": "Razgovaraj putem WhatsApp-a",
+      "viber": "Viber",
+      "viberDesc": "Razgovaraj putem Viber-a",
+      "sendInquiry": "Pošalji upit",
+      "whatsappMessage": "Zdravo {{name}}, pronašao sam vaš profil na BalkanEstate i želeo bih da razgovaram o nekretninama."
     },
     "appraisal": {
       "title": "Добијте Бесплатну Процену Некретнине",
@@ -792,7 +800,12 @@
       "saving": "Чување...",
       "saveChanges": "Сачувај Измене"
     },
-    "editButton": "Измени Профил"
+    "editButton": "Измени Профил",
+    "contactInfo": "Kontakt informacije",
+    "phone": "Telefon",
+    "email": "E-mail",
+    "officeAddress": "Adresa kancelarije",
+    "website": "Veb-sajt"
   },
   "badges": {
     "verifiedAgents": "Verified Agents",
