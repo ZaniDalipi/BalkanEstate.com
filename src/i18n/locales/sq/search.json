@@ -236,7 +236,8 @@
       "fire": "Zjarr",
       "wind": "Erë",
       "air": "Ajër",
-      "heat": "Nxehtësi"
+      "heat": "Nxehtësi",
+      "airQuality": "Cilësia e Ajrit"
     },
     "dawn": "Agim",
     "morning": "Mëngjes",

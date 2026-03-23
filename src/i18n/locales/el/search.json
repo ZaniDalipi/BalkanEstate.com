@@ -223,7 +223,8 @@
       "fire": "Φωτιά",
       "wind": "Άνεμος",
       "air": "Αέρας",
-      "heat": "Καύσωνας"
+      "heat": "Καύσωνας",
+      "airQuality": "Ποιότητα Αέρα"
     },
     "mapLegend": "Map Legend",
     "nightMode": "Night Mode",

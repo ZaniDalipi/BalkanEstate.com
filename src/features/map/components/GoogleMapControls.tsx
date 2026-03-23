@@ -204,7 +204,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                       selectedClimateRisk === risk ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50 text-gray-700'
                     }`}
                   >
-                    {risk === 'none' ? '✕ None' : risk === 'flood' ? '💧 Flood' : risk === 'fire' ? '🔥 Fire' : risk === 'wind' ? '💨 Wind' : risk === 'air' ? '🌬️ Air Quality' : '☀️ Heat'}
+                    {risk === 'none' ? `✕ ${t('search:map.climateRisks.none', 'None')}` : risk === 'flood' ? `💧 ${t('search:map.climateRisks.flood', 'Flood')}` : risk === 'fire' ? `🔥 ${t('search:map.climateRisks.fire', 'Fire')}` : risk === 'wind' ? `💨 ${t('search:map.climateRisks.wind', 'Wind')}` : risk === 'air' ? `🌬️ ${t('search:map.climateRisks.airQuality', 'Air Quality')}` : `☀️ ${t('search:map.climateRisks.heat', 'Heat')}`}
                   </button>
                 ))}
               </div>

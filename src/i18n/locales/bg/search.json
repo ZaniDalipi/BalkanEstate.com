@@ -224,7 +224,8 @@
       "fire": "Пожар",
       "wind": "Вятър",
       "air": "Въздух",
-      "heat": "Горещина"
+      "heat": "Горещина",
+      "airQuality": "Качество на въздуха"
     },
     "nightMode": "Night Mode",
     "dayMode": "Day Mode",

@@ -236,7 +236,8 @@
       "fire": "Požar",
       "wind": "Vjetar",
       "air": "Zrak",
-      "heat": "Vrućina"
+      "heat": "Vrućina",
+      "airQuality": "Kvaliteta zraka"
     },
     "dawn": "Zora",
     "morning": "Jutro",

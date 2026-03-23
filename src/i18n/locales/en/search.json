@@ -251,7 +251,8 @@
       "fire": "Fire",
       "wind": "Wind",
       "air": "Air",
-      "heat": "Heat"
+      "heat": "Heat",
+      "airQuality": "Air Quality"
     },
     "dawn": "Dawn",
     "morning": "Morning",

@@ -223,7 +223,8 @@
       "fire": "Incendiu",
       "wind": "Vânt",
       "air": "Aer",
-      "heat": "Căldură"
+      "heat": "Căldură",
+      "airQuality": "Calitatea aerului"
     },
     "mapLegend": "Map Legend",
     "nightMode": "Night Mode",
