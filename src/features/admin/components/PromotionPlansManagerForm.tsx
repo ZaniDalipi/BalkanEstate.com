@@ -37,10 +37,21 @@ export const PlanCard: React.FC<{
   };
 
   const getHeaderGradient = () => {
+    if (plan.isSpecialOffer) return 'bg-gradient-to-r from-rose-500 to-pink-500';
     if (plan.isAddOn) return 'bg-gradient-to-r from-blue-500 to-indigo-500';
     if (plan.category === 'listing') return 'bg-gradient-to-r from-purple-500 to-indigo-500';
     return 'bg-gradient-to-r from-amber-500 to-orange-500';
   };
+
+  const getOfferStatus = () => {
+    if (!plan.isSpecialOffer) return null;
+    const now = new Date();
+    if (plan.availableTo && new Date(plan.availableTo) < now) return 'expired';
+    if (plan.availableFrom && new Date(plan.availableFrom) > now) return 'scheduled';
+    return 'active';
+  };
+
+  const offerStatus = getOfferStatus();
 
   return (
     <div className={`bg-white rounded-2xl shadow-lg overflow-hidden border-2 transition-all hover:shadow-xl ${
@@ -59,15 +70,31 @@ export const PlanCard: React.FC<{
                     {t('admin:promotionPlans.addOn', 'Add-on')}
                   </span>
                 )}
+                {plan.isSpecialOffer && (
+                  <span className="px-2 py-0.5 bg-white/30 text-white text-xs font-bold rounded-full">
+                    {plan.offerLabel || t('admin:promotionPlans.specialOffer', 'Special Offer')}
+                  </span>
+                )}
               </div>
               <p className="text-white/80 text-sm">{plan.description}</p>
             </div>
           </div>
-          {plan.badge && !plan.isAddOn && (
-            <span className="px-2 py-1 bg-white/20 text-white text-xs font-bold rounded-full backdrop-blur-sm">
-              {plan.badge}
-            </span>
-          )}
+          <div className="flex flex-col items-end gap-1">
+            {plan.badge && !plan.isAddOn && (
+              <span className="px-2 py-1 bg-white/20 text-white text-xs font-bold rounded-full backdrop-blur-sm">
+                {plan.badge}
+              </span>
+            )}
+            {offerStatus && (
+              <span className={`px-2 py-0.5 text-xs font-bold rounded-full ${
+                offerStatus === 'expired' ? 'bg-red-500/30 text-red-100' :
+                offerStatus === 'scheduled' ? 'bg-blue-500/30 text-blue-100' :
+                'bg-green-500/30 text-green-100'
+              }`}>
+                {offerStatus === 'expired' ? 'Expired' : offerStatus === 'scheduled' ? 'Scheduled' : 'Live'}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -143,6 +170,18 @@ export const PlanCard: React.FC<{
         </ul>
       </div>
 
+      {/* Availability Period (special offers) */}
+      {plan.isSpecialOffer && (plan.availableFrom || plan.availableTo) && (
+        <div className="px-4 py-2 border-b border-gray-100 bg-rose-50/50">
+          <div className="text-xs text-gray-500 font-medium mb-1">{t('admin:promotionPlans.availability', 'Availability')}</div>
+          <div className="flex items-center gap-2 text-xs text-gray-600">
+            {plan.availableFrom && <span>{new Date(plan.availableFrom).toLocaleDateString()}</span>}
+            <span>&rarr;</span>
+            {plan.availableTo && <span>{new Date(plan.availableTo).toLocaleDateString()}</span>}
+          </div>
+        </div>
+      )}
+
       {/* Actions */}
       <div className="p-4 flex items-center justify-between">
         <button
@@ -210,8 +249,8 @@ export const EditPlanModal: React.FC<{
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
           <h3 className="text-xl font-bold flex items-center gap-2">
-            {plan._id ? <PencilIcon className="w-5 h-5" /> : <PlusIcon className="w-5 h-5" />}
-            {plan._id ? t('admin:promotionPlans.editPlan', 'Edit Plan') : t('admin:promotionPlans.createPlan', 'Create Plan')}
+            {plan.id ? <PencilIcon className="w-5 h-5" /> : <PlusIcon className="w-5 h-5" />}
+            {plan.id ? t('admin:promotionPlans.editPlan', 'Edit Plan') : t('admin:promotionPlans.createPlan', 'Create Plan')}
           </h3>
           <div className="flex items-center gap-2">
             <button
@@ -521,6 +560,63 @@ export const EditPlanModal: React.FC<{
                     <span className="text-sm font-medium text-gray-700">{t('admin:common.active', 'Active')}</span>
                   </label>
                 </div>
+
+                {/* Special Offer Settings */}
+                {plan.isSpecialOffer && (
+                  <div className="mt-4 bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200 rounded-xl p-4">
+                    <h4 className="font-semibold text-rose-900 mb-3 flex items-center gap-2">
+                      <span className="text-lg">🔥</span>
+                      {t('admin:promotionPlans.offerSettings', 'Special Offer Settings')}
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm text-gray-700 mb-1">{t('admin:promotionPlans.availableFrom', 'Available From')}</label>
+                        <input
+                          type="datetime-local"
+                          value={plan.availableFrom ? plan.availableFrom.slice(0, 16) : ''}
+                          onChange={(e) => onChange({ ...plan, availableFrom: e.target.value ? new Date(e.target.value).toISOString() : undefined })}
+                          className="w-full px-3 py-2 border rounded-lg text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-700 mb-1">{t('admin:promotionPlans.availableTo', 'Available Until')}</label>
+                        <input
+                          type="datetime-local"
+                          value={plan.availableTo ? plan.availableTo.slice(0, 16) : ''}
+                          onChange={(e) => onChange({ ...plan, availableTo: e.target.value ? new Date(e.target.value).toISOString() : undefined })}
+                          className="w-full px-3 py-2 border rounded-lg text-sm"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mt-3">
+                      <div>
+                        <label className="block text-sm text-gray-700 mb-1">{t('admin:promotionPlans.offerLabel', 'Offer Label')}</label>
+                        <input
+                          type="text"
+                          value={plan.offerLabel || ''}
+                          onChange={(e) => onChange({ ...plan, offerLabel: e.target.value })}
+                          placeholder="e.g., Spring Sale, Limited Time"
+                          className="w-full px-3 py-2 border rounded-lg text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-700 mb-1">{t('admin:promotionPlans.originalMultiplier', 'Original Price Multiplier')}</label>
+                        <input
+                          type="number"
+                          min="1"
+                          step="0.1"
+                          value={plan.originalPriceMultiplier || ''}
+                          onChange={(e) => onChange({ ...plan, originalPriceMultiplier: parseFloat(e.target.value) || undefined })}
+                          placeholder="e.g., 1.5 = was 50% more"
+                          className="w-full px-3 py-2 border rounded-lg text-sm"
+                        />
+                      </div>
+                    </div>
+                    {plan.availableFrom && plan.availableTo && new Date(plan.availableTo) <= new Date(plan.availableFrom) && (
+                      <p className="mt-2 text-xs text-red-600 font-medium">{t('admin:promotionPlans.dateError', 'End date must be after start date')}</p>
+                    )}
+                  </div>
+                )}
 
                 {/* Color Presets */}
                 <div className="mt-4">

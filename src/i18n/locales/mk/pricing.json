@@ -46,7 +46,8 @@
       "name": "Про годишно",
       "description": "Заштедете {{percent}}% со годишна наплата",
       "badge": "НАЈПОПУЛАРНО",
-      "saveVsMonthly": "Заштедете 33% споредено со месечно"
+      "saveVsMonthly": "Заштедете 33% споредено со месечно",
+      "saveVsMonthlyDynamic": "Заштедете {{percent}}% споредено со месечно"
     },
     "enterprise": {
       "name": "Enterprise план",
@@ -267,7 +268,8 @@
     "featureComingSoon": "Истакнувањето на агенција ќе биде наскоро достапно!",
     "oneWeek": "1 WEEK",
     "perWeek": "per week",
-    "showsEverywhere": "Shows everywhere!"
+    "showsEverywhere": "Shows everywhere!",
+    "selectDuration": "Избери трајање:"
   },
   "contact": {
     "haveQuestions": "Имате прашања?",
@@ -289,9 +291,15 @@
     "90days": "90 days"
   },
   "coupon": {
-    "title": "Do you have a coupon from the seller?",
-    "description": "Select any plan above and use your coupon code to activate your subscription instantly.",
-    "selectPlan": "Select a plan to use your coupon",
+    "title": "Имате ли купон од продавачот?",
+    "description": "Изберете кој било план од горе и користите ја вашата кодна вредност за да активирате ја вашата претплата веднаш.",
+    "selectPlan": "Изберете план за да го користите вашиот купон",
     "haveDiscountCode": "Have a discount code?"
+  },
+  "specialOffers": {
+    "title": "Специјални Понуди",
+    "subtitle": "Ограничени понуди за промоција на огласи",
+    "selectOffer": "Избери Понуда",
+    "daysLeft": "{{days}} денови преостануваат"
   }
 }

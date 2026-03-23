@@ -40,7 +40,7 @@ export interface Product {
 }
 
 export interface PromotionPlan {
-  _id: string;
+  id: string;
   name: string;
   tier: string;
   category: 'listing' | 'agency';
@@ -65,6 +65,11 @@ export interface PromotionPlan {
     iconBgColor?: string;
     priceColor?: string;
   };
+  isSpecialOffer?: boolean;
+  availableFrom?: string;
+  availableTo?: string;
+  originalPriceMultiplier?: number;
+  offerLabel?: string;
   isActive: boolean;
 }
 
@@ -199,14 +204,18 @@ export function usePricingPageData(activeTab: string, isAuthenticated: boolean) 
     });
   }, [activeTab, queryClient]);
 
-  // Derived data
-  const listingPromotionPlans = promotionPlansQuery.data?.filter(
-    (p) => p.category === 'listing'
-  ) || [];
+  // Derived data - separate regular plans from special offers
+  const allPlans = promotionPlansQuery.data || [];
 
-  const agencyFeaturePlans = promotionPlansQuery.data?.filter(
-    (p) => p.category === 'agency'
-  ) || [];
+  const listingPromotionPlans = allPlans.filter(
+    (p) => p.category === 'listing' && !p.isSpecialOffer
+  );
+
+  const agencyFeaturePlans = allPlans.filter(
+    (p) => p.category === 'agency' && !p.isSpecialOffer
+  );
+
+  const specialOffers = allPlans.filter((p) => p.isSpecialOffer);
 
   return {
     // Products/Subscription Plans
@@ -219,6 +228,7 @@ export function usePricingPageData(activeTab: string, isAuthenticated: boolean) 
     // Promotion Plans
     listingPromotionPlans,
     agencyFeaturePlans,
+    specialOffers,
     isLoadingPromotionPlans: promotionPlansQuery.isLoading,
     isRefetchingPromotionPlans: promotionPlansQuery.isRefetching,
     promotionPlansError: promotionPlansQuery.error,

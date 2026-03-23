@@ -60,6 +60,14 @@
     "propertyViewed": "Listimi juaj u shikua {{count}} herë",
     "newInquiry": "Kërkesë e re për listimen tuaj"
   },
+  "pushPrompt": {
+    "title": "Aktivizo Njoftimet",
+    "description": "Merr përditësime të menjëhershme për mesazhet, vizitat dhe njoftimet e pronave.",
+    "enable": "Aktivizo",
+    "enabling": "Duke aktivizuar...",
+    "later": "Më vonë",
+    "dismiss": "Mbyll"
+  },
   "toast": {
     "success": "Sukses!",
     "error": "Gabim",

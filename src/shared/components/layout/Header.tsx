@@ -116,7 +116,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
           </button>
           <button
             onClick={handleNewListingClick}
-            className="hidden sm:flex min-h-[40px] sm:min-h-[44px] bg-gradient-to-r from-secondary to-orange-400 text-white px-3 py-2 sm:px-4 rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-secondary/30 transition-all shadow-md whitespace-nowrap touch-manipulation select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-secondary/50 active:scale-[0.98] items-center"
+            className="hidden sm:flex min-h-[44px] bg-gradient-to-r from-secondary to-orange-400 text-white px-4 py-2 rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-secondary/30 transition-all shadow-md whitespace-nowrap touch-manipulation select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-secondary/50 active:scale-[0.98] items-center justify-center gap-1"
             aria-label={t('nav:newListing')}
           >
             + {t('nav:newListing')}
@@ -129,7 +129,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   }
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-20 flex-shrink-0" role="banner">
+    <header className="bg-white shadow-sm sticky top-0 z-[1000] flex-shrink-0" role="banner">
       <div className="max-w-screen-xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="flex justify-between items-center py-1.5 sm:py-2 landscape:py-1">
           <div className="flex items-center">
@@ -157,7 +157,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
             </button>
             <button
               onClick={handleNewListingClick}
-              className="min-h-[40px] sm:min-h-[44px] bg-secondary text-white px-3 py-2 sm:px-4 rounded-full text-sm font-semibold hover:bg-orange-600 transition-all shadow-sm hover:shadow-md whitespace-nowrap touch-manipulation select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-secondary/50 active:bg-orange-600"
+              className="inline-flex items-center justify-center min-h-[44px] bg-secondary text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-orange-600 transition-all shadow-sm hover:shadow-md whitespace-nowrap touch-manipulation select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-secondary/50 active:bg-orange-600 gap-1"
               aria-label={t('nav:newListing')}
             >
               <span className="hidden sm:inline">+ {t('nav:newListing')}</span>

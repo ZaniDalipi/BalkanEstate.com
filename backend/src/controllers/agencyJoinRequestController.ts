@@ -8,7 +8,8 @@ import { getSocketInstance } from '../utils/socketInstance';
 import { agencyLogger } from '../utils/logger';
 import { getObjectIdParam } from '../utils/validateParams';
 import { syncAgentAttributesToAgency } from '../services/agencyAttributeSyncService';
-import Notification from '../models/Notification';
+import { createNotificationWithPush } from '../services/engagementService';
+import { sendAgentJoinedAgencyEmail, sendAgencyNewMemberEmail } from '../services/emailService';
 
 // Create a join request
 export const createJoinRequest = async (req: Request, res: Response): Promise<void> => {
@@ -112,7 +113,7 @@ export const createJoinRequest = async (req: Request, res: Response): Promise<vo
     // Create notification for agency owner
     try {
       const codeInfo = invitationCode ? ` with invitation code: ${invitationCode}` : '';
-      await Notification.create({
+      await createNotificationWithPush({
         userId: agency.ownerId,
         type: 'agency_join_request',
         title: 'New Join Request',
@@ -347,6 +348,36 @@ export const approveJoinRequest = async (req: Request, res: Response): Promise<v
       });
     }
 
+    // Send email notifications (non-blocking)
+    try {
+      await sendAgentJoinedAgencyEmail({
+        agentEmail: agent.email,
+        agentName: agent.name || 'Agent',
+        agencyName: agency.name,
+        agencyId: String(agency._id),
+        subscriptionTier: agent.subscription?.tier || 'pro',
+        listingsLimit: agent.subscription?.listingsLimit || 50,
+        expiresAt: agent.subscription?.expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      });
+
+      // Notify agency owner about the new member
+      const owner = await User.findById(agency.ownerId);
+      if (owner) {
+        await sendAgencyNewMemberEmail({
+          ownerEmail: owner.email,
+          ownerName: owner.name || 'Agency Owner',
+          newAgentName: agent.name || 'Agent',
+          newAgentEmail: agent.email,
+          agencyName: agency.name,
+          agencyId: String(agency._id),
+          couponCode: '',
+          totalAgents: agency.agents.length,
+        });
+      }
+    } catch (emailError) {
+      agencyLogger.error('Error sending join approval emails:', emailError);
+    }
+
     res.json({
       message: 'Join request approved successfully',
       joinRequest,
@@ -541,7 +572,7 @@ export const joinByInvitationCode = async (req: Request, res: Response): Promise
 
     // Create notification for agency owner
     try {
-      await Notification.create({
+      await createNotificationWithPush({
         userId: agency.ownerId,
         type: 'agency_join_request',
         title: 'New Join Request',

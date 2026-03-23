@@ -8,27 +8,21 @@ export interface IPromotionPlan extends Document {
   tier: PromotionPlanTier;
   name: string;
   description?: string;
-  icon?: string; // Emoji or icon name
+  icon?: string;
 
   // Pricing for different durations
   pricing: {
-    duration7?: number;  // 1 week price
-    duration14?: number; // 2 weeks price
-    duration28?: number; // 4 weeks price
-    duration30?: number; // Monthly price
-    duration90?: number; // Quarterly price
-    // For fixed-price items (like add-ons)
+    duration7?: number;
+    duration14?: number;
+    duration28?: number;
+    duration30?: number;
+    duration90?: number;
     fixedPrice?: number;
-    fixedDuration?: string; // e.g., "30 days"
+    fixedDuration?: string;
   };
 
-  // Add-on flag - if true, this is an optional add-on to a main plan
   isAddOn: boolean;
-
-  // Features/benefits
   features: string[];
-
-  // Visual multiplier displayed (e.g., "2x visibility")
   visibilityMultiplier?: string;
 
   // Display settings
@@ -37,7 +31,6 @@ export interface IPromotionPlan extends Document {
   badgeColor?: string;
   highlighted: boolean;
 
-  // Card styling
   cardStyle?: {
     gradientFrom?: string;
     gradientTo?: string;
@@ -45,6 +38,13 @@ export interface IPromotionPlan extends Document {
     iconBgColor?: string;
     priceColor?: string;
   };
+
+  // Special Offer: time-limited promotions created by admin
+  isSpecialOffer: boolean;
+  availableFrom?: Date;
+  availableTo?: Date;
+  originalPriceMultiplier?: number; // e.g. 1.5 means original was 50% more (to show "was €X")
+  offerLabel?: string; // e.g. "Spring Sale", "Limited Time"
 
   // Status
   isActive: boolean;
@@ -80,13 +80,16 @@ const PromotionPlanSchema: Schema = new Schema(
     },
 
     pricing: {
-      duration7: { type: Number },
-      duration14: { type: Number },
-      duration28: { type: Number },
-      duration30: { type: Number },
-      duration90: { type: Number },
-      fixedPrice: { type: Number },
-      fixedDuration: { type: String },
+      type: {
+        duration7: { type: Number },
+        duration14: { type: Number },
+        duration28: { type: Number },
+        duration30: { type: Number },
+        duration90: { type: Number },
+        fixedPrice: { type: Number },
+        fixedDuration: { type: String },
+      },
+      _id: false,
     },
 
     isAddOn: {
@@ -126,7 +129,28 @@ const PromotionPlanSchema: Schema = new Schema(
         iconBgColor: String,
         priceColor: String,
       },
+      _id: false,
       default: undefined,
+    },
+
+    // Special Offer fields
+    isSpecialOffer: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    availableFrom: {
+      type: Date,
+    },
+    availableTo: {
+      type: Date,
+    },
+    originalPriceMultiplier: {
+      type: Number,
+      min: 1,
+    },
+    offerLabel: {
+      type: String,
     },
 
     isActive: {
@@ -146,5 +170,6 @@ const PromotionPlanSchema: Schema = new Schema(
 
 // Compound index for efficient queries
 PromotionPlanSchema.index({ category: 1, isActive: 1, displayOrder: 1 });
+PromotionPlanSchema.index({ isSpecialOffer: 1, availableFrom: 1, availableTo: 1 });
 
 export default mongoose.model<IPromotionPlan>('PromotionPlan', PromotionPlanSchema);

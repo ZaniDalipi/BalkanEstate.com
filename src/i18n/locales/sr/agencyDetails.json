@@ -40,12 +40,13 @@
     "averagePrice": "Просечна цена"
   },
   "about": {
-    "title": "О {agencyName}",
+    "title": "О {{agencyName}}",
     "contactInfo": "Контакт Информације",
     "specialties": "Специјалности",
     "specializations": "Специјализације",
     "serviceAreas": "Подручја Услуга",
-    "languagesSpoken": "Језици Којима Говоримо"
+    "languagesSpoken": "Језици Којима Говоримо",
+    "yearsOfExcellence": "{{years}}+ Година изврсности"
   },
   "invitationCode": {
     "title": "Код Позивнице Агенције",
@@ -92,7 +93,7 @@
     "soldProperties": "ПРОДАТЕ НЕКРЕТНИНЕ",
     "activeListingsTitle": "Активни Огласи",
     "soldPropertiesTitle": "Продате Некретнине",
-    "propertiesCount": "{count} некретнина",
+    "propertiesCount": "{{count}} некретнина",
     "noActiveListings": "Тренутно нема активних огласа",
     "noSoldProperties": "Још нема продатих некретнина",
     "checkBackSoon": "Проверите ускоро за нове некретнине",

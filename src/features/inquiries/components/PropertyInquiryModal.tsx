@@ -69,12 +69,21 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
     setIsSubmitting(true);
 
     try {
+      // Build message with property reference (ID and title) for the agent/seller
+      let fullMessage = formData.message.trim();
+      const refParts: string[] = [];
+      if (property.propertyId) refParts.push(property.propertyId);
+      if (property.title) refParts.push(property.title);
+      if (refParts.length > 0) {
+        fullMessage = `[${refParts.join(' - ')}]\n\n${fullMessage}`;
+      }
+
       await sendPropertyInquiry({
         propertyId: property.id,
         buyerName: formData.buyerName.trim(),
         buyerEmail: formData.buyerEmail.trim(),
         buyerPhone: formData.buyerPhone.trim() || undefined,
-        message: formData.message.trim(),
+        message: fullMessage,
       });
       setSuccess(true);
     } catch (err) {
@@ -172,6 +181,9 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
                 />
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-neutral-900 truncate">{property.title}</p>
+                  {property.propertyId && (
+                    <p className="text-xs font-mono text-neutral-400">ID: {property.propertyId}</p>
+                  )}
                   <p className="text-sm text-neutral-500">{property.city}, {property.country}</p>
                   <p className="text-lg font-bold text-primary mt-1">
                     {(property as any).currency || '€'}{property.price.toLocaleString()}

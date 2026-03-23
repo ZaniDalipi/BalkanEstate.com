@@ -4,7 +4,7 @@
     "2weeks": "2 Εβδομάδες",
     "4weeks": "4 Εβδομάδες",
     "90days": "90 Ημέρες",
-    "bestValue": "ΚΑΛΥΤΕΡΗ ΑΞΙΑ",
+    "bestValue": "ΚΑΛΥΤΕΡΗ ΤΙΜΗ",
     "selectDuration": "Επιλέξτε διάρκεια:",
     "noPlansAvailable": "Δεν υπάρχουν διαθέσιμα πλάνα για την προβολή γραφείου αυτή τη στιγμή."
   },
@@ -46,7 +46,8 @@
       "name": "Pro Ετήσιο",
       "description": "Εξοικονομήστε {{percent}}% με ετήσια χρέωση",
       "badge": "ΠΙΟ ΔΗΜΟΦΙΛΕΣ",
-      "saveVsMonthly": "Εξοικονομήστε 33% σε σχέση με το μηνιαίο"
+      "saveVsMonthly": "Εξοικονομήστε 33% σε σχέση με το μηνιαίο",
+      "saveVsMonthlyDynamic": "Εξοικονομήστε {{percent}}% σε σχέση με το μηνιαίο"
     },
     "enterprise": {
       "name": "Πλάνο Enterprise",
@@ -267,7 +268,8 @@
     "featureComingSoon": "Η προβολή μεσιτικού θα είναι διαθέσιμη σύντομα!",
     "oneWeek": "1 WEEK",
     "perWeek": "per week",
-    "showsEverywhere": "Shows everywhere!"
+    "showsEverywhere": "Shows everywhere!",
+    "selectDuration": "Επιλέξτε διάρκεια:"
   },
   "contact": {
     "haveQuestions": "Έχετε ερωτήσεις;",
@@ -289,9 +291,15 @@
     "90days": "90 days"
   },
   "coupon": {
-    "title": "Do you have a coupon from the seller?",
-    "description": "Select any plan above and use your coupon code to activate your subscription instantly.",
-    "selectPlan": "Select a plan to use your coupon",
+    "title": "Έχετε κουπόνι από τον πωλητή;",
+    "description": "Επιλέξτε οποιοδήποτε σχέδιο παραπάνω και χρησιμοποιήστε τον κωδικό κουπονιού σας για να ενεργοποιήσετε την εγγραφή σας αμέσως.",
+    "selectPlan": "Επιλέξτε ένα σχέδιο για να χρησιμοποιήσετε το κουπόνι σας",
     "haveDiscountCode": "Have a discount code?"
+  },
+  "specialOffers": {
+    "title": "Ειδικές Προσφορές",
+    "subtitle": "Περιορισμένες προσφορές για προώθηση αγγελιών",
+    "selectOffer": "Επιλέξτε Προσφορά",
+    "daysLeft": "{{days}} ημέρες απομένουν"
   }
 }

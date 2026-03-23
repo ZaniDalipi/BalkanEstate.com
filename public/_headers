@@ -7,6 +7,7 @@
   X-XSS-Protection: 1; mode=block
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(self)
+  Content-Security-Policy: frame-ancestors 'self'
 
 # Cache static assets (JavaScript and CSS bundles with hashed filenames)
 /assets/*.js
@@ -60,6 +61,14 @@
 
 /robots.txt
   Cache-Control: public, max-age=86400
+
+/llms.txt
+  Cache-Control: public, max-age=86400
+  Content-Type: text/plain; charset=utf-8
+
+/llms-full.txt
+  Cache-Control: public, max-age=86400
+  Content-Type: text/plain; charset=utf-8
 
 /sitemap.xml
   Cache-Control: public, max-age=3600

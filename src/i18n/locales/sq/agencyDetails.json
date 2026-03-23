@@ -40,12 +40,13 @@
     "averagePrice": "Çmimi mesatar"
   },
   "about": {
-    "title": "Rreth {agencyName}",
+    "title": "Rreth {{agencyName}}",
     "contactInfo": "Informacioni i Kontaktit",
     "specialties": "Specialitetet",
     "specializations": "Specializimet",
     "serviceAreas": "Zonat e Shërbimit",
-    "languagesSpoken": "Gjuhët e Folura"
+    "languagesSpoken": "Gjuhët e Folura",
+    "yearsOfExcellence": "{{years}}+ Vite Shkëlqimi"
   },
   "invitationCode": {
     "title": "Kodi i Ftesës së Agjencisë",
@@ -92,7 +93,7 @@
     "soldProperties": "PRONA TË SHITURA",
     "activeListingsTitle": "Listime Aktive",
     "soldPropertiesTitle": "Prona të Shitura",
-    "propertiesCount": "{count} prona",
+    "propertiesCount": "{{count}} prona",
     "noActiveListings": "Nuk ka listime aktive për momentin",
     "noSoldProperties": "Ende pa prona të shitura",
     "checkBackSoon": "Kontrolloni së shpejti për prona të reja",

@@ -76,7 +76,7 @@ const AgentPodiumCard: React.FC<{
           textAlign: 'center',
           position: 'relative',
           boxShadow: '0 20px 40px -10px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.8)',
-          marginBottom: '-30px',
+          marginBottom: podiumHeight > 0 ? '-30px' : '0px',
           zIndex: 10,
           cursor: 'pointer',
           opacity: isVisible ? 1 : 0,
@@ -188,7 +188,7 @@ const AgentPodiumCard: React.FC<{
       </div>
 
       {/* Podium pillar */}
-      <div
+      {podiumHeight > 0 && <div
         style={{
           width: '100%',
           maxWidth: rank === 0 ? '260px' : '220px',
@@ -229,7 +229,7 @@ const AgentPodiumCard: React.FC<{
             background: `linear-gradient(90deg, transparent, ${medal.bg}66, transparent)`,
           }}
         />
-      </div>
+      </div>}
     </div>
   );
 };
@@ -354,13 +354,13 @@ const TopAgentsSection: React.FC = () => {
           </div>
 
           {/* Mobile: vertical stack */}
-          <div className="sm:hidden flex flex-col items-center gap-24 px-4 pb-6">
+          <div className="sm:hidden flex flex-col items-center gap-6 px-4 pt-4 pb-6">
             {[0, 1, 2].map((dataIndex) => (
               <AgentPodiumCard
                 key={podiumAgents[dataIndex].id}
                 agent={podiumAgents[dataIndex]}
                 rank={dataIndex}
-                podiumHeight={60}
+                podiumHeight={0}
                 onAgentClick={handleAgentClick}
                 t={t}
               />

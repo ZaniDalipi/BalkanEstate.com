@@ -118,7 +118,7 @@
   "similarAgents": {
     "title": "Подобни Агенти",
     "viewAll": "Виж Всички",
-    "inArea": "in {area}"
+    "inArea": "in {{area}}"
   },
   "actions": {
     "share": "Сподели Профила",

@@ -41,6 +41,7 @@ export interface IProperty extends Document {
   createdByAgencyName?: string; // If created as agent, store agency name
   createdByAgencyId?: mongoose.Types.ObjectId; // If created as agent, direct reference to Agency document
   createdByLicenseNumber?: string; // If created as agent, store license number
+  propertyId?: string; // Custom property ID assigned by the agency/agent for internal tracking
   listingType: 'sale' | 'rent'; // Whether this property is for sale or rent
   title?: string; // Optional title/headline for the property listing
   status: 'active' | 'pending' | 'sold' | 'rented' | 'draft';
@@ -126,6 +127,8 @@ export interface IProperty extends Document {
   maxOccupants?: number; // Maximum number of occupants allowed
   rentedAt?: Date; // When the property was rented
   rentedUntil?: Date; // When the rental period ends
+  currentTenantName?: string; // Name of current tenant (private, owner-only)
+  currentRentalNotes?: string; // Private notes about the current rental
   rentalHistory?: IRentalHistoryEntry[]; // Past rental periods for income tracking
   // Visit/viewing availability
   visitAvailability?: IVisitAvailability;
@@ -172,6 +175,13 @@ const PropertySchema: Schema = new Schema(
     createdByLicenseNumber: {
       type: String,
       required: false,
+    },
+    propertyId: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: 50,
+      index: true,
     },
     listingType: {
       type: String,
@@ -510,6 +520,12 @@ const PropertySchema: Schema = new Schema(
     },
     rentedUntil: {
       type: Date,
+    },
+    currentTenantName: {
+      type: String,
+    },
+    currentRentalNotes: {
+      type: String,
     },
     rentalHistory: [
       {

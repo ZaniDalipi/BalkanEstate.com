@@ -108,6 +108,9 @@
     "fields": {
       "listingTitle": "Listing Title",
       "titleHint": "Short, catchy title (e.g., \"Luxury Sea View Villa\", \"Cozy Studio Downtown\")",
+      "propertyId": "ID Nekretnine",
+      "propertyIdPlaceholder": "npr., AP-2024-001, VILLA-123",
+      "propertyIdHint": "Neobavezno. Vaš interni referentni broj za ovu nekretninu.",
       "price": "Price",
       "bedrooms": "Bedrooms",
       "bathrooms": "Bathrooms",
@@ -250,7 +253,8 @@
       "publishListing": "Publish Listing",
       "updateListing": "Update Listing",
       "continueToPayment": "Continue to Payment",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "previewListing": "Pregled Oglasa"
     },
     "success": {
       "title": "Listing {{action}} Successfully!",
@@ -276,11 +280,35 @@
       "buyerCannotCreate": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings."
     },
     "video": {
-      "title": "Property Video (Optional)",
-      "description": "Add a video to showcase your property! Videos auto-play when visitors view your listing, creating an engaging first impression.",
-      "label": "Video URL",
+      "title": "Video Nekretnine (Opcionalno)",
+      "description": "Dodajte video da prikažete vašu nekretninu! Videa se automatski pokreću kad posjetitelji pregledavaju vaš oglas.",
+      "label": "URL Videa",
       "placeholder": "https://youtube.com/watch?v=... or https://tiktok.com/...",
-      "hint": "Paste a link from YouTube, TikTok, Instagram Reels, or Vimeo. The video will auto-play when visitors open your listing!"
+      "hint": "Zalijepite link s YouTube, TikTok, Instagram Reels ili Vimeo. Video će se automatski pokrenuti kad posjetitelji otvore vaš oglas!"
+    },
+    "listingType": {
+      "sale": "Na Prodaju",
+      "rent": "Za Najam"
+    },
+    "triState": {
+      "no": "Ne",
+      "any": "Bilo koji",
+      "yes": "Da"
+    },
+    "visitAvailability": {
+      "title": "Dostupnost Poseta",
+      "enable": "Omogući zakazivanje",
+      "description": "Dozvolite posjetiocima da zakažu preglede online. Definirajte svoje dostupne dane i vrijeme.",
+      "availableDays": "Dostupni Dani"
+    },
+    "imageTags": {
+      "exterior": "Eksterijer",
+      "livingRoom": "Dnevna Soba",
+      "kitchen": "Kuhinja",
+      "bedroom": "Spavaća Soba",
+      "bathroom": "Kupaonica",
+      "other": "Ostalo",
+      "selectTag": "Odaberi Oznaku"
     }
   },
   "myListings": {
@@ -289,6 +317,8 @@
     "noListings": "Još niste kreirali nijedan oglas.",
     "createFirst": "Kreirajte svoj prvi oglas",
     "addNewListing": "Dodaj Novi Oglas",
+    "searchByPropertyId": "Pretraži po ID nekretnine...",
+    "propertyIdLabel": "ID Nekretnine",
     "active": "Aktivno",
     "pending": "Na Čekanju",
     "sold": "Prodano",
@@ -341,7 +371,19 @@
       "priceHigh": "Cijena: Padajuće",
       "priceLow": "Cijena: Rastuće",
       "mostViews": "Najviše Pregleda"
-    }
+    },
+    "newSaleListing": "Novi oglas za prodaju",
+    "newRentalListing": "Novi oglas za najam",
+    "searchListings": "Pretraži po ID, naslovu, adresi...",
+    "video": "Video",
+    "createVideo": "Kreiraj video",
+    "forRent": "Za najam",
+    "forSale": "Za prodaju",
+    "noMapLocation": "Nema lokacije na karti",
+    "rentedUntil": "Iznajmljeno do {{date}}",
+    "canRenewIn": "Može se obnoviti za {{hours}}s {{minutes}}m",
+    "forSaleCount": "Na Prodaju ({{count}})",
+    "forRentCount": "Za Najam ({{count}})"
   },
   "form": {
     "basicInfo": "Basic Information",

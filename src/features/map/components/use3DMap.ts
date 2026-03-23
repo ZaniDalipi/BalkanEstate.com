@@ -373,29 +373,29 @@ export function use3DMap(props: Map3DBuildingsProps) {
             background: rgba(15, 23, 42, 0.92);
             backdrop-filter: blur(8px);
             color: white;
-            padding: 4px 10px;
-            border-radius: 10px;
-            border: 2px solid rgba(59, 130, 246, 0.6);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            padding: 3px 7px;
+            border-radius: 8px;
+            border: 1.5px solid rgba(59, 130, 246, 0.6);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             font-family: system-ui, sans-serif;
             text-align: center;
             white-space: nowrap;
           ">
-            <div class="facing-label" style="font-size: 10px; color: #94a3b8; font-weight: 500;">${t('property:map3d.facing', 'Facing')}</div>
-            <div style="display: flex; align-items: center; gap: 4px; justify-content: center;">
+            <div class="facing-label" style="font-size: 8px; color: #94a3b8; font-weight: 500;">${t('property:map3d.facing', 'Facing')}</div>
+            <div style="display: flex; align-items: center; gap: 3px; justify-content: center;">
               <div class="facing-arrow" style="
-                width: 20px; height: 20px;
+                width: 16px; height: 16px;
                 display: flex; align-items: center; justify-content: center;
                 transform: rotate(${arrowRotation}deg);
                 transition: transform 0.15s ease-out;
               ">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 19V5M5 12l7-7 7 7"/>
                 </svg>
               </div>
-              <span class="facing-cardinal" style="font-size: 14px; font-weight: 700; color: #60a5fa;">${cardinal}</span>
+              <span class="facing-cardinal" style="font-size: 11px; font-weight: 700; color: #60a5fa;">${cardinal}</span>
             </div>
-            <div class="facing-direction-label" style="font-size: 9px; color: #64748b;">${t('property:map3d.facingDirection', '{{direction}}-facing', { direction: cardinalFull })}</div>
+            <div class="facing-direction-label" style="font-size: 8px; color: #64748b;">${t('property:map3d.facingDirection', '{{direction}}-facing', { direction: cardinalFull })}</div>
           </div>
         </div>
       `;
@@ -716,21 +716,21 @@ export function use3DMap(props: Map3DBuildingsProps) {
           <div style="
             background: linear-gradient(135deg, #059669, #10b981);
             color: white;
-            padding: 4px 14px;
-            border-radius: 10px;
-            font-size: 13px;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 10px;
             font-weight: 800;
             white-space: nowrap;
-            border: 2px solid rgba(255,255,255,0.9);
-            letter-spacing: 0.5px;
+            border: 1.5px solid rgba(255,255,255,0.9);
+            letter-spacing: 0.3px;
             font-family: system-ui, -apple-system, sans-serif;
           ">Floor ${floorNum}/${totalFlrs}</div>
           <div style="
             width: 0;
             height: 0;
-            border-left: 7px solid transparent;
-            border-right: 7px solid transparent;
-            border-top: 7px solid #10b981;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid #10b981;
             margin-top: -1px;
           "></div>
         </div>
@@ -807,20 +807,20 @@ export function use3DMap(props: Map3DBuildingsProps) {
               display: flex;
               align-items: center;
               justify-content: center;
-              gap: 6px;
+              gap: 4px;
               background: linear-gradient(135deg, #059669, #10b981);
               color: white;
-              padding: 6px 14px;
-              border-radius: 12px;
-              border: 2px solid rgba(255,255,255,0.9);
-              box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 20px rgba(16,185,129,0.4);
+              padding: 3px 8px;
+              border-radius: 8px;
+              border: 1.5px solid rgba(255,255,255,0.9);
+              box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 12px rgba(16,185,129,0.3);
               font-family: system-ui, -apple-system, sans-serif;
               animation: doorPulse 2s ease-in-out infinite;
             ">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
               </svg>
-              <span style="font-size: 12px; font-weight: 800; letter-spacing: 0.3px;">360\u00B0 Tour</span>
+              <span style="font-size: 10px; font-weight: 800; letter-spacing: 0.3px;">360\u00B0 Tour</span>
             </div>
           </div>
         `;
@@ -1103,7 +1103,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
       // Add 360 tour door marker for properties without floor visualization
       // (properties with floor data get the door marker via addCustomBuilding3D instead)
-      const willHaveFloorViz = propertyType === 'apartment' && floorNumber != null && totalFloors != null && totalFloors > 0;
+      const willHaveFloorViz = floorNumber != null && totalFloors != null && totalFloors > 0;
       if (!willHaveFloorViz && virtualTour360Url) {
         const doorEl = document.createElement('div');
         doorEl.className = 'apartment-door-marker';
@@ -1150,15 +1150,15 @@ export function use3DMap(props: Map3DBuildingsProps) {
         doorMarkerRef.current = doorMarker;
       }
 
-      // Add custom 3D building with floor slices only for apartments with floor data
+      // Add custom 3D building with floor slices for properties with floor data
       // Wait for tiles to fully load before querying building geometry
-      if (propertyType === 'apartment' && floorNumber != null && totalFloors != null && totalFloors > 0) {
+      if (floorNumber != null && totalFloors != null && totalFloors > 0) {
         // Retry mechanism to ensure building tiles are loaded
         let retryCount = 0;
-        const maxRetries = 5;
+        const maxRetries = 8;
 
         const tryAddCustomBuilding = () => {
-          // First zoom to the building location to ensure tiles load
+          // Zoom to the building location to ensure tiles load
           mapInstance.flyTo({
             center: [lng, lat],
             zoom: Math.max(mapInstance.getZoom(), 17),
@@ -1166,8 +1166,11 @@ export function use3DMap(props: Map3DBuildingsProps) {
             duration: 1500,
           });
 
-          // Wait for the fly animation and tiles to load
-          setTimeout(() => {
+          // Wait for map to become idle (all tiles loaded and rendered) after flyTo
+          // This is more reliable than a fixed timeout, especially on slow connections
+          const onIdleAfterFly = () => {
+            mapInstance.off('idle', onIdleAfterFly);
+
             addCustomBuilding3D(
               mapInstance,
               lat,
@@ -1181,9 +1184,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
             // Check if source was added successfully - if not, retry
             if (!mapInstance.getSource('custom-building') && retryCount < maxRetries) {
               retryCount++;
-              setTimeout(tryAddCustomBuilding, 1000);
+              setTimeout(tryAddCustomBuilding, 1500);
             }
-          }, 2000);
+          };
+          mapInstance.on('idle', onIdleAfterFly);
         };
 
         // Start the process after initial load

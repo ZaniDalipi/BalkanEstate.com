@@ -272,7 +272,7 @@ export const deactivateUserSubscription = async (
 // --- Admin Products/Pricing ---
 
 export interface Product {
-  _id: string;
+  id: string;
   productId: string;
   name: string;
   description?: string;
@@ -350,7 +350,7 @@ export const toggleProductVisibility = async (productId: string): Promise<{ prod
 // --- Admin Promotion Plans ---
 
 export interface PromotionPlan {
-  _id: string;
+  id: string;
   category: 'listing' | 'agency';
   tier: string;
   name: string;
@@ -379,6 +379,13 @@ export interface PromotionPlan {
     iconBgColor?: string;
     priceColor?: string;
   };
+  // Special Offer fields
+  isSpecialOffer?: boolean;
+  availableFrom?: string;
+  availableTo?: string;
+  originalPriceMultiplier?: number;
+  offerLabel?: string;
+
   isActive: boolean;
   isVisible: boolean;
   createdAt?: string;
@@ -399,7 +406,7 @@ export const getPublicPromotionPlans = async (category?: string): Promise<{ plan
 };
 
 export const createPromotionPlan = async (
-  data: Omit<PromotionPlan, '_id' | 'createdAt' | 'updatedAt'>
+  data: Omit<PromotionPlan, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<{ plan: PromotionPlan }> => {
   return apiRequest('/promotion-plans', {
     method: 'POST',
@@ -412,9 +419,11 @@ export const updatePromotionPlan = async (
   planId: string,
   data: Partial<PromotionPlan>
 ): Promise<{ plan: PromotionPlan }> => {
+  // Strip id and any nested subdocument ids before sending to backend
+  const { id: _stripId, ...cleanData } = data as any;
   return apiRequest(`/promotion-plans/${planId}`, {
     method: 'PUT',
-    body: data,
+    body: cleanData,
     requiresAuth: true,
   });
 };

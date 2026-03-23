@@ -706,12 +706,20 @@
       "recently": "Recently",
       "responseFrom": "Response from {{name}}",
       "noReviews": "No reviews yet",
-      "beFirstToReview": "Be the first to review {{name}}'s services"
+      "beFirstToReview": "Be the first to review {{name}}'s services",
+      "ratedTopPerformer": "{{name}} este evaluat ca Agent de Top",
+      "ratedReliable": "{{name}} este evaluat ca Agent de Încredere"
     },
     "contact": {
-      "title": "Contact {{name}}",
-      "callDirect": "Call Direct",
-      "sendEmail": "Send Email"
+      "title": "Contactează {{name}}",
+      "callDirect": "Apel direct",
+      "sendEmail": "Trimite email",
+      "whatsapp": "WhatsApp",
+      "whatsappDesc": "Chat sau apel prin WhatsApp",
+      "viber": "Viber",
+      "viberDesc": "Chat sau apel prin Viber",
+      "sendInquiry": "Trimite cerere",
+      "whatsappMessage": "Bună {{name}}, am găsit profilul dvs. pe BalkanEstate și aș dori să discutăm despre oportunități imobiliare."
     },
     "appraisal": {
       "title": "Get a Free Property Appraisal",
@@ -792,7 +800,12 @@
       "saving": "Se salvează...",
       "saveChanges": "Salvează Modificările"
     },
-    "editButton": "Editează Profil"
+    "editButton": "Editează Profil",
+    "contactInfo": "Informații de contact",
+    "phone": "Telefon",
+    "email": "Email",
+    "officeAddress": "Adresa biroului",
+    "website": "Site web"
   },
   "badges": {
     "verifiedAgents": "Verified Agents",

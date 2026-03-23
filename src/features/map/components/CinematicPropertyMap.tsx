@@ -5,6 +5,7 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { useCinematicFlythrough, type FlythroughPhase } from '../hooks/useCinematicFlythrough';
 import { useShadowTimelapse, type TimePeriod } from '../hooks/useShadowTimelapse';
 import { MAP_TILE_LAYERS } from '@/config/mapStyles';

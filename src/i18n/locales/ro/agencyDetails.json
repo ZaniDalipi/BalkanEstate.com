@@ -62,7 +62,8 @@
     "contactInfo": "Contact Information",
     "specialties": "Specialties",
     "serviceAreas": "Service Areas",
-    "languagesSpoken": "Languages Spoken"
+    "languagesSpoken": "Languages Spoken",
+    "yearsOfExcellence": "{{years}}+ Ani de Excelență"
   },
   "invitationCode": {
     "title": "Cod de Invitație Echipă",
@@ -135,7 +136,7 @@
     "soldProperties": "SOLD PROPERTIES",
     "activeListingsTitle": "Active Listings",
     "soldPropertiesTitle": "Sold Properties",
-    "propertiesCount": "{count} properties",
+    "propertiesCount": "{{count}} properties",
     "noActiveListings": "No active listings at the moment",
     "noSoldProperties": "No sold properties yet",
     "checkBackSoon": "Check back soon for new properties",

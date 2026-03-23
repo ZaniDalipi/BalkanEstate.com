@@ -20,6 +20,7 @@ import HowItWorksManager from './HowItWorksManager';
 import EmailManager from './EmailManager';
 import SiteSettingsManager from './SiteSettingsManager';
 import PendingLicenses from './PendingLicenses';
+import BusinessListingManager from './BusinessListingManager';
 import type { AdminSection } from '@/types';
 import { tokenService } from '@/src/shared/api/tokenService';
 
@@ -40,6 +41,7 @@ const urlToAdminView: Record<AdminSection, AdminView> = {
   'how-it-works': 'howItWorks',
   'email-templates': 'emailTemplates',
   'site-settings': 'siteSettings',
+  'business-listings': 'businessListings',
 };
 
 // Map AdminView to URL sections
@@ -59,6 +61,7 @@ const adminViewToUrl: Record<AdminView, string> = {
   'howItWorks': 'how-it-works',
   'emailTemplates': 'email-templates',
   'siteSettings': 'site-settings',
+  'businessListings': 'business-listings',
 };
 
 const AdminDashboard: React.FC = () => {
@@ -216,6 +219,8 @@ const AdminDashboard: React.FC = () => {
         return <EmailManager />;
       case 'siteSettings':
         return <SiteSettingsManager />;
+      case 'businessListings':
+        return <BusinessListingManager />;
       default:
         return <AnalyticsDashboard />;
     }

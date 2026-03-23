@@ -706,12 +706,20 @@
       "recently": "Recently",
       "responseFrom": "Response from {{name}}",
       "noReviews": "No reviews yet",
-      "beFirstToReview": "Be the first to review {{name}}'s services"
+      "beFirstToReview": "Be the first to review {{name}}'s services",
+      "ratedTopPerformer": "{{name}} αξιολογείται ως Κορυφαίος Πράκτορας",
+      "ratedReliable": "{{name}} αξιολογείται ως Αξιόπιστος Πράκτορας"
     },
     "contact": {
-      "title": "Contact {{name}}",
-      "callDirect": "Call Direct",
-      "sendEmail": "Send Email"
+      "title": "Επικοινωνία με {{name}}",
+      "callDirect": "Απευθείας κλήση",
+      "sendEmail": "Αποστολή Email",
+      "whatsapp": "WhatsApp",
+      "whatsappDesc": "Συνομιλία ή κλήση μέσω WhatsApp",
+      "viber": "Viber",
+      "viberDesc": "Συνομιλία ή κλήση μέσω Viber",
+      "sendInquiry": "Αποστολή ερώτησης",
+      "whatsappMessage": "Γεια σας {{name}}, βρήκα το προφίλ σας στο BalkanEstate και θα ήθελα να συζητήσουμε ευκαιρίες ακινήτων."
     },
     "appraisal": {
       "title": "Get a Free Property Appraisal",
@@ -792,7 +800,12 @@
       "saving": "Αποθήκευση...",
       "saveChanges": "Αποθήκευση Αλλαγών"
     },
-    "editButton": "Επεξεργασία Προφίλ"
+    "editButton": "Επεξεργασία Προφίλ",
+    "contactInfo": "Πληροφορίες επικοινωνίας",
+    "phone": "Τηλέφωνο",
+    "email": "Email",
+    "officeAddress": "Διεύθυνση γραφείου",
+    "website": "Ιστοσελίδα"
   },
   "badges": {
     "verifiedAgents": "Verified Agents",

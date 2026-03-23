@@ -37,6 +37,7 @@ import MapLocationPicker from '../src/features/seller/components/MapLocationPick
 import { searchLocation } from '../services/osmService';
 import { toggleAgencyFavorite, checkAgencyFavorite } from '../src/features/saved/api/savedApi';
 import { SocialShare } from '../src/components/marketing/SocialShare';
+import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 
 // Map icon SVG for section headers
 const MapIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -151,6 +152,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const { t } = useTranslation(['agencyDetails', 'nav', 'common']);
   const { state, dispatch } = useAppContext();
   const { currentUser, isAuthenticated } = state;
+  const { getLocalizedPath } = useLocalizedNavigation();
   const { confirm } = useConfirmation();
   const { success, error, warning, info } = useNotification();
 
@@ -1927,9 +1929,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               )}
             </div>
 
-            {/* Featured Badge */}
+            {/* Featured Badge - top right, above logo */}
             {agencyData.isFeatured && (
-              <div className="absolute -top-2 -right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-lg flex items-center gap-1">
+              <div className="absolute -top-7 -right-2 z-[60] bg-gradient-to-r from-amber-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-xl flex items-center gap-1 whitespace-nowrap">
                 <StarIcon className="w-3 h-3 fill-current" />
                 {t('common.featured')}
               </div>
@@ -3127,8 +3129,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         className="w-[220px] cursor-pointer"
                         onClick={() => {
                           const propertyId = property.id || property._id;
-                          dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
-                          window.history.pushState({}, '', `/property/${propertyId}`);
+                          dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: { ...property, id: propertyId } });
+                          window.history.pushState({}, '', getLocalizedPath(`/property/${propertyId}`));
                         }}
                       >
                         {property.imageUrl && (

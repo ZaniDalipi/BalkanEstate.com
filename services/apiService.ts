@@ -746,11 +746,16 @@ export const markPropertyAsSold = async (propertyId: string): Promise<Property> 
   return transformBackendProperty(response.property);
 };
 
-export const markPropertyAsRented = async (propertyId: string, rentedUntil?: string): Promise<Property> => {
+export const markPropertyAsRented = async (propertyId: string, rentedUntil?: string, tenantName?: string, notes?: string): Promise<Property> => {
+  const body: Record<string, string> = {};
+  if (rentedUntil) body.rentedUntil = rentedUntil;
+  if (tenantName) body.tenantName = tenantName;
+  if (notes) body.notes = notes;
+
   const response = await apiRequest<{ property: any }>(`/properties/${propertyId}/mark-rented`, {
     method: 'PATCH',
     requiresAuth: true,
-    body: rentedUntil ? { rentedUntil } : undefined,
+    body: Object.keys(body).length > 0 ? body : undefined,
   });
 
   return transformBackendProperty(response.property);
@@ -1157,6 +1162,7 @@ function transformBackendProperty(backendProp: any): Property {
       agencyLogo: seller.agencyLogo,
       agencyId: seller.agencyId,
     },
+    propertyId: backendProp.propertyId,
     propertyType: backendProp.propertyType,
     floorNumber: backendProp.floorNumber,
     totalFloors: backendProp.totalFloors,
@@ -1229,6 +1235,7 @@ function transformToBackendProperty(frontendProp: Property): any {
     images: frontendProp.images,
     lat: frontendProp.lat,
     lng: frontendProp.lng,
+    propertyId: frontendProp.propertyId,
     propertyType: frontendProp.propertyType,
     listingType: frontendProp.listingType || 'sale',
     createdAsRole: frontendProp.createdAsRole,

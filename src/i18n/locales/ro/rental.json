@@ -170,7 +170,13 @@
     "availableBadge": "DISPONIBILĂ {{date}}",
     "inquireAvailability": "Întrebați despre Disponibilitate",
     "rentedNotice": "Această proprietate este în prezent închiriată",
-    "availableFromNotice": "Se estimează a fi disponibilă din {{date}}"
+    "availableFromNotice": "Se estimează a fi disponibilă din {{date}}",
+    "dateInPastError": "Data nu poate fi în trecut.",
+    "tenantNameLabel": "Numele Chiriașului",
+    "tenantNamePlaceholder": "ex. Ion Popescu",
+    "tenantNameHint": "Opțional. Vizibil doar pentru dvs.",
+    "rentalNotesLabel": "Note",
+    "rentalNotesPlaceholder": "ex. Plata lunară pe data de 1, garanția plătită..."
   },
   "rules": {
     "title": "Reguli de Închiriere — {{country}}",

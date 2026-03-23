@@ -28,7 +28,7 @@ export type RentPeriod = 'monthly' | 'weekly' | 'daily';
 
 export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
 
-export type AppView = 'home' | 'search' | 'explore-cities' | 'city-dashboard' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'create-rental' | 'rentals' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'agency-dashboard' | 'analytics' | 'reset-password' | 'verify-email' | 'valuation' | 'mortgage-calculator' | 'pricing' | 'how-it-works' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'contact' | 'createAgency' | 'createAgencyPayment' | 'createAgencyConfirm' | 'guides' | 'not-found';
+export type AppView = 'home' | 'search' | 'explore-cities' | 'city-dashboard' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'create-rental' | 'rentals' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'agency-dashboard' | 'analytics' | 'reset-password' | 'verify-email' | 'valuation' | 'mortgage-calculator' | 'pricing' | 'how-it-works' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'contact' | 'createAgency' | 'createAgencyPayment' | 'createAgencyConfirm' | 'guides' | 'business-directory' | 'not-found';
 
 export type HowItWorksTab = 'getting-started' | 'premium-features' | 'agencies' | 'agents' | 'buyers' | 'sellers';
 
@@ -302,6 +302,7 @@ export interface VisitAvailability {
 
 export interface Property {
     id: string;
+    propertyId?: string; // Custom property ID assigned by agency/agent
     title?: string;
     sellerId: string;
     listingType: ListingType;
@@ -733,6 +734,8 @@ export interface AppState {
     activeConversationId: string | null;
     selectedAgentId: string | null;
     selectedAgencyId: string | Agency | null;
+    selectedBusinessListingId: string | null;
+    businessDirectoryTab: 'all' | 'businesses' | 'individuals';
     pendingProperty: Property | null;
     pendingSubscription: PendingSubscription | null;
     pendingAgencyData: any | null; // Agency form data to be created after payment
@@ -763,7 +766,7 @@ export interface AppState {
     isSessionExpiredModalOpen: boolean;
 }
 
-export type AdminSection = 'dashboard' | 'users' | 'inquiries' | 'agent-requests' | 'discounts' | 'promotions' | 'promotion-plans' | 'properties' | 'agencies' | 'pricing' | 'activity' | 'settings' | 'site-settings' | 'how-it-works' | 'email-templates';
+export type AdminSection = 'dashboard' | 'users' | 'inquiries' | 'agent-requests' | 'discounts' | 'promotions' | 'promotion-plans' | 'properties' | 'agencies' | 'pricing' | 'activity' | 'settings' | 'site-settings' | 'how-it-works' | 'email-templates' | 'business-listings';
 
 export type AgencyDashboardSection = 'overview' | 'agents' | 'properties' | 'leads' | 'analytics' | 'financial' | 'profile' | 'team';
 
@@ -782,6 +785,8 @@ export type AppAction =
     | { type: 'SET_PROPERTY_TO_EDIT', payload: Property | null }
     | { type: 'SET_SELECTED_AGENT', payload: string | null }
     | { type: 'SET_SELECTED_AGENCY', payload: string | Agency | null }
+    | { type: 'SET_SELECTED_BUSINESS_LISTING', payload: string | null }
+    | { type: 'SET_BUSINESS_DIRECTORY_TAB', payload: 'all' | 'businesses' | 'individuals' }
     | { type: 'PROPERTIES_LOADING' }
     | { type: 'PROPERTIES_SUCCESS', payload: Property[] }
     | { type: 'PROPERTIES_ERROR', payload: string }

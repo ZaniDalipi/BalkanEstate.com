@@ -8,7 +8,7 @@
   },
   "buyerPlan": {
     "title": "Buyer Pro",
-    "price": "€{price}",
+    "price": "€{{price}}",
     "perMonth": "/month",
     "description": "Never miss a new listing! Get notified the moment a property matching your criteria hits the market.",
     "features": {
@@ -322,10 +322,10 @@
     },
     "trial": {
       "title": "Free Trial Active",
-      "description": "Your free trial ends on {date}"
+      "description": "Your free trial ends on {{date}}"
     },
     "coupon": {
-      "applied": "Coupon {code} applied"
+      "applied": "Coupon {{code}} applied"
     },
     "cancelNotice": "Subscription will be canceled at the end of the current period",
     "renewStatus": {

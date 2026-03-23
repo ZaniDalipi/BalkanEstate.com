@@ -36,6 +36,7 @@ import AchievementsSection from '@/components/shared/AchievementsSection';
 import { Achievement } from '@/components/shared/AchievementsSection';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { AgentStats, MarketInsights } from './useAgentProfile';
 import { Credential } from '@/src/features/credentials/api/credentialApi';
 import CredentialsSection from '@/src/features/credentials/components/CredentialsSection';
@@ -446,6 +447,11 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                         </div>
                                                         <button
                                                             type="button"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                const propertyId = property.id || (property as any)._id;
+                                                                onViewProperty(propertyId);
+                                                            }}
                                                             className={`w-full text-white px-3 py-2 rounded-lg font-semibold text-sm ${property.status === 'sold' ? 'bg-red-600 hover:bg-red-700' : property.status === 'rented' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'}`}
                                                         >
                                                             {property.status === 'sold' ? t('profilePage.propertiesMap.viewSoldProperty') : property.status === 'rented' ? t('profilePage.propertiesMap.viewRentedProperty', 'View Rented Property') : t('profilePage.propertiesMap.viewDetails')}
@@ -785,7 +791,9 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         <span className="text-gray-600">({stats.reviews} {t('profilePage.reviewsTab.verifiedReviews')})</span>
                                     </div>
                                     <p className="text-gray-700">
-                                        {firstName} is rated as a {agent.rating && agent.rating >= 4.5 ? 'Top Performer' : 'Reliable'} Agent
+                                        {agent.rating && agent.rating >= 4.5
+                                            ? t('profilePage.reviewsTab.ratedTopPerformer', '{{name}} is rated as a Top Performer Agent', { name: firstName })
+                                            : t('profilePage.reviewsTab.ratedReliable', '{{name}} is rated as a Reliable Agent', { name: firstName })}
                                     </p>
                                 </div>
 

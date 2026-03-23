@@ -191,7 +191,7 @@
     "poi": "POI",
     "pointsOfInterest": "Puncte de Interes",
     "landmarks": "Repere",
-    "measure": "Măsoară",
+    "measure": "Măsura",
     "measureDistance": "Măsoară Distanța",
     "parcels": "Parcele",
     "landParcels": "Parcele de Teren",
@@ -223,7 +223,8 @@
       "fire": "Incendiu",
       "wind": "Vânt",
       "air": "Aer",
-      "heat": "Căldură"
+      "heat": "Căldură",
+      "airQuality": "Calitatea aerului"
     },
     "mapLegend": "Map Legend",
     "nightMode": "Night Mode",
@@ -260,7 +261,8 @@
       "autumn": "Toamnă",
       "winter": "Iarnă"
     },
-    "promoted": "Promovate"
+    "promoted": "Promovate",
+    "cadastre": "Cadastru"
   },
   "newsletter": {
     "title": "Fiți la Curent cu Proprietăți Noi",

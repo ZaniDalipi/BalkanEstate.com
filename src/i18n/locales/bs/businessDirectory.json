@@ -1,0 +1,283 @@
+{
+  "hero": {
+    "badge": "Poslovni imenik",
+    "title": "Otkrijte pouzdane stručnjake",
+    "titleHighlight": "i vrhunske pružaoce usluga",
+    "subtitle": "Povežite se sa verificiranim pružaocima usluga građevinarstva, renoviranja, čišćenja i usluga za nekretnine širom Balkana — sve na jednom mjestu.",
+    "popularCategories": "Popularne kategorije"
+  },
+  "search": {
+    "placeholder": "Pretražite po imenu, usluzi ili lokaciji...",
+    "button": "Pretraži"
+  },
+  "tabs": {
+    "all": "Sve",
+    "businesses": "Firme",
+    "individuals": "Pojedinci",
+    "mine": "Moji biznisi"
+  },
+  "types": {
+    "business": "Firma",
+    "individual": "Pojedinac"
+  },
+  "individuals": {
+    "title": "Istaknuti stručnjaci",
+    "subtitle": "Povežite se sa iskusnim pojedincima koji nude stručnost u cijelom sektoru nekretnina"
+  },
+  "filters": {
+    "all": "Sve"
+  },
+  "categories": {
+    "construction": "Građevinarstvo",
+    "renovation": "Renoviranje",
+    "cleaning": "Čišćenje",
+    "moving": "Selidbe",
+    "interior_design": "Dizajn interijera",
+    "architecture": "Arhitektura",
+    "plumbing": "Vodoinstalacije",
+    "electrical": "Elektroinstalacije",
+    "landscaping": "Uređenje okoliša",
+    "security": "Sigurnost",
+    "real_estate_law": "Pravo nekretnina",
+    "insurance": "Osiguranje",
+    "home_inspection": "Inspekcija nekretnina",
+    "pest_control": "Kontrola štetočina",
+    "painting": "Farbanje",
+    "roofing": "Krovopokrivanje",
+    "hvac": "Grijanje i klimatizacija",
+    "furniture": "Namještaj",
+    "appliances": "Aparati",
+    "other": "Ostalo"
+  },
+  "voiceSearch": {
+    "start": "Glasovna pretraga",
+    "stop": "Prestani slušati",
+    "listening": "Slušam — govorite sada"
+  },
+  "stats": {
+    "totalListings": "Ukupno oglasa",
+    "businesses": "Firme",
+    "professionals": "Stručnjaci",
+    "categories": "Kategorije"
+  },
+  "surpriseMe": {
+    "button": "Iznenadi me",
+    "loading": "Otkrivam..."
+  },
+  "quickActions": {
+    "call": "Brzi poziv",
+    "email": "Pošalji email",
+    "website": "Posjeti web stranicu",
+    "getQuote": "Zatražite ponudu"
+  },
+  "cta": {
+    "listBusiness": "Dodajte svoju firmu",
+    "beFirst": "Budite prvi koji će se prijaviti"
+  },
+  "results": {
+    "showing": "{{count}} firmi pronađeno"
+  },
+  "empty": {
+    "title": "Nema pronađenih firmi",
+    "description": "Budite prvi koji će dodati svoju firmu u ovu kategoriju i dosegnite hiljade potencijalnih klijenata širom Balkana."
+  },
+  "pagination": {
+    "previous": "Prethodna",
+    "next": "Sljedeća",
+    "pageOf": "Stranica {{page}} od {{totalPages}}"
+  },
+  "viewMode": {
+    "grid": "Mreža",
+    "map": "Mapa"
+  },
+  "map": {
+    "loading": "Učitavanje mape...",
+    "loadError": "Nije moguće učitati mapu",
+    "geocoding": "Lociranje biznisa...",
+    "noLocations": "Nema lokacija za prikaz",
+    "noLocationsHint": "Biznisi sa adresama će se pojaviti ovdje na mapi",
+    "viewDetails": "Pogledaj detalje",
+    "directions": "Upute"
+  },
+  "verified": "Verificirano",
+  "detail": {
+    "backToDirectory": "Nazad na imenik",
+    "about": "O nama",
+    "aboutSubtitle": "Ko smo i čime se bavimo",
+    "services": "Ponuđene usluge",
+    "businessHours": "Radno vrijeme",
+    "closed": "Zatvoreno",
+    "openNow": "Otvoreno Sada",
+    "closedNow": "Zatvoreno",
+    "today": "Danas",
+    "contactInfo": "Kontakt informacije",
+    "phone": "Telefon",
+    "email": "Email",
+    "website": "Web stranica",
+    "location": "Lokacija",
+    "socialMedia": "Društvene mreže",
+    "views": "{{count}} pregleda",
+    "notFound": "Oglas firme nije pronađen",
+    "notFoundDesc": "Oglas koji tražite je možda uklonjen ili više nije dostupan.",
+    "share": "Podijeli",
+    "linkCopied": "Link kopiran u međuspremnik!",
+    "getInTouch": "Kontaktirajte nas da započnete",
+    "callNow": "Pozovite odmah",
+    "getDirections": "Dobijte upute",
+    "owner": "O vlasniku",
+    "ownerIndividual": "Nezavisni stručnjak",
+    "ownerBusiness": "Vlasnik firme",
+    "licensed": "Licenciran",
+    "languages": "Jezici",
+    "serviceAreas": "Oblasti usluga",
+    "paymentMethods": "Načini plaćanja",
+    "stats": {
+      "services": "Usluge",
+      "views": "Pregledi",
+      "memberSince": "Član od"
+    },
+    "cta": {
+      "title": "Spremni za saradnju sa {{name}}?",
+      "subtitle": "Kontaktirajte nas danas da razgovarate o vašem projektu i dobijte besplatnu konsultaciju.",
+      "callNow": "Pozovite {{phone}}",
+      "sendEmail": "Pošaljite email"
+    }
+  },
+  "days": {
+    "monday": "Ponedjeljak",
+    "tuesday": "Utorak",
+    "wednesday": "Srijeda",
+    "thursday": "Četvrtak",
+    "friday": "Petak",
+    "saturday": "Subota",
+    "sunday": "Nedjelja"
+  },
+  "form": {
+    "title": "Dodajte svoju firmu",
+    "subtitle": "Dosegnite hiljade potencijalnih klijenata širom Balkana",
+    "sections": {
+      "type": "Tip oglasa",
+      "basicInfo": "Osnovne informacije",
+      "contact": "Kontakt informacije",
+      "location": "Lokacija",
+      "businessLocation": "Lokacija firme",
+      "social": "Društvene mreže",
+      "hours": "Radno vrijeme",
+      "languages": "Govoreni jezici",
+      "businessDetails": "Detalji o biznisu",
+      "serviceAreas": "Oblasti usluga",
+      "pricing": "Cijene i plaćanje"
+    },
+    "locationHint": "Dodajte lokaciju vaše firme kako bi vas klijenti lako pronašli.",
+    "pinOnMap": "Označite lokaciju vaše firme na mapi",
+    "loadingMap": "Učitavanje mape...",
+    "locationSet": "Lokacija označena",
+    "typeDescBusiness": "Kompanija ili registrirana firma",
+    "typeDescIndividual": "Slobodni stručnjak ili nezavisni profesionalac",
+    "fields": {
+      "name": "Naziv firme",
+      "fullName": "Puno ime",
+      "category": "Kategorija",
+      "description": "Opis",
+      "services": "Usluge",
+      "phone": "Broj telefona",
+      "email": "Email adresa",
+      "website": "Web stranica",
+      "city": "Grad",
+      "country": "Država",
+      "address": "Adresa",
+      "logo": "Logo",
+      "avatar": "Profilna fotografija",
+      "pinLocation": "Označite lokaciju na mapi",
+      "banner": "Baner za naslovnu",
+      "whatsapp": "WhatsApp",
+      "viber": "Viber",
+      "customCategory": "Navedite svoju kategoriju",
+      "yearEstablished": "Godina osnivanja",
+      "licenseNumber": "Licenca / Certifikat #",
+      "priceRange": "Cjenovni raspon",
+      "paymentMethods": "Prihvaćeni načini plaćanja"
+    },
+    "placeholders": {
+      "name": "Unesite naziv vaše firme",
+      "fullName": "Unesite vaše puno ime",
+      "category": "Odaberite kategoriju",
+      "description": "Opišite svoju firmu, šta nudite i zašto bi vas klijenti trebali odabrati...",
+      "service": "Upišite uslugu i pritisnite Enter",
+      "phone": "+387 XX XXX XXX",
+      "email": "kontakt@vasafirma.com",
+      "website": "https://vasafirma.com",
+      "selectCountry": "Odaberite državu",
+      "selectCity": "Odaberite grad",
+      "address": "Ulica i broj",
+      "hours": "npr. 09:00 - 17:00",
+      "customCategory": "npr. Upravljanje nekretninama, Solarna energija...",
+      "selectLanguage": "Odaberite jezik",
+      "yearEstablished": "npr. 2015",
+      "licenseNumber": "npr. LIC-2024-1234",
+      "serviceArea": "npr. Sarajevo, Mostar..."
+    },
+    "addService": "Dodaj",
+    "bannerHint": "Preporučeno 1200 x 400px",
+    "bannerRemove": "Ukloni",
+    "addLanguage": "Dodaj",
+    "addServiceArea": "Dodaj",
+    "serviceAreasHint": "Gradovi ili regije gdje pružate usluge",
+    "priceRangeHint": "$ = Budžet  |  $$ = Srednje  |  $$$ = Premium",
+    "logoUploadError": "Učitavanje slike nije uspjelo. Molimo pokušajte ponovo.",
+    "bannerUpload": "Učitaj baner",
+    "bannerChange": "Promijeni baner",
+    "bannerUploading": "Učitavanje banera...",
+    "bannerUploadError": "Učitavanje banera nije uspjelo. Molimo pokušajte ponovo.",
+    "bannerInvalidType": "Molimo učitajte JPEG, PNG ili WebP sliku",
+    "bannerTooLarge": "Slika mora biti manja od 5MB",
+    "logoUpload": "Učitajte sliku",
+    "logoChange": "Promijenite sliku",
+    "logoRemove": "Ukloni",
+    "logoHint": "JPG, PNG ili WebP. Maksimalno 5MB.",
+    "logoUploading": "Učitavanje slike...",
+    "submit": "Kreiraj oglas",
+    "submitting": "Kreiranje...",
+    "errors": {
+      "nameRequired": "Naziv firme je obavezan",
+      "categoryRequired": "Molimo odaberite kategoriju",
+      "phoneRequired": "Kontakt telefon je obavezan",
+      "cityRequired": "Grad je obavezan",
+      "countryRequired": "Država je obavezna",
+      "generic": "Nešto je pošlo po krivu. Molimo pokušajte ponovo.",
+      "logoInvalidType": "Molimo učitajte JPG, PNG ili WebP sliku",
+      "logoTooLarge": "Slika mora biti manja od 5MB"
+    }
+  },
+  "banner": {
+    "customize": "Prilagodi",
+    "dragToReposition": "Povucite za premještanje",
+    "reposition": "Premjesti baner",
+    "repositionError": "Čuvanje pozicije banera nije uspjelo"
+  },
+  "edit": {
+    "title": "Uredite svoj oglas",
+    "subtitle": "Ažurirajte informacije o vašoj firmi",
+    "button": "Uredi",
+    "backToListing": "Nazad na oglas",
+    "save": "Sačuvaj izmjene",
+    "saving": "Čuvanje...",
+    "cancel": "Otkaži",
+    "status": "Status oglasa",
+    "statusActiveDesc": "Vaš oglas je vidljiv svima",
+    "statusInactiveDesc": "Vaš oglas je sakriven iz imenika",
+    "success": "Vaš oglas je uspješno ažuriran"
+  },
+  "myBusinesses": {
+    "title": "Moji biznisi",
+    "subtitle_one": "{{count}} poslovni oglas",
+    "subtitle_other": "{{count}} poslovnih oglasa",
+    "createNew": "Novi biznis",
+    "view": "Pogledaj",
+    "edit": "Uredi",
+    "delete": "Obriši",
+    "emptyTitle": "Još nema biznisa",
+    "emptyMessage": "Kreirajte svoj prvi poslovni oglas da prikažete usluge u imeniku.",
+    "createFirst": "Kreiraj poslovni oglas"
+  }
+}

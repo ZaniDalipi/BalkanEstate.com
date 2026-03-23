@@ -108,6 +108,8 @@ import fileRoutes from './routes/fileRoutes';
 import mapProxyRoutes from './routes/mapProxyRoutes';
 import newsRoutes from './routes/newsRoutes';
 import testimonialRoutes from './routes/testimonialRoutes';
+import pushRoutes from './routes/pushRoutes';
+import businessListingRoutes from './routes/businessListingRoutes';
 
 // Import services
 import { initializeGooglePlayService } from './services/googlePlayService';
@@ -119,6 +121,7 @@ import { startPromotionRefreshWorker } from './workers/promotionRefreshWorker';
 import { startTrialManagementJob } from './jobs/trialManagementJob';
 import { startCityMarketDataUpdateJob } from './jobs/updateCityMarketData';
 import { startMonthlyCouponJob } from './jobs/monthlyCouponJob';
+import { initializePushService } from './services/pushNotificationService';
 
 // Create Express app
 const app: Application = express();
@@ -207,6 +210,9 @@ serverLogger.info('✅ City market data update job started (biweekly)');
 // Start monthly coupon refresh job (1st of each month)
 startMonthlyCouponJob();
 serverLogger.info('✅ Monthly coupon refresh job started (1st of each month)');
+
+// Initialize push notification service (VAPID setup)
+initializePushService();
 
 // ============================================================================
 // SECURITY MIDDLEWARE - Apply comprehensive security headers and CORS
@@ -329,6 +335,8 @@ app.use('/api/map', mapProxyRoutes); // Weather tile & FIRMS WMS proxy (API keys
 app.use('/api/files', fileRoutes); // File access with storage access policy (ownership-based)
 app.use('/api/news', newsRoutes); // Public real estate news
 app.use('/api/testimonials', testimonialRoutes); // User testimonials (submit + public list)
+app.use('/api/push', pushRoutes); // Push notification subscriptions
+app.use('/api/business-listings', businessListingRoutes); // Business directory listings
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

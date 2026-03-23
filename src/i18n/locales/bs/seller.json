@@ -108,6 +108,9 @@
     "fields": {
       "listingTitle": "Naslov Oglasa",
       "titleHint": "Kratak, privlačan naslov (npr., \"Luksuzna Vila sa Pogledom na More\", \"Udoban Studio u Centru\")",
+      "propertyId": "ID Nekretnine",
+      "propertyIdPlaceholder": "npr., AP-2024-001, VILLA-123",
+      "propertyIdHint": "Opcionalno. Vaš interni referentni broj za ovu nekretninu.",
       "price": "Cijena",
       "bedrooms": "Spavaće Sobe",
       "bathrooms": "Kupatila",
@@ -250,7 +253,8 @@
       "publishListing": "Objavi Oglas",
       "updateListing": "Ažuriraj Oglas",
       "continueToPayment": "Nastavite na Plaćanje",
-      "saving": "Čuvanje..."
+      "saving": "Čuvanje...",
+      "previewListing": "Pregled Oglasa"
     },
     "success": {
       "title": "Oglas {{action}} Uspješno!",
@@ -281,6 +285,30 @@
       "label": "Video URL",
       "placeholder": "https://youtube.com/watch?v=... or https://tiktok.com/...",
       "hint": "Paste a link from YouTube, TikTok, Instagram Reels, or Vimeo. The video will auto-play when visitors open your listing!"
+    },
+    "listingType": {
+      "sale": "Na Prodaju",
+      "rent": "Za Iznajmljivanje"
+    },
+    "triState": {
+      "no": "Ne",
+      "any": "Bilo koji",
+      "yes": "Da"
+    },
+    "visitAvailability": {
+      "title": "Dostupnost Poseta",
+      "enable": "Omogući zakazivanje",
+      "description": "Dozvolite posjetiocima da zakažu preglede online. Definirajte svoje dostupne dane i vrijeme.",
+      "availableDays": "Dostupni Dani"
+    },
+    "imageTags": {
+      "exterior": "Eksterijer",
+      "livingRoom": "Dnevni Boravak",
+      "kitchen": "Kuhinja",
+      "bedroom": "Spavaća Soba",
+      "bathroom": "Kupaonica",
+      "other": "Ostalo",
+      "selectTag": "Odaberi Oznaku"
     }
   },
   "myListings": {
@@ -289,6 +317,8 @@
     "noListings": "Još niste kreirali nijedan oglas.",
     "createFirst": "Kreirajte svoj prvi oglas",
     "addNewListing": "Dodajte Novi Oglas",
+    "searchByPropertyId": "Pretraži po ID nekretnine...",
+    "propertyIdLabel": "ID Nekretnine",
     "active": "Aktivno",
     "pending": "Na Čekanju",
     "sold": "Prodato",
@@ -341,7 +371,19 @@
       "priceHigh": "Cijena: Opadajuće",
       "priceLow": "Cijena: Rastuće",
       "mostViews": "Najviše Pregleda"
-    }
+    },
+    "newSaleListing": "Novi oglas za prodaju",
+    "newRentalListing": "Novi oglas za iznajmljivanje",
+    "searchListings": "Pretraži po ID, naslovu, adresi...",
+    "video": "Video",
+    "createVideo": "Kreiraj video",
+    "forRent": "Za iznajmljivanje",
+    "forSale": "Za prodaju",
+    "noMapLocation": "Nema lokacije na mapi",
+    "rentedUntil": "Izdato do {{date}}",
+    "canRenewIn": "Može se obnoviti za {{hours}}č {{minutes}}m",
+    "forSaleCount": "Na Prodaju ({{count}})",
+    "forRentCount": "Za Iznajmljivanje ({{count}})"
   },
   "actions": {
     "subscribeToPro": "Pretplatite se na Pro",

@@ -1,0 +1,283 @@
+{
+  "hero": {
+    "badge": "Director de afaceri",
+    "title": "Descoperiți profesioniști de încredere",
+    "titleHighlight": "și furnizori premium de servicii",
+    "subtitle": "Conectați-vă cu furnizori verificați de construcții, renovări, curățenie și servicii imobiliare din Balcani — totul într-un singur loc.",
+    "popularCategories": "Categorii populare"
+  },
+  "search": {
+    "placeholder": "Căutați după nume, serviciu sau locație...",
+    "button": "Caută"
+  },
+  "tabs": {
+    "all": "Toate",
+    "businesses": "Afaceri",
+    "individuals": "Persoane fizice",
+    "mine": "Anunțurile mele"
+  },
+  "types": {
+    "business": "Afacere",
+    "individual": "Persoană fizică"
+  },
+  "individuals": {
+    "title": "Profesioniști recomandați",
+    "subtitle": "Conectați-vă cu persoane calificate care oferă expertiză în întregul sector imobiliar"
+  },
+  "filters": {
+    "all": "Toate"
+  },
+  "categories": {
+    "construction": "Construcții",
+    "renovation": "Renovări",
+    "cleaning": "Curățenie",
+    "moving": "Mutări",
+    "interior_design": "Design interior",
+    "architecture": "Arhitectură",
+    "plumbing": "Instalații sanitare",
+    "electrical": "Instalații electrice",
+    "landscaping": "Amenajare peisagistică",
+    "security": "Securitate",
+    "real_estate_law": "Drept imobiliar",
+    "insurance": "Asigurări",
+    "home_inspection": "Inspecție imobiliară",
+    "pest_control": "Dezinsecție",
+    "painting": "Zugrăveli",
+    "roofing": "Acoperișuri",
+    "hvac": "Încălzire și climatizare",
+    "furniture": "Mobilier",
+    "appliances": "Electrocasnice",
+    "other": "Altele"
+  },
+  "voiceSearch": {
+    "start": "Căutare vocală",
+    "stop": "Oprește ascultarea",
+    "listening": "Ascult — vorbiți acum"
+  },
+  "stats": {
+    "totalListings": "Total anunțuri",
+    "businesses": "Afaceri",
+    "professionals": "Profesioniști",
+    "categories": "Categorii"
+  },
+  "surpriseMe": {
+    "button": "Surprinde-mă",
+    "loading": "Descopăr..."
+  },
+  "quickActions": {
+    "call": "Apel rapid",
+    "email": "Trimite email",
+    "website": "Vizitează site-ul",
+    "getQuote": "Solicitați o ofertă"
+  },
+  "cta": {
+    "listBusiness": "Adaugă afacerea ta",
+    "beFirst": "Fii primul care se înscrie"
+  },
+  "results": {
+    "showing": "{{count}} afaceri găsite"
+  },
+  "empty": {
+    "title": "Nu au fost găsite afaceri",
+    "description": "Fii primul care își listează afacerea în această categorie și ajunge la mii de clienți potențiali din întreaga regiune a Balcanilor."
+  },
+  "pagination": {
+    "previous": "Anterioară",
+    "next": "Următoarea",
+    "pageOf": "Pagina {{page}} din {{totalPages}}"
+  },
+  "viewMode": {
+    "grid": "Grilă",
+    "map": "Hartă"
+  },
+  "map": {
+    "loading": "Se încarcă harta...",
+    "loadError": "Harta nu a putut fi încărcată",
+    "geocoding": "Localizare afaceri...",
+    "noLocations": "Nu există locații de afișat",
+    "noLocationsHint": "Afacerile cu adrese vor apărea aici pe hartă",
+    "viewDetails": "Vezi detalii",
+    "directions": "Direcții"
+  },
+  "verified": "Verificat",
+  "detail": {
+    "backToDirectory": "Înapoi la director",
+    "about": "Despre",
+    "aboutSubtitle": "Cine suntem și ce facem",
+    "services": "Servicii oferite",
+    "businessHours": "Program de lucru",
+    "closed": "Închis",
+    "openNow": "Deschis Acum",
+    "closedNow": "Închis acum",
+    "today": "Astăzi",
+    "contactInfo": "Informații de contact",
+    "phone": "Telefon",
+    "email": "Email",
+    "website": "Site web",
+    "location": "Locație",
+    "socialMedia": "Rețele sociale",
+    "views": "{{count}} vizualizări",
+    "notFound": "Anunțul nu a fost găsit",
+    "notFoundDesc": "Anunțul pe care îl căutați a fost posibil eliminat sau nu mai este disponibil.",
+    "share": "Distribuie",
+    "linkCopied": "Link copiat în clipboard!",
+    "getInTouch": "Contactați-ne pentru a începe",
+    "callNow": "Sună acum",
+    "getDirections": "Obține indicații",
+    "owner": "Despre proprietar",
+    "ownerIndividual": "Profesionist independent",
+    "ownerBusiness": "Proprietar de afacere",
+    "stats": {
+      "services": "Servicii",
+      "views": "Vizualizări",
+      "memberSince": "Membru din"
+    },
+    "licensed": "Licențiat",
+    "languages": "Limbi",
+    "serviceAreas": "Zone de servicii",
+    "paymentMethods": "Metode de plată",
+    "cta": {
+      "title": "Pregătit să lucrezi cu {{name}}?",
+      "subtitle": "Contactați-ne astăzi pentru a discuta proiectul dumneavoastră și a primi o consultație gratuită.",
+      "callNow": "Sună la {{phone}}",
+      "sendEmail": "Trimite email"
+    }
+  },
+  "days": {
+    "monday": "Luni",
+    "tuesday": "Marți",
+    "wednesday": "Miercuri",
+    "thursday": "Joi",
+    "friday": "Vineri",
+    "saturday": "Sâmbătă",
+    "sunday": "Duminică"
+  },
+  "form": {
+    "title": "Adaugă afacerea ta",
+    "subtitle": "Ajungeți la mii de clienți potențiali din întreaga regiune a Balcanilor",
+    "sections": {
+      "type": "Tip anunț",
+      "basicInfo": "Informații de bază",
+      "contact": "Informații de contact",
+      "location": "Locație",
+      "businessLocation": "Locația afacerii",
+      "social": "Rețele sociale",
+      "hours": "Program de lucru",
+      "languages": "Limbi vorbite",
+      "businessDetails": "Detalii despre afacere",
+      "serviceAreas": "Zone de servicii",
+      "pricing": "Prețuri și plăți"
+    },
+    "locationHint": "Adăugați locația afacerii dumneavoastră pentru ca clienții să vă găsească ușor.",
+    "pinOnMap": "Fixați locația afacerii pe hartă",
+    "loadingMap": "Se încarcă harta...",
+    "locationSet": "Locație fixată",
+    "typeDescBusiness": "Companie sau afacere înregistrată",
+    "typeDescIndividual": "Freelancer sau profesionist independent",
+    "fields": {
+      "name": "Numele afacerii",
+      "fullName": "Nume complet",
+      "category": "Categorie",
+      "description": "Descriere",
+      "services": "Servicii",
+      "phone": "Număr de telefon",
+      "email": "Adresă de email",
+      "website": "Site web",
+      "city": "Oraș",
+      "country": "Țară",
+      "address": "Adresă",
+      "logo": "Logo",
+      "avatar": "Fotografie de profil",
+      "pinLocation": "Fixați locația pe hartă",
+      "banner": "Banner de copertă",
+      "whatsapp": "WhatsApp",
+      "viber": "Viber",
+      "customCategory": "Specificați categoria dvs.",
+      "yearEstablished": "Anul înființării",
+      "licenseNumber": "Licență / Certificare #",
+      "priceRange": "Intervalul de prețuri",
+      "paymentMethods": "Metode de plată acceptate"
+    },
+    "placeholders": {
+      "name": "Introduceți numele afacerii",
+      "fullName": "Introduceți numele complet",
+      "category": "Selectați o categorie",
+      "description": "Descrieți afacerea dumneavoastră, ce oferiți și de ce ar trebui clienții să vă aleagă...",
+      "service": "Tastați un serviciu și apăsați Enter",
+      "phone": "+40 XXX XXX XXX",
+      "email": "contact@afacereata.ro",
+      "website": "https://afacereata.ro",
+      "selectCountry": "Selectați o țară",
+      "selectCity": "Selectați un oraș",
+      "address": "Adresa străzii",
+      "hours": "ex. 09:00 - 17:00",
+      "customCategory": "ex. Administrare proprietăți, Energie solară...",
+      "selectLanguage": "Selectați o limbă",
+      "yearEstablished": "ex. 2015",
+      "licenseNumber": "ex. LIC-2024-1234",
+      "serviceArea": "ex. București, Cluj-Napoca..."
+    },
+    "addService": "Adaugă",
+    "bannerUpload": "Încarcă banner",
+    "bannerChange": "Schimbă bannerul",
+    "bannerUploading": "Se încarcă bannerul...",
+    "bannerUploadError": "Încărcarea bannerului a eșuat. Vă rugăm încercați din nou.",
+    "bannerInvalidType": "Vă rugăm încărcați o imagine JPEG, PNG sau WebP",
+    "bannerTooLarge": "Imaginea trebuie să fie sub 5MB",
+    "logoUpload": "Încarcă imagine",
+    "logoChange": "Schimbă imaginea",
+    "logoRemove": "Elimină",
+    "logoHint": "JPG, PNG sau WebP. Maxim 5MB.",
+    "logoUploading": "Se încarcă imaginea...",
+    "submit": "Creează anunțul",
+    "submitting": "Se creează...",
+    "errors": {
+      "nameRequired": "Numele afacerii este obligatoriu",
+      "categoryRequired": "Vă rugăm selectați o categorie",
+      "phoneRequired": "Numărul de telefon de contact este obligatoriu",
+      "cityRequired": "Orașul este obligatoriu",
+      "countryRequired": "Țara este obligatorie",
+      "generic": "Ceva nu a funcționat corect. Vă rugăm încercați din nou.",
+      "logoInvalidType": "Vă rugăm încărcați o imagine JPG, PNG sau WebP",
+      "logoTooLarge": "Imaginea trebuie să fie sub 5MB"
+    },
+    "bannerHint": "Recomandat 1200 x 400px",
+    "bannerRemove": "Elimină",
+    "addLanguage": "Adaugă",
+    "addServiceArea": "Adaugă",
+    "serviceAreasHint": "Orașe sau regiuni în care oferiți servicii",
+    "priceRangeHint": "$ = Economic  |  $$ = Mediu  |  $$$ = Premium",
+    "logoUploadError": "Încărcarea imaginii a eșuat. Vă rugăm încercați din nou."
+  },
+  "banner": {
+    "customize": "Personalizează",
+    "dragToReposition": "Trageți pentru a repoziționa",
+    "reposition": "Repoziționează bannerul",
+    "repositionError": "Salvarea poziției bannerului a eșuat"
+  },
+  "edit": {
+    "title": "Editează anunțul tău",
+    "subtitle": "Actualizează informațiile afacerii tale",
+    "button": "Editează",
+    "backToListing": "Înapoi la anunț",
+    "save": "Salvează modificările",
+    "saving": "Se salvează...",
+    "cancel": "Anulează",
+    "status": "Starea anunțului",
+    "statusActiveDesc": "Anunțul tău este vizibil pentru toți",
+    "statusInactiveDesc": "Anunțul tău este ascuns din director",
+    "success": "Anunțul tău a fost actualizat cu succes"
+  },
+  "myBusinesses": {
+    "title": "Afacerile mele",
+    "subtitle_one": "{{count}} anunț de afacere",
+    "subtitle_other": "{{count}} anunțuri de afaceri",
+    "createNew": "Afacere nouă",
+    "view": "Vizualizare",
+    "edit": "Editează",
+    "delete": "Șterge",
+    "emptyTitle": "Nu există afaceri încă",
+    "emptyMessage": "Creează primul tău anunț de afacere pentru a-ți prezenta serviciile în director.",
+    "createFirst": "Creează anunț de afacere"
+  }
+}

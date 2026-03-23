@@ -213,9 +213,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
     // --- Instagram ---
     // instagram.com/reel/CODE, /p/CODE, /tv/CODE (IGTV)
-    const instagramMatch = url.match(/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/);
+    const instagramMatch = url.match(/instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/);
     if (instagramMatch) {
-      return { embedUrl: `https://www.instagram.com/reel/${instagramMatch[1]}/embed/captioned/?autoplay=1`, platform: 'instagram' };
+      return { embedUrl: `https://www.instagram.com/${instagramMatch[1]}/${instagramMatch[2]}/embed/`, platform: 'instagram' };
     }
 
     // --- Facebook ---

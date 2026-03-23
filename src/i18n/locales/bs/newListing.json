@@ -19,7 +19,7 @@
     "title": "Učitajte Fotografije Nekretnine",
     "subtitle": "Prevucite i ispustite slike ili kliknite za pregled",
     "hint": "Učitajte najmanje 3 fotografije za najbolje rezultate",
-    "maxImages": "Maksimalno {count} slika",
+    "maxImages": "Maksimalno {{count}} slika",
     "dragDrop": "Prevucite i ispustite slike ovdje",
     "orClick": "ili kliknite za pregled",
     "supportedFormats": "Podržani formati: JPG, PNG, WebP",
@@ -213,7 +213,7 @@
   },
   "validation": {
     "required": "Ovo polje je obavezno",
-    "minImages": "Molimo učitajte najmanje {count} slika",
+    "minImages": "Molimo učitajte najmanje {{count}} slika",
     "selectCountry": "Molimo odaberite državu",
     "selectCity": "Molimo odaberite grad",
     "setLocation": "Molimo postavite lokaciju nekretnine na mapi",

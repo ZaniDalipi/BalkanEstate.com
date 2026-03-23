@@ -34,7 +34,8 @@ export type AdminView =
   | 'siteSettings'
   | 'activity'
   | 'howItWorks'
-  | 'emailTemplates';
+  | 'emailTemplates'
+  | 'businessListings';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -117,7 +118,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
 
       {/* Main content area */}
       <div
-        className={`transition-all duration-300 ${
+        className={`transition-[margin] duration-300 ${
           sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-72'
         }`}
       >

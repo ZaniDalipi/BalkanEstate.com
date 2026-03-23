@@ -15,6 +15,7 @@ import {
   SparklesIcon,
   BuildingOfficeIcon,
   CheckIcon,
+  BoltIcon,
 } from '@/constants';
 import { usePromotionPlansManager } from './usePromotionPlansManager';
 import { PlanCard, EditPlanModal } from './PromotionPlansManagerForm';
@@ -137,7 +138,7 @@ const PromotionPlansManager: React.FC = () => {
             <SparklesIcon className="w-5 h-5" />
             {t('admin:promotionPlans.listingPromotions', 'Listing Promotions')}
             <span className={`ml-1 px-2 py-0.5 text-xs rounded-full ${activeTab === 'listing' ? 'bg-white/20' : 'bg-gray-200'}`}>
-              {plans.filter(p => p.category === 'listing').length}
+              {plans.filter(p => p.category === 'listing' && !p.isSpecialOffer).length}
             </span>
           </button>
           <button
@@ -151,18 +152,40 @@ const PromotionPlansManager: React.FC = () => {
             <BuildingOfficeIcon className="w-5 h-5" />
             {t('admin:promotionPlans.agencyFeatures', 'Agency Features')}
             <span className={`ml-1 px-2 py-0.5 text-xs rounded-full ${activeTab === 'agency' ? 'bg-white/20' : 'bg-gray-200'}`}>
-              {plans.filter(p => p.category === 'agency').length}
+              {plans.filter(p => p.category === 'agency' && !p.isSpecialOffer).length}
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab('special-offers')}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all ${
+              activeTab === 'special-offers'
+                ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <BoltIcon className="w-5 h-5" />
+            {t('admin:promotionPlans.specialOffers', 'Special Offers')}
+            <span className={`ml-1 px-2 py-0.5 text-xs rounded-full ${activeTab === 'special-offers' ? 'bg-white/20' : 'bg-gray-200'}`}>
+              {plans.filter(p => p.isSpecialOffer).length}
             </span>
           </button>
           <div className="flex-1" />
-          {/* Only show Add Plan button for listing tab - Agency has a single Featured option */}
           {activeTab === 'listing' && (
             <button
-              onClick={() => handleCreate(activeTab, false)}
+              onClick={() => handleCreate('listing', false)}
               className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all shadow-md hover:shadow-lg"
             >
               <PlusIcon className="w-5 h-5" />
               {t('admin:promotionPlans.addPlan', 'Add Plan')}
+            </button>
+          )}
+          {activeTab === 'special-offers' && (
+            <button
+              onClick={() => handleCreate('listing', false, true)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-xl hover:from-rose-600 hover:to-pink-600 transition-all shadow-md hover:shadow-lg"
+            >
+              <PlusIcon className="w-5 h-5" />
+              {t('admin:promotionPlans.addSpecialOffer', 'Add Special Offer')}
             </button>
           )}
         </div>
@@ -172,36 +195,49 @@ const PromotionPlansManager: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPlans.map((plan) => (
           <PlanCard
-            key={plan._id}
+            key={plan.id}
             plan={plan}
             onEdit={() => handleEdit(plan)}
-            onDelete={() => handleDelete(plan._id)}
+            onDelete={() => handleDelete(plan.id)}
             onToggleStatus={() => handleToggleStatus(plan)}
-            isMutating={mutatingPlanId === plan._id}
+            isMutating={mutatingPlanId === plan.id}
           />
         ))}
         {filteredPlans.length === 0 && (
           <div className="col-span-full bg-white rounded-2xl shadow-lg p-12 text-center">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              {activeTab === 'listing' ? <SparklesIcon className="w-8 h-8 text-gray-400" /> : <BuildingOfficeIcon className="w-8 h-8 text-gray-400" />}
+              {activeTab === 'special-offers' ? <BoltIcon className="w-8 h-8 text-gray-400" /> : activeTab === 'listing' ? <SparklesIcon className="w-8 h-8 text-gray-400" /> : <BuildingOfficeIcon className="w-8 h-8 text-gray-400" />}
             </div>
             <p className="text-gray-500 text-lg mb-4">
-              {t('admin:promotionPlans.noPlans', 'No plans found')}
+              {activeTab === 'special-offers'
+                ? t('admin:promotionPlans.noSpecialOffers', 'No special offers yet')
+                : t('admin:promotionPlans.noPlans', 'No plans found')}
             </p>
             <div className="flex items-center justify-center gap-3">
-              <button
-                onClick={() => handleCreate(activeTab)}
-                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-              >
-                {t('admin:promotionPlans.createFirst', 'Create First Plan')}
-              </button>
-              <button
-                onClick={handleSeedPlans}
-                disabled={seedPlansMutation.isPending}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-              >
-                {seedPlansMutation.isPending ? 'Seeding...' : t('admin:promotionPlans.seedDefaults', 'Seed Default Plans')}
-              </button>
+              {activeTab === 'special-offers' ? (
+                <button
+                  onClick={() => handleCreate('listing', false, true)}
+                  className="px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-colors"
+                >
+                  {t('admin:promotionPlans.createFirstOffer', 'Create First Special Offer')}
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => handleCreate(activeTab as 'listing' | 'agency')}
+                    className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                  >
+                    {t('admin:promotionPlans.createFirst', 'Create First Plan')}
+                  </button>
+                  <button
+                    onClick={handleSeedPlans}
+                    disabled={seedPlansMutation.isPending}
+                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  >
+                    {seedPlansMutation.isPending ? 'Seeding...' : t('admin:promotionPlans.seedDefaults', 'Seed Default Plans')}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}

@@ -8,8 +8,9 @@ import MyPromotions from './MyPromotions';
 import MyMeasurements from './MyMeasurements';
 
 const ViewingRequestsTab = lazy(() => import('./ViewingRequestsTab'));
+const MyBusinessListings = lazy(() => import('./MyBusinessListings'));
 import { User, UserRole, Agency } from '../../types';
-import { BuildingOfficeIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon, CalendarIcon, HomeIcon } from '../../constants';
+import { BuildingOfficeIcon, BuildingStorefrontIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon, CalendarIcon, HomeIcon } from '../../constants';
 import DefaultAvatar from './DefaultAvatar';
 import AvatarCustomizer, { type AvatarOptions, parseAvatarOptions, getDefaultAvatarOptions } from './AvatarCustomizer';
 import AgentLicenseModal from './AgentLicenseModal';
@@ -26,6 +27,7 @@ import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 import { apiLogger } from '../../src/shared/utils/logger';
 import { tokenService } from '../../src/shared/api/tokenService';
+import PushNotificationToggle from '../../src/features/notifications/components/PushNotificationToggle';
 
 // Common languages spoken in the Balkan region
 const BALKAN_LANGUAGES = [
@@ -34,7 +36,7 @@ const BALKAN_LANGUAGES = [
   'Hungarian', 'German', 'Italian', 'French', 'Russian', 'Spanish'
 ];
 
-type AccountTab = 'listings' | 'performance' | 'profile' | 'subscription' | 'security' | 'promotions' | 'measurements' | 'viewings';
+type AccountTab = 'listings' | 'performance' | 'profile' | 'subscription' | 'security' | 'promotions' | 'measurements' | 'viewings' | 'businesses';
 
 // Map URL slugs to account tabs
 const tabRouteMap: Record<string, AccountTab> = {
@@ -54,6 +56,8 @@ const tabRouteMap: Record<string, AccountTab> = {
     'my-measurements': 'measurements',
     'viewings': 'viewings',
     'viewing-requests': 'viewings',
+    'businesses': 'businesses',
+    'my-businesses': 'businesses',
 };
 
 // Map account tabs to URL slugs
@@ -66,6 +70,7 @@ const tabToRouteMap: Record<AccountTab, string> = {
     'security': 'security',
     'measurements': 'measurements',
     'viewings': 'viewings',
+    'businesses': 'businesses',
 };
 
 const TabButton: React.FC<{
@@ -1887,6 +1892,12 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
             </div>
         </form>
 
+        {/* Push Notifications */}
+        <div className="mt-8 border-t border-white/30 pt-6">
+            <h3 className="text-sm font-semibold text-neutral-700 mb-2">{t('account:notifications.title', 'Notification Settings')}</h3>
+            <PushNotificationToggle />
+        </div>
+
         {/* Change Password Section */}
         <div className="mt-8 border-t border-white/30 pt-8">
             <ChangePasswordSection />
@@ -2057,6 +2068,8 @@ const MyAccountPage: React.FC = () => {
                  return hasSellerTabs ? <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}><ViewingRequestsTab /></Suspense> : null;
             case 'security':
                  return <SecuritySettings logoutAllDevices={logoutAllDevices} />;
+            case 'businesses':
+                 return <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}><MyBusinessListings /></Suspense>;
             default:
                 return null;
         }
@@ -2133,6 +2146,7 @@ const MyAccountPage: React.FC = () => {
                                         <TabButton label={t('account:tabs.viewings', 'Viewing Requests')} icon={<CalendarIcon className="w-6 h-6"/>} isActive={activeTab === 'viewings'} onClick={() => setActiveTab('viewings')} tabKey="viewings" hasUnread={unreadViewingCount > 0} />
                                     </>
                                 )}
+                                <TabButton label={t('account:tabs.myBusinesses', 'My Businesses')} icon={<BuildingStorefrontIcon className="w-6 h-6"/>} isActive={activeTab === 'businesses'} onClick={() => setActiveTab('businesses')} tabKey="businesses" />
                                 <TabButton label={t('account:tabs.profileSettings')} icon={<UserCircleIcon className="w-6 h-6"/>} isActive={activeTab === 'profile'} onClick={() => setActiveTab('profile')} tabKey="profile" />
                                 <TabButton label={t('account:tabs.subscription', 'Subscription')} icon={<CreditCardIcon className="w-6 h-6"/>} isActive={activeTab === 'subscription'} onClick={() => setActiveTab('subscription')} tabKey="subscription" />
                                 <TabButton label={t('account:tabs.measurements', 'Measurements')} icon={<MapPinIcon className="w-6 h-6"/>} isActive={activeTab === 'measurements'} onClick={() => setActiveTab('measurements')} tabKey="measurements" />

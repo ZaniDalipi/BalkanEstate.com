@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import {
   PaperAirplaneIcon,
@@ -29,7 +30,7 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
   isSaving,
 }) => {
   const { t } = useTranslation(['admin', 'common']);
-  return (
+  return createPortal(
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
@@ -257,7 +258,8 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -280,7 +282,7 @@ export const PreviewEmailModal: React.FC<PreviewEmailModalProps> = ({
   const [previewMode, setPreviewMode] = React.useState<'light' | 'dark'>('light');
   const [deviceView, setDeviceView] = React.useState<'desktop' | 'mobile'>('desktop');
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
@@ -381,7 +383,8 @@ export const PreviewEmailModal: React.FC<PreviewEmailModalProps> = ({
           </p>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -407,7 +410,7 @@ export const TestEmailModal: React.FC<TestEmailModalProps> = ({
   isSending,
 }) => {
   const { t } = useTranslation(['admin', 'common']);
-  return (
+  return createPortal(
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-md w-full">
         <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
@@ -468,6 +471,7 @@ export const TestEmailModal: React.FC<TestEmailModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

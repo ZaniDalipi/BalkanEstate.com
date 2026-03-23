@@ -449,30 +449,30 @@
     "offlineMessage": "Tani mund të përdorni BalkanEstate edhe pa lidhje interneti."
   },
   "measurements": {
-    "title": "My Measurements",
-    "usageCount": "{{count}} of {{max}} measurements used",
+    "title": "Matjet e mia",
+    "usageCount": "{{count}} nga {{max}} matje të përdorura",
     "planPro": "Pro",
-    "planFree": "Free",
-    "maxAllowed": "{{count}} max",
-    "emptyTitle": "No Measurements Yet",
-    "emptyDescription": "Use the measurement tool on the map to measure land distances and areas.",
-    "openMap": "Open Map",
-    "allMeasurements": "All Measurements",
-    "showAll": "Show All",
-    "typeArea": "Area",
-    "typeDistance": "Distance",
+    "planFree": "Falas",
+    "maxAllowed": "{{count}} maks",
+    "emptyTitle": "Asnjë matje ende",
+    "emptyDescription": "Përdorni mjetin e matjes në hartë për të matur distancat dhe sipërfaqet e tokës.",
+    "openMap": "Hap Hartën",
+    "allMeasurements": "Të gjitha matjet",
+    "showAll": "Shfaq të gjitha",
+    "typeArea": "Sipërfaqe",
+    "typeDistance": "Distancë",
     "typeDistShort": "Dist",
-    "viewOnMap": "View on map",
-    "deleteConfirmation": "Delete \"{{name}}\"?",
-    "deleting": "Deleting...",
+    "viewOnMap": "Shiko në hartë",
+    "deleteConfirmation": "Fshi \"{{name}}\"?",
+    "deleting": "Duke fshirë...",
     "form": {
-      "namePlaceholder": "Name",
-      "addressPlaceholder": "Address"
+      "namePlaceholder": "Emri",
+      "addressPlaceholder": "Adresa"
     },
     "errors": {
-      "loadFailed": "Failed to load measurements",
-      "updateFailed": "Failed to update measurement",
-      "deleteFailed": "Failed to delete measurement"
+      "loadFailed": "Dështoi ngarkimi i matjeve",
+      "updateFailed": "Dështoi përditësimi i matjes",
+      "deleteFailed": "Dështoi fshirja e matjes"
     }
   },
   "splash": {

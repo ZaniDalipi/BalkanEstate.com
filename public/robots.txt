@@ -1,21 +1,41 @@
 # Robots.txt for BalkanEstateAI
 # https://balkanestateai.com
 
+# Default rules for all crawlers
 User-agent: *
 Allow: /
 Allow: /search
 Allow: /property/
 Allow: /agencies/
+Allow: /agencies
 Allow: /agents
+Allow: /agents/
 Allow: /rentals
 Allow: /explore-cities
+Allow: /city-dashboard/
 Allow: /valuation
 Allow: /mortgage-calculator
 Allow: /how-it-works
 Allow: /contact
 Allow: /pricing
+Allow: /guides
+Allow: /privacy
+Allow: /terms
+Allow: /cookies
 
-# Disallow private areas
+# Allow language-prefixed versions of all public pages
+Allow: /en/
+Allow: /sq/
+Allow: /sr/
+Allow: /bg/
+Allow: /hr/
+Allow: /bs/
+Allow: /mk/
+Allow: /me/
+Allow: /ro/
+Allow: /el/
+
+# Disallow private/authenticated areas
 Disallow: /account
 Disallow: /inbox
 Disallow: /admin
@@ -25,22 +45,171 @@ Disallow: /create-listing
 Disallow: /edit-listing
 Disallow: /create-rental
 Disallow: /create-agency
+Disallow: /agency-dashboard
+Disallow: /analytics
 Disallow: /payment/
 Disallow: /reset-password
 Disallow: /verify-email
+Disallow: /login
+Disallow: /register
+
+# Disallow query parameters that create duplicate content
+Disallow: /*?sort=
+Disallow: /*?page=
+Disallow: /*&sort=
+Disallow: /*&page=
 
 # Crawl-delay for polite crawling
 Crawl-delay: 1
 
-# Sitemap location
-Sitemap: https://balkanestateai.com/sitemap.xml
-
-# Google specific
+# Google specific - no crawl delay needed
 User-agent: Googlebot
 Allow: /
 Crawl-delay: 0
+
+# Google Images
+User-agent: Googlebot-Image
+Allow: /icons/
+Allow: /images/
+Allow: /og-image.png
 
 # Bing specific
 User-agent: Bingbot
 Allow: /
 Crawl-delay: 1
+
+# Yandex (relevant for Balkan countries with Russian-speaking tourists)
+User-agent: Yandex
+Allow: /
+Crawl-delay: 2
+
+# DuckDuckBot
+User-agent: DuckDuckBot
+Allow: /
+Crawl-delay: 1
+
+# AI Search Crawlers - Allow public content for AI search visibility
+# Private/authenticated areas remain blocked for all AI crawlers
+
+User-agent: GPTBot
+Allow: /
+Disallow: /account
+Disallow: /inbox
+Disallow: /admin
+Disallow: /saved-properties
+Disallow: /saved-searches
+Disallow: /create-listing
+Disallow: /edit-listing
+Disallow: /create-rental
+Disallow: /create-agency
+Disallow: /agency-dashboard
+Disallow: /analytics
+Disallow: /payment/
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /login
+Disallow: /register
+Crawl-delay: 2
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /account
+Disallow: /inbox
+Disallow: /admin
+Disallow: /saved-properties
+Disallow: /saved-searches
+Disallow: /create-listing
+Disallow: /edit-listing
+Disallow: /create-rental
+Disallow: /create-agency
+Disallow: /agency-dashboard
+Disallow: /analytics
+Disallow: /payment/
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /login
+Disallow: /register
+Crawl-delay: 2
+
+User-agent: CCBot
+Allow: /
+Disallow: /account
+Disallow: /inbox
+Disallow: /admin
+Disallow: /saved-properties
+Disallow: /saved-searches
+Disallow: /create-listing
+Disallow: /edit-listing
+Disallow: /create-rental
+Disallow: /create-agency
+Disallow: /agency-dashboard
+Disallow: /analytics
+Disallow: /payment/
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /login
+Disallow: /register
+Crawl-delay: 2
+
+User-agent: anthropic-ai
+Allow: /
+Disallow: /account
+Disallow: /inbox
+Disallow: /admin
+Disallow: /saved-properties
+Disallow: /saved-searches
+Disallow: /create-listing
+Disallow: /edit-listing
+Disallow: /create-rental
+Disallow: /create-agency
+Disallow: /agency-dashboard
+Disallow: /analytics
+Disallow: /payment/
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /login
+Disallow: /register
+Crawl-delay: 2
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /account
+Disallow: /inbox
+Disallow: /admin
+Disallow: /saved-properties
+Disallow: /saved-searches
+Disallow: /create-listing
+Disallow: /edit-listing
+Disallow: /create-rental
+Disallow: /create-agency
+Disallow: /agency-dashboard
+Disallow: /analytics
+Disallow: /payment/
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /login
+Disallow: /register
+Crawl-delay: 2
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /account
+Disallow: /inbox
+Disallow: /admin
+Disallow: /saved-properties
+Disallow: /saved-searches
+Disallow: /create-listing
+Disallow: /edit-listing
+Disallow: /create-rental
+Disallow: /create-agency
+Disallow: /agency-dashboard
+Disallow: /analytics
+Disallow: /payment/
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /login
+Disallow: /register
+Crawl-delay: 2
+
+# Sitemap location
+Sitemap: https://balkanestateai.com/sitemap.xml

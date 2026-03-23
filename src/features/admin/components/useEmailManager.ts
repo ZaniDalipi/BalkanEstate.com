@@ -77,6 +77,9 @@ export function useEmailManager() {
 
   // Handlers
   const handleOpenEdit = (email: EmailConfig) => {
+    // Close other modals first
+    setIsTestModalOpen(false);
+    setIsPreviewModalOpen(false);
     setSelectedEmail(email);
     setEditForm({
       subject: email.subject,
@@ -215,6 +218,9 @@ export function useEmailManager() {
   };
 
   const handlePreview = async (email: EmailConfig) => {
+    // Close other modals first
+    setIsEditModalOpen(false);
+    setIsTestModalOpen(false);
     setSelectedEmail(email);
     try {
       const result = await previewMutation.mutateAsync({
@@ -232,6 +238,9 @@ export function useEmailManager() {
   };
 
   const handleOpenTestModal = (email: EmailConfig) => {
+    // Close other modals first
+    setIsEditModalOpen(false);
+    setIsPreviewModalOpen(false);
     setSelectedEmail(email);
     setTestEmail('');
     setIsTestModalOpen(true);

@@ -40,7 +40,7 @@ import {
   sendTestAgencyCouponEmail,
   runMonthlyCouponRefreshManually,
 } from '../jobs/monthlyCouponJob';
-import { sendProSubscriptionWelcomeEmail, sendMonthlyCouponEmail, sendSubscriptionInvoice } from '../services/emailService';
+import emailService, { sendProSubscriptionWelcomeEmail, sendMonthlyCouponEmail, sendSubscriptionInvoice } from '../services/emailService';
 import { generateProSubscriptionCoupons } from '../services/subscriptionPaymentService';
 import PaymentRecord from '../models/PaymentRecord';
 import Product from '../models/Product';
@@ -67,6 +67,10 @@ import {
   deactivateAgencySubscription,
   getAgencySubscriptionHistory,
 } from '../controllers/adminSubscriptionController';
+import {
+  getAllBusinessListingsAdmin,
+  adminDeleteBusinessListing,
+} from '../controllers/businessListingController';
 import {
   getAllContent,
   createContent,
@@ -143,6 +147,10 @@ router.post('/fix-coordinates', logAdminAction('FIX_COORDINATES'), fixPropertyCo
 router.post('/fix-coordinates/:propertyId', logAdminAction('FIX_SINGLE_COORDINATES'), fixSinglePropertyCoordinates);
 router.post('/sync-property-schema', logAdminAction('SYNC_PROPERTY_SCHEMA'), syncPropertySchema);
 
+// ===== Business Listing Management =====
+router.get('/business-listings', logAdminAction('VIEW_BUSINESS_LISTINGS'), getAllBusinessListingsAdmin);
+router.delete('/business-listings/:id', logAdminAction('DELETE_BUSINESS_LISTING'), adminDeleteBusinessListing);
+
 // ===== Discount Code Management =====
 router.get('/discount-codes', logAdminAction('VIEW_DISCOUNT_CODES'), getAllDiscountCodes);
 router.post('/discount-codes', logAdminAction('CREATE_DISCOUNT_CODE'), createDiscountCode);
@@ -173,6 +181,11 @@ router.get('/payments/:id', logAdminAction('VIEW_PAYMENT'), getPaymentById);
 // Send test monthly coupon email (Pro user)
 router.post('/test-emails/monthly-coupon', logAdminAction('TEST_EMAIL_MONTHLY_COUPON'), async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!emailService.isConfigured) {
+      res.status(503).json({ message: 'No email provider configured. Set RESEND_API_KEY or SMTP credentials.' });
+      return;
+    }
+
     const { email, userName } = req.body;
 
     if (!email) {
@@ -190,6 +203,11 @@ router.post('/test-emails/monthly-coupon', logAdminAction('TEST_EMAIL_MONTHLY_CO
 // Send test agency coupon email
 router.post('/test-emails/agency-coupon', logAdminAction('TEST_EMAIL_AGENCY_COUPON'), async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!emailService.isConfigured) {
+      res.status(503).json({ message: 'No email provider configured. Set RESEND_API_KEY or SMTP credentials.' });
+      return;
+    }
+
     const { email, userName, agencyName } = req.body;
 
     if (!email) {
@@ -207,6 +225,11 @@ router.post('/test-emails/agency-coupon', logAdminAction('TEST_EMAIL_AGENCY_COUP
 // Run monthly coupon refresh manually (for testing)
 router.post('/test-emails/run-monthly-refresh', logAdminAction('RUN_MONTHLY_COUPON_REFRESH'), async (_req: Request, res: Response): Promise<void> => {
   try {
+    if (!emailService.isConfigured) {
+      res.status(503).json({ message: 'No email provider configured. Set RESEND_API_KEY or SMTP credentials.' });
+      return;
+    }
+
     await runMonthlyCouponRefreshManually();
     res.json({ success: true, message: 'Monthly coupon refresh completed' });
   } catch (error) {
@@ -217,6 +240,11 @@ router.post('/test-emails/run-monthly-refresh', logAdminAction('RUN_MONTHLY_COUP
 // Resend Pro subscription welcome + coupons email (with generated codes) + invoice to a user
 router.post('/test-emails/resend-pro-welcome', logAdminAction('RESEND_PRO_WELCOME_EMAIL'), async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!emailService.isConfigured) {
+      res.status(503).json({ message: 'No email provider configured. Set RESEND_API_KEY or SMTP credentials.' });
+      return;
+    }
+
     const { email } = req.body;
     if (!email) {
       res.status(400).json({ message: 'email is required' });
@@ -320,6 +348,11 @@ router.post('/test-emails/resend-pro-welcome', logAdminAction('RESEND_PRO_WELCOM
 // Trigger daily activity report manually
 router.post('/test-emails/daily-activity-report', logAdminAction('TRIGGER_DAILY_REPORT'), async (_req: Request, res: Response): Promise<void> => {
   try {
+    if (!emailService.isConfigured) {
+      res.status(503).json({ message: 'No email provider configured. Set RESEND_API_KEY or SMTP credentials.' });
+      return;
+    }
+
     await triggerDailyReportManually();
     res.json({ success: true, message: 'Daily activity report sent' });
   } catch (error) {

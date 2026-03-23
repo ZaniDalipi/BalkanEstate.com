@@ -1,24 +1,24 @@
 {
   "property": {
-    "title": "Property Value Calculator",
-    "description": "Estimate your property's value",
+    "title": "Calculator de Valoare a Proprietății",
+    "description": "Estimează valoarea proprietății tale",
     "fields": {
-      "location": "Location",
-      "area": "Area (m²)"
+      "location": "Locație",
+      "area": "Suprafață (m²)"
     },
-    "calculating": "Calculating...",
+    "calculating": "Se calculează...",
     "results": {
-      "estimatedValue": "Estimated Value",
-      "lowEstimate": "Low",
-      "highEstimate": "High",
-      "pricePerSqm": "Price/m²",
+      "estimatedValue": "Valoare Estimată",
+      "lowEstimate": "Minim",
+      "highEstimate": "Maxim",
+      "pricePerSqm": "Preț/m²",
       "valueRange": "Value Range"
     },
     "errors": {
-      "selectLocation": "Please select a valid location from the suggestions.",
-      "locationNotDetermined": "Could not determine city and country from selected location.",
+      "selectLocation": "Selectează o locație validă din sugestii.",
+      "locationNotDetermined": "Nu s-a putut determina orașul și țara din locația selectată.",
       "insufficientData": "Sorry, we don't have enough data for {{city}} to provide a reliable estimate.",
-      "calculationFailed": "Failed to calculate property value. Please try again."
+      "calculationFailed": "Eroare la calcularea valorii. Vă rugăm încercați din nou."
     }
   },
   "mortgage": {
@@ -146,7 +146,7 @@
     "disclaimer": "This is an estimate for informational purposes. Many factors can influence the costs of buying and renting. Consider consulting with a financial advisor for major decisions."
   },
   "common": {
-    "calculate": "Calculate",
+    "calculate": "Calculează",
     "reset": "Reset",
     "perMonth": "/month",
     "perYear": "/year",

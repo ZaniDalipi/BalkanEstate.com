@@ -9,6 +9,7 @@ import { PaperAirplaneIcon, MicrophoneIcon, StopCircleIcon, SparklesIcon, MapPin
 import { formatPrice } from '@/utils/currency';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { useAppContext } from '@/context/AppContext';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
 
 // --- Web Speech API types ---
 interface SpeechRecognitionEvent extends Event { results: SpeechRecognitionResultList; resultIndex: number; }
@@ -361,7 +362,7 @@ const SwipeModal: React.FC<{
         if (!property) return;
         onClose();
         dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-        window.history.pushState({}, '', `/property/${generatePropertySlug(property)}`);
+        window.history.pushState({}, '', buildLocalizedPath(`/property/${generatePropertySlug(property)}`));
     }, [currentIndex, properties, onClose, dispatch]);
 
     // Close on Escape

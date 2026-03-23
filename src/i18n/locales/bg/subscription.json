@@ -20,7 +20,7 @@
       "earlyAccess": "Early access to new listings",
       "marketInsights": "Advanced market insights"
     },
-    "price": "€{price}",
+    "price": "€{{price}}",
     "perMonth": "/month",
     "form": {
       "emailLabel": "Email Address",
@@ -219,10 +219,10 @@
     },
     "trial": {
       "title": "Free Trial Active",
-      "description": "Your free trial ends on {date}"
+      "description": "Your free trial ends on {{date}}"
     },
     "coupon": {
-      "applied": "Coupon {code} applied"
+      "applied": "Coupon {{code}} applied"
     },
     "cancelNotice": "Subscription will be canceled at the end of the current period",
     "renewStatus": {

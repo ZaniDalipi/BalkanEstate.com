@@ -60,3 +60,44 @@ export function generatePropertySlug(property: {
   // The backend extracts the ID by splitting on the last underscore
   return `${slug}_${property.id}`;
 }
+
+/**
+ * Generate an SEO-friendly slug for a business listing.
+ * Format: "balkanestate-real-estate-law-in-skopje-north-macedonia_EncodedId"
+ *
+ * The descriptive prefix provides keyword-rich URLs for SEO.
+ * The encoded ID after the underscore is used by the backend for lookup.
+ * Raw MongoDB ObjectIds are never exposed in the URL.
+ */
+export function generateBusinessSlug(listing: {
+  id: string;
+  name: string;
+  category?: string;
+  city?: string;
+  country?: string;
+}): string {
+  const parts: string[] = [];
+
+  if (listing.name) {
+    parts.push(listing.name);
+  }
+
+  if (listing.category) {
+    parts.push(listing.category.replace(/_/g, '-'));
+  }
+
+  if (listing.city) {
+    parts.push('in');
+    parts.push(listing.city);
+  }
+
+  if (listing.country) {
+    parts.push(listing.country);
+  }
+
+  const slug = slugify(parts.join(' '));
+
+  // Append the encoded ID after underscore (not slugified, preserves case)
+  // The backend extracts the ID by splitting on the last underscore
+  return `${slug}_${listing.id}`;
+}

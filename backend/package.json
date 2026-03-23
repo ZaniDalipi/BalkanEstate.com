@@ -43,6 +43,7 @@
     "set-admin": "ts-node src/scripts/setAdminRole.ts",
     "seed:dev-admin": "ts-node src/scripts/seedDevAdmin.ts",
     "seed:dev": "npm run seed:products && npm run seed:dev-admin",
+    "seed:business-listings": "ts-node src/scripts/seedBusinessListings.ts",
     "seed:coupons": "ts-node src/scripts/seedPromotionCoupons.ts",
     "seed:promotion-plans": "ts-node src/scripts/seedPromotionPlans.ts",
     "seed:promotion-plans:staging": "NODE_ENV=staging ts-node src/scripts/seedPromotionPlans.ts",
@@ -101,7 +102,8 @@
     "socket.io": "^4.8.1",
     "stripe": "^20.4.0",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -124,6 +126,7 @@
     "@types/supertest": "^6.0.3",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
+    "@types/web-push": "^3.6.4",
     "jest": "^29.0.0",
     "mongodb-memory-server": "^10.4.2",
     "nodemon": "^3.1.11",

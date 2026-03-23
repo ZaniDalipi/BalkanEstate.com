@@ -19,7 +19,7 @@
     "title": "Upload Property Photos",
     "subtitle": "Drag and drop images or click to browse",
     "hint": "Upload at least 3 photos for best results",
-    "maxImages": "Maximum {count} images",
+    "maxImages": "Maximum {{count}} images",
     "dragDrop": "Drag & drop images here",
     "orClick": "or click to browse",
     "supportedFormats": "Supported formats: JPG, PNG, WebP",
@@ -213,7 +213,7 @@
   },
   "validation": {
     "required": "This field is required",
-    "minImages": "Please upload at least {count} images",
+    "minImages": "Please upload at least {{count}} images",
     "selectCountry": "Please select a country",
     "selectCity": "Please select a city",
     "setLocation": "Please set the property location on the map",

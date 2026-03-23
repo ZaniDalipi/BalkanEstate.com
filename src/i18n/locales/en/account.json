@@ -7,6 +7,9 @@
     "promotions": "My Promotions",
     "performance": "Performance",
     "subscription": "Subscription",
+    "viewings": "Viewing Requests",
+    "myBusinesses": "My Businesses",
+    "measurements": "Measurements",
     "profileSettings": "Profile Settings",
     "security": "Security"
   },
@@ -279,6 +282,9 @@
       "weekly": "Weekly Summary",
       "never": "Never"
     },
+    "pushEnabled": "Receiving push notifications",
+    "pushDisabled": "Enable to receive instant alerts",
+    "pushDenied": "Blocked in browser settings",
     "savePreferences": "Save Preferences",
     "preferencesSaved": "Notification preferences saved"
   },

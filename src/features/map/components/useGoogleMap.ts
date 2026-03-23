@@ -32,6 +32,7 @@ import {
   type MeasurementPoint,
   type LocalMeasurement,
 } from '../hooks';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { useRainViewer } from '../hooks/useRainViewer';
 import { useOpenMeteoGrid, type MapBounds } from '../hooks/useOpenMeteoGrid';
 import { useMapServices, weatherTileProxyUrl, firmsWmsProxyUrl } from '../hooks/useMapServices';
@@ -1167,8 +1168,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   // Handle view details click
   const handleViewDetails = useCallback((propertyId: string) => {
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
-    window.history.pushState({}, '', `/property/${propertyId}`);
+    window.history.pushState({}, '', buildLocalizedPath(`/property/${propertyId}`));
     window.dispatchEvent(new PopStateEvent('popstate'));
     setSelectedProperty(null);
   }, [dispatch]);

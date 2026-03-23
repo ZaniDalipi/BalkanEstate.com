@@ -124,7 +124,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
       autoPan: true,
     }).addTo(map);
 
-    marker.bindPopup(`<b>${t('search:map.dragToAdjust')}</b><br>${address}`).openPopup();
+    marker.bindPopup(`<b>${t('search:map.dragToAdjust')}</b><br>${address.length > 60 ? address.slice(0, 60) + '…' : address}`, { maxWidth: 220 }).openPopup();
 
     // Handle marker drag
     marker.on('dragstart', () => {
@@ -304,7 +304,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
         mapRef.current.setView(newLatLng, mapRef.current.getZoom(), { animate: false });
       }
 
-      markerRef.current.setPopupContent(`<b>${t('search:map.dragToAdjust')}</b><br>${address}`);
+      markerRef.current.setPopupContent(`<b>${t('search:map.dragToAdjust')}</b><br>${address.length > 60 ? address.slice(0, 60) + '…' : address}`);
 
       // Open popup after animation (no resize needed)
       const popupDelay = distance > 500 ? 900 : (distance > 100 ? 550 : 0);

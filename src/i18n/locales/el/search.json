@@ -223,7 +223,8 @@
       "fire": "Φωτιά",
       "wind": "Άνεμος",
       "air": "Αέρας",
-      "heat": "Καύσωνας"
+      "heat": "Καύσωνας",
+      "airQuality": "Ποιότητα Αέρα"
     },
     "mapLegend": "Map Legend",
     "nightMode": "Night Mode",
@@ -260,7 +261,8 @@
       "autumn": "Φθινόπωρο",
       "winter": "Χειμώνας"
     },
-    "promoted": "Προτεινόμενα"
+    "promoted": "Προτεινόμενα",
+    "cadastre": "Κτηματολόγιο"
   },
   "newsletter": {
     "title": "Μείνετε Ενημερωμένοι για Νέα Ακίνητα",

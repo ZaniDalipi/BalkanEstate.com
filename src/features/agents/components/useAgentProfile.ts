@@ -18,6 +18,7 @@ import { Credential, getCredentials, getAgentPublicCredentials } from '@/src/fea
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import { sendMessage } from '@/src/features/conversations/api/conversationApi';
 import { API_URL } from '@/src/shared/api/config';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
 
 // ─── Shared Types ────────────────────────────────────────────────────────────
 
@@ -438,6 +439,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
             return;
         }
+        const previousState = savedAgent;
         try {
             // Optimistic update
             setSavedAgent(!savedAgent);
@@ -445,10 +447,13 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             const response = await toggleSavedAgent(agent.id);
             // Sync with backend response
             setSavedAgent(response.isSaved);
-        } catch (error) {
+            success(response.isSaved
+                ? t('profilePage.agentSaved', 'Agent saved!')
+                : t('profilePage.agentUnsaved', 'Agent removed from saved'));
+        } catch (err: any) {
             // Revert on error
-            setSavedAgent(savedAgent);
-            // Error removed
+            setSavedAgent(previousState);
+            showError(err?.message || t('profilePage.saveError', 'Failed to save agent. Please try again.'));
         }
     };
 
@@ -768,7 +773,8 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
     // Handler for viewing a property from the map popup
     const handleViewProperty = useCallback((propertyId: string) => {
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
-        window.history.pushState({}, '', `/property/${propertyId}`);
+        window.history.pushState({}, '', buildLocalizedPath(`/property/${propertyId}`));
+        window.dispatchEvent(new PopStateEvent('popstate'));
     }, [dispatch]);
 
     // ─── Return ──────────────────────────────────────────────────────────────

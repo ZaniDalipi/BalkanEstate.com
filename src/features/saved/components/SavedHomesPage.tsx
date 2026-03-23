@@ -46,10 +46,10 @@ const SavedPropertiesPage: React.FC = () => {
       setToast({ show: true, message, type });
   };
 
-  // Fetch saved agents when tab changes to agents
+  // Fetch saved agents and agencies on mount so counts are immediately available
   useEffect(() => {
+    if (!isAuthenticated) return;
     const fetchSavedAgents = async () => {
-      if (!isAuthenticated || activeTab !== 'agents') return;
       setIsLoadingAgents(true);
       try {
         const agents = await getSavedAgents();
@@ -60,13 +60,7 @@ const SavedPropertiesPage: React.FC = () => {
         setIsLoadingAgents(false);
       }
     };
-    fetchSavedAgents();
-  }, [isAuthenticated, activeTab]);
-
-  // Fetch saved agencies when tab changes to agencies
-  useEffect(() => {
     const fetchSavedAgencies = async () => {
-      if (!isAuthenticated || activeTab !== 'agencies') return;
       setIsLoadingAgencies(true);
       try {
         const agencies = await getAgencyFavorites();
@@ -77,8 +71,9 @@ const SavedPropertiesPage: React.FC = () => {
         setIsLoadingAgencies(false);
       }
     };
+    fetchSavedAgents();
     fetchSavedAgencies();
-  }, [isAuthenticated, activeTab]);
+  }, [isAuthenticated]);
 
   // New nested grouping type for Country -> City -> Properties
   type GroupedHomes = Record<string, Record<string, Property[]>>;

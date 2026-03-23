@@ -449,30 +449,30 @@
     "offlineMessage": "Сега можеш да използваш BalkanEstate дори без интернет връзка."
   },
   "measurements": {
-    "title": "My Measurements",
-    "usageCount": "{{count}} of {{max}} measurements used",
+    "title": "Моите измервания",
+    "usageCount": "{{count}} от {{max}} измервания използвани",
     "planPro": "Pro",
-    "planFree": "Free",
-    "maxAllowed": "{{count}} max",
-    "emptyTitle": "No Measurements Yet",
-    "emptyDescription": "Use the measurement tool on the map to measure land distances and areas.",
-    "openMap": "Open Map",
-    "allMeasurements": "All Measurements",
-    "showAll": "Show All",
-    "typeArea": "Area",
-    "typeDistance": "Distance",
-    "typeDistShort": "Dist",
-    "viewOnMap": "View on map",
-    "deleteConfirmation": "Delete \"{{name}}\"?",
-    "deleting": "Deleting...",
+    "planFree": "Безплатно",
+    "maxAllowed": "{{count}} макс",
+    "emptyTitle": "Все още няма измервания",
+    "emptyDescription": "Използвайте инструмента за измерване на картата, за да измервате разстояния и площи.",
+    "openMap": "Отвори картата",
+    "allMeasurements": "Всички измервания",
+    "showAll": "Покажи всички",
+    "typeArea": "Площ",
+    "typeDistance": "Разстояние",
+    "typeDistShort": "Разст",
+    "viewOnMap": "Виж на картата",
+    "deleteConfirmation": "Изтрий \"{{name}}\"?",
+    "deleting": "Изтриване...",
     "form": {
-      "namePlaceholder": "Name",
-      "addressPlaceholder": "Address"
+      "namePlaceholder": "Име",
+      "addressPlaceholder": "Адрес"
     },
     "errors": {
-      "loadFailed": "Failed to load measurements",
-      "updateFailed": "Failed to update measurement",
-      "deleteFailed": "Failed to delete measurement"
+      "loadFailed": "Неуспешно зареждане на измервания",
+      "updateFailed": "Неуспешно актуализиране на измерване",
+      "deleteFailed": "Неуспешно изтриване на измерване"
     }
   },
   "splash": {

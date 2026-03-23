@@ -1,0 +1,283 @@
+{
+  "hero": {
+    "badge": "Business Directory",
+    "title": "Discover Trusted Professionals",
+    "titleHighlight": "& Premium Service Providers",
+    "subtitle": "Connect with verified construction, renovation, cleaning, and real estate service providers across the Balkans — all in one place.",
+    "popularCategories": "Popular categories"
+  },
+  "search": {
+    "placeholder": "Search by name, service, or location...",
+    "button": "Search"
+  },
+  "tabs": {
+    "all": "All",
+    "businesses": "Businesses",
+    "individuals": "Individuals",
+    "mine": "My Businesses"
+  },
+  "types": {
+    "business": "Business",
+    "individual": "Individual"
+  },
+  "individuals": {
+    "title": "Featured Professionals",
+    "subtitle": "Connect with skilled individuals offering expertise across the real estate sector"
+  },
+  "filters": {
+    "all": "All"
+  },
+  "categories": {
+    "construction": "Construction",
+    "renovation": "Renovation",
+    "cleaning": "Cleaning",
+    "moving": "Moving",
+    "interior_design": "Interior Design",
+    "architecture": "Architecture",
+    "plumbing": "Plumbing",
+    "electrical": "Electrical",
+    "landscaping": "Landscaping",
+    "security": "Security",
+    "real_estate_law": "Real Estate Law",
+    "insurance": "Insurance",
+    "home_inspection": "Home Inspection",
+    "pest_control": "Pest Control",
+    "painting": "Painting",
+    "roofing": "Roofing",
+    "hvac": "HVAC",
+    "furniture": "Furniture",
+    "appliances": "Appliances",
+    "other": "Other"
+  },
+  "voiceSearch": {
+    "start": "Search by voice",
+    "stop": "Stop listening",
+    "listening": "Listening — speak now"
+  },
+  "stats": {
+    "totalListings": "Total Listings",
+    "businesses": "Businesses",
+    "professionals": "Professionals",
+    "categories": "Categories"
+  },
+  "surpriseMe": {
+    "button": "Surprise Me",
+    "loading": "Discovering..."
+  },
+  "quickActions": {
+    "call": "Call now",
+    "email": "Send email",
+    "website": "Visit website",
+    "getQuote": "Request a Quote"
+  },
+  "cta": {
+    "listBusiness": "List Your Business",
+    "beFirst": "Be the First to List"
+  },
+  "results": {
+    "showing": "{{count}} businesses found"
+  },
+  "empty": {
+    "title": "No businesses found",
+    "description": "Be the first to list your business in this category and reach thousands of potential customers across the Balkans."
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {{page}} of {{totalPages}}"
+  },
+  "viewMode": {
+    "grid": "Grid",
+    "map": "Map"
+  },
+  "map": {
+    "loading": "Loading map...",
+    "loadError": "Could not load map",
+    "geocoding": "Locating businesses...",
+    "noLocations": "No locations to display",
+    "noLocationsHint": "Businesses with addresses will appear here on the map",
+    "viewDetails": "View Details",
+    "directions": "Directions"
+  },
+  "verified": "Verified",
+  "detail": {
+    "backToDirectory": "Back to Directory",
+    "about": "About",
+    "aboutSubtitle": "Who we are & what we do",
+    "services": "Services Offered",
+    "businessHours": "Business Hours",
+    "closed": "Closed",
+    "openNow": "Open Now",
+    "closedNow": "Closed",
+    "today": "Today",
+    "contactInfo": "Contact Information",
+    "phone": "Phone",
+    "email": "Email",
+    "website": "Website",
+    "location": "Location",
+    "socialMedia": "Social Media",
+    "views": "{{count}} views",
+    "notFound": "Listing Not Found",
+    "notFoundDesc": "The listing you're looking for may have been removed or is no longer available.",
+    "share": "Share",
+    "linkCopied": "Link copied to clipboard!",
+    "getInTouch": "Reach out to get started",
+    "callNow": "Call Now",
+    "getDirections": "Get Directions",
+    "owner": "About the Owner",
+    "ownerIndividual": "Independent Professional",
+    "ownerBusiness": "Business Owner",
+    "stats": {
+      "services": "Services",
+      "views": "Views",
+      "memberSince": "Member since"
+    },
+    "licensed": "Licensed",
+    "languages": "Languages",
+    "serviceAreas": "Service Areas",
+    "paymentMethods": "Payment Methods",
+    "cta": {
+      "title": "Ready to work with {{name}}?",
+      "subtitle": "Get in touch today to discuss your project and receive a free consultation.",
+      "callNow": "Call {{phone}}",
+      "sendEmail": "Send Email"
+    }
+  },
+  "days": {
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday"
+  },
+  "form": {
+    "title": "List Your Business",
+    "subtitle": "Reach thousands of potential customers across the Balkans",
+    "sections": {
+      "type": "Listing Type",
+      "basicInfo": "Basic Information",
+      "contact": "Contact Information",
+      "location": "Location",
+      "businessLocation": "Business Location",
+      "social": "Social Media",
+      "hours": "Business Hours",
+      "languages": "Languages Spoken",
+      "businessDetails": "Business Details",
+      "serviceAreas": "Service Areas",
+      "pricing": "Pricing & Payment"
+    },
+    "locationHint": "Add your business location so clients can find you easily.",
+    "pinOnMap": "Pin Your Business Location on Map",
+    "loadingMap": "Loading map...",
+    "locationSet": "Location pinned",
+    "typeDescBusiness": "Company or registered business",
+    "typeDescIndividual": "Freelancer or independent professional",
+    "fields": {
+      "name": "Business Name",
+      "fullName": "Full Name",
+      "category": "Category",
+      "description": "Description",
+      "services": "Services",
+      "phone": "Phone Number",
+      "email": "Email Address",
+      "website": "Website",
+      "city": "City",
+      "country": "Country",
+      "address": "Address",
+      "logo": "Logo",
+      "avatar": "Profile Photo",
+      "pinLocation": "Pin Location on Map",
+      "banner": "Cover Banner",
+      "whatsapp": "WhatsApp",
+      "viber": "Viber",
+      "customCategory": "Specify your category",
+      "yearEstablished": "Year Established",
+      "licenseNumber": "License / Certification #",
+      "priceRange": "Price Range",
+      "paymentMethods": "Payment Methods Accepted"
+    },
+    "placeholders": {
+      "name": "Enter your business name",
+      "fullName": "Enter your full name",
+      "category": "Select a category",
+      "description": "Describe your business, what you offer, and why clients should choose you...",
+      "service": "Type a service and press Enter",
+      "phone": "+389 XX XXX XXX",
+      "email": "contact@yourbusiness.com",
+      "website": "https://yourbusiness.com",
+      "selectCountry": "Select a country",
+      "selectCity": "Select a city",
+      "address": "Street address",
+      "hours": "e.g. 09:00 - 17:00",
+      "customCategory": "e.g. Property Management, Solar Energy...",
+      "selectLanguage": "Select a language",
+      "yearEstablished": "e.g. 2015",
+      "licenseNumber": "e.g. LIC-2024-1234",
+      "serviceArea": "e.g. Pristina, Prizren..."
+    },
+    "addService": "Add",
+    "addLanguage": "Add",
+    "addServiceArea": "Add",
+    "serviceAreasHint": "Cities or regions where you provide services",
+    "priceRangeHint": "$ = Budget  |  $$ = Mid-range  |  $$$ = Premium",
+    "logoUploadError": "Failed to upload logo. Please try again.",
+    "bannerHint": "1200 x 400px recommended",
+    "bannerRemove": "Remove",
+    "bannerUpload": "Upload Banner",
+    "bannerChange": "Change Banner",
+    "bannerUploading": "Uploading banner...",
+    "bannerUploadError": "Failed to upload banner. Please try again.",
+    "bannerInvalidType": "Please upload a JPEG, PNG, or WebP image",
+    "bannerTooLarge": "Image must be under 5MB",
+    "logoUpload": "Upload Image",
+    "logoChange": "Change Image",
+    "logoRemove": "Remove",
+    "logoHint": "JPG, PNG, or WebP. Max 5MB.",
+    "logoUploading": "Uploading logo...",
+    "submit": "Create Listing",
+    "submitting": "Creating...",
+    "errors": {
+      "nameRequired": "Business name is required",
+      "categoryRequired": "Please select a category",
+      "phoneRequired": "Contact phone number is required",
+      "cityRequired": "City is required",
+      "countryRequired": "Country is required",
+      "generic": "Something went wrong. Please try again.",
+      "logoInvalidType": "Please upload a JPG, PNG, or WebP image",
+      "logoTooLarge": "Image must be under 5MB"
+    }
+  },
+  "banner": {
+    "customize": "Customize",
+    "dragToReposition": "Drag to reposition",
+    "reposition": "Reposition Banner",
+    "repositionError": "Failed to save banner position"
+  },
+  "edit": {
+    "title": "Edit Your Listing",
+    "subtitle": "Update your business information",
+    "button": "Edit",
+    "backToListing": "Back to Listing",
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "status": "Listing Status",
+    "statusActiveDesc": "Your listing is visible to everyone",
+    "statusInactiveDesc": "Your listing is hidden from the directory",
+    "success": "Your listing has been updated successfully"
+  },
+  "myBusinesses": {
+    "title": "My Businesses",
+    "subtitle_one": "{{count}} business listing",
+    "subtitle_other": "{{count}} business listings",
+    "createNew": "New Business",
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete",
+    "emptyTitle": "No businesses yet",
+    "emptyMessage": "Create your first business listing to showcase your services in the directory.",
+    "createFirst": "Create Business Listing"
+  }
+}

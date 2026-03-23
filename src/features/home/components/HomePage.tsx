@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Helmet } from 'react-helmet-async';
 import { useAppContext } from '@/context/AppContext';
+import { SEO, OrganizationSchema, FAQSchema, realEstateFAQs } from '@/src/components/seo';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { Property } from '@/types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -17,6 +17,8 @@ import Footer from '@/components/shared/Footer';
 
 // Lazy-load below-fold sections to reduce initial bundle
 const StackedCards = lazy(() => import('@/src/components/ui/glass-cards').then(m => ({ default: m.StackedCards })));
+const HomeSpecialOffersSection = lazy(() => import('./HomeSpecialOffersSection'));
+const RecentlyViewedSection = lazy(() => import('./RecentlyViewedSection'));
 const TopAgentsSection = lazy(() => import('./TopAgentsSection'));
 const TopAgenciesSection = lazy(() => import('./TopAgenciesSection'));
 const CategoriesSection = lazy(() => import('./CategoriesSection'));
@@ -83,54 +85,64 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
     retry: 2,
   });
 
-  // Prefetch all section data in parallel on mount so nothing waits for scroll
+  // Defer non-critical section data prefetching until after initial render/LCP
   useEffect(() => {
     const opts = { staleTime: 10 * 60 * 1000, gcTime: 30 * 60 * 1000 };
-    queryClient.prefetchQuery({
-      queryKey: ['topAgentsWeek'],
-      queryFn: async () => {
-        const { agents } = await getAllAgents();
-        return agents.filter(a => a.name).sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 3);
-      },
-      ...opts,
-    });
-    queryClient.prefetchQuery({
-      queryKey: ['topAgenciesMonth'],
-      queryFn: async () => {
-        const data = await getAgencies({ limit: 3 });
-        return (data.agencies || []).filter((a: any) => a.name).slice(0, 3);
-      },
-      ...opts,
-    });
-    queryClient.prefetchQuery({
-      queryKey: ['featuredCities'],
-      queryFn: () => getFeaturedCities(50),
-      ...opts,
-    });
-    queryClient.prefetchQuery({
-      queryKey: ['testimonials'],
-      queryFn: async () => {
-        const res = await fetch(`${API_CONFIG.BASE_URL}/testimonials?limit=10`);
-        if (!res.ok) return [];
-        const d = await res.json();
-        return (d.testimonials || []).map((t: any) => ({
-          id: t._id, name: t.name, avatarUrl: t.avatarUrl,
-          profession: t.profession || 'User', country: t.country || '',
-          rating: t.rating, quote: t.quote, source: t.source, createdAt: t.createdAt,
-        }));
-      },
-      ...opts,
-    });
-    queryClient.prefetchQuery({
-      queryKey: ['realEstateNews'],
-      queryFn: async () => {
-        const res = await fetch(`${API_CONFIG.BASE_URL}/news?limit=12`);
-        if (!res.ok) return [];
-        const d = await res.json();
-        return d.articles || [];
-      },
-      ...opts,
-    });
+    const prefetchAll = () => {
+      queryClient.prefetchQuery({
+        queryKey: ['topAgentsWeek'],
+        queryFn: async () => {
+          const { agents } = await getAllAgents();
+          return agents.filter(a => a.name).sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 3);
+        },
+        ...opts,
+      });
+      queryClient.prefetchQuery({
+        queryKey: ['topAgenciesMonth'],
+        queryFn: async () => {
+          const data = await getAgencies({ limit: 3 });
+          return (data.agencies || []).filter((a: any) => a.name).slice(0, 3);
+        },
+        ...opts,
+      });
+      queryClient.prefetchQuery({
+        queryKey: ['featuredCities'],
+        queryFn: () => getFeaturedCities(50),
+        ...opts,
+      });
+      queryClient.prefetchQuery({
+        queryKey: ['testimonials'],
+        queryFn: async () => {
+          const res = await fetch(`${API_CONFIG.BASE_URL}/testimonials?limit=10`);
+          if (!res.ok) return [];
+          const d = await res.json();
+          return (d.testimonials || []).map((t: any) => ({
+            id: t._id, name: t.name, avatarUrl: t.avatarUrl,
+            profession: t.profession || 'User', country: t.country || '',
+            rating: t.rating, quote: t.quote, source: t.source, createdAt: t.createdAt,
+          }));
+        },
+        ...opts,
+      });
+      queryClient.prefetchQuery({
+        queryKey: ['realEstateNews'],
+        queryFn: async () => {
+          const res = await fetch(`${API_CONFIG.BASE_URL}/news?limit=12`);
+          if (!res.ok) return [];
+          const d = await res.json();
+          return d.articles || [];
+        },
+        ...opts,
+      });
+    };
+    // Defer prefetching to after LCP — use requestIdleCallback or setTimeout fallback
+    if ('requestIdleCallback' in window) {
+      const id = requestIdleCallback(prefetchAll, { timeout: 3000 });
+      return () => cancelIdleCallback(id);
+    } else {
+      const id = setTimeout(prefetchAll, 2000);
+      return () => clearTimeout(id);
+    }
   }, [queryClient]);
 
   const handleSearchChange = useCallback((value: string) => {
@@ -186,10 +198,14 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      <Helmet>
-        <title>{t('home:seo.title')}</title>
-        <meta name="description" content={t('home:seo.description')} />
-      </Helmet>
+      <SEO
+        title={t('home:seo.title')}
+        description={t('home:seo.description')}
+        canonical="https://balkanestateai.com"
+        type="website"
+      />
+      <OrganizationSchema />
+      <FAQSchema faqs={realEstateFAQs} />
 
       {/* Mobile hamburger menu button */}
       {onToggleSidebar && (
@@ -227,11 +243,19 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
       )}
 
       <Suspense fallback={<SectionFallback />}>
+        <RecentlyViewedSection onPropertyClick={handlePropertyClick} />
+      </Suspense>
+
+      <Suspense fallback={<SectionFallback />}>
         <StackedCards
           properties={featuredProperties}
           onPropertyClick={handlePropertyClick}
           onViewAll={() => handleNavigate('search', '/search')}
         />
+      </Suspense>
+
+      <Suspense fallback={<SectionFallback />}>
+        <HomeSpecialOffersSection onNavigate={handleNavigate} />
       </Suspense>
 
       <Suspense fallback={<SectionFallback />}>

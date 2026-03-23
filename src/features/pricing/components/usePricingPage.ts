@@ -32,7 +32,12 @@ export function usePricingPage() {
   const { t } = useTranslation(['pricing', 'common']);
   const { state, dispatch, checkAuthStatus } = useAppContext();
   const { setDirection } = useNavigationDirection();
-  const [activeTab, setActiveTab] = useState<'seller' | 'buyer' | 'listing' | 'agency'>('seller');
+  const [activeTab, setActiveTab] = useState<'seller' | 'buyer' | 'listing' | 'agency'>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'listing' || tab === 'buyer' || tab === 'agency' || tab === 'seller') return tab;
+    return 'seller';
+  });
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{
     name: string;
@@ -49,6 +54,12 @@ export function usePricingPage() {
   const [selectedAgencyDuration, setSelectedAgencyDuration] = useState<7 | 14 | 28 | 90>(28);
   const [includeMapMarker, setIncludeMapMarker] = useState(false);
 
+  // Special offer states - auto-select from URL param
+  const [selectedOfferId, setSelectedOfferId] = useState<string | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('offer') || null;
+  });
+
   // Use React Query for real-time data fetching
   const {
     products,
@@ -56,6 +67,7 @@ export function usePricingPage() {
     productsError,
     listingPromotionPlans,
     agencyFeaturePlans,
+    specialOffers,
     isLoadingPromotionPlans: loadingPlans,
     userListings,
     isLoadingUserListings: loadingListings,
@@ -411,15 +423,45 @@ export function usePricingPage() {
 
   const handlePurchasePromotion = () => {
     if (!selectedListing || !selectedPromoTier) return;
-    // Payment integration pending
-    dispatch({
-      type: 'SHOW_ALERT',
-      payload: {
-        type: 'info',
-        title: t('pricing:listing.comingSoon', 'Coming Soon'),
-        message: t('pricing:listing.promotionComingSoon', 'Listing promotion will be available soon!'),
-      },
+
+    const price = getPromotionPrice(selectedPromoTier, selectedDuration);
+    const tierLabel = selectedPromoTier.charAt(0).toUpperCase() + selectedPromoTier.slice(1);
+
+    setSelectedPlan({
+      name: `${tierLabel} Promotion - ${selectedDuration} days`,
+      price,
+      interval: 'once' as const,
+      productId: `listing_promo_${selectedPromoTier}_${selectedDuration}days`,
     });
+    setShowPaymentWindow(true);
+  };
+
+  // Special offer handlers
+  const handleSelectOffer = (offerId: string) => {
+    if (!state.isAuthenticated) {
+      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
+      return;
+    }
+    setSelectedOfferId(offerId);
+    setSelectedListing(null);
+  };
+
+  const handlePurchaseSpecialOffer = () => {
+    if (!selectedListing || !selectedOfferId) return;
+    const offer = specialOffers.find((o) => o.id === selectedOfferId);
+    if (!offer) return;
+
+    const durationKey = `duration${selectedDuration}` as keyof typeof offer.pricing;
+    const price = offer.pricing[durationKey] ?? offer.pricing.duration30 ?? offer.pricing.duration7 ?? 0;
+
+    // Open PaymentWindow for special offer promotion
+    setSelectedPlan({
+      name: `${offer.name} - ${selectedDuration} days`,
+      price,
+      interval: 'once' as const,
+      productId: `special_offer_${offer.id}_${selectedDuration}days`,
+    });
+    setShowPaymentWindow(true);
   };
 
   const handleAgencyFeature = (tier: string) => {
@@ -590,6 +632,7 @@ export function usePricingPage() {
     sellerProducts,
     // Promotion plans data
     agencyFeaturePlans,
+    specialOffers,
     // Helper functions
     getPromotionPrice,
     getAgencyPrice,
@@ -609,5 +652,10 @@ export function usePricingPage() {
     handleSelectListingForPromotion,
     handlePurchasePromotion,
     handleAgencyFeature,
+    // Special offer state & handlers
+    selectedOfferId,
+    setSelectedOfferId,
+    handleSelectOffer,
+    handlePurchaseSpecialOffer,
   };
 }

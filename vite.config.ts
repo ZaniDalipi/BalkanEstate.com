@@ -86,7 +86,7 @@ export default defineConfig(({ mode }) => {
             },
             icons: [
               {
-                src: '/icons/icon.svg',
+                src: '/icons/Logo.svg',
                 sizes: 'any',
                 type: 'image/svg+xml',
                 purpose: 'any'
@@ -182,7 +182,7 @@ export default defineConfig(({ mode }) => {
             // Safari Mobile fix: import a script that strips response.redirected
             // from navigation responses before Safari can reject them with
             // "Response served by service worker has redirections"
-            importScripts: ['/sw-safari-fix.js'],
+            importScripts: ['/sw-safari-fix.js', '/sw-push.js'],
             // Exclude API routes from service worker interception
             // API calls (especially payments) should always be live, not cached
             // Exclude OAuth callback: Safari throws "Response served by service worker

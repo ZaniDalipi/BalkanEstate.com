@@ -108,6 +108,9 @@
     "fields": {
       "listingTitle": "Τίτλος Αγγελίας",
       "titleHint": "Σύντομος, ελκυστικός τίτλος (π.χ., \"Πολυτελής Βίλα με Θέα Θάλασσα\", \"Άνετο Στούντιο στο Κέντρο\")",
+      "propertyId": "ID Ακινήτου",
+      "propertyIdPlaceholder": "π.χ., AP-2024-001, VILLA-123",
+      "propertyIdHint": "Προαιρετικό. Ο εσωτερικός σας κωδικός αναφοράς για αυτό το ακίνητο.",
       "price": "Τιμή",
       "bedrooms": "Υπνοδωμάτια",
       "bathrooms": "Μπάνια",
@@ -250,7 +253,8 @@
       "publishListing": "Δημοσίευση Αγγελίας",
       "updateListing": "Ενημέρωση Αγγελίας",
       "continueToPayment": "Συνέχεια στην Πληρωμή",
-      "saving": "Αποθήκευση..."
+      "saving": "Αποθήκευση...",
+      "previewListing": "Προεπισκόπηση Αγγελίας"
     },
     "success": {
       "title": "Η Αγγελία {{action}} Επιτυχώς!",
@@ -276,11 +280,35 @@
       "buyerCannotCreate": "Οι αγοραστές δεν μπορούν να δημιουργήσουν αγγελίες ακινήτων. Παρακαλώ αλλάξτε σε ρόλο Ιδιώτη Πωλητή ή Πράκτορα."
     },
     "video": {
-      "title": "Property Video (Optional)",
-      "description": "Add a video to showcase your property! Videos auto-play when visitors view your listing, creating an engaging first impression.",
-      "label": "Video URL",
+      "title": "Βίντεο Ακινήτου (Προαιρετικό)",
+      "description": "Προσθέστε ένα βίντεο για να παρουσιάσετε το ακίνητό σας! Τα βίντεο αναπαράγονται αυτόματα όταν οι επισκέπτες βλέπουν την αγγελία σας.",
+      "label": "URL Βίντεο",
       "placeholder": "https://youtube.com/watch?v=... or https://tiktok.com/...",
-      "hint": "Paste a link from YouTube, TikTok, Instagram Reels, or Vimeo. The video will auto-play when visitors open your listing!"
+      "hint": "Επικολλήστε έναν σύνδεσμο από YouTube, TikTok, Instagram Reels ή Vimeo. Το βίντεο θα αναπαράγεται αυτόματα όταν οι επισκέπτες ανοίξουν την αγγελία σας!"
+    },
+    "listingType": {
+      "sale": "Πώληση",
+      "rent": "Ενοικίαση"
+    },
+    "triState": {
+      "no": "Όχι",
+      "any": "Οποιοδήποτε",
+      "yes": "Ναι"
+    },
+    "visitAvailability": {
+      "title": "Διαθεσιμότητα Επισκέψεων",
+      "enable": "Ενεργοποίηση Προγραμματισμού",
+      "description": "Επιτρέψτε στους επισκέπτες να προγραμματίσουν επισκέψεις διαδικτυακά. Καθορίστε τις διαθέσιμες ημέρες και ώρες σας.",
+      "availableDays": "Διαθέσιμες Ημέρες"
+    },
+    "imageTags": {
+      "exterior": "Εξωτερικά",
+      "livingRoom": "Σαλόνι",
+      "kitchen": "Κουζίνα",
+      "bedroom": "Κρεβατοκάμαρα",
+      "bathroom": "Μπάνιο",
+      "other": "Άλλο",
+      "selectTag": "Επιλέξτε Ετικέτα"
     }
   },
   "myListings": {
@@ -289,6 +317,8 @@
     "noListings": "Δεν έχετε δημιουργήσει ακόμη καμία αγγελία.",
     "createFirst": "Δημιουργήστε την πρώτη σας αγγελία",
     "addNewListing": "Προσθήκη Νέας Αγγελίας",
+    "searchByPropertyId": "Αναζήτηση με ID ακινήτου...",
+    "propertyIdLabel": "ID Ακινήτου",
     "active": "Ενεργή",
     "pending": "Σε Αναμονή",
     "sold": "Πωλήθηκε",
@@ -341,7 +371,19 @@
       "priceHigh": "Τιμή: Φθίνουσα",
       "priceLow": "Τιμή: Αύξουσα",
       "mostViews": "Περισσότερες Προβολές"
-    }
+    },
+    "newSaleListing": "Νέα αγγελία πώλησης",
+    "newRentalListing": "Νέα αγγελία ενοικίασης",
+    "searchListings": "Αναζήτηση με ID, τίτλο, διεύθυνση...",
+    "video": "Βίντεο",
+    "createVideo": "Δημιουργία βίντεο",
+    "forRent": "Προς ενοικίαση",
+    "forSale": "Προς πώληση",
+    "noMapLocation": "Χωρίς τοποθεσία στον χάρτη",
+    "rentedUntil": "Ενοικιασμένο μέχρι {{date}}",
+    "canRenewIn": "Ανανέωση σε {{hours}}ω {{minutes}}λ",
+    "forSaleCount": "Πώληση ({{count}})",
+    "forRentCount": "Ενοικίαση ({{count}})"
   },
   "form": {
     "basicInfo": "Βασικές Πληροφορίες",

@@ -105,6 +105,7 @@ const RefundPolicyPage = lazy(() => import('./src/features/legal/components/Refu
 const ContactUsPage = lazy(() => import('./src/features/contact/components/ContactUsPage'));
 const BuyingGuidesPage = lazy(() => import('./src/features/guides/components/BuyingGuidesPage'));
 const HomePage = lazyWithRetry(() => import('./src/features/home/components/HomePage'));
+const BusinessDirectoryPage = lazy(() => import('./src/features/business-directory/components/BusinessDirectoryPage'));
 
 // Agency creation pages
 const CreateAgencyPage = lazy(() => import('./src/features/agencies/components/CreateAgencyPage'));
@@ -114,6 +115,7 @@ const AgencyPaymentPage = lazy(() => import('./src/features/agencies/components/
 
 // Cookie Consent Banner (lazy loaded - shown after initial render)
 const CookieConsent = lazy(() => import('./src/shared/components/CookieConsent'));
+const PushNotificationPrompt = lazy(() => import('./src/features/notifications/components/PushNotificationPrompt'));
 
 // Splash screen (lazy loaded - shown on initial app load to hide loading)
 const SplashScreen = lazy(() => import('./src/components/ui/SplashScreen'));
@@ -268,6 +270,39 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return;
       }
 
+      // Business directory tab routes: /business-directory/businesses, /business-directory/individuals
+      if (path === '/business-directory/businesses') {
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
+        dispatch({ type: 'SET_BUSINESS_DIRECTORY_TAB', payload: 'businesses' });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'business-directory' });
+        return;
+      }
+      if (path === '/business-directory/individuals') {
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
+        dispatch({ type: 'SET_BUSINESS_DIRECTORY_TAB', payload: 'individuals' });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'business-directory' });
+        return;
+      }
+
+      // Business directory detail route: /business-directory/:slugOrId
+      // Supports SEO slugs like "company-name-category-in-city_EncodedId" and plain encoded IDs
+      const businessMatch = path.match(/^\/business-directory\/(.+)$/);
+      if (businessMatch) {
+        const rawParam = decodeURIComponent(businessMatch[1]);
+        // Extract the encoded ID from slug suffix (after last underscore), or use the full param
+        const underscoreIdx = rawParam.lastIndexOf('_');
+        const listingId = underscoreIdx > 0 ? rawParam.slice(underscoreIdx + 1) : rawParam;
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: listingId });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'business-directory' });
+        return;
+      }
+
       // Create listing route (new listing, not edit)
       if (path === '/create-listing') {
         dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
@@ -375,6 +410,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/refund-policy': 'refund',
         '/contact': 'contact',
         '/guides': 'guides',
+        '/business-directory': 'business-directory',
         '/rent': 'rentals',
         '/rentals': 'rentals',
         '/create-agency': 'createAgency',
@@ -406,6 +442,10 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         // Clear selected agent when navigating to agents list (not agent profile)
         if (view === 'agents') {
           dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
+        }
+        // Clear selected business listing when navigating to directory list (not detail)
+        if (view === 'business-directory') {
+          dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
         }
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
       } else {
@@ -501,9 +541,9 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     });
   }, [state.activeView]);
 
-  // Also scroll to top when selected property or agency changes
+  // Also scroll to top when selected property, agency, or business listing changes
   useEffect(() => {
-    if (state.selectedProperty || state.selectedAgencyId) {
+    if (state.selectedProperty || state.selectedAgencyId || state.selectedBusinessListingId) {
       window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
 
       // Also scroll main content container
@@ -512,7 +552,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         mainContent.scrollTop = 0;
       }
     }
-  }, [state.selectedProperty, state.selectedAgencyId]);
+  }, [state.selectedProperty, state.selectedAgencyId, state.selectedBusinessListingId]);
 
   // Payment callback routes (highest priority)
   const path = window.location.pathname;
@@ -605,6 +645,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return <QueryErrorBoundary><AgentsPage /></QueryErrorBoundary>;
       case 'agencies':
         return <QueryErrorBoundary><AgenciesListPage /></QueryErrorBoundary>;
+      case 'business-directory':
+        return <QueryErrorBoundary><BusinessDirectoryPage selectedListingId={state.selectedBusinessListingId} /></QueryErrorBoundary>;
       case 'admin':
         // Only load admin dashboard for admin/super_admin users
         if (state.currentUser?.role === UserRole.ADMIN || state.currentUser?.role === UserRole.SUPER_ADMIN) {
@@ -699,19 +741,21 @@ const MainLayout: React.FC = () => {
   const isFullHeightView = isSearchPage || isRentalPage || state.activeView === 'inbox' || !!state.selectedProperty;
   // On mobile: floating header hidden, PWA top bar handles navigation
   // On desktop: floating header shown (except property details which has its own)
-  const showHeader = !isMobile && !state.selectedProperty && !state.selectedAgentId && !state.selectedAgencyId;
+  const showHeader = !isMobile && !state.selectedProperty && !state.selectedAgentId && !state.selectedAgencyId && !state.selectedBusinessListingId;
 
   // PWA top bar: shown on mobile for internal pages only
   // NOT shown on: search/rental (have their own search headers), property details (has its own header)
   const isHomeView = state.activeView === 'home';
   const isHomePage = isSearchPage || isRentalPage || isHomeView;
-  const showPWATopBar = isMobile && !state.selectedProperty && !isHomePage;
+  const showPWATopBar = isMobile && !state.selectedProperty && !state.selectedBusinessListingId && !isHomePage;
 
   // Main tab views show hamburger menu; detail views show back button
-  const isMainTabView = !state.selectedAgentId && !state.selectedAgencyId && [
+  const isMainTabView = !state.selectedAgentId && !state.selectedAgencyId && !state.selectedBusinessListingId && [
     'agents', 'agencies', 'saved-properties', 'saved-searches', 'explore-cities', 'city-dashboard',
-    'inbox', 'pricing', 'how-it-works', 'valuation', 'mortgage-calculator', 'analytics', 'admin', 'agency-dashboard',
+    'inbox', 'pricing', 'how-it-works', 'valuation', 'mortgage-calculator', 'analytics', 'admin', 'agency-dashboard', 'business-directory',
+    'account',
   ].includes(state.activeView);
+
 
   // Map activeView to readable page title
   const pageTitle = useMemo(() => {
@@ -727,6 +771,7 @@ const MainLayout: React.FC = () => {
       'saved-searches': 'nav:pageTitles.savedSearches',
       agents: 'nav:pageTitles.agents',
       agencies: 'nav:pageTitles.agencies',
+      'business-directory': 'nav:pageTitles.businessDirectory',
       pricing: 'nav:pageTitles.pricing',
       'create-listing': 'nav:pageTitles.createListing',
       'edit-listing': 'nav:pageTitles.editListing',
@@ -757,6 +802,16 @@ const MainLayout: React.FC = () => {
       window.history.pushState({}, '', buildLocalizedPath('/agents'));
       return;
     }
+    if (state.selectedBusinessListingId) {
+      dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'business-directory' });
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.history.pushState({}, '', buildLocalizedPath('/business-directory'));
+      }
+      return;
+    }
     // Use browser history for proper back navigation
     if (window.history.length > 1) {
       window.history.back();
@@ -765,7 +820,7 @@ const MainLayout: React.FC = () => {
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
       window.history.pushState({}, '', buildLocalizedPath('/search'));
     }
-  }, [state.selectedAgencyId, state.selectedAgentId, dispatch]);
+  }, [state.selectedAgencyId, state.selectedAgentId, state.selectedBusinessListingId, dispatch]);
 
   const anyNonAuthModalOpen = state.isListingLimitWarningOpen || state.isDiscountGameOpen;
 
@@ -841,6 +896,7 @@ const MainLayout: React.FC = () => {
                     onClick={() => {
                       dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
                       dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
+                      dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
                       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'home' });
                       window.history.pushState({}, '', buildLocalizedPath('/'));
                     }}
@@ -858,6 +914,7 @@ const MainLayout: React.FC = () => {
             <main id="main-content" data-scroll-container className={`flex flex-col flex-1 overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden h-full min-h-0' : 'overflow-y-auto'}`}>
                 <AppContent onToggleSidebar={() => setIsSidebarOpen(true)} />
             </main>
+
         </div>
 
         {/* Lazy loaded modals - only render when open */}
@@ -1057,6 +1114,7 @@ const AppWrapper: React.FC = () => {
                 {state.isAuthModalOpen && <AuthPage />}
                 <CookieConsent />
                 <PWAInstallPrompt />
+                <PushNotificationPrompt />
             </Suspense>
         </>
     );

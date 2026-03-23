@@ -191,13 +191,43 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                             '@type': 'ItemList',
                             name: seoTitle,
                             description: seoDescription,
+                            url: `${window.location.origin}/search${window.location.search}`,
                             numberOfItems: listProperties.length,
-                            itemListElement: listProperties.slice(0, 10).map((p: Property, i: number) => ({
+                            itemListElement: listProperties.slice(0, 20).map((p: Property, i: number) => ({
                                 '@type': 'ListItem',
                                 position: i + 1,
                                 url: `${window.location.origin}/property/${p.id}`,
-                                name: `${p.beds}-Bed ${p.propertyType || 'Property'} in ${p.city}, ${p.country}`,
+                                name: `${p.beds ? p.beds + '-Bed ' : ''}${p.propertyType || 'Property'} in ${p.city}, ${p.country}`,
                                 ...(p.imageUrl && { image: p.imageUrl }),
+                                item: {
+                                    '@type': 'RealEstateListing',
+                                    name: `${p.beds ? p.beds + '-Bed ' : ''}${p.propertyType || 'Property'} in ${p.city}, ${p.country}`,
+                                    url: `${window.location.origin}/property/${p.id}`,
+                                    ...(p.imageUrl && { image: p.imageUrl }),
+                                    ...(p.price && {
+                                        offers: {
+                                            '@type': 'Offer',
+                                            price: p.price,
+                                            priceCurrency: p.currency || 'EUR',
+                                            availability: 'https://schema.org/InStock',
+                                        },
+                                    }),
+                                    ...(p.beds && { numberOfBedrooms: p.beds }),
+                                    ...(p.baths && { numberOfBathroomsTotal: p.baths }),
+                                    ...(p.sqft && {
+                                        floorSize: {
+                                            '@type': 'QuantitativeValue',
+                                            value: p.sqft,
+                                            unitCode: 'MTK',
+                                            unitText: 'm²',
+                                        },
+                                    }),
+                                    address: {
+                                        '@type': 'PostalAddress',
+                                        addressLocality: p.city,
+                                        addressCountry: p.country,
+                                    },
+                                },
                             })),
                         })}
                     </script>

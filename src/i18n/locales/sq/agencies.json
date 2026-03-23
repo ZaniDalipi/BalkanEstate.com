@@ -7,7 +7,7 @@
   },
   "search": {
     "title": "Gjeni Agjencin Tuaj Ideal",
-    "subtitle": "Kërkoni {count}+ agjenci profesionale në të gjithë Ballkanin",
+    "subtitle": "Kërkoni {{count}}+ agjenci profesionale në të gjithë Ballkanin",
     "tabs": {
       "city": "Qyteti",
       "agencyName": "Emri i Agjencisë"
@@ -39,7 +39,7 @@
     "title": "Agjencitë Kryesore të Pasurive të Paluajtshme",
     "featuredTitle": "Agjenci të Veçanta",
     "yourAgencyTitle": "Agjencia Juaj",
-    "showingMatching": "Duke shfaqur {count} agjenci që përputhen me \"{query}\"",
+    "showingMatching": "Duke shfaqur {{count}} agjenci që përputhen me \"{{query}}\"",
     "browseAgencies": "Shfletoni agjenci profesionale me ekipe me eksperiencë",
     "agenciesFound": "agjenci u gjetën",
     "moreAgencies": "Më Shumë Agjenci"
@@ -53,7 +53,7 @@
     "certs": "Çert.",
     "viewProfile": "Shiko Profilin",
     "view": "Shiko",
-    "more": "+{count} më shumë"
+    "more": "+{{count}} më shumë"
   },
   "statsCards": {
     "mostProperties": "Më Shumë Prona",

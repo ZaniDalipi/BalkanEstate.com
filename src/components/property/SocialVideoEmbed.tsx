@@ -1,5 +1,6 @@
 // SocialVideoEmbed Component
 // Embeds TikTok and Instagram videos using official embed methods
+// Both render in a 9:16 vertical video format
 
 import React, { useMemo, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -112,41 +113,18 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
     };
   }, [platform, tiktokInfo.id]);
 
-  // Load Instagram embed script with retry
+  // Instagram iframe load timeout
   useEffect(() => {
     if (platform !== 'instagram' || !instagramId) return;
 
-    const existingScript = document.querySelector('script[src*="instagram.com/embed.js"]');
-    if (!existingScript) {
-      const script = document.createElement('script');
-      script.src = 'https://www.instagram.com/embed.js';
-      script.async = true;
-      script.onerror = () => setEmbedFailed(true);
-      document.body.appendChild(script);
-    }
-
-    // Process embeds after delays with retries
-    const retries = [500, 1500, 3000, 5000];
-    const timers = retries.map(delay =>
-      setTimeout(() => {
-        if ((window as any).instgrm?.Embeds?.process) {
-          (window as any).instgrm.Embeds.process();
-        }
-      }, delay)
-    );
-
-    // If still not rendered after 8s, show fallback
     const fallbackTimer = setTimeout(() => {
       if (containerRef.current) {
         const iframe = containerRef.current.querySelector('iframe');
         if (!iframe) setEmbedFailed(true);
       }
-    }, 8000);
+    }, 10000);
 
-    return () => {
-      timers.forEach(clearTimeout);
-      clearTimeout(fallbackTimer);
-    };
+    return () => clearTimeout(fallbackTimer);
   }, [platform, instagramId]);
 
   // Don't render if no valid platform or ID
@@ -157,6 +135,11 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
   const instagramPermalink = isReel
     ? `https://www.instagram.com/reel/${instagramId}/`
     : `https://www.instagram.com/p/${instagramId}/`;
+
+  // Instagram embed iframe URL - same format as PropertyGallery uses
+  const instagramEmbedUrl = isReel
+    ? `https://www.instagram.com/reel/${instagramId}/embed/`
+    : `https://www.instagram.com/p/${instagramId}/embed/`;
 
   // TikTok cite URL
   const tiktokCiteUrl = tiktokInfo.username
@@ -251,57 +234,40 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
           </div>
         )}
 
-        {/* Instagram Embed - Using official blockquote */}
+        {/* Instagram Embed - iframe in 9:16 container to match TikTok */}
         {platform === 'instagram' && !embedFailed && (
-          <blockquote
-            className="instagram-media"
-            data-instgrm-captioned
-            data-instgrm-permalink={instagramPermalink}
-            data-instgrm-version="14"
-            style={{
-              background: '#FFF',
-              border: 0,
-              borderRadius: '3px',
-              boxShadow: '0 0 1px 0 rgba(0,0,0,0.5), 0 1px 10px 0 rgba(0,0,0,0.15)',
-              margin: '1px',
-              maxWidth: '540px',
-              minWidth: '326px',
-              padding: 0,
-              width: '99.375%',
-            }}
-          >
-            <div style={{ padding: '16px' }}>
+          <div className="w-full flex justify-center">
+            <div
+              className="relative bg-black rounded-lg overflow-hidden"
+              style={{
+                width: '100%',
+                maxWidth: '400px',
+                aspectRatio: '9 / 16',
+              }}
+            >
+              <iframe
+                src={instagramEmbedUrl}
+                className="absolute inset-0 w-full h-full border-0"
+                allowFullScreen
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                title="Instagram Video"
+                loading="lazy"
+                onError={() => setEmbedFailed(true)}
+              />
+              {/* Open in Instagram link - bottom overlay */}
               <a
                 href={instagramPermalink}
-                style={{
-                  background: '#FFFFFF',
-                  lineHeight: 0,
-                  padding: 0,
-                  textAlign: 'center',
-                  textDecoration: 'none',
-                  width: '100%',
-                }}
                 target="_blank"
                 rel="noopener noreferrer"
+                className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-3 py-1.5 bg-black/60 backdrop-blur-sm text-white text-xs font-medium rounded-full hover:bg-black/80 transition-colors"
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-neutral-200 rounded-full" />
-                  <div className="flex-1">
-                    <div className="h-3 bg-neutral-200 rounded w-24 mb-2" />
-                    <div className="h-3 bg-neutral-200 rounded w-16" />
-                  </div>
-                </div>
-                <div className="aspect-square bg-neutral-100 rounded flex items-center justify-center mb-4">
-                  <svg className="w-16 h-16 text-neutral-300" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M8 5v14l11-7z"/>
-                  </svg>
-                </div>
-                <div className="text-center text-blue-500 font-medium">
-                  View this post on Instagram
-                </div>
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                Instagram
               </a>
             </div>
-          </blockquote>
+          </div>
         )}
       </div>
     </div>

@@ -170,7 +170,13 @@
     "availableBadge": "AVAILABLE {{date}}",
     "inquireAvailability": "Inquire for Availability",
     "rentedNotice": "This property is currently rented",
-    "availableFromNotice": "Expected to be available from {{date}}"
+    "availableFromNotice": "Expected to be available from {{date}}",
+    "dateInPastError": "Date cannot be in the past.",
+    "tenantNameLabel": "Tenant Name",
+    "tenantNamePlaceholder": "e.g. John Smith",
+    "tenantNameHint": "Optional. Only visible to you.",
+    "rentalNotesLabel": "Notes",
+    "rentalNotesPlaceholder": "e.g. Monthly payment on the 1st, deposit paid..."
   },
   "rules": {
     "title": "Rental Rules — {{country}}",
