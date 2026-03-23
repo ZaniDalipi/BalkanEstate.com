@@ -212,7 +212,8 @@
     "needAgencyDescription": "Subscribe to our Enterprise plan to create your agency and unlock these features.",
     "viewEnterprise": "View Enterprise Plan",
     "comingSoon": "Coming Soon",
-    "featureComingSoon": "Agency featuring will be available soon!"
+    "featureComingSoon": "Agency featuring will be available soon!",
+    "selectDuration": "Select duration:"
   },
   "coupon": {
     "title": "Do you have a coupon from the seller?",

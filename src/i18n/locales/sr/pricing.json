@@ -1,10 +1,10 @@
 {
   "agencyDuration": {
-    "1week": "1 Недеља",
-    "2weeks": "2 Недеље",
-    "4weeks": "4 Недеље",
-    "90days": "90 Дана",
-    "bestValue": "НАЈБОЉА ВРЕДНОСТ",
+    "1week": "1 Nedelja",
+    "2weeks": "2 Nedelje",
+    "4weeks": "4 Nedelje",
+    "90days": "90 Dana",
+    "bestValue": "NAJBOLJA VREDNOST",
     "selectDuration": "Изаберите трајање:",
     "noPlansAvailable": "Тренутно нема доступних планова за истицање агенције."
   },
@@ -268,7 +268,8 @@
     "featureComingSoon": "Isticanje agencije biće uskoro dostupno!",
     "oneWeek": "1 WEEK",
     "perWeek": "per week",
-    "showsEverywhere": "Shows everywhere!"
+    "showsEverywhere": "Shows everywhere!",
+    "selectDuration": "Izaberite trajanje:"
   },
   "contact": {
     "haveQuestions": "Imate pitanja?",

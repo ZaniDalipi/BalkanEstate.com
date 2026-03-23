@@ -273,7 +273,8 @@
     "needAgencyDescription": "Abonohu në planin tonë Ndërmarrje për të krijuar agjencin tënde dhe për të zhbllokuar këto veçori.",
     "viewEnterprise": "Shiko Planin Ndërmarrje",
     "comingSoon": "Së Shpejti",
-    "featureComingSoon": "Veçoritë e agjencisë do të jenë të disponueshme së shpejti!"
+    "featureComingSoon": "Veçoritë e agjencisë do të jenë të disponueshme së shpejti!",
+    "selectDuration": "Zgjidh kohëzgjatjen:"
   },
   "contact": {
     "haveQuestions": "Keni pyetje?",

@@ -4,7 +4,7 @@
     "2weeks": "2 Εβδομάδες",
     "4weeks": "4 Εβδομάδες",
     "90days": "90 Ημέρες",
-    "bestValue": "ΚΑΛΥΤΕΡΗ ΑΞΙΑ",
+    "bestValue": "ΚΑΛΥΤΕΡΗ ΤΙΜΗ",
     "selectDuration": "Επιλέξτε διάρκεια:",
     "noPlansAvailable": "Δεν υπάρχουν διαθέσιμα πλάνα για την προβολή γραφείου αυτή τη στιγμή."
   },
@@ -268,7 +268,8 @@
     "featureComingSoon": "Η προβολή μεσιτικού θα είναι διαθέσιμη σύντομα!",
     "oneWeek": "1 WEEK",
     "perWeek": "per week",
-    "showsEverywhere": "Shows everywhere!"
+    "showsEverywhere": "Shows everywhere!",
+    "selectDuration": "Επιλέξτε διάρκεια:"
   },
   "contact": {
     "haveQuestions": "Έχετε ερωτήσεις;",

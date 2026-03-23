@@ -268,7 +268,8 @@
     "featureComingSoon": "Истакнувањето на агенција ќе биде наскоро достапно!",
     "oneWeek": "1 WEEK",
     "perWeek": "per week",
-    "showsEverywhere": "Shows everywhere!"
+    "showsEverywhere": "Shows everywhere!",
+    "selectDuration": "Избери трајање:"
   },
   "contact": {
     "haveQuestions": "Имате прашања?",

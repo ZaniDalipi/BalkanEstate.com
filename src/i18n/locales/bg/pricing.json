@@ -268,7 +268,8 @@
     "featureComingSoon": "Препоръчването на агенции ще бъде достъпно скоро!",
     "oneWeek": "1 WEEK",
     "perWeek": "per week",
-    "showsEverywhere": "Shows everywhere!"
+    "showsEverywhere": "Shows everywhere!",
+    "selectDuration": "Избери продължителност:"
   },
   "contact": {
     "haveQuestions": "Имате въпроси?",
