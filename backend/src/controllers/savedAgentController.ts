@@ -4,6 +4,7 @@ import Agent from '../models/Agent';
 import { IUser } from '../models/User';
 import { apiLogger } from '../utils/logger';
 import { isValidObjectId } from '../utils/validateParams';
+import { resolveId } from '../utils/idObfuscation';
 
 // @desc    Get user's saved agents
 // @route   GET /api/saved-agents
@@ -52,24 +53,26 @@ export const toggleSavedAgent = async (
       return;
     }
 
-    const { agentId } = req.body;
+    const { agentId: rawAgentId } = req.body;
 
-    if (!agentId) {
+    if (!rawAgentId) {
       res.status(400).json({ message: 'Agent ID is required' });
       return;
     }
 
-    // Check if agent exists - support MongoDB _id, custom agentId, and userId
+    // Resolve obfuscated/encoded IDs back to raw hex ObjectIds
+    const resolvedId = resolveId(rawAgentId);
+
+    // Check if agent exists - support raw ObjectId, obfuscated ID, custom agentId slug
     let agent = null;
-    if (isValidObjectId(agentId)) {
-      agent = await Agent.findById(agentId);
+    if (resolvedId && isValidObjectId(resolvedId)) {
+      agent = await Agent.findById(resolvedId);
       if (!agent) {
-        // The frontend may send the User's _id instead of the Agent doc _id
-        agent = await Agent.findOne({ userId: agentId });
+        agent = await Agent.findOne({ userId: resolvedId });
       }
     }
     if (!agent) {
-      agent = await Agent.findOne({ agentId });
+      agent = await Agent.findOne({ agentId: rawAgentId });
     }
 
     if (!agent) {
@@ -117,22 +120,25 @@ export const checkSavedAgent = async (
       return;
     }
 
-    const paramId = req.params.agentId as string;
-    if (!paramId) {
+    const rawParamId = req.params.agentId as string;
+    if (!rawParamId) {
       res.status(400).json({ message: 'Agent ID is required' });
       return;
     }
 
-    // Resolve the agent's MongoDB _id (supports ObjectId, custom agentId, and userId)
+    // Resolve obfuscated/encoded IDs back to raw hex ObjectIds
+    const resolvedId = resolveId(rawParamId);
+
+    // Resolve the agent's MongoDB _id (supports raw ObjectId, obfuscated ID, custom agentId slug)
     let agent = null;
-    if (isValidObjectId(paramId)) {
-      agent = await Agent.findById(paramId).select('_id');
+    if (resolvedId && isValidObjectId(resolvedId)) {
+      agent = await Agent.findById(resolvedId).select('_id');
       if (!agent) {
-        agent = await Agent.findOne({ userId: paramId }).select('_id');
+        agent = await Agent.findOne({ userId: resolvedId }).select('_id');
       }
     }
     if (!agent) {
-      agent = await Agent.findOne({ agentId: paramId }).select('_id');
+      agent = await Agent.findOne({ agentId: rawParamId }).select('_id');
     }
 
     if (!agent) {
