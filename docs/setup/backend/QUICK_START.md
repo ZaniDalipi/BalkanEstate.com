@@ -80,9 +80,10 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 FACEBOOK_APP_ID=your_facebook_app_id
 FACEBOOK_APP_SECRET=your_facebook_app_secret
 
-# Stripe (optional - for payments)
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
+# Braintree (optional - for payments)
+BRAINTREE_MERCHANT_ID=your_merchant_id
+BRAINTREE_PUBLIC_KEY=your_public_key
+BRAINTREE_PRIVATE_KEY=your_private_key
 
 # Redis (optional - for caching/sessions)
 REDIS_URL=redis://localhost:6379
@@ -294,7 +295,7 @@ Check `FRONTEND_URL` in `.env` matches your frontend URL.
 ### Optional
 - `PORT` - Server port (default: 5000)
 - `CLOUDINARY_*` - Image hosting
-- `STRIPE_*` - Payments
+- `BRAINTREE_*` - Payments
 - `SMTP_*` - Email notifications
 - `GOOGLE_*`, `FACEBOOK_*` - OAuth
 

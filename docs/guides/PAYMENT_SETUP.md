@@ -30,8 +30,8 @@ The payment system supports:
 
 ## Prerequisites
 
-1. **Stripe Account**: Create a free account at [stripe.com](https://stripe.com)
-2. **Stripe API Keys**: Get your publishable and secret keys from the Stripe Dashboard
+1. **Braintree Account**: Create a sandbox account at [braintreegateway.com](https://www.braintreegateway.com)
+2. **Braintree API Credentials**: Get your Merchant ID, Public Key, and Private Key from the Braintree Control Panel
 3. **Node.js & npm**: Ensure you have Node.js 18+ installed
 
 ## Installation
@@ -41,14 +41,14 @@ The payment system supports:
 #### Backend
 ```bash
 cd backend
-npm install stripe
-npm install --save-dev @types/stripe
+npm install braintree
+npm install --save-dev @types/braintree
 ```
 
 #### Frontend
 ```bash
 cd ..  # back to root
-npm install @stripe/stripe-js @stripe/react-stripe-js
+npm install braintree-web braintree-web-drop-in
 ```
 
 ### 2. Configure Environment Variables
@@ -57,58 +57,51 @@ npm install @stripe/stripe-js @stripe/react-stripe-js
 Create or update `backend/.env` with the following:
 
 ```env
-# Stripe Configuration
-STRIPE_SECRET_KEY=sk_test_YOUR_SECRET_KEY_HERE
-STRIPE_WEBHOOK_SECRET=whsec_YOUR_WEBHOOK_SECRET_HERE
+# Braintree Configuration
+BRAINTREE_MERCHANT_ID=your_merchant_id_here
+BRAINTREE_PUBLIC_KEY=your_public_key_here
+BRAINTREE_PRIVATE_KEY=your_private_key_here
 
-# These can be found in your Stripe Dashboard
+# These can be found in your Braintree Control Panel
 ```
 
 #### Frontend (.env or .env.local)
-Create or update `.env` with:
+No frontend keys are required. The backend generates a client token that the frontend uses to initialize the Braintree Drop-in UI.
 
-```env
-VITE_STRIPE_PUBLISHABLE_KEY=pk_test_YOUR_PUBLISHABLE_KEY_HERE
-```
+**⚠️ Important**: Never commit your private keys to version control!
 
-**⚠️ Important**: Never commit your secret keys to version control!
+### 3. Get Your Braintree Keys
 
-### 3. Get Your Stripe Keys
-
-1. Log in to [Stripe Dashboard](https://dashboard.stripe.com)
-2. Go to **Developers** → **API keys**
-3. Copy your **Publishable key** (starts with `pk_test_`) → Add to frontend `.env`
-4. Copy your **Secret key** (starts with `sk_test_`) → Add to backend `.env`
+1. Log in to [Braintree Control Panel](https://sandbox.braintreegateway.com/login) (sandbox) or [Production Control Panel](https://www.braintreegateway.com/login)
+2. Go to **Settings** → **API** (under "API Keys, Tokenization Keys, Encryption Keys")
+3. Copy your **Merchant ID** → Add to backend `.env` as `BRAINTREE_MERCHANT_ID`
+4. Copy your **Public Key** → Add to backend `.env` as `BRAINTREE_PUBLIC_KEY`
+5. Copy your **Private Key** → Add to backend `.env` as `BRAINTREE_PRIVATE_KEY`
 
 ### 4. Set Up Webhook (for Production)
 
-Webhooks allow Stripe to notify your backend when payments succeed/fail.
+Webhooks allow Braintree to notify your backend when payments succeed/fail.
 
-#### For Development (using Stripe CLI):
+#### For Development:
+Use a tunneling tool like ngrok to expose your local server:
 ```bash
-# Install Stripe CLI
-brew install stripe/stripe-cli/stripe  # macOS
-# or download from https://stripe.com/docs/stripe-cli
+# Install and run ngrok
+ngrok http 5001
 
-# Login
-stripe login
-
-# Forward webhooks to local server
-stripe listen --forward-to localhost:5001/api/payments/webhook
+# Use the ngrok URL as your webhook destination in the Braintree Control Panel
 ```
 
-This will give you a webhook secret starting with `whsec_` - add it to your backend `.env`.
-
 #### For Production:
-1. Go to **Stripe Dashboard** → **Developers** → **Webhooks**
-2. Click **Add endpoint**
+1. Go to **Braintree Control Panel** → **Settings** → **Webhooks**
+2. Click **Create New Webhook**
 3. Enter your production URL: `https://your-domain.com/api/payments/webhook`
-4. Select events to listen for:
-   - `payment_intent.succeeded`
-   - `payment_intent.payment_failed`
-   - `customer.subscription.deleted`
-   - `customer.subscription.updated`
-5. Copy the signing secret and add to production `.env`
+4. Select notifications to listen for:
+   - `subscription_charged_successfully`
+   - `subscription_charged_unsuccessfully`
+   - `subscription_canceled`
+   - `subscription_went_active`
+   - `subscription_expired`
+5. Braintree will verify the endpoint automatically
 
 ## Payment Configuration
 
@@ -174,18 +167,17 @@ export const PAYMENT_PLANS: Record<string, PaymentPlan> = {
 
 ### Test Card Numbers
 
-Stripe provides test cards for development:
+Braintree provides test card numbers for sandbox development:
 
 | Card Number         | Description           |
 |--------------------|-----------------------|
-| 4242 4242 4242 4242 | Success (Visa)        |
-| 4000 0025 0000 3155 | 3D Secure required    |
-| 4000 0000 0000 9995 | Declined (insufficient funds) |
-| 4000 0000 0000 0002 | Declined (generic)    |
+| 4111 1111 1111 1111 | Success (Visa)        |
+| 5555 5555 5555 4444 | Success (Mastercard)  |
+| 4000 1111 1111 1115 | Processor declined    |
+| 4000 0000 0000 0010 | Gateway rejected      |
 
 - **Expiry**: Any future date (e.g., 12/34)
 - **CVC**: Any 3 digits (e.g., 123)
-- **ZIP**: Any 5 digits (e.g., 12345)
 
 ### Testing the Flow
 
@@ -193,36 +185,36 @@ Stripe provides test cards for development:
 2. Start your frontend: `npm run dev`
 3. Navigate to subscription page
 4. Select a plan
-5. Use test card `4242 4242 4242 4242`
+5. Use test card `4111 1111 1111 1111`
 6. Complete payment
 7. Check backend logs for "Subscription activated"
-8. Check Stripe Dashboard → **Payments** to see the test payment
+8. Check Braintree Control Panel → **Transactions** to see the test payment
 
 ## Going Live
 
-### 1. Switch to Live Mode
+### 1. Switch to Production Mode
 
-1. In Stripe Dashboard, toggle from **Test mode** to **Live mode**
-2. Get your **live** API keys (start with `pk_live_` and `sk_live_`)
-3. Update environment variables with live keys
+1. In Braintree Control Panel, switch from **Sandbox** to **Production**
+2. Get your **production** API credentials (Merchant ID, Public Key, Private Key)
+3. Update environment variables with production credentials
 
-### 2. Create Stripe Products (Optional but Recommended)
+### 2. Create Braintree Plans (Optional but Recommended)
 
 For better tracking and subscription management:
 
-1. Go to **Products** in Stripe Dashboard
-2. Create products for each plan:
+1. Go to **Plans** in Braintree Control Panel (under Subscriptions)
+2. Create plans for each tier:
    - **Buyer Pro Monthly** - €1.50/month
    - **Pro Monthly** - €25/month
    - **Pro Annual** - €200/year
    - **Enterprise** - €1000/year
-3. Copy the Price IDs and add to `config/paymentConfig.ts`:
+3. Copy the Plan IDs and add to `config/paymentConfig.ts`:
 
 ```typescript
 export const PAYMENT_PLANS: Record<string, PaymentPlan> = {
   buyer_pro_monthly: {
     // ...
-    stripePriceId: 'price_XXXXXXXXXXXXX',  // Add Price ID here
+    braintreePlanId: 'buyer_pro_monthly',  // Add Plan ID here
   },
 };
 ```
@@ -243,28 +235,28 @@ export const PAYMENT_PLANS: Record<string, PaymentPlan> = {
 
 **Solution**: Check that:
 1. Backend is running
-2. `STRIPE_SECRET_KEY` is set in backend `.env`
-3. Payment endpoint is accessible: `POST /api/payments/create-intent`
+2. `BRAINTREE_MERCHANT_ID`, `BRAINTREE_PUBLIC_KEY`, and `BRAINTREE_PRIVATE_KEY` are set in backend `.env`
+3. Payment endpoint is accessible: `POST /api/payments/client-token`
 
-### "Stripe is not defined"
+### "Braintree Drop-in failed to initialize"
 
 **Solution**: Check that:
-1. `VITE_STRIPE_PUBLISHABLE_KEY` is set in frontend `.env`
+1. The backend is returning a valid client token
 2. You've restarted the frontend dev server after adding env vars
 
 ### Webhook not receiving events
 
 **Solution**:
-1. Verify webhook secret is correct
-2. Check Stripe CLI is running: `stripe listen --forward-to localhost:5001/api/payments/webhook`
-3. Check endpoint accepts raw body: `express.raw({ type: 'application/json' })`
+1. Verify webhook URL is correct in Braintree Control Panel
+2. Check that your server is publicly accessible (use ngrok for local development)
+3. Check endpoint is properly configured to parse Braintree webhook notifications
 
 ### Payment succeeds but subscription not activated
 
 **Solution**:
 1. Check backend logs for errors in `handlePaymentSuccess`
 2. Verify user exists in database
-3. Check webhook events in Stripe Dashboard → **Developers** → **Webhooks**
+3. Check webhook notifications in Braintree Control Panel → **Settings** → **Webhooks**
 
 ## Payment Method Recommendations
 
@@ -285,25 +277,26 @@ export const PAYMENT_PLANS: Record<string, PaymentPlan> = {
 
 ## Support
 
-- **Stripe Documentation**: https://stripe.com/docs
-- **Stripe Support**: Available 24/7 in Stripe Dashboard
-- **Payment Element Docs**: https://stripe.com/docs/payments/payment-element
+- **Braintree Documentation**: https://developer.paypal.com/braintree/docs
+- **Braintree Support**: Available in Braintree Control Panel
+- **Drop-in UI Docs**: https://developer.paypal.com/braintree/docs/guides/drop-in/overview
 
 ## Architecture
 
 ### Components
 - **PaymentWindow**: Main payment modal component
 - **PaymentConfig**: Configuration for payment methods and plans
-- **Backend Controller**: Handles payment intents and webhooks
+- **Backend Controller**: Handles transactions and webhooks
 
 ### Flow
 1. User selects a plan
-2. Frontend creates payment intent via API
-3. Stripe Payment Element displays available payment methods
-4. User completes payment
-5. Stripe webhook notifies backend
-6. Backend updates user subscription status
-7. User sees success message
+2. Frontend requests a client token from the backend
+3. Braintree Drop-in UI displays available payment methods
+4. User completes payment and a nonce is returned
+5. Backend creates transaction using the nonce
+6. Braintree webhook notifies backend
+7. Backend updates user subscription status
+8. User sees success message
 
 ## Customization Guide
 
@@ -340,15 +333,19 @@ export const BUYER_PAYMENT_CONFIG: UserTypePaymentConfig = {
 
 ### Custom Branding
 
-Update Stripe appearance in `PaymentWindow.tsx`:
+Update Braintree Drop-in appearance in `PaymentWindow.tsx`:
 ```typescript
-const stripeOptions = {
+const braintreeOptions = {
+  authorization: clientToken,
   // ...
-  appearance: {
-    theme: 'stripe' as const,
-    variables: {
-      colorPrimary: '#YOUR_PRIMARY_COLOR',  // Change colors
-      // ...
+  card: {
+    overrides: {
+      styles: {
+        input: {
+          color: '#YOUR_TEXT_COLOR',
+          'font-size': '16px',
+        },
+      },
     },
   },
 };

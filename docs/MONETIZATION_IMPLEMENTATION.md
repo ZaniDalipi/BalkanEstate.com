@@ -249,7 +249,7 @@ Only €0.60 per listing/month vs managing 3 free"
 5. Add buyer dashboard
 
 ### Phase 4: Payment Integration (Week 4)
-1. Update Stripe products
+1. Update Braintree plans
 2. Add agency subscription checkout
 3. Add buyer subscription checkout
 4. Add coupon redemption flow
@@ -270,7 +270,7 @@ Only €0.60 per listing/month vs managing 3 free"
 |------|--------|------------|
 | Data migration failure | High | Create backup + rollback script |
 | Existing users lose access | High | Grandfather existing Pro users |
-| Stripe integration issues | Medium | Test thoroughly in staging |
+| Braintree integration issues | Medium | Test thoroughly in staging |
 | License verification backlog | Medium | Hire temporary reviewers |
 | Agency churn | Medium | Add trial period, onboarding |
 

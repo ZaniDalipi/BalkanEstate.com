@@ -5,7 +5,7 @@ A complete backend subscription management system for mobile and web application
 ## Features
 
 ### Core Functionality
-- ✅ Multi-platform support (Google Play, App Store, Stripe/Web)
+- ✅ Multi-platform support (Google Play, App Store, Braintree/Web)
 - ✅ Automatic subscription renewal tracking
 - ✅ Real-time webhook notifications from stores
 - ✅ Purchase token validation
@@ -151,7 +151,7 @@ Required variables:
 Optional (for store integration):
 - Google Play credentials
 - App Store credentials
-- Stripe credentials
+- Braintree credentials
 
 ### 3. Start the Server
 

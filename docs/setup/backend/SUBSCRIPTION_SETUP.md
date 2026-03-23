@@ -18,7 +18,7 @@ This guide explains how to integrate the subscription management system into you
 The subscription system supports:
 - **Google Play** subscriptions (Android)
 - **App Store** subscriptions (iOS)
-- **Web/Stripe** subscriptions (Web)
+- **Web/Braintree** subscriptions (Web)
 - Automatic renewal tracking
 - Grace period handling
 - Payment reconciliation
@@ -77,7 +77,7 @@ const products = [
     gracePeriodDays: 16,
     googlePlayProductId: 'buyer_pro_monthly',
     appStoreProductId: 'buyer_pro_monthly',
-    stripeProductId: 'prod_buyer_pro_monthly',
+    braintreePlanId: 'buyer_pro_monthly',
     features: [
       'Instant notifications',
       'Save unlimited searches',
