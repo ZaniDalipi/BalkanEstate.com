@@ -59,10 +59,14 @@ export const toggleSavedAgent = async (
       return;
     }
 
-    // Check if agent exists - support both MongoDB _id and custom agentId
+    // Check if agent exists - support MongoDB _id, custom agentId, and userId
     let agent = null;
     if (isValidObjectId(agentId)) {
       agent = await Agent.findById(agentId);
+      if (!agent) {
+        // The frontend may send the User's _id instead of the Agent doc _id
+        agent = await Agent.findOne({ userId: agentId });
+      }
     }
     if (!agent) {
       agent = await Agent.findOne({ agentId });
@@ -119,10 +123,13 @@ export const checkSavedAgent = async (
       return;
     }
 
-    // Resolve the agent's MongoDB _id (supports both ObjectId and custom agentId)
+    // Resolve the agent's MongoDB _id (supports ObjectId, custom agentId, and userId)
     let agent = null;
     if (isValidObjectId(paramId)) {
       agent = await Agent.findById(paramId).select('_id');
+      if (!agent) {
+        agent = await Agent.findOne({ userId: paramId }).select('_id');
+      }
     }
     if (!agent) {
       agent = await Agent.findOne({ agentId: paramId }).select('_id');
