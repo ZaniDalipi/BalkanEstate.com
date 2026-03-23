@@ -294,6 +294,21 @@
       "no": "Nu",
       "any": "Oricare",
       "yes": "Da"
+    },
+    "visitAvailability": {
+      "title": "Disponibilitate Vizite",
+      "enable": "Activează Programarea",
+      "description": "Permite vizitatorilor să programeze vizite online. Definește zilele și orele tale disponibile.",
+      "availableDays": "Zile Disponibile"
+    },
+    "imageTags": {
+      "exterior": "Exterior",
+      "livingRoom": "Cameră de Zi",
+      "kitchen": "Bucătărie",
+      "bedroom": "Dormitor",
+      "bathroom": "Baie",
+      "other": "Altele",
+      "selectTag": "Alege Etichetă"
     }
   },
   "myListings": {

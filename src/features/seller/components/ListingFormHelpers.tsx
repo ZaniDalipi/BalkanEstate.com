@@ -176,6 +176,7 @@ export const ImageTagSelector: React.FC<{
     options: string[];
     onChange: (tag: string) => void;
 }> = ({ value, options, onChange }) => {
+    const { t } = useTranslation(['seller']);
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -196,14 +197,26 @@ export const ImageTagSelector: React.FC<{
         };
     }, []);
 
-    const selectedLabel = value ? value.replace(/_/g, ' ') : 'Select Tag';
+    const getTagLabel = (tag: string) => {
+        const tagMap: Record<string, string> = {
+            'exterior': t('seller:createListing.imageTags.exterior', 'Exterior'),
+            'living_room': t('seller:createListing.imageTags.livingRoom', 'Living Room'),
+            'kitchen': t('seller:createListing.imageTags.kitchen', 'Kitchen'),
+            'bedroom': t('seller:createListing.imageTags.bedroom', 'Bedroom'),
+            'bathroom': t('seller:createListing.imageTags.bathroom', 'Bathroom'),
+            'other': t('seller:createListing.imageTags.other', 'Other'),
+        };
+        return tagMap[tag] || tag.replace(/_/g, ' ');
+    };
+
+    const selectedLabel = value ? getTagLabel(value) : t('seller:createListing.imageTags.selectTag', 'Select Tag');
 
     return (
         <div className="relative" ref={containerRef}>
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full glass-input px-3 py-2 text-sm font-semibold flex justify-between items-center capitalize"
+                className="w-full glass-input px-3 py-2 text-sm font-semibold flex justify-between items-center"
             >
                 {selectedLabel}
                 <svg className={`w-4 h-4 ml-2 transition-transform text-gray-400 ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -214,9 +227,9 @@ export const ImageTagSelector: React.FC<{
                         <li
                             key={tag}
                             onClick={() => handleSelect(tag)}
-                            className="px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer capitalize transition-colors"
+                            className="px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors"
                         >
-                            {tag.replace(/_/g, ' ')}
+                            {getTagLabel(tag)}
                         </li>
                     ))}
                 </ul>

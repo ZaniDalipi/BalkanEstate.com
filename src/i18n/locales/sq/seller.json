@@ -294,6 +294,21 @@
       "no": "Jo",
       "any": "Çfarëdo",
       "yes": "Po"
+    },
+    "visitAvailability": {
+      "title": "Disponibiliteti i Vizitave",
+      "enable": "Aktivizo planifikimin",
+      "description": "Lejoji vizitorët të planifikojnë vizita online. Përcaktoni ditët dhe orët tuaja të disponueshme.",
+      "availableDays": "Ditët e Disponueshme"
+    },
+    "imageTags": {
+      "exterior": "Jashtë",
+      "livingRoom": "Dhoma e Ngrënies",
+      "kitchen": "Kuzhinë",
+      "bedroom": "Dhoma e Gjumit",
+      "bathroom": "Banja",
+      "other": "Tjetër",
+      "selectTag": "Zgjidh Etiketën"
     }
   },
   "propertyTypes": {

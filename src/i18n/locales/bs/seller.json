@@ -294,6 +294,21 @@
       "no": "Ne",
       "any": "Bilo koji",
       "yes": "Da"
+    },
+    "visitAvailability": {
+      "title": "Dostupnost Poseta",
+      "enable": "Omogući zakazivanje",
+      "description": "Dozvolite posjetiocima da zakažu preglede online. Definirajte svoje dostupne dane i vrijeme.",
+      "availableDays": "Dostupni Dani"
+    },
+    "imageTags": {
+      "exterior": "Eksterijer",
+      "livingRoom": "Dnevni Boravak",
+      "kitchen": "Kuhinja",
+      "bedroom": "Spavaća Soba",
+      "bathroom": "Kupaonica",
+      "other": "Ostalo",
+      "selectTag": "Odaberi Oznaku"
     }
   },
   "myListings": {

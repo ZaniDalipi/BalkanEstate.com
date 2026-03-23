@@ -301,6 +301,21 @@
       "no": "No",
       "any": "Any",
       "yes": "Yes"
+    },
+    "visitAvailability": {
+      "title": "Visit Availability",
+      "enable": "Enable scheduling",
+      "description": "Allow visitors to schedule viewings online. Define your available days and hours.",
+      "availableDays": "Available Days"
+    },
+    "imageTags": {
+      "exterior": "Exterior",
+      "livingRoom": "Living Room",
+      "kitchen": "Kitchen",
+      "bedroom": "Bedroom",
+      "bathroom": "Bathroom",
+      "other": "Other",
+      "selectTag": "Select Tag"
     }
   },
   "myListings": {
