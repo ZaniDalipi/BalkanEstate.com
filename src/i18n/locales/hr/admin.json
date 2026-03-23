@@ -494,7 +494,7 @@
     "featuresDescription": "Značajke prikazane na stranici cijena",
     "noFeatures": "Još nema dodanih značajki",
     "addFeature": "Dodaj značajku",
-    "featurePlaceholder": "npr., {listingsLimit} oglasa mjesečno",
+    "featurePlaceholder": "npr., {{listingsLimit}} oglasa mjesečno",
     "moveUp": "Pomakni gore",
     "moveDown": "Pomakni dolje",
     "preview": "Pregled",

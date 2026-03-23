@@ -494,7 +494,7 @@
     "featuresDescription": "Характеристики, показвани на страницата с цени",
     "noFeatures": "Все още няма добавени характеристики",
     "addFeature": "Добави характеристика",
-    "featurePlaceholder": "напр., {listingsLimit} обяви на месец",
+    "featurePlaceholder": "напр., {{listingsLimit}} обяви на месец",
     "moveUp": "Премести нагоре",
     "moveDown": "Премести надолу",
     "preview": "Преглед",

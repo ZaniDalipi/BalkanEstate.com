@@ -494,7 +494,7 @@
     "featuresDescription": "Caracteristici afișate pe pagina de prețuri",
     "noFeatures": "Nicio caracteristică adăugată încă",
     "addFeature": "Adaugă o caracteristică",
-    "featurePlaceholder": "ex., {listingsLimit} anunțuri pe lună",
+    "featurePlaceholder": "ex., {{listingsLimit}} anunțuri pe lună",
     "moveUp": "Mută sus",
     "moveDown": "Mută jos",
     "preview": "Previzualizare",

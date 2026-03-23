@@ -118,7 +118,7 @@
   "similarAgents": {
     "title": "Slični Agenti",
     "viewAll": "Pogledaj Sve",
-    "inArea": "in {area}"
+    "inArea": "in {{area}}"
   },
   "actions": {
     "share": "Podijeli Profil",

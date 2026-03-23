@@ -118,7 +118,7 @@
   "similarAgents": {
     "title": "Παρόμοιοι Πράκτορες",
     "viewAll": "Προβολή Όλων",
-    "inArea": "in {area}"
+    "inArea": "in {{area}}"
   },
   "actions": {
     "share": "Κοινοποίηση Προφίλ",

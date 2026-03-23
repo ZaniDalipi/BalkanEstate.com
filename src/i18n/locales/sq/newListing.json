@@ -19,7 +19,7 @@
     "title": "Ngarko Fotot e Pronës",
     "subtitle": "Tërhiqni dhe lëshoni imazhet ose klikoni për të shfletuar",
     "hint": "Ngarkoni të paktën 3 foto për rezultate më të mira",
-    "maxImages": "Maksimumi {count} imazhe",
+    "maxImages": "Maksimumi {{count}} imazhe",
     "dragDrop": "Tërhiqni dhe lëshoni imazhet këtu",
     "orClick": "ose klikoni për të shfletuar",
     "supportedFormats": "Formatet e mbështetura: JPG, PNG, WebP",
@@ -213,7 +213,7 @@
   },
   "validation": {
     "required": "Kjo fushë është e detyrueshme",
-    "minImages": "Ju lutem ngarkoni të paktën {count} imazhe",
+    "minImages": "Ju lutem ngarkoni të paktën {{count}} imazhe",
     "selectCountry": "Ju lutem zgjidhni një vend",
     "selectCity": "Ju lutem zgjidhni një qytet",
     "setLocation": "Ju lutem vendosni vendndodhjen e pronës në hartë",

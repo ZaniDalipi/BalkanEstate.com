@@ -494,7 +494,7 @@
     "featuresDescription": "Χαρακτηριστικά που εμφανίζονται στη σελίδα τιμών",
     "noFeatures": "Δεν έχουν προστεθεί χαρακτηριστικά ακόμα",
     "addFeature": "Προσθήκη χαρακτηριστικού",
-    "featurePlaceholder": "π.χ., {listingsLimit} αγγελίες το μήνα",
+    "featurePlaceholder": "π.χ., {{listingsLimit}} αγγελίες το μήνα",
     "moveUp": "Μετακίνηση πάνω",
     "moveDown": "Μετακίνηση κάτω",
     "preview": "Προεπισκόπηση",

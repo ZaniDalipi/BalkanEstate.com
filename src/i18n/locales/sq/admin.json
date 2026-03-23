@@ -493,7 +493,7 @@
     "featuresDescription": "Veçoritë e shfaqura në faqen e çmimeve",
     "noFeatures": "Nuk ka veçori të shtuara ende",
     "addFeature": "Shto një veçori",
-    "featurePlaceholder": "p.sh., {listingsLimit} listime në muaj",
+    "featurePlaceholder": "p.sh., {{listingsLimit}} listime në muaj",
     "moveUp": "Lëviz lart",
     "moveDown": "Lëviz poshtë",
     "preview": "Parapamje",

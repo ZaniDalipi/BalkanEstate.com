@@ -231,7 +231,7 @@
     "featuresDescription": "Карактеристики прикажани на страницата за цени",
     "noFeatures": "Сѐ уште нема додадено карактеристики",
     "addFeature": "Додади карактеристика",
-    "featurePlaceholder": "на пр., {listingsLimit} огласи месечно",
+    "featurePlaceholder": "на пр., {{listingsLimit}} огласи месечно",
     "moveUp": "Помести горе",
     "moveDown": "Помести долу",
     "preview": "Преглед",

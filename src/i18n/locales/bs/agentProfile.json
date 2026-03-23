@@ -89,7 +89,7 @@
   },
   "similarAgents": {
     "title": "Slični Agenti",
-    "inArea": "u {area}",
+    "inArea": "u {{area}}",
     "viewAll": "Pogledajte Sve Agente"
   },
   "actions": {

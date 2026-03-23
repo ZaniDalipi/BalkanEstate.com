@@ -8,7 +8,7 @@
   },
   "buyerPlan": {
     "title": "Cumpărător Pro",
-    "price": "€{price}",
+    "price": "€{{price}}",
     "perMonth": "/lună",
     "description": "Nu ratați niciodată un anunț nou! Primiți notificare imediat ce o proprietate care corespunde criteriilor dumneavoastră apare pe piață.",
     "features": {
@@ -192,10 +192,10 @@
     },
     "trial": {
       "title": "Probă Gratuită Activă",
-      "description": "Proba dvs. gratuită se termină pe {date}"
+      "description": "Proba dvs. gratuită se termină pe {{date}}"
     },
     "coupon": {
-      "applied": "Cuponul {code} a fost aplicat"
+      "applied": "Cuponul {{code}} a fost aplicat"
     },
     "cancelNotice": "Abonamentul va fi anulat la sfârșitul perioadei curente",
     "renewStatus": {

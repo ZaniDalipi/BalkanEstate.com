@@ -89,7 +89,7 @@
   },
   "similarAgents": {
     "title": "Agjentë të Ngjashëm",
-    "inArea": "në {area}",
+    "inArea": "në {{area}}",
     "viewAll": "Shiko Të Gjithë Agjentët"
   },
   "actions": {
