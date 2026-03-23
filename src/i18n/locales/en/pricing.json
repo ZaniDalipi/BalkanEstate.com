@@ -193,31 +193,20 @@
     }
   },
   "agency": {
-    "title": "Agency Featured",
-    "subtitle": "Get your agency featured everywhere on the platform",
-    "featuredTitle": "Agency Featured",
-    "featuredDescription": "Featured everywhere on the platform",
+    "title": "Featured Agency",
+    "subtitle": "Get your agency featured everywhere on the platform for 1 week",
+    "featuredTitle": "Featured Agency",
+    "featuredDescription": "Shown everywhere on the platform",
+    "oneWeek": "1 WEEK",
+    "perWeek": "per week",
+    "showsEverywhere": "Shows everywhere!",
     "benefits": {
       "featuredInDirectory": "Featured in agency directory",
       "priorityInSearch": "Priority in search results",
       "homepageCarousel": "Homepage agency carousel",
       "featuredBadge": "Featured badge on profile",
-      "boostedVisibility": "Boosted visibility everywhere (3x)"
-    },
-    "mapMarker": {
-      "title": "Map Marker",
-      "addon": "Add-on",
-      "description": "Show your agency on the property map",
-      "benefits": {
-        "agencyMarker": "Agency marker on property map",
-        "customIcon": "Custom agency icon on map",
-        "clickableMarker": "Clickable marker with agency info",
-        "visibleToAll": "Visible to all property searchers"
-      }
-    },
-    "total": {
-      "title": "Total for {{days}} days",
-      "bundleDescription": "Agency Featured + Map Marker"
+      "boostedVisibility": "Boosted visibility everywhere (3x)",
+      "mapMarker": "Agency marker on property map"
     },
     "needAgency": "Don't have an agency yet?",
     "needAgencyDescription": "Subscribe to our Enterprise plan to create your agency and unlock these features.",
@@ -291,26 +280,10 @@
     "generateInsights": "{{count}} Generate Insights",
     "autoLabelingImages": "{{count}} Auto labeling images when creating new listing"
   },
-  "agency": {
-    "title": "Featured Agency",
-    "subtitle": "Get your agency featured everywhere on the platform for 1 week",
-    "featuredTitle": "Featured Agency",
-    "featuredDescription": "Shown everywhere on the platform",
-    "oneWeek": "1 WEEK",
-    "perWeek": "per week",
-    "showsEverywhere": "Shows everywhere!",
-    "benefits": {
-      "featuredInDirectory": "Featured in agency directory",
-      "priorityInSearch": "Priority in search results",
-      "homepageCarousel": "Homepage agency carousel",
-      "featuredBadge": "Featured badge on profile",
-      "boostedVisibility": "Boosted visibility everywhere (3x)",
-      "mapMarker": "Agency marker on property map"
-    },
-    "needAgency": "Don't have an agency yet?",
-    "needAgencyDescription": "Subscribe to our Enterprise plan to create your agency and unlock these features.",
-    "viewEnterprise": "View Enterprise Plan",
-    "comingSoon": "Coming Soon",
-    "featureComingSoon": "Agency featuring will be available soon!"
+  "specialOffers": {
+    "title": "Special Offers",
+    "subtitle": "Limited-time deals on listing promotions",
+    "selectOffer": "Select Offer",
+    "daysLeft": "{{days}} days left"
   }
 }

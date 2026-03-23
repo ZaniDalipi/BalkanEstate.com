@@ -290,9 +290,15 @@
     "90days": "90 days"
   },
   "coupon": {
-    "title": "Do you have a coupon from the seller?",
-    "description": "Select any plan above and use your coupon code to activate your subscription instantly.",
-    "selectPlan": "Select a plan to use your coupon",
+    "title": "Имате ли купон од продавца?",
+    "description": "Изаберите било који план изнад и користите вашу шифру купона да активирате вашу претплату одмах.",
+    "selectPlan": "Изаберите план да користите ваш купон",
     "haveDiscountCode": "Have a discount code?"
+  },
+  "specialOffers": {
+    "title": "Посебне Понуде",
+    "subtitle": "Ограничене понуде за промоцију огласа",
+    "selectOffer": "Изабери Понуду",
+    "daysLeft": "{{days}} дана преостаје"
   }
 }
