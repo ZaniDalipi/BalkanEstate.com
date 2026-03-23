@@ -18,7 +18,7 @@
 
 // ====== PAYMENT PROVIDERS ======
 
-export type PaymentProvider = 'stripe' | 'paypal' | 'web';
+export type PaymentProvider = 'stripe' | 'paypal' | 'braintree' | 'web';
 
 export interface PaymentProviderInfo {
   id: PaymentProvider;
@@ -48,6 +48,15 @@ export const PAYMENT_PROVIDERS: Record<PaymentProvider, PaymentProviderInfo> = {
     logo: 'paypal',
     supportedCountries: ['AL', 'BA', 'MK', 'ME', 'XK'],
     supportedMethods: ['paypal', 'card'],
+  },
+  braintree: {
+    id: 'braintree',
+    name: 'Braintree',
+    description: 'Secure card payments with Apple Pay, Google Pay, and 3D Secure',
+    fees: '~1.9% + €0.30 per transaction',
+    logo: 'braintree',
+    supportedCountries: ['AL', 'BA', 'MK', 'ME', 'XK'],
+    supportedMethods: ['card', 'apple_pay', 'google_pay'],
   },
   web: {
     id: 'web',

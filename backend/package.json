@@ -73,6 +73,9 @@
     "@sentry/node": "^9.20.0",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
+    "braintree": "^3.36.0",
+    "braintree-web": "^3.138.0",
+    "braintree-web-drop-in": "^1.46.0",
     "cloudinary": "^2.8.0",
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
@@ -107,6 +110,7 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
+    "@types/braintree": "^3.4.4",
     "@types/compression": "^1.8.1",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.5",

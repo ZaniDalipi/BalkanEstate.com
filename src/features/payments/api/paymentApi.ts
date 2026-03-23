@@ -272,6 +272,20 @@ export async function verifyPayment(params: URLSearchParams): Promise<VerifyPaym
     }
   }
 
+  // Braintree verification — payment is already processed synchronously,
+  // so just return success if transaction_id is present
+  if (provider === 'braintree') {
+    const transactionId = params.get('transaction_id');
+    if (transactionId) {
+      return {
+        success: true,
+        paymentStatus: 'paid',
+        provider: 'braintree',
+        message: 'Payment completed successfully.',
+      };
+    }
+  }
+
   // Legacy Paysera verification or fallback
   if (orderId) {
     try {
