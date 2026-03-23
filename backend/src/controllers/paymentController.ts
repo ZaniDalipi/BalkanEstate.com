@@ -10,6 +10,7 @@ import { processSubscriptionPayment } from '../services/subscriptionPaymentServi
 import { paymentProviderFactory } from '../services/paymentProviderFactory';
 import { stripeService } from '../services/stripeService';
 import { paypalService } from '../services/paypalService';
+import { braintreeService } from '../services/braintreeService';
 import emailService from '../services/emailService';
 import { paymentLogger } from '../utils/logger';
 
@@ -1125,5 +1126,167 @@ export const getAvailablePaymentMethods = async (req: Request, res: Response): P
   } catch (error: any) {
     console.error('Error getting payment methods:', error);
     res.status(500).json({ message: 'Error getting payment methods' });
+  }
+};
+
+// ============================================================
+// BRAINTREE ENDPOINTS
+// ============================================================
+
+/**
+ * @desc    Generate a Braintree client token for the Drop-in UI
+ * @route   GET /api/payments/braintree/client-token
+ * @access  Private
+ */
+export const getBraintreeClientToken = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user?._id;
+    if (!userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
+
+    if (!braintreeService.isConfigured()) {
+      res.status(503).json({
+        success: false,
+        message: 'Braintree payments are not currently available.',
+      });
+      return;
+    }
+
+    const clientToken = await braintreeService.generateClientToken();
+
+    res.status(200).json({
+      success: true,
+      clientToken,
+    });
+  } catch (error: any) {
+    paymentLogger.error('Error generating Braintree client token:', error);
+    res.status(500).json({ message: 'Error generating payment token' });
+  }
+};
+
+/**
+ * @desc    Process a Braintree payment using a payment method nonce
+ * @route   POST /api/payments/braintree/process-payment
+ * @access  Private
+ *
+ * Subscription is activated synchronously after successful transaction —
+ * no webhook needed for activation (unlike PayPal).
+ */
+export const processBraintreePayment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user?._id;
+    if (!userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const {
+      paymentMethodNonce,
+      amount,
+      productId,
+      planName,
+      planInterval,
+      countryCode,
+      deviceData,
+    } = req.body;
+
+    if (!amount || amount <= 0) {
+      res.status(400).json({ message: 'Invalid amount' });
+      return;
+    }
+
+    // Validate amount against product price to prevent client-side manipulation
+    if (productId) {
+      const product = await Product.findOne({ productId });
+      if (product && Math.abs(amount - product.price) > 0.50) {
+        paymentLogger.warn(`Braintree price mismatch: client sent ${amount}, product price is ${product.price} (user ${userId})`);
+        res.status(400).json({ message: 'Amount does not match product price' });
+        return;
+      }
+    }
+
+    if (!braintreeService.isConfigured()) {
+      res.status(503).json({
+        success: false,
+        message: 'Braintree payments are not currently available.',
+      });
+      return;
+    }
+
+    // Create the Braintree transaction
+    const transactionResult = await braintreeService.createTransaction({
+      userId: userId.toString(),
+      userEmail: user.email,
+      amount,
+      currency: 'EUR',
+      paymentMethodNonce,
+      productId: productId || `braintree_${planName}`,
+      planName,
+      planInterval: planInterval || 'month',
+      countryCode: countryCode || 'MK',
+      firstName: user.name?.split(' ')[0],
+      lastName: user.name?.split(' ').slice(1).join(' '),
+      deviceData,
+    });
+
+    if (!transactionResult.success) {
+      res.status(400).json({
+        success: false,
+        message: transactionResult.error || 'Payment failed',
+      });
+      return;
+    }
+
+    // Find or create the product for subscription activation
+    let product = productId ? await Product.findOne({ productId }) : null;
+    if (!product) {
+      const isYearly = amount > 50;
+      product = await Product.create({
+        productId: productId || `braintree_${planName}`,
+        name: planName || 'Braintree Subscription',
+        description: 'Subscription via Braintree',
+        price: amount,
+        currency: 'EUR',
+        billingPeriod: isYearly ? 'yearly' : 'monthly',
+        isActive: true,
+      });
+    }
+
+    // Activate subscription synchronously
+    const subscriptionResult = await processSubscriptionPayment({
+      userId: userId.toString(),
+      productId: product.productId,
+      store: 'braintree',
+      amount,
+      currency: 'EUR',
+      transactionId: transactionResult.transactionId,
+      purchaseToken: transactionResult.transactionId,
+    });
+
+    paymentLogger.info(`Braintree payment processed for user ${userId}: txn ${transactionResult.transactionId}`);
+
+    res.status(200).json({
+      success: true,
+      paymentStatus: 'paid',
+      provider: 'braintree',
+      transactionId: transactionResult.transactionId,
+      subscription: {
+        id: subscriptionResult.subscription._id,
+        plan: subscriptionResult.subscription.productId,
+        expiresAt: subscriptionResult.subscription.expirationDate,
+        status: subscriptionResult.subscription.status,
+      },
+    });
+  } catch (error: any) {
+    paymentLogger.error('Error processing Braintree payment:', error);
+    res.status(500).json({ message: 'Error processing payment' });
   }
 };

@@ -15,12 +15,18 @@ import {
 } from '../controllers/paymentController';
 import { handlePayseraWebhook, verifyPayseraPayment } from '../controllers/payseraWebhookController';
 import { handlePayPalWebhook } from '../controllers/paypalWebhookController';
+import { handleBraintreeWebhook } from '../controllers/braintreeWebhookController';
+import {
+  getBraintreeClientToken,
+  processBraintreePayment,
+} from '../controllers/paymentController';
 import { protect } from '../middleware/auth';
 import { decryptPayload } from '../middleware/decryptPayload';
 import {
   validateCreatePayment,
   validateCountryCode,
   validateFreeSubscription,
+  validateBraintreePayment,
 } from '../middleware/paymentValidation';
 
 const router = express.Router();
@@ -100,6 +106,19 @@ router.post('/paypal/webhook', handlePayPalWebhook);
 
 /** Verify PayPal order by order ID (server-side) */
 router.get('/paypal/verify/:orderId', protect, verifyPayPalPayment);
+
+// ============================================================
+// BRAINTREE ENDPOINTS (on-site card payments for PayPal countries)
+// ============================================================
+
+/** Generate a client token for the Braintree Drop-in UI */
+router.get('/braintree/client-token', protect, getBraintreeClientToken);
+
+/** Process a Braintree payment using a payment method nonce */
+router.post('/braintree/process-payment', protect, decryptPayload, validateBraintreePayment, processBraintreePayment);
+
+/** Braintree webhook — for settlement declines and disputes */
+router.post('/braintree/webhook', handleBraintreeWebhook);
 
 // ============================================================
 // PAYSERA ENDPOINTS (legacy — kept for backward compatibility)

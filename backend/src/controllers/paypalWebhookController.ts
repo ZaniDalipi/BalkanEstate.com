@@ -96,6 +96,16 @@ async function handleOrderApproved(event: any): Promise<void> {
 
   paymentLogger.info(`PayPal order approved: ${orderId}, capturing payment...`);
 
+  // Idempotency: check if this order was already processed (e.g. via PAYMENT.CAPTURE.COMPLETED)
+  const alreadyProcessed = await Subscription.findOne({
+    store: 'paypal',
+    purchaseToken: orderId,
+  });
+  if (alreadyProcessed) {
+    paymentLogger.info(`PayPal order ${orderId} already processed (subscription ${alreadyProcessed._id}), skipping capture`);
+    return;
+  }
+
   // Capture the payment
   const captureResult = await paypalService.captureOrder(orderId);
 
@@ -154,7 +164,17 @@ async function handleCaptureCompleted(event: any): Promise<void> {
   }
 
   if (metadata) {
-    await activateSubscription(metadata, orderId || captureId, captureId, amount, currency);
+    // Idempotency: check if this order was already processed (e.g. via CHECKOUT.ORDER.APPROVED)
+    const effectiveOrderId = orderId || captureId;
+    const alreadyProcessed = await Subscription.findOne({
+      store: 'paypal',
+      purchaseToken: effectiveOrderId,
+    });
+    if (alreadyProcessed) {
+      paymentLogger.info(`PayPal capture ${captureId}: Order ${effectiveOrderId} already processed (subscription ${alreadyProcessed._id}), skipping`);
+      return;
+    }
+    await activateSubscription(metadata, effectiveOrderId, captureId, amount, currency);
   } else {
     paymentLogger.error(`PayPal capture ${captureId}: No metadata found, cannot activate subscription`);
   }
@@ -170,9 +190,10 @@ async function handleCaptureRefunded(event: any): Promise<void> {
   paymentLogger.info(`PayPal refund processed: ${refund.id}`);
 
   // Find the subscription by transaction ID and cancel it
+  // Check both 'paypal' (new) and 'web' (legacy) store values
   const subscription = await Subscription.findOne({
     transactionId: refund.id,
-    store: 'paypal',
+    store: { $in: ['paypal', 'web'] },
   });
 
   if (subscription) {
@@ -248,7 +269,7 @@ async function activateSubscription(
   const result = await processSubscriptionPayment({
     userId,
     productId: product.productId,
-    store: 'web', // PayPal uses 'web' store type for compatibility
+    store: 'paypal',
     amount,
     currency: currency || 'EUR',
     transactionId: captureId,

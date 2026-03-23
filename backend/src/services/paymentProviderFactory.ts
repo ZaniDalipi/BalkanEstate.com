@@ -15,9 +15,10 @@
 
 import { stripeService } from './stripeService';
 import { paypalService } from './paypalService';
+import { braintreeService } from './braintreeService';
 
 // Payment provider types
-export type PaymentProvider = 'stripe' | 'paypal' | 'web';
+export type PaymentProvider = 'stripe' | 'paypal' | 'braintree' | 'web';
 
 // Country to provider mapping
 export interface CountryProviderMapping {
@@ -134,6 +135,9 @@ class PaymentProviderFactory {
       case 'paypal':
         return this.createPayPalPayment(params);
 
+      case 'braintree':
+        return this.createBraintreePayment(params);
+
       default:
         return {
           success: false,
@@ -228,6 +232,29 @@ class PaymentProviderFactory {
   }
 
   /**
+   * Create a Braintree payment session (on-site card payment).
+   * Returns a client token for the Drop-in UI — no redirect URL.
+   */
+  private async createBraintreePayment(params: CreatePaymentParams): Promise<PaymentResult> {
+    if (!braintreeService.isConfigured()) {
+      return {
+        success: false,
+        provider: 'braintree',
+        error: 'Braintree is not configured. Please set BRAINTREE_MERCHANT_ID, BRAINTREE_PUBLIC_KEY, and BRAINTREE_PRIVATE_KEY.',
+      };
+    }
+
+    // For Braintree, the frontend handles the payment flow inline.
+    // Return success with no paymentUrl — the frontend will use the
+    // /braintree/client-token and /braintree/process-payment endpoints.
+    return {
+      success: true,
+      provider: 'braintree',
+      // No paymentUrl — frontend renders Drop-in UI inline
+    };
+  }
+
+  /**
    * Create a promotion payment session
    */
   public async createPromotionPayment(params: {
@@ -275,6 +302,12 @@ class PaymentProviderFactory {
           description: 'Secure payments with PayPal account or card',
           fees: '~2.9% + €0.35 per transaction',
         };
+      case 'braintree':
+        return {
+          name: 'Braintree',
+          description: 'Secure card payments with Apple Pay, Google Pay, and 3D Secure',
+          fees: '~1.9% + €0.30 per transaction',
+        };
       default:
         return {
           name: 'Web Payment',
@@ -298,6 +331,8 @@ class PaymentProviderFactory {
         return methods;
       case 'paypal':
         return ['paypal', 'card'];
+      case 'braintree':
+        return ['card', 'apple_pay', 'google_pay'];
       default:
         return ['card'];
     }

@@ -34,7 +34,7 @@ const SUPPORTED_INTERVALS = ['month', 'year', 'one_time'];
 /**
  * Supported payment providers
  */
-const SUPPORTED_PROVIDERS = ['stripe', 'paypal', 'web'];
+const SUPPORTED_PROVIDERS = ['stripe', 'paypal', 'braintree', 'web'];
 
 /**
  * Run validations and return 400 on failure
@@ -107,6 +107,49 @@ export const validateCountryCode: (ValidationChain | typeof handleValidationErro
     .toUpperCase()
     .isLength({ min: 2, max: 2 }).withMessage('Country code must be 2 characters')
     .isAlpha().withMessage('Country code must be alphabetic'),
+
+  handleValidationErrors,
+];
+
+/**
+ * Validation rules for POST /api/payments/apply-free-subscription
+ */
+/**
+ * Validation rules for POST /api/payments/braintree/process-payment
+ */
+export const validateBraintreePayment: (ValidationChain | typeof handleValidationErrors)[] = [
+  body('paymentMethodNonce')
+    .trim()
+    .notEmpty().withMessage('Payment method nonce is required'),
+
+  body('amount')
+    .isFloat({ min: 0, max: 10000 }).withMessage('Amount must be between 0 and 10,000 EUR'),
+
+  body('productId')
+    .trim()
+    .notEmpty().withMessage('Product ID is required')
+    .isLength({ max: 100 }).withMessage('Product ID too long')
+    .matches(/^[a-zA-Z0-9_-]+$/).withMessage('Product ID contains invalid characters'),
+
+  body('planName')
+    .trim()
+    .notEmpty().withMessage('Plan name is required')
+    .isIn(SUPPORTED_PLAN_NAMES).withMessage('Invalid plan name'),
+
+  body('planInterval')
+    .optional()
+    .trim()
+    .isIn(SUPPORTED_INTERVALS).withMessage('Invalid plan interval'),
+
+  body('countryCode')
+    .trim()
+    .toUpperCase()
+    .isLength({ min: 2, max: 2 }).withMessage('Country code must be 2 characters')
+    .isIn(SUPPORTED_COUNTRY_CODES).withMessage('Unsupported country'),
+
+  body('deviceData')
+    .optional()
+    .isString().withMessage('Device data must be a string'),
 
   handleValidationErrors,
 ];

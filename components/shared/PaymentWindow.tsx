@@ -16,6 +16,8 @@ import { trackEcommerce, trackEvent } from '../../src/components/marketing/Analy
 import { encryptSensitiveFields } from '../../src/shared/api/payloadEncryption';
 import { validatePaymentRedirectUrl } from '../../src/utils/security';
 import { tokenService } from '../../src/shared/api/tokenService';
+import BraintreeDropIn from '../../src/features/payments/components/BraintreeDropIn';
+import type { BraintreeProcessResponse } from '../../src/features/payments/api/braintreeApi';
 
 // ====== Encrypted Session Storage ======
 // AES-256-GCM encryption for payment data stored in sessionStorage.
@@ -256,8 +258,15 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   const [showCouponInput, setShowCouponInput] = useState(false);
   const pollingIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
+  // Braintree card payment state for PayPal countries
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'paypal' | 'card'>('paypal');
+  const [showBraintreeDropIn, setShowBraintreeDropIn] = useState(false);
+
   // Dynamically detect user country
   const userCountry = propUserCountry || detectUserCountry(state.currentUser?.country);
+
+  // Check if user is in a PayPal country (eligible for Braintree card payments)
+  const isPayPalCountry = ['AL', 'BA', 'MK', 'ME', 'XK'].includes(userCountry);
 
   // Calculate price with discounts
   let finalPrice = planPrice;
@@ -572,6 +581,13 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         setTimeout(() => {
           onSuccess(data.subscriptionId || 'free_subscription_' + Date.now());
         }, 1000);
+        return;
+      }
+
+      // If user selected card payment in a PayPal country, show Braintree Drop-in
+      if (isPayPalCountry && selectedPaymentMethod === 'card') {
+        setShowBraintreeDropIn(true);
+        setIsProcessing(false);
         return;
       }
 
@@ -1553,7 +1569,83 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               </label>
             </div>
 
-            {/* Payment Button */}
+            {/* Payment Method Chooser for PayPal countries */}
+            {isPayPalCountry && finalPrice > 0 && !showBraintreeDropIn && (
+              <div className="space-y-2">
+                <p className="text-xs sm:text-sm font-medium text-neutral-700">{t('payment:checkout.choosePaymentMethod', 'Choose payment method')}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPaymentMethod('card')}
+                    className={`p-3 rounded-lg border-2 transition-all flex flex-col items-center gap-1.5 ${
+                      selectedPaymentMethod === 'card'
+                        ? 'border-primary bg-primary/5 shadow-sm'
+                        : 'border-neutral-200 hover:border-neutral-300'
+                    }`}
+                  >
+                    <CreditCardIcon className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-700" />
+                    <span className="text-xs sm:text-sm font-medium text-neutral-800">{t('payment:checkout.payWithCard', 'Pay with Card')}</span>
+                    <span className="text-[10px] text-neutral-500">Visa, Mastercard, Apple Pay</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPaymentMethod('paypal')}
+                    className={`p-3 rounded-lg border-2 transition-all flex flex-col items-center gap-1.5 ${
+                      selectedPaymentMethod === 'paypal'
+                        ? 'border-primary bg-primary/5 shadow-sm'
+                        : 'border-neutral-200 hover:border-neutral-300'
+                    }`}
+                  >
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="#003087">
+                      <path d="M7.076 21.337H2.47a.641.641 0 01-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 00-.607-.541c-.013.076-.026.175-.041.254-.93 4.778-4.005 7.201-9.138 7.201h-2.19a.563.563 0 00-.556.479l-1.187 7.527h-.506l-.24 1.516a.56.56 0 00.554.647h3.882c.46 0 .85-.334.922-.788l.038-.2.728-4.616.047-.255a.924.924 0 01.922-.788h.58c3.76 0 6.705-1.528 7.565-5.946.36-1.847.174-3.388-.777-4.49z"/>
+                    </svg>
+                    <span className="text-xs sm:text-sm font-medium text-neutral-800">PayPal</span>
+                    <span className="text-[10px] text-neutral-500">{t('payment:checkout.paypalRedirect', 'Redirect to PayPal')}</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Braintree Drop-in UI (inline card payment for PayPal countries) */}
+            {showBraintreeDropIn && termsAccepted && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm text-neutral-600">
+                  <LockClosedIcon className="w-4 h-4" />
+                  <span>{t('payment:checkout.secureCardPayment', 'Secure card payment')}</span>
+                </div>
+                <BraintreeDropIn
+                  amount={finalPrice}
+                  productId={productId || planName.toLowerCase().replace(/\s+/g, '_') + '_' + planInterval}
+                  planName={planName}
+                  planInterval={planInterval === 'once' ? 'one_time' : planInterval}
+                  countryCode={userCountry}
+                  userEmail={userEmail || state.currentUser?.email}
+                  onSuccess={(result: BraintreeProcessResponse) => {
+                    trackEcommerce.subscribe(planName, finalPrice);
+                    trackEvent('braintree_payment_success', {
+                      plan_name: planName,
+                      plan_interval: planInterval,
+                      provider: 'braintree',
+                    });
+                    setShowSuccess(true);
+                    setTimeout(() => {
+                      onSuccess(result.transactionId || 'braintree_' + Date.now());
+                    }, 1000);
+                  }}
+                  onError={(error: string) => {
+                    setErrorMessage(error);
+                    setShowError(true);
+                    onError(error);
+                  }}
+                  onCancel={() => {
+                    setShowBraintreeDropIn(false);
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Payment Button (hidden when Braintree Drop-in is shown) */}
+            {!showBraintreeDropIn && (
             <button
               type="button"
               onClick={(e) => {
@@ -1584,6 +1676,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 </>
               )}
             </button>
+            )}
 
             {/* Cancel */}
             <button
