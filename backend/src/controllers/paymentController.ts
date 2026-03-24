@@ -3,13 +3,10 @@ import User from '../models/User';
 import Product from '../models/Product';
 import Subscription from '../models/Subscription';
 import DiscountCode from '../models/DiscountCode';
-import PaymentRecord from '../models/PaymentRecord';
-import SubscriptionEvent from '../models/SubscriptionEvent';
 import { processSubscriptionPayment } from '../services/subscriptionPaymentService';
 import { paymentProviderFactory } from '../services/paymentProviderFactory';
 import { paypalService } from '../services/paypalService';
 import { braintreeService } from '../services/braintreeService';
-import emailService from '../services/emailService';
 import { paymentLogger } from '../utils/logger';
 
 /**
