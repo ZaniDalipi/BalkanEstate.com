@@ -611,7 +611,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         }
       }
 
-      // Create unified payment session with backend (routes to Paysera)
+      // Create unified payment session with backend (routes to Braintree/PayPal)
       // Encrypt discount code if present
       const paymentBody = await encryptSensitiveFields({
         planName,

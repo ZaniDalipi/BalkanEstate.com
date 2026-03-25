@@ -355,18 +355,14 @@ export function usePricingPage() {
       return;
     }
 
-    // Payment system is being set up — show contact-us message
-    dispatch({
-      type: 'SHOW_ALERT',
-      payload: {
-        type: 'info',
-        title: t('pricing:inProcess.title', 'Payment System In Process'),
-        message: t(
-          'pricing:inProcess.contactUs',
-          'Our payment system is currently being set up. To subscribe to a Pro plan, please contact our sales team at sales@balkanestateai.com or call +389 71 967 915. We will activate your subscription manually.'
-        ),
-      },
+    // Open PaymentWindow for Pro plans
+    setSelectedPlan({
+      name: product.name || product.productId,
+      price: product.price,
+      interval: product.billingPeriod === 'yearly' ? 'year' : 'month',
+      productId: product.productId,
     });
+    setShowPaymentWindow(true);
   };
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {
@@ -486,18 +482,14 @@ export function usePricingPage() {
       return;
     }
 
-    // Payment system is being set up — show contact-us message
-    dispatch({
-      type: 'SHOW_ALERT',
-      payload: {
-        type: 'info',
-        title: t('pricing:inProcess.title', 'Payment System In Process'),
-        message: t(
-          'pricing:inProcess.contactUs',
-          'Our payment system is currently being set up. To subscribe to a Pro plan, please contact our sales team at sales@balkanestateai.com or call +389 71 967 915. We will activate your subscription manually.'
-        ),
-      },
+    // Open PaymentWindow for agency featured plans
+    setSelectedPlan({
+      name: `Agency Featured - ${tier}`,
+      price: 0, // Price will be determined by the tier
+      interval: 'month' as const,
+      productId: `agency_featured_${tier}`,
     });
+    setShowPaymentWindow(true);
   };
 
   const getBadgeColor = (color?: string) => {
