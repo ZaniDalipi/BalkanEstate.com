@@ -60,8 +60,8 @@
   "checkout": {
     "secureCheckout": "Sigurno Plaćanje",
     "secureCheckoutDescription": "Završite vašu kupovinu kod našeg sigurnog partnera za plaćanje",
-    "secureExternalPayment": "Sigurno Eksterno Plaćanje",
-    "secureExternalPaymentDescription": "Bićete preusmereni na našeg sigurnog partnera za plaćanje da završite kupovinu. Nikada ne čuvamo podatke vaše kartice - njima u potpunosti upravlja naš sertifikovani procesor plaćanja.",
+    "secureExternalPayment": "Sigurno Plaćanje",
+    "secureExternalPaymentDescription": "Vaše plaćanje se sigurno obrađuje putem naših sertifikovanih partnera za plaćanje (Braintree/PayPal). Nikada ne čuvamo podatke vaše kartice.",
     "freeSubscriptionActivated": "Besplatna Pretplata Aktivirana",
     "freeSubscriptionDescription": "Vaš kod za popust obezbeđuje 100% popusta! Kliknite dugme ispod da odmah aktivirate vašu besplatnu pretplatu. Plaćanje nije potrebno.",
     "continueToPayment": "Nastavi na Plaćanje",
@@ -146,6 +146,6 @@
   },
   "taxNotice": {
     "title": "Taxes May Apply",
-    "description": "The final price at checkout may include applicable VAT/taxes based on your location. Paysera handles all tax compliance automatically."
+    "description": "Konačna cena pri naplati može uključivati primenjivi PDV/poreze na osnovu vaše lokacije."
   }
 }

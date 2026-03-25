@@ -67,8 +67,8 @@
   "checkout": {
     "secureCheckout": "Secure Checkout",
     "secureCheckoutDescription": "Complete your purchase on our secure payment partner",
-    "secureExternalPayment": "Secure External Payment",
-    "secureExternalPaymentDescription": "You'll be redirected to our secure payment partner (Paysera) to complete your purchase. We never store your card details - they're handled entirely by our certified payment processor.",
+    "secureExternalPayment": "Сигурно плащане",
+    "secureExternalPaymentDescription": "Вашето плащане се обработва сигурно чрез нашите сертифицирани партньори за плащания (Braintree/PayPal). Ние никога не съхраняваме данните на вашата карта.",
     "freeSubscriptionActivated": "Free Subscription Activated",
     "freeSubscriptionDescription": "Your discount code provides 100% off! Click the button below to activate your free subscription immediately. No payment required.",
     "freeSubscriptionReady": "Free Subscription Ready",
@@ -146,6 +146,6 @@
   },
   "taxNotice": {
     "title": "Taxes May Apply",
-    "description": "The final price at checkout may include applicable VAT/taxes based on your location. Paysera handles all tax compliance automatically."
+    "description": "Крайната цена при плащане може да включва приложим ДДС/данъци въз основа на вашето местоположение."
   }
 }

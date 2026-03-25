@@ -60,8 +60,8 @@
   "checkout": {
     "secureCheckout": "Безбедно плаќање",
     "secureCheckoutDescription": "Завршете ја вашата куповина кај нашиот безбеден партнер за плаќање",
-    "secureExternalPayment": "Безбедно надворешно плаќање",
-    "secureExternalPaymentDescription": "Ќе бидете пренасочени кон нашиот безбеден партнер за плаќање за да ја завршите вашата куповина. Никогаш не ги чуваме деталите на вашата картичка - тие целосно се управуваат од нашиот сертифициран процесор за плаќање.",
+    "secureExternalPayment": "Безбедно плаќање",
+    "secureExternalPaymentDescription": "Вашето плаќање се обработува безбедно преку нашите сертифицирани партнери за плаќање (Braintree/PayPal). Никогаш не ги чуваме деталите на вашата картичка.",
     "freeSubscriptionActivated": "Бесплатна претплата активирана",
     "freeSubscriptionDescription": "Вашиот код за попуст обезбедува 100% попуст! Кликнете на копчето подолу за веднаш да ја активирате вашата бесплатна претплата. Не е потребно плаќање.",
     "continueToPayment": "Продолжи на плаќање",
@@ -146,6 +146,6 @@
   },
   "taxNotice": {
     "title": "Taxes May Apply",
-    "description": "The final price at checkout may include applicable VAT/taxes based on your location. Paysera handles all tax compliance automatically."
+    "description": "Крајната цена при наплата може да вклучува применлив ДДВ/даноци врз основа на вашата локација."
   }
 }

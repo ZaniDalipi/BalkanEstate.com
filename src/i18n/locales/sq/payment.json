@@ -60,8 +60,8 @@
   "checkout": {
     "secureCheckout": "Pagesë e Sigurt",
     "secureCheckoutDescription": "Përfundoni blerjen tuaj te partneri ynë i sigurt i pagesës",
-    "secureExternalPayment": "Pagesë e Jashtme e Sigurt",
-    "secureExternalPaymentDescription": "Do të ridrejtoheni te partneri ynë i sigurt i pagesës për të përfunduar blerjen tuaj. Ne nuk ruajmë kurrë detajet e kartës suaj - ato menaxhohen tërësisht nga procesori ynë i certifikuar i pagesave.",
+    "secureExternalPayment": "Pagesë e Sigurt",
+    "secureExternalPaymentDescription": "Pagesa juaj përpunohet në mënyrë të sigurt përmes partnerëve tanë të certifikuar të pagesave (Braintree/PayPal). Ne nuk ruajmë kurrë detajet e kartës suaj.",
     "freeSubscriptionActivated": "Abonimi Falas i Aktivizuar",
     "freeSubscriptionDescription": "Kodi juaj i zbritjes ofron 100% ulje! Klikoni butonin më poshtë për të aktivizuar abonimin tuaj falas menjëherë. Nuk kërkohet pagesë.",
     "continueToPayment": "Vazhdoni në Pagesë",
@@ -146,6 +146,6 @@
   },
   "taxNotice": {
     "title": "Taxes May Apply",
-    "description": "The final price at checkout may include applicable VAT/taxes based on your location. Paysera handles all tax compliance automatically."
+    "description": "Çmimi përfundimtar në arkë mund të përfshijë TVSH/taksa të aplikueshme bazuar në vendndodhjen tuaj."
   }
 }
