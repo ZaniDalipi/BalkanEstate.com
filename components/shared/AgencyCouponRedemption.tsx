@@ -339,7 +339,7 @@ const AgencyCouponRedemption: React.FC<AgencyCouponRedemptionProps> = ({
             type="text"
             id="couponCode"
             value={couponCode}
-            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+            onChange={(e) => setCouponCode(e.target.value)}
             placeholder={t('agencies:coupon.codePlaceholder', 'Enter your coupon code (e.g., AGENCY-XXXXXXXX)')}
             className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm font-mono uppercase tracking-wider"
             disabled={isRedeeming}

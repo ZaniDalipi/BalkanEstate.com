@@ -622,10 +622,10 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                         type="text"
                         id="agencyInvitationCode"
                         value={agencyInvitationCode}
-                        onChange={e => setAgencyInvitationCode(e.target.value.toUpperCase())}
+                        onChange={e => setAgencyInvitationCode(e.target.value)}
                         disabled={isSubmitting || (!hasProSubscription && !isJoiningAgency)}
                         placeholder={t('modals:agentLicense.invitationCodePlaceholder')}
-                        className={`${inputCls} font-mono tracking-widest`}
+                        className={`${inputCls} font-mono tracking-widest uppercase`}
                         required={isJoiningAgency}
                       />
                       {!isJoiningAgency && (

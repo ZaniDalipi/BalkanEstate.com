@@ -1067,9 +1067,9 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                               <input
                                 type="text"
                                 value={discountCode}
-                                onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                                onChange={(e) => setDiscountCode(e.target.value)}
                                 placeholder={t('payment:checkout.enterCouponCode')}
-                                className="flex-1 min-w-0 px-2.5 sm:px-3 py-2 sm:py-2.5 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                                className="flex-1 min-w-0 px-2.5 sm:px-3 py-2 sm:py-2.5 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm uppercase"
                                 onKeyPress={(e) => e.key === 'Enter' && handleValidateDiscountCode()}
                                 disabled={validatingCode}
                               />
@@ -1414,9 +1414,9 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                     <input
                       type="text"
                       value={discountCode}
-                      onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                      onChange={(e) => setDiscountCode(e.target.value)}
                       placeholder={t('payment:checkout.enterCode')}
-                      className="flex-1 min-w-0 px-2.5 sm:px-3 py-1.5 sm:py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-xs sm:text-sm"
+                      className="flex-1 min-w-0 px-2.5 sm:px-3 py-1.5 sm:py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-xs sm:text-sm uppercase"
                       onKeyPress={(e) => e.key === 'Enter' && handleValidateDiscountCode()}
                       disabled={validatingCode}
                     />

@@ -517,9 +517,9 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
                 <input
                   type="text"
                   value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  onChange={(e) => setCouponCode(e.target.value)}
                   placeholder={t('common:promotions.enterCode')}
-                  className="flex-1 px-3 py-2 text-sm border border-neutral-300 rounded focus:outline-none focus:ring-1 focus:ring-neutral-800 focus:border-neutral-800"
+                  className="flex-1 px-3 py-2 text-sm border border-neutral-300 rounded focus:outline-none focus:ring-1 focus:ring-neutral-800 focus:border-neutral-800 uppercase"
                 />
                 {validatingCoupon && (
                   <div className="flex items-center px-3 py-2 text-neutral-600">

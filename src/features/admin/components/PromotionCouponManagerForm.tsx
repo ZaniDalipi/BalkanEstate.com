@@ -79,7 +79,7 @@ export const CreateCouponModal: React.FC<CreateCouponModalProps> = ({
             <input
               type="text"
               value={newCoupon.code}
-              onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value.toUpperCase() })}
+              onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg font-mono uppercase"
               placeholder={t('admin:promotionCoupons.form.codePlaceholder', 'SUMMER25')}
               required

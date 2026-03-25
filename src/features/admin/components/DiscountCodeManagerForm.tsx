@@ -41,8 +41,8 @@ export const CreateCodeModal: React.FC<CreateCodeModalProps> = ({
             <input
               type="text"
               value={newCode.code}
-              onChange={(e) => setNewCode({ ...newCode, code: e.target.value.toUpperCase() })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg font-mono"
+              onChange={(e) => setNewCode({ ...newCode, code: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg font-mono uppercase"
               placeholder={t('admin:discountCodes.form.codePlaceholder', 'SUMMER2024')}
               required
             />
@@ -263,8 +263,8 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
               <input
                 type="text"
                 value={bulkForm.prefix}
-                onChange={(e) => setBulkForm({ ...bulkForm, prefix: e.target.value.toUpperCase() })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg font-mono"
+                onChange={(e) => setBulkForm({ ...bulkForm, prefix: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg font-mono uppercase"
                 required
               />
             </div>

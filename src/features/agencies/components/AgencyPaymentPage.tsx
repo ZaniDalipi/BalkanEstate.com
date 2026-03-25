@@ -545,9 +545,9 @@ const AgencyPaymentPage: React.FC = () => {
                   <input
                     type="text"
                     value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    onChange={(e) => setCouponCode(e.target.value)}
                     placeholder={t('payment.enterCoupon', 'Enter coupon code')}
-                    className="flex-1 min-w-0 px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary"
+                    className="flex-1 min-w-0 px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary uppercase"
                     onKeyDown={(e) => e.key === 'Enter' && !applyingCoupon && couponCode.trim() && handleApplyCoupon()}
                   />
                   <button
