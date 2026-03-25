@@ -24,7 +24,7 @@ export interface IArticle extends Document {
 const ArticleSchema = new Schema(
   {
     title: { type: String, required: true, trim: true, maxlength: 300 },
-    slug: { type: String, required: true, trim: true, unique: true, index: true },
+    slug: { type: String, required: true, trim: true },
     content: { type: String, required: true, maxlength: 100000 },
     excerpt: { type: String, required: true, trim: true, maxlength: 500 },
     author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

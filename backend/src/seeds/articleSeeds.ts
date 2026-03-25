@@ -103,18 +103,36 @@ const seedArticles = async () => {
     // Create a default admin user ID (you should replace this with an actual admin ID)
     const adminUserId = new mongoose.Types.ObjectId();
 
-    // Insert articles
-    const articles = ARTICLE_IDEAS.map((idea) => ({
-      ...idea,
-      author: adminUserId,
-      status: 'draft',
-      content: `<p>This is a placeholder article for: ${idea.title}</p><p>Full content to be added later.</p>`,
-      viewCount: 0,
-      isFeatured: false,
-    }));
+    // Helper: generate slug from title
+    const generateSlug = (title: string): string => {
+      const baseSlug = title
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+      const shortId = Math.random().toString(36).substring(2, 8);
+      return `${baseSlug}-${shortId}`;
+    };
+
+    // Insert articles one by one using .save() to trigger pre-save hooks,
+    // or generate slugs manually for insertMany (faster)
+    const articles = ARTICLE_IDEAS.map((idea) => {
+      const content = `<p>This is a placeholder article for: ${idea.title}</p><p>Full content to be added later.</p>`;
+      const wordCount = content.split(/\s+/).length;
+      return {
+        ...idea,
+        slug: generateSlug(idea.title),
+        author: adminUserId,
+        status: 'draft',
+        content,
+        readTime: Math.max(1, Math.ceil(wordCount / 200)),
+        viewCount: 0,
+        isFeatured: false,
+      };
+    });
 
     const result = await Article.insertMany(articles);
-    console.log(`✅ Successfully seeded ${result.length} article ideas`);
+    console.log(`Successfully seeded ${result.length} article ideas`);
 
     // Disconnect
     await mongoose.disconnect();
