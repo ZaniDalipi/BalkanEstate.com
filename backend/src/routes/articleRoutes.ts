@@ -87,7 +87,7 @@ router.get('/countries', async (_req: Request, res: Response) => {
 });
 
 // GET /api/articles/:slug - Public: get single article by slug
-router.get('/:slug', async (req: Request, res: Response) => {
+router.get('/:slug', async (req: Request, res: Response): Promise<void> => {
   try {
     const { slug } = req.params;
 
@@ -99,7 +99,8 @@ router.get('/:slug', async (req: Request, res: Response) => {
     ).populate('author', 'name');
 
     if (!article) {
-      return res.status(404).json({ message: 'Article not found' });
+      res.status(404).json({ message: 'Article not found' });
+      return;
     }
 
     res.json({ article });
