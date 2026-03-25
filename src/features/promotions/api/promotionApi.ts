@@ -122,6 +122,7 @@ export const extendPromotion = async (params: {
   success: boolean;
   sessionId?: string;
   url?: string;
+  provider?: 'braintree' | 'paypal' | 'web';
   newEndDate?: string;
   isFree?: boolean;
   pricing?: {

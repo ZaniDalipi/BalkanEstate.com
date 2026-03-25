@@ -6,6 +6,8 @@ import type { PromotionSelectorProps, PromotionTier } from './usePromotionSelect
 import PromotionTierCard from './PromotionTierCard';
 import PromotionDurationPicker from './PromotionDurationPicker';
 import PromotionSummary from './PromotionSummary';
+import BraintreeDropIn from '@/features/payments/components/BraintreeDropIn';
+import { useAppContext } from '@/context/AppContext';
 
 const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
   const {
@@ -19,6 +21,9 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
     hasUrgentBadge: alreadyHasUrgent = false,
     pendingPropertyData,
   } = props;
+
+  const { state } = useAppContext();
+  const userCountry = (state.currentUser as any)?.country?.toUpperCase() || 'GR';
 
   const {
     tiersData,
@@ -35,6 +40,8 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
     couponValidation,
     validatingCoupon,
     showPaymentComingSoon,
+    showBraintreeDropIn,
+    braintreePaymentData,
     isPromotionExpired,
     isProcessing,
     extStyle,
@@ -48,6 +55,8 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
     priceInfo,
     canUseAgencyAllocation,
     handlePurchase,
+    handleBraintreeSuccess,
+    handleBraintreeCancel,
     calculateNewEndDate,
   } = usePromotionSelector(props);
 
@@ -209,6 +218,26 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           {error}
+        </div>
+      )}
+
+      {/* Braintree Inline Payment */}
+      {showBraintreeDropIn && braintreePaymentData && (
+        <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6 shadow-sm">
+          <h3 className="text-base font-semibold text-gray-900 mb-1">{t('common:promotions.completePayment', 'Complete Payment')}</h3>
+          <p className="text-sm text-gray-500 mb-4">
+            {t('common:promotions.securePayment', 'Your payment is secured by Braintree.')}
+          </p>
+          <BraintreeDropIn
+            amount={braintreePaymentData.amount}
+            productId={braintreePaymentData.productId}
+            planName={braintreePaymentData.planName}
+            planInterval="one_time"
+            countryCode={userCountry}
+            onSuccess={handleBraintreeSuccess}
+            onError={(msg) => { setError(msg); handleBraintreeCancel(); }}
+            onCancel={handleBraintreeCancel}
+          />
         </div>
       )}
 

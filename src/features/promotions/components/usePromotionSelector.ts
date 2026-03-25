@@ -123,6 +123,14 @@ export function usePromotionSelector({
   // State to show "online payment coming soon" message
   const [showPaymentComingSoon, setShowPaymentComingSoon] = useState(false);
 
+  // State for Braintree inline payment
+  const [showBraintreeDropIn, setShowBraintreeDropIn] = useState(false);
+  const [braintreePaymentData, setBraintreePaymentData] = useState<{
+    amount: number;
+    productId: string;
+    planName: string;
+  } | null>(null);
+
   // Check if promotion is expired (for focusUrgent mode)
   const isPromotionExpired = focusUrgent && currentEndDate && new Date(currentEndDate).getTime() < Date.now();
 
@@ -309,7 +317,7 @@ export function usePromotionSelector({
           return;
         }
 
-        // Payment required — redirect to Paysera checkout (validated)
+        // Payment required — redirect to PayPal or show Braintree inline
         if (result.url) {
           const validatedUrl = validatePaymentRedirectUrl(result.url);
           if (validatedUrl) {
@@ -317,6 +325,18 @@ export function usePromotionSelector({
           } else {
             setError(t('payment:errors.redirectBlocked', 'Payment redirect was blocked for security reasons. Please try again.'));
           }
+          return;
+        }
+
+        // Braintree: no redirect URL — show inline Drop-in UI
+        if (result.provider === 'braintree') {
+          const tier = selectedTier || currentTier || 'featured';
+          setBraintreePaymentData({
+            amount: result.pricing?.finalPrice ?? 0,
+            productId: `promotion_${tier}_extension`,
+            planName: `${tier}_promotion_extension`,
+          });
+          setShowBraintreeDropIn(true);
           return;
         }
 
@@ -375,7 +395,7 @@ export function usePromotionSelector({
           return;
         }
 
-        // Payment required — redirect to Paysera checkout (validated)
+        // Payment required — redirect to PayPal or show Braintree inline
         if (result.url) {
           const validatedUrl = validatePaymentRedirectUrl(result.url);
           if (validatedUrl) {
@@ -383,6 +403,17 @@ export function usePromotionSelector({
           } else {
             setError(t('payment:errors.redirectBlocked', 'Payment redirect was blocked for security reasons. Please try again.'));
           }
+          return;
+        }
+
+        // Braintree: no redirect URL — show inline Drop-in UI
+        if (result.provider === 'braintree') {
+          setBraintreePaymentData({
+            amount: result.pricing?.finalPrice ?? 0,
+            productId: `promotion_${selectedTier}`,
+            planName: `${selectedTier}_promotion`,
+          });
+          setShowBraintreeDropIn(true);
           return;
         }
 
@@ -408,6 +439,18 @@ export function usePromotionSelector({
   // Tier-specific styles for current mode
   const extStyle = currentTier ? extensionTierStyles[currentTier] : extensionTierStyles.featured;
 
+  const handleBraintreeSuccess = () => {
+    setShowBraintreeDropIn(false);
+    setBraintreePaymentData(null);
+    setSuccessMessage('Payment successful! Your promotion is being activated.');
+    setTimeout(() => onSuccess?.(), 2000);
+  };
+
+  const handleBraintreeCancel = () => {
+    setShowBraintreeDropIn(false);
+    setBraintreePaymentData(null);
+  };
+
   return {
     // State
     tiersData,
@@ -424,6 +467,8 @@ export function usePromotionSelector({
     couponValidation,
     validatingCoupon,
     showPaymentComingSoon,
+    showBraintreeDropIn,
+    braintreePaymentData,
     isPromotionExpired,
     isProcessing,
     extStyle,
@@ -444,6 +489,8 @@ export function usePromotionSelector({
 
     // Handlers
     handlePurchase,
+    handleBraintreeSuccess,
+    handleBraintreeCancel,
     calculateNewEndDate,
   };
 }

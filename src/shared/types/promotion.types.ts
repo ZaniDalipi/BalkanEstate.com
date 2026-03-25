@@ -87,6 +87,7 @@ export interface PromotionCheckoutResponse {
   success: boolean;
   sessionId?: string;
   url?: string;
+  provider?: 'braintree' | 'paypal' | 'web';
   promotion?: any;
   isFree?: boolean;
   pricing?: {
