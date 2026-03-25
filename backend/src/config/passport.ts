@@ -3,6 +3,7 @@ import { Strategy as GoogleStrategy, Profile as GoogleProfile, VerifyCallback } 
 // @ts-ignore - passport-apple doesn't have TypeScript definitions
 import AppleStrategy from 'passport-apple';
 import User from '../models/User';
+import { sendWelcomeEmail } from '../services/emailVerificationService';
 
 // Track which strategies are enabled
 export const oauthStrategies = {
@@ -82,6 +83,13 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             }
           });
 
+          // Send welcome email to new Google OAuth users (non-blocking)
+          try {
+            await sendWelcomeEmail(user);
+          } catch (emailError) {
+            // Don't block OAuth login if email fails
+          }
+
           done(null, user);
         } catch (error) {
           done(error as Error, undefined);
@@ -149,6 +157,13 @@ if (
               lastUpdated: new Date()
             }
           });
+
+          // Send welcome email to new Apple OAuth users (non-blocking)
+          try {
+            await sendWelcomeEmail(user);
+          } catch (emailError) {
+            // Don't block OAuth login if email fails
+          }
 
           done(null, user);
         } catch (error) {
