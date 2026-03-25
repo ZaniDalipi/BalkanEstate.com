@@ -106,6 +106,8 @@ const ContactUsPage = lazy(() => import('./src/features/contact/components/Conta
 const BuyingGuidesPage = lazy(() => import('./src/features/guides/components/BuyingGuidesPage'));
 const HomePage = lazyWithRetry(() => import('./src/features/home/components/HomePage'));
 const BusinessDirectoryPage = lazy(() => import('./src/features/business-directory/components/BusinessDirectoryPage'));
+const BlogPage = lazy(() => import('./src/features/blog/components/BlogPage'));
+const ArticlePage = lazy(() => import('./src/features/blog/components/ArticlePage'));
 
 // Agency creation pages
 const CreateAgencyPage = lazy(() => import('./src/features/agencies/components/CreateAgencyPage'));
@@ -383,6 +385,15 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return;
       }
 
+      // Blog article route: /blog/:slug
+      const blogArticleMatch = path.match(/^\/blog\/(.+)$/);
+      if (blogArticleMatch && path !== '/blog') {
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'blog' });
+        return;
+      }
+
       // Main navigation routes
       const routeMap: Record<string, AppView> = {
         '/': 'home',
@@ -411,6 +422,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/contact': 'contact',
         '/guides': 'guides',
         '/business-directory': 'business-directory',
+        '/blog': 'blog',
         '/rent': 'rentals',
         '/rentals': 'rentals',
         '/create-agency': 'createAgency',
@@ -686,6 +698,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return <ContactUsPage />;
       case 'guides':
         return <BuyingGuidesPage />;
+      case 'blog':
+        return <QueryErrorBoundary><BlogPage /></QueryErrorBoundary>;
       case 'createAgency':
         return <CreateAgencyPage />;
       case 'createAgencyPayment':
