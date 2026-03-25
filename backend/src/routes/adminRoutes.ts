@@ -108,7 +108,6 @@ import {
 } from '../controllers/systemSettingsController';
 import multer from 'multer';
 import Article from '../models/Article';
-import News from '../models/News';
 
 const router = express.Router();
 
@@ -612,7 +611,7 @@ router.post('/articles', logAdminAction('CREATE_ARTICLE'), async (req: Request, 
       countryCode,
       coverImageUrl,
       status: status || 'draft',
-      author: req.user._id,
+      author: (req as any).user._id,
       isFeatured: isFeatured || false,
     });
 
