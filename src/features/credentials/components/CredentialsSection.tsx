@@ -13,7 +13,7 @@ import {
   ExclamationTriangleIcon,
   CalendarIcon,
   TrophyIcon,
-  StarIcon,
+  UsersIcon,
 } from '@/constants';
 import { Credential, addCredential, updateCredential, deleteCredential } from '../api/credentialApi';
 import { submitLicense, getLicenseFormatHint } from '../api/licenseApi';
@@ -75,38 +75,38 @@ const getTimeUntilExpiry = (expiryDate: string | undefined): string | null => {
 const FILE_SIZE_LIMIT = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
 
-const TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string; border: string }> = {
+const TYPE_CONFIG: Record<string, { icon: React.ReactNode; gradient: string; accent: string; labelColor: string }> = {
   license: {
-    icon: <ShieldCheckIcon className="w-5 h-5" />,
-    color: 'text-emerald-600',
-    bg: 'bg-emerald-50',
-    border: 'border-emerald-100',
+    icon: <ShieldCheckIcon className="w-5 h-5 text-white" />,
+    gradient: 'from-emerald-400 to-emerald-600',
+    accent: 'text-emerald-600',
+    labelColor: 'bg-emerald-50 text-emerald-700',
   },
   certification: {
-    icon: <AcademicCapIcon className="w-5 h-5" />,
-    color: 'text-blue-600',
-    bg: 'bg-blue-50',
-    border: 'border-blue-100',
+    icon: <AcademicCapIcon className="w-5 h-5 text-white" />,
+    gradient: 'from-blue-400 to-indigo-600',
+    accent: 'text-blue-600',
+    labelColor: 'bg-blue-50 text-blue-700',
   },
   award: {
-    icon: <TrophyIcon className="w-5 h-5" />,
-    color: 'text-amber-600',
-    bg: 'bg-amber-50',
-    border: 'border-amber-100',
+    icon: <TrophyIcon className="w-5 h-5 text-white" />,
+    gradient: 'from-amber-400 to-orange-500',
+    accent: 'text-amber-600',
+    labelColor: 'bg-amber-50 text-amber-700',
   },
   membership: {
-    icon: <StarIcon className="w-5 h-5" />,
-    color: 'text-purple-600',
-    bg: 'bg-purple-50',
-    border: 'border-purple-100',
+    icon: <UsersIcon className="w-5 h-5 text-white" />,
+    gradient: 'from-violet-400 to-purple-600',
+    accent: 'text-violet-600',
+    labelColor: 'bg-violet-50 text-violet-700',
   },
 };
 
-const STATUS_CONFIG: Record<string, { bg: string; text: string; icon: React.ReactNode; labelKey: string }> = {
-  verified: { bg: 'bg-green-50 border-green-200', text: 'text-green-700', icon: <CheckCircleIcon className="w-3.5 h-3.5" />, labelKey: 'verified' },
-  pending: { bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', icon: <ClockIcon className="w-3.5 h-3.5" />, labelKey: 'pending' },
-  rejected: { bg: 'bg-red-50 border-red-200', text: 'text-red-700', icon: <ExclamationTriangleIcon className="w-3.5 h-3.5" />, labelKey: 'rejected' },
-  expired: { bg: 'bg-gray-100 border-gray-300', text: 'text-gray-500', icon: <ClockIcon className="w-3.5 h-3.5" />, labelKey: 'expired' },
+const STATUS_CONFIG: Record<string, { dot: string; bg: string; text: string; icon: React.ReactNode; labelKey: string }> = {
+  verified: { dot: 'bg-green-500', bg: 'bg-green-50/80 border-green-200', text: 'text-green-700', icon: <CheckCircleIcon className="w-3.5 h-3.5" />, labelKey: 'verified' },
+  pending:  { dot: 'bg-amber-400', bg: 'bg-amber-50/80 border-amber-200', text: 'text-amber-700', icon: <ClockIcon className="w-3.5 h-3.5" />, labelKey: 'pending' },
+  rejected: { dot: 'bg-red-500',   bg: 'bg-red-50/80 border-red-200',     text: 'text-red-700',   icon: <ExclamationTriangleIcon className="w-3.5 h-3.5" />, labelKey: 'rejected' },
+  expired:  { dot: 'bg-gray-400',  bg: 'bg-gray-100/80 border-gray-300',   text: 'text-gray-500',  icon: <ClockIcon className="w-3.5 h-3.5" />, labelKey: 'expired' },
 };
 
 // ─── Validation ───────────────────────────────────────────────────────────────
@@ -679,12 +679,14 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
             const issueDateFormatted = formatDate(cred.issueDate, locale);
             const expiryDateFormatted = formatDate(cred.expiryDate, locale);
 
+            const activeStatus = expired ? STATUS_CONFIG.expired : statusStyle;
+
             return (
               <div
                 key={cred._id}
-                className={`relative bg-white rounded-2xl border p-4 sm:p-5 transition-all duration-200 ${
-                  isBeingDeleted ? 'opacity-40 scale-[0.98] pointer-events-none' : 'hover:shadow-md hover:border-gray-300'
-                } ${expired ? 'border-gray-200 bg-gray-50/50' : 'border-gray-200'}`}
+                className={`relative rounded-2xl border transition-all duration-200 overflow-hidden ${
+                  isBeingDeleted ? 'opacity-40 scale-[0.98] pointer-events-none' : 'hover:shadow-lg hover:-translate-y-0.5'
+                } ${expired ? 'border-gray-200 bg-gradient-to-br from-gray-50 to-white' : 'border-gray-100 bg-gradient-to-br from-white to-gray-50/60'}`}
               >
                 {/* Deleting overlay */}
                 {isBeingDeleted && (
@@ -693,106 +695,108 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                   </div>
                 )}
 
-                <div className="flex items-start gap-3.5">
-                  {/* Type Icon */}
-                  <div className={`w-11 h-11 rounded-xl ${typeConfig.bg} ${typeConfig.border} border flex items-center justify-center flex-shrink-0 ${typeConfig.color}`}>
-                    {typeConfig.icon}
-                  </div>
+                {/* Top accent bar */}
+                <div className={`h-0.5 w-full bg-gradient-to-r ${typeConfig.gradient}`} />
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    {/* Top Row: Title + Status */}
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <div className="min-w-0">
-                        <h4 className={`font-bold text-sm leading-snug ${expired ? 'text-gray-400 line-through decoration-gray-300' : 'text-gray-900'}`}>
-                          {cred.title}
-                        </h4>
-                        <p className="text-xs text-gray-500 mt-0.5">{cred.issuer}</p>
-                      </div>
-                      <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border whitespace-nowrap ${
-                        expired ? STATUS_CONFIG.expired.bg + ' ' + STATUS_CONFIG.expired.text : statusStyle.bg + ' ' + statusStyle.text
-                      }`}>
-                        {expired ? STATUS_CONFIG.expired.icon : statusStyle.icon}
-                        {expired
-                          ? t('profilePage.credentials.status.expired', 'Expired')
-                          : t(`profilePage.credentials.status.${cred.status}`)
-                        }
-                      </div>
+                <div className="p-4 sm:p-5">
+                  <div className="flex items-start gap-3.5">
+                    {/* Gradient icon */}
+                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${typeConfig.gradient} flex items-center justify-center flex-shrink-0 shadow-md`}>
+                      {typeConfig.icon}
                     </div>
 
-                    {/* Certificate Number */}
-                    {cred.issueNumber && (
-                      <div className="flex items-center gap-1.5 mt-1.5">
-                        <span className="text-[10px] text-gray-400 uppercase font-semibold tracking-wider">ID</span>
-                        <span className="text-xs text-gray-600 font-mono bg-gray-50 px-2 py-0.5 rounded-md">{cred.issueNumber}</span>
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      {/* Title + Status row */}
+                      <div className="flex items-start justify-between gap-2 mb-1.5">
+                        <div className="min-w-0">
+                          <h4 className={`font-bold text-sm leading-snug ${expired ? 'text-gray-400 line-through decoration-gray-300' : 'text-gray-900'}`}>
+                            {cred.title}
+                          </h4>
+                          <p className={`text-xs mt-0.5 font-medium ${typeConfig.accent}`}>{cred.issuer}</p>
+                        </div>
+                        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border whitespace-nowrap ${activeStatus.bg} ${activeStatus.text}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${activeStatus.dot} flex-shrink-0`} />
+                          {expired
+                            ? t('profilePage.credentials.status.expired', 'Expired')
+                            : t(`profilePage.credentials.status.${cred.status}`)
+                          }
+                        </div>
                       </div>
-                    )}
 
-                    {/* Date Info */}
-                    {(issueDateFormatted || expiryDateFormatted) && (
-                      <div className="flex items-center gap-3 mt-2.5 text-xs text-gray-500">
-                        {issueDateFormatted && (
-                          <div className="flex items-center gap-1.5">
-                            <CalendarIcon className="w-3.5 h-3.5 text-gray-400" />
-                            <span>{t('profilePage.credentials.issued', 'Issued')} {issueDateFormatted}</span>
-                          </div>
-                        )}
-                        {expiryDateFormatted && (
-                          <div className={`flex items-center gap-1.5 ${expired ? 'text-red-500 font-medium' : expiresIn && parseInt(expiresIn) <= 3 ? 'text-amber-600 font-medium' : ''}`}>
-                            <span className="text-gray-300">·</span>
-                            {expired ? (
-                              <span>{t('profilePage.credentials.expired', 'Expired')} {expiryDateFormatted}</span>
-                            ) : (
-                              <span>
-                                {t('profilePage.credentials.expires', 'Expires')} {expiryDateFormatted}
-                                {expiresIn && <span className="ml-1 text-[10px] opacity-75">({expiresIn} {t('profilePage.credentials.left', 'left')})</span>}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Bottom Row: Document + Actions */}
-                    <div className="flex items-center gap-3 mt-3 pt-2.5 border-t border-gray-100">
-                      {cred.documentUrl && (
-                        <a
-                          href={cred.documentUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-semibold bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded-lg transition-colors"
-                        >
-                          <DocumentTextIcon className="w-3.5 h-3.5" />
-                          {t('profilePage.credentials.viewDocument', 'View Document')}
-                        </a>
-                      )}
-
-                      {/* Type Badge */}
-                      <span className={`text-[10px] font-semibold uppercase tracking-wider ${typeConfig.color} ${typeConfig.bg} px-2 py-0.5 rounded-md`}>
-                        {cred.type}
-                      </span>
-
-                      {isOwner && (
-                        <div className="flex items-center gap-1 ml-auto">
-                          <button
-                            type="button"
-                            onClick={() => openEdit(cred)}
-                            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title={t('profilePage.credentials.edit', 'Edit')}
-                          >
-                            <PencilIcon className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(cred._id)}
-                            disabled={isBeingDeleted}
-                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40"
-                            title={t('profilePage.credentials.delete', 'Delete')}
-                          >
-                            <TrashIcon className="w-3.5 h-3.5" />
-                          </button>
+                      {/* Certificate Number */}
+                      {cred.issueNumber && (
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">ID</span>
+                          <code className="text-xs text-gray-700 font-mono bg-gray-100 px-2 py-0.5 rounded-md tracking-wide">{cred.issueNumber}</code>
                         </div>
                       )}
+
+                      {/* Dates */}
+                      {(issueDateFormatted || expiryDateFormatted) && (
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2.5 text-xs text-gray-500">
+                          {issueDateFormatted && (
+                            <div className="flex items-center gap-1.5">
+                              <CalendarIcon className="w-3.5 h-3.5 text-gray-400" />
+                              <span>{t('profilePage.credentials.issued', 'Issued')} <span className="font-medium text-gray-700">{issueDateFormatted}</span></span>
+                            </div>
+                          )}
+                          {expiryDateFormatted && (
+                            <div className={`flex items-center gap-1.5 ${expired ? 'text-red-500 font-semibold' : expiresIn && parseInt(expiresIn) <= 3 ? 'text-amber-600 font-semibold' : ''}`}>
+                              <span className="text-gray-300 select-none">·</span>
+                              {expired ? (
+                                <span>{t('profilePage.credentials.expired', 'Expired')} {expiryDateFormatted}</span>
+                              ) : (
+                                <span>
+                                  {t('profilePage.credentials.expires', 'Expires')} <span className="font-medium">{expiryDateFormatted}</span>
+                                  {expiresIn && <span className="ml-1 text-[10px] opacity-75">({expiresIn} {t('profilePage.credentials.left', 'left')})</span>}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Bottom row: doc + type pill + actions */}
+                      <div className="flex items-center gap-2 mt-3 pt-2.5 border-t border-gray-100">
+                        {cred.documentUrl && (
+                          <a
+                            href={cred.documentUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded-xl transition-colors"
+                          >
+                            <DocumentTextIcon className="w-3.5 h-3.5" />
+                            {t('profilePage.credentials.viewDocument', 'View Document')}
+                          </a>
+                        )}
+
+                        <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-xl ${typeConfig.labelColor}`}>
+                          {cred.type}
+                        </span>
+
+                        {isOwner && (
+                          <div className="flex items-center gap-1 ml-auto">
+                            <button
+                              type="button"
+                              onClick={() => openEdit(cred)}
+                              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+                              title={t('profilePage.credentials.edit', 'Edit')}
+                            >
+                              <PencilIcon className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(cred._id)}
+                              disabled={isBeingDeleted}
+                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors disabled:opacity-40"
+                              title={t('profilePage.credentials.delete', 'Delete')}
+                            >
+                              <TrashIcon className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
