@@ -3217,6 +3217,7 @@ class EmailService {
       const variables: Record<string, string> = {
         userName:    escapeHtml(params.userName) || 'there',
         frontendUrl,
+        emoji:       '🎉',
       };
       const { html, subject } = await renderEmailWithSiteSettings(config, variables);
       await this.sendEmail({ to: params.email, subject, html, category: config.fromCategory as any });

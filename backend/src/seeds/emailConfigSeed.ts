@@ -83,7 +83,7 @@ export const defaultEmailConfigs = [
     description: 'Sent after a user verifies their email address',
     category: 'transactional',
     fromCategory: 'support',
-    subject: 'Welcome to BalkanEstate! {{emoji}}',
+    subject: 'Welcome to BalkanEstate! 🎉',
     preheaderText: 'Your journey to finding the perfect property starts now',
     headerTitle: 'Welcome to BalkanEstate!',
     headerEmoji: '🎉',
@@ -114,7 +114,6 @@ export const defaultEmailConfigs = [
     variables: [
       { name: 'userName', description: 'User\'s name', required: true, example: 'John Doe' },
       { name: 'frontendUrl', description: 'Frontend base URL', required: true, example: 'https://balkanestate.com' },
-      { name: 'emoji', description: 'Welcome emoji', required: false, example: '🎉' },
     ],
     isActive: true,
   },
