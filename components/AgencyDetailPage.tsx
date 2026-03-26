@@ -1071,9 +1071,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   };
 
   // Achievement handlers
+  // agencyData.id is the obfuscated ObjectId from the toJSON transform; backend decodes it via getObjectIdParam
   const handleAddAchievement = async (achievement: Omit<Achievement, 'id' | 'createdAt' | 'isVerified'>) => {
+    const agencyId = agencyData.id || '';
+    if (!agencyId) return;
     try {
-      const newAchievement = await addAgencyAchievement(agencyData._id || agencyData.id || '', {
+      const newAchievement = await addAgencyAchievement(agencyId, {
         type: achievement.type,
         title: achievement.title,
         description: achievement.description,
@@ -1091,8 +1094,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   };
 
   const handleEditAchievement = async (id: string, achievement: Partial<Achievement>) => {
+    const agencyId = agencyData.id || '';
+    if (!agencyId) return;
     try {
-      const updated = await updateAgencyAchievement(agencyData._id || agencyData.id || '', id, {
+      const updated = await updateAgencyAchievement(agencyId, id, {
         type: achievement.type,
         title: achievement.title,
         description: achievement.description,
@@ -1110,8 +1115,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   };
 
   const handleDeleteAchievement = async (id: string) => {
+    const agencyId = agencyData.id || '';
+    if (!agencyId) return;
     try {
-      await deleteAgencyAchievement(agencyData._id || agencyData.id || '', id);
+      await deleteAgencyAchievement(agencyId, id);
       setAgencyAchievements(prev => prev.filter(a => a.id !== id));
       await success(t('achievements.deletedTitle', 'Achievement Deleted'), t('achievements.deletedMessage', 'The achievement has been deleted'));
     } catch (err) {

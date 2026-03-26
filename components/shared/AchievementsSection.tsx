@@ -44,6 +44,60 @@ interface AchievementsSectionProps {
   className?: string;
 }
 
+// ─── Validation ───────────────────────────────────────────────────────────────
+
+interface ValidationErrors {
+  title?: string;
+  issuingOrganization?: string;
+  dateReceived?: string;
+  expiryDate?: string;
+  documentUrl?: string;
+}
+
+type AchievementFormData = {
+  title: string;
+  issuingOrganization: string;
+  dateReceived: string;
+  expiryDate: string;
+  documentUrl: string;
+};
+
+const validateAchievementForm = (data: AchievementFormData): ValidationErrors => {
+  const errors: ValidationErrors = {};
+
+  if (!data.title.trim()) {
+    errors.title = 'Title is required';
+  } else if (data.title.trim().length < 3) {
+    errors.title = 'Title must be at least 3 characters';
+  } else if (data.title.trim().length > 120) {
+    errors.title = 'Title must be under 120 characters';
+  }
+
+  if (!data.issuingOrganization.trim()) {
+    errors.issuingOrganization = 'Issuing organization is required';
+  } else if (data.issuingOrganization.trim().length < 2) {
+    errors.issuingOrganization = 'Organization name must be at least 2 characters';
+  }
+
+  if (!data.dateReceived) {
+    errors.dateReceived = 'Date received is required';
+  }
+
+  if (data.expiryDate && data.dateReceived) {
+    if (new Date(data.expiryDate) <= new Date(data.dateReceived)) {
+      errors.expiryDate = 'Expiry date must be after the received date';
+    }
+  }
+
+  if (data.documentUrl && !/^https?:\/\/.+/.test(data.documentUrl.trim())) {
+    errors.documentUrl = 'Must be a valid URL starting with http:// or https://';
+  }
+
+  return errors;
+};
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
 const ACHIEVEMENT_TYPES = [
   { value: 'award', label: 'Award', icon: TrophyIcon },
   { value: 'certification', label: 'Certification', icon: AcademicCapIcon },
@@ -99,15 +153,17 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
   const [editingAchievement, setEditingAchievement] = useState<Achievement | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [formData, setFormData] = useState({
-    type: 'award' as Achievement['type'],
+  const [formData, setFormData] = useState<{ type: Achievement['type']; title: string; description: string; dateReceived: string; expiryDate: string; issuingOrganization: string; documentUrl: string }>({
+    type: 'award',
     title: '',
     description: '',
     dateReceived: '',
     expiryDate: '',
     issuingOrganization: '',
-    documentUrl: ''
+    documentUrl: '',
   });
 
   const resetForm = () => {
@@ -118,9 +174,11 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
       dateReceived: '',
       expiryDate: '',
       issuingOrganization: '',
-      documentUrl: ''
+      documentUrl: '',
     });
     setEditingAchievement(null);
+    setErrors({});
+    setSubmitError(null);
   };
 
   const handleOpenAddModal = () => {
@@ -154,18 +212,24 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!formData.title || !formData.issuingOrganization || !formData.dateReceived) return;
+
+    const validationErrors = validateAchievementForm(formData);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
 
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
       const achievementData = {
         type: formData.type,
-        title: formData.title,
-        description: formData.description || undefined,
+        title: formData.title.trim(),
+        description: formData.description.trim() || undefined,
         dateReceived: new Date(formData.dateReceived),
         expiryDate: formData.expiryDate ? new Date(formData.expiryDate) : undefined,
-        issuingOrganization: formData.issuingOrganization,
-        documentUrl: formData.documentUrl || undefined
+        issuingOrganization: formData.issuingOrganization.trim(),
+        documentUrl: formData.documentUrl.trim() || undefined,
       };
 
       if (editingAchievement && onEdit) {
@@ -175,7 +239,8 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
       }
 
       handleCloseModal();
-    } catch (error) {
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -495,11 +560,19 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                 <input
                   type="text"
                   value={formData.title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, title: e.target.value }));
+                    if (errors.title) setErrors(prev => ({ ...prev, title: undefined }));
+                    if (submitError) setSubmitError(null);
+                  }}
                   placeholder={t('common:achievements.form.titlePlaceholder')}
-                  className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base"
-                  required
+                  aria-invalid={!!errors.title}
+                  aria-describedby={errors.title ? 'title-error' : undefined}
+                  className={`w-full px-4 py-3 bg-neutral-50 border rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base ${errors.title ? 'border-red-400 bg-red-50/30' : 'border-neutral-200'}`}
                 />
+                {errors.title && (
+                  <p id="title-error" className="mt-1 text-xs text-red-600" role="alert">{errors.title}</p>
+                )}
               </div>
 
               {/* Issuing Organization */}
@@ -510,11 +583,19 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                 <input
                   type="text"
                   value={formData.issuingOrganization}
-                  onChange={(e) => setFormData(prev => ({ ...prev, issuingOrganization: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, issuingOrganization: e.target.value }));
+                    if (errors.issuingOrganization) setErrors(prev => ({ ...prev, issuingOrganization: undefined }));
+                    if (submitError) setSubmitError(null);
+                  }}
                   placeholder={t('common:achievements.form.organizationPlaceholder')}
-                  className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base"
-                  required
+                  aria-invalid={!!errors.issuingOrganization}
+                  aria-describedby={errors.issuingOrganization ? 'org-error' : undefined}
+                  className={`w-full px-4 py-3 bg-neutral-50 border rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base ${errors.issuingOrganization ? 'border-red-400 bg-red-50/30' : 'border-neutral-200'}`}
                 />
+                {errors.issuingOrganization && (
+                  <p id="org-error" className="mt-1 text-xs text-red-600" role="alert">{errors.issuingOrganization}</p>
+                )}
               </div>
 
               {/* Description */}
@@ -540,10 +621,18 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                   <input
                     type="date"
                     value={formData.dateReceived}
-                    onChange={(e) => setFormData(prev => ({ ...prev, dateReceived: e.target.value }))}
-                    className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base"
-                    required
+                    onChange={(e) => {
+                      setFormData(prev => ({ ...prev, dateReceived: e.target.value }));
+                      if (errors.dateReceived) setErrors(prev => ({ ...prev, dateReceived: undefined }));
+                      if (errors.expiryDate) setErrors(prev => ({ ...prev, expiryDate: undefined }));
+                    }}
+                    aria-invalid={!!errors.dateReceived}
+                    aria-describedby={errors.dateReceived ? 'date-received-error' : undefined}
+                    className={`w-full px-4 py-3 bg-neutral-50 border rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base ${errors.dateReceived ? 'border-red-400 bg-red-50/30' : 'border-neutral-200'}`}
                   />
+                  {errors.dateReceived && (
+                    <p id="date-received-error" className="mt-1 text-xs text-red-600" role="alert">{errors.dateReceived}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">
@@ -552,9 +641,17 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                   <input
                     type="date"
                     value={formData.expiryDate}
-                    onChange={(e) => setFormData(prev => ({ ...prev, expiryDate: e.target.value }))}
-                    className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base"
+                    onChange={(e) => {
+                      setFormData(prev => ({ ...prev, expiryDate: e.target.value }));
+                      if (errors.expiryDate) setErrors(prev => ({ ...prev, expiryDate: undefined }));
+                    }}
+                    aria-invalid={!!errors.expiryDate}
+                    aria-describedby={errors.expiryDate ? 'expiry-error' : undefined}
+                    className={`w-full px-4 py-3 bg-neutral-50 border rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base ${errors.expiryDate ? 'border-red-400 bg-red-50/30' : 'border-neutral-200'}`}
                   />
+                  {errors.expiryDate && (
+                    <p id="expiry-error" className="mt-1 text-xs text-red-600" role="alert">{errors.expiryDate}</p>
+                  )}
                 </div>
               </div>
 
@@ -566,14 +663,30 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                 <input
                   type="url"
                   value={formData.documentUrl}
-                  onChange={(e) => setFormData(prev => ({ ...prev, documentUrl: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, documentUrl: e.target.value }));
+                    if (errors.documentUrl) setErrors(prev => ({ ...prev, documentUrl: undefined }));
+                  }}
                   placeholder="https://..."
-                  className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base"
+                  aria-invalid={!!errors.documentUrl}
+                  aria-describedby={errors.documentUrl ? 'doc-url-error' : undefined}
+                  className={`w-full px-4 py-3 bg-neutral-50 border rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base ${errors.documentUrl ? 'border-red-400 bg-red-50/30' : 'border-neutral-200'}`}
                 />
-                <p className="mt-1 text-[10px] sm:text-xs text-neutral-400">
-                  {t('common:achievements.form.documentHint')}
-                </p>
+                {errors.documentUrl ? (
+                  <p id="doc-url-error" className="mt-1 text-xs text-red-600" role="alert">{errors.documentUrl}</p>
+                ) : (
+                  <p className="mt-1 text-[10px] sm:text-xs text-neutral-400">
+                    {t('common:achievements.form.documentHint')}
+                  </p>
+                )}
               </div>
+
+              {/* Submit error */}
+              {submitError && (
+                <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700" role="alert">
+                  {submitError}
+                </div>
+              )}
 
               {/* Actions */}
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-neutral-100">
@@ -586,7 +699,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting || !formData.title || !formData.issuingOrganization || !formData.dateReceived}
+                  disabled={isSubmitting}
                   className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-xl hover:from-amber-600 hover:to-yellow-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold shadow-lg shadow-amber-500/20"
                 >
                   {isSubmitting ? (
