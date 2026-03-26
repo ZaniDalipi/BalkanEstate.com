@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import User, { IUser } from '../models/User';
 import Agency from '../models/Agency';
 import crypto from 'crypto';
 import { apiLogger } from '../utils/logger';
 import { getParam, getObjectIdParam } from '../utils/validateParams';
+import { resolveId } from '../utils/idObfuscation';
 
 // Generate unique ID for achievements
 const generateAchievementId = () => {
@@ -130,7 +132,11 @@ export const updateUserAchievement = async (req: Request, res: Response): Promis
       return;
     }
 
-    const achievementIndex = (user.achievements || []).findIndex(a => a.id === achievementId);
+    // achievementId may be the obfuscated subdocument _id (from toJSON transform)
+    const resolvedAchId = resolveId(achievementId);
+    const achievementIndex = (user.achievements || []).findIndex(a =>
+      resolvedAchId ? String((a as any)._id) === resolvedAchId : (a as any).id === achievementId
+    );
     if (achievementIndex === -1) {
       res.status(404).json({ message: 'Achievement not found' });
       return;
@@ -173,9 +179,14 @@ export const deleteUserAchievement = async (req: Request, res: Response): Promis
       return;
     }
 
+    // achievementId may be the obfuscated subdocument _id (from toJSON transform)
+    const resolvedAchId = resolveId(achievementId);
+    const pullFilter = resolvedAchId
+      ? { _id: new mongoose.Types.ObjectId(resolvedAchId) }
+      : { id: achievementId };
     const updatedUser = await User.findByIdAndUpdate(
       currentUser._id,
-      { $pull: { achievements: { id: achievementId } } },
+      { $pull: { achievements: pullFilter } },
       { new: true }
     ).select('achievements');
 
@@ -329,7 +340,11 @@ export const updateAgencyAchievement = async (req: Request, res: Response): Prom
       return;
     }
 
-    const achievementIndex = (agency.achievements || []).findIndex((a: any) => a.id === achievementId);
+    // achievementId may be the obfuscated subdocument _id (from toJSON transform)
+    const resolvedAchId = resolveId(achievementId);
+    const achievementIndex = (agency.achievements || []).findIndex((a: any) =>
+      resolvedAchId ? String(a._id) === resolvedAchId : a.id === achievementId
+    );
     if (achievementIndex === -1) {
       res.status(404).json({ message: 'Achievement not found' });
       return;
@@ -390,7 +405,11 @@ export const deleteAgencyAchievement = async (req: Request, res: Response): Prom
       return;
     }
 
-    agency.achievements = (agency.achievements || []).filter((a: any) => a.id !== achievementId);
+    // achievementId may be the obfuscated subdocument _id (from toJSON transform)
+    const resolvedAchId = resolveId(achievementId);
+    agency.achievements = (agency.achievements || []).filter((a: any) =>
+      resolvedAchId ? String(a._id) !== resolvedAchId : a.id !== achievementId
+    );
     await agency.save();
 
     res.json({
@@ -426,7 +445,10 @@ export const verifyAchievement = async (req: Request, res: Response): Promise<vo
         return;
       }
 
-      const achievement = (user.achievements || []).find(a => a.id === achievementId);
+      const resolvedAchId = resolveId(achievementId);
+      const achievement = (user.achievements || []).find(a =>
+        resolvedAchId ? String((a as any)._id) === resolvedAchId : a.id === achievementId
+      );
       if (!achievement) {
         res.status(404).json({ message: 'Achievement not found' });
         return;
@@ -450,7 +472,10 @@ export const verifyAchievement = async (req: Request, res: Response): Promise<vo
         return;
       }
 
-      const achievement = (agency.achievements || []).find((a: any) => a.id === achievementId) as any;
+      const resolvedAchId = resolveId(achievementId);
+      const achievement = (agency.achievements || []).find((a: any) =>
+        resolvedAchId ? String(a._id) === resolvedAchId : a.id === achievementId
+      ) as any;
       if (!achievement) {
         res.status(404).json({ message: 'Achievement not found' });
         return;
