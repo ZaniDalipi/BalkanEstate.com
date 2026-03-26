@@ -282,7 +282,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
       expiryDate: cred.expiryDate ? new Date(cred.expiryDate).toISOString().split('T')[0] : '',
       isPublic: cred.isPublic,
     });
-    setEditingId(cred._id);
+    setEditingId(cred.id);
     setSelectedFile(null);
     setErrors({});
     setSubmitError(null);
@@ -334,7 +334,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
     try {
       if (editingId) {
         const updated = await updateCredential(editingId, formData, selectedFile || undefined);
-        onCredentialsChange(credentials.map(c => c._id === editingId ? updated : c));
+        onCredentialsChange(credentials.map(c => c.id === editingId ? updated : c));
         setSuccessMessage(t('profilePage.credentials.credentialUpdated', 'Credential updated'));
       } else {
         const added = await addCredential(formData, selectedFile || undefined);
@@ -359,7 +359,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
     setDeletingId(id);
     try {
       await deleteCredential(id);
-      onCredentialsChange(credentials.filter(c => c._id !== id));
+      onCredentialsChange(credentials.filter(c => c.id !== id));
       setSuccessMessage(t('profilePage.credentials.credentialRemoved', 'Credential removed'));
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: any) {
@@ -675,7 +675,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
             const typeConfig = TYPE_CONFIG[cred.type] || TYPE_CONFIG.certification;
             const expired = isExpired(cred.expiryDate);
             const expiresIn = getTimeUntilExpiry(cred.expiryDate);
-            const isBeingDeleted = deletingId === cred._id;
+            const isBeingDeleted = deletingId === cred.id;
             const issueDateFormatted = formatDate(cred.issueDate, locale);
             const expiryDateFormatted = formatDate(cred.expiryDate, locale);
 
@@ -684,7 +684,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
             return (
               /* ── Ticket-stub card ─────────────────────────────────────────── */
               <div
-                key={cred._id}
+                key={cred.id}
                 className={`relative flex rounded-2xl overflow-hidden border transition-all duration-200 ${
                   isBeingDeleted ? 'opacity-40 scale-[0.98] pointer-events-none' : 'hover:shadow-md hover:-translate-y-0.5'
                 } ${expired ? 'border-gray-200' : 'border-gray-100'}`}
@@ -791,7 +791,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleDelete(cred._id)}
+                          onClick={() => handleDelete(cred.id)}
                           disabled={isBeingDeleted}
                           className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors disabled:opacity-40"
                           title={t('profilePage.credentials.delete', 'Delete')}
