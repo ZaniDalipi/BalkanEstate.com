@@ -95,6 +95,31 @@ const autoFormatDate = (value: string): string => {
   return digits;
 };
 
+// Applies date formatting while restoring cursor to the correct digit position
+const applyDateChange = (
+  e: React.ChangeEvent<HTMLInputElement>,
+  onFormatted: (v: string) => void
+) => {
+  const input = e.target;
+  const cursorPos = input.selectionStart ?? input.value.length;
+  const formatted = autoFormatDate(input.value);
+  const digitsBefore = (input.value.slice(0, cursorPos).match(/\d/g) ?? []).length;
+  onFormatted(formatted);
+  requestAnimationFrame(() => {
+    if (input !== document.activeElement) return;
+    let count = 0;
+    let pos = formatted.length;
+    if (digitsBefore === 0) {
+      pos = 0;
+    } else {
+      for (let i = 0; i < formatted.length; i++) {
+        if (/\d/.test(formatted[i]) && ++count === digitsBefore) { pos = i + 1; break; }
+      }
+    }
+    input.setSelectionRange(pos, pos);
+  });
+};
+
 const isValidDMY = (dmy: string): boolean => {
   if (!dmy || dmy.length !== 10) return false;
   const [d, m, y] = dmy.split('/');
@@ -1011,7 +1036,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                   <input
                     type="text"
                     value={formData.issueDate}
-                    onChange={(e) => handleFieldChange('issueDate', autoFormatDate(e.target.value))}
+                    onChange={(e) => applyDateChange(e, (v) => handleFieldChange('issueDate', v))}
                     placeholder="DD/MM/YYYY"
                     maxLength={10}
                     inputMode="numeric"
@@ -1033,7 +1058,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                   <input
                     type="text"
                     value={formData.expiryDate}
-                    onChange={(e) => handleFieldChange('expiryDate', autoFormatDate(e.target.value))}
+                    onChange={(e) => applyDateChange(e, (v) => handleFieldChange('expiryDate', v))}
                     placeholder="DD/MM/YYYY"
                     maxLength={10}
                     inputMode="numeric"
