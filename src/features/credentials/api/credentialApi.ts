@@ -1,7 +1,7 @@
 import { apiRequest, uploadRequest } from '@/src/shared/api';
 
 export interface Credential {
-  _id: string;
+  id: string;
   type: 'license' | 'certification' | 'award' | 'membership';
   title: string;
   issuer: string;
