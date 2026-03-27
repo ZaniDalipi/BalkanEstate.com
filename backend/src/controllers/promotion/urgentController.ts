@@ -9,7 +9,6 @@ import { IUser } from '../../models/User';
 import {
   URGENT_MODIFIER,
   verifyPromotionOwnership,
-  isPromotionActive,
 } from '../../services/promotion/promotionService';
 import { promotionLogger } from '../../utils/logger';
 import { getObjectIdParam } from '../../utils/validateParams';
@@ -39,7 +38,7 @@ export const addUrgentBadge = async (
       return;
     }
 
-    if (!isPromotionActive(promotion)) {
+    if (promotion.endDate <= new Date()) {
       res.status(400).json({ message: 'Cannot add urgent badge to expired promotion' });
       return;
     }
