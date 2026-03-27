@@ -7,7 +7,6 @@ import { Request, Response } from 'express';
 import { IUser } from '../../models/User';
 import {
   verifyPromotionOwnership,
-  isPromotionActive,
   isValidDuration,
 } from '../../services/promotion/promotionService';
 import { promotionLogger } from '../../utils/logger';
@@ -39,7 +38,7 @@ export const updateAutoExtend = async (
       return;
     }
 
-    if (!isPromotionActive(promotion)) {
+    if (promotion.endDate <= new Date()) {
       res.status(400).json({ message: 'Cannot modify settings for expired promotion' });
       return;
     }
