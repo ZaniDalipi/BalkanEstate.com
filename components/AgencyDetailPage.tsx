@@ -3105,7 +3105,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               >
                 <TileLayer
                   attribution='&copy; Google Maps'
-                  url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                  url="https://mt1.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}"
                   maxZoom={22}
                 />
                 <MapInvalidator />
@@ -3196,7 +3196,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               >
                 <TileLayer
                   attribution='&copy; Google Maps'
-                  url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                  url="https://mt1.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}"
                   maxZoom={22}
                 />
                 <MapInvalidator />

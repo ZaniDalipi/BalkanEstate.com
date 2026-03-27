@@ -146,7 +146,7 @@ const AgenciesMap: React.FC<AgenciesMapProps> = ({ agencies, onAgencyClick }) =>
             : 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
           }
           url={mapType === 'street'
-            ? "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+            ? "https://mt1.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}"
             : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
           }
           maxZoom={23}
