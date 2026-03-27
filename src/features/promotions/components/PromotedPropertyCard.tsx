@@ -118,7 +118,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
 
   const daysRemaining = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
   const isExpiringSoon = daysRemaining > 0 && daysRemaining <= 3;
-  const isExpired = endDate <= now;
+  const isExpired = endDate <= now || property.isPromoted === false;
 
   const borderClass = tier === 'premium'
     ? 'border-amber-400 shadow-[0_0_15px_rgba(255,184,0,0.25)]'

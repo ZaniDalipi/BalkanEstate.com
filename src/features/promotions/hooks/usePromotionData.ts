@@ -135,8 +135,8 @@ async function fetchPromotionsData(): Promise<PromotionsResponse> {
 
   // Calculate stats
   const now = Date.now();
-  const activeProps = promoted.filter(p => p.promotionEndDate && p.promotionEndDate > now);
-  const expiredProps = promoted.filter(p => !p.promotionEndDate || p.promotionEndDate <= now);
+  const activeProps = promoted.filter(p => p.isPromoted && p.promotionEndDate && p.promotionEndDate > now);
+  const expiredProps = promoted.filter(p => !p.isPromoted || !p.promotionEndDate || p.promotionEndDate <= now);
 
   const tierCounts: Record<string, number> = {};
   activeProps.forEach(p => {
