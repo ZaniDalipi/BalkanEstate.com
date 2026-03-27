@@ -72,6 +72,41 @@ const getTimeUntilExpiry = (expiryDate: string | undefined): string | null => {
   }
 };
 
+// ─── Date Helpers (DD/MM/YYYY) ────────────────────────────────────────────────
+
+const fromISODate = (iso: string): string => {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  if (!y || !m || !d) return '';
+  return `${d}/${m}/${y}`;
+};
+
+const toISODate = (dmy: string): string => {
+  if (!dmy) return '';
+  const [d, m, y] = dmy.split('/');
+  if (!d || !m || !y) return '';
+  return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+};
+
+const autoFormatDate = (value: string): string => {
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+  if (digits.length > 4) return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+  if (digits.length > 2) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return digits;
+};
+
+const isValidDMY = (dmy: string): boolean => {
+  if (!dmy || dmy.length !== 10) return false;
+  const [d, m, y] = dmy.split('/');
+  const day = parseInt(d, 10);
+  const month = parseInt(m, 10);
+  const year = parseInt(y, 10);
+  if (isNaN(day) || isNaN(month) || isNaN(year) || year < 1900 || year > 2100) return false;
+  if (month < 1 || month > 12 || day < 1 || day > 31) return false;
+  const date = new Date(year, month - 1, day);
+  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+};
+
 const FILE_SIZE_LIMIT = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
 
@@ -115,6 +150,7 @@ interface ValidationErrors {
   title?: string;
   issuer?: string;
   file?: string;
+  issueDate?: string;
   expiryDate?: string;
 }
 
@@ -147,9 +183,19 @@ const validate = (
     }
   }
 
-  if (data.expiryDate && data.issueDate) {
-    if (new Date(data.expiryDate) <= new Date(data.issueDate)) {
-      errors.expiryDate = t('profilePage.credentials.validation.expiryAfterIssue', 'Expiry date must be after the issue date');
+  if (data.issueDate && !isValidDMY(data.issueDate)) {
+    errors.issueDate = t('profilePage.credentials.validation.issueDateFormat', 'Use DD/MM/YYYY format');
+  }
+
+  if (data.expiryDate) {
+    if (!isValidDMY(data.expiryDate)) {
+      errors.expiryDate = t('profilePage.credentials.validation.expiryDateFormat', 'Use DD/MM/YYYY format');
+    } else if (data.issueDate && isValidDMY(data.issueDate)) {
+      const expISO = toISODate(data.expiryDate);
+      const issISO = toISODate(data.issueDate);
+      if (expISO && issISO && new Date(expISO) <= new Date(issISO)) {
+        errors.expiryDate = t('profilePage.credentials.validation.expiryAfterIssue', 'Expiry date must be after the issue date');
+      }
     }
   }
 
@@ -278,8 +324,8 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
       title: cred.title,
       issuer: cred.issuer,
       issueNumber: cred.issueNumber || '',
-      issueDate: cred.issueDate ? new Date(cred.issueDate).toISOString().split('T')[0] : '',
-      expiryDate: cred.expiryDate ? new Date(cred.expiryDate).toISOString().split('T')[0] : '',
+      issueDate: cred.issueDate ? fromISODate(new Date(cred.issueDate).toISOString().split('T')[0]) : '',
+      expiryDate: cred.expiryDate ? fromISODate(new Date(cred.expiryDate).toISOString().split('T')[0]) : '',
       isPublic: cred.isPublic,
     });
     setEditingId(cred.id);
@@ -332,12 +378,17 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
     setSubmitError(null);
 
     try {
+      const apiData = {
+        ...formData,
+        issueDate: formData.issueDate ? toISODate(formData.issueDate) : '',
+        expiryDate: formData.expiryDate ? toISODate(formData.expiryDate) : '',
+      };
       if (editingId) {
-        const updated = await updateCredential(editingId, formData, selectedFile || undefined);
+        const updated = await updateCredential(editingId, apiData, selectedFile || undefined);
         onCredentialsChange(credentials.map(c => c.id === editingId ? updated : c));
         setSuccessMessage(t('profilePage.credentials.credentialUpdated', 'Credential updated'));
       } else {
-        const added = await addCredential(formData, selectedFile || undefined);
+        const added = await addCredential(apiData, selectedFile || undefined);
         onCredentialsChange([...credentials, added]);
         setSuccessMessage(t('profilePage.credentials.credentialAdded', 'Credential added'));
       }
@@ -958,21 +1009,34 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                     {t('profilePage.credentials.form.issueDate', 'Issue Date')}
                   </label>
                   <input
-                    type="date"
+                    type="text"
                     value={formData.issueDate}
-                    max={new Date().toISOString().split('T')[0]}
-                    onChange={(e) => handleFieldChange('issueDate', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    onChange={(e) => handleFieldChange('issueDate', autoFormatDate(e.target.value))}
+                    placeholder="DD/MM/YYYY"
+                    maxLength={10}
+                    inputMode="numeric"
+                    className={`w-full px-4 py-3 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 ${
+                      errors.issueDate ? 'border-red-300 bg-red-50/30' : 'border-gray-200'
+                    }`}
                   />
+                  {errors.issueDate && (
+                    <p className="mt-1.5 text-xs text-red-500 font-medium flex items-center gap-1">
+                      <ExclamationTriangleIcon className="w-3.5 h-3.5" />
+                      {errors.issueDate}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wider">
                     {t('profilePage.credentials.form.expiryDate', 'Expiry Date')}
                   </label>
                   <input
-                    type="date"
+                    type="text"
                     value={formData.expiryDate}
-                    onChange={(e) => handleFieldChange('expiryDate', e.target.value)}
+                    onChange={(e) => handleFieldChange('expiryDate', autoFormatDate(e.target.value))}
+                    placeholder="DD/MM/YYYY"
+                    maxLength={10}
+                    inputMode="numeric"
                     className={`w-full px-4 py-3 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 ${
                       errors.expiryDate ? 'border-red-300 bg-red-50/30' : 'border-gray-200'
                     }`}

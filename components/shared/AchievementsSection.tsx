@@ -62,6 +62,41 @@ type AchievementFormData = {
   documentUrl: string;
 };
 
+// ─── Date Helpers (DD/MM/YYYY) ────────────────────────────────────────────────
+
+const fromISODate = (iso: string): string => {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  if (!y || !m || !d) return '';
+  return `${d}/${m}/${y}`;
+};
+
+const toISODate = (dmy: string): string => {
+  if (!dmy) return '';
+  const [d, m, y] = dmy.split('/');
+  if (!d || !m || !y) return '';
+  return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+};
+
+const autoFormatDate = (value: string): string => {
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+  if (digits.length > 4) return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+  if (digits.length > 2) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return digits;
+};
+
+const isValidDMY = (dmy: string): boolean => {
+  if (!dmy || dmy.length !== 10) return false;
+  const [d, m, y] = dmy.split('/');
+  const day = parseInt(d, 10);
+  const month = parseInt(m, 10);
+  const year = parseInt(y, 10);
+  if (isNaN(day) || isNaN(month) || isNaN(year) || year < 1900 || year > 2100) return false;
+  if (month < 1 || month > 12 || day < 1 || day > 31) return false;
+  const date = new Date(year, month - 1, day);
+  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+};
+
 const validateAchievementForm = (data: AchievementFormData): ValidationErrors => {
   const errors: ValidationErrors = {};
 
@@ -81,11 +116,19 @@ const validateAchievementForm = (data: AchievementFormData): ValidationErrors =>
 
   if (!data.dateReceived) {
     errors.dateReceived = 'Date received is required';
+  } else if (!isValidDMY(data.dateReceived)) {
+    errors.dateReceived = 'Use DD/MM/YYYY format (e.g. 27/03/2026)';
   }
 
-  if (data.expiryDate && data.dateReceived) {
-    if (new Date(data.expiryDate) <= new Date(data.dateReceived)) {
-      errors.expiryDate = 'Expiry date must be after the received date';
+  if (data.expiryDate) {
+    if (!isValidDMY(data.expiryDate)) {
+      errors.expiryDate = 'Use DD/MM/YYYY format (e.g. 27/03/2030)';
+    } else if (data.dateReceived && isValidDMY(data.dateReceived)) {
+      const expISO = toISODate(data.expiryDate);
+      const recISO = toISODate(data.dateReceived);
+      if (expISO && recISO && new Date(expISO) <= new Date(recISO)) {
+        errors.expiryDate = 'Expiry date must be after the received date';
+      }
     }
   }
 
@@ -192,15 +235,17 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
       title: achievement.title,
       description: achievement.description || '',
       dateReceived: achievement.dateReceived
-        ? new Date(achievement.dateReceived).toISOString().split('T')[0]
+        ? fromISODate(new Date(achievement.dateReceived).toISOString().split('T')[0])
         : '',
       expiryDate: achievement.expiryDate
-        ? new Date(achievement.expiryDate).toISOString().split('T')[0]
+        ? fromISODate(new Date(achievement.expiryDate).toISOString().split('T')[0])
         : '',
       issuingOrganization: achievement.issuingOrganization,
       documentUrl: achievement.documentUrl || ''
     });
     setEditingAchievement(achievement);
+    setErrors({});
+    setSubmitError(null);
     setShowAddModal(true);
   };
 
@@ -226,8 +271,8 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
         type: formData.type,
         title: formData.title.trim(),
         description: formData.description.trim() || undefined,
-        dateReceived: new Date(formData.dateReceived),
-        expiryDate: formData.expiryDate ? new Date(formData.expiryDate) : undefined,
+        dateReceived: new Date(toISODate(formData.dateReceived)),
+        expiryDate: formData.expiryDate ? new Date(toISODate(formData.expiryDate)) : undefined,
         issuingOrganization: formData.issuingOrganization.trim(),
         documentUrl: formData.documentUrl.trim() || undefined,
       };
@@ -297,177 +342,174 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
         )}
       </div>
 
-      {/* Achievements List — organized card style */}
+      {/* Achievements Grid — medal badge style */}
       {sortedAchievements.length > 0 ? (
-        <div className="space-y-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8">
           {sortedAchievements.map((achievement) => {
             const IconComponent = getTypeIcon(achievement.type);
             const colors = getTypeBadgeColors(achievement.type);
             const expired = isExpired(achievement.expiryDate);
-            const isDeleting = deletingId === achievement.id;
-
-            // Org logo: first 2 chars of issuing organization
-            const orgInitials = achievement.issuingOrganization
-              .replace(/[^a-zA-Z0-9\s]/g, '')
-              .split(/\s+/)
-              .filter(Boolean)
-              .slice(0, 2)
-              .map(w => w[0].toUpperCase())
-              .join('') || achievement.issuingOrganization.slice(0, 2).toUpperCase();
+            const year = new Date(achievement.dateReceived).getFullYear();
+            const STAR_COUNT = 10;
 
             return (
-              <div
-                key={achievement.id}
-                className={`relative flex rounded-2xl overflow-hidden border transition-all duration-200 ${
-                  isDeleting ? 'opacity-40 scale-[0.98] pointer-events-none' : 'hover:shadow-md hover:-translate-y-0.5'
-                } ${expired ? 'border-gray-200' : 'border-gray-100'}`}
-              >
-                {/* Deleting overlay */}
-                {isDeleting && (
-                  <div className="absolute inset-0 flex items-center justify-center z-10">
-                    <div className="w-6 h-6 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
-                  </div>
-                )}
-
-                {/* Left stub — type color */}
+              <div key={achievement.id} className="flex flex-col items-center gap-2 group">
+                {/* Badge circle */}
                 <div
-                  className="relative flex-shrink-0 w-[72px] flex flex-col items-center justify-center gap-2 py-5"
-                  style={{
-                    background: expired
-                      ? 'linear-gradient(to bottom, #9ca3af, #6b7280)'
-                      : `linear-gradient(to bottom, ${colors.ring}, ${colors.bg === colors.ring ? colors.ring + 'cc' : colors.bg})`,
-                  }}
+                  className="relative w-full"
+                  style={{ paddingBottom: '100%' }}
                 >
-                  {/* Org logo / initials */}
                   <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-2 border-white/40 shadow-inner"
-                    style={{ background: 'rgba(255,255,255,0.18)', color: '#fff' }}
+                    className="absolute inset-0 rounded-full flex items-center justify-center"
+                    style={{
+                      background: colors.bg,
+                      border: `4px solid ${colors.ring}`,
+                      boxShadow: `0 0 0 2px ${colors.bg}, 0 0 0 4px ${colors.ring}40, inset 0 0 40px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.35)`,
+                      opacity: expired ? 0.65 : 1,
+                    }}
                   >
-                    {orgInitials}
-                  </div>
-                  {/* Type label */}
-                  <span className="text-[8px] font-black uppercase tracking-[0.15em] text-white/90 text-center leading-tight px-1">
-                    {achievement.type}
-                  </span>
-                  {/* Notch cutout */}
-                  <div className="absolute -right-[11px] top-[calc(50%-11px)] w-[22px] h-[22px] rounded-full bg-white border border-gray-100 z-10" />
-                </div>
+                    {/* Inner decorative ring */}
+                    <div
+                      className="absolute inset-[10%] rounded-full"
+                      style={{ border: `1.5px solid ${colors.ring}50` }}
+                    />
 
-                {/* Dashed separator */}
-                <div className="w-px border-l-2 border-dashed border-gray-200 flex-shrink-0 self-stretch" />
-
-                {/* Right content */}
-                <div className="flex-1 min-w-0 p-4 sm:p-5 bg-white">
-
-                  {/* Row 1: title + verified + actions */}
-                  <div className="flex items-start justify-between gap-2 mb-1.5">
-                    <div className="flex items-center gap-2 flex-wrap min-w-0">
-                      <h3 className="text-sm font-bold text-gray-900 leading-snug">{achievement.title}</h3>
-                      {achievement.isVerified && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-700 border border-green-200 flex-shrink-0">
-                          <CheckCircleIcon className="w-3 h-3" />
-                          {t('common:achievements.verified')}
+                    {/* Stars around perimeter */}
+                    {Array.from({ length: STAR_COUNT }).map((_, i) => {
+                      const angle = (i * 360) / STAR_COUNT;
+                      return (
+                        <span
+                          key={i}
+                          className="absolute text-[9px] sm:text-[10px] select-none"
+                          style={{
+                            top: '50%',
+                            left: '50%',
+                            color: colors.accent,
+                            transform: `rotate(${angle}deg) translateY(-43%) rotate(-${angle}deg)`,
+                            marginTop: '-0.5em',
+                            marginLeft: '-0.4em',
+                            opacity: 0.85,
+                          }}
+                        >
+                          ★
                         </span>
-                      )}
-                      {expired && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-500 border border-gray-200 flex-shrink-0">
-                          {t('common:achievements.expired', 'Expired')}
-                        </span>
-                      )}
+                      );
+                    })}
+
+                    {/* Org name at top */}
+                    <div
+                      className="absolute text-center px-2"
+                      style={{ top: '18%', left: 0, right: 0 }}
+                    >
+                      <p
+                        className="text-[8px] sm:text-[9px] font-semibold uppercase tracking-widest truncate"
+                        style={{ color: colors.accent }}
+                      >
+                        {achievement.issuingOrganization}
+                      </p>
                     </div>
-                    {/* Edit / Delete */}
-                    {isOwner && (onEdit || onDelete) && (
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        {onEdit && (
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEditModal(achievement)}
-                            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                            title={t('common:edit')}
-                          >
-                            <PencilIcon className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                        {onDelete && (
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(achievement.id)}
-                            disabled={isDeleting}
-                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                            title={t('common:delete')}
-                          >
-                            {isDeleting ? (
-                              <div className="w-3.5 h-3.5 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
-                            ) : (
-                              <TrashIcon className="w-3.5 h-3.5" />
-                            )}
-                          </button>
-                        )}
+
+                    {/* Center: icon + title */}
+                    <div className="relative flex flex-col items-center z-10" style={{ marginTop: '-10%' }}>
+                      <IconComponent
+                        className="w-5 h-5 sm:w-6 sm:h-6 mb-1"
+                        style={{ color: colors.accent } as React.CSSProperties}
+                      />
+                      <p
+                        className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-center leading-tight px-4"
+                        style={{ color: colors.text, wordBreak: 'break-word' }}
+                      >
+                        {achievement.title}
+                      </p>
+                    </div>
+
+                    {/* Ribbon / banner with year */}
+                    <div
+                      className="absolute left-0 right-0 flex items-center justify-center py-1.5"
+                      style={{ top: '62%', background: colors.ribbon }}
+                    >
+                      {/* ribbon side notches */}
+                      <div
+                        className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rotate-45"
+                        style={{ background: colors.ribbon }}
+                      />
+                      <div
+                        className="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-2 rotate-45"
+                        style={{ background: colors.ribbon }}
+                      />
+                      <p
+                        className="text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.2em]"
+                        style={{ color: colors.accent }}
+                      >
+                        {expired ? 'EXPIRED' : `YEAR ${year}`}
+                      </p>
+                    </div>
+
+                    {/* Verified dot */}
+                    {achievement.isVerified && (
+                      <div
+                        className="absolute top-2 right-2 w-4 h-4 rounded-full flex items-center justify-center"
+                        style={{ background: '#16a34a', boxShadow: '0 0 6px #16a34a80' }}
+                        title={t('common:achievements.verified')}
+                      >
+                        <CheckCircleIcon className="w-3 h-3 text-white" />
                       </div>
                     )}
                   </div>
+                </div>
 
-                  {/* Row 2: org logo + name + type badge */}
-                  <div className="flex items-center gap-2 mb-2">
-                    {/* Mini org avatar */}
-                    <div
-                      className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0"
-                      style={{ background: expired ? '#9ca3af' : colors.ring }}
-                    >
-                      {orgInitials.charAt(0)}
-                    </div>
-                    <span className="text-xs font-medium text-blue-600 truncate">
-                      {achievement.issuingOrganization}
-                    </span>
-                    {/* Type badge */}
-                    <span
-                      className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold flex-shrink-0"
-                      style={{
-                        background: expired ? '#f3f4f6' : colors.bg,
-                        color: expired ? '#6b7280' : colors.accent,
-                        border: `1px solid ${expired ? '#e5e7eb' : colors.ring + '40'}`,
-                      }}
-                    >
-                      <IconComponent className="w-3 h-3" />
-                      {achievement.type}
-                    </span>
-                  </div>
-
-                  {/* Row 3: dates */}
-                  <div className="flex items-center gap-3 text-[11px] text-gray-400 flex-wrap">
-                    <span className="flex items-center gap-1">
-                      <CalendarIcon className="w-3 h-3" />
-                      {t('common:achievements.issued', 'Issued')} {formatDate(achievement.dateReceived)}
-                    </span>
-                    {achievement.expiryDate && (
-                      <span className={`flex items-center gap-1 ${expired ? 'text-red-400' : ''}`}>
-                        · {expired ? t('common:achievements.expiredOn', 'Expired') : t('common:achievements.expires', 'Expires')} {formatDate(achievement.expiryDate)}
-                      </span>
+                {/* Below badge: description + doc link */}
+                {(achievement.description || achievement.documentUrl) && (
+                  <div className="text-center space-y-1">
+                    {achievement.description && (
+                      <p className="text-[11px] text-neutral-500 line-clamp-2 leading-snug">
+                        {achievement.description}
+                      </p>
+                    )}
+                    {achievement.documentUrl && (
+                      <a
+                        href={achievement.documentUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] text-blue-600 hover:underline"
+                      >
+                        <DocumentTextIcon className="w-3 h-3" />
+                        {t('common:achievements.viewDocument')}
+                      </a>
                     )}
                   </div>
+                )}
 
-                  {/* Row 4: description + doc link */}
-                  {(achievement.description || achievement.documentUrl) && (
-                    <div className="mt-2 flex items-center gap-3 flex-wrap">
-                      {achievement.description && (
-                        <p className="text-[11px] text-gray-500 line-clamp-1 flex-1 min-w-0">
-                          {achievement.description}
-                        </p>
-                      )}
-                      {achievement.documentUrl && (
-                        <a
-                          href={achievement.documentUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[11px] text-blue-600 hover:underline flex-shrink-0"
-                        >
-                          <DocumentTextIcon className="w-3 h-3" />
-                          {t('common:achievements.viewDocument')}
-                        </a>
-                      )}
-                    </div>
-                  )}
-                </div>
+                {/* Owner actions (appear below badge on hover) */}
+                {isOwner && (onEdit || onDelete) && (
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {onEdit && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEditModal(achievement)}
+                        className="p-1.5 bg-white/80 backdrop-blur-sm text-neutral-600 rounded-lg hover:bg-neutral-100 transition-colors border border-neutral-200/60 shadow-sm"
+                        title={t('common:edit')}
+                      >
+                        <PencilIcon className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    {onDelete && (
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(achievement.id)}
+                        disabled={deletingId === achievement.id}
+                        className="p-1.5 bg-red-50/80 backdrop-blur-sm text-red-600 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50 border border-red-200/50 shadow-sm"
+                        title={t('common:delete')}
+                      >
+                        {deletingId === achievement.id ? (
+                          <div className="w-3.5 h-3.5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <TrashIcon className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}
@@ -619,13 +661,17 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                     {t('common:achievements.form.dateReceived')} *
                   </label>
                   <input
-                    type="date"
+                    type="text"
                     value={formData.dateReceived}
                     onChange={(e) => {
-                      setFormData(prev => ({ ...prev, dateReceived: e.target.value }));
+                      const formatted = autoFormatDate(e.target.value);
+                      setFormData(prev => ({ ...prev, dateReceived: formatted }));
                       if (errors.dateReceived) setErrors(prev => ({ ...prev, dateReceived: undefined }));
                       if (errors.expiryDate) setErrors(prev => ({ ...prev, expiryDate: undefined }));
                     }}
+                    placeholder="DD/MM/YYYY"
+                    maxLength={10}
+                    inputMode="numeric"
                     aria-invalid={!!errors.dateReceived}
                     aria-describedby={errors.dateReceived ? 'date-received-error' : undefined}
                     className={`w-full px-4 py-3 bg-neutral-50 border rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base ${errors.dateReceived ? 'border-red-400 bg-red-50/30' : 'border-neutral-200'}`}
@@ -639,12 +685,16 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                     {t('common:achievements.form.expiryDate')}
                   </label>
                   <input
-                    type="date"
+                    type="text"
                     value={formData.expiryDate}
                     onChange={(e) => {
-                      setFormData(prev => ({ ...prev, expiryDate: e.target.value }));
+                      const formatted = autoFormatDate(e.target.value);
+                      setFormData(prev => ({ ...prev, expiryDate: formatted }));
                       if (errors.expiryDate) setErrors(prev => ({ ...prev, expiryDate: undefined }));
                     }}
+                    placeholder="DD/MM/YYYY"
+                    maxLength={10}
+                    inputMode="numeric"
                     aria-invalid={!!errors.expiryDate}
                     aria-describedby={errors.expiryDate ? 'expiry-error' : undefined}
                     className={`w-full px-4 py-3 bg-neutral-50 border rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base ${errors.expiryDate ? 'border-red-400 bg-red-50/30' : 'border-neutral-200'}`}
