@@ -207,20 +207,6 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
       <OrganizationSchema />
       <FAQSchema faqs={realEstateFAQs} />
 
-      {/* Mobile hamburger menu button */}
-      {onToggleSidebar && (
-        <button
-          onClick={onToggleSidebar}
-          className="md:hidden fixed left-3 z-[100] bg-white/90 backdrop-blur-md rounded-full p-2.5 shadow-lg border border-neutral-200/60 active:scale-95 transition-transform"
-          style={{ top: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
-          aria-label="Open menu"
-        >
-          <svg className="w-5 h-5 text-neutral-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-          </svg>
-        </button>
-      )}
-
       <HeroSection
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}

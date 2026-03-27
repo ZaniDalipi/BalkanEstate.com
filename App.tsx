@@ -852,6 +852,22 @@ const MainLayout: React.FC = () => {
           <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
         </Suspense>
 
+        {/* Mobile floating hamburger for home page — rendered outside all scroll/overflow containers
+            so position:fixed works correctly in iOS Safari PWA standalone mode */}
+        {isMobile && isHomeView && !state.selectedProperty && !state.selectedAgentId && !state.selectedAgencyId && !state.selectedBusinessListingId && (
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen(true)}
+            className="md:hidden fixed left-3 z-[200] bg-white/90 backdrop-blur-md rounded-full p-2.5 shadow-lg border border-neutral-200/60 active:scale-95 transition-transform"
+            style={{ top: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
+            aria-label={t('common:aria.openMenu', 'Open menu')}
+          >
+            <svg className="w-5 h-5 text-neutral-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+        )}
+
         <div className={`relative transition-all duration-300 ease-in-out h-full flex flex-col md:pl-20 overflow-x-hidden max-w-full ${isOverlayVisible ? 'blur-sm pointer-events-none' : ''}`}>
             <Suspense fallback={null}>
               {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isFloatingHeaderView} />}
