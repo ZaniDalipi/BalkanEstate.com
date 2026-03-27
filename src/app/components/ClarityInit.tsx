@@ -15,22 +15,32 @@ declare global {
  */
 const ClarityInit: React.FC = () => {
   useEffect(() => {
+    const clarityId = import.meta.env.VITE_CLARITY_PROJECT_ID;
+    const isDev = import.meta.env.DEV;
+
+    // Debug logging
+    console.log('[Clarity] DEV mode:', isDev);
+    console.log('[Clarity] Project ID:', clarityId ? '✓ Found' : '✗ Not set');
+
     // Only run in production mode
-    if (import.meta.env.DEV) {
+    if (isDev) {
+      console.log('[Clarity] Skipping - running in development mode');
       return;
     }
 
-    const clarityId = import.meta.env.VITE_CLARITY_PROJECT_ID;
-
     // Skip if no project ID configured
     if (!clarityId || clarityId === 'YOUR_PROJECT_ID') {
+      console.warn('[Clarity] Skipping - invalid or missing project ID');
       return;
     }
 
     // Check if Clarity is already loaded
     if (window.clarity) {
+      console.log('[Clarity] Already loaded, skipping');
       return;
     }
+
+    console.log('[Clarity] Initializing with project ID...');
 
     // Initialize Clarity
     (function(c: Window, l: Document, a: string, r: string, i: string) {
@@ -41,6 +51,8 @@ const ClarityInit: React.FC = () => {
       const t = l.createElement(r) as HTMLScriptElement;
       t.async = true;
       t.src = "https://www.clarity.ms/tag/" + i;
+      t.onload = () => console.log('[Clarity] Script loaded successfully');
+      t.onerror = () => console.error('[Clarity] Failed to load script');
       const y = l.getElementsByTagName(r)[0];
       y.parentNode?.insertBefore(t, y);
     })(window, document, "clarity", "script", clarityId);
