@@ -154,19 +154,37 @@ export const toggleSavedAgent = async (
 };
 
 export const getSavedAgents = async (): Promise<Agent[]> => {
-  const response = await apiRequest<{ savedAgents: any[] }>('/saved-agents', {
-    requiresAuth: true,
-  });
+  try {
+    const response = await apiRequest<{ savedAgents: any[] }>('/saved-agents', {
+      requiresAuth: true,
+    });
 
-  return response.savedAgents
-    .filter((saved) => saved.agentId)
-    .map((saved) => transformBackendAgent(saved.agentId));
+    return response.savedAgents
+      .filter((saved) => saved.agentId)
+      .map((saved) => transformBackendAgent(saved.agentId));
+  } catch (error: any) {
+    // Return empty array for 404 (not found) and 403 (forbidden) - saved agents are optional
+    if (error?.statusCode === 404 || error?.statusCode === 403) {
+      return [];
+    }
+    // Re-throw other errors
+    throw error;
+  }
 };
 
 export const checkSavedAgent = async (
   agentId: string
 ): Promise<{ isSaved: boolean }> => {
-  return apiRequest(`/saved-agents/check/${agentId}`, {
-    requiresAuth: true,
-  });
+  try {
+    return await apiRequest(`/saved-agents/check/${agentId}`, {
+      requiresAuth: true,
+    });
+  } catch (error: any) {
+    // Return not saved for 404 (not found) and 403 (forbidden) - not critical
+    if (error?.statusCode === 404 || error?.statusCode === 403) {
+      return { isSaved: false };
+    }
+    // Re-throw other errors
+    throw error;
+  }
 };
