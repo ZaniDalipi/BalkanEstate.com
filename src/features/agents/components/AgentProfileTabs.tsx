@@ -422,24 +422,25 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                     shadowSize: [41, 41]
                                                 })}
                                             >
-                                                <Popup>
+                                                <Popup minWidth={200} maxWidth={220}>
                                                     <div
-                                                        className="w-[240px] cursor-pointer"
+                                                        className="cursor-pointer overflow-hidden"
+                                                        style={{ width: 200, maxWidth: '100%' }}
                                                         onClick={() => {
                                                             const propertyId = property.id || (property as any)._id;
                                                             onViewProperty(propertyId);
                                                         }}
                                                     >
                                                         {property.imageUrl && (
-                                                            <div className="w-full h-[140px] overflow-hidden mb-0">
+                                                            <div className="w-full h-28 overflow-hidden">
                                                                 <img src={property.imageUrl} alt={property.address} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                                                             </div>
                                                         )}
-                                                        <div className="px-3 pt-3 pb-2">
-                                                            <p className="font-bold text-sm mb-1 truncate">{property.address}</p>
-                                                            <p className="text-xs text-gray-600 mb-2">{property.city}, {property.country}</p>
-                                                            <p className="font-bold text-blue-600 mb-2">{formatPrice(property.price, property.country)}</p>
-                                                            <div className="flex gap-2 text-xs text-gray-600 mb-3">
+                                                        <div className="p-2.5">
+                                                            <p className="font-bold text-sm mb-0.5 truncate">{property.address}</p>
+                                                            <p className="text-xs text-gray-500 truncate mb-1">{property.city}, {property.country}</p>
+                                                            <p className="font-bold text-blue-600 text-sm mb-1.5">{formatPrice(property.price, property.country)}</p>
+                                                            <div className="flex gap-1.5 text-[11px] text-gray-600 mb-2 flex-wrap">
                                                                 <span>{property.beds} {t('profilePage.propertiesMap.beds')}</span>
                                                                 <span>•</span>
                                                                 <span>{property.baths} {t('profilePage.propertiesMap.baths')}</span>
@@ -453,7 +454,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                                     const propertyId = property.id || (property as any)._id;
                                                                     onViewProperty(propertyId);
                                                                 }}
-                                                                className={`w-full text-white px-3 py-2 rounded-lg font-semibold text-sm ${property.status === 'sold' ? 'bg-red-600 hover:bg-red-700' : property.status === 'rented' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'}`}
+                                                                className={`w-full text-white px-2 py-1.5 rounded-lg font-semibold text-xs truncate ${property.status === 'sold' ? 'bg-red-600 hover:bg-red-700' : property.status === 'rented' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'}`}
                                                             >
                                                                 {property.status === 'sold' ? t('profilePage.propertiesMap.viewSoldProperty') : property.status === 'rented' ? t('profilePage.propertiesMap.viewRentedProperty', 'View Rented Property') : t('profilePage.propertiesMap.viewDetails')}
                                                             </button>

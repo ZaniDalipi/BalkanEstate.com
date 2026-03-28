@@ -10,6 +10,7 @@ import { Achievement } from '@/components/shared/AchievementsSection';
 import CredentialsSection from '@/src/features/credentials/components/CredentialsSection';
 import { Credential } from '@/src/features/credentials/api/credentialApi';
 import { EditFormData } from './useAgentProfile';
+import ServiceAreaMapPicker from './ServiceAreaMapPicker';
 
 // Shared input classes (module-level to avoid recreation)
 const inputCls =
@@ -100,6 +101,8 @@ interface AgentEditModalProps {
     onSaveProfile: (e: React.FormEvent | React.MouseEvent) => void;
     onAddArrayItem: (field: 'specializations' | 'languages' | 'serviceAreas', value: string) => void;
     onRemoveArrayItem: (field: 'specializations' | 'languages' | 'serviceAreas', index: number) => void;
+    centerLat?: number | null;
+    centerLng?: number | null;
     onAddAchievement: (achievement: Omit<Achievement, 'id' | 'createdAt' | 'isVerified'>) => Promise<void>;
     onEditAchievement: (id: string, achievement: Partial<Achievement>) => Promise<void>;
     onDeleteAchievement: (id: string) => Promise<void>;
@@ -130,6 +133,8 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
     licenseNumber,
     licenseCountry,
     onLicenseSubmitted,
+    centerLat,
+    centerLng,
 }) => {
     const { t } = useTranslation(['agents']);
 
@@ -249,13 +254,12 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                             {t('profilePage.editModal.serviceAreas')}
                         </label>
-                        <TagInputRow
-                            field="serviceAreas"
-                            tags={editForm.serviceAreas}
-                            placeholder={t('profilePage.editModal.addServiceArea')}
-                            colorScheme={{ bg: 'bg-purple-100', text: 'text-purple-700', hover: 'text-purple-900' }}
-                            onAddArrayItem={onAddArrayItem}
-                            onRemoveArrayItem={onRemoveArrayItem}
+                        <ServiceAreaMapPicker
+                            areas={editForm.serviceAreas}
+                            onAdd={(name) => onAddArrayItem('serviceAreas', name)}
+                            onRemove={(index) => onRemoveArrayItem('serviceAreas', index)}
+                            centerLat={centerLat}
+                            centerLng={centerLng}
                         />
                     </section>
 
