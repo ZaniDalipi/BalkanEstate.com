@@ -338,8 +338,14 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
 
                     // Fetch agency details
                     try {
-                        const agencyResponse = await fetch(`${API_URL}/agencies/${agent.agencyId}`);
+                        const agencyResponse = await fetch(`${API_URL}/agencies/${agent.agencyId}`, {
+                            credentials: 'include',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        });
                         if (cancelled) return;
+                        // Silently skip non-200 responses for agency data (optional)
                         if (agencyResponse.ok) {
                             const agencyDataResponse = await agencyResponse.json();
                             const agency = agencyDataResponse.agency;
@@ -352,7 +358,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
                             }
                         }
                     } catch (error) {
-                        // Error removed
+                        // Silently fail - agency details are optional
                     }
                 } else {
                     // Fetch agents from same city
@@ -383,9 +389,14 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             if (!state.isAuthenticated || !agent.id) return;
             try {
                 const response = await checkSavedAgent(agent.id);
-                setSavedAgent(response.isSaved);
-            } catch (error) {
-                // Error removed
+                if (isMountedRef.current) {
+                    setSavedAgent(response.isSaved);
+                }
+            } catch (error: any) {
+                // Silently fail for 404/403 - default to not saved
+                if (isMountedRef.current && (error?.statusCode === 404 || error?.statusCode === 403)) {
+                    setSavedAgent(false);
+                }
             }
         };
         checkIfSaved();
@@ -398,9 +409,16 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             if (!userId) return;
             try {
                 const achievements = await getUserAchievements(userId);
-                setAgentAchievements(achievements);
-            } catch (error) {
-                // Error removed
+                if (isMountedRef.current) {
+                    setAgentAchievements(achievements);
+                }
+            } catch (error: any) {
+                // Silently fail for 404/403 - achievements are optional
+                if (error?.statusCode === 404 || error?.statusCode === 403) {
+                    if (isMountedRef.current) {
+                        setAgentAchievements([]);
+                    }
+                }
             }
         };
         fetchAchievements();
@@ -412,16 +430,23 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             try {
                 if (isOwner) {
                     const creds = await getCredentials();
-                    setAgentCredentials(creds);
+                    if (isMountedRef.current) {
+                        setAgentCredentials(creds);
+                    }
                 } else {
                     const agentId = agent.userId || agent.id;
                     if (agentId) {
                         const creds = await getAgentPublicCredentials(String(agentId));
-                        setAgentCredentials(creds);
+                        if (isMountedRef.current) {
+                            setAgentCredentials(creds);
+                        }
                     }
                 }
-            } catch (error) {
-                // Silent fail
+            } catch (error: any) {
+                // Silently fail for 404/403 - credentials are optional
+                if (isMountedRef.current && (error?.statusCode === 404 || error?.statusCode === 403)) {
+                    setAgentCredentials([]);
+                }
             }
         };
         fetchCredentials();

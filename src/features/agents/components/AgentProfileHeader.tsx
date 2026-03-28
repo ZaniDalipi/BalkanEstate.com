@@ -94,6 +94,15 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
         window.history.pushState({}, '', `/${lang}/subscribe`);
     }, [dispatch]);
 
+    const handleNameClick = useCallback(() => {
+        if (agent.userId) {
+            dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+            dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
+            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'profile' });
+            window.history.pushState({}, '', `/profile/${agent.userId}`);
+        }
+    }, [agent.userId, dispatch]);
+
     const accountButton = useMemo(() => {
         if (isAuthenticated && currentUser) {
             return (
@@ -376,7 +385,13 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                         {/* Agent Info */}
                         <div className="flex-1 text-center lg:text-left">
                             <div className="flex flex-col lg:flex-row items-center lg:items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
-                                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">{agent.name}</h1>
+                                <button
+                                    onClick={handleNameClick}
+                                    className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 hover:text-blue-600 transition-colors duration-200 text-left hover:underline"
+                                    title="View profile"
+                                >
+                                    <h1 className="inline">{agent.name}</h1>
+                                </button>
                                 {stats.rating >= 4.5 && (
                                     <span className="inline-flex items-center gap-1 sm:gap-1.5 bg-orange-100 text-orange-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-semibold">
                                         <FireIcon className="w-3 h-3 sm:w-4 sm:h-4" />
