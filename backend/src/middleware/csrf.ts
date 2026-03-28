@@ -61,6 +61,7 @@ const EXEMPT_PATHS = [
   '/auth/',
   '/webhooks/',
   '/health',
+  '/view-stats/',
 ];
 
 /** HTTP methods that are safe (read-only) and don't need CSRF protection */

@@ -25,8 +25,9 @@ export const getUserAchievements = async (req: Request, res: Response): Promise<
 
     const user = await User.findById(userId).select('achievements');
 
+    // Return empty array if user not found — achievements are optional data
     if (!user) {
-      res.status(404).json({ message: 'User not found' });
+      res.json({ achievements: [] });
       return;
     }
 
@@ -217,8 +218,9 @@ export const getAgencyAchievements = async (req: Request, res: Response): Promis
 
     const agency = await Agency.findById(agencyId).select('achievements');
 
+    // Return empty array if agency not found — achievements are optional data
     if (!agency) {
-      res.status(404).json({ message: 'Agency not found' });
+      res.json({ achievements: [] });
       return;
     }
 

@@ -282,8 +282,9 @@ export const getAgentPublicCredentials = async (req: Request, res: Response): Pr
 
     const agent = await Agent.findById(agentId);
 
+    // Return empty array if agent not found — credentials are optional data
     if (!agent) {
-      res.status(404).json({ message: 'Agent not found' });
+      res.json({ success: true, credentials: [] });
       return;
     }
 
