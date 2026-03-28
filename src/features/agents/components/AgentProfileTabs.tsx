@@ -424,38 +424,40 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                             >
                                                 <Popup>
                                                     <div
-                                                        className="w-[220px] cursor-pointer"
+                                                        className="w-[240px] cursor-pointer"
                                                         onClick={() => {
                                                             const propertyId = property.id || (property as any)._id;
                                                             onViewProperty(propertyId);
                                                         }}
                                                     >
                                                         {property.imageUrl && (
-                                                            <div className="w-full h-[130px] rounded-lg overflow-hidden mb-2">
+                                                            <div className="w-full h-[140px] overflow-hidden mb-0">
                                                                 <img src={property.imageUrl} alt={property.address} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                                                             </div>
                                                         )}
-                                                        <p className="font-bold text-sm mb-1 truncate">{property.address}</p>
-                                                        <p className="text-xs text-gray-600 mb-2">{property.city}, {property.country}</p>
-                                                        <p className="font-bold text-blue-600 mb-2">{formatPrice(property.price, property.country)}</p>
-                                                        <div className="flex gap-2 text-xs text-gray-600 mb-3">
-                                                            <span>{property.beds} {t('profilePage.propertiesMap.beds')}</span>
-                                                            <span>•</span>
-                                                            <span>{property.baths} {t('profilePage.propertiesMap.baths')}</span>
-                                                            <span>•</span>
-                                                            <span>{property.sqft} m²</span>
+                                                        <div className="px-3 pt-3 pb-2">
+                                                            <p className="font-bold text-sm mb-1 truncate">{property.address}</p>
+                                                            <p className="text-xs text-gray-600 mb-2">{property.city}, {property.country}</p>
+                                                            <p className="font-bold text-blue-600 mb-2">{formatPrice(property.price, property.country)}</p>
+                                                            <div className="flex gap-2 text-xs text-gray-600 mb-3">
+                                                                <span>{property.beds} {t('profilePage.propertiesMap.beds')}</span>
+                                                                <span>•</span>
+                                                                <span>{property.baths} {t('profilePage.propertiesMap.baths')}</span>
+                                                                <span>•</span>
+                                                                <span>{property.sqft} m²</span>
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    const propertyId = property.id || (property as any)._id;
+                                                                    onViewProperty(propertyId);
+                                                                }}
+                                                                className={`w-full text-white px-3 py-2 rounded-lg font-semibold text-sm ${property.status === 'sold' ? 'bg-red-600 hover:bg-red-700' : property.status === 'rented' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'}`}
+                                                            >
+                                                                {property.status === 'sold' ? t('profilePage.propertiesMap.viewSoldProperty') : property.status === 'rented' ? t('profilePage.propertiesMap.viewRentedProperty', 'View Rented Property') : t('profilePage.propertiesMap.viewDetails')}
+                                                            </button>
                                                         </div>
-                                                        <button
-                                                            type="button"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                const propertyId = property.id || (property as any)._id;
-                                                                onViewProperty(propertyId);
-                                                            }}
-                                                            className={`w-full text-white px-3 py-2 rounded-lg font-semibold text-sm ${property.status === 'sold' ? 'bg-red-600 hover:bg-red-700' : property.status === 'rented' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'}`}
-                                                        >
-                                                            {property.status === 'sold' ? t('profilePage.propertiesMap.viewSoldProperty') : property.status === 'rented' ? t('profilePage.propertiesMap.viewRentedProperty', 'View Rented Property') : t('profilePage.propertiesMap.viewDetails')}
-                                                        </button>
                                                     </div>
                                                 </Popup>
                                             </Marker>
