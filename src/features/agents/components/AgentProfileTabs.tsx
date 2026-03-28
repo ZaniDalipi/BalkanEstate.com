@@ -481,14 +481,29 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                             </div>
                         )}
 
-                        {/* Agent Location Map - only show if coordinates are valid and within Balkans */}
-                        {hasValidCoordinates && (
+                        {/* Service Area — map (when coords valid) + named areas */}
+                        {(hasValidCoordinates || (agent.serviceAreas && agent.serviceAreas.length > 0)) && (
                             <div>
                                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                                     <MapPinIcon className="w-6 h-6 text-blue-600" />
                                     {t('profilePage.serviceArea.title')}
                                 </h3>
-                                <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200 relative">
+
+                                {/* Named service area tags */}
+                                {agent.serviceAreas && agent.serviceAreas.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 mb-4">
+                                        {agent.serviceAreas.map((area: string) => (
+                                            <span
+                                                key={area}
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-full text-sm font-medium"
+                                            >
+                                                <MapPinIcon className="w-3.5 h-3.5 flex-shrink-0" />
+                                                {area}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+                                {hasValidCoordinates && <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200 relative">
                                     <MapContainer
                                         center={[agent.lat, agent.lng]}
                                         zoom={13}
@@ -578,7 +593,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </div>}
                             </div>
                         )}
 
