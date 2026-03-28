@@ -865,8 +865,6 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                     </div>
                   )}
                 </div>
-                </div>
-              </div>
             );
           })}
         </div>
