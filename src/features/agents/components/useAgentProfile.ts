@@ -392,9 +392,9 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
                 if (isMountedRef.current) {
                     setSavedAgent(response.isSaved);
                 }
-            } catch (error: any) {
-                // Silently fail for 404/403 - default to not saved
-                if (isMountedRef.current && (error?.statusCode === 404 || error?.statusCode === 403)) {
+            } catch (error) {
+                // Silently fail - default to not saved
+                if (isMountedRef.current) {
                     setSavedAgent(false);
                 }
             }
@@ -412,12 +412,10 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
                 if (isMountedRef.current) {
                     setAgentAchievements(achievements);
                 }
-            } catch (error: any) {
-                // Silently fail for 404/403 - achievements are optional
-                if (error?.statusCode === 404 || error?.statusCode === 403) {
-                    if (isMountedRef.current) {
-                        setAgentAchievements([]);
-                    }
+            } catch (error) {
+                // Error handling is done at API layer - silent fail
+                if (isMountedRef.current) {
+                    setAgentAchievements([]);
                 }
             }
         };
@@ -442,9 +440,9 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
                         }
                     }
                 }
-            } catch (error: any) {
-                // Silently fail for 404/403 - credentials are optional
-                if (isMountedRef.current && (error?.statusCode === 404 || error?.statusCode === 403)) {
+            } catch (error) {
+                // Error handling is done at API layer - silent fail
+                if (isMountedRef.current) {
                     setAgentCredentials([]);
                 }
             }

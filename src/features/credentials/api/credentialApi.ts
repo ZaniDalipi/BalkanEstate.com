@@ -17,16 +17,34 @@ export interface Credential {
 }
 
 export const getCredentials = async (): Promise<Credential[]> => {
-  const data = await apiRequest<{ credentials: Credential[] }>('/credentials', {
-    requiresAuth: true,
-    encryptResponse: true,
-  });
-  return data.credentials || [];
+  try {
+    const data = await apiRequest<{ credentials: Credential[] }>('/credentials', {
+      requiresAuth: true,
+      encryptResponse: true,
+    });
+    return data.credentials || [];
+  } catch (error: any) {
+    // Return empty array for 404 (not found) and 403 (forbidden) - credentials are optional
+    if (error?.statusCode === 404 || error?.statusCode === 403) {
+      return [];
+    }
+    // Re-throw other errors
+    throw error;
+  }
 };
 
 export const getAgentPublicCredentials = async (agentId: string): Promise<Credential[]> => {
-  const data = await apiRequest<{ credentials: Credential[] }>(`/credentials/agent/${agentId}`);
-  return data.credentials || [];
+  try {
+    const data = await apiRequest<{ credentials: Credential[] }>(`/credentials/agent/${agentId}`);
+    return data.credentials || [];
+  } catch (error: any) {
+    // Return empty array for 404 (not found) and 403 (forbidden) - credentials are optional
+    if (error?.statusCode === 404 || error?.statusCode === 403) {
+      return [];
+    }
+    // Re-throw other errors
+    throw error;
+  }
 };
 
 export const addCredential = async (

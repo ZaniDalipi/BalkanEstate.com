@@ -29,11 +29,20 @@ export interface AchievementInput {
 // User (Agent) Achievements
 
 export const getUserAchievements = async (userId: string): Promise<Achievement[]> => {
-  const data = await apiRequest<{ achievements: Achievement[] }>(`/achievements/user/${userId}`, {
-    requiresAuth: true,
-    encryptResponse: true,
-  });
-  return data.achievements;
+  try {
+    const data = await apiRequest<{ achievements: Achievement[] }>(`/achievements/user/${userId}`, {
+      requiresAuth: true,
+      encryptResponse: true,
+    });
+    return data.achievements;
+  } catch (error: any) {
+    // Return empty array for 404 (not found) and 403 (forbidden) - achievements are optional
+    if (error?.statusCode === 404 || error?.statusCode === 403) {
+      return [];
+    }
+    // Re-throw other errors
+    throw error;
+  }
 };
 
 export const addUserAchievement = async (achievement: AchievementInput): Promise<Achievement> => {
