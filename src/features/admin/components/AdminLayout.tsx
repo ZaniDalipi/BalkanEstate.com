@@ -21,6 +21,7 @@ interface AdminStats {
 
 export type AdminView =
   | 'dashboard'
+  | 'heatmap'
   | 'pricing'
   | 'promotionPlans'
   | 'discounts'

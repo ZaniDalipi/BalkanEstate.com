@@ -9,6 +9,7 @@ import PromotionCouponManager from './PromotionCouponManager';
 import PromotionPlansManager from './PromotionPlansManager';
 import UserManager from './UserManager';
 import AnalyticsDashboard from './AnalyticsDashboard';
+import InteractionHeatmap from './InteractionHeatmap';
 import PropertyManager from './PropertyManager';
 import AgencyManager from './AgencyManager';
 import PricingManager from './PricingManager';
@@ -27,6 +28,7 @@ import { tokenService } from '@/src/shared/api/tokenService';
 // Map URL sections to AdminView types
 const urlToAdminView: Record<AdminSection, AdminView> = {
   'dashboard': 'dashboard',
+  'heatmap': 'heatmap',
   'users': 'users',
   'inquiries': 'inquiries',
   'agent-requests': 'agentRequests',
@@ -47,6 +49,7 @@ const urlToAdminView: Record<AdminSection, AdminView> = {
 // Map AdminView to URL sections
 const adminViewToUrl: Record<AdminView, string> = {
   'dashboard': 'dashboard',
+  'heatmap': 'heatmap',
   'users': 'users',
   'inquiries': 'inquiries',
   'agentRequests': 'agent-requests',
@@ -184,6 +187,8 @@ const AdminDashboard: React.FC = () => {
     switch (activeSection) {
       case 'dashboard':
         return <AnalyticsDashboard />;
+      case 'heatmap':
+        return <InteractionHeatmap />;
       case 'inquiries':
         return <InquiryManager />;
       case 'agentRequests':

@@ -83,6 +83,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           icon: <ChartBarIcon className="w-5 h-5" />
         },
         {
+          id: 'heatmap',
+          label: t('admin:sidebar.interactionHeatmap', 'Interaction Heatmap'),
+          icon: <ChartBarIcon className="w-5 h-5" />
+        },
+        {
           id: 'inquiries',
           label: t('admin:sidebar.inquiries', 'Inquiries'),
           icon: <EnvelopeIcon className="w-5 h-5" />,
