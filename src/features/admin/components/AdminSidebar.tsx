@@ -139,6 +139,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           label: t('admin:sidebar.businessListings', 'Business Listings'),
           icon: <BuildingStorefrontIcon className="w-5 h-5" />
         },
+        {
+          id: 'articles',
+          label: t('admin:sidebar.articles', 'Articles'),
+          icon: <SparklesIcon className="w-5 h-5" />
+        },
       ]
     },
     {

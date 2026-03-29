@@ -36,7 +36,8 @@ export type AdminView =
   | 'activity'
   | 'howItWorks'
   | 'emailTemplates'
-  | 'businessListings';
+  | 'businessListings'
+  | 'articles';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
