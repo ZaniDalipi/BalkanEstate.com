@@ -6,7 +6,8 @@ import SubscriptionEvent from '../models/SubscriptionEvent';
 import Product from '../models/Product';
 import Agency from '../models/Agency';
 import PromotionCoupon from '../models/PromotionCoupon';
-import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail, sendSubscriptionInvoice, sendProSubscriptionWelcomeEmail, sendMonthlyCouponEmail } from './emailService';
+import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail, sendSubscriptionInvoice, sendProSubscriptionWelcomeEmail, sendMonthlyCouponEmail, sendSubscriptionExpired } from './emailService';
+import { createNotificationWithPush } from './engagementService';
 import { generateSecureRandomString } from '../utils/secureRandom';
 import { paymentLogger } from '../utils/logger';
 import { FREE_TIER_LIMITS } from '../config/subscriptionConstants';
@@ -619,6 +620,9 @@ export async function updateExpiredSubscriptions(maxRetries = 3): Promise<number
     const session = await mongoose.startSession();
     session.startTransaction();
 
+    // Collect user info during the transaction for post-commit notifications
+    const expiredUsers: { userId: string; email: string; name: string; planName: string }[] = [];
+
     try {
       const now = new Date();
       let updatedCount = 0;
@@ -637,6 +641,14 @@ export async function updateExpiredSubscriptions(maxRetries = 3): Promise<number
         // Update user - clear subscription fields
         const user = await User.findById(subscription.userId).session(session);
         if (user && String(user.activeSubscriptionId) === String(subscription._id)) {
+          // Collect info for post-commit email and notification
+          expiredUsers.push({
+            userId: String(user._id),
+            email: user.email,
+            name: user.name || 'Customer',
+            planName: subscription.productId || 'subscription',
+          });
+
           user.isSubscribed = false;
           user.subscriptionStatus = 'expired';
           user.subscriptionPlan = undefined;
@@ -667,6 +679,32 @@ export async function updateExpiredSubscriptions(maxRetries = 3): Promise<number
 
       await session.commitTransaction();
       session.endSession();
+
+      // Send expiration emails and in-app notifications after successful commit (non-critical)
+      for (const { userId, email, name, planName } of expiredUsers) {
+        try {
+          await sendSubscriptionExpired(email, name, planName);
+        } catch (emailError) {
+          paymentLogger.error(`Failed to send subscription expired email to ${email}:`, emailError);
+        }
+
+        try {
+          await createNotificationWithPush({
+            userId,
+            type: 'subscription_expiring',
+            title: 'Subscription Expired',
+            message: `Your ${planName} subscription has expired. Your account has been downgraded to the free plan.`,
+            icon: 'alert-circle',
+            priority: 'high',
+            data: {
+              actionUrl: '/account',
+              actionLabel: 'Resubscribe',
+            },
+          });
+        } catch (notifError) {
+          paymentLogger.error(`Failed to create subscription expired notification for user ${userId}:`, notifError);
+        }
+      }
 
       return updatedCount;
     } catch (error: any) {
