@@ -66,6 +66,7 @@ export const ROUTES = {
   CREATE_LISTING: '/create-listing',
   CONTACT: '/contact',
   BUSINESS_DIRECTORY: '/business-directory',
+  BLOG: '/blog',
   PAYMENT_SUCCESS: '/payment/success',
   PAYMENT_CANCEL: '/payment/cancel',
   LOGIN: '/login',
@@ -168,6 +169,7 @@ export const ADMIN_SECTIONS = [
   'how-it-works',
   'email-templates',
   'business-listings',
+  'articles',
 ] as const;
 
 /**

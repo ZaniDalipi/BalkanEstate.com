@@ -9,6 +9,7 @@ import PromotionCouponManager from './PromotionCouponManager';
 import PromotionPlansManager from './PromotionPlansManager';
 import UserManager from './UserManager';
 import AnalyticsDashboard from './AnalyticsDashboard';
+import InteractionHeatmap from './InteractionHeatmap';
 import PropertyManager from './PropertyManager';
 import AgencyManager from './AgencyManager';
 import PricingManager from './PricingManager';
@@ -21,12 +22,14 @@ import EmailManager from './EmailManager';
 import SiteSettingsManager from './SiteSettingsManager';
 import PendingLicenses from './PendingLicenses';
 import BusinessListingManager from './BusinessListingManager';
+import ArticleManager from './ArticleManager';
 import type { AdminSection } from '@/types';
 import { tokenService } from '@/src/shared/api/tokenService';
 
 // Map URL sections to AdminView types
 const urlToAdminView: Record<AdminSection, AdminView> = {
   'dashboard': 'dashboard',
+  'heatmap': 'heatmap',
   'users': 'users',
   'inquiries': 'inquiries',
   'agent-requests': 'agentRequests',
@@ -42,11 +45,13 @@ const urlToAdminView: Record<AdminSection, AdminView> = {
   'email-templates': 'emailTemplates',
   'site-settings': 'siteSettings',
   'business-listings': 'businessListings',
+  'articles': 'articles',
 };
 
 // Map AdminView to URL sections
 const adminViewToUrl: Record<AdminView, string> = {
   'dashboard': 'dashboard',
+  'heatmap': 'heatmap',
   'users': 'users',
   'inquiries': 'inquiries',
   'agentRequests': 'agent-requests',
@@ -62,6 +67,7 @@ const adminViewToUrl: Record<AdminView, string> = {
   'emailTemplates': 'email-templates',
   'siteSettings': 'site-settings',
   'businessListings': 'business-listings',
+  'articles': 'articles',
 };
 
 const AdminDashboard: React.FC = () => {
@@ -184,6 +190,8 @@ const AdminDashboard: React.FC = () => {
     switch (activeSection) {
       case 'dashboard':
         return <AnalyticsDashboard />;
+      case 'heatmap':
+        return <InteractionHeatmap />;
       case 'inquiries':
         return <InquiryManager />;
       case 'agentRequests':
@@ -221,6 +229,8 @@ const AdminDashboard: React.FC = () => {
         return <SiteSettingsManager />;
       case 'businessListings':
         return <BusinessListingManager />;
+      case 'articles':
+        return <ArticleManager />;
       default:
         return <AnalyticsDashboard />;
     }
