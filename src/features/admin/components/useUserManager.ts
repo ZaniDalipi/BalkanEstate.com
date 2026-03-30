@@ -16,7 +16,13 @@ export interface User {
   isEmailVerified?: boolean;
   subscriptionType?: string;
   subscriptionPlan?: string;
+  subscriptionProductName?: string;
   subscriptionStatus?: string;
+  subscriptionExpiresAt?: string;
+  subscriptionStartedAt?: string;
+  subscriptionSource?: string;
+  subscriptionRenewalDate?: string;
+  activeSubscriptionId?: string;
   agencyName?: string;
   agencyId?: string;
   licenseNumber?: string;

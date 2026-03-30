@@ -940,6 +940,179 @@ export const adjustAgencyListingLimit = async (req: Request, res: Response): Pro
   }
 };
 
+/**
+ * @desc    Manage a user's subscription (activate/deactivate/update dates) from the admin User Manager
+ * @route   PATCH /api/admin/subscriptions/manage/:userId
+ * @access  Admin
+ */
+export const manageUserSubscription = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = getObjectIdParam(req, res, 'userId');
+    if (!userId) return;
+
+    const { isSubscribed, subscriptionPlan, subscriptionStartedAt, subscriptionExpiresAt, reason } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Deactivate subscription
+    if (isSubscribed === false) {
+      // Cancel any active Subscription document
+      if (user.activeSubscriptionId) {
+        const sub = await Subscription.findById(user.activeSubscriptionId);
+        if (sub && ['active', 'grace', 'trial'].includes(sub.status as string)) {
+          sub.status = 'canceled';
+          sub.canceledAt = new Date();
+          sub.autoRenewing = false;
+          sub.cancellationReason = reason || 'Admin deactivation via User Manager';
+          await sub.save();
+        }
+      }
+
+      user.isSubscribed = false;
+      user.subscriptionStatus = 'canceled';
+      user.subscriptionPlan = undefined;
+      user.subscriptionProductName = undefined;
+      user.subscriptionSource = undefined;
+      user.activeSubscriptionId = undefined;
+      await user.save();
+
+      await SubscriptionEvent.create({
+        subscriptionId: user.activeSubscriptionId || userId,
+        userId,
+        eventType: 'subscription_canceled',
+        store: 'web',
+        metadata: {
+          deactivatedByAdmin: true,
+          adminUserId: (req as any).user?._id,
+          reason: reason || 'Admin deactivation via User Manager',
+        },
+      });
+
+      invalidateCache('/api/agents');
+      invalidateCache('/api/properties');
+
+      res.json({ success: true, message: `Subscription deactivated for ${user.email}` });
+      return;
+    }
+
+    // Activate or update subscription
+    const expiresAt = subscriptionExpiresAt ? new Date(subscriptionExpiresAt) : undefined;
+    const startedAt = subscriptionStartedAt ? new Date(subscriptionStartedAt) : new Date();
+
+    if (isSubscribed === true) {
+      if (!subscriptionPlan || !expiresAt) {
+        res.status(400).json({ message: 'subscriptionPlan and subscriptionExpiresAt are required for activation' });
+        return;
+      }
+
+      user.isSubscribed = true;
+      user.subscriptionStatus = 'active';
+      user.subscriptionPlan = subscriptionPlan;
+      user.subscriptionProductName = subscriptionPlan.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+      user.subscriptionSource = 'web';
+      user.subscriptionExpiresAt = expiresAt;
+      user.subscriptionStartedAt = startedAt;
+
+      // Create or update Subscription document
+      let subscription = user.activeSubscriptionId
+        ? await Subscription.findById(user.activeSubscriptionId)
+        : null;
+
+      if (subscription) {
+        subscription.productId = subscriptionPlan;
+        subscription.status = 'active';
+        subscription.expirationDate = expiresAt;
+        subscription.renewalDate = expiresAt;
+        subscription.startDate = startedAt;
+        subscription.autoRenewing = false;
+        subscription.lastUpdated = new Date();
+        await subscription.save();
+      } else {
+        subscription = await Subscription.create({
+          userId,
+          store: 'web',
+          productId: subscriptionPlan,
+          startDate: startedAt,
+          expirationDate: expiresAt,
+          renewalDate: expiresAt,
+          status: 'active',
+          autoRenewing: false,
+          price: 0,
+          currency: 'EUR',
+          purchaseToken: `admin_${userId}_${Date.now()}`,
+          transactionId: `admin_txn_${userId}_${Date.now()}`,
+        });
+        user.activeSubscriptionId = subscription._id as mongoose.Types.ObjectId;
+      }
+
+      await user.save();
+
+      await SubscriptionEvent.create({
+        subscriptionId: subscription._id,
+        userId,
+        eventType: 'subscription_purchased',
+        store: 'web',
+        metadata: {
+          activatedByAdmin: true,
+          adminUserId: (req as any).user?._id,
+          reason: reason || 'Admin activation via User Manager',
+          plan: subscriptionPlan,
+          expiresAt,
+          startedAt,
+        },
+      });
+
+      invalidateCache('/api/agents');
+      invalidateCache('/api/properties');
+
+      res.json({
+        success: true,
+        message: `Subscription activated for ${user.email} — ${subscriptionPlan} until ${expiresAt.toLocaleDateString()}`,
+      });
+      return;
+    }
+
+    // Update dates only (isSubscribed not explicitly set)
+    if (subscriptionPlan) {
+      user.subscriptionPlan = subscriptionPlan;
+      user.subscriptionProductName = subscriptionPlan.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+    }
+    if (expiresAt) user.subscriptionExpiresAt = expiresAt;
+    if (subscriptionStartedAt) user.subscriptionStartedAt = startedAt;
+    await user.save();
+
+    // Also update the Subscription document if it exists
+    if (user.activeSubscriptionId) {
+      const sub = await Subscription.findById(user.activeSubscriptionId);
+      if (sub) {
+        if (subscriptionPlan) sub.productId = subscriptionPlan;
+        if (expiresAt) {
+          sub.expirationDate = expiresAt;
+          sub.renewalDate = expiresAt;
+        }
+        if (subscriptionStartedAt) sub.startDate = startedAt;
+        sub.lastUpdated = new Date();
+        await sub.save();
+      }
+    }
+
+    invalidateCache('/api/agents');
+    invalidateCache('/api/properties');
+
+    res.json({
+      success: true,
+      message: `Subscription updated for ${user.email}`,
+    });
+  } catch (error: any) {
+    adminLogger.error('[Admin] Error managing user subscription:', error);
+    res.status(500).json({ message: 'Error managing subscription' });
+  }
+};
+
 export default {
   getAllSubscriptions,
   getSubscriptionById,
@@ -954,4 +1127,5 @@ export default {
   activateAgencySubscription,
   deactivateAgencySubscription,
   getAgencySubscriptionHistory,
+  manageUserSubscription,
 };
