@@ -21,6 +21,7 @@ interface AdminStats {
 
 export type AdminView =
   | 'dashboard'
+  | 'heatmap'
   | 'pricing'
   | 'promotionPlans'
   | 'discounts'
@@ -35,7 +36,8 @@ export type AdminView =
   | 'activity'
   | 'howItWorks'
   | 'emailTemplates'
-  | 'businessListings';
+  | 'businessListings'
+  | 'articles';
 
 interface AdminLayoutProps {
   children: React.ReactNode;

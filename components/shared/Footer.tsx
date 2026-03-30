@@ -52,7 +52,7 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
     const { dispatch } = useAppContext();
     const { getLocalizedPath } = useLocalizedNavigation();
 
-    const handleNavigation = (view: 'search' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'agents' | 'agencies' | 'admin' | 'how-it-works' | 'explore-cities' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'contact') => {
+    const handleNavigation = (view: 'search' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'agents' | 'agencies' | 'admin' | 'how-it-works' | 'explore-cities' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'contact' | 'blog') => {
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
         const route = view === 'search' ? '/' : `/${view}`;
         window.history.pushState({}, '', getLocalizedPath(route));
@@ -75,6 +75,7 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
         { icon: UserGroupIcon, labelKey: 'links.findAgents', view: 'agents' },
         { icon: ChartBarIcon, labelKey: 'links.valuation', view: 'valuation' },
         { icon: BuildingLibraryIcon, labelKey: 'links.browseAgencies', view: 'agencies' },
+        { icon: SparklesIcon, labelKey: 'links.blog', view: 'blog' },
     ];
 
     const sellerLinks = [

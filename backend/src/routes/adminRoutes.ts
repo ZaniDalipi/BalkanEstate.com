@@ -108,6 +108,7 @@ import {
   resetSystemSettings,
 } from '../controllers/systemSettingsController';
 import multer from 'multer';
+import Article from '../models/Article';
 
 const router = express.Router();
 
@@ -560,6 +561,155 @@ router.delete('/news/:id', logAdminAction('DELETE_NEWS'), async (req: Request, r
     res.json({ message: 'News article deleted' });
   } catch (err) {
     res.status(500).json({ message: 'Failed to delete news article' });
+  }
+});
+
+// ===== Article Management (Blog) =====
+
+// GET /api/admin/articles - List all articles
+router.get('/articles', logAdminAction('VIEW_ARTICLES'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { page = '1', limit = '20', status } = req.query;
+    const filter: Record<string, any> = {};
+    if (status) filter.status = status;
+
+    const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+    const limitNum = Math.min(100, parseInt(limit as string, 10) || 20);
+    const skip = (pageNum - 1) * limitNum;
+
+    const [articles, total] = await Promise.all([
+      Article.find(filter)
+        .populate('author', 'name email')
+        .sort({ publishedAt: -1, createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      Article.countDocuments(filter),
+    ]);
+
+    res.json({ articles, pagination: { page: pageNum, limit: limitNum, total, totalPages: Math.ceil(total / limitNum) } });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch articles' });
+  }
+});
+
+// POST /api/admin/articles - Create article
+router.post('/articles', logAdminAction('CREATE_ARTICLE'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { title, content, excerpt, category, tags, country, countryCode, coverImageUrl, status, isFeatured } = req.body;
+
+    if (!title || !content || !excerpt) {
+      res.status(400).json({ message: 'Title, content, and excerpt are required' });
+      return;
+    }
+
+    const article = new Article({
+      title,
+      content,
+      excerpt,
+      category: category || 'guide',
+      tags: tags || [],
+      country,
+      countryCode,
+      coverImageUrl,
+      status: status || 'draft',
+      author: (req as any).user._id,
+      isFeatured: isFeatured || false,
+    });
+
+    await article.save();
+    res.status(201).json({ article });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to create article', error: String(err) });
+  }
+});
+
+// PATCH /api/admin/articles/:id - Update article
+router.patch('/articles/:id', logAdminAction('UPDATE_ARTICLE'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { title, content, excerpt, category, tags, country, countryCode, coverImageUrl, coverImagePublicId, status, isFeatured } = req.body;
+    const article = await Article.findById(req.params.id);
+
+    if (!article) {
+      res.status(404).json({ message: 'Article not found' });
+      return;
+    }
+
+    // Update fields
+    if (title) article.title = title;
+    if (content) article.content = content;
+    if (excerpt) article.excerpt = excerpt;
+    if (category) article.category = category;
+    if (tags) article.tags = tags;
+    if (country) article.country = country;
+    if (countryCode) article.countryCode = countryCode;
+    if (coverImageUrl) article.coverImageUrl = coverImageUrl;
+    if (coverImagePublicId) article.coverImagePublicId = coverImagePublicId;
+    if (isFeatured !== undefined) article.isFeatured = isFeatured;
+
+    // Handle status change to published
+    if (status && status !== article.status) {
+      article.status = status;
+      if (status === 'published' && !article.publishedAt) {
+        article.publishedAt = new Date();
+      }
+    }
+
+    await article.save();
+    res.json({ article });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to update article', error: String(err) });
+  }
+});
+
+// PATCH /api/admin/articles/:id/publish - Toggle publish/unpublish
+router.patch('/articles/:id/publish', logAdminAction('TOGGLE_ARTICLE_STATUS'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const article = await Article.findById(req.params.id);
+
+    if (!article) {
+      res.status(404).json({ message: 'Article not found' });
+      return;
+    }
+
+    if (article.status === 'published') {
+      article.status = 'draft';
+    } else {
+      article.status = 'published';
+      if (!article.publishedAt) {
+        article.publishedAt = new Date();
+      }
+    }
+
+    await article.save();
+    res.json({ article });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to toggle article status', error: String(err) });
+  }
+});
+
+// DELETE /api/admin/articles/:id - Delete article
+router.delete('/articles/:id', logAdminAction('DELETE_ARTICLE'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const article = await Article.findById(req.params.id);
+
+    if (!article) {
+      res.status(404).json({ message: 'Article not found' });
+      return;
+    }
+
+    // Cleanup Cloudinary cover image if it exists
+    if (article.coverImagePublicId) {
+      try {
+        const cloudinary = (await import('../config/cloudinary')).default;
+        await cloudinary.uploader.destroy(article.coverImagePublicId);
+      } catch { /* ignore cleanup errors */ }
+    }
+
+    await article.deleteOne();
+    res.json({ message: 'Article deleted' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to delete article', error: String(err) });
   }
 });
 

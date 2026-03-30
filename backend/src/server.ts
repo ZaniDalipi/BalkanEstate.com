@@ -107,6 +107,7 @@ import agencyDashboardRoutes from './routes/agencyDashboardRoutes';
 import fileRoutes from './routes/fileRoutes';
 import mapProxyRoutes from './routes/mapProxyRoutes';
 import newsRoutes from './routes/newsRoutes';
+import articleRoutes from './routes/articleRoutes';
 import testimonialRoutes from './routes/testimonialRoutes';
 import pushRoutes from './routes/pushRoutes';
 import businessListingRoutes from './routes/businessListingRoutes';
@@ -330,6 +331,7 @@ app.use('/api/cadastre', cadastreRoutes); // Cadastre WMS proxy (GetFeatureInfo)
 app.use('/api/map', mapProxyRoutes); // Weather tile & FIRMS WMS proxy (API keys server-side)
 app.use('/api/files', fileRoutes); // File access with storage access policy (ownership-based)
 app.use('/api/news', newsRoutes); // Public real estate news
+app.use('/api/articles', articleRoutes); // Public blog articles
 app.use('/api/testimonials', testimonialRoutes); // User testimonials (submit + public list)
 app.use('/api/push', pushRoutes); // Push notification subscriptions
 app.use('/api/business-listings', businessListingRoutes); // Business directory listings
