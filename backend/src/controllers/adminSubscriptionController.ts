@@ -549,6 +549,15 @@ export const adjustListingLimit = async (req: Request, res: Response): Promise<v
     }
     user.markModified('subscription');
 
+    // Sync activeListingsLimit (the field actually checked for listing creation)
+    user.activeListingsLimit = newLimit;
+
+    // Also update proSubscription if it exists
+    if (user.proSubscription) {
+      user.proSubscription.totalListingsLimit = newLimit;
+      user.markModified('proSubscription');
+    }
+
     // Also update legacy freeSubscription field if it exists
     if (user.freeSubscription) {
       user.freeSubscription.listingsLimit = newLimit;
