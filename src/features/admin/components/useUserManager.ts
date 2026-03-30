@@ -23,6 +23,7 @@ export interface User {
   subscriptionSource?: string;
   subscriptionRenewalDate?: string;
   activeSubscriptionId?: string;
+  activeListingsLimit?: number;
   agencyName?: string;
   agencyId?: string;
   licenseNumber?: string;

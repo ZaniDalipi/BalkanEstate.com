@@ -504,7 +504,7 @@ function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
         <label className="text-xs font-semibold text-gray-600 block mb-1">
           {t('userDetail.listingLimitOverride')}
           <span className="font-normal text-gray-400 ml-1">
-            {t('userDetail.listingLimitDesc', { current: currentLimit, active: viewingUser.subscription?.activeListingsCount ?? 0 })}
+            (sub.listingsLimit: {currentLimit} · activeListingsLimit: {viewingUser.activeListingsLimit ?? '—'} · {viewingUser.subscription?.activeListingsCount ?? 0} active)
           </span>
         </label>
         <div className="flex items-center gap-2">
@@ -517,7 +517,7 @@ function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
           />
           <button
             onClick={handleSave}
-            disabled={saving || String(currentLimit) === inputLimit}
+            disabled={saving}
             className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed font-medium transition-colors"
           >
             {saving ? t('userDetail.saving') : saved ? t('userDetail.saved') : t('userDetail.apply')}
