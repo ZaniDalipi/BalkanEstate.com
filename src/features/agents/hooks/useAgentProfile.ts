@@ -259,7 +259,7 @@ export function useAgentProfile(agent: Agent) {
 
   // Actions
   const handleShareAgent = useCallback(async () => {
-    const shareUrl = `${window.location.origin}/agent/${agent.id}`;
+    const shareUrl = `${window.location.origin}/agents/${agent.agentId || agent.id}`;
     const shareText = `Check out ${agent.name} - Real Estate Agent on BalkanEstate`;
 
     if (navigator.share) {

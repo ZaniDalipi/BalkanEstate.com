@@ -28,6 +28,7 @@ export interface Seller {
   agencyName?: string;
   agencyLogo?: string;
   agencyId?: string;
+  agentId?: string;
 }
 
 // Price interval for time-based pricing

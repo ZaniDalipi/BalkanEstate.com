@@ -307,7 +307,7 @@ export const getProperties = async (
     const [rawProperties, total] = await Promise.all([
       Property.find(filter)
         .select(LIST_PROJECTION)
-        .populate('sellerId', 'name email phone avatarUrl role agencyName agencyId')
+        .populate('sellerId', 'name email phone avatarUrl role agencyName agencyId agentId')
         .collation({ locale: 'en', strength: 2 }) // Case-insensitive matching for city/country
         .sort(sort)
         .skip(skip)
@@ -413,7 +413,7 @@ export const getProperty = async (
 
     const property = await Property.findById(id).populate(
       'sellerId',
-      'name email phone avatarUrl role agencyName agencyId licenseNumber'
+      'name email phone avatarUrl role agencyName agencyId agentId licenseNumber'
     );
 
     if (!property) {
