@@ -16,6 +16,7 @@ import { adminLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
 import { getObjectIdParam } from '../utils/validateParams';
 import { escapeRegex } from '../utils/escapeRegex';
+import { PRO_TIER_LIMITS, ENTERPRISE_TIER_LIMITS, FREE_TIER_LIMITS } from '../config/subscriptionConstants';
 
 /**
  * @desc    Get all subscriptions with pagination and filters
@@ -337,13 +338,48 @@ export const activateUserSubscription = async (req: Request, res: Response): Pro
     expiresAt.setDate(expiresAt.getDate() + parseInt(durationDays));
 
     // Update user
+    const normalizedPlan = planName.toLowerCase().replace(/\s+/g, '_');
     user.isSubscribed = true;
     user.subscriptionStatus = 'active';
-    user.subscriptionPlan = planName.toLowerCase().replace(/\s+/g, '_');
+    user.subscriptionPlan = normalizedPlan;
     user.subscriptionProductName = planName;
     user.subscriptionSource = 'web';
     user.subscriptionExpiresAt = expiresAt;
     user.subscriptionStartedAt = new Date();
+
+    // Sync embedded subscription object
+    const isEnterprise = normalizedPlan.includes('enterprise') || normalizedPlan === 'agency_yearly';
+    const isPro = normalizedPlan.includes('pro_') || normalizedPlan.includes('seller_pro_');
+    const isYearly = normalizedPlan.includes('yearly');
+
+    if (!user.subscription) {
+      user.subscription = {} as any;
+    }
+    user.subscription.status = 'active';
+    user.subscription.expiresAt = expiresAt;
+    user.subscription.startDate = new Date();
+
+    if (isEnterprise) {
+      user.subscription.tier = 'agency_owner';
+      user.subscription.listingsLimit = ENTERPRISE_TIER_LIMITS.LISTINGS;
+    } else if (isPro) {
+      user.subscription.tier = 'pro';
+      user.subscription.listingsLimit = isYearly ? PRO_TIER_LIMITS.YEARLY.LISTINGS : PRO_TIER_LIMITS.MONTHLY.LISTINGS;
+    }
+    user.markModified('subscription');
+
+    // Sync activeListingsLimit
+    if (user.subscription.listingsLimit) {
+      user.activeListingsLimit = user.subscription.listingsLimit;
+    }
+
+    // Sync activeRole and primaryRole
+    const currentRole = user.role;
+    if (currentRole && currentRole !== 'buyer') {
+      if (user.activeRole !== currentRole) user.activeRole = currentRole as any;
+      if (user.primaryRole !== currentRole) user.primaryRole = currentRole as any;
+    }
+
     await user.save();
 
     // Create subscription record
@@ -972,16 +1008,29 @@ export const manageUserSubscription = async (req: Request, res: Response): Promi
         }
       }
 
+      const prevSubscriptionId = user.activeSubscriptionId;
+
       user.isSubscribed = false;
       user.subscriptionStatus = 'canceled';
       user.subscriptionPlan = undefined;
       user.subscriptionProductName = undefined;
       user.subscriptionSource = undefined;
       user.activeSubscriptionId = undefined;
+
+      // Reset embedded subscription object
+      if (user.subscription) {
+        user.subscription.tier = 'free';
+        user.subscription.status = 'canceled';
+        user.subscription.listingsLimit = FREE_TIER_LIMITS.LISTINGS;
+        user.subscription.expiresAt = undefined;
+        user.markModified('subscription');
+      }
+      user.activeListingsLimit = FREE_TIER_LIMITS.LISTINGS;
+
       await user.save();
 
       await SubscriptionEvent.create({
-        subscriptionId: user.activeSubscriptionId || userId,
+        subscriptionId: prevSubscriptionId || userId,
         userId,
         eventType: 'subscription_canceled',
         store: 'web',
@@ -1016,6 +1065,39 @@ export const manageUserSubscription = async (req: Request, res: Response): Promi
       user.subscriptionSource = 'web';
       user.subscriptionExpiresAt = expiresAt;
       user.subscriptionStartedAt = startedAt;
+
+      // Sync embedded subscription object
+      const isEnterprise = subscriptionPlan.includes('enterprise') || subscriptionPlan === 'agency_yearly';
+      const isPro = subscriptionPlan.includes('pro_') || subscriptionPlan.includes('seller_pro_');
+      const isYearly = subscriptionPlan.includes('yearly');
+
+      if (!user.subscription) {
+        user.subscription = {} as any;
+      }
+      user.subscription.status = 'active';
+      user.subscription.expiresAt = expiresAt;
+      user.subscription.startDate = startedAt;
+
+      if (isEnterprise) {
+        user.subscription.tier = 'agency_owner';
+        user.subscription.listingsLimit = ENTERPRISE_TIER_LIMITS.LISTINGS;
+      } else if (isPro) {
+        user.subscription.tier = 'pro';
+        user.subscription.listingsLimit = isYearly ? PRO_TIER_LIMITS.YEARLY.LISTINGS : PRO_TIER_LIMITS.MONTHLY.LISTINGS;
+      }
+      user.markModified('subscription');
+
+      // Sync activeListingsLimit
+      if (user.subscription.listingsLimit) {
+        user.activeListingsLimit = user.subscription.listingsLimit;
+      }
+
+      // Sync activeRole and primaryRole to match the user's actual role
+      const currentRole = user.role;
+      if (currentRole && currentRole !== 'buyer') {
+        if (user.activeRole !== currentRole) user.activeRole = currentRole as any;
+        if (user.primaryRole !== currentRole) user.primaryRole = currentRole as any;
+      }
 
       // Create or update Subscription document
       let subscription = user.activeSubscriptionId
