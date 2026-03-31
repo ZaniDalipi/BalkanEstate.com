@@ -184,9 +184,9 @@ export function renderEmailConfig(
   <meta name="supported-color-schemes" content="light dark">
   ${config.preheaderText ? '<meta name="x-apple-data-detectors" content="none">' : ''}
   <style>
-    /* Light mode: black text for body content */
+    /* Light mode: black text for body content (only block elements; span/strong inherit from parent) */
     .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-    .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
+    .ec-card ul, .ec-card ol,
     .ec-text, .ec-text-muted,
     .ec-footer p, .ec-footer span, .ec-footer div { color: #000000 !important; }
     .ec-footer a, .ec-card a { color: #000000 !important; }
