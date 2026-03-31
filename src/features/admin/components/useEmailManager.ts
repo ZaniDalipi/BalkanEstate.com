@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 import {
@@ -23,6 +23,7 @@ export function useEmailManager() {
 
   // State
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedEmail, setSelectedEmail] = useState<EmailConfig | null>(null);
@@ -36,6 +37,12 @@ export function useEmailManager() {
   // Edit form state
   const [editForm, setEditForm] = useState<Partial<EmailConfig>>({});
 
+  // Debounce search input — only trigger a new API call 400ms after typing stops
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   // React Query hooks
   const {
     data: emailData,
@@ -46,7 +53,7 @@ export function useEmailManager() {
   } = useEmailConfigs({
     category: selectedCategory !== 'all' ? selectedCategory : undefined,
     isActive: selectedStatus !== 'all' ? selectedStatus : undefined,
-    search: searchQuery || undefined,
+    search: debouncedQuery || undefined,
   });
 
   const updateMutation = useUpdateEmailConfig();
