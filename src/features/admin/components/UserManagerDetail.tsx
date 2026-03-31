@@ -375,29 +375,8 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
                 </div>
               </div>
 
-              {/* Subscription info - view only (managed through Subscription Management) */}
-              {editingUser.isSubscribed && (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <h4 className="text-sm font-semibold text-gray-600 mb-2">{t('userDetail.subscriptionSection')}</h4>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <span className="text-gray-500">{t('userDetail.subscriptionPlan')}:</span>
-                      <span className="ml-1 font-medium text-gray-900">{editingUser.subscriptionPlan || '—'}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">{t('userDetail.subscriptionStatus')}:</span>
-                      <span className="ml-1 font-medium text-gray-900 capitalize">{editingUser.subscriptionStatus || '—'}</span>
-                    </div>
-                    {editingUser.isEnterpriseTier && (
-                      <div>
-                        <span className="text-gray-500">{t('userDetail.enterpriseTier')}:</span>
-                        <span className="ml-1 font-medium text-purple-700">{t('userDetail.yes')}</span>
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-400 mt-2">{t('userDetail.subscriptionManagedNote')}</p>
-                </div>
-              )}
+              {/* Subscription Management */}
+              <SubscriptionEditPanel editingUser={editingUser} />
 
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <p className="text-xs text-yellow-800">
@@ -437,6 +416,11 @@ function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [err, setErr] = useState('');
+
+  const formatDisplayDate = (dateStr?: string) => {
+    if (!dateStr) return '—';
+    return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
 
   const handleSave = async () => {
     const val = Number(inputLimit);
@@ -493,12 +477,34 @@ function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
         )}
       </div>
 
+      {/* Subscription dates */}
+      {viewingUser.isSubscribed && (
+        <div className="grid grid-cols-2 gap-4 border-t border-green-200 pt-3">
+          <div>
+            <label className="text-xs text-gray-500">Started</label>
+            <p className="font-medium text-sm">{formatDisplayDate(viewingUser.subscriptionStartedAt)}</p>
+          </div>
+          <div>
+            <label className="text-xs text-gray-500">Expires</label>
+            <p className="font-medium text-sm">{formatDisplayDate(viewingUser.subscriptionExpiresAt)}</p>
+          </div>
+          <div>
+            <label className="text-xs text-gray-500">Source</label>
+            <p className="font-medium text-sm capitalize">{viewingUser.subscriptionSource || '—'}</p>
+          </div>
+          <div>
+            <label className="text-xs text-gray-500">Product Name</label>
+            <p className="font-medium text-sm">{viewingUser.subscriptionProductName || '—'}</p>
+          </div>
+        </div>
+      )}
+
       {/* Listing limit override */}
       <div className="border-t border-green-200 pt-3">
         <label className="text-xs font-semibold text-gray-600 block mb-1">
           {t('userDetail.listingLimitOverride')}
           <span className="font-normal text-gray-400 ml-1">
-            {t('userDetail.listingLimitDesc', { current: currentLimit, active: viewingUser.subscription?.activeListingsCount ?? 0 })}
+            (sub.listingsLimit: {currentLimit} · activeListingsLimit: {viewingUser.activeListingsLimit ?? '—'} · {viewingUser.subscription?.activeListingsCount ?? 0} active)
           </span>
         </label>
         <div className="flex items-center gap-2">
@@ -511,7 +517,7 @@ function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
           />
           <button
             onClick={handleSave}
-            disabled={saving || String(currentLimit) === inputLimit}
+            disabled={saving}
             className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed font-medium transition-colors"
           >
             {saving ? t('userDetail.saving') : saved ? t('userDetail.saved') : t('userDetail.apply')}
@@ -521,6 +527,197 @@ function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
         {err && <p className="text-xs text-red-500 mt-1">{err}</p>}
         {saved && <p className="text-xs text-green-600 mt-1">{t('userDetail.limitUpdated')}</p>}
       </div>
+    </div>
+  );
+}
+
+// ─── Subscription edit panel for the edit modal ───────────────────────────────
+function SubscriptionEditPanel({ editingUser }: { editingUser: User }) {
+  const { t } = useTranslation('admin');
+  const [isSubscribed, setIsSubscribed] = useState(editingUser.isSubscribed);
+  const [plan, setPlan] = useState(editingUser.subscriptionPlan || '');
+  const [startDate, setStartDate] = useState(
+    editingUser.subscriptionStartedAt ? new Date(editingUser.subscriptionStartedAt).toISOString().split('T')[0] : ''
+  );
+  const [expiresDate, setExpiresDate] = useState(
+    editingUser.subscriptionExpiresAt ? new Date(editingUser.subscriptionExpiresAt).toISOString().split('T')[0] : ''
+  );
+  const [saving, setSaving] = useState(false);
+  const [result, setResult] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+
+  const handleActivate = async () => {
+    if (!plan || !expiresDate) {
+      setResult({ type: 'error', msg: 'Plan and expiration date are required' });
+      return;
+    }
+    setSaving(true);
+    setResult(null);
+    try {
+      await apiRequest(`/admin/subscriptions/manage/${editingUser._id}`, {
+        method: 'PATCH',
+        body: {
+          isSubscribed: true,
+          subscriptionPlan: plan,
+          subscriptionStartedAt: startDate || new Date().toISOString(),
+          subscriptionExpiresAt: new Date(expiresDate + 'T23:59:59.999Z').toISOString(),
+          reason: 'Admin manual activation',
+        },
+        requiresAuth: true,
+      });
+      setIsSubscribed(true);
+      setResult({ type: 'success', msg: 'Subscription activated successfully' });
+    } catch (e: any) {
+      setResult({ type: 'error', msg: e.message || 'Error activating subscription' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeactivate = async () => {
+    setSaving(true);
+    setResult(null);
+    try {
+      await apiRequest(`/admin/subscriptions/manage/${editingUser._id}`, {
+        method: 'PATCH',
+        body: {
+          isSubscribed: false,
+          reason: 'Admin manual deactivation',
+        },
+        requiresAuth: true,
+      });
+      setIsSubscribed(false);
+      setResult({ type: 'success', msg: 'Subscription deactivated successfully' });
+    } catch (e: any) {
+      setResult({ type: 'error', msg: e.message || 'Error deactivating subscription' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleUpdateDates = async () => {
+    if (!expiresDate) {
+      setResult({ type: 'error', msg: 'Expiration date is required' });
+      return;
+    }
+    setSaving(true);
+    setResult(null);
+    try {
+      await apiRequest(`/admin/subscriptions/manage/${editingUser._id}`, {
+        method: 'PATCH',
+        body: {
+          ...(plan && { subscriptionPlan: plan }),
+          ...(startDate && { subscriptionStartedAt: startDate }),
+          subscriptionExpiresAt: new Date(expiresDate + 'T23:59:59.999Z').toISOString(),
+          reason: 'Admin date update',
+        },
+        requiresAuth: true,
+      });
+      setResult({ type: 'success', msg: 'Subscription updated successfully' });
+    } catch (e: any) {
+      setResult({ type: 'error', msg: e.message || 'Error updating subscription' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="border border-gray-200 rounded-lg p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <h4 className="text-sm font-semibold text-gray-700">{t('userDetail.subscriptionSection')}</h4>
+        <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${isSubscribed ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+          {isSubscribed ? 'Active' : 'Inactive'}
+        </span>
+      </div>
+
+      {/* Plan selector */}
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Plan</label>
+        <select
+          value={plan}
+          onChange={(e) => setPlan(e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+        >
+          <option value="">— Select Plan —</option>
+          <option value="seller_pro_monthly">Seller Pro Monthly</option>
+          <option value="seller_pro_yearly">Seller Pro Yearly</option>
+          <option value="seller_enterprise_yearly">Seller Enterprise Yearly</option>
+          <option value="buyer_monthly">Buyer Monthly</option>
+          <option value="buyer_yearly">Buyer Yearly</option>
+          <option value="pro_monthly">Pro Monthly</option>
+          <option value="pro_yearly">Pro Yearly</option>
+          <option value="agency_yearly">Agency Yearly</option>
+        </select>
+      </div>
+
+      {/* Date pickers */}
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-1">Start Date</label>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-1">Expiration Date</label>
+          <input
+            type="date"
+            value={expiresDate}
+            onChange={(e) => setExpiresDate(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+          />
+        </div>
+      </div>
+
+      {/* Current info */}
+      {editingUser.subscriptionSource && (
+        <p className="text-xs text-gray-400">
+          Source: <span className="capitalize">{editingUser.subscriptionSource}</span>
+          {editingUser.subscriptionProductName && <> &middot; {editingUser.subscriptionProductName}</>}
+        </p>
+      )}
+
+      {/* Action buttons */}
+      <div className="flex gap-2 pt-1">
+        {isSubscribed ? (
+          <>
+            <button
+              type="button"
+              onClick={handleUpdateDates}
+              disabled={saving}
+              className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-40 font-medium"
+            >
+              {saving ? 'Saving...' : 'Update Dates'}
+            </button>
+            <button
+              type="button"
+              onClick={handleDeactivate}
+              disabled={saving}
+              className="flex-1 px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 disabled:opacity-40 font-medium"
+            >
+              {saving ? 'Saving...' : 'Deactivate'}
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={handleActivate}
+            disabled={saving || !plan || !expiresDate}
+            className="flex-1 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 disabled:opacity-40 font-medium"
+          >
+            {saving ? 'Activating...' : 'Activate Subscription'}
+          </button>
+        )}
+      </div>
+
+      {/* Feedback */}
+      {result && (
+        <p className={`text-xs mt-1 ${result.type === 'success' ? 'text-green-600' : 'text-red-500'}`}>
+          {result.msg}
+        </p>
+      )}
     </div>
   );
 }

@@ -6,10 +6,11 @@ import SubscriptionEvent from '../models/SubscriptionEvent';
 import Product from '../models/Product';
 import Agency from '../models/Agency';
 import PromotionCoupon from '../models/PromotionCoupon';
-import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail, sendSubscriptionInvoice, sendProSubscriptionWelcomeEmail, sendMonthlyCouponEmail } from './emailService';
+import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail, sendSubscriptionInvoice, sendProSubscriptionWelcomeEmail, sendMonthlyCouponEmail, sendSubscriptionExpired } from './emailService';
+import { createNotificationWithPush } from './engagementService';
 import { generateSecureRandomString } from '../utils/secureRandom';
 import { paymentLogger } from '../utils/logger';
-import { FREE_TIER_LIMITS } from '../config/subscriptionConstants';
+import { FREE_TIER_LIMITS, PRO_TIER_LIMITS, ENTERPRISE_TIER_LIMITS } from '../config/subscriptionConstants';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -232,6 +233,40 @@ export async function processSubscriptionPayment(
     user.lastPaymentAmount = amount;
     user.totalPaid = (user.totalPaid || 0) + amount;
     user.subscriptionStatus = 'active';
+
+    // Sync subscription embedded object (tier, listingsLimit, status)
+    const isEnterprise = productId.includes('enterprise') || productId === 'agency_yearly';
+    const isPro = productId.includes('pro_') || productId.includes('seller_pro_');
+    const isYearly = product.billingPeriod === 'yearly';
+
+    if (!user.subscription) {
+      user.subscription = {} as any;
+    }
+    user.subscription.status = 'active';
+    user.subscription.expiresAt = expirationDate;
+    user.subscription.startDate = startDate;
+
+    if (isEnterprise) {
+      user.subscription.tier = 'agency_owner';
+      user.subscription.listingsLimit = product.listingsLimit || ENTERPRISE_TIER_LIMITS.LISTINGS;
+    } else if (isPro) {
+      user.subscription.tier = 'pro';
+      user.subscription.listingsLimit = product.listingsLimit || (isYearly ? PRO_TIER_LIMITS.YEARLY.LISTINGS : PRO_TIER_LIMITS.MONTHLY.LISTINGS);
+    }
+    user.markModified('subscription');
+
+    // Sync activeListingsLimit to match the plan
+    if (user.subscription.listingsLimit) {
+      user.activeListingsLimit = user.subscription.listingsLimit;
+    }
+
+    // Sync activeRole and primaryRole if user's role is agent/seller but these are stale
+    const currentRole = user.role;
+    if (currentRole && currentRole !== 'buyer') {
+      if (user.activeRole !== currentRole) user.activeRole = currentRole as any;
+      if (user.primaryRole !== currentRole) user.primaryRole = currentRole as any;
+    }
+
     await user.save({ session });
     if (!isProduction) paymentLogger.info('✅ User updated with subscription info');
 
@@ -619,6 +654,9 @@ export async function updateExpiredSubscriptions(maxRetries = 3): Promise<number
     const session = await mongoose.startSession();
     session.startTransaction();
 
+    // Collect user info during the transaction for post-commit notifications
+    const expiredUsers: { userId: string; email: string; name: string; planName: string }[] = [];
+
     try {
       const now = new Date();
       let updatedCount = 0;
@@ -637,12 +675,31 @@ export async function updateExpiredSubscriptions(maxRetries = 3): Promise<number
         // Update user - clear subscription fields
         const user = await User.findById(subscription.userId).session(session);
         if (user && String(user.activeSubscriptionId) === String(subscription._id)) {
+          // Collect info for post-commit email and notification
+          expiredUsers.push({
+            userId: String(user._id),
+            email: user.email,
+            name: user.name || 'Customer',
+            planName: subscription.productId || 'subscription',
+          });
+
           user.isSubscribed = false;
           user.subscriptionStatus = 'expired';
           user.subscriptionPlan = undefined;
           user.subscriptionProductName = undefined;
           user.subscriptionSource = undefined;
           user.activeSubscriptionId = undefined;
+
+          // Reset embedded subscription object
+          if (user.subscription) {
+            user.subscription.tier = 'free';
+            user.subscription.status = 'expired';
+            user.subscription.listingsLimit = FREE_TIER_LIMITS.LISTINGS;
+            user.subscription.expiresAt = undefined;
+            user.markModified('subscription');
+          }
+          user.activeListingsLimit = FREE_TIER_LIMITS.LISTINGS;
+
           await user.save({ session });
         }
 
@@ -667,6 +724,32 @@ export async function updateExpiredSubscriptions(maxRetries = 3): Promise<number
 
       await session.commitTransaction();
       session.endSession();
+
+      // Send expiration emails and in-app notifications after successful commit (non-critical)
+      for (const { userId, email, name, planName } of expiredUsers) {
+        try {
+          await sendSubscriptionExpired(email, name, planName);
+        } catch (emailError) {
+          paymentLogger.error(`Failed to send subscription expired email to ${email}:`, emailError);
+        }
+
+        try {
+          await createNotificationWithPush({
+            userId,
+            type: 'subscription_expiring',
+            title: 'Subscription Expired',
+            message: `Your ${planName} subscription has expired. Your account has been downgraded to the free plan.`,
+            icon: 'alert-circle',
+            priority: 'high',
+            data: {
+              actionUrl: '/account',
+              actionLabel: 'Resubscribe',
+            },
+          });
+        } catch (notifError) {
+          paymentLogger.error(`Failed to create subscription expired notification for user ${userId}:`, notifError);
+        }
+      }
 
       return updatedCount;
     } catch (error: any) {

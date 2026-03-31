@@ -66,6 +66,7 @@ import {
   activateAgencySubscription,
   deactivateAgencySubscription,
   getAgencySubscriptionHistory,
+  manageUserSubscription,
 } from '../controllers/adminSubscriptionController';
 import {
   getAllBusinessListingsAdmin,
@@ -174,6 +175,7 @@ router.post('/subscriptions/activate', logAdminAction('ACTIVATE_SUBSCRIPTION'), 
 router.post('/subscriptions/:id/cancel', logAdminAction('CANCEL_SUBSCRIPTION'), cancelSubscription);
 router.post('/subscriptions/:id/deactivate', logAdminAction('DEACTIVATE_SUBSCRIPTION'), deactivateUserSubscription);
 router.patch('/subscriptions/listing-limit/:userId', logAdminAction('ADJUST_LISTING_LIMIT'), adjustListingLimit);
+router.patch('/subscriptions/manage/:userId', logAdminAction('MANAGE_USER_SUBSCRIPTION'), manageUserSubscription);
 router.get('/payments/stats', logAdminAction('VIEW_PAYMENT_STATS'), getPaymentStats);
 router.get('/payments', logAdminAction('VIEW_PAYMENTS'), getAllPayments);
 router.get('/payments/:id', logAdminAction('VIEW_PAYMENT'), getPaymentById);

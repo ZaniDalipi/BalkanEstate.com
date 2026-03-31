@@ -234,7 +234,7 @@ const UserManager: React.FC = () => {
                     )}
                   </div>
                 </td>
-                <td className="px-4 py-4 whitespace-nowrap">
+                <td className="px-4 py-4">
                   {user.isSubscribed ? (
                     <div>
                       <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
@@ -242,6 +242,16 @@ const UserManager: React.FC = () => {
                       </span>
                       {user.subscriptionStatus && (
                         <div className="text-xs text-gray-500 mt-1 capitalize">{user.subscriptionStatus}</div>
+                      )}
+                      {user.subscriptionExpiresAt && (
+                        <div className="text-xs text-gray-400 mt-1">
+                          Expires: {formatDate(user.subscriptionExpiresAt)}
+                        </div>
+                      )}
+                      {user.subscriptionSource && (
+                        <div className="text-xs text-gray-400 mt-0.5 capitalize">
+                          via {user.subscriptionSource}
+                        </div>
                       )}
                     </div>
                   ) : (

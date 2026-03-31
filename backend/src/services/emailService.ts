@@ -2528,6 +2528,77 @@ class EmailService {
   }
 
   /**
+   * Send subscription expired notification (when subscription has ended and user is downgraded)
+   */
+  async sendSubscriptionExpired(email: string, userName: string, planName: string): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('subscription-expired');
+    if (config) {
+      const variables: Record<string, string> = {
+        userName:    escapeHtml(userName) || 'there',
+        planName:    escapeHtml(planName),
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: email, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // Fallback: inline HTML
+    const html = this.wrapEmailHtml(`
+      <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);" class="ec-card">
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 24px;">
+          <div style="width: 60px; height: 60px; background-color: #fef2f2; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;" class="ec-highlight">
+            <span style="font-size: 28px;">⏳</span>
+          </div>
+          <h1 style="color: #dc2626; margin: 0 0 8px 0; font-size: 24px;" class="ec-text">Your Subscription Has Expired</h1>
+        </div>
+
+        <!-- Main Content -->
+        <p style="color: #374151;" class="ec-text">Hi ${escapeHtml(userName)},</p>
+        <p style="color: #374151;" class="ec-text">
+          Your <strong>${escapeHtml(planName)}</strong> subscription has expired and your account has been downgraded to the free plan.
+        </p>
+
+        <!-- What you've lost -->
+        <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin: 24px 0;" class="ec-highlight">
+          <h3 style="color: #991b1b; margin: 0 0 12px 0; font-size: 16px;" class="ec-text">You no longer have access to:</h3>
+          <ul style="color: #991b1b; margin: 0; padding-left: 20px; line-height: 1.8;" class="ec-text">
+            <li>Increased listing limits</li>
+            <li>Monthly promotion coupons</li>
+            <li>Priority property notifications</li>
+            <li>Market insights and analytics</li>
+          </ul>
+        </div>
+
+        <!-- Resubscribe CTA -->
+        <p style="color: #374151;" class="ec-text">Want to continue enjoying premium features? Resubscribe now to restore your access instantly.</p>
+
+        <div style="text-align: center; margin: 28px 0;">
+          <a href="${frontendUrl}/account" style="background-color: #2563eb; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;" class="ec-cta">Resubscribe Now</a>
+        </div>
+
+        <!-- Footer -->
+        <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 24px; text-align: center;" class="ec-border">
+          <p style="color: #9ca3af; font-size: 12px; margin: 0;" class="ec-text-muted">
+            Questions? Contact us at <a href="mailto:support@balkanestate.com" style="color: #2563eb;" class="ec-link">support@balkanestate.com</a>
+          </p>
+        </div>
+      </div>
+    `);
+
+    await this.sendEmail({
+      to: email,
+      subject: `Your ${escapeHtml(planName)} subscription has expired`,
+      html,
+      text: `Hi ${userName}, your ${planName} subscription has expired and your account has been downgraded to the free plan. Resubscribe at ${frontendUrl}/account to restore your premium access.`,
+    });
+  }
+
+  /**
    * Send subscription invoice with full details including auto-renewal info
    */
   async sendSubscriptionInvoice(email: string, userName: string, details: {
@@ -5971,3 +6042,4 @@ export const sendPaymentConfirmation = emailServiceInstance.sendPaymentConfirmat
 export const sendPromotionCouponsEmail = emailServiceInstance.sendPromotionCouponsEmail.bind(emailServiceInstance);
 export const sendProSubscriptionWelcomeEmail = emailServiceInstance.sendProSubscriptionWelcomeEmail.bind(emailServiceInstance);
 export const sendLicenseRejectionEmail = emailServiceInstance.sendLicenseRejectionEmail.bind(emailServiceInstance);
+export const sendSubscriptionExpired = emailServiceInstance.sendSubscriptionExpired.bind(emailServiceInstance);
