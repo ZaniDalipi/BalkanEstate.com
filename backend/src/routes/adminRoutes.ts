@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import { protect } from '../middleware/auth';
-import { checkAdminRole, logAdminAction } from '../middleware/adminAuth';
+import { checkVPNAccess, checkAdminRole, logAdminAction } from '../middleware/adminAuth';
 import {
   getAdminStats,
   getAllUsers,
@@ -112,8 +112,9 @@ import Article from '../models/Article';
 
 const router = express.Router();
 
-// All admin routes require: authentication + admin role
+// All admin routes require: authentication + VPN/IP check + admin role
 router.use(protect);
+router.use(checkVPNAccess);
 router.use(checkAdminRole);
 
 // ===== Dashboard & Statistics =====
