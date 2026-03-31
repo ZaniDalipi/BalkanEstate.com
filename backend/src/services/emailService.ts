@@ -374,9 +374,9 @@ class EmailService {
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -620,9 +620,9 @@ class EmailService {
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -887,9 +887,9 @@ class EmailService {
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -1085,9 +1085,9 @@ class EmailService {
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -1433,9 +1433,9 @@ class EmailService {
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -1637,9 +1637,9 @@ class EmailService {
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -1876,9 +1876,9 @@ class EmailService {
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -2197,9 +2197,9 @@ class EmailService {
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -3021,9 +3021,9 @@ class EmailService {
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -3173,9 +3173,9 @@ class EmailService {
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -3899,9 +3899,9 @@ Questions? Contact us at support@balkanestateai.com
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -4154,9 +4154,9 @@ Questions? Contact us at support@balkanestateai.com
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -4374,9 +4374,9 @@ Questions? Contact us at support@balkanestateai.com
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -4607,9 +4607,9 @@ Questions? Contact us at support@balkanestateai.com
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -4818,9 +4818,9 @@ Questions? Contact us at support@balkanestateai.com
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -5017,9 +5017,9 @@ Questions? Contact us at support@balkanestateai.com
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -5202,9 +5202,9 @@ Questions? Contact us at support@balkanestateai.com
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -5396,9 +5396,9 @@ Questions? Contact us at support@balkanestateai.com
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -5567,9 +5567,9 @@ Questions? Contact us at support@balkanestateai.com
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -5746,9 +5746,9 @@ Questions? Contact us at support@balkanestateai.com
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -5943,9 +5943,9 @@ Questions? Contact us at support@balkanestateai.com
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -6158,9 +6158,9 @@ Questions? Contact us at support@balkanestateai.com
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
     .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
-    /* Preserve light text in dark-background sections */
-    .ec-dark-text { color: #e2e8f0 !important; }
-    .ec-dark-accent { color: #fbbf24 !important; }
+    /* Preserve light text in dark-background sections (0,2,0 beats .ec-card span at 0,1,1) */
+    .ec-card .ec-dark-text { color: #e2e8f0 !important; }
+    .ec-card .ec-dark-accent { color: #fbbf24 !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
