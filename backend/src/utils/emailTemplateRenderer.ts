@@ -184,12 +184,15 @@ export function renderEmailConfig(
   <meta name="supported-color-schemes" content="light dark">
   ${config.preheaderText ? '<meta name="x-apple-data-detectors" content="none">' : ''}
   <style>
-    /* Light mode: black text everywhere */
+    /* Light mode: black text for body content */
     .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
     .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong,
     .ec-text, .ec-text-muted,
     .ec-footer p, .ec-footer span, .ec-footer div { color: #000000 !important; }
     .ec-footer a, .ec-card a { color: #000000 !important; }
+    /* Preserve white text on colored header and CTA button */
+    .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
+    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
 
     /* Dark mode (device preference): white text everywhere */
     @media (prefers-color-scheme: dark) {
