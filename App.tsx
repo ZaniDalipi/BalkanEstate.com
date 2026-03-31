@@ -146,9 +146,6 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
   const [selectedAgency, setSelectedAgency] = useState<Agency | null>(null);
   const [isLoadingAgency, setIsLoadingAgency] = useState(false);
 
-  // Subscription expiry modals
-  const { expiryInfo, refetch: refetchExpiry } = useSubscriptionExpiry(state.isAuthenticated);
-
   // Listen for session expiration events from httpClient
   useEffect(() => {
     const handleSessionExpired = () => {
@@ -744,6 +741,9 @@ const MainLayout: React.FC = () => {
   const { t, i18n } = useTranslation(['nav', 'common']);
   const currentLang = (i18n.language || 'en').split('-')[0];
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Subscription expiry modals
+  const { expiryInfo, refetch: refetchExpiry } = useSubscriptionExpiry(state.isAuthenticated);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
