@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { API_URL } from '../../shared/api/config';
-import { tokenService } from '../../../src/shared/api/tokenService';
+import { API_URL } from '../../../shared/api/config';
+import { tokenService } from '../../../shared/api/tokenService';
 
 export interface ExpiryCheckResult {
   hasSubscription: boolean;
