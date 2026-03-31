@@ -11,6 +11,7 @@ import {
   verifySubscription,
   activateTestProSubscription,
   syncProSubscription,
+  getExpiryCheck,
 } from '../controllers/subscriptionController';
 import { protect } from '../middleware/auth';
 
@@ -23,6 +24,7 @@ router.use(protect);
 router.post('/', createSubscription);
 router.get('/', getUserSubscriptions);
 router.get('/current', getCurrentSubscription); // Must be before /:id to avoid conflict
+router.get('/expiry-check', getExpiryCheck); // Lightweight expiry status check for frontend modals
 router.post('/activate-test-pro', activateTestProSubscription); // Development only - must be before /:id
 router.post('/sync-pro', syncProSubscription); // Sync user.proSubscription with active Subscription
 

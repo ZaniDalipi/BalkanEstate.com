@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from 'react';
+import { useSubscriptionExpiry } from './src/features/subscription/hooks/useSubscriptionExpiry';
 import { useTranslation } from 'react-i18next';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
 import { HelmetProvider, Helmet } from 'react-helmet-async';
@@ -66,6 +67,7 @@ const AuthPage = lazy(() => import('./src/features/auth/components/AuthModal'));
 const EmailVerificationRequired = lazy(() => import('./src/features/auth/components/EmailVerificationRequired'));
 const AlertDialog = lazy(() => import('./components/shared/AlertDialog'));
 const SessionExpiredModal = lazy(() => import('./src/features/auth/components/SessionExpiredModal'));
+const SubscriptionExpiryModals = lazy(() => import('./src/features/subscription/components/SubscriptionExpiryModals'));
 
 // Lazy loaded components (loaded on demand)
 // All these components use default exports
@@ -143,6 +145,9 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
   const { t } = useTranslation('common');
   const [selectedAgency, setSelectedAgency] = useState<Agency | null>(null);
   const [isLoadingAgency, setIsLoadingAgency] = useState(false);
+
+  // Subscription expiry modals
+  const { expiryInfo, refetch: refetchExpiry } = useSubscriptionExpiry(state.isAuthenticated);
 
   // Listen for session expiration events from httpClient
   useEffect(() => {
@@ -989,6 +994,16 @@ const MainLayout: React.FC = () => {
         {/* Session Expired Modal */}
         <Suspense fallback={null}>
           {state.isSessionExpiredModalOpen && <SessionExpiredModal />}
+        </Suspense>
+
+        {/* Subscription Expiry Modals (warning + expired) */}
+        <Suspense fallback={null}>
+          {state.isAuthenticated && expiryInfo && (
+            <SubscriptionExpiryModals
+              expiryInfo={expiryInfo}
+              onDismissWarning={refetchExpiry}
+            />
+          )}
         </Suspense>
     </div>
   );

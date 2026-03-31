@@ -6,7 +6,7 @@ import SubscriptionEvent from '../models/SubscriptionEvent';
 import Product from '../models/Product';
 import Agency from '../models/Agency';
 import PromotionCoupon from '../models/PromotionCoupon';
-import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail, sendSubscriptionInvoice, sendProSubscriptionWelcomeEmail, sendMonthlyCouponEmail, sendSubscriptionExpired } from './emailService';
+import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail, sendSubscriptionInvoice, sendProSubscriptionWelcomeEmail, sendMonthlyCouponEmail, sendSubscriptionExpired, sendSubscriptionExpiringSoon } from './emailService';
 import { createNotificationWithPush } from './engagementService';
 import { generateSecureRandomString } from '../utils/secureRandom';
 import { paymentLogger } from '../utils/logger';
@@ -1072,12 +1072,68 @@ async function generateEnterpriseAgentCoupons(
   }
 }
 
+/**
+ * Find subscriptions expiring within the next 5 hours and send warning emails/notifications.
+ * Marks each subscription so the warning is only sent once.
+ */
+export async function checkExpiringSoonSubscriptions(): Promise<number> {
+  const now = new Date();
+  const fiveHoursFromNow = new Date(now.getTime() + 5 * 60 * 60 * 1000);
+
+  // Find active subscriptions expiring within 5 hours that haven't received the warning yet
+  const expiringSoon = await Subscription.find({
+    status: { $in: ['active', 'grace'] },
+    expirationDate: { $gt: now, $lte: fiveHoursFromNow },
+    expiryWarningSent: { $ne: true },
+  });
+
+  let notified = 0;
+  for (const subscription of expiringSoon) {
+    try {
+      const user = await User.findById(subscription.userId).select('email name').lean();
+      if (!user) continue;
+
+      const planName = subscription.productId || 'Pro';
+
+      // Send warning email (non-blocking)
+      sendSubscriptionExpiringSoon(user.email, user.name || 'there', planName, subscription.expirationDate).catch(
+        err => paymentLogger.error(`Failed to send expiry warning email to ${user.email}:`, err)
+      );
+
+      // Send in-app notification
+      createNotificationWithPush({
+        userId: String(subscription.userId),
+        type: 'subscription_expiring',
+        title: 'Subscription Expiring Soon',
+        message: `Your ${planName} subscription expires in less than 5 hours. Renew now to keep your premium access.`,
+        icon: 'clock',
+        priority: 'high',
+        data: {
+          actionUrl: '/account',
+          actionLabel: 'Renew Now',
+        },
+      }).catch(err =>
+        paymentLogger.error(`Failed to send expiry warning notification for user ${String(subscription.userId)}:`, err)
+      );
+
+      // Mark warning as sent
+      await Subscription.updateOne({ _id: subscription._id }, { $set: { expiryWarningSent: true } });
+      notified++;
+    } catch (err) {
+      paymentLogger.error(`Error processing expiry warning for subscription ${String(subscription._id)}:`, err);
+    }
+  }
+
+  return notified;
+}
+
 export { generateEnterpriseAgentCoupons, generateProSubscriptionCoupons };
 
 export default {
   processSubscriptionPayment,
   cancelSubscriptionSecurely,
   updateExpiredSubscriptions,
+  checkExpiringSoonSubscriptions,
   verifyPaymentIntegrity,
   generateEnterpriseAgentCoupons,
   generateProSubscriptionCoupons,
