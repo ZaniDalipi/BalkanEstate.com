@@ -66,6 +66,7 @@ const AuthPage = lazy(() => import('./src/features/auth/components/AuthModal'));
 const EmailVerificationRequired = lazy(() => import('./src/features/auth/components/EmailVerificationRequired'));
 const AlertDialog = lazy(() => import('./components/shared/AlertDialog'));
 const SessionExpiredModal = lazy(() => import('./src/features/auth/components/SessionExpiredModal'));
+const SubscriptionExpiredModal = lazy(() => import('./src/features/subscription/components/SubscriptionExpiredModal'));
 
 // Lazy loaded components (loaded on demand)
 // All these components use default exports
@@ -989,6 +990,11 @@ const MainLayout: React.FC = () => {
         {/* Session Expired Modal */}
         <Suspense fallback={null}>
           {state.isSessionExpiredModalOpen && <SessionExpiredModal />}
+        </Suspense>
+
+        {/* Subscription Expired Modal */}
+        <Suspense fallback={null}>
+          {state.isAuthenticated && !state.isSessionExpiredModalOpen && <SubscriptionExpiredModal />}
         </Suspense>
     </div>
   );
