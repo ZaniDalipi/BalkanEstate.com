@@ -20,7 +20,7 @@ interface Z360TourEmbedProps {
   onError?: () => void;
 }
 
-const Z360_LOGO = '/images/partners/z360-logo.svg';
+const Z360_LOGO = '/images/partners/z360-logo.png';
 
 export const Z360TourEmbed: React.FC<Z360TourEmbedProps> = ({
   url,

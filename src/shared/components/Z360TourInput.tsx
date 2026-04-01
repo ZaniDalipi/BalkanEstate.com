@@ -134,7 +134,7 @@ export const Z360TourInput: React.FC<Z360TourInputProps> = ({
       {showZ360Hint && (inputFocused || !value) && (
         <div className="flex items-center gap-2 text-sm text-neutral-500">
           <img
-            src="/images/partners/z360-logo.svg"
+            src="/images/partners/z360-logo.png"
             alt="Z360"
             className="h-4 w-auto opacity-60"
           />
@@ -163,7 +163,7 @@ export const Z360TourInput: React.FC<Z360TourInputProps> = ({
             <div className="flex items-center justify-between p-4 border-b">
               <div className="flex items-center gap-2">
                 {isZ360 && (
-                  <img src="/images/partners/z360-logo.svg" alt="Z360" className="h-6" />
+                  <img src="/images/partners/z360-logo.png" alt="Z360" className="h-6" />
                 )}
                 <h3 className="font-semibold text-neutral-800">{t('newListing:virtualTour.tourPreview')}</h3>
               </div>
