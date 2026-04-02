@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAppContext } from '@/context/AppContext';
-import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
+import { SUBSCRIPTION_PRICING } from '@/shared/utils/subscriptionHelpers';
 
 // ─── Storage ────────────────────────────────────────────────────────────────
 
@@ -9,8 +9,8 @@ const STORAGE_KEY_PREFIX = 'be_sub_expired_v2_';
 interface SubExpiredStorageState {
   /**
    * How many show-phases the user has actively dismissed.
-   * 0 = never shown | 1 = phase 1 (Day 0) dismissed | 2 = phase 2 (Day 3) dismissed
-   * 3 = phase 3 (Day 7) dismissed with "No" — permanent stop
+   * 0 = never shown | 1 = phase 1 dismissed | 2 = phase 2 dismissed
+   * 3 = all phases done — never show again
    */
   phasesDismissed: 0 | 1 | 2 | 3;
 }
@@ -34,6 +34,12 @@ function saveStorageState(userId: string, state: SubExpiredStorageState): void {
   } catch {
     // localStorage unavailable (private mode, quota exceeded) — silently ignore
   }
+}
+
+function clearStorageState(userId: string): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY_PREFIX + userId);
+  } catch {}
 }
 
 // ─── Pure helpers ────────────────────────────────────────────────────────────
@@ -84,7 +90,36 @@ function formatExpiredAt(expiresAt?: Date | string): string {
   });
 }
 
-// ─── Hook ────────────────────────────────────────────────────────────────────
+/** Map subscription plan to PaymentWindow planInterval */
+function getPlanInterval(plan?: string): 'month' | 'year' {
+  return plan?.includes('yearly') ? 'year' : 'month';
+}
+
+/** Map subscription plan to price (EUR) */
+function getPlanPrice(plan?: string): number {
+  if (plan === 'pro_yearly') return SUBSCRIPTION_PRICING.pro_yearly;
+  if (plan === 'pro_monthly') return SUBSCRIPTION_PRICING.pro_monthly;
+  return SUBSCRIPTION_PRICING.pro_monthly; // safe fallback
+}
+
+/** Map user role to PaymentWindow userRole */
+function getPaymentUserRole(role?: string): 'buyer' | 'private_seller' | 'agent' {
+  if (role === 'buyer') return 'buyer';
+  if (role === 'agent') return 'agent';
+  return 'private_seller'; // default for sellers and admins who shouldn't see this
+}
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+export interface PaymentProps {
+  planName: string;
+  planPrice: number;
+  planInterval: 'month' | 'year';
+  productId: string | undefined;
+  userRole: 'buyer' | 'private_seller' | 'agent';
+  userEmail: string;
+  userCountry: string;
+}
 
 export interface UseSubscriptionExpiredModalReturn {
   isVisible: boolean;
@@ -93,17 +128,26 @@ export interface UseSubscriptionExpiredModalReturn {
   planName: string;
   expiredAt: string;
   isBuyer: boolean;
-  /** "Reactivate Plan" → close for session, navigate to pricing (no phase dismissed) */
+  /** Whether to show the PaymentWindow */
+  showPaymentWindow: boolean;
+  /** Props to spread onto <PaymentWindow> */
+  paymentProps: PaymentProps;
+  /** User clicked "Reactivate Plan" — dismisses current phase + opens payment */
   handleReactivate: () => void;
-  /** "Maybe later" → dismiss current phase (phases 1 & 2) */
+  /** "Maybe later" — dismisses current phase, next show at day 3+ or day 7+ */
   handleMaybeLater: () => void;
-  /** "No" → permanent dismissal (phase 3 only) */
+  /** "No" — permanent dismissal (phase 3 only) */
   handleNo: () => void;
+  /** Payment completed successfully — clear all phase state */
+  handlePaymentSuccess: (paymentIntentId: string) => void;
+  /** Payment window closed without completing payment */
+  handlePaymentWindowClose: () => void;
 }
 
+// ─── Hook ────────────────────────────────────────────────────────────────────
+
 export function useSubscriptionExpiredModal(): UseSubscriptionExpiredModalReturn {
-  const { state, dispatch } = useAppContext();
-  const { getLocalizedPath } = useLocalizedNavigation();
+  const { state } = useAppContext();
 
   const user = state.currentUser;
   const subscription = user?.subscription;
@@ -118,6 +162,7 @@ export function useSubscriptionExpiredModal(): UseSubscriptionExpiredModalReturn
 
   const [isVisible, setIsVisible] = useState(false);
   const [phase, setPhase] = useState<1 | 2 | 3>(1);
+  const [showPaymentWindow, setShowPaymentWindow] = useState(false);
 
   useEffect(() => {
     // ① Session guard — must be first
@@ -146,27 +191,56 @@ export function useSubscriptionExpiredModal(): UseSubscriptionExpiredModalReturn
     }
   }, [user, subscription, userId]);
 
-  const handleReactivate = useCallback(() => {
-    // Set session guard BEFORE dispatch to prevent the re-render from re-showing the modal
-    sessionDismissedRef.current = true;
-    setIsVisible(false);
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-    window.history.pushState({ view: 'pricing' }, '', getLocalizedPath('/pricing'));
-  }, [dispatch, getLocalizedPath]);
-
-  const handleMaybeLater = useCallback(() => {
+  /** Advance the dismissal counter without exceeding 2 (phase 3 uses handleNo) */
+  const advancePhase = useCallback(() => {
+    if (!userId) return;
     const stored = loadStorageState(userId);
     const next = Math.min(stored.phasesDismissed + 1, 2) as 0 | 1 | 2 | 3;
     saveStorageState(userId, { phasesDismissed: next });
+  }, [userId]);
+
+  const handleReactivate = useCallback(() => {
+    // Dismiss the current phase so the modal doesn't show on every login while
+    // payment is pending. If they complete payment the subscription status changes
+    // to 'active' and the modal never triggers again regardless.
+    advancePhase();
+    sessionDismissedRef.current = true;
+    setIsVisible(false);
+    setShowPaymentWindow(true);
+  }, [advancePhase]);
+
+  const handleMaybeLater = useCallback(() => {
+    advancePhase();
+    sessionDismissedRef.current = true;
+    setIsVisible(false);
+  }, [advancePhase]);
+
+  const handleNo = useCallback(() => {
+    if (userId) saveStorageState(userId, { phasesDismissed: 3 });
     sessionDismissedRef.current = true;
     setIsVisible(false);
   }, [userId]);
 
-  const handleNo = useCallback(() => {
-    saveStorageState(userId, { phasesDismissed: 3 });
-    sessionDismissedRef.current = true;
-    setIsVisible(false);
+  const handlePaymentSuccess = useCallback((_paymentIntentId: string) => {
+    // Subscription is now active — clear all phase state so there's nothing to show
+    if (userId) clearStorageState(userId);
+    setShowPaymentWindow(false);
   }, [userId]);
+
+  const handlePaymentWindowClose = useCallback(() => {
+    // Phase was already dismissed when "Reactivate" was clicked; just close the window
+    setShowPaymentWindow(false);
+  }, []);
+
+  const paymentProps: PaymentProps = {
+    planName: formatPlanName(subscription?.plan),
+    planPrice: getPlanPrice(subscription?.plan),
+    planInterval: getPlanInterval(subscription?.plan),
+    productId: subscription?.productId || subscription?.plan || undefined,
+    userRole: getPaymentUserRole(user?.role),
+    userEmail: user?.email ?? '',
+    userCountry: user?.country ?? 'RS',
+  };
 
   return {
     isVisible,
@@ -174,8 +248,12 @@ export function useSubscriptionExpiredModal(): UseSubscriptionExpiredModalReturn
     planName: formatPlanName(subscription?.plan),
     expiredAt: formatExpiredAt(subscription?.expiresAt),
     isBuyer: subscription?.tier === 'buyer',
+    showPaymentWindow,
+    paymentProps,
     handleReactivate,
     handleMaybeLater,
     handleNo,
+    handlePaymentSuccess,
+    handlePaymentWindowClose,
   };
 }
