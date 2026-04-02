@@ -18,16 +18,16 @@ const HighlightedCell: React.FC<{ children: React.ReactNode; isBest: boolean }> 
 );
 
 const CompareModalImage: React.FC<{ property: Property }> = ({ property }) => {
-    const [error, setError] = useState(false);
-    useEffect(() => { setError(false); }, [property.imageUrl]);
+    const [error, setError] = useState(!property.imageUrl);
+    useEffect(() => { setError(!property.imageUrl); }, [property.imageUrl]);
     return (
         <>
-            {error ? (
+            {error || !property.imageUrl ? (
                 <div className="w-full h-24 bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center rounded-lg">
                     <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
                 </div>
             ) : (
-                <img src={property.imageUrl} alt={property.title || property.address} loading="lazy" decoding="async" className="w-full h-24 object-cover rounded-lg" onError={() => setError(true)} />
+                <img src={optimizeCloudinaryUrl(property.imageUrl, { width: 384, quality: 'auto', crop: 'fill' })} alt={property.title || property.address} loading="lazy" decoding="async" className="w-full h-24 object-cover rounded-lg" onError={() => setError(true)} />
             )}
             {property.title && (
                 <p className="font-bold text-sm mt-2 truncate text-neutral-900">{property.title}</p>

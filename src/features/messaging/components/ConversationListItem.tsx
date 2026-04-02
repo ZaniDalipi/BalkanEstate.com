@@ -11,7 +11,8 @@ interface ConversationListItemProps {
 
 const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversation, isSelected, onSelect }) => {
     const { state, dispatch } = useAppContext();
-    const [imageError, setImageError] = useState(false);
+    const resolvedImageUrl = property.imageUrl || property.images?.[0]?.url;
+    const [imageError, setImageError] = useState(!resolvedImageUrl);
     const property = conversation.property || state.properties.find(p => p.id === conversation.propertyId);
     const currentUserId = state.currentUser?.id;
 
@@ -56,7 +57,7 @@ const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversatio
                     </div>
                 ) : (
                     <img
-                        src={property.imageUrl || property.images?.[0]?.url}
+                        src={resolvedImageUrl}
                         alt={property.address}
                         loading="lazy"
                         decoding="async"

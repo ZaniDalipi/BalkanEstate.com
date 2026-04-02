@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { sendPropertyInquiry } from '@/services/apiService';
 import { Property } from '@/types';
-import { XMarkIcon } from '@/constants';
+import { XMarkIcon, BuildingOfficeIcon } from '@/constants';
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 
 interface PropertyInquiryModalProps {
   property: Property;
@@ -172,13 +173,19 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
             <>
               {/* Property Preview */}
               <div className="flex gap-3 mb-6 p-3 bg-neutral-50 rounded-lg">
+                {property.imageUrl ? (
                 <img
-                  src={property.imageUrl}
+                  src={optimizeCloudinaryUrl(property.imageUrl, { width: 160, quality: 'auto', crop: 'fill' })}
                   alt={property.title}
                   loading="lazy"
                   decoding="async"
                   className="w-20 h-20 rounded-lg object-cover"
                 />
+                ) : (
+                <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center flex-shrink-0">
+                  <BuildingOfficeIcon className="w-8 h-8 text-neutral-400" />
+                </div>
+                )}
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-neutral-900 truncate">{property.title}</p>
                   {property.propertyId && (
