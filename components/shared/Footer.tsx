@@ -284,13 +284,11 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                             className="group block overflow-hidden rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20"
                             title="Z360 Virtual Tours - Professional 360° Property Tours"
                         >
-                            <div className="w-40 h-14 sm:w-48 sm:h-16 md:w-56 md:h-20 flex items-center justify-center overflow-hidden">
-                                <img
-                                    src="/images/partners/z360-logo.png"
-                                    alt="Z360 Virtual Tours - 360° Property Tours"
-                                    className="max-w-full max-h-full object-contain"
-                                />
-                            </div>
+                            <img
+                                src="/images/partners/z360-logo.png"
+                                alt="Z360 Virtual Tours - 360° Property Tours"
+                                className="w-40 sm:w-52 md:w-64 h-auto rounded-xl"
+                            />
                         </a>
                     </div>
                 </div>
