@@ -284,7 +284,7 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                             className="group block overflow-hidden rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20"
                             title="Z360 Virtual Tours - Professional 360° Property Tours"
                         >
-                            <div className="w-24 h-8 sm:w-28 sm:h-10 md:w-32 md:h-12 flex items-center justify-center overflow-hidden">
+                            <div className="w-40 h-14 sm:w-48 sm:h-16 md:w-56 md:h-20 flex items-center justify-center overflow-hidden">
                                 <img
                                     src="/images/partners/z360-logo.png"
                                     alt="Z360 Virtual Tours - 360° Property Tours"
