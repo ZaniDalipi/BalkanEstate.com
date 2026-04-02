@@ -64,6 +64,7 @@ export interface ISubscription extends Document {
   // Email reminders tracking
   renewalReminderSent?: boolean; // For auto-renewing subscriptions (7-day reminder)
   expiryReminderSent?: boolean; // For non-auto-renewing subscriptions (3-day reminder)
+  expiryWarningSent?: boolean; // 5-hour-before-expiry warning email/notification
 
   // Audit
   lastUpdated: Date;
@@ -220,6 +221,10 @@ const SubscriptionSchema: Schema = new Schema(
       default: false,
     },
     expiryReminderSent: {
+      type: Boolean,
+      default: false,
+    },
+    expiryWarningSent: {
       type: Boolean,
       default: false,
     },

@@ -824,3 +824,52 @@ export const syncProSubscription = async (req: Request, res: Response): Promise<
     res.status(500).json({ message: 'Error syncing Pro subscription' });
   }
 };
+
+/**
+ * @desc    Returns subscription expiry status for the current user.
+ *          Used by the frontend to decide whether to show expiry warning/expired modals.
+ * @route   GET /api/subscriptions/expiry-check
+ * @access  Private
+ */
+export const getExpiryCheck = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user?._id;
+    if (!userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
+
+    const now = new Date();
+    const fiveHoursFromNow = new Date(now.getTime() + 5 * 60 * 60 * 1000);
+
+    // Find the most recent non-free subscription (active or recently expired)
+    const subscription = await Subscription.findOne({
+      userId,
+      status: { $in: ['active', 'grace', 'trial', 'pending_cancellation', 'expired'] },
+    }).sort({ expirationDate: -1 });
+
+    if (!subscription) {
+      res.status(200).json({ hasSubscription: false });
+      return;
+    }
+
+    const expirationDate = subscription.expirationDate;
+    const isExpired = expirationDate <= now;
+    const isExpiringSoon = !isExpired && expirationDate <= fiveHoursFromNow;
+    const msUntilExpiry = expirationDate.getTime() - now.getTime();
+    const hoursUntilExpiry = Math.max(0, msUntilExpiry / (1000 * 60 * 60));
+
+    res.status(200).json({
+      hasSubscription: true,
+      isExpired,
+      isExpiringSoon,
+      hoursUntilExpiry: Math.round(hoursUntilExpiry * 10) / 10,
+      expirationDate: expirationDate.toISOString(),
+      productId: subscription.productId,
+      status: subscription.status,
+    });
+  } catch (error: any) {
+    subscriptionLogger.error('Error checking subscription expiry:', error);
+    res.status(500).json({ message: 'Error checking subscription expiry' });
+  }
+};

@@ -1,38 +1,49 @@
-import { updateExpiredSubscriptions } from '../services/subscriptionPaymentService';
+import { updateExpiredSubscriptions, checkExpiringSoonSubscriptions } from '../services/subscriptionPaymentService';
 
 /**
  * Subscription Expiration Worker
- * Runs periodically to check and update expired subscriptions
- * Ensures users lose access immediately when subscriptions expire
+ * - Every 6 hours: marks expired subscriptions and sends expiry emails
+ * - Every 1 hour: sends 5-hour-before-expiry warning emails/notifications
  */
 
-/**
- * Run the expiration check
- * Silently handles errors as this is a background task
- */
 export async function checkExpiredSubscriptions(): Promise<number> {
   try {
     return await updateExpiredSubscriptions();
   } catch (_error) {
-    // Background worker - errors are handled silently
-    // The updateExpiredSubscriptions function has retry logic for transient errors
     return 0;
   }
 }
 
+async function checkExpiringSoon(): Promise<void> {
+  try {
+    await checkExpiringSoonSubscriptions();
+  } catch (_error) {
+    // Background worker — silently ignore errors
+  }
+}
+
 /**
- * Schedule the expiration worker to run every 6 hours
+ * Schedule the expiration worker:
+ *   - Runs expired-subscription check every 6 hours
+ *   - Runs expiring-soon (5h) check every 1 hour
  */
 export function scheduleExpirationWorker(): void {
-  const SIX_HOURS = 6 * 60 * 60 * 1000;
+  const ONE_HOUR = 60 * 60 * 1000;
+  const SIX_HOURS = 6 * ONE_HOUR;
 
-  // Run immediately on startup
+  // Run both immediately on startup
   checkExpiredSubscriptions();
+  checkExpiringSoon();
 
-  // Then run every 6 hours
+  // Expired check every 6 hours
   setInterval(() => {
     checkExpiredSubscriptions();
   }, SIX_HOURS);
+
+  // Expiring-soon check every hour
+  setInterval(() => {
+    checkExpiringSoon();
+  }, ONE_HOUR);
 }
 
 export default {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from 'react';
+import { useSubscriptionExpiry } from './src/features/subscription/hooks/useSubscriptionExpiry';
 import { useTranslation } from 'react-i18next';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
 import { HelmetProvider, Helmet } from 'react-helmet-async';
@@ -66,7 +67,7 @@ const AuthPage = lazy(() => import('./src/features/auth/components/AuthModal'));
 const EmailVerificationRequired = lazy(() => import('./src/features/auth/components/EmailVerificationRequired'));
 const AlertDialog = lazy(() => import('./components/shared/AlertDialog'));
 const SessionExpiredModal = lazy(() => import('./src/features/auth/components/SessionExpiredModal'));
-const SubscriptionExpiredModal = lazy(() => import('./src/features/subscription/components/SubscriptionExpiredModal'));
+const SubscriptionExpiryModals = lazy(() => import('./src/features/subscription/components/SubscriptionExpiryModals'));
 
 // Lazy loaded components (loaded on demand)
 // All these components use default exports
@@ -740,6 +741,9 @@ const MainLayout: React.FC = () => {
   const { t, i18n } = useTranslation(['nav', 'common']);
   const currentLang = (i18n.language || 'en').split('-')[0];
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Subscription expiry modals
+  const { expiryInfo, refetch: refetchExpiry } = useSubscriptionExpiry(state.isAuthenticated);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
@@ -992,9 +996,14 @@ const MainLayout: React.FC = () => {
           {state.isSessionExpiredModalOpen && <SessionExpiredModal />}
         </Suspense>
 
-        {/* Subscription Expired Modal */}
+        {/* Subscription Expiry Modals (warning + expired) */}
         <Suspense fallback={null}>
-          {state.isAuthenticated && !state.isSessionExpiredModalOpen && <SubscriptionExpiredModal />}
+          {state.isAuthenticated && expiryInfo && (
+            <SubscriptionExpiryModals
+              expiryInfo={expiryInfo}
+              onDismissWarning={refetchExpiry}
+            />
+          )}
         </Suspense>
     </div>
   );

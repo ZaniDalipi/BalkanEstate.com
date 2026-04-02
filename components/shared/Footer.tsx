@@ -285,9 +285,9 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                             title="Z360 Virtual Tours - Professional 360° Property Tours"
                         >
                             <img
-                                src="/images/partners/z360-logo.svg"
+                                src="/images/partners/z360-logo.png"
                                 alt="Z360 Virtual Tours - 360° Property Tours"
-                                className="h-12 sm:h-16 w-auto"
+                                className="w-40 sm:w-52 md:w-64 h-auto rounded-xl"
                             />
                         </a>
                     </div>
