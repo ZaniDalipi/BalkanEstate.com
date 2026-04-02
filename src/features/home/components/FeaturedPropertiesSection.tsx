@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
+import { BuildingOfficeIcon } from '@/constants';
 import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
 
 interface FeaturedPropertiesSectionProps {
@@ -28,6 +29,7 @@ const PropertyCard: React.FC<{
     >
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-neutral-100">
+        {property.imageUrl ? (
         <img
           src={optimizeCloudinaryUrl(property.imageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill' })}
           srcSet={cloudinarySrcSet(property.imageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill' })}
@@ -39,6 +41,11 @@ const PropertyCard: React.FC<{
           loading="lazy"
           decoding="async"
         />
+        ) : (
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300">
+          <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
+        </div>
+        )}
         {/* Badges */}
         <div className="absolute top-2.5 left-2.5 flex gap-1.5">
           {property.isPromoted && property.promotionTier && property.promotionTier !== 'standard' && (

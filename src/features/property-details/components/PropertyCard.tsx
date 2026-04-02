@@ -92,7 +92,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   onLocationClick,
 }) => {
   const { t, i18n } = useTranslation(['property', 'rental', 'common']);
-  const [imageError, setImageError] = useState(false);
+  const [imageError, setImageError] = useState(!property.imageUrl);
   const [isHovered, setIsHovered] = useState(false);
 
   // Safe access with fallbacks
