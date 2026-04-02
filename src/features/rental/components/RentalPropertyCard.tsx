@@ -4,6 +4,7 @@ import { Property } from '@/types';
 import { useAppContext } from '@/context/AppContext';
 import { getCurrencySymbol } from '@/utils/currency';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
+import { BuildingOfficeIcon } from '@/constants';
 import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
 
 interface RentalPropertyCardProps {
@@ -46,6 +47,7 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
         >
             {/* Image */}
             <div className="relative aspect-[16/10] overflow-hidden">
+                {property.imageUrl ? (
                 <img
                     src={optimizeCloudinaryUrl(property.imageUrl, { width: 640, quality: 'auto' })}
                     srcSet={cloudinarySrcSet(property.imageUrl, [320, 480, 640])}
@@ -57,6 +59,11 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                     width={640}
                     height={400}
                 />
+                ) : (
+                <div className="w-full h-full bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
+                    <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
+                </div>
+                )}
                 {/* Status Badge */}
                 {isRented && (
                     <div className="absolute top-2 left-2 bg-red-500/80 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full">

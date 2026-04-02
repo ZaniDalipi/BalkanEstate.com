@@ -43,7 +43,8 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
     const { state, dispatch, deleteConversation } = useAppContext();
     const { confirm } = useConfirmation();
     const { error } = useNotification();
-    const [imageError, setImageError] = useState(false);
+    const resolvedImageUrl = property.imageUrl || property.images?.[0]?.url;
+    const [imageError, setImageError] = useState(!resolvedImageUrl);
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [securityWarning, setSecurityWarning] = useState<string | null>(null);
@@ -228,7 +229,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                     </div>
                 ) : (
                     <img
-                        src={property.imageUrl || property.images?.[0]?.url}
+                        src={resolvedImageUrl}
                         alt={property.address}
                         loading="lazy"
                         decoding="async"
