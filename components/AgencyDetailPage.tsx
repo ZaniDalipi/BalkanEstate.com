@@ -152,7 +152,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const { t } = useTranslation(['agencyDetails', 'nav', 'common']);
   const { state, dispatch } = useAppContext();
   const { currentUser, isAuthenticated } = state;
-  const { getLocalizedPath } = useLocalizedNavigation();
+  const { getLocalizedPath, navigate } = useLocalizedNavigation();
   const { confirm } = useConfirmation();
   const { success, error, warning, info } = useNotification();
 
@@ -914,8 +914,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
       await success(t('messages.leftAgencyTitle', 'Left Agency'), response.message || t('messages.leftAgency', { agency: agencyData.name }));
 
-      // Redirect to home or agencies page
-      window.location.href = '/';
+      // Navigate to home
+      navigate('/');
     } catch (err: any) {
       await error(t('messages.errorTitle', 'Error'), err.message || t('messages.leftAgency', { agency: agencyData.name }));
     } finally {

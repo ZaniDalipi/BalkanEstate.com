@@ -170,6 +170,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                             onSearchAllProperties={profile.handleSearchAllProperties}
                             onRequestMarketReport={profile.handleRequestMarketReport}
                             onViewProperty={profile.handleViewProperty}
+                            onReviewSubmitted={profile.handleReviewSubmitted}
                         />
                     </Animated>
 

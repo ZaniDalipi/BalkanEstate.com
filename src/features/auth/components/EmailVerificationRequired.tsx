@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { resendVerificationEmail } from '@/services/apiService';
 import { LogoIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
+import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 
 interface EmailVerificationRequiredProps {
   email: string;
@@ -11,6 +12,7 @@ interface EmailVerificationRequiredProps {
 const EmailVerificationRequired: React.FC<EmailVerificationRequiredProps> = ({ email }) => {
   const { t } = useTranslation(['auth']);
   const { logout } = useAppContext();
+  const { navigate } = useLocalizedNavigation();
   const [isResending, setIsResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,11 +53,10 @@ const EmailVerificationRequired: React.FC<EmailVerificationRequiredProps> = ({ e
   const handleLogout = async () => {
     try {
       await logout();
-      window.location.href = '/';
     } catch {
-      // Redirect even if logout fails
-      window.location.href = '/';
+      // Continue even if logout fails
     }
+    navigate('/');
   };
 
   return (

@@ -72,6 +72,7 @@ export function usePricingPage() {
     userListings,
     isLoadingUserListings: loadingListings,
     isRefetching,
+    refetchAll,
   } = usePricingPageData(activeTab, state.isAuthenticated);
 
   // Convert error to string for display
@@ -620,6 +621,7 @@ export function usePricingPage() {
     userListings,
     loadingListings,
     isRefetching,
+    refetchAll,
     // Contact info
     salesEmail,
     salesPhone,

@@ -30,9 +30,9 @@ const CookiePolicyPage: React.FC = () => {
   };
 
   const handleManageCookies = () => {
-    // Clear consent to re-show the banner
+    // Clear consent and dispatch event to re-show the banner
     localStorage.removeItem('balkanestate_cookie_consent');
-    window.location.reload();
+    window.dispatchEvent(new Event('cookieConsentReset'));
   };
 
   const lastUpdated = 'January 9, 2026';

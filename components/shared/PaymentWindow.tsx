@@ -232,7 +232,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   onEnterpriseSelected,
 }) => {
   const { t } = useTranslation(['payment', 'common']);
-  const { state } = useAppContext();
+  const { state, checkAuthStatus } = useAppContext();
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
@@ -853,7 +853,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               </div>
             </div>
             <button
-              onClick={() => { onClose(); window.location.reload(); }}
+              onClick={async () => { onClose(); await checkAuthStatus(); }}
               className="w-full py-3 sm:py-4 px-6 rounded-xl font-bold text-sm sm:text-lg shadow-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
             >
               Continue to Dashboard
@@ -1336,10 +1336,10 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
 
             {/* Close button */}
             <button
-              onClick={() => {
+              onClick={async () => {
                 onClose();
-                // Refresh to update user subscription state
-                window.location.reload();
+                // Re-fetch user data to update subscription state
+                await checkAuthStatus();
               }}
               className="w-full py-4 px-6 rounded-xl font-bold text-lg shadow-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
             >

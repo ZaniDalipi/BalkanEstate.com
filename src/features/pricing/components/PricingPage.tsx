@@ -58,6 +58,7 @@ const PricingPage: React.FC = () => {
     userListings,
     loadingListings,
     isRefetching,
+    refetchAll,
     salesEmail,
     salesPhone,
     products,
@@ -300,7 +301,7 @@ const PricingPage: React.FC = () => {
                 <div className="bg-red-50 rounded-2xl p-8 max-w-md mx-auto">
                   <p className="text-red-600 font-medium">{error}</p>
                   <button
-                    onClick={() => window.location.reload()}
+                    onClick={() => refetchAll()}
                     className="mt-4 px-6 py-2.5 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors"
                   >
                     {t('common:tryAgain', 'Try Again')}

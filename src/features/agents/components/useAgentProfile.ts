@@ -875,6 +875,18 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         handleEditAchievement,
         handleDeleteAchievement,
         handleViewProperty,
+        handleReviewSubmitted: useCallback(async () => {
+            try {
+                const agentIdentifier = agent.agentId || agent.id;
+                if (!agentIdentifier) return;
+                const freshAgent = await fetchAgentById(agentIdentifier);
+                if (freshAgent) {
+                    setAgentData(prev => ({ ...prev, ...freshAgent }));
+                }
+            } catch {
+                // Silently fail - review was still submitted
+            }
+        }, [agent.id, agent.agentId]),
     };
 }
 

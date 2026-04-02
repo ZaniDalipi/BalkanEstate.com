@@ -90,6 +90,7 @@ interface AgentProfileTabsProps {
     onSearchAllProperties: () => void;
     onRequestMarketReport: () => void;
     onViewProperty: (propertyId: string) => void;
+    onReviewSubmitted?: () => void;
 }
 
 const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
@@ -118,6 +119,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
     onSearchAllProperties,
     onRequestMarketReport,
     onViewProperty,
+    onReviewSubmitted,
 }) => {
     const { t } = useTranslation(['agents']);
     const [listingTypeFilter, setListingTypeFilter] = useState<'all' | 'sale' | 'rent'>('all');
@@ -836,7 +838,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                     onContactAgent={onContactAgent}
                                     onReviewSubmitted={() => {
                                         setShowReviewForm(false);
-                                        window.location.reload();
+                                        onReviewSubmitted?.();
                                     }}
                                 />
                             </div>

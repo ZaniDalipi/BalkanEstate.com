@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { verifyEmail as verifyEmailApi, resendVerificationEmail } from '@/services/apiService';
 import { LogoIcon } from '@/constants';
+import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 
 interface VerifyEmailPageProps {
   onVerificationComplete?: () => void;
@@ -9,6 +10,7 @@ interface VerifyEmailPageProps {
 
 const VerifyEmailPage: React.FC<VerifyEmailPageProps> = ({ onVerificationComplete }) => {
   const { t } = useTranslation(['auth']);
+  const { navigate } = useLocalizedNavigation();
   const [token, setToken] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [isVerifying, setIsVerifying] = useState(true);
@@ -51,7 +53,7 @@ const VerifyEmailPage: React.FC<VerifyEmailPageProps> = ({ onVerificationComplet
           if (onVerificationComplete) {
             onVerificationComplete();
           } else {
-            window.location.href = hasToken ? '/' : '/login';
+            navigate(hasToken ? '/' : '/login');
           }
         }, 3000);
       } else {

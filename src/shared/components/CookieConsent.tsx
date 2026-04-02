@@ -55,6 +55,16 @@ const CookieConsent: React.FC = () => {
     }
   }, []);
 
+  // Listen for cookie consent reset (e.g. from "Manage Cookies" on the cookie policy page)
+  useEffect(() => {
+    const handleReset = () => {
+      setIsVisible(true);
+      setShowSettings(false);
+    };
+    window.addEventListener('cookieConsentReset', handleReset);
+    return () => window.removeEventListener('cookieConsentReset', handleReset);
+  }, []);
+
   const saveConsent = (prefs: CookiePreferences) => {
     localStorage.setItem(COOKIE_CONSENT_KEY, 'true');
     localStorage.setItem(COOKIE_PREFERENCES_KEY, JSON.stringify(prefs));

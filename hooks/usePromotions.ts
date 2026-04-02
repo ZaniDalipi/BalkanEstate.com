@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Property } from '../types';
 import { getMyListings } from '../src/features/properties/api';
 import { getMyPromotions, addUrgentBadge, updateAutoExtend, getAutoExtendCheckout } from '../src/features/promotions/api';
@@ -131,6 +132,7 @@ export interface UsePromotionActionsReturn {
 
 export const usePromotionActions = (): UsePromotionActionsReturn => {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const handleAddUrgent = useCallback(async (promotionId: string) => {
     try {
@@ -142,8 +144,10 @@ export const usePromotionActions = (): UsePromotionActionsReturn => {
       }
 
       if (result.isFree) {
-        // Free urgent badge - reload to show the change
-        window.location.reload();
+        // Free urgent badge - invalidate queries to show the change
+        queryClient.invalidateQueries({ queryKey: ['promotions'] });
+        queryClient.invalidateQueries({ queryKey: ['myListings'] });
+        setActionLoading(null);
       } else if (result.url) {
         // Redirect to Stripe checkout
         window.location.href = result.url;

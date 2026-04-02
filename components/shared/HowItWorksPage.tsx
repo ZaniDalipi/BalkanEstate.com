@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { buildLocalizedPath } from '../../src/utils/languageRouting';
+import { useLocalizedNavigation } from '../../src/hooks/useLocalizedNavigation';
 import { HowItWorksTab } from '../../types';
 import Footer from './Footer';
 import { API_URL } from '../../src/shared/api/config';
@@ -199,6 +200,7 @@ const FireIcon: React.FC<{ className?: string }> = ({ className }) => (
 const HowItWorksPage: React.FC = () => {
   const { t } = useTranslation(['howItWorks']);
   const { state, dispatch } = useAppContext();
+  const { navigate: localizedNavigate } = useLocalizedNavigation();
   const activeTab = state.howItWorksTab;
   const [videos, setVideos] = useState<Record<string, SiteVideo[]>>({});
 
@@ -232,7 +234,7 @@ const HowItWorksPage: React.FC = () => {
 
   // Navigation helper
   const navigateTo = (path: string) => {
-    window.location.href = buildLocalizedPath(path);
+    localizedNavigate(path);
   };
 
   const handleTabChange = (tabId: HowItWorksTab) => {

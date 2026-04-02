@@ -12,7 +12,8 @@ import {
   EnvelopeIcon,
   BuildingOfficeIcon,
 } from '@/constants';
-import { tokenService } from '@/src/shared/api/tokenService';
+import { useAppContext } from '@/context/AppContext';
+import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 
 interface AdminHeaderProps {
   stats?: {
@@ -38,6 +39,8 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
   userRole
 }) => {
   const { t } = useTranslation(['admin']);
+  const { logout } = useAppContext();
+  const { navigate } = useLocalizedNavigation();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -235,9 +238,10 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
                     </button>
                     <hr className="my-2" />
                     <button
-                      onClick={() => {
-                        tokenService.clearTokens();
-                        window.location.reload();
+                      onClick={async () => {
+                        setUserMenuOpen(false);
+                        await logout();
+                        navigate('/');
                       }}
                       className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                     >
