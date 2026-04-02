@@ -287,7 +287,7 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                             <img
                                 src="/images/partners/z360-logo.png"
                                 alt="Z360 Virtual Tours - 360° Property Tours"
-                                className="h-10 sm:h-12 md:h-14 lg:h-16 w-auto object-contain"
+                                className="h-10 sm:h-12 md:h-14 lg:h-16 w-auto max-w-[120px] sm:max-w-[140px] md:max-w-[160px] lg:max-w-[180px] object-contain"
                             />
                         </a>
                     </div>
