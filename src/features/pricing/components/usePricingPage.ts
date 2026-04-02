@@ -166,6 +166,10 @@ export function usePricingPage() {
     const user = state.currentUser;
     if (!user) return 0;
 
+    // Treat canceled/expired as no active plan — allows re-enrollment even if
+    // user.subscription.status still says 'active' (pending cancellation window)
+    if (user.subscriptionStatus === 'canceled' || user.subscriptionStatus === 'expired') return 0;
+
     const isActive =
       user.subscriptionStatus === 'active' ||
       user.subscriptionStatus === 'trial' ||
@@ -528,6 +532,9 @@ export function usePricingPage() {
   const isActivePlan = (productId: string): boolean => {
     const user = state.currentUser;
     if (!user) return false;
+
+    // Canceled/expired subscriptions are not active — show re-subscribe option
+    if (user.subscriptionStatus === 'canceled' || user.subscriptionStatus === 'expired') return false;
 
     const isActive =
       user.subscriptionStatus === 'active' ||
