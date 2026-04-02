@@ -167,8 +167,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
           )}
         </GoogleMap>
 
-        {/* Debug info overlay */}
-        <div className="absolute top-4 left-4 z-[1001] bg-black/80 text-white text-[10px] font-mono px-2 py-1 rounded-md backdrop-blur-sm shadow-md">
+        {/* Debug info overlay — desktop only */}
+        <div className="hidden sm:block absolute top-4 left-4 z-[1001] bg-black/80 text-white text-[10px] font-mono px-2 py-1 rounded-md backdrop-blur-sm shadow-md">
           <span>🔍{hook.zoom.toFixed(1)}/21 📍{hook.center.lat.toFixed(3)},{hook.center.lng.toFixed(3)} 📌{hook.validProperties.length}</span>
         </div>
 

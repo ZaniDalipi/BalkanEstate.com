@@ -399,7 +399,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                     }`}
                   >
                     <span>🏢</span>
-                    <span>{t('common:aria.threeDBuildings')}</span>
+                    <span>{t('common:aria.buildings3D', '3D Buildings')}</span>
                   </button>
                   <button
                     onClick={() => setShowLandmarks(!showLandmarks)}
