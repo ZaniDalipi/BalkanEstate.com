@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import PaymentWindow from '../../../../components/shared/PaymentWindow';
 import { useAppContext } from '../../../../context/AppContext';
 import { API_URL } from '../../../shared/api/config';
@@ -9,61 +9,17 @@ import {
   markWarningDismissed,
 } from '../hooks/useSubscriptionExpiry';
 
-// ─── Persistent show counter ─────────────────────────────────────────────────
-//
-// Tracks how many times the expired subscription modal has been shown+dismissed.
-// Read synchronously during render (no useEffect) so the value is always fresh
-// regardless of component remounts, auth re-checks, or prop reference changes.
-//
-// Schedule:
-//   Show 1 — Day 0+  (first login after expiry)
-//   Show 2 — Day 3+  (3 days after expiry, if show 1 was dismissed)
-//   Show 3 — Day 7+  (7 days after expiry, if show 2 was dismissed, final "No thanks")
-//   After 3 — never again
-
-const STORAGE_KEY = 'be_sub_exp_v3_';
-const MS_PER_DAY = 86_400_000;
-
-function getStorageKey(userId: string): string { return STORAGE_KEY + userId; }
-
-function readShowCount(userId: string): number {
-  try {
-    const raw = localStorage.getItem(getStorageKey(userId));
-    if (!raw) return 0;
-    const n = JSON.parse(raw)?.c;
-    return typeof n === 'number' && n >= 0 ? n : 0;
-  } catch { return 0; }
-}
-
-function writeShowCount(userId: string, n: number): void {
-  try { localStorage.setItem(getStorageKey(userId), JSON.stringify({ c: n })); } catch {}
-}
-
-function deleteShowCount(userId: string): void {
-  try { localStorage.removeItem(getStorageKey(userId)); } catch {}
-}
-
-function daysSinceExpiry(expirationDate: string): number {
-  const ms = Date.now() - new Date(expirationDate).getTime();
-  return ms < 0 ? 0 : Math.floor(ms / MS_PER_DAY);
-}
-
-/**
- * Determines which phase (1/2/3) to show, or null if nothing should appear.
- */
-function resolvePhase(showCount: number, days: number): 1 | 2 | 3 | null {
-  if (showCount >= 3) return null;           // all 3 shows done — never again
-  if (showCount === 0) return 1;             // first show: Day 0+
-  if (showCount === 1 && days >= 3) return 2; // second show: Day 3+
-  if (showCount === 2 && days >= 7) return 3; // third show: Day 7+
-  return null;                               // waiting for next day threshold
-}
-
-// ─── Component ───────────────────────────────────────────────────────────────
-
 interface Props {
-  expiryInfo: ExpiryCheckResult | null;
+  expiryInfo: ExpiryCheckResult;
+  /** Phase 1 / 2 / 3 to show, or null (nothing to show). Owned by App-level hook. */
+  expiredPhase: 1 | 2 | 3 | null;
   onDismissWarning: () => void;
+  /** "Maybe later" or "Reactivate Plan" without completing payment */
+  onDismissExpired: () => void;
+  /** "No thanks" — phase 3 permanent dismissal */
+  onDismissExpiredFinal: () => void;
+  /** Payment completed successfully */
+  onPaymentSuccess: () => void;
 }
 
 interface ProductInfo {
@@ -73,67 +29,30 @@ interface ProductInfo {
   productId: string;
 }
 
-const SubscriptionExpiryModals: React.FC<Props> = ({ expiryInfo, onDismissWarning }) => {
+const SubscriptionExpiryModals: React.FC<Props> = ({
+  expiryInfo,
+  expiredPhase,
+  onDismissWarning,
+  onDismissExpired,
+  onDismissExpiredFinal,
+  onPaymentSuccess,
+}) => {
   const { state } = useAppContext();
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
   const [productInfo, setProductInfo] = useState<ProductInfo | null>(null);
   const [loadingProduct, setLoadingProduct] = useState(false);
 
-  // Force re-render counter — bumped after writing to localStorage so React
-  // re-reads the new value on the next render.
-  const [, bump] = useState(0);
-
   const user = state.currentUser;
-  const userId = user?.id || user?._id || user?.email || '';
   const userRole: 'buyer' | 'private_seller' | 'agent' =
     user?.role === 'agent' ? 'agent' : user?.role === 'buyer' ? 'buyer' : 'private_seller';
 
-  // ── Session guard ─────────────────────────────────────────────────────────
-  // Set synchronously on any dismiss action. Survives every re-render within
-  // the same page load. Only resets when the page is fully reloaded.
-  const dismissedRef = useRef(false);
-
-  // ── Compute phase synchronously from localStorage ─────────────────────────
-  // No useEffect, no useState for the phase — read directly from localStorage
-  // on every render. localStorage reads are synchronous and < 1ms.
-  let expiredPhase: 1 | 2 | 3 | null = null;
-
-  if (
-    !dismissedRef.current &&
-    expiryInfo?.isExpired &&
-    userId &&
-    expiryInfo.expirationDate
-  ) {
-    const count = readShowCount(userId);
-    const days = daysSinceExpiry(expiryInfo.expirationDate);
-    expiredPhase = resolvePhase(count, days);
-  }
-
-  // ── Dismiss actions ───────────────────────────────────────────────────────
-
-  /** "Maybe later" or "Reactivate Plan" — advance show counter by 1 */
-  const dismiss = useCallback(() => {
-    if (!userId) return;
-    dismissedRef.current = true;
-    const n = readShowCount(userId);
-    writeShowCount(userId, n + 1);
-    bump(c => c + 1);
-  }, [userId]);
-
-  /** "No thanks" (phase 3) — mark as permanently done */
-  const dismissPermanently = useCallback(() => {
-    if (!userId) return;
-    dismissedRef.current = true;
-    writeShowCount(userId, 3);
-    bump(c => c + 1);
-  }, [userId]);
-
-  // ── Fetch product & open PaymentWindow ────────────────────────────────────
+  // ── Fetch product details then open PaymentWindow ─────────────────────────
 
   const fetchProductAndOpenPayment = useCallback(async () => {
-    if (!expiryInfo?.productId) return;
-    // Count this as a show so the modal won't reappear on the next login
-    dismiss();
+    if (!expiryInfo.productId) return;
+    // Count as dismissed so the modal won't reappear on the next login while
+    // the user is deciding whether to complete payment.
+    onDismissExpired();
     setLoadingProduct(true);
     try {
       const token = tokenService.getAccessToken();
@@ -174,26 +93,24 @@ const SubscriptionExpiryModals: React.FC<Props> = ({ expiryInfo, onDismissWarnin
     } finally {
       setLoadingProduct(false);
     }
-  }, [expiryInfo?.productId, dismiss]);
+  }, [expiryInfo.productId, onDismissExpired]);
 
   const handlePaymentSuccess = useCallback(() => {
     setShowPaymentWindow(false);
-    if (userId) deleteShowCount(userId);
-    dismissedRef.current = true;
-    bump(c => c + 1);
+    onPaymentSuccess();
     window.dispatchEvent(new Event('subscriptionUpdated'));
-  }, [userId]);
+  }, [onPaymentSuccess]);
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // ── Derived visibility ────────────────────────────────────────────────────
 
-  if (!expiryInfo?.hasSubscription) return null;
+  if (!expiryInfo.hasSubscription) return null;
 
   const showExpiringSoon =
     expiryInfo.isExpiringSoon &&
     !expiryInfo.isExpired &&
     !hasUserDismissedWarning(expiryInfo.expirationDate);
 
-  const showExpired = expiredPhase !== null;
+  const showExpired = expiryInfo.isExpired && expiredPhase !== null;
   const isFinalPhase = expiredPhase === 3;
 
   const handleDismissWarning = () => {
@@ -291,7 +208,7 @@ const SubscriptionExpiryModals: React.FC<Props> = ({ expiryInfo, onDismissWarnin
               </div>
               <div className="flex gap-3">
                 <button
-                  onClick={isFinalPhase ? dismissPermanently : dismiss}
+                  onClick={isFinalPhase ? onDismissExpiredFinal : onDismissExpired}
                   className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   {isFinalPhase ? 'No, thanks' : 'Maybe later'}
