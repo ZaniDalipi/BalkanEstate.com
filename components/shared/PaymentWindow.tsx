@@ -1051,7 +1051,14 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                               <input
                                 type="text"
                                 value={discountCode}
-                                onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                                onChange={(e) => {
+                                  const start = e.target.selectionStart;
+                                  const end = e.target.selectionEnd;
+                                  const el = e.target;
+                                  const upper = e.target.value.toUpperCase();
+                                  setDiscountCode(upper);
+                                  requestAnimationFrame(() => el.setSelectionRange(start, end));
+                                }}
                                 placeholder={t('payment:checkout.enterCouponCode')}
                                 className="flex-1 min-w-0 px-2.5 sm:px-3 py-2 sm:py-2.5 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                                 onKeyPress={(e) => e.key === 'Enter' && handleValidateDiscountCode()}
@@ -1398,7 +1405,14 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                     <input
                       type="text"
                       value={discountCode}
-                      onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                      onChange={(e) => {
+                        const start = e.target.selectionStart;
+                        const end = e.target.selectionEnd;
+                        const el = e.target;
+                        const upper = e.target.value.toUpperCase();
+                        setDiscountCode(upper);
+                        requestAnimationFrame(() => el.setSelectionRange(start, end));
+                      }}
                       placeholder={t('payment:checkout.enterCode')}
                       className="flex-1 min-w-0 px-2.5 sm:px-3 py-1.5 sm:py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-xs sm:text-sm"
                       onKeyPress={(e) => e.key === 'Enter' && handleValidateDiscountCode()}
