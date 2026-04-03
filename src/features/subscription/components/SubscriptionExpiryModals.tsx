@@ -11,63 +11,60 @@ import {
 
 // ─── Persistent phase storage ─────────────────────────────────────────────────
 //
-// Key: be_sub_exp_v1_{userId}_{expirationDateMs}
-//   – Scoped to the user AND the specific expiry date so if they resubscribe
-//     and the subscription expires again later, the phase counter resets.
+// Key: be_sub_exp_v2_{userId}   (scoped to user only — no date dependency so
+//   slight timestamp jitter between API polls can't produce a different key)
 //
-// Value: { phasesDismissed: 0 | 1 | 2 | 3 }
-//   0 = modal never shown yet this expiry cycle
-//   1 = phase 1 (Day 0)  dismissed → next show Day 3+
-//   2 = phase 2 (Day 3)  dismissed → next show Day 7+
-//   3 = all done          → never show again
+// Value: { totalShows: 0 | 1 | 2 | 3 }
+//   0 = never shown
+//   1 = shown once  (phase 1 done, next show Day 3+)
+//   2 = shown twice (phase 2 done, next show Day 7+)
+//   3 = shown 3×    → never show again
 
-const STORAGE_PREFIX = 'be_sub_exp_v1_';
+const STORAGE_PREFIX = 'be_sub_exp_v2_';
 const MS_PER_DAY = 86_400_000;
 
-function storageKey(userId: string, expirationDate: string): string {
-  // Normalise the date to a UTC day-boundary so slight timestamp jitter
-  // doesn't produce a different key on each auth re-check.
-  const dayTs = Math.floor(new Date(expirationDate).getTime() / MS_PER_DAY);
-  return `${STORAGE_PREFIX}${userId}_${dayTs}`;
+function storageKey(userId: string): string {
+  return `${STORAGE_PREFIX}${userId}`;
 }
 
-function loadPhases(userId: string, expirationDate: string): 0 | 1 | 2 | 3 {
+function loadShows(userId: string): 0 | 1 | 2 | 3 {
   try {
-    const raw = localStorage.getItem(storageKey(userId, expirationDate));
+    const raw = localStorage.getItem(storageKey(userId));
     if (!raw) return 0;
-    const n = JSON.parse(raw)?.phasesDismissed;
+    const n = JSON.parse(raw)?.totalShows;
     if (n === 0 || n === 1 || n === 2 || n === 3) return n;
     return 0;
   } catch { return 0; }
 }
 
-function savePhases(userId: string, expirationDate: string, n: 0 | 1 | 2 | 3): void {
+function saveShows(userId: string, n: 0 | 1 | 2 | 3): void {
   try {
-    localStorage.setItem(storageKey(userId, expirationDate), JSON.stringify({ phasesDismissed: n }));
-  } catch { /* quota exceeded / private mode — silently ignore */ }
+    localStorage.setItem(storageKey(userId), JSON.stringify({ totalShows: n }));
+  } catch { /* quota exceeded / private mode */ }
 }
 
-function clearPhases(userId: string, expirationDate: string): void {
-  try { localStorage.removeItem(storageKey(userId, expirationDate)); } catch { /* ignore */ }
+function clearShows(userId: string): void {
+  try { localStorage.removeItem(storageKey(userId)); } catch {}
 }
 
-/** Days elapsed since the expiration date. */
+/** Days elapsed since the expiration date (0 if not yet expired). */
 function daysSinceExpiry(expirationDate: string): number {
   const ms = Date.now() - new Date(expirationDate).getTime();
   return ms < 0 ? 0 : Math.floor(ms / MS_PER_DAY);
 }
 
 /**
- * Resolves which phase to show, or null if nothing should be shown.
- * Phase 1 — Day 0+  (first time)
- * Phase 2 — Day 3+  (after phase 1 dismissed)
- * Phase 3 — Day 7+  (after phase 2 dismissed, final "No" button)
+ * Which phase to show based on how many times it's been shown already + days elapsed.
+ * Phase 1 — Day 0+  (first show)
+ * Phase 2 — Day 3+  (second show)
+ * Phase 3 — Day 7+  (third and final show, "No thanks")
+ * null     — nothing to show
  */
-function resolvePhase(phases: 0 | 1 | 2 | 3, days: number): 1 | 2 | 3 | null {
-  if (phases === 3) return null;
-  if (phases === 0) return 1;
-  if (phases === 1) return days >= 3 ? 2 : null;
-  if (phases === 2) return days >= 7 ? 3 : null;
+function resolvePhase(totalShows: 0 | 1 | 2 | 3, days: number): 1 | 2 | 3 | null {
+  if (totalShows >= 3) return null;
+  if (totalShows === 0) return 1;
+  if (totalShows === 1) return days >= 3 ? 2 : null;
+  if (totalShows === 2) return days >= 7 ? 3 : null;
   return null;
 }
 
@@ -97,51 +94,63 @@ const SubscriptionExpiryModals: React.FC<Props> = ({ expiryInfo, onDismissWarnin
     user?.role === 'agent' ? 'agent' : user?.role === 'buyer' ? 'buyer' : 'private_seller';
 
   // ── Expired modal phase state ─────────────────────────────────────────────
-  // We derive visibility from localStorage rather than React state so that
-  // re-mounts (caused by auth re-checks creating new state references) never
-  // re-show the modal after the user has dismissed it.
+  //
+  // Two-layer protection against re-appearing:
+  //
+  // 1. dismissedThisSessionRef — set synchronously on any button click.
+  //    Prevents any subsequent re-render (from auth polls, context updates,
+  //    expiryInfo reference changes) from calling setExpiredPhase(non-null)
+  //    within the same page load.
+  //
+  // 2. localStorage (totalShows counter) — survives page reloads and remounts.
+  //    On each mount the effect reads the counter and resolves the right phase
+  //    (or null) based on days elapsed since expiry.
 
+  const dismissedThisSessionRef = useRef(false);
   const [expiredPhase, setExpiredPhase] = useState<1 | 2 | 3 | null>(null);
 
-  // Re-evaluate the phase whenever expiryInfo or userId changes.
-  // We use a ref to avoid running on every render while still picking up
-  // genuine prop changes.
-  const lastKeyRef = useRef('');
   useEffect(() => {
+    // Session guard: once dismissed don't re-show even if expiryInfo changes reference
+    if (dismissedThisSessionRef.current) return;
+
     if (!expiryInfo?.isExpired || !userId || !expiryInfo.expirationDate) {
       setExpiredPhase(null);
       return;
     }
-    const key = `${userId}|${expiryInfo.expirationDate}`;
-    if (key === lastKeyRef.current) return; // nothing changed
-    lastKeyRef.current = key;
 
-    const phases = loadPhases(userId, expiryInfo.expirationDate);
+    const shows = loadShows(userId);
     const days = daysSinceExpiry(expiryInfo.expirationDate);
-    setExpiredPhase(resolvePhase(phases, days));
+    setExpiredPhase(resolvePhase(shows, days));
   }, [expiryInfo, userId]);
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
+  // ── Dismiss helpers ───────────────────────────────────────────────────────
 
-  const advancePhase = useCallback(() => {
-    if (!userId || !expiryInfo?.expirationDate) return;
-    const current = loadPhases(userId, expiryInfo.expirationDate);
+  /** Increment show counter (max 2 — the "No thanks" path uses recordFinalShow). */
+  const recordShow = useCallback(() => {
+    if (!userId) return;
+    dismissedThisSessionRef.current = true;
+    const current = loadShows(userId);
+    // Advance by 1, capped at 2 (phase 3 / "No thanks" sets it to 3 via recordFinalShow)
     const next = Math.min(current + 1, 2) as 0 | 1 | 2 | 3;
-    savePhases(userId, expiryInfo.expirationDate, next);
-    setExpiredPhase(null); // hide immediately; next show at next phase threshold
-  }, [userId, expiryInfo?.expirationDate]);
-
-  const permanentlyDismiss = useCallback(() => {
-    if (!userId || !expiryInfo?.expirationDate) return;
-    savePhases(userId, expiryInfo.expirationDate, 3);
+    saveShows(userId, next);
     setExpiredPhase(null);
-  }, [userId, expiryInfo?.expirationDate]);
+  }, [userId]);
+
+  /** Called by "No thanks" — records the 3rd show as done, never shows again. */
+  const recordFinalShow = useCallback(() => {
+    if (!userId) return;
+    dismissedThisSessionRef.current = true;
+    saveShows(userId, 3);
+    setExpiredPhase(null);
+  }, [userId]);
+
+  // ── Fetch product & open PaymentWindow ────────────────────────────────────
 
   const fetchProductAndOpenPayment = useCallback(async () => {
     if (!expiryInfo?.productId) return;
-    // Dismiss the current phase so the modal doesn't reappear on every login
-    // while the user is deciding whether to reactivate.
-    advancePhase();
+    // Count this as a dismissed show so the modal doesn't reappear on every login
+    // while the user is considering whether to reactivate.
+    recordShow();
     setLoadingProduct(true);
     try {
       const token = tokenService.getAccessToken();
@@ -182,19 +191,18 @@ const SubscriptionExpiryModals: React.FC<Props> = ({ expiryInfo, onDismissWarnin
     } finally {
       setLoadingProduct(false);
     }
-  }, [expiryInfo?.productId, advancePhase]);
+  }, [expiryInfo?.productId, recordShow]);
 
   const handlePaymentSuccess = useCallback(() => {
     setShowPaymentWindow(false);
-    // Payment succeeded — subscription is now active, clear all phase state
-    if (userId && expiryInfo?.expirationDate) {
-      clearPhases(userId, expiryInfo.expirationDate);
-    }
+    // Subscription active — clear the show counter so it never triggers again
+    // (isExpired will also be false on the next poll, making this doubly safe)
+    if (userId) clearShows(userId);
     setExpiredPhase(null);
     window.dispatchEvent(new Event('subscriptionUpdated'));
-  }, [userId, expiryInfo?.expirationDate]);
+  }, [userId]);
 
-  // ── Derived display values ────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────────────
 
   if (!expiryInfo?.hasSubscription) return null;
 
@@ -276,7 +284,6 @@ const SubscriptionExpiryModals: React.FC<Props> = ({ expiryInfo, onDismissWarnin
       {/* ── Subscription Expired Modal ── */}
       {showExpired && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-          {/* Non-dismissable backdrop */}
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
             <div className="bg-gradient-to-r from-red-500 to-rose-600 px-6 py-5 text-center">
@@ -302,7 +309,7 @@ const SubscriptionExpiryModals: React.FC<Props> = ({ expiryInfo, onDismissWarnin
               </div>
               <div className="flex gap-3">
                 <button
-                  onClick={isFinalPhase ? permanentlyDismiss : advancePhase}
+                  onClick={isFinalPhase ? recordFinalShow : recordShow}
                   className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   {isFinalPhase ? 'No, thanks' : 'Maybe later'}

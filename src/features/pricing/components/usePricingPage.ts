@@ -77,14 +77,6 @@ export function usePricingPage() {
   // Convert error to string for display
   const error = productsError ? t('pricing:error.loadFailed', 'Failed to load pricing plans') : null;
 
-  // Refresh user auth state on mount so subscription status is never stale
-  // (e.g. subscription expired between sessions without a page reload)
-  useEffect(() => {
-    if (state.isAuthenticated) {
-      checkAuthStatus();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Sales team contact info - imported from shared config
   const salesEmail = CONTACT_CONFIG.email.sales;
