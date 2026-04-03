@@ -58,6 +58,7 @@ export interface Property {
   soldAt?: number;
   rentedAt?: number;
   price: number;
+  isNegotiable?: boolean; // When true, price is "By Negotiation" (price field can be 0)
   // Price discount fields
   originalPrice?: number; // Original price before discount
   priceReducedAt?: number; // Timestamp when price was reduced

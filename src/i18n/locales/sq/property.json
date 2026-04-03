@@ -28,6 +28,7 @@
   "minPrice": "Çmimi Min",
   "maxPrice": "Çmimi Maks",
   "pricePerSqm": "Çmimi për m²",
+  "byNegotiation": "Me Negocim",
   "types": {
     "apartment": "Banesë",
     "house": "Shtëpi",

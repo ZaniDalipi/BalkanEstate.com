@@ -47,6 +47,7 @@ export interface IProperty extends Document {
   status: 'active' | 'pending' | 'sold' | 'rented' | 'draft';
   soldAt?: Date;
   price: number;
+  isNegotiable?: boolean; // When true, price is "By Negotiation" (price field can be 0)
   // Price discount fields
   originalPrice?: number; // Original price before discount
   priceReducedAt?: Date; // When price was reduced
@@ -210,6 +211,11 @@ const PropertySchema: Schema = new Schema(
       type: Number,
       required: true,
       min: 0,
+      index: true,
+    },
+    isNegotiable: {
+      type: Boolean,
+      default: false,
       index: true,
     },
     // Price discount fields

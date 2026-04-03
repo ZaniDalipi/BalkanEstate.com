@@ -119,6 +119,7 @@
       "propertyIdPlaceholder": "e.g., AP-2024-001, VILLA-123",
       "propertyIdHint": "Optional. Your own internal reference ID for this property.",
       "price": "Price",
+      "priceByNegotiation": "Price will be shown as \"By Negotiation\"",
       "bedrooms": "Bedrooms",
       "bathrooms": "Bathrooms",
       "livingRooms": "Living Rooms",

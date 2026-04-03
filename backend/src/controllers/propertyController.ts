@@ -818,7 +818,7 @@ export const createProperty = async (
     // Whitelist allowed fields to prevent mass assignment attacks
     // (e.g., attacker setting isPromoted, views, saves, etc.)
     const ALLOWED_PROPERTY_FIELDS = [
-      'propertyId', 'listingType', 'title', 'status', 'price', 'originalPrice', 'priceIntervals',
+      'propertyId', 'listingType', 'title', 'status', 'price', 'isNegotiable', 'originalPrice', 'priceIntervals',
       'address', 'city', 'country',
       'beds', 'baths', 'livingRooms', 'sqft', 'yearBuilt', 'parking',
       'description', 'specialFeatures', 'materials',
@@ -1003,7 +1003,7 @@ export const updateProperty = async (
     // IMPORTANT: Only update fields that are explicitly provided and not undefined
     // This preserves existing data when fields are not included in the update
     const fieldsToUpdate = [
-      'propertyId', 'status', 'title', 'price', 'address', 'city', 'country',
+      'propertyId', 'status', 'title', 'price', 'isNegotiable', 'address', 'city', 'country',
       'beds', 'baths', 'livingRooms', 'sqft', 'yearBuilt', 'parking',
       'description', 'specialFeatures', 'materials', 'amenities',
       'tourUrl', 'virtualTour360Url', 'hasVirtualTour360',

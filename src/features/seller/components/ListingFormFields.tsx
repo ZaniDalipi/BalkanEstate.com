@@ -151,10 +151,38 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
                 {/* Price */}
                 <div className="md:col-span-2">
                     <label htmlFor="price" className={labelClasses}>{t('seller:createListing.fields.price')}</label>
-                    <div className="relative">
-                        <input type="text" id="price" inputMode="numeric" name="price" value={listingData.price > 0 ? new Intl.NumberFormat('de-DE').format(listingData.price) : ''} onChange={handlePriceChange} className={`${inputBaseClasses} pl-10`} placeholder="0" required />
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">{getCurrencySymbol(selectedCountry)}</span>
-                    </div>
+                    {!listingData.isNegotiable && (
+                        <div className="relative">
+                            <input type="text" id="price" inputMode="numeric" name="price" value={listingData.price > 0 ? new Intl.NumberFormat('de-DE').format(listingData.price) : ''} onChange={handlePriceChange} className={`${inputBaseClasses} pl-10`} placeholder="0" required />
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">{getCurrencySymbol(selectedCountry)}</span>
+                        </div>
+                    )}
+                    {listingData.isNegotiable && (
+                        <div className="flex items-center gap-2 h-12 px-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 font-medium text-sm">
+                            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            {t('seller:createListing.fields.priceByNegotiation', 'Price will be shown as "By Negotiation"')}
+                        </div>
+                    )}
+                    <label className="flex items-center gap-2 mt-2 cursor-pointer select-none group">
+                        <input
+                            type="checkbox"
+                            checked={listingData.isNegotiable}
+                            onChange={(e) => {
+                                const checked = e.target.checked;
+                                setListingData(prev => ({
+                                    ...prev,
+                                    isNegotiable: checked,
+                                    ...(checked ? { price: 0 } : {}),
+                                }));
+                            }}
+                            className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary/20 transition-colors"
+                        />
+                        <span className="text-sm text-gray-600 group-hover:text-gray-800 transition-colors">
+                            {t('seller:form.negotiable', 'By Negotiation')}
+                        </span>
+                    </label>
                 </div>
             </fieldset>
 

@@ -28,6 +28,7 @@
   "minPrice": "Ελάχιστη Τιμή",
   "maxPrice": "Μέγιστη Τιμή",
   "pricePerSqm": "Τιμή ανά τ.μ.",
+  "byNegotiation": "Κατόπιν Διαπραγμάτευσης",
   "types": {
     "apartment": "Διαμέρισμα",
     "house": "Σπίτι",
