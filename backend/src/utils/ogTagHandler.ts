@@ -9,7 +9,7 @@
 
 import { Request, Response } from 'express';
 import Property from '../models/Property';
-import { resolveId } from './idObfuscation';
+import { resolveId, encodeId } from './idObfuscation';
 import { isValidObjectId } from './validateParams';
 
 const BASE_URL = process.env.FRONTEND_URL || 'https://balkanestateai.com';
@@ -49,6 +49,30 @@ export function isSocialMediaBot(userAgent: string): boolean {
   return BOT_UA_PATTERNS.some(pattern => ua.includes(pattern));
 }
 
+/**
+ * Build the same SEO slug the frontend generates:
+ * "{n}-bed-{type}-for-{sale|rent}-in-{city}-{country}_{encodedId}"
+ */
+function buildPropertySlug(property: any): string {
+  const parts: string[] = [];
+  if (property.bedrooms && property.bedrooms > 0) parts.push(`${property.bedrooms}-bed`);
+  if (property.propertyType) parts.push(property.propertyType);
+  parts.push(property.listingType === 'rent' ? 'for-rent' : 'for-sale');
+  if (property.city) { parts.push('in'); parts.push(property.city); }
+  if (property.country) parts.push(property.country);
+
+  const slugText = parts.join(' ')
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+    .replace(/--+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  const encodedId = encodeId(String(property._id));
+  return `${slugText}_${encodedId}`;
+}
+
 function escapeHtml(str: string): string {
   return str
     .replace(/&/g, '&amp;')
@@ -71,9 +95,15 @@ function formatPrice(price: number, currency = 'EUR'): string {
  * this route are bounced to the SPA immediately.
  */
 function buildPropertyOgHtml(property: any, canonicalUrl: string): string {
+  const action = property.listingType === 'rent' ? 'for Rent' : 'for Sale';
+  const typeLabel = property.propertyType
+    ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1)
+    : 'Property';
+  const bedsLabel = property.bedrooms && property.bedrooms > 0 ? `${property.bedrooms}-Bed ` : '';
+
   const title = property.title
     ? `${property.title} – ${property.city}, ${property.country} | BalkanEstateAI`
-    : `${property.bedrooms ? property.bedrooms + '-Bed ' : ''}${property.propertyType || 'Property'} for ${property.listingType === 'rent' ? 'Rent' : 'Sale'} in ${property.city}, ${property.country} | BalkanEstateAI`;
+    : `${bedsLabel}${typeLabel} ${action} in ${property.city}, ${property.country} | BalkanEstateAI`;
 
   const price = formatPrice(property.price, property.currency || 'EUR');
   const sqft = property.sqft ? `${property.sqft} m²` : '';
@@ -81,10 +111,17 @@ function buildPropertyOgHtml(property: any, canonicalUrl: string): string {
   const baths = property.bathrooms != null ? `${property.bathrooms} bath` : '';
   const details = [beds, baths, sqft].filter(Boolean).join(' · ');
 
-  const description = property.description
-    ? property.description.slice(0, 200).replace(/\n/g, ' ')
-    : `${details ? details + ' – ' : ''}${price} – ${property.city}, ${property.country}`;
+  // Lead with price + details, then property description text
+  const descriptionText = property.description
+    ? property.description.slice(0, 160).replace(/\n/g, ' ').trim()
+    : '';
+  const description = [
+    price,
+    details,
+    descriptionText,
+  ].filter(Boolean).join(' – ').slice(0, 300);
 
+  // Use the first property image; fall back to the generic OG image
   const imageUrl = property.images?.[0]?.url || `${BASE_URL}/og-image.png`;
 
   return `<!DOCTYPE html>
@@ -147,12 +184,13 @@ export async function propertyOgHandler(req: Request, res: Response, next: () =>
     if (!resolvedId || !isValidObjectId(resolvedId)) return next();
 
     const property = await Property.findById(resolvedId)
-      .select('title price currency listingType propertyType bedrooms bathrooms sqft city country description images slug')
+      .select('title price currency listingType propertyType bedrooms bathrooms sqft city country description images')
       .lean();
 
     if (!property) return next();
 
-    const propertySlug = (property as any).slug || slug;
+    // Reconstruct the canonical slug the same way the frontend does
+    const propertySlug = buildPropertySlug(property);
     const canonicalUrl = `${BASE_URL}/en/property/${propertySlug}`;
     const html = buildPropertyOgHtml(property, canonicalUrl);
 
