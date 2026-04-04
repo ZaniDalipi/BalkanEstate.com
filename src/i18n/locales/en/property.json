@@ -21,6 +21,7 @@
   "minPrice": "Min Price",
   "maxPrice": "Max Price",
   "pricePerSqm": "Price per m²",
+  "byNegotiation": "By Negotiation",
   "types": {
     "apartment": "Apartment",
     "house": "House",

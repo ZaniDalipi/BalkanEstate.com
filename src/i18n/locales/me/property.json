@@ -28,6 +28,7 @@
   "minPrice": "Min Price",
   "maxPrice": "Max Price",
   "pricePerSqm": "Price per m²",
+  "byNegotiation": "Po dogovoru",
   "types": {
     "apartment": "Apartment",
     "house": "House",

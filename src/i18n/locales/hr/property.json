@@ -28,6 +28,7 @@
   "minPrice": "Min Cijena",
   "maxPrice": "Max Cijena",
   "pricePerSqm": "Cijena po m²",
+  "byNegotiation": "Po dogovoru",
   "types": {
     "apartment": "Stan",
     "house": "Kuća",

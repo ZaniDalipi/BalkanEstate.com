@@ -14,6 +14,7 @@ export interface ListingData {
     listingType: ListingType;
     streetAddress: string;
     price: number;
+    isNegotiable: boolean;
     bedrooms: number;
     bathrooms: number;
     livingRooms: number;
@@ -72,6 +73,7 @@ export const initialListingData: ListingData = {
     listingType: 'sale',
     streetAddress: '',
     price: 0,
+    isNegotiable: false,
     bedrooms: 0,
     bathrooms: 0,
     livingRooms: 0,

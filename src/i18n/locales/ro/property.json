@@ -28,6 +28,7 @@
   "minPrice": "Preț Minim",
   "maxPrice": "Preț Maxim",
   "pricePerSqm": "Preț pe mp",
+  "byNegotiation": "Preț negociabil",
   "types": {
     "apartment": "Apartament",
     "house": "Casă",

@@ -28,6 +28,7 @@
   "minPrice": "Минимална цена",
   "maxPrice": "Максимална цена",
   "pricePerSqm": "Цена на кв.м",
+  "byNegotiation": "По договаряне",
   "types": {
     "apartment": "Апартамент",
     "house": "Къща",

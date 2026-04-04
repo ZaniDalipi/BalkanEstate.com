@@ -367,6 +367,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error: any) {
+    authLogger.error('Signup error:', error);
 
     // Handle MongoDB duplicate key errors with generic messages
     // to prevent enumeration of existing emails/licenses
@@ -535,6 +536,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       user: buildSafeUserResponse(user),
     });
   } catch (error: any) {
+    authLogger.error('Login error:', error);
     res.status(500).json({ message: 'An error occurred during login' });
   }
 };
@@ -987,6 +989,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error: any) {
+    authLogger.error('Get me error:', error);
     res.status(500).json({ message: 'Error fetching user' });
   }
 };
@@ -1076,6 +1079,7 @@ export const updateProfile = async (
       },
     });
   } catch (error: any) {
+    authLogger.error('Update profile error:', error);
     res.status(500).json({ message: 'Error updating profile' });
   }
 };
@@ -1128,6 +1132,7 @@ export const setPublicKey = async (req: Request, res: Response): Promise<void> =
       message: 'Public key set successfully',
     });
   } catch (error: any) {
+    authLogger.error('Set public key error:', error);
     res.status(500).json({ message: 'Error setting public key' });
   }
 };
@@ -1470,6 +1475,7 @@ export const switchRole = async (req: Request, res: Response): Promise<void> => 
       },
     });
   } catch (error: any) {
+    authLogger.error('Switch role error:', error);
     res.status(500).json({ message: 'Error switching role' });
   }
 };
@@ -1539,6 +1545,7 @@ export const requestPasswordReset = async (
       message: successMessage,
     });
   } catch (error: any) {
+    authLogger.error('Forgot password error:', error);
     res.status(500).json({ message: 'Error processing request' });
   }
 };
@@ -1648,6 +1655,7 @@ export const resetPassword = async (
       },
     });
   } catch (error: any) {
+    authLogger.error('Reset password error:', error);
     res.status(500).json({ message: 'Error resetting password' });
   }
 };
@@ -1738,6 +1746,7 @@ export const uploadAvatar = async (
       }
     });
   } catch (error: any) {
+    authLogger.error('Upload avatar error:', error);
     res.status(500).json({ message: 'Error uploading avatar' });
   }
 };
@@ -1815,6 +1824,7 @@ export const saveAvatarOptions = async (req: Request, res: Response): Promise<vo
       }
     });
   } catch (error: any) {
+    authLogger.error('Save avatar options error:', error);
     res.status(500).json({ message: 'Error saving avatar options' });
   }
 };
@@ -1856,6 +1866,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
       // refreshToken is set as httpOnly cookie only - never exposed in response body
     });
   } catch (error: any) {
+    authLogger.error('Refresh token error:', error);
     res.status(500).json({ message: 'Error refreshing token' });
   }
 };
@@ -1914,6 +1925,7 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
       } : undefined,
     });
   } catch (error: any) {
+    authLogger.error('Verify email error:', error);
     res.status(500).json({ success: false, message: 'Error verifying email' });
   }
 };
@@ -1936,6 +1948,7 @@ export const resendVerificationEmail = async (req: Request, res: Response): Prom
     // Always return success to prevent account enumeration
     res.json({ message: result.message });
   } catch (error: any) {
+    authLogger.error('Resend verification email error:', error);
     res.status(500).json({ message: 'Error resending verification email' });
   }
 };
@@ -1966,6 +1979,7 @@ export const enhancedLogout = async (req: Request, res: Response): Promise<void>
 
     res.json({ message: 'Logged out successfully' });
   } catch (error: any) {
+    authLogger.error('Logout error:', error);
     res.status(500).json({ message: 'Error logging out' });
   }
 };
@@ -1990,6 +2004,7 @@ export const logoutAllDevices = async (req: Request, res: Response): Promise<voi
 
     res.json({ message: 'Logged out from all devices successfully' });
   } catch (error: any) {
+    authLogger.error('Logout all devices error:', error);
     res.status(500).json({ message: 'Error logging out' });
   }
 };
@@ -2011,6 +2026,7 @@ export const getActiveSessions = async (req: Request, res: Response): Promise<vo
 
     res.json({ sessions });
   } catch (error: any) {
+    authLogger.error('Fetch sessions error:', error);
     res.status(500).json({ message: 'Error fetching sessions' });
   }
 };
@@ -2063,6 +2079,7 @@ export const getLoginHistory = async (req: Request, res: Response): Promise<void
       total: sanitizedHistory.length,
     });
   } catch (error: any) {
+    authLogger.error('Fetch login history error:', error);
     res.status(500).json({ message: 'Error fetching login history' });
   }
 };
@@ -2097,6 +2114,7 @@ export const verifyPassword = async (req: Request, res: Response): Promise<void>
 
     res.json({ verified: true });
   } catch (error: any) {
+    authLogger.error('Verify password error:', error);
     res.status(500).json({ message: 'Password verification failed' });
   }
 };
@@ -2232,6 +2250,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       message: 'Password changed successfully. You have been logged out of all devices for security.',
     });
   } catch (error: any) {
+    authLogger.error('Change password error:', error);
     res.status(500).json({ message: 'Error changing password' });
   }
 };
@@ -2295,6 +2314,7 @@ export const setPassword = async (req: Request, res: Response): Promise<void> =>
       message: 'Password set successfully. You can now log in with your email and password.',
     });
   } catch (error: any) {
+    authLogger.error('Set password error:', error);
     res.status(500).json({ message: 'Error setting password' });
   }
 };
@@ -2465,6 +2485,7 @@ export const setActiveRole = async (req: Request, res: Response): Promise<void> 
       },
     });
   } catch (error: any) {
+    authLogger.error('Set active role error:', error);
     res.status(500).json({ message: 'Error setting active role' });
   }
 };
@@ -2565,6 +2586,7 @@ export const addRole = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error: any) {
+    authLogger.error('Add role error:', error);
     res.status(500).json({ message: 'Error adding role' });
   }
 };
@@ -2598,6 +2620,7 @@ export const getEmailPreferences = async (req: Request, res: Response): Promise<
 
     res.json({ emailPreferences: preferences });
   } catch (error: any) {
+    authLogger.error('Get email preferences error:', error);
     res.status(500).json({ message: 'Error getting email preferences' });
   }
 };
@@ -2647,6 +2670,7 @@ export const updateEmailPreferences = async (req: Request, res: Response): Promi
       emailPreferences: user.emailPreferences,
     });
   } catch (error: any) {
+    authLogger.error('Update email preferences error:', error);
     res.status(500).json({ message: 'Error updating email preferences' });
   }
 };
@@ -2752,6 +2776,7 @@ export const unsubscribeFromEmails = async (req: Request, res: Response): Promis
       </html>
     `);
   } catch (error: any) {
+    authLogger.error('Unsubscribe error:', error);
     res.status(500).json({ message: 'Error processing unsubscribe request' });
   }
 };

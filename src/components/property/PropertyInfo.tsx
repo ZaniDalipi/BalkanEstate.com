@@ -129,6 +129,18 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
           )}
 
           {(() => {
+            if (property.isNegotiable) {
+              return (
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="inline-flex items-center gap-2 bg-amber-50 text-amber-700 text-lg sm:text-xl lg:text-2xl font-bold px-4 py-2 rounded-xl border border-amber-200">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    {t('property:byNegotiation', 'By Negotiation')}
+                  </span>
+                </div>
+              );
+            }
             const priceInfo = getPriceReductionInfo(property);
             return (
               <div className="flex flex-wrap items-baseline gap-2">

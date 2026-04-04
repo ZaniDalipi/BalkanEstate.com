@@ -63,6 +63,7 @@ export class PropertyMapper {
       promotionStartDate: dto.promotionStartDate,
       promotionEndDate: dto.promotionEndDate,
       hasUrgentBadge: dto.hasUrgentBadge,
+      isNegotiable: dto.isNegotiable,
     });
   }
 

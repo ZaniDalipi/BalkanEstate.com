@@ -271,6 +271,9 @@ const PROPERTY_TYPE_COLORS: Record<
  * Adds rental period suffix for rental properties
  */
 const formatMarkerPrice = (property: Property): string => {
+  if (property.isNegotiable) {
+    return 'Negotiable';
+  }
   const price = property.price;
   let formatted: string;
   if (price >= 1000000) {

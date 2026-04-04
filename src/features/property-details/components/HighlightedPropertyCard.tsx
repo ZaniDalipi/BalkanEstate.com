@@ -314,14 +314,25 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
         {/* Price & Type Row - iOS style */}
         <div className="flex items-center justify-between gap-2 mb-2">
           <div>
-            <span className="text-primary text-base md:text-lg font-bold tracking-tight">
-              {formatPrice(property.price, property.country)}
-              {isRental && <span className="text-xs font-normal text-neutral-400">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
-            </span>
-            {property.sqft > 0 && property.propertyType !== 'land' && (
-              <p className="text-[11px] text-neutral-400 font-medium">
-                {formatPrice(Math.round(property.price / property.sqft), property.country)} per m²
-              </p>
+            {property.isNegotiable ? (
+              <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-xs md:text-sm font-semibold px-2 py-1 rounded-full border border-amber-200">
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                {t('property:byNegotiation', 'By Negotiation')}
+              </span>
+            ) : (
+              <>
+                <span className="text-primary text-base md:text-lg font-bold tracking-tight">
+                  {formatPrice(property.price, property.country)}
+                  {isRental && <span className="text-xs font-normal text-neutral-400">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
+                </span>
+                {property.sqft > 0 && property.propertyType !== 'land' && (
+                  <p className="text-[11px] text-neutral-400 font-medium">
+                    {formatPrice(Math.round(property.price / property.sqft), property.country)} per m²
+                  </p>
+                )}
+              </>
             )}
           </div>
           <span className="bg-neutral-100 text-neutral-600 text-[11px] font-medium px-2.5 py-[3px] rounded-full">

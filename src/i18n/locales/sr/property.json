@@ -28,6 +28,7 @@
   "minPrice": "Мин Цена",
   "maxPrice": "Макс Цена",
   "pricePerSqm": "Цена по m²",
+  "byNegotiation": "По договору",
   "types": {
     "apartment": "Стан",
     "house": "Кућа",
