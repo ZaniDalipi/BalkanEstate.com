@@ -362,7 +362,7 @@ if (frontendDistExists) {
 
   // SPA catch-all: serve index.html for any non-API route so that client-side
   // routing (React Router / custom routing in App.tsx) works on direct URL access.
-  app.get('*', (_req: Request, res: Response) => {
+  app.get('{*path}', (_req: Request, res: Response) => {
     res.sendFile(path.join(frontendDist, 'index.html'));
   });
 } else {
