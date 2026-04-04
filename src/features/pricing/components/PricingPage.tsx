@@ -407,8 +407,8 @@ const PricingPage: React.FC = () => {
                 <div className="w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center mb-4">
                   <ShieldCheckIcon className="w-7 h-7 text-green-600" />
                 </div>
-                <h4 className="font-bold text-gray-900">{t('pricing:benefits.moneyBack', '30-Day Money Back')}</h4>
-                <p className="text-sm text-gray-600 mt-1">{t('pricing:benefits.moneyBackDesc', 'Full refund if not satisfied')}</p>
+                <h4 className="font-bold text-gray-900">{t('pricing:benefits.moneyBack', 'Money-Back Guarantee')}</h4>
+                <p className="text-sm text-gray-600 mt-1">{t('pricing:benefits.moneyBackDesc', '7 days for monthly, 30 days for yearly')}</p>
               </Animated>
               <Animated variant="fadeInUp" delay={100} className="flex flex-col items-center text-center p-6 rounded-2xl bg-white/50 backdrop-blur-sm border border-gray-100 hover-lift">
                 <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mb-4">

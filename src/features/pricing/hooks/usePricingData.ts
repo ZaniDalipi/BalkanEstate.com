@@ -111,11 +111,10 @@ export function useProducts(role: string) {
   return useQuery({
     queryKey: ['products', role],
     queryFn: () => fetchProducts(role),
-    staleTime: 5 * 1000, // Consider data fresh for 5 seconds
-    gcTime: 60 * 1000, // Keep in cache for 1 minute
-    refetchOnWindowFocus: true, // Refetch when user returns to tab
-    refetchOnReconnect: true, // Refetch when connection is restored
-    refetchInterval: 10 * 1000, // Poll every 10 seconds for near-instant updates
+    staleTime: 5 * 60 * 1000, // 5 minutes — products rarely change mid-session
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
     retry: 3,
   });
 }
@@ -127,11 +126,10 @@ export function usePromotionPlans() {
   return useQuery({
     queryKey: ['promotionPlans'],
     queryFn: fetchPromotionPlans,
-    staleTime: 5 * 1000, // Consider data fresh for 5 seconds
-    gcTime: 60 * 1000, // Keep in cache for 1 minute
-    refetchOnWindowFocus: true,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
     refetchOnReconnect: true,
-    refetchInterval: 10 * 1000, // Poll every 10 seconds for near-instant updates
     retry: 3,
   });
 }

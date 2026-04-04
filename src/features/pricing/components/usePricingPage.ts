@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
@@ -76,6 +76,7 @@ export function usePricingPage() {
 
   // Convert error to string for display
   const error = productsError ? t('pricing:error.loadFailed', 'Failed to load pricing plans') : null;
+
 
   // Sales team contact info - imported from shared config
   const salesEmail = CONTACT_CONFIG.email.sales;
@@ -165,6 +166,16 @@ export function usePricingPage() {
   const getCurrentSellerPlanLevel = (): number => {
     const user = state.currentUser;
     if (!user) return 0;
+
+    // Treat canceled/expired as no active plan — allows re-enrollment even if
+    // user.subscription.status still says 'active' (pending cancellation window)
+    if (user.subscriptionStatus === 'canceled' || user.subscriptionStatus === 'expired') return 0;
+
+    // Safety net: if the billing period has passed but the status field is stale
+    // (worker hasn't run yet), treat the subscription as expired.
+    // Exclude grace period — user still has access despite the date being past.
+    const expiresAt = user.subscription?.expiresAt || user.subscriptionExpiresAt;
+    if (expiresAt && new Date(expiresAt) < new Date() && user.subscriptionStatus !== 'grace') return 0;
 
     const isActive =
       user.subscriptionStatus === 'active' ||
@@ -528,6 +539,13 @@ export function usePricingPage() {
   const isActivePlan = (productId: string): boolean => {
     const user = state.currentUser;
     if (!user) return false;
+
+    // Canceled/expired subscriptions are not active — show re-subscribe option
+    if (user.subscriptionStatus === 'canceled' || user.subscriptionStatus === 'expired') return false;
+
+    // Safety net: stale status — check expiry date directly (exclude grace period)
+    const expiresAt = user.subscription?.expiresAt || user.subscriptionExpiresAt;
+    if (expiresAt && new Date(expiresAt) < new Date() && user.subscriptionStatus !== 'grace') return false;
 
     const isActive =
       user.subscriptionStatus === 'active' ||

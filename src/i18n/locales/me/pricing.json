@@ -115,8 +115,8 @@
     "off": "{{percent}}% POPUSTA"
   },
   "benefits": {
-    "moneyBack": "30 dana garancije povrata novca",
-    "moneyBackDesc": "Puni povrat novca ako nijeste zadovoljni",
+    "moneyBack": "Garancija povrata novca",
+    "moneyBackDesc": "7 dana za mjesečnu, 30 dana za godišnju",
     "moreViews": "3x više pregleda",
     "moreViewsDesc": "Premium oglasi dobijaju veću vidljivost",
     "instantActivation": "Trenutna aktivacija",

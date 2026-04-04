@@ -115,8 +115,8 @@
     "off": "{{percent}}% OFF"
   },
   "benefits": {
-    "moneyBack": "30-Day Money Back",
-    "moneyBackDesc": "Full refund if not satisfied",
+    "moneyBack": "Money-Back Guarantee",
+    "moneyBackDesc": "7 days for monthly, 30 days for yearly",
     "moreViews": "3x More Views",
     "moreViewsDesc": "Premium listings get more exposure",
     "instantActivation": "Instant Activation",

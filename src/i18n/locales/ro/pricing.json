@@ -115,8 +115,8 @@
     "off": "{{percent}}% REDUCERE"
   },
   "benefits": {
-    "moneyBack": "Garanție de returnare a banilor în 30 de zile",
-    "moneyBackDesc": "Rambursare completă dacă nu sunteți mulțumit",
+    "moneyBack": "Garanția de returnare a banilor",
+    "moneyBackDesc": "7 zile pentru lunar, 30 zile pentru anual",
     "moreViews": "De 3 ori mai multe vizualizări",
     "moreViewsDesc": "Anunțurile premium au mai multă expunere",
     "instantActivation": "Activare instantanee",
