@@ -140,7 +140,7 @@ const SwipeCard: React.FC<{
         if (!isTop || images.length <= 1) return;
         const interval = setInterval(() => {
             setCurrentImgIdx(prev => (prev + 1) % images.length);
-        }, 1200);
+        }, 2500);
         return () => clearInterval(interval);
     }, [isTop, images.length]);
 
@@ -203,7 +203,7 @@ const SwipeCard: React.FC<{
                     draggable={false}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ duration: 0.4 }}
+                    transition={{ duration: 0.8 }}
                 />
             </AnimatePresence>
 
@@ -574,10 +574,13 @@ const EmptyState: React.FC<{ onSelect: (text: string) => void; onMicClick: () =>
 // ============================================================================
 // HELPERS
 // ============================================================================
+// Strip diacritics so "Tirana" matches "Tiranë", "Durrës" matches "Durres", etc.
+const normalize = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
 function filterPropertiesByQuery(properties: Property[], query: AiSearchQuery): Property[] {
     return properties.filter(p => {
-        if (query.country && !p.country?.toLowerCase().includes(query.country.toLowerCase())) return false;
-        if (query.location && !p.city?.toLowerCase().includes(query.location.toLowerCase()) && !(p.address || '').toLowerCase().includes(query.location.toLowerCase())) return false;
+        if (query.country && !normalize(p.country || '').includes(normalize(query.country))) return false;
+        if (query.location && !normalize(p.city || '').includes(normalize(query.location)) && !normalize(p.address || '').includes(normalize(query.location))) return false;
         if (query.minPrice && p.price < query.minPrice) return false;
         if (query.maxPrice && p.price > query.maxPrice) return false;
         if (query.beds && p.beds < query.beds) return false;
@@ -618,10 +621,22 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
         setVoiceSupported(!!SR);
     }, []);
 
+    // Auto-apply filters to trigger backend search when AI produces a final query.
+    // This ensures the property list (and map) updates to the correct location
+    // even when the currently loaded properties don't include that area.
+    const appliedQueryRef = useRef<AiSearchQuery | null>(null);
+    useEffect(() => {
+        if (finalQuery && finalQuery !== appliedQueryRef.current) {
+            appliedQueryRef.current = finalQuery;
+            onApplyFilters(finalQuery);
+        }
+    }, [finalQuery]); // eslint-disable-line react-hooks/exhaustive-deps
+
     const matchedProperties = useMemo(() => {
         if (!finalQuery) return [];
         const filtered = filterPropertiesByQuery(properties, finalQuery);
-        // If no local matches (map might show different area), show all available properties
+        // Use filtered results if any match; otherwise show currently loaded
+        // properties (the auto-apply above refreshes them for the right area).
         return (filtered.length > 0 ? filtered : properties).slice(0, 15);
     }, [finalQuery, properties]);
 
