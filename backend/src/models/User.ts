@@ -65,6 +65,7 @@ export interface IUser extends Document {
   totalPaid?: number; // Track lifetime payment value
   subscriptionStatus?: 'active' | 'expired' | 'trial' | 'grace' | 'canceled';
   subscriptionRenewalDate?: Date;
+  expiredModalDismissCount?: number;
   subscriptionMetadata?: {
     payseraOrderId?: string;
   };
@@ -476,6 +477,13 @@ const UserSchema: Schema = new Schema(
     },
     subscriptionRenewalDate: {
       type: Date,
+    },
+    // How many times the "subscription expired" modal has been shown in the UI.
+    // Incremented server-side when the user dismisses it. Reset to 0 on resubscription.
+    // Schedule: 0→show at Day 0, 1→show at Day 3+, 2→show at Day 7+, 3→never again.
+    expiredModalDismissCount: {
+      type: Number,
+      default: 0,
     },
     // Payment provider metadata (Paysera)
     subscriptionMetadata: {

@@ -743,7 +743,6 @@ const MainLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Subscription expiry modals
-  const userId = state.currentUser?.id || state.currentUser?._id || state.currentUser?.email || '';
   const {
     expiryInfo,
     refetch: refetchExpiry,
@@ -751,7 +750,7 @@ const MainLayout: React.FC = () => {
     dismissExpiredModal,
     dismissExpiredModalFinal,
     clearExpiredModal,
-  } = useSubscriptionExpiry(state.isAuthenticated, userId);
+  } = useSubscriptionExpiry(state.isAuthenticated);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {

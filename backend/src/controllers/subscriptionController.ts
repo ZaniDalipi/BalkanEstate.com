@@ -108,6 +108,7 @@ export const createSubscription = async (req: Request, res: Response): Promise<v
     user.isSubscribed = true;
     user.subscriptionPlan = product.productId;
     user.subscriptionExpiresAt = expirationDate;
+    user.expiredModalDismissCount = 0; // Reset so modal won't show after reactivation
 
     // Initialize unified Pro subscription (20 active listings shared)
     user.proSubscription = {
@@ -712,6 +713,7 @@ export const activateTestProSubscription = async (req: Request, res: Response): 
     // Update legacy fields
     user.isSubscribed = true;
     user.subscriptionPlan = 'test_pro_subscription';
+    user.expiredModalDismissCount = 0; // Reset so modal won't show after reactivation
     user.subscriptionProductName = `Test Pro ${plan === 'pro_monthly' ? 'Monthly' : 'Yearly'}`;
     user.subscriptionExpiresAt = expirationDate;
     user.subscriptionStartedAt = startDate;
@@ -798,6 +800,7 @@ export const syncProSubscription = async (req: Request, res: Response): Promise<
       user.isSubscribed = true;
       user.subscriptionPlan = activeSubscription.productId;
       user.subscriptionExpiresAt = activeSubscription.expirationDate;
+      user.expiredModalDismissCount = 0; // Reset so modal won't show after reactivation
 
       await user.save();
 
@@ -843,10 +846,13 @@ export const getExpiryCheck = async (req: Request, res: Response): Promise<void>
     const fiveHoursFromNow = new Date(now.getTime() + 5 * 60 * 60 * 1000);
 
     // Find the most recent non-free subscription (active or recently expired)
-    const subscription = await Subscription.findOne({
-      userId,
-      status: { $in: ['active', 'grace', 'trial', 'pending_cancellation', 'expired'] },
-    }).sort({ expirationDate: -1 });
+    const [subscription, user] = await Promise.all([
+      Subscription.findOne({
+        userId,
+        status: { $in: ['active', 'grace', 'trial', 'pending_cancellation', 'expired'] },
+      }).sort({ expirationDate: -1 }),
+      User.findById(userId).select('expiredModalDismissCount'),
+    ]);
 
     if (!subscription) {
       res.status(200).json({ hasSubscription: false });
@@ -867,9 +873,45 @@ export const getExpiryCheck = async (req: Request, res: Response): Promise<void>
       expirationDate: expirationDate.toISOString(),
       productId: subscription.productId,
       status: subscription.status,
+      expiredModalDismissCount: user?.expiredModalDismissCount ?? 0,
     });
   } catch (error: any) {
     subscriptionLogger.error('Error checking subscription expiry:', error);
     res.status(500).json({ message: 'Error checking subscription expiry' });
+  }
+};
+
+/**
+ * @desc    Increment the expired-modal dismiss counter for the current user.
+ *          Called when the user clicks "Maybe later", "No thanks", or "Reactivate Plan"
+ *          without completing payment. Capped at 3 (never show again).
+ * @route   PATCH /api/subscriptions/dismiss-expired-modal
+ * @access  Private
+ */
+export const dismissExpiredModal = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user?._id;
+    if (!userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
+
+    const user = await User.findById(userId).select('expiredModalDismissCount');
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const current = user.expiredModalDismissCount ?? 0;
+    // Cap at 3 — once at 3 the modal is permanently suppressed
+    if (current < 3) {
+      user.expiredModalDismissCount = current + 1;
+      await user.save();
+    }
+
+    res.status(200).json({ expiredModalDismissCount: user.expiredModalDismissCount });
+  } catch (error: any) {
+    subscriptionLogger.error('Error dismissing expired modal:', error);
+    res.status(500).json({ message: 'Error dismissing expired modal' });
   }
 };
