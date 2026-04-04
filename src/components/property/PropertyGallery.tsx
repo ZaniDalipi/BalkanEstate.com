@@ -11,7 +11,7 @@ import {
   BuildingOfficeIcon,
 } from '../../../constants';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
-import { optimizeCloudinaryUrl, cloudinarySrcSet } from '../../../config/cloudinaryConfig';
+import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
 
 interface PropertyGalleryProps {
   property: Property;
@@ -90,6 +90,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   }, [onImageIndexChange, controlledIndex, internalIndex]);
 
   const [mainImageError, setMainImageError] = useState(false);
+  const [mainImageLoaded, setMainImageLoaded] = useState(false);
   const [viewMode, setViewMode] = useState<'photos' | 'streetview' | 'video'>('photos');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
@@ -276,10 +277,25 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   const currentImageUrl = imagesForCurrentCategory[currentImageIndex]?.url || property.imageUrl;
 
-  // Reset error state when image changes
+  // Reset error/loaded state when image changes
   useEffect(() => {
     setMainImageError(false);
+    setMainImageLoaded(false);
   }, [currentImageUrl]);
+
+  // Preload adjacent images so navigation feels instant
+  useEffect(() => {
+    if (imagesForCurrentCategory.length <= 1) return;
+    const prevIndex = (currentImageIndex - 1 + imagesForCurrentCategory.length) % imagesForCurrentCategory.length;
+    const nextIndex = (currentImageIndex + 1) % imagesForCurrentCategory.length;
+    [prevIndex, nextIndex].forEach((idx) => {
+      const url = imagesForCurrentCategory[idx]?.url;
+      if (url) {
+        const img = new Image();
+        img.src = optimizeCloudinaryUrl(url, { width: 1200, quality: 'auto' });
+      }
+    });
+  }, [currentImageIndex, imagesForCurrentCategory]);
 
   const handleCategorySelect = useCallback((tag: PropertyImageTag | 'all') => {
     setActiveCategory(tag);
@@ -340,14 +356,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               </div>
             ) : (
               <>
-                {/* Blurred background image to fill black bars */}
+                {/* LQIP blur-up placeholder – visible until the sharp image loads */}
                 <img
-                  src={optimizeCloudinaryUrl(currentImageUrl, { width: 200, quality: 30 })}
+                  src={getPropertyImagePlaceholder(currentImageUrl) || optimizeCloudinaryUrl(currentImageUrl, { width: 40, quality: 'auto:eco' })}
                   alt=""
                   aria-hidden="true"
                   className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-60"
                 />
-                {/* Main sharp image */}
+                {/* Main sharp image – fades in once loaded */}
                 <img
                   key={currentImageUrl}
                   src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
@@ -356,7 +372,12 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} for ${property.listingType === 'rent' ? 'rent' : 'sale'} in ${property.city}, ${property.country} - ${property.address}`}
                   width={1200}
                   height={800}
-                  className="relative max-w-full max-h-full object-contain animate-image-fade"
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
+                  fetchpriority="high"
+                  decoding="async"
+                  className={`relative max-w-full max-h-full object-contain transition-opacity duration-300 ${mainImageLoaded ? 'opacity-100 animate-image-fade' : 'opacity-0'}`}
+                  onLoad={() => setMainImageLoaded(true)}
                   onError={() => setMainImageError(true)}
                 />
               </>

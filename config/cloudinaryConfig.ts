@@ -85,6 +85,21 @@ export const getCityImageUrl = (
 };
 
 /**
+ * Generates a low-quality placeholder URL for property images (blur-up / LQIP effect).
+ * Returns a tiny (20px wide), heavily blurred version of the image for use as a
+ * placeholder while the full-resolution image loads.
+ *
+ * @param imageUrl - A Cloudinary upload URL (e.g. https://res.cloudinary.com/.../upload/v123/...)
+ * @returns Optimized placeholder URL, or empty string for non-Cloudinary URLs
+ */
+export const getPropertyImagePlaceholder = (imageUrl: string | undefined): string => {
+  if (!imageUrl) return '';
+  const uploadMatch = imageUrl.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(v\d+\/.+)$/);
+  if (!uploadMatch) return '';
+  return `${uploadMatch[1]}w_20,c_fill,q_10,e_blur:500,f_auto/${uploadMatch[2]}`;
+};
+
+/**
  * Generates a low-quality placeholder URL for blur-up effect
  * @param cityName - The city name
  * @param country - The country name (optional)
