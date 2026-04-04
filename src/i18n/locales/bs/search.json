@@ -62,7 +62,8 @@
     "floorNumber": "Broj sprata",
     "advancedFilters": "Napredni filteri",
     "moreFilters": "Više filtera",
-    "lessFilters": "Manje filtera"
+    "lessFilters": "Manje filtera",
+    "byNegotiation": "Po dogovoru"
   },
   "options": {
     "any": "Bilo koji",
@@ -153,6 +154,7 @@
     "bathsDesc": "Najviše kupatila",
     "featured": "Istaknuto prvo",
     "priceReduced": "Nedavno sniženo",
+    "byNegotiation": "Po dogovoru",
     "pricePerSqm": "Cijena po m²",
     "yearBuiltDesc": "Newest Built",
     "yearBuiltAsc": "Oldest Built"
@@ -388,6 +390,7 @@
   "quickFilters": {
     "newListings": "Novi oglasi",
     "priceReduced": "Snižena cijena",
+    "byNegotiation": "Po dogovoru",
     "openHouse": "Otvorena vrata",
     "virtualTour": "Virtuelna tura dostupna",
     "petFriendly": "Prijateljski prema kućnim ljubimcima",

@@ -95,6 +95,11 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
                 : !(p.originalPrice !== undefined && p.originalPrice < p.price))
             : true;
 
+        // Negotiable pricing filter
+        const isNegotiableMatch = (filters as any).isNegotiable !== null && (filters as any).isNegotiable !== undefined ?
+            ((filters as any).isNegotiable === true ? p.isNegotiable === true : p.isNegotiable !== true)
+            : true;
+
         // Price per sqm filters
         const pricePerSqm = p.sqft > 0 ? p.price / p.sqft : 0;
         const minPricePerSqmMatch = filters.minPricePerSqm !== null ? (p.sqft > 0 && pricePerSqm >= filters.minPricePerSqm) : true;
@@ -162,6 +167,7 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
                has360TourMatch &&
                hasDiscountMatch &&
                hasPriceIncreaseMatch &&
+               isNegotiableMatch &&
                minFloorNumberMatch &&
                maxFloorNumberMatch &&
                maxDistanceToCenterMatch &&

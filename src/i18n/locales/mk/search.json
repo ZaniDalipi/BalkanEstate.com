@@ -62,7 +62,8 @@
     "floorNumber": "Број на Кат",
     "advancedFilters": "Напредни Филтри",
     "moreFilters": "Повеќе Филтри",
-    "lessFilters": "Помалку Филтри"
+    "lessFilters": "Помалку Филтри",
+    "byNegotiation": "По договор"
   },
   "options": {
     "any": "Било кој",
@@ -153,6 +154,7 @@
     "bathsDesc": "Најмногу Бањи",
     "featured": "Истакнати Прво",
     "priceReduced": "Неодамна Намалени",
+    "byNegotiation": "По договор",
     "pricePerSqm": "Цена по м²",
     "yearBuiltDesc": "Newest Built",
     "yearBuiltAsc": "Oldest Built"
@@ -388,6 +390,7 @@
   "quickFilters": {
     "newListings": "Нови Огласи",
     "priceReduced": "Намалена Цена",
+    "byNegotiation": "По договор",
     "openHouse": "Отворен Ден",
     "virtualTour": "Виртуелна Тура Достапна",
     "petFriendly": "Пријателски кон Домашни Миленици",

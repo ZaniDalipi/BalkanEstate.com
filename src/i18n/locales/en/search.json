@@ -77,7 +77,8 @@
     "floorNumber": "Floor Number",
     "advancedFilters": "Advanced Filters",
     "moreFilters": "More Filters",
-    "lessFilters": "Less Filters"
+    "lessFilters": "Less Filters",
+    "byNegotiation": "By Negotiation"
   },
   "options": {
     "any": "Any",
@@ -168,6 +169,7 @@
     "bathsDesc": "Most Bathrooms",
     "featured": "Featured First",
     "priceReduced": "Recently Reduced",
+    "byNegotiation": "By Negotiation",
     "pricePerSqm": "Price per m²",
     "yearBuiltDesc": "Newest Built",
     "yearBuiltAsc": "Oldest Built"

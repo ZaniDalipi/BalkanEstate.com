@@ -62,7 +62,8 @@
     "advancedFilters": "Разширени филтри",
     "moreFilters": "Още филтри",
     "lessFilters": "По-малко филтри",
-    "anyCountry": "Any Country"
+    "anyCountry": "Any Country",
+    "byNegotiation": "По договаряне"
   },
   "options": {
     "any": "Всички",
@@ -153,6 +154,7 @@
     "bathsDesc": "Най-много бани",
     "featured": "Препоръчани първо",
     "priceReduced": "Наскоро намалени",
+    "byNegotiation": "По договаряне",
     "pricePerSqm": "Цена на м²",
     "yearBuiltDesc": "Newest Built",
     "yearBuiltAsc": "Oldest Built"
@@ -388,6 +390,7 @@
   "quickFilters": {
     "newListings": "Нови обяви",
     "priceReduced": "Намалена цена",
+    "byNegotiation": "По договаряне",
     "openHouse": "Дни на отворени врати",
     "virtualTour": "Виртуална обиколка",
     "petFriendly": "Позволени домашни любимци",

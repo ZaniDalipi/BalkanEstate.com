@@ -167,6 +167,11 @@ export const getProperties = async (
       filter.$expr = { ...filter.$expr, $lt: ['$originalPrice', '$price'] };
     }
 
+    // Filter by negotiable pricing
+    if (req.query.isNegotiable === 'true') {
+      filter.isNegotiable = true;
+    }
+
     // Filter by price per sqm range (computed field: price / sqft)
     if (req.query.minPricePerSqm || req.query.maxPricePerSqm) {
       const pricePerSqmConditions: any[] = [];

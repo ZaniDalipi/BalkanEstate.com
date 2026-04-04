@@ -30,6 +30,8 @@ export class PropertyApiClient {
         params.append('hasDiscount', 'true');
       if (filters.hasPriceIncrease === true)
         params.append('hasPriceIncrease', 'true');
+      if (filters.isNegotiable === true)
+        params.append('isNegotiable', 'true');
     }
 
     const queryString = params.toString();

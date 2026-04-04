@@ -335,6 +335,22 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                 </button>
             </div>
 
+            {/* By Negotiation Filter */}
+            <button
+                type="button"
+                onClick={() => onFilterChange('isNegotiable', filters.isNegotiable === true ? null : true)}
+                className={`w-full py-2 px-3 rounded-lg text-xs font-medium border transition-colors flex items-center justify-center gap-1.5 ${
+                    filters.isNegotiable === true
+                        ? 'bg-amber-50 border-amber-300 text-amber-700'
+                        : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50'
+                }`}
+            >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                {t('search:filters.byNegotiation', 'By Negotiation')}
+            </button>
+
             <div className="border-t border-neutral-200 pt-4">
                 <button type="button" onClick={() => setIsAdvancedOpen(!isAdvancedOpen)} className="w-full flex justify-between items-center text-left">
                     <h3 className="text-sm font-semibold text-neutral-800">{t('search:filters.advancedFilters')}</h3>

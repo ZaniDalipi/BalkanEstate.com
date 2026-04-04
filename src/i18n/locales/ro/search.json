@@ -62,7 +62,8 @@
     "advancedFilters": "Filtre Avansate",
     "moreFilters": "Mai Multe Filtre",
     "lessFilters": "Mai Puține Filtre",
-    "anyCountry": "Any Country"
+    "anyCountry": "Any Country",
+    "byNegotiation": "Preț negociabil"
   },
   "options": {
     "any": "Oricare",
@@ -153,6 +154,7 @@
     "bathsDesc": "Cele Mai Multe Băi",
     "featured": "Recomandate Întâi",
     "priceReduced": "Preț Redus Recent",
+    "byNegotiation": "Preț negociabil",
     "pricePerSqm": "Preț pe m²",
     "yearBuiltDesc": "Newest Built",
     "yearBuiltAsc": "Oldest Built"
@@ -388,6 +390,7 @@
   "quickFilters": {
     "newListings": "Anunțuri Noi",
     "priceReduced": "Preț Redus",
+    "byNegotiation": "Preț negociabil",
     "openHouse": "Zi Deschisă",
     "virtualTour": "Tur Virtual Disponibil",
     "petFriendly": "Animale Permise",

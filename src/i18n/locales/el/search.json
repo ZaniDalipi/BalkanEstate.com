@@ -62,7 +62,8 @@
     "advancedFilters": "Προχωρημένα Φίλτρα",
     "moreFilters": "Περισσότερα Φίλτρα",
     "lessFilters": "Λιγότερα Φίλτρα",
-    "anyCountry": "Any Country"
+    "anyCountry": "Any Country",
+    "byNegotiation": "Κατόπιν Διαπραγμάτευσης"
   },
   "options": {
     "any": "Οποιοδήποτε",
@@ -153,6 +154,7 @@
     "bathsDesc": "Περισσότερα Μπάνια",
     "featured": "Προτεινόμενα Πρώτα",
     "priceReduced": "Πρόσφατη Μείωση Τιμής",
+    "byNegotiation": "Κατόπιν Διαπραγμάτευσης",
     "pricePerSqm": "Τιμή ανά m²",
     "yearBuiltDesc": "Newest Built",
     "yearBuiltAsc": "Oldest Built"
@@ -388,6 +390,7 @@
   "quickFilters": {
     "newListings": "Νέες Αγγελίες",
     "priceReduced": "Μειωμένη Τιμή",
+    "byNegotiation": "Κατόπιν Διαπραγμάτευσης",
     "openHouse": "Ημέρα Επίσκεψης",
     "virtualTour": "Διαθέσιμη Εικονική Περιήγηση",
     "petFriendly": "Φιλικό προς Κατοικίδια",

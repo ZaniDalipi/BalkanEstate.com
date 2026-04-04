@@ -62,7 +62,8 @@
     "floorNumber": "Broj Sprata",
     "advancedFilters": "Napredni Filteri",
     "moreFilters": "Više Filtera",
-    "lessFilters": "Manje Filtera"
+    "lessFilters": "Manje Filtera",
+    "byNegotiation": "Po dogovoru"
   },
   "options": {
     "any": "Bilo Koji",
@@ -153,6 +154,7 @@
     "bathsDesc": "Najviše Kupatila",
     "featured": "Istaknuto Prvo",
     "priceReduced": "Nedavno Sniženo",
+    "byNegotiation": "Po dogovoru",
     "pricePerSqm": "Cijena po m²",
     "yearBuiltDesc": "Najnovije Izgrađeno",
     "yearBuiltAsc": "Najstarije Izgrađeno"
@@ -388,6 +390,7 @@
   "quickFilters": {
     "newListings": "Novi Oglasi",
     "priceReduced": "Snižena Cijena",
+    "byNegotiation": "Po dogovoru",
     "openHouse": "Otvorena Vrata",
     "virtualTour": "Virtuelna Tura Dostupna",
     "petFriendly": "Prijateljski Prema Kućnim Ljubimcima",

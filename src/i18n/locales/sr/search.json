@@ -62,7 +62,8 @@
     "floorNumber": "Спрат",
     "advancedFilters": "Напредни Филтери",
     "moreFilters": "Више Филтера",
-    "lessFilters": "Мање Филтера"
+    "lessFilters": "Мање Филтера",
+    "byNegotiation": "По договору"
   },
   "options": {
     "any": "Било који",
@@ -153,6 +154,7 @@
     "bathsDesc": "Највише Купатила",
     "featured": "Истакнуто Прво",
     "priceReduced": "Недавно Снижено",
+    "byNegotiation": "По договору",
     "pricePerSqm": "Цена по m²",
     "yearBuiltDesc": "Newest Built",
     "yearBuiltAsc": "Oldest Built"
@@ -388,6 +390,7 @@
   "quickFilters": {
     "newListings": "Нови Огласи",
     "priceReduced": "Снижена Цена",
+    "byNegotiation": "По договору",
     "openHouse": "Отворена Врата",
     "virtualTour": "Виртуелна Тура Доступна",
     "petFriendly": "Прихватљиво за Кућне Љубимце",

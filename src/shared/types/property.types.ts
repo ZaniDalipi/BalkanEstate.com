@@ -204,6 +204,7 @@ export interface Filters {
   has360Tour: boolean | null;
   hasDiscount: boolean | null;
   hasPriceIncrease: boolean | null;
+  isNegotiable: boolean | null;
   minPricePerSqm: number | null;
   maxPricePerSqm: number | null;
   maxDaysListed: number | null;
@@ -248,6 +249,7 @@ export const initialFilters: Filters = {
   has360Tour: null,
   hasDiscount: null,
   hasPriceIncrease: null,
+  isNegotiable: null,
   minPricePerSqm: null,
   maxPricePerSqm: null,
   maxDaysListed: null,

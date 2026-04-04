@@ -683,6 +683,7 @@ export const getProperties = async (filters?: Filters, options?: { limit?: numbe
     if (filters.sellerType && filters.sellerType !== 'any') params.append('sellerType', filters.sellerType);
     if (filters.propertyType && filters.propertyType !== 'any') params.append('propertyType', filters.propertyType);
     if (filters.listingType && filters.listingType !== 'any') params.append('listingType', filters.listingType);
+    if ((filters as any).isNegotiable === true) params.append('isNegotiable', 'true');
   }
 
   const queryString = params.toString();
