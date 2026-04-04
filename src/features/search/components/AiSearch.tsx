@@ -140,7 +140,7 @@ const SwipeCard: React.FC<{
         if (!isTop || images.length <= 1) return;
         const interval = setInterval(() => {
             setCurrentImgIdx(prev => (prev + 1) % images.length);
-        }, 1200);
+        }, 2500);
         return () => clearInterval(interval);
     }, [isTop, images.length]);
 
@@ -203,7 +203,7 @@ const SwipeCard: React.FC<{
                     draggable={false}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ duration: 0.4 }}
+                    transition={{ duration: 0.8 }}
                 />
             </AnimatePresence>
 
