@@ -93,20 +93,24 @@ export class Property {
     public readonly generatedVideoFormat?: 'vertical' | 'horizontal' | 'square',
     public readonly generatedVideoDuration?: number,
     public readonly hasGeneratedVideo?: boolean,
-    public readonly videoUrl?: string // External embedded video URL
+    public readonly videoUrl?: string, // External embedded video URL
+    public readonly isNegotiable?: boolean // Price is by negotiation
   ) {}
 
   // Business logic methods
 
   get formattedPrice(): string {
+    if (this.isNegotiable) return 'By Negotiation';
     return `€${this.price.toLocaleString()}`;
   }
 
   get pricePerSqft(): number {
+    if (this.isNegotiable || this.sqft === 0) return 0;
     return Math.round(this.price / this.sqft);
   }
 
   get formattedPricePerSqft(): string {
+    if (this.isNegotiable) return '';
     return `€${this.pricePerSqft.toLocaleString()}/sqft`;
   }
 
@@ -356,7 +360,8 @@ export class Property {
       dto.generatedVideoFormat,
       dto.generatedVideoDuration,
       dto.hasGeneratedVideo,
-      dto.videoUrl
+      dto.videoUrl,
+      dto.isNegotiable
     );
   }
 
@@ -426,6 +431,7 @@ export class Property {
       generatedVideoDuration: this.generatedVideoDuration,
       hasGeneratedVideo: this.hasGeneratedVideo,
       videoUrl: this.videoUrl,
+      isNegotiable: this.isNegotiable,
     };
   }
 }
