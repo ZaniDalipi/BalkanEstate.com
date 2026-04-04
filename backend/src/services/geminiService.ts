@@ -1,7 +1,14 @@
 import { GoogleGenAI, Type } from '@google/genai';
 import { apiLogger } from '../utils/logger';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY || '' });
+const ai = new GoogleGenAI({
+  apiKey: process.env.GOOGLE_AI_API_KEY || '',
+  httpOptions: {
+    headers: {
+      'Referer': process.env.FRONTEND_URL || 'https://balkanestateai.com',
+    },
+  },
+});
 
 // ============================================================================
 // Types
