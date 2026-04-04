@@ -574,10 +574,13 @@ const EmptyState: React.FC<{ onSelect: (text: string) => void; onMicClick: () =>
 // ============================================================================
 // HELPERS
 // ============================================================================
+// Strip diacritics so "Tirana" matches "Tiranë", "Durrës" matches "Durres", etc.
+const normalize = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
 function filterPropertiesByQuery(properties: Property[], query: AiSearchQuery): Property[] {
     return properties.filter(p => {
-        if (query.country && !p.country?.toLowerCase().includes(query.country.toLowerCase())) return false;
-        if (query.location && !p.city?.toLowerCase().includes(query.location.toLowerCase()) && !(p.address || '').toLowerCase().includes(query.location.toLowerCase())) return false;
+        if (query.country && !normalize(p.country || '').includes(normalize(query.country))) return false;
+        if (query.location && !normalize(p.city || '').includes(normalize(query.location)) && !normalize(p.address || '').includes(normalize(query.location))) return false;
         if (query.minPrice && p.price < query.minPrice) return false;
         if (query.maxPrice && p.price > query.maxPrice) return false;
         if (query.beds && p.beds < query.beds) return false;
@@ -621,8 +624,12 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
     const matchedProperties = useMemo(() => {
         if (!finalQuery) return [];
         const filtered = filterPropertiesByQuery(properties, finalQuery);
-        // If no local matches (map might show different area), show all available properties
-        return (filtered.length > 0 ? filtered : properties).slice(0, 15);
+        // Only fall back to all properties when no location/country filter was set
+        // (e.g., "show me what you got"). When the user asks for a specific city/country
+        // and nothing matches, return empty so we don't show irrelevant results.
+        const hasLocationFilter = !!(finalQuery.location || finalQuery.country);
+        if (filtered.length > 0) return filtered.slice(0, 15);
+        return hasLocationFilter ? [] : properties.slice(0, 15);
     }, [finalQuery, properties]);
 
     // Auto-show swipe cards when properties are found
