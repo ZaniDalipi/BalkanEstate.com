@@ -64,6 +64,20 @@ async function retryWithBackoff<T>(
   try {
     return await fn();
   } catch (error: any) {
+    // Never retry auth/config errors — they won't resolve on retry
+    const isNonRetryable =
+      error?.status === 400 ||
+      error?.status === 401 ||
+      error?.status === 403 ||
+      error?.message?.includes('API key') ||
+      error?.message?.includes('API_KEY_INVALID') ||
+      error?.message?.includes('PERMISSION_DENIED') ||
+      error?.message?.includes('not found for API version');
+
+    if (isNonRetryable) {
+      throw error;
+    }
+
     // Check if error is retryable (503, network errors, rate limits)
     const isRetryable =
       error?.status === 503 ||

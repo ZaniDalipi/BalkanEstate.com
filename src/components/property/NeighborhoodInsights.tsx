@@ -98,6 +98,8 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
       if (err.statusCode === 429) {
         setError(err.message || 'Rate limit exceeded');
         setUsage({ used: err.details?.used ?? 0, limit: err.details?.limit ?? 0, remaining: 0 });
+      } else if (err.statusCode === 503) {
+        setError(t('neighborhood.serviceUnavailable', 'AI service is temporarily unavailable. Please try again later.'));
       } else if (err instanceof Error) {
         setError(err.message);
       } else {
