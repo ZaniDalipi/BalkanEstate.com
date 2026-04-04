@@ -10,6 +10,13 @@ import {
   PRO_BUYER_LIMITS,
 } from '../config/subscriptionConstants';
 
+/**
+ * Check if the GOOGLE_AI_API_KEY is configured
+ */
+const isApiKeyConfigured = (): boolean => {
+  return !!process.env.GOOGLE_AI_API_KEY;
+};
+
 // Usage limits
 const FREE_USER_MONTHLY_LIMIT = FREE_TIER_LIMITS.AI_INSIGHTS; // Free users get 3 insights per month
 
@@ -20,6 +27,13 @@ const FREE_USER_MONTHLY_LIMIT = FREE_TIER_LIMITS.AI_INSIGHTS; // Free users get 
 export const getNeighborhoodInsights = async (req: Request, res: Response) => {
   try {
     const { lat, lng, address, city, country, language } = req.body;
+
+    // Check if AI service is available
+    if (!isApiKeyConfigured()) {
+      return res.status(503).json({
+        message: 'AI service is temporarily unavailable. Please try again later.',
+      });
+    }
 
     // Validate required fields
     if (!lat || !lng || !address || !city || !country) {
