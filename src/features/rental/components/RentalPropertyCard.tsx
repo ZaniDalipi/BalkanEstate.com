@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { useAppContext } from '@/context/AppContext';
 import { getCurrencySymbol } from '@/utils/currency';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { BuildingOfficeIcon } from '@/constants';
-import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
+import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '@/config/cloudinaryConfig';
 
 interface RentalPropertyCardProps {
     property: Property;
@@ -15,6 +15,7 @@ interface RentalPropertyCardProps {
 const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHover }) => {
     const { t } = useTranslation(['rental', 'common', 'property']);
     const { dispatch } = useAppContext();
+    const [imageLoaded, setImageLoaded] = useState(false);
 
     const handleClick = () => {
         dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
@@ -46,19 +47,34 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
             onMouseLeave={() => onHover?.(null)}
         >
             {/* Image */}
-            <div className="relative aspect-[16/10] overflow-hidden">
+            <div className="relative aspect-[16/10] overflow-hidden bg-neutral-200">
                 {property.imageUrl ? (
-                <img
-                    src={optimizeCloudinaryUrl(property.imageUrl, { width: 640, quality: 'auto' })}
-                    srcSet={cloudinarySrcSet(property.imageUrl, [320, 480, 640])}
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    alt={property.title || property.address}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                    decoding="async"
-                    width={640}
-                    height={400}
-                />
+                <>
+                    {/* LQIP blur-up placeholder */}
+                    <img
+                        src={getPropertyImagePlaceholder(property.imageUrl) || optimizeCloudinaryUrl(property.imageUrl, { width: 40, quality: 'auto:eco' })}
+                        alt=""
+                        aria-hidden="true"
+                        loading="lazy"
+                        decoding="async"
+                        width={40}
+                        height={25}
+                        className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-80"
+                    />
+                    <img
+                        src={optimizeCloudinaryUrl(property.imageUrl, { width: 640, quality: 'auto' })}
+                        srcSet={cloudinarySrcSet(property.imageUrl, [320, 480, 640])}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        alt={property.title || property.address}
+                        style={{ transition: 'transform 300ms ease, opacity 300ms ease' }}
+                        className={`relative w-full h-full object-cover ${imageLoaded ? 'group-hover:scale-105 opacity-100' : 'opacity-0'}`}
+                        loading="lazy"
+                        decoding="async"
+                        width={640}
+                        height={400}
+                        onLoad={() => setImageLoaded(true)}
+                    />
+                </>
                 ) : (
                 <div className="w-full h-full bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
                     <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
