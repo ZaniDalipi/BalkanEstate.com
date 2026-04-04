@@ -85,6 +85,12 @@ export const getConversation = async (
       return;
     }
 
+    // Guard against deleted users: populate returns null if the referenced document no longer exists
+    if (!conversation.buyerId || !conversation.sellerId) {
+      res.status(404).json({ message: 'Conversation participant no longer exists' });
+      return;
+    }
+
     // Check if user is part of conversation
     const isBuyer = conversation.buyerId._id.toString() === String((req.user as IUser)._id).toString();
     const isSeller = conversation.sellerId._id.toString() === String((req.user as IUser)._id).toString();
