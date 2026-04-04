@@ -5,7 +5,10 @@ import dotenv from 'dotenv';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
+import path from 'path';
+import { existsSync } from 'fs';
 import connectDB from './config/database';
+import { propertyOgHandler } from './utils/ogTagHandler';
 import { setupChatSocket } from './sockets/chatSocket';
 import { setupPropertySocket } from './sockets/propertySocket';
 import { setSocketInstance } from './utils/socketInstance';
@@ -336,10 +339,38 @@ app.use('/api/testimonials', testimonialRoutes); // User testimonials (submit + 
 app.use('/api/push', pushRoutes); // Push notification subscriptions
 app.use('/api/business-listings', businessListingRoutes); // Business directory listings
 
-// 404 handler
-app.use((_req: Request, res: Response) => {
-  res.status(404).json({ message: 'Route not found' });
-});
+// ============================================================================
+// FRONTEND SERVING + SOCIAL MEDIA OG TAG INJECTION
+// ============================================================================
+
+// FRONTEND_DIST_PATH env var can override (set by Docker build).
+// Default: two levels up from backend/dist/server.js → project root dist/
+const frontendDist = process.env.FRONTEND_DIST_PATH || path.join(__dirname, '..', '..', 'dist');
+const frontendDistExists = existsSync(frontendDist);
+
+if (frontendDistExists) {
+  // Serve property-specific OG HTML to social media crawlers BEFORE static files.
+  // This ensures bots see rich previews with the correct og:url, og:title, og:image
+  // (property image/title/price) instead of the generic homepage OG tags.
+  // The handler detects bot user-agents and passes through for regular browsers.
+  app.get('/property/:slug', propertyOgHandler);
+  // Also handle language-prefixed URLs: /en/property/:slug, /sq/property/:slug, etc.
+  app.get('/:lang/property/:slug', propertyOgHandler);
+
+  // Serve built frontend static assets (JS, CSS, images, icons, etc.)
+  app.use(express.static(frontendDist, { index: false }));
+
+  // SPA catch-all: serve index.html for any non-API route so that client-side
+  // routing (React Router / custom routing in App.tsx) works on direct URL access.
+  app.get('*', (_req: Request, res: Response) => {
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+} else {
+  // Frontend not built yet (development mode) — normal 404 for unknown routes
+  app.use((_req: Request, res: Response) => {
+    res.status(404).json({ message: 'Route not found' });
+  });
+}
 
 // Sentry error handler (must be before other error handlers)
 attachSentryErrorHandler(app);

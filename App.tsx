@@ -145,6 +145,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
   const { t } = useTranslation('common');
   const [selectedAgency, setSelectedAgency] = useState<Agency | null>(null);
   const [isLoadingAgency, setIsLoadingAgency] = useState(false);
+  const [isLoadingPropertyFromUrl, setIsLoadingPropertyFromUrl] = useState(false);
 
   // Listen for session expiration events from httpClient
   useEffect(() => {
@@ -183,6 +184,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       if (propertyMatch) {
         const propertyId = decodeURIComponent(propertyMatch[1]);
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        // Show loader immediately so we don't flash the home page
+        setIsLoadingPropertyFromUrl(true);
 
         // Fetch property from API to ensure we have full data
         fetch(`${API_CONFIG.BASE_URL}/properties/${propertyId}`)
@@ -193,6 +196,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
             return res.json();
           })
           .then(data => {
+            setIsLoadingPropertyFromUrl(false);
             if (data.property) {
               // Transform backend property to frontend format
               // Backend now returns obfuscated `id` (not raw `_id`)
@@ -203,11 +207,13 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
               };
               dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
             } else {
-              dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+              dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'not-found' });
             }
           })
           .catch(() => {
+            setIsLoadingPropertyFromUrl(false);
             dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'not-found' });
           });
         return;
       }
@@ -583,6 +589,11 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         <PaymentCancel />
       </Suspense>
     );
+  }
+
+  // Show loader while fetching property from a direct URL (prevents home page flash)
+  if (isLoadingPropertyFromUrl) {
+    return <PageLoader />;
   }
 
   // Global handler for selected property view
