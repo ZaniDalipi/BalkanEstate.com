@@ -752,7 +752,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         anchor: 'bottom',
         offset: [0, initialLabelOffset],
       })
-        .setLngLat([centroidLng, centroidLat])
+        .setLngLat([longitude, latitude])
         .addTo(mapInstance);
 
       // Update label position on zoom/pitch changes
