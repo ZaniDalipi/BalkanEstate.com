@@ -621,15 +621,23 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
         setVoiceSupported(!!SR);
     }, []);
 
+    // Auto-apply filters to trigger backend search when AI produces a final query.
+    // This ensures the property list (and map) updates to the correct location
+    // even when the currently loaded properties don't include that area.
+    const appliedQueryRef = useRef<AiSearchQuery | null>(null);
+    useEffect(() => {
+        if (finalQuery && finalQuery !== appliedQueryRef.current) {
+            appliedQueryRef.current = finalQuery;
+            onApplyFilters(finalQuery);
+        }
+    }, [finalQuery]); // eslint-disable-line react-hooks/exhaustive-deps
+
     const matchedProperties = useMemo(() => {
         if (!finalQuery) return [];
         const filtered = filterPropertiesByQuery(properties, finalQuery);
-        // Only fall back to all properties when no location/country filter was set
-        // (e.g., "show me what you got"). When the user asks for a specific city/country
-        // and nothing matches, return empty so we don't show irrelevant results.
-        const hasLocationFilter = !!(finalQuery.location || finalQuery.country);
-        if (filtered.length > 0) return filtered.slice(0, 15);
-        return hasLocationFilter ? [] : properties.slice(0, 15);
+        // Use filtered results if any match; otherwise show currently loaded
+        // properties (the auto-apply above refreshes them for the right area).
+        return (filtered.length > 0 ? filtered : properties).slice(0, 15);
     }, [finalQuery, properties]);
 
     // Auto-show swipe cards when properties are found
