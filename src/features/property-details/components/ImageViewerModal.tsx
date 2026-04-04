@@ -30,6 +30,20 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
         setImageError(false);
     }, [currentIndex, images]);
 
+    // Preload adjacent images so navigation feels instant
+    useEffect(() => {
+        if (images.length <= 1) return;
+        const prevIndex = (currentIndex - 1 + images.length) % images.length;
+        const nextIndex = (currentIndex + 1) % images.length;
+        [prevIndex, nextIndex].forEach((idx) => {
+            const url = images[idx]?.url;
+            if (url) {
+                const img = new Image();
+                img.src = optimizeCloudinaryUrl(url, { width: 1920, quality: 'auto' });
+            }
+        });
+    }, [currentIndex, images]);
+
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'ArrowRight') handleNext();
@@ -140,6 +154,8 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                             alt={t('property:imageViewer.imageAlt', 'Property image {{current}} of {{total}}', { current: currentIndex + 1, total: images.length })}
                             width={1920}
                             height={1280}
+                            loading="eager"
+                            decoding="async"
                             className="max-w-full max-h-full object-contain animate-fade-in select-none"
                             draggable={false}
                             onError={() => setImageError(true)}

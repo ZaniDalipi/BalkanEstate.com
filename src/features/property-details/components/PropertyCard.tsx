@@ -9,7 +9,7 @@ import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { formatPrice } from '@/utils/currency';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
-import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
+import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '@/config/cloudinaryConfig';
 
 interface PropertyCardProps {
   property: Property;
@@ -93,6 +93,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 }) => {
   const { t, i18n } = useTranslation(['property', 'rental', 'common']);
   const [imageError, setImageError] = useState(!property.imageUrl);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
   // Safe access with fallbacks
@@ -165,15 +166,15 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           </div>
         ) : (
           <div className="relative w-full aspect-[4/3] overflow-hidden bg-neutral-200">
-            {/* Blurred background - fills any gaps from object-cover edge cases */}
+            {/* LQIP blur-up background – tiny placeholder visible while main image loads */}
             <img
-              src={optimizeCloudinaryUrl(property.imageUrl, { width: 100, quality: 'auto:low', crop: 'fill' })}
+              src={getPropertyImagePlaceholder(property.imageUrl) || optimizeCloudinaryUrl(property.imageUrl, { width: 40, quality: 'auto:eco', crop: 'fill' })}
               alt=""
               aria-hidden="true"
               loading="lazy"
               decoding="async"
-              width={100}
-              height={75}
+              width={40}
+              height={30}
               className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-80"
             />
             {/* Main image - server-cropped to 4:3 for consistent cards */}
@@ -186,9 +187,10 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               decoding="async"
               width={640}
               height={480}
-              className={`relative w-full h-full object-cover transition-transform duration-700 ${
+              className={`relative w-full h-full object-cover transition-[transform,opacity] duration-300 ${
                 isHovered && !isSold && !isRented ? 'scale-110' : 'scale-100'
-              } ${isSold || isRented ? 'grayscale' : ''}`}
+              } ${isSold || isRented ? 'grayscale' : ''} ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              onLoad={() => setImageLoaded(true)}
               onError={() => setImageError(true)}
             />
             {/* Gradient overlay */}
