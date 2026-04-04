@@ -376,7 +376,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
                   fetchpriority="high"
                   decoding="async"
-                  className={`relative max-w-full max-h-full object-contain transition-opacity duration-300 ${mainImageLoaded ? 'opacity-100 animate-image-fade' : 'opacity-0'}`}
+                  className={`relative max-w-full max-h-full object-contain transition-opacity duration-300 ${mainImageLoaded ? 'opacity-100' : 'opacity-0'}`}
                   onLoad={() => setMainImageLoaded(true)}
                   onError={() => setMainImageError(true)}
                 />

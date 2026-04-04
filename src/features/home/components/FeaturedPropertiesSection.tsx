@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { BuildingOfficeIcon } from '@/constants';
-import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
+import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '@/config/cloudinaryConfig';
 
 interface FeaturedPropertiesSectionProps {
   properties: Property[];
@@ -16,6 +16,7 @@ const PropertyCard: React.FC<{
   index: number;
 }> = ({ property, onClick, index }) => {
   const { t } = useTranslation(['home']);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const formatPrice = (price: number, currency?: string) => {
     const symbol = currency === 'USD' ? '$' : '€';
@@ -28,19 +29,34 @@ const PropertyCard: React.FC<{
       className="group text-left bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg hover:border-neutral-300 hover:-translate-y-1 active:scale-[0.98] transition-all duration-200 w-full"
     >
       {/* Image */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-neutral-100">
+      <div className="relative aspect-[4/3] overflow-hidden bg-neutral-200">
         {property.imageUrl ? (
-        <img
-          src={optimizeCloudinaryUrl(property.imageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill' })}
-          srcSet={cloudinarySrcSet(property.imageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill' })}
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
-          alt={property.address}
-          width={400}
-          height={300}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          loading="lazy"
-          decoding="async"
-        />
+        <>
+          {/* LQIP blur-up placeholder */}
+          <img
+            src={getPropertyImagePlaceholder(property.imageUrl) || optimizeCloudinaryUrl(property.imageUrl, { width: 40, quality: 'auto:eco', crop: 'fill' })}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            decoding="async"
+            width={40}
+            height={30}
+            className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-80"
+          />
+          <img
+            src={optimizeCloudinaryUrl(property.imageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill' })}
+            srcSet={cloudinarySrcSet(property.imageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill' })}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
+            alt={property.address}
+            width={400}
+            height={300}
+            style={{ transition: 'transform 500ms ease, opacity 300ms ease' }}
+            className={`relative w-full h-full object-cover ${imageLoaded ? 'group-hover:scale-105 opacity-100' : 'opacity-0'}`}
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setImageLoaded(true)}
+          />
+        </>
         ) : (
         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300">
           <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
