@@ -187,9 +187,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               decoding="async"
               width={640}
               height={480}
-              style={{ transition: 'transform 700ms ease, opacity 300ms ease' }}
+              style={{ transition: 'transform 8s cubic-bezier(0.05, 0, 0.2, 1), opacity 300ms ease' }}
               className={`relative w-full h-full object-cover ${
-                isHovered && !isSold && !isRented ? 'scale-110' : 'scale-100'
+                isHovered && !isSold && !isRented ? 'scale-[1.02]' : 'scale-100'
               } ${isSold || isRented ? 'grayscale' : ''} ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
               onLoad={() => setImageLoaded(true)}
               onError={() => setImageError(true)}
