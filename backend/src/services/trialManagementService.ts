@@ -315,7 +315,7 @@ export const sendTrialExpirationReminder = async (user: IUser): Promise<void> =>
         <p><strong>Monthly Plan Pricing:</strong></p>
         <ul>
           <li><strong>Agent Plan:</strong> Access to 50 active listings + premium features</li>
-          <li><strong>Private Seller Plan:</strong> 20 active listings</li>
+          <li><strong>Private Seller Plan:</strong> 30 active listings</li>
           <li><strong>Free Plan:</strong> 3 active listings</li>
         </ul>
 
@@ -408,7 +408,7 @@ const sendTrialExpiredEmail = async (user: IUser): Promise<void> => {
         <h3>Want More Features?</h3>
         <p>You can upgrade anytime to access premium features:</p>
         <ul>
-          <li><strong>Private Seller Monthly Plan:</strong> 20 active listings</li>
+          <li><strong>Private Seller Monthly Plan:</strong> 30 active listings</li>
           <li><strong>Agent Plan:</strong> 50 active listings + advanced features</li>
           <li><strong>Pay Per Listing:</strong> Need more? Pay for individual extra listings</li>
         </ul>

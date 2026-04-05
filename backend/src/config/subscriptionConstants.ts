@@ -70,7 +70,7 @@ export const PRO_TIER_LIMITS: {
   };
 } = {
   MONTHLY: {
-    LISTINGS: 20,
+    LISTINGS: 30,
     PROMOTION_COUPONS: 3, // 2 highlighted + 1 premium
     PREMIUM_COUPONS: 1,
     HIGHLIGHTED_COUPONS: 2,

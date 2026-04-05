@@ -36,7 +36,7 @@ export const LISTING_LIMITS: Record<SubscriptionTier, number> = {
  */
 export const PLAN_LISTING_LIMITS: Record<SubscriptionPlan, number> = {
   free: 3,
-  pro_monthly: 20, // 20 listings per month
+  pro_monthly: 30, // 30 listings per month
   pro_yearly: 250, // 250 listings per year
   enterprise_yearly: 750, // 750 listings for enterprise
 };
@@ -671,7 +671,7 @@ export function getUpgradeOptions(
       plan: 'pro_monthly',
       price: SUBSCRIPTION_PRICING.pro_monthly,
       benefits: [
-        '20 active listings per month (vs 3)',
+        '30 active listings per month (vs 3)',
         '3 promotion coupons per month (2 highlighted + 1 premium)',
         '20 insights per month',
         'Unlimited AI chat & saved searches',

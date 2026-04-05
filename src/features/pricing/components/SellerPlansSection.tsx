@@ -142,7 +142,7 @@ const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
             {(proMonthlyProduct.features && proMonthlyProduct.features.length > 0
               ? proMonthlyProduct.features
               : [
-                  '20 listings per month',
+                  '30 listings per month',
                   '3 promo coupons/month',
                   'Unlimited AI chat',
                   'Unlimited saved searches',

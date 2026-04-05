@@ -251,7 +251,14 @@ export async function processSubscriptionPayment(
       user.subscription.listingsLimit = product.listingsLimit || ENTERPRISE_TIER_LIMITS.LISTINGS;
     } else if (isPro) {
       user.subscription.tier = 'pro';
-      user.subscription.listingsLimit = product.listingsLimit || (isYearly ? PRO_TIER_LIMITS.YEARLY.LISTINGS : PRO_TIER_LIMITS.MONTHLY.LISTINGS);
+      const newListings = product.listingsLimit || (isYearly ? PRO_TIER_LIMITS.YEARLY.LISTINGS : PRO_TIER_LIMITS.MONTHLY.LISTINGS);
+      // Monthly pro: accumulate listings on renewal (unused listings roll over)
+      // e.g. Month 1: 30, Month 2 renewal: 60, Month 3 renewal: 90
+      if (!isYearly && existingSubscription) {
+        user.subscription.listingsLimit = (user.subscription.listingsLimit || 0) + newListings;
+      } else {
+        user.subscription.listingsLimit = newListings;
+      }
     }
     user.markModified('subscription');
 

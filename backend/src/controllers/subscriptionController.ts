@@ -109,13 +109,13 @@ export const createSubscription = async (req: Request, res: Response): Promise<v
     user.subscriptionPlan = product.productId;
     user.subscriptionExpiresAt = expirationDate;
 
-    // Initialize unified Pro subscription (20 active listings shared)
+    // Initialize unified Pro subscription (30 active listings shared for monthly)
     user.proSubscription = {
       isActive: true,
       plan: product.billingPeriod === 'monthly' ? 'pro_monthly' : 'pro_yearly',
       expiresAt: expirationDate,
       startedAt: startDate,
-      totalListingsLimit: product.listingsLimit || 20, // 20 active listings for Pro
+      totalListingsLimit: product.listingsLimit || 30, // 30 active listings for Pro monthly
       activeListingsCount: 0,
       privateSellerCount: 0,
       agentCount: 0,
@@ -690,13 +690,13 @@ export const activateTestProSubscription = async (req: Request, res: Response): 
     const expirationDate = new Date();
     expirationDate.setMonth(expirationDate.getMonth() + durationMonths);
 
-    // Initialize/update Pro subscription (20 active listings shared)
+    // Initialize/update Pro subscription (30 active listings shared for monthly)
     user.proSubscription = {
       isActive: true,
       plan: plan as 'pro_monthly' | 'pro_yearly',
       expiresAt: expirationDate,
       startedAt: startDate,
-      totalListingsLimit: 20, // 20 active listings for Pro
+      totalListingsLimit: 30, // 30 active listings for Pro monthly
       activeListingsCount: user.proSubscription?.activeListingsCount || 0,
       privateSellerCount: user.proSubscription?.privateSellerCount || 0,
       agentCount: user.proSubscription?.agentCount || 0,
@@ -776,13 +776,13 @@ export const syncProSubscription = async (req: Request, res: Response): Promise<
       // Get product details for benefits
       const product = await Product.findOne({ productId: activeSubscription.productId });
 
-      // Update/initialize proSubscription based on active subscription (20 listings)
+      // Update/initialize proSubscription based on active subscription (30 listings for monthly)
       user.proSubscription = {
         isActive: true, // 🔥 THIS IS THE FIX
         plan: activeSubscription.productId.includes('yearly') ? 'pro_yearly' : 'pro_monthly',
         expiresAt: activeSubscription.expirationDate,
         startedAt: activeSubscription.startDate,
-        totalListingsLimit: product?.listingsLimit || 20, // 20 active listings for Pro
+        totalListingsLimit: product?.listingsLimit || 30, // 30 active listings for Pro monthly
         activeListingsCount: user.proSubscription?.activeListingsCount || 0,
         privateSellerCount: user.proSubscription?.privateSellerCount || 0,
         agentCount: user.proSubscription?.agentCount || 0,

@@ -144,12 +144,12 @@ const PERIOD_TO_MONTHS: Record<string, number> = {
 // NOTE: These match the new product seeder values
 const LISTING_LIMITS: Record<string, number> = {
   free: 3,
-  seller_pro_monthly: 20,  // 20 listings per month
+  seller_pro_monthly: 30,  // 30 listings per month
   seller_pro_yearly: 250,  // 250 listings per year
   seller_enterprise_yearly: 750, // 750 listings for enterprise
   // New tiers (from new monetization system)
   free_tier: 3,
-  pro_monthly: 20,  // 20 listings per month
+  pro_monthly: 30,  // 30 listings per month
   pro_yearly: 250,  // 250 listings per year
   agency_yearly: 750,  // 750 listings for enterprise
   buyer_monthly: 0,  // Buyers don't create listings

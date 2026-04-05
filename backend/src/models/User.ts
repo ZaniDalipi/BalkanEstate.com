@@ -1107,7 +1107,7 @@ UserSchema.methods.getActiveListingsLimit = function (): number {
   // Private sellers
   if (this.role === 'private_seller') {
     if (this.hasActiveSubscription()) {
-      return 20; // Paid private sellers get 20 active listings
+      return 30; // Paid private sellers get 30 active listings
     }
     return 3; // Free private sellers get 3 active listings
   }

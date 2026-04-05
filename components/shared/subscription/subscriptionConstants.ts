@@ -76,11 +76,11 @@ export const PERIOD_TO_MONTHS: Record<string, number> = {
 // Map product IDs to listing limits (fallbacks — real values come from DB Product records)
 export const LISTING_LIMITS: Record<string, number> = {
   free: 3,
-  seller_pro_monthly: 20,
+  seller_pro_monthly: 30,
   seller_pro_yearly: 250,
   seller_enterprise_yearly: 500,
   free_tier: 3,
-  pro_monthly: 20,
+  pro_monthly: 30,
   pro_yearly: 250,
   enterprise_yearly: 500,
   agency_yearly: 100,

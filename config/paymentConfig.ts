@@ -406,7 +406,7 @@ export const PAYMENT_PLANS: Record<string, PaymentPlan> = {
   pro_monthly: {
     id: 'pro_monthly',
     name: 'Pro Monthly',
-    price: 25, // €25/month - 20 listings/month
+    price: 25, // €25/month - 30 listings/month
     currency: 'EUR',
     interval: 'month',
     externalPriceId: undefined,

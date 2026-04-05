@@ -69,7 +69,7 @@ const PRODUCTS = [
     billingPeriod: 'monthly' as const,
     durationDays: 30,
     features: [
-      '20 listings per month',
+      '30 listings per month (unused listings roll over)',
       '3 promotion coupons/month (2 highlighted + 1 premium)',
       '20 insights per month',
       'Unlimited AI chat (no spam)',
@@ -93,7 +93,7 @@ const PRODUCTS = [
     isVisible: true,
     hasFreeTrial: false,
     gracePeriodDays: 3,
-    listingsLimit: 20, // 20 listings per month
+    listingsLimit: 30, // 30 listings per month
     promotionCoupons: 3, // 2 highlighted + 1 premium
     premiumCoupons: 1, // 1 premium placement
     highlightedCoupons: 2, // 2 highlighted
@@ -168,7 +168,7 @@ const PRODUCTS = [
     billingPeriod: 'monthly' as const,
     durationDays: 30,
     features: [
-      '20 listings per month',
+      '30 listings per month (unused listings roll over)',
       '3 promotion coupons/month (2 highlighted + 1 premium)',
       '20 insights per month',
       'Unlimited AI chat (no spam)',
@@ -192,7 +192,7 @@ const PRODUCTS = [
     isVisible: true,
     hasFreeTrial: false,
     gracePeriodDays: 3,
-    listingsLimit: 20,
+    listingsLimit: 30,
     promotionCoupons: 3,
     premiumCoupons: 1,
     highlightedCoupons: 2,
