@@ -501,7 +501,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
         title={seoTitle}
         description={seoDescription}
         canonical={`${window.location.origin}/property/${propertySlug}`}
-        image={property.imageUrl}
+        image={seoImages[0] || property.imageUrl}
         type="product"
         property={{
           price: property.price,
