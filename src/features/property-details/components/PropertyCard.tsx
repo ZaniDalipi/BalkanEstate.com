@@ -189,7 +189,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               height={480}
               style={{ transition: 'transform 4s ease-in-out, opacity 300ms ease' }}
               className={`relative w-full h-full object-cover ${
-                isHovered && !isSold && !isRented ? 'scale-[1.03]' : 'scale-100'
+                isHovered && !isSold && !isRented ? 'scale-[1.015]' : 'scale-100'
               } ${isSold || isRented ? 'grayscale' : ''} ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
               onLoad={() => setImageLoaded(true)}
               onError={() => setImageError(true)}

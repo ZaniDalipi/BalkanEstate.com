@@ -229,7 +229,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
                 height={600}
                 style={{ transition: 'transform 4s ease-in-out' }}
                 className={`w-full h-full object-cover ${
-                  isHovered ? 'scale-[1.03]' : 'scale-100'
+                  isHovered ? 'scale-[1.015]' : 'scale-100'
                 }`}
                 onError={() => handleImageError(index)}
               />
