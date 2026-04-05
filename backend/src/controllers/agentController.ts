@@ -20,9 +20,19 @@ import { recalculateAgencyAttributes } from '../services/agencyAttributeSyncServ
 // @access  Public
 export const getAgents = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { search, page = 1, limit = 50 } = req.query;
+    const { search, page = 1, limit = 50, licensed } = req.query;
 
     let filter: any = { isActive: true };
+
+    // Filter by license status
+    if (licensed === 'true') {
+      filter.licenseNumber = { $exists: true, $nin: [null, ''] };
+    } else if (licensed === 'false') {
+      filter.$and = [
+        ...(filter.$and || []),
+        { $or: [{ licenseNumber: { $exists: false } }, { licenseNumber: null }, { licenseNumber: '' }] },
+      ];
+    }
 
     // Universal search - searches across multiple fields
     if (search && typeof search === 'string' && search.trim()) {
