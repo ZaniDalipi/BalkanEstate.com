@@ -187,7 +187,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               decoding="async"
               width={640}
               height={480}
-              style={{ transition: 'transform 700ms ease, opacity 300ms ease' }}
+              style={{ transition: 'transform 2s cubic-bezier(0.25, 0.1, 0.25, 1) 0.3s, opacity 300ms ease' }}
               className={`relative w-full h-full object-cover ${
                 isHovered && !isSold && !isRented ? 'scale-110' : 'scale-100'
               } ${isSold || isRented ? 'grayscale' : ''} ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
