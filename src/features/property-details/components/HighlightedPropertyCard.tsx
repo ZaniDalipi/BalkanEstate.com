@@ -227,9 +227,9 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
                 sizes="(max-width: 768px) 100vw, 42vw"
                 width={800}
                 height={600}
-                style={{ transition: 'transform 2s cubic-bezier(0.25, 0.1, 0.25, 1) 0.3s' }}
+                style={{ transition: 'transform 4s ease-in-out' }}
                 className={`w-full h-full object-cover ${
-                  isHovered ? 'scale-105' : 'scale-100'
+                  isHovered ? 'scale-[1.03]' : 'scale-100'
                 }`}
                 onError={() => handleImageError(index)}
               />
