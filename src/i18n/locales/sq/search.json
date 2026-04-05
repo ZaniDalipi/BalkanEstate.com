@@ -326,7 +326,23 @@
     "backToChat": "Back to Chat",
     "swipeTitle": "Your Matches",
     "foundSwipe": "Found {{count}} properties! Swipe through them.",
-    "viewMatches": "View Matches"
+    "viewMatches": "View Matches",
+    "limitReached": {
+      "title": "Kufiri i Mesazheve AI u Arrit",
+      "message": "Keni përdorur të gjitha {{limit}} mesazhet falas të AI këtë muaj.",
+      "resetsOn": "Mesazhet tuaja falas rivendosen më {{date}}.",
+      "upgradeToSellerPro": "Përmirësohuni në Shitës Pro për mesazhe AI pa limit:",
+      "upgradeToBuyerPro": "Përmirësohuni në Blerës Pro për mesazhe AI pa limit:",
+      "benefit1": "Mesazhe pa limit me asistentin AI të pronave",
+      "sellerBenefit2": "Listoni deri në 250 prona në vit",
+      "sellerBenefit3": "Përshkrime dhe analiza pronash me AI",
+      "buyerBenefit2": "Njoftime të menjëhershme për listime të reja",
+      "buyerBenefit3": "Analiza të avancuara tregu dhe kërkime të ruajtura",
+      "viewSellerPlans": "Shiko Planet e Shitësit",
+      "viewBuyerPlans": "Shiko Planet e Blerësit",
+      "freeNote": "Plani falas përfshin {{limit}} mesazhe AI në muaj.",
+      "chatMessage": "Keni arritur kufirin mujor prej {{limit}} mesazheve falas AI. Përmirësoni planin tuaj për qasje pa limit."
+    }
   },
   "energyRatings": {
     "any": "Çdo",

@@ -10,6 +10,7 @@ import { formatPrice } from '@/utils/currency';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { useAppContext } from '@/context/AppContext';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import AiMessageLimitModal from './AiMessageLimitModal';
 
 // --- Web Speech API types ---
 interface SpeechRecognitionEvent extends Event { results: SpeechRecognitionResultList; resultIndex: number; }
@@ -610,6 +611,8 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
     const [ttsEnabled, setTtsEnabled] = useState(true);
     const [autoListenAfterSpeak, setAutoListenAfterSpeak] = useState(false);
     const [showSwipeCards, setShowSwipeCards] = useState(false);
+    const [showLimitModal, setShowLimitModal] = useState(false);
+    const [limitInfo, setLimitInfo] = useState<{ limit: number; used: number; remaining: number; resetDate: string } | null>(null);
     const chatEndRef = useRef<HTMLDivElement>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
@@ -700,9 +703,21 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                 setFinalQuery(result.searchQuery);
             }
             speak(result.responseMessage);
-        } catch {
-            const err: ChatMessage = { sender: 'ai', text: t('ai.connectionError') };
-            onHistoryChange([...newHistory, err]);
+        } catch (error: any) {
+            if (error?.statusCode === 429 && error?.details) {
+                setLimitInfo({
+                    limit: error.details.limit,
+                    used: error.details.used,
+                    remaining: error.details.remaining,
+                    resetDate: error.details.resetDate,
+                });
+                setShowLimitModal(true);
+                const limitMsg: ChatMessage = { sender: 'ai', text: t('ai.limitReached.chatMessage', { limit: error.details.limit }) };
+                onHistoryChange([...newHistory, limitMsg]);
+            } else {
+                const err: ChatMessage = { sender: 'ai', text: t('ai.connectionError') };
+                onHistoryChange([...newHistory, err]);
+            }
         } finally {
             setIsSearching(false);
         }
@@ -956,6 +971,13 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                         if (opts) return t(k, opts as Record<string, string>) as string;
                         return t(k) as string;
                     }}
+            />
+
+            {/* AI message limit upgrade modal */}
+            <AiMessageLimitModal
+                isOpen={showLimitModal}
+                onClose={() => setShowLimitModal(false)}
+                limitInfo={limitInfo}
             />
         </div>
     );
