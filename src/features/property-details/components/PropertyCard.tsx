@@ -147,7 +147,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
   return (
     <div
-      className={`group bg-white rounded-2xl overflow-hidden shadow-sm border transition-all duration-500 ease-out text-left w-full flex flex-col cursor-pointer isolate ${getCardStyles()} ${
+      className={`group bg-white rounded-2xl overflow-hidden shadow-sm border transition-all duration-300 text-left w-full flex flex-col cursor-pointer isolate ${getCardStyles()} ${
         isHovered && !isSold && !isRented ? 'shadow-lg -translate-y-1 scale-[1.01]' : 'hover:shadow-md'
       }`}
       onMouseEnter={() => setIsHovered(true)}
@@ -187,9 +187,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               decoding="async"
               width={640}
               height={480}
-              style={{ transition: 'transform 800ms cubic-bezier(0.25, 0.1, 0.25, 1), opacity 200ms ease' }}
+              style={{ transition: 'transform 700ms ease, opacity 300ms ease' }}
               className={`relative w-full h-full object-cover ${
-                isHovered && !isSold && !isRented ? 'scale-105' : 'scale-100'
+                isHovered && !isSold && !isRented ? 'scale-110' : 'scale-100'
               } ${isSold || isRented ? 'grayscale' : ''} ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
               onLoad={() => setImageLoaded(true)}
               onError={() => setImageError(true)}

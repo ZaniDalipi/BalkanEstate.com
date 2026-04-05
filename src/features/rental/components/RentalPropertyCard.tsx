@@ -39,7 +39,7 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
 
     return (
         <article
-            className={`group glass-panel overflow-hidden hover:bg-gray-50 transition-all duration-500 ease-out cursor-pointer ${isRented ? 'opacity-75' : ''}`}
+            className={`group glass-panel overflow-hidden hover:bg-gray-50 transition-all duration-300 cursor-pointer ${isRented ? 'opacity-75' : ''}`}
             onClick={handleClick}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
             tabIndex={0}
@@ -66,7 +66,7 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                         srcSet={cloudinarySrcSet(property.imageUrl, [320, 480, 640])}
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         alt={property.title || property.address}
-                        style={{ transition: 'transform 800ms cubic-bezier(0.25, 0.1, 0.25, 1), opacity 200ms ease' }}
+                        style={{ transition: 'transform 300ms ease, opacity 300ms ease' }}
                         className={`relative w-full h-full object-cover ${imageLoaded ? 'group-hover:scale-105 opacity-100' : 'opacity-0'}`}
                         loading="lazy"
                         decoding="async"
