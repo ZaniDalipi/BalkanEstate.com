@@ -61,28 +61,11 @@ function detectLanguage(acceptLanguage: string): SupportedLangCode {
 }
 
 /**
- * Reconstruct the canonical SEO slug using the same algorithm as the
- * frontend's generatePropertySlug() in utils/slug.ts.
- * Format: "{n}-bed-{type}-for-{sale|rent}-in-{city}-{country}_{encodedId}"
+ * Return the canonical property URL segment: just the encoded ID.
+ * Matches the frontend's generatePropertySlug() which returns property.id.
  */
 function buildPropertySlug(property: PropertyOgProjection): string {
-  const parts: string[] = [];
-
-  if (property.beds > 0) parts.push(`${property.beds}-bed`);
-  parts.push(property.propertyType);
-  parts.push(property.listingType === 'rent' ? 'for-rent' : 'for-sale');
-  parts.push('in', property.city, property.country);
-
-  const slugText = parts
-    .join(' ')
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w-]+/g, '')
-    .replace(/--+/g, '-')
-    .replace(/^-+|-+$/g, '');
-
-  return `${slugText}_${encodeId(property._id.toString())}`;
+  return encodeId(property._id.toString());
 }
 
 function formatPrice(price: number, isNegotiable = false): string {
