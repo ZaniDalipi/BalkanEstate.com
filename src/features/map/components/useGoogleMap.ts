@@ -1431,10 +1431,10 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
             </div>`;
           infoWindow.setContent(html);
         } else {
-          infoWindow.setContent('<div style="padding:8px;font-family:system-ui,sans-serif;font-size:13px;color:#888;">No parcel found at this location</div>');
+          infoWindow.close();
         }
       } catch {
-        infoWindow.setContent('<div style="padding:8px;font-family:system-ui,sans-serif;font-size:13px;color:#888;">Could not load parcel info</div>');
+        infoWindow.close();
       }
     };
 
