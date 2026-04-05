@@ -14,7 +14,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
-import Property, { IProperty, IPropertyImage } from '../models/Property';
+import Property, { IProperty } from '../models/Property';
 import { resolveId, encodeId } from '../utils/idObfuscation';
 import { isValidObjectId } from '../utils/validateParams';
 import { apiLogger } from '../utils/logger';
@@ -41,6 +41,7 @@ type PropertyOgProjection = Pick<
   | 'city'
   | 'country'
   | 'description'
+  | 'imageUrl'
   | 'images'
   | 'isNegotiable'
 > & { _id: Types.ObjectId };
@@ -130,8 +131,8 @@ function buildOgDescription(property: PropertyOgProjection): string {
   return [price, details, excerpt].filter(Boolean).join(' – ').slice(0, 300);
 }
 
-function getOgImageUrl(images: IPropertyImage[]): string {
-  return images[0]?.url ?? `${OG_BASE_URL}/og-image.png`;
+function getOgImageUrl(property: Pick<PropertyOgProjection, 'imageUrl' | 'images'>): string {
+  return property.images?.[0]?.url ?? property.imageUrl ?? `${OG_BASE_URL}/og-image.png`;
 }
 
 /**
@@ -146,7 +147,7 @@ function buildOgHtml(
 ): string {
   const title = buildOgTitle(property);
   const description = buildOgDescription(property);
-  const imageUrl = getOgImageUrl(property.images);
+  const imageUrl = getOgImageUrl(property);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -186,7 +187,7 @@ function buildOgHtml(
 // ─── Shared fetch helper ──────────────────────────────────────────────────────
 
 const PROPERTY_OG_SELECT =
-  'title price isNegotiable listingType propertyType beds baths sqft city country description images' as const;
+  'title price isNegotiable listingType propertyType beds baths sqft city country description imageUrl images' as const;
 
 async function fetchPropertyForOg(
   slug: string,
