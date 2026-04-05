@@ -193,7 +193,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
 
   return (
     <div
-      className={`group bg-white rounded-2xl overflow-hidden shadow-md ${tierStyles.border} ${tierStyles.glow} transition-all duration-300 cursor-pointer flex flex-col md:flex-row w-full ${
+      className={`group bg-white rounded-2xl overflow-hidden shadow-md ${tierStyles.border} ${tierStyles.glow} transition-all duration-500 ease-out cursor-pointer flex flex-col md:flex-row w-full ${
         isHovered ? 'shadow-xl scale-[1.005]' : ''
       }`}
       onMouseEnter={() => setIsHovered(true)}
