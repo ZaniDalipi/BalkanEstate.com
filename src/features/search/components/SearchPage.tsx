@@ -12,6 +12,7 @@ import Toast from '@/components/shared/Toast';
 import { Helmet } from 'react-helmet-async';
 import { SEO } from '@/src/components/seo';
 import { useSearchPage } from './useSearchPage';
+import { generatePropertySlug } from '@/utils/slug';
 import SearchHeader from './SearchHeader';
 import SearchLocationBar from './SearchLocationBar';
 import SearchMobileFilters from './SearchMobileFilters';
@@ -196,13 +197,13 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                             itemListElement: listProperties.slice(0, 20).map((p: Property, i: number) => ({
                                 '@type': 'ListItem',
                                 position: i + 1,
-                                url: `${window.location.origin}/property/${p.id}`,
+                                url: `${window.location.origin}/property/${generatePropertySlug(p)}`,
                                 name: `${p.beds ? p.beds + '-Bed ' : ''}${p.propertyType || 'Property'} in ${p.city}, ${p.country}`,
                                 ...(p.imageUrl && { image: p.imageUrl }),
                                 item: {
                                     '@type': 'RealEstateListing',
                                     name: `${p.beds ? p.beds + '-Bed ' : ''}${p.propertyType || 'Property'} in ${p.city}, ${p.country}`,
-                                    url: `${window.location.origin}/property/${p.id}`,
+                                    url: `${window.location.origin}/property/${generatePropertySlug(p)}`,
                                     ...(p.imageUrl && { image: p.imageUrl }),
                                     ...(p.price && {
                                         offers: {

@@ -8,7 +8,8 @@ import morgan from 'morgan';
 import path from 'path';
 import { existsSync } from 'fs';
 import connectDB from './config/database';
-import { propertyOgHandler } from './utils/ogTagHandler';
+import ogRoutes from './routes/ogRoutes';
+import { propertyPageOgMiddleware } from './controllers/ogController';
 import { setupChatSocket } from './sockets/chatSocket';
 import { setupPropertySocket } from './sockets/propertySocket';
 import { setSocketInstance } from './utils/socketInstance';
@@ -285,6 +286,12 @@ app.use('/api', xssSanitizer);
 // Apply API caching for GET requests (public data only)
 app.use('/api', apiCache);
 
+// OG share routes (/api/og/property/:slug).
+// /api/* is always proxied nginx → Express, so social media bots are
+// guaranteed to reach this endpoint even when nginx serves frontend routes
+// from static files.
+app.use('/api/og', ogRoutes);
+
 // Sensitive routes with stricter rate limiting (auth, password reset, etc.)
 app.use('/api/auth', sensitiveRateLimiter, authRoutes);
 
@@ -350,19 +357,18 @@ const frontendDistExists = existsSync(frontendDist);
 
 if (frontendDistExists) {
   // Serve property-specific OG HTML to social media crawlers BEFORE static files.
-  // This ensures bots see rich previews with the correct og:url, og:title, og:image
-  // (property image/title/price) instead of the generic homepage OG tags.
-  // The handler detects bot user-agents and passes through for regular browsers.
-  app.get('/property/:slug', propertyOgHandler);
-  // Also handle language-prefixed URLs: /en/property/:slug, /sq/property/:slug, etc.
-  app.get('/:lang/property/:slug', propertyOgHandler);
+  // Detects bot user-agents; regular browsers pass through to the SPA catch-all.
+  app.get('/property/:slug', propertyPageOgMiddleware);
+  app.get('/:lang/property/:slug', propertyPageOgMiddleware);
 
   // Serve built frontend static assets (JS, CSS, images, icons, etc.)
   app.use(express.static(frontendDist, { index: false }));
 
   // SPA catch-all: serve index.html for any non-API route so that client-side
   // routing (React Router / custom routing in App.tsx) works on direct URL access.
-  app.get('{*path}', (_req: Request, res: Response) => {
+  // Note: path-to-regexp v8+ (used by Express 5) does not accept bare '*' —
+  // use '/{*path}' (Express 5) or a regex fallback instead.
+  app.use((_req: Request, res: Response) => {
     res.sendFile(path.join(frontendDist, 'index.html'));
   });
 } else {
