@@ -366,7 +366,9 @@ if (frontendDistExists) {
 
   // SPA catch-all: serve index.html for any non-API route so that client-side
   // routing (React Router / custom routing in App.tsx) works on direct URL access.
-  app.get('*', (_req: Request, res: Response) => {
+  // Note: path-to-regexp v8+ (used by Express 5) does not accept bare '*' —
+  // use '/{*path}' (Express 5) or a regex fallback instead.
+  app.use((_req: Request, res: Response) => {
     res.sendFile(path.join(frontendDist, 'index.html'));
   });
 } else {
