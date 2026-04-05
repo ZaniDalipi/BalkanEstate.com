@@ -421,22 +421,25 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   }, [property.status]);
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/property/${propertySlug}`;
+    // Use the /api/og/property/ URL so social media bots (WhatsApp, Facebook,
+    // Telegram, etc.) receive property-specific OG meta tags (photo, price,
+    // title) instead of the generic homepage preview.  Regular browsers that
+    // open this URL are immediately redirected to the real property page.
+    const shareUrl = `${window.location.origin}/api/og/property/${propertySlug}`;
     try {
       if (navigator.share) {
         await navigator.share({
           title: `${property.address}, ${property.city}`,
           text: `Check out this property: ${property.beds} beds, ${property.baths} baths, ${property.sqft}m²`,
-          url,
+          url: shareUrl,
         });
       } else {
-        await navigator.clipboard.writeText(url);
+        await navigator.clipboard.writeText(shareUrl);
         setShowCopiedToast(true);
         setTimeout(() => setShowCopiedToast(false), 2000);
       }
     } catch (err) {
       // User cancelled share or error occurred
-      // Log removed
     }
   };
 

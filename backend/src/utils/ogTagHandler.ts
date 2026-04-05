@@ -55,7 +55,7 @@ export function isSocialMediaBot(userAgent: string): boolean {
  */
 function buildPropertySlug(property: any): string {
   const parts: string[] = [];
-  if (property.bedrooms && property.bedrooms > 0) parts.push(`${property.bedrooms}-bed`);
+  if (property.beds && property.beds > 0) parts.push(`${property.beds}-bed`);
   if (property.propertyType) parts.push(property.propertyType);
   parts.push(property.listingType === 'rent' ? 'for-rent' : 'for-sale');
   if (property.city) { parts.push('in'); parts.push(property.city); }
@@ -90,41 +90,46 @@ function formatPrice(price: number, currency = 'EUR'): string {
 }
 
 /**
- * Build a minimal HTML page with property-specific Open Graph meta tags.
- * Includes an immediate JS redirect so regular browsers that somehow hit
- * this route are bounced to the SPA immediately.
+ * Fetch a property by slug and return OG-enriched HTML.
+ * Used by both route handlers below.
  */
-function buildPropertyOgHtml(property: any, canonicalUrl: string): string {
-  const action = property.listingType === 'rent' ? 'for Rent' : 'for Sale';
-  const typeLabel = property.propertyType
-    ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1)
-    : 'Property';
-  const bedsLabel = property.bedrooms && property.bedrooms > 0 ? `${property.bedrooms}-Bed ` : '';
+async function servePropertyOgHtml(slug: string, res: Response, next: () => void): Promise<void> {
+  const resolvedId = resolveId(slug);
+  if (!resolvedId || !isValidObjectId(resolvedId)) return next();
 
-  const title = property.title
-    ? `${property.title} – ${property.city}, ${property.country} | BalkanEstateAI`
-    : `${bedsLabel}${typeLabel} ${action} in ${property.city}, ${property.country} | BalkanEstateAI`;
+  // Cast to any: we only need a handful of fields and the lean() type is too strict
+  const p: any = await Property.findById(resolvedId)
+    .select('title price currency listingType propertyType beds baths sqft city country description images')
+    .lean();
 
-  const price = formatPrice(property.price, property.currency || 'EUR');
-  const sqft = property.sqft ? `${property.sqft} m²` : '';
-  const beds = property.bedrooms != null ? `${property.bedrooms} bed` : '';
-  const baths = property.bathrooms != null ? `${property.bathrooms} bath` : '';
+  if (!p) return next();
+
+  const action = p.listingType === 'rent' ? 'for Rent' : 'for Sale';
+  const typeLabel = (p.propertyType || 'property').charAt(0).toUpperCase() + (p.propertyType || 'property').slice(1);
+  const bedsLabel = p.beds && p.beds > 0 ? `${p.beds}-Bed ` : '';
+
+  const title = p.title
+    ? `${p.title} – ${p.city}, ${p.country} | BalkanEstateAI`
+    : `${bedsLabel}${typeLabel} ${action} in ${p.city}, ${p.country} | BalkanEstateAI`;
+
+  const price = formatPrice(p.price, p.currency || 'EUR');
+  const sqft = p.sqft ? `${p.sqft} m²` : '';
+  const beds = p.beds != null ? `${p.beds} bed` : '';
+  const baths = p.baths != null ? `${p.baths} bath` : '';
   const details = [beds, baths, sqft].filter(Boolean).join(' · ');
 
-  // Lead with price + details, then property description text
-  const descriptionText = property.description
-    ? property.description.slice(0, 160).replace(/\n/g, ' ').trim()
+  const descriptionText = p.description
+    ? p.description.slice(0, 160).replace(/\n/g, ' ').trim()
     : '';
-  const description = [
-    price,
-    details,
-    descriptionText,
-  ].filter(Boolean).join(' – ').slice(0, 300);
+  const description = [price, details, descriptionText].filter(Boolean).join(' – ').slice(0, 300);
 
   // Use the first property image; fall back to the generic OG image
-  const imageUrl = property.images?.[0]?.url || `${BASE_URL}/og-image.png`;
+  const imageUrl = p.images?.[0]?.url || `${BASE_URL}/og-image.png`;
 
-  return `<!DOCTYPE html>
+  const propertySlug = buildPropertySlug(p);
+  const canonicalUrl = `${BASE_URL}/en/property/${propertySlug}`;
+
+  const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -143,8 +148,8 @@ function buildPropertyOgHtml(property: any, canonicalUrl: string): string {
   <meta property="og:locale" content="en_US" />
 
   <!-- Product-specific OG -->
-  <meta property="product:price:amount" content="${property.price || 0}" />
-  <meta property="product:price:currency" content="${property.currency || 'EUR'}" />
+  <meta property="product:price:amount" content="${p.price || 0}" />
+  <meta property="product:price:currency" content="${p.currency || 'EUR'}" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -160,43 +165,65 @@ function buildPropertyOgHtml(property: any, canonicalUrl: string): string {
   <p>Redirecting to <a href="${escapeHtml(canonicalUrl)}">${escapeHtml(title)}</a>…</p>
 </body>
 </html>`;
+
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.status(200).send(html);
+}
+
+// ─── Route handlers ───────────────────────────────────────────────────────────
+
+/**
+ * GET /api/og/property/:slug  (primary share endpoint)
+ *
+ * This is the URL the share button puts in the message.
+ * Because /api/* is always proxied nginx → Express, this endpoint is
+ * guaranteed to be reached by social media crawlers even when nginx
+ * serves frontend routes from static files.
+ *
+ *  - Social media bots  → 200 OG HTML  (property photo, title, price)
+ *  - Regular browsers   → 302 redirect to the real /en/property/:slug page
+ */
+export async function propertyOgShareHandler(req: Request, res: Response, next: () => void): Promise<void> {
+  try {
+    const rawSlug = req.params.slug;
+    const slug = (Array.isArray(rawSlug) ? rawSlug[0] : rawSlug || '').trim();
+    if (!slug) return next();
+
+    const userAgent = req.get('user-agent') || '';
+
+    if (!isSocialMediaBot(userAgent)) {
+      // Regular browser: redirect to the real property page using the visitor's language
+      const acceptLang = (req.get('accept-language') || 'en').slice(0, 2).toLowerCase();
+      const supported = ['en', 'sq', 'sr', 'bg', 'hr', 'bs', 'mk', 'me', 'ro', 'el'];
+      const lang = supported.includes(acceptLang) ? acceptLang : 'en';
+      res.redirect(302, `${BASE_URL}/${lang}/property/${slug}`);
+      return;
+    }
+
+    await servePropertyOgHtml(slug, res, next);
+  } catch {
+    next();
+  }
 }
 
 /**
- * Express route handler for property pages.
- * Only responds to social media bots – passes through otherwise.
- * Handles both /property/:slug and /:lang/property/:slug URL patterns.
+ * GET /property/:slug  and  GET /:lang/property/:slug  (fallback OG handler)
+ *
+ * Only fires when the Express server is also serving the frontend
+ * (i.e. single-container deployment or nginx proxying everything to Express).
+ * Regular browsers get passed through to the SPA catch-all; bots get OG HTML.
  */
 export async function propertyOgHandler(req: Request, res: Response, next: () => void): Promise<void> {
   const userAgent = req.get('user-agent') || '';
-  if (!isSocialMediaBot(userAgent)) {
-    return next();
-  }
+  if (!isSocialMediaBot(userAgent)) return next();
 
   try {
-    // Support both /property/:slug and /:lang/property/:slug
     const rawSlug = req.params.slug || req.params[0];
-    const slug: string = (Array.isArray(rawSlug) ? rawSlug[0] : rawSlug || '').trim();
+    const slug = (Array.isArray(rawSlug) ? rawSlug[0] : rawSlug || '').trim();
     if (!slug) return next();
 
-    // Resolve slug/encoded-id to a MongoDB ObjectId
-    const resolvedId = resolveId(slug);
-    if (!resolvedId || !isValidObjectId(resolvedId)) return next();
-
-    const property = await Property.findById(resolvedId)
-      .select('title price currency listingType propertyType bedrooms bathrooms sqft city country description images')
-      .lean();
-
-    if (!property) return next();
-
-    // Reconstruct the canonical slug the same way the frontend does
-    const propertySlug = buildPropertySlug(property);
-    const canonicalUrl = `${BASE_URL}/en/property/${propertySlug}`;
-    const html = buildPropertyOgHtml(property, canonicalUrl);
-
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour cache for bot responses
-    res.status(200).send(html);
+    await servePropertyOgHtml(slug, res, next);
   } catch {
     next();
   }

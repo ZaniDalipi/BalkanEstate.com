@@ -8,7 +8,7 @@ import morgan from 'morgan';
 import path from 'path';
 import { existsSync } from 'fs';
 import connectDB from './config/database';
-import { propertyOgHandler } from './utils/ogTagHandler';
+import { propertyOgHandler, propertyOgShareHandler } from './utils/ogTagHandler';
 import { setupChatSocket } from './sockets/chatSocket';
 import { setupPropertySocket } from './sockets/propertySocket';
 import { setSocketInstance } from './utils/socketInstance';
@@ -284,6 +284,12 @@ app.use('/api', xssSanitizer);
 
 // Apply API caching for GET requests (public data only)
 app.use('/api', apiCache);
+
+// OG share handler for property link previews.
+// Using /api/ prefix ensures nginx always proxies this to Express instead of
+// serving the generic index.html from the static dist/ folder.
+// Social media bots get property-specific OG HTML; browsers get a 302 redirect.
+app.get('/api/og/property/:slug', propertyOgShareHandler);
 
 // Sensitive routes with stricter rate limiting (auth, password reset, etc.)
 app.use('/api/auth', sensitiveRateLimiter, authRoutes);
