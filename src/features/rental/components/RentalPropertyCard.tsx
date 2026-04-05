@@ -5,7 +5,9 @@ import { useAppContext } from '@/context/AppContext';
 import { getCurrencySymbol } from '@/utils/currency';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { BuildingOfficeIcon } from '@/constants';
-import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '@/config/cloudinaryConfig';
+import { generatePropertySlug } from '@/utils/slug';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
 
 interface RentalPropertyCardProps {
     property: Property;
@@ -19,6 +21,7 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
 
     const handleClick = () => {
         dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
+        window.history.pushState({}, '', buildLocalizedPath(`/property/${generatePropertySlug(property)}`));
     };
 
     const currencySymbol = getCurrencySymbol(property.country);
@@ -66,8 +69,8 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                         srcSet={cloudinarySrcSet(property.imageUrl, [320, 480, 640])}
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         alt={property.title || property.address}
-                        style={{ transition: 'transform 300ms ease, opacity 300ms ease' }}
-                        className={`relative w-full h-full object-cover ${imageLoaded ? 'group-hover:scale-105 opacity-100' : 'opacity-0'}`}
+                        style={{ transition: 'transform 8s cubic-bezier(0.05, 0, 0.2, 1), opacity 300ms ease' }}
+                        className={`relative w-full h-full object-cover ${imageLoaded ? 'group-hover:scale-[1.02] opacity-100' : 'opacity-0'}`}
                         loading="lazy"
                         decoding="async"
                         width={640}

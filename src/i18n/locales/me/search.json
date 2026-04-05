@@ -326,7 +326,23 @@
     "backToChat": "Back to Chat",
     "swipeTitle": "Your Matches",
     "foundSwipe": "Found {{count}} properties! Swipe through them.",
-    "viewMatches": "View Matches"
+    "viewMatches": "View Matches",
+    "limitReached": {
+      "title": "Dostignut limit AI poruka",
+      "message": "Iskoristili ste svih {{limit}} besplatnih AI poruka ovog mjeseca.",
+      "resetsOn": "Vaše besplatne poruke se obnavljaju {{date}}.",
+      "upgradeToSellerPro": "Nadogradite na Prodavac Pro za neograničene AI poruke:",
+      "upgradeToBuyerPro": "Nadogradite na Kupac Pro za neograničene AI poruke:",
+      "benefit1": "Neograničene poruke AI asistenta za nekretnine",
+      "sellerBenefit2": "Oglasite do 250 nekretnina godišnje",
+      "sellerBenefit3": "AI opisi i uvidi o nekretninama",
+      "buyerBenefit2": "Trenutna obavještenja za nove oglase",
+      "buyerBenefit3": "Napredni tržišni uvidi i sačuvane pretrage",
+      "viewSellerPlans": "Pogledajte planove za prodavce",
+      "viewBuyerPlans": "Pogledajte planove za kupce",
+      "freeNote": "Besplatni plan uključuje {{limit}} AI poruka mjesečno.",
+      "chatMessage": "Dostigli ste mjesečni limit od {{limit}} besplatnih AI poruka. Nadogradite plan za neograničen pristup."
+    }
   },
   "energyRatings": {
     "any": "Bilo Koji",

@@ -326,7 +326,23 @@
     "backToChat": "Back to Chat",
     "swipeTitle": "Your Matches",
     "foundSwipe": "Found {{count}} properties! Swipe through them.",
-    "viewMatches": "View Matches"
+    "viewMatches": "View Matches",
+    "limitReached": {
+      "title": "Συμπληρώθηκε το όριο μηνυμάτων AI",
+      "message": "Χρησιμοποιήσατε και τα {{limit}} δωρεάν μηνύματα AI αυτόν τον μήνα.",
+      "resetsOn": "Τα δωρεάν μηνύματά σας ανανεώνονται στις {{date}}.",
+      "upgradeToSellerPro": "Αναβαθμίστε σε Πωλητής Pro για απεριόριστα μηνύματα AI:",
+      "upgradeToBuyerPro": "Αναβαθμίστε σε Αγοραστής Pro για απεριόριστα μηνύματα AI:",
+      "benefit1": "Απεριόριστα μηνύματα με τον AI βοηθό ακινήτων",
+      "sellerBenefit2": "Καταχωρήστε έως 250 ακίνητα ετησίως",
+      "sellerBenefit3": "AI περιγραφές και αναλύσεις ακινήτων",
+      "buyerBenefit2": "Άμεσες ειδοποιήσεις για νέες αγγελίες",
+      "buyerBenefit3": "Προηγμένες αναλύσεις αγοράς και αποθηκευμένες αναζητήσεις",
+      "viewSellerPlans": "Δείτε τα πλάνα πωλητών",
+      "viewBuyerPlans": "Δείτε τα πλάνα αγοραστών",
+      "freeNote": "Το δωρεάν πλάνο περιλαμβάνει {{limit}} μηνύματα AI ανά μήνα.",
+      "chatMessage": "Φτάσατε το μηνιαίο όριο των {{limit}} δωρεάν μηνυμάτων AI. Αναβαθμίστε το πλάνο σας για απεριόριστη πρόσβαση."
+    }
   },
   "energyRatings": {
     "any": "Οποιαδήποτε",

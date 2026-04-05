@@ -326,7 +326,23 @@
     "backToChat": "Back to Chat",
     "swipeTitle": "Your Matches",
     "foundSwipe": "Found {{count}} properties! Swipe through them.",
-    "viewMatches": "View Matches"
+    "viewMatches": "View Matches",
+    "limitReached": {
+      "title": "Limita de mesaje AI atinsă",
+      "message": "Ați utilizat toate cele {{limit}} mesaje AI gratuite în această lună.",
+      "resetsOn": "Mesajele gratuite se resetează pe {{date}}.",
+      "upgradeToSellerPro": "Faceți upgrade la Vânzător Pro pentru mesaje AI nelimitate:",
+      "upgradeToBuyerPro": "Faceți upgrade la Cumpărător Pro pentru mesaje AI nelimitate:",
+      "benefit1": "Mesaje nelimitate cu asistentul AI pentru proprietăți",
+      "sellerBenefit2": "Publicați până la 250 de proprietăți pe an",
+      "sellerBenefit3": "Descrieri și analize AI pentru proprietăți",
+      "buyerBenefit2": "Notificări instantanee pentru anunțuri noi",
+      "buyerBenefit3": "Analize avansate de piață și căutări salvate",
+      "viewSellerPlans": "Vezi planurile pentru vânzători",
+      "viewBuyerPlans": "Vezi planurile pentru cumpărători",
+      "freeNote": "Planul gratuit include {{limit}} mesaje AI pe lună.",
+      "chatMessage": "Ați atins limita lunară de {{limit}} mesaje AI gratuite. Faceți upgrade la plan pentru acces nelimitat."
+    }
   },
   "energyRatings": {
     "any": "Oricare",
