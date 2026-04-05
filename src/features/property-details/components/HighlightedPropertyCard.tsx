@@ -83,7 +83,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
   onCardClick,
   onFavoriteClick,
 }) => {
-  const { t } = useTranslation(['property', 'common']);
+  const { t } = useTranslation(['property', 'common', 'rental']);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
   const [isHovered, setIsHovered] = useState(false);
@@ -327,10 +327,18 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
                   {formatPrice(property.price, property.country)}
                   {isRental && <span className="text-xs font-normal text-neutral-400">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
                 </span>
-                {property.sqft > 0 && property.propertyType !== 'land' && (
-                  <p className="text-[11px] text-neutral-400 font-medium">
-                    {formatPrice(Math.round(property.price / property.sqft), property.country)} per m²
-                  </p>
+                {isRental ? (
+                  property.rentPeriod !== 'daily' && (
+                    <p className="text-[11px] text-neutral-400 font-medium">
+                      {formatPrice(Math.round(property.price / (property.rentPeriod === 'weekly' ? 7 : 30)), property.country)}{t('rental:perDay', '/day')}
+                    </p>
+                  )
+                ) : (
+                  property.sqft > 0 && property.propertyType !== 'land' && (
+                    <p className="text-[11px] text-neutral-400 font-medium">
+                      {formatPrice(Math.round(property.price / property.sqft), property.country)} per m²
+                    </p>
+                  )
                 )}
               </>
             )}
