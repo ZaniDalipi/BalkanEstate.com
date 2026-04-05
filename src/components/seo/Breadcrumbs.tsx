@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { generatePropertySlug } from '@/utils/slug';
 
 interface BreadcrumbItem {
   label: string;
@@ -113,13 +114,16 @@ export const generatePropertyBreadcrumbs = (property: {
   address: string;
   city: string;
   country: string;
+  beds?: number;
+  propertyType?: string;
+  listingType?: string;
 }): BreadcrumbItem[] => {
   return [
     { label: 'Home', href: '/' },
     { label: 'Properties', href: '/search' },
     { label: property.country, href: `/search?country=${encodeURIComponent(property.country)}` },
     { label: property.city, href: `/search?city=${encodeURIComponent(property.city)}` },
-    { label: property.address, href: `/property/${property.id}` },
+    { label: property.address, href: `/property/${generatePropertySlug(property)}` },
   ];
 };
 

@@ -10,6 +10,7 @@ import { getAllAgents } from '@/src/features/agents/api/agentApi';
 import { getAgencies } from '@/src/features/agencies/api/agencyApi';
 import { getFeaturedCities } from '@/src/features/cities/api/cityApi';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
+import { generatePropertySlug } from '@/utils/slug';
 import HeroSection from './HeroSection';
 import AppShowcaseSection from './AppShowcaseSection';
 import QuickAccessSection from './QuickAccessSection';
@@ -174,7 +175,7 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
 
   const handlePropertyClick = useCallback((property: Property) => {
     dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-    navigate(`/property/${property.id}`, { direction: 'up' });
+    navigate(`/property/${generatePropertySlug(property)}`, { direction: 'up' });
   }, [dispatch, navigate]);
 
   const handleCategoryClick = useCallback((propertyType: string, listingType?: string) => {

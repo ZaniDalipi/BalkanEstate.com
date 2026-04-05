@@ -5,6 +5,8 @@ import { useAppContext } from '@/context/AppContext';
 import { getCurrencySymbol } from '@/utils/currency';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { BuildingOfficeIcon } from '@/constants';
+import { generatePropertySlug } from '@/utils/slug';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
 
 interface RentalPropertyCardProps {
@@ -18,6 +20,7 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
 
     const handleClick = () => {
         dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
+        window.history.pushState({}, '', buildLocalizedPath(`/property/${generatePropertySlug(property)}`));
     };
 
     const currencySymbol = getCurrencySymbol(property.country);

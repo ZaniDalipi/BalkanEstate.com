@@ -7,6 +7,7 @@ import { formatPrice } from '@/utils/currency';
 import { CalendarIcon, UserCircleIcon, ChevronLeftIcon, BuildingOfficeIcon, ShieldExclamationIcon, TrashIcon } from '@/constants';
 import { getConversation, sendMessage as sendMessageAPI, uploadMessageImage, getSecurityWarning } from '@/services/apiService';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import { generatePropertySlug } from '@/utils/slug';
 import { socketService } from '@/services/socketService';
 import { notificationService } from '@/services/notificationService';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
@@ -246,7 +247,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                         onClick={() => {
                             dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property.id });
                             dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
-                            window.history.pushState({}, '', buildLocalizedPath(`/property/${property.id}`));
+                            window.history.pushState({}, '', buildLocalizedPath(`/property/${generatePropertySlug(property)}`));
                             window.dispatchEvent(new PopStateEvent('popstate'));
                         }}
                         className="hidden sm:block px-3 py-1.5 text-xs sm:text-sm font-semibold bg-primary-light text-primary-dark rounded-full hover:bg-primary/20 transition-colors"
