@@ -542,6 +542,22 @@ function SubscriptionEditPanel({ editingUser }: { editingUser: User }) {
   const [expiresDate, setExpiresDate] = useState(
     editingUser.subscriptionExpiresAt ? new Date(editingUser.subscriptionExpiresAt).toISOString().split('T')[0] : ''
   );
+
+  // Display DD/MM/YYYY, store YYYY-MM-DD internally
+  const [startDateDisplay, setStartDateDisplay] = useState(
+    startDate ? (() => { const [y, m, d] = startDate.split('-'); return `${d}/${m}/${y}`; })() : ''
+  );
+  const [expiresDateDisplay, setExpiresDateDisplay] = useState(
+    expiresDate ? (() => { const [y, m, d] = expiresDate.split('-'); return `${d}/${m}/${y}`; })() : ''
+  );
+  const parseDisplayDate = (display: string): string | null => {
+    const parts = display.split('/');
+    if (parts.length === 3 && parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
+      const iso = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      if (!isNaN(new Date(iso).getTime())) return iso;
+    }
+    return null;
+  };
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
 
@@ -652,20 +668,32 @@ function SubscriptionEditPanel({ editingUser }: { editingUser: User }) {
       {/* Date pickers */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">Start Date</label>
+          <label className="block text-xs font-medium text-gray-600 mb-1">Start Date (DD/MM/YYYY)</label>
           <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            type="text"
+            placeholder="DD/MM/YYYY"
+            value={startDateDisplay}
+            onChange={(e) => {
+              setStartDateDisplay(e.target.value);
+              const iso = parseDisplayDate(e.target.value);
+              if (iso) setStartDate(iso);
+              else if (e.target.value === '') setStartDate('');
+            }}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">Expiration Date</label>
+          <label className="block text-xs font-medium text-gray-600 mb-1">Expiration Date (DD/MM/YYYY)</label>
           <input
-            type="date"
-            value={expiresDate}
-            onChange={(e) => setExpiresDate(e.target.value)}
+            type="text"
+            placeholder="DD/MM/YYYY"
+            value={expiresDateDisplay}
+            onChange={(e) => {
+              setExpiresDateDisplay(e.target.value);
+              const iso = parseDisplayDate(e.target.value);
+              if (iso) setExpiresDate(iso);
+              else if (e.target.value === '') setExpiresDate('');
+            }}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
           />
         </div>
