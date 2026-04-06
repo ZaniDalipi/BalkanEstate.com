@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
-import { SearchIcon, XMarkIcon, BellIcon, BuildingLibraryIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon } from '@/constants';
+import { SearchIcon, XMarkIcon, BellIcon, BuildingLibraryIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon, AdjustmentsHorizontalIcon } from '@/constants';
 import AiSearch from './AiSearch';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import Footer from '@/components/shared/Footer';
@@ -791,6 +791,21 @@ const PropertyList = memo<PropertyListProps>((props) => {
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
     const loadMoreRef = useRef(null);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(false);
+
+    // Count active basic filters (shown in collapse toggle badge)
+    const activeBasicFilterCount = [
+        filters.query,
+        filters.minPrice,
+        filters.maxPrice,
+        filters.minSqft,
+        filters.maxSqft,
+        filters.minPricePerSqm,
+        filters.maxPricePerSqm,
+        filters.maxDaysListed,
+        filters.hasDiscount,
+        filters.hasPriceIncrease,
+    ].filter(v => v !== null && v !== undefined && v !== '' && v !== false).length;
 
     // Entrance animation: check if splash screen just completed
     const [animateCards, setAnimateCards] = useState(() => {
@@ -844,7 +859,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
             <div className="flex flex-col h-full bg-transparent">
                 {/* TOP CONTROLS SECTION */}
                 <div className={`${searchMode === 'ai' ? 'flex flex-col' : 'flex-shrink-0'} border-b border-neutral-200`} style={searchMode === 'ai' ? { flex: '1 1 50%', minHeight: 0 } : undefined}>
-                    <div className="p-4 flex-shrink-0">
+                    <div className="p-4 pb-2 flex-shrink-0">
                         <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm max-w-sm mx-auto">
                             <button onClick={() => onSearchModeChange('manual')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'manual' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('search:title')}</button>
                             {isAuthenticated ? (
@@ -857,22 +872,56 @@ const PropertyList = memo<PropertyListProps>((props) => {
                         </div>
                     </div>
 
-                    <div className={`px-4 pb-4 relative z-[60] ${searchMode === 'ai' ? 'flex-grow min-h-0' : ''}`} style={searchMode === 'manual' ? { height: '280px' } : undefined}>
-                        {searchMode === 'manual' ? (
-                            <div className="h-full overflow-y-auto pr-2">
-                                <FilterControls {...props} />
-                            </div>
-                        ) : (
-                            <div className="h-full">
-                                <AiSearch
-                                    properties={properties}
-                                    onApplyFilters={onApplyAiFilters}
-                                    isMobile={isMobile}
-                                    history={aiChatHistory}
-                                    onHistoryChange={onAiChatHistoryChange}
-                                />
-                            </div>
-                        )}
+                    {searchMode === 'manual' && (
+                        <div className="px-4 pt-2 pb-1 flex-shrink-0">
+                            <button
+                                type="button"
+                                onClick={() => setIsFiltersCollapsed(!isFiltersCollapsed)}
+                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-neutral-50 border border-neutral-200 hover:bg-neutral-100 transition-colors"
+                                aria-expanded={!isFiltersCollapsed}
+                                aria-controls="desktop-filter-panel"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <AdjustmentsHorizontalIcon className="w-4 h-4 text-neutral-600" />
+                                    <span className="text-sm font-semibold text-neutral-700">{t('search:filters.filters', 'Filters')}</span>
+                                    {isFiltersCollapsed && activeBasicFilterCount > 0 && (
+                                        <span className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-primary rounded-full">
+                                            {activeBasicFilterCount}
+                                        </span>
+                                    )}
+                                </div>
+                                <ChevronDownIcon className={`w-4 h-4 text-neutral-500 transition-transform duration-300 ${isFiltersCollapsed ? '' : 'rotate-180'}`} />
+                            </button>
+                        </div>
+                    )}
+
+                    <div
+                        id="desktop-filter-panel"
+                        className={`relative z-[60] transition-all duration-300 ease-in-out overflow-hidden ${searchMode === 'ai' ? 'flex-grow min-h-0' : ''}`}
+                        style={searchMode === 'manual'
+                            ? isFiltersCollapsed
+                                ? { height: 0, opacity: 0, padding: 0 }
+                                : { height: '280px', opacity: 1 }
+                            : undefined
+                        }
+                    >
+                        <div className="px-4 pb-4 h-full">
+                            {searchMode === 'manual' ? (
+                                <div className="h-full overflow-y-auto pr-2">
+                                    <FilterControls {...props} />
+                                </div>
+                            ) : (
+                                <div className="h-full">
+                                    <AiSearch
+                                        properties={properties}
+                                        onApplyFilters={onApplyAiFilters}
+                                        isMobile={isMobile}
+                                        history={aiChatHistory}
+                                        onHistoryChange={onAiChatHistoryChange}
+                                    />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
