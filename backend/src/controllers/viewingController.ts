@@ -262,7 +262,7 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
         actionLabel: 'View Requests',
       },
     }).catch(err => apiLogger.error('Failed to create new viewing notification:', err));
-    const formattedDate = viewingDate.toLocaleDateString('en-US', {
+    const formattedDate = viewingDate.toLocaleDateString('en-GB', {
       weekday: 'long',
       month: 'long',
       day: 'numeric',
@@ -453,7 +453,7 @@ export const updateViewingStatus = async (req: Request, res: Response): Promise<
     const location = property ? [property.address, property.city, property.country].filter(Boolean).join(', ') : '';
 
     const viewingDate = new Date(viewing.date);
-    const formattedDate = viewingDate.toLocaleDateString('en-US', {
+    const formattedDate = viewingDate.toLocaleDateString('en-GB', {
       weekday: 'long',
       month: 'long',
       day: 'numeric',

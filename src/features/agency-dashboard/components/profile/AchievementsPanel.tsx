@@ -64,7 +64,7 @@ const AchievementsPanel: React.FC<AchievementsPanelProps> = ({ achievements }) =
                   {achievement.issuingOrganization}
                 </p>
                 <p className="text-xs text-gray-400 mt-0.5">
-                  {new Date(achievement.dateReceived).toLocaleDateString()}
+                  {new Date(achievement.dateReceived).toLocaleDateString('en-GB')}
                 </p>
               </div>
             </div>

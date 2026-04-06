@@ -170,7 +170,7 @@ export async function sendDailyActivityReport(): Promise<void> {
     }
 
     const html = generateReportHtml(summary);
-    const today = new Date().toLocaleDateString('en-US', {
+    const today = new Date().toLocaleDateString('en-GB', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',

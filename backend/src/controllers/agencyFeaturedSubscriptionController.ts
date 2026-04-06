@@ -50,7 +50,7 @@ export const createFeaturedSubscription = async (req: Request, res: Response): P
     if (agency.isFeatured && agency.featuredEndDate && agency.featuredEndDate > now) {
       res.status(400).json({
         error: 'Agency is already featured',
-        message: `Your agency is already featured until ${agency.featuredEndDate.toLocaleDateString()}`,
+        message: `Your agency is already featured until ${agency.featuredEndDate.toLocaleDateString('en-GB')}`,
         featuredEndDate: agency.featuredEndDate,
         daysRemaining: Math.ceil((agency.featuredEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)),
       });

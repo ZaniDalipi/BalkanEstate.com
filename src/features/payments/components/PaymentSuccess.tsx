@@ -423,7 +423,7 @@ const PaymentSuccess: React.FC = () => {
                       <div className="flex justify-between">
                         <span className="text-neutral-600">{t('success.validUntil')}:</span>
                         <span className="font-medium text-neutral-800">
-                          {new Date(paymentDetails.subscription.expiresAt).toLocaleDateString()}
+                          {new Date(paymentDetails.subscription.expiresAt).toLocaleDateString('en-GB')}
                         </span>
                       </div>
                     )}

@@ -114,7 +114,7 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                 {/* Available From */}
                 {property.availableFrom && !isRented && (
                     <div className="absolute bottom-2 left-2 glass-badge text-xs px-2 py-1 text-gray-700">
-                        {t('rental:availableFrom')}: {new Date(property.availableFrom).toLocaleDateString()}
+                        {t('rental:availableFrom')}: {new Date(property.availableFrom).toLocaleDateString('en-GB')}
                     </div>
                 )}
             </div>

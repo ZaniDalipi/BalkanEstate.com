@@ -27,7 +27,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 const NewsCard: React.FC<{ item: NewsItem; index: number; t: (key: string, fallback?: string) => string }> = ({ item, index, t }) => {
-  const formattedDate = new Date(item.date).toLocaleDateString('en-US', {
+  const formattedDate = new Date(item.date).toLocaleDateString('en-GB', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',

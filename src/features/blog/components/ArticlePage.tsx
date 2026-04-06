@@ -75,7 +75,7 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
   }
 
   const publishedDate = article.publishedAt
-    ? new Date(article.publishedAt).toLocaleDateString('en-US', {
+    ? new Date(article.publishedAt).toLocaleDateString('en-GB', {
         month: 'long',
         day: 'numeric',
         year: 'numeric',

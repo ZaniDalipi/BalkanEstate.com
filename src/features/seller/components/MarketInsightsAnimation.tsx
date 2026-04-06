@@ -285,7 +285,7 @@ const MarketInsightsAnimation: React.FC<MarketInsightsAnimationProps> = ({
             {cityData && (
                 <div className="mt-4 text-center">
                     <p className="text-xs text-neutral-500">
-                        📊 Live market data powered by AI • Updated {new Date(cityData.lastUpdated).toLocaleDateString()}
+                        📊 Live market data powered by AI • Updated {new Date(cityData.lastUpdated).toLocaleDateString('en-GB')}
                     </p>
                 </div>
             )}

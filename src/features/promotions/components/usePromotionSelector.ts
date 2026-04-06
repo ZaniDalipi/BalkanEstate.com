@@ -304,7 +304,7 @@ export function usePromotionSelector({
         });
 
         if (result.isFree) {
-          setSuccessMessage(`Promotion extended successfully! New end date: ${new Date(result.newEndDate!).toLocaleDateString()}`);
+          setSuccessMessage(`Promotion extended successfully! New end date: ${new Date(result.newEndDate!).toLocaleDateString('en-GB')}`);
           setTimeout(() => onSuccess?.(), 1500);
           return;
         }

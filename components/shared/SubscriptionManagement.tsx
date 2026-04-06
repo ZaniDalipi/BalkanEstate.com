@@ -731,7 +731,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
   const formatDate = (date: Date | null) => {
     if (!date) return 'N/A';
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    return date.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
   const getStatusColor = (status?: string) => {
@@ -1507,7 +1507,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                           <div className="flex items-center justify-between sm:justify-end gap-2 pl-4 sm:pl-0">
                             <span className="text-xs text-green-600 whitespace-nowrap">
                               <span className="hidden sm:inline">{t('management.expiresLabel', 'Expires:')} </span>
-                              {new Date(coupon.expiresAt).toLocaleDateString()}
+                              {new Date(coupon.expiresAt).toLocaleDateString('en-GB')}
                             </span>
                             <button
                               onClick={() => handleCopyCode(coupon.code)}
@@ -1556,7 +1556,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                               </span>
                             </div>
                             <span className="text-xs text-amber-700 pl-3.5 sm:pl-0">
-                              {coupon.usedAt ? new Date(coupon.usedAt).toLocaleDateString() : t('management.redeemed', 'Redeemed')}
+                              {coupon.usedAt ? new Date(coupon.usedAt).toLocaleDateString('en-GB') : t('management.redeemed', 'Redeemed')}
                             </span>
                           </div>
                           {coupon.usedBy && (
@@ -1630,7 +1630,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               </div>
 
               <p className="text-xs text-neutral-400 mt-2">
-                {t('management.refreshesMonthly', 'Refreshes monthly')} • {t('management.lastRefresh', { date: new Date(agencyTeamData.promotionCoupons.lastRefresh).toLocaleDateString(), defaultValue: 'Last refresh: {{date}}' })}
+                {t('management.refreshesMonthly', 'Refreshes monthly')} • {t('management.lastRefresh', { date: new Date(agencyTeamData.promotionCoupons.lastRefresh).toLocaleDateString('en-GB'), defaultValue: 'Last refresh: {{date}}' })}
               </p>
             </div>
           )}

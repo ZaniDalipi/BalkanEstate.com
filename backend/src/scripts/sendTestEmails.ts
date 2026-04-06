@@ -75,7 +75,7 @@ async function sendAgentCouponsEmail() {
   log.info(`   To: ${TEST_EMAIL}`);
   log.info('   Contains 5 agent registration codes:');
   testAgentCoupons.forEach((coupon, i) => {
-    log.info(`   ${i + 1}. ${coupon.code} (expires: ${coupon.expiresAt.toLocaleDateString()})`);
+    log.info(`   ${i + 1}. ${coupon.code} (expires: ${coupon.expiresAt.toLocaleDateString('en-GB')})`);
   });
 
   await sendAgentRegistrationCouponsEmail({

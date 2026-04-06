@@ -344,7 +344,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
   const handleSave = useCallback(async () => {
     if (points.length < 2) return;
 
-    const name = measurementName.trim() || address.trim() || `Measurement ${new Date().toLocaleDateString()}`;
+    const name = measurementName.trim() || address.trim() || `Measurement ${new Date().toLocaleDateString('en-GB')}`;
 
     const measurement: SavedMeasurement = {
       id: `measurement-${Date.now()}`,

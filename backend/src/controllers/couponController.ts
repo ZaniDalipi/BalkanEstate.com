@@ -160,7 +160,7 @@ export const validateCoupon = async (req: Request, res: Response): Promise<void>
     }
 
     if (coupon.status === 'expired' || !coupon.isValid()) {
-      const expiredDate = coupon.validUntil ? new Date(coupon.validUntil).toLocaleDateString() : '';
+      const expiredDate = coupon.validUntil ? new Date(coupon.validUntil).toLocaleDateString('en-GB') : '';
       res.status(400).json({ message: `This coupon expired on ${expiredDate}. It is no longer valid.` });
       return;
     }

@@ -247,8 +247,8 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
             <div className={`h-full rounded-full transition-all duration-300 ${progressBarClass}`} style={{ width: `${100 - progressPercent}%` }} />
           </div>
           <div className="flex justify-between text-xs text-neutral-400 mt-1">
-            <span>{t('promotionCard.started', 'Started:')} {new Date(startDate).toLocaleDateString()}</span>
-            <span>{t('promotionCard.ends', 'Ends:')} {new Date(endDate).toLocaleDateString()}</span>
+            <span>{t('promotionCard.started', 'Started:')} {new Date(startDate).toLocaleDateString('en-GB')}</span>
+            <span>{t('promotionCard.ends', 'Ends:')} {new Date(endDate).toLocaleDateString('en-GB')}</span>
           </div>
         </div>
 

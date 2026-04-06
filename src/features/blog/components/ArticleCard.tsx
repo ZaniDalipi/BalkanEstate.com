@@ -46,7 +46,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, index, t }) => {
   };
 
   const publishedDate = article.publishedAt
-    ? new Date(article.publishedAt).toLocaleDateString('en-US', {
+    ? new Date(article.publishedAt).toLocaleDateString('en-GB', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',

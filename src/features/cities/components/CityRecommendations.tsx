@@ -219,7 +219,7 @@ const CityRecommendations: React.FC = () => {
                   </p>
                   <p className="text-xs text-slate-500">
                     {t('aiInsights.lastUpdated', {
-                      date: new Date(cities[0].lastUpdated).toLocaleDateString('en-US', {
+                      date: new Date(cities[0].lastUpdated).toLocaleDateString('en-GB', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric'

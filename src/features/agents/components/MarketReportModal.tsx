@@ -118,7 +118,7 @@ const MarketReportModal: React.FC<MarketReportModalProps> = ({
                                 </span>
                                 {marketData.lastUpdated && (
                                     <span className="text-xs text-gray-400">
-                                        Updated {new Date(marketData.lastUpdated).toLocaleDateString()}
+                                        Updated {new Date(marketData.lastUpdated).toLocaleDateString('en-GB')}
                                     </span>
                                 )}
                             </div>

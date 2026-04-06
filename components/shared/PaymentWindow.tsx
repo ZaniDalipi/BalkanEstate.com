@@ -733,7 +733,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                   <div className="text-right">
                     <p className="text-xs text-neutral-500">{t('payment:subscription.renewsOn')}</p>
                     <p className="text-sm font-medium text-neutral-700">
-                      {new Date(state.currentUser.subscriptionExpiresAt).toLocaleDateString()}
+                      {new Date(state.currentUser.subscriptionExpiresAt).toLocaleDateString('en-GB')}
                     </p>
                   </div>
                 )}

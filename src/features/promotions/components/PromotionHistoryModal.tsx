@@ -220,9 +220,9 @@ const PromotionHistoryModal: React.FC<PromotionHistoryModalProps> = ({
                           <div className="flex items-center gap-4 text-sm text-neutral-600 mb-3">
                             <div className="flex items-center gap-1">
                               <ClockIcon className="w-4 h-4" />
-                              <span>{new Date(item.startDate).toLocaleDateString()}</span>
+                              <span>{new Date(item.startDate).toLocaleDateString('en-GB')}</span>
                               <span className="text-neutral-400">→</span>
-                              <span>{new Date(item.endDate).toLocaleDateString()}</span>
+                              <span>{new Date(item.endDate).toLocaleDateString('en-GB')}</span>
                             </div>
                             {item.isActive && (
                               <span className="text-green-600 font-medium">

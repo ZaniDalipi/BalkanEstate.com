@@ -278,7 +278,7 @@ const NotificationCenter: React.FC = () => {
     if (minutes < 60) return t('common:time.minutesAgo', '{{count}}m ago', { count: minutes });
     if (hours < 24) return t('common:time.hoursAgo', '{{count}}h ago', { count: hours });
     if (days < 7) return t('common:time.daysAgo', '{{count}}d ago', { count: days });
-    return date.toLocaleDateString();
+    return date.toLocaleDateString('en-GB');
   };
 
   if (!isAuthenticated) {

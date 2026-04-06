@@ -443,7 +443,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
               <div key={request._id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-yellow-200">
                 <div>
                   <p className="font-medium text-gray-900">{request.agencyId?.name || 'Unknown Agency'}</p>
-                  <p className="text-xs text-gray-600">{t('agencies:management.sent', 'Sent:')} {new Date(request.createdAt).toLocaleDateString()}</p>
+                  <p className="text-xs text-gray-600">{t('agencies:management.sent', 'Sent:')} {new Date(request.createdAt).toLocaleDateString('en-GB')}</p>
                 </div>
                 <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full">
                   {t('agencies:management.pendingApproval', 'Pending Approval')}
@@ -478,7 +478,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                 <div className="flex-1">
                   <h5 className="font-semibold text-green-800">{t('agencies:management.welcomeToAgency', 'Welcome to {{name}}!', { name: couponRedemptionSuccess.agencyName })}</h5>
                   <p className="text-sm text-green-700 mt-1">
-                    {t('agencies:management.proSubscriptionInfo', 'You now have a Pro subscription with {{listings}} listings, valid until {{date}}.', { listings: couponRedemptionSuccess.subscription.listingsLimit, date: new Date(couponRedemptionSuccess.subscription.expiresAt).toLocaleDateString() })}
+                    {t('agencies:management.proSubscriptionInfo', 'You now have a Pro subscription with {{listings}} listings, valid until {{date}}.', { listings: couponRedemptionSuccess.subscription.listingsLimit, date: new Date(couponRedemptionSuccess.subscription.expiresAt).toLocaleDateString('en-GB') })}
                   </p>
                   <div className="mt-4 flex gap-3">
                     <button

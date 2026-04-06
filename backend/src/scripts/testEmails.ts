@@ -80,7 +80,7 @@ function generateAgentCouponsEmail(params: {
         Agent ${index + 1}
       </td>
       <td style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; color: #6b7280; font-size: 13px;">
-        ${coupon.expiresAt.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+        ${coupon.expiresAt.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })}
       </td>
     </tr>
   `).join('');

@@ -2396,14 +2396,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-slate-500">{t('adminStats.featuredUntil', 'Featured Until')}</span>
                           <span className="font-semibold text-slate-800">
-                            {new Date((agencyData as any).featuredEndDate).toLocaleDateString()}
+                            {new Date((agencyData as any).featuredEndDate).toLocaleDateString('en-GB')}
                           </span>
                         </div>
                       )}
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-slate-500">{t('adminStats.memberSince', 'Member Since')}</span>
                         <span className="font-semibold text-slate-800">
-                          {agencyData.createdAt ? new Date(agencyData.createdAt).toLocaleDateString() : '—'}
+                          {agencyData.createdAt ? new Date(agencyData.createdAt).toLocaleDateString('en-GB') : '—'}
                         </span>
                       </div>
                     </div>

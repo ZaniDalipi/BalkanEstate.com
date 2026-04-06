@@ -419,7 +419,7 @@ function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
 
   const formatDisplayDate = (dateStr?: string) => {
     if (!dateStr) return '—';
-    return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    return new Date(dateStr).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
   const handleSave = async () => {

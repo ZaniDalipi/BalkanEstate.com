@@ -113,7 +113,7 @@ const PropertyTable: React.FC<PropertyTableProps> = ({
                   <td className="px-4 py-3 text-gray-600">
                     <span className="inline-flex items-center gap-1"><EnvelopeIcon className="w-3.5 h-3.5" />{prop.inquiries}</span>
                   </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{new Date(prop.listedAt).toLocaleDateString()}</td>
+                  <td className="px-4 py-3 text-gray-500 text-xs">{new Date(prop.listedAt).toLocaleDateString('en-GB')}</td>
                 </tr>
               ))}
           </tbody>

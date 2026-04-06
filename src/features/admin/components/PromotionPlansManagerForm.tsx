@@ -175,9 +175,9 @@ export const PlanCard: React.FC<{
         <div className="px-4 py-2 border-b border-gray-100 bg-rose-50/50">
           <div className="text-xs text-gray-500 font-medium mb-1">{t('admin:promotionPlans.availability', 'Availability')}</div>
           <div className="flex items-center gap-2 text-xs text-gray-600">
-            {plan.availableFrom && <span>{new Date(plan.availableFrom).toLocaleDateString()}</span>}
+            {plan.availableFrom && <span>{new Date(plan.availableFrom).toLocaleDateString('en-GB')}</span>}
             <span>&rarr;</span>
-            {plan.availableTo && <span>{new Date(plan.availableTo).toLocaleDateString()}</span>}
+            {plan.availableTo && <span>{new Date(plan.availableTo).toLocaleDateString('en-GB')}</span>}
           </div>
         </div>
       )}

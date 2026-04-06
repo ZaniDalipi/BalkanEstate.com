@@ -138,7 +138,7 @@ const ArticleManager: React.FC = () => {
                       </span>
                     </td>
                     <td className="py-3 px-4 text-xs">
-                      {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString() : '-'}
+                      {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('en-GB') : '-'}
                     </td>
                     <td className="py-3 px-4">{article.viewCount}</td>
                     <td className="py-3 px-4 flex gap-2">

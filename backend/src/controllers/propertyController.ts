@@ -749,7 +749,7 @@ export const createProperty = async (
       const monthlyCreated = user.subscription.monthlyListingsCreated || 0;
       if (monthlyCreated >= monthlyLimit) {
         res.status(403).json({
-          message: `You have reached your monthly limit of ${monthlyLimit} listings. Your limit resets on ${user.subscription.listingsMonthResetDate?.toLocaleDateString() || 'next month'}.`,
+          message: `You have reached your monthly limit of ${monthlyLimit} listings. Your limit resets on ${user.subscription.listingsMonthResetDate?.toLocaleDateString('en-GB') || 'next month'}.`,
           code: 'MONTHLY_LISTING_LIMIT_REACHED',
           tier,
           limit: monthlyLimit,

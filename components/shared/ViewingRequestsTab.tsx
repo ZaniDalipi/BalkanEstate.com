@@ -144,7 +144,7 @@ const ViewingRequestsTab: React.FC = () => {
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('en-GB', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
@@ -472,7 +472,7 @@ const ViewingRequestsTab: React.FC = () => {
 
                     {/* Timestamp */}
                     <p className="text-xs text-neutral-400 mt-2">
-                      {t('property:viewings.requested', 'Requested')} {new Date(viewing.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      {t('property:viewings.requested', 'Requested')} {new Date(viewing.createdAt).toLocaleDateString('en-GB', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
                 </div>

@@ -869,7 +869,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                             </div>
                                             <div className="text-right">
                                                 <div className="text-gray-500 text-sm">
-                                                    {t.createdAt ? new Date(t.createdAt).toLocaleDateString('en-US', {
+                                                    {t.createdAt ? new Date(t.createdAt).toLocaleDateString('en-GB', {
                                                         year: 'numeric',
                                                         month: 'short',
                                                         day: 'numeric',

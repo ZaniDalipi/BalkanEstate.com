@@ -182,8 +182,8 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                 const localDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
                 dates.push({
                     value: localDateStr,
-                    label: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                    dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
+                    label: d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' }),
+                    dayName: d.toLocaleDateString('en-GB', { weekday: 'short' }),
                     dayOfWeek: d.getDay(),
                 });
             }
@@ -293,7 +293,7 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
 
     const location = [property.address, property.city, property.country].filter(Boolean).join(', ');
     const formattedDate = selectedDate
-        ? new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+        ? new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
         : '';
 
     if (!isOpen) return null;

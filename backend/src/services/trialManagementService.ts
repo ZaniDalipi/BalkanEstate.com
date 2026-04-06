@@ -74,7 +74,7 @@ export const startAgentTrial = async (user: IUser): Promise<void> => {
  * Send trial start email
  */
 const sendTrialStartEmail = async (user: IUser): Promise<void> => {
-  const trialEndDate = user.trialEndDate!.toLocaleDateString('en-US', {
+  const trialEndDate = user.trialEndDate!.toLocaleDateString('en-GB', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -206,7 +206,7 @@ const sendTrialStartEmail = async (user: IUser): Promise<void> => {
  * Send trial expiration reminder (3 days before)
  */
 export const sendTrialExpirationReminder = async (user: IUser): Promise<void> => {
-  const trialEndDate = user.trialEndDate!.toLocaleDateString('en-US', {
+  const trialEndDate = user.trialEndDate!.toLocaleDateString('en-GB', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

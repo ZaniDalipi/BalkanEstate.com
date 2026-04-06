@@ -1154,7 +1154,7 @@ class EmailService {
   }
 
   async sendWelcomeCoupon(email: string, agencyName: string, couponCode: string, expiryDate: Date): Promise<void> {
-    const expiryDateStr = expiryDate.toLocaleDateString();
+    const expiryDateStr = expiryDate.toLocaleDateString('en-GB');
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
     const daysUntilExpiry = Math.max(1, Math.ceil((expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
 
@@ -1203,7 +1203,7 @@ class EmailService {
   }
 
   async sendExpiryReminder(email: string, agencyName: string, expiryDate: Date, couponCode: string, discount: number): Promise<void> {
-    const expiryDateStr = expiryDate.toLocaleDateString();
+    const expiryDateStr = expiryDate.toLocaleDateString('en-GB');
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
@@ -1250,7 +1250,7 @@ class EmailService {
   }
 
   async sendSubscriptionConfirmation(email: string, agencyName: string, details: { interval: string; price: number; endDate: Date }): Promise<void> {
-    const renewsDate = details.endDate.toLocaleDateString();
+    const renewsDate = details.endDate.toLocaleDateString('en-GB');
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
@@ -2318,9 +2318,9 @@ class EmailService {
         userName:      escapeHtml(userName) || 'there',
         planName:      escapeHtml(planName),
         daysUntil:     String(daysUntil),
-        renewalDate:   expiryDate.toLocaleDateString(),
+        renewalDate:   expiryDate.toLocaleDateString('en-GB'),
         amount:        '',
-        expiryDate:    expiryDate.toLocaleDateString(),
+        expiryDate:    expiryDate.toLocaleDateString('en-GB'),
         frontendUrl,
       };
       const { html, subject } = await renderEmailWithSiteSettings(config, variables);
@@ -2333,7 +2333,7 @@ class EmailService {
       <div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;" class="ec-card">
           <h1 style="color: #2563eb;" class="ec-text">Subscription Expiring Soon</h1>
           <p class="ec-text">Hi ${userName},</p>
-          <p class="ec-text">Your <strong>${planName}</strong> subscription will expire on <strong>${expiryDate.toLocaleDateString()}</strong>.</p>
+          <p class="ec-text">Your <strong>${planName}</strong> subscription will expire on <strong>${expiryDate.toLocaleDateString('en-GB')}</strong>.</p>
           <p class="ec-text">Don't lose access to your premium features! Renew your subscription to continue enjoying:</p>
           <ul class="ec-text">
             <li>Unlimited saved searches</li>
@@ -2353,7 +2353,7 @@ class EmailService {
       to: email,
       subject: `Your ${planName} subscription expires soon`,
       html,
-      text: `Hi ${userName}, your ${planName} subscription expires on ${expiryDate.toLocaleDateString()}. Renew at ${frontendUrl}/account`,
+      text: `Hi ${userName}, your ${planName} subscription expires on ${expiryDate.toLocaleDateString('en-GB')}. Renew at ${frontendUrl}/account`,
     });
   }
 
@@ -2362,7 +2362,7 @@ class EmailService {
    */
   async sendAutoRenewalReminder(email: string, userName: string, renewalDate: Date, planName: string): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
-    const formattedDate = renewalDate.toLocaleDateString();
+    const formattedDate = renewalDate.toLocaleDateString('en-GB');
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('auto-renewal-reminder');
@@ -2455,8 +2455,8 @@ class EmailService {
         planName:      escapeHtml(details.planName),
         description:   `${escapeHtml(details.planName)} Subscription`,
         amount:        `${details.currency}${details.amount.toFixed(2)}`,
-        paymentDate:   new Date().toLocaleDateString(),
-        expiresAt:     details.expiresAt.toLocaleDateString(),
+        paymentDate:   new Date().toLocaleDateString('en-GB'),
+        expiresAt:     details.expiresAt.toLocaleDateString('en-GB'),
         transactionId: escapeHtml(details.transactionId) || '',
         frontendUrl,
       };
@@ -2475,7 +2475,7 @@ class EmailService {
             <h3 style="margin-top: 0;" class="ec-text">Payment Details</h3>
             <p class="ec-text"><strong>Plan:</strong> ${details.planName}</p>
             <p class="ec-text"><strong>Amount:</strong> ${details.currency}${details.amount.toFixed(2)}</p>
-            <p class="ec-text"><strong>Valid Until:</strong> ${details.expiresAt.toLocaleDateString()}</p>
+            <p class="ec-text"><strong>Valid Until:</strong> ${details.expiresAt.toLocaleDateString('en-GB')}</p>
             ${details.transactionId ? `<p class="ec-text"><strong>Transaction ID:</strong> ${details.transactionId}</p>` : ''}
           </div>
           <p class="ec-text">You now have access to all premium features. Enjoy!</p>
@@ -2488,7 +2488,7 @@ class EmailService {
       to: email,
       subject: `Payment confirmed - ${details.planName} subscription active`,
       html,
-      text: `Payment confirmed! ${details.planName} subscription active until ${details.expiresAt.toLocaleDateString()}. Amount: ${details.currency}${details.amount.toFixed(2)}`,
+      text: `Payment confirmed! ${details.planName} subscription active until ${details.expiresAt.toLocaleDateString('en-GB')}. Amount: ${details.currency}${details.amount.toFixed(2)}`,
     });
   }
 
@@ -2507,8 +2507,8 @@ class EmailService {
       const variables: Record<string, string> = {
         userName:  escapeHtml(userName) || 'there',
         planName:  escapeHtml(details.planName),
-        endDate:   details.expiresAt.toLocaleDateString(),
-        expiresAt: details.expiresAt.toLocaleDateString(),
+        endDate:   details.expiresAt.toLocaleDateString('en-GB'),
+        expiresAt: details.expiresAt.toLocaleDateString('en-GB'),
         frontendUrl,
       };
       const { html, subject } = await renderEmailWithSiteSettings(config, variables);
@@ -2522,7 +2522,7 @@ class EmailService {
           <h1 style="color: #dc2626;" class="ec-text">Subscription Cancelled</h1>
           <p class="ec-text">Hi ${userName},</p>
           <p class="ec-text">We're sorry to see you go. Your <strong>${details.planName}</strong> subscription has been cancelled.</p>
-          <p class="ec-text">You'll continue to have access to premium features until <strong>${details.expiresAt.toLocaleDateString()}</strong>.</p>
+          <p class="ec-text">You'll continue to have access to premium features until <strong>${details.expiresAt.toLocaleDateString('en-GB')}</strong>.</p>
           <p class="ec-text">Changed your mind? You can resubscribe anytime to regain access to:</p>
           <ul class="ec-text">
             <li>Unlimited saved searches</li>
@@ -2537,9 +2537,9 @@ class EmailService {
     `);
     await this.sendEmail({
       to: email,
-      subject: `Subscription cancelled - access until ${details.expiresAt.toLocaleDateString()}`,
+      subject: `Subscription cancelled - access until ${details.expiresAt.toLocaleDateString('en-GB')}`,
       html,
-      text: `Your ${details.planName} subscription has been cancelled. Access continues until ${details.expiresAt.toLocaleDateString()}.`,
+      text: `Your ${details.planName} subscription has been cancelled. Access continues until ${details.expiresAt.toLocaleDateString('en-GB')}.`,
     });
   }
 
@@ -2753,8 +2753,8 @@ class EmailService {
         amount:          `${currencySymbol}${details.amount.toFixed(2)}`,
         billingPeriod:   billingText,
         orderId:         escapeHtml(details.orderId),
-        startDate:       details.subscriptionStartDate.toLocaleDateString(),
-        nextBillingDate: renewalDate.toLocaleDateString(),
+        startDate:       details.subscriptionStartDate.toLocaleDateString('en-GB'),
+        nextBillingDate: renewalDate.toLocaleDateString('en-GB'),
         autoRenewStatus: details.autoRenewing ? 'On' : 'Off',
         frontendUrl,
       };
@@ -2789,7 +2789,7 @@ class EmailService {
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; color: #6b7280;" class="ec-text-muted">Start Date:</td>
-                  <td style="padding: 8px 0; text-align: right;" class="ec-text">${details.subscriptionStartDate.toLocaleDateString()}</td>
+                  <td style="padding: 8px 0; text-align: right;" class="ec-text">${details.subscriptionStartDate.toLocaleDateString('en-GB')}</td>
                 </tr>
                 <tr style="border-top: 2px solid #e5e7eb;" class="ec-border">
                   <td style="padding: 16px 0 8px 0; color: #111827; font-weight: bold; font-size: 18px;" class="ec-text">Amount Paid:</td>
@@ -2803,7 +2803,7 @@ class EmailService {
             <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; padding: 16px; border-radius: 8px; margin: 20px 0;" class="ec-highlight">
               <h3 style="color: #1e40af; margin-top: 0; font-size: 14px;" class="ec-text">Auto-Renewal Information</h3>
               <p style="color: #1e3a8a; font-size: 13px; margin-bottom: 8px;" class="ec-text">
-                Your subscription will automatically renew on <strong>${renewalDate.toLocaleDateString()}</strong>.
+                Your subscription will automatically renew on <strong>${renewalDate.toLocaleDateString('en-GB')}</strong>.
               </p>
               <ul style="color: #1e3a8a; font-size: 12px; margin: 0; padding-left: 20px;" class="ec-text">
                 <li>You will be charged <strong>${currencySymbol}${details.amount.toFixed(2)}/${billingText}</strong></li>
@@ -2814,7 +2814,7 @@ class EmailService {
             ` : `
             <div style="background-color: #fef3c7; border: 1px solid #fcd34d; padding: 16px; border-radius: 8px; margin: 20px 0;" class="ec-highlight">
               <p style="color: #92400e; font-size: 13px; margin: 0;" class="ec-text">
-                Your subscription is set to expire on <strong>${renewalDate.toLocaleDateString()}</strong>.
+                Your subscription is set to expire on <strong>${renewalDate.toLocaleDateString('en-GB')}</strong>.
                 Visit your account to enable auto-renewal if you'd like to continue your subscription.
               </p>
             </div>
@@ -2857,7 +2857,7 @@ class EmailService {
       to: email,
       subject: `Invoice #${details.orderId} - ${details.planName} Subscription`,
       html,
-      text: `Invoice #${details.orderId}\n\nThank you for subscribing to ${details.planName}!\n\nAmount: ${currencySymbol}${details.amount.toFixed(2)}\nBilling: ${details.billingPeriod}\n${details.autoRenewing ? `Next renewal: ${renewalDate.toLocaleDateString()}\n\nYour subscription will automatically renew. You'll receive a reminder 7 days before.` : `Expires: ${renewalDate.toLocaleDateString()}`}\n\nManage your subscription at ${frontendUrl}/account`,
+      text: `Invoice #${details.orderId}\n\nThank you for subscribing to ${details.planName}!\n\nAmount: ${currencySymbol}${details.amount.toFixed(2)}\nBilling: ${details.billingPeriod}\n${details.autoRenewing ? `Next renewal: ${renewalDate.toLocaleDateString('en-GB')}\n\nYour subscription will automatically renew. You'll receive a reminder 7 days before.` : `Expires: ${renewalDate.toLocaleDateString('en-GB')}`}\n\nManage your subscription at ${frontendUrl}/account`,
     });
   }
 
@@ -4043,7 +4043,7 @@ Questions? Contact us at support@balkanestateai.com
           Agent ${index + 1}
         </td>
         <td style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; color: #6b7280; font-size: 13px;">
-          ${coupon.expiresAt.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+          ${coupon.expiresAt.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })}
         </td>
       </tr>`).join('');
 
@@ -4083,7 +4083,7 @@ Questions? Contact us at support@balkanestateai.com
           Agent ${index + 1}
         </td>
         <td style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; color: #6b7280; font-size: 13px;">
-          ${coupon.expiresAt.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+          ${coupon.expiresAt.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })}
         </td>
       </tr>
     `).join('');
@@ -4226,7 +4226,7 @@ Questions? Contact us at support@balkanestateai.com
 </body>
 </html>`;
 
-    const couponList = params.coupons.map((c, i) => `Agent ${i + 1}: ${c.code} (expires ${c.expiresAt.toLocaleDateString()})`).join('\n');
+    const couponList = params.coupons.map((c, i) => `Agent ${i + 1}: ${c.code} (expires ${c.expiresAt.toLocaleDateString('en-GB')})`).join('\n');
 
     await this.sendEmail({
       to: params.email,
@@ -4507,7 +4507,7 @@ Questions? Contact us at support@balkanestateai.com
     const safeAgencyName = escapeHtml(params.agencyName);
 
     const currentYear = new Date().getFullYear();
-    const expiryDate = params.expiresAt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const expiryDate = params.expiresAt.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
 
     // Try DB-driven template first
     const config = await getActiveEmailConfig('agent-joined-agency');

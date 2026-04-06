@@ -85,7 +85,7 @@ const InquiryTable: React.FC<InquiryTableProps> = ({
                     {inq.message.length > 60 ? `${inq.message.slice(0, 60)}...` : inq.message}
                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">
-                    {new Date(inq.date).toLocaleDateString()}
+                    {new Date(inq.date).toLocaleDateString('en-GB')}
                   </td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${STATUS_COLORS[inq.status] ?? 'bg-gray-100 text-gray-600'}`}>

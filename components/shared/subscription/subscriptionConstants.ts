@@ -128,7 +128,7 @@ export const STATUS_COLORS: Record<string, string> = {
 // Format date helper
 export const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString('en-GB', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

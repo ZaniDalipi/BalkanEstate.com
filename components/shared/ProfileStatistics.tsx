@@ -177,7 +177,7 @@ const SoldPropertyCard: React.FC<{ sale: SaleRecord }> = ({ sale }) => {
         <div className="flex items-center justify-between pt-2 border-t border-neutral-100 text-[10px] text-neutral-500">
           <div className="flex items-center gap-1">
             <CalendarIcon className="w-3 h-3" />
-            <span>{new Date(sale.soldAt).toLocaleDateString()}</span>
+            <span>{new Date(sale.soldAt).toLocaleDateString('en-GB')}</span>
           </div>
           <span className="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-medium">
             {t('account:statistics.daysOnMarket', { count: sale.daysOnMarket })}
@@ -501,7 +501,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
       sale.sqft || '',
       sale.salePrice,
       sale.daysOnMarket,
-      new Date(sale.soldAt).toLocaleDateString(),
+      new Date(sale.soldAt).toLocaleDateString('en-GB'),
     ]);
 
     const csvContent = [

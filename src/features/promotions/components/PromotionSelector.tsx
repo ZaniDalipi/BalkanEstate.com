@@ -137,7 +137,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
             <div className="text-left">
               <p className="text-xs text-gray-500 uppercase tracking-wide">{t('common:promotions.currentEndDate')}</p>
               <p className="text-lg font-bold text-gray-900">
-                {currentEndDate ? new Date(currentEndDate).toLocaleDateString('en-US', {
+                {currentEndDate ? new Date(currentEndDate).toLocaleDateString('en-GB', {
                   month: 'short',
                   day: 'numeric',
                   year: 'numeric'
@@ -148,7 +148,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
             <div className="text-left">
               <p className="text-xs text-gray-500 uppercase tracking-wide">{t('common:promotions.newEndDate')}</p>
               <p className={`text-lg font-bold ${extStyle.text}`}>
-                {calculateNewEndDate().toLocaleDateString('en-US', {
+                {calculateNewEndDate().toLocaleDateString('en-GB', {
                   month: 'short',
                   day: 'numeric',
                   year: 'numeric'

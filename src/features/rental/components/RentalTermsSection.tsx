@@ -104,7 +104,7 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
                             <p className="text-sm font-semibold text-neutral-800">
                                 {isAvailableNow
                                     ? t('rental:details.immediately')
-                                    : availableDate!.toLocaleDateString()}
+                                    : availableDate!.toLocaleDateString('en-GB')}
                             </p>
                         </div>
                     </div>

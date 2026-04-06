@@ -23,7 +23,7 @@ const MiniBarChart: React.FC<MiniBarChartProps> = ({
   const dayLabels = labels || data.map((_, i) => {
     const date = new Date();
     date.setDate(date.getDate() - (data.length - 1 - i));
-    return date.toLocaleDateString('en-US', { weekday: 'short' });
+    return date.toLocaleDateString('en-GB', { weekday: 'short' });
   });
 
   useEffect(() => {

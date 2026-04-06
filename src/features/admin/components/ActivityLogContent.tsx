@@ -521,7 +521,7 @@ export const ActivityList: React.FC<ActivityListProps> = ({
 
               <div className="hidden lg:block text-right">
                 <div className="text-sm text-gray-500">
-                  {new Date(activity.timestamp).toLocaleDateString()}
+                  {new Date(activity.timestamp).toLocaleDateString('en-GB')}
                 </div>
                 <div className="text-xs text-gray-400">
                   {new Date(activity.timestamp).toLocaleTimeString()}

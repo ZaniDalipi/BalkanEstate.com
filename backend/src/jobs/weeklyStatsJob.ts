@@ -17,8 +17,8 @@ import emailService, { WeeklyStatsData, AgencyWeeklyStatsData } from '../service
  */
 const formatDateRange = (startDate: Date, endDate: Date): string => {
   const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-  const start = startDate.toLocaleDateString('en-US', options);
-  const end = endDate.toLocaleDateString('en-US', options);
+  const start = startDate.toLocaleDateString('en-GB', options);
+  const end = endDate.toLocaleDateString('en-GB', options);
   return `${start} - ${end}`;
 };
 

@@ -261,10 +261,10 @@ function generateQuickBooks(bankExport: any): string {
 
   bankExport.records.forEach((record: any, index: number) => {
     lines.push(
-      `TRNS\t${index + 1}\tDEPOSIT\t${record.transactionDate.toLocaleDateString()}\tBank Account\t${record.amount.toFixed(2)}\t${record.transactionId}`
+      `TRNS\t${index + 1}\tDEPOSIT\t${record.transactionDate.toLocaleDateString('en-GB')}\tBank Account\t${record.amount.toFixed(2)}\t${record.transactionId}`
     );
     lines.push(
-      `SPL\t${index + 1}\tDEPOSIT\t${record.transactionDate.toLocaleDateString()}\tSales Income\t-${record.amount.toFixed(2)}\t${record.transactionId}`
+      `SPL\t${index + 1}\tDEPOSIT\t${record.transactionDate.toLocaleDateString('en-GB')}\tSales Income\t-${record.amount.toFixed(2)}\t${record.transactionId}`
     );
     lines.push('ENDTRNS');
   });

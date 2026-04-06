@@ -3205,7 +3205,7 @@ export const deleteAgency = async (req: Request, res: Response): Promise<void> =
     agencyLogger.info(`🗑️ Agency "${agency.name}" deleted by owner ${currentUser.email}. ${agentMembers.length} agents transferred to Pro monthly.`);
 
     res.json({
-      message: `Agency deleted successfully. ${agentMembers.length} agent(s) have been transferred to Pro monthly plan${agencyExpirationDate ? ` until ${agencyExpirationDate.toLocaleDateString()}` : ''}.`,
+      message: `Agency deleted successfully. ${agentMembers.length} agent(s) have been transferred to Pro monthly plan${agencyExpirationDate ? ` until ${agencyExpirationDate.toLocaleDateString('en-GB')}` : ''}.`,
       agentsTransferred: agentMembers.length,
     });
   } catch (error) {

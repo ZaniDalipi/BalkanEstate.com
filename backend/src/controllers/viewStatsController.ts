@@ -1010,7 +1010,7 @@ export const generateReport = async (req: Request, res: Response): Promise<void>
 
       // Format date
       const formatDate = (date: string) => {
-        return new Date(date).toLocaleDateString('en-US', {
+        return new Date(date).toLocaleDateString('en-GB', {
           year: 'numeric',
           month: 'long',
           day: 'numeric',

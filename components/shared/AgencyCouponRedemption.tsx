@@ -255,7 +255,7 @@ const AgencyCouponRedemption: React.FC<AgencyCouponRedemptionProps> = ({
               <li className="flex items-center gap-2">
                 <CheckCircleIcon className="w-4 h-4" />
                 <span>
-                  {t('agencies:coupon.success.validUntil', 'Subscription valid until {{date}}', { date: new Date(success.subscription.expiresAt).toLocaleDateString() })}
+                  {t('agencies:coupon.success.validUntil', 'Subscription valid until {{date}}', { date: new Date(success.subscription.expiresAt).toLocaleDateString('en-GB') })}
                 </span>
               </li>
             </ul>

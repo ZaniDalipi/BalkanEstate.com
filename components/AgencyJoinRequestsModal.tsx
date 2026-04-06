@@ -254,9 +254,9 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
 
                       {/* Dates */}
                       <div className="mt-3 text-xs text-gray-500">
-                        <p>{t('agencies:joinRequests.requestedLabel', 'Requested:')} {new Date(request.requestedAt).toLocaleDateString()}</p>
+                        <p>{t('agencies:joinRequests.requestedLabel', 'Requested:')} {new Date(request.requestedAt).toLocaleDateString('en-GB')}</p>
                         {request.respondedAt && (
-                          <p>{t('agencies:joinRequests.respondedLabel', 'Responded:')} {new Date(request.respondedAt).toLocaleDateString()}</p>
+                          <p>{t('agencies:joinRequests.respondedLabel', 'Responded:')} {new Date(request.respondedAt).toLocaleDateString('en-GB')}</p>
                         )}
                       </div>
 

@@ -1162,7 +1162,7 @@ export const manageUserSubscription = async (req: Request, res: Response): Promi
 
       res.json({
         success: true,
-        message: `Subscription activated for ${user.email} — ${subscriptionPlan} until ${expiresAt.toLocaleDateString()}`,
+        message: `Subscription activated for ${user.email} — ${subscriptionPlan} until ${expiresAt.toLocaleDateString('en-GB')}`,
       });
       return;
     }
