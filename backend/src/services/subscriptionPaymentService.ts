@@ -252,19 +252,12 @@ export async function processSubscriptionPayment(
     } else if (isPro) {
       user.subscription.tier = 'pro';
       const newListings = product.listingsLimit || (isYearly ? PRO_TIER_LIMITS.YEARLY.LISTINGS : PRO_TIER_LIMITS.MONTHLY.LISTINGS);
-      if (!isYearly && existingSubscription) {
-        // Monthly pro renewal: accumulate listings (unused listings roll over)
-        // e.g. Month 1: 30, Month 2 renewal: 60, Month 3 renewal: 90
+      if (!isYearly) {
+        // Monthly pro: always add 30 on top of current limit
+        // Keeps existing listings, just gives them 30 more slots
         user.subscription.listingsLimit = (user.subscription.listingsLimit || 0) + newListings;
       } else {
-        // New subscription (or yearly): fresh start with full quota
         user.subscription.listingsLimit = newListings;
-        if (!isYearly) {
-          // Reset active count for monthly pro fresh start
-          user.subscription.activeListingsCount = 0;
-          user.subscription.privateSellerCount = 0;
-          user.subscription.agentCount = 0;
-        }
       }
     }
     user.markModified('subscription');
