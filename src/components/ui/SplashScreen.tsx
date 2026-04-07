@@ -78,7 +78,7 @@ const HelloGreeting: React.FC<HelloGreetingProps> = ({ onComplete, userName }) =
             className="mt-2 text-3xl sm:text-4xl md:text-5xl font-light text-neutral-500 tracking-wide"
             style={{ fontFamily: "'SF Pro Display', system-ui, -apple-system, sans-serif" }}
             onAnimationComplete={() => {
-              setTimeout(() => onComplete?.(), 300);
+              setTimeout(() => onComplete?.(), 150);
             }}
           >
             {userName}
@@ -122,7 +122,7 @@ const BrandReveal: React.FC<BrandRevealProps> = ({ onComplete }) => {
           <motion.span
             initial={{ clipPath: 'inset(0 100% 0 0)' }}
             animate={{ clipPath: 'inset(0 0% 0 0)' }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-neutral-900"
             style={{ fontFamily: "'SF Pro Display', system-ui, -apple-system, sans-serif" }}
           >
@@ -133,7 +133,7 @@ const BrandReveal: React.FC<BrandRevealProps> = ({ onComplete }) => {
           <motion.span
             initial={{ clipPath: 'inset(0 100% 0 0)' }}
             animate={{ clipPath: 'inset(0 0% 0 0)' }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.45 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight"
             style={{
               fontFamily: "'SF Pro Display', system-ui, -apple-system, sans-serif",
@@ -189,7 +189,7 @@ interface SplashScreenProps {
 
 const SplashScreen: React.FC<SplashScreenProps> = ({
   onComplete,
-  minimumDuration = 2500,
+  minimumDuration = 1200,
   userName,
 }) => {
   const [phase, setPhase] = useState<'hello' | 'brand' | 'done'>('hello');
@@ -211,14 +211,14 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
 
   useEffect(() => {
     if (phase === 'brand' && brandDone && minTimeReached) {
-      const t = setTimeout(() => setPhase('done'), 500);
+      const t = setTimeout(() => setPhase('done'), 200);
       return () => clearTimeout(t);
     }
   }, [phase, brandDone, minTimeReached]);
 
   useEffect(() => {
     if (phase === 'done') {
-      const t = setTimeout(onComplete, 300);
+      const t = setTimeout(onComplete, 150);
       return () => clearTimeout(t);
     }
   }, [phase, onComplete]);
