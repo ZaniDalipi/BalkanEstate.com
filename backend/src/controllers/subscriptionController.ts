@@ -110,13 +110,18 @@ export const createSubscription = async (req: Request, res: Response): Promise<v
     user.subscriptionExpiresAt = expirationDate;
 
     // Initialize unified Pro subscription (30 active listings shared for monthly)
+    const isMonthly = product.billingPeriod === 'monthly';
+    const baseLimit = product.listingsLimit || 30;
+    const accumulatedLimit = isMonthly
+      ? (user.proSubscription?.totalListingsLimit || 0) + baseLimit
+      : baseLimit;
     user.proSubscription = {
       isActive: true,
-      plan: product.billingPeriod === 'monthly' ? 'pro_monthly' : 'pro_yearly',
+      plan: isMonthly ? 'pro_monthly' : 'pro_yearly',
       expiresAt: expirationDate,
       startedAt: startDate,
-      totalListingsLimit: product.listingsLimit || 30, // 30 active listings for Pro monthly
-      activeListingsCount: 0,
+      totalListingsLimit: accumulatedLimit,
+      activeListingsCount: user.proSubscription?.activeListingsCount || 0,
       privateSellerCount: 0,
       agentCount: 0,
       promotionCoupons: {
@@ -691,12 +696,17 @@ export const activateTestProSubscription = async (req: Request, res: Response): 
     expirationDate.setMonth(expirationDate.getMonth() + durationMonths);
 
     // Initialize/update Pro subscription (30 active listings shared for monthly)
+    const isMonthlyPlan = plan === 'pro_monthly';
+    const testBaseLimit = 30;
+    const testAccumulatedLimit = isMonthlyPlan
+      ? (user.proSubscription?.totalListingsLimit || 0) + testBaseLimit
+      : testBaseLimit;
     user.proSubscription = {
       isActive: true,
       plan: plan as 'pro_monthly' | 'pro_yearly',
       expiresAt: expirationDate,
       startedAt: startDate,
-      totalListingsLimit: 30, // 30 active listings for Pro monthly
+      totalListingsLimit: testAccumulatedLimit,
       activeListingsCount: user.proSubscription?.activeListingsCount || 0,
       privateSellerCount: user.proSubscription?.privateSellerCount || 0,
       agentCount: user.proSubscription?.agentCount || 0,
@@ -776,13 +786,15 @@ export const syncProSubscription = async (req: Request, res: Response): Promise<
       // Get product details for benefits
       const product = await Product.findOne({ productId: activeSubscription.productId });
 
-      // Update/initialize proSubscription based on active subscription (30 listings for monthly)
+      // Update/initialize proSubscription based on active subscription
+      // Preserve accumulated totalListingsLimit for monthly pro (don't reset on sync)
+      const syncLimit = user.proSubscription?.totalListingsLimit || product?.listingsLimit || 30;
       user.proSubscription = {
         isActive: true, // 🔥 THIS IS THE FIX
         plan: activeSubscription.productId.includes('yearly') ? 'pro_yearly' : 'pro_monthly',
         expiresAt: activeSubscription.expirationDate,
         startedAt: activeSubscription.startDate,
-        totalListingsLimit: product?.listingsLimit || 30, // 30 active listings for Pro monthly
+        totalListingsLimit: syncLimit,
         activeListingsCount: user.proSubscription?.activeListingsCount || 0,
         privateSellerCount: user.proSubscription?.privateSellerCount || 0,
         agentCount: user.proSubscription?.agentCount || 0,

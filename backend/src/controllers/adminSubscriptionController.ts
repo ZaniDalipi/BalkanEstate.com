@@ -1092,7 +1092,13 @@ export const manageUserSubscription = async (req: Request, res: Response): Promi
         user.subscription.listingsLimit = ENTERPRISE_TIER_LIMITS.LISTINGS;
       } else if (isPro) {
         user.subscription.tier = 'pro';
-        user.subscription.listingsLimit = isYearly ? PRO_TIER_LIMITS.YEARLY.LISTINGS : PRO_TIER_LIMITS.MONTHLY.LISTINGS;
+        const newListings = isYearly ? PRO_TIER_LIMITS.YEARLY.LISTINGS : PRO_TIER_LIMITS.MONTHLY.LISTINGS;
+        if (!isYearly) {
+          // Monthly pro: add 30 on top of current limit (keeps existing listings)
+          user.subscription.listingsLimit = (user.subscription.listingsLimit || 0) + newListings;
+        } else {
+          user.subscription.listingsLimit = newListings;
+        }
       }
       user.markModified('subscription');
 
