@@ -791,7 +791,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
     const loadMoreRef = useRef(null);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
-    const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(false);
+    const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(true);
 
     // Count active basic filters (shown in collapse toggle badge)
     const activeBasicFilterCount = [
@@ -895,34 +895,32 @@ const PropertyList = memo<PropertyListProps>((props) => {
                         </div>
                     )}
 
-                    <div
-                        id="desktop-filter-panel"
-                        className={`relative z-[60] transition-all duration-300 ease-in-out overflow-hidden ${searchMode === 'ai' ? 'flex-grow min-h-0' : ''}`}
-                        style={searchMode === 'manual'
-                            ? isFiltersCollapsed
-                                ? { height: 0, opacity: 0, padding: 0 }
-                                : { height: '280px', opacity: 1 }
-                            : undefined
-                        }
-                    >
-                        <div className="px-4 pb-4 h-full">
-                            {searchMode === 'manual' ? (
-                                <div className="h-full overflow-y-auto pr-2">
-                                    <FilterControls {...props} />
-                                </div>
-                            ) : (
-                                <div className="h-full">
-                                    <AiSearch
-                                        properties={properties}
-                                        onApplyFilters={onApplyAiFilters}
-                                        isMobile={isMobile}
-                                        history={aiChatHistory}
-                                        onHistoryChange={onAiChatHistoryChange}
-                                    />
-                                </div>
-                            )}
+                    {searchMode === 'manual' ? (
+                        <div
+                            id="desktop-filter-panel"
+                            className="relative z-[60] overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out"
+                            style={isFiltersCollapsed
+                                ? { maxHeight: 0, opacity: 0 }
+                                : { maxHeight: '50vh', opacity: 1 }
+                            }
+                        >
+                            <div className="px-4 pb-4 overflow-y-auto" style={{ maxHeight: '50vh' }}>
+                                <FilterControls {...props} />
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="relative z-[60] flex-grow min-h-0">
+                            <div className="px-4 pb-4 h-full">
+                                <AiSearch
+                                    properties={properties}
+                                    onApplyFilters={onApplyAiFilters}
+                                    isMobile={isMobile}
+                                    history={aiChatHistory}
+                                    onHistoryChange={onAiChatHistoryChange}
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* PROPERTY LIST SECTION */}
