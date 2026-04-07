@@ -8,6 +8,7 @@ import { getGooglePlayService } from '../services/googlePlayService';
 import { getAppStoreService } from '../services/appStoreService';
 import { subscriptionLogger } from '../utils/logger';
 import { getObjectIdParam } from '../utils/validateParams';
+import { PRO_TIER_LIMITS } from '../config/subscriptionConstants';
 
 /**
  * @desc    Create a new subscription (web purchases)
@@ -883,5 +884,108 @@ export const getExpiryCheck = async (req: Request, res: Response): Promise<void>
   } catch (error: any) {
     subscriptionLogger.error('Error checking subscription expiry:', error);
     res.status(500).json({ message: 'Error checking subscription expiry' });
+  }
+};
+
+/**
+ * @desc    Extend a monthly subscription by 30 days and add 30 more listings
+ * @route   POST /api/subscriptions/:id/extend
+ * @access  Private
+ */
+export const extendSubscription = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user?._id;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    if (!userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
+
+    const subscription = await Subscription.findOne({ _id: id, userId });
+    if (!subscription) {
+      res.status(404).json({ message: 'Subscription not found' });
+      return;
+    }
+
+    // Only allow extending monthly pro subscriptions
+    const isMonthlyPro = subscription.productId.includes('pro_monthly') || subscription.productId === 'seller_pro_monthly';
+    if (!isMonthlyPro) {
+      res.status(400).json({ message: 'Only monthly Pro subscriptions can be extended' });
+      return;
+    }
+
+    // Only allow extending when 1 day or less remains
+    const now = new Date();
+    const expirationDate = new Date(subscription.expirationDate);
+    const daysRemaining = Math.ceil((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    if (daysRemaining > 1) {
+      res.status(400).json({ message: 'Subscription can only be extended when 1 day or less remains' });
+      return;
+    }
+
+    // Use the current expiration date as the start of the new period
+    const newStartDate = expirationDate;
+    const newExpirationDate = new Date(expirationDate);
+    newExpirationDate.setMonth(newExpirationDate.getMonth() + 1);
+
+    // Update subscription dates
+    subscription.expirationDate = newExpirationDate;
+    subscription.renewalDate = newExpirationDate;
+    subscription.status = 'active';
+    subscription.lastUpdated = new Date();
+    await subscription.save();
+
+    // Update user: add 30 more listings on top of current limit
+    const user = await User.findById(userId);
+    if (user) {
+      const product = await Product.findOne({ productId: subscription.productId });
+      const newListings = product?.listingsLimit || PRO_TIER_LIMITS.MONTHLY.LISTINGS;
+
+      if (!user.subscription) {
+        user.subscription = {} as any;
+      }
+      user.subscription.listingsLimit = (user.subscription.listingsLimit || 0) + newListings;
+      user.subscription.status = 'active';
+      user.subscription.expiresAt = newExpirationDate;
+      user.subscription.startDate = newStartDate;
+      user.markModified('subscription');
+
+      // Sync activeListingsLimit
+      user.activeListingsLimit = user.subscription.listingsLimit;
+      user.subscriptionExpiresAt = newExpirationDate;
+      user.subscriptionStatus = 'active';
+
+      await user.save();
+    }
+
+    // Create event
+    await SubscriptionEvent.create({
+      subscriptionId: subscription._id,
+      userId,
+      eventType: 'subscription_renewed',
+      store: subscription.store,
+      metadata: {
+        extendedByUser: true,
+        previousExpiration: expirationDate,
+        newExpiration: newExpirationDate,
+        listingsAdded: PRO_TIER_LIMITS.MONTHLY.LISTINGS,
+        newListingsLimit: user?.subscription?.listingsLimit,
+      },
+    });
+
+    res.status(200).json({
+      message: 'Subscription extended successfully',
+      subscription: {
+        id: subscription._id,
+        status: subscription.status,
+        expirationDate: newExpirationDate,
+        newListingsLimit: user?.subscription?.listingsLimit,
+      },
+    });
+  } catch (error: any) {
+    subscriptionLogger.error('Error extending subscription:', error);
+    res.status(500).json({ message: 'Error extending subscription' });
   }
 };

@@ -6,6 +6,7 @@ import {
   getSubscriptionById,
   cancelSubscription,
   restoreSubscription,
+  extendSubscription,
   getSubscriptionEvents,
   getSubscriptionPayments,
   verifySubscription,
@@ -31,6 +32,7 @@ router.post('/sync-pro', syncProSubscription); // Sync user.proSubscription with
 router.get('/:id', getSubscriptionById);
 router.post('/:id/cancel', cancelSubscription);
 router.post('/:id/restore', restoreSubscription);
+router.post('/:id/extend', extendSubscription);
 router.post('/:id/verify', verifySubscription);
 
 // Subscription details

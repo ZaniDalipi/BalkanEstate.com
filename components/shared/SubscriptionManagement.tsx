@@ -250,6 +250,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
   const [cancelling, setCancelling] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [togglingAutoRenew, setTogglingAutoRenew] = useState(false);
+  const [extending, setExtending] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -993,6 +994,46 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     }
   };
 
+  // Extend subscription (add 30 more listings + 30 more days)
+  const handleExtendSubscription = async () => {
+    if (!subscription) return;
+
+    const confirmed = window.confirm(
+      t('management.validation.confirmExtend', 'Extend your subscription by 30 days and add 30 more listings?')
+    );
+    if (!confirmed) return;
+
+    try {
+      setExtending(true);
+      setActionError(null);
+
+      const token = tokenService.getAccessToken();
+      await ensureCsrfToken();
+      const response = await fetch(`${API_URL}/subscriptions/${subscription._id}/extend`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          ...csrfHeaders(),
+        },
+      });
+
+      if (response.ok) {
+        fetchSubscription();
+        if (token) await refreshUserContext(token);
+        window.dispatchEvent(new Event('subscriptionUpdated'));
+      } else {
+        const data = await response.json();
+        setActionError(data.message || 'Error extending subscription');
+      }
+    } catch (error) {
+      setActionError('Error extending subscription');
+    } finally {
+      setExtending(false);
+    }
+  };
+
   // Check if subscription is pending cancellation or cancelled but not yet expired
   const isPendingCancellation = subscription?.status === 'pending_cancellation';
   const isCancelledButActive = subscription?.status === 'canceled' && subscriptionDetails && !subscriptionDetails.isExpired;
@@ -1164,6 +1205,30 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
           </div>
         </div>
+
+        {/* Extend Package button — shown when 1 day or less remains for monthly pro */}
+        {subscriptionDetails.daysRemaining <= 1 &&
+          (subscriptionDetails.currentPlanKey.includes('pro_monthly') || subscriptionDetails.currentPlanKey === 'seller_pro_monthly') && (
+          <div className="mt-4 pt-4 border-t border-white/20">
+            <button
+              onClick={handleExtendSubscription}
+              disabled={extending}
+              className="w-full py-3 px-6 bg-white text-blue-600 font-bold rounded-xl hover:bg-blue-50 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {extending ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  {t('management.extending', 'Extending...')}
+                </>
+              ) : (
+                <>
+                  <SparklesIcon className="w-5 h-5" />
+                  {t('management.extendPackage', 'Extend Package (+30 listings, +30 days)')}
+                </>
+              )}
+            </button>
+          </div>
+        )}
 
         {/* Subscription dates */}
         <div className="mt-4 pt-4 border-t border-white/20 grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
