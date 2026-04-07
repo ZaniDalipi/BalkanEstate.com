@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   XMarkIcon,
   CheckIcon,
@@ -534,6 +535,7 @@ function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
 // ─── Subscription edit panel for the edit modal ───────────────────────────────
 function SubscriptionEditPanel({ editingUser }: { editingUser: User }) {
   const { t } = useTranslation('admin');
+  const queryClient = useQueryClient();
   const [isSubscribed, setIsSubscribed] = useState(editingUser.isSubscribed);
   const [plan, setPlan] = useState(editingUser.subscriptionPlan || '');
   const [startDate, setStartDate] = useState(
@@ -582,6 +584,7 @@ function SubscriptionEditPanel({ editingUser }: { editingUser: User }) {
       });
       setIsSubscribed(true);
       setResult({ type: 'success', msg: 'Subscription activated successfully' });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     } catch (e: any) {
       setResult({ type: 'error', msg: e.message || 'Error activating subscription' });
     } finally {
@@ -603,6 +606,7 @@ function SubscriptionEditPanel({ editingUser }: { editingUser: User }) {
       });
       setIsSubscribed(false);
       setResult({ type: 'success', msg: 'Subscription deactivated successfully' });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     } catch (e: any) {
       setResult({ type: 'error', msg: e.message || 'Error deactivating subscription' });
     } finally {
@@ -629,6 +633,7 @@ function SubscriptionEditPanel({ editingUser }: { editingUser: User }) {
         requiresAuth: true,
       });
       setResult({ type: 'success', msg: 'Subscription updated successfully' });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     } catch (e: any) {
       setResult({ type: 'error', msg: e.message || 'Error updating subscription' });
     } finally {
