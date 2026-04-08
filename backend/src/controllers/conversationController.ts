@@ -8,6 +8,7 @@ import cloudinary from '../config/cloudinary';
 import { sendNewMessageNotification } from '../services/emailService';
 import { getSocketInstance } from '../utils/socketInstance';
 import { incrementInquiryCount } from '../utils/statsUpdater';
+import { createNotificationWithPush } from '../services/engagementService';
 import { apiLogger } from '../utils/logger';
 import { sanitizeConversation } from '../utils/responseSanitizer';
 import { getObjectIdParam, isValidObjectId } from '../utils/validateParams';
@@ -207,6 +208,23 @@ export const createConversation = async (
 
         await conversation.populate('buyerId', 'name email phone avatarUrl');
         await conversation.populate('sellerId', 'name email phone avatarUrl role agencyName');
+
+        // Notify the agent/seller about the new direct conversation
+        const buyer = await User.findById(currentUserId, 'name');
+        const buyerName = buyer?.name || 'Someone';
+        createNotificationWithPush({
+          userId: sellerUser._id,
+          type: 'new_message',
+          title: 'New Conversation',
+          message: `${buyerName} started a conversation with you`,
+          icon: 'message',
+          priority: 'normal',
+          data: {
+            conversationId: String(conversation._id),
+            actionUrl: '/inbox',
+            actionLabel: 'Open Inbox',
+          },
+        }).catch(() => {});
       }
 
       res.status(201).json({ conversation: sanitizeConversation(conversation.toObject()) });
@@ -262,6 +280,25 @@ export const createConversation = async (
         'sellerId',
         'name email phone avatarUrl role agencyName'
       );
+
+      // Notify the seller about the new property conversation
+      const buyer = await User.findById(currentUserId, 'name');
+      const buyerName = buyer?.name || 'Someone';
+      createNotificationWithPush({
+        userId: property.sellerId,
+        type: 'new_inquiry',
+        title: 'New Property Inquiry',
+        message: `${buyerName} inquired about "${property.title}"`,
+        icon: 'message',
+        priority: 'high',
+        data: {
+          propertyId: String(property._id),
+          propertyTitle: property.title,
+          conversationId: String(conversation._id),
+          actionUrl: `/property/${String(property._id)}`,
+          actionLabel: 'View Property',
+        },
+      }).catch(() => {});
     }
 
     res.status(201).json({ conversation: sanitizeConversation(conversation.toObject()) });
@@ -403,6 +440,28 @@ export const sendMessage = async (
       apiLogger.info(`📨 Emitted message to conversation room: ${conversationId}`);
 
     }
+
+    // Create in-app notification for the recipient
+    const sender = req.user as IUser;
+    const recipientId = isBuyer ? conversation.sellerId : conversation.buyerId;
+    const messagePreview = text
+      ? (text.length > 80 ? text.substring(0, 80) + '...' : text)
+      : (imageUrl ? 'Sent an image' : 'New message');
+
+    createNotificationWithPush({
+      userId: recipientId,
+      type: 'new_message',
+      title: `Message from ${sender.name || 'User'}`,
+      message: messagePreview,
+      icon: 'message',
+      priority: 'normal',
+      data: {
+        conversationId: String(conversation._id),
+        propertyId: conversation.propertyId ? String(conversation.propertyId) : undefined,
+        actionUrl: '/inbox',
+        actionLabel: 'Open Inbox',
+      },
+    }).catch(() => {});
 
     // Include security warnings if any (from server-side filtering)
     const response: any = { message };
