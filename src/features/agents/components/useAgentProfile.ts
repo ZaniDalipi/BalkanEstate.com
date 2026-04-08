@@ -514,7 +514,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             return;
         }
         try {
-            const conversation = await createConversation(agent.id);
+            const conversation = await createConversation({ sellerId: agent.userId || agent.id });
             dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
             window.history.pushState({ page: 'inbox' }, '', '/inbox');
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
@@ -536,7 +536,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         setIsSubmitting(true);
         try {
             // Send appraisal request via message to agent
-            const conversation = await createConversation(agent.id);
+            const conversation = await createConversation({ sellerId: agent.userId || agent.id });
             const messageText = `Property Appraisal Request:\n\nAddress: ${appraisalForm.address}\nProperty Type: ${appraisalForm.propertyType}\nNotes: ${appraisalForm.notes || 'No additional notes'}`;
 
             // Actually send the message to the conversation
@@ -568,7 +568,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         setIsSubmitting(true);
         try {
             // Send consultation request via message to agent
-            const conversation = await createConversation(agent.id);
+            const conversation = await createConversation({ sellerId: agent.userId || agent.id });
             const messageText = `Consultation Request:\n\nPreferred Date: ${consultationForm.date}\nPreferred Time: ${consultationForm.time}\nTopic: ${consultationForm.topic}\nNotes: ${consultationForm.notes || 'No additional notes'}`;
 
             // Actually send the message to the conversation

@@ -18,7 +18,7 @@ const ConversationSchema: Schema = new Schema(
     propertyId: {
       type: Schema.Types.ObjectId,
       ref: 'Property',
-      required: true,
+      required: false,
       index: true,
     },
     buyerId: {

@@ -95,10 +95,14 @@ export const getConversation = async (
   };
 };
 
-export const createConversation = async (propertyId: string): Promise<Conversation> => {
+export const createConversation = async (propertyIdOrOptions: string | { propertyId?: string; sellerId?: string }): Promise<Conversation> => {
+  const body = typeof propertyIdOrOptions === 'string'
+    ? { propertyId: propertyIdOrOptions }
+    : propertyIdOrOptions;
+
   const response = await apiRequest<{ conversation: any }>('/conversations', {
     method: 'POST',
-    body: { propertyId },
+    body,
     requiresAuth: true,
   });
 
