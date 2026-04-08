@@ -96,72 +96,92 @@ export const RandomCityBubbles: React.FC<{
     setBubbles(initialBubbles);
   }, [count, generateRandomPosition]);
 
-  // Split animation effect - randomly split a bubble every 4-8 seconds
+  // Split animation effect - randomly split a bubble every 6-12 seconds
+  // Deferred to avoid blocking main thread during initial load
   useEffect(() => {
-    const splitInterval = setInterval(() => {
-      if (bubbles.length === 0) return;
+    let splitInterval: ReturnType<typeof setInterval>;
+    const startAnimations = () => {
+      splitInterval = setInterval(() => {
+        if (bubbles.length === 0) return;
 
-      // Pick a random bubble to split
-      const randomIndex = Math.floor(Math.random() * bubbles.length);
-      const bubbleToSplit = bubbles[randomIndex];
+        // Pick a random bubble to split
+        const randomIndex = Math.floor(Math.random() * bubbles.length);
+        const bubbleToSplit = bubbles[randomIndex];
 
-      if (!bubbleToSplit || bubbleToSplit.isSplitting) return;
+        if (!bubbleToSplit || bubbleToSplit.isSplitting) return;
 
-      // Create 2-3 small split bubbles
-      const splitCount = 2 + Math.floor(Math.random() * 2);
-      const newSplitBubbles: SplitBubble[] = Array.from({ length: splitCount }, (_, i) => ({
-        id: `split-${bubbleToSplit.id}-${i}-${Date.now()}`,
-        x: bubbleToSplit.x,
-        y: bubbleToSplit.y,
-        size: Math.random() > 0.5 ? 'sm' : 'md',
-        opacity: 0.4,
-        direction: {
-          x: (Math.random() - 0.5) * 30,
-          y: (Math.random() - 0.5) * 30,
-        },
-      }));
+        // Create 2-3 small split bubbles
+        const splitCount = 2 + Math.floor(Math.random() * 2);
+        const newSplitBubbles: SplitBubble[] = Array.from({ length: splitCount }, (_, i) => ({
+          id: `split-${bubbleToSplit.id}-${i}-${Date.now()}`,
+          x: bubbleToSplit.x,
+          y: bubbleToSplit.y,
+          size: Math.random() > 0.5 ? 'sm' : 'md',
+          opacity: 0.4,
+          direction: {
+            x: (Math.random() - 0.5) * 30,
+            y: (Math.random() - 0.5) * 30,
+          },
+        }));
 
-      setSplitAnimations(prev => {
-        const newMap = new Map(prev);
-        newMap.set(bubbleToSplit.id, newSplitBubbles);
-        return newMap;
-      });
-
-      // Remove split animations after animation completes
-      setTimeout(() => {
         setSplitAnimations(prev => {
           const newMap = new Map(prev);
-          newMap.delete(bubbleToSplit.id);
+          newMap.set(bubbleToSplit.id, newSplitBubbles);
           return newMap;
         });
-      }, 2000);
-    }, 4000 + Math.random() * 4000);
 
-    return () => clearInterval(splitInterval);
+        // Remove split animations after animation completes
+        setTimeout(() => {
+          setSplitAnimations(prev => {
+            const newMap = new Map(prev);
+            newMap.delete(bubbleToSplit.id);
+            return newMap;
+          });
+        }, 2000);
+      }, 6000 + Math.random() * 6000);
+    };
+
+    // Defer animation start to avoid blocking initial render
+    if ('requestIdleCallback' in window) {
+      const idleId = requestIdleCallback(startAnimations);
+      return () => { cancelIdleCallback(idleId); clearInterval(splitInterval); };
+    } else {
+      const timeoutId = setTimeout(startAnimations, 3000);
+      return () => { clearTimeout(timeoutId); clearInterval(splitInterval); };
+    }
   }, [bubbles]);
 
-  // Periodically reposition a random bubble
+  // Periodically reposition a random bubble (deferred to avoid blocking main thread)
   useEffect(() => {
-    const repositionInterval = setInterval(() => {
-      setBubbles(prev => {
-        if (prev.length === 0) return prev;
+    let repositionInterval: ReturnType<typeof setInterval>;
+    const startRepositioning = () => {
+      repositionInterval = setInterval(() => {
+        setBubbles(prev => {
+          if (prev.length === 0) return prev;
 
-        const randomIndex = Math.floor(Math.random() * prev.length);
-        const newBubbles = [...prev];
-        const existingPositions = prev.filter((_, i) => i !== randomIndex).map(b => ({ x: b.x, y: b.y }));
-        const newPos = generateRandomPosition(existingPositions);
+          const randomIndex = Math.floor(Math.random() * prev.length);
+          const newBubbles = [...prev];
+          const existingPositions = prev.filter((_, i) => i !== randomIndex).map(b => ({ x: b.x, y: b.y }));
+          const newPos = generateRandomPosition(existingPositions);
 
-        newBubbles[randomIndex] = {
-          ...newBubbles[randomIndex],
-          x: newPos.x,
-          y: newPos.y,
-        };
+          newBubbles[randomIndex] = {
+            ...newBubbles[randomIndex],
+            x: newPos.x,
+            y: newPos.y,
+          };
 
-        return newBubbles;
-      });
-    }, 8000 + Math.random() * 4000);
+          return newBubbles;
+        });
+      }, 10000 + Math.random() * 5000);
+    };
 
-    return () => clearInterval(repositionInterval);
+    if ('requestIdleCallback' in window) {
+      const idleId = requestIdleCallback(startRepositioning);
+      return () => { cancelIdleCallback(idleId); clearInterval(repositionInterval); };
+    } else {
+      const timeoutId = setTimeout(startRepositioning, 4000);
+      return () => { clearTimeout(timeoutId); clearInterval(repositionInterval); };
+    }
   }, [generateRandomPosition]);
 
   return (

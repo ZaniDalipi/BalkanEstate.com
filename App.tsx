@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense, startTransition } from 'react';
 import { useSubscriptionExpiry } from './src/features/subscription/hooks/useSubscriptionExpiry';
 import { useTranslation } from 'react-i18next';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
@@ -162,6 +162,10 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
   // Check URL for routing on mount and when URL changes (handles browser/mobile back button)
   useEffect(() => {
     const checkUrlForRouting = () => {
+      // Wrap routing dispatches in startTransition to avoid blocking user interactions
+      startTransition(() => { checkUrlForRoutingInner(); });
+    };
+    const checkUrlForRoutingInner = () => {
       // Initialize language from URL (handles redirect if no language prefix)
       const { lang, path: cleanPath } = initializeLanguageFromUrl();
 
@@ -766,7 +770,7 @@ const MainLayout: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => startTransition(() => setIsMobile(window.innerWidth < 768));
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -1129,7 +1133,7 @@ const AppWrapper: React.FC = () => {
         return (
             <>
                 {/* Render main layout behind the splash so map/resources start loading */}
-                <div className="fixed inset-0 opacity-0 pointer-events-none" aria-hidden="true">
+                <div className="fixed inset-0 pointer-events-none" aria-hidden="true" style={{ opacity: 0.01, contain: 'strict' }}>
                     {!state.isAuthenticating && <MainLayout />}
                 </div>
                 <Suspense fallback={<FullScreenLoader />}>

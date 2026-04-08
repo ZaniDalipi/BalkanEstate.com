@@ -234,57 +234,77 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
         <RecentlyViewedSection onPropertyClick={handlePropertyClick} />
       </Suspense>
 
-      <Suspense fallback={<SectionFallback />}>
-        <StackedCards
-          properties={featuredProperties}
-          onPropertyClick={handlePropertyClick}
-          onViewAll={() => handleNavigate('search', '/search')}
-        />
-      </Suspense>
-
-      <Suspense fallback={<SectionFallback />}>
-        <HomeSpecialOffersSection onNavigate={handleNavigate} />
-      </Suspense>
-
-      <Suspense fallback={<SectionFallback />}>
-        <TopAgentsSection />
-      </Suspense>
-
-      <Suspense fallback={<SectionFallback />}>
-        <TopAgenciesSection />
-      </Suspense>
-
-      <Suspense fallback={<SectionFallback />}>
-        <CategoriesSection onCategoryClick={handleCategoryClick} />
-      </Suspense>
-
-      <Suspense fallback={<SectionFallback />}>
-        <PopularCitiesSection onNavigate={handleNavigate} />
-      </Suspense>
-
-      <Suspense fallback={<SectionFallback />}>
-        <NewsSection />
-      </Suspense>
-
-      <Suspense fallback={<SectionFallback />}>
-        <HowItWorksSection onLearnMore={() => handleNavigate('how-it-works', '/how-it-works')} />
-      </Suspense>
-
-      <Suspense fallback={<SectionFallback />}>
-        <TestimonialsSection />
-      </Suspense>
-
-      {!isAuthenticated && (
+      <div className="content-below-fold">
         <Suspense fallback={<SectionFallback />}>
-          <CTASection
-            onListProperty={() => {
-              dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
-            }}
-            onJoinAsAgent={() => {
-              dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
-            }}
+          <StackedCards
+            properties={featuredProperties}
+            onPropertyClick={handlePropertyClick}
+            onViewAll={() => handleNavigate('search', '/search')}
           />
         </Suspense>
+      </div>
+
+      <div className="content-below-fold">
+        <Suspense fallback={<SectionFallback />}>
+          <HomeSpecialOffersSection onNavigate={handleNavigate} />
+        </Suspense>
+      </div>
+
+      <div className="content-below-fold">
+        <Suspense fallback={<SectionFallback />}>
+          <TopAgentsSection />
+        </Suspense>
+      </div>
+
+      <div className="content-below-fold">
+        <Suspense fallback={<SectionFallback />}>
+          <TopAgenciesSection />
+        </Suspense>
+      </div>
+
+      <div className="content-below-fold">
+        <Suspense fallback={<SectionFallback />}>
+          <CategoriesSection onCategoryClick={handleCategoryClick} />
+        </Suspense>
+      </div>
+
+      <div className="content-below-fold">
+        <Suspense fallback={<SectionFallback />}>
+          <PopularCitiesSection onNavigate={handleNavigate} />
+        </Suspense>
+      </div>
+
+      <div className="content-below-fold">
+        <Suspense fallback={<SectionFallback />}>
+          <NewsSection />
+        </Suspense>
+      </div>
+
+      <div className="content-below-fold">
+        <Suspense fallback={<SectionFallback />}>
+          <HowItWorksSection onLearnMore={() => handleNavigate('how-it-works', '/how-it-works')} />
+        </Suspense>
+      </div>
+
+      <div className="content-below-fold">
+        <Suspense fallback={<SectionFallback />}>
+          <TestimonialsSection />
+        </Suspense>
+      </div>
+
+      {!isAuthenticated && (
+        <div className="content-below-fold">
+          <Suspense fallback={<SectionFallback />}>
+            <CTASection
+              onListProperty={() => {
+                dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
+              }}
+              onJoinAsAgent={() => {
+                dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
+              }}
+            />
+          </Suspense>
+        </div>
       )}
 
       <Footer />
