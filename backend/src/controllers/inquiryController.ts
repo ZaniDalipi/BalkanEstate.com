@@ -7,6 +7,7 @@ import Inquiry from '../models/Inquiry';
 import { apiLogger } from '../utils/logger';
 import { resolveId } from '../utils/idObfuscation';
 import { isValidObjectId } from '../utils/validateParams';
+import { createNotificationWithPush } from '../services/engagementService';
 
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'contact@balkanestateai.com';
 const VALID_SUBJECTS = ['general', 'buying', 'selling', 'agency', 'support', 'partnership'];
@@ -101,6 +102,25 @@ export const sendPropertyInquiry = async (
       location,
       inquiryType: 'property',
     });
+
+    // Create in-app notification for the property owner/agent
+    createNotificationWithPush({
+      userId: seller._id,
+      type: 'new_inquiry',
+      title: 'New Property Inquiry',
+      message: `${buyerName} sent an inquiry about "${property.title}"`,
+      icon: 'message',
+      priority: 'high',
+      data: {
+        propertyId: String(property._id),
+        propertyTitle: property.title,
+        inquiryId: String(inquiry._id),
+        buyerName,
+        buyerEmail,
+        actionUrl: `/property/${String(property._id)}`,
+        actionLabel: 'View Property',
+      },
+    }).catch(err => apiLogger.warn(`[inquiryController] Failed to create property inquiry notification: ${err}`));
 
     apiLogger.info(`[inquiryController] Property inquiry sent and saved: ${buyerEmail} -> ${agentEmail} about ${property.title} (ID: ${inquiry._id})`);
 
@@ -205,6 +225,22 @@ export const sendAgentGeneralInquiry = async (
       message,
       inquiryType: 'general',
     });
+
+    // Create in-app notification for the agent
+    createNotificationWithPush({
+      userId: agent._id,
+      type: 'new_inquiry',
+      title: 'New Inquiry',
+      message: `${buyerName} sent you a general inquiry`,
+      icon: 'message',
+      priority: 'high',
+      data: {
+        inquiryId: String(inquiry._id),
+        buyerName,
+        buyerEmail,
+        actionLabel: 'View Messages',
+      },
+    }).catch(err => apiLogger.warn(`[inquiryController] Failed to create agent inquiry notification: ${err}`));
 
     apiLogger.info(`[inquiryController] General inquiry sent and saved: inquiry ${inquiry._id} for agent ${agent._id}`);
 
