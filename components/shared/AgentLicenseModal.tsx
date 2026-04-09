@@ -106,6 +106,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
   const [selectedAgency, setSelectedAgency] = useState<string>('');
   const [loadingAgencies, setLoadingAgencies] = useState(false);
   const [languages, setLanguages] = useState<string[]>(['English']);
+  const [noLicense, setNoLicense] = useState(false);
 
   const isJoiningAgency = Boolean(currentLicenseNumber && currentAgentId);
 
@@ -183,13 +184,12 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
       return;
     }
 
-    if (!licenseNumber.trim()) {
-      setError(t('modals:agentLicense.licenseRequired'));
-      return;
-    }
-    if (!licenseCountry) {
-      setError(t('modals:agentLicense.countryRequired', 'Please select the country where your license was issued'));
-      return;
+    // License is optional — validate only if user has entered one
+    if (!noLicense && licenseNumber.trim()) {
+      if (!licenseCountry) {
+        setError(t('modals:agentLicense.countryRequired', 'Please select the country where your license was issued'));
+        return;
+      }
     }
     // Validate phone — required if user has no phone on record
     if (phoneRequired && !phone.trim()) {
@@ -219,9 +219,10 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
     setError('');
     setIsSubmitting(true);
     try {
+      const hasLicenseData = !noLicense && licenseNumber.trim();
       await onSubmit({
-        licenseNumber: licenseNumber.trim(),
-        licenseCountry: licenseCountry || undefined,
+        licenseNumber: hasLicenseData ? licenseNumber.trim() : '',
+        licenseCountry: hasLicenseData ? (licenseCountry || undefined) : undefined,
         phone: getFullPhone() || undefined,
         agencyInvitationCode: effectiveInvitationCode || undefined,
         agentId: agentId.trim() || undefined,
@@ -372,13 +373,41 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
             ) : (
               /* Full agent registration form */
               <>
+                {/* No license checkbox — only for new agent registration */}
+                {!isJoiningAgency && (
+                  <label className="flex items-center gap-3 px-3.5 py-3 bg-blue-50 border border-blue-100 rounded-xl cursor-pointer hover:bg-blue-100/60 transition-colors select-none">
+                    <input
+                      type="checkbox"
+                      checked={noLicense}
+                      onChange={e => {
+                        setNoLicense(e.target.checked);
+                        if (e.target.checked) {
+                          setLicenseNumber('');
+                          setLicenseCountry('');
+                          setError('');
+                        }
+                      }}
+                      disabled={isSubmitting}
+                      className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500/20 flex-shrink-0"
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-blue-700">
+                        {t('modals:agentLicense.noLicenseCheckbox', "I don't have a license yet")}
+                      </span>
+                      <p className="text-xs text-blue-500 mt-0.5">
+                        {t('modals:agentLicense.noLicenseHint', 'You can add your license later from your profile settings')}
+                      </p>
+                    </div>
+                  </label>
+                )}
+
                 {/* License + Agent ID — side by side on desktop */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 transition-all duration-300 ${noLicense ? 'opacity-40 pointer-events-none' : ''}`}>
                   <Field
                     id="licenseNumber"
                     label={t('modals:agentLicense.licenseNumber')}
                     icon={<ShieldCheck className="w-3 h-3" />}
-                    required
+                    required={!noLicense}
                     hint={isJoiningAgency
                       ? undefined
                       : t('modals:agentLicense.officialLicense')}
@@ -388,11 +417,11 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                       id="licenseNumber"
                       value={licenseNumber}
                       onChange={e => setLicenseNumber(e.target.value)}
-                      disabled={isSubmitting || isJoiningAgency}
+                      disabled={isSubmitting || isJoiningAgency || noLicense}
                       readOnly={isJoiningAgency}
                       placeholder={t('modals:agentLicense.licenseNumberPlaceholder')}
                       className={inputCls}
-                      required
+                      required={!noLicense}
                     />
                     {isJoiningAgency && (
                       <p className="flex items-center gap-1 text-xs text-emerald-600 font-medium mt-1">
@@ -432,11 +461,12 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
 
                 {/* License Country — required when license number is provided */}
                 {!isJoiningAgency && (
+                  <div className={`transition-all duration-300 ${noLicense ? 'opacity-40 pointer-events-none' : ''}`}>
                   <Field
                     id="licenseCountry"
                     label={t('modals:agentLicense.licenseCountry', 'License Country')}
                     icon={<MapPin className="w-3 h-3" />}
-                    required
+                    required={!noLicense}
                     hint={t('modals:agentLicense.licenseCountryHint', 'Select the country where your license was issued')}
                   >
                     <div className="relative">
@@ -444,8 +474,8 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                         id="licenseCountry"
                         value={licenseCountry}
                         onChange={e => { setLicenseCountry(e.target.value); setError(''); }}
-                        disabled={isSubmitting}
-                        required
+                        disabled={isSubmitting || noLicense}
+                        required={!noLicense}
                         className={`${inputCls} appearance-none pr-8`}
                       >
                         <option value="">
@@ -460,6 +490,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                       <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-300 pointer-events-none" />
                     </div>
                   </Field>
+                  </div>
                 )}
 
                 {/* Phone number — required if user has none on file */}
@@ -673,7 +704,9 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
               ? t('modals:agentLicense.saveAndContinue', 'Save & Continue')
               : isJoiningAgency
                 ? t('modals:agentLicense.joinAgency')
-                : t('modals:agentLicense.verifyAndBecomeAgent')
+                : noLicense
+                  ? t('modals:agentLicense.becomeAgentWithoutLicense', 'Become Agent')
+                  : t('modals:agentLicense.verifyAndBecomeAgent')
             }
           </button>
         </div>

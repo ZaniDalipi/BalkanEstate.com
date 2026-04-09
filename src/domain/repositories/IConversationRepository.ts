@@ -4,9 +4,9 @@
 import { Conversation, Message } from '../entities/Conversation';
 
 export interface CreateConversationDTO {
-  propertyId?: string;
-  buyerId?: string;
-  sellerId?: string;
+  propertyId: string;
+  buyerId: string;
+  sellerId: string;
   initialMessage?: string;
 }
 

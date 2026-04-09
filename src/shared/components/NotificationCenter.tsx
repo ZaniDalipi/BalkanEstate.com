@@ -160,45 +160,7 @@ const NotificationCenter: React.FC = () => {
       return;
     }
 
-    // Navigate to inbox for message and conversation notifications
-    if (notification.type === 'new_message') {
-      setIsOpen(false);
-      setDirection('morph');
-      if (data.conversationId) {
-        dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: data.conversationId });
-      }
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
-      return;
-    }
-
-    // Navigate for inquiry notifications - property inquiry goes to property, general goes to inbox
-    if (notification.type === 'new_inquiry') {
-      setIsOpen(false);
-      if (data.propertyId) {
-        setDirection('up');
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: data.propertyId });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
-      } else if (data.conversationId) {
-        setDirection('morph');
-        dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: data.conversationId });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
-      } else {
-        setDirection('morph');
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
-      }
-      return;
-    }
-
-    // Navigate to subscription/account for subscription notifications
-    if (notification.type === 'subscription_expiring') {
-      setIsOpen(false);
-      setDirection('morph');
-      dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'subscription' });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-      return;
-    }
-
-    // Navigate to property detail for listing milestones and promotions
+    // Navigate to property detail
     if (data.propertyId) {
       setIsOpen(false);
       setDirection('up');
@@ -207,11 +169,10 @@ const NotificationCenter: React.FC = () => {
       return;
     }
 
-    // Navigate to conversations as fallback for conversation data
+    // Navigate to conversations
     if (data.conversationId) {
       setIsOpen(false);
       setDirection('morph');
-      dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: data.conversationId });
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
       return;
     }
@@ -294,11 +255,11 @@ const NotificationCenter: React.FC = () => {
 
   // Check if notification is clickable (has a navigation target)
   const isClickable = (notification: Notification): boolean => {
-    const alwaysClickableTypes = [
-      'new_viewing', 'viewing_approved', 'viewing_declined',
-      'new_message', 'new_inquiry', 'subscription_expiring',
-    ];
-    if (alwaysClickableTypes.includes(notification.type)) return true;
+    if (
+      notification.type === 'new_viewing' ||
+      notification.type === 'viewing_approved' ||
+      notification.type === 'viewing_declined'
+    ) return true;
     const data = notification.data;
     if (!data) return false;
     return !!(data.agencyId || data.propertyId || data.conversationId);

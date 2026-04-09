@@ -8,12 +8,10 @@ import cloudinary from '../config/cloudinary';
 import { sendNewMessageNotification } from '../services/emailService';
 import { getSocketInstance } from '../utils/socketInstance';
 import { incrementInquiryCount } from '../utils/statsUpdater';
-import { createNotificationWithPush } from '../services/engagementService';
 import { apiLogger } from '../utils/logger';
 import { sanitizeConversation } from '../utils/responseSanitizer';
-import { getObjectIdParam, isValidObjectId } from '../utils/validateParams';
+import { getObjectIdParam } from '../utils/validateParams';
 import { resolveId } from '../utils/idObfuscation';
-import Agent from '../models/Agent';
 
 // @desc    Get user's conversations
 // @route   GET /api/conversations
@@ -149,89 +147,12 @@ export const createConversation = async (
     }
 
     const rawPropertyId = req.body.propertyId;
-    const rawSellerId = req.body.sellerId;
 
-    if (!rawPropertyId && !rawSellerId) {
-      res.status(400).json({ message: 'Property ID or Seller ID is required' });
+    if (!rawPropertyId) {
+      res.status(400).json({ message: 'Property ID is required' });
       return;
     }
 
-    const currentUserId = String((req.user as IUser)._id);
-
-    // --- Direct agent/seller conversation (no property) ---
-    if (rawSellerId && !rawPropertyId) {
-      const resolvedSellerId = resolveId(rawSellerId) || rawSellerId;
-
-      // Resolve the seller User - may be a User ID, Agent document ID, or custom agentId
-      let sellerUser = isValidObjectId(resolvedSellerId)
-        ? await User.findById(resolvedSellerId)
-        : null;
-
-      if (!sellerUser) {
-        let agentDoc = isValidObjectId(resolvedSellerId)
-          ? await Agent.findById(resolvedSellerId)
-          : null;
-        if (!agentDoc) {
-          agentDoc = await Agent.findOne({ agentId: resolvedSellerId });
-        }
-        if (agentDoc && agentDoc.userId) {
-          sellerUser = await User.findById(agentDoc.userId);
-        }
-      }
-
-      if (!sellerUser) {
-        res.status(404).json({ message: 'Agent not found' });
-        return;
-      }
-
-      if (String(sellerUser._id) === currentUserId) {
-        res.status(400).json({ message: 'Cannot create conversation with yourself' });
-        return;
-      }
-
-      // Check if a direct conversation already exists (no propertyId)
-      let conversation = await Conversation.findOne({
-        propertyId: null,
-        buyerId: currentUserId,
-        sellerId: String(sellerUser._id),
-      })
-        .populate('buyerId', 'name email phone avatarUrl')
-        .populate('sellerId', 'name email phone avatarUrl role agencyName');
-
-      if (!conversation) {
-        conversation = await Conversation.create({
-          buyerId: currentUserId,
-          sellerId: String(sellerUser._id),
-        });
-
-        await incrementInquiryCount(String(sellerUser._id));
-
-        await conversation.populate('buyerId', 'name email phone avatarUrl');
-        await conversation.populate('sellerId', 'name email phone avatarUrl role agencyName');
-
-        // Notify the agent/seller about the new direct conversation
-        const buyer = await User.findById(currentUserId, 'name');
-        const buyerName = buyer?.name || 'Someone';
-        createNotificationWithPush({
-          userId: sellerUser._id,
-          type: 'new_message',
-          title: 'New Conversation',
-          message: `${buyerName} started a conversation with you`,
-          icon: 'message',
-          priority: 'normal',
-          data: {
-            conversationId: String(conversation._id),
-            actionUrl: '/inbox',
-            actionLabel: 'Open Inbox',
-          },
-        }).catch(() => {});
-      }
-
-      res.status(201).json({ conversation: sanitizeConversation(conversation.toObject()) });
-      return;
-    }
-
-    // --- Property-based conversation ---
     // Resolve obfuscated or raw ID
     const propertyId = resolveId(rawPropertyId) || rawPropertyId;
 
@@ -244,7 +165,7 @@ export const createConversation = async (
     }
 
     // Can't create conversation with yourself
-    if (property.sellerId.toString() === currentUserId) {
+    if (property.sellerId.toString() === String((req.user as IUser)._id).toString()) {
       res.status(400).json({ message: 'Cannot create conversation with yourself' });
       return;
     }
@@ -252,7 +173,7 @@ export const createConversation = async (
     // Check if conversation already exists
     let conversation = await Conversation.findOne({
       propertyId,
-      buyerId: currentUserId,
+      buyerId: String((req.user as IUser)._id),
       sellerId: property.sellerId,
     })
       .populate('propertyId', 'title imageUrl images price city country address propertyType sellerId')
@@ -263,7 +184,7 @@ export const createConversation = async (
       // Create new conversation
       conversation = await Conversation.create({
         propertyId,
-        buyerId: currentUserId,
+        buyerId: String((req.user as IUser)._id),
         sellerId: property.sellerId,
       });
 
@@ -280,25 +201,6 @@ export const createConversation = async (
         'sellerId',
         'name email phone avatarUrl role agencyName'
       );
-
-      // Notify the seller about the new property conversation
-      const buyer = await User.findById(currentUserId, 'name');
-      const buyerName = buyer?.name || 'Someone';
-      createNotificationWithPush({
-        userId: property.sellerId,
-        type: 'new_inquiry',
-        title: 'New Property Inquiry',
-        message: `${buyerName} inquired about "${property.title}"`,
-        icon: 'message',
-        priority: 'high',
-        data: {
-          propertyId: String(property._id),
-          propertyTitle: property.title,
-          conversationId: String(conversation._id),
-          actionUrl: `/property/${String(property._id)}`,
-          actionLabel: 'View Property',
-        },
-      }).catch(() => {});
     }
 
     res.status(201).json({ conversation: sanitizeConversation(conversation.toObject()) });
@@ -440,28 +342,6 @@ export const sendMessage = async (
       apiLogger.info(`📨 Emitted message to conversation room: ${conversationId}`);
 
     }
-
-    // Create in-app notification for the recipient
-    const sender = req.user as IUser;
-    const recipientId = isBuyer ? conversation.sellerId : conversation.buyerId;
-    const messagePreview = text
-      ? (text.length > 80 ? text.substring(0, 80) + '...' : text)
-      : (imageUrl ? 'Sent an image' : 'New message');
-
-    createNotificationWithPush({
-      userId: recipientId,
-      type: 'new_message',
-      title: `Message from ${sender.name || 'User'}`,
-      message: messagePreview,
-      icon: 'message',
-      priority: 'normal',
-      data: {
-        conversationId: String(conversation._id),
-        propertyId: conversation.propertyId ? String(conversation.propertyId) : undefined,
-        actionUrl: '/inbox',
-        actionLabel: 'Open Inbox',
-      },
-    }).catch(() => {});
 
     // Include security warnings if any (from server-side filtering)
     const response: any = { message };

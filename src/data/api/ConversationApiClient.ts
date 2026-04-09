@@ -13,9 +13,9 @@ export class ConversationApiClient {
   }
 
   async createConversation(data: {
-    propertyId?: string;
-    buyerId?: string;
-    sellerId?: string;
+    propertyId: string;
+    buyerId: string;
+    sellerId: string;
     initialMessage?: string;
   }): Promise<any> {
     return await httpClient.post('/conversations', data, true);

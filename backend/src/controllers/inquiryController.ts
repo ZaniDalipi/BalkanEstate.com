@@ -6,8 +6,6 @@ import Property from '../models/Property';
 import Inquiry from '../models/Inquiry';
 import { apiLogger } from '../utils/logger';
 import { resolveId } from '../utils/idObfuscation';
-import { isValidObjectId } from '../utils/validateParams';
-import { createNotificationWithPush } from '../services/engagementService';
 
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'contact@balkanestateai.com';
 const VALID_SUBJECTS = ['general', 'buying', 'selling', 'agency', 'support', 'partnership'];
@@ -103,25 +101,6 @@ export const sendPropertyInquiry = async (
       inquiryType: 'property',
     });
 
-    // Create in-app notification for the property owner/agent
-    createNotificationWithPush({
-      userId: seller._id,
-      type: 'new_inquiry',
-      title: 'New Property Inquiry',
-      message: `${buyerName} sent an inquiry about "${property.title}"`,
-      icon: 'message',
-      priority: 'high',
-      data: {
-        propertyId: String(property._id),
-        propertyTitle: property.title,
-        inquiryId: String(inquiry._id),
-        buyerName,
-        buyerEmail,
-        actionUrl: `/property/${String(property._id)}`,
-        actionLabel: 'View Property',
-      },
-    }).catch(err => apiLogger.warn(`[inquiryController] Failed to create property inquiry notification: ${err}`));
-
     apiLogger.info(`[inquiryController] Property inquiry sent and saved: ${buyerEmail} -> ${agentEmail} about ${property.title} (ID: ${inquiry._id})`);
 
     res.json({
@@ -167,40 +146,17 @@ export const sendAgentGeneralInquiry = async (
       return;
     }
 
-    // Find the agent user - the agentId may be a User ID, Agent document ID, or custom agentId string
-    let agentUser = isValidObjectId(agentId) ? await User.findById(agentId) : null;
-
-    // If not found in User collection, look up the Agent document and get the user through it
-    if (!agentUser) {
-      let agentDoc = isValidObjectId(agentId)
-        ? await Agent.findById(agentId).populate('userId', 'name email phone role')
-        : null;
-
-      // Fallback: search by custom agentId field (e.g., "AGT-123")
-      if (!agentDoc) {
-        agentDoc = await Agent.findOne({ agentId: agentId })
-          .populate('userId', 'name email phone role');
-      }
-
-      if (agentDoc && agentDoc.userId) {
-        agentUser = typeof agentDoc.userId === 'object'
-          ? agentDoc.userId as any
-          : await User.findById(agentDoc.userId);
-      }
-    }
-
-    if (!agentUser) {
+    // Find the agent user
+    const agent = await User.findById(agentId);
+    if (!agent) {
       res.status(404).json({ message: 'Agent not found' });
       return;
     }
 
-    if (agentUser.role !== 'agent') {
+    if (agent.role !== 'agent') {
       res.status(400).json({ message: 'User is not an agent' });
       return;
     }
-
-    // Use a consistent reference to the resolved user
-    const agent = agentUser;
 
     // Save the inquiry to database
     const inquiry = await Inquiry.create({
@@ -225,22 +181,6 @@ export const sendAgentGeneralInquiry = async (
       message,
       inquiryType: 'general',
     });
-
-    // Create in-app notification for the agent
-    createNotificationWithPush({
-      userId: agent._id,
-      type: 'new_inquiry',
-      title: 'New Inquiry',
-      message: `${buyerName} sent you a general inquiry`,
-      icon: 'message',
-      priority: 'high',
-      data: {
-        inquiryId: String(inquiry._id),
-        buyerName,
-        buyerEmail,
-        actionLabel: 'View Messages',
-      },
-    }).catch(err => apiLogger.warn(`[inquiryController] Failed to create agent inquiry notification: ${err}`));
 
     apiLogger.info(`[inquiryController] General inquiry sent and saved: inquiry ${inquiry._id} for agent ${agent._id}`);
 

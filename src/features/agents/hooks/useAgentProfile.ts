@@ -287,7 +287,7 @@ export function useAgentProfile(agent: Agent) {
     }
 
     try {
-      const conversation = await createConversation({ sellerId: agent.userId || agent.id });
+      const conversation = await createConversation(agent.id);
       dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
     } catch {
