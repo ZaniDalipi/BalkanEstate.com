@@ -44,7 +44,9 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
     const { state, dispatch, deleteConversation } = useAppContext();
     const { confirm } = useConfirmation();
     const { error } = useNotification();
-    const resolvedImageUrl = property.imageUrl || property.images?.[0]?.url;
+    // Resolve property FIRST — must be declared before any hooks that depend on it
+    const property = conversation.property || state.properties.find(p => p.id === conversation.propertyId);
+    const resolvedImageUrl = property?.imageUrl || property?.images?.[0]?.url;
     const [imageError, setImageError] = useState(!resolvedImageUrl);
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -52,9 +54,12 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
     const [showSecurityAlert, setShowSecurityAlert] = useState(false);
     const [isTyping, setIsTyping] = useState(false);
     const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
-    const property = conversation.property || state.properties.find(p => p.id === conversation.propertyId);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const currentUserId = state.currentUser?.id;
+    // For direct agent conversations (no property), derive display info from participants
+    const isDirectConversation = !property;
+    const isBuyer = String(conversation.buyerId) === String(currentUserId);
+    const otherParticipant = isBuyer ? conversation.seller : conversation.buyer;
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -144,14 +149,6 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
         }
     };
 
-    if (!property) {
-        return (
-            <div className="h-full flex items-center justify-center text-center text-neutral-500 p-4">
-                <p className="text-sm">{t('inbox.propertyNotFound')}</p>
-            </div>
-        );
-    }
-
     const handleSendMessage = async (text: string, imageFile?: File) => {
         let imageUrl: string | undefined;
 
@@ -224,14 +221,28 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                         <ChevronLeftIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                     </button>
                 )}
-                {imageError ? (
+                {isDirectConversation ? (
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center rounded-lg flex-shrink-0">
+                        {otherParticipant?.avatarUrl ? (
+                            <img
+                                src={otherParticipant.avatarUrl}
+                                alt={otherParticipant.name}
+                                loading="lazy"
+                                decoding="async"
+                                className="w-full h-full object-cover rounded-lg"
+                            />
+                        ) : (
+                            <UserCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-primary/60" />
+                        )}
+                    </div>
+                ) : imageError ? (
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center rounded-lg flex-shrink-0">
                         <BuildingOfficeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-400" />
                     </div>
                 ) : (
                     <img
                         src={resolvedImageUrl}
-                        alt={property.address}
+                        alt={property!.address}
                         loading="lazy"
                         decoding="async"
                         className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-lg flex-shrink-0"
@@ -239,21 +250,38 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                     />
                 )}
                 <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm sm:text-base text-neutral-800 truncate">{property.address}, {property.city}</p>
-                    <p className="text-xs sm:text-sm font-semibold text-primary">{formatPrice(property.price, property.country)}</p>
+                    {isDirectConversation ? (
+                        <>
+                            <p className="font-bold text-sm sm:text-base text-neutral-800 truncate">
+                                {otherParticipant?.name || t('inbox.directConversation', 'Direct Conversation')}
+                            </p>
+                            <p className="text-xs sm:text-sm text-neutral-500">
+                                {conversation.seller?.role === 'agent'
+                                    ? t('inbox.directAgentConversation', 'Agent Conversation')
+                                    : t('inbox.directConversation', 'Direct Conversation')}
+                            </p>
+                        </>
+                    ) : (
+                        <>
+                            <p className="font-bold text-sm sm:text-base text-neutral-800 truncate">{property!.address}, {property!.city}</p>
+                            <p className="text-xs sm:text-sm font-semibold text-primary">{formatPrice(property!.price, property!.country)}</p>
+                        </>
+                    )}
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                    <button
-                        onClick={() => {
-                            dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property.id });
-                            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
-                            window.history.pushState({}, '', buildLocalizedPath(`/property/${generatePropertySlug(property)}`));
-                            window.dispatchEvent(new PopStateEvent('popstate'));
-                        }}
-                        className="hidden sm:block px-3 py-1.5 text-xs sm:text-sm font-semibold bg-primary-light text-primary-dark rounded-full hover:bg-primary/20 transition-colors"
-                    >
-                        {t('inbox.viewProperty')}
-                    </button>
+                    {!isDirectConversation && (
+                        <button
+                            onClick={() => {
+                                dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property!.id });
+                                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
+                                window.history.pushState({}, '', buildLocalizedPath(`/property/${generatePropertySlug(property!)}`));
+                                window.dispatchEvent(new PopStateEvent('popstate'));
+                            }}
+                            className="hidden sm:block px-3 py-1.5 text-xs sm:text-sm font-semibold bg-primary-light text-primary-dark rounded-full hover:bg-primary/20 transition-colors"
+                        >
+                            {t('inbox.viewProperty')}
+                        </button>
+                    )}
                     <button
                         onClick={handleDelete}
                         className="p-1.5 sm:p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"

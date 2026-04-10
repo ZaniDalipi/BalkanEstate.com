@@ -9,8 +9,8 @@ import { SEO } from '@/src/components/seo';
 
 const InboxPage: React.FC = () => {
     const { t } = useTranslation(['messages', 'nav']);
-    const { state, dispatch } = useAppContext();
-    const { conversations, properties, isAuthenticated, activeConversationId } = state;
+    const { state, dispatch, fetchProperties } = useAppContext();
+    const { conversations, properties, isAuthenticated, activeConversationId, isLoadingProperties } = state;
 
     // Responsive breakpoint detection
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -25,6 +25,13 @@ const InboxPage: React.FC = () => {
         window.addEventListener('resize', checkScreenSize);
         return () => window.removeEventListener('resize', checkScreenSize);
     }, []);
+
+    // Load featured properties for the empty inbox state if not already loaded
+    useEffect(() => {
+        if (isAuthenticated && conversations.length === 0 && properties.length === 0 && !isLoadingProperties) {
+            fetchProperties();
+        }
+    }, [isAuthenticated, conversations.length, properties.length, isLoadingProperties, fetchProperties]);
 
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
 
@@ -79,11 +86,19 @@ const InboxPage: React.FC = () => {
                 </p>
                 <div className="mt-6 sm:mt-8 w-full max-w-4xl">
                     <h3 className="text-base sm:text-lg font-semibold text-neutral-700 mb-4">{t('messages:inbox.featuredProperties')}</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                        {featuredProperties.map(prop => (
-                            <PropertyCard key={prop.id} property={prop} />
-                        ))}
-                    </div>
+                    {isLoadingProperties ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="rounded-xl bg-neutral-100 animate-pulse h-64" />
+                            ))}
+                        </div>
+                    ) : featuredProperties.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                            {featuredProperties.map(prop => (
+                                <PropertyCard key={prop.id} property={prop} />
+                            ))}
+                        </div>
+                    ) : null}
                 </div>
             </div>
         );
