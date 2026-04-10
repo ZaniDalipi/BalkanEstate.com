@@ -800,6 +800,20 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         window.dispatchEvent(new PopStateEvent('popstate'));
     }, [dispatch]);
 
+    // Refresh agent data after license submission
+    const handleLicenseSubmitted = useCallback(async () => {
+        try {
+            const agentIdentifier = agentData.agentId || agentData.id;
+            if (!agentIdentifier) return;
+            const freshAgent = await fetchAgentById(agentIdentifier);
+            if (isMountedRef.current && freshAgent) {
+                setAgentData(prev => ({ ...prev, ...freshAgent }));
+            }
+        } catch {
+            // Silently fail — existing data remains as fallback
+        }
+    }, [agentData.agentId, agentData.id]);
+
     // ─── Return ──────────────────────────────────────────────────────────────
 
     return {
@@ -875,6 +889,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         handleEditAchievement,
         handleDeleteAchievement,
         handleViewProperty,
+        handleLicenseSubmitted,
     };
 }
 

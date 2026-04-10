@@ -16,6 +16,7 @@ import AvatarCustomizer, { type AvatarOptions, parseAvatarOptions, getDefaultAva
 import AgentLicenseModal from './AgentLicenseModal';
 import AgencyManagementSection from './AgencyManagementSection';
 import { switchRole, joinAgencyByInvitationCode, getAgencies, updateAgentProfile, changeEmail } from '../../services/apiService';
+import { submitLicense, getLicenseFormatHint } from '../../src/features/credentials/api/licenseApi';
 import Footer from './Footer';
 import { BALKAN_LOCATIONS } from '../../utils/balkanLocations';
 import MapLocationPicker from '../../src/features/seller/components/MapLocationPicker';
@@ -34,6 +35,21 @@ const BALKAN_LANGUAGES = [
   'English', 'Serbian', 'Croatian', 'Slovenian', 'Bosnian', 'Macedonian',
   'Albanian', 'Montenegrin', 'Bulgarian', 'Romanian', 'Greek', 'Turkish',
   'Hungarian', 'German', 'Italian', 'French', 'Russian', 'Spanish'
+];
+
+// Balkan countries for license submission
+const BALKAN_COUNTRIES = [
+  { code: 'RS', name: 'Serbia' },
+  { code: 'HR', name: 'Croatia' },
+  { code: 'BA', name: 'Bosnia & Herzegovina' },
+  { code: 'ME', name: 'Montenegro' },
+  { code: 'MK', name: 'North Macedonia' },
+  { code: 'AL', name: 'Albania' },
+  { code: 'BG', name: 'Bulgaria' },
+  { code: 'GR', name: 'Greece' },
+  { code: 'RO', name: 'Romania' },
+  { code: 'XK', name: 'Kosovo' },
+  { code: 'SI', name: 'Slovenia' },
 ];
 
 type AccountTab = 'listings' | 'performance' | 'profile' | 'subscription' | 'security' | 'promotions' | 'measurements' | 'viewings' | 'businesses';
@@ -915,6 +931,56 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
         lng: user.lng ?? 0,
     });
 
+    // License submission form state (for agents who registered without a license)
+    const [showLicenseForm, setShowLicenseForm] = useState(false);
+    const [licenseInput, setLicenseInput] = useState('');
+    const [licenseCountryInput, setLicenseCountryInput] = useState('');
+    const [licenseFormatHint, setLicenseFormatHint] = useState('');
+    const [licenseSubmitting, setLicenseSubmitting] = useState(false);
+    const [licenseError, setLicenseError] = useState<string | null>(null);
+    const [licenseSuccess, setLicenseSuccess] = useState(false);
+
+    // Fetch format hint when license country changes
+    useEffect(() => {
+        if (!licenseCountryInput) {
+            setLicenseFormatHint('');
+            return;
+        }
+        let cancelled = false;
+        getLicenseFormatHint(licenseCountryInput)
+            .then((res) => { if (!cancelled) setLicenseFormatHint(res.formatHint); })
+            .catch(() => { if (!cancelled) setLicenseFormatHint(''); });
+        return () => { cancelled = true; };
+    }, [licenseCountryInput]);
+
+    const handleLicenseFormSubmit = async () => {
+        const trimmed = licenseInput.trim();
+        if (!trimmed || !licenseCountryInput) return;
+
+        setLicenseSubmitting(true);
+        setLicenseError(null);
+        try {
+            const result = await submitLicense({ licenseNumber: trimmed, country: licenseCountryInput });
+            setLicenseSuccess(true);
+            setShowLicenseForm(false);
+            // Update local state so the UI reflects the new license
+            setFormData(prev => ({
+                ...prev,
+                licenseNumber: result.licenseNumber,
+                licenseVerified: false,
+            }));
+            dispatch({ type: 'UPDATE_USER', payload: { ...formData, licenseNumber: result.licenseNumber, licenseVerified: false } });
+        } catch (err: unknown) {
+            const error = err as { formatHint?: string; message?: string };
+            const msg = error.formatHint
+                ? `Invalid format. Expected: ${error.formatHint}`
+                : error.message || 'Failed to submit license';
+            setLicenseError(msg);
+        } finally {
+            setLicenseSubmitting(false);
+        }
+    };
+
     const handleAgencyClick = async () => {
         if (formData?.agencyId) {
             try {
@@ -1750,16 +1816,131 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                             <label htmlFor="agentId" className={floatingLabelClasses}>{t('agent.agentId')}</label>
                         </div>
                         <div className="relative md:col-span-2">
-                            <input
-                                type="text"
-                                id="licenseNumber"
-                                value={formData.licenseNumber || ''}
-                                className={floatingInputClasses}
-                                placeholder=" "
-                                disabled
-                                title={t('agent.licenseCannotChange')}
-                            />
-                            <label htmlFor="licenseNumber" className={floatingLabelClasses}>{t('agent.licenseNumber')}</label>
+                            {formData.licenseNumber ? (
+                                <>
+                                    <input
+                                        type="text"
+                                        id="licenseNumber"
+                                        value={formData.licenseNumber}
+                                        className={floatingInputClasses}
+                                        placeholder=" "
+                                        disabled
+                                        title={t('agent.licenseCannotChange')}
+                                    />
+                                    <label htmlFor="licenseNumber" className={floatingLabelClasses}>{t('agent.licenseNumber')}</label>
+                                </>
+                            ) : licenseSuccess ? (
+                                <div className="flex items-center gap-3 p-4 bg-green-50/80 backdrop-blur-sm border border-green-200/50 rounded-xl">
+                                    <ShieldCheckIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
+                                    <div>
+                                        <p className="text-sm font-semibold text-green-800">
+                                            {t('agent.licenseSubmitted', 'License Submitted')}
+                                        </p>
+                                        <p className="text-xs text-green-600 mt-0.5">
+                                            {t('agent.licenseSubmittedDesc', 'Your license is pending admin verification. You will be notified once reviewed.')}
+                                        </p>
+                                    </div>
+                                </div>
+                            ) : !showLicenseForm ? (
+                                <div className="flex items-center justify-between p-4 bg-blue-50/80 backdrop-blur-sm border border-blue-200/50 rounded-xl">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-blue-100/80 flex items-center justify-center flex-shrink-0">
+                                            <ShieldCheckIcon className="w-5 h-5 text-blue-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-semibold text-blue-800">
+                                                {t('agent.noLicenseYet', 'No License on File')}
+                                            </p>
+                                            <p className="text-xs text-blue-600 mt-0.5">
+                                                {t('agent.addLicenseHint', 'Submit your license to get verified and stand out to clients.')}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => { setShowLicenseForm(true); setLicenseError(null); }}
+                                        className="ml-4 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shadow-sm"
+                                    >
+                                        {t('agent.addLicense', 'Add License')}
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="p-4 bg-blue-50/80 backdrop-blur-sm border border-blue-200/50 rounded-xl space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-sm font-semibold text-blue-800">
+                                            {t('agent.submitLicenseTitle', 'Submit Your License')}
+                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={() => { setShowLicenseForm(false); setLicenseError(null); setLicenseInput(''); setLicenseCountryInput(''); }}
+                                            className="text-blue-400 hover:text-blue-600 transition-colors"
+                                        >
+                                            <XMarkIcon className="w-5 h-5" />
+                                        </button>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-semibold text-blue-800 mb-1">
+                                                {t('agent.licenseCountry', 'Country')}
+                                            </label>
+                                            <select
+                                                value={licenseCountryInput}
+                                                onChange={(e) => setLicenseCountryInput(e.target.value)}
+                                                className="w-full px-3 py-2.5 border border-blue-200 rounded-xl text-sm bg-white/60 backdrop-blur-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                            >
+                                                <option value="">{t('agent.selectCountry', 'Select country...')}</option>
+                                                {BALKAN_COUNTRIES.map((c) => (
+                                                    <option key={c.code} value={c.code}>{c.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-blue-800 mb-1">
+                                                {t('agent.licenseNumber', 'License Number')}
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={licenseInput}
+                                                onChange={(e) => { setLicenseInput(e.target.value); setLicenseError(null); }}
+                                                className="w-full px-3 py-2.5 border border-blue-200 rounded-xl text-sm font-mono bg-white/60 backdrop-blur-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                                placeholder={licenseFormatHint || t('agent.enterLicenseNumber', 'Enter your license number')}
+                                            />
+                                            {licenseFormatHint && (
+                                                <p className="mt-1 text-[11px] text-blue-500">
+                                                    {t('agent.formatHint', 'Expected format')}: {licenseFormatHint}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {licenseError && (
+                                        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                            <XMarkIcon className="w-4 h-4 text-red-500 flex-shrink-0" />
+                                            <p className="text-xs text-red-700 font-medium">{licenseError}</p>
+                                        </div>
+                                    )}
+
+                                    <div className="flex justify-end gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => { setShowLicenseForm(false); setLicenseError(null); setLicenseInput(''); setLicenseCountryInput(''); }}
+                                            className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                                        >
+                                            {t('common.cancel', 'Cancel')}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={handleLicenseFormSubmit}
+                                            disabled={licenseSubmitting || !licenseInput.trim() || !licenseCountryInput}
+                                            className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
+                                        >
+                                            {licenseSubmitting && <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                                            {t('agent.submitForReview', 'Submit for Review')}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 

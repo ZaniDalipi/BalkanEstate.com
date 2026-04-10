@@ -283,6 +283,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                 licenseStatus={profile.agentData.licenseStatus || (profile.agentData.licenseVerified ? 'verified' : profile.agentData.licenseNumber ? 'pending' : 'none')}
                 licenseNumber={profile.agentData.licenseNumber}
                 licenseCountry={profile.agentData.licenseCountry}
+                onLicenseSubmitted={profile.handleLicenseSubmitted}
                 centerLat={profile.agentData.lat}
                 centerLng={profile.agentData.lng}
             />
