@@ -129,6 +129,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
 
+    <!-- Preload the main entry script for faster LCP -->
+    <link rel="modulepreload" href="/index.tsx">
+
     <!-- DNS prefetch for third-party domains (lower priority than preconnect) -->
     <link rel="dns-prefetch" href="https://images.unsplash.com">
     <link rel="dns-prefetch" href="https://maps.googleapis.com">
@@ -418,6 +421,12 @@
       @keyframes float {
         0%, 100% { transform: translateY(0px); }
         50% { transform: translateY(-3px); }
+      }
+
+      /* Optimize rendering for below-fold sections */
+      .content-below-fold {
+        content-visibility: auto;
+        contain-intrinsic-size: auto 500px;
       }
 
       /* Hero section CSS animations (replaces framer-motion for FCP) */

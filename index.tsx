@@ -33,9 +33,13 @@ import App from './App';
 // Import Tailwind CSS (production build)
 import './src/index.css';
 
-// Initialize Sentry for error monitoring (must be first)
+// Initialize Sentry for error monitoring (deferred to avoid blocking LCP)
 import { initSentry } from './src/lib/sentry';
-initSentry();
+if ('requestIdleCallback' in window) {
+  requestIdleCallback(() => initSentry());
+} else {
+  setTimeout(initSentry, 0);
+}
 
 // Suppress console logs in production for security
 import { suppressConsoleLogs } from './src/utils/logger';
@@ -51,10 +55,9 @@ if (!rootElement) {
 }
 
 const root = ReactDOM.createRoot(rootElement);
+const app = <App />;
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  import.meta.env.DEV ? <React.StrictMode>{app}</React.StrictMode> : app
 );
 
 // Register the service worker AFTER the page has loaded so it doesn't
