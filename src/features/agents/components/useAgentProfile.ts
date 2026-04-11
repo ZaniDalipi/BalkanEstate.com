@@ -470,13 +470,16 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             const response = await toggleSavedAgent(agent.id);
             // Sync with backend response
             setSavedAgent(response.isSaved);
-            success(response.isSaved
-                ? t('profilePage.agentSaved', 'Agent saved!')
-                : t('profilePage.agentUnsaved', 'Agent removed from saved'));
+            success(
+                response.isSaved
+                    ? t('profilePage.agentSaved', 'Agent saved!')
+                    : t('profilePage.agentUnsaved', 'Agent removed from saved'),
+                ''
+            );
         } catch (err: any) {
             // Revert on error
             setSavedAgent(previousState);
-            showError(err?.message || t('profilePage.saveError', 'Failed to save agent. Please try again.'));
+            showError(t('profilePage.saveError', 'Failed to save agent'), err?.message || t('profilePage.saveErrorMessage', 'Please try again.'));
         }
     };
 
