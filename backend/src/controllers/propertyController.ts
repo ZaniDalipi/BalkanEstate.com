@@ -721,40 +721,52 @@ export const createProperty = async (
     // When posting as private_seller, the listing won't appear on the agency page.
     // Their profile role remains "agent" - only the listing's createdAsRole changes.
 
-    // Check listing limits based on subscription tier
+    // Import carryover service for listing allowance management
+    const listingCarryoverService = require('../services/listingCarryoverService').default;
+
+    // Check listing limits based on subscription tier and carryover system
     const limit = user.subscription.listingsLimit || FREE_TIER_LIMITS.LISTINGS;
     const tier = user.subscription.tier || 'free';
     const isAgencyAgent = tier === 'agency_agent';
 
-    // For agency agents: check and reset monthly listing counter
-    // Agency agents get 30 active listings per month, resetting from their subscription start date
+    // For agency agents: use carryover system with monthly allowance + YTD cap
     if (isAgencyAgent) {
       const now = new Date();
       const resetDate = user.subscription.listingsMonthResetDate;
-      if (!resetDate || now >= resetDate) {
-        // Reset monthly counter and set next reset date (30 days from now)
-        const nextReset = new Date(now);
-        nextReset.setDate(nextReset.getDate() + 30);
-        nextReset.setHours(0, 0, 0, 0);
-        await User.findByIdAndUpdate(user._id, {
-          'subscription.monthlyListingsCreated': 0,
-          'subscription.listingsMonthResetDate': nextReset,
-        });
-        user.subscription.monthlyListingsCreated = 0;
-        user.subscription.listingsMonthResetDate = nextReset;
+
+      // Check if subscription cycle is complete (annual reset)
+      if (listingCarryoverService.isAnnualCycleComplete(user)) {
+        const resetResult = await listingCarryoverService.applyAnnualReset(user._id.toString());
+        if (resetResult.success && resetResult.user) {
+          Object.assign(user, resetResult.user.toObject());
+        }
       }
 
-      // Check monthly limit for agency agents (30 per month)
-      const monthlyLimit = AGENCY_AGENT_LIMITS.LISTINGS_PER_MONTH;
-      const monthlyCreated = user.subscription.monthlyListingsCreated || 0;
-      if (monthlyCreated >= monthlyLimit) {
+      // Check if monthly allowance needs refresh
+      if (!resetDate || now >= resetDate) {
+        const refreshResult = await listingCarryoverService.refreshMonthlyAllowance(
+          user._id.toString()
+        );
+        if (refreshResult.success && refreshResult.user) {
+          Object.assign(user, refreshResult.user.toObject());
+        }
+      }
+
+      // Get effective listing limit (respects annual cap)
+      const monthlyAllowance = await listingCarryoverService.getMonthlyAllowance(tier);
+      const effectiveLimit = listingCarryoverService.getEffectiveListingLimit(user, monthlyAllowance);
+      const monthlyCreated = user.subscription.listingsCreatedThisMonth || 0;
+
+      if (monthlyCreated >= effectiveLimit) {
         res.status(403).json({
-          message: `You have reached your monthly limit of ${monthlyLimit} listings. Your limit resets on ${user.subscription.listingsMonthResetDate?.toLocaleDateString() || 'next month'}.`,
+          message: `You have reached your monthly limit of ${effectiveLimit} listings. Your limit resets on ${user.subscription.subscriptionCycleEndDate?.toLocaleDateString() || 'at subscription renewal'}.`,
           code: 'MONTHLY_LISTING_LIMIT_REACHED',
           tier,
-          limit: monthlyLimit,
+          limit: effectiveLimit,
           current: monthlyCreated,
-          resetDate: user.subscription.listingsMonthResetDate,
+          carryover: user.subscription.carryoverListings,
+          ytdAllowance: user.subscription.listingsAllowanceYTD,
+          resetDate: user.subscription.subscriptionCycleEndDate,
         });
         return;
       }
@@ -774,9 +786,10 @@ export const createProperty = async (
       totalListingsCreated: 1,
     };
 
-    // For agency agents, also increment the monthly counter
+    // For agency agents, track monthly listings created AND YTD allowance used
     if (isAgencyAgent) {
-      incrementFields['subscription.monthlyListingsCreated'] = 1;
+      incrementFields['subscription.listingsCreatedThisMonth'] = 1;
+      incrementFields['subscription.listingsAllowanceYTD'] = 1;
     }
 
     const atomicResult = await User.findOneAndUpdate(

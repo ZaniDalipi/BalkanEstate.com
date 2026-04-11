@@ -237,6 +237,7 @@ export async function processSubscriptionPayment(
     // Sync subscription embedded object (tier, listingsLimit, status)
     const isEnterprise = productId.includes('enterprise') || productId === 'agency_yearly';
     const isPro = productId.includes('pro_') || productId.includes('seller_pro_');
+    const isAgencyAgent = productId.includes('agency_agent') || productId === 'agency_monthly';
     const isYearly = product.billingPeriod === 'yearly';
 
     if (!user.subscription) {
@@ -252,7 +253,53 @@ export async function processSubscriptionPayment(
     } else if (isPro) {
       user.subscription.tier = 'pro';
       user.subscription.listingsLimit = product.listingsLimit || (isYearly ? PRO_TIER_LIMITS.YEARLY.LISTINGS : PRO_TIER_LIMITS.MONTHLY.LISTINGS);
+    } else if (isAgencyAgent) {
+      user.subscription.tier = 'agency_agent';
+      user.subscription.listingsLimit = product.listingsLimit || 30; // Default 30 per month
     }
+
+    // Initialize carryover system for all listing-based subscriptions
+    if (!existingSubscription && (isEnterprise || isPro || isAgencyAgent)) {
+      // New subscription: initialize carryover fields
+      const monthlyAllowance = product.listingsLimit || 0;
+      user.subscription.listingsAllowanceThisMonth = monthlyAllowance;
+      user.subscription.listingsAllowanceYTD = monthlyAllowance; // Start with first month
+      user.subscription.carryoverListings = 0; // No carryover on new subscription
+      user.subscription.listingsCreatedThisMonth = 0;
+      user.subscription.subscriptionCycleStartDate = startDate;
+      user.subscription.subscriptionCycleEndDate = new Date(startDate.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year
+    } else if (existingSubscription && (isEnterprise || isPro || isAgencyAgent)) {
+      // Subscription renewal: check if annual cycle complete and apply carryover
+      const listingCarryoverService = require('./listingCarryoverService').default;
+
+      // Check if annual cycle is complete
+      if (listingCarryoverService.isAnnualCycleComplete(user)) {
+        // Apply annual reset asynchronously (don't block the transaction)
+        try {
+          const resetResult = await listingCarryoverService.applyAnnualReset(user._id.toString());
+          if (resetResult.success && resetResult.user) {
+            Object.assign(user.subscription, resetResult.user.subscription);
+          }
+        } catch (resetError) {
+          paymentLogger.error('⚠️ Error applying annual reset during renewal:', resetError);
+          // Don't fail renewal if reset fails
+        }
+      } else {
+        // Refresh monthly allowance (carryover + new month)
+        try {
+          const refreshResult = await listingCarryoverService.refreshMonthlyAllowance(
+            user._id.toString()
+          );
+          if (refreshResult.success && refreshResult.user) {
+            Object.assign(user.subscription, refreshResult.user.subscription);
+          }
+        } catch (refreshError) {
+          paymentLogger.error('⚠️ Error refreshing monthly allowance:', refreshError);
+          // Don't fail renewal if refresh fails
+        }
+      }
+    }
+
     user.markModified('subscription');
 
     // Sync activeListingsLimit to match the plan

@@ -143,6 +143,16 @@ export interface IUser extends Document {
       lastRefresh: Date; // Last monthly refresh
     };
 
+    // Listing Carryover & Annual Cap System
+    listingsAllowanceThisMonth?: number; // Current month allocation (e.g., 30 for agency)
+    listingsAllowanceYTD?: number; // Cumulative YTD (30, 60, 90... for stacking)
+    carryoverListings?: number; // Unused from last month (auto-carry forward)
+    subscriptionCycleStartDate?: Date; // When subscription started or last reset
+    subscriptionCycleEndDate?: Date; // 1 year from start
+    listingsCreatedThisMonth?: number; // Count for current month (separate from monthlyListingsCreated)
+    listingsArchivedDate?: Date; // When listings were archived (>90 days old)
+    archiveNotificationSent?: boolean; // Sent email about old listings
+
     // Buyer-specific features
     savedSearchesLimit?: number; // 1 free, 10 pro, unlimited buyer
 
@@ -659,6 +669,37 @@ const UserSchema: Schema = new Schema(
           type: Date,
           default: Date.now,
         },
+      },
+
+      // Listing Carryover & Annual Cap System
+      listingsAllowanceThisMonth: {
+        type: Number,
+        default: 0, // Current month allocation
+      },
+      listingsAllowanceYTD: {
+        type: Number,
+        default: 0, // Cumulative YTD for stacking
+      },
+      carryoverListings: {
+        type: Number,
+        default: 0, // Unused from last month
+      },
+      subscriptionCycleStartDate: {
+        type: Date, // When subscription started or last reset
+      },
+      subscriptionCycleEndDate: {
+        type: Date, // 1 year from start
+      },
+      listingsCreatedThisMonth: {
+        type: Number,
+        default: 0, // Count for current month
+      },
+      listingsArchivedDate: {
+        type: Date, // When listings were archived
+      },
+      archiveNotificationSent: {
+        type: Boolean,
+        default: false, // Sent email about old listings
       },
 
       // Buyer features
