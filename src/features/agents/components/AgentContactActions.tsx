@@ -179,6 +179,8 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
             <AgentInquiryModal
                 agent={{
                     id: agent.id,
+                    userId: agent.userId,
+                    agentId: agent.agentId,
                     name: agent.name,
                     avatarUrl: agent.avatarUrl,
                     agencyName: agent.agencyName,

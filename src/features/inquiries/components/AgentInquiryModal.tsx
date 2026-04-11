@@ -5,6 +5,8 @@ import { XMarkIcon, UserCircleIcon } from '@/constants';
 
 interface Agent {
   id: string;
+  userId?: string;
+  agentId?: string;
   name: string;
   avatarUrl?: string;
   agencyName?: string;
@@ -69,8 +71,14 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
     setIsSubmitting(true);
 
     try {
+      // Try userId (User ObjectId), then agentId (custom string), then id (Agent ObjectId)
+      const agentId = String(agent.userId || agent.agentId || agent.id || '');
+      if (!agentId) {
+        throw new Error(t('agents:inquiry.agentIdentificationError', 'Unable to identify agent'));
+      }
+
       await sendAgentInquiry({
-        agentId: agent.id,
+        agentId,
         buyerName: formData.buyerName.trim(),
         buyerEmail: formData.buyerEmail.trim(),
         buyerPhone: formData.buyerPhone.trim() || undefined,
