@@ -1057,8 +1057,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
         }
       }
 
-      // Always add the blue dot property marker
-      addPropertyMarker(mapInstance, lat, lng, orientation);
+      // Only add the blue dot property marker if orientation is provided
+      if (orientation && orientation !== 'any') {
+        addPropertyMarker(mapInstance, lat, lng, orientation);
+      }
 
       // Show POIs (Points of Interest) for neighborhood context
       // Only hide very minor labels that would clutter the 3D view
