@@ -1217,7 +1217,20 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             <div>
               <p className="font-semibold text-neutral-800">{t('management.listingLimit', 'Listing Limit')}</p>
               <p className="text-sm text-neutral-500">
-                {t('management.listingUsage', { used: user.subscription?.activeListingsCount || user.listingsCount || 0, limit: currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit, defaultValue: '{{used}} of {{limit}} used' })}
+                {/* For carryover system: show listingsCreatedThisMonth / listingsAllowanceThisMonth + carryover */}
+                {/* For non-carryover: show activeListingsCount / listingsLimit */}
+                {user.subscription?.listingsAllowanceYTD !== undefined && user.subscription?.listingsAllowanceThisMonth !== undefined
+                  ? t('management.listingUsage', {
+                      used: user.subscription.listingsCreatedThisMonth || 0,
+                      limit: (user.subscription.listingsAllowanceThisMonth || 0) + (user.subscription.carryoverListings || 0),
+                      defaultValue: '{{used}} of {{limit}} used'
+                    })
+                  : t('management.listingUsage', {
+                      used: user.subscription?.activeListingsCount || user.listingsCount || 0,
+                      limit: currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit,
+                      defaultValue: '{{used}} of {{limit}} used'
+                    })
+                }
                 {subscriptionDetails && subscriptionDetails.currentPlan.period && subscriptionDetails.currentPlan.period !== 'forever' && (
                   <span className="ml-1 text-neutral-400">· {subscriptionDetails.currentPlan.period === 'month' ? t('management.perMonth', 'per month') : t('management.perYear', 'per year')}</span>
                 )}
@@ -1226,7 +1239,10 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           </div>
           <div className="text-right">
             <p className="text-2xl font-bold text-neutral-800">
-              {(currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit) - (user.subscription?.activeListingsCount || user.listingsCount || 0)}
+              {user.subscription?.listingsAllowanceYTD !== undefined && user.subscription?.listingsAllowanceThisMonth !== undefined
+                ? Math.max(0, (user.subscription.listingsAllowanceThisMonth || 0) + (user.subscription.carryoverListings || 0) - (user.subscription.listingsCreatedThisMonth || 0))
+                : (currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit) - (user.subscription?.activeListingsCount || user.listingsCount || 0)
+              }
             </p>
             <p className="text-xs text-neutral-500">{t('management.remaining', 'remaining')}</p>
           </div>
@@ -1234,7 +1250,13 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         <div className="mt-3 w-full bg-neutral-100 rounded-full h-2 overflow-hidden">
           <div
             className="bg-blue-500 h-full rounded-full transition-all duration-500"
-            style={{ width: `${Math.min(100, ((user.subscription?.activeListingsCount || user.listingsCount || 0) / (currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit)) * 100)}%` }}
+            style={{
+              width: `${Math.min(100, (
+                user.subscription?.listingsAllowanceYTD !== undefined && user.subscription?.listingsAllowanceThisMonth !== undefined
+                  ? ((user.subscription.listingsCreatedThisMonth || 0) / ((user.subscription.listingsAllowanceThisMonth || 0) + (user.subscription.carryoverListings || 0)) * 100)
+                  : ((user.subscription?.activeListingsCount || user.listingsCount || 0) / (currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit) * 100)
+              ))}`
+            }}
           />
         </div>
       </div>
