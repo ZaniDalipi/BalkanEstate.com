@@ -1013,11 +1013,9 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
   // Show "No Active Subscription" only if there's truly no subscription
   // OR if the subscription is cancelled AND expired
-  // OR if user only has the free tier (no paid subscription)
   const showNoSubscription = !subscription || !subscriptionDetails ||
     (subscription?.status === 'canceled' && subscriptionDetails?.isExpired) ||
-    (subscription?.status === 'expired') ||
-    (subscriptionDetails?.currentPlanKey === 'free');
+    (subscription?.status === 'expired');
 
   if (showNoSubscription && !isCancelledButActive) {
     // Build benefit list from DB product data based on user role
