@@ -287,7 +287,11 @@ export function useAgentProfile(agent: Agent) {
     }
 
     try {
-      const conversation = await createConversation({ sellerId: agent.userId || agent.id });
+      const sellerId = String(agent.userId || agent.agentId || agent.id || '');
+      if (!sellerId) {
+        throw new Error('Unable to identify agent');
+      }
+      const conversation = await createConversation({ sellerId });
       dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
     } catch {
