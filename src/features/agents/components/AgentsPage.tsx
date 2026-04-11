@@ -17,7 +17,7 @@ import AgentsHeroBanner from '@/components/shared/AgentsHeroBanner';
 import { HERO_IMAGES } from '@/config/cloudinaryConfig';
 import { apiRequest } from '@/src/shared/api';
 
-type SortOption = 'rating' | 'experience' | 'sales' | 'recent' | 'name';
+type SortOption = 'rating' | 'experience' | 'sales' | 'recent' | 'name' | 'licensed';
 type SearchTab = 'all' | 'name' | 'location' | 'specialization';
 
 const AgentsPage: React.FC = () => {
@@ -46,6 +46,7 @@ const AgentsPage: React.FC = () => {
     minExperience: 0,
     languages: [] as string[],
     priceRange: 'all' as 'all' | 'luxury' | 'mid' | 'affordable',
+    licensedOnly: false,
   });
 
   // Contact form state
@@ -306,6 +307,11 @@ const AgentsPage: React.FC = () => {
         if (filters.priceRange === 'affordable' && avgPrice > 150000) return false;
       }
 
+      // Licensed filter
+      if (filters.licensedOnly) {
+        if (!agent.licenseVerified) return false;
+      }
+
       return true;
     });
 
@@ -323,6 +329,12 @@ const AgentsPage: React.FC = () => {
           return 0;
         case 'name':
           return a.name.localeCompare(b.name);
+        case 'licensed': {
+          const aLicensed = a.licenseVerified ? 1 : 0;
+          const bLicensed = b.licenseVerified ? 1 : 0;
+          if (bLicensed !== aLicensed) return bLicensed - aLicensed;
+          return (b.rating || 0) - (a.rating || 0);
+        }
         default:
           return 0;
       }
@@ -575,6 +587,7 @@ const AgentsPage: React.FC = () => {
                     <option value="rating">{t('agents:filters.highestRated')}</option>
                     <option value="experience">{t('agents:filters.mostExperienced')}</option>
                     <option value="sales">{t('agents:filters.mostSales')}</option>
+                    <option value="licensed">{t('agents:filters.licensedFirst', 'Licensed First')}</option>
                     <option value="name">{t('agents:filters.nameAZ')}</option>
                   </select>
                 </div>
@@ -601,9 +614,9 @@ const AgentsPage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                   </svg>
                   {showFilters ? t('agents:filters.hideFilters') : t('agents:filters.showFilters')}
-                  {(filters.propertyTypes.length > 0 || filters.minRating > 0 || filters.minExperience > 0 || filters.languages.length > 0 || filters.priceRange !== 'all') && (
+                  {(filters.propertyTypes.length > 0 || filters.minRating > 0 || filters.minExperience > 0 || filters.languages.length > 0 || filters.priceRange !== 'all' || filters.licensedOnly) && (
                     <span className="bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {[filters.propertyTypes.length, filters.minRating > 0 ? 1 : 0, filters.minExperience > 0 ? 1 : 0, filters.languages.length, filters.priceRange !== 'all' ? 1 : 0].reduce((a, b) => a + b, 0)}
+                      {[filters.propertyTypes.length, filters.minRating > 0 ? 1 : 0, filters.minExperience > 0 ? 1 : 0, filters.languages.length, filters.priceRange !== 'all' ? 1 : 0, filters.licensedOnly ? 1 : 0].reduce((a, b) => a + b, 0)}
                     </span>
                   )}
                 </button>
@@ -613,6 +626,29 @@ const AgentsPage: React.FC = () => {
               {/* Advanced Filters Panel */}
               {showFilters && (
                 <div className="border-t border-gray-200 pt-4 space-y-4 animate-fade-in-up">
+                  {/* Licensed Only Toggle */}
+                  <label className="flex items-center gap-3 cursor-pointer select-none group">
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        checked={filters.licensedOnly}
+                        onChange={(e) => setFilters(prev => ({ ...prev, licensedOnly: e.target.checked }))}
+                        className="sr-only peer"
+                      />
+                      <div className="w-10 h-5 bg-gray-200 rounded-full peer-checked:bg-emerald-500 transition-colors duration-200" />
+                      <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-200 peer-checked:translate-x-5" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-gray-700 group-hover:text-gray-900 transition-colors">
+                        {t('agents:filters.licensedOnly', 'Licensed Agents Only')}
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-wide">
+                        <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                        {t('agents:filters.verified', 'Verified')}
+                      </span>
+                    </div>
+                  </label>
+
                   {/* Property Types */}
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">{t('agents:filters.specialization')}</label>
@@ -689,7 +725,7 @@ const AgentsPage: React.FC = () => {
                   </div>
 
                   {/* Clear Filters Button */}
-                  {(filters.propertyTypes.length > 0 || filters.minRating > 0 || filters.minExperience > 0 || filters.priceRange !== 'all') && (
+                  {(filters.propertyTypes.length > 0 || filters.minRating > 0 || filters.minExperience > 0 || filters.priceRange !== 'all' || filters.licensedOnly) && (
                     <div className="pt-2">
                       <button
                         onClick={() => setFilters({
@@ -697,7 +733,8 @@ const AgentsPage: React.FC = () => {
                           minRating: 0,
                           minExperience: 0,
                           languages: [],
-                          priceRange: 'all'
+                          priceRange: 'all',
+                          licensedOnly: false,
                         })}
                         className="text-sm text-primary hover:text-primary-dark font-medium"
                       >

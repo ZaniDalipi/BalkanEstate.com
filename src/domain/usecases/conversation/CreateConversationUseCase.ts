@@ -8,9 +8,13 @@ export class CreateConversationUseCase {
   constructor(private conversationRepository: IConversationRepository) {}
 
   async execute(data: CreateConversationDTO): Promise<Conversation> {
-    // Business logic validation - require either propertyId or sellerId
-    if (!data.propertyId && !data.sellerId) {
-      throw new Error('Property ID or Seller ID is required');
+    // Business logic validation
+    if (!data.propertyId) {
+      throw new Error('Property ID is required');
+    }
+
+    if (!data.buyerId || !data.sellerId) {
+      throw new Error('Buyer and seller IDs are required');
     }
 
     if (data.buyerId === data.sellerId) {

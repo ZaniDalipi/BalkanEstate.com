@@ -169,44 +169,39 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     let verifiedAgency: any = null;
 
     if (sanitizedRole === 'agent') {
-      // License number is required for agents
-      if (!licenseNumber) {
-        res.status(400).json({
-          message: 'License number is required for agent registration',
-          code: 'LICENSE_REQUIRED'
-        });
-        return;
-      }
+      // License number is optional — agents can register without one
+      // and provide it later from their profile
+      if (licenseNumber) {
+        // Validate license number format
+        const licenseRegex = /^[A-Z0-9-]+$/i;
+        if (!licenseRegex.test(licenseNumber)) {
+          res.status(400).json({
+            message: 'Invalid license number format. Only letters, numbers, and hyphens are allowed.',
+            code: 'INVALID_LICENSE_FORMAT'
+          });
+          return;
+        }
 
-      // Validate license number format
-      const licenseRegex = /^[A-Z0-9-]+$/i;
-      if (!licenseRegex.test(licenseNumber)) {
-        res.status(400).json({
-          message: 'Invalid license number format. Only letters, numbers, and hyphens are allowed.',
-          code: 'INVALID_LICENSE_FORMAT'
-        });
-        return;
-      }
+        // Validate license number length
+        if (licenseNumber.length < 5 || licenseNumber.length > 30) {
+          res.status(400).json({
+            message: 'License number must be between 5 and 30 characters',
+            code: 'INVALID_LICENSE_LENGTH'
+          });
+          return;
+        }
 
-      // Validate license number length
-      if (licenseNumber.length < 5 || licenseNumber.length > 30) {
-        res.status(400).json({
-          message: 'License number must be between 5 and 30 characters',
-          code: 'INVALID_LICENSE_LENGTH'
-        });
-        return;
-      }
-
-      // Check if license number already exists in User or Agent collection
-      // Use a generic error message to prevent license enumeration
-      const existingUserWithLicense = await User.findOne({ licenseNumber: licenseNumber });
-      const existingAgentWithLicense = await Agent.findOne({ licenseNumber: licenseNumber });
-      if (existingUserWithLicense || existingAgentWithLicense) {
-        res.status(400).json({
-          message: 'Unable to create account. Please check your information and try again.',
-          code: 'SIGNUP_FAILED'
-        });
-        return;
+        // Check if license number already exists in User or Agent collection
+        // Use a generic error message to prevent license enumeration
+        const existingUserWithLicense = await User.findOne({ licenseNumber: licenseNumber });
+        const existingAgentWithLicense = await Agent.findOne({ licenseNumber: licenseNumber });
+        if (existingUserWithLicense || existingAgentWithLicense) {
+          res.status(400).json({
+            message: 'Unable to create account. Please check your information and try again.',
+            code: 'SIGNUP_FAILED'
+          });
+          return;
+        }
       }
 
       agencyName = 'Independent Agent'; // Default for independent agents
@@ -248,7 +243,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       name,
       phone: cleanPhone,
       role: sanitizedRole,
-      licenseNumber: sanitizedRole === 'agent' ? licenseNumber : undefined,
+      licenseNumber: sanitizedRole === 'agent' && licenseNumber ? licenseNumber : undefined,
       agencyName: agencyName,
       agencyId: agencyId,
       agentId: generatedAgentId,
@@ -265,18 +260,20 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     });
 
     // If agent, create Agent record and add to agency
-    if (sanitizedRole === 'agent' && licenseNumber) {
+    if (sanitizedRole === 'agent') {
       try {
         const agentLanguages = languages && languages.length > 0 ? languages : ['English'];
+        const hasLicense = !!licenseNumber;
 
         await Agent.create({
           userId: user._id,
           agencyName: agencyName!,
           agencyId: agencyId || undefined,
           agentId: generatedAgentId!,
-          licenseNumber,
-          licenseVerified: true,
-          licenseVerificationDate: new Date(),
+          ...(hasLicense ? { licenseNumber } : {}),
+          licenseVerified: hasLicense,
+          licenseVerificationDate: hasLicense ? new Date() : undefined,
+          licenseStatus: hasLicense ? 'pending' : 'none',
           languages: agentLanguages,
           isActive: true,
         });

@@ -284,7 +284,8 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                             </h3>
 
                             <div className="space-y-4">
-                                {/* Licensed Real Estate Agent */}
+                                {/* Licensed Real Estate Agent — only show when license is verified */}
+                                {agent.licenseVerified && agent.licenseNumber && (
                                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-5">
                                     <div className="flex items-start gap-4">
                                         <div className="bg-blue-600 text-white p-3 rounded-lg flex-shrink-0">
@@ -292,17 +293,18 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         </div>
                                         <div className="flex-1">
                                             <h4 className="font-bold text-gray-900 text-lg mb-1">{t('profilePage.credentials.licensedAgent')}</h4>
-                                            {agent.licenseNumber && (
-                                                <p className="text-blue-700 font-mono text-sm font-semibold">
-                                                    {agent.licenseNumber}
-                                                </p>
-                                            )}
-                                            <p className="text-gray-600 text-sm mt-1">
-                                                {t('profilePage.credentials.authorizedToPractice', { city: agent.city, country: agent.country })}
+                                            <p className="text-blue-700 font-mono text-sm font-semibold">
+                                                {agent.licenseNumber}
                                             </p>
+                                            {(agent.city || agent.country) && (
+                                            <p className="text-gray-600 text-sm mt-1">
+                                                {t('profilePage.credentials.authorizedToPractice', { city: agent.city || '', country: agent.country || '' })}
+                                            </p>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
+                                )}
 
                                 {/* Professional Credentials from API */}
                                 {agentCredentials.length > 0 && (

@@ -189,11 +189,12 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
 
         {/* Status & verified */}
         <div className="flex items-center gap-2">
-          {agent.licenseVerified && (
-            <div className="rounded-full bg-blue-500 p-1 shadow-[2px_2px_4px_rgba(0,0,0,0.1)] transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 group-hover:shadow-[0_0_12px_rgba(59,130,246,0.4)]">
-              <CheckBadgeIcon className="h-3.5 w-3.5 text-white" />
+          {agent.licenseVerified ? (
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 shadow-[2px_2px_4px_rgba(0,0,0,0.1)] transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_12px_rgba(16,185,129,0.4)]">
+              <CheckBadgeIcon className="h-3 w-3 text-white" />
+              <span className="text-[10px] font-bold text-white tracking-wide uppercase">{t('agents:card.licensed', 'Licensed')}</span>
             </div>
-          )}
+          ) : null}
           <div className="relative">
             <div
               className={cn(

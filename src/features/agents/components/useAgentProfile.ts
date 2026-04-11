@@ -517,7 +517,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             return;
         }
         try {
-            const conversation = await createConversation({ sellerId: agent.userId || agent.id });
+            const conversation = await createConversation(agent.id);
             dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
             window.history.pushState({ page: 'inbox' }, '', '/inbox');
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
@@ -813,6 +813,20 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         window.dispatchEvent(new PopStateEvent('popstate'));
     }, [dispatch]);
 
+    // Refresh agent data after license submission
+    const handleLicenseSubmitted = useCallback(async () => {
+        try {
+            const agentIdentifier = agentData.agentId || agentData.id;
+            if (!agentIdentifier) return;
+            const freshAgent = await fetchAgentById(agentIdentifier);
+            if (isMountedRef.current && freshAgent) {
+                setAgentData(prev => ({ ...prev, ...freshAgent }));
+            }
+        } catch {
+            // Silently fail — existing data remains as fallback
+        }
+    }, [agentData.agentId, agentData.id]);
+
     // ─── Return ──────────────────────────────────────────────────────────────
 
     return {
@@ -888,6 +902,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         handleEditAchievement,
         handleDeleteAchievement,
         handleViewProperty,
+        handleLicenseSubmitted,
     };
 }
 

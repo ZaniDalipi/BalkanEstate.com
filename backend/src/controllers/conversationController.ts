@@ -10,9 +10,8 @@ import { getSocketInstance } from '../utils/socketInstance';
 import { incrementInquiryCount } from '../utils/statsUpdater';
 import { apiLogger } from '../utils/logger';
 import { sanitizeConversation } from '../utils/responseSanitizer';
-import { getObjectIdParam, isValidObjectId } from '../utils/validateParams';
+import { getObjectIdParam } from '../utils/validateParams';
 import { resolveId } from '../utils/idObfuscation';
-import Agent from '../models/Agent';
 
 // @desc    Get user's conversations
 // @route   GET /api/conversations
@@ -148,72 +147,12 @@ export const createConversation = async (
     }
 
     const rawPropertyId = req.body.propertyId;
-    const rawSellerId = req.body.sellerId;
 
-    if (!rawPropertyId && !rawSellerId) {
-      res.status(400).json({ message: 'Property ID or Seller ID is required' });
+    if (!rawPropertyId) {
+      res.status(400).json({ message: 'Property ID is required' });
       return;
     }
 
-    const currentUserId = String((req.user as IUser)._id);
-
-    // --- Direct agent/seller conversation (no property) ---
-    if (rawSellerId && !rawPropertyId) {
-      const resolvedSellerId = resolveId(rawSellerId) || rawSellerId;
-
-      // Resolve the seller User - may be a User ID, Agent document ID, or custom agentId
-      let sellerUser = isValidObjectId(resolvedSellerId)
-        ? await User.findById(resolvedSellerId)
-        : null;
-
-      if (!sellerUser) {
-        let agentDoc = isValidObjectId(resolvedSellerId)
-          ? await Agent.findById(resolvedSellerId)
-          : null;
-        if (!agentDoc) {
-          agentDoc = await Agent.findOne({ agentId: resolvedSellerId });
-        }
-        if (agentDoc && agentDoc.userId) {
-          sellerUser = await User.findById(agentDoc.userId);
-        }
-      }
-
-      if (!sellerUser) {
-        res.status(404).json({ message: 'Agent not found' });
-        return;
-      }
-
-      if (String(sellerUser._id) === currentUserId) {
-        res.status(400).json({ message: 'Cannot create conversation with yourself' });
-        return;
-      }
-
-      // Check if a direct conversation already exists (no propertyId)
-      let conversation = await Conversation.findOne({
-        propertyId: null,
-        buyerId: currentUserId,
-        sellerId: String(sellerUser._id),
-      })
-        .populate('buyerId', 'name email phone avatarUrl')
-        .populate('sellerId', 'name email phone avatarUrl role agencyName');
-
-      if (!conversation) {
-        conversation = await Conversation.create({
-          buyerId: currentUserId,
-          sellerId: String(sellerUser._id),
-        });
-
-        await incrementInquiryCount(String(sellerUser._id));
-
-        await conversation.populate('buyerId', 'name email phone avatarUrl');
-        await conversation.populate('sellerId', 'name email phone avatarUrl role agencyName');
-      }
-
-      res.status(201).json({ conversation: sanitizeConversation(conversation.toObject()) });
-      return;
-    }
-
-    // --- Property-based conversation ---
     // Resolve obfuscated or raw ID
     const propertyId = resolveId(rawPropertyId) || rawPropertyId;
 
@@ -226,7 +165,7 @@ export const createConversation = async (
     }
 
     // Can't create conversation with yourself
-    if (property.sellerId.toString() === currentUserId) {
+    if (property.sellerId.toString() === String((req.user as IUser)._id).toString()) {
       res.status(400).json({ message: 'Cannot create conversation with yourself' });
       return;
     }
@@ -234,7 +173,7 @@ export const createConversation = async (
     // Check if conversation already exists
     let conversation = await Conversation.findOne({
       propertyId,
-      buyerId: currentUserId,
+      buyerId: String((req.user as IUser)._id),
       sellerId: property.sellerId,
     })
       .populate('propertyId', 'title imageUrl images price city country address propertyType sellerId')
@@ -245,7 +184,7 @@ export const createConversation = async (
       // Create new conversation
       conversation = await Conversation.create({
         propertyId,
-        buyerId: currentUserId,
+        buyerId: String((req.user as IUser)._id),
         sellerId: property.sellerId,
       });
 

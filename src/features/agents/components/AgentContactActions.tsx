@@ -341,37 +341,41 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                 </button>
             </div>
 
-            {/* Agent Credentials */}
+            {/* Agent Credentials — only render when there is something real to show */}
+            {((agent.licenseVerified && agent.licenseNumber) || (agent.certifications && agent.certifications.length > 0) || (agent.awards && agent.awards.length > 0)) && (
             <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-6 mt-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-4">{t('profilePage.credentials.title')}</h3>
                 <div className="space-y-3">
+                    {agent.licenseVerified && agent.licenseNumber && (
                     <div className="flex items-center gap-3">
                         <ShieldCheckIcon className="w-5 h-5 text-green-500" />
                         <div>
                             <p className="font-medium text-gray-900">{t('profilePage.credentials.licensedAgent')}</p>
-                            <p className="text-sm text-gray-600">{agent.licenseNumber || t('profilePage.credentials.memberOfAssociation')}</p>
+                            <p className="text-sm text-gray-600 font-mono">{agent.licenseNumber}</p>
                         </div>
                     </div>
+                    )}
+                    {agent.certifications && agent.certifications.length > 0 && (
                     <div className="flex items-center gap-3">
                         <AcademicCapIcon className="w-5 h-5 text-blue-500" />
                         <div>
                             <p className="font-medium text-gray-900">{t('profilePage.credentials.professionalCertifications')}</p>
-                            <p className="text-sm text-gray-600">
-                                {agent.certifications?.join(', ') || t('profilePage.credentials.memberOfAssociation')}
-                            </p>
+                            <p className="text-sm text-gray-600">{agent.certifications.join(', ')}</p>
                         </div>
                     </div>
+                    )}
+                    {agent.awards && agent.awards.length > 0 && (
                     <div className="flex items-center gap-3">
                         <TrophyIcon className="w-5 h-5 text-amber-500" />
                         <div>
                             <p className="font-medium text-gray-900">{t('profilePage.credentials.awardsRecognition')}</p>
-                            <p className="text-sm text-gray-600">
-                                {agent.awards?.join(', ') || t('profilePage.credentials.noAwards')}
-                            </p>
+                            <p className="text-sm text-gray-600">{agent.awards.join(', ')}</p>
                         </div>
                     </div>
+                    )}
                 </div>
             </div>
+            )}
 
             {/* Quick Stats */}
             {marketInsights && (marketInsights.totalSold > 0 || marketInsights.totalActive > 0) && (

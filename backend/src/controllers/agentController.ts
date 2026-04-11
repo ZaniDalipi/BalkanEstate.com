@@ -20,9 +20,16 @@ import { recalculateAgencyAttributes } from '../services/agencyAttributeSyncServ
 // @access  Public
 export const getAgents = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { search, page = 1, limit = 50 } = req.query;
+    const { search, page = 1, limit = 50, licensed } = req.query;
 
     let filter: any = { isActive: true };
+
+    // Filter by verified license status
+    if (licensed === 'true') {
+      filter.licenseVerified = true;
+    } else if (licensed === 'false') {
+      filter.licenseVerified = { $ne: true };
+    }
 
     // Universal search - searches across multiple fields
     if (search && typeof search === 'string' && search.trim()) {

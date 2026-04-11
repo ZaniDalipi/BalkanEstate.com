@@ -248,7 +248,7 @@ const BusinessListingCard: React.FC<BusinessListingCardProps> = ({ listing, onVi
       {/* Banner strip */}
       <div className={`h-20 sm:h-24 bg-gradient-to-r ${gradient} relative overflow-hidden`}>
         {listing.bannerUrl && (
-          <img src={listing.bannerUrl} alt="" className="w-full h-full object-cover" />
+          <img src={listing.bannerUrl} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
         )}
         <div className="absolute inset-0 bg-black/10" />
 
@@ -280,7 +280,7 @@ const BusinessListingCard: React.FC<BusinessListingCardProps> = ({ listing, onVi
         {/* Logo - overlapping banner */}
         <div className={`absolute -bottom-5 left-4 w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden border-[3px] border-white shadow-lg bg-gradient-to-br ${gradient}`}>
           {listing.logoUrl ? (
-            <img src={listing.logoUrl} alt={listing.name} className="w-full h-full object-cover" />
+            <img src={listing.logoUrl} alt={listing.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <span className="text-lg sm:text-xl font-bold text-white">{listing.name.charAt(0).toUpperCase()}</span>
