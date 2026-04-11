@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CheckCircleIcon } from '../../../constants';
 
@@ -44,6 +44,7 @@ const UpgradePlanCard: React.FC<UpgradePlanCardProps> = ({
   isDisabled = false,
 }) => {
   const { t } = useTranslation('subscription');
+  const [isHovered, setIsHovered] = useState(false);
 
   // Validation
   if (price < 0 || listingsLimit < 0 || promoCoupons < 0) {
@@ -54,6 +55,13 @@ const UpgradePlanCard: React.FC<UpgradePlanCardProps> = ({
   const handleClick = () => {
     if (isDisabled) return;
     onUpgradeClick(planKey);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.key === 'Enter' || e.key === ' ') && !isDisabled) {
+      e.preventDefault();
+      handleClick();
+    }
   };
 
   const getCardStyle = () => {
@@ -90,7 +98,13 @@ const UpgradePlanCard: React.FC<UpgradePlanCardProps> = ({
   };
 
   return (
-    <div className={`rounded-3xl flex flex-col h-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow ${getCardStyle()} relative`}>
+    <div
+      className={`rounded-3xl flex flex-col h-full overflow-hidden shadow-lg transition-all duration-300 ${
+        isHovered && !isDisabled ? 'shadow-2xl -translate-y-1' : 'shadow-lg'
+      } ${getCardStyle()} relative`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* Badge */}
       {badge && (
         <div className="absolute -top-0 left-1/2 -translate-x-1/2 z-20">
@@ -180,9 +194,19 @@ const UpgradePlanCard: React.FC<UpgradePlanCardProps> = ({
       <div className="px-4 sm:px-6 pb-4">
         <button
           onClick={handleClick}
+          onKeyDown={handleKeyDown}
           disabled={isDisabled}
           aria-label={`Upgrade to ${planName} plan`}
-          className={`w-full mt-4 py-3 sm:py-4 rounded-xl font-bold transition-all duration-300 text-sm sm:text-base ${getButtonStyle()}`}
+          aria-disabled={isDisabled}
+          className={`w-full mt-4 py-3 sm:py-4 rounded-xl font-bold transition-all duration-300 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+            isDisabled
+              ? 'focus:ring-gray-300'
+              : isEnterprise
+                ? 'focus:ring-amber-500'
+                : isHighlighted
+                  ? 'focus:ring-emerald-500'
+                  : 'focus:ring-primary'
+          } ${getButtonStyle()}`}
         >
           {isEnterprise ? t('buttons.startAgency', 'Start Your Agency') : t('buttons.upgradeNow', 'Upgrade Now')}
         </button>

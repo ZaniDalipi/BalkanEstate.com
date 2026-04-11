@@ -105,14 +105,19 @@ const UpgradeOptionsGrid: React.FC<UpgradeOptionsGridProps> = ({
   }
 
   return (
-    <div className="space-y-4 sm:space-y-0">
+    <div className="w-full space-y-4 sm:space-y-6">
       {/* Title */}
-      <h3 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-4 sm:mb-6">
-        {t('sections.upgradePlan', 'Upgrade Your Plan')}
-      </h3>
+      <div className="space-y-2">
+        <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900">
+          {t('sections.upgradePlan', 'Upgrade Your Plan')}
+        </h3>
+        <p className="text-sm sm:text-base text-neutral-600">
+          {t('sections.upgradePlanSubtitle', 'Choose a plan that fits your needs')}
+        </p>
+      </div>
 
-      {/* Responsive Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+      {/* Responsive Grid - Mobile: 1 col, Tablet: 2 cols, Desktop: 3 cols */}
+      <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 auto-rows-max">
         {options.map((option) => (
           <UpgradePlanCard
             key={option.key}
@@ -135,10 +140,19 @@ const UpgradeOptionsGrid: React.FC<UpgradeOptionsGridProps> = ({
         ))}
       </div>
 
-      {/* Mobile Tip */}
-      <div className="md:hidden mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-        <p className="text-xs text-blue-700">
-          💡 {t('tips.swipeToCompare', 'Swipe horizontally to compare plans on mobile')}
+      {/* Mobile Helper Text */}
+      <div className="sm:hidden mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+        <p className="text-xs text-blue-700 flex items-center gap-2">
+          <span>💡</span>
+          {t('tips.swipeToCompare', 'Scroll to see all plans')}
+        </p>
+      </div>
+
+      {/* Tablet Helper Text */}
+      <div className="hidden sm:block lg:hidden mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+        <p className="text-xs sm:text-sm text-blue-700 flex items-center gap-2">
+          <span>ℹ️</span>
+          {t('tips.tabletCompare', 'All your plan options are displayed above')}
         </p>
       </div>
     </div>
