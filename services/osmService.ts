@@ -14,11 +14,11 @@ export function getZoomFromBoundingBox(
   if (maxDiff > 0.5)  return 10; // large city / region
   if (maxDiff > 0.2)  return 11; // city
   if (maxDiff > 0.05) return 12; // large town / district
-  if (maxDiff > 0.015) return 13; // town / borough
-  if (maxDiff > 0.005) return 15; // suburb / village
-  if (maxDiff > 0.002) return 16; // neighbourhood
-  if (maxDiff > 0.0005) return 17; // road / street
-  return 18;                        // building / hotel / POI
+  if (maxDiff > 0.015) return 14; // town / borough
+  if (maxDiff > 0.005) return 16; // suburb / village
+  if (maxDiff > 0.002) return 17; // neighbourhood
+  if (maxDiff > 0.0005) return 18; // road / street
+  return 19;                        // building / hotel / POI
 }
 
 export const searchLocation = async (query: string, countryCode?: string): Promise<NominatimResult[]> => {
