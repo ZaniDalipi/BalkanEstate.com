@@ -707,6 +707,9 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         if (key === 'free') return false;
         // agency_agent_yearly is NOT purchasable - only obtained via agency coupon redemption
         if (key === 'agency_agent_yearly') return false;
+        // Hide legacy alias IDs — they are duplicates of canonical plan IDs
+        // Canonical: buyer_monthly, pro_monthly, pro_yearly, agency_yearly
+        if (['seller_pro_monthly', 'seller_pro_yearly', 'seller_enterprise_yearly', 'buyer_pro_monthly', 'free_tier'].includes(key)) return false;
         // Hide Enterprise plan if user already owns/manages an agency
         if (key === 'agency_yearly' && user?.agencyId) return false;
         if (key === subscriptionDetails.currentPlanKey) return false;
