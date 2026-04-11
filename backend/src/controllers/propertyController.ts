@@ -16,7 +16,7 @@ import {
 import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/highlightingUtils';
 import { recordPriceChange, processInstantAlertsForProperty, processInstantPriceDropForProperty } from '../jobs/propertyAlertsJob';
 import { trackUserActivity } from '../services/proBuyerEmailService';
-import { FREE_TIER_LIMITS, PRO_TIER_LIMITS, AGENCY_AGENT_LIMITS } from '../config/subscriptionConstants';
+import { FREE_TIER_LIMITS, PRO_TIER_LIMITS } from '../config/subscriptionConstants';
 import ArchivedListing from '../models/ArchivedListing';
 import { sanitizeProperty } from '../utils/responseSanitizer';
 import {

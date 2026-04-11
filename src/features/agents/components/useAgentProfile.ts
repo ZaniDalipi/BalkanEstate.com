@@ -470,13 +470,14 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             const response = await toggleSavedAgent(agent.id);
             // Sync with backend response
             setSavedAgent(response.isSaved);
-            success(response.isSaved
-                ? t('profilePage.agentSaved', 'Agent saved!')
-                : t('profilePage.agentUnsaved', 'Agent removed from saved'));
+            success(
+                response.isSaved ? t('profilePage.agentSaved', 'Agent saved!') : t('profilePage.agentUnsaved', 'Agent removed from saved'),
+                ''
+            );
         } catch (err: any) {
             // Revert on error
             setSavedAgent(previousState);
-            showError(err?.message || t('profilePage.saveError', 'Failed to save agent. Please try again.'));
+            showError(t('profilePage.error', 'Error'), err?.message || t('profilePage.saveError', 'Failed to save agent. Please try again.'));
         }
     };
 
@@ -540,7 +541,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             const messageText = `Property Appraisal Request:\n\nAddress: ${appraisalForm.address}\nProperty Type: ${appraisalForm.propertyType}\nNotes: ${appraisalForm.notes || 'No additional notes'}`;
 
             // Actually send the message to the conversation
-            await sendMessage(conversation.id, { text: messageText });
+            await sendMessage(conversation.id, { text: messageText } as any);
 
             // Redirect to inbox
             dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
@@ -572,7 +573,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             const messageText = `Consultation Request:\n\nPreferred Date: ${consultationForm.date}\nPreferred Time: ${consultationForm.time}\nTopic: ${consultationForm.topic}\nNotes: ${consultationForm.notes || 'No additional notes'}`;
 
             // Actually send the message to the conversation
-            await sendMessage(conversation.id, { text: messageText });
+            await sendMessage(conversation.id, { text: messageText } as any);
 
             dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
             window.history.pushState({ page: 'inbox' }, '', '/inbox');
