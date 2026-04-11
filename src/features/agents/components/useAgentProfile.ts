@@ -536,7 +536,12 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         setIsSubmitting(true);
         try {
             // Send appraisal request via message to agent
-            const conversation = await createConversation(agent.id);
+            // Try userId (User ObjectId), then agentId (custom string), then agent id (Agent ObjectId)
+            const sellerId = String(agent.userId || agent.agentId || agent.id || '');
+            if (!sellerId) {
+                throw new Error('Unable to identify agent');
+            }
+            const conversation = await createConversation({ sellerId });
             const messageText = `Property Appraisal Request:\n\nAddress: ${appraisalForm.address}\nProperty Type: ${appraisalForm.propertyType}\nNotes: ${appraisalForm.notes || 'No additional notes'}`;
 
             // Actually send the message to the conversation
@@ -568,7 +573,12 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         setIsSubmitting(true);
         try {
             // Send consultation request via message to agent
-            const conversation = await createConversation(agent.id);
+            // Try userId (User ObjectId), then agentId (custom string), then agent id (Agent ObjectId)
+            const sellerId = String(agent.userId || agent.agentId || agent.id || '');
+            if (!sellerId) {
+                throw new Error('Unable to identify agent');
+            }
+            const conversation = await createConversation({ sellerId });
             const messageText = `Consultation Request:\n\nPreferred Date: ${consultationForm.date}\nPreferred Time: ${consultationForm.time}\nTopic: ${consultationForm.topic}\nNotes: ${consultationForm.notes || 'No additional notes'}`;
 
             // Actually send the message to the conversation
