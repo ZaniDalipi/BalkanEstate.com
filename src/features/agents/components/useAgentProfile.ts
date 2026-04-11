@@ -470,11 +470,9 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             const response = await toggleSavedAgent(agent.id);
             // Sync with backend response
             setSavedAgent(response.isSaved);
-            success(
-                response.isSaved
-                    ? t('profilePage.agentSaved', 'Agent saved!')
-                    : t('profilePage.agentUnsaved', 'Agent removed from saved'),
-                ''
+            await success(
+                response.isSaved ? t('profilePage.agentSaved', 'Agent saved!') : t('profilePage.agentUnsaved', 'Agent removed'),
+                response.isSaved ? t('profilePage.agentSavedMsg', 'Added to your favorites') : t('profilePage.agentUnsavedMsg', 'Removed from your favorites')
             );
         } catch (err: any) {
             // Revert on error
