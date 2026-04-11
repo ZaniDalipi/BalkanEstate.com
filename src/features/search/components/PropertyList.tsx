@@ -137,17 +137,6 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
     return (
          <div className="space-y-4">
-            {!isMobile && (
-                <div className="flex items-center gap-2">
-                        <button
-                            onClick={onResetFilters}
-                            className="flex-grow py-2.5 px-4 border border-neutral-300 text-neutral-600 rounded-lg text-sm font-bold bg-white hover:bg-neutral-100 transition-colors"
-                            aria-label={t('search:filters.resetFilters')}
-                        >
-                            {t('search:filters.resetFilters')}
-                        </button>
-                    </div>
-            )}
 
             {/* Search by Address */}
             <div className="relative">
@@ -676,43 +665,6 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                 )}
             </div>
 
-            {!isMobile && (
-                 <div className="pt-2 space-y-2">
-                     <button
-                        onClick={onSearchClick}
-                        disabled={isSearchingLocation}
-                        className="w-full py-2.5 px-4 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
-                    >
-                        {isSearchingLocation ? (
-                            <>
-                                <SpinnerIcon className="w-5 h-5" />
-                                <span>{t('search:ai.searching')}</span>
-                            </>
-                        ) : (
-                            t('search:searchButton')
-                        )}
-                    </button>
-                     <div className="flex items-center gap-2">
-                        <button
-                            onClick={onSaveSearch}
-                            disabled={isSaving}
-                            className="flex-grow py-2.5 px-4 border border-primary text-primary rounded-lg shadow-sm text-sm font-bold bg-white hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
-                        >
-                            {isSaving ? (
-                                <>
-                                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    {t('search:ai.searching')}
-                                </>
-                            ) : (
-                                t('search:savedSearch.saveSearch')
-                            )}
-                        </button>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
@@ -918,6 +870,52 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     history={aiChatHistory}
                                     onHistoryChange={onAiChatHistoryChange}
                                 />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Action buttons - always visible outside collapsible panel */}
+                    {searchMode === 'manual' && (
+                        <div className="px-4 py-2 flex-shrink-0 space-y-2">
+                            <button
+                                onClick={onSearchClick}
+                                disabled={isSearchingLocation}
+                                className="w-full py-2.5 px-4 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
+                            >
+                                {isSearchingLocation ? (
+                                    <>
+                                        <SpinnerIcon className="w-5 h-5" />
+                                        <span>{t('search:ai.searching')}</span>
+                                    </>
+                                ) : (
+                                    t('search:searchButton')
+                                )}
+                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={onResetFilters}
+                                    className="flex-1 py-2 px-4 border border-neutral-300 text-neutral-600 rounded-lg text-sm font-bold bg-white hover:bg-neutral-100 transition-colors"
+                                    aria-label={t('search:filters.resetFilters')}
+                                >
+                                    {t('search:filters.resetFilters')}
+                                </button>
+                                <button
+                                    onClick={onSaveSearch}
+                                    disabled={isSaving}
+                                    className="flex-1 py-2 px-4 border border-primary text-primary rounded-lg text-sm font-bold bg-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2 transition-colors"
+                                >
+                                    {isSaving ? (
+                                        <>
+                                            <svg className="animate-spin h-4 w-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            {t('search:ai.searching')}
+                                        </>
+                                    ) : (
+                                        t('search:savedSearch.saveSearch')
+                                    )}
+                                </button>
                             </div>
                         </div>
                     )}
