@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { Property, Filters, initialFilters, NominatimResult, SavedSearch } from '@/types';
-import { searchLocation } from '@/services/osmService';
+import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import L from 'leaflet';
 import { filterProperties } from '@/utils/propertyUtils';
@@ -410,7 +410,8 @@ export function useRentalSearch() {
         setFilters(prev => ({ ...prev, query: displayName }));
         setSuggestions([]);
         setDrawnBoundsJSON(null); // Clear drawn bounds when searching a location
-        setFlyToTarget({ center: [lat, lng], zoom: 12 });
+        const zoom = getZoomFromBoundingBox(suggestion.boundingbox);
+        setFlyToTarget({ center: [lat, lng], zoom });
         setIsQueryInputFocused(false);
     }, []);
 
