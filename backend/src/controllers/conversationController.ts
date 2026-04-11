@@ -365,7 +365,7 @@ export const sendMessage = async (
       const property = conversation.propertyId as any;
 
       // Only send email if recipient has an email
-      if (recipient && recipient.email && property) {
+      if (recipient && recipient.email) {
         const messageText = text || (imageUrl ? '[Image message]' : '[Message]');
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
@@ -375,10 +375,10 @@ export const sendMessage = async (
           senderName: sender.name || 'A user',
           senderAvatarUrl: sender.avatarUrl,
           messagePreview: messageText.substring(0, 150) + (messageText.length > 150 ? '...' : ''),
-          propertyTitle: property.title || `${property.address}, ${property.city}`,
-          propertyAddress: property.address as string,
-          propertyCity: property.city as string,
-          propertyImageUrl: property.imageUrl || (property.images && property.images[0]?.url),
+          propertyTitle: property ? (property.title || `${property.address}, ${property.city}`) : '',
+          propertyAddress: property ? (property.address as string) : '',
+          propertyCity: property ? (property.city as string) : '',
+          propertyImageUrl: property ? (property.imageUrl || (property.images && property.images[0]?.url)) : undefined,
           conversationUrl: `${frontendUrl}/inbox`,
         });
       }
