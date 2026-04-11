@@ -825,11 +825,12 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
     });
     if (existingActiveSub) {
       // If the user is trying to subscribe to the exact same product, block it (prevent stacking)
-      if (existingActiveSub.productId === productId) {
+      // EXCEPT: Allow coupon subscriptions to override for renewal/extension
+      if (existingActiveSub.productId === productId && existingActiveSub.price !== 0) {
         res.status(400).json({ message: 'You already have an active subscription for this plan' });
         return;
       }
-      // Otherwise, allow the upgrade/switch — the old subscription will be
+      // Otherwise, allow the upgrade/switch/renewal — the old subscription will be
       // canceled automatically inside processSubscriptionPayment
     }
 
