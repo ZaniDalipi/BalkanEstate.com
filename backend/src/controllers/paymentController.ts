@@ -818,19 +818,22 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
 
     // User found
 
-    // Check if user already has an active subscription
+    // Check if user already has a truly active subscription (not expired)
+    // The expiration worker runs every 6 hours, so status may still be 'active'
+    // even though expirationDate has passed — check both fields
+    const now = new Date();
     const existingActiveSub = await Subscription.findOne({
       userId,
       status: { $in: ['active', 'grace'] },
+      expirationDate: { $gt: now },
     });
     if (existingActiveSub) {
       // If the user is trying to subscribe to the exact same product, block it (prevent stacking)
-      // EXCEPT: Allow coupon subscriptions to override for renewal/extension
-      if (existingActiveSub.productId === productId && existingActiveSub.price !== 0) {
+      if (existingActiveSub.productId === productId) {
         res.status(400).json({ message: 'You already have an active subscription for this plan' });
         return;
       }
-      // Otherwise, allow the upgrade/switch/renewal — the old subscription will be
+      // Otherwise, allow the upgrade/switch — the old subscription will be
       // canceled automatically inside processSubscriptionPayment
     }
 
