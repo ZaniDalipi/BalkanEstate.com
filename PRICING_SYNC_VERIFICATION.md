@@ -89,9 +89,27 @@ const LISTING_LIMITS: Record<string, number> = {
 - [x] Listing limits match between config and seed data
 - [x] Currency (EUR) is consistent across all configurations
 
-## To Sync Database with Seed Data
+## Automatic Syncing (Recommended)
 
-If the database needs to be updated with the latest pricing, run:
+**Pricing syncs automatically on every server startup!**
+
+The pricing sync runs automatically as part of the database initialization (`backend/src/utils/initDatabase.ts`):
+
+1. When the server starts, it connects to MongoDB
+2. Immediately after connection, it syncs all products from `seedProducts.ts`
+3. Each product is upserted (updated if exists, created if new)
+4. Pricing, features, and all limits are automatically kept in sync
+5. No manual intervention required
+
+This means:
+- ✅ Frontend always sees current pricing from the database
+- ✅ No manual seed commands needed
+- ✅ Works across all environments (development, staging, production)
+- ✅ Runs automatically without additional configuration
+
+## Manual Syncing (Optional)
+
+If you need to manually trigger a sync without restarting the server, you can run:
 
 ```bash
 # Development
