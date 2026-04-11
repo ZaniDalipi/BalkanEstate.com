@@ -517,7 +517,12 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             return;
         }
         try {
-            const conversation = await createConversation(agent.id);
+            // Try userId (User ObjectId), then agentId (custom string), then id (Agent ObjectId)
+            const sellerId = String(agent.userId || agent.agentId || agent.id || '');
+            if (!sellerId) {
+                throw new Error('Unable to identify agent');
+            }
+            const conversation = await createConversation({ sellerId });
             dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
             window.history.pushState({ page: 'inbox' }, '', '/inbox');
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
