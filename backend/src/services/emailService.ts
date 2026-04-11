@@ -2939,7 +2939,7 @@ class EmailService {
         buyerName:       escapeHtml(params.buyerName),
         buyerEmail:      escapeHtml(params.buyerEmail),
         buyerPhone:      escapeHtml(params.buyerPhone) || '',
-        propertyTitle:   escapeHtml(params.propertyTitle) || '',
+        propertyTitle:   escapeHtml(params.propertyTitle) || (params.inquiryType === 'general' ? 'General Inquiry' : params.inquiryType === 'area_search' ? 'Area Search Request' : ''),
         propertyAddress: escapeHtml(params.location) || '',
         inquiryMessage:  escapeHtml(params.message),
         inquiryUrl,
