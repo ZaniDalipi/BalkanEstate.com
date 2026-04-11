@@ -4,6 +4,7 @@ import { CheckCircleIcon, XCircleIcon, SparklesIcon, HomeIcon, ChartBarIcon } fr
 import { useAppContext } from '../../context/AppContext';
 import { User } from '../../types';
 import PaymentWindow from './PaymentWindow';
+import { UpgradeOptionsGrid, useUpgradeOptions } from './upgrade-plan-card';
 import { replacePlaceholders, ProductValues } from '../../src/shared/utils/featurePlaceholders';
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
@@ -731,6 +732,13 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       }))
       .sort((a, b) => a.plan.tier - b.plan.tier);
   }, [subscriptionDetails, plans, products, calculateUpgradePrice]);
+
+  // Transform upgrade options for the new UpgradeOptionsGrid component
+  const transformedUpgradeOptions = useUpgradeOptions({
+    upgradeOptionsRaw: upgradeOptions,
+    products: products as any, // ProductData extends the Product interface
+    agencyOwnerProductFromDB: agencyOwnerProductFromDB as any,
+  });
 
   const formatDate = (date: Date | null) => {
     if (!date) return 'N/A';
@@ -1830,128 +1838,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       )}
 
       {/* Upgrade Options */}
-      {upgradeOptions.length > 0 && (
-        <div>
-          <h3 className="text-2xl font-bold text-neutral-900 mb-6">{t('management.upgradePlan', 'Upgrade Your Plan')}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {upgradeOptions.map(({ key, plan, pricing }) => {
-              // Enhanced features for Enterprise plan
-              const isEnterprise = key.includes('enterprise') || key.includes('agency_yearly');
-              const matchedProduct = products.find(p => p.productId === key);
-              const displayFeatures = isEnterprise ? [
-                t('management.enterpriseFeatures.listingsCount', '{{count}} Active Listings', { count: matchedProduct?.listingsLimit ?? agencyOwnerProductFromDB?.listingsLimit ?? 750 }),
-                t('management.enterpriseFeatures.createAgency', 'Create Your Own Agency'),
-                t('management.enterpriseFeatures.agentCouponsCount', '{{count}} Agent Invitation Coupons', { count: matchedProduct?.agentCoupons ?? agencyOwnerProductFromDB?.agentCoupons ?? 5 }),
-                t('management.enterpriseFeatures.unlimitedSearches', 'Unlimited Saved Searches'),
-                t('management.enterpriseFeatures.fullAnalytics', 'Full Analytics Dashboard'),
-                t('management.enterpriseFeatures.prioritySupport', 'Priority Support'),
-                t('management.enterpriseFeatures.promoCouponsCount', '{{count}} Monthly Promotion Coupons', { count: matchedProduct?.promotionCoupons ?? agencyOwnerProductFromDB?.promotionCoupons ?? 10 }),
-                t('management.enterpriseFeatures.teamTools', 'Team Management Tools'),
-              ] : matchedProduct
-                ? plan.features.map(f => replacePlaceholders(f, matchedProduct))
-                : plan.features;
-
-              return (
-                <div
-                  key={key}
-                  className={`rounded-3xl flex flex-col h-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow ${
-                    isEnterprise
-                      ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700'
-                      : plan.highlighted
-                        ? 'bg-gradient-to-br from-emerald-50 via-white to-cyan-50 border-2 border-emerald-400'
-                        : 'bg-white border border-gray-200'
-                  } relative`}
-                >
-                  {/* Badge */}
-                  {(plan.badge || isEnterprise) && (
-                    <div className="absolute -top-0 left-1/2 -translate-x-1/2 z-20">
-                      <span className={`inline-flex items-center gap-1.5 text-white text-xs font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-lg ${
-                        isEnterprise ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-red-500 to-rose-600'
-                      }`}>
-                        {isEnterprise ? t('management.bestForAgencies', 'Best for Agencies') : plan.badge}
-                      </span>
-                    </div>
-                  )}
-                  <div className="p-6 text-white" style={{ background: plan.color }}>
-                    <h4 className="font-bold text-2xl">{plan.name}</h4>
-                    <p className="text-sm text-white/80 mt-2">
-                      {matchedProduct?.description || (isEnterprise ? t('management.buildAgencyDesc', 'Build and manage your real estate agency') : '')}
-                    </p>
-                    <div className="flex items-baseline gap-2 mt-4">
-                      {pricing.discount > 0 && (
-                        <span className="text-sm line-through text-white/60">€{pricing.originalPrice.toFixed(2)}</span>
-                      )}
-                      <span className="text-5xl font-extrabold">€{pricing.finalPrice.toFixed(2)}</span>
-                      <span className="text-lg text-white/80">/{plan.period}</span>
-                    </div>
-                    {pricing.savings && (
-                      <p className="text-xs mt-3 bg-white/20 px-3 py-1 rounded-full inline-block">
-                        {pricing.savings}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Key Metrics Section */}
-                  <div className="px-6 pt-6 pb-4">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className={`rounded-lg p-3 text-center border ${
-                        isEnterprise
-                          ? 'bg-slate-700/30 border-amber-500/30'
-                          : plan.highlighted
-                            ? 'bg-primary/10 border-primary/30'
-                            : 'bg-gray-50 border-gray-200'
-                      }`}>
-                        <p className={`text-2xl font-bold ${isEnterprise ? 'text-amber-400' : 'text-primary'}`}>
-                          {matchedProduct?.listingsLimit ?? plan.listingLimit}
-                        </p>
-                        <p className={`text-xs mt-1 ${isEnterprise ? 'text-gray-400' : 'text-gray-600'}`}>
-                          {t('management.listings', 'Listings')}
-                        </p>
-                      </div>
-                      <div className={`rounded-lg p-3 text-center border ${
-                        isEnterprise
-                          ? 'bg-slate-700/30 border-amber-500/30'
-                          : plan.highlighted
-                            ? 'bg-primary/10 border-primary/30'
-                            : 'bg-gray-50 border-gray-200'
-                      }`}>
-                        <p className={`text-2xl font-bold ${isEnterprise ? 'text-amber-400' : 'text-primary'}`}>
-                          {matchedProduct?.promotionCoupons ?? 0}
-                        </p>
-                        <p className={`text-xs mt-1 ${isEnterprise ? 'text-gray-400' : 'text-gray-600'}`}>
-                          {t('management.promoCoupons', 'Promo Coupons')}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="px-6 pb-4">
-                    <ul className="space-y-2 mb-4">
-                      {displayFeatures.slice(0, isEnterprise ? 8 : displayFeatures.length).map((feature, idx) => (
-                        <li key={idx} className="flex items-center gap-2 text-sm text-neutral-700">
-                          <CheckCircleIcon className="w-4 h-4 text-green-500 flex-shrink-0" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                    <button
-                      onClick={() => handleUpgradeClick(key)}
-                      className={`w-full mt-auto py-4 rounded-xl font-bold transition-all duration-300 text-base ${
-                        isEnterprise
-                          ? 'text-slate-900 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 shadow-lg hover:shadow-xl'
-                          : plan.highlighted
-                            ? 'text-white bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 shadow-lg hover:shadow-xl'
-                            : 'text-gray-700 bg-white border-2 border-gray-300 hover:border-primary hover:text-primary hover:shadow-lg'
-                      }`}
-                    >
-                      {isEnterprise ? t('management.startYourAgency', 'Start Your Agency') : t('management.upgradeNow', 'Upgrade Now')}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+      {transformedUpgradeOptions.length > 0 && (
+        <UpgradeOptionsGrid
+          options={transformedUpgradeOptions}
+          onUpgradeClick={handleUpgradeClick}
+          isLoading={false}
+          error={null}
+          currentPlanKey={subscriptionDetails?.currentPlanKey}
+        />
       )}
 
       {/* Pro-rated Calculator Info */}
