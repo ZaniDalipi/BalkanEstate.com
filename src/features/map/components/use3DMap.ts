@@ -343,12 +343,12 @@ export function use3DMap(props: Map3DBuildingsProps) {
       .setLngLat([longitude, latitude])
       .addTo(mapInstance);
 
-    // Add facing direction indicator
-    // Use user-defined orientation if available, otherwise auto-detect from building geometry
+    // Add facing direction indicator only if user provided an explicit orientation
+    // Don't auto-detect from building geometry if no orientation is provided
+    if (!userOrientation || userOrientation === 'any') return;
+
     setTimeout(() => {
-      const facing = userOrientation && userOrientation !== 'any'
-        ? orientationToBearing(userOrientation)
-        : getBuildingFacing(mapInstance, latitude, longitude);
+      const facing = orientationToBearing(userOrientation);
       if (facing === null) return;
 
       // Store the absolute facing bearing for dynamic rotation
@@ -1057,7 +1057,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         }
       }
 
-      // Always add the blue dot property marker
+      // Add the property marker (always shows blue dot, orientation indicator only if provided)
       addPropertyMarker(mapInstance, lat, lng, orientation);
 
       // Show POIs (Points of Interest) for neighborhood context
