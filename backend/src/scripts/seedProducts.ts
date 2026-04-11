@@ -13,7 +13,8 @@ dotenv.config({ path: path.resolve(__dirname, '../../', envFile) });
 
 log.info(`🌍 Environment: ${env.toUpperCase()}`);
 
-const PRODUCTS = [
+// Export PRODUCTS so it can be imported for automatic syncing
+export const PRODUCTS = [
   // ============================================================================
   // FREE TIER - Basic access with limited AI features
   // ============================================================================
