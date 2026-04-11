@@ -10,7 +10,7 @@ import MyMeasurements from './MyMeasurements';
 const ViewingRequestsTab = lazy(() => import('./ViewingRequestsTab'));
 const MyBusinessListings = lazy(() => import('./MyBusinessListings'));
 import { User, UserRole, Agency } from '../../types';
-import { BuildingOfficeIcon, BuildingStorefrontIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon, CalendarIcon, HomeIcon } from '../../constants';
+import { BuildingOfficeIcon, BuildingStorefrontIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon, CalendarIcon, HomeIcon, ClockIcon, ExclamationTriangleIcon, CheckCircleIcon } from '../../constants';
 import DefaultAvatar from './DefaultAvatar';
 import AvatarCustomizer, { type AvatarOptions, parseAvatarOptions, getDefaultAvatarOptions } from './AvatarCustomizer';
 import AgentLicenseModal from './AgentLicenseModal';
@@ -1816,19 +1816,31 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                             <label htmlFor="agentId" className={floatingLabelClasses}>{t('agent.agentId')}</label>
                         </div>
                         <div className="relative md:col-span-2">
-                            {formData.licenseNumber ? (
-                                <>
-                                    <input
-                                        type="text"
-                                        id="licenseNumber"
-                                        value={formData.licenseNumber}
-                                        className={floatingInputClasses}
-                                        placeholder=" "
-                                        disabled
-                                        title={t('agent.licenseCannotChange')}
-                                    />
-                                    <label htmlFor="licenseNumber" className={floatingLabelClasses}>{t('agent.licenseNumber')}</label>
-                                </>
+                            {formData.licenseNumber && formData.licenseVerified ? (
+                                <div className="flex items-center gap-3 p-4 bg-green-50/80 backdrop-blur-sm border border-green-200/50 rounded-xl">
+                                    <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
+                                    <div className="flex-1">
+                                        <p className="text-sm font-semibold text-green-800">
+                                            {t('agent.licenseVerified', 'License Verified')}
+                                        </p>
+                                        <p className="text-xs text-green-600 font-mono mt-0.5">{formData.licenseNumber}</p>
+                                    </div>
+                                </div>
+                            ) : formData.licenseNumber && !formData.licenseVerified ? (
+                                <div className="flex items-center justify-between p-4 bg-amber-50/80 backdrop-blur-sm border border-amber-200/50 rounded-xl">
+                                    <div className="flex items-center gap-3">
+                                        <ClockIcon className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                                        <div>
+                                            <p className="text-sm font-semibold text-amber-800">
+                                                {t('agent.licensePending', 'License Pending Review')}
+                                            </p>
+                                            <p className="text-xs text-amber-600 font-mono mt-0.5">{formData.licenseNumber}</p>
+                                            <p className="text-xs text-amber-500 mt-0.5">
+                                                {t('agent.licensePendingDesc', 'Your license is being reviewed by an admin. It will not appear on your public profile until approved.')}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                             ) : licenseSuccess ? (
                                 <div className="flex items-center gap-3 p-4 bg-green-50/80 backdrop-blur-sm border border-green-200/50 rounded-xl">
                                     <ShieldCheckIcon className="w-5 h-5 text-green-600 flex-shrink-0" />

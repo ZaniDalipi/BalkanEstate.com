@@ -284,8 +284,8 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                             </h3>
 
                             <div className="space-y-4">
-                                {/* Licensed Real Estate Agent — only show when license exists */}
-                                {agent.licenseNumber && (
+                                {/* Licensed Real Estate Agent — only show when license is verified */}
+                                {agent.licenseVerified && agent.licenseNumber && (
                                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-5">
                                     <div className="flex items-start gap-4">
                                         <div className="bg-blue-600 text-white p-3 rounded-lg flex-shrink-0">

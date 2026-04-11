@@ -189,7 +189,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
 
         {/* Status & verified */}
         <div className="flex items-center gap-2">
-          {(agent.licenseVerified || agent.licenseNumber) ? (
+          {agent.licenseVerified ? (
             <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 shadow-[2px_2px_4px_rgba(0,0,0,0.1)] transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_12px_rgba(16,185,129,0.4)]">
               <CheckBadgeIcon className="h-3 w-3 text-white" />
               <span className="text-[10px] font-bold text-white tracking-wide uppercase">{t('agents:card.licensed', 'Licensed')}</span>

@@ -340,11 +340,11 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
             </div>
 
             {/* Agent Credentials — only render when there is something real to show */}
-            {(agent.licenseNumber || (agent.certifications && agent.certifications.length > 0) || (agent.awards && agent.awards.length > 0)) && (
+            {((agent.licenseVerified && agent.licenseNumber) || (agent.certifications && agent.certifications.length > 0) || (agent.awards && agent.awards.length > 0)) && (
             <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-6 mt-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-4">{t('profilePage.credentials.title')}</h3>
                 <div className="space-y-3">
-                    {agent.licenseNumber && (
+                    {agent.licenseVerified && agent.licenseNumber && (
                     <div className="flex items-center gap-3">
                         <ShieldCheckIcon className="w-5 h-5 text-green-500" />
                         <div>
