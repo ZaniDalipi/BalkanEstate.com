@@ -12,6 +12,7 @@ import PaymentRecord from '../models/PaymentRecord';
 import SubscriptionEvent from '../models/SubscriptionEvent';
 import User from '../models/User';
 import Agency from '../models/Agency';
+import Product from '../models/Product';
 import { adminLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
 import { getObjectIdParam } from '../utils/validateParams';
@@ -1204,6 +1205,299 @@ export const manageUserSubscription = async (req: Request, res: Response): Promi
   }
 };
 
+/**
+ * @desc    Get carryover stats for a user (testing)
+ * @route   GET /api/admin/subscriptions/carryover/:userId
+ * @access  Admin
+ */
+export const getCarryoverStats = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = getObjectIdParam(req, res, 'userId');
+    if (!userId) return;
+
+    const user = await User.findById(userId).lean();
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const product = await Product.findOne({ productId: user.subscriptionPlan }).lean();
+
+    res.json({
+      success: true,
+      userId: user._id,
+      email: user.email,
+      name: user.name,
+      subscriptionPlan: user.subscriptionPlan,
+      product: product
+        ? {
+            productId: product.productId,
+            name: product.name,
+            listingsLimit: product.listingsLimit,
+            billingPeriod: product.billingPeriod,
+            tier: product.tier,
+          }
+        : null,
+      carryover: {
+        listingsAllowanceThisMonth: user.subscription?.listingsAllowanceThisMonth ?? 0,
+        listingsAllowanceYTD: user.subscription?.listingsAllowanceYTD ?? 0,
+        carryoverListings: user.subscription?.carryoverListings ?? 0,
+        listingsCreatedThisMonth: user.subscription?.listingsCreatedThisMonth ?? 0,
+        subscriptionCycleStartDate: user.subscription?.subscriptionCycleStartDate,
+        subscriptionCycleEndDate: user.subscription?.subscriptionCycleEndDate,
+        totalAvailable: (user.subscription?.listingsAllowanceThisMonth ?? 0) + (user.subscription?.carryoverListings ?? 0),
+      },
+      activeListingsCount: user.subscription?.activeListingsCount ?? 0,
+    });
+  } catch (error: any) {
+    adminLogger.error('[Admin] Error getting carryover stats:', error);
+    res.status(500).json({ message: 'Error getting carryover stats' });
+  }
+};
+
+/**
+ * @desc    Manually trigger subscription renewal (for testing carryover)
+ * @route   POST /api/admin/subscriptions/trigger-renewal/:userId
+ * @access  Admin
+ */
+export const triggerSubscriptionRenewal = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = getObjectIdParam(req, res, 'userId');
+    if (!userId) return;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    if (!user.subscription) {
+      res.status(400).json({ message: 'User has no subscription' });
+      return;
+    }
+
+    const subscription = await Subscription.findOne({
+      userId,
+      status: { $in: ['active', 'grace', 'pending_cancellation'] },
+    });
+
+    if (!subscription) {
+      res.status(404).json({ message: 'No active subscription found' });
+      return;
+    }
+
+    const product = await Product.findOne({ productId: subscription.productId });
+    if (!product) {
+      res.status(404).json({ message: `Product not found: ${subscription.productId}` });
+      return;
+    }
+
+    // Get the listingCarryoverService
+    const listingCarryoverService = require('../services/listingCarryoverService').default;
+
+    // Calculate new expiration date
+    const newExpirationDate = new Date();
+    if (product.billingPeriod === 'yearly') {
+      newExpirationDate.setFullYear(newExpirationDate.getFullYear() + 1);
+    } else {
+      newExpirationDate.setMonth(newExpirationDate.getMonth() + 1);
+    }
+
+    // Update subscription
+    subscription.expirationDate = newExpirationDate;
+    subscription.renewalDate = newExpirationDate;
+    subscription.status = 'active';
+    subscription.autoRenewing = true;
+    subscription.lastUpdated = new Date();
+    await subscription.save();
+
+    // Check if annual cycle is complete
+    if (listingCarryoverService.isAnnualCycleComplete(user)) {
+      // Apply annual reset
+      const resetResult = await listingCarryoverService.applyAnnualReset(userId);
+      if (resetResult.success && resetResult.user) {
+        Object.assign(user.subscription, resetResult.user.subscription);
+      } else {
+        throw new Error(`Annual reset failed: ${resetResult.error}`);
+      }
+    } else {
+      // Refresh monthly allowance
+      const refreshResult = await listingCarryoverService.refreshMonthlyAllowance(userId);
+      if (refreshResult.success && refreshResult.user) {
+        Object.assign(user.subscription, refreshResult.user.subscription);
+      } else {
+        throw new Error(`Monthly refresh failed: ${refreshResult.error}`);
+      }
+    }
+
+    user.markModified('subscription');
+    await user.save();
+
+    // Fetch updated user
+    const updatedUser = await User.findById(userId).lean();
+
+    res.json({
+      success: true,
+      message: 'Subscription renewal triggered successfully',
+      subscription: {
+        expirationDate: subscription.expirationDate,
+        status: subscription.status,
+      },
+      carryover: {
+        listingsAllowanceThisMonth: updatedUser?.subscription?.listingsAllowanceThisMonth ?? 0,
+        listingsAllowanceYTD: updatedUser?.subscription?.listingsAllowanceYTD ?? 0,
+        carryoverListings: updatedUser?.subscription?.carryoverListings ?? 0,
+        listingsCreatedThisMonth: updatedUser?.subscription?.listingsCreatedThisMonth ?? 0,
+        totalAvailable: (updatedUser?.subscription?.listingsAllowanceThisMonth ?? 0) + (updatedUser?.subscription?.carryoverListings ?? 0),
+      },
+    });
+  } catch (error: any) {
+    adminLogger.error('[Admin] Error triggering renewal:', error);
+    res.status(500).json({ message: 'Error triggering renewal', error: error.message });
+  }
+};
+
+/**
+ * @desc    Update carryover fields directly (for testing)
+ * @route   PATCH /api/admin/subscriptions/carryover/:userId
+ * @access  Admin
+ */
+export const updateCarryoverFields = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = getObjectIdParam(req, res, 'userId');
+    if (!userId) return;
+
+    const {
+      listingsAllowanceThisMonth,
+      listingsAllowanceYTD,
+      carryoverListings,
+      listingsCreatedThisMonth,
+      subscriptionCycleStartDate,
+      subscriptionCycleEndDate,
+    } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    if (!user.subscription) {
+      res.status(400).json({ message: 'User has no subscription' });
+      return;
+    }
+
+    // Update only provided fields
+    if (listingsAllowanceThisMonth !== undefined) {
+      user.subscription.listingsAllowanceThisMonth = listingsAllowanceThisMonth;
+    }
+    if (listingsAllowanceYTD !== undefined) {
+      user.subscription.listingsAllowanceYTD = listingsAllowanceYTD;
+    }
+    if (carryoverListings !== undefined) {
+      user.subscription.carryoverListings = carryoverListings;
+    }
+    if (listingsCreatedThisMonth !== undefined) {
+      user.subscription.listingsCreatedThisMonth = listingsCreatedThisMonth;
+    }
+    if (subscriptionCycleStartDate !== undefined) {
+      user.subscription.subscriptionCycleStartDate = new Date(subscriptionCycleStartDate);
+    }
+    if (subscriptionCycleEndDate !== undefined) {
+      user.subscription.subscriptionCycleEndDate = new Date(subscriptionCycleEndDate);
+    }
+
+    user.markModified('subscription');
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Carryover fields updated',
+      carryover: {
+        listingsAllowanceThisMonth: user.subscription?.listingsAllowanceThisMonth ?? 0,
+        listingsAllowanceYTD: user.subscription?.listingsAllowanceYTD ?? 0,
+        carryoverListings: user.subscription?.carryoverListings ?? 0,
+        listingsCreatedThisMonth: user.subscription?.listingsCreatedThisMonth ?? 0,
+        subscriptionCycleStartDate: user.subscription?.subscriptionCycleStartDate,
+        subscriptionCycleEndDate: user.subscription?.subscriptionCycleEndDate,
+        totalAvailable: (user.subscription?.listingsAllowanceThisMonth ?? 0) + (user.subscription?.carryoverListings ?? 0),
+      },
+    });
+  } catch (error: any) {
+    adminLogger.error('[Admin] Error updating carryover fields:', error);
+    res.status(500).json({ message: 'Error updating carryover fields' });
+  }
+};
+
+/**
+ * @desc    Get Product configuration (for understanding tier limits)
+ * @route   GET /api/admin/subscriptions/product-config/:productId
+ * @access  Admin
+ */
+export const getProductConfig = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+
+    if (!productId) {
+      res.status(400).json({ message: 'productId is required' });
+      return;
+    }
+
+    const product = await Product.findOne({ productId }).lean();
+    if (!product) {
+      res.status(404).json({ message: `Product not found: ${productId}` });
+      return;
+    }
+
+    res.json({
+      success: true,
+      product: {
+        productId: product.productId,
+        name: product.name,
+        tier: product.tier,
+        listingsLimit: product.listingsLimit,
+        billingPeriod: product.billingPeriod,
+        price: product.price,
+        currency: product.currency,
+        isActive: product.isActive,
+        isVisible: product.isVisible,
+        promotionCoupons: product.promotionCoupons,
+      },
+    });
+  } catch (error: any) {
+    adminLogger.error('[Admin] Error getting product config:', error);
+    res.status(500).json({ message: 'Error getting product config' });
+  }
+};
+
+/**
+ * @desc    List all products (for testing)
+ * @route   GET /api/admin/subscriptions/products
+ * @access  Admin
+ */
+export const getAllProducts = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const products = await Product.find({}).lean() as any[];
+
+    res.json({
+      success: true,
+      products: products.map((p: any) => ({
+        productId: p.productId,
+        name: p.name,
+        tier: p.tier,
+        listingsLimit: p.listingsLimit,
+        billingPeriod: p.billingPeriod,
+        price: p.price,
+        isActive: p.isActive,
+        isVisible: p.isVisible,
+      })),
+    });
+  } catch (error: any) {
+    adminLogger.error('[Admin] Error getting products:', error);
+    res.status(500).json({ message: 'Error getting products' });
+  }
+};
+
 export default {
   getAllSubscriptions,
   getSubscriptionById,
@@ -1219,4 +1513,9 @@ export default {
   deactivateAgencySubscription,
   getAgencySubscriptionHistory,
   manageUserSubscription,
+  getCarryoverStats,
+  triggerSubscriptionRenewal,
+  updateCarryoverFields,
+  getProductConfig,
+  getAllProducts,
 };

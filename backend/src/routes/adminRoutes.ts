@@ -67,6 +67,11 @@ import {
   deactivateAgencySubscription,
   getAgencySubscriptionHistory,
   manageUserSubscription,
+  getCarryoverStats,
+  triggerSubscriptionRenewal,
+  updateCarryoverFields,
+  getProductConfig,
+  getAllProducts,
 } from '../controllers/adminSubscriptionController';
 import {
   getAllBusinessListingsAdmin,
@@ -179,6 +184,13 @@ router.patch('/subscriptions/manage/:userId', logAdminAction('MANAGE_USER_SUBSCR
 router.get('/payments/stats', logAdminAction('VIEW_PAYMENT_STATS'), getPaymentStats);
 router.get('/payments', logAdminAction('VIEW_PAYMENTS'), getAllPayments);
 router.get('/payments/:id', logAdminAction('VIEW_PAYMENT'), getPaymentById);
+
+// ===== Carryover Testing & Debugging =====
+router.get('/subscriptions/products', logAdminAction('VIEW_PRODUCTS'), getAllProducts);
+router.get('/subscriptions/product-config/:productId', logAdminAction('VIEW_PRODUCT_CONFIG'), getProductConfig);
+router.get('/subscriptions/carryover/:userId', logAdminAction('VIEW_CARRYOVER_STATS'), getCarryoverStats);
+router.post('/subscriptions/trigger-renewal/:userId', logAdminAction('TRIGGER_RENEWAL'), triggerSubscriptionRenewal);
+router.patch('/subscriptions/carryover/:userId', logAdminAction('UPDATE_CARRYOVER_FIELDS'), updateCarryoverFields);
 
 // ===== Test Email Endpoints =====
 // Send test monthly coupon email (Pro user)
