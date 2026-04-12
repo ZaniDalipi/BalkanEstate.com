@@ -94,6 +94,16 @@ const UpgradePlanCard: React.FC<UpgradePlanCardProps> = ({
     return 'text-primary';
   };
 
+  const getMetricColor = () => {
+    if (isEnterprise) {
+      return 'text-amber-400';
+    }
+    if (isHighlighted) {
+      return 'text-emerald-600';
+    }
+    return 'text-primary';
+  };
+
 
   const getButtonStyle = () => {
     if (isDisabled) {
