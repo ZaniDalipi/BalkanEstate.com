@@ -229,7 +229,7 @@ class ListingCarryoverService {
       user.subscription.listingsCreatedThisMonth = 0;
       user.subscription.subscriptionCycleStartDate = new Date();
       user.subscription.subscriptionCycleEndDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
-      user.subscription.listingsArchivedDate = new Date();
+      user.subscription.lastListingsArchiveDate = new Date();
       user.subscription.archiveNotificationSent = false; // Reset for next cycle
 
       await user.save();

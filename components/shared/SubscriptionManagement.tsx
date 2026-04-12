@@ -1217,20 +1217,27 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             <div>
               <p className="font-semibold text-neutral-800">{t('management.listingLimit', 'Listing Limit')}</p>
               <p className="text-sm text-neutral-500">
-                {/* For carryover system: show listingsCreatedThisMonth / listingsAllowanceThisMonth + carryover */}
-                {/* For non-carryover: show activeListingsCount / listingsLimit */}
-                {user.subscription?.listingsAllowanceYTD !== undefined && user.subscription?.listingsAllowanceThisMonth !== undefined
-                  ? t('management.listingUsage', {
-                      used: user.subscription.listingsCreatedThisMonth || 0,
-                      limit: (user.subscription.listingsAllowanceThisMonth || 0) + (user.subscription.carryoverListings || 0),
-                      defaultValue: '{{used}} of {{limit}} used'
-                    })
-                  : t('management.listingUsage', {
-                      used: user.subscription?.activeListingsCount || user.listingsCount || 0,
-                      limit: currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit,
-                      defaultValue: '{{used}} of {{limit}} used'
-                    })
-                }
+                {/* Simple model: show active listings / max allowed */}
+                {(() => {
+                  const activeCount = user.subscription?.activeListingsCount || user.listingsCount || 0;
+                  const monthlyLimit = currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit;
+
+                  // Calculate max allowed based on months in subscription cycle
+                  let maxAllowed = monthlyLimit;
+                  if (user.subscription?.subscriptionCycleStartDate) {
+                    const now = new Date();
+                    const cycleStart = new Date(user.subscription.subscriptionCycleStartDate);
+                    const daysSince = Math.floor((now.getTime() - cycleStart.getTime()) / (24 * 60 * 60 * 1000));
+                    const monthsElapsed = Math.floor(daysSince / 30) + 1;
+                    maxAllowed = Math.min(monthsElapsed * monthlyLimit, monthsElapsed * monthlyLimit); // Cap at 12 months
+                  }
+
+                  return t('management.listingUsage', {
+                    used: activeCount,
+                    limit: maxAllowed,
+                    defaultValue: '{{used}} of {{limit}} used'
+                  });
+                })()}
                 {subscriptionDetails && subscriptionDetails.currentPlan.period && subscriptionDetails.currentPlan.period !== 'forever' && (
                   <span className="ml-1 text-neutral-400">· {subscriptionDetails.currentPlan.period === 'month' ? t('management.perMonth', 'per month') : t('management.perYear', 'per year')}</span>
                 )}
@@ -1239,10 +1246,22 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           </div>
           <div className="text-right">
             <p className="text-2xl font-bold text-neutral-800">
-              {user.subscription?.listingsAllowanceYTD !== undefined && user.subscription?.listingsAllowanceThisMonth !== undefined
-                ? Math.max(0, (user.subscription.listingsAllowanceThisMonth || 0) + (user.subscription.carryoverListings || 0) - (user.subscription.listingsCreatedThisMonth || 0))
-                : (currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit) - (user.subscription?.activeListingsCount || user.listingsCount || 0)
-              }
+              {(() => {
+                const activeCount = user.subscription?.activeListingsCount || user.listingsCount || 0;
+                const monthlyLimit = currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit;
+
+                // Calculate max allowed
+                let maxAllowed = monthlyLimit;
+                if (user.subscription?.subscriptionCycleStartDate) {
+                  const now = new Date();
+                  const cycleStart = new Date(user.subscription.subscriptionCycleStartDate);
+                  const daysSince = Math.floor((now.getTime() - cycleStart.getTime()) / (24 * 60 * 60 * 1000));
+                  const monthsElapsed = Math.floor(daysSince / 30) + 1;
+                  maxAllowed = Math.min(monthsElapsed * monthlyLimit, monthsElapsed * monthlyLimit);
+                }
+
+                return Math.max(0, maxAllowed - activeCount);
+              })()}
             </p>
             <p className="text-xs text-neutral-500">{t('management.remaining', 'remaining')}</p>
           </div>
@@ -1252,9 +1271,21 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             className="bg-blue-500 h-full rounded-full transition-all duration-500"
             style={{
               width: `${Math.min(100, (
-                user.subscription?.listingsAllowanceYTD !== undefined && user.subscription?.listingsAllowanceThisMonth !== undefined
-                  ? ((user.subscription.listingsCreatedThisMonth || 0) / ((user.subscription.listingsAllowanceThisMonth || 0) + (user.subscription.carryoverListings || 0)) * 100)
-                  : ((user.subscription?.activeListingsCount || user.listingsCount || 0) / (currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit) * 100)
+                (() => {
+                  const activeCount = user.subscription?.activeListingsCount || user.listingsCount || 0;
+                  const monthlyLimit = currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit;
+
+                  let maxAllowed = monthlyLimit;
+                  if (user.subscription?.subscriptionCycleStartDate) {
+                    const now = new Date();
+                    const cycleStart = new Date(user.subscription.subscriptionCycleStartDate);
+                    const daysSince = Math.floor((now.getTime() - cycleStart.getTime()) / (24 * 60 * 60 * 1000));
+                    const monthsElapsed = Math.floor(daysSince / 30) + 1;
+                    maxAllowed = Math.min(monthsElapsed * monthlyLimit, monthsElapsed * monthlyLimit);
+                  }
+
+                  return (activeCount / maxAllowed) * 100;
+                })()
               ))}`
             }}
           />

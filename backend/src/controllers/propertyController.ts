@@ -721,54 +721,61 @@ export const createProperty = async (
     // When posting as private_seller, the listing won't appear on the agency page.
     // Their profile role remains "agent" - only the listing's createdAsRole changes.
 
-    // Import carryover service for listing allowance management
-    const listingCarryoverService = require('../services/listingCarryoverService').default;
+    // Import services for listing management
+    const listingLimitService = require('../services/listingLimitService').default;
 
-    // Check listing limits based on subscription tier and carryover system
-    const limit = user.subscription.listingsLimit || FREE_TIER_LIMITS.LISTINGS;
+    // Check listing limits based on subscription tier and monthly allowance
+    const baseLimit = user.subscription.listingsLimit || FREE_TIER_LIMITS.LISTINGS;
     const tier = user.subscription.tier || 'free';
     const isAgencyAgent = tier === 'agency_agent';
 
-    // For agency agents: use carryover system with monthly allowance + YTD cap
-    if (isAgencyAgent) {
-      const now = new Date();
-      const resetDate = user.subscription.listingsMonthResetDate;
+    // For subscribed users with monthly limits (Pro, Agency): use stacking model
+    if (isAgencyAgent || tier === 'pro') {
+      try {
+        // Get monthly allowance from Product
+        const monthlyAllowance = await listingLimitService.getMonthlyAllowance(user.subscriptionPlan);
 
-      // Check if subscription cycle is complete (annual reset)
-      if (listingCarryoverService.isAnnualCycleComplete(user)) {
-        const resetResult = await listingCarryoverService.applyAnnualReset(user._id.toString());
-        if (resetResult.success && resetResult.user) {
-          Object.assign(user, resetResult.user.toObject());
+        // Check if annual cycle needs reset (365+ days)
+        if (listingLimitService.isAnnualCycleComplete(user)) {
+          const resetResult = await listingLimitService.applyAnnualReset(user._id.toString());
+          if (!resetResult.success) {
+            propertyLogger.warn('Annual reset failed, continuing anyway', { userId: user._id });
+          }
+          // Re-fetch user after potential reset
+          const freshUser = await User.findById(user._id);
+          if (freshUser) {
+            Object.assign(user, freshUser.toObject());
+          }
         }
-      }
 
-      // Check if monthly allowance needs refresh
-      if (!resetDate || now >= resetDate) {
-        const refreshResult = await listingCarryoverService.refreshMonthlyAllowance(
-          user._id.toString()
+        // Calculate max allowed listings based on months in current cycle
+        const maxAllowed = listingLimitService.getMaxAllowedListings(
+          user.subscription.subscriptionCycleStartDate,
+          monthlyAllowance
         );
-        if (refreshResult.success && refreshResult.user) {
-          Object.assign(user, refreshResult.user.toObject());
+        const activeCount = user.subscription.activeListingsCount || 0;
+
+        // Check if user can create more listings
+        if (activeCount >= maxAllowed) {
+          const cycleEndDate = user.subscription.subscriptionCycleEndDate;
+          const monthsElapsed = Math.floor(
+            (new Date().getTime() - (user.subscription.subscriptionCycleStartDate?.getTime() || 0)) / (30 * 24 * 60 * 60 * 1000)
+          ) + 1;
+
+          res.status(403).json({
+            message: `You have ${activeCount} active listings out of ${maxAllowed} allowed. You can have up to ${monthlyAllowance} listings per month for ${Math.min(monthsElapsed, 12)} months.`,
+            code: 'LISTING_LIMIT_REACHED',
+            tier,
+            activeCount,
+            maxAllowed,
+            monthlyAllowance,
+            cycleEndDate,
+          });
+          return;
         }
-      }
-
-      // Get effective listing limit (respects annual cap)
-      const monthlyAllowance = await listingCarryoverService.getMonthlyAllowance(tier);
-      const effectiveLimit = listingCarryoverService.getEffectiveListingLimit(user, monthlyAllowance);
-      const monthlyCreated = user.subscription.listingsCreatedThisMonth || 0;
-
-      if (monthlyCreated >= effectiveLimit) {
-        res.status(403).json({
-          message: `You have reached your monthly limit of ${effectiveLimit} listings. Your limit resets on ${user.subscription.subscriptionCycleEndDate?.toLocaleDateString() || 'at subscription renewal'}.`,
-          code: 'MONTHLY_LISTING_LIMIT_REACHED',
-          tier,
-          limit: effectiveLimit,
-          current: monthlyCreated,
-          carryover: user.subscription.carryoverListings,
-          ytdAllowance: user.subscription.listingsAllowanceYTD,
-          resetDate: user.subscription.subscriptionCycleEndDate,
-        });
-        return;
+      } catch (error: any) {
+        propertyLogger.error('Error checking listing limit', { userId: user._id, error: error.message });
+        // Fall through to basic limit check
       }
     }
 
@@ -786,16 +793,12 @@ export const createProperty = async (
       totalListingsCreated: 1,
     };
 
-    // For agency agents, track monthly listings created AND YTD allowance used
-    if (isAgencyAgent) {
-      incrementFields['subscription.listingsCreatedThisMonth'] = 1;
-      incrementFields['subscription.listingsAllowanceYTD'] = 1;
-    }
-
+    // For atomic check, use the base subscription limit (free/pro tier static limit)
+    // Subscribed users with monthly allowances already checked above
     const atomicResult = await User.findOneAndUpdate(
       {
         _id: user._id,
-        'subscription.activeListingsCount': { $lt: limit },
+        'subscription.activeListingsCount': { $lt: baseLimit },
       },
       {
         $inc: incrementFields,
@@ -808,10 +811,10 @@ export const createProperty = async (
       const freshUser = await User.findById(user._id);
       const currentCount = freshUser?.subscription?.activeListingsCount || 0;
       res.status(403).json({
-        message: `You have reached your ${tier} tier limit of ${limit} active listings. ${tier === 'free' ? 'Upgrade to Pro for up to 250 active listings!' : 'Please delete some listings to create new ones.'}`,
+        message: `You have reached your ${tier} tier limit of ${baseLimit} active listings. ${tier === 'free' ? 'Upgrade to Pro for unlimited listings per month!' : 'Please delete some listings to create new ones.'}`,
         code: 'LISTING_LIMIT_REACHED',
         tier,
-        limit,
+        limit: baseLimit,
         current: currentCount,
         privateSellerCount: freshUser?.subscription?.privateSellerCount || 0,
         agentCount: freshUser?.subscription?.agentCount || 0,

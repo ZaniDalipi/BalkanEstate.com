@@ -150,7 +150,7 @@ export interface IUser extends Document {
     subscriptionCycleStartDate?: Date; // When subscription started or last reset
     subscriptionCycleEndDate?: Date; // 1 year from start
     listingsCreatedThisMonth?: number; // Count for current month (separate from monthlyListingsCreated)
-    listingsArchivedDate?: Date; // When listings were archived (>90 days old)
+    lastListingsArchiveDate?: Date; // When listings were last archived
     archiveNotificationSent?: boolean; // Sent email about old listings
 
     // Buyer-specific features
@@ -671,35 +671,20 @@ const UserSchema: Schema = new Schema(
         },
       },
 
-      // Listing Carryover & Annual Cap System
-      listingsAllowanceThisMonth: {
-        type: Number,
-        default: 0, // Current month allocation
-      },
-      listingsAllowanceYTD: {
-        type: Number,
-        default: 0, // Cumulative YTD for stacking
-      },
-      carryoverListings: {
-        type: Number,
-        default: 0, // Unused from last month
-      },
+      // Annual subscription cycle tracking
       subscriptionCycleStartDate: {
-        type: Date, // When subscription started or last reset
+        type: Date, // When subscription started or last annual reset
+        index: true,
       },
       subscriptionCycleEndDate: {
-        type: Date, // 1 year from start
+        type: Date, // 1 year from start (for checking if reset needed)
       },
-      listingsCreatedThisMonth: {
-        type: Number,
-        default: 0, // Count for current month
-      },
-      listingsArchivedDate: {
-        type: Date, // When listings were archived
+      lastListingsArchiveDate: {
+        type: Date, // When we last archived old listings
       },
       archiveNotificationSent: {
         type: Boolean,
-        default: false, // Sent email about old listings
+        default: false, // Sent email about archived listings
       },
 
       // Buyer features

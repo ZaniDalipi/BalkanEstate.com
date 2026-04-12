@@ -258,34 +258,19 @@ export async function processSubscriptionPayment(
       user.subscription.listingsLimit = product.listingsLimit || 30; // Default 30 per month
     }
 
-    // Initialize carryover system for all listing-based subscriptions
+    // Initialize annual cycle tracking for subscribed users
     if (isEnterprise || isPro || isAgencyAgent) {
-      const monthlyAllowance = product.listingsLimit || 0;
-
       if (!existingSubscription) {
-        // New subscription: initialize carryover fields
-        user.subscription.listingsAllowanceThisMonth = monthlyAllowance;
-        user.subscription.listingsAllowanceYTD = monthlyAllowance; // Start with first month
-        user.subscription.carryoverListings = 0; // No carryover on new subscription
-        user.subscription.listingsCreatedThisMonth = 0;
+        // New subscription: initialize cycle dates
         user.subscription.subscriptionCycleStartDate = startDate;
         user.subscription.subscriptionCycleEndDate = new Date(startDate.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year
+        if (!isProduction) paymentLogger.info('🎯 New subscription cycle initialized', {
+          userId,
+          cycleStart: user.subscription.subscriptionCycleStartDate,
+          cycleEnd: user.subscription.subscriptionCycleEndDate,
+        });
       } else {
-        // Subscription renewal: apply carryover logic inline (atomic within transaction)
-        if (!user.subscription.listingsAllowanceThisMonth) {
-          user.subscription.listingsAllowanceThisMonth = monthlyAllowance;
-        }
-        if (!user.subscription.listingsAllowanceYTD) {
-          user.subscription.listingsAllowanceYTD = monthlyAllowance;
-        }
-        if (!user.subscription.subscriptionCycleStartDate) {
-          user.subscription.subscriptionCycleStartDate = startDate;
-        }
-        if (!user.subscription.subscriptionCycleEndDate) {
-          user.subscription.subscriptionCycleEndDate = new Date(startDate.getTime() + 365 * 24 * 60 * 60 * 1000);
-        }
-
-        // Check if annual cycle is complete
+        // Subscription renewal: check if annual reset needed
         const cycleEndDate = user.subscription.subscriptionCycleEndDate
           ? new Date(user.subscription.subscriptionCycleEndDate)
           : null;
@@ -293,14 +278,13 @@ export async function processSubscriptionPayment(
         const isAnnualCycleComplete = cycleEndDate && now >= cycleEndDate;
 
         if (isAnnualCycleComplete) {
-          // Apply annual reset: archive old listings and reset counters
+          // Annual reset: archive old listings and reset cycle
           if (!isProduction) paymentLogger.info('🔄 Annual cycle complete, applying reset...');
 
-          // Calculate cutoff date: 90 days ago
           const cutoffDate = new Date();
           cutoffDate.setDate(cutoffDate.getDate() - 90);
 
-          // Archive listings older than 90 days (within the same transaction session)
+          // Archive listings older than 90 days (within the transaction session)
           const Property = (await import('../models/Property')).default;
           const archivedResult = await Property.updateMany(
             {
@@ -314,43 +298,48 @@ export async function processSubscriptionPayment(
 
           if (archivedResult.modifiedCount > 0) {
             if (!isProduction) paymentLogger.info(`📦 Archived ${archivedResult.modifiedCount} listings older than 90 days`);
-            user.subscription.listingsArchivedDate = new Date();
+            user.subscription.lastListingsArchiveDate = new Date();
+
+            // Send archive notification
+            try {
+              const { sendEmail } = await import('./emailService');
+              await sendEmail({
+                to: user.email,
+                subject: 'Your Listings Have Been Archived',
+                html: `
+                  <h2>Listings Archived</h2>
+                  <p>Hi ${user.name},</p>
+                  <p>We've archived ${archivedResult.modifiedCount} of your listings that are older than 90 days to keep your profile clean.</p>
+                  <p>These listings are no longer visible to buyers, but you can reactivate them anytime from your dashboard.</p>
+                  <p>Your recent listings remain active and visible.</p>
+                  <p>Best regards,<br/>BalkanEstate Team</p>
+                `,
+              });
+              user.subscription.archiveNotificationSent = true;
+            } catch (emailError) {
+              paymentLogger.warn('Failed to send archive notification', { userId, error: emailError });
+            }
           }
 
           // Reset for new annual cycle
-          user.subscription.listingsAllowanceThisMonth = monthlyAllowance;
-          user.subscription.listingsAllowanceYTD = monthlyAllowance;
-          user.subscription.carryoverListings = 0;
-          user.subscription.listingsCreatedThisMonth = 0;
           user.subscription.subscriptionCycleStartDate = new Date();
           user.subscription.subscriptionCycleEndDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
           user.subscription.archiveNotificationSent = false;
 
           if (!isProduction) paymentLogger.info('✅ Annual reset applied on renewal');
         } else {
-          // Monthly carryover: calculate unused from previous month and carry forward
-          const prevAllowance = user.subscription.listingsAllowanceThisMonth ?? monthlyAllowance;
-          const prevCreated = user.subscription.listingsCreatedThisMonth ?? 0;
-          const prevCarryover = user.subscription.carryoverListings ?? 0;
+          // Monthly renewal: no action needed, old listings stay active
+          // Next month they'll be able to create more
+          if (!isProduction) paymentLogger.info('✅ Monthly renewal, cycle continues', {
+            userId,
+            cycleEnd: user.subscription.subscriptionCycleEndDate,
+          });
+        }
 
-          // Unused = (previous allowance + previous carryover) - previous created
-          const previousUnused = Math.max(0, (prevAllowance + prevCarryover) - prevCreated);
-
-          user.subscription.listingsAllowanceThisMonth = monthlyAllowance;
-          user.subscription.carryoverListings = previousUnused;
-          user.subscription.listingsCreatedThisMonth = 0;
-          user.subscription.listingsAllowanceYTD = (user.subscription.listingsAllowanceYTD || 0) + monthlyAllowance;
-
-          if (!isProduction) {
-            paymentLogger.info('✅ Monthly carryover applied on renewal', {
-              prevAllowance,
-              prevCreated,
-              prevCarryover,
-              carryoverListings: previousUnused,
-              newAllowanceThisMonth: monthlyAllowance,
-              listingsAllowanceYTD: user.subscription.listingsAllowanceYTD,
-            });
-          }
+        // Ensure cycle dates are set (fallback for users without them)
+        if (!user.subscription.subscriptionCycleStartDate) {
+          user.subscription.subscriptionCycleStartDate = startDate;
+          user.subscription.subscriptionCycleEndDate = new Date(startDate.getTime() + 365 * 24 * 60 * 60 * 1000);
         }
       }
     }
