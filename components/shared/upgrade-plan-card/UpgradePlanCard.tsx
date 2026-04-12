@@ -144,10 +144,10 @@ const UpgradePlanCard: React.FC<UpgradePlanCardProps> = ({
       )}
 
       {/* Header - Pricing Section */}
-      <div className={`p-6 sm:p-7 ${getHeaderStyle()}`}>
-        <h4 className="font-bold text-2xl sm:text-3xl leading-tight">{planName}</h4>
+      <div className={`p-5 sm:p-6 ${getHeaderStyle()}`}>
+        <h4 className="font-bold text-lg sm:text-xl leading-tight">{planName}</h4>
         {description && (
-          <p className={`text-sm sm:text-base mt-2 opacity-75 leading-relaxed ${
+          <p className={`text-xs sm:text-sm mt-2 opacity-75 leading-relaxed ${
             isEnterprise ? 'text-gray-300' : 'text-slate-700'
           }`}>
             {description}
@@ -155,19 +155,19 @@ const UpgradePlanCard: React.FC<UpgradePlanCardProps> = ({
         )}
 
         {/* Price Display */}
-        <div className="flex items-baseline gap-2 mt-6">
+        <div className="flex items-baseline gap-2 mt-4">
           {originalPrice !== undefined && originalPrice > price && (
-            <span className={`text-sm sm:text-base line-through opacity-60 ${
+            <span className={`text-xs sm:text-sm line-through opacity-60 ${
               isEnterprise ? 'text-white' : 'text-slate-600'
             }`}>
               €{originalPrice.toFixed(2)}
             </span>
           )}
-          <span className={`text-5xl sm:text-6xl font-black ${getPriceColor()}`}>
+          <span className={`text-4xl sm:text-5xl font-black ${getPriceColor()}`}>
             €{price.toFixed(2)}
           </span>
           <div className="flex flex-col">
-            <span className={`text-base sm:text-lg font-semibold ${
+            <span className={`text-sm sm:text-base font-semibold ${
               isEnterprise ? 'text-gray-300' : 'text-slate-700'
             }`}>
               /{period === 'month' ? t('billing.month', 'month') : t('billing.year', 'year')}
@@ -176,7 +176,7 @@ const UpgradePlanCard: React.FC<UpgradePlanCardProps> = ({
         </div>
 
         {savings && (
-          <div className={`text-sm font-semibold mt-4 px-3 py-2 rounded-lg inline-block ${
+          <div className={`text-xs sm:text-sm font-semibold mt-3 px-3 py-1.5 rounded-lg inline-block ${
             isEnterprise
               ? 'bg-amber-500/20 text-amber-100'
               : isHighlighted
@@ -189,32 +189,32 @@ const UpgradePlanCard: React.FC<UpgradePlanCardProps> = ({
       </div>
 
       {/* Key Metrics Section */}
-      <div className="px-6 sm:px-7 pt-6 pb-6">
-        <div className="grid grid-cols-2 gap-3">
-          <div className={`rounded-xl p-4 sm:p-5 text-center border-2 transition-colors duration-300 ${
+      <div className="px-5 sm:px-6 pt-4 pb-5">
+        <div className="grid grid-cols-2 gap-2">
+          <div className={`rounded-lg p-3 sm:p-4 text-center border-2 transition-colors duration-300 ${
             isEnterprise
               ? 'bg-slate-700/20 border-amber-500/40 hover:border-amber-500/60'
               : isHighlighted
                 ? 'bg-emerald-50 border-emerald-200 hover:border-emerald-400'
                 : 'bg-gray-50 border-gray-200 hover:border-primary/30'
           }`}>
-            <p className={`text-3xl sm:text-4xl font-black ${getMetricColor()}`}>
+            <p className={`text-2xl sm:text-3xl font-black ${getMetricColor()}`}>
               {listingsLimit.toLocaleString()}
             </p>
-            <p className={`text-xs sm:text-sm mt-2 font-medium ${
+            <p className={`text-xs mt-1 font-medium ${
               isEnterprise ? 'text-gray-300' : 'text-gray-700'
             }`}>
               {t('metrics.listings', 'Listings')}
             </p>
           </div>
-          <div className={`rounded-xl p-4 sm:p-5 text-center border-2 transition-colors duration-300 ${
+          <div className={`rounded-lg p-3 sm:p-4 text-center border-2 transition-colors duration-300 ${
             isEnterprise
               ? 'bg-slate-700/20 border-amber-500/40 hover:border-amber-500/60'
               : isHighlighted
                 ? 'bg-emerald-50 border-emerald-200 hover:border-emerald-400'
                 : 'bg-gray-50 border-gray-200 hover:border-primary/30'
           }`}>
-            <p className={`text-3xl sm:text-4xl font-black ${getMetricColor()}`}>
+            <p className={`text-2xl sm:text-3xl font-black ${getMetricColor()}`}>
               {promoCoupons}
             </p>
             <p className={`text-xs sm:text-sm mt-2 font-medium ${
@@ -227,16 +227,16 @@ const UpgradePlanCard: React.FC<UpgradePlanCardProps> = ({
       </div>
 
       {/* Features List */}
-      <div className="px-6 sm:px-7 pb-6 flex-grow">
-        <ul className="space-y-3">
+      <div className="px-5 sm:px-6 pb-5 flex-grow">
+        <ul className="space-y-2">
           {features.slice(0, 5).map((feature, idx) => (
-            <li key={idx} className="flex items-start gap-3">
+            <li key={idx} className="flex items-start gap-2">
               <div className="flex-shrink-0 mt-0.5">
-                <CheckCircleIcon className={`w-5 h-5 ${
+                <CheckCircleIcon className={`w-4 h-4 ${
                   isEnterprise ? 'text-amber-400' : isHighlighted ? 'text-emerald-500' : 'text-primary'
                 }`} />
               </div>
-              <span className={`text-sm sm:text-base leading-snug ${
+              <span className={`text-xs sm:text-sm leading-snug ${
                 isEnterprise ? 'text-gray-200' : 'text-gray-700'
               }`}>
                 {feature}
@@ -244,7 +244,7 @@ const UpgradePlanCard: React.FC<UpgradePlanCardProps> = ({
             </li>
           ))}
           {features.length > 5 && (
-            <li className={`text-sm font-medium flex items-start gap-3 ${
+            <li className={`text-xs font-medium flex items-start gap-2 ${
               isEnterprise ? 'text-gray-400' : 'text-gray-600'
             }`}>
               <span className="text-primary font-bold">+</span>
@@ -255,14 +255,14 @@ const UpgradePlanCard: React.FC<UpgradePlanCardProps> = ({
       </div>
 
       {/* CTA Button */}
-      <div className="px-6 sm:px-7 pb-6">
+      <div className="px-5 sm:px-6 pb-5">
         <button
           onClick={handleClick}
           onKeyDown={handleKeyDown}
           disabled={isDisabled}
           aria-label={`${isEnterprise ? 'Start your agency' : 'Upgrade to ' + planName}`}
           aria-disabled={isDisabled}
-          className={`w-full mt-auto py-4 sm:py-5 rounded-2xl font-bold transition-all duration-300 text-base sm:text-lg focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+          className={`w-full mt-auto py-3 sm:py-4 rounded-xl font-bold transition-all duration-300 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-offset-2 ${
             isDisabled
               ? 'focus:ring-gray-300'
               : isEnterprise
