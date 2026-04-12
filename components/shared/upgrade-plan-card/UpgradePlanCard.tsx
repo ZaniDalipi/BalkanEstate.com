@@ -69,32 +69,43 @@ const UpgradePlanCard: React.FC<UpgradePlanCardProps> = ({
       return 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700';
     }
     if (isHighlighted) {
-      return 'bg-gradient-to-br from-emerald-50 via-white to-cyan-50 border-2 border-emerald-400';
+      return 'bg-white border-2 border-emerald-400';
     }
     return 'bg-white border border-gray-200';
   };
 
-  const getMetricColor = () => {
-    return isEnterprise ? 'text-amber-400' : 'text-primary';
+  const getHeaderStyle = () => {
+    if (isEnterprise) {
+      return 'bg-gradient-to-br from-slate-900 to-slate-800 text-white';
+    }
+    if (isHighlighted) {
+      return 'bg-gradient-to-br from-emerald-50 to-cyan-50 text-slate-900';
+    }
+    return 'bg-gradient-to-br from-primary/10 to-primary/5 text-slate-900';
   };
 
-  const getMetricBgColor = () => {
-    if (isEnterprise) return 'bg-slate-700/30 border-amber-500/30';
-    if (isHighlighted) return 'bg-primary/10 border-primary/30';
-    return 'bg-gray-50 border-gray-200';
+  const getPriceColor = () => {
+    if (isEnterprise) {
+      return 'text-white';
+    }
+    if (isHighlighted) {
+      return 'text-emerald-600';
+    }
+    return 'text-primary';
   };
+
 
   const getButtonStyle = () => {
     if (isDisabled) {
-      return 'bg-gray-200 text-gray-500 cursor-not-allowed shadow-none';
+      return 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none border border-gray-200';
     }
     if (isEnterprise) {
-      return 'text-slate-900 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 shadow-lg hover:shadow-xl';
+      return 'text-slate-900 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 active:from-amber-600 active:to-amber-700 shadow-lg hover:shadow-xl font-semibold';
     }
     if (isHighlighted) {
-      return 'text-white bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 shadow-lg hover:shadow-xl';
+      return 'text-white bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 active:from-emerald-700 active:to-cyan-700 shadow-lg hover:shadow-xl font-semibold';
     }
-    return 'text-gray-700 bg-white border-2 border-gray-300 hover:border-primary hover:text-primary hover:shadow-lg';
+    return 'text-white bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary-darker active:from-primary-darker active:to-primary-dark shadow-md hover:shadow-lg font-semibold border-0';
   };
 
   return (
@@ -107,12 +118,14 @@ const UpgradePlanCard: React.FC<UpgradePlanCardProps> = ({
     >
       {/* Badge */}
       {badge && (
-        <div className="absolute -top-0 left-1/2 -translate-x-1/2 z-20">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20">
           <span
-            className={`inline-flex items-center gap-1.5 text-white text-xs font-bold px-3 py-1.5 sm:px-4 sm:py-2 rounded-full whitespace-nowrap shadow-lg ${
+            className={`inline-flex items-center gap-1.5 text-white text-xs sm:text-sm font-black px-4 sm:px-5 py-2 sm:py-2.5 rounded-full whitespace-nowrap shadow-xl backdrop-blur-sm ${
               isEnterprise
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500'
-                : 'bg-gradient-to-r from-red-500 to-rose-600'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-600'
+                : isHighlighted
+                  ? 'bg-gradient-to-r from-emerald-500 to-cyan-600'
+                  : 'bg-gradient-to-r from-red-500 to-rose-600'
             }`}
           >
             {badge}
@@ -121,91 +134,132 @@ const UpgradePlanCard: React.FC<UpgradePlanCardProps> = ({
       )}
 
       {/* Header - Pricing Section */}
-      <div className={`p-4 sm:p-6 text-white ${isEnterprise ? 'bg-slate-900/50' : ''}`}>
-        <h4 className="font-bold text-xl sm:text-2xl">{planName}</h4>
+      <div className={`p-6 sm:p-7 ${getHeaderStyle()}`}>
+        <h4 className="font-bold text-2xl sm:text-3xl leading-tight">{planName}</h4>
         {description && (
-          <p className={`text-xs sm:text-sm mt-2 ${isEnterprise ? 'text-gray-400' : 'text-white/80'}`}>
+          <p className={`text-sm sm:text-base mt-2 opacity-75 leading-relaxed ${
+            isEnterprise ? 'text-gray-300' : 'text-slate-700'
+          }`}>
             {description}
           </p>
         )}
 
         {/* Price Display */}
-        <div className="flex items-baseline gap-2 mt-4">
+        <div className="flex items-baseline gap-2 mt-6">
           {originalPrice !== undefined && originalPrice > price && (
-            <span className="text-xs sm:text-sm line-through text-white/60">
+            <span className={`text-sm sm:text-base line-through opacity-60 ${
+              isEnterprise ? 'text-white' : 'text-slate-600'
+            }`}>
               €{originalPrice.toFixed(2)}
             </span>
           )}
-          <span className="text-4xl sm:text-5xl font-extrabold">€{price.toFixed(2)}</span>
-          <span className="text-base sm:text-lg text-white/80">/{period === 'month' ? t('billing.month', 'month') : t('billing.year', 'year')}</span>
+          <span className={`text-5xl sm:text-6xl font-black ${getPriceColor()}`}>
+            €{price.toFixed(2)}
+          </span>
+          <div className="flex flex-col">
+            <span className={`text-base sm:text-lg font-semibold ${
+              isEnterprise ? 'text-gray-300' : 'text-slate-700'
+            }`}>
+              /{period === 'month' ? t('billing.month', 'month') : t('billing.year', 'year')}
+            </span>
+          </div>
         </div>
 
         {savings && (
-          <p className="text-xs mt-3 bg-white/20 px-3 py-1 rounded-full inline-block">
-            {savings}
-          </p>
+          <div className={`text-sm font-semibold mt-4 px-3 py-2 rounded-lg inline-block ${
+            isEnterprise
+              ? 'bg-amber-500/20 text-amber-100'
+              : isHighlighted
+                ? 'bg-emerald-500/20 text-emerald-700'
+                : 'bg-primary/20 text-primary'
+          }`}>
+            💰 {savings}
+          </div>
         )}
       </div>
 
       {/* Key Metrics Section */}
-      <div className="px-4 sm:px-6 pt-4 sm:pt-6 pb-4">
+      <div className="px-6 sm:px-7 pt-6 pb-6">
         <div className="grid grid-cols-2 gap-3">
-          <div className={`rounded-lg p-3 sm:p-4 text-center border ${getMetricBgColor()}`}>
-            <p className={`text-xl sm:text-2xl font-bold ${getMetricColor()}`}>
-              {listingsLimit}
+          <div className={`rounded-xl p-4 sm:p-5 text-center border-2 transition-colors duration-300 ${
+            isEnterprise
+              ? 'bg-slate-700/20 border-amber-500/40 hover:border-amber-500/60'
+              : isHighlighted
+                ? 'bg-emerald-50 border-emerald-200 hover:border-emerald-400'
+                : 'bg-gray-50 border-gray-200 hover:border-primary/30'
+          }`}>
+            <p className={`text-3xl sm:text-4xl font-black ${getMetricColor()}`}>
+              {listingsLimit.toLocaleString()}
             </p>
-            <p className={`text-xs mt-1 ${isEnterprise ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`text-xs sm:text-sm mt-2 font-medium ${
+              isEnterprise ? 'text-gray-300' : 'text-gray-700'
+            }`}>
               {t('metrics.listings', 'Listings')}
             </p>
           </div>
-          <div className={`rounded-lg p-3 sm:p-4 text-center border ${getMetricBgColor()}`}>
-            <p className={`text-xl sm:text-2xl font-bold ${getMetricColor()}`}>
+          <div className={`rounded-xl p-4 sm:p-5 text-center border-2 transition-colors duration-300 ${
+            isEnterprise
+              ? 'bg-slate-700/20 border-amber-500/40 hover:border-amber-500/60'
+              : isHighlighted
+                ? 'bg-emerald-50 border-emerald-200 hover:border-emerald-400'
+                : 'bg-gray-50 border-gray-200 hover:border-primary/30'
+          }`}>
+            <p className={`text-3xl sm:text-4xl font-black ${getMetricColor()}`}>
               {promoCoupons}
             </p>
-            <p className={`text-xs mt-1 ${isEnterprise ? 'text-gray-400' : 'text-gray-600'}`}>
-              {t('metrics.promoCoupons', 'Promo Coupons')}
+            <p className={`text-xs sm:text-sm mt-2 font-medium ${
+              isEnterprise ? 'text-gray-300' : 'text-gray-700'
+            }`}>
+              {t('metrics.promoCoupons', 'Coupons')}
             </p>
           </div>
         </div>
       </div>
 
       {/* Features List */}
-      <div className="px-4 sm:px-6 pb-4 flex-grow">
-        <ul className="space-y-2">
+      <div className="px-6 sm:px-7 pb-6 flex-grow">
+        <ul className="space-y-3">
           {features.slice(0, 5).map((feature, idx) => (
-            <li key={idx} className="flex items-start gap-2">
+            <li key={idx} className="flex items-start gap-3">
               <div className="flex-shrink-0 mt-0.5">
-                <CheckCircleIcon className={`w-4 h-4 ${isEnterprise ? 'text-amber-400' : 'text-green-500'}`} />
+                <CheckCircleIcon className={`w-5 h-5 ${
+                  isEnterprise ? 'text-amber-400' : isHighlighted ? 'text-emerald-500' : 'text-primary'
+                }`} />
               </div>
-              <span className={`text-xs sm:text-sm ${isEnterprise ? 'text-gray-300' : 'text-gray-700'}`}>
+              <span className={`text-sm sm:text-base leading-snug ${
+                isEnterprise ? 'text-gray-200' : 'text-gray-700'
+              }`}>
                 {feature}
               </span>
             </li>
           ))}
           {features.length > 5 && (
-            <li className={`text-xs sm:text-sm italic ${isEnterprise ? 'text-gray-400' : 'text-gray-600'}`}>
-              + {features.length - 5} {t('common.more', 'more')}
+            <li className={`text-sm font-medium flex items-start gap-3 ${
+              isEnterprise ? 'text-gray-400' : 'text-gray-600'
+            }`}>
+              <span className="text-primary font-bold">+</span>
+              {features.length - 5} {t('common.more', 'more')}
             </li>
           )}
         </ul>
       </div>
 
       {/* CTA Button */}
-      <div className="px-4 sm:px-6 pb-4">
+      <div className="px-6 sm:px-7 pb-6">
         <button
           onClick={handleClick}
           onKeyDown={handleKeyDown}
           disabled={isDisabled}
-          aria-label={`Upgrade to ${planName} plan`}
+          aria-label={`${isEnterprise ? 'Start your agency' : 'Upgrade to ' + planName}`}
           aria-disabled={isDisabled}
-          className={`w-full mt-4 py-3 sm:py-4 rounded-xl font-bold transition-all duration-300 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+          className={`w-full mt-auto py-4 sm:py-5 rounded-2xl font-bold transition-all duration-300 text-base sm:text-lg focus:outline-none focus:ring-2 focus:ring-offset-2 ${
             isDisabled
               ? 'focus:ring-gray-300'
               : isEnterprise
-                ? 'focus:ring-amber-500'
+                ? 'focus:ring-amber-400'
                 : isHighlighted
                   ? 'focus:ring-emerald-500'
-                  : 'focus:ring-primary'
+                  : 'focus:ring-primary/50'
           } ${getButtonStyle()}`}
         >
           {isEnterprise ? t('buttons.startAgency', 'Start Your Agency') : t('buttons.upgradeNow', 'Upgrade Now')}
