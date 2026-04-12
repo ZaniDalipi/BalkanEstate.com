@@ -271,7 +271,7 @@ export async function processSubscriptionPayment(
         user.subscription.subscriptionCycleStartDate = startDate;
         user.subscription.subscriptionCycleEndDate = new Date(startDate.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year
       } else {
-        // Subscription renewal: ensure carryover fields exist before processing
+        // Subscription renewal: apply carryover logic inline (atomic within transaction)
         if (!user.subscription.listingsAllowanceThisMonth) {
           user.subscription.listingsAllowanceThisMonth = monthlyAllowance;
         }
@@ -285,33 +285,71 @@ export async function processSubscriptionPayment(
           user.subscription.subscriptionCycleEndDate = new Date(startDate.getTime() + 365 * 24 * 60 * 60 * 1000);
         }
 
-        // Check if annual cycle is complete and apply carryover
-        const listingCarryoverService = require('./listingCarryoverService').default;
-
         // Check if annual cycle is complete
-        if (listingCarryoverService.isAnnualCycleComplete(user)) {
-          // Apply annual reset asynchronously (don't block the transaction)
-          try {
-            const resetResult = await listingCarryoverService.applyAnnualReset(user._id.toString());
-            if (resetResult.success && resetResult.user) {
-              Object.assign(user.subscription, resetResult.user.subscription);
-            }
-          } catch (resetError) {
-            paymentLogger.error('⚠️ Error applying annual reset during renewal:', resetError);
-            // Don't fail renewal if reset fails
+        const cycleEndDate = user.subscription.subscriptionCycleEndDate
+          ? new Date(user.subscription.subscriptionCycleEndDate)
+          : null;
+        const now = new Date();
+        const isAnnualCycleComplete = cycleEndDate && now >= cycleEndDate;
+
+        if (isAnnualCycleComplete) {
+          // Apply annual reset: archive old listings and reset counters
+          if (!isProduction) paymentLogger.info('🔄 Annual cycle complete, applying reset...');
+
+          // Calculate cutoff date: 90 days ago
+          const cutoffDate = new Date();
+          cutoffDate.setDate(cutoffDate.getDate() - 90);
+
+          // Archive listings older than 90 days (within the same transaction session)
+          const Property = (await import('../models/Property')).default;
+          const archivedResult = await Property.updateMany(
+            {
+              owner: user._id,
+              createdAt: { $lt: cutoffDate },
+              status: { $ne: 'archived' },
+            },
+            { status: 'archived' },
+            { session }
+          );
+
+          if (archivedResult.modifiedCount > 0) {
+            if (!isProduction) paymentLogger.info(`📦 Archived ${archivedResult.modifiedCount} listings older than 90 days`);
+            user.subscription.listingsArchivedDate = new Date();
           }
+
+          // Reset for new annual cycle
+          user.subscription.listingsAllowanceThisMonth = monthlyAllowance;
+          user.subscription.listingsAllowanceYTD = monthlyAllowance;
+          user.subscription.carryoverListings = 0;
+          user.subscription.listingsCreatedThisMonth = 0;
+          user.subscription.subscriptionCycleStartDate = new Date();
+          user.subscription.subscriptionCycleEndDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+          user.subscription.archiveNotificationSent = false;
+
+          if (!isProduction) paymentLogger.info('✅ Annual reset applied on renewal');
         } else {
-          // Refresh monthly allowance (carryover + new month)
-          try {
-            const refreshResult = await listingCarryoverService.refreshMonthlyAllowance(
-              user._id.toString()
-            );
-            if (refreshResult.success && refreshResult.user) {
-              Object.assign(user.subscription, refreshResult.user.subscription);
-            }
-          } catch (refreshError) {
-            paymentLogger.error('⚠️ Error refreshing monthly allowance:', refreshError);
-            // Don't fail renewal if refresh fails
+          // Monthly carryover: calculate unused from previous month and carry forward
+          const prevAllowance = user.subscription.listingsAllowanceThisMonth ?? monthlyAllowance;
+          const prevCreated = user.subscription.listingsCreatedThisMonth ?? 0;
+          const prevCarryover = user.subscription.carryoverListings ?? 0;
+
+          // Unused = (previous allowance + previous carryover) - previous created
+          const previousUnused = Math.max(0, (prevAllowance + prevCarryover) - prevCreated);
+
+          user.subscription.listingsAllowanceThisMonth = monthlyAllowance;
+          user.subscription.carryoverListings = previousUnused;
+          user.subscription.listingsCreatedThisMonth = 0;
+          user.subscription.listingsAllowanceYTD = (user.subscription.listingsAllowanceYTD || 0) + monthlyAllowance;
+
+          if (!isProduction) {
+            paymentLogger.info('✅ Monthly carryover applied on renewal', {
+              prevAllowance,
+              prevCreated,
+              prevCarryover,
+              carryoverListings: previousUnused,
+              newAllowanceThisMonth: monthlyAllowance,
+              listingsAllowanceYTD: user.subscription.listingsAllowanceYTD,
+            });
           }
         }
       }

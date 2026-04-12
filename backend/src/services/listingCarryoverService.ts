@@ -1,6 +1,6 @@
 import { IUser } from '../models/User';
 import User from '../models/User';
-import Product, { IProduct } from '../models/Product';
+import Product from '../models/Product';
 import { logger } from '../utils/logger';
 
 /**
@@ -20,30 +20,29 @@ interface CarryoverResult {
 
 class ListingCarryoverService {
   /**
-   * Get monthly listing allowance from Product tier configuration
-   * @throws Error if product not found
+   * Get monthly listing allowance from Product by productId
+   * @param productId - The product ID (e.g., 'pro_monthly', 'agency_monthly')
+   * @throws Error if productId is missing or product not found
    */
-  async getMonthlyAllowance(tier: string): Promise<number> {
+  async getMonthlyAllowance(productId: string): Promise<number> {
     try {
-      if (!tier) {
-        throw new Error('Subscription tier is required');
+      if (!productId) {
+        throw new Error('productId is required');
       }
 
       const product = await Product.findOne({
-        tier: tier,
+        productId,
         isActive: true,
-        isVisible: true,
       }).lean();
 
       if (!product) {
-        logger.warn(`Product not found for tier: ${tier}`);
-        return 0;
+        throw new Error(`Product not found for productId: ${productId}`);
       }
 
       return product.listingsLimit || 0;
     } catch (error) {
       logger.error('Error getting monthly allowance', {
-        tier,
+        productId,
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;
@@ -107,8 +106,17 @@ class ListingCarryoverService {
         };
       }
 
-      // Get current tier's monthly allowance from Product
-      const monthlyAllowance = await this.getMonthlyAllowance(user.subscription.tier);
+      // Validate subscriptionPlan exists
+      const subscriptionPlan = (user as any).subscriptionPlan;
+      if (!subscriptionPlan) {
+        return {
+          success: false,
+          error: 'No subscriptionPlan found on user',
+        };
+      }
+
+      // Get current productId's monthly allowance from Product
+      const monthlyAllowance = await this.getMonthlyAllowance(subscriptionPlan);
 
       // Calculate carryover: unused from previous month
       const previousMonthListingsCreated = user.subscription.listingsCreatedThisMonth || 0;
@@ -182,15 +190,24 @@ class ListingCarryoverService {
         };
       }
 
-      // Get monthly allowance for this tier
-      const monthlyAllowance = await this.getMonthlyAllowance(user.subscription.tier);
+      // Validate subscriptionPlan exists
+      const subscriptionPlan = (user as any).subscriptionPlan;
+      if (!subscriptionPlan) {
+        return {
+          success: false,
+          error: 'No subscriptionPlan found on user',
+        };
+      }
+
+      // Get monthly allowance for this productId
+      const monthlyAllowance = await this.getMonthlyAllowance(subscriptionPlan);
 
       // Calculate cutoff date: 90 days ago
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - 90);
 
       // Archive listings older than 90 days
-      const { Property } = await import('../models/Property');
+      const Property = (await import('../models/Property')).default;
       const archivedCount = await Property.updateMany(
         {
           owner: user._id,
@@ -251,7 +268,7 @@ class ListingCarryoverService {
   ): Promise<void> {
     try {
       // Import email service
-      const { sendEmail } = await import('../utils/emailService');
+      const { sendEmail } = await import('./emailService');
 
       const subject = 'Your Old Listings Have Been Archived';
       const html = `
@@ -324,9 +341,15 @@ class ListingCarryoverService {
         return false;
       }
 
+      // Get subscriptionPlan (productId)
+      const subscriptionPlan = (user as any).subscriptionPlan;
+      if (!subscriptionPlan) {
+        return false;
+      }
+
       // Get current month's allowance
-      const monthlyAllowance = await this.getMonthlyAllowance(user.subscription.tier);
-      const effectiveLimit = this.getEffectiveListingLimit(user, monthlyAllowance);
+      const monthlyAllowance = await this.getMonthlyAllowance(subscriptionPlan);
+      const effectiveLimit = this.getEffectiveListingLimit(user as any, monthlyAllowance);
 
       // Get listings created this month
       const listingsCreatedThisMonth = user.subscription.listingsCreatedThisMonth || 0;
