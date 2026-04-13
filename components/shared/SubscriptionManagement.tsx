@@ -711,6 +711,9 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         // Hide legacy alias IDs — they are duplicates of canonical plan IDs
         // Canonical: buyer_monthly, pro_monthly, pro_yearly, agency_yearly
         if (['seller_pro_monthly', 'seller_pro_yearly', 'seller_enterprise_yearly', 'buyer_pro_monthly', 'free_tier'].includes(key)) return false;
+        // Hide buyer plans if user is not a buyer
+        const isBuyerRole = user?.primaryRole === 'buyer';
+        if (key.startsWith('buyer') && !isBuyerRole) return false;
         // Hide Enterprise plan if user already owns/manages an agency
         if (key === 'agency_yearly' && user?.agencyId) return false;
         if (key === subscriptionDetails.currentPlanKey) return false;
@@ -731,7 +734,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         pricing: calculateUpgradePrice(key),
       }))
       .sort((a, b) => a.plan.tier - b.plan.tier);
-  }, [subscriptionDetails, plans, products, calculateUpgradePrice]);
+  }, [subscriptionDetails, plans, products, calculateUpgradePrice, user?.primaryRole]);
 
   // Transform upgrade options for the new UpgradeOptionsGrid component
   const transformedUpgradeOptions = useUpgradeOptions({
