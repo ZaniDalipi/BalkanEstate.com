@@ -11,6 +11,7 @@ import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryCon
 import ExploreCitiesHeroBanner from '@/components/shared/ExploreCitiesHeroBanner';
 import { RandomCityBubbles, FloatingSphere, Decorative3DStyles } from '@/components/shared/Decorative3D';
 import { navigateWithLanguage } from '@/src/utils/languageRouting';
+import { searchLocation } from '@/services/osmService';
 
 const CityRecommendations: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
@@ -22,7 +23,7 @@ const CityRecommendations: React.FC = () => {
     return params.get('country') || 'all';
   });
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
-  const { dispatch } = useAppContext();
+  const { dispatch, updateSearchPageState } = useAppContext();
 
   // Listen for country filter changes from footer (when component is already mounted)
   useEffect(() => {
@@ -64,6 +65,78 @@ const CityRecommendations: React.FC = () => {
   const handleCityClick = (city: CityMarketData) => {
     const path = `/explore-cities/${encodeURIComponent(city.city)}/${encodeURIComponent(city.country)}`;
     navigateWithLanguage(path);
+  };
+
+  const handleViewListingsOnMap = async (e: React.MouseEvent, city: CityMarketData) => {
+    e.stopPropagation();
+    const searchQuery = `${city.city}, ${city.country}`;
+    const results = await searchLocation(searchQuery);
+    const bestResult = results[0];
+    const lat = bestResult ? Number(bestResult.lat) : 0;
+    const lng = bestResult ? Number(bestResult.lon) : 0;
+
+    let drawnBoundsJSON: string | null = null;
+    if (bestResult?.boundingbox) {
+      const [south, north, west, east] = bestResult.boundingbox.map(Number);
+      drawnBoundsJSON = JSON.stringify({
+        _southWest: { lat: south, lng: west },
+        _northEast: { lat: north, lng: east },
+      });
+    }
+
+    const displayName = `${city.city}, ${city.country}`;
+    const emptyFilters = {
+      country: 'any' as const,
+      query: '',
+      listingType: 'sale' as const,
+      minPrice: null,
+      maxPrice: null,
+      beds: null,
+      baths: null,
+      livingRooms: null,
+      minSqft: null,
+      maxSqft: null,
+      sortBy: 'newest' as const,
+      sellerType: 'any' as const,
+      propertyType: 'any' as const,
+      minYearBuilt: null,
+      maxYearBuilt: null,
+      minParking: null,
+      furnishing: 'any' as const,
+      heatingType: 'any' as const,
+      condition: 'any' as const,
+      viewType: 'any' as const,
+      energyRating: 'any' as const,
+      hasBalcony: null,
+      hasGarden: null,
+      hasElevator: null,
+      hasSecurity: null,
+      hasAirConditioning: null,
+      hasPool: null,
+      petsAllowed: null,
+      minFloorNumber: null,
+      maxFloorNumber: null,
+      maxDistanceToCenter: null,
+      maxDistanceToSea: null,
+      maxDistanceToSchool: null,
+      maxDistanceToHospital: null,
+      amenities: [] as string[],
+      has360Tour: null,
+      hasDiscount: null,
+      hasPriceIncrease: null,
+      minPricePerSqm: null,
+      maxPricePerSqm: null,
+      maxDaysListed: null,
+    };
+
+    updateSearchPageState({
+      filters: { ...emptyFilters, query: displayName },
+      activeFilters: { ...emptyFilters },
+      drawnBoundsJSON,
+      focusMapOnProperty: { lat, lng, address: displayName, zoom: 12 },
+      mobileView: 'map',
+    });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
   };
 
   const getTrendIcon = (trend: string) => {
@@ -251,7 +324,7 @@ const CityRecommendations: React.FC = () => {
             const fallbackGradient = getCityFallbackGradient(city.city);
 
             return (
-              <button
+              <div
                 key={city._id}
                 onClick={() => handleCityClick(city)}
                 className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-2xl hover:border-primary hover:scale-[1.02] transition-all duration-300 text-left group shadow-md cursor-pointer"
@@ -443,16 +516,19 @@ const CityRecommendations: React.FC = () => {
 
                   {/* View Listings Button */}
                   <div className="mt-4 pt-3 border-t border-neutral-100">
-                    <div className="w-full py-2.5 px-4 bg-primary text-white rounded-lg font-semibold text-sm flex items-center justify-center gap-2 group-hover:bg-primary-dark transition-colors shadow-md">
+                    <button
+                      onClick={(e) => handleViewListingsOnMap(e, city)}
+                      className="w-full py-2.5 px-4 bg-primary text-white rounded-lg font-semibold text-sm flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors shadow-md"
+                    >
                       <MapPinIcon className="w-4 h-4" />
                       <span>{t('footer.viewListings', 'View Listings on Map')}</span>
                       <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
-                    </div>
+                    </button>
                   </div>
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>
