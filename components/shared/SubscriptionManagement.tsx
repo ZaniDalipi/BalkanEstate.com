@@ -1217,7 +1217,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             <div>
               <p className="font-semibold text-neutral-800">{t('management.listingLimit', 'Listing Limit')}</p>
               <p className="text-sm text-neutral-500">
-                {/* Simple model: show active listings / max allowed */}
+                {/* Calculate listing stats */}
                 {(() => {
                   const activeCount = user.subscription?.activeListingsCount || user.listingsCount || 0;
                   const monthlyLimit = currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit;
@@ -1229,7 +1229,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                     const cycleStart = new Date(user.subscription.subscriptionCycleStartDate);
                     const daysSince = Math.floor((now.getTime() - cycleStart.getTime()) / (24 * 60 * 60 * 1000));
                     const monthsElapsed = Math.floor(daysSince / 30) + 1;
-                    maxAllowed = Math.min(monthsElapsed * monthlyLimit, monthsElapsed * monthlyLimit); // Cap at 12 months
+                    maxAllowed = Math.min(monthsElapsed * monthlyLimit, 12 * monthlyLimit); // Cap at 12 months
                   }
 
                   return t('management.listingUsage', {
@@ -1245,50 +1245,98 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-bold text-neutral-800">
-              {(() => {
-                const activeCount = user.subscription?.activeListingsCount || user.listingsCount || 0;
-                const monthlyLimit = currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit;
+            {(() => {
+              const activeCount = user.subscription?.activeListingsCount || user.listingsCount || 0;
+              const monthlyLimit = currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit;
 
-                // Calculate max allowed
-                let maxAllowed = monthlyLimit;
-                if (user.subscription?.subscriptionCycleStartDate) {
-                  const now = new Date();
-                  const cycleStart = new Date(user.subscription.subscriptionCycleStartDate);
-                  const daysSince = Math.floor((now.getTime() - cycleStart.getTime()) / (24 * 60 * 60 * 1000));
-                  const monthsElapsed = Math.floor(daysSince / 30) + 1;
-                  maxAllowed = Math.min(monthsElapsed * monthlyLimit, monthsElapsed * monthlyLimit);
-                }
+              // Calculate max allowed
+              let maxAllowed = monthlyLimit;
+              if (user.subscription?.subscriptionCycleStartDate) {
+                const now = new Date();
+                const cycleStart = new Date(user.subscription.subscriptionCycleStartDate);
+                const daysSince = Math.floor((now.getTime() - cycleStart.getTime()) / (24 * 60 * 60 * 1000));
+                const monthsElapsed = Math.floor(daysSince / 30) + 1;
+                maxAllowed = Math.min(monthsElapsed * monthlyLimit, 12 * monthlyLimit);
+              }
 
-                return Math.max(0, maxAllowed - activeCount);
-              })()}
-            </p>
-            <p className="text-xs text-neutral-500">{t('management.remaining', 'remaining')}</p>
+              const remaining = Math.max(0, maxAllowed - activeCount);
+              const isOverLimit = activeCount > maxAllowed;
+
+              return (
+                <>
+                  <p className={`text-2xl font-bold ${isOverLimit ? 'text-red-600' : 'text-neutral-800'}`}>
+                    {isOverLimit ? '0' : remaining}
+                  </p>
+                  <p className={`text-xs ${isOverLimit ? 'text-red-500' : 'text-neutral-500'}`}>
+                    {isOverLimit ? 'limit exceeded' : t('management.remaining', 'remaining')}
+                  </p>
+                </>
+              );
+            })()}
           </div>
         </div>
-        <div className="mt-3 w-full bg-neutral-100 rounded-full h-2 overflow-hidden">
-          <div
-            className="bg-blue-500 h-full rounded-full transition-all duration-500"
-            style={{
-              width: `${Math.min(100, (
-                (() => {
-                  const activeCount = user.subscription?.activeListingsCount || user.listingsCount || 0;
-                  const monthlyLimit = currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit;
 
-                  let maxAllowed = monthlyLimit;
-                  if (user.subscription?.subscriptionCycleStartDate) {
-                    const now = new Date();
-                    const cycleStart = new Date(user.subscription.subscriptionCycleStartDate);
-                    const daysSince = Math.floor((now.getTime() - cycleStart.getTime()) / (24 * 60 * 60 * 1000));
-                    const monthsElapsed = Math.floor(daysSince / 30) + 1;
-                    maxAllowed = Math.min(monthsElapsed * monthlyLimit, monthsElapsed * monthlyLimit);
-                  }
+        {/* Progress Bar - Interactive & Color-Coded */}
+        <div className="mt-3">
+          <div className="w-full bg-neutral-100 rounded-full h-3 overflow-hidden">
+            {(() => {
+              const activeCount = user.subscription?.activeListingsCount || user.listingsCount || 0;
+              const monthlyLimit = currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit;
 
-                  return (activeCount / maxAllowed) * 100;
-                })()
-              ))}`
-            }}
-          />
+              let maxAllowed = monthlyLimit;
+              if (user.subscription?.subscriptionCycleStartDate) {
+                const now = new Date();
+                const cycleStart = new Date(user.subscription.subscriptionCycleStartDate);
+                const daysSince = Math.floor((now.getTime() - cycleStart.getTime()) / (24 * 60 * 60 * 1000));
+                const monthsElapsed = Math.floor(daysSince / 30) + 1;
+                maxAllowed = Math.min(monthsElapsed * monthlyLimit, 12 * monthlyLimit);
+              }
+
+              const percentage = (activeCount / maxAllowed) * 100;
+              const isOverLimit = activeCount > maxAllowed;
+              const barColor = isOverLimit ? 'bg-red-500' : percentage >= 80 ? 'bg-amber-500' : 'bg-blue-500';
+
+              return (
+                <div
+                  className={`${barColor} h-full rounded-full transition-all duration-500`}
+                  style={{
+                    width: `${Math.min(100, percentage)}%`,
+                  }}
+                  title={`${activeCount} of ${maxAllowed} listings used`}
+                />
+              );
+            })()}
+          </div>
+
+          {/* Status message below bar */}
+          <div className="mt-2 text-xs">
+            {(() => {
+              const activeCount = user.subscription?.activeListingsCount || user.listingsCount || 0;
+              const monthlyLimit = currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit;
+
+              let maxAllowed = monthlyLimit;
+              if (user.subscription?.subscriptionCycleStartDate) {
+                const now = new Date();
+                const cycleStart = new Date(user.subscription.subscriptionCycleStartDate);
+                const daysSince = Math.floor((now.getTime() - cycleStart.getTime()) / (24 * 60 * 60 * 1000));
+                const monthsElapsed = Math.floor(daysSince / 30) + 1;
+                maxAllowed = Math.min(monthsElapsed * monthlyLimit, 12 * monthlyLimit);
+              }
+
+              const percentage = (activeCount / maxAllowed) * 100;
+              const isOverLimit = activeCount > maxAllowed;
+
+              if (isOverLimit) {
+                return <span className="text-red-600 font-semibold">⚠️ You've exceeded your listing limit. Delete some listings to create new ones.</span>;
+              } else if (percentage >= 90) {
+                return <span className="text-amber-600">⚡ You're close to your limit ({Math.round(percentage)}% used)</span>;
+              } else if (percentage >= 80) {
+                return <span className="text-amber-500">{Math.round(percentage)}% of your limit used</span>;
+              } else {
+                return <span className="text-green-600">✓ You have plenty of space</span>;
+              }
+            })()}
+          </div>
         </div>
       </div>
 
