@@ -1235,7 +1235,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 {/* Display monthly listing usage */}
                 {(() => {
                   const created = user.subscription?.listingsCreatedThisMonth || 0;
-                  const monthlyLimit = currentProduct?.listingsPerMonth || currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit || 30;
+                  const monthlyLimit = currentProduct?.listingsPerMonth || currentProduct?.listingsLimit || subscriptionDetails.currentPlan.listingLimit || 30;
 
                   return t('management.listingUsage', {
                     used: created,
@@ -1249,7 +1249,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           <div className="text-right">
             {(() => {
               const created = user.subscription?.listingsCreatedThisMonth || 0;
-              const monthlyLimit = currentProduct?.listingsPerMonth || currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit || 30;
+              const monthlyLimit = currentProduct?.listingsPerMonth || currentProduct?.listingsLimit || subscriptionDetails.currentPlan.listingLimit || 30;
               const remaining = Math.max(0, monthlyLimit - created);
               const isOverLimit = created >= monthlyLimit;
 
@@ -1272,7 +1272,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           <div className="w-full bg-neutral-100 rounded-full h-3 overflow-hidden">
             {(() => {
               const created = user.subscription?.listingsCreatedThisMonth || 0;
-              const monthlyLimit = currentProduct?.listingsPerMonth || currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit || 30;
+              const monthlyLimit = currentProduct?.listingsPerMonth || currentProduct?.listingsLimit || subscriptionDetails.currentPlan.listingLimit || 30;
               const percentage = (created / monthlyLimit) * 100;
               const isOverLimit = created >= monthlyLimit;
               const barColor = isOverLimit ? 'bg-red-500' : percentage >= 80 ? 'bg-amber-500' : 'bg-blue-500';
@@ -1293,7 +1293,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           <div className="mt-2 text-xs">
             {(() => {
               const created = user.subscription?.listingsCreatedThisMonth || 0;
-              const monthlyLimit = currentProduct?.listingsPerMonth || currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit || 30;
+              const monthlyLimit = currentProduct?.listingsPerMonth || currentProduct?.listingsLimit || subscriptionDetails.currentPlan.listingLimit || 30;
               const percentage = (created / monthlyLimit) * 100;
               const isOverLimit = created >= monthlyLimit;
 
