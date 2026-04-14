@@ -110,7 +110,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     const { t } = useTranslation(['newListing', 'seller', 'common', 'validation']);
     const { state, dispatch, updateUser, createListing, updateListing } = useAppContext();
     const { currentUser, properties, isPricingModalOpen, pendingProperty, isAuthenticating, isLoadingUserData } = state;
-    const { showError, showWarning, showSuccess, showInfo } = useAlert();
+    const { showError, showWarning, showSuccess, showInfo, closeAlert } = useAlert();
     const [mode, setMode] = useState<Mode>('manual');
     const [step, setStep] = useState<Step>('init');
     const [images, setImages] = useState<ImageData[]>([]);
@@ -1054,6 +1054,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                         {
                             label: t('seller:actions.viewMyListings', 'View My Listings'),
                             onClick: () => {
+                                closeAlert();
                                 dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
                             },
                             variant: 'secondary',

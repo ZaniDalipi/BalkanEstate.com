@@ -271,6 +271,9 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     productId: string;
   } | null>(null);
 
+  // Track actual properties created this month (for progress bar accuracy)
+  const [actualCreatedThisMonth, setActualCreatedThisMonth] = useState<number>(0);
+
   const user = state.currentUser as User;
 
   // Fetch products from database — include seller, buyer, and agent plans so all subscriptions display correctly
@@ -445,6 +448,21 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     }
     fetchSubscription();
   }, [userAgencyId, userSubTier, fetchSubscription]);
+
+  // Calculate actual properties created this month from state.properties
+  useEffect(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const createdThisMonth = state.properties.filter(property => {
+      if (!property.createdAt) return false;
+      const createdDate = new Date(property.createdAt);
+      return createdDate.getMonth() === currentMonth && createdDate.getFullYear() === currentYear;
+    }).length;
+
+    setActualCreatedThisMonth(createdThisMonth);
+  }, [state.properties]);
 
   // Derive max team members from the enterprise product in DB (owner + agents)
   const enterpriseMaxAgents = useMemo(() => {
@@ -1234,7 +1252,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               <p className="text-sm text-neutral-500">
                 {/* Display monthly listing usage */}
                 {(() => {
-                  const created = user.subscription?.listingsCreatedThisMonth || 0;
+                  const created = actualCreatedThisMonth;
                   const monthlyLimit = currentProduct?.listingsPerMonth || currentProduct?.listingsLimit || subscriptionDetails.currentPlan.listingLimit || 30;
 
                   return t('management.listingUsage', {
