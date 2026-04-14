@@ -724,64 +724,48 @@ export const createProperty = async (
     // Import services for listing management
     const listingLimitService = require('../services/listingLimitService').default;
 
-    // Check listing limits based on subscription tier and monthly allowance
-    const baseLimit = user.subscription.listingsLimit || FREE_TIER_LIMITS.LISTINGS;
+    // Check monthly listing limits for subscribed users
     const tier = user.subscription.tier || 'free';
-    const isAgencyAgent = tier === 'agency_agent';
 
-    // For subscribed users with monthly limits (Pro, Agency): use stacking model
-    if (isAgencyAgent || tier === 'pro') {
+    // For subscribed users with subscription plans: check monthly allowance
+    if (user.subscriptionPlan && (tier === 'pro' || tier === 'agency_agent' || tier === 'agency_owner')) {
       try {
         // Get monthly allowance from Product
         const monthlyAllowance = await listingLimitService.getMonthlyAllowance(user.subscriptionPlan);
 
-        // Check if annual cycle needs reset (365+ days)
-        if (listingLimitService.isAnnualCycleComplete(user)) {
-          const resetResult = await listingLimitService.applyAnnualReset(user._id.toString());
-          if (!resetResult.success) {
-            propertyLogger.warn('Annual reset failed, continuing anyway', { userId: user._id });
-          }
-          // Re-fetch user after potential reset
-          const freshUser = await User.findById(user._id);
-          if (freshUser) {
-            Object.assign(user, freshUser.toObject());
-          }
+        // Check if month boundary has passed, reset counter if needed
+        if (listingLimitService.isMonthBoundaryPassed(user.subscription.monthResetDate)) {
+          user.subscription.listingsCreatedThisMonth = 0;
+          user.subscription.monthResetDate = new Date();
+          await user.save();
         }
 
-        // Calculate max allowed listings based on months in current cycle
-        const maxAllowed = listingLimitService.getMaxAllowedListings(
-          user.subscription.subscriptionCycleStartDate,
-          monthlyAllowance
-        );
-        const activeCount = user.subscription.activeListingsCount || 0;
+        // Get current month's creation count
+        const created = user.subscription.listingsCreatedThisMonth || 0;
 
-        // Check if user can create more listings
-        if (activeCount >= maxAllowed) {
-          const cycleEndDate = user.subscription.subscriptionCycleEndDate;
-          const monthsElapsed = Math.floor(
-            (new Date().getTime() - (user.subscription.subscriptionCycleStartDate?.getTime() || 0)) / (30 * 24 * 60 * 60 * 1000)
-          ) + 1;
-
+        // Check if user can create more listings this month
+        if (created >= monthlyAllowance) {
           res.status(403).json({
-            message: `You have ${activeCount} active listings out of ${maxAllowed} allowed. You can have up to ${monthlyAllowance} listings per month for ${Math.min(monthsElapsed, 12)} months.`,
-            code: 'LISTING_LIMIT_REACHED',
+            message: `You have reached your monthly listing limit (${created}/${monthlyAllowance}). Please wait until next month or purchase additional listings.`,
+            code: 'MONTHLY_LISTING_LIMIT_REACHED',
             tier,
-            activeCount,
-            maxAllowed,
+            created,
             monthlyAllowance,
-            cycleEndDate,
           });
           return;
         }
       } catch (error: any) {
-        propertyLogger.error('Error checking listing limit', { userId: user._id, error: error.message });
-        // Fall through to basic limit check
+        propertyLogger.error('Error checking monthly listing limit', { userId: user._id, error: error.message });
+        res.status(500).json({
+          message: 'Error checking listing limits. Please try again.',
+          code: 'LISTING_LIMIT_CHECK_ERROR',
+        });
+        return;
       }
     }
 
-    // ATOMIC check-and-increment: Use findOneAndUpdate to prevent race conditions.
-    // Without this, concurrent requests could all read the same count (e.g. 2),
-    // all pass the limit check, and all create listings - bypassing the limit.
+    // ATOMIC check-and-increment: Use findOneAndUpdate to prevent race conditions
+    const baseLimit = user.subscription.listingsLimit || FREE_TIER_LIMITS.LISTINGS;
     const roleCountField = createdAsRole === 'agent'
       ? 'subscription.agentCount'
       : 'subscription.privateSellerCount';
@@ -791,10 +775,12 @@ export const createProperty = async (
       [roleCountField]: 1,
       listingsCount: 1,
       totalListingsCreated: 1,
+      // For subscribed users: also increment monthly counter
+      ...(user.subscriptionPlan && (tier === 'pro' || tier === 'agency_agent' || tier === 'agency_owner') ?
+        { 'subscription.listingsCreatedThisMonth': 1 } : {}),
     };
 
     // For atomic check, use the base subscription limit (free/pro tier static limit)
-    // Subscribed users with monthly allowances already checked above
     const atomicResult = await User.findOneAndUpdate(
       {
         _id: user._id,

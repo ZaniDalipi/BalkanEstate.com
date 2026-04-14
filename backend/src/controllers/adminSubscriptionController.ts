@@ -1238,14 +1238,9 @@ export const getCarryoverStats = async (req: Request, res: Response): Promise<vo
             tier: product.tier,
           }
         : null,
-      carryover: {
-        listingsAllowanceThisMonth: user.subscription?.listingsAllowanceThisMonth ?? 0,
-        listingsAllowanceYTD: user.subscription?.listingsAllowanceYTD ?? 0,
-        carryoverListings: user.subscription?.carryoverListings ?? 0,
+      monthlyListing: {
         listingsCreatedThisMonth: user.subscription?.listingsCreatedThisMonth ?? 0,
-        subscriptionCycleStartDate: user.subscription?.subscriptionCycleStartDate,
-        subscriptionCycleEndDate: user.subscription?.subscriptionCycleEndDate,
-        totalAvailable: (user.subscription?.listingsAllowanceThisMonth ?? 0) + (user.subscription?.carryoverListings ?? 0),
+        monthResetDate: user.subscription?.monthResetDate ?? null,
       },
       activeListingsCount: user.subscription?.activeListingsCount ?? 0,
     });
@@ -1292,9 +1287,6 @@ export const triggerSubscriptionRenewal = async (req: Request, res: Response): P
       return;
     }
 
-    // Get the listingCarryoverService
-    const listingCarryoverService = require('../services/listingCarryoverService').default;
-
     // Calculate new expiration date
     const newExpirationDate = new Date();
     if (product.billingPeriod === 'yearly') {
@@ -1311,24 +1303,9 @@ export const triggerSubscriptionRenewal = async (req: Request, res: Response): P
     subscription.lastUpdated = new Date();
     await subscription.save();
 
-    // Check if annual cycle is complete
-    if (listingCarryoverService.isAnnualCycleComplete(user)) {
-      // Apply annual reset
-      const resetResult = await listingCarryoverService.applyAnnualReset(userId);
-      if (resetResult.success && resetResult.user) {
-        Object.assign(user.subscription, resetResult.user.subscription);
-      } else {
-        throw new Error(`Annual reset failed: ${resetResult.error}`);
-      }
-    } else {
-      // Refresh monthly allowance
-      const refreshResult = await listingCarryoverService.refreshMonthlyAllowance(userId);
-      if (refreshResult.success && refreshResult.user) {
-        Object.assign(user.subscription, refreshResult.user.subscription);
-      } else {
-        throw new Error(`Monthly refresh failed: ${refreshResult.error}`);
-      }
-    }
+    // Reset monthly counter on renewal
+    user.subscription.listingsCreatedThisMonth = 0;
+    user.subscription.monthResetDate = new Date();
 
     user.markModified('subscription');
     await user.save();
@@ -1343,12 +1320,9 @@ export const triggerSubscriptionRenewal = async (req: Request, res: Response): P
         expirationDate: subscription.expirationDate,
         status: subscription.status,
       },
-      carryover: {
-        listingsAllowanceThisMonth: updatedUser?.subscription?.listingsAllowanceThisMonth ?? 0,
-        listingsAllowanceYTD: updatedUser?.subscription?.listingsAllowanceYTD ?? 0,
-        carryoverListings: updatedUser?.subscription?.carryoverListings ?? 0,
+      monthlyListing: {
         listingsCreatedThisMonth: updatedUser?.subscription?.listingsCreatedThisMonth ?? 0,
-        totalAvailable: (updatedUser?.subscription?.listingsAllowanceThisMonth ?? 0) + (updatedUser?.subscription?.carryoverListings ?? 0),
+        monthResetDate: updatedUser?.subscription?.monthResetDate ?? null,
       },
     });
   } catch (error: any) {
@@ -1358,8 +1332,8 @@ export const triggerSubscriptionRenewal = async (req: Request, res: Response): P
 };
 
 /**
- * @desc    Update carryover fields directly (for testing)
- * @route   PATCH /api/admin/subscriptions/carryover/:userId
+ * @desc    Update monthly listing fields directly (for testing)
+ * @route   PATCH /api/admin/subscriptions/monthly-listing/:userId
  * @access  Admin
  */
 export const updateCarryoverFields = async (req: Request, res: Response): Promise<void> => {
@@ -1368,12 +1342,8 @@ export const updateCarryoverFields = async (req: Request, res: Response): Promis
     if (!userId) return;
 
     const {
-      listingsAllowanceThisMonth,
-      listingsAllowanceYTD,
-      carryoverListings,
       listingsCreatedThisMonth,
-      subscriptionCycleStartDate,
-      subscriptionCycleEndDate,
+      monthResetDate,
     } = req.body;
 
     const user = await User.findById(userId);
@@ -1388,23 +1358,11 @@ export const updateCarryoverFields = async (req: Request, res: Response): Promis
     }
 
     // Update only provided fields
-    if (listingsAllowanceThisMonth !== undefined) {
-      user.subscription.listingsAllowanceThisMonth = listingsAllowanceThisMonth;
-    }
-    if (listingsAllowanceYTD !== undefined) {
-      user.subscription.listingsAllowanceYTD = listingsAllowanceYTD;
-    }
-    if (carryoverListings !== undefined) {
-      user.subscription.carryoverListings = carryoverListings;
-    }
     if (listingsCreatedThisMonth !== undefined) {
       user.subscription.listingsCreatedThisMonth = listingsCreatedThisMonth;
     }
-    if (subscriptionCycleStartDate !== undefined) {
-      user.subscription.subscriptionCycleStartDate = new Date(subscriptionCycleStartDate);
-    }
-    if (subscriptionCycleEndDate !== undefined) {
-      user.subscription.subscriptionCycleEndDate = new Date(subscriptionCycleEndDate);
+    if (monthResetDate !== undefined) {
+      user.subscription.monthResetDate = new Date(monthResetDate);
     }
 
     user.markModified('subscription');
@@ -1412,20 +1370,15 @@ export const updateCarryoverFields = async (req: Request, res: Response): Promis
 
     res.json({
       success: true,
-      message: 'Carryover fields updated',
-      carryover: {
-        listingsAllowanceThisMonth: user.subscription?.listingsAllowanceThisMonth ?? 0,
-        listingsAllowanceYTD: user.subscription?.listingsAllowanceYTD ?? 0,
-        carryoverListings: user.subscription?.carryoverListings ?? 0,
+      message: 'Monthly listing fields updated',
+      monthlyListing: {
         listingsCreatedThisMonth: user.subscription?.listingsCreatedThisMonth ?? 0,
-        subscriptionCycleStartDate: user.subscription?.subscriptionCycleStartDate,
-        subscriptionCycleEndDate: user.subscription?.subscriptionCycleEndDate,
-        totalAvailable: (user.subscription?.listingsAllowanceThisMonth ?? 0) + (user.subscription?.carryoverListings ?? 0),
+        monthResetDate: user.subscription?.monthResetDate ?? null,
       },
     });
   } catch (error: any) {
-    adminLogger.error('[Admin] Error updating carryover fields:', error);
-    res.status(500).json({ message: 'Error updating carryover fields' });
+    adminLogger.error('[Admin] Error updating monthly listing fields:', error);
+    res.status(500).json({ message: 'Error updating monthly listing fields' });
   }
 };
 
