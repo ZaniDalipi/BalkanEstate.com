@@ -54,7 +54,6 @@ const buildSafeUserResponse = (user: IUser) => ({
   subscription: user.subscription ? {
     tier: user.subscription.tier,
     status: user.subscription.status,
-    plan: user.subscription.plan,
     listingsLimit: user.subscription.listingsLimit,
     activeListingsCount: user.subscription.activeListingsCount,
     listingsCreatedThisMonth: user.subscription.listingsCreatedThisMonth || 0,
