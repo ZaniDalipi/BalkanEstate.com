@@ -123,6 +123,7 @@ import { initializeAppStoreService } from './services/appStoreService';
 import { scheduleReconciliation } from './workers/reconciliationWorker';
 import { scheduleExpirationWorker } from './workers/subscriptionExpirationWorker';
 import { startPromotionRefreshWorker } from './workers/promotionRefreshWorker';
+import { startMonthlyResetWorker } from './workers/monthlyResetWorker';
 import { startTrialManagementJob } from './jobs/trialManagementJob';
 import { startCityMarketDataUpdateJob } from './jobs/updateCityMarketData';
 import { startMonthlyCouponJob } from './jobs/monthlyCouponJob';
@@ -215,6 +216,10 @@ serverLogger.info('✅ City market data update job started (biweekly)');
 // Start monthly coupon refresh job (1st of each month)
 startMonthlyCouponJob();
 serverLogger.info('✅ Monthly coupon refresh job started (1st of each month)');
+
+// Start monthly listing counter reset worker (1st of each month at 00:00 UTC)
+startMonthlyResetWorker();
+serverLogger.info('✅ Monthly listing counter reset worker started');
 
 // Initialize push notification service (VAPID setup)
 initializePushService();

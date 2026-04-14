@@ -258,89 +258,25 @@ export async function processSubscriptionPayment(
       user.subscription.listingsLimit = product.listingsLimit || 30; // Default 30 per month
     }
 
-    // Initialize annual cycle tracking for subscribed users
+    // Initialize monthly counter for subscribed users
     if (isEnterprise || isPro || isAgencyAgent) {
       if (!existingSubscription) {
-        // New subscription: initialize cycle dates
-        user.subscription.subscriptionCycleStartDate = startDate;
-        user.subscription.subscriptionCycleEndDate = new Date(startDate.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year
-        if (!isProduction) paymentLogger.info('🎯 New subscription cycle initialized', {
+        // New subscription: initialize monthly counter
+        user.subscription.listingsCreatedThisMonth = 0;
+        user.subscription.monthResetDate = new Date();
+        if (!isProduction) paymentLogger.info('🎯 New subscription initialized with monthly counter', {
           userId,
-          cycleStart: user.subscription.subscriptionCycleStartDate,
-          cycleEnd: user.subscription.subscriptionCycleEndDate,
+          monthlyAllowance: product.listingsLimit,
         });
       } else {
-        // Subscription renewal: check if annual reset needed
-        const cycleEndDate = user.subscription.subscriptionCycleEndDate
-          ? new Date(user.subscription.subscriptionCycleEndDate)
-          : null;
-        const now = new Date();
-        const isAnnualCycleComplete = cycleEndDate && now >= cycleEndDate;
+        // Subscription renewal: reset monthly counter, old listings stay active
+        user.subscription.listingsCreatedThisMonth = 0;
+        user.subscription.monthResetDate = new Date();
 
-        if (isAnnualCycleComplete) {
-          // Annual reset: archive old listings and reset cycle
-          if (!isProduction) paymentLogger.info('🔄 Annual cycle complete, applying reset...');
-
-          const cutoffDate = new Date();
-          cutoffDate.setDate(cutoffDate.getDate() - 90);
-
-          // Archive listings older than 90 days (within the transaction session)
-          const Property = (await import('../models/Property')).default;
-          const archivedResult = await Property.updateMany(
-            {
-              owner: user._id,
-              createdAt: { $lt: cutoffDate },
-              status: { $ne: 'archived' },
-            },
-            { status: 'archived' },
-            { session }
-          );
-
-          if (archivedResult.modifiedCount > 0) {
-            if (!isProduction) paymentLogger.info(`📦 Archived ${archivedResult.modifiedCount} listings older than 90 days`);
-            user.subscription.lastListingsArchiveDate = new Date();
-
-            // Send archive notification
-            try {
-              const { sendEmail } = await import('./emailService');
-              await sendEmail({
-                to: user.email,
-                subject: 'Your Listings Have Been Archived',
-                html: `
-                  <h2>Listings Archived</h2>
-                  <p>Hi ${user.name},</p>
-                  <p>We've archived ${archivedResult.modifiedCount} of your listings that are older than 90 days to keep your profile clean.</p>
-                  <p>These listings are no longer visible to buyers, but you can reactivate them anytime from your dashboard.</p>
-                  <p>Your recent listings remain active and visible.</p>
-                  <p>Best regards,<br/>BalkanEstate Team</p>
-                `,
-              });
-              user.subscription.archiveNotificationSent = true;
-            } catch (emailError) {
-              paymentLogger.warn('Failed to send archive notification', { userId, error: emailError });
-            }
-          }
-
-          // Reset for new annual cycle
-          user.subscription.subscriptionCycleStartDate = new Date();
-          user.subscription.subscriptionCycleEndDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
-          user.subscription.archiveNotificationSent = false;
-
-          if (!isProduction) paymentLogger.info('✅ Annual reset applied on renewal');
-        } else {
-          // Monthly renewal: no action needed, old listings stay active
-          // Next month they'll be able to create more
-          if (!isProduction) paymentLogger.info('✅ Monthly renewal, cycle continues', {
-            userId,
-            cycleEnd: user.subscription.subscriptionCycleEndDate,
-          });
-        }
-
-        // Ensure cycle dates are set (fallback for users without them)
-        if (!user.subscription.subscriptionCycleStartDate) {
-          user.subscription.subscriptionCycleStartDate = startDate;
-          user.subscription.subscriptionCycleEndDate = new Date(startDate.getTime() + 365 * 24 * 60 * 60 * 1000);
-        }
+        if (!isProduction) paymentLogger.info('✅ Monthly renewal, counter reset', {
+          userId,
+          monthlyAllowance: product.listingsLimit,
+        });
       }
     }
 

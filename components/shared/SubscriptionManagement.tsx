@@ -1222,7 +1222,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         </div>
       </div>
 
-      {/* Listing Limit Info */}
+      {/* Listing Limit Info - Monthly Counter */}
       <div className="bg-white rounded-xl border border-neutral-200 p-4 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -1230,60 +1230,36 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               <HomeIcon className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <p className="font-semibold text-neutral-800">{t('management.listingLimit', 'Listing Limit')}</p>
+              <p className="font-semibold text-neutral-800">{t('management.listingLimit', 'Monthly Listings')}</p>
               <p className="text-sm text-neutral-500">
-                {/* Calculate listing stats */}
+                {/* Display monthly listing usage */}
                 {(() => {
-                  const activeCount = user.subscription?.activeListingsCount || user.listingsCount || 0;
-                  const monthlyLimit = currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit;
-
-                  // Calculate max allowed based on months in subscription cycle
-                  let maxAllowed = monthlyLimit;
-                  if (user.subscription?.subscriptionCycleStartDate) {
-                    const now = new Date();
-                    const cycleStart = new Date(user.subscription.subscriptionCycleStartDate);
-                    const daysSince = Math.floor((now.getTime() - cycleStart.getTime()) / (24 * 60 * 60 * 1000));
-                    const monthsElapsed = Math.floor(daysSince / 30) + 1;
-                    maxAllowed = Math.min(monthsElapsed * monthlyLimit, 12 * monthlyLimit); // Cap at 12 months
-                  }
+                  const created = user.subscription?.listingsCreatedThisMonth || 0;
+                  const monthlyLimit = currentProduct?.listingsPerMonth || currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit || 30;
 
                   return t('management.listingUsage', {
-                    used: activeCount,
-                    limit: maxAllowed,
-                    defaultValue: '{{used}} of {{limit}} used'
+                    used: created,
+                    limit: monthlyLimit,
+                    defaultValue: '{{used}} of {{limit}} this month'
                   });
                 })()}
-                {subscriptionDetails && subscriptionDetails.currentPlan.period && subscriptionDetails.currentPlan.period !== 'forever' && (
-                  <span className="ml-1 text-neutral-400">· {subscriptionDetails.currentPlan.period === 'month' ? t('management.perMonth', 'per month') : t('management.perYear', 'per year')}</span>
-                )}
               </p>
             </div>
           </div>
           <div className="text-right">
             {(() => {
-              const activeCount = user.subscription?.activeListingsCount || user.listingsCount || 0;
-              const monthlyLimit = currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit;
-
-              // Calculate max allowed
-              let maxAllowed = monthlyLimit;
-              if (user.subscription?.subscriptionCycleStartDate) {
-                const now = new Date();
-                const cycleStart = new Date(user.subscription.subscriptionCycleStartDate);
-                const daysSince = Math.floor((now.getTime() - cycleStart.getTime()) / (24 * 60 * 60 * 1000));
-                const monthsElapsed = Math.floor(daysSince / 30) + 1;
-                maxAllowed = Math.min(monthsElapsed * monthlyLimit, 12 * monthlyLimit);
-              }
-
-              const remaining = Math.max(0, maxAllowed - activeCount);
-              const isOverLimit = activeCount > maxAllowed;
+              const created = user.subscription?.listingsCreatedThisMonth || 0;
+              const monthlyLimit = currentProduct?.listingsPerMonth || currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit || 30;
+              const remaining = Math.max(0, monthlyLimit - created);
+              const isOverLimit = created >= monthlyLimit;
 
               return (
                 <>
                   <p className={`text-2xl font-bold ${isOverLimit ? 'text-red-600' : 'text-neutral-800'}`}>
-                    {isOverLimit ? '0' : remaining}
+                    {remaining}
                   </p>
                   <p className={`text-xs ${isOverLimit ? 'text-red-500' : 'text-neutral-500'}`}>
-                    {isOverLimit ? 'limit exceeded' : t('management.remaining', 'remaining')}
+                    {isOverLimit ? 'limit reached' : t('management.remaining', 'remaining')}
                   </p>
                 </>
               );
@@ -1295,20 +1271,10 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         <div className="mt-3">
           <div className="w-full bg-neutral-100 rounded-full h-3 overflow-hidden">
             {(() => {
-              const activeCount = user.subscription?.activeListingsCount || user.listingsCount || 0;
-              const monthlyLimit = currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit;
-
-              let maxAllowed = monthlyLimit;
-              if (user.subscription?.subscriptionCycleStartDate) {
-                const now = new Date();
-                const cycleStart = new Date(user.subscription.subscriptionCycleStartDate);
-                const daysSince = Math.floor((now.getTime() - cycleStart.getTime()) / (24 * 60 * 60 * 1000));
-                const monthsElapsed = Math.floor(daysSince / 30) + 1;
-                maxAllowed = Math.min(monthsElapsed * monthlyLimit, 12 * monthlyLimit);
-              }
-
-              const percentage = (activeCount / maxAllowed) * 100;
-              const isOverLimit = activeCount > maxAllowed;
+              const created = user.subscription?.listingsCreatedThisMonth || 0;
+              const monthlyLimit = currentProduct?.listingsPerMonth || currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit || 30;
+              const percentage = (created / monthlyLimit) * 100;
+              const isOverLimit = created >= monthlyLimit;
               const barColor = isOverLimit ? 'bg-red-500' : percentage >= 80 ? 'bg-amber-500' : 'bg-blue-500';
 
               return (
@@ -1317,7 +1283,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                   style={{
                     width: `${Math.min(100, percentage)}%`,
                   }}
-                  title={`${activeCount} of ${maxAllowed} listings used`}
+                  title={`${created} of ${monthlyLimit} listings created this month`}
                 />
               );
             })()}
@@ -1326,29 +1292,19 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           {/* Status message below bar */}
           <div className="mt-2 text-xs">
             {(() => {
-              const activeCount = user.subscription?.activeListingsCount || user.listingsCount || 0;
-              const monthlyLimit = currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit;
-
-              let maxAllowed = monthlyLimit;
-              if (user.subscription?.subscriptionCycleStartDate) {
-                const now = new Date();
-                const cycleStart = new Date(user.subscription.subscriptionCycleStartDate);
-                const daysSince = Math.floor((now.getTime() - cycleStart.getTime()) / (24 * 60 * 60 * 1000));
-                const monthsElapsed = Math.floor(daysSince / 30) + 1;
-                maxAllowed = Math.min(monthsElapsed * monthlyLimit, 12 * monthlyLimit);
-              }
-
-              const percentage = (activeCount / maxAllowed) * 100;
-              const isOverLimit = activeCount > maxAllowed;
+              const created = user.subscription?.listingsCreatedThisMonth || 0;
+              const monthlyLimit = currentProduct?.listingsPerMonth || currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit || 30;
+              const percentage = (created / monthlyLimit) * 100;
+              const isOverLimit = created >= monthlyLimit;
 
               if (isOverLimit) {
-                return <span className="text-red-600 font-semibold">⚠️ You've exceeded your listing limit. Delete some listings to create new ones.</span>;
+                return <span className="text-red-600 font-semibold">⚠️ Monthly limit reached. Wait for next month or upgrade.</span>;
               } else if (percentage >= 90) {
-                return <span className="text-amber-600">⚡ You're close to your limit ({Math.round(percentage)}% used)</span>;
+                return <span className="text-amber-600">⚡ Almost there! ({Math.round(percentage)}% used)</span>;
               } else if (percentage >= 80) {
-                return <span className="text-amber-500">{Math.round(percentage)}% of your limit used</span>;
+                return <span className="text-amber-500">{Math.round(percentage)}% of monthly limit used</span>;
               } else {
-                return <span className="text-green-600">✓ You have plenty of space</span>;
+                return <span className="text-green-600">✓ You have plenty of space this month</span>;
               }
             })()}
           </div>

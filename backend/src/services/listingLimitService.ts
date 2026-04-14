@@ -1,174 +1,180 @@
-import { IUser } from '../models/User';
 import User from '../models/User';
 import Product from '../models/Product';
-import Property from '../models/Property';
 import { logger } from '../utils/logger';
 
 /**
  * Listing Limit Service
  *
- * Simple model: Users get X listings per month, old listings stay active.
- * After 1 year, archive old listings and reset the cycle.
+ * Monthly reset model: Users get X listings per month.
+ * At calendar month boundary, counter resets to 0.
+ * Old listings stay active indefinitely (no archiving).
  *
  * Example:
- * - Month 1: can have 30 active listings
- * - Month 2: can have 60 active listings (30 old + 30 new)
- * - Month 12: can have 360 active listings (annual cap)
- * - After 365 days: archive old listings, reset cycle
+ * - Monthly allowance: 30 listings
+ * - January: 5 created (under limit)
+ * - February: counter resets to 0, can create 30 more
+ * - Old listings from January stay active
  */
 
 class ListingLimitService {
   /**
-   * Get monthly allowance from Product
+   * Get monthly listing allowance for a subscription product
+   * @param productId - Product ID (e.g., 'pro_monthly', 'agency_monthly')
+   * @returns Monthly allowance count
+   * @throws Error if product not found or has no valid allowance
    */
   async getMonthlyAllowance(productId: string): Promise<number> {
-    if (!productId) throw new Error('productId is required');
+    try {
+      if (!productId) {
+        throw new Error('productId is required');
+      }
 
-    const product = await Product.findOne({ productId }).lean();
-    if (!product) {
-      throw new Error(`Product not found: ${productId}`);
+      const product = await Product.findOne({
+        productId,
+        isActive: true,
+      }).lean();
+
+      if (!product) {
+        throw new Error(`Product not found for productId: ${productId}`);
+      }
+
+      const allowance = product.listingsLimit || 0;
+
+      if (allowance <= 0) {
+        throw new Error(`Product ${productId} has no valid listings allowance configured`);
+      }
+
+      return allowance;
+    } catch (error) {
+      logger.error('Error getting monthly allowance', {
+        productId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
     }
-
-    return product.listingsLimit || 0;
   }
 
   /**
-   * Calculate max allowed listings based on months in current subscription cycle
-   *
-   * Example:
-   * - 30 listings/month × 1 month = 30 max
-   * - 30 listings/month × 6 months = 180 max
-   * - 30 listings/month × 12 months = 360 max (annual cap)
+   * Check if a calendar month boundary has passed since last reset
+   * @param lastResetDate - When monthly counter was last reset
+   * @returns true if month/year has changed, false otherwise
    */
-  getMaxAllowedListings(
-    cycleStartDate: Date | undefined,
-    monthlyAllowance: number
-  ): number {
-    if (!cycleStartDate) {
-      return monthlyAllowance; // Default to 1 month if no start date
+  isMonthBoundaryPassed(lastResetDate: Date | undefined): boolean {
+    if (!lastResetDate) {
+      return true; // If no reset date, treat as boundary passed
     }
 
     const now = new Date();
-    const daysSinceStart = Math.floor((now.getTime() - cycleStartDate.getTime()) / (24 * 60 * 60 * 1000));
-    const monthsElapsed = Math.floor(daysSinceStart / 30); // ~30 days per month
-
-    // Cap at 12 months = annual limit
-    const effectiveMonths = Math.min(monthsElapsed + 1, 12);
-
-    return effectiveMonths * monthlyAllowance;
+    return (
+      now.getMonth() !== lastResetDate.getMonth() ||
+      now.getFullYear() !== lastResetDate.getFullYear()
+    );
   }
 
   /**
-   * Check if user can create a new listing
+   * Check if user can create a listing this month
+   * @param userId - User ID
+   * @returns true if under monthly limit, false otherwise
    */
   async canCreateListing(userId: string): Promise<boolean> {
-    const user = await User.findById(userId).lean();
-    if (!user?.subscription || !user.subscriptionPlan) {
-      return false;
-    }
-
-    const monthlyAllowance = await this.getMonthlyAllowance(user.subscriptionPlan);
-    const maxAllowed = this.getMaxAllowedListings(user.subscription.subscriptionCycleStartDate, monthlyAllowance);
-    const activeCount = user.subscription.activeListingsCount || 0;
-
-    return activeCount < maxAllowed;
-  }
-
-  /**
-   * Check if annual cycle is complete (365+ days since start)
-   */
-  isAnnualCycleComplete(user: IUser): boolean {
-    if (!user?.subscription?.subscriptionCycleEndDate) {
-      return false;
-    }
-
-    const cycleEndDate = new Date(user.subscription.subscriptionCycleEndDate);
-    const now = new Date();
-
-    return now >= cycleEndDate;
-  }
-
-  /**
-   * Apply annual reset: archive old listings, reset cycle
-   *
-   * Archived listings:
-   * - Older than 90 days from now
-   * - User can see them in profile but they won't be visible to buyers
-   * - User can unarchive if needed
-   */
-  async applyAnnualReset(userId: string): Promise<{ success: boolean; error?: string; archivedCount?: number }> {
     try {
       if (!userId) {
-        return { success: false, error: 'User ID is required' };
+        return false;
       }
 
-      const user = await User.findById(userId);
-      if (!user) {
-        return { success: false, error: 'User not found' };
+      const user = await User.findById(userId).lean();
+      if (!user?.subscription || !user.subscriptionPlan) {
+        return false;
       }
 
-      if (!user.subscription) {
-        return { success: false, error: 'No subscription found' };
+      // Get monthly allowance from product
+      const monthlyAllowance = await this.getMonthlyAllowance(user.subscriptionPlan);
+
+      // Get current month's creation count
+      let listingsCreatedThisMonth = user.subscription.listingsCreatedThisMonth || 0;
+
+      // Check if month boundary has passed
+      if (this.isMonthBoundaryPassed(user.subscription.monthResetDate)) {
+        listingsCreatedThisMonth = 0;
       }
 
-      // Archive listings older than 90 days
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - 90);
+      // Can create if under limit
+      return listingsCreatedThisMonth < monthlyAllowance;
+    } catch (error) {
+      logger.error('Error checking if can create listing', {
+        userId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return false;
+    }
+  }
 
-      const result = await Property.updateMany(
+  /**
+   * Get monthly listing usage stats for a user
+   * @param userId - User ID
+   * @returns { monthlyAllowance, created, remaining, percentage }
+   */
+  async getMonthlyUsage(userId: string): Promise<{
+    monthlyAllowance: number;
+    created: number;
+    remaining: number;
+    percentage: number;
+  }> {
+    try {
+      const user = await User.findById(userId).lean();
+      if (!user?.subscription || !user.subscriptionPlan) {
+        throw new Error('User subscription not found');
+      }
+
+      const monthlyAllowance = await this.getMonthlyAllowance(user.subscriptionPlan);
+      let created = user.subscription.listingsCreatedThisMonth || 0;
+
+      // Reset counter if month boundary passed
+      if (this.isMonthBoundaryPassed(user.subscription.monthResetDate)) {
+        created = 0;
+      }
+
+      const remaining = Math.max(0, monthlyAllowance - created);
+      const percentage = Math.min(100, (created / monthlyAllowance) * 100);
+
+      return {
+        monthlyAllowance,
+        created,
+        remaining,
+        percentage,
+      };
+    } catch (error) {
+      logger.error('Error getting monthly usage', {
+        userId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Reset monthly counter for a user (called by cron job at month boundary)
+   * @param userId - User ID
+   */
+  async resetMonthlyCounter(userId: string): Promise<void> {
+    try {
+      await User.updateOne(
+        { _id: userId },
         {
-          owner: user._id,
-          createdAt: { $lt: cutoffDate },
-          status: { $ne: 'archived' },
-        },
-        { status: 'archived' }
+          $set: {
+            'subscription.listingsCreatedThisMonth': 0,
+            'subscription.monthResetDate': new Date(),
+          },
+        }
       );
 
-      const archivedCount = result.modifiedCount || 0;
-
-      // Send notification if listings were archived
-      if (archivedCount > 0 && !user.subscription.archiveNotificationSent) {
-        try {
-          const { sendEmail: emailSender } = await import('./emailService');
-          await emailSender({
-            to: user.email,
-            subject: 'Your Listings Have Been Archived',
-            html: `
-              <h2>Listings Archived</h2>
-              <p>Hi ${user.name},</p>
-              <p>We've archived ${archivedCount} of your listings that are older than 90 days to keep your profile clean.</p>
-              <p>These listings are no longer visible to buyers, but you can reactivate them from your dashboard if needed.</p>
-              <p>Your recent listings (from the last 3 months) remain active and visible.</p>
-              <p>Best regards,<br/>BalkanEstate Team</p>
-            `,
-          });
-          user.subscription.archiveNotificationSent = true;
-        } catch (emailError) {
-          logger.warn('Failed to send archive notification', { userId, error: emailError });
-          // Don't fail the reset if email fails
-        }
-      }
-
-      // Reset the annual cycle
-      const now = new Date();
-      user.subscription.subscriptionCycleStartDate = now;
-      user.subscription.subscriptionCycleEndDate = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
-      user.subscription.lastListingsArchiveDate = new Date();
-      user.subscription.archiveNotificationSent = false;
-
-      user.markModified('subscription');
-      await user.save();
-
-      logger.info('Annual reset applied', {
+      logger.info('Monthly counter reset', { userId });
+    } catch (error) {
+      logger.error('Error resetting monthly counter', {
         userId,
-        archivedCount,
-        newCycleStart: user.subscription.subscriptionCycleStartDate,
+        error: error instanceof Error ? error.message : String(error),
       });
-
-      return { success: true, archivedCount };
-    } catch (error: any) {
-      logger.error('Error applying annual reset', { userId, error: error?.message });
-      return { success: false, error: error?.message || 'Unknown error' };
+      throw error;
     }
   }
 }
