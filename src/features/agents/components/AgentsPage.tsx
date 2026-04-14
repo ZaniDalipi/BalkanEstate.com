@@ -309,7 +309,7 @@ const AgentsPage: React.FC = () => {
 
       // Licensed filter
       if (filters.licensedOnly) {
-        if (!agent.licenseVerified && !agent.licenseNumber) return false;
+        if (!agent.licenseVerified) return false;
       }
 
       return true;
@@ -330,8 +330,8 @@ const AgentsPage: React.FC = () => {
         case 'name':
           return a.name.localeCompare(b.name);
         case 'licensed': {
-          const aLicensed = (a.licenseVerified || !!a.licenseNumber) ? 1 : 0;
-          const bLicensed = (b.licenseVerified || !!b.licenseNumber) ? 1 : 0;
+          const aLicensed = a.licenseVerified ? 1 : 0;
+          const bLicensed = b.licenseVerified ? 1 : 0;
           if (bLicensed !== aLicensed) return bLicensed - aLicensed;
           return (b.rating || 0) - (a.rating || 0);
         }

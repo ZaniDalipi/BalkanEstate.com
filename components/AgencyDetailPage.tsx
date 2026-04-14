@@ -2203,7 +2203,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-violet-500/15 flex items-center justify-center">
                   <CalendarIcon className="w-5 h-5 text-violet-600" />
                 </div>
-                <div className="text-2xl font-bold text-slate-900">{agencyData.yearsInBusiness || 1}+</div>
+                <div className="text-2xl font-bold text-slate-900">{agencyData.yearsInBusiness ? `${agencyData.yearsInBusiness}+` : '—'}</div>
                 <div className="text-xs text-slate-500 font-medium">Years</div>
               </div>
               <div
@@ -2213,7 +2213,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-amber-500/15 flex items-center justify-center">
                   <StarIcon className="w-5 h-5 text-amber-500" />
                 </div>
-                <div className="text-2xl font-bold text-slate-900">{agencyData.rating?.toFixed(1) || '5.0'}</div>
+                <div className="text-2xl font-bold text-slate-900">{agencyData.rating && agencyData.rating > 0 ? agencyData.rating.toFixed(1) : '—'}</div>
                 <div className="text-xs text-slate-500 font-medium">{t('agencyDetails:stats.rating')}</div>
               </div>
             </div>

@@ -13,7 +13,8 @@ dotenv.config({ path: path.resolve(__dirname, '../../', envFile) });
 
 log.info(`🌍 Environment: ${env.toUpperCase()}`);
 
-const PRODUCTS = [
+// Export PRODUCTS so it can be imported for automatic syncing
+export const PRODUCTS = [
   // ============================================================================
   // FREE TIER - Basic access with limited AI features
   // ============================================================================
@@ -1009,5 +1010,8 @@ async function seedProducts() {
   }
 }
 
-// Run the seed function
-seedProducts();
+// Only run the seed function if this script is executed directly (not imported as a module)
+// This allows PRODUCTS to be imported for automatic syncing without triggering a connection attempt
+if (require.main === module || process.argv[1]?.endsWith('seedProducts.ts')) {
+  seedProducts();
+}

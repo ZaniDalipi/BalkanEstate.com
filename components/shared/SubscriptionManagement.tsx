@@ -4,6 +4,7 @@ import { CheckCircleIcon, XCircleIcon, SparklesIcon, HomeIcon, ChartBarIcon } fr
 import { useAppContext } from '../../context/AppContext';
 import { User } from '../../types';
 import PaymentWindow from './PaymentWindow';
+import { UpgradeOptionsGrid, useUpgradeOptions } from './upgrade-plan-card';
 import { replacePlaceholders, ProductValues } from '../../src/shared/utils/featurePlaceholders';
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
@@ -707,6 +708,13 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         if (key === 'free') return false;
         // agency_agent_yearly is NOT purchasable - only obtained via agency coupon redemption
         if (key === 'agency_agent_yearly') return false;
+        // Hide legacy alias IDs — they are duplicates of canonical plan IDs
+        // Canonical: buyer_monthly, pro_monthly, pro_yearly, agency_yearly
+        if (['seller_pro_monthly', 'seller_pro_yearly', 'seller_enterprise_yearly', 'buyer_pro_monthly', 'free_tier'].includes(key)) return false;
+        // Hide buyer/enterprise plans if user is not a buyer
+        const isBuyerRole = user?.primaryRole === 'buyer';
+        if (key.startsWith('buyer') && !isBuyerRole) return false;
+        if (key === 'agency_yearly' && !isBuyerRole) return false;
         // Hide Enterprise plan if user already owns/manages an agency
         if (key === 'agency_yearly' && user?.agencyId) return false;
         if (key === subscriptionDetails.currentPlanKey) return false;
@@ -727,7 +735,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         pricing: calculateUpgradePrice(key),
       }))
       .sort((a, b) => a.plan.tier - b.plan.tier);
-  }, [subscriptionDetails, plans, products, calculateUpgradePrice]);
+  }, [subscriptionDetails, plans, products, calculateUpgradePrice, user?.primaryRole]);
+
+  // Transform upgrade options for the new UpgradeOptionsGrid component
+  const transformedUpgradeOptions = useUpgradeOptions({
+    upgradeOptionsRaw: upgradeOptions,
+    products: products as any, // ProductData extends the Product interface
+    agencyOwnerProductFromDB: agencyOwnerProductFromDB as any,
+  });
 
   const formatDate = (date: Date | null) => {
     if (!date) return 'N/A';
@@ -1928,80 +1943,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       )}
 
       {/* Upgrade Options */}
-      {upgradeOptions.length > 0 && (
-        <div>
-          <h3 className="text-lg font-bold text-neutral-800 mb-4">{t('management.upgradePlan', 'Upgrade Your Plan')}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {upgradeOptions.map(({ key, plan, pricing }) => {
-              // Enhanced features for Enterprise plan
-              const isEnterprise = key.includes('enterprise') || key.includes('agency_yearly');
-              const matchedProduct = products.find(p => p.productId === key);
-              const displayFeatures = isEnterprise ? [
-                t('management.enterpriseFeatures.listingsCount', '{{count}} Active Listings', { count: matchedProduct?.listingsLimit ?? agencyOwnerProductFromDB?.listingsLimit ?? 750 }),
-                t('management.enterpriseFeatures.createAgency', 'Create Your Own Agency'),
-                t('management.enterpriseFeatures.agentCouponsCount', '{{count}} Agent Invitation Coupons', { count: matchedProduct?.agentCoupons ?? agencyOwnerProductFromDB?.agentCoupons ?? 5 }),
-                t('management.enterpriseFeatures.unlimitedSearches', 'Unlimited Saved Searches'),
-                t('management.enterpriseFeatures.fullAnalytics', 'Full Analytics Dashboard'),
-                t('management.enterpriseFeatures.prioritySupport', 'Priority Support'),
-                t('management.enterpriseFeatures.promoCouponsCount', '{{count}} Monthly Promotion Coupons', { count: matchedProduct?.promotionCoupons ?? agencyOwnerProductFromDB?.promotionCoupons ?? 10 }),
-                t('management.enterpriseFeatures.teamTools', 'Team Management Tools'),
-              ] : matchedProduct
-                ? plan.features.map(f => replacePlaceholders(f, matchedProduct))
-                : plan.features;
-
-              return (
-                <div
-                  key={key}
-                  className={`bg-white rounded-xl border-2 ${plan.highlighted || isEnterprise ? 'border-primary' : 'border-neutral-200'} hover:border-primary transition-colors overflow-hidden shadow-sm hover:shadow-md relative`}
-                >
-                  {/* Badge */}
-                  {(plan.badge || isEnterprise) && (
-                    <div className={`absolute top-0 right-0 px-3 py-1 text-xs font-bold text-white ${isEnterprise ? 'bg-amber-500' : plan.badgeColor === 'red' ? 'bg-red-500' : plan.badgeColor === 'green' ? 'bg-green-500' : 'bg-amber-500'} rounded-bl-lg`}>
-                      {isEnterprise ? t('management.bestForAgencies', 'Best for Agencies') : plan.badge}
-                    </div>
-                  )}
-                  <div className="p-4 text-white" style={{ background: plan.color }}>
-                    <h4 className="font-bold text-lg">{plan.name}</h4>
-                    <div className="flex items-baseline gap-1 mt-1">
-                      {pricing.discount > 0 && (
-                        <span className="text-sm line-through text-white/60">€{pricing.originalPrice}</span>
-                      )}
-                      <span className="text-2xl font-bold">€{pricing.finalPrice.toFixed(2)}</span>
-                      <span className="text-sm text-white/80">/{plan.period}</span>
-                    </div>
-                    {pricing.savings && (
-                      <p className="text-xs mt-1 bg-white/20 px-2 py-0.5 rounded-full inline-block">
-                        {pricing.savings}
-                      </p>
-                    )}
-                    {isEnterprise && (
-                      <p className="text-xs mt-2 text-white/80">
-                        {t('management.buildAgencyDesc', 'Build and manage your real estate agency')}
-                      </p>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <ul className="space-y-2 mb-4">
-                      {displayFeatures.slice(0, isEnterprise ? 8 : displayFeatures.length).map((feature, idx) => (
-                        <li key={idx} className="flex items-center gap-2 text-sm text-neutral-700">
-                          <CheckCircleIcon className="w-4 h-4 text-green-500 flex-shrink-0" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                    <button
-                      onClick={() => handleUpgradeClick(key)}
-                      className="w-full py-2.5 rounded-lg font-bold text-white hover:opacity-90 transition-opacity"
-                      style={{ background: plan.color }}
-                    >
-                      {isEnterprise ? t('management.startYourAgency', 'Start Your Agency') : t('management.upgradeNow', 'Upgrade Now')}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+      {transformedUpgradeOptions.length > 0 && (
+        <UpgradeOptionsGrid
+          options={transformedUpgradeOptions}
+          onUpgradeClick={handleUpgradeClick}
+          isLoading={false}
+          error={null}
+          currentPlanKey={subscriptionDetails?.currentPlanKey}
+        />
       )}
 
       {/* Pro-rated Calculator Info */}

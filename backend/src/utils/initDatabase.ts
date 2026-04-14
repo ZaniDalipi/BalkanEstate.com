@@ -76,6 +76,46 @@ const allModels = [
 ];
 
 /**
+ * Syncs products from seed data to the database.
+ * Ensures all pricing and features are up-to-date without requiring manual seed commands.
+ * This runs automatically on every server startup.
+ */
+const syncProductPricing = async (): Promise<void> => {
+  try {
+    // Import PRODUCTS from seedProducts
+    const { PRODUCTS } = await import('../scripts/seedProducts');
+
+    let upsertedCount = 0;
+    const errors: string[] = [];
+
+    for (const productData of PRODUCTS) {
+      try {
+        // Use findOneAndUpdate with upsert to keep existing data but sync pricing
+        const result = await Product.findOneAndUpdate(
+          { productId: productData.productId },
+          productData,
+          { upsert: true, new: true }
+        );
+        if (result) {
+          upsertedCount++;
+        }
+      } catch (error: any) {
+        errors.push(`${productData.productId}: ${error.message}`);
+      }
+    }
+
+    if (errors.length > 0) {
+      dbLogger.warn(`⚠️  Product sync had ${errors.length} error(s): ${errors.join('; ')}`);
+    }
+
+    dbLogger.info(`✅ Product pricing synced (${upsertedCount} products updated/created)`);
+  } catch (error: any) {
+    dbLogger.error('❌ Error syncing product pricing:', error.message);
+    // Don't throw - let app continue even if product sync fails
+  }
+};
+
+/**
  * Syncs all Mongoose schema indexes to MongoDB.
  * Creates missing indexes and drops stale ones so production matches development.
  */
@@ -142,6 +182,15 @@ export const initializeDatabase = async (): Promise<void> => {
 
     // Ensure all property documents have the same attributes across environments
     await ensurePropertySchemaSync();
+
+    // Sync product pricing from seed data on every startup
+    // This ensures frontend and backend pricing are always in sync without manual commands
+    try {
+      dbLogger.info('🔄 Syncing product pricing from seed data...');
+      await syncProductPricing();
+    } catch (error) {
+      dbLogger.error('❌ Error syncing product pricing:', error);
+    }
 
     // Initialize email configurations - seed missing configs on every startup
     try {
