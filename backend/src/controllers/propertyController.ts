@@ -734,7 +734,13 @@ export const createProperty = async (
       try {
         monthlyAllowance = await listingLimitService.getMonthlyAllowance(user.subscriptionPlan);
 
-        // Reset counter if calendar month has changed
+        // Initialize monthResetDate if not set (first time using monthly model)
+        if (!user.subscription.monthResetDate) {
+          user.subscription.monthResetDate = new Date();
+          await user.save();
+        }
+
+        // Reset counter only if calendar month has actually changed since last reset
         if (listingLimitService.isMonthBoundaryPassed(user.subscription.monthResetDate)) {
           user.subscription.listingsCreatedThisMonth = 0;
           user.subscription.monthResetDate = new Date();
