@@ -85,6 +85,7 @@
     "dayLeft": "ημέρα απομένει",
     "daysLeft": "ημέρες απομένουν",
     "listingLimit": "Όριο Καταχωρίσεων",
+    "listingUsage": "{{used}} από {{limit}} αυτό το μήνα",
     "remaining": "απομένουν",
     "couponSubscription": "Συνδρομή με Κουπόνι",
     "cancellationPending": "Ακύρωση Συνδρομής σε Εκκρεμότητα",
