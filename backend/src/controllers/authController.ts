@@ -496,6 +496,21 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // Password is correct - reset login attempts
     await user.resetLoginAttempts();
 
+    // CRITICAL: Initialize monthResetDate if not set (prevents false resets on hard refresh)
+    // Use atomic operation to prevent race conditions
+    if (user.subscription && !user.subscription.monthResetDate) {
+      await User.updateOne(
+        { _id: user._id, 'subscription.monthResetDate': { $exists: false } },
+        {
+          $set: {
+            'subscription.monthResetDate': new Date(),
+          },
+        }
+      );
+      // Update local object for response
+      user.subscription.monthResetDate = new Date();
+    }
+
     // Log successful login
     activityLogger.logLogin(String(user._id), user.email, req);
 

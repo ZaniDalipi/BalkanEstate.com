@@ -1451,6 +1451,84 @@ export const getAllProducts = async (_req: Request, res: Response): Promise<void
   }
 };
 
+/**
+ * @desc    Update user's monthly listing counter
+ * @route   PATCH /api/admin/users/:userId/listing-counter
+ * @access  Admin
+ * @body    { listingsCreatedThisMonth: number, resetMonth: boolean }
+ */
+export const updateUserListingCounter = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { userId } = req.params;
+    const { listingsCreatedThisMonth, resetMonth } = req.body;
+
+    // Validate userId
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      res.status(400).json({ message: 'Invalid user ID' });
+      return;
+    }
+
+    // Validate input
+    if (typeof listingsCreatedThisMonth !== 'number' || listingsCreatedThisMonth < 0) {
+      res.status(400).json({
+        message: 'listingsCreatedThisMonth must be a non-negative number',
+      });
+      return;
+    }
+
+    // Update user's listing counter
+    const updateData: any = {
+      'subscription.listingsCreatedThisMonth': Math.floor(listingsCreatedThisMonth),
+    };
+
+    // If resetMonth is true, update the monthResetDate to today
+    if (resetMonth) {
+      updateData['subscription.monthResetDate'] = new Date();
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Invalidate cache for this user
+    invalidateCache(`/api/auth/me/${userId}`);
+
+    adminLogger.info('[Admin] Updated user listing counter', {
+      adminId: (req.user as any)?._id,
+      userId,
+      newCounter: listingsCreatedThisMonth,
+      resetMonth,
+    });
+
+    res.json({
+      success: true,
+      message: 'Listing counter updated',
+      user: {
+        id: String(user._id),
+        email: user.email,
+        name: user.name,
+        subscription: {
+          tier: user.subscription?.tier,
+          listingsCreatedThisMonth: user.subscription?.listingsCreatedThisMonth || 0,
+          monthResetDate: user.subscription?.monthResetDate,
+          listingsLimit: user.subscription?.listingsLimit,
+          activeListingsCount: user.subscription?.activeListingsCount,
+        },
+      },
+    });
+  } catch (error: any) {
+    adminLogger.error('[Admin] Error updating user listing counter:', error);
+    res.status(500).json({ message: 'Error updating listing counter' });
+  }
+};
+
 export default {
   getAllSubscriptions,
   getSubscriptionById,
@@ -1467,6 +1545,7 @@ export default {
   getAgencySubscriptionHistory,
   manageUserSubscription,
   getCarryoverStats,
+  updateUserListingCounter,
   triggerSubscriptionRenewal,
   updateCarryoverFields,
   getProductConfig,

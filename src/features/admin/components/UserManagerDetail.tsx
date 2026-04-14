@@ -417,6 +417,14 @@ function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
   const [saved, setSaved] = useState(false);
   const [err, setErr] = useState('');
 
+  // Monthly counter editor state
+  const currentMonthlyCounter = viewingUser.subscription?.listingsCreatedThisMonth ?? 0;
+  const [inputMonthlyCounter, setInputMonthlyCounter] = useState(String(currentMonthlyCounter));
+  const [savingMonthly, setSavingMonthly] = useState(false);
+  const [savedMonthly, setSavedMonthly] = useState(false);
+  const [errMonthly, setErrMonthly] = useState('');
+  const [resetMonthCheckbox, setResetMonthCheckbox] = useState(false);
+
   const formatDisplayDate = (dateStr?: string) => {
     if (!dateStr) return '—';
     return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -438,6 +446,25 @@ function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
       setErr(e.message || 'Error saving');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSaveMonthlyCounter = async () => {
+    const val = Number(inputMonthlyCounter);
+    if (isNaN(val) || val < 0) { setErrMonthly(t('userDetail.invalidNumber')); return; }
+    setSavingMonthly(true); setErrMonthly('');
+    try {
+      await apiRequest(`/admin/users/${viewingUser._id}/listing-counter`, {
+        method: 'PATCH',
+        body: { listingsCreatedThisMonth: val, resetMonth: resetMonthCheckbox },
+        requiresAuth: true,
+      });
+      setSavedMonthly(true);
+      setTimeout(() => setSavedMonthly(false), 3000);
+    } catch (e: any) {
+      setErrMonthly(e.message || 'Error saving');
+    } finally {
+      setSavingMonthly(false);
     }
   };
 
@@ -526,6 +553,43 @@ function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
         </div>
         {err && <p className="text-xs text-red-500 mt-1">{err}</p>}
         {saved && <p className="text-xs text-green-600 mt-1">{t('userDetail.limitUpdated')}</p>}
+      </div>
+
+      {/* Monthly listing counter */}
+      <div className="border-t border-green-200 pt-3">
+        <label className="text-xs font-semibold text-gray-600 block mb-1">
+          {t('userDetail.monthlyListingCounter', 'Monthly Listing Counter')}
+          <span className="font-normal text-gray-400 ml-1">
+            (created this month: {currentMonthlyCounter})
+          </span>
+        </label>
+        <div className="flex items-center gap-2 mb-2">
+          <input
+            type="number"
+            min={0}
+            value={inputMonthlyCounter}
+            onChange={e => { setInputMonthlyCounter(e.target.value); setSavedMonthly(false); }}
+            className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <button
+            onClick={handleSaveMonthlyCounter}
+            disabled={savingMonthly}
+            className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed font-medium transition-colors"
+          >
+            {savingMonthly ? t('userDetail.saving') : savedMonthly ? t('userDetail.saved') : t('userDetail.apply')}
+          </button>
+        </div>
+        <label className="flex items-center gap-2 text-sm mb-2">
+          <input
+            type="checkbox"
+            checked={resetMonthCheckbox}
+            onChange={e => setResetMonthCheckbox(e.target.checked)}
+            className="w-4 h-4 rounded border-gray-300"
+          />
+          <span className="text-xs text-gray-600">{t('userDetail.resetMonthDate', 'Reset month date to today')}</span>
+        </label>
+        {errMonthly && <p className="text-xs text-red-500 mt-1">{errMonthly}</p>}
+        {savedMonthly && <p className="text-xs text-green-600 mt-1">{t('userDetail.counterUpdated', 'Counter updated')}</p>}
       </div>
     </div>
   );
