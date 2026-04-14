@@ -671,7 +671,8 @@
     "switchRoleRequired": "Switch Role Required",
     "buyerCannotCreateListing": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings.",
     "monthlyLimitReached": "Monthly Listing Limit Reached",
-    "monthlyLimitMessage": "You have used all your listings for this month. Your limit resets at the start of next month. You can delete an existing listing to free up a slot, or contact us to request additional listings for an extra cost."
+    "monthlyLimitMessage": "You've used all your listings this month. Resets at the start of next month.",
+    "monthlyLimitMessageWithCount": "You've used {{used}} of {{limit}} listings this month. Resets at the start of next month."
   },
   "actions": {
     "subscribeToPro": "Subscribe to Pro",

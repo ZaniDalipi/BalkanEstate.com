@@ -1031,33 +1031,32 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             };
 
             if (errorCode === 'MONTHLY_LISTING_LIMIT_REACHED') {
-                // Pro user monthly limit — show clear message with "resets next month"
+                // Pro user monthly limit — show count from backend error details
+                const created = (err.details?.created ?? err.details?.monthlyAllowance) as number | undefined;
+                const allowance = err.details?.monthlyAllowance as number | undefined;
+                const limitMsg = created != null && allowance != null
+                    ? t('seller:errors.monthlyLimitMessageWithCount', 'You\'ve used {{used}} of {{limit}} listings this month. Resets at the start of next month.', { used: created, limit: allowance })
+                    : t('seller:errors.monthlyLimitMessage', 'You\'ve used all your listings this month. Resets at the start of next month.');
                 showWarning(
                     t('seller:errors.monthlyLimitReached', 'Monthly Listing Limit Reached'),
-                    t('seller:errors.monthlyLimitMessage', 'You have used all your listings for this month. Your limit resets at the start of next month. You can delete an existing listing to free up a slot, or contact us to request additional listings for an extra cost.'),
+                    limitMsg,
                     [
-                        {
-                            label: t('seller:actions.viewMyListings', 'View My Listings'),
-                            onClick: () => {
-                                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-                            },
-                            variant: 'primary',
-                        },
                         {
                             label: t('seller:actions.requestMoreListings', 'Request More Listings'),
                             onClick: () => {
-                                // Open contact email
                                 const email = 'support@balkanestate.com';
                                 const subject = encodeURIComponent('Request for Additional Monthly Listings');
                                 const body = encodeURIComponent(`Hello,\n\nI have reached my monthly listing limit and would like to request additional listings.\n\nPlease let me know about the cost and process.\n\nThank you.`);
                                 window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
                             },
-                            variant: 'secondary',
+                            variant: 'primary',
                         },
                         {
-                            label: t('common:actions.close', 'Close'),
-                            onClick: () => {},
-                            variant: 'tertiary',
+                            label: t('seller:actions.viewMyListings', 'View My Listings'),
+                            onClick: () => {
+                                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+                            },
+                            variant: 'secondary',
                         },
                     ]
                 );

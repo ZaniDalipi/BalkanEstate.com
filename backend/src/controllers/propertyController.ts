@@ -941,6 +941,8 @@ export const createProperty = async (
         privateSellerCount: updatedUser.subscription?.privateSellerCount,
         agentCount: updatedUser.subscription?.agentCount,
         listingsLimit: updatedUser.subscription?.listingsLimit,
+        listingsCreatedThisMonth: updatedUser.subscription?.listingsCreatedThisMonth,
+        monthResetDate: updatedUser.subscription?.monthResetDate,
         tier: updatedUser.subscription?.tier,
       },
     });

@@ -414,7 +414,8 @@
     "switchRoleRequired": "Kërkohet Ndërrimi i Rolit",
     "buyerCannotCreateListing": "Blerësit nuk mund të krijojnë listime pronash. Ju lutem kaloni në rolin Shitës Privat ose Agjent.",
     "monthlyLimitReached": "Limiti Mujor i Listimeve u Arrit",
-    "monthlyLimitMessage": "Keni përdorur të gjitha listimet tuaja për këtë muaj. Limiti juaj rivendoset në fillim të muajit të ardhshëm. Mund të fshini një listim ekzistues për të liruar një vend, ose na kontaktoni për të kërkuar listime shtesë për një kosto shtesë."
+    "monthlyLimitMessage": "Keni përdorur të gjitha listimet tuaja këtë muaj. Rivendoset në fillim të muajit të ardhshëm.",
+    "monthlyLimitMessageWithCount": "Keni përdorur {{used}} nga {{limit}} listime këtë muaj. Rivendoset në fillim të muajit të ardhshëm."
   },
   "actions": {
     "subscribeToPro": "Abonohu në Pro",

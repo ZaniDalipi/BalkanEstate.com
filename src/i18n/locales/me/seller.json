@@ -667,7 +667,8 @@
     "switchRoleRequired": "Switch Role Required",
     "buyerCannotCreateListing": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings.",
     "monthlyLimitReached": "Mjesečni Limit Oglasa Dosegnut",
-    "monthlyLimitMessage": "Koristili ste sve svoje oglase za ovaj mjesec. Vaš limit se ponovno postavlja na početku sljedećeg mjeseca. Možete izbrisati postojeći oglas da oslobodite prostor, ili nas kontaktirajte da zatražite dodatne oglase za dodatnu naknadu."
+    "monthlyLimitMessage": "Iskoristili ste sve oglase ovog mjeseca. Obnavlja se početkom sljedećeg mjeseca.",
+    "monthlyLimitMessageWithCount": "Iskoristili ste {{used}} od {{limit}} oglasa ovog mjeseca. Obnavlja se početkom sljedećeg mjeseca."
   },
   "actions": {
     "subscribeToPro": "Subscribe to Pro",

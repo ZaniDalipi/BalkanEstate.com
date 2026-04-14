@@ -667,7 +667,8 @@
     "switchRoleRequired": "Potrebna Promjena Uloge",
     "buyerCannotCreateListing": "Kupci ne mogu kreirati oglase za nekretnine. Molimo prebacite se na ulogu Privatnog Prodavača ili Agenta.",
     "monthlyLimitReached": "Mjesečni Limit Oglasa Dosegnut",
-    "monthlyLimitMessage": "Koristili ste sve svoje oglase za ovaj mjesec. Vaš limit se ponovno postavlja na početku sljedećeg mjeseca. Možete izbrisati postojeći oglas da oslobodite prostor, ili nas kontaktirajte da zatražite dodatne oglase za dodatnu naknadu."
+    "monthlyLimitMessage": "Iskoristili ste sve oglase ovog mjeseca. Obnavlja se početkom sljedećeg mjeseca.",
+    "monthlyLimitMessageWithCount": "Iskoristili ste {{used}} od {{limit}} oglasa ovog mjeseca. Obnavlja se početkom sljedećeg mjeseca."
   },
   "actions": {
     "subscribeToPro": "Pretplati se na Pro",

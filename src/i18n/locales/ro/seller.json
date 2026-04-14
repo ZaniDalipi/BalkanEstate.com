@@ -667,7 +667,8 @@
     "switchRoleRequired": "Schimbare de Rol Necesară",
     "buyerCannotCreateListing": "Cumpărătorii nu pot crea anunțuri de proprietăți. Vă rugăm treceți la rolul de Vânzător Privat sau Agent.",
     "monthlyLimitReached": "Limita Lunară de Anunțuri Atinsă",
-    "monthlyLimitMessage": "Ați utilizat toate anunțurile pentru această lună. Limita dvs. se resetează la începutul lunii următoare. Puteți șterge un anunț existent pentru a elibera spațiu, sau ne contactați pentru a solicita anunțuri suplimentare pentru o taxă suplimentară."
+    "monthlyLimitMessage": "Ați folosit toate anunțurile acestei luni. Se resetează la începutul lunii viitoare.",
+    "monthlyLimitMessageWithCount": "Ați folosit {{used}} din {{limit}} anunțuri această lună. Se resetează la începutul lunii viitoare."
   },
   "actions": {
     "subscribeToPro": "Abonează-te la Pro",
