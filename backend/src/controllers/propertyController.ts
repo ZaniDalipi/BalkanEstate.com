@@ -724,29 +724,28 @@ export const createProperty = async (
     // Import services for listing management
     const listingLimitService = require('../services/listingLimitService').default;
 
-    // Check monthly listing limits for subscribed users
+    // Check listing limits based on subscription tier
     const tier = user.subscription.tier || 'free';
+    const isProUser = !!(user.subscriptionPlan && (tier === 'pro' || tier === 'agency_agent' || tier === 'agency_owner'));
+    let monthlyAllowance = 0;
 
-    // For subscribed users with subscription plans: check monthly allowance
-    if (user.subscriptionPlan && (tier === 'pro' || tier === 'agency_agent' || tier === 'agency_owner')) {
+    if (isProUser) {
+      // MONTHLY MODEL: Pro/agency users — check listingsCreatedThisMonth against product allowance
       try {
-        // Get monthly allowance from Product
-        const monthlyAllowance = await listingLimitService.getMonthlyAllowance(user.subscriptionPlan);
+        monthlyAllowance = await listingLimitService.getMonthlyAllowance(user.subscriptionPlan);
 
-        // Check if month boundary has passed, reset counter if needed
+        // Reset counter if calendar month has changed
         if (listingLimitService.isMonthBoundaryPassed(user.subscription.monthResetDate)) {
           user.subscription.listingsCreatedThisMonth = 0;
           user.subscription.monthResetDate = new Date();
           await user.save();
         }
 
-        // Get current month's creation count
         const created = user.subscription.listingsCreatedThisMonth || 0;
 
-        // Check if user can create more listings this month
         if (created >= monthlyAllowance) {
           res.status(403).json({
-            message: `You have reached your monthly listing limit (${created}/${monthlyAllowance}). Please wait until next month or purchase additional listings.`,
+            message: `You have reached your monthly listing limit (${created}/${monthlyAllowance}). Resets at the start of next month.`,
             code: 'MONTHLY_LISTING_LIMIT_REACHED',
             tier,
             created,
@@ -764,8 +763,7 @@ export const createProperty = async (
       }
     }
 
-    // ATOMIC check-and-increment: Use findOneAndUpdate to prevent race conditions
-    const baseLimit = user.subscription.listingsLimit || FREE_TIER_LIMITS.LISTINGS;
+    // ATOMIC check-and-increment to prevent race conditions
     const roleCountField = createdAsRole === 'agent'
       ? 'subscription.agentCount'
       : 'subscription.privateSellerCount';
@@ -775,37 +773,55 @@ export const createProperty = async (
       [roleCountField]: 1,
       listingsCount: 1,
       totalListingsCreated: 1,
-      // For subscribed users: also increment monthly counter
-      ...(user.subscriptionPlan && (tier === 'pro' || tier === 'agency_agent' || tier === 'agency_owner') ?
-        { 'subscription.listingsCreatedThisMonth': 1 } : {}),
     };
 
-    // For atomic check, use the base subscription limit (free/pro tier static limit)
-    const atomicResult = await User.findOneAndUpdate(
-      {
+    let atomicFilter: Record<string, any>;
+
+    if (isProUser && monthlyAllowance > 0) {
+      // Pro/agency: atomically check and increment the monthly counter
+      incrementFields['subscription.listingsCreatedThisMonth'] = 1;
+      atomicFilter = {
         _id: user._id,
-        'subscription.activeListingsCount': { $lt: baseLimit },
-      },
-      {
-        $inc: incrementFields,
-      },
+        'subscription.listingsCreatedThisMonth': { $lt: monthlyAllowance },
+      };
+    } else {
+      // Free tier: atomically check and increment total active count
+      const freeLimit = FREE_TIER_LIMITS.LISTINGS;
+      atomicFilter = {
+        _id: user._id,
+        'subscription.activeListingsCount': { $lt: freeLimit },
+      };
+    }
+
+    const atomicResult = await User.findOneAndUpdate(
+      atomicFilter,
+      { $inc: incrementFields },
       { new: true }
     );
 
     if (!atomicResult) {
-      // Re-read to get current count for the error response
       const freshUser = await User.findById(user._id);
-      const currentCount = freshUser?.subscription?.activeListingsCount || 0;
-      res.status(403).json({
-        message: `You have reached your ${tier} tier limit of ${baseLimit} active listings. ${tier === 'free' ? 'Upgrade to Pro for unlimited listings per month!' : 'Please delete some listings to create new ones.'}`,
-        code: 'LISTING_LIMIT_REACHED',
-        tier,
-        limit: baseLimit,
-        current: currentCount,
-        privateSellerCount: freshUser?.subscription?.privateSellerCount || 0,
-        agentCount: freshUser?.subscription?.agentCount || 0,
-        upgradeAvailable: tier === 'free',
-      });
+      if (isProUser) {
+        const currentCount = freshUser?.subscription?.listingsCreatedThisMonth || 0;
+        res.status(403).json({
+          message: `Monthly listing limit reached (${currentCount}/${monthlyAllowance}). Resets at the start of next month.`,
+          code: 'MONTHLY_LISTING_LIMIT_REACHED',
+          tier,
+          created: currentCount,
+          monthlyAllowance,
+        });
+      } else {
+        const freeLimit = FREE_TIER_LIMITS.LISTINGS;
+        const currentCount = freshUser?.subscription?.activeListingsCount || 0;
+        res.status(403).json({
+          message: `You have reached your free tier limit of ${freeLimit} active listings. Upgrade to Pro for more listings!`,
+          code: 'FREE_LISTING_LIMIT_REACHED',
+          tier,
+          limit: freeLimit,
+          current: currentCount,
+          upgradeAvailable: true,
+        });
+      }
       return;
     }
 

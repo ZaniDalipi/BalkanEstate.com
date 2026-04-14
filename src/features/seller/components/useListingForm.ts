@@ -951,18 +951,44 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 return;
             }
 
-            // Check if user has reached their listing limit (from PLAN_LISTING_LIMITS as source of truth)
+            // Check if user has reached their listing limit before calling the backend
             if (!propertyToEdit) {
-                const userListings = properties.filter(p => p.sellerId === currentUser.id);
-                // Get listing limit from PLAN_LISTING_LIMITS (source of truth) with fallbacks
-                const productId = currentUser.subscription?.productId as SubscriptionPlan | undefined;
-                const listingsLimit = (productId && PLAN_LISTING_LIMITS[productId]) || currentUser.subscription?.listingsLimit || 3;
+                const sub = currentUser.subscription;
+                const tier = sub?.tier || 'free';
+                // subscriptionPlan is returned at top level of user object
+                const subscriptionPlan = (currentUser.subscriptionPlan || sub?.plan) as SubscriptionPlan | undefined;
+                const isProTier = subscriptionPlan && (tier === 'pro' || tier === 'agency_agent' || tier === 'agency_owner');
 
-                if (userListings.length >= listingsLimit) {
-                    dispatch({ type: 'SET_PENDING_PROPERTY', payload: newProperty });
-                    dispatch({ type: 'TOGGLE_LISTING_LIMIT_WARNING', payload: true });
-                    setIsSubmitting(false);
-                    return;
+                if (isProTier) {
+                    // MONTHLY MODEL: compare listingsCreatedThisMonth against monthly allowance
+                    const monthlyAllowance = (subscriptionPlan && PLAN_LISTING_LIMITS[subscriptionPlan]) || sub?.listingsLimit || 20;
+
+                    // Check if month boundary has passed (mirror backend logic)
+                    const monthResetDate = sub?.monthResetDate ? new Date(sub.monthResetDate as string) : undefined;
+                    const now = new Date();
+                    const isNewMonth = !monthResetDate ||
+                        now.getMonth() !== monthResetDate.getMonth() ||
+                        now.getFullYear() !== monthResetDate.getFullYear();
+
+                    const createdThisMonth = isNewMonth ? 0 : (sub?.listingsCreatedThisMonth || 0);
+
+                    if (createdThisMonth >= monthlyAllowance) {
+                        dispatch({ type: 'SET_PENDING_PROPERTY', payload: newProperty });
+                        dispatch({ type: 'TOGGLE_LISTING_LIMIT_WARNING', payload: true });
+                        setIsSubmitting(false);
+                        return;
+                    }
+                } else {
+                    // FREE TIER: compare total active listings against the free limit
+                    const freeLimit = sub?.listingsLimit || 3;
+                    const activeCount = sub?.activeListingsCount || 0;
+
+                    if (activeCount >= freeLimit) {
+                        dispatch({ type: 'SET_PENDING_PROPERTY', payload: newProperty });
+                        dispatch({ type: 'TOGGLE_LISTING_LIMIT_WARNING', payload: true });
+                        setIsSubmitting(false);
+                        return;
+                    }
                 }
             }
 
@@ -996,23 +1022,41 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             const errorMessage = err.message || "Failed to submit listing.";
 
             // Handle specific backend error codes with professional dialogs
-            // Handle listing limit reached - show discount game option
-            if (errorCode === 'LISTING_LIMIT_REACHED' || errorCode === 'FREE_LISTING_LIMIT_REACHED') {
-                // Save the property data so user doesn't lose their work
-                // Note: newProperty may not exist if error occurred during image upload
-                const propertyToSave = {
-                    title: listingData.title,
-                    price: listingData.price,
-                    description: listingData.description,
-                    propertyType: listingData.propertyType,
-                    createdAsRole: selectedRole,
-                };
+            const propertyToSave = {
+                title: listingData.title,
+                price: listingData.price,
+                description: listingData.description,
+                propertyType: listingData.propertyType,
+                createdAsRole: selectedRole,
+            };
+
+            if (errorCode === 'MONTHLY_LISTING_LIMIT_REACHED') {
+                // Pro user monthly limit — show clear message with "resets next month"
+                showWarning(
+                    t('seller:errors.monthlyLimitReached', 'Monthly Listing Limit Reached'),
+                    t('seller:errors.monthlyLimitMessage', 'You have used all your listings for this month. Your limit resets at the start of next month.'),
+                    [
+                        {
+                            label: t('seller:actions.viewMyListings', 'View My Listings'),
+                            onClick: () => {
+                                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+                            },
+                            variant: 'primary',
+                        },
+                        {
+                            label: t('common:actions.close', 'Close'),
+                            onClick: () => {},
+                            variant: 'secondary',
+                        },
+                    ]
+                );
+            } else if (errorCode === 'FREE_LISTING_LIMIT_REACHED' || errorCode === 'LISTING_LIMIT_REACHED') {
+                // Free tier — show upgrade prompt with discount game option
                 dispatch({ type: 'SET_PENDING_PROPERTY', payload: propertyToSave as any });
                 setPendingPropertyData(propertyToSave as any);
 
-                // Show the discount game modal
                 showWarning(
-                    t('seller:errors.freeListingLimitReached', 'Listing Limit Reached'),
+                    t('seller:errors.freeListingLimitReached', 'Free Listing Limit Reached'),
                     t('seller:errors.freeListingLimitMessage', 'You have reached your free tier limit. Play a game to win a discount on Pro subscription, or save your listing as a draft!'),
                     [
                         {
@@ -1025,17 +1069,10 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                         {
                             label: t('seller:actions.saveDraft', 'Save as Draft'),
                             onClick: () => {
-                                // Property is already saved in pendingProperty state
                                 showInfo(
                                     t('seller:draft.savedTitle', 'Draft Saved'),
                                     t('seller:draft.savedMessage', 'Your listing has been saved. You can continue editing it later from your account.'),
-                                    [
-                                        {
-                                            label: t('common:actions.ok', 'OK'),
-                                            onClick: () => {},
-                                            variant: 'primary',
-                                        },
-                                    ]
+                                    [{ label: t('common:actions.ok', 'OK'), onClick: () => {}, variant: 'primary' }]
                                 );
                             },
                             variant: 'secondary',

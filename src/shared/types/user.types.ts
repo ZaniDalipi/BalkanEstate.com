@@ -52,6 +52,10 @@ export interface UserSubscription {
   privateSellerCount: number;
   agentCount: number;
 
+  // Monthly reset tracking (for pro/agency monthly model)
+  listingsCreatedThisMonth?: number; // Counter resets at calendar month boundary
+  monthResetDate?: Date | string; // When the counter was last reset
+
   // Promotion coupons
   promotionCoupons?: PromotionCoupons;
 

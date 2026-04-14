@@ -49,14 +49,19 @@ const buildSafeUserResponse = (user: IUser) => ({
     trialEndDate: user.trialEndDate,
     trialExpiring: user.isTrialExpiring(),
   } : {}),
-  // Only return minimal subscription info, not the full internal object
+  // Subscription info — include all fields needed by frontend limit checks
+  subscriptionPlan: user.subscriptionPlan,
   subscription: user.subscription ? {
     tier: user.subscription.tier,
     status: user.subscription.status,
+    plan: user.subscription.plan,
     listingsLimit: user.subscription.listingsLimit,
     activeListingsCount: user.subscription.activeListingsCount,
+    listingsCreatedThisMonth: user.subscription.listingsCreatedThisMonth || 0,
+    monthResetDate: user.subscription.monthResetDate,
     promotionCoupons: user.subscription.promotionCoupons,
     savedSearchesLimit: user.subscription.savedSearchesLimit,
+    expiresAt: user.subscription.expiresAt,
   } : undefined,
 });
 
