@@ -1034,7 +1034,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 // Pro user monthly limit — show clear message with "resets next month"
                 showWarning(
                     t('seller:errors.monthlyLimitReached', 'Monthly Listing Limit Reached'),
-                    t('seller:errors.monthlyLimitMessage', 'You have used all your listings for this month. Your limit resets at the start of next month.'),
+                    t('seller:errors.monthlyLimitMessage', 'You have used all your listings for this month. Your limit resets at the start of next month. You can delete an existing listing to free up a slot, or contact us to request additional listings for an extra cost.'),
                     [
                         {
                             label: t('seller:actions.viewMyListings', 'View My Listings'),
@@ -1044,9 +1044,20 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                             variant: 'primary',
                         },
                         {
+                            label: t('seller:actions.requestMoreListings', 'Request More Listings'),
+                            onClick: () => {
+                                // Open contact email
+                                const email = 'support@balkanestate.com';
+                                const subject = encodeURIComponent('Request for Additional Monthly Listings');
+                                const body = encodeURIComponent(`Hello,\n\nI have reached my monthly listing limit and would like to request additional listings.\n\nPlease let me know about the cost and process.\n\nThank you.`);
+                                window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+                            },
+                            variant: 'secondary',
+                        },
+                        {
                             label: t('common:actions.close', 'Close'),
                             onClick: () => {},
-                            variant: 'secondary',
+                            variant: 'tertiary',
                         },
                     ]
                 );

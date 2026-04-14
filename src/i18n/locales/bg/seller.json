@@ -669,12 +669,15 @@
     "proSubscriptionRequired": "Pro Subscription Required",
     "agentProRequiredMessage": "Agents must have an active Pro subscription to post listings. Subscribe now to get 30 active listings!",
     "switchRoleRequired": "Switch Role Required",
-    "buyerCannotCreateListing": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings."
+    "buyerCannotCreateListing": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings.",
+    "monthlyLimitReached": "Monthly Listing Limit Reached",
+    "monthlyLimitMessage": "You have used all your listings for this month. Your limit resets at the start of next month. You can delete an existing listing to free up a slot, or contact us to request additional listings for an extra cost."
   },
   "actions": {
     "subscribeToPro": "Subscribe to Pro",
     "viewMyListings": "View My Listings",
-    "switchRole": "Switch Role"
+    "switchRole": "Switch Role",
+    "requestMoreListings": "Request More Listings"
   },
   "promotionHistory": {
     "title": "История на Промоциите",

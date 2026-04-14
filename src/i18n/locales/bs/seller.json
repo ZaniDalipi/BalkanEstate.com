@@ -393,7 +393,8 @@
   "actions": {
     "subscribeToPro": "Pretplatite se na Pro",
     "viewMyListings": "Pogledajte Moje Oglase",
-    "switchRole": "Promijenite Ulogu"
+    "switchRole": "Promijenite Ulogu",
+    "requestMoreListings": "Zatraži Više Oglasa"
   },
   "listings": {
     "confirmSold": "Are you sure you want to mark this property as sold? This action cannot be undone.",
@@ -674,7 +675,9 @@
     "proSubscriptionRequired": "Pro Subscription Required",
     "agentProRequiredMessage": "Agents must have an active Pro subscription to post listings. Subscribe now to get 30 active listings!",
     "switchRoleRequired": "Switch Role Required",
-    "buyerCannotCreateListing": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings."
+    "buyerCannotCreateListing": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings.",
+    "monthlyLimitReached": "Mjesečni Limit Oglasa Dosegnut",
+    "monthlyLimitMessage": "Koristili ste sve svoje oglase za ovaj mjesec. Vaš limit se ponovno postavlja na početku sljedećeg mjeseca. Možete izbrisati postojeći oglas da oslobodite prostor, ili nas kontaktirajte da zatražite dodatne oglase za dodatnu naknadu."
   },
   "promotionHistory": {
     "title": "Historija Promocija",

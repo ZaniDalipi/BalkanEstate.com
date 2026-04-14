@@ -412,12 +412,15 @@
     "proSubscriptionRequired": "Kërkohet Abonim Pro",
     "agentProRequiredMessage": "Agjentët duhet të kenë një abonim aktiv Pro për të postuar listime. Abonohuni tani për 30 listime aktive!",
     "switchRoleRequired": "Kërkohet Ndërrimi i Rolit",
-    "buyerCannotCreateListing": "Blerësit nuk mund të krijojnë listime pronash. Ju lutem kaloni në rolin Shitës Privat ose Agjent."
+    "buyerCannotCreateListing": "Blerësit nuk mund të krijojnë listime pronash. Ju lutem kaloni në rolin Shitës Privat ose Agjent.",
+    "monthlyLimitReached": "Limiti Mujor i Listimeve u Arrit",
+    "monthlyLimitMessage": "Keni përdorur të gjitha listimet tuaja për këtë muaj. Limiti juaj rivendoset në fillim të muajit të ardhshëm. Mund të fshini një listim ekzistues për të liruar një vend, ose na kontaktoni për të kërkuar listime shtesë për një kosto shtesë."
   },
   "actions": {
     "subscribeToPro": "Abonohu në Pro",
     "viewMyListings": "Shiko Listimet e Mia",
-    "switchRole": "Ndërro Rolin"
+    "switchRole": "Ndërro Rolin",
+    "requestMoreListings": "Kërkoni Më Shumë Listime"
   },
   "myListings": {
     "title": "Listimet e Mia",

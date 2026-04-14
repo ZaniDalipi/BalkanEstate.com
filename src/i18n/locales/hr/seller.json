@@ -665,12 +665,15 @@
     "proSubscriptionRequired": "Potrebna Pro Pretplata",
     "agentProRequiredMessage": "Agenti moraju imati aktivnu Pro pretplatu za objavljivanje oglasa. Pretplatite se sada za 30 aktivnih oglasa!",
     "switchRoleRequired": "Potrebna Promjena Uloge",
-    "buyerCannotCreateListing": "Kupci ne mogu kreirati oglase za nekretnine. Molimo prebacite se na ulogu Privatnog Prodavača ili Agenta."
+    "buyerCannotCreateListing": "Kupci ne mogu kreirati oglase za nekretnine. Molimo prebacite se na ulogu Privatnog Prodavača ili Agenta.",
+    "monthlyLimitReached": "Mjesečni Limit Oglasa Dosegnut",
+    "monthlyLimitMessage": "Koristili ste sve svoje oglase za ovaj mjesec. Vaš limit se ponovno postavlja na početku sljedećeg mjeseca. Možete izbrisati postojeći oglas da oslobodite prostor, ili nas kontaktirajte da zatražite dodatne oglase za dodatnu naknadu."
   },
   "actions": {
     "subscribeToPro": "Pretplati se na Pro",
     "viewMyListings": "Pogledaj Moje Oglase",
-    "switchRole": "Promijeni Ulogu"
+    "switchRole": "Promijeni Ulogu",
+    "requestMoreListings": "Zatraži Više Oglasa"
   },
   "listings": {
     "confirmSold": "Are you sure you want to mark this property as sold? This action cannot be undone.",
