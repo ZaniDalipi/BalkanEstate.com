@@ -186,19 +186,6 @@ export const updateAlertSettings = async (
     const id = getObjectIdParam(req, res, 'id');
     if (!id) return;
 
-    const savedSearch = await SavedSearch.findById(id);
-
-    if (!savedSearch) {
-      res.status(404).json({ message: 'Saved search not found' });
-      return;
-    }
-
-    // Check ownership
-    if (savedSearch.userId.toString() !== String((req.user as IUser)._id).toString()) {
-      res.status(403).json({ message: 'Not authorized to update this search' });
-      return;
-    }
-
     const { alertsEnabled, alertFrequency } = req.body;
 
     // Validate frequency
@@ -208,15 +195,33 @@ export const updateAlertSettings = async (
       return;
     }
 
-    // Update alert settings
+    // Build update — only touch the fields being changed
+    const updateFields: Record<string, unknown> = {};
     if (typeof alertsEnabled === 'boolean') {
-      savedSearch.alertsEnabled = alertsEnabled;
+      updateFields.alertsEnabled = alertsEnabled;
     }
-    if (alertFrequency) {
-      savedSearch.alertFrequency = alertFrequency;
+    if (alertFrequency && validFrequencies.includes(alertFrequency)) {
+      updateFields.alertFrequency = alertFrequency;
     }
 
-    await savedSearch.save();
+    // Use findOneAndUpdate to avoid full-document validation on save(),
+    // which can fail for older documents with legacy field values
+    const savedSearch = await SavedSearch.findOneAndUpdate(
+      { _id: id, userId: (req.user as IUser)._id },
+      { $set: updateFields },
+      { new: true }
+    );
+
+    if (!savedSearch) {
+      // Could be not found or not owned by this user
+      const exists = await SavedSearch.exists({ _id: id });
+      if (!exists) {
+        res.status(404).json({ message: 'Saved search not found' });
+      } else {
+        res.status(403).json({ message: 'Not authorized to update this search' });
+      }
+      return;
+    }
 
     apiLogger.info(`[savedSearchController] Updated alerts for search ${savedSearch._id}: enabled=${savedSearch.alertsEnabled}, frequency=${savedSearch.alertFrequency}`);
 
