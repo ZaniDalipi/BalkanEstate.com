@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   XMarkIcon,
@@ -427,6 +427,17 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
   const [savedMonthly, setSavedMonthly] = useState(false);
   const [errMonthly, setErrMonthly] = useState('');
   const [resetMonthCheckbox, setResetMonthCheckbox] = useState(false);
+
+  // Sync input state when viewingUser changes (e.g., after parent refresh or new user selected)
+  useEffect(() => {
+    setInputLimit(String(currentLimit));
+    setInputMonthlyCounter(String(currentMonthlyCounter));
+    setSaved(false);
+    setSavedMonthly(false);
+    setErr('');
+    setErrMonthly('');
+    setResetMonthCheckbox(false);
+  }, [viewingUser._id, currentLimit, currentMonthlyCounter]);
 
   // Track if value has changed from original
   const hasLimitChanged = inputLimit !== String(currentLimit);
