@@ -108,10 +108,20 @@ export function initializeLanguageFromUrl(): { lang: LanguageCode; path: string 
   if (lang && isLanguageSupported(lang)) {
     // URL has valid language prefix - use it
     localStorage.setItem('balkanestate_language', lang);
-    // Load bundle async then switch (English shown briefly if non-en)
-    loadLanguageResources(lang).then(() => {
-      i18n.changeLanguage(lang);
-    });
+    // Only switch language when it actually differs from the current one.
+    // Calling i18n.changeLanguage() even with the same value triggers a
+    // 'languageChanged' event that causes every useTranslation() component
+    // to re-render, producing the visible "page refresh" after a few seconds.
+    const currentLang = (i18n.language || 'en').split('-')[0];
+    if (currentLang !== lang) {
+      loadLanguageResources(lang).then(() => {
+        // Re-check after async load to guard against concurrent language switches
+        const nowLang = (i18n.language || 'en').split('-')[0];
+        if (nowLang !== lang) {
+          i18n.changeLanguage(lang);
+        }
+      });
+    }
     return { lang, path };
   }
 
@@ -127,10 +137,16 @@ export function initializeLanguageFromUrl(): { lang: LanguageCode; path: string 
   window.history.replaceState({}, '', newPath);
 
   localStorage.setItem('balkanestate_language', detectedLang);
-  // Load bundle async then switch
-  loadLanguageResources(detectedLang).then(() => {
-    i18n.changeLanguage(detectedLang);
-  });
+  // Only switch language when it actually differs from the current one
+  const currentLang = (i18n.language || 'en').split('-')[0];
+  if (currentLang !== detectedLang) {
+    loadLanguageResources(detectedLang).then(() => {
+      const nowLang = (i18n.language || 'en').split('-')[0];
+      if (nowLang !== detectedLang) {
+        i18n.changeLanguage(detectedLang);
+      }
+    });
+  }
 
   return { lang: detectedLang, path };
 }
