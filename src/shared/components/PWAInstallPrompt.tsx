@@ -53,11 +53,22 @@ export function PWAInstallPrompt() {
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream;
     setIsIOS(isIOSDevice);
 
+    // Track session start time so the delay is based on actual time on site
+    const SESSION_KEY = 'pwa-session-start';
+    const DELAY_MS = 150000; // 2.5 minutes
+
+    if (!sessionStorage.getItem(SESSION_KEY)) {
+      sessionStorage.setItem(SESSION_KEY, Date.now().toString());
+    }
+    const sessionStart = parseInt(sessionStorage.getItem(SESSION_KEY)!, 10);
+    const elapsed = Date.now() - sessionStart;
+    const remaining = Math.max(0, DELAY_MS - elapsed);
+
     // For iOS, show custom prompt after delay
     if (isIOSDevice) {
       const timer = setTimeout(() => {
         setShowPrompt(true);
-      }, 3000);
+      }, remaining);
       return () => clearTimeout(timer);
     }
 
@@ -65,10 +76,13 @@ export function PWAInstallPrompt() {
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      // Show prompt after a short delay
+      // Show prompt only after 2.5 minutes of usage
+      const now = Date.now();
+      const elapsedNow = now - sessionStart;
+      const remainingNow = Math.max(0, DELAY_MS - elapsedNow);
       setTimeout(() => {
         setShowPrompt(true);
-      }, 2000);
+      }, remainingNow);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);

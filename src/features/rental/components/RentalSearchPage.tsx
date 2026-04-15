@@ -411,7 +411,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                     <>
                         {/* Mobile-only: floating search bar overlay (matches buy page pattern) */}
                         {isMobile && (
-                            <div className="absolute top-0 left-0 right-0 z-[100] p-2 landscape:p-1.5 pointer-events-none safe-area-inset-top">
+                            <div className="absolute top-0 left-0 right-0 z-[100] px-2 landscape:px-1.5 pb-2 landscape:pb-1.5 pointer-events-none" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 8px)' }}>
                                 <div ref={searchWrapperRef} className="pointer-events-auto w-full space-y-2">
                                     <div
                                         className="w-full bg-white/60 backdrop-blur-xl rounded-full p-1 flex items-center gap-0.5 sm:gap-1 border border-white/40"
@@ -498,7 +498,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                         )}
 
                         {/* Floating List/Map toggle */}
-                        <div className="absolute bottom-20 xs:bottom-24 sm:bottom-20 md:bottom-6 landscape:bottom-14 left-0 right-0 z-[100] p-3 sm:p-4 landscape:p-2 pointer-events-none flex justify-center" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}>
+                        <div className="absolute bottom-24 xs:bottom-28 sm:bottom-24 md:bottom-6 landscape:bottom-14 left-0 right-0 z-[100] p-3 sm:p-4 landscape:p-2 pointer-events-none flex justify-center" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)' }}>
                             <div className="pointer-events-auto mx-auto w-fit" role="tablist" aria-label={t('common:aria.viewToggle')}>
                                 <LiquidGlassSwitch
                                     options={[
