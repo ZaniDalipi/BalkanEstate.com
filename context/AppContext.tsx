@@ -24,7 +24,7 @@ import {
 import { MUNICIPALITY_DATA } from '../services/propertyService';
 import { socketService } from '../services/socketService';
 import { notificationService } from '../services/notificationService';
-import { tokenService } from '../src/shared/api/tokenService';
+import { tokenService, hasLikelyValidSession } from '../src/shared/api/tokenService';
 
 const initialSearchPageState: SearchPageState = {
     filters: initialFilters,
@@ -42,7 +42,10 @@ const initialSearchPageState: SearchPageState = {
 const initialState: AppState = {
   user: null,
   onboardingComplete: true,
-  isAuthenticating: true,
+  // Only start in the "authenticating" state when there is a likely valid session
+  // (httpOnly refresh cookie is present). This prevents a FullScreenLoader flash
+  // for unauthenticated / first-time visitors who don't have a session to restore.
+  isAuthenticating: hasLikelyValidSession(),
   activeView: 'home',
   isPricingModalOpen: false,
   isFirstLoginOffer: false,
@@ -399,11 +402,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [state, dispatch] = useReducer(appReducer, initialState);
 
   const checkAuthStatus = useCallback(async () => {
+    const hasSession = hasLikelyValidSession();
+    const hasToken = !!tokenService.getAccessToken();
+
+    // If there's no session hint and no in-memory token, there's nothing to restore.
+    // Return immediately to avoid an unnecessary loading screen and network requests
+    // that cause the "page refresh after a few seconds" effect for unauthenticated visitors.
+    if (!hasSession && !hasToken) {
+      return;
+    }
+
     dispatch({ type: 'AUTH_CHECK_START' });
 
-    // On page load, there's no in-memory token yet. Attempt a silent refresh
-    // via the httpOnly cookie BEFORE checking auth, so the token is available.
-    if (!tokenService.getAccessToken()) {
+    // Attempt silent token refresh only when a session hint exists, i.e. the user
+    // has previously authenticated and the httpOnly refresh cookie is likely present.
+    // Skipping this for visitors with no session avoids a pointless POST /auth/refresh-token
+    // that would return 400 and add ~500 ms–2 s of unnecessary latency.
+    if (!hasToken && hasSession) {
       await tokenService.forceRefresh();
     }
 
