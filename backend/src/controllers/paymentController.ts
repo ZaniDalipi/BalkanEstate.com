@@ -693,13 +693,20 @@ async function handleRecurringPaymentSucceeded(invoice: Stripe.Invoice) {
     }
 
     // Process the renewal payment
-    await processSubscriptionPayment({
+    const result = await processSubscriptionPayment({
       userId,
       productId,
       store: 'stripe',
       amount: (invoice.amount_paid || 0) / 100, // Convert from cents
       currency: (invoice.currency || 'eur').toUpperCase(),
     });
+
+    // If auto-renewal was disabled by admin, log it but don't fail
+    if (result.skipped) {
+      console.log(`⚠️ Auto-renewal skipped for user ${userId} - subscription renewal is disabled (${result.message})`);
+      console.log(`📝 Payment recorded under ID: ${result.paymentId}`);
+      return;
+    }
 
     console.log(`✅ Recurring payment processed for user ${userId}`);
   } catch (error) {

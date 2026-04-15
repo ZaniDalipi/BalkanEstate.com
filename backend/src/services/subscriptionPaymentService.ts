@@ -35,10 +35,13 @@ interface ProcessPaymentParams {
 
 interface ProcessPaymentResult {
   success: boolean;
-  subscription: any;
-  paymentRecord: any;
-  user: any;
+  subscription?: any;
+  paymentRecord?: any;
+  user?: any;
   message: string;
+  paymentId?: string;
+  subscriptionId?: string;
+  skipped?: boolean;
 }
 
 /**
@@ -90,7 +93,7 @@ export async function processSubscriptionPayment(
     const existingSubscription = await Subscription.findOne({
       userId,
       productId,
-      status: { $in: ['active', 'grace', 'pending_cancellation'] },
+      status: { $in: ['active', 'grace'] }, // Don't renew pending_cancellation subscriptions
     }).session(session);
     // eslint-disable-next-line prefer-const
     let subscription!: NonNullable<typeof existingSubscription>;
@@ -133,12 +136,52 @@ export async function processSubscriptionPayment(
     }
 
     if (existingSubscription) {
+      // CRITICAL: Respect admin actions - only renew if autoRenewing is true
+      // If admin has disabled auto-renewal, this payment should not renew the subscription
+      if (!existingSubscription.autoRenewing) {
+        paymentLogger.warn('⚠️ Auto-renewal disabled for subscription:', {
+          subscriptionId: existingSubscription._id,
+          userId,
+          productId,
+          reason: 'Admin deactivation or user cancellation',
+        });
+        // Create a payment record but mark subscription as not renewed
+        // This allows the payment to be tracked but prevents auto-renewal
+        const [paymentRecord] = await PaymentRecord.create(
+          [{
+            userId,
+            store,
+            amount,
+            currency,
+            productId,
+            status: 'success',
+            transactionId,
+            purchaseToken,
+            metadata: {
+              autoRenewalDisabled: true,
+              subscriptionId: existingSubscription._id,
+              reason: 'Auto-renewal was disabled by admin action',
+            },
+          }],
+          { session }
+        );
+        await session.commitTransaction();
+        session.endSession();
+        return {
+          success: false,
+          message: 'Auto-renewal is disabled for this subscription',
+          paymentId: String(paymentRecord._id),
+          subscriptionId: String(existingSubscription._id),
+          skipped: true,
+        };
+      }
+
       if (!isProduction) paymentLogger.info('🔄 Renewing existing subscription:', existingSubscription._id);
       // Renew existing subscription
       existingSubscription.expirationDate = expirationDate;
       existingSubscription.renewalDate = expirationDate;
       existingSubscription.status = 'active';
-      existingSubscription.autoRenewing = true;
+      existingSubscription.autoRenewing = true; // Maintain auto-renewal for next cycle
       existingSubscription.lastUpdated = new Date();
       await existingSubscription.save({ session });
       subscription = existingSubscription;
