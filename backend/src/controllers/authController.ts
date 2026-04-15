@@ -996,6 +996,8 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
           productId: subscriptionProductId,
           listingsLimit: user.subscription.listingsLimit,
           activeListingsCount: user.subscription.activeListingsCount,
+          listingsCreatedThisMonth: user.subscription.listingsCreatedThisMonth || 0,
+          monthResetDate: user.subscription.monthResetDate,
           privateSellerCount: user.subscription.privateSellerCount,
           agentCount: user.subscription.agentCount,
           promotionCoupons: user.subscription.promotionCoupons,
