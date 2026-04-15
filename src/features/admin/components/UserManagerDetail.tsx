@@ -25,6 +25,8 @@ interface UserManagerDetailProps {
   handleEditUser: (user: User) => void;
   formatDate: (dateString: string) => string;
   getRoleBadgeColor: (role: string) => string;
+  // Callback to refresh user data after updates
+  onUserUpdated?: () => void;
 }
 
 const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
@@ -40,6 +42,7 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
   handleEditUser,
   formatDate,
   getRoleBadgeColor,
+  onUserUpdated,
 }) => {
   const { t } = useTranslation('admin');
 
@@ -179,7 +182,7 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
               </div>
 
               {/* Subscription Info */}
-              <SubscriptionPanel viewingUser={viewingUser} />
+              <SubscriptionPanel viewingUser={viewingUser} onUpdate={onUserUpdated} />
 
               {/* Agency Info */}
               {viewingUser.agencyName && (
@@ -409,7 +412,7 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
 };
 
 // ─── Subscription info + listing-limit override panel ───────────────────────
-function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
+function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpdate?: () => void }) {
   const { t } = useTranslation('admin');
   const currentLimit = viewingUser.subscription?.listingsLimit ?? 0;
   const [inputLimit, setInputLimit] = useState(String(currentLimit));
@@ -425,44 +428,119 @@ function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
   const [errMonthly, setErrMonthly] = useState('');
   const [resetMonthCheckbox, setResetMonthCheckbox] = useState(false);
 
+  // Track if value has changed from original
+  const hasLimitChanged = inputLimit !== String(currentLimit);
+  const hasCounterChanged = inputMonthlyCounter !== String(currentMonthlyCounter);
+
   const formatDisplayDate = (dateStr?: string) => {
     if (!dateStr) return '—';
     return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
+  // Validation: ensure value is valid integer >= 0
+  const validateNumber = (value: string): { valid: boolean; error?: string } => {
+    const num = Number(value);
+    if (value.trim() === '') return { valid: false, error: 'Value cannot be empty' };
+    if (isNaN(num)) return { valid: false, error: 'Must be a valid number' };
+    if (!Number.isInteger(num)) return { valid: false, error: 'Must be a whole number' };
+    if (num < 0) return { valid: false, error: 'Cannot be negative' };
+    if (num > 999) return { valid: false, error: 'Value too large (max 999)' };
+    return { valid: true };
+  };
+
   const handleSave = async () => {
+    // Validation
+    const validation = validateNumber(inputLimit);
+    if (!validation.valid) {
+      setErr(validation.error || 'Invalid value');
+      return;
+    }
+
     const val = Number(inputLimit);
-    if (isNaN(val) || val < 0) { setErr(t('userDetail.invalidNumber')); return; }
-    setSaving(true); setErr('');
+    if (val === currentLimit) {
+      setErr('No change from current value');
+      return;
+    }
+
+    setSaving(true);
+    setErr('');
     try {
-      await apiRequest(`/admin/subscriptions/listing-limit/${viewingUser._id}`, {
+      const response = await apiRequest(`/admin/subscriptions/listing-limit/${viewingUser._id}`, {
         method: 'PATCH',
         body: { listingsLimit: val, reason: 'Admin manual override' },
         requiresAuth: true,
       });
+
+      if (!response.success) {
+        setErr(response.message || 'Failed to update listing limit');
+        setSaving(false);
+        return;
+      }
+
+      // Update local state to reflect change
+      viewingUser.subscription = viewingUser.subscription || {};
+      viewingUser.subscription.listingsLimit = val;
+
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
+
+      // Trigger parent refresh to sync across all components
+      if (onUpdate) {
+        setTimeout(() => onUpdate(), 500);
+      }
     } catch (e: any) {
-      setErr(e.message || 'Error saving');
+      setErr(e.message || 'Error saving listing limit');
     } finally {
       setSaving(false);
     }
   };
 
   const handleSaveMonthlyCounter = async () => {
+    // Validation
+    const validation = validateNumber(inputMonthlyCounter);
+    if (!validation.valid) {
+      setErrMonthly(validation.error || 'Invalid value');
+      return;
+    }
+
     const val = Number(inputMonthlyCounter);
-    if (isNaN(val) || val < 0) { setErrMonthly(t('userDetail.invalidNumber')); return; }
-    setSavingMonthly(true); setErrMonthly('');
+    if (val === currentMonthlyCounter && !resetMonthCheckbox) {
+      setErrMonthly('No change from current value');
+      return;
+    }
+
+    setSavingMonthly(true);
+    setErrMonthly('');
     try {
-      await apiRequest(`/admin/users/${viewingUser._id}/listing-counter`, {
+      const response = await apiRequest(`/admin/users/${viewingUser._id}/listing-counter`, {
         method: 'PATCH',
         body: { listingsCreatedThisMonth: val, resetMonth: resetMonthCheckbox },
         requiresAuth: true,
       });
+
+      if (!response.success) {
+        setErrMonthly(response.message || 'Failed to update counter');
+        setSavingMonthly(false);
+        return;
+      }
+
+      // Update local state to reflect change
+      viewingUser.subscription = viewingUser.subscription || {};
+      viewingUser.subscription.listingsCreatedThisMonth = val;
+      if (resetMonthCheckbox) {
+        viewingUser.subscription.monthResetDate = new Date().toISOString();
+      }
+
       setSavedMonthly(true);
       setTimeout(() => setSavedMonthly(false), 3000);
+      setResetMonthCheckbox(false); // Reset checkbox after successful save
+
+      // Trigger parent refresh to sync across all components
+      if (onUpdate) {
+        setTimeout(() => onUpdate(), 500);
+      }
     } catch (e: any) {
-      setErrMonthly(e.message || 'Error saving');
+      setErrMonthly(e.message || 'Error saving counter');
     } finally {
       setSavingMonthly(false);
     }
@@ -538,21 +616,28 @@ function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
           <input
             type="number"
             min={0}
+            max={999}
             value={inputLimit}
-            onChange={e => { setInputLimit(e.target.value); setSaved(false); }}
+            onChange={e => {
+              setInputLimit(e.target.value);
+              setSaved(false);
+              setErr('');
+            }}
             className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            disabled={saving}
           />
           <button
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || !hasLimitChanged}
             className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed font-medium transition-colors"
+            title={!hasLimitChanged ? 'No changes to save' : 'Save changes'}
           >
             {saving ? t('userDetail.saving') : saved ? t('userDetail.saved') : t('userDetail.apply')}
           </button>
-          <span className="text-xs text-gray-400">{t('userDetail.listingsPerMonth')}</span>
+          <span className="text-xs text-gray-400">listings/month</span>
         </div>
-        {err && <p className="text-xs text-red-500 mt-1">{err}</p>}
-        {saved && <p className="text-xs text-green-600 mt-1">{t('userDetail.limitUpdated')}</p>}
+        {err && <p className="text-xs text-red-600 font-medium mt-1">{err}</p>}
+        {saved && <p className="text-xs text-green-600 font-medium mt-1">✓ Limit updated successfully</p>}
       </div>
 
       {/* Monthly listing counter */}
@@ -560,36 +645,49 @@ function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
         <label className="text-xs font-semibold text-gray-600 block mb-1">
           {t('userDetail.monthlyListingCounter', 'Monthly Listing Counter')}
           <span className="font-normal text-gray-400 ml-1">
-            (created this month: {currentMonthlyCounter})
+            (current: {currentMonthlyCounter})
           </span>
         </label>
         <div className="flex items-center gap-2 mb-2">
           <input
             type="number"
             min={0}
+            max={999}
             value={inputMonthlyCounter}
-            onChange={e => { setInputMonthlyCounter(e.target.value); setSavedMonthly(false); }}
+            onChange={e => {
+              setInputMonthlyCounter(e.target.value);
+              setSavedMonthly(false);
+              setErrMonthly('');
+            }}
             className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            disabled={savingMonthly}
           />
           <button
             onClick={handleSaveMonthlyCounter}
-            disabled={savingMonthly}
+            disabled={savingMonthly || (!hasCounterChanged && !resetMonthCheckbox)}
             className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed font-medium transition-colors"
+            title={!hasCounterChanged && !resetMonthCheckbox ? 'No changes to save' : 'Save changes'}
           >
             {savingMonthly ? t('userDetail.saving') : savedMonthly ? t('userDetail.saved') : t('userDetail.apply')}
           </button>
         </div>
-        <label className="flex items-center gap-2 text-sm mb-2">
+        <label className="flex items-center gap-2 text-sm mb-2 cursor-pointer hover:bg-gray-100 p-1 rounded">
           <input
             type="checkbox"
             checked={resetMonthCheckbox}
-            onChange={e => setResetMonthCheckbox(e.target.checked)}
-            className="w-4 h-4 rounded border-gray-300"
+            onChange={e => {
+              setResetMonthCheckbox(e.target.checked);
+              setSavedMonthly(false);
+              setErrMonthly('');
+            }}
+            className="w-4 h-4 rounded border-gray-300 cursor-pointer"
+            disabled={savingMonthly}
           />
-          <span className="text-xs text-gray-600">{t('userDetail.resetMonthDate', 'Reset month date to today')}</span>
+          <span className="text-xs text-gray-600">Reset monthResetDate to today</span>
+          {resetMonthCheckbox && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Will update</span>}
         </label>
-        {errMonthly && <p className="text-xs text-red-500 mt-1">{errMonthly}</p>}
-        {savedMonthly && <p className="text-xs text-green-600 mt-1">{t('userDetail.counterUpdated', 'Counter updated')}</p>}
+        {errMonthly && <p className="text-xs text-red-600 font-medium mt-1">{errMonthly}</p>}
+        {savedMonthly && <p className="text-xs text-green-600 font-medium mt-1">✓ Counter updated successfully</p>}
       </div>
     </div>
   );

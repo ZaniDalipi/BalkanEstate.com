@@ -1457,76 +1457,170 @@ export const getAllProducts = async (_req: Request, res: Response): Promise<void
  * @access  Admin
  * @body    { listingsCreatedThisMonth: number, resetMonth: boolean }
  */
+/**
+ * @desc    Update user's monthly listing counter
+ * @route   PATCH /api/admin/users/:userId/listing-counter
+ * @access  Admin
+ * @body    { listingsCreatedThisMonth: number, resetMonth: boolean }
+ *
+ * IMPORTANT: Only explicit value changes are allowed. No automatic resets.
+ * If resetMonth is true, monthResetDate is updated to current date.
+ * Changes are reflected immediately in database and cached invalidated.
+ */
 export const updateUserListingCounter = async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
     const { listingsCreatedThisMonth, resetMonth } = req.body;
 
-    // Validate userId
+    // ===== VALIDATION =====
+    // 1. Validate userId format
     const userIdStr = typeof userId === 'string' ? userId : String(userId);
     if (!userIdStr || !mongoose.Types.ObjectId.isValid(userIdStr)) {
-      res.status(400).json({ message: 'Invalid user ID' });
-      return;
-    }
-
-    // Validate input
-    if (typeof listingsCreatedThisMonth !== 'number' || listingsCreatedThisMonth < 0) {
       res.status(400).json({
-        message: 'listingsCreatedThisMonth must be a non-negative number',
+        success: false,
+        message: 'Invalid user ID format',
       });
       return;
     }
 
-    // Update user's listing counter
-    const updateData: any = {
-      'subscription.listingsCreatedThisMonth': Math.floor(listingsCreatedThisMonth),
-    };
+    // 2. Validate listingsCreatedThisMonth
+    if (typeof listingsCreatedThisMonth !== 'number') {
+      res.status(400).json({
+        success: false,
+        message: 'listingsCreatedThisMonth must be a number',
+      });
+      return;
+    }
 
-    // If resetMonth is true, update the monthResetDate to today
-    if (resetMonth) {
+    if (!Number.isInteger(listingsCreatedThisMonth)) {
+      res.status(400).json({
+        success: false,
+        message: 'listingsCreatedThisMonth must be a whole number',
+      });
+      return;
+    }
+
+    if (listingsCreatedThisMonth < 0) {
+      res.status(400).json({
+        success: false,
+        message: 'listingsCreatedThisMonth cannot be negative',
+      });
+      return;
+    }
+
+    if (listingsCreatedThisMonth > 999) {
+      res.status(400).json({
+        success: false,
+        message: 'listingsCreatedThisMonth cannot exceed 999',
+      });
+      return;
+    }
+
+    // 3. Validate resetMonth flag
+    if (typeof resetMonth !== 'boolean' && resetMonth !== undefined) {
+      res.status(400).json({
+        success: false,
+        message: 'resetMonth must be a boolean',
+      });
+      return;
+    }
+
+    // ===== FETCH USER =====
+    const user = await User.findById(userIdStr);
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+      return;
+    }
+
+    // ===== CHECK FOR CHANGES =====
+    const currentCounter = user.subscription?.listingsCreatedThisMonth ?? 0;
+    const hasCounterChanged = listingsCreatedThisMonth !== currentCounter;
+    const hasResetRequested = resetMonth === true;
+
+    if (!hasCounterChanged && !hasResetRequested) {
+      res.status(400).json({
+        success: false,
+        message: 'No changes to apply. Counter and reset flag are the same.',
+      });
+      return;
+    }
+
+    // ===== BUILD UPDATE OBJECT =====
+    const updateData: Record<string, any> = {};
+
+    if (hasCounterChanged) {
+      updateData['subscription.listingsCreatedThisMonth'] = Math.floor(listingsCreatedThisMonth);
+    }
+
+    if (hasResetRequested) {
       updateData['subscription.monthResetDate'] = new Date();
     }
 
-    const user = await User.findByIdAndUpdate(
+    // ===== UPDATE DATABASE =====
+    const updatedUser = await User.findByIdAndUpdate(
       userIdStr,
       { $set: updateData },
       { new: true, runValidators: true }
     );
 
-    if (!user) {
-      res.status(404).json({ message: 'User not found' });
+    if (!updatedUser) {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update user',
+      });
       return;
     }
 
-    // Invalidate cache for this user
+    // ===== INVALIDATE CACHE =====
     invalidateCache(`/api/auth/me/${userIdStr}`);
+    invalidateCache(`/api/auth/user/${userIdStr}`);
+    invalidateCache('/api/admin/subscriptions');
 
+    // ===== AUDIT LOG =====
     adminLogger.info('[Admin] Updated user listing counter', {
       adminId: (req.user as any)?._id,
+      adminEmail: (req.user as any)?.email,
       userId: userIdStr,
-      newCounter: listingsCreatedThisMonth,
-      resetMonth,
+      userEmail: user.email,
+      changes: {
+        counterChanged: hasCounterChanged,
+        previousCounter: currentCounter,
+        newCounter: listingsCreatedThisMonth,
+        resetMonthDate: hasResetRequested,
+      },
+      timestamp: new Date().toISOString(),
     });
 
-    res.json({
+    // ===== RETURN SUCCESS RESPONSE =====
+    res.status(200).json({
       success: true,
-      message: 'Listing counter updated',
+      message: 'Listing counter updated successfully',
       user: {
-        id: String(user._id),
-        email: user.email,
-        name: user.name,
+        id: String(updatedUser._id),
+        email: updatedUser.email,
+        name: updatedUser.name,
         subscription: {
-          tier: user.subscription?.tier,
-          listingsCreatedThisMonth: user.subscription?.listingsCreatedThisMonth || 0,
-          monthResetDate: user.subscription?.monthResetDate,
-          listingsLimit: user.subscription?.listingsLimit,
-          activeListingsCount: user.subscription?.activeListingsCount,
+          tier: updatedUser.subscription?.tier,
+          listingsCreatedThisMonth: updatedUser.subscription?.listingsCreatedThisMonth || 0,
+          monthResetDate: updatedUser.subscription?.monthResetDate,
+          listingsLimit: updatedUser.subscription?.listingsLimit,
+          activeListingsCount: updatedUser.subscription?.activeListingsCount,
         },
       },
     });
   } catch (error: any) {
-    adminLogger.error('[Admin] Error updating user listing counter:', error);
-    res.status(500).json({ message: 'Error updating listing counter' });
+    adminLogger.error('[Admin] Error updating user listing counter', {
+      userId: req.params.userId,
+      error: error.message,
+      stack: error.stack,
+    });
+    res.status(500).json({
+      success: false,
+      message: 'Error updating listing counter: ' + (error.message || 'Unknown error'),
+    });
   }
 };
 
