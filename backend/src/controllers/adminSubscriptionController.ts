@@ -1463,7 +1463,8 @@ export const updateUserListingCounter = async (req: Request, res: Response): Pro
     const { listingsCreatedThisMonth, resetMonth } = req.body;
 
     // Validate userId
-    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+    const userIdStr = typeof userId === 'string' ? userId : String(userId);
+    if (!userIdStr || !mongoose.Types.ObjectId.isValid(userIdStr)) {
       res.status(400).json({ message: 'Invalid user ID' });
       return;
     }
@@ -1487,7 +1488,7 @@ export const updateUserListingCounter = async (req: Request, res: Response): Pro
     }
 
     const user = await User.findByIdAndUpdate(
-      userId,
+      userIdStr,
       { $set: updateData },
       { new: true, runValidators: true }
     );
@@ -1498,11 +1499,11 @@ export const updateUserListingCounter = async (req: Request, res: Response): Pro
     }
 
     // Invalidate cache for this user
-    invalidateCache(`/api/auth/me/${userId}`);
+    invalidateCache(`/api/auth/me/${userIdStr}`);
 
     adminLogger.info('[Admin] Updated user listing counter', {
       adminId: (req.user as any)?._id,
-      userId,
+      userId: userIdStr,
       newCounter: listingsCreatedThisMonth,
       resetMonth,
     });
