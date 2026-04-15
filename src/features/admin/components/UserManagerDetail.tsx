@@ -25,6 +25,8 @@ interface UserManagerDetailProps {
   handleEditUser: (user: User) => void;
   formatDate: (dateString: string) => string;
   getRoleBadgeColor: (role: string) => string;
+  // Callback to refresh user data after updates
+  onUserUpdated?: () => void;
 }
 
 const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
@@ -40,6 +42,7 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
   handleEditUser,
   formatDate,
   getRoleBadgeColor,
+  onUserUpdated,
 }) => {
   const { t } = useTranslation('admin');
 
@@ -179,7 +182,7 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
               </div>
 
               {/* Subscription Info */}
-              <SubscriptionPanel viewingUser={viewingUser} />
+              <SubscriptionPanel viewingUser={viewingUser} onUpdate={onUserUpdated} />
 
               {/* Agency Info */}
               {viewingUser.agencyName && (
@@ -409,7 +412,7 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
 };
 
 // ─── Subscription info + listing-limit override panel ───────────────────────
-function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
+function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpdate?: () => void }) {
   const { t } = useTranslation('admin');
   const currentLimit = viewingUser.subscription?.listingsLimit ?? 0;
   const [inputLimit, setInputLimit] = useState(String(currentLimit));
@@ -480,6 +483,11 @@ function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
 
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
+
+      // Trigger parent refresh to sync across all components
+      if (onUpdate) {
+        setTimeout(() => onUpdate(), 500);
+      }
     } catch (e: any) {
       setErr(e.message || 'Error saving listing limit');
     } finally {
@@ -526,6 +534,11 @@ function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
       setSavedMonthly(true);
       setTimeout(() => setSavedMonthly(false), 3000);
       setResetMonthCheckbox(false); // Reset checkbox after successful save
+
+      // Trigger parent refresh to sync across all components
+      if (onUpdate) {
+        setTimeout(() => onUpdate(), 500);
+      }
     } catch (e: any) {
       setErrMonthly(e.message || 'Error saving counter');
     } finally {
