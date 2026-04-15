@@ -207,7 +207,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 aria-label={t('nav:mainNavigation', 'Main navigation')}
                 style={{ paddingTop: 'env(safe-area-inset-top, 0px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
             >
-                <div className="flex items-center p-3 h-[56px] border-b border-neutral-200 flex-shrink-0 md:justify-center group-hover:md:justify-start">
+                <div className="flex items-center justify-between p-3 h-[56px] border-b border-neutral-200 flex-shrink-0 md:justify-center group-hover:md:justify-start">
                     <button
                         onClick={() => handleNavClick('home')}
                         className="flex items-center space-x-2"
@@ -220,7 +220,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     </button>
                     <button
                         onClick={onClose}
-                        className="md:hidden absolute right-3 top-4 text-neutral-700 hover:text-neutral-800"
+                        className="md:hidden p-1 text-neutral-700 hover:text-neutral-800"
                         aria-label={t('nav:closeMenu', 'Close navigation menu')}
                     >
                         <XMarkIcon className="w-5 h-5" aria-hidden="true" />
