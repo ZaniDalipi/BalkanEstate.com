@@ -428,7 +428,7 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
   const [errMonthly, setErrMonthly] = useState('');
   const [resetMonthCheckbox, setResetMonthCheckbox] = useState(false);
 
-  // Sync input state when viewingUser changes (e.g., after parent refresh or new user selected)
+  // Sync input state ONLY when a different user is selected (not after saves on same user)
   useEffect(() => {
     setInputLimit(String(currentLimit));
     setInputMonthlyCounter(String(currentMonthlyCounter));
@@ -437,7 +437,7 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
     setErr('');
     setErrMonthly('');
     setResetMonthCheckbox(false);
-  }, [viewingUser._id, currentLimit, currentMonthlyCounter]);
+  }, [viewingUser._id]);
 
   // Track if value has changed from original
   const hasLimitChanged = inputLimit !== String(currentLimit);
