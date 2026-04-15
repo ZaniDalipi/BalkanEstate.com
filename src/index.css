@@ -821,6 +821,25 @@ html[data-zoom] #root {
   animation: slideInRight 0.4s ease-out forwards;
 }
 
+/* Bottom-sheet slide-up: full translateY(100%) → 0, used for mobile modals */
+@keyframes sheetSlideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* Only apply the sheet animation on mobile; tablet/desktop get a fast fade-scale */
+@media (max-width: 639px) {
+  .animate-sheet-up {
+    animation: sheetSlideUp 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+}
+
+@media (min-width: 640px) {
+  .animate-sheet-up {
+    animation: fadeIn 0.2s ease-out forwards;
+  }
+}
+
 .animate-scale-in {
   animation: scaleIn 0.3s ease-out forwards;
 }

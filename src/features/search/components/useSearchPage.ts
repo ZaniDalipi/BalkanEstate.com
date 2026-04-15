@@ -4,7 +4,7 @@ import { useAppContext } from '@/context/AppContext';
 import { useRealtimeProperties } from '@/src/features/properties/hooks';
 import { SavedSearch, ChatMessage, AiSearchQuery, Filters, initialFilters, SearchPageState, Property, NominatimResult } from '@/types';
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
-import { searchLocation } from '@/services/osmService';
+import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import L from 'leaflet';
 import { filterProperties } from '@/utils/propertyUtils';
 import { BALKAN_COUNTRIES, normalizeCountryKey } from '@/constants/countries';
@@ -132,7 +132,8 @@ export function useSearchPage() {
 
         // Fly to the location's center - mapBounds will update automatically
         // and properties visible on the map will show in the list
-        setFlyToTarget({ center: [Number(suggestion.lat), Number(suggestion.lon)], zoom: 12 });
+        const zoom = getZoomFromBoundingBox(suggestion.boundingbox);
+        setFlyToTarget({ center: [Number(suggestion.lat), Number(suggestion.lon)], zoom });
         setIsQueryInputFocused(false);
     }, [filters, updateSearchPageState]);
 

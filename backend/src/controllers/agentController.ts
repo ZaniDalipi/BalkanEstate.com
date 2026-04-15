@@ -24,14 +24,11 @@ export const getAgents = async (req: Request, res: Response): Promise<void> => {
 
     let filter: any = { isActive: true };
 
-    // Filter by license status
+    // Filter by verified license status
     if (licensed === 'true') {
-      filter.licenseNumber = { $exists: true, $nin: [null, ''] };
+      filter.licenseVerified = true;
     } else if (licensed === 'false') {
-      filter.$and = [
-        ...(filter.$and || []),
-        { $or: [{ licenseNumber: { $exists: false } }, { licenseNumber: null }, { licenseNumber: '' }] },
-      ];
+      filter.licenseVerified = { $ne: true };
     }
 
     // Universal search - searches across multiple fields

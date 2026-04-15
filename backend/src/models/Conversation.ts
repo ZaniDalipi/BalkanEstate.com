@@ -2,7 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 import { dbLogger } from '../utils/logger';
 
 export interface IConversation extends Document {
-  propertyId: mongoose.Types.ObjectId;
+  propertyId?: mongoose.Types.ObjectId; // Optional — null for direct agent conversations
   buyerId: mongoose.Types.ObjectId;
   sellerId: mongoose.Types.ObjectId;
   lastMessageAt: Date;
@@ -18,7 +18,8 @@ const ConversationSchema: Schema = new Schema(
     propertyId: {
       type: Schema.Types.ObjectId,
       ref: 'Property',
-      required: true,
+      required: false, // Optional — direct agent conversations have no property
+      default: null,
       index: true,
     },
     buyerId: {

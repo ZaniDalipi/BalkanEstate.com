@@ -470,13 +470,14 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             const response = await toggleSavedAgent(agent.id);
             // Sync with backend response
             setSavedAgent(response.isSaved);
-            success(response.isSaved
-                ? t('profilePage.agentSaved', 'Agent saved!')
-                : t('profilePage.agentUnsaved', 'Agent removed from saved'));
+            await success(
+                response.isSaved ? t('profilePage.agentSaved', 'Agent saved!') : t('profilePage.agentUnsaved', 'Agent removed'),
+                response.isSaved ? t('profilePage.agentSavedMsg', 'Added to your favorites') : t('profilePage.agentUnsavedMsg', 'Removed from your favorites')
+            );
         } catch (err: any) {
             // Revert on error
             setSavedAgent(previousState);
-            showError(err?.message || t('profilePage.saveError', 'Failed to save agent. Please try again.'));
+            showError(t('profilePage.saveError', 'Failed to save agent'), err?.message || t('profilePage.saveErrorMessage', 'Please try again.'));
         }
     };
 
@@ -514,7 +515,12 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             return;
         }
         try {
-            const conversation = await createConversation(agent.id);
+            // Try userId (User ObjectId), then agentId (custom string), then id (Agent ObjectId)
+            const sellerId = String(agent.userId || agent.agentId || agent.id || '');
+            if (!sellerId) {
+                throw new Error('Unable to identify agent');
+            }
+            const conversation = await createConversation({ sellerId });
             dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
             window.history.pushState({ page: 'inbox' }, '', '/inbox');
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
@@ -536,7 +542,12 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         setIsSubmitting(true);
         try {
             // Send appraisal request via message to agent
-            const conversation = await createConversation(agent.id);
+            // Try userId (User ObjectId), then agentId (custom string), then agent id (Agent ObjectId)
+            const sellerId = String(agent.userId || agent.agentId || agent.id || '');
+            if (!sellerId) {
+                throw new Error('Unable to identify agent');
+            }
+            const conversation = await createConversation({ sellerId });
             const messageText = `Property Appraisal Request:\n\nAddress: ${appraisalForm.address}\nProperty Type: ${appraisalForm.propertyType}\nNotes: ${appraisalForm.notes || 'No additional notes'}`;
 
             // Actually send the message to the conversation
@@ -568,7 +579,12 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         setIsSubmitting(true);
         try {
             // Send consultation request via message to agent
-            const conversation = await createConversation(agent.id);
+            // Try userId (User ObjectId), then agentId (custom string), then agent id (Agent ObjectId)
+            const sellerId = String(agent.userId || agent.agentId || agent.id || '');
+            if (!sellerId) {
+                throw new Error('Unable to identify agent');
+            }
+            const conversation = await createConversation({ sellerId });
             const messageText = `Consultation Request:\n\nPreferred Date: ${consultationForm.date}\nPreferred Time: ${consultationForm.time}\nTopic: ${consultationForm.topic}\nNotes: ${consultationForm.notes || 'No additional notes'}`;
 
             // Actually send the message to the conversation
@@ -800,6 +816,20 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         window.dispatchEvent(new PopStateEvent('popstate'));
     }, [dispatch]);
 
+    // Refresh agent data after license submission
+    const handleLicenseSubmitted = useCallback(async () => {
+        try {
+            const agentIdentifier = agentData.agentId || agentData.id;
+            if (!agentIdentifier) return;
+            const freshAgent = await fetchAgentById(agentIdentifier);
+            if (isMountedRef.current && freshAgent) {
+                setAgentData(prev => ({ ...prev, ...freshAgent }));
+            }
+        } catch {
+            // Silently fail — existing data remains as fallback
+        }
+    }, [agentData.agentId, agentData.id]);
+
     // ─── Return ──────────────────────────────────────────────────────────────
 
     return {
@@ -875,6 +905,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         handleEditAchievement,
         handleDeleteAchievement,
         handleViewProperty,
+        handleLicenseSubmitted,
     };
 }
 

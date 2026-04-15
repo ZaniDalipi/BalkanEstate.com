@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import Conversation from '../models/Conversation';
 import Message from '../models/Message';
 import Property from '../models/Property';
+import Agent from '../models/Agent';
 import User, { IUser } from '../models/User';
 import { SECURITY_WARNING } from '../utils/messageFilter';
 import cloudinary from '../config/cloudinary';
@@ -12,6 +14,8 @@ import { apiLogger } from '../utils/logger';
 import { sanitizeConversation } from '../utils/responseSanitizer';
 import { getObjectIdParam } from '../utils/validateParams';
 import { resolveId } from '../utils/idObfuscation';
+
+const { isValidObjectId } = mongoose;
 
 // @desc    Get user's conversations
 // @route   GET /api/conversations
@@ -136,6 +140,9 @@ export const getConversation = async (
 // @desc    Create or get conversation
 // @route   POST /api/conversations
 // @access  Private
+// Supports two modes:
+//   1. Property-based: { propertyId } → conversation about a specific listing
+//   2. Direct agent:   { sellerId }   → direct conversation with an agent (no property)
 export const createConversation = async (
   req: Request,
   res: Response
@@ -146,64 +153,130 @@ export const createConversation = async (
       return;
     }
 
+    const buyerId = String((req.user as IUser)._id);
     const rawPropertyId = req.body.propertyId;
+    const rawSellerId = req.body.sellerId;
 
-    if (!rawPropertyId) {
-      res.status(400).json({ message: 'Property ID is required' });
-      return;
-    }
+    // ── Mode 1: Property-based conversation ─────────────────────────────────
+    if (rawPropertyId) {
+      const propertyId = resolveId(rawPropertyId) || rawPropertyId;
 
-    // Resolve obfuscated or raw ID
-    const propertyId = resolveId(rawPropertyId) || rawPropertyId;
+      const property = await Property.findById(propertyId);
+      if (!property) {
+        res.status(404).json({ message: 'Property not found' });
+        return;
+      }
 
-    // Get property
-    const property = await Property.findById(propertyId);
+      if (property.sellerId.toString() === buyerId) {
+        res.status(400).json({ message: 'Cannot create conversation with yourself' });
+        return;
+      }
 
-    if (!property) {
-      res.status(404).json({ message: 'Property not found' });
-      return;
-    }
-
-    // Can't create conversation with yourself
-    if (property.sellerId.toString() === String((req.user as IUser)._id).toString()) {
-      res.status(400).json({ message: 'Cannot create conversation with yourself' });
-      return;
-    }
-
-    // Check if conversation already exists
-    let conversation = await Conversation.findOne({
-      propertyId,
-      buyerId: String((req.user as IUser)._id),
-      sellerId: property.sellerId,
-    })
-      .populate('propertyId', 'title imageUrl images price city country address propertyType sellerId')
-      .populate('buyerId', 'name email phone avatarUrl')
-      .populate('sellerId', 'name email phone avatarUrl role agencyName');
-
-    if (!conversation) {
-      // Create new conversation
-      conversation = await Conversation.create({
+      let conversation = await Conversation.findOne({
         propertyId,
-        buyerId: String((req.user as IUser)._id),
+        buyerId,
         sellerId: property.sellerId,
-      });
+      })
+        .populate('propertyId', 'title imageUrl images price city country address propertyType sellerId')
+        .populate('buyerId', 'name email phone avatarUrl')
+        .populate('sellerId', 'name email phone avatarUrl role agencyName');
 
-      // Increment inquiries count on property
-      property.inquiries += 1;
-      await property.save();
+      if (!conversation) {
+        conversation = await Conversation.create({
+          propertyId,
+          buyerId,
+          sellerId: property.sellerId,
+        });
 
-      // Update seller's inquiry stats in real-time
-      await incrementInquiryCount(String(property.sellerId));
+        property.inquiries += 1;
+        await property.save();
+        await incrementInquiryCount(String(property.sellerId));
 
-      await conversation.populate('propertyId', 'title images price city country address propertyType sellerId');
-      await conversation.populate('buyerId', 'name email phone avatarUrl');
-      await conversation.populate(
-        'sellerId',
-        'name email phone avatarUrl role agencyName'
-      );
+        await conversation.populate('propertyId', 'title images price city country address propertyType sellerId');
+        await conversation.populate('buyerId', 'name email phone avatarUrl');
+        await conversation.populate('sellerId', 'name email phone avatarUrl role agencyName');
+      }
+
+      res.status(201).json({ conversation: sanitizeConversation(conversation.toObject()) });
+      return;
     }
 
-    res.status(201).json({ conversation: sanitizeConversation(conversation.toObject()) });
+    // ── Mode 2: Direct agent conversation (no property) ─────────────────────
+    if (rawSellerId) {
+      // Resolve the agent/user ID: try User → Agent by ObjectId → Agent by custom agentId
+      let sellerUser: IUser | null = null;
+
+      const resolvedId = resolveId(rawSellerId) || (isValidObjectId(rawSellerId) ? rawSellerId : null);
+
+      if (resolvedId) {
+        sellerUser = await User.findById(resolvedId);
+      }
+
+      if (!sellerUser) {
+        // Try Agent document by ObjectId, then get its linked user
+        let agentDoc = resolvedId ? await Agent.findById(resolvedId) : null;
+
+        // Fallback: search by custom string agentId field (e.g. "AGT-123")
+        if (!agentDoc) {
+          agentDoc = await Agent.findOne({ agentId: rawSellerId });
+        }
+
+        if (agentDoc?.userId) {
+          sellerUser = await User.findById(agentDoc.userId);
+        }
+      }
+
+      if (!sellerUser) {
+        res.status(404).json({ message: 'Agent not found' });
+        return;
+      }
+
+      if (String(sellerUser._id) === buyerId) {
+        res.status(400).json({ message: 'Cannot create conversation with yourself' });
+        return;
+      }
+
+      const sellerId = String(sellerUser._id);
+
+      // Return existing direct conversation if one already exists
+      let conversation = await Conversation.findOne({
+        propertyId: { $exists: false },
+        buyerId,
+        sellerId,
+      })
+        .populate('buyerId', 'name email phone avatarUrl')
+        .populate('sellerId', 'name email phone avatarUrl role agencyName');
+
+      if (!conversation) {
+        // Also check without the $exists constraint (propertyId may be null/undefined)
+        conversation = await Conversation.findOne({
+          propertyId: null,
+          buyerId,
+          sellerId,
+        })
+          .populate('buyerId', 'name email phone avatarUrl')
+          .populate('sellerId', 'name email phone avatarUrl role agencyName');
+      }
+
+      if (!conversation) {
+        conversation = await Conversation.create({
+          buyerId,
+          sellerId,
+          // no propertyId — direct conversation
+        });
+
+        await incrementInquiryCount(sellerId);
+
+        await conversation.populate('buyerId', 'name email phone avatarUrl');
+        await conversation.populate('sellerId', 'name email phone avatarUrl role agencyName');
+      }
+
+      res.status(201).json({ conversation: sanitizeConversation(conversation.toObject()) });
+      return;
+    }
+
+    // ── Neither propertyId nor sellerId provided ─────────────────────────────
+    res.status(400).json({ message: 'Either propertyId or sellerId is required' });
   } catch (error: any) {
     apiLogger.error('Create conversation error:', error);
     res.status(500).json({ message: 'Error creating conversation' });
@@ -292,7 +365,7 @@ export const sendMessage = async (
       const property = conversation.propertyId as any;
 
       // Only send email if recipient has an email
-      if (recipient && recipient.email && property) {
+      if (recipient && recipient.email) {
         const messageText = text || (imageUrl ? '[Image message]' : '[Message]');
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
@@ -302,10 +375,10 @@ export const sendMessage = async (
           senderName: sender.name || 'A user',
           senderAvatarUrl: sender.avatarUrl,
           messagePreview: messageText.substring(0, 150) + (messageText.length > 150 ? '...' : ''),
-          propertyTitle: property.title || `${property.address}, ${property.city}`,
-          propertyAddress: property.address as string,
-          propertyCity: property.city as string,
-          propertyImageUrl: property.imageUrl || (property.images && property.images[0]?.url),
+          propertyTitle: property ? (property.title || `${property.address}, ${property.city}`) : '',
+          propertyAddress: property ? (property.address as string) : '',
+          propertyCity: property ? (property.city as string) : '',
+          propertyImageUrl: property ? (property.imageUrl || (property.images && property.images[0]?.url)) : undefined,
           conversationUrl: `${frontendUrl}/inbox`,
         });
       }

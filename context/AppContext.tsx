@@ -382,7 +382,7 @@ interface AppContextType {
     fetchProperties: (filters?: Filters) => Promise<void>;
     toggleSavedHome: (property: Property) => Promise<void>;
     addSavedSearch: (search: SavedSearch) => Promise<void>;
-    createConversation: (propertyId: string) => Promise<Conversation>;
+    createConversation: (propertyIdOrOptions: string | { propertyId?: string; sellerId?: string }) => Promise<Conversation>;
     deleteConversation: (conversationId: string) => Promise<void>;
     sendMessage: (conversationId: string, message: Message) => Promise<void>;
     createListing: (property: Property) => Promise<Property>;
@@ -651,8 +651,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     dispatch({ type: 'ADD_SAVED_SEARCH', payload: newSearch });
   }, []);
 
-  const createConversation = useCallback(async (propertyId: string) => {
-      const conversation = await apiCreateConversation(propertyId);
+  const createConversation = useCallback(async (propertyIdOrOptions: string | { propertyId?: string; sellerId?: string }) => {
+      const conversation = await apiCreateConversation(propertyIdOrOptions);
       dispatch({ type: 'CREATE_CONVERSATION', payload: conversation });
       return conversation;
   }, []);

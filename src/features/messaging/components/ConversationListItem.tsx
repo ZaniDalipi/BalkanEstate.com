@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Conversation } from '@/types';
 import { useAppContext } from '@/context/AppContext';
-import { BuildingOfficeIcon } from '@/constants';
+import { BuildingOfficeIcon, UserCircleIcon } from '@/constants';
 
 interface ConversationListItemProps {
     conversation: Conversation;
@@ -10,15 +11,12 @@ interface ConversationListItemProps {
 }
 
 const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversation, isSelected, onSelect }) => {
+    const { t } = useTranslation(['messages']);
     const { state, dispatch } = useAppContext();
-    const resolvedImageUrl = property.imageUrl || property.images?.[0]?.url;
-    const [imageError, setImageError] = useState(!resolvedImageUrl);
     const property = conversation.property || state.properties.find(p => p.id === conversation.propertyId);
+    const resolvedImageUrl = property?.imageUrl || property?.images?.[0]?.url;
+    const [imageError, setImageError] = useState(!resolvedImageUrl);
     const currentUserId = state.currentUser?.id;
-
-    if (!property) {
-        return null; // Or some fallback UI
-    }
 
     // Use lastMessage from conversation if messages array is empty
     const lastMessage = (conversation.messages && conversation.messages.length > 0)
@@ -31,8 +29,8 @@ const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversatio
 
     // Get the other person's name for displaying in message preview
     const otherPersonName = isBuyer
-        ? (conversation.seller?.name || property?.seller?.name || 'Seller')
-        : (conversation.buyer?.name || 'Buyer');
+        ? (conversation.seller?.name || property?.seller?.name || t('messages:inbox.seller', 'Seller'))
+        : (conversation.buyer?.name || t('messages:inbox.buyer', 'Buyer'));
 
     const handleClick = () => {
         onSelect();
@@ -40,6 +38,16 @@ const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversatio
             dispatch({ type: 'MARK_CONVERSATION_AS_READ', payload: conversation.id });
         }
     };
+
+    // Display label: property address or agent/seller name for direct conversations
+    const displayTitle = property
+        ? (property.title || property.address)
+        : otherPersonName;
+    const displaySubtitle = property
+        ? `${property.address ? `${property.address}, ` : ''}${property.city}, ${property.country}`
+        : (conversation.seller?.role === 'agent'
+            ? t('messages:inbox.directAgentConversation', 'Direct Agent Conversation')
+            : t('messages:inbox.directConversation', 'Direct Conversation'));
 
     return (
         <button
@@ -51,7 +59,11 @@ const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversatio
             }`}
         >
             <div className="relative flex-shrink-0">
-                {imageError ? (
+                {!property ? (
+                    <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center rounded-md">
+                        <UserCircleIcon className="w-8 h-8 text-primary/60" />
+                    </div>
+                ) : imageError ? (
                     <div className="w-16 h-16 bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center rounded-md">
                         <BuildingOfficeIcon className="w-8 h-8 text-neutral-400" />
                     </div>
@@ -71,14 +83,16 @@ const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversatio
             </div>
             <div className="flex-grow overflow-hidden">
                 <div className="flex justify-between items-center">
-                    <p className={`font-bold text-sm truncate ${isSelected ? 'text-primary-dark' : 'text-neutral-800'}`}>{property.title || property.address}</p>
+                    <p className={`font-bold text-sm truncate ${isSelected ? 'text-primary-dark' : 'text-neutral-800'}`}>
+                        {displayTitle}
+                    </p>
                     {unreadCount > 0 && (
                          <span className="bg-primary text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ml-2">
                             {unreadCount}
                         </span>
                     )}
                 </div>
-                <p className="text-xs text-neutral-500 truncate">{property.title ? `${property.address}, ` : ''}{property.city}, {property.country}</p>
+                <p className="text-xs text-neutral-500 truncate">{displaySubtitle}</p>
                 {lastMessage && (
                     <p className={`text-xs mt-1 truncate ${unreadCount > 0 ? 'font-bold text-neutral-800' : 'text-neutral-600'}`}>
                         {(() => {
@@ -87,9 +101,9 @@ const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversatio
                                 ? (lastMessage.senderId as any)._id || (lastMessage.senderId as any).id
                                 : lastMessage.senderId;
                             const isFromCurrentUser = String(senderId) === String(currentUserId);
-                            return isFromCurrentUser ? 'You: ' : `${otherPersonName}: `;
+                            return isFromCurrentUser ? `${t('messages:inbox.you', 'You')}: ` : `${otherPersonName}: `;
                         })()}
-                        {lastMessage.text || 'Image'}
+                        {lastMessage.text || t('messages:inbox.image', 'Image')}
                     </p>
                 )}
             </div>

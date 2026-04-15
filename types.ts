@@ -428,7 +428,7 @@ export interface Message {
 
 export interface Conversation {
     id: string;
-    propertyId: string;
+    propertyId?: string;
     property?: Property;
     buyerId: string;
     sellerId: string;
