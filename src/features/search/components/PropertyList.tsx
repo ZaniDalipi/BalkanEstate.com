@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
-import { SearchIcon, XMarkIcon, BellIcon, BuildingLibraryIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon } from '@/constants';
+import { SearchIcon, XMarkIcon, BellIcon, BuildingLibraryIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon, AdjustmentsHorizontalIcon } from '@/constants';
 import AiSearch from './AiSearch';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import Footer from '@/components/shared/Footer';
@@ -137,17 +137,6 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
     return (
          <div className="space-y-4">
-            {!isMobile && (
-                <div className="flex items-center gap-2">
-                        <button
-                            onClick={onResetFilters}
-                            className="flex-grow py-2.5 px-4 border border-neutral-300 text-neutral-600 rounded-lg text-sm font-bold bg-white hover:bg-neutral-100 transition-colors"
-                            aria-label={t('search:filters.resetFilters')}
-                        >
-                            {t('search:filters.resetFilters')}
-                        </button>
-                    </div>
-            )}
 
             {/* Search by Address */}
             <div className="relative">
@@ -676,43 +665,6 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                 )}
             </div>
 
-            {!isMobile && (
-                 <div className="pt-2 space-y-2">
-                     <button
-                        onClick={onSearchClick}
-                        disabled={isSearchingLocation}
-                        className="w-full py-2.5 px-4 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
-                    >
-                        {isSearchingLocation ? (
-                            <>
-                                <SpinnerIcon className="w-5 h-5" />
-                                <span>{t('search:ai.searching')}</span>
-                            </>
-                        ) : (
-                            t('search:searchButton')
-                        )}
-                    </button>
-                     <div className="flex items-center gap-2">
-                        <button
-                            onClick={onSaveSearch}
-                            disabled={isSaving}
-                            className="flex-grow py-2.5 px-4 border border-primary text-primary rounded-lg shadow-sm text-sm font-bold bg-white hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
-                        >
-                            {isSaving ? (
-                                <>
-                                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    {t('search:ai.searching')}
-                                </>
-                            ) : (
-                                t('search:savedSearch.saveSearch')
-                            )}
-                        </button>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
@@ -786,11 +738,26 @@ const PropertyList = memo<PropertyListProps>((props) => {
 
     // Use props instead of useAppContext() to avoid re-rendering the
     // entire property list when unrelated context state changes (e.g. savedHomes).
-    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover, onResetFilters, isLoadingProperties = false, isAuthenticated = false, onOpenAuthModal } = props;
+    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover, onResetFilters, onSearchClick, onSaveSearch, isSaving, isSearchingLocation, isLoadingProperties = false, isAuthenticated = false, onOpenAuthModal } = props;
 
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
     const loadMoreRef = useRef(null);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(true);
+
+    // Count active basic filters (shown in collapse toggle badge)
+    const activeBasicFilterCount = [
+        filters.query,
+        filters.minPrice,
+        filters.maxPrice,
+        filters.minSqft,
+        filters.maxSqft,
+        filters.minPricePerSqm,
+        filters.maxPricePerSqm,
+        filters.maxDaysListed,
+        filters.hasDiscount,
+        filters.hasPriceIncrease,
+    ].filter(v => v !== null && v !== undefined && v !== '' && v !== false).length;
 
     // Entrance animation: check if splash screen just completed
     const [animateCards, setAnimateCards] = useState(() => {
@@ -844,7 +811,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
             <div className="flex flex-col h-full bg-transparent">
                 {/* TOP CONTROLS SECTION */}
                 <div className={`${searchMode === 'ai' ? 'flex flex-col' : 'flex-shrink-0'} border-b border-neutral-200`} style={searchMode === 'ai' ? { flex: '1 1 50%', minHeight: 0 } : undefined}>
-                    <div className="p-4 flex-shrink-0">
+                    <div className="p-4 pb-2 flex-shrink-0">
                         <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm max-w-sm mx-auto">
                             <button onClick={() => onSearchModeChange('manual')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'manual' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('search:title')}</button>
                             {isAuthenticated ? (
@@ -857,13 +824,45 @@ const PropertyList = memo<PropertyListProps>((props) => {
                         </div>
                     </div>
 
-                    <div className={`px-4 pb-4 relative z-[60] ${searchMode === 'ai' ? 'flex-grow min-h-0' : ''}`} style={searchMode === 'manual' ? { height: '280px' } : undefined}>
-                        {searchMode === 'manual' ? (
-                            <div className="h-full overflow-y-auto pr-2">
+                    {searchMode === 'manual' && (
+                        <div className="px-4 pt-2 pb-1 flex-shrink-0">
+                            <button
+                                type="button"
+                                onClick={() => setIsFiltersCollapsed(!isFiltersCollapsed)}
+                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-neutral-50 border border-neutral-200 hover:bg-neutral-100 transition-colors"
+                                aria-expanded={!isFiltersCollapsed}
+                                aria-controls="desktop-filter-panel"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <AdjustmentsHorizontalIcon className="w-4 h-4 text-neutral-600" />
+                                    <span className="text-sm font-semibold text-neutral-700">{t('search:filters.filters', 'Filters')}</span>
+                                    {isFiltersCollapsed && activeBasicFilterCount > 0 && (
+                                        <span className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-primary rounded-full">
+                                            {activeBasicFilterCount}
+                                        </span>
+                                    )}
+                                </div>
+                                <ChevronDownIcon className={`w-4 h-4 text-neutral-500 transition-transform duration-300 ${isFiltersCollapsed ? '' : 'rotate-180'}`} />
+                            </button>
+                        </div>
+                    )}
+
+                    {searchMode === 'manual' ? (
+                        <div
+                            id="desktop-filter-panel"
+                            className="relative z-[60] overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out"
+                            style={isFiltersCollapsed
+                                ? { maxHeight: 0, opacity: 0 }
+                                : { maxHeight: '50vh', opacity: 1 }
+                            }
+                        >
+                            <div className="px-4 pb-4 overflow-y-auto" style={{ maxHeight: '50vh' }}>
                                 <FilterControls {...props} />
                             </div>
-                        ) : (
-                            <div className="h-full">
+                        </div>
+                    ) : (
+                        <div className="relative z-[60] flex-grow min-h-0">
+                            <div className="px-4 pb-4 h-full">
                                 <AiSearch
                                     properties={properties}
                                     onApplyFilters={onApplyAiFilters}
@@ -872,8 +871,54 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     onHistoryChange={onAiChatHistoryChange}
                                 />
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
+
+                    {/* Action buttons - always visible outside collapsible panel */}
+                    {searchMode === 'manual' && (
+                        <div className="px-4 py-2 flex-shrink-0 space-y-2">
+                            <button
+                                onClick={onSearchClick}
+                                disabled={isSearchingLocation}
+                                className="w-full py-2.5 px-4 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
+                            >
+                                {isSearchingLocation ? (
+                                    <>
+                                        <SpinnerIcon className="w-5 h-5" />
+                                        <span>{t('search:ai.searching')}</span>
+                                    </>
+                                ) : (
+                                    t('search:searchButton')
+                                )}
+                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={onResetFilters}
+                                    className="flex-1 py-2 px-4 border border-neutral-300 text-neutral-600 rounded-lg text-sm font-bold bg-white hover:bg-neutral-100 transition-colors"
+                                    aria-label={t('search:filters.resetFilters')}
+                                >
+                                    {t('search:filters.resetFilters')}
+                                </button>
+                                <button
+                                    onClick={onSaveSearch}
+                                    disabled={isSaving}
+                                    className="flex-1 py-2 px-4 border border-primary text-primary rounded-lg text-sm font-bold bg-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2 transition-colors"
+                                >
+                                    {isSaving ? (
+                                        <>
+                                            <svg className="animate-spin h-4 w-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            {t('search:ai.searching')}
+                                        </>
+                                    ) : (
+                                        t('search:savedSearch.saveSearch')
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* PROPERTY LIST SECTION */}
