@@ -440,8 +440,8 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
   }, [viewingUser._id]);
 
   // Track if value has changed from original
-  const hasLimitChanged = inputLimit !== String(currentLimit);
-  const hasCounterChanged = inputMonthlyCounter !== String(currentMonthlyCounter);
+  const hasLimitChanged = Number(inputLimit) !== currentLimit;
+  const hasCounterChanged = Number(inputMonthlyCounter) !== currentMonthlyCounter;
 
   const formatDisplayDate = (dateStr?: string) => {
     if (!dateStr) return '—';
