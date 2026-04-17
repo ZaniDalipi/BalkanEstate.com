@@ -442,6 +442,12 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/create-agency/confirm': 'createAgencyConfirm',
       };
 
+      // /auth/callback is handled by AppWrapper's OAuth useEffect — preserve the URL and token
+      if (path === '/auth/callback') {
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+        return;
+      }
+
       // /login and /register open the AuthModal over the search page
       if (path === '/login' || path === '/register') {
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
