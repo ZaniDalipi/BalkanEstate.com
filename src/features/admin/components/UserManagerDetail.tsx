@@ -9,6 +9,7 @@ import {
 import { User, UserEditForm } from './useUserManager';
 import { apiRequest } from '@/src/shared/api';
 import { approveLicense, rejectLicense } from '../api/adminApi';
+import { useUpdateUserListingCounter } from '../hooks/useAdminData';
 
 interface UserManagerDetailProps {
   // Detail modal
@@ -423,12 +424,17 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
   // Monthly counter editor state
   const currentMonthlyCounter = viewingUser.subscription?.listingsCreatedThisMonth ?? 0;
   const [inputMonthlyCounter, setInputMonthlyCounter] = useState(String(currentMonthlyCounter));
-  const [savingMonthly, setSavingMonthly] = useState(false);
   const [savedMonthly, setSavedMonthly] = useState(false);
   const [errMonthly, setErrMonthly] = useState('');
   const [resetMonthCheckbox, setResetMonthCheckbox] = useState(false);
 
-  // Sync input state ONLY when a different user is selected (not after saves on same user)
+  // React Query mutation — handles optimistic update + cache invalidation
+  const counterMutation = useUpdateUserListingCounter();
+  const savingMonthly = counterMutation.isPending;
+
+  // Sync inputs only when switching to a different user. Doing so on counter
+  // changes would stomp on the admin's in-progress edits; optimistic updates
+  // already keep the "current:" label in sync with the server.
   useEffect(() => {
     setInputLimit(String(currentLimit));
     setInputMonthlyCounter(String(currentMonthlyCounter));
@@ -437,6 +443,7 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
     setErr('');
     setErrMonthly('');
     setResetMonthCheckbox(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewingUser._id]);
 
   // Track if value has changed from original
@@ -506,8 +513,7 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
     }
   };
 
-  const handleSaveMonthlyCounter = async () => {
-    // Validation
+  const handleSaveMonthlyCounter = () => {
     const validation = validateNumber(inputMonthlyCounter);
     if (!validation.valid) {
       setErrMonthly(validation.error || 'Invalid value');
@@ -520,41 +526,24 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
       return;
     }
 
-    setSavingMonthly(true);
     setErrMonthly('');
-    try {
-      const response = await apiRequest(`/admin/users/${viewingUser._id}/listing-counter`, {
-        method: 'PATCH',
-        body: { listingsCreatedThisMonth: val, resetMonth: resetMonthCheckbox },
-        requiresAuth: true,
-      });
-
-      if (!response.success) {
-        setErrMonthly(response.message || 'Failed to update counter');
-        setSavingMonthly(false);
-        return;
+    counterMutation.mutate(
+      {
+        userId: viewingUser._id,
+        listingsCreatedThisMonth: val,
+        resetMonth: resetMonthCheckbox,
+      },
+      {
+        onSuccess: () => {
+          setSavedMonthly(true);
+          setTimeout(() => setSavedMonthly(false), 3000);
+          setResetMonthCheckbox(false);
+        },
+        onError: (e: any) => {
+          setErrMonthly(e?.message || 'Failed to update counter');
+        },
       }
-
-      // Update local state to reflect change
-      viewingUser.subscription = viewingUser.subscription || {};
-      viewingUser.subscription.listingsCreatedThisMonth = val;
-      if (resetMonthCheckbox) {
-        viewingUser.subscription.monthResetDate = new Date().toISOString();
-      }
-
-      setSavedMonthly(true);
-      setTimeout(() => setSavedMonthly(false), 3000);
-      setResetMonthCheckbox(false); // Reset checkbox after successful save
-
-      // Trigger parent refresh to sync across all components
-      if (onUpdate) {
-        setTimeout(() => onUpdate(), 500);
-      }
-    } catch (e: any) {
-      setErrMonthly(e.message || 'Error saving counter');
-    } finally {
-      setSavingMonthly(false);
-    }
+    );
   };
 
   return (
