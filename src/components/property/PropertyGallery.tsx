@@ -156,6 +156,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   const getVideoEmbedUrl = useCallback((url: string): { embedUrl: string; platform: string } => {
     if (!url) return { embedUrl: '', platform: 'unknown' };
 
+    // Remove query parameters and trailing slashes for consistent matching
+    const cleanUrl = url.split('?')[0].replace(/\/$/, '');
+
     // --- YouTube ---
     // watch?v=ID, watch?feature=share&v=ID (v= as first or later param)
     const ytParamMatch = url.match(/youtube\.com\/watch\?(?:.*&)?v=([a-zA-Z0-9_-]{11})/);
@@ -163,58 +166,58 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
       return { embedUrl: `https://www.youtube.com/embed/${ytParamMatch[1]}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`, platform: 'youtube' };
     }
     // embed/ID, shorts/ID, v/ID (legacy), live/ID
-    const ytPathMatch = url.match(/youtube\.com\/(?:embed|shorts|v|live)\/([a-zA-Z0-9_-]{11})/);
+    const ytPathMatch = cleanUrl.match(/youtube\.com\/(?:embed|shorts|v|live)\/([a-zA-Z0-9_-]{11})/);
     if (ytPathMatch) {
       return { embedUrl: `https://www.youtube.com/embed/${ytPathMatch[1]}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`, platform: 'youtube' };
     }
     // youtu.be/ID short links
-    const ytShortMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+    const ytShortMatch = cleanUrl.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
     if (ytShortMatch) {
       return { embedUrl: `https://www.youtube.com/embed/${ytShortMatch[1]}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`, platform: 'youtube' };
     }
 
     // --- Vimeo ---
     // player.vimeo.com/video/ID (already an embed URL)
-    const vimeoPlayerMatch = url.match(/player\.vimeo\.com\/video\/(\d+)/);
+    const vimeoPlayerMatch = cleanUrl.match(/player\.vimeo\.com\/video\/(\d+)/);
     if (vimeoPlayerMatch) {
       return { embedUrl: `https://player.vimeo.com/video/${vimeoPlayerMatch[1]}?autoplay=1&playsinline=1`, platform: 'vimeo' };
     }
     // vimeo.com/channels/xxx/ID, vimeo.com/groups/xxx/videos/ID, vimeo.com/manage/videos/ID
-    const vimeoPathMatch = url.match(/vimeo\.com\/(?:channels\/[\w]+\/|groups\/[\w]+\/videos\/|manage\/videos\/)(\d+)/);
+    const vimeoPathMatch = cleanUrl.match(/vimeo\.com\/(?:channels\/[\w]+\/|groups\/[\w]+\/videos\/|manage\/videos\/)(\d+)/);
     if (vimeoPathMatch) {
       return { embedUrl: `https://player.vimeo.com/video/${vimeoPathMatch[1]}?autoplay=1&playsinline=1`, platform: 'vimeo' };
     }
     // vimeo.com/ID (standard - must be after path-based matches to avoid false positives)
-    const vimeoStdMatch = url.match(/vimeo\.com\/(\d+)/);
+    const vimeoStdMatch = cleanUrl.match(/vimeo\.com\/(\d+)/);
     if (vimeoStdMatch) {
       return { embedUrl: `https://player.vimeo.com/video/${vimeoStdMatch[1]}?autoplay=1&playsinline=1`, platform: 'vimeo' };
     }
 
     // --- TikTok ---
     // tiktok.com/@username/video/ID (full URL)
-    const tiktokFullMatch = url.match(/tiktok\.com\/@[\w.-]+\/video\/(\d+)/);
+    const tiktokFullMatch = cleanUrl.match(/tiktok\.com\/@[\w.-]+\/video\/(\d+)/);
     if (tiktokFullMatch) {
       return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokFullMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
     }
     // m.tiktok.com/v/ID (mobile URL)
-    const tiktokMobileMatch = url.match(/m\.tiktok\.com\/v\/(\d+)/);
+    const tiktokMobileMatch = cleanUrl.match(/m\.tiktok\.com\/v\/(\d+)/);
     if (tiktokMobileMatch) {
       return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokMobileMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
     }
-    // vm.tiktok.com/CODE/ (short URL - alphanumeric)
-    const tiktokVmMatch = url.match(/vm\.tiktok\.com\/([\w]+)/);
+    // vm.tiktok.com/CODE/ (short URL - alphanumeric, case insensitive)
+    const tiktokVmMatch = cleanUrl.match(/vm\.tiktok\.com\/([A-Za-z0-9]+)/);
     if (tiktokVmMatch) {
       return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokVmMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
     }
     // tiktok.com/t/CODE/ (another short URL format)
-    const tiktokTMatch = url.match(/tiktok\.com\/t\/([\w]+)/);
+    const tiktokTMatch = cleanUrl.match(/tiktok\.com\/t\/([A-Za-z0-9]+)/);
     if (tiktokTMatch) {
       return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokTMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
     }
 
     // --- Instagram ---
-    // instagram.com/reel/CODE, /p/CODE, /tv/CODE (IGTV)
-    const instagramMatch = url.match(/instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/);
+    // instagram.com/reel/CODE, /p/CODE, /tv/CODE (IGTV), handling query parameters
+    const instagramMatch = cleanUrl.match(/instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/);
     if (instagramMatch) {
       return { embedUrl: `https://www.instagram.com/${instagramMatch[1]}/${instagramMatch[2]}/embed/`, platform: 'instagram' };
     }
@@ -226,17 +229,17 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
       return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
     }
     // facebook.com/share/v/CODE/ (share links)
-    const fbShareMatch = url.match(/facebook\.com\/share\/v\/([A-Za-z0-9_-]+)/);
+    const fbShareMatch = cleanUrl.match(/facebook\.com\/share\/v\/([A-Za-z0-9_-]+)/);
     if (fbShareMatch) {
       return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
     }
     // facebook.com/watch/?v=ID, /videos/ID, /reel/ID
-    const fbVideoMatch = url.match(/facebook\.com\/(?:watch\/?\?v=|[\w.]+\/videos\/|reel\/)(\d+)/);
+    const fbVideoMatch = cleanUrl.match(/facebook\.com\/(?:watch\/?\?v=|[\w.]+\/videos\/|reel\/)(\d+)/);
     if (fbVideoMatch) {
       return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
     }
     // fb.watch/CODE/ (short links)
-    const fbWatchMatch = url.match(/fb\.watch\/([A-Za-z0-9_-]+)/);
+    const fbWatchMatch = cleanUrl.match(/fb\.watch\/([A-Za-z0-9_-]+)/);
     if (fbWatchMatch) {
       return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
     }
