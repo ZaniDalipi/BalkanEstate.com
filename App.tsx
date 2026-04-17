@@ -442,6 +442,12 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/create-agency/confirm': 'createAgencyConfirm',
       };
 
+      // /auth/callback is handled by AppWrapper's OAuth useEffect — preserve the URL and token
+      if (path === '/auth/callback') {
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+        return;
+      }
+
       // /login and /register open the AuthModal over the search page
       if (path === '/login' || path === '/register') {
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
@@ -1084,24 +1090,26 @@ const AppWrapper: React.FC = () => {
     }, [state.currentUser?.isEmailVerified, state.pendingEmailVerification, dispatch]);
 
     useEffect(() => {
-        // Check for OAuth callback parameters in URL
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
         const refreshToken = urlParams.get('refresh');
         const error = urlParams.get('error');
+        const pathname = window.location.pathname;
 
-        // Check if this is a page that uses 'token' param for non-OAuth purposes
-        // - reset-password: uses token for password reset
-        // - verify-email: uses token for email verification
-        const isTokenUsedPage = window.location.pathname.includes('reset-password') ||
-                                window.location.pathname.includes('verify-email');
+        // OAuth tokens are ONLY valid when the backend has redirected to /auth/callback.
+        // Restricting to this path prevents arbitrary ?token= params on other pages
+        // (e.g. crafted phishing links) from being processed as OAuth credentials.
+        const isOAuthCallback = pathname.includes('auth/callback');
 
-        // Only process as OAuth callback if NOT on a page that uses token for other purposes
-        if (!isTokenUsedPage) {
-            // SECURITY: Immediately clean up URL to remove OAuth tokens from browser history
-            // This prevents tokens from being logged or leaked via Referer headers
+        // reset-password and verify-email also use a ?token= param for different purposes.
+        const isTokenUsedPage = pathname.includes('reset-password') ||
+                                pathname.includes('verify-email');
+
+        if (isOAuthCallback && !isTokenUsedPage) {
+            // SECURITY: Strip OAuth params from URL immediately so they don't appear
+            // in browser history, server logs, or leak via the Referer header.
             if (token || refreshToken || error) {
-                window.history.replaceState({}, document.title, window.location.pathname);
+                window.history.replaceState({}, document.title, pathname);
             }
 
             if (error) {
@@ -1117,13 +1125,12 @@ const AppWrapper: React.FC = () => {
             }
 
             if (token) {
-                // SECURITY: Only tokens are passed in URL, user data is fetched securely via API
                 handleOAuthCallback(token, refreshToken || undefined);
                 return;
             }
         }
 
-        // Normal auth check (for all pages including reset-password and verify-email)
+        // Normal auth check for all other pages
         checkAuthStatus();
     }, [checkAuthStatus, handleOAuthCallback, dispatch]);
 
