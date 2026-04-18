@@ -194,30 +194,27 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
 
     // --- TikTok ---
-    // tiktok.com/@username/video/ID (full URL)
+    // tiktok.com/@username/video/ID (full URL - numeric ID)
     const tiktokFullMatch = cleanUrl.match(/tiktok\.com\/@[\w.-]+\/video\/(\d+)/);
     if (tiktokFullMatch) {
       return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokFullMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
     }
-    // m.tiktok.com/v/ID (mobile URL)
+    // m.tiktok.com/v/ID (mobile URL - numeric ID)
     const tiktokMobileMatch = cleanUrl.match(/m\.tiktok\.com\/v\/(\d+)/);
     if (tiktokMobileMatch) {
       return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokMobileMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
     }
-    // vm.tiktok.com/CODE/ (short URL - any non-separator chars)
-    const tiktokVmMatch = cleanUrl.match(/vm\.tiktok\.com\/([^\s/?#]+)/);
+    // vm.tiktok.com/CODE/ or vt.tiktok.com/CODE/ (short URLs - can't embed due to X-Frame-Options)
+    const tiktokVmMatch = cleanUrl.match(/v[mt]\.tiktok\.com\/([^\s/?#]+)/);
     if (tiktokVmMatch) {
-      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokVmMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
+      // Short codes can't be embedded directly - return empty to show fallback link
+      return { embedUrl: '', platform: 'tiktok' };
     }
-    // vt.tiktok.com/CODE/ (mobile share short URL)
-    const tiktokVtMatch = cleanUrl.match(/vt\.tiktok\.com\/([^\s/?#]+)/);
-    if (tiktokVtMatch) {
-      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokVtMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
-    }
-    // tiktok.com/t/CODE/ (another short URL format)
+    // tiktok.com/t/CODE/ (share link short format - can't embed due to restrictions)
     const tiktokTMatch = cleanUrl.match(/tiktok\.com\/t\/([^\s/?#]+)/);
     if (tiktokTMatch) {
-      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokTMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
+      // Can't embed short codes - show fallback link
+      return { embedUrl: '', platform: 'tiktok' };
     }
 
     // --- Instagram ---
@@ -454,7 +451,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   </svg>
                 </button>
               </>
-            ) : (
+            ) : videoInfo.embedUrl ? (
               <>
                 {/* External video player for YouTube, Vimeo, Facebook */}
                 <iframe
@@ -495,6 +492,29 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   <span className="capitalize">{t('property:gallery.videoTour', 'Video Tour')}</span>
                 </div>
               </>
+            ) : (
+              <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-neutral-900 to-neutral-800 p-6">
+                <div className="text-center">
+                  <svg className="w-16 h-16 text-neutral-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-neutral-300 text-sm mb-4">
+                    {t('property:gallery.videoEmbedNotSupported', 'This video link cannot be embedded directly')}
+                  </p>
+                  <a
+                    href={externalVideoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary to-primary-dark text-white font-medium rounded-lg hover:shadow-lg transition-shadow"
+                  >
+                    {t('property:gallery.openVideo', 'Open Video')}
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
             )}
           </div>
         ) : viewMode === 'streetview' ? (
