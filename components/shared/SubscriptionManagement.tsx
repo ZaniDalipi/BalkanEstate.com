@@ -58,6 +58,7 @@ interface ProductData {
   };
   // Limit fields for placeholder replacement
   listingsLimit?: number;
+  listingsPerMonth?: number; // Monthly listing allowance
   promotionCoupons?: number;
   premiumCoupons?: number;
   highlightedCoupons?: number;
@@ -271,6 +272,13 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     productId: string;
   } | null>(null);
 
+  // Request more listings state
+  const [showRequestMoreModal, setShowRequestMoreModal] = useState(false);
+  const [requestMessage, setRequestMessage] = useState('');
+  const [sendingRequest, setSendingRequest] = useState(false);
+  const [requestSuccess, setRequestSuccess] = useState(false);
+  const [requestError, setRequestError] = useState<string | null>(null);
+
   const user = state.currentUser as User;
 
   // Fetch products from database — include seller, buyer, and agent plans so all subscriptions display correctly
@@ -445,6 +453,33 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     }
     fetchSubscription();
   }, [userAgencyId, userSubTier, fetchSubscription]);
+
+  // Auto-refresh user data when tab regains focus (for admin counter changes)
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible') {
+        // Tab came back into focus — refresh subscription and user data
+        const token = tokenService.getAccessToken();
+        if (token) {
+          try {
+            const response = await fetch(`${API_URL}/auth/me`, {
+              credentials: 'include',
+              headers: { 'Authorization': `Bearer ${token}` },
+            });
+            if (response.ok) {
+              const data = await response.json();
+              dispatch({ type: 'UPDATE_USER', payload: data.user });
+            }
+          } catch (error) {
+            // Silent fail - not critical
+          }
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [dispatch]);
 
   // Derive max team members from the enterprise product in DB (owner + agents)
   const enterpriseMaxAgents = useMemo(() => {
@@ -865,6 +900,47 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         dispatch({ type: 'UPDATE_USER', payload: data.user });
       }
     } catch (error) {
+    }
+  };
+
+  // Request more listings via email to admin
+  const handleRequestMoreListings = async () => {
+    setSendingRequest(true);
+    setRequestError(null);
+    setRequestSuccess(false);
+
+    try {
+      const token = tokenService.getAccessToken();
+      await ensureCsrfToken();
+
+      const response = await fetch(`${API_URL}/subscriptions/request-more-listings`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          ...csrfHeaders(),
+        },
+        body: JSON.stringify({
+          message: requestMessage,
+        }),
+      });
+
+      if (response.ok) {
+        setRequestSuccess(true);
+        setRequestMessage('');
+        setTimeout(() => {
+          setShowRequestMoreModal(false);
+          setRequestSuccess(false);
+        }, 2000);
+      } else {
+        const data = await response.json();
+        setRequestError(data.message || 'Failed to send request');
+      }
+    } catch (error: any) {
+      setRequestError(error.message || 'An error occurred while sending your request');
+    } finally {
+      setSendingRequest(false);
     }
   };
 
@@ -1308,6 +1384,24 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               }
             })()}
           </div>
+
+          {/* Request More Listings button - shown when usage ≥80% */}
+          {(() => {
+            const created = user.subscription?.listingsCreatedThisMonth || 0;
+            const monthlyLimit = currentProduct?.listingsPerMonth || currentProduct?.listingsLimit || subscriptionDetails.currentPlan.listingLimit || 30;
+            const percentage = (created / monthlyLimit) * 100;
+
+            return percentage >= 80 ? (
+              <div className="mt-4 pt-4 border-t border-neutral-200">
+                <button
+                  onClick={() => setShowRequestMoreModal(true)}
+                  className="w-full px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-100 font-medium text-sm transition-colors"
+                >
+                  📧 Request More Listings
+                </button>
+              </div>
+            ) : null;
+          })()}
         </div>
       </div>
 
@@ -2176,6 +2270,66 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           onError={handlePaymentError}
           productId={selectedPlanForPayment.productId}
         />
+      )}
+
+      {/* Request More Listings Modal */}
+      {showRequestMoreModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-lg">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-lg">
+                📧
+              </div>
+              <h3 className="text-lg font-bold text-neutral-900">Request More Listings</h3>
+            </div>
+
+            <p className="text-sm text-neutral-600 mb-4">
+              You're approaching your monthly listing limit. Let us know if you'd like to increase it, and our team will review your request.
+            </p>
+
+            {requestSuccess ? (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                <p className="text-sm font-medium text-green-800">✓ Request sent successfully!</p>
+                <p className="text-xs text-green-700 mt-1">Our team will review your request and contact you soon.</p>
+              </div>
+            ) : (
+              <>
+                <textarea
+                  value={requestMessage}
+                  onChange={(e) => setRequestMessage(e.target.value)}
+                  placeholder="Tell us why you need more listings... (optional)"
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  rows={4}
+                />
+
+                {requestError && (
+                  <p className="text-xs text-red-600 mt-2">{requestError}</p>
+                )}
+
+                <div className="flex gap-2 mt-4">
+                  <button
+                    onClick={handleRequestMoreListings}
+                    disabled={sendingRequest}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium text-sm transition-colors"
+                  >
+                    {sendingRequest ? 'Sending...' : 'Send Request'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowRequestMoreModal(false);
+                      setRequestMessage('');
+                      setRequestError(null);
+                    }}
+                    disabled={sendingRequest}
+                    className="flex-1 px-4 py-2 border border-neutral-300 text-neutral-700 rounded-lg hover:bg-neutral-50 disabled:opacity-50 font-medium text-sm transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

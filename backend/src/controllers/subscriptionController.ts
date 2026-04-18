@@ -873,3 +873,45 @@ export const getExpiryCheck = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ message: 'Error checking subscription expiry' });
   }
 };
+
+/**
+ * @desc    User requests more listings via email to admin
+ * @route   POST /api/subscriptions/request-more-listings
+ * @access  Private
+ */
+export const requestMoreListings = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user?._id;
+    const { message } = req.body;
+
+    if (!userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const emailServiceInstance = await import('../services/emailService');
+
+    await emailServiceInstance.default.sendListingRequestEmail({
+      userEmail: user.email,
+      userName: user.name,
+      userRole: user.role,
+      message: message || '',
+      currentPlan: user.subscriptionPlan || 'Free',
+      currentListingLimit: user.subscription?.listingsLimit || 0,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Your request has been sent to our team. We will review it shortly.'
+    });
+  } catch (error: any) {
+    subscriptionLogger.error('Error requesting more listings:', error);
+    res.status(500).json({ message: 'Failed to send request' });
+  }
+};

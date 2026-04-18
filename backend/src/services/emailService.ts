@@ -6165,6 +6165,96 @@ Questions? Contact us at support@balkanestateai.com
       category: 'noreply',
     });
   }
+
+  async sendListingRequestEmail(params: {
+    userEmail: string;
+    userName: string;
+    userRole: string;
+    message: string;
+    currentPlan: string;
+    currentListingLimit: number;
+  }): Promise<void> {
+    const supportEmail = this.fromEmails?.alerts || 'support@balkanestateai.com';
+    const currentYear = new Date().getFullYear();
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #333; line-height: 1.6; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #f9fafb; }
+    .card { background: white; padding: 24px; border-radius: 8px; margin: 16px 0; border: 1px solid #e5e7eb; }
+    .header { color: #3b82f6; padding: 12px 0; margin-bottom: 16px; border-bottom: 2px solid #e5e7eb; }
+    .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+    .info-row strong { color: #374151; }
+    .info-row span { color: #6b7280; text-align: right; }
+    .message-box { background: #f3f4f6; padding: 12px; border-left: 4px solid #3b82f6; border-radius: 4px; margin: 12px 0; }
+    .footer { color: #6b7280; font-size: 12px; text-align: center; margin-top: 24px; padding-top: 12px; border-top: 1px solid #e5e7eb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h2 class="header">📊 New Listing Limit Request</h2>
+
+      <div class="info-row">
+        <strong>User Name:</strong>
+        <span>${escapeHtml(params.userName)}</span>
+      </div>
+
+      <div class="info-row">
+        <strong>Email:</strong>
+        <span>${escapeHtml(params.userEmail)}</span>
+      </div>
+
+      <div class="info-row">
+        <strong>Role:</strong>
+        <span>${escapeHtml(params.userRole)}</span>
+      </div>
+
+      <div class="info-row">
+        <strong>Current Plan:</strong>
+        <span>${escapeHtml(params.currentPlan)}</span>
+      </div>
+
+      <div class="info-row">
+        <strong>Current Listing Limit:</strong>
+        <span>${params.currentListingLimit} listings/month</span>
+      </div>
+
+      ${params.message ? `
+      <div style="margin-top: 16px;">
+        <strong style="color: #374151;">User's Message:</strong>
+        <div class="message-box">
+          ${escapeHtml(params.message).replace(/\n/g, '<br>')}
+        </div>
+      </div>
+      ` : ''}
+
+      <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+        <p style="color: #6b7280; font-size: 14px; margin: 0;">
+          This user has requested an increase in their monthly listing limit. Review their request and adjust the limit in the admin panel if appropriate.
+        </p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p style="margin: 0;">© ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span></p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: supportEmail,
+      subject: `Listing Limit Request from ${escapeHtml(params.userName)}`,
+      html,
+      category: 'alerts',
+    });
+  }
 }
 
 const emailServiceInstance = new EmailService();
@@ -6200,3 +6290,4 @@ export const sendProSubscriptionWelcomeEmail = emailServiceInstance.sendProSubsc
 export const sendLicenseRejectionEmail = emailServiceInstance.sendLicenseRejectionEmail.bind(emailServiceInstance);
 export const sendSubscriptionExpired = emailServiceInstance.sendSubscriptionExpired.bind(emailServiceInstance);
 export const sendSubscriptionExpiringSoon = emailServiceInstance.sendSubscriptionExpiringSoon.bind(emailServiceInstance);
+export const sendListingRequestEmail = emailServiceInstance.sendListingRequestEmail.bind(emailServiceInstance);
