@@ -20,6 +20,7 @@ import {
 } from '@/constants';
 import { API_URL } from '@/src/shared/api/config';
 import { Upload, ImageIcon, X } from 'lucide-react';
+import PhoneInput, { validateFullPhone } from '@/src/shared/components/ui/PhoneInput';
 
 const AGENCY_TYPES = [
   { value: 'standard', label: 'Standard' },
@@ -756,14 +757,9 @@ const CreateAgencyPage: React.FC = () => {
                     <label htmlFor="phone" className={labelClasses}>
                       {t('create.fields.phone', 'Phone Number')}
                     </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
+                    <PhoneInput
                       value={formData.phone}
-                      onChange={handleInputChange}
-                      placeholder={t('create.placeholders.phone', '+381 11 123 4567')}
-                      className={inputClasses}
+                      onChange={fullPhone => setFormData(prev => ({ ...prev, phone: fullPhone }))}
                     />
                   </div>
                 </div>
