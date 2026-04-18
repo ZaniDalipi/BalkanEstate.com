@@ -39,13 +39,21 @@ const initialSearchPageState: SearchPageState = {
     focusMapOnProperty: null,
 };
 
+// Show the FullScreenLoader immediately when the backend has redirected back to
+// /auth/callback with an access token. Without this, the main layout flashes for
+// one frame before handleOAuthCallback can dispatch AUTH_CHECK_START.
+const isOAuthCallbackInProgress =
+  typeof window !== 'undefined' &&
+  window.location.pathname.includes('auth/callback') &&
+  !!new URLSearchParams(window.location.search).get('token');
+
 const initialState: AppState = {
   user: null,
   onboardingComplete: true,
-  // Only start in the "authenticating" state when there is a likely valid session
-  // (httpOnly refresh cookie is present). This prevents a FullScreenLoader flash
-  // for unauthenticated / first-time visitors who don't have a session to restore.
-  isAuthenticating: hasLikelyValidSession(),
+  // Show the loader when:
+  // 1. A likely-valid session exists (session cookie present) → restoring silently
+  // 2. An OAuth callback is in progress → token must be verified before rendering
+  isAuthenticating: hasLikelyValidSession() || isOAuthCallbackInProgress,
   activeView: 'home',
   isPricingModalOpen: false,
   isFirstLoginOffer: false,
@@ -624,7 +632,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         throw new Error('Failed to fetch user profile');
       }
     } catch (_error) {
-      // Clear tokens on failure
+      // Clear the "just authed" flag so the splash screen is NOT shown on failure
+      sessionStorage.removeItem('balkanestate_just_authed');
       tokenService.clearTokens();
       dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: false, user: null } });
       dispatch({ type: 'AUTH_CHECK_COMPLETE', payload: { isAuthenticated: false, user: null } });
