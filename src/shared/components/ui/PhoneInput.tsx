@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ALL_PHONE_COUNTRY_CODES,
   BALKAN_PHONE_CODES,
@@ -19,7 +19,7 @@ interface PhoneInputProps {
 
 /**
  * Parse a full E.164 phone string into { countryCode, localDigits }.
- * Falls back to the first Balkan code if no match found.
+ * Falls back to the first Balkan code (Kosovo) if no match found.
  */
 export function parsePhoneValue(fullPhone: string): { countryCode: string; localDigits: string } {
   if (!fullPhone || typeof fullPhone !== 'string') {
@@ -35,33 +35,29 @@ export function parsePhoneValue(fullPhone: string): { countryCode: string; local
 
   for (const cc of sorted) {
     if (trimmed.startsWith(cc.code)) {
-      const afterCode = trimmed.slice(cc.code.length);
-      const localDigits = afterCode.replace(/\D/g, '');
+      const localDigits = trimmed.slice(cc.code.length).replace(/\D/g, '');
       return { countryCode: cc.code, localDigits };
     }
   }
 
-  // No country code match found - extract digits only
   const allDigits = trimmed.replace(/\D/g, '');
   return { countryCode: ALL_PHONE_COUNTRY_CODES[0].code, localDigits: allDigits };
 }
 
 /**
  * Build E.164 phone string from country code + local digits.
- * Strips leading zeros to maintain E.164 format (required for WhatsApp/Viber).
- * Returns "" when localDigits is empty.
+ * Strips leading zeros (E.164 format doesn't allow them — required for WhatsApp/Viber).
+ * Returns "" when localDigits is empty so callers can distinguish "no number" from a number.
  */
 export function buildFullPhone(countryCode: string, localDigits: string): string {
   const digits = localDigits.replace(/\D/g, '');
-  // Strip leading zeros (E.164 format doesn't allow them)
-  const trimmedDigits = digits.replace(/^0+/, '');
-  return trimmedDigits ? `${countryCode}${trimmedDigits}` : '';
+  const stripped = digits.replace(/^0+/, '');
+  return stripped ? `${countryCode}${stripped}` : '';
 }
 
 /**
  * Validate a full E.164 phone string.
  * Returns an error string or null when valid.
- * Accepts E.164 format with or without leading zeros (zeros are stripped).
  */
 export function validateFullPhone(
   fullPhone: string,
@@ -78,12 +74,10 @@ export function validateFullPhone(
 
   const { localDigits } = parsePhoneValue(fullPhone);
 
-  // Check that we have only digits in the local part
   if (!/^\d+$/.test(localDigits)) {
     return tr('auth:validation.phone.digitsOnly', 'Phone number must contain only digits');
   }
 
-  // Check length (6-12 digits is standard for most countries)
   if (localDigits.length < 6 || localDigits.length > 12) {
     return tr(
       'auth:validation.phone.invalidLength',
@@ -103,30 +97,46 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
   className = '',
   variant = 'bordered',
 }) => {
-  // Parse the full phone into country code and local digits
-  const { countryCode, localDigits } = parsePhoneValue(value);
-  const formattedLocal = formatPhoneNumber(countryCode, localDigits);
+  // Parse the incoming value to extract any country code already embedded in it
+  const parsed = parsePhoneValue(value);
 
-  // Handle country code changes - always allow, even with empty field
+  // Track selected country code in LOCAL state so it persists even when
+  // the phone field is empty — without this, every re-render with value=""
+  // resets back to the default (Kosovo).
+  const [selectedCode, setSelectedCode] = useState<string>(parsed.countryCode);
+
+  // If the parent pushes a value that contains a country code (e.g. loading
+  // a saved profile), sync our local state to match.
+  useEffect(() => {
+    if (value && value.trim()) {
+      const { countryCode } = parsePhoneValue(value);
+      setSelectedCode(countryCode);
+    }
+  }, [value]);
+
+  // Local digits are always derived from the value prop
+  const localDigits = parsed.localDigits;
+  const formattedLocal = formatPhoneNumber(selectedCode, localDigits);
+
   const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newCode = e.target.value;
-    if (!newCode) return; // Only return if somehow no value selected
+    if (!newCode) return;
 
-    // Allow changing country code at any time, preserves current local digits
-    const currentDigits = localDigits || '';
-    const newPhone = buildFullPhone(newCode, currentDigits);
-    onChange(newPhone);
+    // Update local code immediately — this is what keeps the dropdown
+    // responsive even when there are no digits yet
+    setSelectedCode(newCode);
+
+    // If there are already digits, rebuild the full number with the new code
+    // If not, don't call onChange yet — the user still needs to type a number
+    if (localDigits) {
+      onChange(buildFullPhone(newCode, localDigits));
+    }
   };
 
-  // Handle local number input changes
   const handleLocalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawInput = e.target.value;
-    // Extract only digits
-    const digits = rawInput.replace(/\D/g, '');
-
-    // buildFullPhone will handle stripping leading zeros for E.164 format
-    // (required for WhatsApp/Viber and other services)
-    onChange(buildFullPhone(countryCode, digits));
+    const digits = e.target.value.replace(/\D/g, '');
+    // Always use selectedCode (local state) so the chosen country is respected
+    onChange(buildFullPhone(selectedCode, digits));
   };
 
   const isGlass = variant === 'glass';
@@ -155,27 +165,21 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
     ? 'flex-1 min-w-0 bg-transparent text-base text-neutral-900 px-3 py-4 border-none focus:outline-none focus:ring-0 placeholder:text-neutral-400'
     : 'flex-1 min-w-0 bg-transparent text-sm text-gray-900 px-3 py-2.5 border-none focus:outline-none focus:ring-0 placeholder:text-gray-300';
 
-  // Ensure countryCode is always valid (fallback to Kosovo if not found)
-  const validCountryCode = ALL_PHONE_COUNTRY_CODES.some(cc => cc.code === countryCode)
-    ? countryCode
-    : ALL_PHONE_COUNTRY_CODES[0].code;
-
   return (
     <div className={wrapperCls}>
       <select
-        value={validCountryCode}
+        value={selectedCode}
         onChange={handleCountryChange}
         disabled={disabled}
         className={selectCls}
         aria-label="Country code"
-        title={`Select country code`}
       >
         {ALL_PHONE_COUNTRY_CODES.map((cc, i) => (
           <React.Fragment key={`${cc.country}-${cc.code}`}>
             {i === BALKAN_PHONE_CODES.length && (
               <option disabled>──────────</option>
             )}
-            <option value={cc.code} key={`opt-${cc.code}`}>
+            <option value={cc.code}>
               {cc.flag} {cc.code}
             </option>
           </React.Fragment>
@@ -188,7 +192,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
         onChange={handleLocalChange}
         disabled={disabled}
         required={required}
-        placeholder={getPhonePlaceholder(validCountryCode)}
+        placeholder={getPhonePlaceholder(selectedCode)}
         className={inputCls}
         autoComplete="tel-national"
         aria-label="Phone number"
