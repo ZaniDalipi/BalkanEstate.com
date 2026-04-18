@@ -48,16 +48,20 @@ export function parsePhoneValue(fullPhone: string): { countryCode: string; local
 
 /**
  * Build E.164 phone string from country code + local digits.
+ * Strips leading zeros to maintain E.164 format (required for WhatsApp/Viber).
  * Returns "" when localDigits is empty.
  */
 export function buildFullPhone(countryCode: string, localDigits: string): string {
   const digits = localDigits.replace(/\D/g, '');
-  return digits ? `${countryCode}${digits}` : '';
+  // Strip leading zeros (E.164 format doesn't allow them)
+  const trimmedDigits = digits.replace(/^0+/, '');
+  return trimmedDigits ? `${countryCode}${trimmedDigits}` : '';
 }
 
 /**
  * Validate a full E.164 phone string.
  * Returns an error string or null when valid.
+ * Accepts E.164 format with or without leading zeros (zeros are stripped).
  */
 export function validateFullPhone(
   fullPhone: string,
@@ -65,18 +69,28 @@ export function validateFullPhone(
   t?: (key: string, fallback: string) => string
 ): string | null {
   const tr = t ?? ((_key: string, fallback: string) => fallback);
+
   if (!fullPhone || !fullPhone.replace(/\D/g, '')) {
     return required
       ? tr('auth:validation.phone.required', 'Phone number is required')
       : null;
   }
+
   const { localDigits } = parsePhoneValue(fullPhone);
+
+  // Check that we have only digits in the local part
   if (!/^\d+$/.test(localDigits)) {
     return tr('auth:validation.phone.digitsOnly', 'Phone number must contain only digits');
   }
+
+  // Check length (6-12 digits is standard for most countries)
   if (localDigits.length < 6 || localDigits.length > 12) {
-    return tr('auth:validation.phone.invalidLength', 'Phone number must be between 6 and 12 digits');
+    return tr(
+      'auth:validation.phone.invalidLength',
+      'Phone number must be between 6 and 12 digits'
+    );
   }
+
   return null;
 }
 
@@ -93,20 +107,25 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
   const { countryCode, localDigits } = parsePhoneValue(value);
   const formattedLocal = formatPhoneNumber(countryCode, localDigits);
 
-  // Handle country code changes explicitly and immediately
+  // Handle country code changes - always allow, even with empty field
   const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newCode = e.target.value;
-    if (!newCode) return; // Safety check
-    // Always rebuild with new country code and current digits
+    if (!newCode) return; // Only return if somehow no value selected
+
+    // Allow changing country code at any time, preserves current local digits
     const currentDigits = localDigits || '';
-    onChange(buildFullPhone(newCode, currentDigits));
+    const newPhone = buildFullPhone(newCode, currentDigits);
+    onChange(newPhone);
   };
 
   // Handle local number input changes
   const handleLocalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawInput = e.target.value;
+    // Extract only digits
     const digits = rawInput.replace(/\D/g, '');
-    // Rebuild the full phone number with current country code
+
+    // buildFullPhone will handle stripping leading zeros for E.164 format
+    // (required for WhatsApp/Viber and other services)
     onChange(buildFullPhone(countryCode, digits));
   };
 
@@ -125,8 +144,8 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
       } ${className}`;
 
   const selectCls = isGlass
-    ? 'bg-transparent text-sm text-neutral-700 font-medium pl-4 pr-1 py-4 border-none focus:outline-none focus:ring-0 cursor-pointer max-w-[140px] flex-shrink-0'
-    : 'bg-transparent text-sm text-gray-700 font-medium pl-3 pr-1 py-2.5 border-none focus:outline-none focus:ring-0 cursor-pointer flex-shrink-0';
+    ? 'bg-transparent text-sm text-neutral-700 font-medium pl-4 pr-2 py-4 border-none focus:outline-none focus:ring-0 cursor-pointer flex-shrink-0 hover:text-neutral-900 transition-colors'
+    : 'bg-transparent text-sm text-gray-700 font-medium pl-3 pr-2 py-2.5 border-none focus:outline-none focus:ring-0 cursor-pointer flex-shrink-0 hover:text-gray-900 transition-colors';
 
   const dividerCls = isGlass
     ? 'w-px h-6 bg-neutral-300/60 flex-shrink-0'
