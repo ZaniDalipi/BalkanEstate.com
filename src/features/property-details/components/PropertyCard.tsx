@@ -156,7 +156,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCardClick(e as any); } }}
       role="article"
       tabIndex={0}
-      aria-label={`${property.title || propertyTypeLabel}, ${property.isNegotiable ? t('property:byNegotiation', 'By Negotiation') : formatPrice(property.price, property.country) + (isRental ? '/mo' : '')}, ${safeProperty.city}, ${safeProperty.country}`}
+      aria-label={`${property.title || propertyTypeLabel}, ${(property.priceType === 'negotiable' || (!property.priceType && property.isNegotiable)) ? t('property:byNegotiation', 'By Negotiation') : property.priceType === 'per_sqm' && property.pricePerSqm ? `${formatPrice(property.pricePerSqm, property.country)}/m²` : formatPrice(property.price, property.country) + (isRental ? '/mo' : '')}, ${safeProperty.city}, ${safeProperty.country}`}
     >
       {/* Image Section */}
       <div className="relative overflow-hidden">
@@ -332,7 +332,10 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           </span>
           {/* Price Badge */}
           {(() => {
-            if (property.isNegotiable) {
+            const isNegotiableMode = property.priceType === 'negotiable' || (!property.priceType && property.isNegotiable);
+            const isPerSqmMode = property.priceType === 'per_sqm' && !isRental;
+
+            if (isNegotiableMode) {
               return (
                 <div className="text-right">
                   <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-xs sm:text-sm font-semibold px-2.5 py-1 rounded-full border border-amber-200">
@@ -344,6 +347,23 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 </div>
               );
             }
+
+            if (isPerSqmMode && property.pricePerSqm) {
+              const totalCalc = safeProperty.sqft > 0 ? Math.round(property.pricePerSqm * safeProperty.sqft) : null;
+              return (
+                <div className="text-right">
+                  {totalCalc && (
+                    <p className="text-primary text-sm sm:text-base font-bold tracking-tight">
+                      {t('property:startingFrom', 'From')} {formatPrice(totalCalc, property.country)}
+                    </p>
+                  )}
+                  <p className="text-[11px] text-neutral-500 font-medium">
+                    {formatPrice(property.pricePerSqm, property.country)}/m²
+                  </p>
+                </div>
+              );
+            }
+
             const priceInfo = getPriceReductionInfo(property);
             return (
               <div className="text-right">

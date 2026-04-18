@@ -59,6 +59,8 @@ export interface Property {
   rentedAt?: number;
   price: number;
   isNegotiable?: boolean; // When true, price is "By Negotiation" (price field can be 0)
+  priceType?: 'fixed' | 'negotiable' | 'per_sqm'; // Pricing mode
+  pricePerSqm?: number; // Price per square meter (used when priceType === 'per_sqm')
   // Price discount fields
   originalPrice?: number; // Original price before discount
   priceReducedAt?: number; // Timestamp when price was reduced

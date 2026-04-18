@@ -48,6 +48,8 @@ export interface IProperty extends Document {
   soldAt?: Date;
   price: number;
   isNegotiable?: boolean; // When true, price is "By Negotiation" (price field can be 0)
+  priceType?: 'fixed' | 'negotiable' | 'per_sqm';
+  pricePerSqm?: number;
   // Price discount fields
   originalPrice?: number; // Original price before discount
   priceReducedAt?: Date; // When price was reduced
@@ -217,6 +219,14 @@ const PropertySchema: Schema = new Schema(
       type: Boolean,
       default: false,
       index: true,
+    },
+    priceType: {
+      type: String,
+      enum: ['fixed', 'negotiable', 'per_sqm'],
+    },
+    pricePerSqm: {
+      type: Number,
+      min: 0,
     },
     // Price discount fields
     originalPrice: {

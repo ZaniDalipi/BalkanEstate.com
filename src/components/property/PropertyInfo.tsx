@@ -129,7 +129,10 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
           )}
 
           {(() => {
-            if (property.isNegotiable) {
+            const isNegotiableMode = property.priceType === 'negotiable' || (!property.priceType && property.isNegotiable);
+            const isPerSqmMode = property.priceType === 'per_sqm' && property.listingType === 'sale';
+
+            if (isNegotiableMode) {
               return (
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="inline-flex items-center gap-2 bg-amber-50 text-amber-700 text-lg sm:text-xl lg:text-2xl font-bold px-4 py-2 rounded-xl border border-amber-200">
@@ -141,6 +144,23 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                 </div>
               );
             }
+
+            if (isPerSqmMode && property.pricePerSqm) {
+              const totalCalc = property.sqft > 0 ? Math.round(property.pricePerSqm * property.sqft) : null;
+              return (
+                <div className="flex flex-wrap items-center gap-3">
+                  {totalCalc && (
+                    <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900">
+                      {t('property:startingFrom', 'Starting from')} {formatPrice(totalCalc, property.country)}
+                    </p>
+                  )}
+                  <span className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-base sm:text-lg font-semibold px-3 py-1.5 rounded-xl border border-blue-200">
+                    {formatPrice(property.pricePerSqm, property.country)}/m²
+                  </span>
+                </div>
+              );
+            }
+
             const priceInfo = getPriceReductionInfo(property);
             return (
               <div className="flex flex-wrap items-baseline gap-2">

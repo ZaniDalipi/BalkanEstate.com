@@ -15,6 +15,8 @@ export interface ListingData {
     streetAddress: string;
     price: number;
     isNegotiable: boolean;
+    priceType: 'fixed' | 'negotiable' | 'per_sqm';
+    pricePerSqm: number;
     bedrooms: number;
     bathrooms: number;
     livingRooms: number;
@@ -74,6 +76,8 @@ export const initialListingData: ListingData = {
     streetAddress: '',
     price: 0,
     isNegotiable: false,
+    priceType: 'fixed',
+    pricePerSqm: 0,
     bedrooms: 0,
     bathrooms: 0,
     livingRooms: 0,

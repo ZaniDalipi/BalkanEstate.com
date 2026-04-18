@@ -271,8 +271,19 @@ const PROPERTY_TYPE_COLORS: Record<
  * Adds rental period suffix for rental properties
  */
 const formatMarkerPrice = (property: Property): string => {
-  if (property.isNegotiable) {
+  if (property.priceType === 'negotiable' || (!property.priceType && property.isNegotiable)) {
     return 'Negotiable';
+  }
+  if (property.priceType === 'per_sqm' && property.pricePerSqm) {
+    const total = property.sqft > 0 ? Math.round(property.pricePerSqm * property.sqft) : null;
+    if (total) {
+      return total >= 1000000
+        ? `€${(total / 1000000).toFixed(1).replace('.0', '')}M`
+        : total >= 1000
+          ? `€${Math.round(total / 1000)}K`
+          : `€${total}`;
+    }
+    return `€${Math.round(property.pricePerSqm)}/m²`;
   }
   const price = property.price;
   let formatted: string;

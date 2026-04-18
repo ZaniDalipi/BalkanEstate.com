@@ -315,13 +315,24 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
         {/* Price & Type Row - iOS style */}
         <div className="flex items-center justify-between gap-2 mb-2">
           <div>
-            {property.isNegotiable ? (
+            {(property.priceType === 'negotiable' || (!property.priceType && property.isNegotiable)) ? (
               <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-xs md:text-sm font-semibold px-2 py-1 rounded-full border border-amber-200">
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
                 {t('property:byNegotiation', 'By Negotiation')}
               </span>
+            ) : property.priceType === 'per_sqm' && property.pricePerSqm && !isRental ? (
+              <>
+                {property.sqft > 0 && (
+                  <span className="text-primary text-base md:text-lg font-bold tracking-tight">
+                    {t('property:startingFrom', 'From')} {formatPrice(Math.round(property.pricePerSqm * property.sqft), property.country)}
+                  </span>
+                )}
+                <p className="text-[11px] text-neutral-500 font-medium">
+                  {formatPrice(property.pricePerSqm, property.country)}/m²
+                </p>
+              </>
             ) : (
               <>
                 <span className="text-primary text-base md:text-lg font-bold tracking-tight">

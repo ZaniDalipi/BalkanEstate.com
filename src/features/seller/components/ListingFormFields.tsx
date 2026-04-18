@@ -150,14 +150,53 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
 
                 {/* Price */}
                 <div className="md:col-span-2">
-                    <label htmlFor="price" className={labelClasses}>{t('seller:createListing.fields.price')}</label>
-                    {!listingData.isNegotiable && (
+                    <label className={labelClasses}>{t('seller:createListing.fields.price')}</label>
+
+                    {/* Pricing mode segmented control */}
+                    <div className="flex gap-2 mb-3">
+                        {(['fixed', 'negotiable', ...(listingData.listingType === 'sale' ? ['per_sqm'] : [])] as const).map((mode) => {
+                            const labels: Record<string, string> = {
+                                fixed: t('seller:createListing.fields.priceFixed', 'Fixed Price'),
+                                negotiable: t('seller:form.negotiable', 'By Negotiation'),
+                                per_sqm: t('seller:createListing.fields.pricePerSqm', 'Per m²'),
+                            };
+                            const isActive = listingData.priceType === mode;
+                            return (
+                                <button
+                                    key={mode}
+                                    type="button"
+                                    onClick={() => {
+                                        setListingData(prev => ({
+                                            ...prev,
+                                            priceType: mode,
+                                            isNegotiable: mode === 'negotiable',
+                                            ...(mode === 'negotiable' ? { price: 0, pricePerSqm: 0 } : {}),
+                                            ...(mode === 'fixed' ? { pricePerSqm: 0 } : {}),
+                                            ...(mode === 'per_sqm' ? { price: 0 } : {}),
+                                        }));
+                                    }}
+                                    className={`flex-1 py-2 px-3 rounded-xl text-sm font-medium border transition-all ${
+                                        isActive
+                                            ? 'bg-primary text-white border-primary shadow-sm'
+                                            : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                                    }`}
+                                >
+                                    {labels[mode]}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Fixed price input */}
+                    {listingData.priceType === 'fixed' && (
                         <div className="relative">
                             <input type="text" id="price" inputMode="numeric" name="price" value={listingData.price > 0 ? new Intl.NumberFormat('de-DE').format(listingData.price) : ''} onChange={handlePriceChange} className={`${inputBaseClasses} pl-10`} placeholder="0" required />
                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">{getCurrencySymbol(selectedCountry)}</span>
                         </div>
                     )}
-                    {listingData.isNegotiable && (
+
+                    {/* Negotiable info box */}
+                    {listingData.priceType === 'negotiable' && (
                         <div className="flex items-center gap-2 h-12 px-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 font-medium text-sm">
                             <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -165,24 +204,39 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
                             {t('seller:createListing.fields.priceByNegotiation', 'Price will be shown as "By Negotiation"')}
                         </div>
                     )}
-                    <label className="flex items-center gap-2 mt-2 cursor-pointer select-none group">
-                        <input
-                            type="checkbox"
-                            checked={listingData.isNegotiable}
-                            onChange={(e) => {
-                                const checked = e.target.checked;
-                                setListingData(prev => ({
-                                    ...prev,
-                                    isNegotiable: checked,
-                                    ...(checked ? { price: 0 } : {}),
-                                }));
-                            }}
-                            className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary/20 transition-colors"
-                        />
-                        <span className="text-sm text-gray-600 group-hover:text-gray-800 transition-colors">
-                            {t('seller:form.negotiable', 'By Negotiation')}
-                        </span>
-                    </label>
+
+                    {/* Per m² input */}
+                    {listingData.priceType === 'per_sqm' && (
+                        <div>
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    id="pricePerSqm"
+                                    inputMode="numeric"
+                                    value={listingData.pricePerSqm > 0 ? new Intl.NumberFormat('de-DE').format(listingData.pricePerSqm) : ''}
+                                    onChange={(e) => {
+                                        const raw = e.target.value.replace(/\./g, '').replace(/,/g, '.');
+                                        const parsed = parseFloat(raw);
+                                        setListingData(prev => ({ ...prev, pricePerSqm: isNaN(parsed) ? 0 : parsed }));
+                                    }}
+                                    className={`${inputBaseClasses} pl-10 pr-14`}
+                                    placeholder="0"
+                                    required
+                                />
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">{getCurrencySymbol(selectedCountry)}</span>
+                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">/m²</span>
+                            </div>
+                            {listingData.pricePerSqm > 0 && listingData.sq_meters > 0 && (
+                                <div className="mt-2 flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium">
+                                    <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    </svg>
+                                    {t('seller:createListing.fields.totalCalculated', 'Total')}: {getCurrencySymbol(selectedCountry)}{new Intl.NumberFormat('de-DE').format(Math.round(listingData.pricePerSqm * listingData.sq_meters))}
+                                    <span className="text-emerald-500 font-normal">({t('seller:createListing.fields.fromArea', 'from')} {listingData.sq_meters} m²)</span>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </fieldset>
 
