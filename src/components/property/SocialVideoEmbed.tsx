@@ -12,7 +12,7 @@ interface SocialVideoEmbedProps {
 // Detect platform from URL
 const detectPlatform = (url: string): 'tiktok' | 'instagram' | null => {
   if (!url) return null;
-  if (url.includes('tiktok.com') || url.includes('vm.tiktok.com') || url.includes('m.tiktok.com')) return 'tiktok';
+  if (url.includes('tiktok.com') || url.includes('vm.tiktok.com') || url.includes('vt.tiktok.com') || url.includes('m.tiktok.com')) return 'tiktok';
   if (url.includes('instagram.com')) return 'instagram';
   return null;
 };
@@ -32,30 +32,36 @@ const extractTikTokInfo = (url: string): { id: string; username: string } => {
   if (mobileMatch) {
     return { username: '', id: mobileMatch[1] };
   }
-  // Format: vm.tiktok.com/ZMrxxxxxxx/ (short URL - alphanumeric, case insensitive)
-  const vmMatch = cleanUrl.match(/vm\.tiktok\.com\/([A-Za-z0-9]+)/);
+  // Format: vm.tiktok.com/ZMrxxxxxxx/ (short URL - accept any non-whitespace characters)
+  const vmMatch = cleanUrl.match(/vm\.tiktok\.com\/([^\s/?#]+)/);
   if (vmMatch) {
     return { username: '', id: vmMatch[1] };
   }
-  // Format: tiktok.com/t/ZTRxxxxx/ (another short URL format)
-  const tMatch = cleanUrl.match(/tiktok\.com\/t\/([A-Za-z0-9]+)/);
+  // Format: vt.tiktok.com/ZMrxxxxxxx/ (another short domain used by mobile sharing)
+  const vtMatch = cleanUrl.match(/vt\.tiktok\.com\/([^\s/?#]+)/);
+  if (vtMatch) {
+    return { username: '', id: vtMatch[1] };
+  }
+  // Format: tiktok.com/t/ZTRxxxxx/ (another short URL format - accept any non-whitespace)
+  const tMatch = cleanUrl.match(/tiktok\.com\/t\/([^\s/?#]+)/);
   if (tMatch) {
     return { username: '', id: tMatch[1] };
   }
   return { username: '', id: '' };
 };
 
-// Extract Instagram post/reel/tv ID, handling query parameters and trailing slashes
+// Extract Instagram post/reel/tv ID, handling all URL formats and query parameters
 const extractInstagramId = (url: string): string => {
   const cleanUrl = url.split('?')[0].replace(/\/$/, '');
-  const match = cleanUrl.match(/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/);
+  // Handles: /reel/, /reels/, /p/, /tv/, /share/reel/, /share/p/
+  const match = cleanUrl.match(/instagram\.com\/(?:share\/)?(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/);
   return match?.[1] || '';
 };
 
 // Check if Instagram URL is a reel or IGTV (video content, not a static post)
 const isInstagramReel = (url: string): boolean => {
   const cleanUrl = url.split('?')[0];
-  return cleanUrl.includes('/reel/') || cleanUrl.includes('/tv/');
+  return cleanUrl.includes('/reel/') || cleanUrl.includes('/reels/') || cleanUrl.includes('/tv/') || cleanUrl.includes('/share/reel');
 };
 
 export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) => {

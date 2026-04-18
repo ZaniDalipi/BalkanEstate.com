@@ -100,7 +100,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   // Determine video platform from URL
   const getVideoPlatform = useCallback((url: string): string => {
     if (!url) return 'unknown';
-    if (url.includes('tiktok.com') || url.includes('vm.tiktok.com') || url.includes('m.tiktok.com')) return 'tiktok';
+    if (url.includes('tiktok.com') || url.includes('vm.tiktok.com') || url.includes('vt.tiktok.com') || url.includes('m.tiktok.com')) return 'tiktok';
     if (url.includes('instagram.com')) return 'instagram';
     if (url.includes('facebook.com') || url.includes('fb.watch')) return 'facebook';
     if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
@@ -204,22 +204,28 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     if (tiktokMobileMatch) {
       return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokMobileMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
     }
-    // vm.tiktok.com/CODE/ (short URL - alphanumeric, case insensitive)
-    const tiktokVmMatch = cleanUrl.match(/vm\.tiktok\.com\/([A-Za-z0-9]+)/);
+    // vm.tiktok.com/CODE/ (short URL - any non-separator chars)
+    const tiktokVmMatch = cleanUrl.match(/vm\.tiktok\.com\/([^\s/?#]+)/);
     if (tiktokVmMatch) {
       return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokVmMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
     }
+    // vt.tiktok.com/CODE/ (mobile share short URL)
+    const tiktokVtMatch = cleanUrl.match(/vt\.tiktok\.com\/([^\s/?#]+)/);
+    if (tiktokVtMatch) {
+      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokVtMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
+    }
     // tiktok.com/t/CODE/ (another short URL format)
-    const tiktokTMatch = cleanUrl.match(/tiktok\.com\/t\/([A-Za-z0-9]+)/);
+    const tiktokTMatch = cleanUrl.match(/tiktok\.com\/t\/([^\s/?#]+)/);
     if (tiktokTMatch) {
       return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokTMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
     }
 
     // --- Instagram ---
-    // instagram.com/reel/CODE, /p/CODE, /tv/CODE (IGTV), handling query parameters
-    const instagramMatch = cleanUrl.match(/instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/);
+    // Handles: /reel/, /reels/, /p/, /tv/, /share/reel/, /share/p/ — all with optional query params
+    const instagramMatch = cleanUrl.match(/instagram\.com\/(?:share\/)?(reel|reels|p|tv)\/([A-Za-z0-9_-]+)/);
     if (instagramMatch) {
-      return { embedUrl: `https://www.instagram.com/${instagramMatch[1]}/${instagramMatch[2]}/embed/`, platform: 'instagram' };
+      const type = instagramMatch[1] === 'reels' ? 'reel' : instagramMatch[1];
+      return { embedUrl: `https://www.instagram.com/${type}/${instagramMatch[2]}/embed/`, platform: 'instagram' };
     }
 
     // --- Facebook ---
