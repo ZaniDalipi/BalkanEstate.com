@@ -92,28 +92,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   const [tiktokScriptLoaded, setTiktokScriptLoaded] = useState(false);
   const tiktokBlockquoteRef = useRef<HTMLDivElement>(null);
 
-  // Load and render TikTok blockquote embed for short codes
-  useEffect(() => {
-    if (videoPlatform === 'tiktok' && videoInfo.embedUrl.startsWith('blockquote:')) {
-      // Load TikTok script
-      const existingScript = document.querySelector('script[src*="tiktok.com/embed.js"]');
-      if (!existingScript) {
-        const script = document.createElement('script');
-        script.src = 'https://www.tiktok.com/embed.js';
-        script.async = true;
-        document.body.appendChild(script);
-      } else {
-        // Script already loaded, process blockquotes
-        setTimeout(() => {
-          if ((window as any).tiktokEmbed?.lib?.render) {
-            (window as any).tiktokEmbed.lib.render(tiktokBlockquoteRef.current);
-          }
-        }, 100);
-      }
-      setTiktokScriptLoaded(true);
-    }
-  }, [videoPlatform, videoInfo.embedUrl]);
-
   // Determine video platform from URL
   const getVideoPlatform = useCallback((url: string): string => {
     if (!url) return 'unknown';
@@ -269,6 +247,28 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   }, []);
 
   const videoInfo = useMemo(() => getVideoEmbedUrl(externalVideoUrl), [externalVideoUrl, getVideoEmbedUrl]);
+
+  // Load and render TikTok blockquote embed for short codes
+  useEffect(() => {
+    if (videoPlatform === 'tiktok' && videoInfo.embedUrl.startsWith('blockquote:')) {
+      // Load TikTok script
+      const existingScript = document.querySelector('script[src*="tiktok.com/embed.js"]');
+      if (!existingScript) {
+        const script = document.createElement('script');
+        script.src = 'https://www.tiktok.com/embed.js';
+        script.async = true;
+        document.body.appendChild(script);
+      } else {
+        // Script already loaded, process blockquotes
+        setTimeout(() => {
+          if ((window as any).tiktokEmbed?.lib?.render) {
+            (window as any).tiktokEmbed.lib.render(tiktokBlockquoteRef.current);
+          }
+        }, 100);
+      }
+      setTiktokScriptLoaded(true);
+    }
+  }, [videoPlatform, videoInfo.embedUrl]);
 
   // Combine all images
   const allImages = useMemo(() => {
