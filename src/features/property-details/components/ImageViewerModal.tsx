@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon, BuildingOfficeIcon } from '@/constants';
 import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 
 interface ImageViewerModalProps {
     images: { url: string; tag: string }[];
@@ -13,10 +14,6 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
     const { t } = useTranslation(['property', 'common']);
     const [currentIndex, setCurrentIndex] = useState(startIndex);
     const [imageError, setImageError] = useState(false);
-    const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
-    const [touchMove, setTouchMove] = useState<{ x: number; y: number } | null>(null);
-
-    const minSwipeDistance = 50; // pixels
 
     const handleNext = useCallback(() => {
         setCurrentIndex(prev => (prev + 1) % images.length);
@@ -25,6 +22,12 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
     const handlePrev = useCallback(() => {
         setCurrentIndex(prev => (prev - 1 + images.length) % images.length);
     }, [images.length]);
+
+    const swipeHandlers = useSwipeGesture({
+        onSwipeLeft: handleNext,
+        onSwipeRight: handlePrev,
+        onSwipeDown: onClose,
+    });
 
     useEffect(() => {
         setImageError(false);
@@ -70,39 +73,6 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
         }
     };
 
-    const onTouchStart = (e: React.TouchEvent) => {
-        setTouchMove(null);
-        setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
-    };
-
-    const onTouchMove = (e: React.TouchEvent) => {
-        setTouchMove({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
-    };
-
-    const onTouchEnd = () => {
-        if (!touchStart || !touchMove) return;
-
-        const xDistance = touchStart.x - touchMove.x;
-        const yDistance = touchStart.y - touchMove.y;
-
-        // Horizontal swipe
-        if (Math.abs(xDistance) > Math.abs(yDistance)) {
-            const isLeftSwipe = xDistance > minSwipeDistance;
-            const isRightSwipe = xDistance < -minSwipeDistance;
-
-            if (isLeftSwipe) handleNext();
-            else if (isRightSwipe) handlePrev();
-        }
-        // Vertical swipe
-        else {
-            const isDownSwipe = yDistance < -minSwipeDistance;
-            if (isDownSwipe) onClose();
-        }
-
-        setTouchStart(null);
-        setTouchMove(null);
-    };
-
     return (
         <div
             className="fixed inset-0 bg-black/95 z-[6000] flex flex-col items-center justify-center"
@@ -125,9 +95,8 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
 
             <div
                 className="relative w-full h-full flex items-center justify-center overflow-hidden"
-                onTouchStart={onTouchStart}
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}
+                {...swipeHandlers}
+                style={{ touchAction: 'pan-x' }}
             >
                 {/* Previous button - 44px min touch target */}
                 <button

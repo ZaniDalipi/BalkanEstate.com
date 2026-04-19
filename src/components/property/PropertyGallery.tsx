@@ -12,6 +12,7 @@ import {
 } from '../../../constants';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 
 interface PropertyGalleryProps {
   property: Property;
@@ -324,6 +325,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
   }, [currentImageIndex, imagesForCurrentCategory.length, onImageIndexChange]);
 
+  const swipeHandlers = useSwipeGesture({
+    onSwipeLeft: handleNextImage,
+    onSwipeRight: handlePrevImage,
+  });
+
   // Get category label for display
   const getCategoryEmoji = (category: PropertyImageTag | 'all'): string => {
     const emojiMap: Record<string, string> = {
@@ -344,7 +350,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
-      <div className="relative w-full h-[280px] xs:h-[340px] sm:h-[420px] md:h-[500px] lg:h-[560px] landscape:h-[60vh] landscape:min-h-[280px] bg-neutral-900 overflow-hidden">
+      <div
+        className="relative w-full h-[280px] xs:h-[340px] sm:h-[420px] md:h-[500px] lg:h-[560px] landscape:h-[60vh] landscape:min-h-[280px] bg-neutral-900 overflow-hidden"
+        {...(viewMode === 'photos' && imagesForCurrentCategory.length > 1 ? swipeHandlers : {})}
+        style={viewMode === 'photos' && imagesForCurrentCategory.length > 1 ? { touchAction: 'pan-y' } : undefined}
+      >
         {viewMode === 'photos' ? (
           <button
             onClick={onOpenViewer}
@@ -376,7 +386,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
                   fetchpriority="high"
                   decoding="async"
-                  className={`relative max-w-full max-h-full object-contain transition-opacity duration-300 ${mainImageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-150 ${mainImageLoaded ? 'opacity-100' : 'opacity-0'}`}
                   onLoad={() => setMainImageLoaded(true)}
                   onError={() => setMainImageError(true)}
                 />
