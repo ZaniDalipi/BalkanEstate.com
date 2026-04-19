@@ -89,6 +89,13 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
   }, [onImageIndexChange, controlledIndex, internalIndex]);
 
+  const [mainImageError, setMainImageError] = useState(false);
+  const [mainImageLoaded, setMainImageLoaded] = useState(false);
+  const [viewMode, setViewMode] = useState<'photos' | 'streetview' | 'video'>('photos');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [videoEnded, setVideoEnded] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
   const [tiktokScriptLoaded, setTiktokScriptLoaded] = useState(false);
   const tiktokBlockquoteRef = useRef<HTMLDivElement>(null);
 
