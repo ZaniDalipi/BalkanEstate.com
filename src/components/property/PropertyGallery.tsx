@@ -12,6 +12,7 @@ import {
 } from '../../../constants';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
+import { isTikTokShortLink, resolveTikTokShortLink } from '../../features/videos/utils/tiktokLinkResolver';
 
 interface PropertyGalleryProps {
   property: Property;
@@ -98,6 +99,12 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const [tiktokScriptLoaded, setTiktokScriptLoaded] = useState(false);
   const tiktokBlockquoteRef = useRef<HTMLDivElement>(null);
+
+  // State for resolved TikTok short links
+  const [resolvedTikTokId, setResolvedTikTokId] = useState<string | null>(null);
+  const [resolvedTikTokUsername, setResolvedTikTokUsername] = useState<string | null>(null);
+  const [resolvingTikTok, setResolvingTikTok] = useState(false);
+  const [tiktokResolveError, setTiktokResolveError] = useState<string | null>(null);
 
   // Determine video platform from URL
   const getVideoPlatform = useCallback((url: string): string => {
@@ -206,15 +213,15 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     if (tiktokMobileMatch) {
       return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokMobileMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok', tiktokInfo: { username: '', id: tiktokMobileMatch[1] } };
     }
-    // vm.tiktok.com/CODE/ or vt.tiktok.com/CODE/ (short URLs - use blockquote method)
+    // vm.tiktok.com/CODE/ or vt.tiktok.com/CODE/ (short URLs - mark for resolution)
     const tiktokVmMatch = cleanUrl.match(/v[mt]\.tiktok\.com\/([^\s/?#]+)/);
     if (tiktokVmMatch) {
-      return { embedUrl: `blockquote:${url}`, platform: 'tiktok', tiktokInfo: { username: '', id: tiktokVmMatch[1] } };
+      return { embedUrl: `short-link:${url}`, platform: 'tiktok', tiktokInfo: { username: '', id: tiktokVmMatch[1] } };
     }
-    // tiktok.com/t/CODE/ (share link short format - use blockquote method)
+    // tiktok.com/t/CODE/ (share link short format - mark for resolution)
     const tiktokTMatch = cleanUrl.match(/tiktok\.com\/t\/([^\s/?#]+)/);
     if (tiktokTMatch) {
-      return { embedUrl: `blockquote:${url}`, platform: 'tiktok', tiktokInfo: { username: '', id: tiktokTMatch[1] } };
+      return { embedUrl: `short-link:${url}`, platform: 'tiktok', tiktokInfo: { username: '', id: tiktokTMatch[1] } };
     }
 
     // --- Instagram ---
@@ -253,9 +260,34 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   const videoInfo = useMemo(() => getVideoEmbedUrl(externalVideoUrl), [externalVideoUrl, getVideoEmbedUrl]);
 
-  // Load and render TikTok blockquote embed for short codes
+  // Resolve TikTok short links
   useEffect(() => {
-    if (videoPlatform === 'tiktok' && videoInfo.embedUrl.startsWith('blockquote:')) {
+    if (videoPlatform === 'tiktok' && videoInfo.embedUrl.startsWith('short-link:')) {
+      const shortUrl = videoInfo.embedUrl.replace('short-link:', '');
+
+      // Only resolve if not already resolved and not already resolving
+      if (!resolvedTikTokId && !resolvingTikTok && viewMode === 'video') {
+        setResolvingTikTok(true);
+        setTiktokResolveError(null);
+
+        resolveTikTokShortLink(shortUrl)
+          .then((result) => {
+            setResolvedTikTokId(result.videoId);
+            setResolvedTikTokUsername(result.username);
+            setResolvingTikTok(false);
+          })
+          .catch((error) => {
+            console.error('Failed to resolve TikTok short link:', error);
+            setTiktokResolveError(error.message || 'Failed to resolve TikTok link');
+            setResolvingTikTok(false);
+          });
+      }
+    }
+  }, [videoPlatform, videoInfo.embedUrl, viewMode, resolvedTikTokId, resolvingTikTok]);
+
+  // Load and render TikTok blockquote embed for short codes (fallback if resolution fails)
+  useEffect(() => {
+    if (videoPlatform === 'tiktok' && videoInfo.embedUrl.startsWith('short-link:') && tiktokResolveError) {
       const loadAndRender = () => {
         const existingScript = document.querySelector('script[src*="tiktok.com/embed.js"]');
         if (!existingScript) {
@@ -284,7 +316,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
         loadAndRender();
       }
     }
-  }, [videoPlatform, videoInfo.embedUrl, viewMode]);
+  }, [videoPlatform, videoInfo.embedUrl, viewMode, tiktokResolveError]);
 
   // Combine all images
   const allImages = useMemo(() => {
@@ -486,41 +518,68 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               </>
             ) : videoInfo.embedUrl ? (
               <>
-                {/* TikTok blockquote embed for short codes */}
-                {videoInfo.platform === 'tiktok' && videoInfo.embedUrl.startsWith('blockquote:') ? (
-                  <div
-                    ref={tiktokBlockquoteRef}
-                    className="absolute inset-0 w-full h-full flex items-center justify-center bg-black overflow-auto"
-                  >
-                    <blockquote
-                      className="tiktok-embed"
-                      cite={externalVideoUrl}
-                      data-video-id={videoInfo.tiktokInfo?.id}
-                      style={{
-                        maxWidth: '605px',
-                        minWidth: '325px',
-                        margin: 'auto',
-                      }}
-                    >
-                      <section>
-                        <a
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          href={externalVideoUrl}
-                          className="block text-center p-8"
-                        >
-                          <div className="flex flex-col items-center gap-4">
-                            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-                              <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
-                              </svg>
-                            </div>
-                            <span className="text-white text-sm">Loading TikTok video...</span>
+                {/* TikTok short link handling */}
+                {videoInfo.platform === 'tiktok' && videoInfo.embedUrl.startsWith('short-link:') ? (
+                  <>
+                    {resolvingTikTok ? (
+                      // Loading state while resolving
+                      <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-black">
+                        <div className="flex flex-col items-center gap-4">
+                          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
+                            <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+                            </svg>
                           </div>
-                        </a>
-                      </section>
-                    </blockquote>
-                  </div>
+                          <span className="text-white text-sm">Resolving TikTok video...</span>
+                        </div>
+                      </div>
+                    ) : resolvedTikTokId ? (
+                      // Resolved short link - use player/v1 endpoint
+                      <iframe
+                        src={`https://www.tiktok.com/player/v1/${resolvedTikTokId}?music_info=0&description=0&autoplay=1&loop=1`}
+                        className="absolute inset-0 w-full h-full border-0"
+                        style={{ minHeight: '100%', minWidth: '100%' }}
+                        allowFullScreen
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                        title="Property Video Tour"
+                      />
+                    ) : (
+                      // Resolution failed - fallback to blockquote
+                      <div
+                        ref={tiktokBlockquoteRef}
+                        className="absolute inset-0 w-full h-full flex items-center justify-center bg-black overflow-auto"
+                      >
+                        <blockquote
+                          className="tiktok-embed"
+                          cite={externalVideoUrl}
+                          data-video-id={videoInfo.tiktokInfo?.id}
+                          style={{
+                            maxWidth: '605px',
+                            minWidth: '325px',
+                            margin: 'auto',
+                          }}
+                        >
+                          <section>
+                            <a
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              href={externalVideoUrl}
+                              className="block text-center p-8"
+                            >
+                              <div className="flex flex-col items-center gap-4">
+                                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                                  <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+                                  </svg>
+                                </div>
+                                <span className="text-white text-sm">Loading TikTok video...</span>
+                              </div>
+                            </a>
+                          </section>
+                        </blockquote>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <>
                     {/* External video player for YouTube, Vimeo, Facebook, Instagram */}

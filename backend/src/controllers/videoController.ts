@@ -386,6 +386,74 @@ export const addVideoToListing = async (req: Request, res: Response): Promise<vo
 };
 
 /**
+ * @desc    Resolve TikTok short link to get video ID and username
+ * @route   POST /api/videos/resolve-tiktok-short-link
+ * @access  Public (no auth required)
+ */
+export const resolveTikTokShortLink = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { url } = req.body;
+
+    if (!url || typeof url !== 'string') {
+      res.status(400).json({ message: 'Missing or invalid URL parameter' });
+      return;
+    }
+
+    // Validate that it's a TikTok short link
+    const shortLinkPatterns = [
+      /v[mt]\.tiktok\.com\/([^\s/?#]+)/i, // vm.tiktok.com or vt.tiktok.com
+      /tiktok\.com\/t\/([^\s/?#]+)/i, // tiktok.com/t/CODE
+    ];
+
+    const isShortLink = shortLinkPatterns.some(pattern => pattern.test(url));
+
+    if (!isShortLink) {
+      res.status(400).json({ message: 'Invalid TikTok short link format' });
+      return;
+    }
+
+    try {
+      // Follow the redirect to get the full URL
+      const response = await fetch(url, {
+        redirect: 'follow',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        },
+      });
+
+      const finalUrl = response.url;
+
+      // Extract video ID and username from the full URL
+      // Expected format: https://www.tiktok.com/@username/video/123456789
+      const videoIdMatch = finalUrl.match(/\/video\/(\d+)/);
+      const usernameMatch = finalUrl.match(/@([\w.-]+)\//);
+
+      if (!videoIdMatch) {
+        res.status(400).json({ message: 'Could not extract video ID from TikTok link' });
+        return;
+      }
+
+      const videoId = videoIdMatch[1];
+      const username = usernameMatch ? usernameMatch[1] : '';
+
+      res.status(200).json({
+        videoId,
+        username,
+        fullUrl: finalUrl,
+      });
+    } catch (fetchError: any) {
+      videoLogger.error('Failed to follow TikTok redirect:', fetchError);
+      res.status(502).json({ message: 'Failed to resolve TikTok link. Please try again.' });
+    }
+  } catch (error: any) {
+    videoLogger.error('❌ Failed to resolve TikTok short link:', error);
+    res.status(500).json({
+      message: 'Failed to resolve TikTok short link',
+    });
+  }
+};
+
+/**
  * @desc    Get video generation preview (estimate duration and size)
  * @route   GET /api/videos/preview/:propertyId
  * @access  Private (property owner only)
