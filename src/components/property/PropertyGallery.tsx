@@ -359,7 +359,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   return (
     <div className="overflow-hidden sm:bg-white sm:rounded-xl sm:shadow-lg sm:border sm:border-neutral-200">
       <div
-        className="relative w-full h-[350px] sm:aspect-auto sm:h-[420px] md:h-[500px] lg:h-[560px] landscape:h-[60vh] landscape:min-h-[280px] bg-neutral-900 overflow-hidden"
+        className="relative w-full h-[380px] sm:aspect-auto sm:h-[480px] md:h-[580px] lg:h-[640px] landscape:h-[70vh] landscape:min-h-[340px] bg-neutral-900 overflow-hidden"
       >
         {viewMode === 'photos' ? (
           <motion.button
@@ -813,66 +813,89 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           </motion.div>
         )}
 
-        {/* View Mode Toggle (Video / Photos / Street View) - Compact Action Buttons Style */}
-        <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 z-10">
-          <div className="flex items-center gap-2 sm:gap-3 px-2">
-            {/* Photos button */}
-            <motion.button
-              onClick={() => handleViewModeChange('photos')}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-semibold text-sm sm:text-base transition-all ${
-                viewMode === 'photos'
-                  ? 'bg-blue-500 text-white shadow-lg'
-                  : 'bg-white/90 backdrop-blur-sm text-neutral-800 hover:bg-white'
-              }`}
-            >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <circle cx="9" cy="9" r="2" />
-                <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
-              </svg>
-              <span className="hidden sm:inline">{t('actions.photos')}</span>
-            </motion.button>
-
-            {/* Video button */}
-            {hasVideo && (
-              <motion.button
-                onClick={() => handleViewModeChange('video')}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-semibold text-sm sm:text-base transition-all ${
-                  viewMode === 'video'
-                    ? 'bg-blue-500 text-white shadow-lg'
-                    : 'bg-white/90 backdrop-blur-sm text-neutral-800 hover:bg-white'
-                }`}
-              >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polygon points="5 3 19 12 5 21 5 3" />
-                </svg>
-                <span className="hidden sm:inline">{t('actions.video', 'Video')}</span>
-              </motion.button>
-            )}
-
-            {/* Street View button */}
-            <motion.button
-              onClick={() => handleViewModeChange('streetview')}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-semibold text-sm sm:text-base transition-all ${
-                viewMode === 'streetview'
-                  ? 'bg-blue-500 text-white shadow-lg'
-                  : 'bg-white/90 backdrop-blur-sm text-neutral-800 hover:bg-white'
-              }`}
-            >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="5" r="3" />
-                <path d="M12 8v4" />
-                <path d="M8 21l4-9 4 9" />
-              </svg>
-              <span className="hidden sm:inline">{t('actions.streetView')}</span>
-            </motion.button>
-          </div>
+        {/* View Mode Toggle (Video / Photos / Street View) - Liquid Glass Style */}
+        <div className="sm:hidden absolute bottom-2 left-1/2 -translate-x-1/2 z-10">
+          <LiquidGlassSwitch
+            options={[
+              // Video option (only if property has video)
+              ...(hasVideo ? [{
+                value: 'video',
+                label: t('actions.video', 'Video'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                ),
+              }] : []),
+              {
+                value: 'photos',
+                label: t('actions.photos'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="9" cy="9" r="2" />
+                    <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+                  </svg>
+                ),
+              },
+              {
+                value: 'streetview',
+                label: t('actions.streetView'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="5" r="3" />
+                    <path d="M12 8v4" />
+                    <path d="M8 21l4-9 4 9" />
+                  </svg>
+                ),
+              },
+            ]}
+            value={viewMode}
+            onChange={handleViewModeChange}
+            size="sm"
+          />
+        </div>
+        {/* Desktop version - medium */}
+        <div className="hidden sm:block absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 z-10">
+          <LiquidGlassSwitch
+            options={[
+              // Video option (only if property has video)
+              ...(hasVideo ? [{
+                value: 'video',
+                label: t('actions.video', 'Video'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                ),
+              }] : []),
+              {
+                value: 'photos',
+                label: t('actions.photos'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="9" cy="9" r="2" />
+                    <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+                  </svg>
+                ),
+              },
+              {
+                value: 'streetview',
+                label: t('actions.streetView'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="5" r="3" />
+                    <path d="M12 8v4" />
+                    <path d="M8 21l4-9 4 9" />
+                  </svg>
+                ),
+              },
+            ]}
+            value={viewMode}
+            onChange={handleViewModeChange}
+            size="md"
+          />
         </div>
       </div>
     </div>
