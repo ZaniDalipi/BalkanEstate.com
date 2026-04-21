@@ -357,17 +357,18 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
+    <div className="overflow-hidden sm:bg-white sm:rounded-xl sm:shadow-lg sm:border sm:border-neutral-200">
       <div
-        className="relative w-full h-[280px] xs:h-[340px] sm:h-[420px] md:h-[500px] lg:h-[560px] landscape:h-[60vh] landscape:min-h-[280px] bg-neutral-900 overflow-hidden"
+        className="relative w-full aspect-video sm:aspect-auto sm:h-[420px] md:h-[500px] lg:h-[560px] landscape:h-[60vh] landscape:min-h-[280px] bg-neutral-900 overflow-hidden"
       >
         {viewMode === 'photos' ? (
           <motion.button
             onClick={onOpenViewer}
             drag={imagesForCurrentCategory.length > 1 ? 'x' : false}
             dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.18}
+            dragElastic={0.22}
             dragMomentum={false}
+            whileTap={{ scale: 0.98 }}
             onDragEnd={(_, info) => {
               if (info.offset.x < -60) handleNextImage();
               else if (info.offset.x > 60) handlePrevImage();
@@ -381,12 +382,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               </div>
             ) : (
               <>
-                {/* LQIP blur-up placeholder – visible until the sharp image loads */}
-                <img
+                {/* LQIP blur-up placeholder – fades as sharp image loads */}
+                <motion.img
                   src={getPropertyImagePlaceholder(currentImageUrl) || optimizeCloudinaryUrl(currentImageUrl, { width: 40, quality: 'auto:eco' })}
                   alt=""
                   aria-hidden="true"
-                  className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-60"
+                  animate={{ opacity: mainImageLoaded ? 0.15 : 0.65 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 will-change-opacity"
                 />
                 {/* Main sharp image – slides + fades in once loaded */}
                 <motion.img
@@ -402,19 +405,19 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   fetchpriority="high"
                   decoding="async"
                   initial={{
-                    x: slideDirectionRef.current === 'left' ? '6%' : slideDirectionRef.current === 'right' ? '-6%' : 0,
+                    x: slideDirectionRef.current === 'left' ? '5%' : slideDirectionRef.current === 'right' ? '-5%' : 0,
                     opacity: 0,
-                    scale: 1.03,
+                    scale: 1.04,
                   }}
                   animate={mainImageLoaded
                     ? { x: 0, opacity: 1, scale: 1 }
                     : {
-                        x: slideDirectionRef.current === 'left' ? '6%' : slideDirectionRef.current === 'right' ? '-6%' : 0,
+                        x: slideDirectionRef.current === 'left' ? '5%' : slideDirectionRef.current === 'right' ? '-5%' : 0,
                         opacity: 0,
-                        scale: 1.03,
+                        scale: 1.04,
                       }
                   }
-                  transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  transition={{ duration: 0.4, ease: 'easeOut' }}
                   className="absolute inset-0 w-full h-full object-contain will-change-transform"
                   onLoad={() => setMainImageLoaded(true)}
                   onError={() => setMainImageError(true)}
@@ -579,42 +582,51 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
         {viewMode === 'photos' && (
           <>
             <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-2 z-10">
-              <button
+              <motion.button
                 onClick={(e) => {
                   e.stopPropagation();
                   onOpenEditor(currentImageUrl);
                 }}
-                className="flex items-center justify-center bg-white/90 backdrop-blur-sm text-neutral-800 rounded-full hover:scale-105 transition-transform shadow-md w-10 h-10 sm:w-auto sm:h-auto sm:gap-2 sm:px-4 sm:py-2"
+                whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,1)' }}
+                whileTap={{ scale: 0.92 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                className="flex items-center justify-center bg-white/90 backdrop-blur-sm text-neutral-800 rounded-full shadow-md w-10 h-10 sm:w-auto sm:h-auto sm:gap-2 sm:px-4 sm:py-2"
               >
                 <PencilIcon className="w-5 h-5 sm:w-5 sm:h-5" />
                 <span className="hidden sm:inline font-semibold text-sm">{t('actions.annotate')}</span>
-              </button>
+              </motion.button>
 
             </div>
 
             {/* Navigation Controls */}
             {imagesForCurrentCategory.length > 1 && (
               <>
-                <button
+                <motion.button
                   onClick={(e) => {
                     e.stopPropagation();
                     handlePrevImage();
                   }}
-                  className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 bg-white/75 backdrop-blur-sm rounded-full hover:bg-white active:bg-neutral-100 transition-colors shadow-md z-10 w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center"
+                  whileHover={{ scale: 1.08, backgroundColor: 'rgba(255,255,255,0.95)' }}
+                  whileTap={{ scale: 0.92 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 bg-white/75 backdrop-blur-sm rounded-full shadow-md z-10 w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center"
                   aria-label="Previous image"
                 >
                   <ChevronLeftIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800" />
-                </button>
-                <button
+                </motion.button>
+                <motion.button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleNextImage();
                   }}
-                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 bg-white/75 backdrop-blur-sm rounded-full hover:bg-white active:bg-neutral-100 transition-colors shadow-md z-10 w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center"
+                  whileHover={{ scale: 1.08, backgroundColor: 'rgba(255,255,255,0.95)' }}
+                  whileTap={{ scale: 0.92 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 bg-white/75 backdrop-blur-sm rounded-full shadow-md z-10 w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center"
                   aria-label="Next image"
                 >
                   <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800" />
-                </button>
+                </motion.button>
 
                 {/* Image Counter & Category Badge - Top left corner */}
                 <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 flex flex-col gap-1.5" style={{ marginTop: property.virtualTour360Url ? '40px' : '0' }}>
@@ -770,11 +782,12 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 onClick={(e) => { e.stopPropagation(); handleDotNav(i); }}
                 aria-label={`Go to image ${i + 1}`}
                 animate={{
-                  width: i === currentImageIndex ? 16 : 6,
-                  opacity: i === currentImageIndex ? 1 : 0.55,
+                  width: i === currentImageIndex ? 18 : 6,
+                  opacity: i === currentImageIndex ? 1 : 0.5,
                 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
-                className="h-1.5 rounded-full bg-white shadow-sm flex-shrink-0"
+                whileHover={{ opacity: i === currentImageIndex ? 1 : 0.75 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                className="h-1.5 rounded-full bg-white shadow-sm backdrop-blur-sm flex-shrink-0 cursor-pointer"
                 style={{ minWidth: 6 }}
               />
             ))}
