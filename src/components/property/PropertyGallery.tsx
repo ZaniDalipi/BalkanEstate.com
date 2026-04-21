@@ -359,7 +359,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   return (
     <div className="overflow-hidden sm:bg-white sm:rounded-xl sm:shadow-lg sm:border sm:border-neutral-200">
       <div
-        className="relative w-full aspect-video sm:aspect-auto sm:h-[420px] md:h-[500px] lg:h-[560px] landscape:h-[60vh] landscape:min-h-[280px] bg-neutral-900 overflow-hidden"
+        className="relative w-full h-[350px] sm:aspect-auto sm:h-[420px] md:h-[500px] lg:h-[560px] landscape:h-[60vh] landscape:min-h-[280px] bg-neutral-900 overflow-hidden"
       >
         {viewMode === 'photos' ? (
           <motion.button
