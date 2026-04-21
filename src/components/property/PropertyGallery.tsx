@@ -105,6 +105,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   const [resolvedTikTokUsername, setResolvedTikTokUsername] = useState<string | null>(null);
   const [resolvingTikTok, setResolvingTikTok] = useState(false);
   const [tiktokResolveError, setTiktokResolveError] = useState<string | null>(null);
+  const [showResolvingOverlay, setShowResolvingOverlay] = useState(false);
 
   // Determine video platform from URL
   const getVideoPlatform = useCallback((url: string): string => {
@@ -226,7 +227,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
     // --- Instagram ---
     // Handles: /reel/, /reels/, /p/, /tv/, /share/reel/, /share/p/ — all with optional query params
-    const instagramMatch = cleanUrl.match(/instagram\.com\/(?:share\/)?(reel|reels|p|tv)\/([A-Za-z0-9_-]+)/);
+    // First, strip query parameters entirely from the full URL
+    const instagramClean = url.split('?')[0].replace(/\/$/, '');
+    const instagramMatch = instagramClean.match(/instagram\.com\/(?:share\/)?(reel|reels|p|tv)\/([A-Za-z0-9_-]+)/);
     if (instagramMatch) {
       const type = instagramMatch[1] === 'reels' ? 'reel' : instagramMatch[1];
       return { embedUrl: `https://www.instagram.com/${type}/${instagramMatch[2]}/embed/`, platform: 'instagram' };
@@ -260,13 +263,13 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   const videoInfo = useMemo(() => getVideoEmbedUrl(externalVideoUrl), [externalVideoUrl, getVideoEmbedUrl]);
 
-  // Resolve TikTok short links
+  // Preload TikTok short links in background (no UI feedback)
   useEffect(() => {
     if (videoPlatform === 'tiktok' && videoInfo.embedUrl.startsWith('short-link:')) {
       const shortUrl = videoInfo.embedUrl.replace('short-link:', '');
 
       // Only resolve if not already resolved and not already resolving
-      if (!resolvedTikTokId && !resolvingTikTok && viewMode === 'video') {
+      if (!resolvedTikTokId && !resolvingTikTok) {
         setResolvingTikTok(true);
         setTiktokResolveError(null);
 
@@ -283,7 +286,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           });
       }
     }
-  }, [videoPlatform, videoInfo.embedUrl, viewMode, resolvedTikTokId, resolvingTikTok]);
+  }, [videoPlatform, videoInfo.embedUrl, resolvedTikTokId, resolvingTikTok]);
 
   // Load and render TikTok blockquote embed for short codes (fallback if resolution fails)
   useEffect(() => {
@@ -521,29 +524,28 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 {/* TikTok short link handling */}
                 {videoInfo.platform === 'tiktok' && videoInfo.embedUrl.startsWith('short-link:') ? (
                   <>
-                    {resolvingTikTok ? (
-                      // Loading state while resolving
-                      <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-black">
-                        <div className="flex flex-col items-center gap-4">
-                          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
-                            <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
-                            </svg>
-                          </div>
-                          <span className="text-white text-sm">Resolving TikTok video...</span>
-                        </div>
-                      </div>
-                    ) : resolvedTikTokId ? (
+                    {resolvedTikTokId ? (
                       // Resolved short link - use player/v1 endpoint
-                      <iframe
-                        src={`https://www.tiktok.com/player/v1/${resolvedTikTokId}?music_info=0&description=0&autoplay=1&loop=1`}
-                        className="absolute inset-0 w-full h-full border-0"
-                        style={{ minHeight: '100%', minWidth: '100%' }}
-                        allowFullScreen
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-                        title="Property Video Tour"
-                      />
-                    ) : (
+                      <>
+                        <iframe
+                          src={`https://www.tiktok.com/player/v1/${resolvedTikTokId}?music_info=0&description=0&autoplay=1&loop=1`}
+                          className="absolute inset-0 w-full h-full border-0"
+                          style={{ minHeight: '100%', minWidth: '100%' }}
+                          allowFullScreen
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                          title="Property Video Tour"
+                        />
+                        {/* Minimal loading overlay only if still resolving when user sees video */}
+                        {showResolvingOverlay && resolvingTikTok && (
+                          <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-black/30 pointer-events-none">
+                            <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                              <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
+                              <span className="text-white text-xs">Loading...</span>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : tiktokResolveError ? (
                       // Resolution failed - fallback to blockquote
                       <div
                         ref={tiktokBlockquoteRef}
@@ -577,6 +579,21 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                             </a>
                           </section>
                         </blockquote>
+                      </div>
+                    ) : (
+                      // Still resolving - show minimal loading state
+                      <div
+                        onClick={() => setShowResolvingOverlay(true)}
+                        className="absolute inset-0 w-full h-full flex items-center justify-center bg-black cursor-pointer hover:bg-black/90 transition-colors"
+                      >
+                        <div className="flex flex-col items-center gap-4">
+                          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
+                            <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+                            </svg>
+                          </div>
+                          <span className="text-white text-sm">Click to play</span>
+                        </div>
                       </div>
                     )}
                   </>

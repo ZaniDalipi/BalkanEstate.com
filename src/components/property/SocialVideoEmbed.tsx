@@ -52,6 +52,7 @@ const extractTikTokInfo = (url: string): { id: string; username: string } => {
 
 // Extract Instagram post/reel/tv ID, handling all URL formats and query parameters
 const extractInstagramId = (url: string): string => {
+  // Strip query parameters and trailing slashes
   const cleanUrl = url.split('?')[0].replace(/\/$/, '');
   // Handles: /reel/, /reels/, /p/, /tv/, /share/reel/, /share/p/
   const match = cleanUrl.match(/instagram\.com\/(?:share\/)?(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/);
@@ -60,7 +61,8 @@ const extractInstagramId = (url: string): string => {
 
 // Check if Instagram URL is a reel or IGTV (video content, not a static post)
 const isInstagramReel = (url: string): boolean => {
-  const cleanUrl = url.split('?')[0];
+  // Strip query parameters and trailing slashes
+  const cleanUrl = url.split('?')[0].replace(/\/$/, '');
   return cleanUrl.includes('/reel/') || cleanUrl.includes('/reels/') || cleanUrl.includes('/tv/') || cleanUrl.includes('/share/reel');
 };
 
