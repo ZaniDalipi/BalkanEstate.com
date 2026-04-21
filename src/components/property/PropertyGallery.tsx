@@ -103,9 +103,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   // State for resolved TikTok short links
   const [resolvedTikTokId, setResolvedTikTokId] = useState<string | null>(null);
   const [resolvedTikTokUsername, setResolvedTikTokUsername] = useState<string | null>(null);
-  const [resolvingTikTok, setResolvingTikTok] = useState(false);
   const [tiktokResolveError, setTiktokResolveError] = useState<string | null>(null);
   const [showResolvingOverlay, setShowResolvingOverlay] = useState(false);
+
+  // Ref to track which TikTok URLs we've already attempted to resolve (prevent duplicate requests)
+  const resolveAttemptedRef = useRef<Set<string>>(new Set());
 
   // Determine video platform from URL
   const getVideoPlatform = useCallback((url: string): string => {
@@ -263,30 +265,37 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   const videoInfo = useMemo(() => getVideoEmbedUrl(externalVideoUrl), [externalVideoUrl, getVideoEmbedUrl]);
 
+  // Reset tracking when property/video URL changes
+  useEffect(() => {
+    resolveAttemptedRef.current.clear();
+    setResolvedTikTokId(null);
+    setResolvedTikTokUsername(null);
+    setTiktokResolveError(null);
+  }, [externalVideoUrl]);
+
   // Preload TikTok short links in background (no UI feedback)
   useEffect(() => {
     if (videoPlatform === 'tiktok' && videoInfo.embedUrl.startsWith('short-link:')) {
       const shortUrl = videoInfo.embedUrl.replace('short-link:', '');
 
-      // Only resolve if not already resolved and not already resolving
-      if (!resolvedTikTokId && !resolvingTikTok) {
-        setResolvingTikTok(true);
+      // Only resolve if we haven't already attempted this specific URL
+      if (!resolveAttemptedRef.current.has(shortUrl)) {
+        // Mark this URL as being attempted (prevent duplicate requests)
+        resolveAttemptedRef.current.add(shortUrl);
         setTiktokResolveError(null);
 
         resolveTikTokShortLink(shortUrl)
           .then((result) => {
             setResolvedTikTokId(result.videoId);
             setResolvedTikTokUsername(result.username);
-            setResolvingTikTok(false);
           })
           .catch((error) => {
             console.error('Failed to resolve TikTok short link:', error);
             setTiktokResolveError(error.message || 'Failed to resolve TikTok link');
-            setResolvingTikTok(false);
           });
       }
     }
-  }, [videoPlatform, videoInfo.embedUrl, resolvedTikTokId, resolvingTikTok]);
+  }, [videoPlatform, videoInfo.embedUrl]);
 
   // Load and render TikTok blockquote embed for short codes (fallback if resolution fails)
   useEffect(() => {
