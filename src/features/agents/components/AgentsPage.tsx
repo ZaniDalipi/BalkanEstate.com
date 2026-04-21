@@ -16,6 +16,7 @@ import { FloatingSphere, GlossyPill, AbstractBlob, RealEstateOrb, Decorative3DSt
 import AgentsHeroBanner from '@/components/shared/AgentsHeroBanner';
 import { HERO_IMAGES } from '@/config/cloudinaryConfig';
 import { apiRequest } from '@/src/shared/api';
+import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 
 type SortOption = 'rating' | 'experience' | 'sales' | 'recent' | 'name' | 'licensed';
 type SearchTab = 'all' | 'name' | 'location' | 'specialization';
@@ -911,14 +912,10 @@ const AgentsPage: React.FC = () => {
                       <label htmlFor="phone" className="block text-xs sm:text-sm font-semibold text-neutral-700 mb-1 sm:mb-2">
                         {t('agents:contact.phoneLabel')}
                       </label>
-                      <input
-                        type="tel"
-                        id="phone"
-                        required
+                      <PhoneInput
                         value={contactForm.phone}
-                        onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
-                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm sm:text-base"
-                        placeholder={t('agents:contact.phonePlaceholder')}
+                        onChange={(v) => setContactForm({ ...contactForm, phone: v })}
+                        required
                       />
                     </div>
                   </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { sendAgentInquiry } from '@/services/apiService';
 import { XMarkIcon, UserCircleIcon } from '@/constants';
+import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 
 interface Agent {
   id: string;
@@ -340,21 +341,13 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
 
                 {/* Phone */}
                 <div>
-                  <label htmlFor="ai-buyerPhone" className="block text-xs font-medium text-neutral-700 mb-1.5">
+                  <label className="block text-xs font-medium text-neutral-700 mb-1.5">
                     {t('agents:inquiry.yourPhone', 'Phone')}
                     <span className="text-neutral-400 font-normal ml-1">({t('common:optional', 'optional')})</span>
                   </label>
-                  <input
-                    type="tel"
-                    id="ai-buyerPhone"
-                    name="buyerPhone"
+                  <PhoneInput
                     value={formData.buyerPhone}
-                    onChange={handleChange}
-                    className={inputClasses}
-                    placeholder="+1 234 567 8900"
-                    autoComplete="tel"
-                    inputMode="tel"
-                    style={{ touchAction: 'manipulation' }}
+                    onChange={(v) => setFormData(prev => ({ ...prev, buyerPhone: v }))}
                   />
                 </div>
 
