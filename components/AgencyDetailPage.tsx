@@ -38,6 +38,7 @@ import { searchLocation } from '../services/osmService';
 import { toggleAgencyFavorite, checkAgencyFavorite } from '../src/features/saved/api/savedApi';
 import { SocialShare } from '../src/components/marketing/SocialShare';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
+import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 
 // Map icon SVG for section headers
 const MapIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -3501,11 +3502,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
                       {t('agencyDetails:editModal.phone')} {t('agencyDetails:common.required', '*')}
                     </label>
-                    <input
-                      type="tel"
-                      value={editForm.phone}
-                      onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
+                    <PhoneInput
+                      value={editForm.phone || ''}
+                      onChange={(v) => setEditForm({ ...editForm, phone: v })}
                       required
                     />
                   </div>

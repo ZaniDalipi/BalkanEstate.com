@@ -15,6 +15,7 @@ import { uploadRequest } from '../../src/shared/api/httpClient';
 import { API_URL } from '../../src/shared/api/config';
 import MapLocationPicker from '../../src/features/seller/components/MapLocationPicker';
 import { ChevronLeft, ChevronRight, X, Upload, ImageIcon } from 'lucide-react';
+import PhoneInput, { validateFullPhone } from '../../src/shared/components/ui/PhoneInput';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -348,11 +349,8 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
       } else if (!emailRegex.test(formData.email.trim())) {
         errs.email = t('agents:agencyCreation.validation.emailInvalid', 'Please enter a valid email address');
       }
-      if (!formData.phone.trim()) {
-        errs.phone = t('agents:agencyCreation.validation.phoneRequired', 'Phone number is required');
-      } else if (!/^[+\d\s\-().]{7,20}$/.test(formData.phone.trim())) {
-        errs.phone = t('agents:agencyCreation.validation.phoneInvalid', 'Please enter a valid phone number (e.g. +381 11 123 4567)');
-      }
+      const phoneErr = validateFullPhone(formData.phone, true, t as any);
+      if (phoneErr) errs.phone = phoneErr;
       if (formData.website && !/^https?:\/\/.+/.test(formData.website)) {
         errs.website = t('agents:agencyCreation.validation.websiteInvalid', 'Website must start with http:// or https://');
       }
@@ -716,16 +714,14 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
             </div>
             <div>
               <label className={labelCls}>{t('agents:agencyCreation.fields.phone', 'Phone Number')} <Required /></label>
-              <input
-                type="tel"
+              <PhoneInput
                 value={formData.phone}
-                onChange={e => set('phone', e.target.value)}
-                placeholder="+381 11 123 4567"
-                className={inputCls('phone')}
+                onChange={fullPhone => set('phone', fullPhone)}
+                error={fieldErrors.phone}
                 disabled={isCreating}
+                required
               />
               <FieldError field="phone" fieldErrors={fieldErrors} />
-              <p className="text-xs text-gray-400 mt-1">{t('agents:agencyCreation.hints.phone', 'Include country code (e.g. +381 for Serbia)')}</p>
             </div>
             <div>
               <label className={labelCls}>{t('agents:agencyCreation.fields.website', 'Website URL')}</label>

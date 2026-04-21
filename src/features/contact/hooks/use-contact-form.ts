@@ -4,7 +4,8 @@
  */
 
 import { useState, useCallback } from 'react';
-import { validateEmail, validateName, validatePhone, sanitizeText } from '@/src/shared/utils/validation';
+import { validateEmail, validateName, sanitizeText } from '@/src/shared/utils/validation';
+import { validateFullPhone } from '@/src/shared/components/ui/PhoneInput';
 import type { ContactFormData, ContactFormErrors } from '../types';
 
 const INITIAL_FORM_DATA: ContactFormData = {
@@ -35,6 +36,12 @@ export function useContactForm() {
     []
   );
 
+  const handlePhoneChange = useCallback((fullPhone: string) => {
+    setFormData((prev) => ({ ...prev, phone: fullPhone }));
+    setErrors((prev) => ({ ...prev, phone: undefined }));
+    setSubmitError(null);
+  }, []);
+
   const validate = useCallback((): boolean => {
     const newErrors: ContactFormErrors = {};
 
@@ -48,11 +55,9 @@ export function useContactForm() {
       newErrors.email = emailResult.error;
     }
 
-    if (formData.phone.trim()) {
-      const phoneResult = validatePhone(formData.phone.trim());
-      if (!phoneResult.isValid) {
-        newErrors.phone = phoneResult.error;
-      }
+    if (formData.phone) {
+      const phoneErr = validateFullPhone(formData.phone, false);
+      if (phoneErr) newErrors.phone = phoneErr;
     }
 
     if (!formData.subject) {
@@ -125,6 +130,7 @@ export function useContactForm() {
     isSuccess,
     submitError,
     handleChange,
+    handlePhoneChange,
     handleSubmit,
     reset,
   };

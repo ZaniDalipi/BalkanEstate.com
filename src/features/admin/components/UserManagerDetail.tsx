@@ -8,6 +8,7 @@ import {
 } from '@/constants';
 import { User, UserEditForm } from './useUserManager';
 import { apiRequest } from '@/src/shared/api';
+import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import { approveLicense, rejectLicense } from '../api/adminApi';
 
 interface UserManagerDetailProps {
@@ -269,11 +270,9 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t('userDetail.phone')}
                 </label>
-                <input
-                  type="tel"
-                  value={editForm.phone}
-                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                <PhoneInput
+                  value={editForm.phone || ''}
+                  onChange={(v) => setEditForm({ ...editForm, phone: v })}
                 />
               </div>
 

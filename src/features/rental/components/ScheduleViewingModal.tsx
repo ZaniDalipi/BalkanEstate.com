@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { apiRequest } from '@/src/shared/api';
+import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 
 interface ScheduleViewingModalProps {
     property: Property;
@@ -545,12 +546,9 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-neutral-600 mb-1">{t('rental:viewing.phone', 'Phone')} <span className="text-neutral-400">({t('rental:viewing.optional', 'optional')})</span></label>
-                                <input
-                                    type="tel"
+                                <PhoneInput
                                     value={phone}
-                                    onChange={(e) => setPhone(e.target.value)}
-                                    className="w-full px-3 py-2.5 text-sm border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder={t('rental:viewing.placeholders.phone', '+1 234 567 8900')}
+                                    onChange={setPhone}
                                 />
                             </div>
                             <div>
