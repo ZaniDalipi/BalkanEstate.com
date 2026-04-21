@@ -13,7 +13,6 @@ import {
 } from '../../../constants';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
-import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 
 interface PropertyGalleryProps {
   property: Property;
@@ -330,10 +329,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
   }, [currentImageIndex, imagesForCurrentCategory.length, onImageIndexChange]);
 
-  const swipeHandlers = useSwipeGesture({
-    onSwipeLeft: handleNextImage,
-    onSwipeRight: handlePrevImage,
-  });
+  const handleDotNav = useCallback((index: number) => {
+    slideDirectionRef.current = index > currentImageIndex ? 'left' : 'right';
+    if (onImageIndexChange) {
+      onImageIndexChange(index);
+    } else {
+      setInternalIndex(index);
+    }
+  }, [currentImageIndex, onImageIndexChange]);
 
   // Get category label for display
   const getCategoryEmoji = (category: PropertyImageTag | 'all'): string => {
@@ -357,13 +360,20 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
       <div
         className="relative w-full h-[280px] xs:h-[340px] sm:h-[420px] md:h-[500px] lg:h-[560px] landscape:h-[60vh] landscape:min-h-[280px] bg-neutral-900 overflow-hidden"
-        {...(viewMode === 'photos' && imagesForCurrentCategory.length > 1 ? swipeHandlers : {})}
-        style={viewMode === 'photos' && imagesForCurrentCategory.length > 1 ? { touchAction: 'pan-y' } : undefined}
       >
         {viewMode === 'photos' ? (
-          <button
+          <motion.button
             onClick={onOpenViewer}
+            drag={imagesForCurrentCategory.length > 1 ? 'x' : false}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.18}
+            dragMomentum={false}
+            onDragEnd={(_, info) => {
+              if (info.offset.x < -60) handleNextImage();
+              else if (info.offset.x > 60) handlePrevImage();
+            }}
             className="relative w-full h-full flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-t-xl overflow-hidden"
+            style={{ touchAction: 'pan-y', cursor: 'pointer' }}
           >
             {mainImageError ? (
               <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
@@ -405,13 +415,13 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                       }
                   }
                   transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
-                  className="absolute inset-0 w-full h-full object-cover will-change-transform"
+                  className="absolute inset-0 w-full h-full object-contain will-change-transform"
                   onLoad={() => setMainImageLoaded(true)}
                   onError={() => setMainImageError(true)}
                 />
               </>
             )}
-          </button>
+          </motion.button>
         ) : viewMode === 'video' && hasVideo ? (
           // Video player - supports both generated videos (mp4) and external embeds
           <div className="relative w-full h-full bg-black flex items-center justify-center overflow-hidden">
@@ -554,14 +564,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 onNavigateTo3DTour();
               }
             }}
-            className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold px-3 py-2 sm:px-4 sm:py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all shadow-lg animate-pulse hover:animate-none"
+            className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold rounded-full hover:scale-105 active:scale-95 transition-all shadow-lg animate-pulse hover:animate-none w-9 h-9 sm:w-auto sm:h-auto sm:px-4 sm:py-2.5"
           >
-            <svg className="w-5 h-5 sm:w-5 sm:h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" />
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
               <path d="M2 12h20" />
             </svg>
-            <span className="text-xs sm:text-sm">{t('property:gallery.enter3DTour', 'Enter 3D Tour')}</span>
+            <span className="hidden sm:inline text-sm">{t('property:gallery.enter3DTour', 'Enter 3D Tour')}</span>
           </button>
         )}
 
@@ -590,20 +600,20 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     e.stopPropagation();
                     handlePrevImage();
                   }}
-                  className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white active:bg-neutral-100 transition-colors shadow-md z-10 w-11 h-11 flex items-center justify-center"
+                  className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 bg-white/75 backdrop-blur-sm rounded-full hover:bg-white active:bg-neutral-100 transition-colors shadow-md z-10 w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center"
                   aria-label="Previous image"
                 >
-                  <ChevronLeftIcon className="w-5 h-5 text-neutral-800" />
+                  <ChevronLeftIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800" />
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleNextImage();
                   }}
-                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white active:bg-neutral-100 transition-colors shadow-md z-10 w-11 h-11 flex items-center justify-center"
+                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 bg-white/75 backdrop-blur-sm rounded-full hover:bg-white active:bg-neutral-100 transition-colors shadow-md z-10 w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center"
                   aria-label="Next image"
                 >
-                  <ChevronRightIcon className="w-5 h-5 text-neutral-800" />
+                  <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800" />
                 </button>
 
                 {/* Image Counter & Category Badge - Top left corner */}
@@ -631,8 +641,20 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
         {/* Building Floor Overlay - Shows apartment position in building */}
         {viewMode === 'photos' && property.propertyType === 'apartment' && property.floorNumber && property.totalFloors && property.totalFloors > 1 && (
-          <div className="absolute bottom-[calc(2.5rem-1px)] sm:bottom-[calc(3rem-1px)] left-2 sm:left-3 z-10 animate-fade-in">
-            <div className="bg-slate-900/85 backdrop-blur-sm rounded-xl shadow-lg border border-slate-700/50 overflow-hidden w-[52px] sm:w-[60px]">
+          <>
+            {/* Mobile: compact floor pill */}
+            <div className="sm:hidden absolute bottom-[2.6rem] left-2 z-10 animate-fade-in">
+              <div className="flex items-center gap-1 bg-slate-900/80 backdrop-blur-sm px-2 py-1 rounded-lg">
+                <svg className="w-3 h-3 text-green-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="3" width="18" height="18" rx="1" />
+                  <path d="M3 9h18M3 15h18M9 3v18" />
+                </svg>
+                <span className="text-green-400 text-[11px] font-bold leading-none">{property.floorNumber}/{property.totalFloors}</span>
+              </div>
+            </div>
+            {/* Desktop: full building visualization */}
+            <div className="hidden sm:block absolute bottom-[calc(3rem-1px)] left-3 z-10 animate-fade-in">
+            <div className="bg-slate-900/85 backdrop-blur-sm rounded-xl shadow-lg border border-slate-700/50 overflow-hidden w-[60px]">
               {/* Building visualization */}
               <div className="relative px-2 sm:px-2.5 pt-2 sm:pt-2.5 pb-1">
                 {/* Roof */}
@@ -695,7 +717,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 </div>
               </div>
             </div>
-          </div>
+            </div>
+          </>
         )}
 
         {/* Property Type & Listing Chip - Bottom right overlay */}
@@ -735,6 +758,26 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 {property.listingType === 'rent' ? t('property:gallery.forRent', 'Rent') : t('property:gallery.forSale', 'Sale')}
               </span>
             </div>
+          </div>
+        )}
+
+        {/* Dot progress indicators – visible on photos mode for ≤20 images */}
+        {viewMode === 'photos' && imagesForCurrentCategory.length > 1 && imagesForCurrentCategory.length <= 20 && (
+          <div className="absolute bottom-[3.2rem] sm:bottom-[3.8rem] left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
+            {imagesForCurrentCategory.map((_, i) => (
+              <motion.button
+                key={i}
+                onClick={(e) => { e.stopPropagation(); handleDotNav(i); }}
+                aria-label={`Go to image ${i + 1}`}
+                animate={{
+                  width: i === currentImageIndex ? 16 : 6,
+                  opacity: i === currentImageIndex ? 1 : 0.55,
+                }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                className="h-1.5 rounded-full bg-white shadow-sm flex-shrink-0"
+                style={{ minWidth: 6 }}
+              />
+            ))}
           </div>
         )}
 
