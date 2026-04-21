@@ -773,112 +773,105 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           </div>
         )}
 
-        {/* Dot progress indicators – visible on photos mode for ≤20 images */}
-        {viewMode === 'photos' && imagesForCurrentCategory.length > 1 && imagesForCurrentCategory.length <= 20 && (
-          <div className="absolute bottom-[3.2rem] sm:bottom-[3.8rem] left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
-            {imagesForCurrentCategory.map((_, i) => (
-              <motion.button
-                key={i}
-                onClick={(e) => { e.stopPropagation(); handleDotNav(i); }}
-                aria-label={`Go to image ${i + 1}`}
-                animate={{
-                  width: i === currentImageIndex ? 18 : 6,
-                  opacity: i === currentImageIndex ? 1 : 0.5,
-                }}
-                whileHover={{ opacity: i === currentImageIndex ? 1 : 0.75 }}
-                transition={{ duration: 0.25, ease: 'easeOut' }}
-                className="h-1.5 rounded-full bg-white shadow-sm backdrop-blur-sm flex-shrink-0 cursor-pointer"
-                style={{ minWidth: 6 }}
-              />
-            ))}
-          </div>
+        {/* Progress scrubber bar – Zillow-style interactive progress */}
+        {viewMode === 'photos' && imagesForCurrentCategory.length > 1 && (
+          <motion.div
+            className="absolute bottom-[3.2rem] sm:bottom-[3.5rem] left-0 right-0 h-1 bg-white/20 backdrop-blur-sm z-10 cursor-pointer group"
+            onClick={(e) => {
+              const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+              const percent = (e.clientX - rect.left) / rect.width;
+              const index = Math.min(Math.floor(percent * imagesForCurrentCategory.length), imagesForCurrentCategory.length - 1);
+              handleDotNav(index);
+            }}
+            whileHover={{ height: 4 }}
+            transition={{ duration: 0.15 }}
+          >
+            {/* Filled progress bar */}
+            <motion.div
+              className="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-400 to-blue-500 shadow-lg"
+              animate={{ width: `${((currentImageIndex + 1) / imagesForCurrentCategory.length) * 100}%` }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+            />
+            {/* Progress dots on track */}
+            <div className="absolute top-0 h-full w-full flex">
+              {imagesForCurrentCategory.map((_, i) => (
+                <div
+                  key={i}
+                  className="flex-1 h-full flex items-center justify-center"
+                >
+                  <motion.div
+                    animate={{
+                      scale: i === currentImageIndex ? 1.3 : 0.6,
+                      opacity: i === currentImageIndex ? 1 : 0.4,
+                    }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                    className="w-1.5 h-1.5 rounded-full bg-white"
+                  />
+                </div>
+              ))}
+            </div>
+          </motion.div>
         )}
 
-        {/* View Mode Toggle (Video / Photos / Street View) - Liquid Glass Style */}
+        {/* View Mode Toggle (Video / Photos / Street View) - Compact Action Buttons Style */}
         <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 z-10">
-          {/* Mobile version - smaller */}
-          <div className="sm:hidden">
-            <LiquidGlassSwitch
-              options={[
-                // Video option (only if property has video)
-                ...(hasVideo ? [{
-                  value: 'video',
-                  label: t('actions.video', 'Video'),
-                  icon: (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polygon points="5 3 19 12 5 21 5 3" />
-                    </svg>
-                  ),
-                }] : []),
-                {
-                  value: 'photos',
-                  label: t('actions.photos'),
-                  icon: (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="3" width="18" height="18" rx="2" />
-                      <circle cx="9" cy="9" r="2" />
-                      <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
-                    </svg>
-                  ),
-                },
-                {
-                  value: 'streetview',
-                  label: t('actions.streetView'),
-                  icon: (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="5" r="3" />
-                      <path d="M12 8v4" />
-                      <path d="M8 21l4-9 4 9" />
-                    </svg>
-                  ),
-                },
-              ]}
-              value={viewMode}
-              onChange={handleViewModeChange}
-              size="sm"
-            />
-          </div>
-          {/* Desktop version - medium */}
-          <div className="hidden sm:block">
-            <LiquidGlassSwitch
-              options={[
-                // Video option (only if property has video)
-                ...(hasVideo ? [{
-                  value: 'video',
-                  label: t('actions.video', 'Video'),
-                  icon: (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polygon points="5 3 19 12 5 21 5 3" />
-                    </svg>
-                  ),
-                }] : []),
-                {
-                  value: 'photos',
-                  label: t('actions.photos'),
-                  icon: (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="3" width="18" height="18" rx="2" />
-                      <circle cx="9" cy="9" r="2" />
-                      <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
-                    </svg>
-                  ),
-                },
-                {
-                  value: 'streetview',
-                  label: t('actions.streetView'),
-                  icon: (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="5" r="3" />
-                      <path d="M12 8v4" />
-                      <path d="M8 21l4-9 4 9" />
-                    </svg>
-                  ),
-                },
-              ]}
-              value={viewMode}
-              onChange={handleViewModeChange}
-              size="md"
-            />
+          <div className="flex items-center gap-2 sm:gap-3 px-2">
+            {/* Photos button */}
+            <motion.button
+              onClick={() => handleViewModeChange('photos')}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-semibold text-sm sm:text-base transition-all ${
+                viewMode === 'photos'
+                  ? 'bg-blue-500 text-white shadow-lg'
+                  : 'bg-white/90 backdrop-blur-sm text-neutral-800 hover:bg-white'
+              }`}
+            >
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <circle cx="9" cy="9" r="2" />
+                <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+              </svg>
+              <span className="hidden sm:inline">{t('actions.photos')}</span>
+            </motion.button>
+
+            {/* Video button */}
+            {hasVideo && (
+              <motion.button
+                onClick={() => handleViewModeChange('video')}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-semibold text-sm sm:text-base transition-all ${
+                  viewMode === 'video'
+                    ? 'bg-blue-500 text-white shadow-lg'
+                    : 'bg-white/90 backdrop-blur-sm text-neutral-800 hover:bg-white'
+                }`}
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+                <span className="hidden sm:inline">{t('actions.video', 'Video')}</span>
+              </motion.button>
+            )}
+
+            {/* Street View button */}
+            <motion.button
+              onClick={() => handleViewModeChange('streetview')}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-semibold text-sm sm:text-base transition-all ${
+                viewMode === 'streetview'
+                  ? 'bg-blue-500 text-white shadow-lg'
+                  : 'bg-white/90 backdrop-blur-sm text-neutral-800 hover:bg-white'
+              }`}
+            >
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="5" r="3" />
+                <path d="M12 8v4" />
+                <path d="M8 21l4-9 4 9" />
+              </svg>
+              <span className="hidden sm:inline">{t('actions.streetView')}</span>
+            </motion.button>
           </div>
         </div>
       </div>
