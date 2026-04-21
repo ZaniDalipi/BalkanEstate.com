@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { sendPropertyInquiry } from '@/services/apiService';
 import { Property } from '@/types';
+import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import { XMarkIcon, BuildingOfficeIcon } from '@/constants';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 
@@ -240,19 +241,14 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
                 </div>
 
                 {/* Phone (optional) */}
-                <div className="relative">
-                  <input
-                    type="tel"
-                    id="buyerPhone"
-                    name="buyerPhone"
-                    value={formData.buyerPhone}
-                    onChange={handleChange}
-                    className={floatingInputClasses}
-                    placeholder=" "
-                  />
-                  <label htmlFor="buyerPhone" className={floatingLabelClasses}>
+                <div>
+                  <label className="block text-xs font-medium text-neutral-600 mb-1.5">
                     {t('property:inquiry.yourPhone', 'Your Phone (optional)')}
                   </label>
+                  <PhoneInput
+                    value={formData.buyerPhone}
+                    onChange={(v) => setFormData(prev => ({ ...prev, buyerPhone: v }))}
+                  />
                 </div>
 
                 {/* Message */}

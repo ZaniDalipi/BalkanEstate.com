@@ -57,6 +57,7 @@ const ContactUsPage: React.FC = () => {
     isSuccess,
     submitError,
     handleChange,
+    handlePhoneChange,
     handleSubmit,
     reset,
   } = useContactForm();
@@ -160,6 +161,7 @@ const ContactUsPage: React.FC = () => {
                     isSubmitting={isSubmitting}
                     submitError={submitError}
                     onChange={handleChange}
+                    onPhoneChange={handlePhoneChange}
                     onSubmit={onFormSubmit}
                   />
                 )}

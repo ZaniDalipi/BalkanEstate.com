@@ -4,6 +4,7 @@ import { XMarkIcon, BuildingOfficeIcon } from '@/constants';
 import { Agency } from '@/types';
 import { AgencyEditForm } from './useAgencyManager';
 import { apiRequest } from '@/src/shared/api';
+import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 
 const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
 
@@ -363,11 +364,9 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     {t('admin:agencyManager.phone')}
                   </label>
-                  <input
-                    type="tel"
-                    value={editForm.phone}
-                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  <PhoneInput
+                    value={editForm.phone || ''}
+                    onChange={(v) => setEditForm({ ...editForm, phone: v })}
                   />
                 </div>
               </div>

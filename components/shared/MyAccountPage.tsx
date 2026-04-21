@@ -18,6 +18,7 @@ import AgencyManagementSection from './AgencyManagementSection';
 import { switchRole, joinAgencyByInvitationCode, getAgencies, updateAgentProfile, changeEmail } from '../../services/apiService';
 import { submitLicense, getLicenseFormatHint } from '../../src/features/credentials/api/licenseApi';
 import Footer from './Footer';
+import PhoneInput from '../../src/shared/components/ui/PhoneInput';
 import { BALKAN_LOCATIONS } from '../../utils/balkanLocations';
 import MapLocationPicker from '../../src/features/seller/components/MapLocationPicker';
 import { SEO } from '../../src/components/seo';
@@ -1077,40 +1078,10 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
         fetchAgencies();
     }, [formData.role]);
 
-    // Format phone number for display: +38971967915 → +389 71 967 915
-    const formatPhoneDisplay = (phone: string): string => {
-        if (!phone) return '';
-        // Remove all non-digit characters except leading +
-        const hasPlus = phone.startsWith('+');
-        const digits = phone.replace(/\D/g, '');
-        if (digits.length === 0) return hasPlus ? '+' : '';
-
-        // Format: +XXX XX XXX XXX (country code + groups)
-        let formatted = '';
-        if (digits.length <= 3) {
-            formatted = digits;
-        } else if (digits.length <= 5) {
-            formatted = `${digits.slice(0, 3)} ${digits.slice(3)}`;
-        } else if (digits.length <= 8) {
-            formatted = `${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5)}`;
-        } else {
-            formatted = `${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5, 8)} ${digits.slice(8, 11)}`;
-        }
-        return hasPlus ? `+${formatted}` : formatted;
-    };
-
-    // Strip formatting from phone for storage
-    const stripPhoneFormatting = (phone: string): string => {
-        const hasPlus = phone.startsWith('+');
-        const digits = phone.replace(/\D/g, '');
-        return hasPlus ? `+${digits}` : digits;
-    };
-
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
         if (id === 'phone') {
-            // Store raw phone number (strip formatting)
-            setFormData(prev => ({ ...prev, phone: stripPhoneFormatting(value) }));
+            setFormData(prev => ({ ...prev, phone: value }));
         } else {
             setFormData(prev => ({ ...prev, [id]: value }));
         }
@@ -1738,9 +1709,12 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                         </p>
                     )}
                 </div>
-                <div className="relative md:col-span-2">
-                    <input type="tel" id="phone" value={formatPhoneDisplay(formData.phone || '')} onChange={handleInputChange} className={floatingInputClasses} placeholder=" " />
-                    <label htmlFor="phone" className={floatingLabelClasses}>{t('profile.phone')}</label>
+                <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-neutral-600 mb-1.5">{t('profile.phone')}</label>
+                    <PhoneInput
+                        value={formData.phone || ''}
+                        onChange={fullPhone => setFormData(prev => ({ ...prev, phone: fullPhone }))}
+                    />
                 </div>
             </fieldset>
 
