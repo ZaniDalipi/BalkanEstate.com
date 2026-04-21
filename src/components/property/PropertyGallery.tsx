@@ -1,7 +1,8 @@
 // PropertyGallery Component
 // Image gallery with carousel, street view, video player, and interactive controls
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '../../../types';
 import {
@@ -307,7 +308,10 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
   }, [setActiveCategory, onImageIndexChange]);
 
+  const slideDirectionRef = useRef<'left' | 'right' | null>(null);
+
   const handleNextImage = useCallback(() => {
+    slideDirectionRef.current = 'left';
     const newIndex = (currentImageIndex + 1) % imagesForCurrentCategory.length;
     if (onImageIndexChange) {
       onImageIndexChange(newIndex);
@@ -317,6 +321,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   }, [currentImageIndex, imagesForCurrentCategory.length, onImageIndexChange]);
 
   const handlePrevImage = useCallback(() => {
+    slideDirectionRef.current = 'right';
     const newIndex = (currentImageIndex - 1 + imagesForCurrentCategory.length) % imagesForCurrentCategory.length;
     if (onImageIndexChange) {
       onImageIndexChange(newIndex);
@@ -373,8 +378,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   aria-hidden="true"
                   className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-60"
                 />
-                {/* Main sharp image – fades in once loaded */}
-                <img
+                {/* Main sharp image – slides + fades in once loaded */}
+                <motion.img
                   key={currentImageUrl}
                   src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
                   srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 1200, 1920])}
@@ -386,7 +391,21 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
                   fetchpriority="high"
                   decoding="async"
-                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-150 ${mainImageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                  initial={{
+                    x: slideDirectionRef.current === 'left' ? '6%' : slideDirectionRef.current === 'right' ? '-6%' : 0,
+                    opacity: 0,
+                    scale: 1.03,
+                  }}
+                  animate={mainImageLoaded
+                    ? { x: 0, opacity: 1, scale: 1 }
+                    : {
+                        x: slideDirectionRef.current === 'left' ? '6%' : slideDirectionRef.current === 'right' ? '-6%' : 0,
+                        opacity: 0,
+                        scale: 1.03,
+                      }
+                  }
+                  transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  className="absolute inset-0 w-full h-full object-cover will-change-transform"
                   onLoad={() => setMainImageLoaded(true)}
                   onError={() => setMainImageError(true)}
                 />
