@@ -444,9 +444,9 @@ export async function updateAllCityMarketData(): Promise<void> {
             displayOrder: cityIndex,
           };
 
-          // If we have Gemini data but also calculated data, blend them
-          if (geminiCityData && calculatedData) {
-            marketData.avgPricePerSqm = Math.round((geminiCityData.avgPricePerSqm + calculatedData.avgPricePerSqm!) / 2);
+          // Always use Gemini price per m² — listing averages skew real market data
+          if (geminiCityData) {
+            marketData.avgPricePerSqm = geminiCityData.avgPricePerSqm;
             marketData.dataSource = 'gemini';
           }
 
