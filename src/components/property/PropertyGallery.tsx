@@ -98,6 +98,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   const [mainImageError, setMainImageError] = useState(false);
   const [mainImageLoaded, setMainImageLoaded] = useState(false);
+  const [imageNaturalRatio, setImageNaturalRatio] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<'photos' | 'streetview' | 'video'>('photos');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
@@ -288,6 +289,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   useEffect(() => {
     setMainImageError(false);
     setMainImageLoaded(false);
+    setImageNaturalRatio(null);
   }, [currentImageUrl]);
 
   // Eagerly preload first 4 images when the listing opens so swipes feel instant
@@ -374,7 +376,10 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   return (
     <div className="overflow-hidden sm:rounded-xl sm:shadow-lg sm:border sm:border-neutral-200">
       {/* ── Gallery frame ── */}
-      <div className="relative w-full h-[500px] sm:h-[600px] md:h-[700px] bg-neutral-900 overflow-hidden">
+      <div
+        className="relative w-full bg-neutral-900 overflow-hidden"
+        style={{ aspectRatio: imageNaturalRatio ? String(imageNaturalRatio) : '16/9', maxHeight: '90vh' }}
+      >
 
         {/* ── PHOTOS ── */}
         {viewMode === 'photos' && (
@@ -428,7 +433,13 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
                     className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
                     draggable={false}
-                    onLoad={() => setMainImageLoaded(true)}
+                    onLoad={(e) => {
+                      const img = e.currentTarget;
+                      if (img.naturalWidth && img.naturalHeight) {
+                        setImageNaturalRatio(img.naturalWidth / img.naturalHeight);
+                      }
+                      setMainImageLoaded(true);
+                    }}
                     onError={() => setMainImageError(true)}
                   />
                 </AnimatePresence>
