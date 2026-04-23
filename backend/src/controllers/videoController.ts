@@ -414,12 +414,33 @@ export const resolveTikTokShortLink = async (req: Request, res: Response): Promi
 
     try {
       // Follow the redirect to get the full URL
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch(url, {
         redirect: 'follow',
+        signal: controller.signal,
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'DNT': '1',
+          'Connection': 'keep-alive',
+          'Upgrade-Insecure-Requests': '1',
+          'Referer': 'https://www.tiktok.com/',
+          'Sec-Fetch-Dest': 'document',
+          'Sec-Fetch-Mode': 'navigate',
+          'Sec-Fetch-Site': 'none',
+          'Cache-Control': 'max-age=0',
         },
       });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok && response.status !== 200) {
+        videoLogger.warn(`TikTok returned status ${response.status} for ${url}`);
+      }
 
       const finalUrl = response.url;
 
@@ -429,12 +450,15 @@ export const resolveTikTokShortLink = async (req: Request, res: Response): Promi
       const usernameMatch = finalUrl.match(/@([\w.-]+)\//);
 
       if (!videoIdMatch) {
-        res.status(400).json({ message: 'Could not extract video ID from TikTok link' });
+        videoLogger.warn(`Could not extract video ID from resolved URL: ${finalUrl}`);
+        res.status(400).json({ message: 'Could not extract video ID from TikTok link. The link may be invalid or expired.' });
         return;
       }
 
       const videoId = videoIdMatch[1];
       const username = usernameMatch ? usernameMatch[1] : '';
+
+      videoLogger.info(`✅ Successfully resolved TikTok link: ${videoId}`);
 
       res.status(200).json({
         videoId,
@@ -442,8 +466,11 @@ export const resolveTikTokShortLink = async (req: Request, res: Response): Promi
         fullUrl: finalUrl,
       });
     } catch (fetchError: any) {
-      videoLogger.error('Failed to follow TikTok redirect:', fetchError);
-      res.status(502).json({ message: 'Failed to resolve TikTok link. Please try again.' });
+      videoLogger.error('Failed to follow TikTok redirect:', fetchError.message);
+      res.status(502).json({
+        message: 'Failed to resolve TikTok link. The link may be invalid, expired, or temporarily unavailable. Please try again in a few moments.',
+        error: process.env.NODE_ENV === 'development' ? fetchError.message : undefined,
+      });
     }
   } catch (error: any) {
     videoLogger.error('❌ Failed to resolve TikTok short link:', error);

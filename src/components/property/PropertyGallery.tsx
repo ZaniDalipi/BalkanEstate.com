@@ -544,15 +544,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
                           title="Property Video Tour"
                         />
-                        {/* Minimal loading overlay only if still resolving when user sees video */}
-                        {showResolvingOverlay && resolvingTikTok && (
-                          <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-black/30 pointer-events-none">
-                            <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                              <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
-                              <span className="text-white text-xs">Loading...</span>
-                            </div>
-                          </div>
-                        )}
                       </>
                     ) : tiktokResolveError ? (
                       // Resolution failed - fallback to blockquote
