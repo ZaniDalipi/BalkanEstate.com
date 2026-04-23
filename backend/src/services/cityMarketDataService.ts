@@ -372,32 +372,41 @@ async function calculateMarketDataFromProperties(city: string, country: string):
 }
 
 /**
- * Get live listing counts from the Property collection for a city
- * This is always current and doesn't depend on scheduled updates
+ * Get live city stats from the Property collection for a city.
+ * Always current — does not depend on scheduled updates.
+ * Returns listing counts AND the avg price per m² from active for-sale listings.
  */
-async function getLiveListingCounts(city: string, country: string): Promise<{ listingsCount: number; soldLastMonth: number }> {
+async function getLiveCityStats(city: string, country: string): Promise<{
+  listingsCount: number;
+  soldLastMonth: number;
+  listingAvgPricePerSqm?: number;
+}> {
   try {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const cityRegex = { $regex: new RegExp(`^${escapeRegex(city)}$`, 'i') };
+    const countryRegex = { $regex: new RegExp(`^${escapeRegex(country)}$`, 'i') };
 
-    // Count active listings
-    const listingsCount = await Property.countDocuments({
-      city: { $regex: new RegExp(`^${escapeRegex(city)}$`, 'i') },
-      country: { $regex: new RegExp(`^${escapeRegex(country)}$`, 'i') },
-      status: 'active',
-    });
+    const [activeProperties, soldLastMonth] = await Promise.all([
+      Property.find({ city: cityRegex, country: countryRegex, status: 'active' }, { price: 1, sqft: 1 }).lean(),
+      Property.countDocuments({ city: cityRegex, country: countryRegex, status: 'sold', updatedAt: { $gte: thirtyDaysAgo } }),
+    ]);
 
-    // Count properties sold in the last 30 days
-    const soldLastMonth = await Property.countDocuments({
-      city: { $regex: new RegExp(`^${escapeRegex(city)}$`, 'i') },
-      country: { $regex: new RegExp(`^${escapeRegex(country)}$`, 'i') },
-      status: 'sold',
-      updatedAt: { $gte: thirtyDaysAgo },
-    });
+    const listingsCount = activeProperties.length;
 
-    return { listingsCount, soldLastMonth };
+    const MIN_PRICE_PER_SQM = 300;
+    const MAX_PRICE_PER_SQM = 7500;
+    const validPrices = activeProperties
+      .map((p: { price: number; sqft?: number }) => (p.price / (p.sqft || 70)) * 10.764)
+      .filter((v: number) => v >= MIN_PRICE_PER_SQM && v <= MAX_PRICE_PER_SQM);
+
+    const listingAvgPricePerSqm = validPrices.length >= 3
+      ? Math.round(validPrices.reduce((a: number, b: number) => a + b, 0) / validPrices.length)
+      : undefined;
+
+    return { listingsCount, soldLastMonth, listingAvgPricePerSqm };
   } catch (error) {
-    apiLogger.error(`Error getting live listing counts for ${city}:`, error);
+    apiLogger.error(`Error getting live city stats for ${city}:`, error);
     return { listingsCount: 0, soldLastMonth: 0 };
   }
 }
@@ -532,14 +541,17 @@ export async function getFeaturedCities(limit: number = 12): Promise<CityMarketD
       .limit(limit)
       .lean<CityMarketDataLean[]>();
 
-    // Enrich each city with live listing counts from the Property collection
+    // Enrich each city with live stats from the Property collection
     const enrichedCities = await Promise.all(
       cities.map(async (city) => {
-        const liveCounts = await getLiveListingCounts(city.city, city.country);
+        const liveStats = await getLiveCityStats(city.city, city.country);
         return {
           ...city,
-          listingsCount: liveCounts.listingsCount,
-          soldLastMonth: liveCounts.soldLastMonth,
+          listingsCount: liveStats.listingsCount,
+          soldLastMonth: liveStats.soldLastMonth,
+          ...(liveStats.listingAvgPricePerSqm !== undefined
+            ? { listingAvgPricePerSqm: liveStats.listingAvgPricePerSqm }
+            : {}),
         };
       })
     );
@@ -560,14 +572,17 @@ export async function getCitiesByCountry(country: string): Promise<CityMarketDat
       .sort({ demandScore: -1, avgPricePerSqm: 1 })
       .lean<CityMarketDataLean[]>();
 
-    // Enrich each city with live listing counts from the Property collection
+    // Enrich each city with live stats from the Property collection
     const enrichedCities = await Promise.all(
       cities.map(async (city) => {
-        const liveCounts = await getLiveListingCounts(city.city, city.country);
+        const liveStats = await getLiveCityStats(city.city, city.country);
         return {
           ...city,
-          listingsCount: liveCounts.listingsCount,
-          soldLastMonth: liveCounts.soldLastMonth,
+          listingsCount: liveStats.listingsCount,
+          soldLastMonth: liveStats.soldLastMonth,
+          ...(liveStats.listingAvgPricePerSqm !== undefined
+            ? { listingAvgPricePerSqm: liveStats.listingAvgPricePerSqm }
+            : {}),
         };
       })
     );
@@ -590,12 +605,15 @@ export async function getCityMarketData(city: string, country: string): Promise<
       return null;
     }
 
-    // Enrich with live listing counts
-    const liveCounts = await getLiveListingCounts(city, country);
+    // Enrich with live stats
+    const liveStats = await getLiveCityStats(city, country);
     return {
       ...data,
-      listingsCount: liveCounts.listingsCount,
-      soldLastMonth: liveCounts.soldLastMonth,
+      listingsCount: liveStats.listingsCount,
+      soldLastMonth: liveStats.soldLastMonth,
+      ...(liveStats.listingAvgPricePerSqm !== undefined
+        ? { listingAvgPricePerSqm: liveStats.listingAvgPricePerSqm }
+        : {}),
     };
   } catch (error) {
     apiLogger.error(`Error fetching market data for ${city}:`, error);
