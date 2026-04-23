@@ -495,7 +495,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   const propertySlug = generatePropertySlug(property);
 
   return (
-    <div className="bg-neutral-50 h-full overflow-y-auto overflow-x-hidden animate-fade-in" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', overscrollBehaviorY: 'contain', WebkitOverflowScrolling: 'touch' }}>
+    <div className="relative bg-neutral-50 h-full overflow-y-auto overflow-x-hidden animate-fade-in" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', overscrollBehaviorY: 'contain', WebkitOverflowScrolling: 'touch' }}>
       {/* SEO Meta Tags + VideoObject for tours */}
       <SEO
         title={seoTitle}
