@@ -374,7 +374,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   return (
     <div className="overflow-hidden sm:rounded-xl sm:shadow-lg sm:border sm:border-neutral-200">
       {/* ── Gallery frame ── */}
-      <div className="relative w-full h-auto min-h-[300px] max-h-[90vh] bg-neutral-900 overflow-hidden">
+      <div className="relative w-full h-[500px] sm:h-[600px] md:h-[700px] bg-neutral-900 overflow-hidden">
 
         {/* ── PHOTOS ── */}
         {viewMode === 'photos' && (
