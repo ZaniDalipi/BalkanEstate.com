@@ -14,6 +14,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
     const { t } = useTranslation(['property', 'common']);
     const [currentIndex, setCurrentIndex] = useState(startIndex);
     const [imageError, setImageError] = useState(false);
+    const [imageLoaded, setImageLoaded] = useState(false);
 
     const handleNext = useCallback(() => {
         setCurrentIndex(prev => (prev + 1) % images.length);
@@ -31,6 +32,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
 
     useEffect(() => {
         setImageError(false);
+        setImageLoaded(false);
     }, [currentIndex, images]);
 
     // Preload adjacent images so navigation feels instant
@@ -126,8 +128,9 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                             height={1280}
                             loading="eager"
                             decoding="async"
-                            className="max-w-full max-h-full object-contain animate-fade-in select-none"
+                            className={`max-w-full max-h-full object-contain select-none transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                             draggable={false}
+                            onLoad={() => setImageLoaded(true)}
                             onError={() => setImageError(true)}
                         />
                     )}
