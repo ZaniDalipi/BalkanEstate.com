@@ -99,6 +99,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   const [mainImageError, setMainImageError] = useState(false);
   const [mainImageLoaded, setMainImageLoaded] = useState(false);
   const [imageNaturalRatio, setImageNaturalRatio] = useState<number | null>(null);
+  const imageRatiosRef = React.useRef<Record<string, number>>({});
   const [viewMode, setViewMode] = useState<'photos' | 'streetview' | 'video'>('photos');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
@@ -289,7 +290,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   useEffect(() => {
     setMainImageError(false);
     setMainImageLoaded(false);
-    setImageNaturalRatio(null);
+    // Apply cached ratio immediately — avoids the reset-to-null that races with onLoad on preloaded images
+    const cached = imageRatiosRef.current[currentImageUrl];
+    if (cached) setImageNaturalRatio(cached);
   }, [currentImageUrl]);
 
   // Eagerly preload first 4 images when the listing opens so swipes feel instant
@@ -433,10 +436,21 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
                     className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
                     draggable={false}
+                    ref={(el: HTMLImageElement | null) => {
+                      // Handle already-cached images that fire load synchronously before effects run
+                      if (el?.complete && el.naturalWidth && el.naturalHeight) {
+                        const ratio = el.naturalWidth / el.naturalHeight;
+                        imageRatiosRef.current[currentImageUrl] = ratio;
+                        setImageNaturalRatio(ratio);
+                        setMainImageLoaded(true);
+                      }
+                    }}
                     onLoad={(e) => {
                       const img = e.currentTarget;
                       if (img.naturalWidth && img.naturalHeight) {
-                        setImageNaturalRatio(img.naturalWidth / img.naturalHeight);
+                        const ratio = img.naturalWidth / img.naturalHeight;
+                        imageRatiosRef.current[currentImageUrl] = ratio;
+                        setImageNaturalRatio(ratio);
                       }
                       setMainImageLoaded(true);
                     }}
