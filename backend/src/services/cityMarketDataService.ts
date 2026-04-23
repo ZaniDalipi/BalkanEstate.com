@@ -322,36 +322,44 @@ async function calculateMarketDataFromProperties(city: string, country: string):
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const properties = await Property.find({
+    const activeProperties = await Property.find({
       city,
       country,
-      status: { $in: ['active', 'sold'] },
+      status: 'active',
     });
 
-    if (properties.length < 3) {
-      return null; // Not enough data for price calculations
-    }
+    const soldProperties = await Property.find({
+      city,
+      country,
+      status: 'sold',
+      updatedAt: { $gte: thirtyDaysAgo },
+    });
 
-    const prices = properties.map(p => p.price / (p.sqft || 70)); // Price per sqft, default 70 if missing
-    const avgPricePerSqm = (prices.reduce((a, b) => a + b, 0) / prices.length) * 10.764; // Convert sqft to sqm
+    const listingsCount = activeProperties.length;
+    const soldLastMonth = soldProperties.length;
 
-    const activeDays = properties
-      .filter(p => p.status === 'active' && p.createdAt)
+    // Price per m² is based only on active (for-sale) listings.
+    // Filter out entries with unrealistic per-m² values (below €300 or above €7,500).
+    const MIN_PRICE_PER_SQM = 300;
+    const MAX_PRICE_PER_SQM = 7500;
+    const validPricesPerSqm = activeProperties
+      .map(p => (p.price / (p.sqft || 70)) * 10.764)
+      .filter(v => v >= MIN_PRICE_PER_SQM && v <= MAX_PRICE_PER_SQM);
+
+    const avgPricePerSqm = validPricesPerSqm.length >= 3
+      ? validPricesPerSqm.reduce((a, b) => a + b, 0) / validPricesPerSqm.length
+      : null;
+
+    const activeDays = activeProperties
+      .filter(p => p.createdAt)
       .map(p => Math.floor((Date.now() - p.createdAt.getTime()) / (1000 * 60 * 60 * 24)));
 
     const averageDaysOnMarket = activeDays.length > 0
       ? activeDays.reduce((a, b) => a + b, 0) / activeDays.length
       : 45;
 
-    // Count only active listings (available properties)
-    const listingsCount = properties.filter(p => p.status === 'active').length;
-
-    const soldLastMonth = properties.filter(
-      p => p.status === 'sold' && p.updatedAt && p.updatedAt > thirtyDaysAgo
-    ).length;
-
     return {
-      avgPricePerSqm: Math.round(avgPricePerSqm),
+      ...(avgPricePerSqm !== null ? { avgPricePerSqm: Math.round(avgPricePerSqm) } : {}),
       listingsCount,
       averageDaysOnMarket: Math.round(averageDaysOnMarket),
       soldLastMonth,
@@ -444,8 +452,12 @@ export async function updateAllCityMarketData(): Promise<void> {
             displayOrder: cityIndex,
           };
 
-          // Always use Gemini price per m² — listing averages skew real market data
-          if (geminiCityData) {
+          // Use listing-calculated price when available (active for-sale properties only),
+          // fall back to Gemini when there aren't enough listings
+          if (calculatedData?.avgPricePerSqm) {
+            marketData.avgPricePerSqm = calculatedData.avgPricePerSqm;
+            marketData.dataSource = 'calculated';
+          } else if (geminiCityData) {
             marketData.avgPricePerSqm = geminiCityData.avgPricePerSqm;
             marketData.dataSource = 'gemini';
           }
