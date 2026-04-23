@@ -128,6 +128,43 @@ export const createSubscription = async (req: Request, res: Response): Promise<v
       },
     };
 
+    // Initialize modern unified subscription system
+    const monthStart = new Date(startDate);
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+
+    // Map product tier to subscription tier
+    let subscriptionTier: 'free' | 'pro' | 'agency_owner' | 'agency_agent' | 'buyer' = 'pro';
+    if (product.tier === 'agency') {
+      subscriptionTier = user.agency?.role === 'owner' ? 'agency_owner' : 'agency_agent';
+    } else if (product.tier === 'buyer') {
+      subscriptionTier = 'buyer';
+    } else if (product.tier === 'free') {
+      subscriptionTier = 'free';
+    }
+
+    user.subscription = {
+      tier: subscriptionTier,
+      status: 'active',
+      startDate,
+      expiresAt: expirationDate,
+      listingsLimit: product.listingsLimit || 20,
+      activeListingsCount: 0,
+      privateSellerCount: 0,
+      agentCount: 0,
+      listingsCreatedThisMonth: 0,
+      monthResetDate: monthStart,
+      promotionCoupons: product.promotionCoupons ? {
+        monthly: product.promotionCoupons,
+        available: product.promotionCoupons,
+        used: 0,
+        rollover: 0,
+        lastRefresh: monthStart,
+      } : undefined,
+      savedSearchesLimit: product.savedSearchesLimit,
+      totalPaid: product.price,
+    };
+
     await user.save();
 
     res.status(201).json({
