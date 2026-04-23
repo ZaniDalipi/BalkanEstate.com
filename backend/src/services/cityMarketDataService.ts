@@ -339,11 +339,11 @@ async function calculateMarketDataFromProperties(city: string, country: string):
     const soldLastMonth = soldProperties.length;
 
     // Price per m² is based only on active (for-sale) listings.
-    // Filter out entries with unrealistic per-m² values (below €300 or above €7,500).
+    // sqft field stores m² (despite the name). Filter unrealistic values (below €300 or above €7,500/m²).
     const MIN_PRICE_PER_SQM = 300;
     const MAX_PRICE_PER_SQM = 7500;
     const validPricesPerSqm = activeProperties
-      .map(p => (p.price / (p.sqft || 70)) * 10.764)
+      .map(p => p.price / (p.sqft || 80))
       .filter(v => v >= MIN_PRICE_PER_SQM && v <= MAX_PRICE_PER_SQM);
 
     const avgPricePerSqm = validPricesPerSqm.length >= 3
@@ -396,8 +396,9 @@ async function getLiveCityStats(city: string, country: string): Promise<{
 
     const MIN_PRICE_PER_SQM = 300;
     const MAX_PRICE_PER_SQM = 7500;
+    // sqft field stores m² (despite the name — frontend always displays it as m²)
     const validPrices = activeProperties
-      .map((p: { price: number; sqft?: number }) => (p.price / (p.sqft || 70)) * 10.764)
+      .map((p: { price: number; sqft?: number }) => p.price / (p.sqft || 80))
       .filter((v: number) => v >= MIN_PRICE_PER_SQM && v <= MAX_PRICE_PER_SQM);
 
     const listingAvgPricePerSqm = validPrices.length >= 3
