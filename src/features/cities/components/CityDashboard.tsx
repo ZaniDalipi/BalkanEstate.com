@@ -393,6 +393,15 @@ const CityDashboard: React.FC = () => {
               <span className="text-2xl sm:text-3xl font-black text-neutral-900">€{avgPrice.toLocaleString()}</span>
               <span className="text-sm text-neutral-400">/m²</span>
             </div>
+            {city.listingAvgPricePerSqm && (
+              <div className="mt-2 pt-2 border-t border-neutral-100">
+                <span className="text-xs text-neutral-500">{t('cityCard.listingAvgPricePerSqm')}</span>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-lg font-bold text-blue-600">€{city.listingAvgPricePerSqm.toLocaleString()}</span>
+                  <span className="text-xs text-neutral-400">/m²</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Median Price */}

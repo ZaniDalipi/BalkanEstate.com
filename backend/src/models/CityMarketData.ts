@@ -6,7 +6,8 @@ export interface ICityMarketData extends Document {
   countryCode: string;
 
   // Market metrics
-  avgPricePerSqm: number; // Average price per square meter in EUR
+  avgPricePerSqm: number; // Average price per square meter in EUR (from Gemini market data)
+  listingAvgPricePerSqm?: number; // Average price per square meter from active platform listings
   medianPrice: number; // Median property price in EUR
   priceGrowthYoY: number; // Year over year growth percentage
   priceGrowthMoM: number; // Month over month growth percentage
@@ -57,6 +58,9 @@ const CityMarketDataSchema = new Schema<ICityMarketData>({
   avgPricePerSqm: {
     type: Number,
     required: true,
+  },
+  listingAvgPricePerSqm: {
+    type: Number,
   },
   medianPrice: {
     type: Number,

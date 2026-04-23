@@ -359,7 +359,7 @@ async function calculateMarketDataFromProperties(city: string, country: string):
       : 45;
 
     return {
-      ...(avgPricePerSqm !== null ? { avgPricePerSqm: Math.round(avgPricePerSqm) } : {}),
+      ...(avgPricePerSqm !== null ? { listingAvgPricePerSqm: Math.round(avgPricePerSqm) } : {}),
       listingsCount,
       averageDaysOnMarket: Math.round(averageDaysOnMarket),
       soldLastMonth,
@@ -440,27 +440,27 @@ export async function updateAllCityMarketData(): Promise<void> {
             continue;
           }
 
-          // Merge Gemini and calculated data
+          // Merge: Gemini provides market-wide metrics; calculated provides live listing stats.
+          // avgPricePerSqm always comes from Gemini (market reference).
+          // listingAvgPricePerSqm comes from active platform listings (when enough exist).
           const marketData: Partial<ICityMarketData> = {
             city: cityInfo.city,
             country: cityInfo.country,
             countryCode: cityInfo.countryCode,
             ...(geminiCityData || {}),
-            ...(calculatedData || {}),
+            ...(calculatedData ? {
+              listingsCount: calculatedData.listingsCount,
+              soldLastMonth: calculatedData.soldLastMonth,
+              averageDaysOnMarket: calculatedData.averageDaysOnMarket,
+              ...(calculatedData.listingAvgPricePerSqm
+                ? { listingAvgPricePerSqm: calculatedData.listingAvgPricePerSqm }
+                : {}),
+            } : {}),
             lastUpdated: new Date(),
             featured: true,
             displayOrder: cityIndex,
+            dataSource: geminiCityData ? 'gemini' : 'calculated',
           };
-
-          // Use listing-calculated price when available (active for-sale properties only),
-          // fall back to Gemini when there aren't enough listings
-          if (calculatedData?.avgPricePerSqm) {
-            marketData.avgPricePerSqm = calculatedData.avgPricePerSqm;
-            marketData.dataSource = 'calculated';
-          } else if (geminiCityData) {
-            marketData.avgPricePerSqm = geminiCityData.avgPricePerSqm;
-            marketData.dataSource = 'gemini';
-          }
 
           await CityMarketData.findOneAndUpdate(
             { city: cityInfo.city, country: cityInfo.country },
