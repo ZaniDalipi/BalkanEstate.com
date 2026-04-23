@@ -290,6 +290,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     setMainImageLoaded(false);
   }, [currentImageUrl]);
 
+  // Eagerly preload first 4 images when the listing opens so swipes feel instant
+  useEffect(() => {
+    imagesForCurrentCategory.slice(1, 5).forEach((item) => {
+      const el = new Image();
+      el.src = optimizeCloudinaryUrl(item.url, { width: 1200, quality: 'auto' });
+    });
+  }, [imagesForCurrentCategory]);
+
   // Preload adjacent images so navigation feels instant
   useEffect(() => {
     if (imagesForCurrentCategory.length <= 1) return;
@@ -418,12 +426,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     animate="center"
                     exit="exit"
                     transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+                    className="absolute inset-0 w-full h-full object-cover sm:object-contain pointer-events-none select-none"
                     draggable={false}
                     onLoad={() => setMainImageLoaded(true)}
                     onError={() => setMainImageError(true)}
                   />
                 </AnimatePresence>
+                {/* Subtle bottom vignette – just enough to make chip/counter readable */}
+                <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-[1]" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.32) 0%, transparent 100%)' }} />
               </>
             )}
           </motion.button>
