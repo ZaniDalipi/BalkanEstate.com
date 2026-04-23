@@ -374,7 +374,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   return (
     <div className="overflow-hidden sm:rounded-xl sm:shadow-lg sm:border sm:border-neutral-200">
       {/* ── Gallery frame ── */}
-      <div className="relative w-full h-[450px] sm:h-[480px] md:h-[580px] lg:h-[640px] landscape:h-[70vh] landscape:min-h-[340px] bg-neutral-900 overflow-hidden">
+      <div className="relative w-full h-[450px] sm:h-[560px] md:h-[680px] lg:h-[760px] landscape:h-[80vh] landscape:min-h-[360px] bg-neutral-900 overflow-hidden">
 
         {/* ── PHOTOS ── */}
         {viewMode === 'photos' && (
@@ -426,7 +426,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     animate="center"
                     exit="exit"
                     transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    className="absolute inset-0 w-full h-full object-cover sm:object-contain pointer-events-none select-none"
+                    className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
                     draggable={false}
                     onLoad={() => setMainImageLoaded(true)}
                     onError={() => setMainImageError(true)}
