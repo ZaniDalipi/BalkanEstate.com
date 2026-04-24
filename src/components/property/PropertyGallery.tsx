@@ -11,6 +11,7 @@ import {
   BuildingOfficeIcon,
 } from '../../../constants';
 import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
+import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 
 interface PropertyGalleryProps {
   property: Property;
@@ -354,8 +355,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   return (
     <div className="overflow-hidden lg:rounded-xl lg:shadow-lg lg:border lg:border-neutral-200">
-      {/* ── Gallery frame — fixed 16:9, never resizes; object-contain shows full image; blurred LQIP fills bars ── */}
-      <div className="relative w-full bg-neutral-900 overflow-hidden" style={{ aspectRatio: '16/9', maxHeight: '90vh' }}>
+      {/* ── Gallery frame — 4:3 on mobile, 16:9 on sm+; object-contain shows full image; blurred LQIP fills bars ── */}
+      <div className="relative w-full bg-neutral-900 overflow-hidden aspect-[4/3] sm:aspect-[16/9]" style={{ maxHeight: '90vh' }}>
 
         {/* ── PHOTOS ── */}
         {viewMode === 'photos' && (
@@ -412,7 +413,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     animate="center"
                     exit="exit"
                     transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+                    className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
                     draggable={false}
                     onError={() => setMainImageError(true)}
                   />
@@ -693,11 +694,10 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
       </div>
 
-      {/* ── Thumbnail strip + category tabs ── */}
+      {/* ── Thumbnail strip + category tabs + LiquidGlassSwitch ── */}
       <div className="bg-white border-t border-neutral-100 px-4 sm:px-5 pt-4 pb-4">
-        {/* Header row: camera icon + "Photos" label + category pills + view mode icons */}
+        {/* Header row: camera icon + "Photos" label + category pills */}
         <div className="flex items-center gap-2 mb-3 overflow-x-auto scrollbar-hide">
-          {/* Photos label with icon */}
           <div className="flex items-center gap-1.5 flex-shrink-0 mr-1">
             <svg className="w-4 h-4 text-neutral-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -707,12 +707,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             <span className="text-sm font-bold text-neutral-800">{t('property:photos.title', 'Photos')}</span>
           </div>
 
-          {/* All category pill */}
+          {/* All pill */}
           <button
-            onClick={() => {
-              if (viewMode !== 'photos') setViewMode('photos');
-              handleCategorySelect('all');
-            }}
+            onClick={() => { if (viewMode !== 'photos') setViewMode('photos'); handleCategorySelect('all'); }}
             className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
               activeCategory === 'all' && viewMode === 'photos'
                 ? 'bg-primary text-white border-primary'
@@ -731,10 +728,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           {(Object.keys(categorizedImages) as PropertyImageTag[]).map((tag) => (
             <button
               key={tag}
-              onClick={() => {
-                if (viewMode !== 'photos') setViewMode('photos');
-                handleCategorySelect(tag);
-              }}
+              onClick={() => { if (viewMode !== 'photos') setViewMode('photos'); handleCategorySelect(tag); }}
               className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold capitalize transition-all border ${
                 activeCategory === tag && viewMode === 'photos'
                   ? 'bg-primary text-white border-primary'
@@ -742,68 +736,31 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               }`}
             >
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                <path d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
               </svg>
               {t(`property:photos.categories.${tag}`, { defaultValue: tag.replace('_', ' ') })} {categorizedImages[tag]?.length || 0}
             </button>
           ))}
-
-          {/* Spacer */}
-          <div className="flex-1 min-w-[8px]" />
-
-          {/* Street View icon */}
-          <button
-            onClick={() => setViewMode(viewMode === 'streetview' ? 'photos' : 'streetview')}
-            className={`flex-shrink-0 p-1.5 rounded-lg transition-colors ${
-              viewMode === 'streetview' ? 'bg-primary text-white' : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
-            }`}
-            title={t('actions.streetView', 'Street View')}
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="5" r="3" />
-              <path d="M12 8v4" />
-              <path d="M8 21l4-9 4 9" />
-            </svg>
-          </button>
-
-          {/* Video icon (if available) */}
-          {hasVideo && (
-            <button
-              onClick={() => setViewMode(viewMode === 'video' ? 'photos' : 'video')}
-              className={`flex-shrink-0 p-1.5 rounded-lg transition-colors ${
-                viewMode === 'video' ? 'bg-primary text-white' : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
-              }`}
-              title={t('actions.video', 'Video')}
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-            </button>
-          )}
         </div>
 
-        {/* Thumbnail row — large cards matching screenshot */}
+        {/* Thumbnail row — large cards filling card width */}
         {viewMode === 'photos' ? (
-          <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 sm:-mx-5 px-4 sm:px-5">
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 sm:-mx-5 px-4 sm:px-5 pb-1">
             {imagesForCurrentCategory.map((img, index) => (
               <button
                 key={img.url}
                 onClick={() => {
                   setSlideDirection(index > currentImageIndex ? 1 : -1);
-                  if (onImageIndexChange) {
-                    onImageIndexChange(index);
-                  } else {
-                    setInternalIndex(index);
-                  }
+                  if (onImageIndexChange) { onImageIndexChange(index); } else { setInternalIndex(index); }
                 }}
-                className={`flex-shrink-0 w-[170px] h-[120px] sm:w-[190px] sm:h-[132px] rounded-xl overflow-hidden transition-all border-2 ${
+                className={`flex-shrink-0 w-[155px] h-[110px] sm:w-[195px] sm:h-[140px] rounded-xl overflow-hidden transition-all border-2 ${
                   index === currentImageIndex
                     ? 'border-primary shadow-lg'
                     : 'border-transparent hover:border-neutral-300'
                 }`}
               >
                 <img
-                  src={optimizeCloudinaryUrl(img.url, { width: 380, quality: 'auto', crop: 'fill' })}
+                  src={optimizeCloudinaryUrl(img.url, { width: 390, quality: 'auto', crop: 'fill' })}
                   alt=""
                   className="w-full h-full object-cover"
                   loading="lazy"
@@ -811,25 +768,68 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 />
               </button>
             ))}
-            {/* Scroll hint arrow if many images */}
             {imagesForCurrentCategory.length > 5 && (
               <button
                 onClick={handleNextImage}
-                className="flex-shrink-0 w-10 h-[120px] sm:h-[132px] bg-neutral-100 hover:bg-neutral-200 rounded-xl flex items-center justify-center transition-colors"
+                className="flex-shrink-0 w-10 h-[110px] sm:h-[140px] bg-neutral-100 hover:bg-neutral-200 rounded-xl flex items-center justify-center transition-colors"
               >
                 <ChevronRightIcon className="w-5 h-5 text-neutral-600" />
               </button>
             )}
           </div>
         ) : (
-          <button
-            onClick={() => setViewMode('photos')}
-            className="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
-          >
-            <ChevronLeftIcon className="w-3 h-3" />
-            {t('property:gallery.backToPhotos', 'Back to Photos')}
-          </button>
+          <div className="pb-1">
+            <button
+              onClick={() => setViewMode('photos')}
+              className="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
+            >
+              <ChevronLeftIcon className="w-3 h-3" />
+              {t('property:gallery.backToPhotos', 'Back to Photos')}
+            </button>
+          </div>
         )}
+
+        {/* LiquidGlassSwitch — Photos / Street View / Video */}
+        <div className="flex justify-center mt-3 pt-3 border-t border-neutral-100">
+          <LiquidGlassSwitch
+            options={[
+              ...(hasVideo ? [{
+                value: 'video',
+                label: t('actions.video', 'Video'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                ),
+              }] : []),
+              {
+                value: 'photos',
+                label: t('actions.photos'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="9" cy="9" r="2" />
+                    <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+                  </svg>
+                ),
+              },
+              {
+                value: 'streetview',
+                label: t('actions.streetView'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="5" r="3" />
+                    <path d="M12 8v4" />
+                    <path d="M8 21l4-9 4 9" />
+                  </svg>
+                ),
+              },
+            ]}
+            value={viewMode}
+            onChange={handleViewModeChange}
+            size="md"
+          />
+        </div>
       </div>
     </div>
   );
