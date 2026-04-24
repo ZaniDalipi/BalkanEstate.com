@@ -33,10 +33,12 @@ import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import { useRecentlyViewed } from '@/src/hooks/useRecentlyViewed';
 import PromotionModal from '@/src/features/promotions/components/PromotionModal';
+import ScheduleViewingModal from '@/src/features/rental/components/ScheduleViewingModal';
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import Footer from '@/components/shared/Footer';
 import Modal from '@/components/shared/Modal';
 import * as api from '@/services/apiService';
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 
 /**
  * PropertyDetailsPage Component
@@ -118,6 +120,9 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
   // State for share
   const [showCopiedToast, setShowCopiedToast] = useState(false);
+
+  // State for sticky bottom bar schedule modal
+  const [showStickyScheduleModal, setShowStickyScheduleModal] = useState(false);
 
   // State for promotion modal
   const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false);
@@ -967,6 +972,66 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
         </div>
       </main>
 
+      {/* Sticky Bottom Action Bar - Mobile Only (Zillow-style) */}
+      {!isOwner && property.status !== 'sold' && (
+        <div
+          className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-neutral-200 shadow-[0_-4px_24px_rgba(0,0,0,0.10)] px-3 py-2.5 flex items-center gap-2.5"
+          style={{ paddingBottom: 'calc(0.625rem + env(safe-area-inset-bottom, 0px))' }}
+        >
+          {/* Agent avatar + info */}
+          <div className="flex items-center gap-2.5 flex-1 min-w-0">
+            {property.seller?.avatarUrl ? (
+              <img
+                src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 80, quality: 'auto', crop: 'fill' })}
+                alt={property.seller.name || ''}
+                className="w-11 h-11 rounded-full object-cover ring-2 ring-white shadow-md flex-shrink-0"
+              />
+            ) : (
+              <div className={`w-11 h-11 rounded-full flex items-center justify-center ring-2 ring-white shadow-md flex-shrink-0 ${property.seller?.type === 'agent' ? 'bg-gradient-to-br from-blue-500 to-indigo-600' : 'bg-gradient-to-br from-green-500 to-emerald-600'}`}>
+                <span className="text-white font-bold text-base">
+                  {property.seller?.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || '?'}
+                </span>
+              </div>
+            )}
+            <div className="min-w-0">
+              <p className="font-semibold text-sm text-neutral-900 truncate leading-tight">{property.seller?.name || t('property:seller.privateSeller', 'Private Seller')}</p>
+              <p className="text-xs text-neutral-500 leading-tight">{property.seller?.type === 'agent' ? t('property:seller.agent', 'Agent') : t('property:seller.privateSeller', 'Private Seller')}</p>
+            </div>
+          </div>
+
+          {/* Call button */}
+          {property.seller?.phone ? (
+            <a
+              href={`tel:${property.seller.phone}`}
+              className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border-2 border-green-500 text-green-600 font-semibold text-sm hover:bg-green-50 active:bg-green-100 transition-colors flex-shrink-0"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              {t('property:actions.call', 'Call')}
+            </a>
+          ) : null}
+
+          {/* Schedule Tour button */}
+          <button
+            onClick={() => setShowStickyScheduleModal(true)}
+            className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold text-sm hover:from-amber-600 hover:to-orange-600 active:from-amber-700 active:to-orange-700 transition-all shadow-md flex-shrink-0"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            {t('property:actions.scheduleVisit', 'Schedule Tour')}
+          </button>
+        </div>
+      )}
+
+      {/* Schedule modal for sticky bar */}
+      <ScheduleViewingModal
+        property={property}
+        isOpen={showStickyScheduleModal}
+        onClose={() => setShowStickyScheduleModal(false)}
+      />
+
       {/* Animation styles */}
       <style>{`
         @keyframes slide-up {
@@ -984,6 +1049,9 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           opacity: 0;
         }
       `}</style>
+
+      {/* Spacer so sticky bar doesn't overlap footer on mobile */}
+      {!isOwner && property.status !== 'sold' && <div className="h-20 lg:hidden" />}
 
       {/* Footer */}
       <Footer />
