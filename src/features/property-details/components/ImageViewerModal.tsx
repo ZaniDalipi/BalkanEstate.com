@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon, BuildingOfficeIcon } from '@/constants';
 import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 
 interface ImageViewerModalProps {
     images: { url: string; tag: string }[];
@@ -13,10 +14,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
     const { t } = useTranslation(['property', 'common']);
     const [currentIndex, setCurrentIndex] = useState(startIndex);
     const [imageError, setImageError] = useState(false);
-    const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
-    const [touchMove, setTouchMove] = useState<{ x: number; y: number } | null>(null);
-
-    const minSwipeDistance = 50; // pixels
+    const [imageLoaded, setImageLoaded] = useState(false);
 
     const handleNext = useCallback(() => {
         setCurrentIndex(prev => (prev + 1) % images.length);
@@ -26,8 +24,15 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
         setCurrentIndex(prev => (prev - 1 + images.length) % images.length);
     }, [images.length]);
 
+    const swipeHandlers = useSwipeGesture({
+        onSwipeLeft: handleNext,
+        onSwipeRight: handlePrev,
+        onSwipeDown: onClose,
+    });
+
     useEffect(() => {
         setImageError(false);
+        setImageLoaded(false);
     }, [currentIndex, images]);
 
     // Preload adjacent images so navigation feels instant
@@ -70,39 +75,6 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
         }
     };
 
-    const onTouchStart = (e: React.TouchEvent) => {
-        setTouchMove(null);
-        setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
-    };
-
-    const onTouchMove = (e: React.TouchEvent) => {
-        setTouchMove({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
-    };
-
-    const onTouchEnd = () => {
-        if (!touchStart || !touchMove) return;
-
-        const xDistance = touchStart.x - touchMove.x;
-        const yDistance = touchStart.y - touchMove.y;
-
-        // Horizontal swipe
-        if (Math.abs(xDistance) > Math.abs(yDistance)) {
-            const isLeftSwipe = xDistance > minSwipeDistance;
-            const isRightSwipe = xDistance < -minSwipeDistance;
-
-            if (isLeftSwipe) handleNext();
-            else if (isRightSwipe) handlePrev();
-        }
-        // Vertical swipe
-        else {
-            const isDownSwipe = yDistance < -minSwipeDistance;
-            if (isDownSwipe) onClose();
-        }
-
-        setTouchStart(null);
-        setTouchMove(null);
-    };
-
     return (
         <div
             className="fixed inset-0 bg-black/95 z-[6000] flex flex-col items-center justify-center"
@@ -125,21 +97,21 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
 
             <div
                 className="relative w-full h-full flex items-center justify-center overflow-hidden"
-                onTouchStart={onTouchStart}
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}
+                {...swipeHandlers}
+                style={{ touchAction: 'pan-x' }}
             >
-                {/* Previous button - 44px min touch target */}
-                <button
-                    type="button"
-                    onClick={handlePrev}
-                    className="absolute left-1 sm:left-3 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm p-2.5 sm:p-3 rounded-full hover:bg-white/40 active:bg-white/50 transition-colors z-10 min-w-[44px] min-h-[44px] flex items-center justify-center"
-                    aria-label={t('property:imageViewer.previous', 'Previous image ({{current}} of {{total}})', { current: ((currentIndex - 1 + images.length) % images.length) + 1, total: images.length })}
-                >
-                    <ChevronLeftIcon className="w-6 h-6 sm:w-7 sm:h-7 text-white"/>
-                </button>
+                {/* Blurred background – fills black bars for any aspect ratio */}
+                {!imageError && (
+                    <img
+                        src={optimizeCloudinaryUrl(images[currentIndex].url, { width: 40, quality: 'auto:eco' })}
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-60 pointer-events-none select-none"
+                    />
+                )}
 
-                <div className="w-full h-full flex items-center justify-center overflow-hidden px-12 sm:px-16">
+                {/* Image */}
+                <div className="relative w-full h-full flex items-center justify-center z-[1]">
                     {imageError ? (
                         <div className="max-w-full max-h-full w-full h-full bg-gradient-to-br from-neutral-600 to-neutral-700 flex flex-col items-center justify-center text-white p-4 sm:p-6 md:p-8 rounded-lg">
                             <BuildingOfficeIcon className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 text-neutral-400" />
@@ -156,18 +128,29 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                             height={1280}
                             loading="eager"
                             decoding="async"
-                            className="max-w-full max-h-full object-contain animate-fade-in select-none"
+                            className={`max-w-full max-h-full object-contain select-none transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                             draggable={false}
+                            onLoad={() => setImageLoaded(true)}
                             onError={() => setImageError(true)}
                         />
                     )}
                 </div>
 
-                {/* Next button - 44px min touch target */}
+                {/* Previous button */}
+                <button
+                    type="button"
+                    onClick={handlePrev}
+                    className="absolute left-1 sm:left-3 top-1/2 -translate-y-1/2 bg-black/40 backdrop-blur-sm p-2.5 sm:p-3 rounded-full hover:bg-black/60 active:bg-black/70 transition-colors z-10 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                    aria-label={t('property:imageViewer.previous', 'Previous image ({{current}} of {{total}})', { current: ((currentIndex - 1 + images.length) % images.length) + 1, total: images.length })}
+                >
+                    <ChevronLeftIcon className="w-6 h-6 sm:w-7 sm:h-7 text-white"/>
+                </button>
+
+                {/* Next button */}
                 <button
                     type="button"
                     onClick={handleNext}
-                    className="absolute right-1 sm:right-3 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm p-2.5 sm:p-3 rounded-full hover:bg-white/40 active:bg-white/50 transition-colors z-10 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                    className="absolute right-1 sm:right-3 top-1/2 -translate-y-1/2 bg-black/40 backdrop-blur-sm p-2.5 sm:p-3 rounded-full hover:bg-black/60 active:bg-black/70 transition-colors z-10 min-w-[44px] min-h-[44px] flex items-center justify-center"
                     aria-label={t('property:imageViewer.next', 'Next image ({{current}} of {{total}})', { current: (currentIndex + 1) % images.length + 1, total: images.length })}
                 >
                     <ChevronRightIcon className="w-6 h-6 sm:w-7 sm:h-7 text-white"/>

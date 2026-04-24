@@ -36,6 +36,14 @@ const STEPS: Step[] = ['datetime', 'details', 'confirm'];
 // Validation helpers
 const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
+/** Convert "14:30" → "2:30 PM" */
+function formatTime12h(time: string): string {
+    const [h, m] = time.split(':').map(Number);
+    const period = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+}
+
 /** Generate time slots from start/end time and duration (mirrors backend logic) */
 function generateTimeSlotsFromConfig(startTime: string, endTime: string, durationMinutes: number): string[] {
     const slots: string[] = [];
@@ -411,7 +419,7 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                {formattedDate} at {selectedTime}
+                                {formattedDate} at {formatTime12h(selectedTime)}
                             </div>
 
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4">
@@ -443,7 +451,7 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                                     </svg>
                                     <div className="text-xs text-blue-800">
                                         <span className="font-medium">{t('rental:viewing.availableHours', 'Available hours')}:</span>{' '}
-                                        {availability.timeSlots[0]} – {availability.timeSlots[availability.timeSlots.length - 1]}
+                                        {formatTime12h(availability.timeSlots[0])} – {formatTime12h(availability.timeSlots[availability.timeSlots.length - 1])}
                                         {availability.slotDurationMinutes && (
                                             <span className="text-blue-600"> ({availability.slotDurationMinutes} {t('rental:viewing.minSlots', 'min slots')})</span>
                                         )}
@@ -490,22 +498,22 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                                     <label className="block text-sm font-semibold text-neutral-700 mb-2">
                                         {t('rental:viewing.selectTime', 'Select a time')}
                                     </label>
-                                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
+                                    <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 snap-x snap-mandatory">
                                         {timeSlots.map(({ time, booked }) => (
                                             <button
                                                 key={time}
                                                 onClick={() => !booked && setSelectedTime(time)}
                                                 disabled={booked}
-                                                className={`px-2 py-2 rounded-lg text-xs font-medium transition-all border ${
+                                                className={`flex-shrink-0 snap-start px-3.5 py-2 rounded-full text-sm font-medium transition-all border whitespace-nowrap ${
                                                     booked
                                                         ? 'bg-neutral-100 text-neutral-300 border-neutral-100 cursor-not-allowed line-through'
                                                         : selectedTime === time
-                                                            ? 'bg-blue-600 text-white border-blue-600 ring-2 ring-blue-300'
-                                                            : 'bg-white text-neutral-600 border-neutral-200 hover:border-blue-300 hover:bg-blue-50'
+                                                            ? 'bg-blue-600 text-white border-blue-600 shadow-md ring-2 ring-blue-200'
+                                                            : 'bg-white text-neutral-700 border-neutral-200 hover:border-blue-400 hover:bg-blue-50 active:bg-blue-100'
                                                 }`}
-                                                title={booked ? t('rental:viewing.slotBooked', 'Already booked') : time}
+                                                title={booked ? t('rental:viewing.slotBooked', 'Already booked') : formatTime12h(time)}
                                             >
-                                                {time}
+                                                {formatTime12h(time)}
                                             </button>
                                         ))}
                                     </div>

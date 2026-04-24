@@ -295,31 +295,49 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             </div>
           )}
 
-          <div className="mt-6 flex flex-wrap justify-around text-base sm:text-lg text-neutral-800 border-t border-neutral-200 pt-4 gap-4">
-            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary-light/50 transition-all duration-200 cursor-default group">
-              <BedIcon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
-              <span>
-                <span className="font-bold">{property.beds}</span> {t('features.beds').toLowerCase()}
-              </span>
+          <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 border-t border-neutral-200 pt-5">
+            {/* Beds */}
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-blue-50 hover:bg-blue-100 transition-colors cursor-default group">
+              <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                <BedIcon className="w-5 h-5 text-blue-500" />
+              </div>
+              <div>
+                <p className="text-xl font-bold text-neutral-900 leading-none">{property.beds}</p>
+                <p className="text-xs text-neutral-500 mt-0.5">{t('features.bedrooms')}</p>
+              </div>
             </div>
-            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary-light/50 transition-all duration-200 cursor-default group">
-              <BathIcon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
-              <span>
-                <span className="font-bold">{property.baths}</span> {t('features.baths').toLowerCase()}
-              </span>
+
+            {/* Baths */}
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-cyan-50 hover:bg-cyan-100 transition-colors cursor-default group">
+              <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                <BathIcon className="w-5 h-5 text-cyan-500" />
+              </div>
+              <div>
+                <p className="text-xl font-bold text-neutral-900 leading-none">{property.baths}</p>
+                <p className="text-xs text-neutral-500 mt-0.5">{t('features.bathrooms')}</p>
+              </div>
             </div>
-            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary-light/50 transition-all duration-200 cursor-default group">
-              <LivingRoomIcon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
-              <span>
-                <span className="font-bold">{property.livingRooms}</span>{' '}
-                {property.livingRooms === 1 ? t('details.livingRoom') : t('details.livingRoomPlural')}
-              </span>
+
+            {/* Living rooms */}
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-violet-50 hover:bg-violet-100 transition-colors cursor-default group">
+              <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                <LivingRoomIcon className="w-5 h-5 text-violet-500" />
+              </div>
+              <div>
+                <p className="text-xl font-bold text-neutral-900 leading-none">{property.livingRooms}</p>
+                <p className="text-xs text-neutral-500 mt-0.5">{property.livingRooms === 1 ? t('details.livingRoom') : t('details.livingRoomPlural')}</p>
+              </div>
             </div>
-            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary-light/50 transition-all duration-200 cursor-default group">
-              <SqftIcon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
-              <span>
-                <span className="font-bold">{property.sqft}</span> m²
-              </span>
+
+            {/* Area */}
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 transition-colors cursor-default group">
+              <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                <SqftIcon className="w-5 h-5 text-emerald-500" />
+              </div>
+              <div>
+                <p className="text-xl font-bold text-neutral-900 leading-none">{property.sqft}</p>
+                <p className="text-xs text-neutral-500 mt-0.5">m²</p>
+              </div>
             </div>
           </div>
         </div>

@@ -139,30 +139,38 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
       <div className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200">
         <h3 className="text-sm font-semibold text-neutral-600 mb-3 uppercase tracking-wide">{t('property:actions.quickActions')}</h3>
         <div className="grid grid-cols-3 gap-2">
-          {/* Compare Button */}
-          <button
-            onClick={handleCompare}
-            className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all duration-200 ${
-              isInComparison
-                ? 'bg-purple-50 border-purple-200 text-purple-600'
-                : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:bg-purple-50 hover:border-purple-200 hover:text-purple-600'
-            }`}
-          >
-            <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            <span className="text-xs font-medium">{isInComparison ? t('property:actions.comparing') : t('property:actions.compare')}</span>
-          </button>
+          {/* Call Button */}
+          {property.seller?.phone ? (
+            <a
+              href={`tel:${property.seller.phone}`}
+              className="flex flex-col items-center justify-center p-3 rounded-xl border-2 bg-neutral-50 border-neutral-200 text-neutral-600 hover:bg-green-50 hover:border-green-200 hover:text-green-600 transition-all duration-200"
+            >
+              <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              <span className="text-xs font-medium">{t('property:actions.call', 'Call')}</span>
+            </a>
+          ) : (
+            <button
+              disabled
+              className="flex flex-col items-center justify-center p-3 rounded-xl border-2 bg-neutral-50 border-neutral-100 text-neutral-300 cursor-not-allowed"
+            >
+              <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              <span className="text-xs font-medium">{t('property:actions.call', 'Call')}</span>
+            </button>
+          )}
 
-          {/* Print Button */}
+          {/* Email / Message Button */}
           <button
-            onClick={handlePrint}
-            className="flex flex-col items-center justify-center p-3 rounded-xl border-2 bg-neutral-50 border-neutral-200 text-neutral-600 hover:bg-neutral-100 hover:border-neutral-300 transition-all duration-200"
+            onClick={() => setShowInquiryModal(true)}
+            className="flex flex-col items-center justify-center p-3 rounded-xl border-2 bg-neutral-50 border-neutral-200 text-neutral-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-all duration-200"
           >
             <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
-            <span className="text-xs font-medium">{t('property:actions.print')}</span>
+            <span className="text-xs font-medium">{t('property:actions.email', 'Email')}</span>
           </button>
 
           {/* Share Button */}
@@ -228,8 +236,9 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
         {/* Schedule Visit Button */}
         {property.status !== 'sold' && (
           <button
-            onClick={handleScheduleVisit}
-            className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl text-sm font-semibold hover:from-amber-600 hover:to-orange-600 transition-all duration-200 shadow-md hover:shadow-lg"
+            onClick={property.visitAvailability?.enabled ? handleScheduleVisit : undefined}
+            disabled={!property.visitAvailability?.enabled}
+            className={`w-full mt-3 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${property.visitAvailability?.enabled ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-md hover:shadow-lg' : 'bg-neutral-100 text-neutral-400 cursor-not-allowed'}`}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />

@@ -2,6 +2,7 @@
 // Image gallery with carousel, street view, video player, and interactive controls
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '../../../types';
 import {
@@ -46,6 +47,12 @@ interface PropertyGalleryProps {
  * />
  * ```
  */
+const imageSlideVariants = {
+  enter: (dir: number) => ({ opacity: 0, x: dir > 0 ? '6%' : '-6%' }),
+  center: { opacity: 1, x: 0 },
+  exit: (dir: number) => ({ opacity: 0, x: dir > 0 ? '-6%' : '6%' }),
+};
+
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   property,
   onOpenEditor,
@@ -91,6 +98,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   const [mainImageError, setMainImageError] = useState(false);
   const [mainImageLoaded, setMainImageLoaded] = useState(false);
+  const [imageNaturalRatio, setImageNaturalRatio] = useState<number | null>(null);
+  const imageRatiosRef = React.useRef<Record<string, number>>({});
   const [viewMode, setViewMode] = useState<'photos' | 'streetview' | 'video'>('photos');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
@@ -281,7 +290,18 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   useEffect(() => {
     setMainImageError(false);
     setMainImageLoaded(false);
+    // Apply cached ratio immediately — avoids the reset-to-null that races with onLoad on preloaded images
+    const cached = imageRatiosRef.current[currentImageUrl];
+    if (cached) setImageNaturalRatio(cached);
   }, [currentImageUrl]);
+
+  // Eagerly preload first 4 images when the listing opens so swipes feel instant
+  useEffect(() => {
+    imagesForCurrentCategory.slice(1, 5).forEach((item) => {
+      const el = new Image();
+      el.src = optimizeCloudinaryUrl(item.url, { width: 1200, quality: 'auto' });
+    });
+  }, [imagesForCurrentCategory]);
 
   // Preload adjacent images so navigation feels instant
   useEffect(() => {
@@ -306,7 +326,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
   }, [setActiveCategory, onImageIndexChange]);
 
+  // 1 = forward/next, -1 = backward/prev
+  const [slideDirection, setSlideDirection] = useState(1);
+
   const handleNextImage = useCallback(() => {
+    setSlideDirection(1);
     const newIndex = (currentImageIndex + 1) % imagesForCurrentCategory.length;
     if (onImageIndexChange) {
       onImageIndexChange(newIndex);
@@ -316,6 +340,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   }, [currentImageIndex, imagesForCurrentCategory.length, onImageIndexChange]);
 
   const handlePrevImage = useCallback(() => {
+    setSlideDirection(-1);
     const newIndex = (currentImageIndex - 1 + imagesForCurrentCategory.length) % imagesForCurrentCategory.length;
     if (onImageIndexChange) {
       onImageIndexChange(newIndex);
@@ -323,6 +348,15 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
       setInternalIndex(newIndex);
     }
   }, [currentImageIndex, imagesForCurrentCategory.length, onImageIndexChange]);
+
+  const handleDotNav = useCallback((index: number) => {
+    setSlideDirection(index > currentImageIndex ? 1 : -1);
+    if (onImageIndexChange) {
+      onImageIndexChange(index);
+    } else {
+      setInternalIndex(index);
+    }
+  }, [currentImageIndex, onImageIndexChange]);
 
   // Get category label for display
   const getCategoryEmoji = (category: PropertyImageTag | 'all'): string => {
@@ -343,47 +377,95 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
-      <div className="relative w-full h-[280px] xs:h-[340px] sm:h-[420px] md:h-[500px] lg:h-[560px] landscape:h-[60vh] landscape:min-h-[280px] bg-neutral-900 overflow-hidden">
-        {viewMode === 'photos' ? (
-          <button
+    <div className="overflow-hidden sm:rounded-xl sm:shadow-lg sm:border sm:border-neutral-200">
+      {/* ── Gallery frame ── */}
+      <div
+        className="relative w-full bg-neutral-900 overflow-hidden"
+        style={{ aspectRatio: imageNaturalRatio ? String(imageNaturalRatio) : '16/9', maxHeight: '90vh' }}
+      >
+
+        {/* ── PHOTOS ── */}
+        {viewMode === 'photos' && (
+          <motion.button
             onClick={onOpenViewer}
-            className="relative w-full h-full flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-t-xl overflow-hidden"
+            drag={imagesForCurrentCategory.length > 1 ? 'x' : false}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.18}
+            dragMomentum={false}
+            onDragEnd={(_, info) => {
+              if (info.offset.x < -60) handleNextImage();
+              else if (info.offset.x > 60) handlePrevImage();
+            }}
+            className="absolute inset-0 focus:outline-none cursor-pointer overflow-hidden"
+            style={{ touchAction: 'pan-y' }}
+            aria-label={t('property:gallery.viewImages', 'View property images')}
           >
             {mainImageError ? (
-              <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
-                <BuildingOfficeIcon className="w-24 h-24 text-neutral-400" />
+              <div className="w-full h-full bg-gradient-to-br from-neutral-700 to-neutral-800 flex items-center justify-center">
+                <BuildingOfficeIcon className="w-20 h-20 text-neutral-500" />
               </div>
             ) : (
               <>
-                {/* LQIP blur-up placeholder – visible until the sharp image loads */}
+                {/* LQIP: permanent blurred background — handles loading state */}
                 <img
                   src={getPropertyImagePlaceholder(currentImageUrl) || optimizeCloudinaryUrl(currentImageUrl, { width: 40, quality: 'auto:eco' })}
                   alt=""
                   aria-hidden="true"
-                  className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-60"
+                  className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 pointer-events-none select-none"
                 />
-                {/* Main sharp image – fades in once loaded */}
-                <img
-                  key={currentImageUrl}
-                  src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
-                  srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 1200, 1920])}
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
-                  alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} for ${property.listingType === 'rent' ? 'rent' : 'sale'} in ${property.city}, ${property.country} - ${property.address}`}
-                  width={1200}
-                  height={800}
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
-                  fetchpriority="high"
-                  decoding="async"
-                  className={`relative max-w-full max-h-full object-contain transition-opacity duration-300 ${mainImageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                  onLoad={() => setMainImageLoaded(true)}
-                  onError={() => setMainImageError(true)}
-                />
+                {/* Sharp image: AnimatePresence for direction-aware crossfade */}
+                <AnimatePresence initial={false} custom={slideDirection}>
+                  <motion.img
+                    key={currentImageUrl}
+                    src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
+                    srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 1200, 1920])}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
+                    alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
+                    width={1200}
+                    height={800}
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
+                    fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
+                    decoding="async"
+                    loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
+                    custom={slideDirection}
+                    variants={imageSlideVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
+                    draggable={false}
+                    ref={(el: HTMLImageElement | null) => {
+                      // Handle already-cached images that fire load synchronously before effects run
+                      if (el?.complete && el.naturalWidth && el.naturalHeight) {
+                        const ratio = el.naturalWidth / el.naturalHeight;
+                        imageRatiosRef.current[currentImageUrl] = ratio;
+                        setImageNaturalRatio(ratio);
+                        setMainImageLoaded(true);
+                      }
+                    }}
+                    onLoad={(e) => {
+                      const img = e.currentTarget;
+                      if (img.naturalWidth && img.naturalHeight) {
+                        const ratio = img.naturalWidth / img.naturalHeight;
+                        imageRatiosRef.current[currentImageUrl] = ratio;
+                        setImageNaturalRatio(ratio);
+                      }
+                      setMainImageLoaded(true);
+                    }}
+                    onError={() => setMainImageError(true)}
+                  />
+                </AnimatePresence>
+                {/* Subtle bottom vignette – just enough to make chip/counter readable */}
+                <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-[1]" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.32) 0%, transparent 100%)' }} />
               </>
             )}
-          </button>
-        ) : viewMode === 'video' && hasVideo ? (
+          </motion.button>
+        )}
+
+        {/* ── VIDEO ── */}
+        {viewMode === 'video' && hasVideo ? (
           // Video player - supports both generated videos (mp4) and external embeds
           <div className="relative w-full h-full bg-black flex items-center justify-center overflow-hidden">
             {/* Generated video (direct mp4 playback) */}
@@ -516,285 +598,233 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           </div>
         ) : null}
 
-        {/* 360 Tour Badge - Top Left - Shows after video ends */}
-        {videoEnded && property.virtualTour360Url && viewMode === 'photos' && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              if (onNavigateTo3DTour) {
-                onNavigateTo3DTour();
-              }
-            }}
-            className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold px-3 py-2 sm:px-4 sm:py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all shadow-lg animate-pulse hover:animate-none"
-          >
-            <svg className="w-5 h-5 sm:w-5 sm:h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-              <path d="M2 12h20" />
-            </svg>
-            <span className="text-xs sm:text-sm">{t('property:gallery.enter3DTour', 'Enter 3D Tour')}</span>
-          </button>
-        )}
-
-        {/* Action Buttons (Annotate, 3D Tour) - Horizontal on mobile, vertical on larger screens */}
+        {/* ── OVERLAYS (photos mode only) ── */}
         {viewMode === 'photos' && (
           <>
-            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-2 z-10">
+            {/* 3D Tour badge – top-left */}
+            {videoEnded && property.virtualTour360Url && (
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onOpenEditor(currentImageUrl);
-                }}
-                className="flex items-center justify-center bg-white/90 backdrop-blur-sm text-neutral-800 rounded-full hover:scale-105 transition-transform shadow-md w-10 h-10 sm:w-auto sm:h-auto sm:gap-2 sm:px-4 sm:py-2"
+                onClick={(e) => { e.stopPropagation(); onNavigateTo3DTour?.(); }}
+                className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs font-semibold rounded-full px-3 py-1.5 shadow-lg hover:scale-105 active:scale-95 transition-all animate-pulse hover:animate-none"
               >
-                <PencilIcon className="w-5 h-5 sm:w-5 sm:h-5" />
-                <span className="hidden sm:inline font-semibold text-sm">{t('actions.annotate')}</span>
+                <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                  <path d="M2 12h20" />
+                </svg>
+                <span>{t('property:gallery.enter3DTour', 'Enter 3D Tour')}</span>
               </button>
+            )}
 
-            </div>
+            {/* Edit button – top-right */}
+            <motion.button
+              onClick={(e) => { e.stopPropagation(); onOpenEditor(currentImageUrl); }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.92 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="absolute top-3 right-3 z-10 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
+            >
+              <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800" />
+            </motion.button>
 
-            {/* Navigation Controls */}
+            {/* Nav arrows – center sides */}
             {imagesForCurrentCategory.length > 1 && (
               <>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePrevImage();
-                  }}
-                  className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white active:bg-neutral-100 transition-colors shadow-md z-10 w-11 h-11 flex items-center justify-center"
-                  aria-label="Previous image"
+                <motion.button
+                  onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
+                  whileHover={{ scale: 1.08, backgroundColor: 'rgba(255,255,255,0.95)' }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 sm:w-10 sm:h-10 bg-white/80 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
+                  aria-label={t('property:gallery.prevImage', 'Previous image')}
                 >
-                  <ChevronLeftIcon className="w-5 h-5 text-neutral-800" />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNextImage();
-                  }}
-                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white active:bg-neutral-100 transition-colors shadow-md z-10 w-11 h-11 flex items-center justify-center"
-                  aria-label="Next image"
+                  <ChevronLeftIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800" />
+                </motion.button>
+                <motion.button
+                  onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
+                  whileHover={{ scale: 1.08, backgroundColor: 'rgba(255,255,255,0.95)' }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 sm:w-10 sm:h-10 bg-white/80 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
+                  aria-label={t('property:gallery.nextImage', 'Next image')}
                 >
-                  <ChevronRightIcon className="w-5 h-5 text-neutral-800" />
-                </button>
+                  <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800" />
+                </motion.button>
+              </>
+            )}
 
-                {/* Image Counter & Category Badge - Top left corner */}
-                <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 flex flex-col gap-1.5" style={{ marginTop: property.virtualTour360Url ? '40px' : '0' }}>
-                  {/* Category Badge - Shows when not viewing 'all' */}
-                  {activeCategory !== 'all' && (
-                    <div className="flex items-center gap-1.5 bg-primary/90 backdrop-blur-sm px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-lg animate-fade-in">
-                      <span className="text-sm">{getCategoryEmoji(activeCategory)}</span>
-                      <span className="text-white text-[11px] sm:text-xs font-semibold capitalize">
-                        {t(`photos.categories.${activeCategory}`, { defaultValue: activeCategory.replace('_', ' ') })}
-                      </span>
+            {/* Bottom-right: image counter + property chip — no overlap with anything */}
+            <div className="absolute bottom-4 right-3 z-10 flex items-center gap-2">
+              {imagesForCurrentCategory.length > 1 && (
+                <div className="bg-black/55 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-full" role="status" aria-live="polite">
+                  {currentImageIndex + 1} / {imagesForCurrentCategory.length}
+                </div>
+              )}
+              {property.propertyType && (
+                <div className="bg-black/40 backdrop-blur-sm border border-white/20 text-white text-[11px] sm:text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                  {property.propertyType === 'apartment' && <svg className="w-3 h-3 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" /></svg>}
+                  {property.propertyType === 'house' && <svg className="w-3 h-3 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>}
+                  {property.propertyType === 'villa' && <svg className="w-3 h-3 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3L2 12h3v8h6v-5h2v5h6v-8h3L12 3z" /></svg>}
+                  {property.propertyType === 'land' && <svg className="w-3 h-3 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" /></svg>}
+                  {!['apartment', 'house', 'villa', 'land'].includes(property.propertyType) && <BuildingOfficeIcon className="w-3 h-3 text-white/90" />}
+                  <span className="capitalize">{t(`property:propertyTypes.${property.propertyType}`, property.propertyType)}</span>
+                  <span className="w-px h-2.5 bg-white/40" />
+                  <span className={property.listingType === 'rent' ? 'text-blue-300' : 'text-emerald-300'}>
+                    {property.listingType === 'rent' ? t('property:gallery.forRent', 'Rent') : t('property:gallery.forSale', 'Sale')}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Floor widget – desktop only, bottom-left (no mobile clutter) */}
+            {property.propertyType === 'apartment' && property.floorNumber && property.totalFloors && property.totalFloors > 1 && (
+              <div className="hidden sm:block absolute bottom-4 left-3 z-10 animate-fade-in">
+                <div className="bg-slate-900/85 backdrop-blur-sm rounded-xl shadow-lg border border-slate-700/50 overflow-hidden w-[60px]">
+                  <div className="relative px-2.5 pt-2.5 pb-1">
+                    <div className="mx-auto w-0 h-0 border-l-[16px] border-r-[16px] border-b-[7px] border-l-transparent border-r-transparent border-b-slate-600 mb-px" />
+                    <div className="relative mx-auto w-8 rounded-b-sm overflow-hidden border border-slate-600/80 bg-slate-800/60" style={{ height: `${Math.min(Math.max(property.totalFloors * 7, 35), 80)}px` }}>
+                      {Array.from({ length: property.totalFloors }).map((_, i) => {
+                        const floor = property.totalFloors! - i;
+                        const isHighlighted = floor === property.floorNumber;
+                        return (
+                          <div
+                            key={floor}
+                            className="absolute left-0 right-0 border-b border-slate-700/40"
+                            style={{
+                              height: `${100 / property.totalFloors!}%`,
+                              top: `${(i / property.totalFloors!) * 100}%`,
+                              background: isHighlighted ? 'linear-gradient(90deg,rgba(34,197,94,0.9),rgba(22,163,74,0.9))' : 'transparent',
+                              boxShadow: isHighlighted ? '0 0 6px rgba(34,197,94,0.5)' : 'none',
+                            }}
+                          >
+                            {isHighlighted && <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-green-400/20 to-emerald-400/20" />}
+                          </div>
+                        );
+                      })}
+                      {property.totalFloors <= 12 && Array.from({ length: property.totalFloors }).map((_, i) => {
+                        const floor = property.totalFloors! - i;
+                        if (floor === property.floorNumber) return null;
+                        return (
+                          <div key={`w-${floor}`} className="absolute left-1/2 -translate-x-1/2 flex gap-0.5" style={{ top: `${((i + 0.35) / property.totalFloors!) * 100}%` }}>
+                            <div className="w-1 h-0.5 bg-slate-600/60 rounded-[0.5px]" />
+                            <div className="w-1 h-0.5 bg-slate-600/60 rounded-[0.5px]" />
+                          </div>
+                        );
+                      })}
                     </div>
-                  )}
-                  {/* Image Counter */}
-                  <div className="flex items-center bg-black/60 backdrop-blur-sm px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full" role="status" aria-live="polite">
-                    <span className="text-white text-[11px] sm:text-xs font-medium whitespace-nowrap">
-                      {currentImageIndex + 1} / {imagesForCurrentCategory.length}
-                    </span>
+                    <div className="w-10 h-0.5 mx-auto bg-slate-600 rounded-b" />
+                  </div>
+                  <div className="px-1 py-1 text-center border-t border-slate-700/50">
+                    <div className="text-xs font-bold text-green-400 leading-none">{property.floorNumber}/{property.totalFloors}</div>
+                    <div className="text-[8px] text-slate-400 leading-tight mt-0.5">{t('property:gallery.floor', 'floor')}</div>
                   </div>
                 </div>
-              </>
+              </div>
+            )}
+
+            {/* Progress bar – Zillow-style thin indicator at very bottom of frame */}
+            {imagesForCurrentCategory.length > 1 && (
+              <div
+                className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/20 z-10 cursor-pointer"
+                onClick={(e) => {
+                  const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+                  const pct = (e.clientX - rect.left) / rect.width;
+                  handleDotNav(Math.min(Math.floor(pct * imagesForCurrentCategory.length), imagesForCurrentCategory.length - 1));
+                }}
+              >
+                <motion.div
+                  className="h-full bg-white/80"
+                  animate={{ width: `${((currentImageIndex + 1) / imagesForCurrentCategory.length) * 100}%` }}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                />
+              </div>
             )}
           </>
         )}
 
-        {/* Building Floor Overlay - Shows apartment position in building */}
-        {viewMode === 'photos' && property.propertyType === 'apartment' && property.floorNumber && property.totalFloors && property.totalFloors > 1 && (
-          <div className="absolute bottom-[calc(2.5rem-1px)] sm:bottom-[calc(3rem-1px)] left-2 sm:left-3 z-10 animate-fade-in">
-            <div className="bg-slate-900/85 backdrop-blur-sm rounded-xl shadow-lg border border-slate-700/50 overflow-hidden w-[52px] sm:w-[60px]">
-              {/* Building visualization */}
-              <div className="relative px-2 sm:px-2.5 pt-2 sm:pt-2.5 pb-1">
-                {/* Roof */}
-                <div className="mx-auto w-0 h-0 border-l-[14px] sm:border-l-[16px] border-r-[14px] sm:border-r-[16px] border-b-[6px] sm:border-b-[7px] border-l-transparent border-r-transparent border-b-slate-600 mb-px" />
-                {/* Building outline */}
-                <div
-                  className="relative mx-auto w-7 sm:w-8 rounded-b-sm overflow-hidden border border-slate-600/80 bg-slate-800/60"
-                  style={{ height: `${Math.min(Math.max(property.totalFloors * 7, 35), 80)}px` }}
-                >
-                  {Array.from({ length: property.totalFloors }).map((_, i) => {
-                    const floor = property.totalFloors! - i;
-                    const isHighlighted = floor === property.floorNumber;
-                    return (
-                      <div
-                        key={floor}
-                        className="absolute left-0 right-0 border-b border-slate-700/40"
-                        style={{
-                          height: `${100 / property.totalFloors!}%`,
-                          top: `${(i / property.totalFloors!) * 100}%`,
-                          background: isHighlighted
-                            ? 'linear-gradient(90deg, rgba(34, 197, 94, 0.9), rgba(22, 163, 74, 0.9))'
-                            : 'transparent',
-                          boxShadow: isHighlighted ? '0 0 6px rgba(34, 197, 94, 0.5)' : 'none',
-                        }}
-                      >
-                        {isHighlighted && (
-                          <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-green-400/20 to-emerald-400/20" />
-                        )}
-                      </div>
-                    );
-                  })}
-                  {/* Window dots for non-highlighted floors */}
-                  {property.totalFloors <= 12 && Array.from({ length: property.totalFloors }).map((_, i) => {
-                    const floor = property.totalFloors! - i;
-                    if (floor === property.floorNumber) return null;
-                    return (
-                      <div
-                        key={`win-${floor}`}
-                        className="absolute left-1/2 -translate-x-1/2 flex gap-0.5"
-                        style={{
-                          top: `${((i + 0.35) / property.totalFloors!) * 100}%`,
-                        }}
-                      >
-                        <div className="w-1 h-0.5 bg-slate-600/60 rounded-[0.5px]" />
-                        <div className="w-1 h-0.5 bg-slate-600/60 rounded-[0.5px]" />
-                      </div>
-                    );
-                  })}
-                </div>
-                {/* Ground */}
-                <div className="w-9 sm:w-10 h-0.5 mx-auto bg-slate-600 rounded-b" />
-              </div>
-              {/* Floor label */}
-              <div className="px-1 py-1 text-center border-t border-slate-700/50">
-                <div className="text-[10px] sm:text-xs font-bold text-green-400 leading-none">
-                  {property.floorNumber}/{property.totalFloors}
-                </div>
-                <div className="text-[7px] sm:text-[8px] text-slate-400 leading-tight mt-0.5">
-                  {t('property:gallery.floor', 'floor')}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+      </div>
 
-        {/* Property Type & Listing Chip - Bottom right overlay */}
-        {viewMode === 'photos' && property.propertyType && (
-          <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 z-10 flex items-center gap-1.5 animate-fade-in">
-            <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-xl backdrop-saturate-150 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-full border border-white/25 shadow-[0_4px_20px_rgba(0,0,0,0.15)]">
-              {property.propertyType === 'apartment' && (
-                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
-                </svg>
-              )}
-              {property.propertyType === 'house' && (
-                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                </svg>
-              )}
-              {property.propertyType === 'villa' && (
-                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3L2 12h3v8h6v-5h2v5h6v-8h3L12 3z" />
-                </svg>
-              )}
-              {property.propertyType === 'land' && (
-                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
-                </svg>
-              )}
-              {!['apartment', 'house', 'villa', 'land'].includes(property.propertyType) && (
-                <BuildingOfficeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90" />
-              )}
-              <span className="text-white text-[11px] sm:text-xs font-semibold capitalize">
-                {t(`property:propertyTypes.${property.propertyType}`, property.propertyType)}
-              </span>
-              <span className="w-px h-3 bg-white/30" />
-              <span className={`text-[11px] sm:text-xs font-bold ${
-                property.listingType === 'rent' ? 'text-blue-300' : 'text-emerald-300'
-              }`}>
-                {property.listingType === 'rent' ? t('property:gallery.forRent', 'Rent') : t('property:gallery.forSale', 'Sale')}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* View Mode Toggle (Video / Photos / Street View) - Liquid Glass Style */}
-        <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 z-10">
-          {/* Mobile version - smaller */}
-          <div className="sm:hidden">
-            <LiquidGlassSwitch
-              options={[
-                // Video option (only if property has video)
-                ...(hasVideo ? [{
-                  value: 'video',
-                  label: t('actions.video', 'Video'),
-                  icon: (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polygon points="5 3 19 12 5 21 5 3" />
-                    </svg>
-                  ),
-                }] : []),
-                {
-                  value: 'photos',
-                  label: t('actions.photos'),
-                  icon: (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="3" width="18" height="18" rx="2" />
-                      <circle cx="9" cy="9" r="2" />
-                      <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
-                    </svg>
-                  ),
-                },
-                {
-                  value: 'streetview',
-                  label: t('actions.streetView'),
-                  icon: (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="5" r="3" />
-                      <path d="M12 8v4" />
-                      <path d="M8 21l4-9 4 9" />
-                    </svg>
-                  ),
-                },
-              ]}
-              value={viewMode}
-              onChange={handleViewModeChange}
-              size="sm"
-            />
-          </div>
-          {/* Desktop version - medium */}
-          <div className="hidden sm:block">
-            <LiquidGlassSwitch
-              options={[
-                // Video option (only if property has video)
-                ...(hasVideo ? [{
-                  value: 'video',
-                  label: t('actions.video', 'Video'),
-                  icon: (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polygon points="5 3 19 12 5 21 5 3" />
-                    </svg>
-                  ),
-                }] : []),
-                {
-                  value: 'photos',
-                  label: t('actions.photos'),
-                  icon: (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="3" width="18" height="18" rx="2" />
-                      <circle cx="9" cy="9" r="2" />
-                      <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
-                    </svg>
-                  ),
-                },
-                {
-                  value: 'streetview',
-                  label: t('actions.streetView'),
-                  icon: (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="5" r="3" />
-                      <path d="M12 8v4" />
-                      <path d="M8 21l4-9 4 9" />
-                    </svg>
-                  ),
-                },
-              ]}
-              value={viewMode}
-              onChange={handleViewModeChange}
-              size="md"
-            />
-          </div>
+      {/* ── View Mode Toggle – below gallery frame, zero overlap ── */}
+      <div className="flex justify-center px-4 py-2.5 sm:py-3 bg-white border-t border-neutral-200">
+        <div className="sm:hidden">
+          <LiquidGlassSwitch
+            options={[
+              ...(hasVideo ? [{
+                value: 'video',
+                label: t('actions.video', 'Video'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                ),
+              }] : []),
+              {
+                value: 'photos',
+                label: t('actions.photos'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="9" cy="9" r="2" />
+                    <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+                  </svg>
+                ),
+              },
+              {
+                value: 'streetview',
+                label: t('actions.streetView'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="5" r="3" />
+                    <path d="M12 8v4" />
+                    <path d="M8 21l4-9 4 9" />
+                  </svg>
+                ),
+              },
+            ]}
+            value={viewMode}
+            onChange={handleViewModeChange}
+            size="sm"
+          />
+        </div>
+        <div className="hidden sm:block">
+          <LiquidGlassSwitch
+            options={[
+              ...(hasVideo ? [{
+                value: 'video',
+                label: t('actions.video', 'Video'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                ),
+              }] : []),
+              {
+                value: 'photos',
+                label: t('actions.photos'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="9" cy="9" r="2" />
+                    <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+                  </svg>
+                ),
+              },
+              {
+                value: 'streetview',
+                label: t('actions.streetView'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="5" r="3" />
+                    <path d="M12 8v4" />
+                    <path d="M8 21l4-9 4 9" />
+                  </svg>
+                ),
+              },
+            ]}
+            value={viewMode}
+            onChange={handleViewModeChange}
+            size="md"
+          />
         </div>
       </div>
     </div>
