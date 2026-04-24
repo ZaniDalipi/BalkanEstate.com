@@ -303,7 +303,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
               </div>
               <div>
                 <p className="text-xl font-bold text-neutral-900 leading-none">{property.beds}</p>
-                <p className="text-xs text-neutral-500 mt-0.5">{t('features.beds')}</p>
+                <p className="text-xs text-neutral-500 mt-0.5">{t('features.bedrooms')}</p>
               </div>
             </div>
 
@@ -314,7 +314,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
               </div>
               <div>
                 <p className="text-xl font-bold text-neutral-900 leading-none">{property.baths}</p>
-                <p className="text-xs text-neutral-500 mt-0.5">{t('features.baths')}</p>
+                <p className="text-xs text-neutral-500 mt-0.5">{t('features.bathrooms')}</p>
               </div>
             </div>
 
