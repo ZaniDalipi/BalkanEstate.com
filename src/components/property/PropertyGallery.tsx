@@ -424,7 +424,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     animate="center"
                     exit="exit"
                     transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+                    className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
                     style={{ willChange: 'transform' }}
                     draggable={false}
                     onError={() => setMainImageError(true)}
