@@ -124,6 +124,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   // State for sticky bottom bar schedule modal
   const [showStickyScheduleModal, setShowStickyScheduleModal] = useState(false);
   const [sellerAvatarError, setSellerAvatarError] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Reset avatar error if the seller's photo changes (e.g. live property refresh)
   useEffect(() => {
@@ -456,7 +457,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
   // Scroll to top on mount
   useEffect(() => {
-    window.scrollTo(0, 0);
+    scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   }, [property.id]);
 
   // Handle browser back button
@@ -506,7 +507,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   const propertySlug = generatePropertySlug(property);
 
   return (
-    <div className="bg-neutral-50 h-full overflow-y-auto overflow-x-hidden animate-fade-in" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', overscrollBehaviorY: 'contain', WebkitOverflowScrolling: 'touch' }}>
+    <div ref={scrollContainerRef} className="bg-neutral-50 h-full overflow-y-auto overflow-x-hidden animate-fade-in" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', overscrollBehaviorY: 'contain', WebkitOverflowScrolling: 'touch' }}>
       {/* SEO Meta Tags + VideoObject for tours */}
       <SEO
         title={seoTitle}
@@ -1028,8 +1029,9 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
           {/* Schedule Tour button */}
           <button
-            onClick={() => setShowStickyScheduleModal(true)}
-            className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold text-sm hover:from-amber-600 hover:to-orange-600 active:from-amber-700 active:to-orange-700 transition-all shadow-md flex-shrink-0"
+            onClick={() => property.visitAvailability?.enabled && setShowStickyScheduleModal(true)}
+            disabled={!property.visitAvailability?.enabled}
+            className={`flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md flex-shrink-0 ${property.visitAvailability?.enabled ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 active:from-amber-700 active:to-orange-700' : 'bg-neutral-200 text-neutral-400 cursor-not-allowed shadow-none'}`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
