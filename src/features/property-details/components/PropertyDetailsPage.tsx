@@ -123,6 +123,12 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
   // State for sticky bottom bar schedule modal
   const [showStickyScheduleModal, setShowStickyScheduleModal] = useState(false);
+  const [sellerAvatarError, setSellerAvatarError] = useState(false);
+
+  // Reset avatar error if the seller's photo changes (e.g. live property refresh)
+  useEffect(() => {
+    setSellerAvatarError(false);
+  }, [property.seller?.avatarUrl]);
 
   // State for promotion modal
   const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false);
@@ -979,24 +985,32 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           style={{ paddingBottom: 'calc(0.625rem + env(safe-area-inset-bottom, 0px))' }}
         >
           {/* Agent avatar + info */}
-          <div className="flex items-center gap-2.5 flex-1 min-w-0">
-            {property.seller?.avatarUrl ? (
+          {/* Avatar with ripple-ring animation */}
+          <div className="relative flex-shrink-0">
+            <span className="absolute inset-0 rounded-full avatar-ring-pulse" />
+            {property.seller?.avatarUrl && !sellerAvatarError ? (
               <img
-                src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 80, quality: 'auto', crop: 'fill' })}
+                src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 88, quality: 'auto', crop: 'fill' })}
                 alt={property.seller.name || ''}
-                className="w-11 h-11 rounded-full object-cover ring-2 ring-white shadow-md flex-shrink-0"
+                className="w-11 h-11 rounded-full object-cover ring-2 ring-white shadow-md relative"
+                onError={() => setSellerAvatarError(true)}
               />
             ) : (
-              <div className={`w-11 h-11 rounded-full flex items-center justify-center ring-2 ring-white shadow-md flex-shrink-0 ${property.seller?.type === 'agent' ? 'bg-gradient-to-br from-blue-500 to-indigo-600' : 'bg-gradient-to-br from-green-500 to-emerald-600'}`}>
-                <span className="text-white font-bold text-base">
-                  {property.seller?.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || '?'}
+              <div className={`w-11 h-11 rounded-full flex items-center justify-center ring-2 ring-white shadow-md relative ${property.seller?.type === 'agent' ? 'bg-gradient-to-br from-blue-500 to-indigo-600' : 'bg-gradient-to-br from-green-500 to-emerald-600'}`}>
+                <span className="text-white font-bold text-base select-none">
+                  {property.seller?.name
+                    ? property.seller.name.trim().split(/\s+/).map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+                    : '?'}
                 </span>
               </div>
             )}
-            <div className="min-w-0">
-              <p className="font-semibold text-sm text-neutral-900 truncate leading-tight">{property.seller?.name || t('property:seller.privateSeller', 'Private Seller')}</p>
-              <p className="text-xs text-neutral-500 leading-tight">{property.seller?.type === 'agent' ? t('property:seller.agent', 'Agent') : t('property:seller.privateSeller', 'Private Seller')}</p>
-            </div>
+            {/* Online indicator */}
+            <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-sm" />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-sm text-neutral-900 truncate leading-tight">{property.seller?.name || t('property:seller.privateSeller', 'Private Seller')}</p>
+            <p className="text-xs text-neutral-500 leading-tight">{property.seller?.type === 'agent' ? t('property:seller.agent', 'Agent') : t('property:seller.privateSeller', 'Private Seller')}</p>
           </div>
 
           {/* Call button */}
@@ -1035,18 +1049,22 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       {/* Animation styles */}
       <style>{`
         @keyframes slide-up {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(20px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
         .animate-slide-up {
           animation: slide-up 0.6s ease-out forwards;
           opacity: 0;
+        }
+        @keyframes avatar-ring {
+          0%   { box-shadow: 0 0 0 0 rgba(59,130,246,0.45); }
+          60%  { box-shadow: 0 0 0 7px rgba(59,130,246,0); }
+          100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
+        }
+        .avatar-ring-pulse {
+          animation: avatar-ring 2.2s ease-out infinite;
+          border-radius: 9999px;
+          pointer-events: none;
         }
       `}</style>
 
