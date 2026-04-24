@@ -17,6 +17,7 @@ const CityRecommendations: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
   const [cities, setCities] = useState<CityMarketData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showListingPrice, setShowListingPrice] = useState<Record<string, boolean>>({});
   // Read ?country= URL param to pre-select a country on mount
   const [selectedCountry, setSelectedCountry] = useState<string>(() => {
     const params = new URLSearchParams(window.location.search);
@@ -385,24 +386,27 @@ const CityRecommendations: React.FC = () => {
                 <div className="p-4">
                   {/* Price Headline Section */}
                   <div className="flex items-stretch gap-3 mb-4">
-                    {/* Price per sqm - stacked: market (Gemini) + platform listings */}
-                    <div className="flex-1 flex flex-col gap-2">
-                      <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-3 border border-primary/10">
-                        <p className="text-[11px] font-medium text-neutral-500 mb-1">{t('cityCard.avgPricePerSqm')}</p>
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-xl font-extrabold text-neutral-900">€{city.avgPricePerSqm.toLocaleString()}</span>
-                          <span className="text-xs font-medium text-neutral-400">/m²</span>
-                        </div>
+                    {/* Avg Price per sqm with toggle */}
+                    <div className="flex-1 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-3 border border-primary/10">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-[11px] font-medium text-neutral-500">
+                          {showListingPrice[city._id] ? t('cityCard.listingAvgPricePerSqm') : t('cityCard.avgPricePerSqm')}
+                        </p>
+                        {city.listingAvgPricePerSqm && (
+                          <button
+                            onClick={e => { e.stopPropagation(); setShowListingPrice(prev => ({ ...prev, [city._id]: !prev[city._id] })); }}
+                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border transition-colors ${showListingPrice[city._id] ? 'bg-blue-100 text-blue-700 border-blue-200' : 'bg-white/70 text-neutral-500 border-neutral-200 hover:bg-white'}`}
+                          >
+                            {showListingPrice[city._id] ? 'Market' : 'Listings'}
+                          </button>
+                        )}
                       </div>
-                      {city.listingAvgPricePerSqm && (
-                        <div className="bg-blue-50 rounded-xl p-3 border border-blue-100">
-                          <p className="text-[11px] font-medium text-neutral-500 mb-1">{t('cityCard.listingAvgPricePerSqm')}</p>
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-xl font-extrabold text-neutral-900">€{city.listingAvgPricePerSqm.toLocaleString()}</span>
-                            <span className="text-xs font-medium text-neutral-400">/m²</span>
-                          </div>
-                        </div>
-                      )}
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-xl font-extrabold text-neutral-900">
+                          €{(showListingPrice[city._id] && city.listingAvgPricePerSqm ? city.listingAvgPricePerSqm : city.avgPricePerSqm).toLocaleString()}
+                        </span>
+                        <span className="text-xs font-medium text-neutral-400">/m²</span>
+                      </div>
                     </div>
                     {/* Typical Property Price */}
                     <div className="flex-1 bg-neutral-50 rounded-xl p-3 border border-neutral-100">
