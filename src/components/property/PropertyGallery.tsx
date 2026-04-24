@@ -8,7 +8,6 @@ import { Property, PropertyImageTag } from '../../../types';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
-  PencilIcon,
   BuildingOfficeIcon,
 } from '../../../constants';
 import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
@@ -380,7 +379,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               </div>
             ) : (
               <>
-                {/* LQIP blurred background — animated Ken Burns pan/zoom for cinematic feel, no crop on main image */}
+                {/* LQIP blurred background — Ken Burns pan/zoom for loading state */}
                 <motion.img
                   key={`lqip-${currentImageUrl}`}
                   src={getPropertyImagePlaceholder(currentImageUrl) || optimizeCloudinaryUrl(currentImageUrl, { width: 40, quality: 'auto:eco' })}
@@ -392,7 +391,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   transition={{ duration: 10, ease: 'linear' }}
                   style={{ willChange: 'transform' }}
                 />
-                {/* Main image — centered, full image visible, crossfade on image change */}
+                {/* Main image — covers full frame, crossfade on image change */}
                 <AnimatePresence initial={false} custom={slideDirection}>
                   <motion.img
                     key={currentImageUrl}
@@ -413,13 +412,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     animate="center"
                     exit="exit"
                     transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
+                    className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
                     draggable={false}
                     onError={() => setMainImageError(true)}
                   />
                 </AnimatePresence>
-                {/* Subtle bottom vignette – just enough to make chip/counter readable */}
-                <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-[1]" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.32) 0%, transparent 100%)' }} />
               </>
             )}
           </motion.button>
@@ -577,36 +574,25 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               </button>
             )}
 
-            {/* Top-right: Favorite + Edit buttons */}
-            <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
-              {onFavoriteClick && (
-                <motion.button
-                  onClick={(e) => { e.stopPropagation(); onFavoriteClick(); }}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.92 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
-                  aria-label={isFavorited ? t('property:actions.removeFavorite', 'Remove from favorites') : t('property:actions.addFavorite', 'Add to favorites')}
-                >
-                  <svg
-                    className={`w-5 h-5 transition-colors ${isFavorited ? 'text-red-500 fill-current' : 'text-neutral-700'}`}
-                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                </motion.button>
-              )}
+            {/* Top-right: Favorite button */}
+            {onFavoriteClick && (
               <motion.button
-                onClick={(e) => { e.stopPropagation(); onOpenEditor(currentImageUrl); }}
+                onClick={(e) => { e.stopPropagation(); onFavoriteClick(); }}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.92 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
+                className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
+                aria-label={isFavorited ? t('property:actions.removeFavorite', 'Remove from favorites') : t('property:actions.addFavorite', 'Add to favorites')}
               >
-                <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800" />
+                <svg
+                  className={`w-5 h-5 transition-colors ${isFavorited ? 'text-red-500 fill-current' : 'text-neutral-600'}`}
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
               </motion.button>
-            </div>
+            )}
 
             {/* Nav arrows – center sides */}
             {imagesForCurrentCategory.length > 1 && (
@@ -616,7 +602,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   whileHover={{ scale: 1.08, backgroundColor: 'rgba(255,255,255,0.95)' }}
                   whileTap={{ scale: 0.9 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 sm:w-10 sm:h-10 bg-white/80 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
                   aria-label={t('property:gallery.prevImage', 'Previous image')}
                 >
                   <ChevronLeftIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800" />
@@ -626,7 +612,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   whileHover={{ scale: 1.08, backgroundColor: 'rgba(255,255,255,0.95)' }}
                   whileTap={{ scale: 0.9 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 sm:w-10 sm:h-10 bg-white/80 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
                   aria-label={t('property:gallery.nextImage', 'Next image')}
                 >
                   <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800" />
@@ -634,77 +620,72 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               </>
             )}
 
-            {/* Property info overlay — gradient at bottom with title, location, specs, price */}
+            {/* Right-side gradient overlay — dark navy on right, transparent on left; text vertically centered */}
             <div
-              className="absolute bottom-0 left-0 right-0 z-[2] pointer-events-none"
-              style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.6) 35%, rgba(0,0,0,0.1) 65%, transparent 85%)' }}
+              className="absolute inset-0 z-[2] pointer-events-none flex items-center justify-end"
+              style={{ background: 'linear-gradient(to left, rgba(5,15,50,0.97) 0%, rgba(5,15,50,0.88) 22%, rgba(5,15,50,0.55) 45%, rgba(5,15,50,0.1) 65%, transparent 80%)' }}
             >
-              <div className="px-4 sm:px-5 pt-16 sm:pt-20 pb-3 sm:pb-4">
+              <div className="w-[48%] sm:w-[44%] pr-5 sm:pr-8 pl-4 py-6">
                 {/* Title */}
                 {(property.title || property.address) && (
-                  <h2 className="text-white font-bold text-base sm:text-xl lg:text-2xl leading-tight drop-shadow mb-1 line-clamp-2">
+                  <h2 className="text-white font-bold text-xl sm:text-2xl lg:text-3xl leading-tight mb-2">
                     {property.title || property.address}
                   </h2>
                 )}
                 {/* Location */}
                 {(property.city || property.country) && (
-                  <div className="flex items-center gap-1 text-white/80 text-xs sm:text-sm mb-2.5">
-                    <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                  <div className="flex items-center gap-1.5 text-white/80 text-sm mb-3">
+                    <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                     </svg>
                     <span>{[property.city, property.country].filter(Boolean).join(', ')}</span>
                   </div>
                 )}
-                {/* Specs + Price row */}
-                <div className="flex items-end justify-between gap-2 flex-wrap">
-                  {/* Specs chips */}
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    {property.propertyType && (
-                      <span className="bg-white/20 backdrop-blur-sm text-white text-[11px] sm:text-xs font-semibold px-2 py-0.5 rounded-full capitalize">
-                        {t(`property:propertyTypes.${property.propertyType}`, property.propertyType)}
-                      </span>
-                    )}
-                    {property.beds ? (
-                      <span className="text-white/90 text-[11px] sm:text-xs font-medium flex items-center gap-1">
-                        <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 12v7h18v-7M3 12V8a1 1 0 011-1h16a1 1 0 011 1v4M3 12h18" />
-                        </svg>
-                        {property.beds} {t('property:specs.beds', 'Beds')}
-                      </span>
-                    ) : null}
-                    {property.baths ? (
-                      <span className="text-white/90 text-[11px] sm:text-xs font-medium flex items-center gap-1">
-                        <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 12h16M4 12V7a2 2 0 012-2h12a2 2 0 012 2v5M4 12v6a2 2 0 002 2h12a2 2 0 002-2v-6" />
-                        </svg>
-                        {property.baths} {t('property:specs.baths', 'Baths')}
-                      </span>
-                    ) : null}
-                    {property.sqft ? (
-                      <span className="text-white/90 text-[11px] sm:text-xs font-medium">{property.sqft} m²</span>
-                    ) : null}
-                  </div>
-                  {/* Price + listing type + counter */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {property.price ? (
-                      <>
-                        <span className="text-white font-bold text-sm sm:text-lg drop-shadow">
-                          €{property.price.toLocaleString()}{property.listingType === 'rent' ? t('property:seo.perMonth', '/mo') : ''}
-                        </span>
-                        <span className={`text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
-                          property.listingType === 'rent' ? 'bg-blue-500/90 text-white' : 'bg-emerald-500/90 text-white'
-                        }`}>
-                          {property.listingType === 'rent' ? t('property:gallery.forRent', 'For Rent') : t('property:gallery.forSale', 'For Sale')}
-                        </span>
-                      </>
-                    ) : null}
-                    {imagesForCurrentCategory.length > 1 && (
-                      <span className="bg-black/50 backdrop-blur-sm text-white text-[10px] sm:text-xs font-medium px-2 py-0.5 rounded-full" role="status" aria-live="polite">
-                        {currentImageIndex + 1}/{imagesForCurrentCategory.length}
-                      </span>
-                    )}
-                  </div>
+                {/* Spec chips row */}
+                <div className="flex items-center gap-1.5 flex-wrap mb-3">
+                  {property.propertyType && (
+                    <span className="flex items-center gap-1 bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full capitalize">
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                      </svg>
+                      {t(`property:propertyTypes.${property.propertyType}`, property.propertyType)}
+                    </span>
+                  )}
+                  {property.beds ? (
+                    <span className="bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                      {property.beds} {t('property:specs.beds', 'Beds')}
+                    </span>
+                  ) : null}
+                  {property.baths ? (
+                    <span className="bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                      {property.baths} {t('property:specs.baths', 'Baths')}
+                    </span>
+                  ) : null}
+                  {property.sqft ? (
+                    <span className="bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                      {property.sqft} m²
+                    </span>
+                  ) : null}
                 </div>
+                {/* Price + listing type badge */}
+                {property.price ? (
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-white font-bold text-2xl sm:text-3xl drop-shadow">
+                      € {property.price.toLocaleString()}{property.listingType === 'rent' ? t('property:seo.perMonth', '/mo') : ''}
+                    </span>
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full flex-shrink-0 ${
+                      property.listingType === 'rent' ? 'bg-blue-500 text-white' : 'bg-emerald-500 text-white'
+                    }`}>
+                      {property.listingType === 'rent' ? t('property:gallery.forRent', 'For Rent') : t('property:gallery.forSale', 'For Sale')}
+                    </span>
+                  </div>
+                ) : null}
+                {/* Image counter */}
+                {imagesForCurrentCategory.length > 1 && (
+                  <div className="text-white/60 text-sm font-medium" role="status" aria-live="polite">
+                    {currentImageIndex + 1} / {imagesForCurrentCategory.length}
+                  </div>
+                )}
               </div>
             </div>
           </>
@@ -713,26 +694,39 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
       </div>
 
       {/* ── Thumbnail strip + category tabs ── */}
-      <div className="bg-white border-t border-neutral-100">
-        {/* Header row: "Photos" label + category pills + view mode icons */}
-        <div className="flex items-center gap-1.5 px-3 sm:px-4 pt-3 pb-2 overflow-x-auto scrollbar-hide">
-          <span className="text-sm font-bold text-neutral-800 mr-1 flex-shrink-0">
-            {t('property:photos.title', 'Photos')}
-          </span>
+      <div className="bg-white border-t border-neutral-100 px-4 sm:px-5 pt-4 pb-4">
+        {/* Header row: camera icon + "Photos" label + category pills + view mode icons */}
+        <div className="flex items-center gap-2 mb-3 overflow-x-auto scrollbar-hide">
+          {/* Photos label with icon */}
+          <div className="flex items-center gap-1.5 flex-shrink-0 mr-1">
+            <svg className="w-4 h-4 text-neutral-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="9" cy="9" r="2" />
+              <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+            </svg>
+            <span className="text-sm font-bold text-neutral-800">{t('property:photos.title', 'Photos')}</span>
+          </div>
+
           {/* All category pill */}
           <button
             onClick={() => {
               if (viewMode !== 'photos') setViewMode('photos');
               handleCategorySelect('all');
             }}
-            className={`flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+            className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
               activeCategory === 'all' && viewMode === 'photos'
-                ? 'bg-primary text-white'
-                : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                ? 'bg-primary text-white border-primary'
+                : 'bg-neutral-100 text-neutral-600 border-neutral-200 hover:bg-neutral-200'
             }`}
           >
-            {t('property:photos.all', 'All')} <span className="opacity-80">{allImages.length}</span>
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="9" cy="9" r="2" />
+              <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+            </svg>
+            {t('property:photos.all', 'All')} {allImages.length}
           </button>
+
           {/* Per-tag pills */}
           {(Object.keys(categorizedImages) as PropertyImageTag[]).map((tag) => (
             <button
@@ -741,19 +735,23 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 if (viewMode !== 'photos') setViewMode('photos');
                 handleCategorySelect(tag);
               }}
-              className={`flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold capitalize transition-all ${
+              className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold capitalize transition-all border ${
                 activeCategory === tag && viewMode === 'photos'
-                  ? 'bg-primary text-white'
-                  : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-neutral-100 text-neutral-600 border-neutral-200 hover:bg-neutral-200'
               }`}
             >
-              {t(`property:photos.categories.${tag}`, { defaultValue: tag.replace('_', ' ') })}
-              <span className="opacity-80">{categorizedImages[tag]?.length || 0}</span>
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+              </svg>
+              {t(`property:photos.categories.${tag}`, { defaultValue: tag.replace('_', ' ') })} {categorizedImages[tag]?.length || 0}
             </button>
           ))}
+
           {/* Spacer */}
           <div className="flex-1 min-w-[8px]" />
-          {/* Street View icon button */}
+
+          {/* Street View icon */}
           <button
             onClick={() => setViewMode(viewMode === 'streetview' ? 'photos' : 'streetview')}
             className={`flex-shrink-0 p-1.5 rounded-lg transition-colors ${
@@ -767,7 +765,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               <path d="M8 21l4-9 4 9" />
             </svg>
           </button>
-          {/* Video icon button (only if video available) */}
+
+          {/* Video icon (if available) */}
           {hasVideo && (
             <button
               onClick={() => setViewMode(viewMode === 'video' ? 'photos' : 'video')}
@@ -783,9 +782,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           )}
         </div>
 
-        {/* Thumbnail row — only in photos mode */}
+        {/* Thumbnail row — large cards matching screenshot */}
         {viewMode === 'photos' ? (
-          <div className="flex gap-2 px-3 sm:px-4 pb-3 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 sm:-mx-5 px-4 sm:px-5">
             {imagesForCurrentCategory.map((img, index) => (
               <button
                 key={img.url}
@@ -797,14 +796,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     setInternalIndex(index);
                   }
                 }}
-                className={`flex-shrink-0 w-[72px] h-[54px] sm:w-20 sm:h-14 rounded-lg overflow-hidden transition-all border-2 ${
+                className={`flex-shrink-0 w-[170px] h-[120px] sm:w-[190px] sm:h-[132px] rounded-xl overflow-hidden transition-all border-2 ${
                   index === currentImageIndex
-                    ? 'border-primary shadow-md scale-[1.04]'
-                    : 'border-transparent opacity-70 hover:opacity-100 hover:border-neutral-300'
+                    ? 'border-primary shadow-lg'
+                    : 'border-transparent hover:border-neutral-300'
                 }`}
               >
                 <img
-                  src={optimizeCloudinaryUrl(img.url, { width: 160, quality: 'auto', crop: 'fill' })}
+                  src={optimizeCloudinaryUrl(img.url, { width: 380, quality: 'auto', crop: 'fill' })}
                   alt=""
                   className="w-full h-full object-cover"
                   loading="lazy"
@@ -812,17 +811,24 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 />
               </button>
             ))}
+            {/* Scroll hint arrow if many images */}
+            {imagesForCurrentCategory.length > 5 && (
+              <button
+                onClick={handleNextImage}
+                className="flex-shrink-0 w-10 h-[120px] sm:h-[132px] bg-neutral-100 hover:bg-neutral-200 rounded-xl flex items-center justify-center transition-colors"
+              >
+                <ChevronRightIcon className="w-5 h-5 text-neutral-600" />
+              </button>
+            )}
           </div>
         ) : (
-          <div className="px-3 sm:px-4 pb-3">
-            <button
-              onClick={() => setViewMode('photos')}
-              className="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
-            >
-              <ChevronLeftIcon className="w-3 h-3" />
-              {t('property:gallery.backToPhotos', 'Back to Photos')}
-            </button>
-          </div>
+          <button
+            onClick={() => setViewMode('photos')}
+            className="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
+          >
+            <ChevronLeftIcon className="w-3 h-3" />
+            {t('property:gallery.backToPhotos', 'Back to Photos')}
+          </button>
         )}
       </div>
     </div>
