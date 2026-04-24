@@ -402,39 +402,32 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   aria-hidden="true"
                   className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 pointer-events-none select-none"
                 />
-                {/* Sharp image: crossfade wrapper + Ken Burns pan on the image itself */}
+                {/* Sharp image: direction-aware crossfade; object-contain shows full image; blurred LQIP fills bars */}
                 <AnimatePresence initial={false} custom={slideDirection}>
-                  <motion.div
+                  <motion.img
                     key={currentImageUrl}
+                    src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
+                    srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 1200, 1920])}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
+                    alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
+                    width={1200}
+                    height={800}
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
+                    fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
+                    decoding="async"
+                    loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
                     custom={slideDirection}
                     variants={imageSlideVariants}
                     initial="enter"
                     animate="center"
                     exit="exit"
                     transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    className="absolute inset-0 overflow-hidden"
-                  >
-                    <motion.img
-                      src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
-                      srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 1200, 1920])}
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
-                      alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
-                      width={1200}
-                      height={800}
-                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                      // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
-                      fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
-                      decoding="async"
-                      loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
-                      className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
-                      initial={{ scale: 1.08, x: currentImageIndex % 2 === 0 ? '-3%' : '3%' }}
-                      animate={{ scale: 1.08, x: currentImageIndex % 2 === 0 ? '3%' : '-3%' }}
-                      transition={{ duration: 7, ease: 'linear' }}
-                      style={{ willChange: 'transform', transformOrigin: 'center center' }}
-                      draggable={false}
-                      onError={() => setMainImageError(true)}
-                    />
-                  </motion.div>
+                    className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
+                    style={{ willChange: 'transform' }}
+                    draggable={false}
+                    onError={() => setMainImageError(true)}
+                  />
                 </AnimatePresence>
                 {/* Subtle bottom vignette – just enough to make chip/counter readable */}
                 <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-[1]" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.32) 0%, transparent 100%)' }} />
