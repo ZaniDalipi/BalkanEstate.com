@@ -369,7 +369,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   };
 
   return (
-    <div className="overflow-hidden sm:rounded-xl sm:shadow-lg sm:border sm:border-neutral-200">
+    <div className="overflow-hidden lg:rounded-xl lg:shadow-lg lg:border lg:border-neutral-200">
       {/* ── Gallery frame — fixed 16:9, never resizes; object-contain shows full image; blurred LQIP fills bars ── */}
       <div className="relative w-full bg-neutral-900 overflow-hidden" style={{ aspectRatio: '16/9', maxHeight: '90vh' }}>
 

@@ -872,8 +872,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Left Column - Property Details */}
           <div className="lg:col-span-2 space-y-6 sm:space-y-8 lg:space-y-10 min-w-0">
-            {/* Image Gallery — full-bleed on mobile, rounded card on sm+ */}
-            <div className="animate-slide-up -mx-3 sm:mx-0" style={{ animationDelay: '0ms' }}>
+            {/* Image Gallery — full-bleed up to lg, stays in column on lg+ */}
+            <div className="animate-slide-up -mx-3 sm:-mx-4 md:-mx-6 lg:mx-0" style={{ animationDelay: '0ms' }}>
               <PropertyGallery
                 property={property}
                 onOpenEditor={(url) => setIsEditorOpen(true)}
