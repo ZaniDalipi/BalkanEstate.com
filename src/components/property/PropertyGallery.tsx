@@ -97,9 +97,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   }, [onImageIndexChange, controlledIndex, internalIndex]);
 
   const [mainImageError, setMainImageError] = useState(false);
-  const [mainImageLoaded, setMainImageLoaded] = useState(false);
-  const [imageNaturalRatio, setImageNaturalRatio] = useState<number | null>(null);
-  const imageRatiosRef = React.useRef<Record<string, number>>({});
   const [viewMode, setViewMode] = useState<'photos' | 'streetview' | 'video'>('photos');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
@@ -286,13 +283,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   const currentImageUrl = imagesForCurrentCategory[currentImageIndex]?.url || property.imageUrl;
 
-  // Reset error/loaded state when image changes
+  // Reset error state when image changes
   useEffect(() => {
     setMainImageError(false);
-    setMainImageLoaded(false);
-    // Apply cached ratio immediately — avoids the reset-to-null that races with onLoad on preloaded images
-    const cached = imageRatiosRef.current[currentImageUrl];
-    if (cached) setImageNaturalRatio(cached);
   }, [currentImageUrl]);
 
   // Eagerly preload first 4 images when the listing opens so swipes feel instant
@@ -379,10 +372,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   return (
     <div className="overflow-hidden sm:rounded-xl sm:shadow-lg sm:border sm:border-neutral-200">
       {/* ── Gallery frame ── */}
-      <div
-        className="relative w-full bg-neutral-900 overflow-hidden"
-        style={{ aspectRatio: imageNaturalRatio ? String(imageNaturalRatio) : '16/9', maxHeight: '90vh' }}
-      >
+      <div className="relative w-full aspect-video max-h-[90vh] bg-neutral-900 overflow-hidden">
 
         {/* ── PHOTOS ── */}
         {viewMode === 'photos' && (
@@ -390,11 +380,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             onClick={onOpenViewer}
             drag={imagesForCurrentCategory.length > 1 ? 'x' : false}
             dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.18}
+            dragElastic={0.08}
             dragMomentum={false}
             onDragEnd={(_, info) => {
-              if (info.offset.x < -60) handleNextImage();
-              else if (info.offset.x > 60) handlePrevImage();
+              if (info.offset.x < -50) handleNextImage();
+              else if (info.offset.x > 50) handlePrevImage();
             }}
             className="absolute inset-0 focus:outline-none cursor-pointer overflow-hidden"
             style={{ touchAction: 'pan-y' }}
@@ -434,26 +424,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     animate="center"
                     exit="exit"
                     transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
+                    className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+                    style={{ willChange: 'transform' }}
                     draggable={false}
-                    ref={(el: HTMLImageElement | null) => {
-                      // Handle already-cached images that fire load synchronously before effects run
-                      if (el?.complete && el.naturalWidth && el.naturalHeight) {
-                        const ratio = el.naturalWidth / el.naturalHeight;
-                        imageRatiosRef.current[currentImageUrl] = ratio;
-                        setImageNaturalRatio(ratio);
-                        setMainImageLoaded(true);
-                      }
-                    }}
-                    onLoad={(e) => {
-                      const img = e.currentTarget;
-                      if (img.naturalWidth && img.naturalHeight) {
-                        const ratio = img.naturalWidth / img.naturalHeight;
-                        imageRatiosRef.current[currentImageUrl] = ratio;
-                        setImageNaturalRatio(ratio);
-                      }
-                      setMainImageLoaded(true);
-                    }}
                     onError={() => setMainImageError(true)}
                   />
                 </AnimatePresence>
