@@ -386,7 +386,7 @@ const CityRecommendations: React.FC = () => {
                 <div className="p-4">
                   {/* Price Headline Section */}
                   <div className="flex items-stretch gap-3 mb-4">
-                    {/* Avg Price per sqm with toggle */}
+                    {/* Avg Price per sqm — default: Gemini internet market data; toggle: platform listings */}
                     <div className="flex-1 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-3 border border-primary/10">
                       <div className="flex items-center justify-between mb-1">
                         <p className="text-[11px] font-medium text-neutral-500">
@@ -395,9 +395,9 @@ const CityRecommendations: React.FC = () => {
                         {city.listingAvgPricePerSqm && (
                           <button
                             onClick={e => { e.stopPropagation(); setShowListingPrice(prev => ({ ...prev, [city._id]: !prev[city._id] })); }}
-                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border transition-colors ${showListingPrice[city._id] ? 'bg-blue-100 text-blue-700 border-blue-200' : 'bg-white/70 text-neutral-500 border-neutral-200 hover:bg-white'}`}
+                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border transition-colors ${showListingPrice[city._id] ? 'bg-white/70 text-neutral-500 border-neutral-200 hover:bg-white' : 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200'}`}
                           >
-                            {showListingPrice[city._id] ? 'Market' : 'Listings'}
+                            {showListingPrice[city._id] ? 'Market' : 'Our Listings'}
                           </button>
                         )}
                       </div>
