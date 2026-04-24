@@ -97,8 +97,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   }, [onImageIndexChange, controlledIndex, internalIndex]);
 
   const [mainImageError, setMainImageError] = useState(false);
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const imageRatiosRef = React.useRef<Record<string, number>>({});
   const [viewMode, setViewMode] = useState<'photos' | 'streetview' | 'video'>('photos');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
@@ -285,13 +283,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   const currentImageUrl = imagesForCurrentCategory[currentImageIndex]?.url || property.imageUrl;
 
-  // Reset error state and apply cached ratio immediately (no React re-render)
   useEffect(() => {
     setMainImageError(false);
-    const cached = imageRatiosRef.current[currentImageUrl];
-    if (cached && containerRef.current) {
-      containerRef.current.style.aspectRatio = String(cached);
-    }
   }, [currentImageUrl]);
 
   // Eagerly preload first 4 images when the listing opens so swipes feel instant
@@ -377,12 +370,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   return (
     <div className="overflow-hidden sm:rounded-xl sm:shadow-lg sm:border sm:border-neutral-200">
-      {/* ── Gallery frame — height driven by each image's natural ratio, updated via direct DOM write (no React re-render) ── */}
-      <div
-        ref={containerRef}
-        className="relative w-full bg-neutral-900 overflow-hidden"
-        style={{ aspectRatio: '16/9', maxHeight: '90vh' }}
-      >
+      {/* ── Gallery frame — fixed 16:9, never resizes; object-contain shows full image; blurred LQIP fills bars ── */}
+      <div className="relative w-full bg-neutral-900 overflow-hidden" style={{ aspectRatio: '16/9', maxHeight: '90vh' }}>
 
         {/* ── PHOTOS ── */}
         {viewMode === 'photos' && (
@@ -437,21 +426,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
                     style={{ willChange: 'transform' }}
                     draggable={false}
-                    ref={(el: HTMLImageElement | null) => {
-                      if (el?.complete && el.naturalWidth && el.naturalHeight) {
-                        const ratio = el.naturalWidth / el.naturalHeight;
-                        imageRatiosRef.current[currentImageUrl] = ratio;
-                        if (containerRef.current) containerRef.current.style.aspectRatio = String(ratio);
-                      }
-                    }}
-                    onLoad={(e) => {
-                      const img = e.currentTarget;
-                      if (img.naturalWidth && img.naturalHeight) {
-                        const ratio = img.naturalWidth / img.naturalHeight;
-                        imageRatiosRef.current[currentImageUrl] = ratio;
-                        if (containerRef.current) containerRef.current.style.aspectRatio = String(ratio);
-                      }
-                    }}
                     onError={() => setMainImageError(true)}
                   />
                 </AnimatePresence>
