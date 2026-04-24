@@ -393,12 +393,20 @@ const CityRecommendations: React.FC = () => {
                           {showListingPrice[city._id] ? t('cityCard.listingAvgPricePerSqm') : t('cityCard.avgPricePerSqm')}
                         </p>
                         {city.listingAvgPricePerSqm && (
-                          <button
-                            onClick={e => { e.stopPropagation(); setShowListingPrice(prev => ({ ...prev, [city._id]: !prev[city._id] })); }}
-                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border transition-colors ${showListingPrice[city._id] ? 'bg-white/70 text-neutral-500 border-neutral-200 hover:bg-white' : 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200'}`}
-                          >
-                            {showListingPrice[city._id] ? 'Market' : 'Our Listings'}
-                          </button>
+                          <div className="flex gap-0.5 bg-neutral-100 rounded-full p-0.5">
+                            <button
+                              onClick={e => { e.stopPropagation(); setShowListingPrice(prev => ({ ...prev, [city._id]: false })); }}
+                              className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${!showListingPrice[city._id] ? 'bg-white text-primary shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
+                            >
+                              Market
+                            </button>
+                            <button
+                              onClick={e => { e.stopPropagation(); setShowListingPrice(prev => ({ ...prev, [city._id]: true })); }}
+                              className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${showListingPrice[city._id] ? 'bg-white text-blue-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
+                            >
+                              Listings
+                            </button>
+                          </div>
                         )}
                       </div>
                       <div className="flex items-baseline gap-1">

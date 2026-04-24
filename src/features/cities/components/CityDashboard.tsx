@@ -68,6 +68,7 @@ const CityDashboard: React.FC = () => {
   const { dispatch, updateSearchPageState } = useAppContext();
 
   const [params, setParams] = useState(parseCityFromUrl);
+  const [showListingPrice, setShowListingPrice] = useState(false);
 
   // Re-parse URL when navigating between cities (popstate or pushState)
   useEffect(() => {
@@ -383,25 +384,38 @@ const CityDashboard: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-8">
           {/* Avg Price/m² */}
           <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-4 sm:p-5">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                <HomeIcon className="w-4 h-4 text-primary" />
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <HomeIcon className="w-4 h-4 text-primary" />
+                </div>
+                <span className="text-xs font-medium text-neutral-500">
+                  {showListingPrice ? t('cityCard.listingAvgPricePerSqm') : t('cityCard.avgPricePerSqm')}
+                </span>
               </div>
-              <span className="text-xs font-medium text-neutral-500">{t('cityCard.avgPricePerSqm')}</span>
+              {city.listingAvgPricePerSqm && (
+                <div className="flex gap-0.5 bg-neutral-100 rounded-full p-0.5">
+                  <button
+                    onClick={() => setShowListingPrice(false)}
+                    className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${!showListingPrice ? 'bg-white text-primary shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
+                  >
+                    Market
+                  </button>
+                  <button
+                    onClick={() => setShowListingPrice(true)}
+                    className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${showListingPrice ? 'bg-white text-blue-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
+                  >
+                    Listings
+                  </button>
+                </div>
+              )}
             </div>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl sm:text-3xl font-black text-neutral-900">€{avgPrice.toLocaleString()}</span>
+              <span className="text-2xl sm:text-3xl font-black text-neutral-900">
+                €{(showListingPrice && city.listingAvgPricePerSqm ? city.listingAvgPricePerSqm : avgPrice).toLocaleString()}
+              </span>
               <span className="text-sm text-neutral-400">/m²</span>
             </div>
-            {city.listingAvgPricePerSqm && (
-              <div className="mt-2 pt-2 border-t border-neutral-100">
-                <span className="text-xs text-neutral-500">{t('cityCard.listingAvgPricePerSqm')}</span>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-lg font-bold text-blue-600">€{city.listingAvgPricePerSqm.toLocaleString()}</span>
-                  <span className="text-xs text-neutral-400">/m²</span>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Median Price */}
