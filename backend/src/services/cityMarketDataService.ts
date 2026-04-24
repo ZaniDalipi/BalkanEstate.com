@@ -256,7 +256,7 @@ async function fetchCityDataFromGemini(cities: Array<{ city: string; country: st
 
   const citiesList = cities.map(c => `${c.city}, ${c.country}`).join('; ');
 
-  const prompt = `You are a real estate market analyst. Provide current 2025 real estate market data for these Balkan cities: ${citiesList}
+  const prompt = `You are a real estate market analyst. Provide current 2025 real estate SALE market data for these Balkan cities: ${citiesList}
 
 For each city, provide realistic market data based on general economic trends, tourism, and typical Balkan real estate patterns. Return ONLY valid JSON array format with this structure:
 
@@ -265,8 +265,8 @@ For each city, provide realistic market data based on general economic trends, t
     "city": "City Name",
     "country": "Country Name",
     "countryCode": "XX",
-    "avgPricePerSqm": <number in EUR>,
-    "medianPrice": <number in EUR for 70sqm apartment>,
+    "avgPricePerSqm": <number in EUR, for-sale properties only — NOT rental prices>,
+    "medianPrice": <number in EUR for 70sqm apartment, for sale>,
     "priceGrowthYoY": <percentage, can be negative>,
     "averageDaysOnMarket": <number of days>,
     "demandScore": <0-100, higher = more demand>,
@@ -278,10 +278,17 @@ For each city, provide realistic market data based on general economic trends, t
   }
 ]
 
-Guidelines:
-- Capital cities typically have higher prices (€1500-2500/sqm)
-- Coastal/tourist cities have good rental yields (5-8%)
-- Smaller cities have lower prices (€800-1500/sqm)
+Guidelines for avgPricePerSqm (for-sale prices only, NOT rental):
+- Albania (Tirana): €800-1,400/sqm; coastal (Sarande, Vlore): €700-1,200/sqm
+- Serbia (Belgrade): €1,500-2,500/sqm; smaller Serbian cities: €600-1,200/sqm
+- Montenegro coastal (Budva, Kotor): €2,000-4,000/sqm; Podgorica: €1,000-1,800/sqm
+- Croatia coastal (Split, Dubrovnik area): €3,000-5,000/sqm; Zagreb: €2,000-3,500/sqm
+- Bosnia (Sarajevo): €1,200-2,000/sqm; smaller cities: €600-1,200/sqm
+- North Macedonia (Skopje): €1,000-1,800/sqm; smaller cities: €500-900/sqm
+- Bulgaria (Sofia): €1,200-2,000/sqm; coastal: €800-1,500/sqm
+- Romania (Bucharest): €1,500-2,500/sqm; other cities: €800-1,500/sqm
+- Kosovo (Pristina): €700-1,200/sqm
+- Greece: coastal/islands €2,000-5,000/sqm; mainland cities €1,000-2,000/sqm
 - Rising markets have 8-15% YoY growth
 - Stable markets have 2-7% YoY growth
 - Declining markets have -3% to 2% growth
@@ -326,6 +333,7 @@ async function calculateMarketDataFromProperties(city: string, country: string):
       city,
       country,
       status: 'active',
+      listingType: 'sale',
     });
 
     const soldProperties = await Property.find({
@@ -388,7 +396,7 @@ async function getLiveCityStats(city: string, country: string): Promise<{
     const countryRegex = { $regex: new RegExp(`^${escapeRegex(country)}$`, 'i') };
 
     const [activeProperties, soldLastMonth] = await Promise.all([
-      Property.find({ city: cityRegex, country: countryRegex, status: 'active' }, { price: 1, sqft: 1 }).lean(),
+      Property.find({ city: cityRegex, country: countryRegex, status: 'active', listingType: 'sale' }, { price: 1, sqft: 1 }).lean(),
       Property.countDocuments({ city: cityRegex, country: countryRegex, status: 'sold', updatedAt: { $gte: thirtyDaysAgo } }),
     ]);
 
