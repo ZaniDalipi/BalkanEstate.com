@@ -23,7 +23,6 @@ import {
   PropertyGallery,
   PropertyInfo,
   PropertyContact,
-  PropertyPhotos,
   PropertyMapLink,
   NeighborhoodInsights,
   SocialVideoEmbed,
@@ -883,17 +882,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                 currentImageIndex={currentImageIndex}
                 onCategoryChange={handleCategorySelect}
                 onImageIndexChange={setCurrentImageIndex}
-              />
-            </div>
-
-            {/* Photo Thumbnails - Under gallery with spacing */}
-            <div className="animate-slide-up mt-4 sm:mt-6" style={{ animationDelay: '50ms' }}>
-              <PropertyPhotos
-                property={property}
-                activeCategory={activeCategory}
-                currentImageIndex={currentImageIndex}
-                onCategorySelect={handleCategorySelect}
-                onImageSelect={handleImageSelect}
+                isFavorited={isFavorited}
+                onFavoriteClick={handleFavoriteClick}
               />
             </div>
 

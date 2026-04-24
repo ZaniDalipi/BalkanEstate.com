@@ -11,7 +11,6 @@ import {
   PencilIcon,
   BuildingOfficeIcon,
 } from '../../../constants';
-import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
 
 interface PropertyGalleryProps {
@@ -24,6 +23,8 @@ interface PropertyGalleryProps {
   currentImageIndex?: number;
   onCategoryChange?: (category: PropertyImageTag | 'all') => void;
   onImageIndexChange?: (index: number) => void;
+  isFavorited?: boolean;
+  onFavoriteClick?: () => void;
 }
 
 /**
@@ -62,6 +63,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   currentImageIndex: controlledIndex,
   onCategoryChange,
   onImageIndexChange,
+  isFavorited = false,
+  onFavoriteClick,
 }) => {
   const { t } = useTranslation(['property']);
 
@@ -350,24 +353,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
   }, [currentImageIndex, onImageIndexChange]);
 
-  // Get category label for display
-  const getCategoryEmoji = (category: PropertyImageTag | 'all'): string => {
-    const emojiMap: Record<string, string> = {
-      all: '📷',
-      exterior: '🏠',
-      interior: '🛋️',
-      bedroom: '🛏️',
-      bathroom: '🚿',
-      kitchen: '🍳',
-      living_room: '🛋️',
-      garden: '🌳',
-      pool: '🏊',
-      view: '🌅',
-      other: '📸',
-    };
-    return emojiMap[category] || '📷';
-  };
-
   return (
     <div className="overflow-hidden lg:rounded-xl lg:shadow-lg lg:border lg:border-neutral-200">
       {/* ── Gallery frame — fixed 16:9, never resizes; object-contain shows full image; blurred LQIP fills bars ── */}
@@ -592,16 +577,36 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               </button>
             )}
 
-            {/* Edit button – top-right */}
-            <motion.button
-              onClick={(e) => { e.stopPropagation(); onOpenEditor(currentImageUrl); }}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.92 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="absolute top-3 right-3 z-10 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
-            >
-              <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800" />
-            </motion.button>
+            {/* Top-right: Favorite + Edit buttons */}
+            <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+              {onFavoriteClick && (
+                <motion.button
+                  onClick={(e) => { e.stopPropagation(); onFavoriteClick(); }}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.92 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
+                  aria-label={isFavorited ? t('property:actions.removeFavorite', 'Remove from favorites') : t('property:actions.addFavorite', 'Add to favorites')}
+                >
+                  <svg
+                    className={`w-5 h-5 transition-colors ${isFavorited ? 'text-red-500 fill-current' : 'text-neutral-700'}`}
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                </motion.button>
+              )}
+              <motion.button
+                onClick={(e) => { e.stopPropagation(); onOpenEditor(currentImageUrl); }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.92 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
+              >
+                <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800" />
+              </motion.button>
+            </div>
 
             {/* Nav arrows – center sides */}
             {imagesForCurrentCategory.length > 1 && (
@@ -629,179 +634,196 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               </>
             )}
 
-            {/* Bottom-right: image counter + property chip — no overlap with anything */}
-            <div className="absolute bottom-4 right-3 z-10 flex items-center gap-2">
-              {imagesForCurrentCategory.length > 1 && (
-                <div className="bg-black/55 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-full" role="status" aria-live="polite">
-                  {currentImageIndex + 1} / {imagesForCurrentCategory.length}
+            {/* Property info overlay — gradient at bottom with title, location, specs, price */}
+            <div
+              className="absolute bottom-0 left-0 right-0 z-[2] pointer-events-none"
+              style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.6) 35%, rgba(0,0,0,0.1) 65%, transparent 85%)' }}
+            >
+              <div className="px-4 sm:px-5 pt-16 sm:pt-20 pb-3 sm:pb-4">
+                {/* Title */}
+                {(property.title || property.address) && (
+                  <h2 className="text-white font-bold text-base sm:text-xl lg:text-2xl leading-tight drop-shadow mb-1 line-clamp-2">
+                    {property.title || property.address}
+                  </h2>
+                )}
+                {/* Location */}
+                {(property.city || property.country) && (
+                  <div className="flex items-center gap-1 text-white/80 text-xs sm:text-sm mb-2.5">
+                    <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                    </svg>
+                    <span>{[property.city, property.country].filter(Boolean).join(', ')}</span>
+                  </div>
+                )}
+                {/* Specs + Price row */}
+                <div className="flex items-end justify-between gap-2 flex-wrap">
+                  {/* Specs chips */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {property.propertyType && (
+                      <span className="bg-white/20 backdrop-blur-sm text-white text-[11px] sm:text-xs font-semibold px-2 py-0.5 rounded-full capitalize">
+                        {t(`property:propertyTypes.${property.propertyType}`, property.propertyType)}
+                      </span>
+                    )}
+                    {property.beds ? (
+                      <span className="text-white/90 text-[11px] sm:text-xs font-medium flex items-center gap-1">
+                        <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 12v7h18v-7M3 12V8a1 1 0 011-1h16a1 1 0 011 1v4M3 12h18" />
+                        </svg>
+                        {property.beds} {t('property:specs.beds', 'Beds')}
+                      </span>
+                    ) : null}
+                    {property.baths ? (
+                      <span className="text-white/90 text-[11px] sm:text-xs font-medium flex items-center gap-1">
+                        <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 12h16M4 12V7a2 2 0 012-2h12a2 2 0 012 2v5M4 12v6a2 2 0 002 2h12a2 2 0 002-2v-6" />
+                        </svg>
+                        {property.baths} {t('property:specs.baths', 'Baths')}
+                      </span>
+                    ) : null}
+                    {property.sqft ? (
+                      <span className="text-white/90 text-[11px] sm:text-xs font-medium">{property.sqft} m²</span>
+                    ) : null}
+                  </div>
+                  {/* Price + listing type + counter */}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {property.price ? (
+                      <>
+                        <span className="text-white font-bold text-sm sm:text-lg drop-shadow">
+                          €{property.price.toLocaleString()}{property.listingType === 'rent' ? t('property:seo.perMonth', '/mo') : ''}
+                        </span>
+                        <span className={`text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                          property.listingType === 'rent' ? 'bg-blue-500/90 text-white' : 'bg-emerald-500/90 text-white'
+                        }`}>
+                          {property.listingType === 'rent' ? t('property:gallery.forRent', 'For Rent') : t('property:gallery.forSale', 'For Sale')}
+                        </span>
+                      </>
+                    ) : null}
+                    {imagesForCurrentCategory.length > 1 && (
+                      <span className="bg-black/50 backdrop-blur-sm text-white text-[10px] sm:text-xs font-medium px-2 py-0.5 rounded-full" role="status" aria-live="polite">
+                        {currentImageIndex + 1}/{imagesForCurrentCategory.length}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              )}
-              {property.propertyType && (
-                <div className="bg-black/40 backdrop-blur-sm border border-white/20 text-white text-[11px] sm:text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5">
-                  {property.propertyType === 'apartment' && <svg className="w-3 h-3 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" /></svg>}
-                  {property.propertyType === 'house' && <svg className="w-3 h-3 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>}
-                  {property.propertyType === 'villa' && <svg className="w-3 h-3 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3L2 12h3v8h6v-5h2v5h6v-8h3L12 3z" /></svg>}
-                  {property.propertyType === 'land' && <svg className="w-3 h-3 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" /></svg>}
-                  {!['apartment', 'house', 'villa', 'land'].includes(property.propertyType) && <BuildingOfficeIcon className="w-3 h-3 text-white/90" />}
-                  <span className="capitalize">{t(`property:propertyTypes.${property.propertyType}`, property.propertyType)}</span>
-                  <span className="w-px h-2.5 bg-white/40" />
-                  <span className={property.listingType === 'rent' ? 'text-blue-300' : 'text-emerald-300'}>
-                    {property.listingType === 'rent' ? t('property:gallery.forRent', 'Rent') : t('property:gallery.forSale', 'Sale')}
-                  </span>
-                </div>
-              )}
+              </div>
             </div>
-
-            {/* Floor widget – desktop only, bottom-left (no mobile clutter) */}
-            {property.propertyType === 'apartment' && property.floorNumber && property.totalFloors && property.totalFloors > 1 && (
-              <div className="hidden sm:block absolute bottom-4 left-3 z-10 animate-fade-in">
-                <div className="bg-slate-900/85 backdrop-blur-sm rounded-xl shadow-lg border border-slate-700/50 overflow-hidden w-[60px]">
-                  <div className="relative px-2.5 pt-2.5 pb-1">
-                    <div className="mx-auto w-0 h-0 border-l-[16px] border-r-[16px] border-b-[7px] border-l-transparent border-r-transparent border-b-slate-600 mb-px" />
-                    <div className="relative mx-auto w-8 rounded-b-sm overflow-hidden border border-slate-600/80 bg-slate-800/60" style={{ height: `${Math.min(Math.max(property.totalFloors * 7, 35), 80)}px` }}>
-                      {Array.from({ length: property.totalFloors }).map((_, i) => {
-                        const floor = property.totalFloors! - i;
-                        const isHighlighted = floor === property.floorNumber;
-                        return (
-                          <div
-                            key={floor}
-                            className="absolute left-0 right-0 border-b border-slate-700/40"
-                            style={{
-                              height: `${100 / property.totalFloors!}%`,
-                              top: `${(i / property.totalFloors!) * 100}%`,
-                              background: isHighlighted ? 'linear-gradient(90deg,rgba(34,197,94,0.9),rgba(22,163,74,0.9))' : 'transparent',
-                              boxShadow: isHighlighted ? '0 0 6px rgba(34,197,94,0.5)' : 'none',
-                            }}
-                          >
-                            {isHighlighted && <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-green-400/20 to-emerald-400/20" />}
-                          </div>
-                        );
-                      })}
-                      {property.totalFloors <= 12 && Array.from({ length: property.totalFloors }).map((_, i) => {
-                        const floor = property.totalFloors! - i;
-                        if (floor === property.floorNumber) return null;
-                        return (
-                          <div key={`w-${floor}`} className="absolute left-1/2 -translate-x-1/2 flex gap-0.5" style={{ top: `${((i + 0.35) / property.totalFloors!) * 100}%` }}>
-                            <div className="w-1 h-0.5 bg-slate-600/60 rounded-[0.5px]" />
-                            <div className="w-1 h-0.5 bg-slate-600/60 rounded-[0.5px]" />
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <div className="w-10 h-0.5 mx-auto bg-slate-600 rounded-b" />
-                  </div>
-                  <div className="px-1 py-1 text-center border-t border-slate-700/50">
-                    <div className="text-xs font-bold text-green-400 leading-none">{property.floorNumber}/{property.totalFloors}</div>
-                    <div className="text-[8px] text-slate-400 leading-tight mt-0.5">{t('property:gallery.floor', 'floor')}</div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Progress bar – Zillow-style thin indicator at very bottom of frame */}
-            {imagesForCurrentCategory.length > 1 && (
-              <div
-                className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/20 z-10 cursor-pointer"
-                onClick={(e) => {
-                  const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-                  const pct = (e.clientX - rect.left) / rect.width;
-                  handleDotNav(Math.min(Math.floor(pct * imagesForCurrentCategory.length), imagesForCurrentCategory.length - 1));
-                }}
-              >
-                <motion.div
-                  className="h-full bg-white/80"
-                  animate={{ width: `${((currentImageIndex + 1) / imagesForCurrentCategory.length) * 100}%` }}
-                  transition={{ duration: 0.25, ease: 'easeOut' }}
-                />
-              </div>
-            )}
           </>
         )}
 
       </div>
 
-      {/* ── View Mode Toggle – below gallery frame, zero overlap ── */}
-      <div className="flex justify-center px-4 py-2.5 sm:py-3 bg-white border-t border-neutral-200">
-        <div className="sm:hidden">
-          <LiquidGlassSwitch
-            options={[
-              ...(hasVideo ? [{
-                value: 'video',
-                label: t('actions.video', 'Video'),
-                icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="5 3 19 12 5 21 5 3" />
-                  </svg>
-                ),
-              }] : []),
-              {
-                value: 'photos',
-                label: t('actions.photos'),
-                icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="9" cy="9" r="2" />
-                    <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
-                  </svg>
-                ),
-              },
-              {
-                value: 'streetview',
-                label: t('actions.streetView'),
-                icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="5" r="3" />
-                    <path d="M12 8v4" />
-                    <path d="M8 21l4-9 4 9" />
-                  </svg>
-                ),
-              },
-            ]}
-            value={viewMode}
-            onChange={handleViewModeChange}
-            size="sm"
-          />
+      {/* ── Thumbnail strip + category tabs ── */}
+      <div className="bg-white border-t border-neutral-100">
+        {/* Header row: "Photos" label + category pills + view mode icons */}
+        <div className="flex items-center gap-1.5 px-3 sm:px-4 pt-3 pb-2 overflow-x-auto scrollbar-hide">
+          <span className="text-sm font-bold text-neutral-800 mr-1 flex-shrink-0">
+            {t('property:photos.title', 'Photos')}
+          </span>
+          {/* All category pill */}
+          <button
+            onClick={() => {
+              if (viewMode !== 'photos') setViewMode('photos');
+              handleCategorySelect('all');
+            }}
+            className={`flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+              activeCategory === 'all' && viewMode === 'photos'
+                ? 'bg-primary text-white'
+                : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+            }`}
+          >
+            {t('property:photos.all', 'All')} <span className="opacity-80">{allImages.length}</span>
+          </button>
+          {/* Per-tag pills */}
+          {(Object.keys(categorizedImages) as PropertyImageTag[]).map((tag) => (
+            <button
+              key={tag}
+              onClick={() => {
+                if (viewMode !== 'photos') setViewMode('photos');
+                handleCategorySelect(tag);
+              }}
+              className={`flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold capitalize transition-all ${
+                activeCategory === tag && viewMode === 'photos'
+                  ? 'bg-primary text-white'
+                  : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+              }`}
+            >
+              {t(`property:photos.categories.${tag}`, { defaultValue: tag.replace('_', ' ') })}
+              <span className="opacity-80">{categorizedImages[tag]?.length || 0}</span>
+            </button>
+          ))}
+          {/* Spacer */}
+          <div className="flex-1 min-w-[8px]" />
+          {/* Street View icon button */}
+          <button
+            onClick={() => setViewMode(viewMode === 'streetview' ? 'photos' : 'streetview')}
+            className={`flex-shrink-0 p-1.5 rounded-lg transition-colors ${
+              viewMode === 'streetview' ? 'bg-primary text-white' : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
+            }`}
+            title={t('actions.streetView', 'Street View')}
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="5" r="3" />
+              <path d="M12 8v4" />
+              <path d="M8 21l4-9 4 9" />
+            </svg>
+          </button>
+          {/* Video icon button (only if video available) */}
+          {hasVideo && (
+            <button
+              onClick={() => setViewMode(viewMode === 'video' ? 'photos' : 'video')}
+              className={`flex-shrink-0 p-1.5 rounded-lg transition-colors ${
+                viewMode === 'video' ? 'bg-primary text-white' : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
+              }`}
+              title={t('actions.video', 'Video')}
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+            </button>
+          )}
         </div>
-        <div className="hidden sm:block">
-          <LiquidGlassSwitch
-            options={[
-              ...(hasVideo ? [{
-                value: 'video',
-                label: t('actions.video', 'Video'),
-                icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="5 3 19 12 5 21 5 3" />
-                  </svg>
-                ),
-              }] : []),
-              {
-                value: 'photos',
-                label: t('actions.photos'),
-                icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="9" cy="9" r="2" />
-                    <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
-                  </svg>
-                ),
-              },
-              {
-                value: 'streetview',
-                label: t('actions.streetView'),
-                icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="5" r="3" />
-                    <path d="M12 8v4" />
-                    <path d="M8 21l4-9 4 9" />
-                  </svg>
-                ),
-              },
-            ]}
-            value={viewMode}
-            onChange={handleViewModeChange}
-            size="md"
-          />
-        </div>
+
+        {/* Thumbnail row — only in photos mode */}
+        {viewMode === 'photos' ? (
+          <div className="flex gap-2 px-3 sm:px-4 pb-3 overflow-x-auto scrollbar-hide">
+            {imagesForCurrentCategory.map((img, index) => (
+              <button
+                key={img.url}
+                onClick={() => {
+                  setSlideDirection(index > currentImageIndex ? 1 : -1);
+                  if (onImageIndexChange) {
+                    onImageIndexChange(index);
+                  } else {
+                    setInternalIndex(index);
+                  }
+                }}
+                className={`flex-shrink-0 w-[72px] h-[54px] sm:w-20 sm:h-14 rounded-lg overflow-hidden transition-all border-2 ${
+                  index === currentImageIndex
+                    ? 'border-primary shadow-md scale-[1.04]'
+                    : 'border-transparent opacity-70 hover:opacity-100 hover:border-neutral-300'
+                }`}
+              >
+                <img
+                  src={optimizeCloudinaryUrl(img.url, { width: 160, quality: 'auto', crop: 'fill' })}
+                  alt=""
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="px-3 sm:px-4 pb-3">
+            <button
+              onClick={() => setViewMode('photos')}
+              className="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
+            >
+              <ChevronLeftIcon className="w-3 h-3" />
+              {t('property:gallery.backToPhotos', 'Back to Photos')}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
