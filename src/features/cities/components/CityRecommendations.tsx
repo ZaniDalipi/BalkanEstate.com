@@ -386,12 +386,9 @@ const CityRecommendations: React.FC = () => {
                 <div className="p-4">
                   {/* Price Headline Section */}
                   <div className="flex items-stretch gap-3 mb-4">
-                    {/* Avg Price per sqm — default: Gemini internet market data; toggle: platform listings */}
                     <div className="flex-1 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-3 border border-primary/10">
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-[11px] font-medium text-neutral-500">
-                          {showListingPrice[city._id] ? t('cityCard.listingAvgPricePerSqm') : t('cityCard.avgPricePerSqm')}
-                        </p>
+                        <p className="text-[11px] font-medium text-neutral-500">Avg. Price /m²</p>
                         {city.listingAvgPricePerSqm && (
                           <div className="flex gap-0.5 bg-neutral-100 rounded-full p-0.5">
                             <button
@@ -415,6 +412,9 @@ const CityRecommendations: React.FC = () => {
                         </span>
                         <span className="text-xs font-medium text-neutral-400">/m²</span>
                       </div>
+                      <p className="text-[10px] text-neutral-400 mt-1">
+                        {showListingPrice[city._id] ? `${city.listingsCount} active listings` : 'Market research'}
+                      </p>
                     </div>
                     {/* Typical Property Price */}
                     <div className="flex-1 bg-neutral-50 rounded-xl p-3 border border-neutral-100">

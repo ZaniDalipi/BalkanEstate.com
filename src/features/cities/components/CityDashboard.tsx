@@ -389,9 +389,7 @@ const CityDashboard: React.FC = () => {
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                   <HomeIcon className="w-4 h-4 text-primary" />
                 </div>
-                <span className="text-xs font-medium text-neutral-500">
-                  {showListingPrice ? t('cityCard.listingAvgPricePerSqm') : t('cityCard.avgPricePerSqm')}
-                </span>
+                <span className="text-xs font-medium text-neutral-500">Avg. Price /m²</span>
               </div>
               {city.listingAvgPricePerSqm && (
                 <div className="flex gap-0.5 bg-neutral-100 rounded-full p-0.5">
@@ -416,6 +414,9 @@ const CityDashboard: React.FC = () => {
               </span>
               <span className="text-sm text-neutral-400">/m²</span>
             </div>
+            <p className="text-[10px] text-neutral-400 mt-1">
+              {showListingPrice ? `${city.listingsCount} active listings` : 'Market research'}
+            </p>
           </div>
 
           {/* Median Price */}
