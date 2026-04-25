@@ -932,9 +932,9 @@ export const requestMoreListings = async (req: Request, res: Response): Promise<
       return;
     }
 
-    const emailServiceInstance = await import('../services/emailService');
+    const { sendListingRequestEmail } = await import('../services/emailService');
 
-    await emailServiceInstance.default.sendListingRequestEmail({
+    await sendListingRequestEmail({
       userEmail: user.email,
       userName: user.name,
       userRole: user.role,
@@ -948,7 +948,8 @@ export const requestMoreListings = async (req: Request, res: Response): Promise<
       message: 'Your request has been sent to our team. We will review it shortly.'
     });
   } catch (error: any) {
-    subscriptionLogger.error('Error requesting more listings:', error);
+    subscriptionLogger.error('Error requesting more listings:', error.message || error);
+    subscriptionLogger.error('Stack:', error.stack);
     res.status(500).json({ message: 'Failed to send request' });
   }
 };
