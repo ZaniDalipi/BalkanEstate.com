@@ -135,10 +135,10 @@ export type EmailCategory = 'noreply' | 'alerts' | 'support' | 'inquiries';
 
 // Default "from" addresses for each category
 const DEFAULT_EMAIL_ADDRESSES: Record<EmailCategory, string> = {
-  noreply: 'BalkanEstateᴬᴵ <noreply@balkanestateai.com>',
-  alerts: 'BalkanEstateᴬᴵ Alerts <alerts@balkanestateai.com>',
-  support: 'BalkanEstateᴬᴵ Support <support@balkanestateai.com>',
-  inquiries: 'BalkanEstateᴬᴵ <inquiries@balkanestateai.com>',
+  noreply: 'BalkanEstateAI <noreply@balkanestateai.com>',
+  alerts: 'BalkanEstateAI Alerts <alerts@balkanestateai.com>',
+  support: 'BalkanEstateAI Support <support@balkanestateai.com>',
+  inquiries: 'BalkanEstateAI <inquiries@balkanestateai.com>',
 };
 
 // Minimum gap between consecutive email sends (ms). Default 5 minutes.
