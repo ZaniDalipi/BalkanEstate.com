@@ -69,6 +69,15 @@ const imageSlideVariants = {
   }),
 };
 
+// Ken Burns pan directions — each image gets a unique slow pan starting from the
+// opposite corner so the motion feels intentional and cinematic (like a real camera pan).
+const KB_DIRECTIONS = [
+  { initial: { x: '2%',  y: '1%'  }, animate: { x: '-2%', y: '-1%' } }, // TR → BL
+  { initial: { x: '-2%', y: '-1%' }, animate: { x: '2%',  y: '1%'  } }, // BL → TR
+  { initial: { x: '2%',  y: '-1%' }, animate: { x: '-2%', y: '1%'  } }, // BR → TL
+  { initial: { x: '-2%', y: '1%'  }, animate: { x: '2%',  y: '-1%' } }, // TL → TR
+] as const;
+
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   property,
   onOpenEditor,
@@ -395,60 +404,65 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               </div>
             ) : (
               <>
-                {/* LQIP blurred background — loading placeholder only */}
+                {/* LQIP blurred background — fills letterbox bars on desktop object-contain */}
                 <img
                   src={getPropertyImagePlaceholder(currentImageUrl) || optimizeCloudinaryUrl(currentImageUrl, { width: 40, quality: 'auto:eco' })}
                   alt=""
                   aria-hidden="true"
                   className="absolute inset-0 w-full h-full object-cover blur-3xl scale-110 pointer-events-none select-none"
                 />
-                {/* Ken Burns wrapper — slow pan/zoom on the visible image */}
-                <motion.div
-                  key={`kb-${currentImageUrl}`}
-                  className="absolute inset-0"
-                  initial={{
-                    scale: 1.0,
-                    x: currentImageIndex % 2 === 0 ? '0%' : '0%',
-                    y: '0%',
-                  }}
-                  animate={{
-                    scale: 1.07,
-                    x: currentImageIndex % 2 === 0 ? '-2%' : '2%',
-                    y: currentImageIndex % 3 === 0 ? '-1%' : '1%',
-                  }}
-                  transition={{ duration: 25, ease: 'linear' }}
-                  style={{ willChange: 'transform' }}
-                >
-                  <AnimatePresence initial={false} custom={slideDirection}>
-                    <motion.img
-                      key={currentImageUrl}
-                      src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
-                      srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 1200, 1920])}
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 1200px"
-                      alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
-                      width={1200}
-                      height={800}
-                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                      // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
-                      fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
-                      decoding="async"
-                      loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
-                      custom={slideDirection}
-                      variants={imageSlideVariants}
-                      initial="enter"
-                      animate="center"
-                      exit="exit"
-                      transition={{
-                        opacity: { duration: 0.35, ease: 'easeOut' },
-                        x: { type: 'spring', stiffness: 260, damping: 26 },
-                        scale: { type: 'spring', stiffness: 300, damping: 28 },
+
+                {/* AnimatePresence at the outer level so exit animations complete before unmount */}
+                <AnimatePresence initial={false} custom={slideDirection}>
+                  <motion.div
+                    key={currentImageUrl}
+                    className="absolute inset-0"
+                    custom={slideDirection}
+                    variants={imageSlideVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{
+                      opacity: { duration: 0.35, ease: 'easeOut' },
+                      x: { type: 'spring', stiffness: 260, damping: 26 },
+                      scale: { type: 'spring', stiffness: 300, damping: 28 },
+                    }}
+                  >
+                    {/* Ken Burns slow pan — unique direction per image, starts from opposite corner */}
+                    <motion.div
+                      className="absolute inset-0 overflow-hidden"
+                      initial={{
+                        scale: 1.0,
+                        x: KB_DIRECTIONS[currentImageIndex % KB_DIRECTIONS.length].initial.x,
+                        y: KB_DIRECTIONS[currentImageIndex % KB_DIRECTIONS.length].initial.y,
                       }}
-                      className="absolute inset-0 w-full h-full object-cover sm:object-contain pointer-events-none select-none"
-                      draggable={false}
-                      onError={() => setMainImageError(true)}
-                    />
-                  </AnimatePresence>
-                </motion.div>
+                      animate={{
+                        scale: 1.07,
+                        x: KB_DIRECTIONS[currentImageIndex % KB_DIRECTIONS.length].animate.x,
+                        y: KB_DIRECTIONS[currentImageIndex % KB_DIRECTIONS.length].animate.y,
+                      }}
+                      transition={{ duration: 25, ease: 'linear' }}
+                      style={{ willChange: 'transform' }}
+                    >
+                      <motion.img
+                        src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
+                        srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 1200, 1920])}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
+                        alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
+                        width={1200}
+                        height={800}
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
+                        fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
+                        decoding="async"
+                        loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
+                        className="absolute inset-0 w-full h-full object-cover sm:object-contain pointer-events-none select-none"
+                        draggable={false}
+                        onError={() => setMainImageError(true)}
+                      />
+                    </motion.div>
+                  </motion.div>
+                </AnimatePresence>
               </>
             )}
           </motion.button>
