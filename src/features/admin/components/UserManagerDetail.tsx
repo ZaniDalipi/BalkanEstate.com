@@ -495,16 +495,14 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
         return;
       }
 
-      // Update local state to reflect change
-      viewingUser.subscription = viewingUser.subscription || {};
-      viewingUser.subscription.listingsLimit = val;
-
+      // Immediately update the input field and show success
+      setInputLimit(String(val));
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
 
       // Trigger parent refresh to sync across all components
       if (onUpdate) {
-        setTimeout(() => onUpdate(), 500);
+        onUpdate();
       }
     } catch (e: any) {
       setErr(e.message || 'Error saving listing limit');
