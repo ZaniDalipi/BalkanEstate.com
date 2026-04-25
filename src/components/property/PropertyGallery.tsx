@@ -361,7 +361,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   src={getPropertyImagePlaceholder(currentImageUrl) || optimizeCloudinaryUrl(currentImageUrl, { width: 40, quality: 'auto:eco' })}
                   alt=""
                   aria-hidden="true"
-                  className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-60"
+                  className="absolute inset-0 w-full h-full object-contain blur-2xl scale-110 opacity-60"
                 />
                 {/* Main sharp image – fades in once loaded */}
                 <img
@@ -376,7 +376,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
                   fetchpriority="high"
                   decoding="async"
-                  className={`relative max-w-full max-h-full object-contain transition-opacity duration-300 ${mainImageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                  className={`w-full h-full object-contain transition-opacity duration-300 ${mainImageLoaded ? 'opacity-100' : 'opacity-0'}`}
                   onLoad={() => setMainImageLoaded(true)}
                   onError={() => setMainImageError(true)}
                 />
