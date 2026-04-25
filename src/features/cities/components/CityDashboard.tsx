@@ -572,8 +572,8 @@ const CityDashboard: React.FC = () => {
               {/* Quick summary */}
               <div className="p-4 bg-gradient-to-br from-violet-50 to-blue-50 rounded-xl border border-violet-100">
                 <p className="text-sm text-slate-700">
-                  <span className="font-semibold">{city.city}</span>{' '}
-                  {t('dashboard.investmentSummary', 'has a {{demand}} demand market with {{investment}} investment potential and {{yield}}% rental yield.', {
+                  {t('dashboard.investmentSummary', '{{city}} has a {{demand}} demand market with {{investment}} investment potential and {{yield}}% rental yield.', {
+                    city: city.city,
                     demand: demandInfo.label.toLowerCase(),
                     investment: investmentInfo.label.toLowerCase(),
                     yield: rentalYield,

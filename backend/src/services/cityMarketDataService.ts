@@ -26,6 +26,20 @@ interface CityDataFromGemini {
   highlights: string[];
 }
 
+// Realistic for-sale price ranges per country (€/m²). Used to clamp Gemini output and generate fallback data.
+const COUNTRY_PRICE_RANGES: Record<string, { min: number; max: number; defaultBase: number }> = {
+  'Albania':                 { min: 600,  max: 1800,  defaultBase: 1100 },
+  'Kosovo':                  { min: 500,  max: 1400,  defaultBase: 900  },
+  'North Macedonia':         { min: 500,  max: 1800,  defaultBase: 1000 },
+  'Serbia':                  { min: 600,  max: 2500,  defaultBase: 1400 },
+  'Bosnia and Herzegovina':  { min: 600,  max: 2000,  defaultBase: 1200 },
+  'Montenegro':              { min: 800,  max: 4000,  defaultBase: 1600 },
+  'Croatia':                 { min: 1500, max: 5000,  defaultBase: 2500 },
+  'Greece':                  { min: 800,  max: 5000,  defaultBase: 1800 },
+  'Bulgaria':                { min: 700,  max: 2000,  defaultBase: 1200 },
+  'Romania':                 { min: 800,  max: 2500,  defaultBase: 1400 },
+};
+
 /**
  * Selected cities to feature across all Balkan countries
  * Chosen based on population, economic importance, and tourism
@@ -158,21 +172,21 @@ const CITY_METADATA: Record<string, {
  */
 function generateFallbackCityData(cityInfo: { city: string; country: string; countryCode: string }): CityDataFromGemini {
   const metadata = CITY_METADATA[cityInfo.city] || { type: 'regional', tier: 3, neighborhoods: ['Center', 'Downtown', 'Suburb'] };
+  const countryRange = COUNTRY_PRICE_RANGES[cityInfo.country] || { min: 700, max: 3000, defaultBase: 1400 };
 
-  // Base prices by tier and type
-  let basePrice = 1200; // Default mid-range
-  if (metadata.tier === 1) basePrice = 2000;
-  else if (metadata.tier === 2) basePrice = 1400;
-  else basePrice = 1000;
+  // Start from the country's realistic base price, then adjust by tier and city type
+  let basePrice = countryRange.defaultBase;
+  if (metadata.tier === 1) basePrice = countryRange.defaultBase * 1.2;
+  else if (metadata.tier === 2) basePrice = countryRange.defaultBase * 1.0;
+  else basePrice = countryRange.defaultBase * 0.85;
 
-  // Adjust by city type
-  if (metadata.type === 'capital') basePrice *= 1.3;
-  else if (metadata.type === 'coastal' || metadata.type === 'tourist') basePrice *= 1.2;
-  else if (metadata.type === 'industrial') basePrice *= 0.9;
+  // Adjust by city type within the country's range
+  if (metadata.type === 'coastal' || metadata.type === 'tourist') basePrice *= 1.15;
+  else if (metadata.type === 'industrial') basePrice *= 0.85;
 
-  // Add some variance
-  const variance = 0.85 + Math.random() * 0.3; // 85% to 115%
-  const avgPricePerSqm = Math.round(basePrice * variance);
+  // Add some variance, then clamp to the country's realistic range
+  const variance = 0.9 + Math.random() * 0.2; // 90% to 110%
+  const avgPricePerSqm = Math.round(Math.min(countryRange.max, Math.max(countryRange.min, basePrice * variance)));
   const medianPrice = avgPricePerSqm * 70; // 70sqm apartment
 
   // Growth rates based on type
@@ -310,6 +324,19 @@ Return only the JSON array, no other text.`;
     }
 
     const data: CityDataFromGemini[] = JSON.parse(jsonMatch[0]);
+
+    // Clamp avgPricePerSqm to realistic country-specific ranges to prevent stale/hallucinated values
+    for (const item of data) {
+      const range = COUNTRY_PRICE_RANGES[item.country];
+      if (range && typeof item.avgPricePerSqm === 'number') {
+        const clamped = Math.min(range.max, Math.max(range.min, item.avgPricePerSqm));
+        if (clamped !== item.avgPricePerSqm) {
+          apiLogger.warn(`⚠️ Gemini returned ${item.avgPricePerSqm} €/m² for ${item.city} (${item.country}), clamped to ${clamped}`);
+          item.avgPricePerSqm = clamped;
+        }
+      }
+    }
+
     apiLogger.info(`✅ Fetched market data for ${data.length} cities from Gemini`);
 
     return data;
