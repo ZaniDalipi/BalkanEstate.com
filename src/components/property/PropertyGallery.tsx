@@ -456,7 +456,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                         fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
                         decoding="async"
                         loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
-                        className="absolute inset-0 w-full h-full object-cover sm:object-contain pointer-events-none select-none"
+                        className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
                         draggable={false}
                         onError={() => setMainImageError(true)}
                       />
