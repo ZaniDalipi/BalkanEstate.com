@@ -430,7 +430,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   >
                     {/* Ken Burns slow pan — unique direction per image, starts from opposite corner */}
                     <motion.div
-                      className="absolute inset-0 overflow-hidden"
+                      className="absolute inset-0 overflow-hidden flex items-center justify-center"
                       initial={{
                         scale: 1.0,
                         x: KB_DIRECTIONS[currentImageIndex % KB_DIRECTIONS.length].initial.x,
@@ -456,7 +456,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                         fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
                         decoding="async"
                         loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
-                        className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+                        className="h-full w-auto max-w-none pointer-events-none select-none"
                         draggable={false}
                         onError={() => setMainImageError(true)}
                       />
