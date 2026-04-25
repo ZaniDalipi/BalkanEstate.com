@@ -370,11 +370,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   return (
     <div className="overflow-hidden shadow-sm border-b border-neutral-200">
-      {/* ── Gallery frame — two-panel: image (left, flex-1) + info (right, desktop) ── */}
-      <div className="relative w-full flex h-[300px] sm:h-[480px] lg:h-[560px]" style={{ maxHeight: '85vh' }}>
-
-        {/* ── LEFT PANEL: Image ── */}
-        <div className="relative flex-1 overflow-hidden bg-neutral-900">
+      {/* ── Gallery frame — full-bleed single frame, aspect-ratio driven ── */}
+      <div className="relative w-full bg-neutral-900 overflow-hidden aspect-[4/3] sm:aspect-[16/9]" style={{ maxHeight: '85vh' }}>
 
         {/* ── PHOTOS ── */}
         {viewMode === 'photos' && (
@@ -443,7 +440,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                       x: { type: 'spring', stiffness: 260, damping: 26 },
                       scale: { type: 'spring', stiffness: 300, damping: 28 },
                     }}
-                    className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
+                    className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
                     draggable={false}
                     onError={() => setMainImageError(true)}
                   />
@@ -605,14 +602,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               </button>
             )}
 
-            {/* Favorite button — mobile only (desktop shown in right panel) */}
+            {/* Favorite button */}
             {onFavoriteClick && (
               <motion.button
                 onClick={(e) => { e.stopPropagation(); onFavoriteClick(); }}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.92 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="absolute top-4 right-4 z-10 sm:hidden w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
+                className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
                 aria-label={isFavorited ? t('property:actions.removeFavorite', 'Remove from favorites') : t('property:actions.addFavorite', 'Add to favorites')}
               >
                 <svg
@@ -625,7 +622,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               </motion.button>
             )}
 
-            {/* Nav arrows – center sides of image panel */}
+            {/* Nav arrows – outer edges */}
             {imagesForCurrentCategory.length > 1 && (
               <>
                 <motion.button
@@ -633,141 +630,89 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   whileHover={{ scale: 1.08, backgroundColor: 'rgba(255,255,255,0.95)' }}
                   whileTap={{ scale: 0.9 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center"
                   aria-label={t('property:gallery.prevImage', 'Previous image')}
                 >
-                  <ChevronLeftIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800" />
+                  <ChevronLeftIcon className="w-5 h-5 text-neutral-800" />
                 </motion.button>
                 <motion.button
                   onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
                   whileHover={{ scale: 1.08, backgroundColor: 'rgba(255,255,255,0.95)' }}
                   whileTap={{ scale: 0.9 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center"
                   aria-label={t('property:gallery.nextImage', 'Next image')}
                 >
-                  <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800" />
+                  <ChevronRightIcon className="w-5 h-5 text-neutral-800" />
                 </motion.button>
               </>
             )}
 
-            {/* Mobile bottom gradient — brief title + price */}
+            {/* Right-side gradient overlay with property info */}
             <div
-              className="sm:hidden absolute bottom-0 inset-x-0 z-[2] pointer-events-none"
-              style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.25) 55%, transparent 100%)' }}
+              className="absolute inset-0 z-[2] pointer-events-none flex items-center justify-end"
+              style={{ background: 'linear-gradient(to left, rgba(5,15,50,0.96) 0%, rgba(5,15,50,0.85) 20%, rgba(5,15,50,0.5) 42%, rgba(5,15,50,0.08) 62%, transparent 78%)' }}
             >
-              <div className="px-4 pb-4 pt-10 flex items-end justify-between">
-                <div className="min-w-0 pr-2">
-                  {(property.title || property.address) && (
-                    <h2 className="text-white font-bold text-sm leading-tight line-clamp-1 drop-shadow">
-                      {property.title || property.address}
-                    </h2>
+              <div className="w-[46%] sm:w-[42%] pr-6 sm:pr-10 pl-4 py-6">
+                {(property.title || property.address) && (
+                  <h2 className="text-white font-bold text-xl sm:text-2xl lg:text-3xl leading-tight mb-2 drop-shadow-lg">
+                    {property.title || property.address}
+                  </h2>
+                )}
+                {(property.city || property.country) && (
+                  <div className="flex items-center gap-1.5 text-white/80 text-sm mb-3">
+                    <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                    </svg>
+                    <span>{[property.city, property.country].filter(Boolean).join(', ')}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-1.5 flex-wrap mb-3">
+                  {property.propertyType && (
+                    <span className="flex items-center gap-1 bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full capitalize">
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                      </svg>
+                      {t(`property:propertyTypes.${property.propertyType}`, property.propertyType)}
+                    </span>
                   )}
-                  {(property.city || property.country) && (
-                    <p className="text-white/75 text-xs mt-0.5">{[property.city, property.country].filter(Boolean).join(', ')}</p>
-                  )}
+                  {property.beds ? (
+                    <span className="bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                      {property.beds} {t('property:specs.beds', 'Beds')}
+                    </span>
+                  ) : null}
+                  {property.baths ? (
+                    <span className="bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                      {property.baths} {t('property:specs.baths', 'Baths')}
+                    </span>
+                  ) : null}
+                  {property.sqft ? (
+                    <span className="bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                      {property.sqft} m²
+                    </span>
+                  ) : null}
                 </div>
-                {property.price && (
-                  <span className="text-white font-bold text-base flex-shrink-0 drop-shadow">
-                    € {property.price.toLocaleString()}
-                  </span>
+                {property.price ? (
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-white font-bold text-2xl sm:text-3xl drop-shadow-lg">
+                      € {property.price.toLocaleString()}{property.listingType === 'rent' ? t('property:seo.perMonth', '/mo') : ''}
+                    </span>
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full flex-shrink-0 ${
+                      property.listingType === 'rent' ? 'bg-blue-500 text-white' : 'bg-emerald-500 text-white'
+                    }`}>
+                      {property.listingType === 'rent' ? t('property:gallery.forRent', 'For Rent') : t('property:gallery.forSale', 'For Sale')}
+                    </span>
+                  </div>
+                ) : null}
+                {imagesForCurrentCategory.length > 1 && (
+                  <div className="text-white/60 text-sm font-medium" role="status" aria-live="polite">
+                    {currentImageIndex + 1} / {imagesForCurrentCategory.length}
+                  </div>
                 )}
               </div>
             </div>
           </>
         )}
-
-        </div>{/* end LEFT PANEL */}
-
-        {/* ── RIGHT PANEL: Property Info (desktop sm+) ── */}
-        <div className="hidden sm:flex w-[38%] lg:w-[36%] shrink-0 relative overflow-hidden flex-col justify-center px-6 sm:px-8 py-6" style={{ backgroundColor: 'rgb(5,15,50)' }}>
-          {/* Soft left-edge blend */}
-          <div className="absolute left-0 inset-y-0 w-10 bg-gradient-to-r from-neutral-900/50 to-transparent pointer-events-none z-[1]" />
-
-          {/* Favorite button */}
-          {onFavoriteClick && (
-            <motion.button
-              onClick={(e) => { e.stopPropagation(); onFavoriteClick(); }}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.92 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 flex items-center justify-center"
-              aria-label={isFavorited ? t('property:actions.removeFavorite', 'Remove from favorites') : t('property:actions.addFavorite', 'Add to favorites')}
-            >
-              <svg
-                className={`w-5 h-5 transition-colors ${isFavorited ? 'text-red-400 fill-current' : 'text-white/70'}`}
-                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-            </motion.button>
-          )}
-
-          {/* Info content */}
-          <div className="relative z-[2]">
-            {/* Title */}
-            {(property.title || property.address) && (
-              <h2 className="text-white font-bold text-xl sm:text-2xl lg:text-3xl leading-tight mb-2">
-                {property.title || property.address}
-              </h2>
-            )}
-            {/* Location */}
-            {(property.city || property.country) && (
-              <div className="flex items-center gap-1.5 text-white/80 text-sm mb-3">
-                <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                </svg>
-                <span>{[property.city, property.country].filter(Boolean).join(', ')}</span>
-              </div>
-            )}
-            {/* Spec chips row */}
-            <div className="flex items-center gap-1.5 flex-wrap mb-3">
-              {property.propertyType && (
-                <span className="flex items-center gap-1 bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full capitalize">
-                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                  </svg>
-                  {t(`property:propertyTypes.${property.propertyType}`, property.propertyType)}
-                </span>
-              )}
-              {property.beds ? (
-                <span className="bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
-                  {property.beds} {t('property:specs.beds', 'Beds')}
-                </span>
-              ) : null}
-              {property.baths ? (
-                <span className="bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
-                  {property.baths} {t('property:specs.baths', 'Baths')}
-                </span>
-              ) : null}
-              {property.sqft ? (
-                <span className="bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
-                  {property.sqft} m²
-                </span>
-              ) : null}
-            </div>
-            {/* Price + listing type badge */}
-            {property.price ? (
-              <div className="flex items-center gap-3 mb-2">
-                <span className="text-white font-bold text-2xl sm:text-3xl drop-shadow">
-                  € {property.price.toLocaleString()}{property.listingType === 'rent' ? t('property:seo.perMonth', '/mo') : ''}
-                </span>
-                <span className={`text-xs font-bold px-3 py-1 rounded-full flex-shrink-0 ${
-                  property.listingType === 'rent' ? 'bg-blue-500 text-white' : 'bg-emerald-500 text-white'
-                }`}>
-                  {property.listingType === 'rent' ? t('property:gallery.forRent', 'For Rent') : t('property:gallery.forSale', 'For Sale')}
-                </span>
-              </div>
-            ) : null}
-            {/* Image counter */}
-            {imagesForCurrentCategory.length > 1 && (
-              <div className="text-white/60 text-sm font-medium" role="status" aria-live="polite">
-                {currentImageIndex + 1} / {imagesForCurrentCategory.length}
-              </div>
-            )}
-          </div>
-        </div>{/* end RIGHT PANEL */}
 
       </div>
 
