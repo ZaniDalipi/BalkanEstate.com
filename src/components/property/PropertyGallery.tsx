@@ -443,7 +443,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                         x: { type: 'spring', stiffness: 260, damping: 26 },
                         scale: { type: 'spring', stiffness: 300, damping: 28 },
                       }}
-                      className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+                      className="absolute inset-0 w-full h-full object-cover sm:object-contain pointer-events-none select-none"
                       draggable={false}
                       onError={() => setMainImageError(true)}
                     />
