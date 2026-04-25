@@ -395,54 +395,60 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               </div>
             ) : (
               <>
-                {/* LQIP blurred background — subtle Ken Burns, fills letterbox gaps */}
-                <motion.img
-                  key={`lqip-${currentImageUrl}`}
+                {/* LQIP blurred background — loading placeholder only */}
+                <img
                   src={getPropertyImagePlaceholder(currentImageUrl) || optimizeCloudinaryUrl(currentImageUrl, { width: 40, quality: 'auto:eco' })}
                   alt=""
                   aria-hidden="true"
                   className="absolute inset-0 w-full h-full object-cover blur-3xl scale-110 pointer-events-none select-none"
+                />
+                {/* Ken Burns wrapper — slow pan/zoom on the visible image */}
+                <motion.div
+                  key={`kb-${currentImageUrl}`}
+                  className="absolute inset-0"
                   initial={{
-                    x: currentImageIndex % 2 === 0 ? '-1%' : '1%',
-                    y: currentImageIndex % 3 === 0 ? '-1%' : '1%',
+                    scale: 1.0,
+                    x: currentImageIndex % 2 === 0 ? '0%' : '0%',
+                    y: '0%',
                   }}
                   animate={{
-                    x: currentImageIndex % 2 === 0 ? '1%' : '-1%',
-                    y: currentImageIndex % 3 === 0 ? '1%' : '-1%',
+                    scale: 1.07,
+                    x: currentImageIndex % 2 === 0 ? '-2%' : '2%',
+                    y: currentImageIndex % 3 === 0 ? '-1%' : '1%',
                   }}
-                  transition={{ duration: 14, ease: 'linear' }}
+                  transition={{ duration: 25, ease: 'linear' }}
                   style={{ willChange: 'transform' }}
-                />
-                {/* Main image — object-contain: full image always visible */}
-                <AnimatePresence initial={false} custom={slideDirection}>
-                  <motion.img
-                    key={currentImageUrl}
-                    src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
-                    srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 1200, 1920])}
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 1200px"
-                    alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
-                    width={1200}
-                    height={800}
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
-                    fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
-                    decoding="async"
-                    loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
-                    custom={slideDirection}
-                    variants={imageSlideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={{
-                      opacity: { duration: 0.28, ease: 'easeOut' },
-                      x: { type: 'spring', stiffness: 260, damping: 26 },
-                      scale: { type: 'spring', stiffness: 300, damping: 28 },
-                    }}
-                    className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
-                    draggable={false}
-                    onError={() => setMainImageError(true)}
-                  />
-                </AnimatePresence>
+                >
+                  <AnimatePresence initial={false} custom={slideDirection}>
+                    <motion.img
+                      key={currentImageUrl}
+                      src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
+                      srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 1200, 1920])}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 1200px"
+                      alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
+                      width={1200}
+                      height={800}
+                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                      // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
+                      fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
+                      decoding="async"
+                      loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
+                      custom={slideDirection}
+                      variants={imageSlideVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={{
+                        opacity: { duration: 0.35, ease: 'easeOut' },
+                        x: { type: 'spring', stiffness: 260, damping: 26 },
+                        scale: { type: 'spring', stiffness: 300, damping: 28 },
+                      }}
+                      className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+                      draggable={false}
+                      onError={() => setMainImageError(true)}
+                    />
+                  </AnimatePresence>
+                </motion.div>
               </>
             )}
           </motion.button>
