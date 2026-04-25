@@ -48,10 +48,25 @@ interface PropertyGalleryProps {
  * />
  * ```
  */
+// Cinematic parallax-depth transition:
+// entering image springs in from the side with scale punch (1.05 → 1)
+// exiting image drifts away in the same direction at reduced scale (depth parallax)
 const imageSlideVariants = {
-  enter: (dir: number) => ({ opacity: 0, x: dir > 0 ? '6%' : '-6%' }),
-  center: { opacity: 1, x: 0 },
-  exit: (dir: number) => ({ opacity: 0, x: dir > 0 ? '-6%' : '6%' }),
+  enter: (dir: number) => ({
+    opacity: 0,
+    x: dir > 0 ? '9%' : '-9%',
+    scale: 1.05,
+  }),
+  center: {
+    opacity: 1,
+    x: '0%',
+    scale: 1,
+  },
+  exit: (dir: number) => ({
+    opacity: 0,
+    x: dir > 0 ? '-3%' : '3%',
+    scale: 0.96,
+  }),
 };
 
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
@@ -390,9 +405,17 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   alt=""
                   aria-hidden="true"
                   className="absolute inset-0 w-full h-full object-cover blur-2xl pointer-events-none select-none"
-                  initial={{ scale: 1.15, x: currentImageIndex % 2 === 0 ? '-3%' : '3%' }}
-                  animate={{ scale: 1.25, x: currentImageIndex % 2 === 0 ? '3%' : '-3%' }}
-                  transition={{ duration: 10, ease: 'linear' }}
+                  initial={{
+                    scale: 1.12,
+                    x: currentImageIndex % 2 === 0 ? '-2%' : '2%',
+                    y: currentImageIndex % 3 === 0 ? '-1.5%' : '1%',
+                  }}
+                  animate={{
+                    scale: 1.22,
+                    x: currentImageIndex % 2 === 0 ? '2%' : '-2%',
+                    y: currentImageIndex % 3 === 0 ? '1.5%' : '-1%',
+                  }}
+                  transition={{ duration: 12, ease: 'linear' }}
                   style={{ willChange: 'transform' }}
                 />
                 {/* Main image — object-contain: full image always visible */}
@@ -415,7 +438,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     initial="enter"
                     animate="center"
                     exit="exit"
-                    transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    transition={{
+                      opacity: { duration: 0.28, ease: 'easeOut' },
+                      x: { type: 'spring', stiffness: 260, damping: 26 },
+                      scale: { type: 'spring', stiffness: 300, damping: 28 },
+                    }}
                     className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
                     draggable={false}
                     onError={() => setMainImageError(true)}
