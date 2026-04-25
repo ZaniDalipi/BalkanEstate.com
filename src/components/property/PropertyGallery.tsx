@@ -371,7 +371,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   return (
     <div className="overflow-hidden shadow-sm border-b border-neutral-200">
       {/* ── Gallery frame — full-bleed single frame, aspect-ratio driven ── */}
-      <div className="relative w-full bg-neutral-900 overflow-hidden aspect-[3/4] sm:aspect-[16/9]" style={{ maxHeight: '85vh' }}>
+      <div className="relative w-full bg-neutral-900 overflow-hidden aspect-[4/3] sm:aspect-[16/9]" style={{ maxHeight: '65vh' }}>
 
         {/* ── PHOTOS ── */}
         {viewMode === 'photos' && (
@@ -438,7 +438,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                       x: { type: 'spring', stiffness: 260, damping: 26 },
                       scale: { type: 'spring', stiffness: 300, damping: 28 },
                     }}
-                    className="absolute inset-0 w-full h-full object-cover sm:object-contain pointer-events-none select-none"
+                    className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
                     draggable={false}
                     onError={() => setMainImageError(true)}
                   />
