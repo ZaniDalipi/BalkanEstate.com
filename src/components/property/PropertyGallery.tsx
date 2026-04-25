@@ -354,9 +354,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   }, [currentImageIndex, onImageIndexChange]);
 
   return (
-    <div className="overflow-hidden lg:rounded-xl lg:shadow-lg lg:border lg:border-neutral-200">
-      {/* ── Gallery frame — 4:3 on mobile, 16:9 on sm+; object-contain shows full image; blurred LQIP fills bars ── */}
-      <div className="relative w-full bg-neutral-900 overflow-hidden aspect-[4/3] sm:aspect-[16/9]" style={{ maxHeight: '90vh' }}>
+    <div className="overflow-hidden shadow-sm border-b border-neutral-200">
+      {/* ── Gallery frame — 4:3 mobile, 16:10 sm, 21:9 lg; full-bleed hero ── */}
+      <div className="relative w-full bg-neutral-900 overflow-hidden aspect-[4/3] sm:aspect-[16/9] lg:aspect-[21/9]" style={{ maxHeight: '85vh' }}>
 
         {/* ── PHOTOS ── */}
         {viewMode === 'photos' && (

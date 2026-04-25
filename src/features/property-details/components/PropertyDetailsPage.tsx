@@ -866,26 +866,27 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
         </div>
       </div>
 
+      {/* Gallery — full-bleed, outside main container so it spans 100% page width */}
+      <div className="animate-slide-up w-full" style={{ animationDelay: '0ms' }}>
+        <PropertyGallery
+          property={property}
+          onOpenEditor={(url) => setIsEditorOpen(true)}
+          onOpenViewer={() => setIsViewerOpen(true)}
+          onNavigateTo3DTour={handleNavigateTo3DTour}
+          activeCategory={activeCategory}
+          currentImageIndex={currentImageIndex}
+          onCategoryChange={handleCategorySelect}
+          onImageIndexChange={setCurrentImageIndex}
+          isFavorited={isFavorited}
+          onFavoriteClick={handleFavoriteClick}
+        />
+      </div>
+
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 overflow-x-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Left Column - Property Details */}
           <div className="lg:col-span-2 space-y-6 sm:space-y-8 lg:space-y-10 min-w-0">
-            {/* Image Gallery — full-bleed up to lg, stays in column on lg+ */}
-            <div className="animate-slide-up -mx-3 sm:-mx-4 md:-mx-6 lg:mx-0" style={{ animationDelay: '0ms' }}>
-              <PropertyGallery
-                property={property}
-                onOpenEditor={(url) => setIsEditorOpen(true)}
-                onOpenViewer={() => setIsViewerOpen(true)}
-                onNavigateTo3DTour={handleNavigateTo3DTour}
-                activeCategory={activeCategory}
-                currentImageIndex={currentImageIndex}
-                onCategoryChange={handleCategorySelect}
-                onImageIndexChange={setCurrentImageIndex}
-                isFavorited={isFavorited}
-                onFavoriteClick={handleFavoriteClick}
-              />
-            </div>
 
             {/* Mobile Only: Property Info (description) shown early */}
             <div className="lg:hidden animate-slide-up" style={{ animationDelay: '50ms' }}>
