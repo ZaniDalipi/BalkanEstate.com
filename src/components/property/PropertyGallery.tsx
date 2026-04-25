@@ -358,6 +358,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
   }, [currentImageIndex, imagesForCurrentCategory.length, onImageIndexChange]);
 
+  // Auto-rotate every 5 s in photos mode; resets whenever the user manually navigates
+  // (handleNextImage recreates on index change, which restarts the interval)
+  useEffect(() => {
+    if (viewMode !== 'photos' || imagesForCurrentCategory.length <= 1) return;
+    const timer = setInterval(handleNextImage, 5000);
+    return () => clearInterval(timer);
+  }, [viewMode, imagesForCurrentCategory.length, handleNextImage]);
+
   const handlePrevImage = useCallback(() => {
     setSlideDirection(-1);
     const newIndex = (currentImageIndex - 1 + imagesForCurrentCategory.length) % imagesForCurrentCategory.length;
@@ -380,7 +388,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   return (
     <div className="overflow-hidden shadow-sm border-b border-neutral-200">
       {/* ── Gallery frame — full-bleed single frame, aspect-ratio driven ── */}
-      <div className="relative w-full bg-neutral-900 overflow-hidden aspect-[4/3] sm:aspect-[16/9]" style={{ maxHeight: '65vh' }}>
+      <div className="relative w-full bg-neutral-900 overflow-hidden aspect-[4/3] sm:aspect-[16/9]" style={{ maxHeight: '80vh' }}>
 
         {/* ── PHOTOS ── */}
         {viewMode === 'photos' && (
@@ -456,7 +464,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                         fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
                         decoding="async"
                         loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
-                        className="absolute inset-0 w-full h-full object-cover sm:object-contain pointer-events-none select-none"
+                        className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
                         draggable={false}
                         onError={() => setMainImageError(true)}
                       />
