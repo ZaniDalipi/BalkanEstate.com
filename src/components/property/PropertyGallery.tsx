@@ -371,7 +371,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   return (
     <div className="overflow-hidden shadow-sm border-b border-neutral-200">
       {/* ── Gallery frame — full-bleed single frame, aspect-ratio driven ── */}
-      <div className="relative w-full bg-neutral-900 overflow-hidden aspect-[4/3] sm:aspect-[16/9]" style={{ maxHeight: '85vh' }}>
+      <div className="relative w-full bg-neutral-900 overflow-hidden aspect-[3/4] sm:aspect-[16/9]" style={{ maxHeight: '85vh' }}>
 
         {/* ── PHOTOS ── */}
         {viewMode === 'photos' && (
@@ -438,7 +438,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                       x: { type: 'spring', stiffness: 260, damping: 26 },
                       scale: { type: 'spring', stiffness: 300, damping: 28 },
                     }}
-                    className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
+                    className="absolute inset-0 w-full h-full object-cover sm:object-contain pointer-events-none select-none"
                     draggable={false}
                     onError={() => setMainImageError(true)}
                   />
@@ -646,9 +646,25 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               </>
             )}
 
-            {/* Right-side gradient overlay with property info */}
+            {/* Mobile-only bottom badge: type | sale/rent */}
+            <div className="sm:hidden absolute bottom-3 right-3 z-[3] flex items-center gap-1.5 bg-black/70 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full pointer-events-none">
+              {property.propertyType && (
+                <>
+                  <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                  </svg>
+                  <span className="capitalize">{t(`property:propertyTypes.${property.propertyType}`, property.propertyType)}</span>
+                  <span className="opacity-50">|</span>
+                </>
+              )}
+              <span className={property.listingType === 'rent' ? 'text-blue-300' : 'text-emerald-400'}>
+                {property.listingType === 'rent' ? t('property:gallery.forRent', 'Rent') : t('property:gallery.forSale', 'Sale')}
+              </span>
+            </div>
+
+            {/* Right-side gradient overlay with property info — desktop only */}
             <div
-              className="absolute inset-0 z-[2] pointer-events-none flex items-center justify-end"
+              className="hidden sm:flex absolute inset-0 z-[2] pointer-events-none items-center justify-end"
               style={{ background: 'linear-gradient(to left, rgba(5,15,50,0.96) 0%, rgba(5,15,50,0.85) 20%, rgba(5,15,50,0.5) 42%, rgba(5,15,50,0.08) 62%, transparent 78%)' }}
             >
               <div className="w-[46%] sm:w-[42%] pr-6 sm:pr-10 pl-4 py-6">
@@ -712,8 +728,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           </>
         )}
 
-        {/* LiquidGlassSwitch — overlaid at bottom-center of gallery frame */}
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-[5] pointer-events-auto">
+        {/* LiquidGlassSwitch — overlaid at bottom-center of gallery frame (desktop only) */}
+        <div className="hidden sm:block absolute bottom-5 left-1/2 -translate-x-1/2 z-[5] pointer-events-auto">
           <LiquidGlassSwitch
             options={[
               ...(hasVideo ? [{
@@ -758,6 +774,49 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
       {/* ── Thumbnail strip + category tabs ── */}
       <div className="bg-white border-t border-neutral-100 px-4 sm:px-5 pt-4 pb-4">
+
+        {/* Mobile LiquidGlassSwitch — below the image */}
+        <div className="sm:hidden flex justify-center mb-4">
+          <LiquidGlassSwitch
+            options={[
+              ...(hasVideo ? [{
+                value: 'video',
+                label: t('actions.video', 'Video'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                ),
+              }] : []),
+              {
+                value: 'photos',
+                label: t('actions.photos'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="9" cy="9" r="2" />
+                    <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+                  </svg>
+                ),
+              },
+              {
+                value: 'streetview',
+                label: t('actions.streetView'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="5" r="3" />
+                    <path d="M12 8v4" />
+                    <path d="M8 21l4-9 4 9" />
+                  </svg>
+                ),
+              },
+            ]}
+            value={viewMode}
+            onChange={handleViewModeChange}
+            size="md"
+          />
+        </div>
+
         {/* Header row: camera icon + "Photos" label + category pills */}
         <div className="flex items-center gap-2 mb-3 overflow-x-auto scrollbar-hide">
           <div className="flex items-center gap-1.5 flex-shrink-0 mr-1">
