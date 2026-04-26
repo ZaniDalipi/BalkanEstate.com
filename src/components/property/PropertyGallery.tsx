@@ -127,6 +127,19 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = React.useRef<HTMLVideoElement>(null);
 
+  // Frame adapts to each image's natural aspect ratio so the full image fills the
+  // container edge-to-edge — no crop, no letterbox bars. Default 16:9 until the
+  // image loads. Clamped between 3:4 portrait and 2:1 wide to prevent extreme shapes.
+  const [imageAspect, setImageAspect] = useState<number>(16 / 9);
+
+  const handleMainImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+      const ratio = img.naturalWidth / img.naturalHeight;
+      setImageAspect(Math.max(0.75, Math.min(ratio, 2.0)));
+    }
+  }, []);
+
   // Determine video platform from URL
   const getVideoPlatform = useCallback((url: string): string => {
     if (!url) return 'unknown';
@@ -384,8 +397,17 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   return (
     <div className="overflow-hidden shadow-sm border-b border-neutral-200">
-      {/* ── Gallery frame — full-bleed single frame, aspect-ratio driven ── */}
-      <div className="relative w-full bg-neutral-900 overflow-hidden aspect-[4/3] sm:aspect-[16/9]" style={{ maxHeight: '80vh' }}>
+      {/* ── Gallery frame — adapts to each image's natural aspect ratio so the
+           full image always fills the frame edge-to-edge (Zillow-style) ── */}
+      <div
+        className="relative w-full bg-neutral-900 overflow-hidden"
+        style={{
+          aspectRatio: imageAspect,
+          maxHeight: '80vh',
+          minHeight: '320px',
+          transition: 'aspect-ratio 350ms cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
+      >
 
         {/* ── PHOTOS ── */}
         {viewMode === 'photos' && (
@@ -460,6 +482,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                         loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
                         className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
                         draggable={false}
+                        onLoad={handleMainImageLoad}
                         onError={() => setMainImageError(true)}
                       />
                     </motion.div>
