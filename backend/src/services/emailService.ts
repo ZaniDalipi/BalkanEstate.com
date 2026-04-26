@@ -26,9 +26,13 @@ function escapeHtml(unsafe: string | undefined | null): string {
  * Validate email address format
  */
 function isValidEmail(email: string): boolean {
+  // Handle "Display Name <email>" format by extracting the bare email
+  const bracketMatch = email.match(/<([^>]+)>/);
+  const bareEmail = bracketMatch ? bracketMatch[1].trim() : email.trim();
+
   // RFC 5322 compliant email regex
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-  return emailRegex.test(email) && email.length <= 254;
+  return emailRegex.test(bareEmail) && bareEmail.length <= 254;
 }
 
 /**
