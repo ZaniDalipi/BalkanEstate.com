@@ -132,14 +132,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   // image loads. Clamped between 3:4 portrait and 2:1 wide to prevent extreme shapes.
   const [imageAspect, setImageAspect] = useState<number>(16 / 9);
 
-  // Determine if image fills container width (landscape) or has letterbox bars (portrait).
-  // Container is 100vw × 80vh, so aspect ratio is window.innerWidth / (window.innerHeight × 0.8).
-  // If imageAspect > containerAspect, image fills width → apply Ken Burns scale for video effect.
-  const containerAspect = typeof window !== 'undefined'
-    ? window.innerWidth / (window.innerHeight * 0.8)
-    : 16 / 9; // Default fallback
-  const shouldScaleKenBurns = imageAspect > containerAspect;
-
   const handleMainImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.currentTarget;
     if (img.naturalWidth > 0 && img.naturalHeight > 0) {
@@ -460,18 +452,16 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     }}
                   >
                     {/* Ken Burns slow pan — unique direction per image, starts from opposite corner.
-                         For landscape images (filling container width), scale slightly for video effect. */}
+                         Pan motion alone creates the video-like camera effect without zoom clipping. */}
                     <motion.div
                       className="absolute inset-0 overflow-hidden"
                       initial={{
                         x: KB_DIRECTIONS[currentImageIndex % KB_DIRECTIONS.length].initial.x,
                         y: KB_DIRECTIONS[currentImageIndex % KB_DIRECTIONS.length].initial.y,
-                        ...(shouldScaleKenBurns && { scale: 1.0 }),
                       }}
                       animate={{
                         x: KB_DIRECTIONS[currentImageIndex % KB_DIRECTIONS.length].animate.x,
                         y: KB_DIRECTIONS[currentImageIndex % KB_DIRECTIONS.length].animate.y,
-                        ...(shouldScaleKenBurns && { scale: 1.1 }),
                       }}
                       transition={{ duration: 25, ease: 'linear' }}
                       style={{ willChange: 'transform' }}
