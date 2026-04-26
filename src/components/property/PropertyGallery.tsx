@@ -54,18 +54,15 @@ interface PropertyGalleryProps {
 const imageSlideVariants = {
   enter: (dir: number) => ({
     opacity: 0,
-    x: dir > 0 ? '9%' : '-9%',
-    scale: 1.05,
+    x: dir > 0 ? '6%' : '-6%',
   }),
   center: {
     opacity: 1,
     x: '0%',
-    scale: 1,
   },
   exit: (dir: number) => ({
     opacity: 0,
     x: dir > 0 ? '-3%' : '3%',
-    scale: 0.96,
   }),
 };
 
@@ -433,19 +430,16 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     transition={{
                       opacity: { duration: 0.35, ease: 'easeOut' },
                       x: { type: 'spring', stiffness: 260, damping: 26 },
-                      scale: { type: 'spring', stiffness: 300, damping: 28 },
                     }}
                   >
                     {/* Ken Burns slow pan — unique direction per image, starts from opposite corner */}
                     <motion.div
                       className="absolute inset-0 overflow-hidden"
                       initial={{
-                        scale: 1.0,
                         x: KB_DIRECTIONS[currentImageIndex % KB_DIRECTIONS.length].initial.x,
                         y: KB_DIRECTIONS[currentImageIndex % KB_DIRECTIONS.length].initial.y,
                       }}
                       animate={{
-                        scale: 1.07,
                         x: KB_DIRECTIONS[currentImageIndex % KB_DIRECTIONS.length].animate.x,
                         y: KB_DIRECTIONS[currentImageIndex % KB_DIRECTIONS.length].animate.y,
                       }}
