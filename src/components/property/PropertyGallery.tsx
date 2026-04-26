@@ -127,19 +127,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = React.useRef<HTMLVideoElement>(null);
 
-  // Frame adapts to each image's natural aspect ratio so the full image fills the
-  // container edge-to-edge — no crop, no letterbox bars. Default 16:9 until the
-  // image loads. Clamped between 3:4 portrait and 2:1 wide to prevent extreme shapes.
-  const [imageAspect, setImageAspect] = useState<number>(16 / 9);
-
-  const handleMainImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-    const img = e.currentTarget;
-    if (img.naturalWidth > 0 && img.naturalHeight > 0) {
-      const ratio = img.naturalWidth / img.naturalHeight;
-      setImageAspect(Math.max(0.75, Math.min(ratio, 2.0)));
-    }
-  }, []);
-
   // Determine video platform from URL
   const getVideoPlatform = useCallback((url: string): string => {
     if (!url) return 'unknown';
@@ -397,11 +384,12 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   return (
     <div className="overflow-hidden shadow-sm border-b border-neutral-200">
-      {/* ── Gallery frame — fixed height with blurred LQIP background filling empty space ── */}
+      {/* ── Gallery frame — fixed 16:9 aspect ratio for consistent size across all images.
+           Each image is shown fully (object-contain) and blurred LQIP fills any empty space. ── */}
       <div
-        className="relative w-full bg-neutral-900 overflow-hidden"
+        className="relative w-full bg-neutral-900 overflow-hidden aspect-[16/9]"
         style={{
-          height: '80vh',
+          maxHeight: '80vh',
           minHeight: '320px',
         }}
       >
@@ -480,7 +468,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                         loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
                         className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
                         draggable={false}
-                        onLoad={handleMainImageLoad}
                         onError={() => setMainImageError(true)}
                       />
                     </motion.div>
