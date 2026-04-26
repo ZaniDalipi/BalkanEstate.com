@@ -6,7 +6,7 @@ import SubscriptionEvent from '../models/SubscriptionEvent';
 import Product from '../models/Product';
 import Agency from '../models/Agency';
 import PromotionCoupon from '../models/PromotionCoupon';
-import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail, sendSubscriptionInvoice, sendProSubscriptionWelcomeEmail, sendMonthlyCouponEmail, sendSubscriptionExpired, sendSubscriptionExpiringSoon } from './emailService';
+import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail, sendSubscriptionInvoice, sendProSubscriptionWelcomeEmail, sendMonthlyCouponEmail, sendSubscriptionExpired, sendSubscriptionExpiringSoon, sendRenewalReminderEmail } from './emailService';
 import { createNotificationWithPush } from './engagementService';
 import { generateSecureRandomString } from '../utils/secureRandom';
 import { paymentLogger } from '../utils/logger';
@@ -717,6 +717,9 @@ export async function revokeAgencyCouponSubscription(
  * Should be run by a cron job daily
  * Includes retry logic for MongoDB transient transaction errors (WriteConflict)
  */
+const GRACE_PERIOD_DAYS = 7;
+const FRONTEND_BASE_URL = process.env.FRONTEND_URL || 'https://balkanestateai.com';
+
 export async function updateExpiredSubscriptions(maxRetries = 3): Promise<number> {
   let lastError: any;
 
@@ -724,33 +727,118 @@ export async function updateExpiredSubscriptions(maxRetries = 3): Promise<number
     const session = await mongoose.startSession();
     session.startTransaction();
 
-    // Collect user info during the transaction for post-commit notifications
     const expiredUsers: { userId: string; email: string; name: string; planName: string }[] = [];
+    const gracePeriodUsers: { userId: string; email: string; name: string; planName: string; gracePeriodEndDate: Date }[] = [];
 
     try {
       const now = new Date();
       let updatedCount = 0;
 
-      // Find all expired subscriptions
-      const expiredSubscriptions = await Subscription.find({
-        status: { $in: ['active', 'grace'] },
+      // Handle 'active' subscriptions: respect autoRenewing flag
+      const activeExpired = await Subscription.find({
+        status: 'active',
         expirationDate: { $lt: now },
       }).session(session);
 
-      for (const subscription of expiredSubscriptions) {
-        // Update subscription
+      for (const subscription of activeExpired) {
+        const user = await User.findById(subscription.userId).session(session);
+
+        // Web subscriptions with auto-renewal ON → grace period instead of immediate expiry
+        if (subscription.autoRenewing && subscription.store === 'web') {
+          const gracePeriodEndDate = new Date(now);
+          gracePeriodEndDate.setDate(gracePeriodEndDate.getDate() + GRACE_PERIOD_DAYS);
+
+          subscription.status = 'grace';
+          subscription.gracePeriodEndDate = gracePeriodEndDate;
+          await subscription.save({ session });
+
+          if (user && String(user.activeSubscriptionId) === String(subscription._id)) {
+            // Keep user's subscription active during grace period
+            if (user.subscription) {
+              user.subscription.status = 'grace';
+              user.markModified('subscription');
+            }
+            user.subscriptionStatus = 'grace';
+            await user.save({ session });
+
+            gracePeriodUsers.push({
+              userId: String(user._id),
+              email: user.email,
+              name: user.name || 'Customer',
+              planName: user.subscriptionProductName || subscription.productId || 'subscription',
+              gracePeriodEndDate,
+            });
+          }
+
+          await SubscriptionEvent.create([{
+            subscriptionId: subscription._id,
+            userId: subscription.userId,
+            eventType: 'subscription_grace_period_started',
+            store: subscription.store,
+            metadata: { gracePeriodEndDate, reason: 'auto_renewal_pending' },
+          }], { session });
+
+          updatedCount++;
+        } else {
+          // Auto-renewal OFF or non-web: expire immediately
+          subscription.status = 'expired';
+          await subscription.save({ session });
+
+          if (user && String(user.activeSubscriptionId) === String(subscription._id)) {
+            expiredUsers.push({
+              userId: String(user._id),
+              email: user.email,
+              name: user.name || 'Customer',
+              planName: subscription.productId || 'subscription',
+            });
+
+            user.isSubscribed = false;
+            user.subscriptionStatus = 'expired';
+            user.subscriptionPlan = undefined;
+            user.subscriptionProductName = undefined;
+            user.subscriptionSource = undefined;
+            user.activeSubscriptionId = undefined;
+
+            if (user.subscription) {
+              user.subscription.tier = 'free';
+              user.subscription.status = 'expired';
+              user.subscription.listingsLimit = FREE_TIER_LIMITS.LISTINGS;
+              user.subscription.expiresAt = undefined;
+              user.markModified('subscription');
+            }
+            user.activeListingsLimit = FREE_TIER_LIMITS.LISTINGS;
+            await user.save({ session });
+          }
+
+          await SubscriptionEvent.create([{
+            subscriptionId: subscription._id,
+            userId: subscription.userId,
+            eventType: 'subscription_expired',
+            store: subscription.store,
+            metadata: { expiredAt: now },
+          }], { session });
+
+          updatedCount++;
+        }
+      }
+
+      // Handle 'grace' subscriptions whose grace period has ended
+      const graceExpired = await Subscription.find({
+        status: 'grace',
+        gracePeriodEndDate: { $lt: now },
+      }).session(session);
+
+      for (const subscription of graceExpired) {
         subscription.status = 'expired';
         await subscription.save({ session });
 
-        // Update user - clear subscription fields
         const user = await User.findById(subscription.userId).session(session);
         if (user && String(user.activeSubscriptionId) === String(subscription._id)) {
-          // Collect info for post-commit email and notification
           expiredUsers.push({
             userId: String(user._id),
             email: user.email,
             name: user.name || 'Customer',
-            planName: subscription.productId || 'subscription',
+            planName: user.subscriptionProductName || subscription.productId || 'subscription',
           });
 
           user.isSubscribed = false;
@@ -760,7 +848,6 @@ export async function updateExpiredSubscriptions(maxRetries = 3): Promise<number
           user.subscriptionSource = undefined;
           user.activeSubscriptionId = undefined;
 
-          // Reset embedded subscription object
           if (user.subscription) {
             user.subscription.tier = 'free';
             user.subscription.status = 'expired';
@@ -769,25 +856,16 @@ export async function updateExpiredSubscriptions(maxRetries = 3): Promise<number
             user.markModified('subscription');
           }
           user.activeListingsLimit = FREE_TIER_LIMITS.LISTINGS;
-
           await user.save({ session });
         }
 
-        // Create event
-        await SubscriptionEvent.create(
-          [
-            {
-              subscriptionId: subscription._id,
-              userId: subscription.userId,
-              eventType: 'subscription_expired',
-              store: subscription.store,
-              metadata: {
-                expiredAt: now,
-              },
-            },
-          ],
-          { session }
-        );
+        await SubscriptionEvent.create([{
+          subscriptionId: subscription._id,
+          userId: subscription.userId,
+          eventType: 'subscription_expired',
+          store: subscription.store,
+          metadata: { expiredAt: now, reason: 'grace_period_ended' },
+        }], { session });
 
         updatedCount++;
       }
@@ -795,7 +873,22 @@ export async function updateExpiredSubscriptions(maxRetries = 3): Promise<number
       await session.commitTransaction();
       session.endSession();
 
-      // Send expiration emails and in-app notifications after successful commit (non-critical)
+      // Post-commit: send grace period renewal reminders
+      for (const { email, name, planName, gracePeriodEndDate } of gracePeriodUsers) {
+        try {
+          await sendRenewalReminderEmail({
+            email,
+            userName: name,
+            planName,
+            gracePeriodEndDate,
+            renewalUrl: `${FRONTEND_BASE_URL}/account?tab=subscription`,
+          });
+        } catch (emailError) {
+          paymentLogger.error(`Failed to send renewal reminder email to ${email}:`, emailError);
+        }
+      }
+
+      // Post-commit: send expiration notifications
       for (const { userId, email, name, planName } of expiredUsers) {
         try {
           await sendSubscriptionExpired(email, name, planName);
@@ -811,10 +904,7 @@ export async function updateExpiredSubscriptions(maxRetries = 3): Promise<number
             message: `Your ${planName} subscription has expired. Your account has been downgraded to the free plan.`,
             icon: 'alert-circle',
             priority: 'high',
-            data: {
-              actionUrl: '/account',
-              actionLabel: 'Resubscribe',
-            },
+            data: { actionUrl: '/account', actionLabel: 'Resubscribe' },
           });
         } catch (notifError) {
           paymentLogger.error(`Failed to create subscription expired notification for user ${userId}:`, notifError);
@@ -827,13 +917,11 @@ export async function updateExpiredSubscriptions(maxRetries = 3): Promise<number
       session.endSession();
       lastError = error;
 
-      // Check for transient transaction errors (WriteConflict) that can be retried
       const isTransientError =
         error.errorLabels?.includes('TransientTransactionError') ||
-        error.code === 112; // WriteConflict
+        error.code === 112;
 
       if (isTransientError && attempt < maxRetries) {
-        // Exponential backoff: 100ms, 200ms, 400ms...
         const delay = Math.pow(2, attempt - 1) * 100;
         await new Promise(resolve => setTimeout(resolve, delay));
         continue;

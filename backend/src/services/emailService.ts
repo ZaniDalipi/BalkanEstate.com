@@ -6259,6 +6259,76 @@ Questions? Contact us at support@balkanestateai.com
       category: 'alerts',
     });
   }
+
+  async sendRenewalReminderEmail(params: {
+    email: string;
+    userName: string;
+    planName: string;
+    gracePeriodEndDate: Date;
+    renewalUrl: string;
+  }): Promise<void> {
+    const graceEndStr = params.gracePeriodEndDate.toLocaleDateString('en-US', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+    const currentYear = new Date().getFullYear();
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #333; line-height: 1.6; margin: 0; padding: 0; background: #f9fafb; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .card { background: white; padding: 32px; border-radius: 12px; border: 1px solid #e5e7eb; }
+    .header { text-align: center; margin-bottom: 24px; }
+    .icon { font-size: 48px; margin-bottom: 12px; }
+    h2 { color: #1f2937; margin: 0 0 8px; font-size: 24px; }
+    .subtitle { color: #6b7280; font-size: 16px; margin: 0; }
+    .highlight { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 16px; margin: 20px 0; }
+    .highlight p { margin: 0; color: #92400e; font-weight: 500; }
+    .cta-button { display: block; width: fit-content; margin: 24px auto; background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px; text-align: center; }
+    .footer { color: #9ca3af; font-size: 12px; text-align: center; margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="icon">🔄</div>
+        <h2>Your Subscription Needs Renewal</h2>
+        <p class="subtitle">Hi ${escapeHtml(params.userName)}, your ${escapeHtml(params.planName)} plan has expired</p>
+      </div>
+
+      <p>Because you have <strong>Auto-Renewal enabled</strong>, we're giving you a 7-day grace period to complete your renewal and keep all your benefits uninterrupted.</p>
+
+      <div class="highlight">
+        <p>⏰ Grace period ends: <strong>${graceEndStr}</strong></p>
+      </div>
+
+      <p>During the grace period your subscription remains fully active. Complete your renewal before it ends to avoid any interruption to your service.</p>
+
+      <a href="${params.renewalUrl}" class="cta-button">Renew My Subscription</a>
+
+      <p style="color: #6b7280; font-size: 14px; text-align: center;">
+        If you no longer wish to continue, you can turn off auto-renewal in your account settings.
+      </p>
+    </div>
+    <div class="footer">
+      <p>© ${currentYear} BalkanEstateAI · <a href="${params.renewalUrl}" style="color: #9ca3af;">Manage Subscription</a></p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: params.email,
+      subject: `Action Required: Renew your ${escapeHtml(params.planName)} subscription`,
+      html,
+      category: 'noreply',
+    });
+  }
 }
 
 const emailServiceInstance = new EmailService();
@@ -6295,3 +6365,4 @@ export const sendLicenseRejectionEmail = emailServiceInstance.sendLicenseRejecti
 export const sendSubscriptionExpired = emailServiceInstance.sendSubscriptionExpired.bind(emailServiceInstance);
 export const sendSubscriptionExpiringSoon = emailServiceInstance.sendSubscriptionExpiringSoon.bind(emailServiceInstance);
 export const sendListingRequestEmail = emailServiceInstance.sendListingRequestEmail.bind(emailServiceInstance);
+export const sendRenewalReminderEmail = emailServiceInstance.sendRenewalReminderEmail.bind(emailServiceInstance);
