@@ -210,19 +210,26 @@ export const optimizeCloudinaryUrl = (
   const width = clampDimension(rawWidth, 4096);
   const height = clampDimension(rawHeight, 4096);
 
-  // Handle Cloudinary upload URLs
-  const uploadMatch = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(v\d+\/.+)$/);
-  if (uploadMatch) {
-    const transforms: string[] = [`f_${format}`, `q_${quality}`];
-    if (width) transforms.push(`w_${width}`);
-    if (height) transforms.push(`h_${height}`);
-    if (crop) transforms.push(`c_${crop}`);
-    if (gravity) transforms.push(`g_${gravity}`);
-    return `${uploadMatch[1]}${transforms.join(',')}/${uploadMatch[2]}`;
-  }
-
-  // Handle Cloudinary URLs that already have transforms (don't double-transform)
+  // Handle Cloudinary upload URLs — including those with existing transforms baked in.
+  // We find the version segment (v{digits}) to separate any pre-existing transforms
+  // from the versioned public ID, then rebuild the URL with only the requested options.
+  // This prevents pre-existing crops (e.g. c_fill,ar_16:9) from silently cropping images.
   if (url.includes('res.cloudinary.com') && url.includes('/image/upload/')) {
+    const uploadBaseMatch = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/);
+    if (uploadBaseMatch) {
+      const [, base, rest] = uploadBaseMatch;
+      // Find the version segment v{digits} to strip any transforms before it
+      const parts = rest.split('/');
+      const versionIdx = parts.findIndex(p => /^v\d+$/.test(p));
+      const versionedPath = versionIdx !== -1 ? parts.slice(versionIdx).join('/') : rest;
+
+      const transforms: string[] = [`f_${format}`, `q_${quality}`];
+      if (width) transforms.push(`w_${width}`);
+      if (height) transforms.push(`h_${height}`);
+      if (crop) transforms.push(`c_${crop}`);
+      if (gravity) transforms.push(`g_${gravity}`);
+      return `${base}${transforms.join(',')}/${versionedPath}`;
+    }
     return url;
   }
 
