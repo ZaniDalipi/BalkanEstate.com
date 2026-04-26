@@ -96,7 +96,7 @@ export const getPropertyImagePlaceholder = (imageUrl: string | undefined): strin
   if (!imageUrl) return '';
   const uploadMatch = imageUrl.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(v\d+\/.+)$/);
   if (!uploadMatch) return '';
-  return `${uploadMatch[1]}w_20,c_fill,q_10,e_blur:500,f_auto/${uploadMatch[2]}`;
+  return `${uploadMatch[1]}w_40,c_fill,q_10,e_blur:500,f_auto/${uploadMatch[2]}`;
 };
 
 /**
