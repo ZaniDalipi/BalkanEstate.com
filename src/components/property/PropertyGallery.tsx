@@ -397,17 +397,12 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   return (
     <div className="overflow-hidden shadow-sm border-b border-neutral-200">
-      {/* ── Gallery frame — adapts to each image's natural aspect ratio so the
-           full image always fills the frame edge-to-edge (Zillow-style) ── */}
+      {/* ── Gallery frame — fixed height with blurred LQIP background filling empty space ── */}
       <div
-        className="relative bg-neutral-900 overflow-hidden mx-auto"
+        className="relative w-full bg-neutral-900 overflow-hidden"
         style={{
-          aspectRatio: imageAspect,
-          width: '100%',
-          maxHeight: '80vh',
-          maxWidth: `calc(80vh * ${imageAspect})`,
+          height: '80vh',
           minHeight: '320px',
-          transition: 'aspect-ratio 350ms cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       >
 
