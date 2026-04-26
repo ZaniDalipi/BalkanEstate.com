@@ -400,10 +400,12 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
       {/* ── Gallery frame — adapts to each image's natural aspect ratio so the
            full image always fills the frame edge-to-edge (Zillow-style) ── */}
       <div
-        className="relative w-full bg-neutral-900 overflow-hidden"
+        className="relative bg-neutral-900 overflow-hidden mx-auto"
         style={{
           aspectRatio: imageAspect,
+          width: '100%',
           maxHeight: '80vh',
+          maxWidth: `calc(80vh * ${imageAspect})`,
           minHeight: '320px',
           transition: 'aspect-ratio 350ms cubic-bezier(0.4, 0, 0.2, 1)',
         }}
