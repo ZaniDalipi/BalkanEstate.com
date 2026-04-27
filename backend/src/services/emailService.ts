@@ -6178,7 +6178,7 @@ Questions? Contact us at support@balkanestateai.com
     currentPlan: string;
     currentListingLimit: number;
   }): Promise<void> {
-    const supportEmail = this.fromEmails?.alerts || 'support@balkanestateai.com';
+    const supportEmail = this.fromEmails?.inquiries || 'inquiries@balkanestateai.com';
     const currentYear = new Date().getFullYear();
 
     const html = `
@@ -6256,7 +6256,7 @@ Questions? Contact us at support@balkanestateai.com
       to: supportEmail,
       subject: `Listing Limit Request from ${escapeHtml(params.userName)}`,
       html,
-      category: 'alerts',
+      category: 'inquiries',
     });
   }
 
