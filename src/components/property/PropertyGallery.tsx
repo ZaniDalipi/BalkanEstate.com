@@ -69,10 +69,10 @@ const imageSlideVariants = {
 // Ken Burns pan directions — each image gets a unique slow pan starting from the
 // opposite corner so the motion feels intentional and cinematic (like a real camera pan).
 const KB_DIRECTIONS = [
-  { initial: { x: '2%',  y: '1%'  }, animate: { x: '-2%', y: '-1%' } }, // TR → BL
-  { initial: { x: '-2%', y: '-1%' }, animate: { x: '2%',  y: '1%'  } }, // BL → TR
-  { initial: { x: '2%',  y: '-1%' }, animate: { x: '-2%', y: '1%'  } }, // BR → TL
-  { initial: { x: '-2%', y: '1%'  }, animate: { x: '2%',  y: '-1%' } }, // TL → TR
+  { initial: { x: '0.8%',  y: '0.4%'  }, animate: { x: '-0.8%', y: '-0.4%' } },
+  { initial: { x: '-0.8%', y: '-0.4%' }, animate: { x: '0.8%',  y: '0.4%'  } },
+  { initial: { x: '0.8%',  y: '-0.4%' }, animate: { x: '-0.8%', y: '0.4%'  } },
+  { initial: { x: '-0.8%', y: '0.4%'  }, animate: { x: '0.8%',  y: '-0.4%' } },
 ] as const;
 
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
