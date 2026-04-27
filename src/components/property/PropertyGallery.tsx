@@ -66,15 +66,27 @@ const imageSlideVariants = {
   }),
 };
 
-// Ken Burns pan directions — each image gets a unique slow pan starting from the
-// opposite corner so the motion feels intentional and cinematic (like a real camera pan).
-// Pan range ±5% x / ±2% y: portrait images (9:16, 4:5) have side bars that absorb
-// the pan so they stay fully visible; landscape images have only minimal edge shift.
-const KB_DIRECTIONS = [
-  { initial: { x: '5%',  y: '2%'  }, animate: { x: '-5%', y: '-2%' } },
-  { initial: { x: '-5%', y: '-2%' }, animate: { x: '5%',  y: '2%'  } },
-  { initial: { x: '5%',  y: '-2%' }, animate: { x: '-5%', y: '2%'  } },
-  { initial: { x: '-5%', y: '2%'  }, animate: { x: '5%',  y: '-2%' } },
+// Ken Burns directions split by orientation:
+//
+// Landscape (fills container width): scale 1.06 baked in so the image is slightly
+// larger than the container, giving the pan 3% of room on each side with no edge
+// clipping or LQIP bleed-through during the 25s animation.
+//
+// Portrait (9:16, 4:5 — fills container height, has side bars): no scale needed;
+// the wide bar areas on each side absorb the full ±5% x pan so the image stays
+// 100% visible. No y-pan to avoid clipping the top/bottom of the tall image.
+const KB_LANDSCAPE = [
+  { initial: { scale: 1.06, x: '3%',  y: '1.5%'  }, animate: { scale: 1.06, x: '-3%', y: '-1.5%' } },
+  { initial: { scale: 1.06, x: '-3%', y: '-1.5%' }, animate: { scale: 1.06, x: '3%',  y: '1.5%'  } },
+  { initial: { scale: 1.06, x: '3%',  y: '-1.5%' }, animate: { scale: 1.06, x: '-3%', y: '1.5%'  } },
+  { initial: { scale: 1.06, x: '-3%', y: '1.5%'  }, animate: { scale: 1.06, x: '3%',  y: '-1.5%' } },
+] as const;
+
+const KB_PORTRAIT = [
+  { initial: { x: '5%',  y: '0%' }, animate: { x: '-5%', y: '0%' } },
+  { initial: { x: '-5%', y: '0%' }, animate: { x: '5%',  y: '0%' } },
+  { initial: { x: '5%',  y: '0%' }, animate: { x: '-5%', y: '0%' } },
+  { initial: { x: '-5%', y: '0%' }, animate: { x: '5%',  y: '0%' } },
 ] as const;
 
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
@@ -124,6 +136,15 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   const [mainImageError, setMainImageError] = useState(false);
   const [viewMode, setViewMode] = useState<'photos' | 'streetview' | 'video'>('photos');
+  // Aspect ratio of the currently displayed image — used to pick the right Ken Burns preset.
+  // Default 16/9 (landscape) so the first frame always uses the landscape preset.
+  const [imageAspect, setImageAspect] = useState<number>(16 / 9);
+  const handleMainImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+      setImageAspect(img.naturalWidth / img.naturalHeight);
+    }
+  }, []);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -441,18 +462,19 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                       x: { type: 'spring', stiffness: 260, damping: 26 },
                     }}
                   >
-                    {/* Ken Burns slow pan — unique direction per image, starts from opposite corner.
-                         Pan motion alone creates the video-like camera effect without zoom clipping. */}
+                    {/* Ken Burns: landscape images get scale 1.06 + diagonal pan so the
+                         slightly-oversized image can travel ±3% without exposing edges.
+                         Portrait images (side bars) get no scale + ±5% x-only pan. */}
+                    {(() => {
+                      const isLandscape = imageAspect >= 16 / 9;
+                      const kb = isLandscape
+                        ? KB_LANDSCAPE[currentImageIndex % KB_LANDSCAPE.length]
+                        : KB_PORTRAIT[currentImageIndex % KB_PORTRAIT.length];
+                      return (
                     <motion.div
                       className="absolute inset-0 overflow-hidden"
-                      initial={{
-                        x: KB_DIRECTIONS[currentImageIndex % KB_DIRECTIONS.length].initial.x,
-                        y: KB_DIRECTIONS[currentImageIndex % KB_DIRECTIONS.length].initial.y,
-                      }}
-                      animate={{
-                        x: KB_DIRECTIONS[currentImageIndex % KB_DIRECTIONS.length].animate.x,
-                        y: KB_DIRECTIONS[currentImageIndex % KB_DIRECTIONS.length].animate.y,
-                      }}
+                      initial={kb.initial}
+                      animate={kb.animate}
                       transition={{ duration: 25, ease: 'linear' }}
                       style={{ willChange: 'transform' }}
                     >
@@ -470,9 +492,12 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                         loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
                         className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
                         draggable={false}
+                        onLoad={handleMainImageLoad}
                         onError={() => setMainImageError(true)}
                       />
                     </motion.div>
+                      );
+                    })()}
                   </motion.div>
                 </AnimatePresence>
               </>
