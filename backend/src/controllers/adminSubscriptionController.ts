@@ -18,6 +18,7 @@ import { invalidateCache } from '../middleware/cache';
 import { getObjectIdParam } from '../utils/validateParams';
 import { escapeRegex } from '../utils/escapeRegex';
 import { PRO_TIER_LIMITS, ENTERPRISE_TIER_LIMITS, FREE_TIER_LIMITS } from '../config/subscriptionConstants';
+import { createNotificationWithPush } from '../services/engagementService';
 
 /**
  * @desc    Get all subscriptions with pagination and filters
@@ -522,7 +523,7 @@ export const adjustListingLimit = async (req: Request, res: Response): Promise<v
   try {
     const userId = getObjectIdParam(req, res, 'userId');
     if (!userId) return;
-    const { listingsLimit, reason } = req.body;
+    const { listingsLimit, reason, sendNotification } = req.body;
 
     if (listingsLimit === undefined || listingsLimit === null || Number(listingsLimit) < 0) {
       res.status(400).json({ message: 'listingsLimit must be a non-negative number' });
@@ -536,6 +537,7 @@ export const adjustListingLimit = async (req: Request, res: Response): Promise<v
     }
 
     const newLimit = Number(listingsLimit);
+    const oldLimit = user.subscription?.listingsLimit ?? 0;
 
     // Update unified subscription object — initialize if missing
     if (!user.subscription) {
@@ -585,6 +587,24 @@ export const adjustListingLimit = async (req: Request, res: Response): Promise<v
     invalidateCache('/api/properties');
 
     adminLogger.info(`[Admin] Listing limit for user ${userId} set to ${newLimit} by admin ${(req as any).user?._id}`);
+
+    // Send notification to user about listing limit increase (if enabled)
+    if (sendNotification !== false) {
+      await createNotificationWithPush({
+        userId,
+        type: 'listing_limit_increased',
+        title: 'Listing Limit Increased',
+        message: `Your monthly listing limit has been increased to ${newLimit} listings. You can now create more listings this month!`,
+        icon: 'check-circle',
+        priority: 'high',
+        data: {
+          newLimit,
+          previousLimit: oldLimit,
+        },
+      }).catch((err) => {
+        adminLogger.error(`[Admin] Failed to send notification for listing limit increase:`, err);
+      });
+    }
 
     res.json({
       success: true,

@@ -420,6 +420,7 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [err, setErr] = useState('');
+  const [sendNotification, setSendNotification] = useState(true);
 
   // Monthly counter editor state
   const currentMonthlyCounter = viewingUser.subscription?.listingsCreatedThisMonth ?? 0;
@@ -485,7 +486,7 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
     try {
       const response = await apiRequest(`/admin/subscriptions/listing-limit/${viewingUser._id}`, {
         method: 'PATCH',
-        body: { listingsLimit: val, reason: 'Admin manual override' },
+        body: { listingsLimit: val, reason: 'Admin manual override', sendNotification },
         requiresAuth: true,
       });
 
@@ -610,7 +611,7 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
             (sub.listingsLimit: {currentLimit} · activeListingsLimit: {viewingUser.activeListingsLimit ?? '—'} · {viewingUser.subscription?.activeListingsCount ?? 0} active)
           </span>
         </label>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-2">
           <input
             type="number"
             min={0}
@@ -634,6 +635,16 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
           </button>
           <span className="text-xs text-gray-400">listings/month</span>
         </div>
+        <label className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-100 p-1 rounded mb-2">
+          <input
+            type="checkbox"
+            checked={sendNotification}
+            onChange={e => setSendNotification(e.target.checked)}
+            className="w-4 h-4 rounded border-gray-300 cursor-pointer"
+            disabled={saving}
+          />
+          <span className="text-xs text-gray-600">Notify user of limit increase</span>
+        </label>
         {err && <p className="text-xs text-red-600 font-medium mt-1">{err}</p>}
         {saved && <p className="text-xs text-green-600 font-medium mt-1">✓ Limit updated successfully</p>}
       </div>
