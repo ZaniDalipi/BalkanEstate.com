@@ -66,27 +66,32 @@ const imageSlideVariants = {
   }),
 };
 
-// Ken Burns directions split by orientation:
-//
-// Landscape (fills container width): scale 1.06 baked in so the image is slightly
-// larger than the container, giving the pan 3% of room on each side with no edge
-// clipping or LQIP bleed-through during the 25s animation.
-//
-// Portrait (9:16, 4:5 — fills container height, has side bars): no scale needed;
-// the wide bar areas on each side absorb the full ±5% x pan so the image stays
-// 100% visible. No y-pan to avoid clipping the top/bottom of the tall image.
-const KB_LANDSCAPE = [
-  { initial: { scale: 1.06, x: '3%',  y: '1.5%'  }, animate: { scale: 1.06, x: '-3%', y: '-1.5%' } },
-  { initial: { scale: 1.06, x: '-3%', y: '-1.5%' }, animate: { scale: 1.06, x: '3%',  y: '1.5%'  } },
-  { initial: { scale: 1.06, x: '3%',  y: '-1.5%' }, animate: { scale: 1.06, x: '-3%', y: '1.5%'  } },
-  { initial: { scale: 1.06, x: '-3%', y: '1.5%'  }, animate: { scale: 1.06, x: '3%',  y: '-1.5%' } },
+// Container is fixed 16:9. Each KB preset uses the available bar space for panning
+// so the image is never scaled or cropped — object-contain always shows it fully.
+const CONTAINER_ASPECT = 16 / 9; // 1.778
+
+// Wide images (aspect > 16/9): fill container width, have top/bottom bars → y-only pan
+const KB_WIDE = [
+  { initial: { x: '0%', y: '4%'  }, animate: { x: '0%', y: '-4%' } },
+  { initial: { x: '0%', y: '-4%' }, animate: { x: '0%', y: '4%'  } },
+  { initial: { x: '0%', y: '4%'  }, animate: { x: '0%', y: '-4%' } },
+  { initial: { x: '0%', y: '-4%' }, animate: { x: '0%', y: '4%'  } },
 ] as const;
 
-const KB_PORTRAIT = [
+// Narrow images (aspect < 16/9): fill container height, have side bars → x-only pan
+const KB_NARROW = [
   { initial: { x: '5%',  y: '0%' }, animate: { x: '-5%', y: '0%' } },
   { initial: { x: '-5%', y: '0%' }, animate: { x: '5%',  y: '0%' } },
   { initial: { x: '5%',  y: '0%' }, animate: { x: '-5%', y: '0%' } },
   { initial: { x: '-5%', y: '0%' }, animate: { x: '5%',  y: '0%' } },
+] as const;
+
+// Exact-fit images (aspect ≈ 16/9, within ±5%): no usable bars → very subtle diagonal
+const KB_EXACT = [
+  { initial: { x: '1%',  y: '0.5%'  }, animate: { x: '-1%', y: '-0.5%' } },
+  { initial: { x: '-1%', y: '-0.5%' }, animate: { x: '1%',  y: '0.5%'  } },
+  { initial: { x: '1%',  y: '-0.5%' }, animate: { x: '-1%', y: '0.5%'  } },
+  { initial: { x: '-1%', y: '0.5%'  }, animate: { x: '1%',  y: '-0.5%' } },
 ] as const;
 
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
@@ -462,14 +467,16 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                       x: { type: 'spring', stiffness: 260, damping: 26 },
                     }}
                   >
-                    {/* Ken Burns: landscape images get scale 1.06 + diagonal pan so the
-                         slightly-oversized image can travel ±3% without exposing edges.
-                         Portrait images (side bars) get no scale + ±5% x-only pan. */}
+                    {/* Ken Burns: pan direction matched to available bar space — no scale ever.
+                         Wide → y-only (top/bottom bars), Narrow → x-only (side bars),
+                         Exact-fit → subtle diagonal (no bars, ±1%). Full image always visible. */}
                     {(() => {
-                      const isLandscape = imageAspect >= 16 / 9;
-                      const kb = isLandscape
-                        ? KB_LANDSCAPE[currentImageIndex % KB_LANDSCAPE.length]
-                        : KB_PORTRAIT[currentImageIndex % KB_PORTRAIT.length];
+                      const TOL = 0.05 * CONTAINER_ASPECT;
+                      const kbTable =
+                        imageAspect > CONTAINER_ASPECT + TOL ? KB_WIDE :
+                        imageAspect < CONTAINER_ASPECT - TOL ? KB_NARROW :
+                        KB_EXACT;
+                      const kb = kbTable[currentImageIndex % kbTable.length];
                       return (
                     <motion.div
                       className="absolute inset-0 overflow-hidden"
