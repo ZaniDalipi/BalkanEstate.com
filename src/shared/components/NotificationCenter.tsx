@@ -35,7 +35,7 @@ interface Notification {
 
 const NotificationCenter: React.FC = () => {
   const { t } = useTranslation(['common']);
-  const { state, dispatch } = useAppContext();
+  const { state, dispatch, checkAuthStatus } = useAppContext();
   const { setDirection } = useNavigationDirection();
   const { isAuthenticated } = state;
 
@@ -49,6 +49,32 @@ const NotificationCenter: React.FC = () => {
   const isAuthenticatedRef = useRef(isAuthenticated);
   isAuthenticatedRef.current = isAuthenticated;
 
+  // Track previous unread count to detect new notifications
+  const prevUnreadCountRef = useRef(0);
+  const checkAuthStatusRef = useRef(checkAuthStatus);
+  checkAuthStatusRef.current = checkAuthStatus;
+
+  // Check if any new notifications require user data refresh (e.g., listing_limit_increased)
+  const checkForUserDataRefresh = useCallback(async () => {
+    if (!isAuthenticatedRef.current) return;
+    try {
+      const data = await apiRequest<{ notifications: Notification[] }>('/notifications?limit=5', {
+        requiresAuth: true,
+        encryptResponse: true,
+      });
+      const recentNotifications = data.notifications || [];
+      // If any unread notification is a listing_limit_increased type, refresh user data
+      const hasLimitChange = recentNotifications.some(
+        (n) => !n.isRead && n.type === 'listing_limit_increased'
+      );
+      if (hasLimitChange) {
+        await checkAuthStatusRef.current();
+      }
+    } catch (error) {
+      // Silently handle error
+    }
+  }, []);
+
   // Fetch unread count - stable callback that doesn't change across renders
   const fetchUnreadCount = useCallback(async () => {
     if (!isAuthenticatedRef.current) return;
@@ -59,11 +85,17 @@ const NotificationCenter: React.FC = () => {
         requiresAuth: true,
         encryptResponse: true,
       });
-      setUnreadCount(data.count || 0);
+      const newCount = data.count || 0;
+      // If unread count increased, check for notifications that require user data refresh
+      if (newCount > prevUnreadCountRef.current) {
+        checkForUserDataRefresh();
+      }
+      prevUnreadCountRef.current = newCount;
+      setUnreadCount(newCount);
     } catch (error) {
       // Silently handle error - unread count will remain unchanged
     }
-  }, []); // Stable: uses ref for isAuthenticated, API_URL is module constant
+  }, [checkForUserDataRefresh]); // Stable: uses ref for isAuthenticated, API_URL is module constant
 
   // Fetch notifications - stable callback
   const fetchNotifications = useCallback(async () => {
@@ -178,11 +210,11 @@ const NotificationCenter: React.FC = () => {
     }
   };
 
-  // Fetch on mount and poll every 5 minutes (reduced from 1 minute)
+  // Fetch on mount and poll every 60 seconds for responsive updates
   // Also pause polling when tab is hidden and resume when visible
   useEffect(() => {
     fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 300000); // 5 minutes
+    const interval = setInterval(fetchUnreadCount, 60000); // 1 minute
 
     // Fetch when tab becomes visible again
     const handleVisibilityChange = () => {
@@ -198,12 +230,13 @@ const NotificationCenter: React.FC = () => {
     };
   }, [fetchUnreadCount]);
 
-  // Fetch notifications when dropdown opens
+  // Fetch notifications when dropdown opens, and check for user data refresh
   useEffect(() => {
     if (isOpen) {
       fetchNotifications();
+      checkForUserDataRefresh();
     }
-  }, [isOpen, fetchNotifications]);
+  }, [isOpen, fetchNotifications, checkForUserDataRefresh]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -248,6 +281,8 @@ const NotificationCenter: React.FC = () => {
         return <CheckCircle className="w-4 h-4 text-green-500" />;
       case 'viewing_declined':
         return <XCircle className="w-4 h-4 text-red-500" />;
+      case 'listing_limit_increased':
+        return <CheckCircle className="w-4 h-4 text-blue-500" />;
       default:
         return <AlertCircle className="w-4 h-4 text-gray-500" />;
     }
