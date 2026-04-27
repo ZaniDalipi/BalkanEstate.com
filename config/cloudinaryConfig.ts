@@ -94,9 +94,12 @@ export const getCityImageUrl = (
  */
 export const getPropertyImagePlaceholder = (imageUrl: string | undefined): string => {
   if (!imageUrl) return '';
-  const uploadMatch = imageUrl.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(v\d+\/.+)$/);
-  if (!uploadMatch) return '';
-  return `${uploadMatch[1]}w_20,c_fill,q_10,e_blur:500,f_auto/${uploadMatch[2]}`;
+  const baseMatch = imageUrl.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/);
+  if (!baseMatch) return '';
+  const [, base, rest] = baseMatch;
+  const cleanPath = stripCloudinaryTransforms(rest);
+  if (!cleanPath) return '';
+  return `${base}w_20,c_fill,q_10,e_blur:500,f_auto/${cleanPath}`;
 };
 
 /**
@@ -161,6 +164,29 @@ export const SUPPORTED_CITIES = [
 // ============================================================================
 
 /**
+ * Strips Cloudinary transform segments from the path portion of an upload URL.
+ * Handles both versioned URLs (v1234/...) and unversioned URLs with baked-in
+ * transforms (c_fill,ar_16:9/my_image.jpg).
+ *
+ * Cloudinary transform tokens always follow the pattern: shortKey_value
+ * e.g. c_fill, w_1200, g_auto, ar_16:9, e_blur:500
+ * Real path segments (folders, filenames) do not match this pattern.
+ */
+const stripCloudinaryTransforms = (rest: string): string => {
+  const parts = rest.split('/');
+  const versionIdx = parts.findIndex(p => /^v\d+$/.test(p));
+  if (versionIdx !== -1) {
+    return parts.slice(versionIdx).join('/');
+  }
+  // No version segment — strip any leading transform segments.
+  // A transform segment has all comma-separated tokens matching key_value (1-3 char key).
+  const firstNonTransform = parts.findIndex(
+    p => !p.split(',').every(token => /^[a-z]{1,3}_/.test(token))
+  );
+  return firstNonTransform !== -1 ? parts.slice(firstNonTransform).join('/') : rest;
+};
+
+/**
  * Optimizes a Cloudinary-uploaded image URL by injecting transformation parameters.
  *
  * Cloudinary upload URLs follow this format:
@@ -218,17 +244,14 @@ export const optimizeCloudinaryUrl = (
     const uploadBaseMatch = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/);
     if (uploadBaseMatch) {
       const [, base, rest] = uploadBaseMatch;
-      // Find the version segment v{digits} to strip any transforms before it
-      const parts = rest.split('/');
-      const versionIdx = parts.findIndex(p => /^v\d+$/.test(p));
-      const versionedPath = versionIdx !== -1 ? parts.slice(versionIdx).join('/') : rest;
+      const cleanPath = stripCloudinaryTransforms(rest);
 
       const transforms: string[] = [`f_${format}`, `q_${quality}`];
       if (width) transforms.push(`w_${width}`);
       if (height) transforms.push(`h_${height}`);
       if (crop) transforms.push(`c_${crop}`);
       if (gravity) transforms.push(`g_${gravity}`);
-      return `${base}${transforms.join(',')}/${versionedPath}`;
+      return `${base}${transforms.join(',')}/${cleanPath}`;
     }
     return url;
   }
@@ -263,7 +286,7 @@ export const cloudinarySrcSet = (
   if (!/^https?:\/\//i.test(url)) return '';
 
   // Only generate srcSet for Cloudinary upload URLs
-  const uploadMatch = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(v\d+\/.+)$/);
+  const uploadMatch = url.match(/^https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/.+$/);
   if (!uploadMatch) return '';
 
   return widths
