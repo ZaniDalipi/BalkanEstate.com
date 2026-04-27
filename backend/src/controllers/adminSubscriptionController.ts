@@ -588,6 +588,10 @@ export const adjustListingLimit = async (req: Request, res: Response): Promise<v
 
     adminLogger.info(`[Admin] Listing limit for user ${userId} set to ${newLimit} by admin ${(req as any).user?._id}`);
 
+    // Invalidate user caches so they get fresh data on next request
+    invalidateCache(`/api/auth/me/${userId}`);
+    invalidateCache(`/api/users/${userId}`);
+
     // Send notification to user about listing limit increase (if enabled)
     if (sendNotification !== false) {
       await createNotificationWithPush({
