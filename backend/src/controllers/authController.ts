@@ -953,8 +953,23 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       }
 
       // Sync listingsLimit for all paid tiers based on their actual DB Product value
-      if (listingsLimit > 0 && user.subscription.listingsLimit !== listingsLimit && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer') {
-        user.subscription.listingsLimit = listingsLimit;
+      // BUT: respect admin overrides — when an admin manually sets a custom limit
+      // via /admin/subscriptions/listing-limit/:userId, they update both
+      // user.subscription.listingsLimit and user.activeListingsLimit to the same value.
+      // If activeListingsLimit differs from the product default, that's the admin
+      // override and must be preserved (otherwise getMe stomps it on every call).
+      if (listingsLimit > 0 && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer') {
+        const hasAdminOverride =
+          typeof user.activeListingsLimit === 'number' &&
+          user.activeListingsLimit !== listingsLimit;
+
+        if (hasAdminOverride) {
+          // Preserve admin's custom limit on subscription.listingsLimit
+          user.subscription.listingsLimit = user.activeListingsLimit as number;
+        } else if (user.subscription.listingsLimit !== listingsLimit) {
+          // No override — sync to product default
+          user.subscription.listingsLimit = listingsLimit;
+        }
       }
 
     }
