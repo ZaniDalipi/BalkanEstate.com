@@ -68,11 +68,13 @@ const imageSlideVariants = {
 
 // Ken Burns pan directions — each image gets a unique slow pan starting from the
 // opposite corner so the motion feels intentional and cinematic (like a real camera pan).
+// Pan range ±5% x / ±2% y: portrait images (9:16, 4:5) have side bars that absorb
+// the pan so they stay fully visible; landscape images have only minimal edge shift.
 const KB_DIRECTIONS = [
-  { initial: { x: '0.8%',  y: '0.4%'  }, animate: { x: '-0.8%', y: '-0.4%' } },
-  { initial: { x: '-0.8%', y: '-0.4%' }, animate: { x: '0.8%',  y: '0.4%'  } },
-  { initial: { x: '0.8%',  y: '-0.4%' }, animate: { x: '-0.8%', y: '0.4%'  } },
-  { initial: { x: '-0.8%', y: '0.4%'  }, animate: { x: '0.8%',  y: '-0.4%' } },
+  { initial: { x: '5%',  y: '2%'  }, animate: { x: '-5%', y: '-2%' } },
+  { initial: { x: '-5%', y: '-2%' }, animate: { x: '5%',  y: '2%'  } },
+  { initial: { x: '5%',  y: '-2%' }, animate: { x: '-5%', y: '2%'  } },
+  { initial: { x: '-5%', y: '2%'  }, animate: { x: '5%',  y: '-2%' } },
 ] as const;
 
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
