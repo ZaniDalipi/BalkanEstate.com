@@ -6177,6 +6177,7 @@ Questions? Contact us at support@balkanestateai.com
     message: string;
     currentPlan: string;
     currentListingLimit: number;
+    pricePerMonth?: number;
   }): Promise<void> {
     const supportEmail = this.fromEmails?.inquiries || 'inquiries@balkanestateai.com';
     const currentYear = new Date().getFullYear();
@@ -6196,6 +6197,9 @@ Questions? Contact us at support@balkanestateai.com
     .info-row strong { color: #374151; }
     .info-row span { color: #6b7280; text-align: right; }
     .message-box { background: #f3f4f6; padding: 12px; border-left: 4px solid #3b82f6; border-radius: 4px; margin: 12px 0; }
+    .user-message { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 4px; margin: 16px 0; }
+    .user-message strong { color: #b45309; display: block; margin-bottom: 8px; }
+    .user-message p { color: #92400e; margin: 0; }
     .footer { color: #6b7280; font-size: 12px; text-align: center; margin-top: 24px; padding-top: 12px; border-top: 1px solid #e5e7eb; }
   </style>
 </head>
@@ -6229,18 +6233,23 @@ Questions? Contact us at support@balkanestateai.com
         <span>${params.currentListingLimit} listings/month</span>
       </div>
 
+      ${params.pricePerMonth ? `
+      <div class="info-row">
+        <strong>Price Per Month:</strong>
+        <span>$${(params.pricePerMonth / 100).toFixed(2)}</span>
+      </div>
+      ` : ''}
+
       ${params.message ? `
-      <div style="margin-top: 16px;">
-        <strong style="color: #374151;">User's Message:</strong>
-        <div class="message-box">
-          ${escapeHtml(params.message).replace(/\n/g, '<br>')}
-        </div>
+      <div class="user-message">
+        <strong>💬 User's Request:</strong>
+        <p>${escapeHtml(params.message).replace(/\n/g, '<br>')}</p>
       </div>
       ` : ''}
 
       <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
         <p style="color: #6b7280; font-size: 14px; margin: 0;">
-          This user has requested an increase in their monthly listing limit. Review their request and adjust the limit in the admin panel if appropriate.
+          This user has requested an increase in their monthly listing limit. Review their request and adjust the limit in the admin panel if appropriate. Once processed, contact them to confirm the change.
         </p>
       </div>
     </div>

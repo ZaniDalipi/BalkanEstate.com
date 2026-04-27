@@ -934,6 +934,12 @@ export const requestMoreListings = async (req: Request, res: Response): Promise<
 
     const { sendListingRequestEmail } = await import('../services/emailService');
 
+    // Get current product to show price per listing
+    const product = user.subscriptionPlan ?
+      await Product.findOne({ productId: user.subscriptionPlan }) :
+      null;
+    const pricePerMonth = product?.price || 0;
+
     await sendListingRequestEmail({
       userEmail: user.email,
       userName: user.name,
@@ -941,6 +947,7 @@ export const requestMoreListings = async (req: Request, res: Response): Promise<
       message: message || '',
       currentPlan: user.subscriptionPlan || 'Free',
       currentListingLimit: user.subscription?.listingsLimit || 0,
+      pricePerMonth,
     });
 
     res.status(200).json({
