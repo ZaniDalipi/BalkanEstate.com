@@ -49,26 +49,32 @@ const NotificationCenter: React.FC = () => {
   const isAuthenticatedRef = useRef(isAuthenticated);
   isAuthenticatedRef.current = isAuthenticated;
 
-  // Track previous unread count to detect new notifications
-  const prevUnreadCountRef = useRef(0);
   const checkAuthStatusRef = useRef(checkAuthStatus);
   checkAuthStatusRef.current = checkAuthStatus;
 
   // Check if any new notifications require user data refresh (e.g., listing_limit_increased)
+  // Only runs once per session to avoid infinite refresh loops
+  const hasCheckedForRefresh = useRef(false);
   const checkForUserDataRefresh = useCallback(async () => {
-    if (!isAuthenticatedRef.current) return;
+    if (!isAuthenticatedRef.current || hasCheckedForRefresh.current) return;
+    hasCheckedForRefresh.current = true;
     try {
       const data = await apiRequest<{ notifications: Notification[] }>('/notifications?limit=5', {
         requiresAuth: true,
         encryptResponse: true,
       });
       const recentNotifications = data.notifications || [];
-      // If any unread notification is a listing_limit_increased type, refresh user data
-      const hasLimitChange = recentNotifications.some(
+      // If any unread notification is a listing_limit_increased type, refresh user data and mark as read
+      const limitChangeNotif = recentNotifications.find(
         (n) => !n.isRead && n.type === 'listing_limit_increased'
       );
-      if (hasLimitChange) {
+      if (limitChangeNotif) {
         await checkAuthStatusRef.current();
+        // Mark the notification as read so it doesn't trigger refresh again
+        await apiRequest(`/notifications/${limitChangeNotif._id}/read`, {
+          method: 'PATCH',
+          requiresAuth: true,
+        });
       }
     } catch (error) {
       // Silently handle error
@@ -86,16 +92,11 @@ const NotificationCenter: React.FC = () => {
         encryptResponse: true,
       });
       const newCount = data.count || 0;
-      // If unread count increased, check for notifications that require user data refresh
-      if (newCount > prevUnreadCountRef.current) {
-        checkForUserDataRefresh();
-      }
-      prevUnreadCountRef.current = newCount;
       setUnreadCount(newCount);
     } catch (error) {
       // Silently handle error - unread count will remain unchanged
     }
-  }, [checkForUserDataRefresh]); // Stable: uses ref for isAuthenticated, API_URL is module constant
+  }, []);
 
   // Fetch notifications - stable callback
   const fetchNotifications = useCallback(async () => {
@@ -210,11 +211,13 @@ const NotificationCenter: React.FC = () => {
     }
   };
 
-  // Fetch on mount and poll every 60 seconds for responsive updates
+  // Fetch on mount and poll every 5 minutes
   // Also pause polling when tab is hidden and resume when visible
+  // Check for user data refresh on initial mount only
   useEffect(() => {
     fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 60000); // 1 minute
+    checkForUserDataRefresh();
+    const interval = setInterval(fetchUnreadCount, 300000); // 5 minutes
 
     // Fetch when tab becomes visible again
     const handleVisibilityChange = () => {
@@ -228,15 +231,14 @@ const NotificationCenter: React.FC = () => {
       clearInterval(interval);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [fetchUnreadCount]);
+  }, [fetchUnreadCount, checkForUserDataRefresh]);
 
-  // Fetch notifications when dropdown opens, and check for user data refresh
+  // Fetch notifications when dropdown opens
   useEffect(() => {
     if (isOpen) {
       fetchNotifications();
-      checkForUserDataRefresh();
     }
-  }, [isOpen, fetchNotifications, checkForUserDataRefresh]);
+  }, [isOpen, fetchNotifications]);
 
   // Close dropdown on outside click
   useEffect(() => {
