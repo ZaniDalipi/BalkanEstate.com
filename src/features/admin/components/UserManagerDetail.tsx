@@ -9,7 +9,7 @@ import {
 import { User, UserEditForm } from './useUserManager';
 import { apiRequest } from '@/src/shared/api';
 import { approveLicense, rejectLicense } from '../api/adminApi';
-import { useUpdateUserListingCounter } from '../hooks/useAdminData';
+import { useUpdateUserListingCounter, useUpdateUserListingLimit } from '../hooks/useAdminData';
 
 interface UserManagerDetailProps {
   // Detail modal
@@ -418,7 +418,6 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
   const currentLimit = viewingUser.subscription?.listingsLimit ?? 0;
   const [inputLimit, setInputLimit] = useState(String(currentLimit));
   const [displayLimit, setDisplayLimit] = useState(currentLimit);
-  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [err, setErr] = useState('');
   const [sendNotification, setSendNotification] = useState(true);
@@ -430,9 +429,11 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
   const [errMonthly, setErrMonthly] = useState('');
   const [resetMonthCheckbox, setResetMonthCheckbox] = useState(false);
 
-  // React Query mutation — handles optimistic update + cache invalidation
+  // React Query mutations — handle optimistic update + cache invalidation
   const counterMutation = useUpdateUserListingCounter();
+  const limitMutation = useUpdateUserListingLimit();
   const savingMonthly = counterMutation.isPending;
+  const saving = limitMutation.isPending;
 
   // Sync inputs only when switching to a different user. Doing so on counter
   // changes would stomp on the admin's in-progress edits; optimistic updates
@@ -469,7 +470,7 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
     return { valid: true };
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     // Validation
     const validation = validateNumber(inputLimit);
     if (!validation.valid) {
@@ -483,36 +484,32 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
       return;
     }
 
-    setSaving(true);
     setErr('');
-    try {
-      const response = await apiRequest(`/admin/subscriptions/listing-limit/${viewingUser._id}`, {
-        method: 'PATCH',
-        body: { listingsLimit: val, reason: 'Admin manual override', sendNotification },
-        requiresAuth: true,
-      });
-
-      if (!response.success) {
-        setErr(response.message || 'Failed to update listing limit');
-        setSaving(false);
-        return;
+    limitMutation.mutate(
+      {
+        userId: viewingUser._id,
+        listingsLimit: val,
+        sendNotification,
+      },
+      {
+        onSuccess: (response) => {
+          if (!response.success) {
+            setErr(response.message || 'Failed to update listing limit');
+            return;
+          }
+          // Persist the new value in local state — optimistic update
+          // already patched the React Query cache, so the parent's
+          // viewingUser will reflect this on next render too.
+          setInputLimit(String(val));
+          setDisplayLimit(val);
+          setSaved(true);
+          setTimeout(() => setSaved(false), 3000);
+        },
+        onError: (e: any) => {
+          setErr(e?.message || 'Error saving listing limit');
+        },
       }
-
-      // Immediately update both the input field and the display value
-      setInputLimit(String(val));
-      setDisplayLimit(val);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-
-      // Trigger parent refresh to sync across all components
-      if (onUpdate) {
-        onUpdate();
-      }
-    } catch (e: any) {
-      setErr(e.message || 'Error saving listing limit');
-    } finally {
-      setSaving(false);
-    }
+    );
   };
 
   const handleSaveMonthlyCounter = () => {
