@@ -6233,12 +6233,10 @@ Questions? Contact us at support@balkanestateai.com
         <span>${params.currentListingLimit} listings/month</span>
       </div>
 
-      ${params.pricePerMonth && params.currentListingLimit ? `
       <div class="info-row">
         <strong>Price Per Listing:</strong>
-        <span>$${((params.pricePerMonth / 100) / params.currentListingLimit).toFixed(2)}</span>
+        <span>€0.50</span>
       </div>
-      ` : ''}
 
       ${params.message ? `
       <div class="user-message">
