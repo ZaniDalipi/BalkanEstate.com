@@ -417,6 +417,7 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
   const { t } = useTranslation('admin');
   const currentLimit = viewingUser.subscription?.listingsLimit ?? 0;
   const [inputLimit, setInputLimit] = useState(String(currentLimit));
+  const [displayLimit, setDisplayLimit] = useState(currentLimit);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [err, setErr] = useState('');
@@ -438,6 +439,7 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
   // already keep the "current:" label in sync with the server.
   useEffect(() => {
     setInputLimit(String(currentLimit));
+    setDisplayLimit(currentLimit);
     setInputMonthlyCounter(String(currentMonthlyCounter));
     setSaved(false);
     setSavedMonthly(false);
@@ -448,7 +450,7 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
   }, [viewingUser._id]);
 
   // Track if value has changed from original
-  const hasLimitChanged = Number(inputLimit) !== currentLimit;
+  const hasLimitChanged = Number(inputLimit) !== displayLimit;
   const hasCounterChanged = Number(inputMonthlyCounter) !== currentMonthlyCounter;
 
   const formatDisplayDate = (dateStr?: string) => {
@@ -476,7 +478,7 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
     }
 
     const val = Number(inputLimit);
-    if (val === currentLimit) {
+    if (val === displayLimit) {
       setErr('No change from current value');
       return;
     }
@@ -496,8 +498,9 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
         return;
       }
 
-      // Immediately update the input field and show success
+      // Immediately update both the input field and the display value
       setInputLimit(String(val));
+      setDisplayLimit(val);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
 
@@ -608,7 +611,7 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
         <label className="text-xs font-semibold text-gray-600 block mb-1">
           {t('userDetail.listingLimitOverride')}
           <span className="font-normal text-gray-400 ml-1">
-            (sub.listingsLimit: {currentLimit} · activeListingsLimit: {viewingUser.activeListingsLimit ?? '—'} · {viewingUser.subscription?.activeListingsCount ?? 0} active)
+            (sub.listingsLimit: {displayLimit} · activeListingsLimit: {viewingUser.activeListingsLimit ?? '—'} · {viewingUser.subscription?.activeListingsCount ?? 0} active)
           </span>
         </label>
         <div className="flex items-center gap-2 mb-2">
