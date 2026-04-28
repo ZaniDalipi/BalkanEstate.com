@@ -65,30 +65,33 @@ const imageSlideVariants = {
   }),
 };
 
-// Container aspect ratio (16:9, the Zillow standard for property galleries).
+// Container aspect ratio (16:9 standard).
 const CONTAINER_ASPECT = 16 / 9; // 1.778
-// Images with aspect >= this are treated as landscape (object-cover, Zillow look).
-// Below this, treated as portrait (object-contain + LQIP blur on sides to preserve full image).
-const LANDSCAPE_THRESHOLD = 1.4;
 // Slow cinematic Ken Burns duration in seconds.
 const KEN_BURNS_DURATION = 25;
 
-// Ken Burns presets for LANDSCAPE images (object-cover, fills frame edge-to-edge).
-// Subtle scale 1.0 → 1.05 with tiny diagonal drift = the classic Zillow zoom-in feel.
-const KB_COVER = [
-  { initial: { scale: 1, x: '0%', y: '0%' }, animate: { scale: 1.05, x: '-1%', y: '-0.5%' } },
-  { initial: { scale: 1, x: '0%', y: '0%' }, animate: { scale: 1.05, x: '1%',  y: '0.5%'  } },
-  { initial: { scale: 1, x: '0%', y: '0%' }, animate: { scale: 1.05, x: '-1%', y: '0.5%'  } },
-  { initial: { scale: 1, x: '0%', y: '0%' }, animate: { scale: 1.05, x: '1%',  y: '-0.5%' } },
+// Wide images (aspect > container): fill width, have top/bottom bars → pan y-only
+const KB_WIDE = [
+  { initial: { x: '0%', y: '4%'  }, animate: { x: '0%', y: '-4%' } },
+  { initial: { x: '0%', y: '-4%' }, animate: { x: '0%', y: '4%'  } },
+  { initial: { x: '0%', y: '4%'  }, animate: { x: '0%', y: '-4%' } },
+  { initial: { x: '0%', y: '-4%' }, animate: { x: '0%', y: '4%'  } },
 ] as const;
 
-// Ken Burns presets for PORTRAIT images (object-contain, full image visible with blur on sides).
-// No scale (would clip the image). Pure x-pan ±3% sliding within the side bar space.
-const KB_CONTAIN = [
-  { initial: { scale: 1, x: '3%',  y: '0%' }, animate: { scale: 1, x: '-3%', y: '0%' } },
-  { initial: { scale: 1, x: '-3%', y: '0%' }, animate: { scale: 1, x: '3%',  y: '0%' } },
-  { initial: { scale: 1, x: '3%',  y: '0%' }, animate: { scale: 1, x: '-3%', y: '0%' } },
-  { initial: { scale: 1, x: '-3%', y: '0%' }, animate: { scale: 1, x: '3%',  y: '0%' } },
+// Narrow images (aspect < container): fill height, have side bars → pan x-only
+const KB_NARROW = [
+  { initial: { x: '5%',  y: '0%' }, animate: { x: '-5%', y: '0%' } },
+  { initial: { x: '-5%', y: '0%' }, animate: { x: '5%',  y: '0%' } },
+  { initial: { x: '5%',  y: '0%' }, animate: { x: '-5%', y: '0%' } },
+  { initial: { x: '-5%', y: '0%' }, animate: { x: '5%',  y: '0%' } },
+] as const;
+
+// Exact-fit images (aspect ≈ container): no bars → very subtle ±1% diagonal
+const KB_EXACT = [
+  { initial: { x: '1%',  y: '0.5%'  }, animate: { x: '-1%', y: '-0.5%' } },
+  { initial: { x: '-1%', y: '-0.5%' }, animate: { x: '1%',  y: '0.5%'  } },
+  { initial: { x: '1%',  y: '-0.5%' }, animate: { x: '-1%', y: '0.5%'  } },
+  { initial: { x: '-1%', y: '0.5%'  }, animate: { x: '1%',  y: '-0.5%' } },
 ] as const;
 
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
@@ -465,15 +468,18 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                       x: { duration: 0.6, ease: 'easeOut' },
                     }}
                   >
-                    {/* Zillow-style display:
-                         Landscape (>= 1.4) → object-cover (full-bleed) + scale 1→1.05 zoom.
-                         Portrait  (<  1.4) → object-contain (full image) + x-pan inside side bars.
-                         The blurred LQIP behind always fills any bar space gracefully. */}
+                    {/* Direction-aware Ken Burns: no scale ever applied.
+                         Wide images (aspect > 16/9) → y-pan through top/bottom bars.
+                         Narrow images (aspect < 16/9) → x-pan through side bars.
+                         Exact-fit images → very subtle ±1% diagonal (no visible bars).
+                         LQIP backdrop fills any letterbox bars gracefully. */}
                     {(() => {
-                      const isLandscape = imageAspect >= LANDSCAPE_THRESHOLD;
-                      const kbTable = isLandscape ? KB_COVER : KB_CONTAIN;
+                      const TOLERANCE = 0.05 * CONTAINER_ASPECT;
+                      const kbTable =
+                        imageAspect > CONTAINER_ASPECT + TOLERANCE ? KB_WIDE :
+                        imageAspect < CONTAINER_ASPECT - TOLERANCE ? KB_NARROW :
+                        KB_EXACT;
                       const kb = kbTable[currentImageIndex % kbTable.length];
-                      const objectFitClass = isLandscape ? 'object-cover' : 'object-contain';
                       return (
                     <motion.div
                       className="absolute inset-0 overflow-hidden"
@@ -494,7 +500,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                         fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
                         decoding="async"
                         loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
-                        className={`absolute inset-0 w-full h-full ${objectFitClass} pointer-events-none select-none`}
+                        className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
                         draggable={false}
                         onLoad={handleMainImageLoad}
                         onError={() => setMainImageError(true)}
