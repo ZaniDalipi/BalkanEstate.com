@@ -146,7 +146,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
   return (
     <div
-      className={`group bg-white rounded-2xl overflow-hidden shadow-sm border transition-all duration-300 text-left w-full flex flex-col cursor-pointer isolate ${getCardStyles()} ${
+      className={`group bg-white rounded-2xl overflow-hidden shadow-sm border transition-[transform,box-shadow,border-color,opacity] duration-300 text-left w-full flex flex-col cursor-pointer isolate ${getCardStyles()} ${
         isSold || isRented ? 'hover:shadow-md' : 'hover:shadow-lg hover:-translate-y-1 hover:scale-[1.01]'
       }`}
       onClick={onCardClick}
@@ -298,7 +298,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           {/* iOS-style Favorite Button - frosted glass */}
           <button
             onClick={onFavoriteClick}
-            className={`w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 touch-manipulation focus:outline-none active:scale-90 ${
+            className={`w-8 h-8 flex items-center justify-center rounded-full transition-[background-color,transform] duration-200 touch-manipulation focus:outline-none active:scale-90 ${
               isFavorited
                 ? 'bg-red-500 text-white'
                 : 'bg-black/20 backdrop-blur-md text-white border border-white/20'
@@ -417,7 +417,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
         <div className="grid grid-cols-4 gap-1.5 mb-2.5">
           {/* Beds */}
           <div
-            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-200"
+            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-[box-shadow,border-color] duration-200"
             aria-label={`${safeProperty.beds} ${safeProperty.beds === 1 ? t('property:features.bedroom') : t('property:features.bedrooms')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -429,7 +429,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
           {/* Baths */}
           <div
-            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-emerald-100 transition-all duration-200"
+            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-emerald-100 transition-[box-shadow,border-color] duration-200"
             aria-label={`${safeProperty.baths} ${safeProperty.baths === 1 ? t('property:features.bathroom') : t('property:features.bathrooms')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -441,7 +441,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
           {/* Living Rooms */}
           <div
-            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-purple-100 transition-all duration-200"
+            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-purple-100 transition-[box-shadow,border-color] duration-200"
             aria-label={`${safeProperty.livingRooms} ${safeProperty.livingRooms === 1 ? t('property:features.livingRoom') : t('property:features.livingRooms')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-purple-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -453,7 +453,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
           {/* Sqft - Highlighted */}
           <div
-            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/60 shadow-sm hover:shadow-md hover:border-blue-300/70 transition-all duration-200"
+            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/60 shadow-sm hover:shadow-md hover:border-blue-300/70 transition-[box-shadow,border-color] duration-200"
             aria-label={`${safeProperty.sqft} ${t('common:sqm')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-100/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -520,7 +520,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           {showCompareButton && (
             <button
               onClick={onCompareClick}
-              className={`mt-2.5 flex items-center justify-center gap-1.5 h-10 px-4 rounded-full text-[13px] font-medium transition-all duration-200 w-full touch-manipulation focus:outline-none active:scale-[0.98] ${
+              className={`mt-2.5 flex items-center justify-center gap-1.5 h-10 px-4 rounded-full text-[13px] font-medium transition-colors duration-200 w-full touch-manipulation focus:outline-none active:scale-[0.98] ${
                 isInComparison
                   ? 'bg-primary text-white'
                   : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'

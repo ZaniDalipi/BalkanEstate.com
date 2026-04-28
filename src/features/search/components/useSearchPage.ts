@@ -410,24 +410,24 @@ export function useSearchPage() {
         const filtered = filterProperties(properties, activeFilters);
         const now = Date.now();
 
-        // Helper to calculate promotion priority score
-        // Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Pink (3rd)
-        const getPromotionScore = (p: Property) => {
+        // Pre-compute promotion scores once (O(N)) — avoids O(N log N) calls inside comparators
+        const scoreCache = new Map<string, number>();
+        const tierScores: Record<string, number> = { premium: 100, highlight: 70, featured: 40, standard: 10 };
+        for (const p of filtered) {
             const isActivelyPromoted = p.isPromoted && p.promotionEndDate && p.promotionEndDate > now;
-            if (!isActivelyPromoted) return 0;
-
-            const tierScores: Record<string, number> = { premium: 100, highlight: 70, featured: 40, standard: 10 };
-            const tierScore = tierScores[p.promotionTier || 'standard'] || 0;
-            const urgentBonus = p.hasUrgentBadge ? 5 : 0; // Urgent listings first within tier
-            return tierScore + urgentBonus;
-        };
+            if (!isActivelyPromoted) {
+                scoreCache.set(p.id, 0);
+            } else {
+                const tierScore = tierScores[p.promotionTier || 'standard'] || 0;
+                scoreCache.set(p.id, tierScore + (p.hasUrgentBadge ? 5 : 0));
+            }
+        }
+        const score = (p: Property) => scoreCache.get(p.id) ?? 0;
 
         // First sort by promotion score, then apply user's selected sort
         const promotionSorted = [...filtered].sort((a, b) => {
-            const scoreA = getPromotionScore(a);
-            const scoreB = getPromotionScore(b);
-            if (scoreA !== scoreB) return scoreB - scoreA; // Higher score first
-            return 0; // Keep original order for same score
+            const diff = score(b) - score(a);
+            return diff !== 0 ? diff : 0;
         });
 
         // Helper to convert date/string/number to timestamp
@@ -449,75 +449,53 @@ export function useSearchPage() {
         // Then apply user's sorting preference (maintaining promotion priority)
         switch (activeFilters.sortBy) {
             case 'price_asc': return promotionSorted.sort((a, b) => {
-                const scoreA = getPromotionScore(a);
-                const scoreB = getPromotionScore(b);
-                if (scoreA !== scoreB) return scoreB - scoreA;
-                return a.price - b.price;
+                const diff = score(b) - score(a);
+                return diff !== 0 ? diff : a.price - b.price;
             });
             case 'price_desc': return promotionSorted.sort((a, b) => {
-                const scoreA = getPromotionScore(a);
-                const scoreB = getPromotionScore(b);
-                if (scoreA !== scoreB) return scoreB - scoreA;
-                return b.price - a.price;
+                const diff = score(b) - score(a);
+                return diff !== 0 ? diff : b.price - a.price;
             });
             case 'area_asc':
             case 'sqft_asc': return promotionSorted.sort((a, b) => {
-                const scoreA = getPromotionScore(a);
-                const scoreB = getPromotionScore(b);
-                if (scoreA !== scoreB) return scoreB - scoreA;
-                return a.sqft - b.sqft;
+                const diff = score(b) - score(a);
+                return diff !== 0 ? diff : a.sqft - b.sqft;
             });
             case 'area_desc':
             case 'sqft_desc': return promotionSorted.sort((a, b) => {
-                const scoreA = getPromotionScore(a);
-                const scoreB = getPromotionScore(b);
-                if (scoreA !== scoreB) return scoreB - scoreA;
-                return b.sqft - a.sqft;
+                const diff = score(b) - score(a);
+                return diff !== 0 ? diff : b.sqft - a.sqft;
             });
             case 'beds_desc': return promotionSorted.sort((a, b) => {
-                const scoreA = getPromotionScore(a);
-                const scoreB = getPromotionScore(b);
-                if (scoreA !== scoreB) return scoreB - scoreA;
-                return b.beds - a.beds;
+                const diff = score(b) - score(a);
+                return diff !== 0 ? diff : b.beds - a.beds;
             });
             case 'baths_desc': return promotionSorted.sort((a, b) => {
-                const scoreA = getPromotionScore(a);
-                const scoreB = getPromotionScore(b);
-                if (scoreA !== scoreB) return scoreB - scoreA;
-                return b.baths - a.baths;
+                const diff = score(b) - score(a);
+                return diff !== 0 ? diff : b.baths - a.baths;
             });
             case 'oldest': return promotionSorted.sort((a, b) => {
-                const scoreA = getPromotionScore(a);
-                const scoreB = getPromotionScore(b);
-                if (scoreA !== scoreB) return scoreB - scoreA;
-                return (a.createdAt || 0) - (b.createdAt || 0);
+                const diff = score(b) - score(a);
+                return diff !== 0 ? diff : (a.createdAt || 0) - (b.createdAt || 0);
             });
             case 'featured': return promotionSorted.sort((a, b) => {
-                // Already sorted by promotion score, just maintain that order
-                const scoreA = getPromotionScore(a);
-                const scoreB = getPromotionScore(b);
-                if (scoreA !== scoreB) return scoreB - scoreA;
-                return getPropertyTime(b) - getPropertyTime(a);
+                const diff = score(b) - score(a);
+                return diff !== 0 ? diff : getPropertyTime(b) - getPropertyTime(a);
             });
             case 'price_per_sqm': return promotionSorted.sort((a, b) => {
-                const scoreA = getPromotionScore(a);
-                const scoreB = getPromotionScore(b);
-                if (scoreA !== scoreB) return scoreB - scoreA;
+                const diff = score(b) - score(a);
+                if (diff !== 0) return diff;
                 const pricePerSqmA = a.sqft > 0 ? a.price / a.sqft : Infinity;
                 const pricePerSqmB = b.sqft > 0 ? b.price / b.sqft : Infinity;
                 return pricePerSqmA - pricePerSqmB;
             });
             case 'year_built_desc': return promotionSorted.sort((a, b) => {
-                const scoreA = getPromotionScore(a);
-                const scoreB = getPromotionScore(b);
-                if (scoreA !== scoreB) return scoreB - scoreA;
-                return (b.yearBuilt || 0) - (a.yearBuilt || 0);
+                const diff = score(b) - score(a);
+                return diff !== 0 ? diff : (b.yearBuilt || 0) - (a.yearBuilt || 0);
             });
             case 'price_reduced': return promotionSorted.sort((a, b) => {
-                const scoreA = getPromotionScore(a);
-                const scoreB = getPromotionScore(b);
-                if (scoreA !== scoreB) return scoreB - scoreA;
-                // Properties with discounts first, then by discount percentage
+                const diff = score(b) - score(a);
+                if (diff !== 0) return diff;
                 const hasDiscountA = a.hasDiscount ? 1 : 0;
                 const hasDiscountB = b.hasDiscount ? 1 : 0;
                 if (hasDiscountA !== hasDiscountB) return hasDiscountB - hasDiscountA;
@@ -525,12 +503,9 @@ export function useSearchPage() {
             });
             case 'newest':
             default:
-                // Default to newest - prioritize lastRenewed for renewed listings
                 return promotionSorted.sort((a, b) => {
-                    const scoreA = getPromotionScore(a);
-                    const scoreB = getPromotionScore(b);
-                    if (scoreA !== scoreB) return scoreB - scoreA;
-                    return getPropertyTime(b) - getPropertyTime(a);
+                    const diff = score(b) - score(a);
+                    return diff !== 0 ? diff : getPropertyTime(b) - getPropertyTime(a);
                 });
         }
     }, [properties, activeFilters]);
