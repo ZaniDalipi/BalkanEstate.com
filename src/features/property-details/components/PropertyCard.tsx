@@ -533,6 +533,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           )}
         </div>
       </div>
+      </div>
     </div>
   );
 });
