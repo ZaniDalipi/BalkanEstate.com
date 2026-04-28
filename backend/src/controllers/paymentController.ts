@@ -980,8 +980,7 @@ export const reactivateSubscription = async (req: Request, res: Response): Promi
 
     // Calculate new expiration date based on billing period
     const product = await Product.findOne({ productId });
-    const now = new Date();
-    let newExpirationDate = new Date();
+    const newExpirationDate = new Date();
 
     if (product?.billingPeriod === 'yearly') {
       newExpirationDate.setFullYear(newExpirationDate.getFullYear() + 1);
@@ -1059,6 +1058,10 @@ export const reactivateSubscription = async (req: Request, res: Response): Promi
   }
 };
 
+/**
+ * Handle refund from Stripe charge.refunded webhook
+ */
+async function handleChargeRefunded(charge: Stripe.Charge) {
   try {
     console.log(`💰 Processing refund for charge: ${charge.id}`);
 
