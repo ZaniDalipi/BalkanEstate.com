@@ -94,7 +94,6 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   const { t, i18n } = useTranslation(['property', 'rental', 'common']);
   const [imageError, setImageError] = useState(!property.imageUrl);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
 
   // Safe access with fallbacks
   const safeProperty = {
@@ -148,10 +147,8 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   return (
     <div
       className={`group bg-white rounded-2xl overflow-hidden shadow-sm border transition-all duration-300 text-left w-full flex flex-col cursor-pointer isolate ${getCardStyles()} ${
-        isHovered && !isSold && !isRented ? 'shadow-lg -translate-y-1 scale-[1.01]' : 'hover:shadow-md'
+        isSold || isRented ? 'hover:shadow-md' : 'hover:shadow-lg hover:-translate-y-1 hover:scale-[1.01]'
       }`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       onClick={onCardClick}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCardClick(e as any); } }}
       role="article"
@@ -188,9 +185,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               width={640}
               height={480}
               style={{ transition: 'transform 8s cubic-bezier(0.05, 0, 0.2, 1), opacity 300ms ease' }}
-              className={`relative w-full h-full object-cover ${
-                isHovered && !isSold && !isRented ? 'scale-[1.02]' : 'scale-100'
-              } ${isSold || isRented ? 'grayscale' : ''} ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              className={`relative w-full h-full object-cover scale-100 ${
+                isSold || isRented ? 'grayscale' : 'group-hover:scale-[1.02]'
+              } ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
               onLoad={() => setImageLoaded(true)}
               onError={() => setImageError(true)}
             />
@@ -318,12 +315,8 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
       </div>
 
       {/* Content Section */}
-      <div className="relative p-2.5 sm:p-3.5 flex flex-col flex-grow">
-        {/* Glass background layer - sits behind all content */}
-        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-0" />
-
-        {/* Content wrapper - on top of glass */}
-        <div className="relative z-10 flex flex-col flex-grow">
+      <div className="relative p-2.5 sm:p-3.5 flex flex-col flex-grow bg-white">
+        <div className="flex flex-col flex-grow">
         {/* Property Type & Price Row - iOS style */}
         <div className="flex items-center justify-between gap-2 mb-2">
           {/* Property Type Badge */}
@@ -424,7 +417,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
         <div className="grid grid-cols-4 gap-1.5 mb-2.5">
           {/* Beds */}
           <div
-            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_4px_12px_rgba(59,130,246,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] hover:border-blue-200/60 transition-all duration-300"
+            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-200"
             aria-label={`${safeProperty.beds} ${safeProperty.beds === 1 ? t('property:features.bedroom') : t('property:features.bedrooms')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -436,7 +429,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
           {/* Baths */}
           <div
-            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_4px_12px_rgba(16,185,129,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] hover:border-emerald-200/60 transition-all duration-300"
+            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-emerald-100 transition-all duration-200"
             aria-label={`${safeProperty.baths} ${safeProperty.baths === 1 ? t('property:features.bathroom') : t('property:features.bathrooms')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -448,7 +441,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
           {/* Living Rooms */}
           <div
-            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_4px_12px_rgba(168,85,247,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] hover:border-purple-200/60 transition-all duration-300"
+            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-purple-100 transition-all duration-200"
             aria-label={`${safeProperty.livingRooms} ${safeProperty.livingRooms === 1 ? t('property:features.livingRoom') : t('property:features.livingRooms')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-purple-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -460,7 +453,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
           {/* Sqft - Highlighted */}
           <div
-            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-gradient-to-br from-blue-50/80 to-indigo-50/80 backdrop-blur-md border border-blue-200/60 shadow-[0_2px_8px_rgba(59,130,246,0.1),inset_0_1px_0_rgba(255,255,255,0.9)] hover:shadow-[0_4px_12px_rgba(59,130,246,0.2),inset_0_1px_0_rgba(255,255,255,1)] hover:border-blue-300/70 transition-all duration-300"
+            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/60 shadow-sm hover:shadow-md hover:border-blue-300/70 transition-all duration-200"
             aria-label={`${safeProperty.sqft} ${t('common:sqm')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-100/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -539,7 +532,6 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             </button>
           )}
         </div>
-        </div>{/* Close content wrapper */}
       </div>
     </div>
   );

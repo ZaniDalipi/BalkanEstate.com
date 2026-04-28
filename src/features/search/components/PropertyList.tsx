@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, memo } from 'react';
+import React, { useState, useRef, useEffect, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
@@ -772,7 +772,9 @@ const PropertyList = memo<PropertyListProps>((props) => {
 
     // Reset pagination only when the user's filter criteria change,
     // NOT on every map move (which changes the properties array reference).
-    const filtersKey = JSON.stringify(filters);
+    // Memoized so JSON.stringify only runs when filters reference changes, not on every
+    // internal state change (visibleCount, isLoadingMore, etc.).
+    const filtersKey = useMemo(() => JSON.stringify(filters), [filters]);
     useEffect(() => {
       setVisibleCount(ITEMS_PER_PAGE);
     }, [filtersKey]);
