@@ -7,6 +7,7 @@ import {
   getSubscriptionStatus,
   cancelSubscription,
   applyFreeSubscription,
+  reactivateSubscription,
   getCustomerPortal,
   getAvailablePaymentMethods,
 } from '../controllers/paymentController';
@@ -56,6 +57,9 @@ router.get('/methods/:countryCode', validateCountryCode, getAvailablePaymentMeth
 
 /** Apply free subscription with 100% off coupon */
 router.post('/apply-free-subscription', protect, decryptPayload, validateFreeSubscription, applyFreeSubscription);
+
+/** Reactivate an expired subscription (no payment required) */
+router.post('/reactivate-subscription', protect, reactivateSubscription);
 
 /** Get subscription status */
 router.get('/subscription-status', protect, getSubscriptionStatus);

@@ -693,13 +693,20 @@ async function handleRecurringPaymentSucceeded(invoice: Stripe.Invoice) {
     }
 
     // Process the renewal payment
-    await processSubscriptionPayment({
+    const result = await processSubscriptionPayment({
       userId,
       productId,
       store: 'stripe',
       amount: (invoice.amount_paid || 0) / 100, // Convert from cents
       currency: (invoice.currency || 'eur').toUpperCase(),
     });
+
+    // If auto-renewal was disabled by admin, log it but don't fail
+    if (result.skipped) {
+      console.log(`⚠️ Auto-renewal skipped for user ${userId} - subscription renewal is disabled (${result.message})`);
+      console.log(`📝 Payment recorded under ID: ${result.paymentId}`);
+      return;
+    }
 
     console.log(`✅ Recurring payment processed for user ${userId}`);
   } catch (error) {
@@ -818,10 +825,14 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
 
     // User found
 
-    // Check if user already has an active subscription
+    // Check if user already has a truly active subscription (not expired)
+    // The expiration worker runs every 6 hours, so status may still be 'active'
+    // even though expirationDate has passed — check both fields
+    const now = new Date();
     const existingActiveSub = await Subscription.findOne({
       userId,
       status: { $in: ['active', 'grace'] },
+      expirationDate: { $gt: now },
     });
     if (existingActiveSub) {
       // If the user is trying to subscribe to the exact same product, block it (prevent stacking)
@@ -928,6 +939,122 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
     console.error('❌ Error applying free subscription:', error);
     console.error('Stack trace:', error.stack);
     res.status(500).json({ message: 'Error applying free subscription' });
+  }
+};
+
+/**
+ * Reactivate an expired subscription without requiring new payment
+ * POST /api/payments/reactivate-subscription
+ * Body: { productId }
+ * For re-enabling subscriptions that have already been purchased/expired
+ */
+export const reactivateSubscription = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.body;
+    const userId = (req as any).user?._id;
+
+    if (!userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
+
+    if (!productId) {
+      res.status(400).json({ message: 'Product ID is required' });
+      return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Find the most recent subscription for this product (regardless of status)
+    const lastSubscription = await Subscription.findOne({ userId, productId })
+      .sort({ createdAt: -1 });
+
+    if (!lastSubscription) {
+      res.status(404).json({ message: 'No previous subscription found for this product' });
+      return;
+    }
+
+    // Calculate new expiration date based on billing period
+    const product = await Product.findOne({ productId });
+    const newExpirationDate = new Date();
+
+    if (product?.billingPeriod === 'yearly') {
+      newExpirationDate.setFullYear(newExpirationDate.getFullYear() + 1);
+    } else {
+      // Default to monthly
+      newExpirationDate.setMonth(newExpirationDate.getMonth() + 1);
+    }
+
+    // Reactivate the subscription
+    lastSubscription.status = 'active';
+    lastSubscription.expirationDate = newExpirationDate;
+    lastSubscription.renewalDate = newExpirationDate;
+    lastSubscription.autoRenewing = false;
+    lastSubscription.canceledAt = undefined;
+    lastSubscription.cancellationReason = undefined;
+    lastSubscription.willCancelAt = undefined;
+    await lastSubscription.save();
+
+    // Update user's subscription status
+    user.isSubscribed = true;
+    user.subscriptionStatus = 'active';
+    user.subscriptionExpiresAt = newExpirationDate;
+    user.subscriptionPlan = productId;
+    if (product) {
+      user.subscriptionProductName = product.name;
+    }
+
+    // Sync embedded subscription object
+    if (!user.subscription) {
+      user.subscription = {} as any;
+    }
+    user.subscription.status = 'active';
+    user.subscription.expiresAt = newExpirationDate;
+
+    // Set listingsLimit from product if available
+    if (product?.listingsLimit) {
+      user.subscription.listingsLimit = product.listingsLimit;
+      user.activeListingsLimit = product.listingsLimit;
+    }
+
+    user.markModified('subscription');
+    await user.save();
+
+    // Log reactivation event
+    await SubscriptionEvent.create({
+      subscriptionId: lastSubscription._id,
+      userId,
+      eventType: 'subscription_reactivated',
+      store: 'web',
+      previousStatus: 'expired',
+      newStatus: 'active',
+      metadata: {
+        reactivatedAt: new Date(),
+        expiresAt: newExpirationDate,
+        productId,
+      },
+    });
+
+    paymentLogger.info(`Subscription reactivated for user ${userId}, product ${productId}`);
+
+    res.status(200).json({
+      success: true,
+      message: 'Subscription reactivated successfully',
+      subscription: {
+        id: lastSubscription._id,
+        status: 'active',
+        plan: productId,
+        expiresAt: newExpirationDate,
+        productName: product?.name || productId,
+      },
+    });
+  } catch (error: any) {
+    paymentLogger.error('Error reactivating subscription:', error);
+    res.status(500).json({ message: 'Error reactivating subscription' });
   }
 };
 

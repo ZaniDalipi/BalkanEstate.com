@@ -85,6 +85,7 @@
     "dayLeft": "ditë e mbetur",
     "daysLeft": "ditë të mbetura",
     "listingLimit": "Limiti i Listimeve",
+    "listingUsage": "{{used}} nga {{limit}} këtë muaj",
     "remaining": "të mbetura",
     "couponSubscription": "Abonim me Kupon",
     "cancellationPending": "Anulimi i Abonimit në Pritje",

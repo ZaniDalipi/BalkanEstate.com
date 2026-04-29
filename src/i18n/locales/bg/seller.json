@@ -7,6 +7,10 @@
     "sharedLimit": "Общ Лимит: {{used}}/{{limit}} обяви общо",
     "asRole": "({{count}} като {{role}})",
     "listings": "Обяви",
+    "monthlyListings": "Този месец",
+    "monthlyRemaining": "Остават {{count}} обяви този месец",
+    "monthlyAvailable": "Налични {{count}} обяви този месец",
+    "monthlyLimitReached": "Месечният лимит е достигнат. Ресетира се следващия месец.",
     "limitReachedShared": "Общият лимит е достигнат за двете роли.",
     "limitReachedUpgrade": "Достигнат е лимитът за обяви. Актуализирайте до Pro за 30 обяви!",
     "remainingListings": "Остават {{count}} обяви",
@@ -665,12 +669,16 @@
     "proSubscriptionRequired": "Pro Subscription Required",
     "agentProRequiredMessage": "Agents must have an active Pro subscription to post listings. Subscribe now to get 30 active listings!",
     "switchRoleRequired": "Switch Role Required",
-    "buyerCannotCreateListing": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings."
+    "buyerCannotCreateListing": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings.",
+    "monthlyLimitReached": "Monthly Listing Limit Reached",
+    "monthlyLimitMessage": "You've used all your listings this month. Resets at the start of next month.",
+    "monthlyLimitMessageWithCount": "You've used {{used}} of {{limit}} listings this month. Resets at the start of next month."
   },
   "actions": {
     "subscribeToPro": "Subscribe to Pro",
     "viewMyListings": "View My Listings",
-    "switchRole": "Switch Role"
+    "switchRole": "Switch Role",
+    "requestMoreListings": "Request More Listings"
   },
   "promotionHistory": {
     "title": "История на Промоциите",

@@ -7,6 +7,10 @@
     "sharedLimit": "Споделен лимит: {{used}}/{{limit}} вкупно огласи",
     "asRole": "({{count}} како {{role}})",
     "listings": "Огласи",
+    "monthlyListings": "Овој месец",
+    "monthlyRemaining": "{{count}} преостанат(и) оглас(и) овој месец",
+    "monthlyAvailable": "{{count}} достапен(ни) оглас(и) овој месец",
+    "monthlyLimitReached": "Месечниот лимит е достигнат. Ресетува се следниот месец.",
     "limitReachedShared": "Споделениот лимит е достигнат за двете улоги.",
     "limitReachedUpgrade": "Лимитот за огласи е достигнат. Надградете на Pro за 30 огласи!",
     "remainingListings": "{{count}} преостанат(и) оглас(и)",
@@ -661,12 +665,16 @@
     "proSubscriptionRequired": "Потребна е Pro претплата",
     "agentProRequiredMessage": "Агентите мора да имаат активна Pro претплата за да објавуваат огласи. Претплатете се сега за да добиете 30 активни огласи!",
     "switchRoleRequired": "Потребна е промена на улога",
-    "buyerCannotCreateListing": "Купувачите не можат да креираат огласи за имоти. Ве молиме префрлете се на улога Приватен продавач или Агент за да креирате огласи."
+    "buyerCannotCreateListing": "Купувачите не можат да креираат огласи за имоти. Ве молиме префрлете се на улога Приватен продавач или Агент за да креирате огласи.",
+    "monthlyLimitReached": "Месечниот Лимит за Огласи е Достигнат",
+    "monthlyLimitMessage": "Ги искористивте сите огласи овој месец. Се обновува на почетокот на следниот месец.",
+    "monthlyLimitMessageWithCount": "Ги искористивте {{used}} од {{limit}} огласи овој месец. Се обновува на почетокот на следниот месец."
   },
   "actions": {
     "subscribeToPro": "Претплатете се на Pro",
     "viewMyListings": "Прегледај ги моите огласи",
-    "switchRole": "Промени улога"
+    "switchRole": "Промени улога",
+    "requestMoreListings": "Затежи Повеќе Огласи"
   },
   "listings": {
     "confirmSold": "Are you sure you want to mark this property as sold? This action cannot be undone.",

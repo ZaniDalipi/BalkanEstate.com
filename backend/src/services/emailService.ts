@@ -26,9 +26,13 @@ function escapeHtml(unsafe: string | undefined | null): string {
  * Validate email address format
  */
 function isValidEmail(email: string): boolean {
+  // Handle "Display Name <email>" format by extracting the bare email
+  const bracketMatch = email.match(/<([^>]+)>/);
+  const bareEmail = bracketMatch ? bracketMatch[1].trim() : email.trim();
+
   // RFC 5322 compliant email regex
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-  return emailRegex.test(email) && email.length <= 254;
+  return emailRegex.test(bareEmail) && bareEmail.length <= 254;
 }
 
 /**
@@ -135,10 +139,10 @@ export type EmailCategory = 'noreply' | 'alerts' | 'support' | 'inquiries';
 
 // Default "from" addresses for each category
 const DEFAULT_EMAIL_ADDRESSES: Record<EmailCategory, string> = {
-  noreply: 'BalkanEstateᴬᴵ <noreply@balkanestateai.com>',
-  alerts: 'BalkanEstateᴬᴵ Alerts <alerts@balkanestateai.com>',
-  support: 'BalkanEstateᴬᴵ Support <support@balkanestateai.com>',
-  inquiries: 'BalkanEstateᴬᴵ <inquiries@balkanestateai.com>',
+  noreply: 'BalkanEstateAI <noreply@balkanestateai.com>',
+  alerts: 'BalkanEstateAI Alerts <alerts@balkanestateai.com>',
+  support: 'BalkanEstateAI Support <support@balkanestateai.com>',
+  inquiries: 'BalkanEstateAI <inquiries@balkanestateai.com>',
 };
 
 // Minimum gap between consecutive email sends (ms). Default 5 minutes.
@@ -6165,6 +6169,173 @@ Questions? Contact us at support@balkanestateai.com
       category: 'noreply',
     });
   }
+
+  async sendListingRequestEmail(params: {
+    userEmail: string;
+    userName: string;
+    userRole: string;
+    message: string;
+    currentPlan: string;
+    currentListingLimit: number;
+    pricePerMonth?: number;
+  }): Promise<void> {
+    const supportEmail = this.fromEmails?.inquiries || 'inquiries@balkanestateai.com';
+    const currentYear = new Date().getFullYear();
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #333; line-height: 1.6; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #f9fafb; }
+    .card { background: white; padding: 24px; border-radius: 8px; margin: 16px 0; border: 1px solid #e5e7eb; }
+    .header { color: #3b82f6; padding: 12px 0; margin-bottom: 16px; border-bottom: 2px solid #e5e7eb; }
+    .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+    .info-row strong { color: #374151; }
+    .info-row span { color: #6b7280; text-align: right; }
+    .message-box { background: #f3f4f6; padding: 12px; border-left: 4px solid #3b82f6; border-radius: 4px; margin: 12px 0; }
+    .user-message { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 4px; margin: 16px 0; }
+    .user-message strong { color: #b45309; display: block; margin-bottom: 8px; }
+    .user-message p { color: #92400e; margin: 0; }
+    .footer { color: #6b7280; font-size: 12px; text-align: center; margin-top: 24px; padding-top: 12px; border-top: 1px solid #e5e7eb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h2 class="header">📊 New Listing Limit Request</h2>
+
+      <div class="info-row">
+        <strong>User Name:</strong>
+        <span>${escapeHtml(params.userName)}</span>
+      </div>
+
+      <div class="info-row">
+        <strong>Email:</strong>
+        <span>${escapeHtml(params.userEmail)}</span>
+      </div>
+
+      <div class="info-row">
+        <strong>Role:</strong>
+        <span>${escapeHtml(params.userRole)}</span>
+      </div>
+
+      <div class="info-row">
+        <strong>Current Plan:</strong>
+        <span>${escapeHtml(params.currentPlan)}</span>
+      </div>
+
+      <div class="info-row">
+        <strong>Current Listing Limit:</strong>
+        <span>${params.currentListingLimit} listings/month</span>
+      </div>
+
+      <div class="info-row">
+        <strong>Price Per Listing:</strong>
+        <span>€0.50</span>
+      </div>
+
+      ${params.message ? `
+      <div class="user-message">
+        <strong>💬 User's Request:</strong>
+        <p>${escapeHtml(params.message).replace(/\n/g, '<br>')}</p>
+      </div>
+      ` : ''}
+
+      <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+        <p style="color: #6b7280; font-size: 14px; margin: 0;">
+          This user has requested an increase in their monthly listing limit. Review their request and adjust the limit in the admin panel if appropriate. Once processed, contact them to confirm the change.
+        </p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p style="margin: 0;">© ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span></p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: supportEmail,
+      subject: `Listing Limit Request from ${escapeHtml(params.userName)}`,
+      html,
+      category: 'inquiries',
+    });
+  }
+
+  async sendRenewalReminderEmail(params: {
+    email: string;
+    userName: string;
+    planName: string;
+    gracePeriodEndDate: Date;
+    renewalUrl: string;
+  }): Promise<void> {
+    const graceEndStr = params.gracePeriodEndDate.toLocaleDateString('en-US', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+    const currentYear = new Date().getFullYear();
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #333; line-height: 1.6; margin: 0; padding: 0; background: #f9fafb; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .card { background: white; padding: 32px; border-radius: 12px; border: 1px solid #e5e7eb; }
+    .header { text-align: center; margin-bottom: 24px; }
+    .icon { font-size: 48px; margin-bottom: 12px; }
+    h2 { color: #1f2937; margin: 0 0 8px; font-size: 24px; }
+    .subtitle { color: #6b7280; font-size: 16px; margin: 0; }
+    .highlight { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 16px; margin: 20px 0; }
+    .highlight p { margin: 0; color: #92400e; font-weight: 500; }
+    .cta-button { display: block; width: fit-content; margin: 24px auto; background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px; text-align: center; }
+    .footer { color: #9ca3af; font-size: 12px; text-align: center; margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="icon">🔄</div>
+        <h2>Your Subscription Needs Renewal</h2>
+        <p class="subtitle">Hi ${escapeHtml(params.userName)}, your ${escapeHtml(params.planName)} plan has expired</p>
+      </div>
+
+      <p>Because you have <strong>Auto-Renewal enabled</strong>, we're giving you a 7-day grace period to complete your renewal and keep all your benefits uninterrupted.</p>
+
+      <div class="highlight">
+        <p>⏰ Grace period ends: <strong>${graceEndStr}</strong></p>
+      </div>
+
+      <p>During the grace period your subscription remains fully active. Complete your renewal before it ends to avoid any interruption to your service.</p>
+
+      <a href="${params.renewalUrl}" class="cta-button">Renew My Subscription</a>
+
+      <p style="color: #6b7280; font-size: 14px; text-align: center;">
+        If you no longer wish to continue, you can turn off auto-renewal in your account settings.
+      </p>
+    </div>
+    <div class="footer">
+      <p>© ${currentYear} BalkanEstateAI · <a href="${params.renewalUrl}" style="color: #9ca3af;">Manage Subscription</a></p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: params.email,
+      subject: `Action Required: Renew your ${escapeHtml(params.planName)} subscription`,
+      html,
+      category: 'noreply',
+    });
+  }
 }
 
 const emailServiceInstance = new EmailService();
@@ -6200,3 +6371,5 @@ export const sendProSubscriptionWelcomeEmail = emailServiceInstance.sendProSubsc
 export const sendLicenseRejectionEmail = emailServiceInstance.sendLicenseRejectionEmail.bind(emailServiceInstance);
 export const sendSubscriptionExpired = emailServiceInstance.sendSubscriptionExpired.bind(emailServiceInstance);
 export const sendSubscriptionExpiringSoon = emailServiceInstance.sendSubscriptionExpiringSoon.bind(emailServiceInstance);
+export const sendListingRequestEmail = emailServiceInstance.sendListingRequestEmail.bind(emailServiceInstance);
+export const sendRenewalReminderEmail = emailServiceInstance.sendRenewalReminderEmail.bind(emailServiceInstance);
