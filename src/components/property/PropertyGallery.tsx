@@ -295,6 +295,27 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     if (cached) setImageNaturalRatio(cached);
   }, [currentImageUrl]);
 
+  // Inject <link rel="preload"> for the first (LCP) image so the browser fetches
+  // it at the highest priority before the <img> element even renders.
+  useEffect(() => {
+    const firstUrl = property.imageUrl;
+    if (!firstUrl) return;
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = optimizeCloudinaryUrl(firstUrl, { width: 1200, quality: 'auto' });
+    const srcset = cloudinarySrcSet(firstUrl, [480, 768, 1200]);
+    if (srcset) {
+      link.setAttribute('imagesrcset', srcset);
+      link.setAttribute('imagesizes', '(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px');
+    }
+    link.setAttribute('fetchpriority', 'high');
+    document.head.appendChild(link);
+    return () => {
+      if (document.head.contains(link)) document.head.removeChild(link);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Eagerly preload first 4 images when the listing opens so swipes feel instant
   useEffect(() => {
     imagesForCurrentCategory.slice(1, 5).forEach((item) => {
