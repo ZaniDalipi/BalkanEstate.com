@@ -627,11 +627,11 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
-  // Detect if subscription plan is yearly (not monthly)
+  // Detect if subscription plan is yearly (not monthly) — derived from productId alone
   const isYearlyPlan = useMemo(() => {
     const productId = subscription?.productId || '';
-    return productId.includes('yearly') || currentProduct?.billingPeriod === 'yearly';
-  }, [subscription?.productId, currentProduct?.billingPeriod]);
+    return productId.includes('yearly');
+  }, [subscription?.productId]);
 
   // Calculate subscription details with calendar-based days
   const subscriptionDetails = useMemo(() => {
