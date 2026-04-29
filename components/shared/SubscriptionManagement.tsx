@@ -1448,11 +1448,11 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 {t('management.activeListings', { count: user.subscription?.listingsLimit ?? currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit, defaultValue: '{{count}} Active Listings' })}
               </p>
               <p className="text-sm text-neutral-500">
-                {subscriptionDetails.currentPlan.tier === 2 || user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner'
+                {(user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner')
                   ? t('management.perMonthPerAgent', 'Per month, per agent')
-                  : isYearlyPlan ? t('management.perYearLabel', 'Per year') : subscriptionDetails.currentPlan.period === 'month' ? t('management.perMonthLabel', 'Per month') : t('management.totalAvailable', 'Total available')}
+                  : isYearlyPlan ? t('management.perYearLabel', 'Per year') : t('management.perMonthLabel', 'Per month')}
               </p>
-              {(subscriptionDetails.currentPlan.tier === 2 || user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner') && (
+              {(user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner') && (
                 <p className="text-xs text-neutral-400 mt-0.5">{t('management.agencyPoolDesc', '{{count}} listing pool / year across the agency', { count: agencyOwnerProductFromDB?.listingsLimit ?? 750 })}</p>
               )}
             </div>
