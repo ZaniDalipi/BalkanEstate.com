@@ -493,10 +493,12 @@ export const deleteAgency = async (req: Request, res: Response): Promise<void> =
 // @access  Private/Admin + VPN
 export const getAllPropertiesAdmin = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { status, search, page = 1, limit = 50 } = req.query;
+    const { status, search, page = 1, limit = 50, isPromoted } = req.query;
 
     const query: any = {};
     if (status) query.status = status;
+    if (isPromoted === 'true') query.isPromoted = true;
+    else if (isPromoted === 'false') query.isPromoted = false;
     if (search) {
       const safeSearch = escapeRegex(String(search));
       query.$or = [
@@ -577,6 +579,8 @@ export const updateProperty = async (req: Request, res: Response): Promise<void>
       res.status(404).json({ message: 'Property not found' });
       return;
     }
+
+    invalidateCache('/api/properties');
 
     res.json({
       message: 'Property updated successfully',
