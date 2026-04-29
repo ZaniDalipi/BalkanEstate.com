@@ -168,7 +168,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         if (wasModalOpen.current && !isPricingModalOpen && pendingProperty) {
             // Get listing limit from PLAN_LISTING_LIMITS (source of truth) with fallbacks
             const productId = currentUser?.subscription?.productId as SubscriptionPlan | undefined;
-            const listingsLimit = (productId && PLAN_LISTING_LIMITS[productId]) || currentUser?.subscription?.listingsLimit || 3;
+            const listingsLimit = currentUser?.subscription?.listingsLimit || (productId && PLAN_LISTING_LIMITS[productId]) || 3;
             const tierName = currentUser?.subscription?.tier === 'pro' ? 'Pro' : 'Free';
             showError(t('seller:errors.listingLimitReached'), t('seller:errors.listingLimitMessage', { tierName, limit: listingsLimit }));
             dispatch({ type: 'SET_PENDING_PROPERTY', payload: null });
@@ -961,7 +961,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
 
                 if (isProTier) {
                     // MONTHLY MODEL: compare listingsCreatedThisMonth against monthly allowance
-                    const monthlyAllowance = (subscriptionPlan && PLAN_LISTING_LIMITS[subscriptionPlan]) || sub?.listingsLimit || 20;
+                    const monthlyAllowance = sub?.listingsLimit || (subscriptionPlan && PLAN_LISTING_LIMITS[subscriptionPlan]) || 20;
 
                     // Check if month boundary has passed (mirror backend logic)
                     const monthResetDate = sub?.monthResetDate ? new Date(sub.monthResetDate as string) : undefined;
