@@ -87,8 +87,9 @@ class ListingLimitService {
         return false;
       }
 
-      // Get monthly allowance from product
-      const monthlyAllowance = await this.getMonthlyAllowance(user.subscriptionPlan);
+      // Prefer stored subscription limit (may be admin-overridden) over product default
+      const monthlyAllowance = user.subscription.listingsLimit ||
+        await this.getMonthlyAllowance(user.subscriptionPlan);
 
       // Get current month's creation count
       let listingsCreatedThisMonth = user.subscription.listingsCreatedThisMonth || 0;
@@ -126,7 +127,9 @@ class ListingLimitService {
         throw new Error('User subscription not found');
       }
 
-      const monthlyAllowance = await this.getMonthlyAllowance(user.subscriptionPlan);
+      // Prefer stored subscription limit (may be admin-overridden) over product default
+      const monthlyAllowance = user.subscription.listingsLimit ||
+        await this.getMonthlyAllowance(user.subscriptionPlan);
       let created = user.subscription.listingsCreatedThisMonth || 0;
 
       // Reset counter if month boundary passed

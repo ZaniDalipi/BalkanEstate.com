@@ -732,7 +732,9 @@ export const createProperty = async (
     if (isProUser) {
       // MONTHLY MODEL: Pro/agency users — check listingsCreatedThisMonth against product allowance
       try {
-        monthlyAllowance = await listingLimitService.getMonthlyAllowance(user.subscriptionPlan);
+        // Prefer stored subscription limit (may be admin-overridden) over product default
+        monthlyAllowance = user.subscription.listingsLimit ||
+          await listingLimitService.getMonthlyAllowance(user.subscriptionPlan);
 
         // Initialize monthResetDate if not set (first time using monthly model)
         if (!user.subscription.monthResetDate) {
