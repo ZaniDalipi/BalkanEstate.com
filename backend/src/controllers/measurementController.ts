@@ -192,7 +192,9 @@ export const updateMeasurement = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    const measurementIndex = user.savedMeasurements?.findIndex(m => m.id === id);
+    const measurementIndex = user.savedMeasurements?.findIndex(
+      m => (m as any)._id?.toString() === id || m.id === id
+    );
 
     if (measurementIndex === undefined || measurementIndex === -1) {
       res.status(404).json({ message: 'Measurement not found' });
@@ -246,7 +248,9 @@ export const deleteMeasurement = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    const measurementIndex = user.savedMeasurements?.findIndex(m => m.id === id);
+    const measurementIndex = user.savedMeasurements?.findIndex(
+      m => (m as any)._id?.toString() === id || m.id === id
+    );
 
     if (measurementIndex === undefined || measurementIndex === -1) {
       res.status(404).json({ message: 'Measurement not found' });
@@ -289,7 +293,9 @@ export const getMeasurementById = async (req: Request, res: Response): Promise<v
       return;
     }
 
-    const measurement = user.savedMeasurements?.find(m => m.id === id);
+    const measurement = user.savedMeasurements?.find(
+      m => (m as any)._id?.toString() === id || m.id === id
+    );
 
     if (!measurement) {
       res.status(404).json({ message: 'Measurement not found' });
