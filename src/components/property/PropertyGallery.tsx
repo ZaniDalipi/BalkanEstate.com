@@ -67,32 +67,8 @@ const imageSlideVariants = {
 
 // Container aspect ratio (16:9 standard).
 const CONTAINER_ASPECT = 16 / 9; // 1.778
-// Slow cinematic Ken Burns duration in seconds.
-const KEN_BURNS_DURATION = 25;
-
-// Wide images (aspect > container): fill width, have top/bottom bars → pan y-only
-const KB_WIDE = [
-  { initial: { x: '0%', y: '4%'  }, animate: { x: '0%', y: '-4%' } },
-  { initial: { x: '0%', y: '-4%' }, animate: { x: '0%', y: '4%'  } },
-  { initial: { x: '0%', y: '4%'  }, animate: { x: '0%', y: '-4%' } },
-  { initial: { x: '0%', y: '-4%' }, animate: { x: '0%', y: '4%'  } },
-] as const;
-
-// Narrow images (aspect < container): fill height, have side bars → pan x-only
-const KB_NARROW = [
-  { initial: { x: '5%',  y: '0%' }, animate: { x: '-5%', y: '0%' } },
-  { initial: { x: '-5%', y: '0%' }, animate: { x: '5%',  y: '0%' } },
-  { initial: { x: '5%',  y: '0%' }, animate: { x: '-5%', y: '0%' } },
-  { initial: { x: '-5%', y: '0%' }, animate: { x: '5%',  y: '0%' } },
-] as const;
-
-// Exact-fit images (aspect ≈ container): no bars → very subtle ±1% diagonal
-const KB_EXACT = [
-  { initial: { x: '1%',  y: '0.5%'  }, animate: { x: '-1%', y: '-0.5%' } },
-  { initial: { x: '-1%', y: '-0.5%' }, animate: { x: '1%',  y: '0.5%'  } },
-  { initial: { x: '1%',  y: '-0.5%' }, animate: { x: '-1%', y: '0.5%'  } },
-  { initial: { x: '-1%', y: '0.5%'  }, animate: { x: '1%',  y: '-0.5%' } },
-] as const;
+// Ken Burns slow cinematic drift duration in seconds.
+const KEN_BURNS_DURATION = 20;
 
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   property,
@@ -468,44 +444,57 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                       x: { duration: 0.6, ease: 'easeOut' },
                     }}
                   >
-                    {/* Direction-aware Ken Burns: no scale ever applied.
-                         Wide images (aspect > 16/9) → y-pan through top/bottom bars.
-                         Narrow images (aspect < 16/9) → x-pan through side bars.
-                         Exact-fit images → very subtle ±1% diagonal (no visible bars).
-                         LQIP backdrop fills any letterbox bars gracefully. */}
                     {(() => {
-                      const TOLERANCE = 0.05 * CONTAINER_ASPECT;
-                      const kbTable =
-                        imageAspect > CONTAINER_ASPECT + TOLERANCE ? KB_WIDE :
-                        imageAspect < CONTAINER_ASPECT - TOLERANCE ? KB_NARROW :
-                        KB_EXACT;
-                      const kb = kbTable[currentImageIndex % kbTable.length];
+                      // How much bar space this image has on each axis (as fraction of
+                      // container dimension). object-contain fills whichever axis is
+                      // limiting; the other axis has letterbox bars.
+                      const barX = imageAspect < CONTAINER_ASPECT
+                        ? (1 - imageAspect / CONTAINER_ASPECT) / 2
+                        : 0;
+                      const barY = imageAspect > CONTAINER_ASPECT
+                        ? (1 - CONTAINER_ASPECT / imageAspect) / 2
+                        : 0;
+
+                      // Pan = 80% of available bar space so the image edge never reaches
+                      // the container edge. Cap at 12% — portrait images have huge bars
+                      // but a 12% slow drift is already very cinematic.
+                      const panX = Math.min(barX * 0.80, 0.12) * 100;
+                      const panY = Math.min(barY * 0.80, 0.12) * 100;
+
+                      // Alternate start direction per image for visual variety.
+                      const sx = currentImageIndex % 2 === 0 ? 1 : -1;
+                      const sy = Math.floor(currentImageIndex / 2) % 2 === 0 ? 1 : -1;
+
+                      // For exact-fit images (near-zero bars) apply a barely-perceptible
+                      // scale 1→1.02 so there is still some life in the frame.
+                      const exactFit = panX < 0.5 && panY < 0.5;
+
                       return (
-                    <motion.div
-                      className="absolute inset-0 overflow-hidden"
-                      initial={kb.initial}
-                      animate={kb.animate}
-                      transition={{ duration: KEN_BURNS_DURATION, ease: 'easeOut' }}
-                      style={{ willChange: 'transform' }}
-                    >
-                      <motion.img
-                        src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
-                        srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 1200, 1920])}
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
-                        alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
-                        width={1200}
-                        height={800}
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
-                        fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
-                        decoding="async"
-                        loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
-                        className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
-                        draggable={false}
-                        onLoad={handleMainImageLoad}
-                        onError={() => setMainImageError(true)}
-                      />
-                    </motion.div>
+                        <motion.div
+                          className="absolute inset-0 overflow-hidden"
+                          initial={{ x: `${panX * sx}%`, y: `${panY * sy}%`, scale: 1 }}
+                          animate={{ x: `${-panX * sx}%`, y: `${-panY * sy}%`, scale: exactFit ? 1.02 : 1 }}
+                          transition={{ duration: KEN_BURNS_DURATION, ease: 'linear' }}
+                          style={{ willChange: 'transform' }}
+                        >
+                          <img
+                            src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
+                            srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 1200, 1920])}
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
+                            alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
+                            width={1200}
+                            height={800}
+                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                            // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
+                            fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
+                            decoding="async"
+                            loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
+                            className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
+                            draggable={false}
+                            onLoad={handleMainImageLoad}
+                            onError={() => setMainImageError(true)}
+                          />
+                        </motion.div>
                       );
                     })()}
                   </motion.div>
