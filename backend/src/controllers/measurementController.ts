@@ -193,7 +193,7 @@ export const updateMeasurement = async (req: Request, res: Response): Promise<vo
     }
 
     const measurementIndex = user.savedMeasurements?.findIndex(
-      m => (m as any)._id?.toString() === id || m.id === id
+      m => (m as any)._doc?.id === id
     );
 
     if (measurementIndex === undefined || measurementIndex === -1) {
@@ -249,7 +249,7 @@ export const deleteMeasurement = async (req: Request, res: Response): Promise<vo
     }
 
     const measurementIndex = user.savedMeasurements?.findIndex(
-      m => (m as any)._id?.toString() === id || m.id === id
+      m => (m as any)._doc?.id === id
     );
 
     if (measurementIndex === undefined || measurementIndex === -1) {
@@ -294,7 +294,7 @@ export const getMeasurementById = async (req: Request, res: Response): Promise<v
     }
 
     const measurement = user.savedMeasurements?.find(
-      m => (m as any)._id?.toString() === id || m.id === id
+      m => (m as any)._doc?.id === id
     );
 
     if (!measurement) {
