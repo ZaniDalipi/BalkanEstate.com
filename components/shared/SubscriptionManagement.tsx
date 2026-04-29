@@ -627,6 +627,12 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
+  // Detect if subscription plan is yearly (not monthly)
+  const isYearlyPlan = useMemo(() => {
+    const productId = subscription?.productId || '';
+    return productId.includes('yearly') || currentProduct?.billingPeriod === 'yearly';
+  }, [subscription?.productId, currentProduct?.billingPeriod]);
+
   // Calculate subscription details with calendar-based days
   const subscriptionDetails = useMemo(() => {
     if (!subscription) return null;
@@ -1298,7 +1304,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         </div>
       </div>
 
-      {/* Listing Limit Info - Monthly Counter */}
+      {/* Listing Limit Info - Monthly Counter (or Yearly Total for Yearly Plans) */}
       <div className="bg-white rounded-xl border border-neutral-200 p-4 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -1306,28 +1312,41 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               <HomeIcon className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <p className="font-semibold text-neutral-800">{t('management.listingLimit', 'Monthly Listings')}</p>
+              <p className="font-semibold text-neutral-800">
+                {isYearlyPlan
+                  ? t('management.listingLimitYearly', 'Annual Listings')
+                  : t('management.listingLimit', 'Monthly Listings')}
+              </p>
               <p className="text-sm text-neutral-500">
-                {/* Display monthly listing usage */}
                 {(() => {
-                  const created = user.subscription?.listingsCreatedThisMonth || 0;
-                  const monthlyLimit = user.subscription?.listingsLimit || currentProduct?.listingsPerMonth || currentProduct?.listingsLimit || subscriptionDetails.currentPlan.listingLimit || 30;
+                  const limit = user.subscription?.listingsLimit || currentProduct?.listingsPerMonth || currentProduct?.listingsLimit || subscriptionDetails.currentPlan.listingLimit || 30;
+                  const used = isYearlyPlan
+                    ? user.subscription?.activeListingsCount || 0
+                    : user.subscription?.listingsCreatedThisMonth || 0;
 
-                  return t('management.listingUsage', {
-                    used: created,
-                    limit: monthlyLimit,
-                    defaultValue: '{{used}} of {{limit}} this month'
-                  });
+                  return isYearlyPlan
+                    ? t('management.listingUsageYearly', {
+                        used,
+                        limit,
+                        defaultValue: '{{used}} of {{limit}} this year'
+                      })
+                    : t('management.listingUsage', {
+                        used,
+                        limit,
+                        defaultValue: '{{used}} of {{limit}} this month'
+                      });
                 })()}
               </p>
             </div>
           </div>
           <div className="text-right">
             {(() => {
-              const created = user.subscription?.listingsCreatedThisMonth || 0;
-              const monthlyLimit = user.subscription?.listingsLimit || currentProduct?.listingsPerMonth || currentProduct?.listingsLimit || subscriptionDetails.currentPlan.listingLimit || 30;
-              const remaining = Math.max(0, monthlyLimit - created);
-              const isOverLimit = created >= monthlyLimit;
+              const limit = user.subscription?.listingsLimit || currentProduct?.listingsPerMonth || currentProduct?.listingsLimit || subscriptionDetails.currentPlan.listingLimit || 30;
+              const used = isYearlyPlan
+                ? user.subscription?.activeListingsCount || 0
+                : user.subscription?.listingsCreatedThisMonth || 0;
+              const remaining = Math.max(0, limit - used);
+              const isOverLimit = used >= limit;
 
               return (
                 <>
@@ -1347,10 +1366,12 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         <div className="mt-3">
           <div className="w-full bg-neutral-100 rounded-full h-3 overflow-hidden">
             {(() => {
-              const created = user.subscription?.listingsCreatedThisMonth || 0;
-              const monthlyLimit = user.subscription?.listingsLimit || currentProduct?.listingsPerMonth || currentProduct?.listingsLimit || subscriptionDetails.currentPlan.listingLimit || 30;
-              const percentage = (created / monthlyLimit) * 100;
-              const isOverLimit = created >= monthlyLimit;
+              const limit = user.subscription?.listingsLimit || currentProduct?.listingsPerMonth || currentProduct?.listingsLimit || subscriptionDetails.currentPlan.listingLimit || 30;
+              const used = isYearlyPlan
+                ? user.subscription?.activeListingsCount || 0
+                : user.subscription?.listingsCreatedThisMonth || 0;
+              const percentage = (used / limit) * 100;
+              const isOverLimit = used >= limit;
               const barColor = isOverLimit ? 'bg-red-500' : percentage >= 80 ? 'bg-amber-500' : 'bg-blue-500';
 
               return (
@@ -1359,7 +1380,9 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                   style={{
                     width: `${Math.min(100, percentage)}%`,
                   }}
-                  title={`${created} of ${monthlyLimit} listings created this month`}
+                  title={isYearlyPlan
+                    ? `${used} of ${limit} listings (this year)`
+                    : `${used} of ${limit} listings created this month`}
                 />
               );
             })()}
@@ -1368,25 +1391,27 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           {/* Status message below bar */}
           <div className="mt-2 text-xs">
             {(() => {
-              const created = user.subscription?.listingsCreatedThisMonth || 0;
-              const monthlyLimit = user.subscription?.listingsLimit || currentProduct?.listingsPerMonth || currentProduct?.listingsLimit || subscriptionDetails.currentPlan.listingLimit || 30;
-              const percentage = (created / monthlyLimit) * 100;
-              const isOverLimit = created >= monthlyLimit;
+              const limit = user.subscription?.listingsLimit || currentProduct?.listingsPerMonth || currentProduct?.listingsLimit || subscriptionDetails.currentPlan.listingLimit || 30;
+              const used = isYearlyPlan
+                ? user.subscription?.activeListingsCount || 0
+                : user.subscription?.listingsCreatedThisMonth || 0;
+              const percentage = (used / limit) * 100;
+              const isOverLimit = used >= limit;
 
               if (isOverLimit) {
-                return <span className="text-red-600 font-semibold">⚠️ Monthly limit reached. Wait for next month or upgrade.</span>;
+                return <span className="text-red-600 font-semibold">⚠️ {isYearlyPlan ? 'Annual' : 'Monthly'} limit reached. {!isYearlyPlan && 'Wait for next month or '}Upgrade your plan.</span>;
               } else if (percentage >= 90) {
                 return <span className="text-amber-600">⚡ Almost there! ({Math.round(percentage)}% used)</span>;
               } else if (percentage >= 80) {
-                return <span className="text-amber-500">{Math.round(percentage)}% of monthly limit used</span>;
+                return <span className="text-amber-500">{Math.round(percentage)}% of {isYearlyPlan ? 'annual' : 'monthly'} limit used</span>;
               } else {
-                return <span className="text-green-600">✓ You have plenty of space this month</span>;
+                return <span className="text-green-600">✓ You have plenty of space {isYearlyPlan ? 'this year' : 'this month'}</span>;
               }
             })()}
           </div>
 
-          {/* Request More Listings button - shown when usage ≥80% */}
-          {(() => {
+          {/* Request More Listings button - shown when usage ≥80% (monthly plans only) */}
+          {!isYearlyPlan && (() => {
             const created = user.subscription?.listingsCreatedThisMonth || 0;
             const monthlyLimit = user.subscription?.listingsLimit || currentProduct?.listingsPerMonth || currentProduct?.listingsLimit || subscriptionDetails.currentPlan.listingLimit || 30;
             const percentage = (created / monthlyLimit) * 100;
@@ -1425,7 +1450,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               <p className="text-sm text-neutral-500">
                 {subscriptionDetails.currentPlan.tier === 2 || user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner'
                   ? t('management.perMonthPerAgent', 'Per month, per agent')
-                  : subscriptionDetails.currentPlan.period === 'month' ? t('management.perMonthLabel', 'Per month') : t('management.totalAvailable', 'Total available')}
+                  : isYearlyPlan ? t('management.perYearLabel', 'Per year') : subscriptionDetails.currentPlan.period === 'month' ? t('management.perMonthLabel', 'Per month') : t('management.totalAvailable', 'Total available')}
               </p>
               {(subscriptionDetails.currentPlan.tier === 2 || user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner') && (
                 <p className="text-xs text-neutral-400 mt-0.5">{t('management.agencyPoolDesc', '{{count}} listing pool / year across the agency', { count: agencyOwnerProductFromDB?.listingsLimit ?? 750 })}</p>
