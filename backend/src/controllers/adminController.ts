@@ -493,10 +493,11 @@ export const deleteAgency = async (req: Request, res: Response): Promise<void> =
 // @access  Private/Admin + VPN
 export const getAllPropertiesAdmin = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { status, search, page = 1, limit = 50, isPromoted } = req.query;
+    const { status, search, page = 1, limit = 50, isPromoted, propertyType } = req.query;
 
     const query: any = {};
     if (status) query.status = status;
+    if (propertyType) query.propertyType = propertyType;
     if (isPromoted === 'true') query.isPromoted = true;
     else if (isPromoted === 'false') query.isPromoted = false;
     if (search) {
