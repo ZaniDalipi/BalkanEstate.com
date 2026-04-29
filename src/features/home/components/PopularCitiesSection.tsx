@@ -18,36 +18,68 @@ const CityCardSkeleton: React.FC<{ large?: boolean }> = ({ large }) => (
   </div>
 );
 
-/** Pick `count` cities with maximum country diversity */
-function pickDiverseCities(allCities: CityMarketData[], count: number): CityMarketData[] {
-  if (allCities.length <= count) return allCities;
+// Static seed cities for Balkan countries that may have no API coverage yet.
+// They fill gaps so the grid always shows geographic diversity.
+// listingsCount=0 so the card omits the count text; no marketTrend shown.
+const STATIC_CITY_SEEDS: CityMarketData[] = [
+  { _id: 'seed-bgd', city: 'Belgrade',      country: 'Serbia',           countryCode: 'RS', listingsCount: 0, marketTrend: 'stable', featured: true, displayOrder: 99, avgPricePerSqm: 0, medianPrice: 0, priceGrowthYoY: 0, priceGrowthMoM: 0, averageDaysOnMarket: 0, soldLastMonth: 0, demandScore: 0, rentalYield: 0, investmentScore: 0, topNeighborhoods: [], highlights: [], lastUpdated: '', dataSource: 'manual' },
+  { _id: 'seed-nsad',city: 'Novi Sad',      country: 'Serbia',           countryCode: 'RS', listingsCount: 0, marketTrend: 'stable', featured: true, displayOrder: 99, avgPricePerSqm: 0, medianPrice: 0, priceGrowthYoY: 0, priceGrowthMoM: 0, averageDaysOnMarket: 0, soldLastMonth: 0, demandScore: 0, rentalYield: 0, investmentScore: 0, topNeighborhoods: [], highlights: [], lastUpdated: '', dataSource: 'manual' },
+  { _id: 'seed-bdv', city: 'Budva',         country: 'Montenegro',       countryCode: 'ME', listingsCount: 0, marketTrend: 'rising', featured: true, displayOrder: 99, avgPricePerSqm: 0, medianPrice: 0, priceGrowthYoY: 0, priceGrowthMoM: 0, averageDaysOnMarket: 0, soldLastMonth: 0, demandScore: 0, rentalYield: 0, investmentScore: 0, topNeighborhoods: [], highlights: [], lastUpdated: '', dataSource: 'manual' },
+  { _id: 'seed-ktr', city: 'Kotor',         country: 'Montenegro',       countryCode: 'ME', listingsCount: 0, marketTrend: 'rising', featured: true, displayOrder: 99, avgPricePerSqm: 0, medianPrice: 0, priceGrowthYoY: 0, priceGrowthMoM: 0, averageDaysOnMarket: 0, soldLastMonth: 0, demandScore: 0, rentalYield: 0, investmentScore: 0, topNeighborhoods: [], highlights: [], lastUpdated: '', dataSource: 'manual' },
+  { _id: 'seed-pdg', city: 'Podgorica',     country: 'Montenegro',       countryCode: 'ME', listingsCount: 0, marketTrend: 'stable', featured: true, displayOrder: 99, avgPricePerSqm: 0, medianPrice: 0, priceGrowthYoY: 0, priceGrowthMoM: 0, averageDaysOnMarket: 0, soldLastMonth: 0, demandScore: 0, rentalYield: 0, investmentScore: 0, topNeighborhoods: [], highlights: [], lastUpdated: '', dataSource: 'manual' },
+  { _id: 'seed-skp', city: 'Skopje',        country: 'North Macedonia',  countryCode: 'MK', listingsCount: 0, marketTrend: 'stable', featured: true, displayOrder: 99, avgPricePerSqm: 0, medianPrice: 0, priceGrowthYoY: 0, priceGrowthMoM: 0, averageDaysOnMarket: 0, soldLastMonth: 0, demandScore: 0, rentalYield: 0, investmentScore: 0, topNeighborhoods: [], highlights: [], lastUpdated: '', dataSource: 'manual' },
+  { _id: 'seed-ohr', city: 'Ohrid',         country: 'North Macedonia',  countryCode: 'MK', listingsCount: 0, marketTrend: 'rising', featured: true, displayOrder: 99, avgPricePerSqm: 0, medianPrice: 0, priceGrowthYoY: 0, priceGrowthMoM: 0, averageDaysOnMarket: 0, soldLastMonth: 0, demandScore: 0, rentalYield: 0, investmentScore: 0, topNeighborhoods: [], highlights: [], lastUpdated: '', dataSource: 'manual' },
+  { _id: 'seed-sjj', city: 'Sarajevo',      country: 'Bosnia',           countryCode: 'BA', listingsCount: 0, marketTrend: 'stable', featured: true, displayOrder: 99, avgPricePerSqm: 0, medianPrice: 0, priceGrowthYoY: 0, priceGrowthMoM: 0, averageDaysOnMarket: 0, soldLastMonth: 0, demandScore: 0, rentalYield: 0, investmentScore: 0, topNeighborhoods: [], highlights: [], lastUpdated: '', dataSource: 'manual' },
+  { _id: 'seed-mst', city: 'Mostar',        country: 'Bosnia',           countryCode: 'BA', listingsCount: 0, marketTrend: 'stable', featured: true, displayOrder: 99, avgPricePerSqm: 0, medianPrice: 0, priceGrowthYoY: 0, priceGrowthMoM: 0, averageDaysOnMarket: 0, soldLastMonth: 0, demandScore: 0, rentalYield: 0, investmentScore: 0, topNeighborhoods: [], highlights: [], lastUpdated: '', dataSource: 'manual' },
+  { _id: 'seed-zag', city: 'Zagreb',        country: 'Croatia',          countryCode: 'HR', listingsCount: 0, marketTrend: 'stable', featured: true, displayOrder: 99, avgPricePerSqm: 0, medianPrice: 0, priceGrowthYoY: 0, priceGrowthMoM: 0, averageDaysOnMarket: 0, soldLastMonth: 0, demandScore: 0, rentalYield: 0, investmentScore: 0, topNeighborhoods: [], highlights: [], lastUpdated: '', dataSource: 'manual' },
+  { _id: 'seed-spl', city: 'Split',         country: 'Croatia',          countryCode: 'HR', listingsCount: 0, marketTrend: 'rising', featured: true, displayOrder: 99, avgPricePerSqm: 0, medianPrice: 0, priceGrowthYoY: 0, priceGrowthMoM: 0, averageDaysOnMarket: 0, soldLastMonth: 0, demandScore: 0, rentalYield: 0, investmentScore: 0, topNeighborhoods: [], highlights: [], lastUpdated: '', dataSource: 'manual' },
+  { _id: 'seed-dbr', city: 'Dubrovnik',     country: 'Croatia',          countryCode: 'HR', listingsCount: 0, marketTrend: 'rising', featured: true, displayOrder: 99, avgPricePerSqm: 0, medianPrice: 0, priceGrowthYoY: 0, priceGrowthMoM: 0, averageDaysOnMarket: 0, soldLastMonth: 0, demandScore: 0, rentalYield: 0, investmentScore: 0, topNeighborhoods: [], highlights: [], lastUpdated: '', dataSource: 'manual' },
+  { _id: 'seed-sof', city: 'Sofia',         country: 'Bulgaria',         countryCode: 'BG', listingsCount: 0, marketTrend: 'stable', featured: true, displayOrder: 99, avgPricePerSqm: 0, medianPrice: 0, priceGrowthYoY: 0, priceGrowthMoM: 0, averageDaysOnMarket: 0, soldLastMonth: 0, demandScore: 0, rentalYield: 0, investmentScore: 0, topNeighborhoods: [], highlights: [], lastUpdated: '', dataSource: 'manual' },
+];
 
-  // Shuffle all cities (Fisher-Yates)
-  const shuffled = [...allCities];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
+/**
+ * Pick `count` cities ensuring maximum country diversity.
+ * API cities (real listing data) are preferred; static seed cities fill
+ * any countries not represented in the API response.
+ */
+function pickDiverseCities(apiCities: CityMarketData[], count: number): CityMarketData[] {
+  const shuffle = <T,>(arr: T[]): T[] => {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+
+  const shuffledApi   = shuffle(apiCities);
+  const shuffledSeeds = shuffle(STATIC_CITY_SEEDS);
 
   const picked: CityMarketData[] = [];
-  const countryCounts: Record<string, number> = {};
+  const seenCountries = new Set<string>();
 
-  // First pass: pick one city per country until we have enough
-  for (const city of shuffled) {
+  // Pass 1: one API city per country
+  for (const city of shuffledApi) {
     if (picked.length >= count) break;
-    if (!countryCounts[city.country]) {
+    if (!seenCountries.has(city.country)) {
       picked.push(city);
-      countryCounts[city.country] = 1;
+      seenCountries.add(city.country);
     }
   }
 
-  // Second pass: fill remaining slots from unused cities
-  for (const city of shuffled) {
+  // Pass 2: fill remaining slots with seeds from countries not yet shown
+  for (const seed of shuffledSeeds) {
     if (picked.length >= count) break;
-    if (!picked.includes(city)) {
-      picked.push(city);
-      countryCounts[city.country] = (countryCounts[city.country] || 0) + 1;
+    if (!seenCountries.has(seed.country)) {
+      picked.push(seed);
+      seenCountries.add(seed.country);
     }
+  }
+
+  // Pass 3: if still short, add more API cities (multi-city from same country)
+  for (const city of shuffledApi) {
+    if (picked.length >= count) break;
+    if (!picked.includes(city)) picked.push(city);
   }
 
   return picked;
@@ -152,10 +184,12 @@ const PopularCitiesSection: React.FC<PopularCitiesSectionProps> = ({ onNavigate 
                   <h3 className="text-base sm:text-lg font-bold text-white">{city.city}</h3>
                   <p className="text-xs sm:text-sm text-white/70">{city.country}</p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <p className="text-xs text-white/60">
-                      {t('home:cities.propertiesCount', { count: city.listingsCount || 0 })}
-                    </p>
-                    {city.marketTrend && (
+                    {city.listingsCount > 0 && (
+                      <p className="text-xs text-white/60">
+                        {t('home:cities.propertiesCount', { count: city.listingsCount })}
+                      </p>
+                    )}
+                    {city.marketTrend && city.listingsCount > 0 && (
                       <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${
                         city.marketTrend === 'rising' ? 'bg-emerald-500/20 text-emerald-300' :
                         city.marketTrend === 'declining' ? 'bg-red-500/20 text-red-300' :

@@ -524,17 +524,24 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
   // Create clusterer once marker library is available
   const createClusterer = useCallback((mapInstance: google.maps.Map) => {
-    // Animate cluster click: step zoom in one level at a time for a smooth feel
+    // Animate cluster click: snap center synchronously then step-zoom for smooth animation.
+    // panTo() is asynchronous — zooming during an in-flight pan causes the map to zoom
+    // into the wrong location. setCenter() is synchronous so zoom always starts at the
+    // correct cluster position.
     const onClusterClick = (_event: google.maps.MapMouseEvent, cluster: { position?: google.maps.LatLng | google.maps.LatLngLiteral | null }, map: google.maps.Map) => {
-      if (cluster.position) map.panTo(cluster.position);
+      const center = cluster.position;
+      if (!center) return;
+      map.setCenter(center); // synchronous — no animation, but zoom will be correctly anchored
       const fromZoom = map.getZoom() ?? 10;
       const toZoom = Math.min(fromZoom + 3, 18);
-      const step = (cur: number) => {
+      const animateZoom = (cur: number) => {
         if (cur >= toZoom) return;
-        map.setZoom(cur + 1);
-        if (cur + 1 < toZoom) setTimeout(() => step(cur + 1), 100);
+        setTimeout(() => {
+          map.setZoom(cur + 1);
+          animateZoom(cur + 1);
+        }, 120);
       };
-      step(fromZoom);
+      animateZoom(fromZoom);
     };
 
     const clusterer = new MarkerClusterer({
