@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense, startTransition } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense, startTransition, useReducer } from 'react';
 import { useSubscriptionExpiry } from './src/features/subscription/hooks/useSubscriptionExpiry';
 import { useTranslation } from 'react-i18next';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
@@ -1066,13 +1066,21 @@ const AppWrapper: React.FC = () => {
     const justAuthed = sessionStorage.getItem('balkanestate_just_authed') === 'true';
     const shouldShowSplash = showSplash || justAuthed;
 
+    // Used to guarantee a re-render after handleSplashComplete even when showSplash
+    // was already false (returning users). Without this, setShowSplash(false) is a
+    // no-op and React never re-reads justAuthed from sessionStorage, leaving the app
+    // stuck behind the 0.01-opacity overlay with no splash visible.
+    const [, forceUpdate] = useReducer((n: number) => n + 1, 0);
+
     const handleSplashComplete = useCallback(() => {
         setShowSplash(false);
         // Clear the post-login flag so subsequent renders don't re-trigger the splash
         sessionStorage.removeItem('balkanestate_just_authed');
+        // Always increment so React re-renders even when showSplash was already false
+        forceUpdate();
         localStorage.setItem('balkanestate_visited', 'true');
         (window as any).__balkanestateSplashDone = Date.now();
-    }, []);
+    }, [forceUpdate]);
 
     // Monitor user's email verification status and clear pending verification when verified
     useEffect(() => {
