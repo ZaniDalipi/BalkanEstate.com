@@ -70,6 +70,40 @@ export const deactivateExpiredPromotions = async (): Promise<void> => {
     cronLogger.info(
       `[CleanupWorker] Successfully deactivated ${deactivatedCount}/${expiredPromotions.length} promotions`
     );
+
+    // Also expire properties that were admin-promoted (no Promotion document)
+    // and whose promotionEndDate has passed
+    const expiredAdminPromotions = await Property.find({
+      isPromoted: true,
+      promotionEndDate: { $lt: now },
+    });
+
+    let adminDeactivatedCount = 0;
+    for (const property of expiredAdminPromotions) {
+      try {
+        property.isPromoted = false;
+        property.promotionTier = undefined;
+        property.hasUrgentBadge = false;
+        property.promotionStartDate = undefined;
+        property.promotionEndDate = undefined;
+        await property.save();
+        adminDeactivatedCount++;
+        cronLogger.info(
+          `[CleanupWorker] Expired admin promotion for property ${property._id}`
+        );
+      } catch (error) {
+        cronLogger.error(
+          `[CleanupWorker] Error expiring admin promotion for property ${property._id}:`,
+          error
+        );
+      }
+    }
+
+    if (adminDeactivatedCount > 0) {
+      cronLogger.info(
+        `[CleanupWorker] Expired ${adminDeactivatedCount} admin-promoted properties`
+      );
+    }
   } catch (error) {
     cronLogger.error('[CleanupWorker] Error in cleanup worker:', error);
   }

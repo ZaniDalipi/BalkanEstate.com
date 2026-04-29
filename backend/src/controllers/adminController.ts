@@ -549,6 +549,23 @@ export const updateProperty = async (req: Request, res: Response): Promise<void>
     delete updates.price;
     delete updates.priceType;
 
+    // When toggling promotion, set/clear the 7-day window automatically
+    if ('isPromoted' in updates) {
+      if (updates.isPromoted === true) {
+        const now = new Date();
+        updates.promotionStartDate = now;
+        updates.promotionEndDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+        if (!updates.promotionTier) {
+          updates.promotionTier = 'standard';
+        }
+      } else {
+        updates.promotionStartDate = null;
+        updates.promotionEndDate = null;
+        updates.promotionTier = null;
+        updates.hasUrgentBadge = false;
+      }
+    }
+
     const property = await Property.findByIdAndUpdate(id, updates, {
       new: true,
       runValidators: true,
