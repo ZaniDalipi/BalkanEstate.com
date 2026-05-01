@@ -234,7 +234,7 @@
     "loading": "Loading virtual tour...",
     "exit": "Izađi iz ture",
     "floor": "Kat {{floor}}",
-    "hint": "Povucite za gledanje \u2022 Skrolajte za zum",
+    "hint": "Povucite za gledanje • Skrolajte za zum",
     "entering": "Ulazim u zgradu...",
     "tourButton": "360° Tura"
   },
@@ -619,5 +619,10 @@
     "next": "Sljedeća slika ({{current}} od {{total}})",
     "loadError": "Slika se nije mogla učitati",
     "imageAlt": "Slika nekretnine {{current}} od {{total}}"
+  },
+  "source": {
+    "listedOn": "Objavljeno na {{source}}",
+    "viewOriginal": "Pogledaj na {{source}}",
+    "importedAt": "Uvezeno {{date}}"
   }
 }

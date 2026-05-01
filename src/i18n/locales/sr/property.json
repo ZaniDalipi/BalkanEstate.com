@@ -234,7 +234,7 @@
     "loading": "Loading virtual tour...",
     "exit": "Изађи из туре",
     "floor": "Спрат {{floor}}",
-    "hint": "Превуците за гледање \u2022 Скролујте за зум",
+    "hint": "Превуците за гледање • Скролујте за зум",
     "entering": "Улазим у зграду...",
     "tourButton": "360° Тура"
   },
@@ -619,5 +619,10 @@
     "next": "Следећа слика ({{current}} од {{total}})",
     "loadError": "Слика није могла бити учитана",
     "imageAlt": "Слика некретнине {{current}} од {{total}}"
+  },
+  "source": {
+    "listedOn": "Objavljeno na {{source}}",
+    "viewOriginal": "Pogledaj na {{source}}",
+    "importedAt": "Uvezeno {{date}}"
   }
 }

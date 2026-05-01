@@ -234,7 +234,7 @@
     "loading": "Loading virtual tour...",
     "exit": "Έξοδος από την περιήγηση",
     "floor": "Όροφος {{floor}}",
-    "hint": "Σύρετε για να κοιτάξετε \u2022 Κυλήστε για ζουμ",
+    "hint": "Σύρετε για να κοιτάξετε • Κυλήστε για ζουμ",
     "entering": "Είσοδος στο κτίριο...",
     "tourButton": "Περιήγηση 360°"
   },
@@ -559,5 +559,10 @@
     "updating": "Ενημέρωση...",
     "cancelViewing": "Ακύρωση Επίσκεψης",
     "requested": "Ζητήθηκε"
+  },
+  "source": {
+    "listedOn": "Δημοσιεύτηκε στο {{source}}",
+    "viewOriginal": "Δείτε στο {{source}}",
+    "importedAt": "Εισαγωγή {{date}}"
   }
 }

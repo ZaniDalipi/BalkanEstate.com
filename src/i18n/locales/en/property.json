@@ -8,7 +8,21 @@
   },
   "property": "Property",
   "properties": "Properties",
-  "listing": "Listing",
+  "listing": {
+    "listedOn": "Listed on",
+    "updatedOn": "Updated on",
+    "listedDaysAgo": "Listed {{days}} days ago",
+    "listedToday": "Listed today",
+    "listedYesterday": "Listed yesterday",
+    "listedWeeksAgo": "Listed {{weeks}} week ago",
+    "listedWeeksAgoPlural": "Listed {{weeks}} weeks ago",
+    "listedMonthsAgo": "Listed {{months}} month ago",
+    "listedMonthsAgoPlural": "Listed {{months}} months ago",
+    "views": "views",
+    "viewsCount": "{{count}} views",
+    "inquiries": "Inquiries",
+    "id": "Listing ID"
+  },
   "listings": "Listings",
   "forSale": "For Sale",
   "forRent": "For Rent",
@@ -213,21 +227,6 @@
     "website": "Website",
     "viewProfile": "View Profile"
   },
-  "listing": {
-    "listedOn": "Listed on",
-    "updatedOn": "Updated on",
-    "listedDaysAgo": "Listed {{days}} days ago",
-    "listedToday": "Listed today",
-    "listedYesterday": "Listed yesterday",
-    "listedWeeksAgo": "Listed {{weeks}} week ago",
-    "listedWeeksAgoPlural": "Listed {{weeks}} weeks ago",
-    "listedMonthsAgo": "Listed {{months}} month ago",
-    "listedMonthsAgoPlural": "Listed {{months}} months ago",
-    "views": "views",
-    "viewsCount": "{{count}} views",
-    "inquiries": "Inquiries",
-    "id": "Listing ID"
-  },
   "navigation": {
     "back": "Back",
     "goBackToSearch": "Go back to search results"
@@ -243,7 +242,7 @@
     "loading": "Loading virtual tour...",
     "exit": "Exit Tour",
     "floor": "Floor {{floor}}",
-    "hint": "Drag to look around \u2022 Scroll to zoom",
+    "hint": "Drag to look around • Scroll to zoom",
     "entering": "Entering building...",
     "tourButton": "360° Tour"
   },
@@ -628,5 +627,10 @@
     "next": "Next image ({{current}} of {{total}})",
     "loadError": "Image could not be loaded",
     "imageAlt": "Property image {{current}} of {{total}}"
+  },
+  "source": {
+    "listedOn": "Listed on {{source}}",
+    "viewOriginal": "View on {{source}}",
+    "importedAt": "Imported {{date}}"
   }
 }

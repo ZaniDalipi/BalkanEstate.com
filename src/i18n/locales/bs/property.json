@@ -234,7 +234,7 @@
     "loading": "Loading virtual tour...",
     "exit": "Izađi iz ture",
     "floor": "Sprat {{floor}}",
-    "hint": "Povucite za gledanje \u2022 Skrolajte za zum",
+    "hint": "Povucite za gledanje • Skrolajte za zum",
     "entering": "Ulazim u zgradu...",
     "tourButton": "360° Tura"
   },
@@ -532,32 +532,97 @@
   "viewings": {
     "title": "Zahtjevi za Razgledanje",
     "subtitle": "Upravljajte zahtjevima za razgledanje nekretnina od potencijalnih kupaca. Odobrite ili odbijte da ih obavijestite e-poštom.",
-    "status": { "pending": "Na čekanju", "approved": "Odobreno", "declined": "Odbijeno", "completed": "Završeno" },
-    "empty": { "title": "Nema zahtjeva za razgledanje", "description": "Kada neko zakaže razgledanje vaše nekretnine, pojavit će se ovdje.", "filtered": "Nema {{status}} zahtjeva za razgledanje." },
-    "relative": { "past": "Prošlo", "inDays": "Za {{count}} dana" },
-    "reason": "Razlog:", "declineReason": "Razlog odbijanja (opcionalno)", "declineReasonPlaceholder": "npr., Termin više nije dostupan...",
-    "declining": "Odbijanje...", "confirmDecline": "Potvrdi Odbijanje", "approving": "Odobravanje...", "approve": "Odobri",
-    "decline": "Odbij", "markCompleted": "Označi kao Završeno", "updating": "Ažuriranje...", "cancelViewing": "Otkaži Razgledanje", "requested": "Zatraženo"
+    "status": {
+      "pending": "Na čekanju",
+      "approved": "Odobreno",
+      "declined": "Odbijeno",
+      "completed": "Završeno"
+    },
+    "empty": {
+      "title": "Nema zahtjeva za razgledanje",
+      "description": "Kada neko zakaže razgledanje vaše nekretnine, pojavit će se ovdje.",
+      "filtered": "Nema {{status}} zahtjeva za razgledanje."
+    },
+    "relative": {
+      "past": "Prošlo",
+      "inDays": "Za {{count}} dana"
+    },
+    "reason": "Razlog:",
+    "declineReason": "Razlog odbijanja (opcionalno)",
+    "declineReasonPlaceholder": "npr., Termin više nije dostupan...",
+    "declining": "Odbijanje...",
+    "confirmDecline": "Potvrdi Odbijanje",
+    "approving": "Odobravanje...",
+    "approve": "Odobri",
+    "decline": "Odbij",
+    "markCompleted": "Označi kao Završeno",
+    "updating": "Ažuriranje...",
+    "cancelViewing": "Otkaži Razgledanje",
+    "requested": "Zatraženo"
   },
   "floorPlan": {
     "viewer": {
-      "ariaLabel": "Preglednik plana sprata", "panMode": "Način pomicanja", "panTitle": "Pomakni i Uvećaj (povuci za pomicanje, skrolaj za uvećanje)",
-      "pan": "Pomakni", "annotateMode": "Način označavanja", "annotateTitle": "Kliknite na plan sprata da dodate oznake soba",
-      "label": "Oznaka", "clearLabels": "Obriši sve oznake", "zoomOut": "Umanji", "zoomIn": "Uvećaj",
-      "fitToScreen": "Prilagodi ekranu", "fitToScreenShortcut": "Prilagodi ekranu (0)", "close": "Zatvori preglednik plana sprata",
-      "closeShortcut": "Zatvori (Esc)", "clickToAddLabel": "Kliknite bilo gdje na planu sprata da dodate oznaku sobe",
-      "loading": "Učitavanje plana sprata...", "loadFailed": "Neuspješno Učitavanje Plana Sprata",
+      "ariaLabel": "Preglednik plana sprata",
+      "panMode": "Način pomicanja",
+      "panTitle": "Pomakni i Uvećaj (povuci za pomicanje, skrolaj za uvećanje)",
+      "pan": "Pomakni",
+      "annotateMode": "Način označavanja",
+      "annotateTitle": "Kliknite na plan sprata da dodate oznake soba",
+      "label": "Oznaka",
+      "clearLabels": "Obriši sve oznake",
+      "zoomOut": "Umanji",
+      "zoomIn": "Uvećaj",
+      "fitToScreen": "Prilagodi ekranu",
+      "fitToScreenShortcut": "Prilagodi ekranu (0)",
+      "close": "Zatvori preglednik plana sprata",
+      "closeShortcut": "Zatvori (Esc)",
+      "clickToAddLabel": "Kliknite bilo gdje na planu sprata da dodate oznaku sobe",
+      "loading": "Učitavanje plana sprata...",
+      "loadFailed": "Neuspješno Učitavanje Plana Sprata",
       "loadFailedDesc": "Slika plana sprata nije se mogla učitati. Možda je premještena ili obrisana.",
-      "floorPlanAlt": "Plan Sprata", "roomNamePlaceholder": "Naziv sobe...", "closeDetails": "Zatvori detalje", "roomType": "Vrsta Sobe",
-      "rooms": { "bedroom": "Spavaća soba", "bathroom": "Kupatilo", "kitchen": "Kuhinja", "living": "Dnevna soba", "dining": "Trpezarija", "office": "Kancelarija", "garage": "Garaža", "storage": "Ostava", "balcony": "Balkon", "hallway": "Hodnik", "other": "Ostalo" },
-      "area": "Površina (m²)", "areaPlaceholder": "npr. 25", "notes": "Bilješke", "notesPlaceholder": "Prozor na jug, ugrađeni ormar...",
-      "rename": "Preimenuj", "removeLabel": "Ukloni oznaku", "zoomLevel": "Nivo uvećanja", "roomLabels": "Oznake Soba",
-      "shortcuts": { "scroll": "Skrolaj: Uvećaj | Povuci: Pomakni | Dvostruki klik: Brzo uvećanje", "keys": "+/-: Uvećaj | 0: Resetuj | Esc: Zatvori", "annotate": "Klik: Dodaj oznaku | Esc: Izađi iz načina označavanja" }
+      "floorPlanAlt": "Plan Sprata",
+      "roomNamePlaceholder": "Naziv sobe...",
+      "closeDetails": "Zatvori detalje",
+      "roomType": "Vrsta Sobe",
+      "rooms": {
+        "bedroom": "Spavaća soba",
+        "bathroom": "Kupatilo",
+        "kitchen": "Kuhinja",
+        "living": "Dnevna soba",
+        "dining": "Trpezarija",
+        "office": "Kancelarija",
+        "garage": "Garaža",
+        "storage": "Ostava",
+        "balcony": "Balkon",
+        "hallway": "Hodnik",
+        "other": "Ostalo"
+      },
+      "area": "Površina (m²)",
+      "areaPlaceholder": "npr. 25",
+      "notes": "Bilješke",
+      "notesPlaceholder": "Prozor na jug, ugrađeni ormar...",
+      "rename": "Preimenuj",
+      "removeLabel": "Ukloni oznaku",
+      "zoomLevel": "Nivo uvećanja",
+      "roomLabels": "Oznake Soba",
+      "shortcuts": {
+        "scroll": "Skrolaj: Uvećaj | Povuci: Pomakni | Dvostruki klik: Brzo uvećanje",
+        "keys": "+/-: Uvećaj | 0: Resetuj | Esc: Zatvori",
+        "annotate": "Klik: Dodaj oznaku | Esc: Izađi iz načina označavanja"
+      }
     }
   },
   "imageViewer": {
-    "ariaLabel": "Preglednik slika: {{current}} od {{total}}", "close": "Zatvori preglednik slika",
-    "previous": "Prethodna slika ({{current}} od {{total}})", "next": "Sljedeća slika ({{current}} od {{total}})",
-    "loadError": "Slika se nije mogla učitati", "imageAlt": "Slika nekretnine {{current}} od {{total}}"
+    "ariaLabel": "Preglednik slika: {{current}} od {{total}}",
+    "close": "Zatvori preglednik slika",
+    "previous": "Prethodna slika ({{current}} od {{total}})",
+    "next": "Sljedeća slika ({{current}} od {{total}})",
+    "loadError": "Slika se nije mogla učitati",
+    "imageAlt": "Slika nekretnine {{current}} od {{total}}"
+  },
+  "source": {
+    "listedOn": "Objavljeno na {{source}}",
+    "viewOriginal": "Pogledaj na {{source}}",
+    "importedAt": "Uvezeno {{date}}"
   }
 }

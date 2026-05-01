@@ -34,6 +34,7 @@ import { useTrackView } from '@/src/features/view-stats/hooks';
 import { useRecentlyViewed } from '@/src/hooks/useRecentlyViewed';
 import PromotionModal from '@/src/features/promotions/components/PromotionModal';
 import ScheduleViewingModal from '@/src/features/rental/components/ScheduleViewingModal';
+import ExternalSourceBadge from '@/src/features/properties/components/ExternalSourceBadge';
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import Footer from '@/components/shared/Footer';
 import Modal from '@/components/shared/Modal';
@@ -896,6 +897,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                 onImageSelect={handleImageSelect}
               />
             </div>
+
+            {/* External-source attribution: shown above PropertyInfo when this listing was imported from a third-party site */}
+            {property.source && (
+              <div className="px-4 lg:px-0 animate-slide-up" style={{ animationDelay: '40ms' }}>
+                <ExternalSourceBadge source={property.source} sourceUrl={property.sourceUrl} variant="link" />
+              </div>
+            )}
 
             {/* Mobile Only: Property Info (description) shown early */}
             <div className="lg:hidden animate-slide-up" style={{ animationDelay: '50ms' }}>

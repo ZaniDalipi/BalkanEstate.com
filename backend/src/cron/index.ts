@@ -16,6 +16,7 @@ import { processMonthlyCouponRefresh } from '../services/monthlyCouponService';
 import { fetchAndStoreNews, cleanupOldNews } from '../services/newsService';
 import { startPropertyStatsJob, stopPropertyStatsJob } from '../jobs/computePropertyStatsJob';
 import { processExpiredRentals } from '../jobs/rentalExpiryJob';
+import { processListingIngest } from '../jobs/listingIngestJob';
 
 // Helper to check if MongoDB is connected before running a job
 const isMongoConnected = (): boolean => {
@@ -47,6 +48,7 @@ let activityCleanupTask: cron.ScheduledTask | null = null;
 let newsFetchTask: cron.ScheduledTask | null = null;
 let newsCleanupTask: cron.ScheduledTask | null = null;
 let rentalExpiryTask: cron.ScheduledTask | null = null;
+let listingIngestTask: cron.ScheduledTask | null = null;
 
 export const startCronJobs = () => {
   // Check for subscriptions expiring in 1 day - runs daily at 10 AM
@@ -435,7 +437,15 @@ export const startCronJobs = () => {
   // Pre-computed property stats (hourly)
   startPropertyStatsJob();
 
-  cronLogger.info('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails, monthly coupons, news fetch, property stats, rental expiry)');
+  // Universal listings ingestion: pull from every enabled ListingSource every 6 hours (at minute 30).
+  // Adapters internally apply robots.txt + per-host rate limits.
+  listingIngestTask = cron.schedule('30 */6 * * *', async () => {
+    await withDbConnection('listing ingest', async () => {
+      await processListingIngest();
+    });
+  });
+
+  cronLogger.info('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails, monthly coupons, news fetch, property stats, rental expiry, listing ingest)');
 };
 
 export const stopCronJobs = () => {
@@ -455,6 +465,7 @@ export const stopCronJobs = () => {
   if (newsFetchTask) newsFetchTask.stop();
   if (newsCleanupTask) newsCleanupTask.stop();
   if (rentalExpiryTask) rentalExpiryTask.stop();
+  if (listingIngestTask) listingIngestTask.stop();
   stopPropertyStatsJob();
   cronLogger.info('🛑 All cron jobs stopped');
 };

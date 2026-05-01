@@ -234,7 +234,7 @@
     "loading": "Loading virtual tour...",
     "exit": "Излези од турата",
     "floor": "Кат {{floor}}",
-    "hint": "Повлечете за гледање \u2022 Скролајте за зум",
+    "hint": "Повлечете за гледање • Скролајте за зум",
     "entering": "Влегувам во зграда...",
     "tourButton": "360° Тура"
   },
@@ -559,5 +559,10 @@
     "updating": "Се ажурира...",
     "cancelViewing": "Откажи преглед",
     "requested": "Побарано"
+  },
+  "source": {
+    "listedOn": "Објавено на {{source}}",
+    "viewOriginal": "Види на {{source}}",
+    "importedAt": "Увезено {{date}}"
   }
 }

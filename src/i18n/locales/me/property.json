@@ -559,5 +559,10 @@
     "updating": "Ažuriranje...",
     "cancelViewing": "Otkaži razgledanje",
     "requested": "Zatraženo"
+  },
+  "source": {
+    "listedOn": "Objavljeno na {{source}}",
+    "viewOriginal": "Pogledaj na {{source}}",
+    "importedAt": "Uvezeno {{date}}"
   }
 }

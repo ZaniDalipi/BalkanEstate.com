@@ -395,6 +395,10 @@ export interface Property {
     currency?: string;
     // Price discount
     hasDiscount?: boolean;
+    // Universal-listings ingestion: present when this listing was imported from a third-party site.
+    source?: string;
+    sourceUrl?: string;
+    sourceFetchedAt?: number;
 }
 
 export interface RentalHistoryEntry {
