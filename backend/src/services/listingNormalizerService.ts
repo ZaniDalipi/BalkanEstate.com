@@ -226,6 +226,37 @@ const knownPropertyKeys = new Set<string>([
 ]);
 
 /**
+ * Validate that a raw listing looks like a real estate listing.
+ * Requires at least: (title OR description) AND (price OR address/city/country)
+ * Tolerates various field name variations (title, name, naslov, naziv, etc.)
+ * This prevents accidentally ingesting page metadata or non-listing content.
+ */
+export const isValidListingItem = (raw: Record<string, unknown>): boolean => {
+  // Check for content fields (title/description)
+  const contentFields = ['title', 'name', 'naslov', 'naziv', 'description', 'opis', 'content', 'summary'];
+  const hasContent = contentFields.some(f => {
+    const v = raw[f];
+    return v != null && String(v).trim().length > 0;
+  });
+
+  // Check for location fields
+  const locationFields = ['address', 'city', 'country', 'lat', 'lng', 'grad', 'zemlja', 'ulica'];
+  const hasLocation = locationFields.some(f => {
+    const v = raw[f];
+    return v != null && String(v).trim().length > 0;
+  });
+
+  // Check for price (must be present and non-empty)
+  const priceFields = ['price', 'cijena', 'cena', 'preis', 'prix', 'precio'];
+  const hasPrice = priceFields.some(f => {
+    const v = raw[f];
+    return v != null && String(v).trim() !== '';
+  });
+
+  return hasContent && (hasPrice || hasLocation);
+};
+
+/**
  * Convert an adapter's RawListing into a `Property` document.
  * The result is `Partial<IProperty>` because the orchestrator merges
  * required defaults (sellerId, status, …) at upsert time.

@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import type { IListingSource } from '../../models/ListingSource';
+import { isValidListingItem } from '../listingNormalizerService';
 import { httpGet } from './httpClient';
 import type { FetchOptions, RawListing, SourceAdapter } from './types';
 
@@ -121,6 +122,8 @@ export class JsonLdAdapter implements SourceAdapter {
       try {
         const json = await this.parsePage(url, accepted);
         if (!json) continue;
+        // Validate that this JSON-LD item looks like a real listing
+        if (!isValidListingItem(json)) continue;
         const id = String(json['@id'] ?? json['identifier'] ?? json['sku'] ?? url);
         out.push({ id, url, raw: json });
         if (limit && out.length >= limit) break;

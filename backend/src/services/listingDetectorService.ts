@@ -5,6 +5,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import Parser from 'rss-parser';
+import { isValidListingItem } from './listingNormalizerService';
 
 const BOT_UA = 'BalkanEstateBot/1.0 (+https://balkanestate.com/bot)';
 const TIMEOUT = 12_000;
@@ -65,12 +66,16 @@ const findJsonLdInHtml = (html: string): boolean => {
   return found;
 };
 
-/** Try to validate a URL looks like an RSS/Atom feed. */
+/** Try to validate a URL looks like an RSS/Atom feed with real estate listings. */
 const probeRss = async (url: string): Promise<Record<string, unknown>[] | null> => {
   try {
     const parser = new Parser({ timeout: TIMEOUT, headers: { 'User-Agent': BOT_UA } });
     const feed = await parser.parseURL(url);
-    if (feed.items && feed.items.length > 0) return feed.items as Record<string, unknown>[];
+    if (feed.items && feed.items.length > 0) {
+      // Filter to only items that look like real listings
+      const validItems = (feed.items as Record<string, unknown>[]).filter(item => isValidListingItem(item));
+      if (validItems.length > 0) return validItems;
+    }
     return null;
   } catch {
     return null;
@@ -81,7 +86,11 @@ const probeRss = async (url: string): Promise<Record<string, unknown>[] | null> 
 const probeWordPress = async (baseUrl: string): Promise<Record<string, unknown>[] | null> => {
   const origin = new URL(baseUrl).origin;
   const data = await tryUrl(`${origin}/wp-json/wp/v2/posts?per_page=3&_embed`, 'json');
-  if (Array.isArray(data) && data.length > 0) return data as Record<string, unknown>[];
+  if (Array.isArray(data) && data.length > 0) {
+    // Filter to only items that look like real listings
+    const validItems = (data as Record<string, unknown>[]).filter(item => isValidListingItem(item));
+    if (validItems.length > 0) return validItems;
+  }
   return null;
 };
 
@@ -89,12 +98,18 @@ const probeWordPress = async (baseUrl: string): Promise<Record<string, unknown>[
 const probeJsonFeed = async (url: string): Promise<{ items: Record<string, unknown>[]; itemsPath: string } | null> => {
   const data = await tryUrl(url, 'json');
   if (!data || typeof data !== 'object') return null;
-  if (Array.isArray(data) && data.length > 0) return { items: data as Record<string, unknown>[], itemsPath: '$[*]' };
+  if (Array.isArray(data) && data.length > 0) {
+    const validItems = (data as Record<string, unknown>[]).filter(item => isValidListingItem(item));
+    if (validItems.length > 0) return { items: validItems, itemsPath: '$[*]' };
+  }
   // Common wrappers: { data: [], items: [], results: [], listings: [] }
   for (const key of ['data', 'items', 'results', 'listings', 'properties', 'nekretnine']) {
     const val = (data as Record<string, unknown>)[key];
     if (Array.isArray(val) && val.length > 0) {
-      return { items: val as Record<string, unknown>[], itemsPath: `$.${key}[*]` };
+      const validItems = (val as Record<string, unknown>[]).filter(item => isValidListingItem(item));
+      if (validItems.length > 0) {
+        return { items: validItems, itemsPath: `$.${key}[*]` };
+      }
     }
   }
   return null;
@@ -225,13 +240,22 @@ export const detectFromJsonSample = (jsonString: string): DetectResult => {
 
   if (items.length === 0) throw new Error('No items found in the provided JSON');
 
-  const sample = items[0];
+  // Filter to only items that look like real listings
+  const validItems = items.filter(item => isValidListingItem(item));
+  if (validItems.length === 0) {
+    throw new Error(
+      'No items in the JSON look like real estate listings. ' +
+      'Listings must have at least (title or description) and (price or location/city/country).'
+    );
+  }
+
+  const sample = validItems[0];
   return {
     adapterType: 'jsonFeed',
     adapterConfig: { itemsPath, idPath: '$.id', urlPath: '$.url' },
     fieldMap: buildJsonFieldMap(sample),
     sample,
-    hint: `JSON sample analyzed — ${items.length} item(s) detected`,
+    hint: `JSON sample analyzed — ${validItems.length} valid item(s) detected out of ${items.length}`,
   };
 };
 
@@ -285,7 +309,16 @@ export const detectFeedForUrlWithAuth = async (
     );
   }
 
-  const sample = items[0];
+  // Filter to only items that look like real listings
+  const validItems = items.filter(item => isValidListingItem(item));
+  if (validItems.length === 0) {
+    throw new Error(
+      'API returned items but none look like real estate listings. ' +
+      'Listings must have at least (title or description) and (price or location/city/country).'
+    );
+  }
+
+  const sample = validItems[0];
   const authConfig: Record<string, unknown> = {};
   if (Object.keys(headers).length > 0) authConfig.headers = headers;
 
@@ -300,7 +333,7 @@ export const detectFeedForUrlWithAuth = async (
     },
     fieldMap: buildJsonFieldMap(sample),
     sample,
-    hint: `Custom API detected — ${items.length} item(s) in response`,
+    hint: `Custom API detected — ${validItems.length} valid item(s) detected out of ${items.length}`,
   };
 };
 

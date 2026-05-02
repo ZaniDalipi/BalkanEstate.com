@@ -1,6 +1,7 @@
 import { parseStringPromise } from 'xml2js';
 import { JSONPath } from 'jsonpath-plus';
 import type { IListingSource } from '../../models/ListingSource';
+import { isValidListingItem } from '../listingNormalizerService';
 import { httpGet } from './httpClient';
 import type { FetchOptions, RawListing, SourceAdapter } from './types';
 
@@ -58,6 +59,8 @@ export class XmlFeedAdapter implements SourceAdapter {
     for (const item of items) {
       const id = queryFirst(item, cfg.idPath);
       if (id == null) continue;
+      // Validate that this item looks like a real listing (not page metadata or other content)
+      if (!isValidListingItem(item as Record<string, unknown>)) continue;
       if (since && cfg.publishedAtPath) {
         const ts = queryFirst(item, cfg.publishedAtPath);
         const t = ts ? new Date(String(ts)).getTime() : NaN;
