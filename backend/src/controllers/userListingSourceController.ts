@@ -3,7 +3,11 @@ import { Types } from 'mongoose';
 import ListingSource from '../models/ListingSource';
 import Property from '../models/Property';
 import { runSource } from '../services/listingIngestService';
-import { detectFeedForUrl } from '../services/listingDetectorService';
+import {
+  detectFeedForUrl,
+  detectFromJsonSample,
+  detectFeedForUrlWithAuth,
+} from '../services/listingDetectorService';
 
 /**
  * User-facing listing-source endpoints. All handlers require `req.user`
@@ -26,6 +30,15 @@ const requireUserId = (req: Request, res: Response): Types.ObjectId | null => {
   return id as Types.ObjectId;
 };
 
+const requireValidId = (req: Request, res: Response): string | null => {
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  if (!id || !Types.ObjectId.isValid(id)) {
+    res.status(400).json({ message: 'Invalid listing source id' });
+    return null;
+  }
+  return id;
+};
+
 /** GET /api/listing-sources */
 export const list = async (req: Request, res: Response): Promise<void> => {
   const userId = requireUserId(req, res);
@@ -38,7 +51,9 @@ export const list = async (req: Request, res: Response): Promise<void> => {
 export const get = async (req: Request, res: Response): Promise<void> => {
   const userId = requireUserId(req, res);
   if (!userId) return;
-  const source = await ListingSource.findOne({ _id: req.params.id, userId });
+  const id = requireValidId(req, res);
+  if (!id) return;
+  const source = await ListingSource.findOne({ _id: id, userId });
   if (!source) {
     res.status(404).json({ message: 'ListingSource not found' });
     return;
@@ -60,8 +75,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-  // Force a per-user namespaced slug to keep the unique index conflict-free
-  // (and to make it visually obvious which user owns a slug).
+  // Force a per-user namespaced slug to keep the unique index conflict-free.
   const safeSlug = String(slug || `user-${userId.toString().slice(-6)}-${Date.now()}`)
     .toLowerCase()
     .replace(/[^a-z0-9-]/g, '-');
@@ -71,7 +85,6 @@ export const create = async (req: Request, res: Response): Promise<void> => {
       ...req.body,
       slug: safeSlug,
       userId,
-      // Users can't bypass the HTML-scraping ToS gate.
       acceptedTermsAt: undefined,
     });
     res.status(201).json({ source });
@@ -84,20 +97,20 @@ export const create = async (req: Request, res: Response): Promise<void> => {
 export const update = async (req: Request, res: Response): Promise<void> => {
   const userId = requireUserId(req, res);
   if (!userId) return;
+  const id = requireValidId(req, res);
+  if (!id) return;
 
-  // Allow-list fields users can edit; never let them reassign userId or flip
-  // adapterType to htmlScrape / set acceptedTermsAt.
   const { name, baseUrl, enabled, adapterConfig, fieldMap, schedule, rateLimitRpm } = req.body || {};
-  const update: Record<string, unknown> = {};
-  if (name !== undefined) update.name = name;
-  if (baseUrl !== undefined) update.baseUrl = baseUrl;
-  if (enabled !== undefined) update.enabled = Boolean(enabled);
-  if (adapterConfig !== undefined) update.adapterConfig = adapterConfig;
-  if (fieldMap !== undefined) update.fieldMap = fieldMap;
-  if (schedule !== undefined) update.schedule = schedule;
-  if (rateLimitRpm !== undefined) update.rateLimitRpm = rateLimitRpm;
+  const patch: Record<string, unknown> = {};
+  if (name !== undefined) patch.name = name;
+  if (baseUrl !== undefined) patch.baseUrl = baseUrl;
+  if (enabled !== undefined) patch.enabled = Boolean(enabled);
+  if (adapterConfig !== undefined) patch.adapterConfig = adapterConfig;
+  if (fieldMap !== undefined) patch.fieldMap = fieldMap;
+  if (schedule !== undefined) patch.schedule = schedule;
+  if (rateLimitRpm !== undefined) patch.rateLimitRpm = rateLimitRpm;
 
-  const source = await ListingSource.findOneAndUpdate({ _id: req.params.id, userId }, update, {
+  const source = await ListingSource.findOneAndUpdate({ _id: id, userId }, patch, {
     new: true,
     runValidators: true,
   });
@@ -112,13 +125,13 @@ export const update = async (req: Request, res: Response): Promise<void> => {
 export const remove = async (req: Request, res: Response): Promise<void> => {
   const userId = requireUserId(req, res);
   if (!userId) return;
-  const source = await ListingSource.findOneAndDelete({ _id: req.params.id, userId });
+  const id = requireValidId(req, res);
+  if (!id) return;
+  const source = await ListingSource.findOneAndDelete({ _id: id, userId });
   if (!source) {
     res.status(404).json({ message: 'ListingSource not found' });
     return;
   }
-  // Best-effort cleanup of the listings this source created. Users won't
-  // expect to keep shadow copies of imports they've removed.
   await Property.deleteMany({ source: source.slug });
   res.json({ ok: true });
 };
@@ -127,8 +140,10 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
 export const runNow = async (req: Request, res: Response): Promise<void> => {
   const userId = requireUserId(req, res);
   if (!userId) return;
+  const id = requireValidId(req, res);
+  if (!id) return;
 
-  const source = await ListingSource.findOne({ _id: req.params.id, userId });
+  const source = await ListingSource.findOne({ _id: id, userId });
   if (!source) {
     res.status(404).json({ message: 'ListingSource not found' });
     return;
@@ -143,8 +158,10 @@ export const runNow = async (req: Request, res: Response): Promise<void> => {
 export const stats = async (req: Request, res: Response): Promise<void> => {
   const userId = requireUserId(req, res);
   if (!userId) return;
+  const id = requireValidId(req, res);
+  if (!id) return;
 
-  const source = await ListingSource.findOne({ _id: req.params.id, userId });
+  const source = await ListingSource.findOne({ _id: id, userId });
   if (!source) {
     res.status(404).json({ message: 'ListingSource not found' });
     return;
@@ -173,21 +190,51 @@ export const stats = async (req: Request, res: Response): Promise<void> => {
 
 /**
  * POST /api/listing-sources/detect
- * Probe a URL and return the best adapter config + a sample item.
+ * Probe a URL / analyze a JSON sample and return adapter config + a sample item.
  * Does not persist anything — purely a detection helper.
+ *
+ * Body variants:
+ *   { method: 'url',       url: string }
+ *   { method: 'rss',       url: string }          — direct RSS/Atom URL, skips detection
+ *   { method: 'sampleJson', sampleJson: string }  — analyze pasted JSON
+ *   { method: 'customApi', url: string, authHeaders?: Record<string,string> }
  */
 export const detect = async (req: Request, res: Response): Promise<void> => {
   const userId = requireUserId(req, res);
   if (!userId) return;
 
-  const { url } = req.body || {};
-  if (!url || typeof url !== 'string') {
-    res.status(400).json({ message: 'url is required' });
-    return;
-  }
+  const { method = 'url', url, sampleJson, authHeaders } = req.body || {};
 
   try {
-    const result = await detectFeedForUrl(url);
+    if (method === 'sampleJson') {
+      if (!sampleJson || typeof sampleJson !== 'string') {
+        res.status(400).json({ message: 'sampleJson is required' });
+        return;
+      }
+      const result = detectFromJsonSample(sampleJson);
+      res.json(result);
+      return;
+    }
+
+    if (!url || typeof url !== 'string' || !url.trim()) {
+      res.status(400).json({ message: 'url is required' });
+      return;
+    }
+
+    if (method === 'customApi') {
+      const safeHeaders: Record<string, string> = {};
+      if (authHeaders && typeof authHeaders === 'object') {
+        for (const [k, v] of Object.entries(authHeaders)) {
+          if (typeof k === 'string' && typeof v === 'string') safeHeaders[k] = v;
+        }
+      }
+      const result = await detectFeedForUrlWithAuth(url.trim(), safeHeaders);
+      res.json(result);
+      return;
+    }
+
+    // 'url' or 'rss' — auto-detect
+    const result = await detectFeedForUrl(url.trim());
     res.json(result);
   } catch (err) {
     res.status(422).json({ message: (err as Error).message });

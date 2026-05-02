@@ -161,6 +161,121 @@ const buildJsonFieldMap = (sample: Record<string, unknown>): Record<string, stri
   return map;
 };
 
+/**
+ * Analyze a pasted JSON string (single object or array) and build a fieldMap
+ * from it. Does not make any network requests.
+ */
+export const detectFromJsonSample = (jsonString: string): DetectResult => {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(jsonString.trim());
+  } catch {
+    throw new Error('Invalid JSON — please paste a valid JSON object or array of listings');
+  }
+
+  let items: Record<string, unknown>[] = [];
+  let itemsPath = '$[*]';
+
+  if (Array.isArray(parsed)) {
+    items = parsed as Record<string, unknown>[];
+  } else if (parsed && typeof parsed === 'object') {
+    for (const key of ['data', 'items', 'results', 'listings', 'properties', 'nekretnine']) {
+      const val = (parsed as Record<string, unknown>)[key];
+      if (Array.isArray(val) && val.length > 0) {
+        items = val as Record<string, unknown>[];
+        itemsPath = `$.${key}[*]`;
+        break;
+      }
+    }
+    if (items.length === 0) {
+      items = [parsed as Record<string, unknown>];
+      itemsPath = '$';
+    }
+  } else {
+    throw new Error('JSON must be an object or array of listings');
+  }
+
+  if (items.length === 0) throw new Error('No items found in the provided JSON');
+
+  const sample = items[0];
+  return {
+    adapterType: 'jsonFeed',
+    adapterConfig: { itemsPath, idPath: '$.id', urlPath: '$.url' },
+    fieldMap: buildJsonFieldMap(sample),
+    sample,
+    hint: `JSON sample analyzed — ${items.length} item(s) detected`,
+  };
+};
+
+/**
+ * Probe a URL with optional auth headers and build an adapter config from the
+ * response. Used when the user already knows the API endpoint and credentials.
+ */
+export const detectFeedForUrlWithAuth = async (
+  rawUrl: string,
+  headers: Record<string, string>
+): Promise<DetectResult> => {
+  const url = rawUrl.trim();
+  let data: unknown;
+  try {
+    const r = await axios.get(url, {
+      timeout: TIMEOUT,
+      headers: { 'User-Agent': BOT_UA, Accept: 'application/json, */*', ...headers },
+      responseType: 'json',
+      validateStatus: (s) => s < 500,
+    });
+    if (r.status >= 400) {
+      throw new Error(`API returned HTTP ${r.status} — check the URL and auth credentials`);
+    }
+    data = r.data;
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.response) {
+      throw new Error(`API returned HTTP ${err.response.status} — check the URL and auth credentials`);
+    }
+    throw err;
+  }
+
+  let items: Record<string, unknown>[] = [];
+  let itemsPath = '$[*]';
+
+  if (Array.isArray(data) && data.length > 0) {
+    items = data as Record<string, unknown>[];
+  } else if (data && typeof data === 'object') {
+    for (const key of ['data', 'items', 'results', 'listings', 'properties', 'nekretnine']) {
+      const val = (data as Record<string, unknown>)[key];
+      if (Array.isArray(val) && val.length > 0) {
+        items = val as Record<string, unknown>[];
+        itemsPath = `$.${key}[*]`;
+        break;
+      }
+    }
+  }
+
+  if (items.length === 0) {
+    throw new Error(
+      'API responded but returned no items. Check the URL, auth credentials, and that the endpoint returns a list of listings.'
+    );
+  }
+
+  const sample = items[0];
+  const authConfig: Record<string, unknown> = {};
+  if (Object.keys(headers).length > 0) authConfig.headers = headers;
+
+  return {
+    adapterType: 'customApi',
+    adapterConfig: {
+      url,
+      ...authConfig,
+      itemsPath,
+      idPath: '$.id',
+      urlPath: '$.url',
+    },
+    fieldMap: buildJsonFieldMap(sample),
+    sample,
+    hint: `Custom API detected — ${items.length} item(s) in response`,
+  };
+};
+
 export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> => {
   const url = rawUrl.trim();
 

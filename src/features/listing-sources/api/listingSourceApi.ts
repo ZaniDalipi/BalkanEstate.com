@@ -143,10 +143,15 @@ export interface DetectResult {
   hint: string;
 }
 
-export const detectFeed = async (url: string): Promise<DetectResult> => {
+export type DetectMethod = 'url' | 'rss' | 'sampleJson' | 'customApi';
+
+export const detectFeed = async (
+  method: DetectMethod,
+  payload: { url?: string; sampleJson?: string; authHeaders?: Record<string, string> }
+): Promise<DetectResult> => {
   return apiRequest<DetectResult>(`${BASE}/detect`, {
     method: 'POST',
-    body: { url },
+    body: { method, ...payload },
     requiresAuth: true,
   });
 };
