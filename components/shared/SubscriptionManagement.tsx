@@ -101,7 +101,7 @@ const FREE_PLAN: Plan = {
   price: 0,
   period: 'forever',
   periodMonths: 0,
-  features: ['3 active listings', '3 saved searches', '3 AI messages', '3 generate insights', 'Basic property details'],
+  features: ['{listingsLimit} active listings', '{savedSearchesLimit} saved searches', '{aiMessagesLimit} AI messages', '{imageDescriptionLimit} auto image descriptions', 'Basic property details'],
   listingLimit: 3,
   color: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
   tier: 0,
@@ -120,7 +120,7 @@ const AGENCY_AGENT_PLAN: Plan = {
   price: 0,
   period: 'month',
   periodMonths: 1,
-  features: ['30 active listings per month', 'Unlimited saved searches', 'Unlimited AI chat', 'Full analytics', 'Agency team support'],
+  features: ['{listingsLimit} listings per month', 'Unlimited saved searches', 'Unlimited AI chat', 'Full analytics', 'Priority support'],
   listingLimit: 30,
   color: 'linear-gradient(135deg, #10b981 0%, #0d9488 100%)',
   tier: 2,
@@ -1123,7 +1123,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     const rawBenefits: string[] = featuredProduct?.features?.slice(0, 4) ?? (
       isBuyerRole
         ? ['Instant Property Alerts', 'Unlimited Saved Searches', 'Early Access to Listings', 'Advanced Market Insights']
-        : ['250 Listings/Year', '3 Promo Coupons/Month', 'Unlimited AI Chat', '20 Insights/Month']
+        : ['{listingsLimit} Listings/Year', '{promotionCoupons} Promo Coupons/Month', 'Unlimited AI Chat', '{aiInsightsLimit} Insights/Month']
     );
     // Replace {listingsLimit} and other placeholders with actual product values
     const noBenefits = featuredProduct
