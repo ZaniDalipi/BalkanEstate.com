@@ -9,6 +9,8 @@ import {
   runNow,
   stats,
   detect,
+  bulkDelete,
+  clearImports,
 } from '../controllers/userListingSourceController';
 
 const router = express.Router();
@@ -18,13 +20,18 @@ const router = express.Router();
 router.use(protect);
 
 router.get('/', list);
-router.post('/detect', detect);   // probe-only — must be before /:id
-router.get('/:id', get);
 router.post('/', create);
+
+// Static routes — must precede /:id so they aren't parsed as an ObjectId param.
+router.post('/detect', detect);
+router.post('/bulk-delete', bulkDelete);
+
+router.get('/:id', get);
 router.put('/:id', update);
 router.delete('/:id', remove);
 
 router.post('/:id/run', runNow);
+router.post('/:id/clear-imports', clearImports);
 router.get('/:id/stats', stats);
 
 export default router;

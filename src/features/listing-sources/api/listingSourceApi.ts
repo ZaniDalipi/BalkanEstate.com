@@ -116,6 +116,33 @@ export const deleteMyListingSource = async (id: string): Promise<void> => {
   });
 };
 
+export interface BulkDeleteResult {
+  ok: true;
+  deleted: number;
+  deletedSlugs: string[];
+}
+
+export const bulkDeleteMyListingSources = async (ids: string[]): Promise<BulkDeleteResult> => {
+  return apiRequest<BulkDeleteResult>(`${BASE}/bulk-delete`, {
+    method: 'POST',
+    body: { ids },
+    requiresAuth: true,
+  });
+};
+
+export interface ClearImportsResult {
+  ok: true;
+  deleted: number;
+  source: ListingSource;
+}
+
+export const clearMyListingSourceImports = async (id: string): Promise<ClearImportsResult> => {
+  return apiRequest<ClearImportsResult>(`${BASE}/${id}/clear-imports`, {
+    method: 'POST',
+    requiresAuth: true,
+  });
+};
+
 export const runMyListingSource = async (
   id: string,
   options?: { fullRefresh?: boolean; limit?: number }

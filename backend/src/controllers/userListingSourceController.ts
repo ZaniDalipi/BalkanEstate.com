@@ -139,6 +139,69 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
   res.json({ ok: true });
 };
 
+/**
+ * POST /api/listing-sources/bulk-delete
+ * Body: { ids: string[] }
+ * Deletes multiple sources (and their imported properties) in one round-trip.
+ * Only sources owned by the caller are touched; unknown ids are silently skipped.
+ */
+export const bulkDelete = async (req: Request, res: Response): Promise<void> => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+
+  const rawIds = req.body?.ids;
+  if (!Array.isArray(rawIds) || rawIds.length === 0) {
+    res.status(400).json({ message: 'ids[] is required' });
+    return;
+  }
+
+  const decoded = rawIds
+    .map((raw) => (typeof raw === 'string' ? (resolveId(raw) ?? (Types.ObjectId.isValid(raw) ? raw : null)) : null))
+    .filter((v): v is string => v !== null);
+
+  if (decoded.length === 0) {
+    res.status(400).json({ message: 'No valid ids provided' });
+    return;
+  }
+
+  const sources = await ListingSource.find({ _id: { $in: decoded }, userId }).select('slug');
+  const slugs = sources.map((s) => s.slug);
+  const ids = sources.map((s) => s._id);
+
+  await Property.deleteMany({ source: { $in: slugs } });
+  const result = await ListingSource.deleteMany({ _id: { $in: ids }, userId });
+
+  res.json({ ok: true, deleted: result.deletedCount ?? 0, deletedSlugs: slugs });
+};
+
+/**
+ * POST /api/listing-sources/:id/clear-imports
+ * Wipes the imported `Property` documents for this source without deleting
+ * the source itself. Resets ingest counters so the next sync starts fresh.
+ */
+export const clearImports = async (req: Request, res: Response): Promise<void> => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+  const id = requireValidId(req, res);
+  if (!id) return;
+
+  const source = await ListingSource.findOne({ _id: id, userId });
+  if (!source) {
+    res.status(404).json({ message: 'ListingSource not found' });
+    return;
+  }
+
+  const result = await Property.deleteMany({ source: source.slug });
+
+  source.listingsImported = 0;
+  source.listingsUpdated = 0;
+  source.listingsFailed = 0;
+  source.lastErrorMessage = undefined;
+  await source.save();
+
+  res.json({ ok: true, deleted: result.deletedCount ?? 0, source });
+};
+
 /** POST /api/listing-sources/:id/run — trigger an immediate ingest. */
 export const runNow = async (req: Request, res: Response): Promise<void> => {
   const userId = requireUserId(req, res);
