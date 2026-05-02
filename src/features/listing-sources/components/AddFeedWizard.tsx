@@ -206,7 +206,10 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
     setStep('saving');
     setError(null);
     try {
-      const baseUrl = method === 'customApi' ? apiUrl.trim() : method === 'sampleJson' ? '' : url.trim();
+      const baseUrl =
+        method === 'customApi' ? apiUrl.trim() :
+        method === 'sampleJson' ? (apiUrl.trim() || detected.adapterConfig.url as string || 'manual://imported') :
+        url.trim();
       const input: ListingSourceInput = {
         name: name.trim() || (baseUrl ? new URL(baseUrl).hostname : 'My feed'),
         baseUrl,
@@ -328,7 +331,9 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
                   />
                 </label>
                 <label className="block">
-                  <span className="text-sm font-semibold text-gray-700">{t('listingFeeds:fields.feedUrl')} <span className="text-gray-400 font-normal">({t('common:optional')})</span></span>
+                  <span className="text-sm font-semibold text-gray-700">
+                    {t('listingFeeds:fields.apiUrl')} <span className="text-gray-400 font-normal">({t('common:optional')} — {t('listingFeeds:method.apiUrlHint')})</span>
+                  </span>
                   <input
                     type="url"
                     value={apiUrl}

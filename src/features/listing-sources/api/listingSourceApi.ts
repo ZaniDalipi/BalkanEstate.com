@@ -3,7 +3,7 @@ import { apiRequest } from '@/src/shared/api';
 export type ListingAdapterType = 'rss' | 'jsonFeed' | 'xmlFeed' | 'jsonLd' | 'customApi';
 
 export interface ListingSource {
-  _id: string;
+  id: string;
   userId?: string;
   name: string;
   slug: string;

@@ -1,13 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  type ListingSource,
-  type IngestStats,
-  listMyListingSources,
-  deleteMyListingSource,
-  runMyListingSource,
-  updateMyListingSource,
-} from '../api/listingSourceApi';
+import { type ListingSource } from '../api/listingSourceApi';
+import { useListingFeeds } from '../hooks/useListingFeeds';
 import AddFeedWizard from './AddFeedWizard';
 import ListingFeedForm from './ListingFeedForm';
 import ListingFeedRow from './ListingFeedRow';
@@ -16,65 +10,35 @@ type View = 'list' | 'add' | 'edit';
 
 const MyListingFeeds: React.FC = () => {
   const { t } = useTranslation(['listingFeeds', 'common']);
-  const [sources, setSources] = useState<ListingSource[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<View>('list');
   const [editing, setEditing] = useState<ListingSource | null>(null);
-  const [runningIds, setRunningIds] = useState<Set<string>>(new Set());
-  const [lastRun, setLastRun] = useState<Record<string, IngestStats>>({});
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      setSources(await listMyListingSources());
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => { void refresh(); }, [refresh]);
+  const {
+    sources,
+    loading,
+    error,
+    runningIds,
+    deletingIds,
+    togglingIds,
+    lastRun,
+    deleteFeed,
+    runFeed,
+    toggleEnabled,
+    upsertFeed,
+    clearError,
+  } = useListingFeeds();
 
   const handleSaved = (source: ListingSource) => {
+    upsertFeed(source);
     setView('list');
     setEditing(null);
-    setSources((prev) => {
-      const idx = prev.findIndex((s) => s._id === source._id);
-      if (idx === -1) return [source, ...prev];
-      const next = [...prev];
-      next[idx] = source;
-      return next;
-    });
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!confirm(t('listingFeeds:confirmDelete'))) return;
-    await deleteMyListingSource(id);
-    setSources((prev) => prev.filter((s) => s._id !== id));
+    void deleteFeed(id);
   };
 
-  const handleRun = async (id: string) => {
-    setRunningIds((prev) => new Set(prev).add(id));
-    try {
-      const stats = await runMyListingSource(id);
-      setLastRun((prev) => ({ ...prev, [id]: stats }));
-      await refresh();
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setRunningIds((prev) => { const n = new Set(prev); n.delete(id); return n; });
-    }
-  };
-
-  const handleToggleEnabled = async (source: ListingSource) => {
-    const updated = await updateMyListingSource(source._id, { enabled: !source.enabled });
-    setSources((prev) => prev.map((s) => (s._id === source._id ? updated : s)));
-  };
-
-  // Add new feed — use the auto-detect wizard
   if (view === 'add') {
     return (
       <AddFeedWizard
@@ -84,7 +48,6 @@ const MyListingFeeds: React.FC = () => {
     );
   }
 
-  // Edit existing feed — keep the JSON form (user already knows what they set up)
   if (view === 'edit' && editing) {
     return (
       <ListingFeedForm
@@ -112,7 +75,10 @@ const MyListingFeeds: React.FC = () => {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 mb-4 text-sm">{error}</div>
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 mb-4 text-sm flex items-center justify-between gap-2">
+          <span>{error}</span>
+          <button type="button" onClick={clearError} className="text-red-400 hover:text-red-600 font-bold text-lg leading-none">×</button>
+        </div>
       )}
 
       {loading ? (
@@ -132,14 +98,16 @@ const MyListingFeeds: React.FC = () => {
         <div className="space-y-3">
           {sources.map((source) => (
             <ListingFeedRow
-              key={source._id}
+              key={source.id}
               source={source}
-              isRunning={runningIds.has(source._id)}
-              lastRun={lastRun[source._id]}
+              isRunning={runningIds.has(source.id)}
+              isDeleting={deletingIds.has(source.id)}
+              isToggling={togglingIds.has(source.id)}
+              lastRun={lastRun[source.id]}
               onEdit={() => { setEditing(source); setView('edit'); }}
-              onDelete={() => handleDelete(source._id)}
-              onRun={() => handleRun(source._id)}
-              onToggleEnabled={() => handleToggleEnabled(source)}
+              onDelete={() => handleDelete(source.id)}
+              onRun={() => void runFeed(source.id)}
+              onToggleEnabled={() => void toggleEnabled(source)}
             />
           ))}
         </div>

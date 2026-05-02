@@ -8,6 +8,7 @@ import {
   detectFromJsonSample,
   detectFeedForUrlWithAuth,
 } from '../services/listingDetectorService';
+import { resolveId } from '../utils/idObfuscation';
 
 /**
  * User-facing listing-source endpoints. All handlers require `req.user`
@@ -31,8 +32,10 @@ const requireUserId = (req: Request, res: Response): Types.ObjectId | null => {
 };
 
 const requireValidId = (req: Request, res: Response): string | null => {
-  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-  if (!id || !Types.ObjectId.isValid(id)) {
+  const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  // Accepts encoded IDs (from global toJSON transform) or raw hex ObjectIds.
+  const id = raw ? (resolveId(raw) ?? (Types.ObjectId.isValid(raw) ? raw : null)) : null;
+  if (!id) {
     res.status(400).json({ message: 'Invalid listing source id' });
     return null;
   }

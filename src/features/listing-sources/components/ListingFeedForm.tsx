@@ -22,11 +22,16 @@ const ADAPTER_OPTIONS: { value: ListingAdapterType; labelKey: string; descKey: s
   { value: 'customApi', labelKey: 'listingFeeds:adapter.customApi', descKey: 'listingFeeds:adapter.customApiDesc' },
 ];
 
-const tryParseJson = (input: string, fallback: Record<string, unknown> = {}): Record<string, unknown> => {
+const tryParseJson = (input: string, fieldName: string, fallback: Record<string, unknown> = {}): Record<string, unknown> => {
   if (!input.trim()) return fallback;
-  const parsed = JSON.parse(input);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(input);
+  } catch {
+    throw new Error(`${fieldName}: invalid JSON — check for missing commas, quotes, or brackets`);
+  }
   if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-    throw new Error('Expected a JSON object');
+    throw new Error(`${fieldName}: must be a JSON object { … }`);
   }
   return parsed as Record<string, unknown>;
 };
@@ -60,8 +65,8 @@ const ListingFeedForm: React.FC<Props> = ({ initial, onCancel, onSaved }) => {
     setError(null);
     setSubmitting(true);
     try {
-      const adapterConfig = tryParseJson(adapterConfigText);
-      const fieldMapParsed = tryParseJson(fieldMapText);
+      const adapterConfig = tryParseJson(adapterConfigText, 'Adapter config');
+      const fieldMapParsed = tryParseJson(fieldMapText, 'Field map');
       const fieldMap: Record<string, string> = {};
       for (const [k, v] of Object.entries(fieldMapParsed)) {
         if (typeof v === 'string') fieldMap[k] = v;
@@ -76,7 +81,7 @@ const ListingFeedForm: React.FC<Props> = ({ initial, onCancel, onSaved }) => {
         fieldMap,
       };
       const saved = initial
-        ? await updateMyListingSource(initial._id, input)
+        ? await updateMyListingSource(initial.id, input)
         : await createMyListingSource(input);
       onSaved(saved);
     } catch (err) {

@@ -38,7 +38,8 @@
     "pasteJson": "Paste JSON sample",
     "customApi": "Custom API",
     "customApiDesc": "REST endpoint with auth headers",
-    "customApiHint": "Enter your API endpoint URL and authentication details. We'll probe it and map the fields automatically."
+    "customApiHint": "Enter your API endpoint URL and authentication details. We'll probe it and map the fields automatically.",
+    "apiUrlHint": "needed for future auto-sync"
   },
   "auth": {
     "none": "No auth",
