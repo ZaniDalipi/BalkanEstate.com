@@ -232,7 +232,28 @@ export const normalize = async (
     imageUrl = rehosted[0]?.url ?? imageUrl;
   }
 
-  const sellerId = await getExternalSellerId();
+  // If the source belongs to a user, attribute imported listings to them.
+  // Otherwise fall back to the system "external" seller account.
+  let sellerId: Types.ObjectId;
+  let createdByName: string;
+  let createdByEmail: string;
+  let createdAsRole: IProperty['createdAsRole'];
+
+  if (source.userId) {
+    const owner = await User.findById(source.userId).select('email name role').lean();
+    if (!owner) {
+      throw new Error(`Owner user ${source.userId.toString()} not found for source ${source.slug}`);
+    }
+    sellerId = owner._id as Types.ObjectId;
+    createdByName = (owner as { name?: string }).name || source.name || 'External Source';
+    createdByEmail = (owner as { email?: string }).email || EXTERNAL_SELLER_EMAIL;
+    createdAsRole = (owner as { role?: string }).role === 'agent' ? 'agent' : 'private_seller';
+  } else {
+    sellerId = await getExternalSellerId();
+    createdByName = source.name || 'External Source';
+    createdByEmail = EXTERNAL_SELLER_EMAIL;
+    createdAsRole = 'external';
+  }
 
   // Anything that wasn't a known IProperty key stays in sourceMetadata
   // so we don't lose source-specific information.
@@ -245,9 +266,9 @@ export const normalize = async (
 
   const property: Partial<IProperty> = {
     sellerId,
-    createdByName: source.name || 'External Source',
-    createdByEmail: EXTERNAL_SELLER_EMAIL,
-    createdAsRole: 'external',
+    createdByName,
+    createdByEmail,
+    createdAsRole,
     listingType,
     title: (mapped.title as string | undefined) ?? undefined,
     status: 'active',

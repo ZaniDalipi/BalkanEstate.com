@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema, Types } from 'mongoose';
 
 export type ListingAdapterType =
   | 'rss'
@@ -9,6 +9,8 @@ export type ListingAdapterType =
   | 'customApi';
 
 export interface IListingSource extends Document {
+  /** Owning user. When set, imported listings are attributed to this user's sellerId. */
+  userId?: Types.ObjectId;
   name: string;
   slug: string;
   baseUrl: string;
@@ -31,6 +33,7 @@ export interface IListingSource extends Document {
 
 const ListingSourceSchema = new Schema<IListingSource>(
   {
+    userId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
     name: { type: String, required: true, trim: true },
     slug: {
       type: String,
@@ -63,5 +66,6 @@ const ListingSourceSchema = new Schema<IListingSource>(
 );
 
 ListingSourceSchema.index({ enabled: 1, adapterType: 1 });
+ListingSourceSchema.index({ userId: 1, createdAt: -1 });
 
 export default mongoose.model<IListingSource>('ListingSource', ListingSourceSchema);
