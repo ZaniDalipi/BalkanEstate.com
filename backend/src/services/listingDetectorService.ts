@@ -135,20 +135,48 @@ const wpFieldMap = (): Record<string, string> => ({
 const buildJsonFieldMap = (sample: Record<string, unknown>): Record<string, string> => {
   const map: Record<string, string> = {};
   const keyHints: Array<[RegExp, string]> = [
-    [/^(title|name|naslov|naziv)$/i, 'title'],
-    [/^(description|desc|opis|content)$/i, 'description'],
-    [/^(price|cijena|cena|preis|prix|precio)$/i, 'price'],
-    [/^(image|img|photo|foto|thumbnail|slika)$/i, 'imageUrl'],
+    // Core fields
+    [/^(title|name|naslov|naziv|listing_title|property_title)$/i, 'title'],
+    [/^(description|desc|opis|content|listing_description|property_description|summary)$/i, 'description'],
+    [/^(price|cijena|cena|preis|prix|precio|asking_price|listing_price)$/i, 'price'],
+
+    // Images (multiple patterns — higher priority)
+    [/^(images|photos|pictures|photos_array|image_array|gallery)$/i, 'images'],
+    [/^(image|img|photo|foto|thumbnail|slika|main_image|primary_image|featured_image)$/i, 'imageUrl'],
+    [/^(image_url|photo_url|image_link|thumbnail_url)$/i, 'imageUrl'],
+
+    // Location
     [/^(city|grad|stadt|ville|ciudad)$/i, 'city'],
-    [/^(address|adresa|adresse)$/i, 'address'],
-    [/^(country|zemlja|drzava|pays)$/i, 'country'],
-    [/^(lat|latitude)$/i, 'lat'],
-    [/^(lng|lon|longitude)$/i, 'lng'],
-    [/^(beds|bedrooms|sobe|zimmer)$/i, 'beds'],
-    [/^(baths|bathrooms|kupatila)$/i, 'baths'],
-    [/^(sqft|area|povrsina|size|flaeche)$/i, 'sqft'],
-    [/^(url|link|permalink|href)$/i, 'sourceUrl'],
-    [/^(id|_id|uid)$/i, 'id'],
+    [/^(address|adresa|adresse|street|ulica|ulice)$/i, 'address'],
+    [/^(country|zemlja|drzava|pays|nation)$/i, 'country'],
+    [/^(lat|latitude|coords_lat)$/i, 'lat'],
+    [/^(lng|lon|longitude|coords_lng|coords_lon)$/i, 'lng'],
+
+    // Specs
+    [/^(beds|bedrooms|sobe|zimmer|num_bedrooms|bedroom_count)$/i, 'beds'],
+    [/^(baths|bathrooms|kupatila|num_bathrooms|bathroom_count)$/i, 'baths'],
+    [/^(sqft|area|povrsina|size|flaeche|square_feet|square_meters|living_area|floor_area)$/i, 'sqft'],
+    [/^(rooms|living_rooms|salon|num_rooms)$/i, 'livingRooms'],
+    [/^(year_built|year_constructed|godinu_izgradnje|baujahr)$/i, 'yearBuilt'],
+    [/^(parking|parking_spaces|garaza|garagen)$/i, 'parking'],
+    [/^(floor|floor_number|sprat|etaj)$/i, 'floorNumber'],
+    [/^(total_floors|num_floors|ukupno_spratova|stockwerke)$/i, 'totalFloors'],
+
+    // Property details
+    [/^(property_type|type|kategorija|kategorie|propertytype)$/i, 'propertyType'],
+    [/^(listing_type|transaction_type|tip_oglasa)$/i, 'listingType'],
+    [/^(amenities|features|specijalne_karakteristike|ausstattung|facility)$/i, 'amenities'],
+    [/^(furnishing|furnish|namesten|moebel|furnished_status)$/i, 'furnishing'],
+    [/^(heating|heating_type|grijanje|heizung)$/i, 'heatingType'],
+    [/^(condition|stanje|zustand|quality)$/i, 'condition'],
+    [/^(view|views|pogled|aussicht|view_type)$/i, 'viewType'],
+
+    // Links
+    [/^(url|link|permalink|href|listing_url|property_url|source_url)$/i, 'sourceUrl'],
+    [/^(virtual_tour|tour_url|3d_tour|video_url|video)$/i, 'virtualTour360Url'],
+
+    // Identifiers
+    [/^(id|_id|uid|listing_id|property_id)$/i, 'id'],
   ];
   for (const key of Object.keys(sample)) {
     for (const [re, prop] of keyHints) {

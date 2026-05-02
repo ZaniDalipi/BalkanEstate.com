@@ -122,6 +122,55 @@ const mapListingType = (raw: unknown): IProperty['listingType'] | undefined => {
   return undefined;
 };
 
+const categorizeAmenities = (amenities: unknown[]): string[] => {
+  if (!Array.isArray(amenities)) return [];
+
+  const AMENITY_KEYWORDS: Record<string, string[]> = {
+    'balcony': ['balkon', 'balcony', 'terassa', 'terrace', 'veranda'],
+    'parking': ['parking', 'parkiraliste', 'garage', 'garaza', 'lot', 'spaces'],
+    'pool': ['pool', 'swimming', 'bazen', 'bazin', 'bazenit'],
+    'garden': ['garden', 'yard', 'basta', 'bašta', 'dvoriste', 'dvorište'],
+    'gym': ['gym', 'fitness', 'teretana', 'tererana'],
+    'security': ['security', 'guard', 'zaštita', 'brvar', 'alarma', 'alarm'],
+    'elevator': ['elevator', 'lift', 'asansor', 'lift'],
+    'laundry': ['laundry', 'pranje', 'vešeraj', 'vešeraj'],
+    'dishwasher': ['dishwasher', 'mašina za sudove'],
+    'central_heating': ['central heating', 'centralno grijanje', 'zentrale heizung', 'centralino otopljavanje'],
+    'ac': ['air conditioning', 'ac', 'klima', 'klimatizacija', 'klime'],
+    'furnished': ['furnished', 'namesten', 'mebliran', 'möbliert'],
+    'internet': ['internet', 'wifi', 'wi-fi', 'broadband'],
+    'pets': ['pets', 'pet friendly', 'ljubimci', 'haustiere'],
+  };
+
+  const normalized: Set<string> = new Set();
+
+  for (const item of amenities) {
+    const str = String(item).toLowerCase().trim();
+    if (!str) continue;
+
+    // Check if it's already a known amenity key
+    if (Object.keys(AMENITY_KEYWORDS).includes(str)) {
+      normalized.add(str);
+      continue;
+    }
+
+    // Try to match against known keywords
+    for (const [key, keywords] of Object.entries(AMENITY_KEYWORDS)) {
+      if (keywords.some(kw => str.includes(kw))) {
+        normalized.add(key);
+        break;
+      }
+    }
+
+    // If no match, keep the original (trimmed/lowercased) as a custom amenity
+    if (!normalized.has(str) && str.length < 50) {
+      normalized.add(str);
+    }
+  }
+
+  return Array.from(normalized);
+};
+
 const queryPath = (data: unknown, path: string): unknown => {
   if (!path) return undefined;
   // Bare string ⇒ literal key on the raw object.
@@ -286,7 +335,7 @@ export const normalize = async (
     description: (mapped.description as string | undefined) ?? '',
     specialFeatures: Array.isArray(mapped.specialFeatures) ? (mapped.specialFeatures as string[]) : [],
     materials: Array.isArray(mapped.materials) ? (mapped.materials as string[]) : [],
-    amenities: Array.isArray(mapped.amenities) ? (mapped.amenities as string[]) : [],
+    amenities: categorizeAmenities(Array.isArray(mapped.amenities) ? (mapped.amenities as unknown[]) : []),
     imageUrl,
     images,
     lat: lat ?? 0,

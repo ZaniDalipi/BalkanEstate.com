@@ -138,6 +138,8 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
   const [detecting, setDetecting] = useState(false);
   const [detected, setDetected] = useState<DetectResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [editingFieldMap, setEditingFieldMap] = useState<Record<string, string> | null>(null);
+  const [showFieldMapEditor, setShowFieldMapEditor] = useState(false);
 
   // URL / RSS method
   const [url, setUrl] = useState('');
@@ -193,6 +195,7 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
         result = await detectFeed(method, { url: url.trim() });
       }
       setDetected(result);
+      setEditingFieldMap(result.fieldMap);
       setStep('preview');
     } catch (err) {
       setError((err as Error).message);
@@ -202,7 +205,7 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
   };
 
   const handleSave = async () => {
-    if (!detected) return;
+    if (!detected || !editingFieldMap) return;
     setStep('saving');
     setError(null);
     try {
@@ -215,7 +218,7 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
         baseUrl,
         adapterType: detected.adapterType,
         adapterConfig: detected.adapterConfig,
-        fieldMap: detected.fieldMap,
+        fieldMap: editingFieldMap,
         enabled: true,
       };
       const source = await createMyListingSource(input);
@@ -485,7 +488,7 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
           {detected.sample && (
             <div>
               <p className="text-sm font-semibold text-gray-700 mb-2">{t('listingFeeds:sampleListing')}</p>
-              <SamplePreview sample={detected.sample} fieldMap={detected.fieldMap} />
+              <SamplePreview sample={detected.sample} fieldMap={editingFieldMap || detected.fieldMap} />
             </div>
           )}
 
@@ -499,6 +502,56 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
               className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/30"
             />
           </label>
+
+          {/* Field Mapping Editor */}
+          {editingFieldMap && (
+            <div className="border border-gray-200 rounded-xl overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowFieldMapEditor(!showFieldMapEditor)}
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+              >
+                <span className="text-sm font-semibold text-gray-700">
+                  🔧 Field mapping ({Object.keys(editingFieldMap).length} fields)
+                </span>
+                <span className="text-lg text-gray-400 leading-none">{showFieldMapEditor ? '▼' : '▶'}</span>
+              </button>
+
+              {showFieldMapEditor && (
+                <div className="border-t border-gray-200 px-4 py-3 space-y-2.5 bg-gray-50 max-h-72 overflow-y-auto">
+                  {Object.entries(editingFieldMap).map(([prop, sourcePath]) => (
+                    <div key={prop} className="flex gap-2 items-end">
+                      <label className="flex-1">
+                        <span className="text-xs font-mono font-medium text-gray-600 block mb-1">{prop}</span>
+                        <input
+                          type="text"
+                          value={sourcePath}
+                          onChange={(e) => setEditingFieldMap({ ...editingFieldMap, [prop]: e.target.value })}
+                          className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono focus:ring-1 focus:ring-primary/50"
+                          placeholder="e.g., title, images[0], $.item.name"
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const next = { ...editingFieldMap };
+                          delete next[prop];
+                          setEditingFieldMap(next);
+                        }}
+                        className="px-2 py-1.5 text-red-600 hover:bg-red-50 rounded text-lg leading-none font-semibold"
+                        title="Remove this field"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                  <p className="text-xs text-gray-500 mt-3 pt-2 border-t border-gray-300">
+                    💡 Use JSONPath notation for nested data: <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs">$.images[0].url</code> or bare keys for top-level:  <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs">image_url</code>
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="flex gap-3">
             <button

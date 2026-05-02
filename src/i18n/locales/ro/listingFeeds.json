@@ -26,6 +26,7 @@
   "detected": "detected",
   "sampleListing": "Sample listing found:",
   "saveAndEnable": "Save & start syncing",
+  "fieldMapTitle": "Field mapping",
   "method": {
     "url": "Website URL",
     "urlDesc": "Auto-detect format from any real estate website",
