@@ -134,3 +134,19 @@ export const runMyListingSource = async (
 export const getMyListingSourceStats = async (id: string): Promise<ListingSourceStats> => {
   return apiRequest<ListingSourceStats>(`${BASE}/${id}/stats`, { requiresAuth: true });
 };
+
+export interface DetectResult {
+  adapterType: ListingAdapterType;
+  adapterConfig: Record<string, unknown>;
+  fieldMap: Record<string, string>;
+  sample?: Record<string, unknown>;
+  hint: string;
+}
+
+export const detectFeed = async (url: string): Promise<DetectResult> => {
+  return apiRequest<DetectResult>(`${BASE}/detect`, {
+    method: 'POST',
+    body: { url },
+    requiresAuth: true,
+  });
+};

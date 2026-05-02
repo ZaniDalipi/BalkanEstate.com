@@ -8,6 +8,7 @@ import {
   remove,
   runNow,
   stats,
+  detect,
 } from '../controllers/userListingSourceController';
 
 const router = express.Router();
@@ -17,6 +18,7 @@ const router = express.Router();
 router.use(protect);
 
 router.get('/', list);
+router.post('/detect', detect);   // probe-only — must be before /:id
 router.get('/:id', get);
 router.post('/', create);
 router.put('/:id', update);

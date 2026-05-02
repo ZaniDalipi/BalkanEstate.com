@@ -3,6 +3,7 @@ import { Types } from 'mongoose';
 import ListingSource from '../models/ListingSource';
 import Property from '../models/Property';
 import { runSource } from '../services/listingIngestService';
+import { detectFeedForUrl } from '../services/listingDetectorService';
 
 /**
  * User-facing listing-source endpoints. All handlers require `req.user`
@@ -168,4 +169,27 @@ export const stats = async (req: Request, res: Response): Promise<void> => {
     },
     recent,
   });
+};
+
+/**
+ * POST /api/listing-sources/detect
+ * Probe a URL and return the best adapter config + a sample item.
+ * Does not persist anything — purely a detection helper.
+ */
+export const detect = async (req: Request, res: Response): Promise<void> => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+
+  const { url } = req.body || {};
+  if (!url || typeof url !== 'string') {
+    res.status(400).json({ message: 'url is required' });
+    return;
+  }
+
+  try {
+    const result = await detectFeedForUrl(url);
+    res.json(result);
+  } catch (err) {
+    res.status(422).json({ message: (err as Error).message });
+  }
 };

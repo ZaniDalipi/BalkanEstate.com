@@ -8,15 +8,18 @@ import {
   runMyListingSource,
   updateMyListingSource,
 } from '../api/listingSourceApi';
+import AddFeedWizard from './AddFeedWizard';
 import ListingFeedForm from './ListingFeedForm';
 import ListingFeedRow from './ListingFeedRow';
+
+type View = 'list' | 'add' | 'edit';
 
 const MyListingFeeds: React.FC = () => {
   const { t } = useTranslation(['listingFeeds', 'common']);
   const [sources, setSources] = useState<ListingSource[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState(false);
+  const [view, setView] = useState<View>('list');
   const [editing, setEditing] = useState<ListingSource | null>(null);
   const [runningIds, setRunningIds] = useState<Set<string>>(new Set());
   const [lastRun, setLastRun] = useState<Record<string, IngestStats>>({});
@@ -33,12 +36,10 @@ const MyListingFeeds: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
+  useEffect(() => { void refresh(); }, [refresh]);
 
   const handleSaved = (source: ListingSource) => {
-    setShowForm(false);
+    setView('list');
     setEditing(null);
     setSources((prev) => {
       const idx = prev.findIndex((s) => s._id === source._id);
@@ -64,11 +65,7 @@ const MyListingFeeds: React.FC = () => {
     } catch (e) {
       setError((e as Error).message);
     } finally {
-      setRunningIds((prev) => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
+      setRunningIds((prev) => { const n = new Set(prev); n.delete(id); return n; });
     }
   };
 
@@ -77,14 +74,22 @@ const MyListingFeeds: React.FC = () => {
     setSources((prev) => prev.map((s) => (s._id === source._id ? updated : s)));
   };
 
-  if (showForm) {
+  // Add new feed — use the auto-detect wizard
+  if (view === 'add') {
+    return (
+      <AddFeedWizard
+        onCancel={() => setView('list')}
+        onSaved={handleSaved}
+      />
+    );
+  }
+
+  // Edit existing feed — keep the JSON form (user already knows what they set up)
+  if (view === 'edit' && editing) {
     return (
       <ListingFeedForm
-        initial={editing ?? undefined}
-        onCancel={() => {
-          setShowForm(false);
-          setEditing(null);
-        }}
+        initial={editing}
+        onCancel={() => { setView('list'); setEditing(null); }}
         onSaved={handleSaved}
       />
     );
@@ -99,10 +104,7 @@ const MyListingFeeds: React.FC = () => {
         </div>
         <button
           type="button"
-          onClick={() => {
-            setEditing(null);
-            setShowForm(true);
-          }}
+          onClick={() => setView('add')}
           className="px-4 py-2 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition-colors"
         >
           {t('listingFeeds:addFeed')}
@@ -110,9 +112,7 @@ const MyListingFeeds: React.FC = () => {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 mb-4 text-sm">
-          {error}
-        </div>
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 mb-4 text-sm">{error}</div>
       )}
 
       {loading ? (
@@ -122,7 +122,7 @@ const MyListingFeeds: React.FC = () => {
           <p className="text-gray-600 mb-4">{t('listingFeeds:empty')}</p>
           <button
             type="button"
-            onClick={() => setShowForm(true)}
+            onClick={() => setView('add')}
             className="px-4 py-2 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition-colors"
           >
             {t('listingFeeds:addFirstFeed')}
@@ -136,10 +136,7 @@ const MyListingFeeds: React.FC = () => {
               source={source}
               isRunning={runningIds.has(source._id)}
               lastRun={lastRun[source._id]}
-              onEdit={() => {
-                setEditing(source);
-                setShowForm(true);
-              }}
+              onEdit={() => { setEditing(source); setView('edit'); }}
               onDelete={() => handleDelete(source._id)}
               onRun={() => handleRun(source._id)}
               onToggleEnabled={() => handleToggleEnabled(source)}
