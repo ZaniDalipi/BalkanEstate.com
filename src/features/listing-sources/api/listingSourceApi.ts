@@ -1,6 +1,6 @@
 import { apiRequest } from '@/src/shared/api';
 
-export type ListingAdapterType = 'rss' | 'jsonFeed' | 'xmlFeed' | 'jsonLd' | 'customApi';
+export type ListingAdapterType = 'rss' | 'jsonFeed' | 'xmlFeed' | 'jsonLd' | 'customApi' | 'htmlScrape';
 
 export interface ListingSource {
   id: string;
@@ -60,7 +60,7 @@ export interface RecentImportedListing {
 export interface ListingSourceStats {
   source: Pick<
     ListingSource,
-    | '_id'
+    | 'id'
     | 'slug'
     | 'enabled'
     | 'adapterType'

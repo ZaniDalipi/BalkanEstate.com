@@ -4,6 +4,7 @@
  */
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import type { AnyNode } from 'domhandler';
 import Parser from 'rss-parser';
 import { isValidListingItem } from './listingNormalizerService';
 
@@ -11,7 +12,7 @@ const BOT_UA = 'BalkanEstateBot/1.0 (+https://balkanestate.com/bot)';
 const TIMEOUT = 12_000;
 
 export interface DetectResult {
-  adapterType: 'rss' | 'jsonFeed' | 'jsonLd' | 'customApi' | 'xmlFeed';
+  adapterType: 'rss' | 'jsonFeed' | 'jsonLd' | 'customApi' | 'xmlFeed' | 'htmlScrape';
   adapterConfig: Record<string, unknown>;
   fieldMap: Record<string, string>;
   /** One raw example item from the source (for preview). */
@@ -19,6 +20,34 @@ export interface DetectResult {
   /** Human-readable description of what was found. */
   hint: string;
 }
+
+/**
+ * URL-path fragments commonly used for individual listing detail pages
+ * across Balkan / European real-estate sites. Used to discriminate
+ * "listing card" anchors from navigation/footer/agency links.
+ */
+const LISTING_URL_FRAGMENTS = [
+  '/oglas/', '/oglasi/', '/oglas-', '/oglasi-',
+  '/nekretnina/', '/nekretnine/', '/nekretnina-',
+  '/imovina/', '/imobil/',
+  '/listing/', '/listings/',
+  '/property/', '/properties/',
+  '/inmueble/', '/immobilien/', '/immobilier/',
+  '/objava/', '/objave/',
+  '/apartman/', '/apartmani/', '/stan/', '/stanovi/',
+  '/kuca/', '/kuće/', '/kuce/',
+  '/anuntul/', '/anunt/',
+  '/detail/', '/details/',
+  '/p/', '/l/', '/o/',
+];
+
+const looksLikeListingPath = (pathname: string): boolean => {
+  const lower = pathname.toLowerCase();
+  if (LISTING_URL_FRAGMENTS.some(f => lower.includes(f))) return true;
+  // Numeric-id detail pages like /property/12345 or /oglas/12345
+  if (/\/\d{3,}(?:[/-]|$)/.test(lower)) return true;
+  return false;
+};
 
 const get = (url: string, responseType: 'text' | 'json' = 'text') =>
   axios.get(url, {
@@ -92,6 +121,198 @@ const probeWordPress = async (baseUrl: string): Promise<Record<string, unknown>[
     if (validItems.length > 0) return validItems;
   }
   return null;
+};
+
+/**
+ * Smart HTML scrape detection: parse a page (e.g. an agency listings page),
+ * find anchors that match listing-detail URL patterns, identify the common
+ * card container, and synthesize an htmlScrape adapter config.
+ *
+ * Returns null when fewer than 2 listing-link anchors are found.
+ */
+const detectHtmlScrape = (
+  html: string,
+  pageUrl: string
+): {
+  selectors: {
+    listingItem: string;
+    link: string;
+    title?: string;
+    price?: string;
+    image?: string;
+    description?: string;
+  };
+  sample: Record<string, unknown>;
+  count: number;
+} | null => {
+  const $ = cheerio.load(html);
+
+  // 1. Collect anchors that point at listing-detail URLs.
+  type AnchorInfo = { el: cheerio.Cheerio<AnyNode>; href: string; abs: string };
+  const anchors: AnchorInfo[] = [];
+  $('a[href]').each((_, el) => {
+    const href = $(el).attr('href');
+    if (!href) return;
+    let abs: string;
+    try { abs = new URL(href, pageUrl).toString(); } catch { return; }
+    let pathname: string;
+    try { pathname = new URL(abs).pathname; } catch { return; }
+    if (looksLikeListingPath(pathname)) {
+      anchors.push({ el: $(el), href, abs });
+    }
+  });
+
+  if (anchors.length < 2) return null;
+
+  // 2. De-duplicate by abs URL (some pages link the same listing 2-3 times via
+  //    image + title + "view" anchors all inside one card).
+  const seenUrl = new Set<string>();
+  const uniqueAnchors = anchors.filter(a => (seenUrl.has(a.abs) ? false : (seenUrl.add(a.abs), true)));
+  if (uniqueAnchors.length < 2) return null;
+
+  // 3. For each anchor, walk up to find the closest ancestor with a class that
+  //    looks like a listing card (e.g. ".listing-item", ".oglas", ".property-card").
+  //    Score class names by how listing-y they sound.
+  const cardKeywords = /(listing|oglas|nekretnin|propert|imovin|imobil|estate|stan|kuca|item|card|result|search)/i;
+
+  const findCardAncestor = (el: cheerio.Cheerio<AnyNode>): { selector: string; classNames: string[] } | null => {
+    let cur = el.parent();
+    let depth = 0;
+    while (cur.length && depth < 8) {
+      const tag = (cur.get(0) as { tagName?: string } | undefined)?.tagName?.toLowerCase() ?? '';
+      const cls = (cur.attr('class') || '').trim();
+      if (cls) {
+        const classes = cls.split(/\s+/).filter(c => cardKeywords.test(c));
+        if (classes.length > 0 && (tag === 'div' || tag === 'article' || tag === 'li' || tag === 'section')) {
+          return { selector: `${tag}.${classes[0]}`, classNames: classes };
+        }
+      }
+      cur = cur.parent();
+      depth++;
+    }
+    return null;
+  };
+
+  // 4. Tally which selector covers the most anchors → that's the listing card.
+  const selectorCounts = new Map<string, number>();
+  for (const a of uniqueAnchors) {
+    const card = findCardAncestor(a.el);
+    if (!card) continue;
+    selectorCounts.set(card.selector, (selectorCounts.get(card.selector) ?? 0) + 1);
+  }
+
+  let listingItemSelector: string | null = null;
+  let bestCount = 0;
+  for (const [sel, count] of selectorCounts) {
+    if (count > bestCount) { bestCount = count; listingItemSelector = sel; }
+  }
+
+  // 5. Fallback: if no class-based match, group anchors by their immediate
+  //    parent's tag-path (e.g. "div > div > article") and use that.
+  if (!listingItemSelector || bestCount < 2) {
+    // Try article tag (semantic listings) or li (list-based grids)
+    const articleCount = $('article').length;
+    const liInUlCount = $('ul li').length;
+    if (articleCount >= 2 && articleCount <= 200) {
+      listingItemSelector = 'article';
+      bestCount = articleCount;
+    } else if (liInUlCount >= 2 && liInUlCount <= 200) {
+      // Find a UL whose LIs each contain a listing link
+      let bestLi = '';
+      let bestLiCount = 0;
+      $('ul').each((_, ul) => {
+        const lis = $(ul).find('> li');
+        let count = 0;
+        lis.each((__, li) => {
+          if ($(li).find('a[href]').filter((___, a) => looksLikeListingPath(new URL($(a).attr('href') || '', pageUrl).pathname || '')).length) count++;
+        });
+        if (count > bestLiCount) {
+          bestLiCount = count;
+          const ulCls = ($(ul).attr('class') || '').split(/\s+/)[0];
+          bestLi = ulCls ? `ul.${ulCls} > li` : 'ul > li';
+        }
+      });
+      if (bestLi && bestLiCount >= 2) { listingItemSelector = bestLi; bestCount = bestLiCount; }
+    }
+  }
+
+  if (!listingItemSelector || bestCount < 2) return null;
+
+  // 6. Now figure out per-card child selectors using the first matched card as a probe.
+  const firstCard = $(listingItemSelector).first();
+  if (!firstCard.length) return null;
+
+  const probeText = (sel: string): string | undefined => {
+    const t = firstCard.find(sel).first().text().trim();
+    return t || undefined;
+  };
+
+  // Title: most prominent heading inside the card
+  let titleSel: string | undefined;
+  for (const candidate of ['h1', 'h2', 'h3', 'h4', '[class*="title"]', '[class*="name"]', '[class*="naslov"]']) {
+    if (probeText(candidate)) { titleSel = candidate; break; }
+  }
+
+  // Price: look for currency symbols/keywords in any child element's text
+  let priceSel: string | undefined;
+  const priceClassCandidates = ['[class*="price"]', '[class*="cijena"]', '[class*="cena"]', '[class*="preis"]'];
+  for (const candidate of priceClassCandidates) {
+    if (probeText(candidate)) { priceSel = candidate; break; }
+  }
+  if (!priceSel) {
+    // Fall back: find any descendant whose text contains a currency mark
+    firstCard.find('*').each((_, el) => {
+      if (priceSel) return;
+      const text = $(el).contents().filter((__, n) => n.type === 'text').text().trim();
+      if (/[€$£]|EUR\b|RSD\b|HRK\b|BAM\b|RON\b|BGN\b|MKD\b|kn\b/i.test(text) && /\d/.test(text)) {
+        const cls = ($(el).attr('class') || '').split(/\s+/)[0];
+        const tag = (el as { tagName?: string }).tagName?.toLowerCase() ?? 'span';
+        priceSel = cls ? `${tag}.${cls}` : tag;
+      }
+    });
+  }
+
+  // Image: first <img> inside the card
+  const imageSel = firstCard.find('img').first().length ? 'img|attr:src' : undefined;
+
+  // Description: first paragraph or [class*="desc"]
+  let descSel: string | undefined;
+  for (const candidate of ['[class*="desc"]', '[class*="opis"]', 'p']) {
+    if (probeText(candidate)) { descSel = candidate; break; }
+  }
+
+  // 7. Build a sample object from the first card so the wizard can show a preview.
+  const linkAnchorInCard = firstCard.find('a[href]').filter((_, a) => {
+    const href = $(a).attr('href') || '';
+    let pn: string;
+    try { pn = new URL(href, pageUrl).pathname; } catch { return false; }
+    return looksLikeListingPath(pn);
+  }).first();
+  const linkHref = linkAnchorInCard.attr('href') || '';
+  const linkSelector = linkAnchorInCard.is('a') ? `a[href*="${(() => {
+    try { return new URL(linkHref, pageUrl).pathname.split('/').filter(Boolean)[0] ?? ''; } catch { return ''; }
+  })()}"]|attr:href` : 'a|attr:href';
+
+  const sample: Record<string, unknown> = {
+    title: titleSel ? probeText(titleSel) : undefined,
+    price: priceSel ? probeText(priceSel) : undefined,
+    description: descSel ? probeText(descSel) : undefined,
+    image: imageSel ? firstCard.find('img').first().attr('src') : undefined,
+    url: linkHref ? new URL(linkHref, pageUrl).toString() : undefined,
+  };
+
+  return {
+    selectors: {
+      listingItem: listingItemSelector,
+      link: linkSelector,
+      title: titleSel,
+      price: priceSel,
+      image: imageSel,
+      description: descSel,
+    },
+    sample,
+    count: bestCount,
+  };
 };
 
 /** Try fetching the URL itself as a JSON array/object. */
@@ -448,6 +669,33 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
       sample,
       hint: `JSON feed detected — ${jsonResult.items.length} item(s) in response`,
     };
+  }
+
+  // ── 6. Smart HTML scrape: agency / search pages with listing cards ───────────
+  if (html && typeof html === 'string') {
+    const scrape = detectHtmlScrape(html, url);
+    if (scrape) {
+      return {
+        adapterType: 'htmlScrape',
+        adapterConfig: {
+          indexUrl: url,
+          selectors: scrape.selectors,
+          followDetails: true,
+          requestDelayMs: 2000,
+          respectRobotsTxt: true,
+          maxPages: 5,
+        },
+        fieldMap: {
+          title: 'title',
+          price: 'price',
+          description: 'description',
+          imageUrl: 'image',
+          sourceUrl: 'url',
+        },
+        sample: scrape.sample,
+        hint: `HTML listing page detected — found ${scrape.count} listing card(s) on the page`,
+      };
+    }
   }
 
   // ── Nothing found ────────────────────────────────────────────────────────────

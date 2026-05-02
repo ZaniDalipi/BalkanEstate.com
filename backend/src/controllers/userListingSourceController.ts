@@ -14,13 +14,20 @@ import { resolveId } from '../utils/idObfuscation';
  * User-facing listing-source endpoints. All handlers require `req.user`
  * and only ever read/write sources whose `userId` matches the caller.
  *
- * HTML scraping requires an admin-set `acceptedTermsAt` for ToS reasons,
- * so users can only configure feed-style adapters (rss / jsonFeed /
- * xmlFeed / jsonLd / customApi). Attempts to create an `htmlScrape` source
- * via these routes are rejected.
+ * Users can configure all adapter types including `htmlScrape`. Creating
+ * an htmlScrape source via the wizard counts as the user accepting
+ * responsibility for the target site's ToS, so `acceptedTermsAt` is
+ * stamped automatically at create time.
  */
 
-const USER_ALLOWED_ADAPTERS = new Set(['rss', 'jsonFeed', 'xmlFeed', 'jsonLd', 'customApi']);
+const USER_ALLOWED_ADAPTERS = new Set([
+  'rss',
+  'jsonFeed',
+  'xmlFeed',
+  'jsonLd',
+  'customApi',
+  'htmlScrape',
+]);
 
 const requireUserId = (req: Request, res: Response): Types.ObjectId | null => {
   const id = req.user?._id;
@@ -73,7 +80,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
   if (!USER_ALLOWED_ADAPTERS.has(adapterType)) {
     res.status(400).json({
       message:
-        'HTML scraping must be enabled by an administrator. Please use rss, jsonFeed, xmlFeed, jsonLd, or customApi.',
+        'Unsupported adapter type. Use rss, jsonFeed, xmlFeed, jsonLd, customApi, or htmlScrape.',
     });
     return;
   }
@@ -83,12 +90,16 @@ export const create = async (req: Request, res: Response): Promise<void> => {
     .toLowerCase()
     .replace(/[^a-z0-9-]/g, '-');
 
+  // For HTML scraping, the user is explicitly opting in by adding the source,
+  // so stamp acceptedTermsAt automatically. The HtmlScrapeAdapter checks this.
+  const acceptedTermsAt = adapterType === 'htmlScrape' ? new Date() : undefined;
+
   try {
     const source = await ListingSource.create({
       ...req.body,
       slug: safeSlug,
       userId,
-      acceptedTermsAt: undefined,
+      acceptedTermsAt,
     });
     res.status(201).json({ source });
   } catch (err) {

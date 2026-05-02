@@ -22,6 +22,7 @@ const ADAPTER_LABELS: Record<string, string> = {
   xmlFeed: 'XML feed',
   jsonLd: 'Schema.org JSON-LD',
   customApi: 'Custom API',
+  htmlScrape: 'HTML listings page',
 };
 
 // ── Sample preview card ──────────────────────────────────────────────────────
