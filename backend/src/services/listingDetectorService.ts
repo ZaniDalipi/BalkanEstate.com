@@ -7,6 +7,7 @@ import * as cheerio from 'cheerio';
 import type { AnyNode } from 'domhandler';
 import Parser from 'rss-parser';
 import { isValidListingItem } from './listingNormalizerService';
+import { findSiteProfile } from './listingDetectorProfiles';
 
 const BOT_UA = 'BalkanEstateBot/1.0 (+https://balkanestate.com/bot)';
 const TIMEOUT = 12_000;
@@ -64,6 +65,90 @@ const tryUrl = async (url: string, responseType: 'text' | 'json' = 'text') => {
   } catch {
     return null;
   }
+};
+
+/**
+ * Walk a deeply-nested object/array and return the first array that:
+ * - has at least 2 items
+ * - items are objects that look like real estate listings
+ * Returns the array and a dot-path to it (for itemsPath).
+ */
+const findListingsInState = (
+  obj: unknown,
+  depth = 0,
+  path = '$'
+): { items: Record<string, unknown>[]; itemsPath: string } | null => {
+  if (depth > 6 || obj == null || typeof obj !== 'object') return null;
+  if (Array.isArray(obj)) {
+    if (obj.length >= 2) {
+      const records = obj as Record<string, unknown>[];
+      const validCount = records.filter(i => typeof i === 'object' && i !== null && isValidListingItem(i as Record<string, unknown>)).length;
+      if (validCount >= 2) return { items: records, itemsPath: `${path}[*]` };
+    }
+    return null;
+  }
+  for (const [key, val] of Object.entries(obj as Record<string, unknown>)) {
+    const result = findListingsInState(val, depth + 1, `${path}.${key}`);
+    if (result) return result;
+  }
+  return null;
+};
+
+/**
+ * Try to extract listing data embedded in the page's JavaScript state.
+ * Handles Next.js (__NEXT_DATA__), Nuxt (window.__NUXT__), generic
+ * window.__INITIAL_STATE__, and any <script type="application/json"> blocks.
+ */
+const extractEmbeddedSpaListings = (
+  html: string
+): { items: Record<string, unknown>[]; itemsPath: string; source: string } | null => {
+  // 1. Next.js: <script id="__NEXT_DATA__" type="application/json">
+  const nextMatch = html.match(/<script[^>]+id=["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/i);
+  if (nextMatch?.[1]) {
+    try {
+      const data = JSON.parse(nextMatch[1]) as Record<string, unknown>;
+      const props = (data.props as Record<string, unknown>)?.pageProps ?? data.props ?? data;
+      const result = findListingsInState(props);
+      if (result) return { ...result, source: '__NEXT_DATA__' };
+    } catch {/* ignore */}
+  }
+
+  // 2. Nuxt: window.__NUXT__ = {...}  or  <script>window.__NUXT__={...}</script>
+  const nuxtMatch = html.match(/window\.__NUXT__\s*=\s*(\{[\s\S]{20,8000}?\})\s*[;<]/);
+  if (nuxtMatch?.[1]) {
+    try {
+      const data = JSON.parse(nuxtMatch[1]) as Record<string, unknown>;
+      const state = (data.data as unknown[]) ?? data;
+      const result = findListingsInState(state);
+      if (result) return { ...result, source: '__NUXT__' };
+    } catch {/* ignore */}
+  }
+
+  // 3. Generic window.__INITIAL_STATE__ or window.initialState
+  const stateMatch = html.match(/window\.__(?:INITIAL_)?STATE__\s*=\s*(\{[\s\S]{20,8000}?\})\s*[;<]/i);
+  if (stateMatch?.[1]) {
+    try {
+      const data = JSON.parse(stateMatch[1]) as Record<string, unknown>;
+      const result = findListingsInState(data);
+      if (result) return { ...result, source: '__INITIAL_STATE__' };
+    } catch {/* ignore */}
+  }
+
+  // 4. Any standalone <script type="application/json"> with listing arrays
+  const $ = cheerio.load(html);
+  let spaResult: { items: Record<string, unknown>[]; itemsPath: string; source: string } | null = null;
+  $('script[type="application/json"]').each((_, el) => {
+    if (spaResult) return;
+    const text = $(el).contents().text();
+    if (!text || text.length < 50) return;
+    try {
+      const data = JSON.parse(text) as unknown;
+      const result = findListingsInState(data);
+      if (result) spaResult = { ...result, source: 'application/json script' };
+    } catch {/* ignore */}
+  });
+
+  return spaResult;
 };
 
 /** Extract the first RSS/Atom feed URL from a page's <head>. */
@@ -603,7 +688,30 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
       };
     }
 
-    // 2c. WordPress indicators → probe WP REST
+    // 2c. Embedded SPA state (Next.js, Nuxt, window.__INITIAL_STATE__)
+    //     Many modern Balkan portals (cityexpert.rs, indomio.rs, etc.) embed their
+    //     entire page data as JSON so we can read it without DOM scraping.
+    const spaData = extractEmbeddedSpaListings(html);
+    if (spaData) {
+      const validItems = spaData.items.filter(i => isValidListingItem(i));
+      if (validItems.length >= 2) {
+        const sample = validItems[0];
+        return {
+          adapterType: 'jsonFeed',
+          adapterConfig: {
+            endpoint: url,
+            itemsPath: spaData.itemsPath,
+            idPath: '$.id',
+            urlPath: '$.url',
+          },
+          fieldMap: buildJsonFieldMap(sample),
+          sample,
+          hint: `Embedded ${spaData.source} data detected — ${validItems.length} listing(s) found`,
+        };
+      }
+    }
+
+    // 2d. WordPress indicators → probe WP REST
     if (html.includes('/wp-content/') || html.includes('wp-json')) {
       const wpItems = await probeWordPress(url);
       if (wpItems) {
@@ -671,8 +779,68 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
     };
   }
 
-  // ── 6. Smart HTML scrape: agency / search pages with listing cards ───────────
+  // ── 6. Known Balkan portal profile → then generic HTML card detection ────────
   if (html && typeof html === 'string') {
+    // 6a. Check against known-site profiles (nekretnine.hr, 4zida.rs, etc.)
+    const profile = findSiteProfile(url);
+    if (profile) {
+      const $ = cheerio.load(html);
+      const cardCount = $(profile.listingItem).length;
+      if (cardCount >= 2) {
+        // Build a sample from the first card
+        const firstCard = $(profile.listingItem).first();
+        const pickText = (sel?: string) => sel ? firstCard.find(sel.split('|')[0]).first().text().trim() || undefined : undefined;
+        const pickAttr = (sel?: string) => {
+          if (!sel) return undefined;
+          const [css, attr] = sel.split('|attr:');
+          if (!attr) return firstCard.find(css).first().text().trim() || undefined;
+          return firstCard.find(css).first().attr(attr) || undefined;
+        };
+        const rawLink = pickAttr(profile.link);
+        const sample: Record<string, unknown> = {
+          title: pickText(profile.title),
+          price: pickText(profile.price),
+          location: pickText(profile.location),
+          sqft: pickText(profile.sqft),
+          image: pickAttr(profile.image),
+          url: rawLink ? (() => { try { return new URL(rawLink, url).toString(); } catch { return rawLink; } })() : undefined,
+        };
+        return {
+          adapterType: 'htmlScrape',
+          adapterConfig: {
+            indexUrl: url,
+            selectors: {
+              listingItem: profile.listingItem,
+              link: profile.link,
+              title: profile.title,
+              price: profile.price,
+              image: profile.image,
+              description: undefined,
+              ...(profile.location && { location: profile.location }),
+              ...(profile.sqft && { sqft: profile.sqft }),
+            },
+            ...(profile.nextPageSelector && { nextPageSelector: profile.nextPageSelector }),
+            ...(profile.pageParam && { pageParam: profile.pageParam }),
+            followDetails: true,
+            requestDelayMs: 2000,
+            respectRobotsTxt: true,
+            maxPages: 5,
+          },
+          fieldMap: {
+            title: 'title',
+            price: 'price',
+            city: 'location',
+            sqft: 'sqft',
+            imageUrl: 'image',
+            sourceUrl: 'url',
+          },
+          sample,
+          hint: `Known site: ${new URL(url).hostname} — ${cardCount} listing card(s) detected`,
+        };
+      }
+    }
+
+    // 6b. Generic heuristic: find listing-like anchors and identify card container
     const scrape = detectHtmlScrape(html, url);
     if (scrape) {
       return {
@@ -693,7 +861,7 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
           sourceUrl: 'url',
         },
         sample: scrape.sample,
-        hint: `HTML listing page detected — found ${scrape.count} listing card(s) on the page`,
+        hint: `HTML listing page — found ${scrape.count} listing card(s) on the page`,
       };
     }
   }
