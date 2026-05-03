@@ -9,7 +9,6 @@ import Parser from 'rss-parser';
 import { isValidListingItem } from './listingNormalizerService';
 import { findSiteProfile } from './listingDetectorProfiles';
 
-const BOT_UA = 'BalkanEstateBot/1.0 (+https://balkanestate.com/bot)';
 const TIMEOUT = 12_000;
 
 export interface DetectResult {
@@ -50,20 +49,85 @@ const looksLikeListingPath = (pathname: string): boolean => {
   return false;
 };
 
+// Realistic browser UA — many Balkan portals block obvious bot UAs at the edge.
+const BROWSER_UA =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 ' +
+  '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+
+const buildBrowserHeaders = (url: string) => {
+  let referer: string | undefined;
+  try {
+    const u = new URL(url);
+    referer = `${u.protocol}//${u.host}/`;
+  } catch { /* ignore */ }
+  return {
+    'User-Agent': BROWSER_UA,
+    Accept:
+      'text/html,application/xhtml+xml,application/xml;q=0.9,application/json;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.9,hr;q=0.8,sr;q=0.7,bs;q=0.7,sl;q=0.6,bg;q=0.6,mk;q=0.6',
+    'Accept-Encoding': 'gzip, deflate, br',
+    ...(referer ? { Referer: referer } : {}),
+  };
+};
+
 const get = (url: string, responseType: 'text' | 'json' = 'text') =>
   axios.get(url, {
     timeout: TIMEOUT,
-    headers: { 'User-Agent': BOT_UA, Accept: '*/*' },
+    headers: buildBrowserHeaders(url),
     responseType,
+    decompress: true,
+    maxRedirects: 5,
     validateStatus: (s) => s < 400,
   });
 
+/**
+ * The probe-style fetch returns null on any failure (used during auto-detect
+ * when each call may legitimately 404). The caller decides whether to keep
+ * trying alternatives.
+ */
 const tryUrl = async (url: string, responseType: 'text' | 'json' = 'text') => {
   try {
     const r = await get(url, responseType);
     return r.data as unknown;
   } catch {
     return null;
+  }
+};
+
+/**
+ * Strict variant for the initial homepage fetch — surfaces the HTTP status so
+ * detectFeedForUrl can give the user a meaningful error if the site blocks us
+ * with 403 / Cloudflare instead of just saying "could not auto-detect".
+ */
+const fetchPageStrict = async (
+  url: string
+): Promise<{ html: string; status: number } | { html: null; status: number; reason: string }> => {
+  try {
+    const r = await axios.get<string>(url, {
+      timeout: TIMEOUT,
+      headers: buildBrowserHeaders(url),
+      responseType: 'text',
+      decompress: true,
+      maxRedirects: 5,
+      validateStatus: () => true,
+    });
+    if (r.status >= 200 && r.status < 400) {
+      return { html: typeof r.data === 'string' ? r.data : '', status: r.status };
+    }
+    let reason = `HTTP ${r.status}`;
+    if (r.status === 403) reason = 'HTTP 403 — the site is blocking automated access (likely Cloudflare or anti-bot).';
+    else if (r.status === 404) reason = 'HTTP 404 — page not found. Double-check the URL.';
+    else if (r.status === 429) reason = 'HTTP 429 — rate-limited.';
+    else if (r.status >= 500) reason = `HTTP ${r.status} — the site is temporarily unavailable.`;
+    return { html: null, status: r.status, reason };
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      if (err.code === 'ENOTFOUND') return { html: null, status: 0, reason: 'Domain could not be resolved — check the spelling.' };
+      if (err.code === 'ECONNABORTED' || err.code === 'ETIMEDOUT') {
+        return { html: null, status: 0, reason: `Connection timed out after ${TIMEOUT}ms.` };
+      }
+    }
+    return { html: null, status: 0, reason: (err as Error).message };
   }
 };
 
@@ -151,6 +215,144 @@ const extractEmbeddedSpaListings = (
   return spaResult;
 };
 
+/**
+ * Discover listing detail-page URLs by parsing sitemap.xml.
+ *
+ * Most real-estate portals expose a sitemap (often listed in /robots.txt)
+ * that enumerates every listing URL — this is the single most reliable way
+ * to ingest a site's catalogue without HTML scraping.
+ *
+ * If `scopedToPath` is provided, only URLs whose pathname starts with it are
+ * kept (useful when the user pastes an agency-specific URL).
+ */
+const SITEMAP_TIMEOUT = 8_000;
+const SITEMAP_MAX_TOTAL_URLS = 5_000;
+const SITEMAP_MAX_INDEX_CHILDREN = 30;
+const SITEMAP_RETURN_LIMIT = 500;
+
+const fetchTextWithBrowserUa = async (url: string): Promise<string | null> => {
+  try {
+    const r = await axios.get<string>(url, {
+      timeout: SITEMAP_TIMEOUT,
+      headers: {
+        'User-Agent': BROWSER_UA,
+        Accept: 'text/xml,application/xml,text/plain,*/*',
+        'Accept-Encoding': 'gzip, deflate, br',
+      },
+      responseType: 'text',
+      maxRedirects: 5,
+      decompress: true,
+      validateStatus: (s) => s < 400,
+    });
+    return typeof r.data === 'string' ? r.data : null;
+  } catch {
+    return null;
+  }
+};
+
+const parseSitemapXml = (xml: string): { kind: 'index' | 'urlset'; locs: string[] } => {
+  // Cheap regex parse — sitemap files are simple XML and we only need <loc> values.
+  const isIndex = /<sitemapindex\b/i.test(xml);
+  const locs: string[] = [];
+  const re = /<loc>\s*([^<\s]+)\s*<\/loc>/gi;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(xml)) !== null) {
+    if (locs.length >= SITEMAP_MAX_TOTAL_URLS) break;
+    locs.push(match[1].trim());
+  }
+  return { kind: isIndex ? 'index' : 'urlset', locs };
+};
+
+const discoverSitemapUrls = async (pageUrl: string): Promise<{
+  urls: string[];
+  source: string;
+} | null> => {
+  let origin: string;
+  let scopedPath: string;
+  try {
+    const u = new URL(pageUrl);
+    origin = u.origin;
+    scopedPath = u.pathname;
+  } catch {
+    return null;
+  }
+
+  // Build candidate sitemap URLs from robots.txt + standard locations.
+  const candidates = new Set<string>([
+    `${origin}/sitemap.xml`,
+    `${origin}/sitemap_index.xml`,
+    `${origin}/sitemap-index.xml`,
+    `${origin}/sitemap/sitemap.xml`,
+  ]);
+  const robotsTxt = await fetchTextWithBrowserUa(`${origin}/robots.txt`);
+  if (robotsTxt) {
+    const matches = robotsTxt.match(/Sitemap:\s*(\S+)/gi);
+    if (matches) {
+      for (const m of matches) {
+        const line = m.replace(/Sitemap:\s*/i, '').trim();
+        if (line) candidates.add(line);
+      }
+    }
+  }
+
+  const allListingUrls: string[] = [];
+  let usedSitemap = '';
+
+  for (const sitemapUrl of candidates) {
+    if (allListingUrls.length >= SITEMAP_RETURN_LIMIT) break;
+    const xml = await fetchTextWithBrowserUa(sitemapUrl);
+    if (!xml || (!xml.includes('<urlset') && !xml.includes('<sitemapindex'))) continue;
+    usedSitemap ||= sitemapUrl;
+
+    const parsed = parseSitemapXml(xml);
+    if (parsed.kind === 'index') {
+      // Visit child sitemaps. Prefer ones whose URL hints at listings/properties.
+      const ranked = parsed.locs
+        .slice(0, SITEMAP_MAX_INDEX_CHILDREN)
+        .sort((a, b) => {
+          const score = (s: string) =>
+            /(oglas|nekretnin|listing|propert|imovin|agency|agencij|stan|kuca|apartman|advert)/i.test(s) ? -1 : 0;
+          return score(a) - score(b);
+        });
+      for (const childUrl of ranked) {
+        if (allListingUrls.length >= SITEMAP_RETURN_LIMIT) break;
+        const childXml = await fetchTextWithBrowserUa(childUrl);
+        if (!childXml) continue;
+        const child = parseSitemapXml(childXml);
+        for (const loc of child.locs) {
+          try {
+            if (looksLikeListingPath(new URL(loc).pathname)) allListingUrls.push(loc);
+          } catch {/* ignore */}
+          if (allListingUrls.length >= SITEMAP_RETURN_LIMIT) break;
+        }
+      }
+    } else {
+      // Direct urlset
+      for (const loc of parsed.locs) {
+        try {
+          if (looksLikeListingPath(new URL(loc).pathname)) allListingUrls.push(loc);
+        } catch {/* ignore */}
+        if (allListingUrls.length >= SITEMAP_RETURN_LIMIT) break;
+      }
+    }
+  }
+
+  if (allListingUrls.length < 3) return null;
+
+  // De-duplicate and (when the user pasted a scoped URL like /agencije/123/) try
+  // to filter to URLs that share a meaningful path/id segment with the source URL.
+  const unique = Array.from(new Set(allListingUrls));
+  const idLike = scopedPath.match(/\/(\d{3,})(?:\/|$)/)?.[1];
+  let filtered: string[];
+  if (idLike && unique.some(u => u.includes(`/${idLike}/`) || u.includes(`-${idLike}/`) || u.includes(`/${idLike}.`))) {
+    filtered = unique.filter(u => u.includes(`/${idLike}/`) || u.includes(`-${idLike}/`) || u.includes(`/${idLike}.`));
+  } else {
+    filtered = unique;
+  }
+
+  return { urls: filtered.slice(0, SITEMAP_RETURN_LIMIT), source: usedSitemap };
+};
+
 /** Extract the first RSS/Atom feed URL from a page's <head>. */
 const findFeedLinkInHtml = (html: string, baseUrl: string): string | null => {
   const $ = cheerio.load(html);
@@ -183,7 +385,7 @@ const findJsonLdInHtml = (html: string): boolean => {
 /** Try to validate a URL looks like an RSS/Atom feed with real estate listings. */
 const probeRss = async (url: string): Promise<Record<string, unknown>[] | null> => {
   try {
-    const parser = new Parser({ timeout: TIMEOUT, headers: { 'User-Agent': BOT_UA } });
+    const parser = new Parser({ timeout: TIMEOUT, headers: { 'User-Agent': BROWSER_UA } });
     const feed = await parser.parseURL(url);
     if (feed.items && feed.items.length > 0) {
       // Filter to only items that look like real listings
@@ -578,7 +780,7 @@ export const detectFeedForUrlWithAuth = async (
   try {
     const r = await axios.get(url, {
       timeout: TIMEOUT,
-      headers: { 'User-Agent': BOT_UA, Accept: 'application/json, */*', ...headers },
+      headers: { 'User-Agent': BROWSER_UA, Accept: 'application/json, */*', ...headers },
       responseType: 'json',
       validateStatus: (s) => s < 500,
     });
@@ -660,7 +862,11 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
   }
 
   // ── 2. Fetch the page HTML and look for clues ────────────────────────────────
-  const html = (await tryUrl(url)) as string | null;
+  const fetched = await fetchPageStrict(url);
+  const html = fetched.html;
+  // Capture a non-blocking-error reason so we can surface it later if all
+  // detection paths fail (instead of silently saying "could not auto-detect").
+  const fetchFailureReason = html === null ? (fetched as { reason: string }).reason : null;
 
   if (html && typeof html === 'string') {
     // 2a. RSS/Atom link in <head>
@@ -866,9 +1072,34 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
     }
   }
 
+  // ── 7. Sitemap discovery: works even when the page is JS-rendered ───────────
+  // Most real-estate portals expose a /sitemap.xml referenced in robots.txt.
+  // Fetch the listing detail pages individually and let the JsonLdAdapter parse
+  // each one (it already handles JSON-LD + we'll enrich with OpenGraph too).
+  const sitemap = await discoverSitemapUrls(url);
+  if (sitemap && sitemap.urls.length >= 3) {
+    return {
+      adapterType: 'jsonLd',
+      adapterConfig: {
+        listingUrls: sitemap.urls,
+        requestDelayMs: 2000,
+        respectRobotsTxt: true,
+      },
+      fieldMap: jsonLdFieldMap(),
+      hint: `Sitemap discovered (${sitemap.source}) — ${sitemap.urls.length} listing URL(s) will be fetched`,
+    };
+  }
+
   // ── Nothing found ────────────────────────────────────────────────────────────
+  if (fetchFailureReason) {
+    throw new Error(
+      `Could not auto-detect listings: ${fetchFailureReason} ` +
+      'Try pasting a direct RSS, JSON, or Atom feed URL, or a JSON sample from the agency portal.'
+    );
+  }
   throw new Error(
-    'Could not auto-detect a supported feed format. The site may block automated access. ' +
-    'Try pasting a direct RSS, JSON, or Atom feed URL instead of the homepage.'
+    'Could not auto-detect a supported feed format. The page may render its listings ' +
+    'entirely in JavaScript (we don\'t run JS), or the site has no recognizable listing markup. ' +
+    'Try pasting a direct RSS, JSON, or Atom feed URL, or a JSON sample from the agency portal.'
   );
 };

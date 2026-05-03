@@ -5,6 +5,7 @@ import type { IProperty, IPropertyImage } from '../models/Property';
 import type { RawListing } from './listingAdapters';
 import { geocodeAddress } from './geocodingService';
 import { uploadFromUrl } from './cloudinaryService';
+import { enrichFromDetailHtml } from './listingHtmlEnricher';
 import User from '../models/User';
 import { cronLogger } from '../utils/logger';
 
@@ -267,6 +268,19 @@ export const normalize = async (
   opts: NormalizeOptions = {}
 ): Promise<Partial<IProperty>> => {
   const mapped = applyFieldMap(raw, source);
+
+  // Adapters that fetch a per-listing HTML detail page (e.g. HtmlScrapeAdapter
+  // with followDetails=true) attach the raw HTML at raw.raw.detailHtml. Pull
+  // every structured-data signal we can find from it (JSON-LD, OpenGraph,
+  // microdata, image galleries) without overwriting fields the index card
+  // already supplied — those are typically more accurate.
+  const detailHtml = (raw.raw as Record<string, unknown> | undefined)?.detailHtml;
+  if (typeof detailHtml === 'string' && detailHtml.length > 0) {
+    enrichFromDetailHtml(detailHtml, raw.url ?? source.baseUrl ?? '', mapped);
+  }
+
+  // Don't carry the raw HTML blob into sourceMetadata — it's huge and adds nothing.
+  if ('detailHtml' in mapped) delete mapped.detailHtml;
 
   const parsedPrice = parsePrice(mapped.price);
   const explicitListing = mapListingType(mapped.listingType);

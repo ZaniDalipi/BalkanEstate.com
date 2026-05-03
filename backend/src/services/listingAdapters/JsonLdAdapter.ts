@@ -64,9 +64,13 @@ const resolveUrl = (base: string, href: string): string => {
 export class JsonLdAdapter implements SourceAdapter {
   readonly type = 'jsonLd' as const;
 
-  private async parsePage(url: string, accepted: Set<string>): Promise<Record<string, unknown> | null> {
+  private async parsePage(
+    url: string,
+    accepted: Set<string>
+  ): Promise<{ jsonLd: Record<string, unknown> | null; detailHtml: string } | null> {
     const response = await httpGet<string>(url, { responseType: 'text' });
-    const $ = cheerio.load(String(response.data));
+    const html = String(response.data);
+    const $ = cheerio.load(html);
     const candidates: Record<string, unknown>[] = [];
     $('script[type="application/ld+json"]').each((_, el) => {
       const txt = $(el).contents().text();
@@ -77,7 +81,8 @@ export class JsonLdAdapter implements SourceAdapter {
         // ignore malformed JSON-LD
       }
     });
-    return candidates.find((c) => matchesType(c, accepted)) ?? null;
+    const jsonLd = candidates.find((c) => matchesType(c, accepted)) ?? null;
+    return { jsonLd, detailHtml: html };
   }
 
   async fetchListings(source: IListingSource, options: FetchOptions = {}): Promise<RawListing[]> {
@@ -120,12 +125,27 @@ export class JsonLdAdapter implements SourceAdapter {
 
     for (const url of urls) {
       try {
-        const json = await this.parsePage(url, accepted);
-        if (!json) continue;
-        // Validate that this JSON-LD item looks like a real listing
-        if (!isValidListingItem(json)) continue;
-        const id = String(json['@id'] ?? json['identifier'] ?? json['sku'] ?? url);
-        out.push({ id, url, raw: json });
+        const result = await this.parsePage(url, accepted);
+        if (!result) continue;
+        const { jsonLd, detailHtml } = result;
+
+        // Build the raw payload. We always include detailHtml so the normalizer's
+        // enricher can extract OpenGraph / microdata / image gallery even when
+        // the page has no JSON-LD (or the JSON-LD doesn't pass our type filter).
+        const raw: Record<string, unknown> = jsonLd ? { ...jsonLd, detailHtml } : { detailHtml };
+
+        // Skip pages that have neither valid JSON-LD nor enough OpenGraph for us
+        // to consider them listings.
+        const hasJsonLd = jsonLd && isValidListingItem(jsonLd);
+        const ogTitleHit = /<meta[^>]+property=["']og:title["']/i.test(detailHtml);
+        const ogPriceHit = /<meta[^>]+property=["'](og:price:amount|product:price:amount)["']/i.test(detailHtml);
+        const looksLikeListing = hasJsonLd || (ogTitleHit && (ogPriceHit || /price|cijena|cena|preis/i.test(detailHtml)));
+        if (!looksLikeListing) continue;
+
+        const id = String(
+          (jsonLd && (jsonLd['@id'] ?? jsonLd['identifier'] ?? jsonLd['sku'])) ?? url
+        );
+        out.push({ id, url, raw });
         if (limit && out.length >= limit) break;
       } catch {
         // skip failed page; orchestrator records per-listing failures
