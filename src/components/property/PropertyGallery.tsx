@@ -65,17 +65,9 @@ const imageSlideVariants = {
   }),
 };
 
-// Ken Burns: starts full-frame (scale 1.0, centered) and zooms to 1.08
-// over 10 s — at the 5 s auto-rotate the frame is visibly alive at ~1.04.
-// object-contain keeps every image fully visible; the bars compress as
-// the scale grows, which looks cinematic.
-const KEN_BURNS_DURATION = 10;
-const KB_PRESETS = [
-  { initial: { scale: 1, x: '0%', y: '0%' }, animate: { scale: 1.08, x: '-0.5%', y: '-0.3%' } },
-  { initial: { scale: 1, x: '0%', y: '0%' }, animate: { scale: 1.08, x: '0.5%',  y: '0.3%'  } },
-  { initial: { scale: 1, x: '0%', y: '0%' }, animate: { scale: 1.08, x: '0.5%',  y: '-0.3%' } },
-  { initial: { scale: 1, x: '0%', y: '0%' }, animate: { scale: 1.08, x: '-0.5%', y: '0.3%'  } },
-] as const;
+// Ken Burns constants — pan/scale animation for the gallery frame.
+const KEN_BURNS_DURATION = 8; // seconds; shorter = more visible at 5 s auto-rotate
+const CONTAINER_ASPECT = 16 / 9; // 1.778
 
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   property,
@@ -124,6 +116,13 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   const [mainImageError, setMainImageError] = useState(false);
   const [viewMode, setViewMode] = useState<'photos' | 'streetview' | 'video'>('photos');
+  const [imageAspect, setImageAspect] = useState<number>(CONTAINER_ASPECT);
+  const handleMainImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+      setImageAspect(img.naturalWidth / img.naturalHeight);
+    }
+  }, []);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -430,12 +429,39 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     }}
                   >
                     {(() => {
-                      const kb = KB_PRESETS[currentImageIndex % KB_PRESETS.length];
+                      // Bar fractions: how much of the container this image does NOT fill
+                      // on each axis when rendered with object-contain.
+                      const barX = imageAspect < CONTAINER_ASPECT
+                        ? (1 - imageAspect / CONTAINER_ASPECT) / 2
+                        : 0;
+                      const barY = imageAspect > CONTAINER_ASPECT
+                        ? (1 - CONTAINER_ASPECT / imageAspect) / 2
+                        : 0;
+
+                      // Pan = 70 % of available bar space, capped at 14 %.
+                      // The image translates WITHIN its own bar space so it is
+                      // always 100 % visible — no edge ever reaches the clip boundary.
+                      const panX = Math.min(barX * 0.70, 0.14) * 100;
+                      const panY = Math.min(barY * 0.70, 0.14) * 100;
+
+                      // Alternate start direction per image for visual variety.
+                      const sign = currentImageIndex % 2 === 0 ? 1 : -1;
+
+                      // Exact-fit images (16:9, no bar space): barely-perceptible scale only.
+                      const noBar = panX < 0.3 && panY < 0.3;
+
+                      const kbInitial = noBar
+                        ? { scale: 1,    x: '0%', y: '0%' }
+                        : { scale: 1,    x: `${panX * sign}%`,  y: `${panY * sign}%`  };
+                      const kbAnimate = noBar
+                        ? { scale: 1.03, x: '0%', y: '0%' }
+                        : { scale: 1,    x: `${-panX * sign}%`, y: `${-panY * sign}%` };
+
                       return (
                         <motion.div
                           className="absolute inset-0"
-                          initial={kb.initial}
-                          animate={kb.animate}
+                          initial={kbInitial}
+                          animate={kbAnimate}
                           transition={{ duration: KEN_BURNS_DURATION, ease: 'linear' }}
                           style={{ willChange: 'transform' }}
                         >
@@ -453,6 +479,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                             loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
                             className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
                             draggable={false}
+                            onLoad={handleMainImageLoad}
                             onError={() => setMainImageError(true)}
                           />
                         </motion.div>
