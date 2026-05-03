@@ -429,37 +429,29 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     }}
                   >
                     {(() => {
-                      // Bar fractions: how much of the container this image does NOT fill
-                      // on each axis when rendered with object-contain.
-                      const barX = imageAspect < CONTAINER_ASPECT
-                        ? (1 - imageAspect / CONTAINER_ASPECT) / 2
-                        : 0;
-                      const barY = imageAspect > CONTAINER_ASPECT
-                        ? (1 - CONTAINER_ASPECT / imageAspect) / 2
-                        : 0;
-
-                      // Pan = 70 % of available bar space, capped at 14 %.
-                      // The image translates WITHIN its own bar space so it is
-                      // always 100 % visible — no edge ever reaches the clip boundary.
-                      const panX = Math.min(barX * 0.70, 0.14) * 100;
-                      const panY = Math.min(barY * 0.70, 0.14) * 100;
-
-                      // Alternate start direction per image for visual variety.
+                      // Image is rendered h-full w-auto: always fills the container
+                      // top-to-bottom. Width follows the image's natural aspect ratio.
+                      //
+                      // relWidth = image width relative to container width (when h=100%):
+                      //   < 1 → portrait/4:3 → side bars → pan within bars (full image visible)
+                      //   > 1 → ultra-wide   → sides overflow → pan within overflow (cinematic)
+                      //   ≈ 1 → exact 16:9   → no travel room → subtle scale only
+                      const relWidth = imageAspect / CONTAINER_ASPECT;
+                      const horizTravel = Math.abs(relWidth - 1) / 2; // available pan space
+                      const panX = Math.min(horizTravel * 0.70, 0.12) * 100;
+                      const exactFit = horizTravel < 0.015;
                       const sign = currentImageIndex % 2 === 0 ? 1 : -1;
 
-                      // Exact-fit images (16:9, no bar space): barely-perceptible scale only.
-                      const noBar = panX < 0.3 && panY < 0.3;
-
-                      const kbInitial = noBar
-                        ? { scale: 1,    x: '0%', y: '0%' }
-                        : { scale: 1,    x: `${panX * sign}%`,  y: `${panY * sign}%`  };
-                      const kbAnimate = noBar
-                        ? { scale: 1.03, x: '0%', y: '0%' }
-                        : { scale: 1,    x: `${-panX * sign}%`, y: `${-panY * sign}%` };
+                      const kbInitial = exactFit
+                        ? { scale: 1,    x: '0%' }
+                        : { scale: 1,    x: `${panX * sign}%` };
+                      const kbAnimate = exactFit
+                        ? { scale: 1.03, x: '0%' }
+                        : { scale: 1,    x: `${-panX * sign}%` };
 
                       return (
                         <motion.div
-                          className="absolute inset-0"
+                          className="absolute inset-0 flex items-center justify-center"
                           initial={kbInitial}
                           animate={kbAnimate}
                           transition={{ duration: KEN_BURNS_DURATION, ease: 'linear' }}
@@ -477,7 +469,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                             fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
                             decoding={currentImageIndex === 0 ? 'sync' : 'async'}
                             loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
-                            className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
+                            className="h-full w-auto pointer-events-none select-none"
                             draggable={false}
                             onLoad={handleMainImageLoad}
                             onError={() => setMainImageError(true)}
