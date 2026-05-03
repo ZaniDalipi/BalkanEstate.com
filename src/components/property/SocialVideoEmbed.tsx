@@ -77,38 +77,13 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
   const isReel = useMemo(() => isInstagramReel(videoUrl), [videoUrl]);
 
   const [embedFailed, setEmbedFailed] = useState(false);
-  // Resolved numeric video ID for TikTok (short codes need oEmbed resolution)
-  const [resolvedVideoId, setResolvedVideoId] = useState<string | null>(null);
-  const resolveAttempted = useRef(false);
 
-  // Resolve TikTok short codes to numeric video IDs via oEmbed API
+  // Check if TikTok ID is numeric (full URL) or alphanumeric (short code)
+  const isNumericId = /^\d+$/.test(tiktokInfo.id);
+
+  // Load TikTok embed script
   useEffect(() => {
-    if (platform !== 'tiktok' || !tiktokInfo.id || resolveAttempted.current) return;
-    resolveAttempted.current = true;
-
-    const isNumeric = /^\d+$/.test(tiktokInfo.id);
-    if (isNumeric) {
-      setResolvedVideoId(tiktokInfo.id);
-      return;
-    }
-
-    // Short code — use TikTok oEmbed API from browser (no CORS issues)
-    fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(videoUrl)}`)
-      .then(res => res.json())
-      .then(data => {
-        const match = (data.html as string)?.match(/data-video-id="(\d+)"/);
-        if (match?.[1]) {
-          setResolvedVideoId(match[1]);
-        } else {
-          setEmbedFailed(true);
-        }
-      })
-      .catch(() => setEmbedFailed(true));
-  }, [platform, tiktokInfo.id, videoUrl]);
-
-  // Load TikTok embed script once numeric ID is resolved
-  useEffect(() => {
-    if (platform !== 'tiktok' || !resolvedVideoId) return;
+    if (platform !== 'tiktok' || !tiktokInfo.id) return;
 
     const existingScript = document.querySelector('script[src*="tiktok.com/embed.js"]');
     if (!existingScript) {
@@ -125,8 +100,8 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
       }, 100);
     }
 
-    // Retry rendering and check for failure after 10s
-    const retries = [1000, 3000, 5000];
+    // Retry rendering
+    const retries = [500, 1500, 3000];
     const timers = retries.map(delay =>
       setTimeout(() => {
         if ((window as any).tiktokEmbed?.lib?.render) {
@@ -135,17 +110,18 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
       }, delay)
     );
 
+    // Timeout check
     const fallbackTimer = setTimeout(() => {
       if (tiktokContainerRef.current && !tiktokContainerRef.current.querySelector('iframe')) {
         setEmbedFailed(true);
       }
-    }, 10000);
+    }, 5000);
 
     return () => {
       timers.forEach(clearTimeout);
       clearTimeout(fallbackTimer);
     };
-  }, [platform, resolvedVideoId]);
+  }, [platform, tiktokInfo.id]);
 
   // Instagram iframe load timeout
   useEffect(() => {
@@ -174,12 +150,10 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
     ? `https://www.instagram.com/reel/${instagramId}/embed/`
     : `https://www.instagram.com/p/${instagramId}/embed/`;
 
-  // TikTok cite URL always points to full video URL when we have the numeric ID
-  const tiktokCiteUrl = resolvedVideoId && tiktokInfo.username
-    ? `https://www.tiktok.com/@${tiktokInfo.username}/video/${resolvedVideoId}`
-    : resolvedVideoId
-      ? `https://www.tiktok.com/video/${resolvedVideoId}`
-      : videoUrl;
+  // TikTok cite URL
+  const tiktokCiteUrl = tiktokInfo.username && isNumericId
+    ? `https://www.tiktok.com/@${tiktokInfo.username}/video/${tiktokInfo.id}`
+    : videoUrl;
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
@@ -236,19 +210,13 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
           </div>
         )}
 
-        {/* TikTok Embed - Using official blockquote method with resolved numeric ID */}
-        {platform === 'tiktok' && !embedFailed && !resolvedVideoId && (
-          <div className="flex flex-col items-center gap-3 py-12 text-neutral-400">
-            <div className="w-10 h-10 border-2 border-neutral-300 border-t-black rounded-full animate-spin" />
-            <span className="text-sm">Loading TikTok video...</span>
-          </div>
-        )}
-        {platform === 'tiktok' && !embedFailed && resolvedVideoId && (
+        {/* TikTok Embed - Using official blockquote method */}
+        {platform === 'tiktok' && !embedFailed && (
           <div ref={tiktokContainerRef} className="w-full flex justify-center">
             <blockquote
               className="tiktok-embed"
               cite={tiktokCiteUrl}
-              data-video-id={resolvedVideoId}
+              {...(isNumericId && { 'data-video-id': tiktokInfo.id })}
               style={{
                 maxWidth: '605px',
                 minWidth: '325px',
