@@ -493,15 +493,21 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
                     key={p.key}
                     type="button"
                     onClick={() => insertPlaceholder(p.key)}
-                    className="px-2 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 transition-colors font-mono"
-                    title={t(`admin:pricing.placeholders.${p.key.replace(/[{}]/g, '')}Desc`, p.description)}
+                    className="px-2 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 transition-colors font-mono group relative"
+                    title={`${p.label}: ${p.description} (e.g., ${p.example})`}
                   >
                     {p.key}
+                    <span className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-10">
+                      {p.label}: {p.description}
+                    </span>
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-gray-500 mt-2">
-                {t('admin:pricing.placeholders.description', 'Use placeholders to dynamically show values from the product.')}
+              <p className="text-xs text-gray-500 mt-3 space-y-1">
+                <div>{t('admin:pricing.placeholders.helpText', 'Examples:')}</div>
+                <div className="font-mono text-gray-600 ml-2">• {`"{listingsLimit} listings per month"`}</div>
+                <div className="font-mono text-gray-600 ml-2">• {`"{promotionCoupons} promo coupons/month"`}</div>
+                <div className="font-mono text-gray-600 ml-2">• {`"Unlimited AI chat + {aiInsightsLimit} insights"`}</div>
               </p>
             </div>
           </div>
