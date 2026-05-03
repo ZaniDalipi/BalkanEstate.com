@@ -445,13 +445,23 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   >
                     {(() => {
                       const kb = KB_PRESETS[currentImageIndex % KB_PRESETS.length];
+                      // Physically size the div to KB_SCALE × container (120%) and offset
+                      // it so it's centered. The parent overflow-hidden clips it cleanly —
+                      // no CSS transform scale, no stacking-context issues with the LQIP.
+                      const pct = ((KB_SCALE - 1) / 2) * 100; // = 10 for scale 1.2
                       return (
                         <motion.div
-                          className="absolute inset-0"
-                          initial={{ scale: KB_SCALE, x: kb.initial.x, y: kb.initial.y }}
-                          animate={{ scale: KB_SCALE, x: kb.animate.x, y: kb.animate.y }}
+                          style={{
+                            position: 'absolute',
+                            width: `${KB_SCALE * 100}%`,
+                            height: `${KB_SCALE * 100}%`,
+                            top: `-${pct}%`,
+                            left: `-${pct}%`,
+                            willChange: 'transform',
+                          }}
+                          initial={{ x: kb.initial.x, y: kb.initial.y }}
+                          animate={{ x: kb.animate.x, y: kb.animate.y }}
                           transition={{ duration: KEN_BURNS_DURATION, ease: 'linear' }}
-                          style={{ willChange: 'transform' }}
                         >
                           <img
                             src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
@@ -465,7 +475,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                             fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
                             decoding="async"
                             loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
-                            className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+                            className="w-full h-full object-cover pointer-events-none select-none"
                             draggable={false}
                             onError={() => setMainImageError(true)}
                           />
