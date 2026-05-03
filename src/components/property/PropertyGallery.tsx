@@ -65,17 +65,16 @@ const imageSlideVariants = {
   }),
 };
 
-// Ken Burns: image is pre-scaled 1.2× so it overflows the container by 10%
-// on each side — object-cover fills edge-to-edge, no grey bars ever.
-// Pan uses that 10% buffer; ±8% x / ±5% y stays safely within it.
+// Ken Burns: starts at scale 1.0 (full frame, no crop) and drifts to 1.04
+// over 20 s — imperceptible at the 5 s auto-rotate interval but keeps the
+// frame feeling alive. All four presets start from center so no edge of
+// the image is clipped at t=0.
 const KEN_BURNS_DURATION = 20;
-const KB_SCALE = 1.2;
-
 const KB_PRESETS = [
-  { initial: { x: '8%',  y: '5%'  }, animate: { x: '-8%', y: '-5%' } },
-  { initial: { x: '-8%', y: '-5%' }, animate: { x: '8%',  y: '5%'  } },
-  { initial: { x: '8%',  y: '-5%' }, animate: { x: '-8%', y: '5%'  } },
-  { initial: { x: '-8%', y: '5%'  }, animate: { x: '8%',  y: '-5%' } },
+  { initial: { scale: 1,    x: '0%',    y: '0%'    }, animate: { scale: 1.04, x: '-0.8%', y: '-0.5%' } },
+  { initial: { scale: 1,    x: '0%',    y: '0%'    }, animate: { scale: 1.04, x: '0.8%',  y: '0.5%'  } },
+  { initial: { scale: 1,    x: '0%',    y: '0%'    }, animate: { scale: 1.04, x: '0.8%',  y: '-0.5%' } },
+  { initial: { scale: 1,    x: '0%',    y: '0%'    }, animate: { scale: 1.04, x: '-0.8%', y: '0.5%'  } },
 ] as const;
 
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
@@ -314,27 +313,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     setMainImageError(false);
   }, [currentImageUrl]);
 
-  // Eagerly preload first 4 images when the listing opens so swipes feel instant
+  // Eagerly preload all gallery images at display-size (900px) so every
+  // swipe and auto-rotate feels instant.
   useEffect(() => {
-    imagesForCurrentCategory.slice(1, 5).forEach((item) => {
+    imagesForCurrentCategory.forEach((item) => {
       const el = new Image();
-      el.src = optimizeCloudinaryUrl(item.url, { width: 1200, quality: 'auto' });
+      el.src = optimizeCloudinaryUrl(item.url, { width: 900, quality: 'auto' });
     });
   }, [imagesForCurrentCategory]);
-
-  // Preload adjacent images so navigation feels instant
-  useEffect(() => {
-    if (imagesForCurrentCategory.length <= 1) return;
-    const prevIndex = (currentImageIndex - 1 + imagesForCurrentCategory.length) % imagesForCurrentCategory.length;
-    const nextIndex = (currentImageIndex + 1) % imagesForCurrentCategory.length;
-    [prevIndex, nextIndex].forEach((idx) => {
-      const url = imagesForCurrentCategory[idx]?.url;
-      if (url) {
-        const img = new Image();
-        img.src = optimizeCloudinaryUrl(url, { width: 1200, quality: 'auto' });
-      }
-    });
-  }, [currentImageIndex, imagesForCurrentCategory]);
 
   const handleCategorySelect = useCallback((tag: PropertyImageTag | 'all') => {
     setActiveCategory(tag);
@@ -445,37 +431,27 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   >
                     {(() => {
                       const kb = KB_PRESETS[currentImageIndex % KB_PRESETS.length];
-                      // Physically size the div to KB_SCALE × container (120%) and offset
-                      // it so it's centered. The parent overflow-hidden clips it cleanly —
-                      // no CSS transform scale, no stacking-context issues with the LQIP.
-                      const pct = ((KB_SCALE - 1) / 2) * 100; // = 10 for scale 1.2
                       return (
                         <motion.div
-                          style={{
-                            position: 'absolute',
-                            width: `${KB_SCALE * 100}%`,
-                            height: `${KB_SCALE * 100}%`,
-                            top: `-${pct}%`,
-                            left: `-${pct}%`,
-                            willChange: 'transform',
-                          }}
-                          initial={{ x: kb.initial.x, y: kb.initial.y }}
-                          animate={{ x: kb.animate.x, y: kb.animate.y }}
+                          className="absolute inset-0"
+                          initial={kb.initial}
+                          animate={kb.animate}
                           transition={{ duration: KEN_BURNS_DURATION, ease: 'linear' }}
+                          style={{ willChange: 'transform' }}
                         >
                           <img
-                            src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
-                            srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 1200, 1920])}
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
+                            src={optimizeCloudinaryUrl(currentImageUrl, { width: 900, quality: 'auto' })}
+                            srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 900, 1400])}
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 900px"
                             alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
-                            width={1200}
-                            height={800}
+                            width={900}
+                            height={600}
                             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                             // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
                             fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
-                            decoding="async"
+                            decoding={currentImageIndex === 0 ? 'sync' : 'async'}
                             loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
-                            className="w-full h-full object-cover pointer-events-none select-none"
+                            className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
                             draggable={false}
                             onError={() => setMainImageError(true)}
                           />
