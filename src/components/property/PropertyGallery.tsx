@@ -65,16 +65,16 @@ const imageSlideVariants = {
   }),
 };
 
-// Ken Burns: starts at scale 1.0 (full frame, no crop) and drifts to 1.04
-// over 20 s — imperceptible at the 5 s auto-rotate interval but keeps the
-// frame feeling alive. All four presets start from center so no edge of
-// the image is clipped at t=0.
-const KEN_BURNS_DURATION = 20;
+// Ken Burns: starts full-frame (scale 1.0, centered) and zooms to 1.08
+// over 10 s — at the 5 s auto-rotate the frame is visibly alive at ~1.04.
+// object-contain keeps every image fully visible; the bars compress as
+// the scale grows, which looks cinematic.
+const KEN_BURNS_DURATION = 10;
 const KB_PRESETS = [
-  { initial: { scale: 1,    x: '0%',    y: '0%'    }, animate: { scale: 1.04, x: '-0.8%', y: '-0.5%' } },
-  { initial: { scale: 1,    x: '0%',    y: '0%'    }, animate: { scale: 1.04, x: '0.8%',  y: '0.5%'  } },
-  { initial: { scale: 1,    x: '0%',    y: '0%'    }, animate: { scale: 1.04, x: '0.8%',  y: '-0.5%' } },
-  { initial: { scale: 1,    x: '0%',    y: '0%'    }, animate: { scale: 1.04, x: '-0.8%', y: '0.5%'  } },
+  { initial: { scale: 1, x: '0%', y: '0%' }, animate: { scale: 1.08, x: '-0.5%', y: '-0.3%' } },
+  { initial: { scale: 1, x: '0%', y: '0%' }, animate: { scale: 1.08, x: '0.5%',  y: '0.3%'  } },
+  { initial: { scale: 1, x: '0%', y: '0%' }, animate: { scale: 1.08, x: '0.5%',  y: '-0.3%' } },
+  { initial: { scale: 1, x: '0%', y: '0%' }, animate: { scale: 1.08, x: '-0.5%', y: '0.3%'  } },
 ] as const;
 
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
