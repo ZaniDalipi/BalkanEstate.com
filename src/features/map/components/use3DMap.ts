@@ -953,6 +953,19 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
     map.current = mapInstance;
 
+    // Provide a transparent fallback for any sprite icons missing from the
+    // OpenFreeMap style so MapLibre stops logging "Image X could not be loaded".
+    mapInstance.on('styleimagemissing', (e) => {
+      const id = e.id;
+      if (mapInstance.hasImage(id)) return;
+      const size = 1;
+      mapInstance.addImage(id, {
+        width: size,
+        height: size,
+        data: new Uint8Array(size * size * 4),
+      });
+    });
+
     // Track bearing changes for compass overlay
     mapInstance.on('rotate', () => {
       setCurrentBearing(mapInstance.getBearing());
