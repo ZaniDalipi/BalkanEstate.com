@@ -538,6 +538,35 @@ export function use3DMap(props: Map3DBuildingsProps) {
       }
     }
 
+    // 3. Fallback: querySourceFeatures queries raw tile data, not just rendered screen features.
+    // This is more reliable in production where tiles may load after the first idle event.
+    if (!buildingFeature) {
+      const buildingLayer = mapInstance.getLayer('3d-buildings') as any;
+      const vectorSourceId: string | undefined = buildingLayer?.source;
+      if (vectorSourceId) {
+        try {
+          const sourceFeatures = mapInstance.querySourceFeatures(vectorSourceId, {
+            sourceLayer: 'building',
+          }) as maplibregl.MapGeoJSONFeature[];
+
+          const maxAcceptableDistance = 0.0005; // ~55m
+          let minDist = Infinity;
+          for (const feature of sourceFeatures) {
+            const centroid = getBuildingCentroid(feature);
+            if (centroid) {
+              const dist = getDistance(latitude, longitude, centroid.lat, centroid.lng);
+              if (dist < maxAcceptableDistance && dist < minDist) {
+                minDist = dist;
+                buildingFeature = feature;
+              }
+            }
+          }
+        } catch {
+          // querySourceFeatures not supported or source unavailable
+        }
+      }
+    }
+
     // Extract coordinates from the building feature
     if (buildingFeature) {
       if (buildingFeature.geometry.type === 'Polygon') {
@@ -1014,13 +1043,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
           }
         }
 
-        // Verify the source exists before adding layer
-        if (!mapInstance.getSource(buildingSource)) {
-          // Error removed
-          return;
-        }
-
-        try {
+        // Only add the layer if the source is available
+        if (mapInstance.getSource(buildingSource)) {
+          try {
           // Add 3D buildings layer - OneGeo style dark grey buildings
           mapInstance.addLayer(
             {
@@ -1052,10 +1077,11 @@ export function use3DMap(props: Map3DBuildingsProps) {
             },
             labelLayerId
           );
-        } catch (error) {
-          // Error removed
-        }
-      }
+          } catch (error) {
+            // Error removed
+          }
+        } // end if (getSource)
+      } // end if (!getLayer)
 
       // Add the property marker (always shows blue dot, orientation indicator only if provided)
       addPropertyMarker(mapInstance, lat, lng, orientation);

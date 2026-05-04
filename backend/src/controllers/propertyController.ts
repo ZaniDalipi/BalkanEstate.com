@@ -16,7 +16,7 @@ import {
 import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/highlightingUtils';
 import { recordPriceChange, processInstantAlertsForProperty, processInstantPriceDropForProperty } from '../jobs/propertyAlertsJob';
 import { trackUserActivity } from '../services/proBuyerEmailService';
-import { FREE_TIER_LIMITS, PRO_TIER_LIMITS, AGENCY_AGENT_LIMITS } from '../config/subscriptionConstants';
+import { FREE_TIER_LIMITS, PRO_TIER_LIMITS } from '../config/subscriptionConstants';
 import ArchivedListing from '../models/ArchivedListing';
 import { sanitizeProperty } from '../utils/responseSanitizer';
 import {
@@ -721,48 +721,57 @@ export const createProperty = async (
     // When posting as private_seller, the listing won't appear on the agency page.
     // Their profile role remains "agent" - only the listing's createdAsRole changes.
 
+    // Import services for listing management
+    const listingLimitService = require('../services/listingLimitService').default;
+
     // Check listing limits based on subscription tier
-    const limit = user.subscription.listingsLimit || FREE_TIER_LIMITS.LISTINGS;
     const tier = user.subscription.tier || 'free';
-    const isAgencyAgent = tier === 'agency_agent';
+    const isProUser = !!(user.subscriptionPlan && (tier === 'pro' || tier === 'agency_agent' || tier === 'agency_owner'));
+    let monthlyAllowance = 0;
 
-    // For agency agents: check and reset monthly listing counter
-    // Agency agents get 30 active listings per month, resetting from their subscription start date
-    if (isAgencyAgent) {
-      const now = new Date();
-      const resetDate = user.subscription.listingsMonthResetDate;
-      if (!resetDate || now >= resetDate) {
-        // Reset monthly counter and set next reset date (30 days from now)
-        const nextReset = new Date(now);
-        nextReset.setDate(nextReset.getDate() + 30);
-        nextReset.setHours(0, 0, 0, 0);
-        await User.findByIdAndUpdate(user._id, {
-          'subscription.monthlyListingsCreated': 0,
-          'subscription.listingsMonthResetDate': nextReset,
-        });
-        user.subscription.monthlyListingsCreated = 0;
-        user.subscription.listingsMonthResetDate = nextReset;
-      }
+    if (isProUser) {
+      // MONTHLY MODEL: Pro/agency users — check listingsCreatedThisMonth against product allowance
+      try {
+        // Prefer stored subscription limit (may be admin-overridden) over product default
+        monthlyAllowance = user.subscription.listingsLimit ||
+          await listingLimitService.getMonthlyAllowance(user.subscriptionPlan);
 
-      // Check monthly limit for agency agents (30 per month)
-      const monthlyLimit = AGENCY_AGENT_LIMITS.LISTINGS_PER_MONTH;
-      const monthlyCreated = user.subscription.monthlyListingsCreated || 0;
-      if (monthlyCreated >= monthlyLimit) {
-        res.status(403).json({
-          message: `You have reached your monthly limit of ${monthlyLimit} listings. Your limit resets on ${user.subscription.listingsMonthResetDate?.toLocaleDateString() || 'next month'}.`,
-          code: 'MONTHLY_LISTING_LIMIT_REACHED',
-          tier,
-          limit: monthlyLimit,
-          current: monthlyCreated,
-          resetDate: user.subscription.listingsMonthResetDate,
+        // Initialize monthResetDate if not set (first time using monthly model)
+        if (!user.subscription.monthResetDate) {
+          user.subscription.monthResetDate = new Date();
+          await user.save();
+        }
+
+        // Reset counter only if calendar month has actually changed since last reset
+        if (listingLimitService.isMonthBoundaryPassed(user.subscription.monthResetDate)) {
+          user.subscription.listingsCreatedThisMonth = 0;
+          user.subscription.monthResetDate = new Date();
+          await user.save();
+        }
+
+        const created = user.subscription.listingsCreatedThisMonth || 0;
+
+        if (created >= monthlyAllowance) {
+          res.status(403).json({
+            message: `You have reached your monthly listing limit (${created}/${monthlyAllowance}). Resets at the start of next month.`,
+            code: 'MONTHLY_LISTING_LIMIT_REACHED',
+            tier,
+            created,
+            monthlyAllowance,
+          });
+          return;
+        }
+      } catch (error: any) {
+        propertyLogger.error('Error checking monthly listing limit', { userId: user._id, error: error.message });
+        res.status(500).json({
+          message: 'Error checking listing limits. Please try again.',
+          code: 'LISTING_LIMIT_CHECK_ERROR',
         });
         return;
       }
     }
 
-    // ATOMIC check-and-increment: Use findOneAndUpdate to prevent race conditions.
-    // Without this, concurrent requests could all read the same count (e.g. 2),
-    // all pass the limit check, and all create listings - bypassing the limit.
+    // ATOMIC check-and-increment to prevent race conditions
     const roleCountField = createdAsRole === 'agent'
       ? 'subscription.agentCount'
       : 'subscription.privateSellerCount';
@@ -774,36 +783,53 @@ export const createProperty = async (
       totalListingsCreated: 1,
     };
 
-    // For agency agents, also increment the monthly counter
-    if (isAgencyAgent) {
-      incrementFields['subscription.monthlyListingsCreated'] = 1;
+    let atomicFilter: Record<string, any>;
+
+    if (isProUser && monthlyAllowance > 0) {
+      // Pro/agency: atomically check and increment the monthly counter
+      incrementFields['subscription.listingsCreatedThisMonth'] = 1;
+      atomicFilter = {
+        _id: user._id,
+        'subscription.listingsCreatedThisMonth': { $lt: monthlyAllowance },
+      };
+    } else {
+      // Free tier: atomically check and increment total active count
+      const freeLimit = FREE_TIER_LIMITS.LISTINGS;
+      atomicFilter = {
+        _id: user._id,
+        'subscription.activeListingsCount': { $lt: freeLimit },
+      };
     }
 
     const atomicResult = await User.findOneAndUpdate(
-      {
-        _id: user._id,
-        'subscription.activeListingsCount': { $lt: limit },
-      },
-      {
-        $inc: incrementFields,
-      },
+      atomicFilter,
+      { $inc: incrementFields },
       { new: true }
     );
 
     if (!atomicResult) {
-      // Re-read to get current count for the error response
       const freshUser = await User.findById(user._id);
-      const currentCount = freshUser?.subscription?.activeListingsCount || 0;
-      res.status(403).json({
-        message: `You have reached your ${tier} tier limit of ${limit} active listings. ${tier === 'free' ? 'Upgrade to Pro for up to 250 active listings!' : 'Please delete some listings to create new ones.'}`,
-        code: 'LISTING_LIMIT_REACHED',
-        tier,
-        limit,
-        current: currentCount,
-        privateSellerCount: freshUser?.subscription?.privateSellerCount || 0,
-        agentCount: freshUser?.subscription?.agentCount || 0,
-        upgradeAvailable: tier === 'free',
-      });
+      if (isProUser) {
+        const currentCount = freshUser?.subscription?.listingsCreatedThisMonth || 0;
+        res.status(403).json({
+          message: `Monthly listing limit reached (${currentCount}/${monthlyAllowance}). Resets at the start of next month.`,
+          code: 'MONTHLY_LISTING_LIMIT_REACHED',
+          tier,
+          created: currentCount,
+          monthlyAllowance,
+        });
+      } else {
+        const freeLimit = FREE_TIER_LIMITS.LISTINGS;
+        const currentCount = freshUser?.subscription?.activeListingsCount || 0;
+        res.status(403).json({
+          message: `You have reached your free tier limit of ${freeLimit} active listings. Upgrade to Pro for more listings!`,
+          code: 'FREE_LISTING_LIMIT_REACHED',
+          tier,
+          limit: freeLimit,
+          current: currentCount,
+          upgradeAvailable: true,
+        });
+      }
       return;
     }
 
@@ -923,6 +949,8 @@ export const createProperty = async (
         privateSellerCount: updatedUser.subscription?.privateSellerCount,
         agentCount: updatedUser.subscription?.agentCount,
         listingsLimit: updatedUser.subscription?.listingsLimit,
+        listingsCreatedThisMonth: updatedUser.subscription?.listingsCreatedThisMonth,
+        monthResetDate: updatedUser.subscription?.monthResetDate,
         tier: updatedUser.subscription?.tier,
       },
     });

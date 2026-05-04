@@ -124,10 +124,55 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     return city;
   }, [currentLang, CITY_NAMES_SQ]);
 
-  const displayCities = useMemo(() => featuredCities.slice(0, 6).map(c => ({
-    original: c.city,
-    display: localizeCityName(c.city),
-  })), [featuredCities, localizeCityName]);
+  // Balkan-wide city seeds — ensure chips are diverse when API data is sparse
+  const CHIP_SEEDS = useMemo(() => [
+    { city: 'Belgrade',   country: 'Serbia' },
+    { city: 'Novi Sad',   country: 'Serbia' },
+    { city: 'Budva',      country: 'Montenegro' },
+    { city: 'Kotor',      country: 'Montenegro' },
+    { city: 'Podgorica',  country: 'Montenegro' },
+    { city: 'Skopje',     country: 'North Macedonia' },
+    { city: 'Ohrid',      country: 'North Macedonia' },
+    { city: 'Sarajevo',   country: 'Bosnia' },
+    { city: 'Mostar',     country: 'Bosnia' },
+    { city: 'Zagreb',     country: 'Croatia' },
+    { city: 'Split',      country: 'Croatia' },
+    { city: 'Dubrovnik',  country: 'Croatia' },
+    { city: 'Sofia',      country: 'Bulgaria' },
+  ], []);
+
+  const displayCities = useMemo(() => {
+    const shuffle = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
+    const shuffledApi   = shuffle(featuredCities);
+    const shuffledSeeds = shuffle(CHIP_SEEDS);
+    const picked: Array<{ original: string; display: string }> = [];
+    const seenCountries = new Set<string>();
+
+    // One API city per country first
+    for (const c of shuffledApi) {
+      if (picked.length >= 6) break;
+      if (!seenCountries.has(c.country)) {
+        picked.push({ original: c.city, display: localizeCityName(c.city) });
+        seenCountries.add(c.country);
+      }
+    }
+    // Fill from seeds for countries not yet represented
+    for (const s of shuffledSeeds) {
+      if (picked.length >= 6) break;
+      if (!seenCountries.has(s.country)) {
+        picked.push({ original: s.city, display: localizeCityName(s.city) });
+        seenCountries.add(s.country);
+      }
+    }
+    // Top-up with more API cities if needed
+    for (const c of shuffledApi) {
+      if (picked.length >= 6) break;
+      if (!picked.some(p => p.original === c.city)) {
+        picked.push({ original: c.city, display: localizeCityName(c.city) });
+      }
+    }
+    return picked;
+  }, [featuredCities, localizeCityName, CHIP_SEEDS]);
 
   // Autocomplete: debounced location search
   useEffect(() => {

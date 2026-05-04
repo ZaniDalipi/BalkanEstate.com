@@ -7,6 +7,10 @@
     "sharedLimit": "Limit i Përbashkët: {{used}}/{{limit}} listime totale",
     "asRole": "({{count}} si {{role}})",
     "listings": "Listime",
+    "monthlyListings": "Këtë muaj",
+    "monthlyRemaining": "{{count}} listim(e) të mbetura këtë muaj",
+    "monthlyAvailable": "{{count}} listim(e) të disponueshme këtë muaj",
+    "monthlyLimitReached": "Limiti mujor u arrit. Rinisi muajin e ardhshëm.",
     "limitReachedShared": "Limiti i përbashkët u arrit për të dy rolet.",
     "limitReachedUpgrade": "Limiti i listimeve u arrit. Përmirësohuni në Pro për 30 listime!",
     "remainingListings": "{{count}} listim(e) të mbetura",
@@ -408,12 +412,16 @@
     "proSubscriptionRequired": "Kërkohet Abonim Pro",
     "agentProRequiredMessage": "Agjentët duhet të kenë një abonim aktiv Pro për të postuar listime. Abonohuni tani për 30 listime aktive!",
     "switchRoleRequired": "Kërkohet Ndërrimi i Rolit",
-    "buyerCannotCreateListing": "Blerësit nuk mund të krijojnë listime pronash. Ju lutem kaloni në rolin Shitës Privat ose Agjent."
+    "buyerCannotCreateListing": "Blerësit nuk mund të krijojnë listime pronash. Ju lutem kaloni në rolin Shitës Privat ose Agjent.",
+    "monthlyLimitReached": "Limiti Mujor i Listimeve u Arrit",
+    "monthlyLimitMessage": "Keni përdorur të gjitha listimet tuaja këtë muaj. Rivendoset në fillim të muajit të ardhshëm.",
+    "monthlyLimitMessageWithCount": "Keni përdorur {{used}} nga {{limit}} listime këtë muaj. Rivendoset në fillim të muajit të ardhshëm."
   },
   "actions": {
     "subscribeToPro": "Abonohu në Pro",
     "viewMyListings": "Shiko Listimet e Mia",
-    "switchRole": "Ndërro Rolin"
+    "switchRole": "Ndërro Rolin",
+    "requestMoreListings": "Kërkoni Më Shumë Listime"
   },
   "myListings": {
     "title": "Listimet e Mia",

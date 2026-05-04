@@ -143,6 +143,10 @@ export interface IUser extends Document {
       lastRefresh: Date; // Last monthly refresh
     };
 
+    // Monthly listing tracking
+    listingsCreatedThisMonth?: number; // Count of listings created this calendar month
+    monthResetDate?: Date; // When the monthly counter was last reset
+
     // Buyer-specific features
     savedSearchesLimit?: number; // 1 free, 10 pro, unlimited buyer
 
@@ -659,6 +663,15 @@ const UserSchema: Schema = new Schema(
           type: Date,
           default: Date.now,
         },
+      },
+
+      // Monthly listing tracking
+      listingsCreatedThisMonth: {
+        type: Number,
+        default: 0, // Count of listings created this calendar month
+      },
+      monthResetDate: {
+        type: Date, // When the monthly counter was last reset
       },
 
       // Buyer features

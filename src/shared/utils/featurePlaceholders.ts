@@ -10,6 +10,7 @@
 export interface ProductValues {
   // Listing limits
   listingsLimit?: number;
+  listingsPerMonth?: number; // Monthly listing allowance
 
   // Promotion coupons
   promotionCoupons?: number;

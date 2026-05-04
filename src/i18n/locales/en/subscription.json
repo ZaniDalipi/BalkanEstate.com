@@ -105,7 +105,7 @@
     "disabled": "Disabled",
     "planIncludes": "Your plan includes:",
     "listingLimit": "Listing Limit",
-    "listingUsage": "{{used}} of {{limit}} used",
+    "listingUsage": "{{used}} of {{limit}} this month",
     "perMonth": "per month",
     "perYear": "per year",
     "remaining": "remaining",

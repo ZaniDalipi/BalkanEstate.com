@@ -40,8 +40,13 @@ export interface User {
   };
   subscription?: {
     tier?: string;
+    status?: string;
     listingsLimit?: number;
     activeListingsCount?: number;
+    listingsCreatedThisMonth?: number;
+    monthResetDate?: string;
+    privateSellerCount?: number;
+    agentCount?: number;
   };
 }
 
@@ -94,9 +99,10 @@ export function useUserManager() {
     isEnterpriseTier: false,
   });
 
-  // Detail modal
+  // Detail modal — viewingUser is DERIVED from the users[] array via ID lookup
+  // so any refetch or cache update reflects instantly in the open modal
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [viewingUser, setViewingUser] = useState<User | null>(null);
+  const [viewingUserId, setViewingUserId] = useState<string | null>(null);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -139,6 +145,13 @@ export function useUserManager() {
   const { users, totalPages, totalUsers } = processedData;
   const error = queryError ? 'Failed to load users' : localError;
 
+  // Derive viewingUser from the current users[] snapshot so the modal stays in sync
+  // with the source of truth (React Query cache) after any mutation/refetch.
+  const viewingUser = useMemo<User | null>(
+    () => (viewingUserId ? users.find((u: User) => u._id === viewingUserId) ?? null : null),
+    [users, viewingUserId]
+  );
+
   const handleEditUser = (user: User) => {
     setEditingUser(user);
     setEditForm({
@@ -161,7 +174,7 @@ export function useUserManager() {
   };
 
   const handleViewUser = (user: User) => {
-    setViewingUser(user);
+    setViewingUserId(user._id);
     setIsDetailModalOpen(true);
   };
 

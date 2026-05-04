@@ -60,7 +60,7 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
 
     /**
      * Get subscription data for a role - Single Source of Truth
-     * Uses the new unified subscription system
+     * Uses the new monthly reset subscription system
      * IMPORTANT: Always check subscription status - cancelled/expired = free tier
      */
     const getRoleSubscription = (role: UserRole) => {
@@ -81,16 +81,33 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
             const proTiers = ['pro', 'agency_owner', 'agency_agent'];
             const isPro = isActiveSubscription && (proTiers.includes(tier) || (tier !== 'free' && tier !== 'buyer'));
 
-            // Get the correct listing limit based on subscription status
-            // If subscription is not active, fall back to free tier (3 listings)
-            // Priority: 1) sub.listingsLimit (from DB) 2) PLAN_LISTING_LIMITS[productId] 3) LISTING_LIMITS[tier] 4) fallback to 3
+            // Check if month boundary has passed
+            const isMonthBoundaryPassed = (lastResetDate: Date | undefined): boolean => {
+                if (!lastResetDate) return true;
+                const now = new Date();
+                return (
+                    now.getMonth() !== new Date(lastResetDate).getMonth() ||
+                    now.getFullYear() !== new Date(lastResetDate).getFullYear()
+                );
+            };
+
+            // Get monthly allowance from product
+            // MONTHLY MODEL: Users get X listings per month, counter resets at calendar month boundary
             const productId = sub.productId as keyof typeof PLAN_LISTING_LIMITS | undefined;
-            const limit = isActiveSubscription
+            const monthlyAllowance = isActiveSubscription
                 ? sub.listingsLimit || (productId && PLAN_LISTING_LIMITS[productId]) || LISTING_LIMITS[tier] || 3
                 : 3; // Free tier limit
 
-            // Get counts
-            const used = sub.activeListingsCount || 0;
+            // Get listings created THIS MONTH (resets at calendar month boundary)
+            let listingsCreatedThisMonth = sub.listingsCreatedThisMonth || 0;
+
+            // If month boundary has passed, counter should be reset to 0
+            if (isMonthBoundaryPassed(sub.monthResetDate)) {
+                listingsCreatedThisMonth = 0;
+            }
+
+            // Get role-specific counts
+            const used = listingsCreatedThisMonth;
             const roleCount = role === UserRole.AGENT
                 ? (sub.agentCount || 0)
                 : (sub.privateSellerCount || 0);
@@ -104,11 +121,12 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
 
             return {
                 plan: isActiveSubscription ? tier : 'free',
-                limit,
+                limit: monthlyAllowance, // Monthly allowance, resets at calendar month boundary
                 used,
                 roleCount,
                 isActive: isActiveSubscription,
                 isPro,
+                isMonthlyReset: true, // Indicate this uses monthly reset model
                 // Promotion coupon details
                 featuredCoupons,
                 highlightedCoupons,
@@ -263,6 +281,7 @@ interface RoleCardProps {
         isActive: boolean;
         isPro?: boolean;
         roleCount?: number;
+        isMonthlyReset?: boolean; // Indicates monthly reset model
         // Promotion coupons
         featuredCoupons?: number;
         highlightedCoupons?: number;
@@ -350,24 +369,17 @@ const RoleCard: React.FC<RoleCardProps> = ({
                             </div>
                         ) : (
                             <div className="space-y-2">
-                                {/* Show shared limit info for Pro users */}
-                                {subscription.isPro ? (
-                                    <div className="mb-2 p-2 glass-fieldset border-amber-200 rounded">
-                                        <p className="text-xs text-amber-600 font-medium">
-                                            {t('seller:roleSelector.sharedLimit', { used: subscription.used, limit: subscription.limit })}
-                                        </p>
-                                        <p className="text-xs text-amber-500 mt-0.5">
-                                            {t('seller:roleSelector.asRole', { count: subscription.roleCount || 0, role: role === UserRole.AGENT ? t('seller:roleSelector.agent').toLowerCase() : t('seller:roleSelector.privateSeller').toLowerCase() })}
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center justify-between text-sm">
-                                        <span className="text-gray-400">{t('seller:roleSelector.listings')}</span>
-                                        <span className={`font-semibold ${isLimitReached ? 'text-red-600' : 'text-gray-700'}`}>
-                                            {subscription.used} / {subscription.limit}
-                                        </span>
-                                    </div>
-                                )}
+                                {/* Show monthly listing limit for all users (new monthly reset model) */}
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-gray-400">
+                                        {subscription.isMonthlyReset
+                                            ? t('seller:roleSelector.monthlyListings', 'This month')
+                                            : t('seller:roleSelector.listings')}
+                                    </span>
+                                    <span className={`font-semibold ${isLimitReached ? 'text-red-600' : 'text-gray-700'}`}>
+                                        {subscription.used} / {subscription.limit}
+                                    </span>
+                                </div>
 
                                 {/* Progress bar */}
                                 <div className="w-full bg-gray-200 rounded-full h-1.5">
@@ -385,15 +397,21 @@ const RoleCard: React.FC<RoleCardProps> = ({
 
                                 {isLimitReached ? (
                                     <p className="text-xs text-red-600 font-medium mt-1">
-                                        {subscription.isPro ? t('seller:roleSelector.limitReachedShared') : t('seller:roleSelector.limitReachedUpgrade')}
+                                        {subscription.isMonthlyReset
+                                            ? t('seller:roleSelector.monthlyLimitReached', 'Monthly limit reached. Resets next month.')
+                                            : t('seller:roleSelector.limitReachedUpgrade')}
                                     </p>
                                 ) : remaining <= 2 ? (
                                     <p className="text-xs text-amber-600 font-medium mt-1">
-                                        {t('seller:roleSelector.remainingListings', { count: remaining })} {subscription.isPro ? t('seller:roleSelector.shared') : ''}
+                                        {subscription.isMonthlyReset
+                                            ? t('seller:roleSelector.monthlyRemaining', { count: remaining }, `${remaining} listing(s) remaining this month`)
+                                            : t('seller:roleSelector.remainingListings', { count: remaining })}
                                     </p>
                                 ) : (
                                     <p className="text-xs text-emerald-600 font-medium mt-1">
-                                        {t('seller:roleSelector.availableListings', { count: remaining })} {subscription.isPro ? t('seller:roleSelector.shared') : ''}
+                                        {subscription.isMonthlyReset
+                                            ? t('seller:roleSelector.monthlyAvailable', { count: remaining }, `${remaining} listing(s) available this month`)
+                                            : t('seller:roleSelector.availableListings', { count: remaining })}
                                     </p>
                                 )}
 
