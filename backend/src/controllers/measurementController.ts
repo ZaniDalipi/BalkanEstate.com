@@ -195,11 +195,15 @@ export const updateMeasurement = async (req: Request, res: Response): Promise<vo
     // DEBUG
     if (user.savedMeasurements && user.savedMeasurements.length > 0) {
       const first = user.savedMeasurements[0] as any;
-      apiLogger.info(`DEBUG update - incoming id: "${id}", _doc.id: "${first._doc?.id}", .id: "${first.id}", ._id: "${first._id}", toObject: ${JSON.stringify(first.toObject())}`);
+      const firstObj = first.toObject?.() || first;
+      apiLogger.info(`DEBUG update - incoming id: "${id}", toObject().id: "${firstObj.id}", .id: "${first.id}", ._id: "${first._id}"`);
     }
 
     const measurementIndex = user.savedMeasurements?.findIndex(
-      m => (m as any)._doc?.id === id
+      m => {
+        const mObj = (m as any).toObject?.() || m;
+        return mObj.id === id;
+      }
     );
 
     if (measurementIndex === undefined || measurementIndex === -1) {
@@ -255,7 +259,10 @@ export const deleteMeasurement = async (req: Request, res: Response): Promise<vo
     }
 
     const measurementIndex = user.savedMeasurements?.findIndex(
-      m => (m as any)._doc?.id === id
+      m => {
+        const mObj = (m as any).toObject?.() || m;
+        return mObj.id === id;
+      }
     );
 
     if (measurementIndex === undefined || measurementIndex === -1) {
@@ -300,7 +307,10 @@ export const getMeasurementById = async (req: Request, res: Response): Promise<v
     }
 
     const measurement = user.savedMeasurements?.find(
-      m => (m as any)._doc?.id === id
+      m => {
+        const mObj = (m as any).toObject?.() || m;
+        return mObj.id === id;
+      }
     );
 
     if (!measurement) {
