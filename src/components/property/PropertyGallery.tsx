@@ -375,11 +375,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
            fill edge-to-edge via object-cover; portrait photos are preserved with object-contain
            and a blurred LQIP backdrop on the side bars. ── */}
       <div
-        className="relative w-full bg-neutral-900 overflow-hidden aspect-[16/9]"
-        style={{
-          maxHeight: '75vh',
-          minHeight: '360px',
-        }}
+        className="relative w-full bg-neutral-900 overflow-hidden aspect-[16/9] min-h-[420px] sm:min-h-[360px]"
+        style={{ maxHeight: '75vh' }}
       >
 
         {/* ── PHOTOS ── */}
@@ -428,13 +425,15 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     }}
                   >
                     {(() => {
-                      const isNarrow = imageAspect < CONTAINER_ASPECT;
+                      // Animate only images that fill the container (wide / landscape).
+                      // Narrow images with side bars stay completely still.
+                      const isWide = imageAspect >= CONTAINER_ASPECT;
 
                       let kbInitial, kbAnimate;
-                      if (isNarrow) {
+                      if (isWide) {
                         const sign = currentImageIndex % 2 === 0 ? 1 : -1;
-                        kbInitial = { scale: 1.06, x: `${5 * sign}%` };
-                        kbAnimate = { scale: 1.06, x: `${-5 * sign}%` };
+                        kbInitial = { scale: 1,    x: `${1.5 * sign}%`, y: '0%' };
+                        kbAnimate = { scale: 1.05, x: `${-1.5 * sign}%`, y: '0%' };
                       } else {
                         kbInitial = { scale: 1, x: '0%', y: '0%' };
                         kbAnimate = { scale: 1, x: '0%', y: '0%' };
