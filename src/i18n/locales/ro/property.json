@@ -619,6 +619,12 @@
     "next": "Imaginea următoare ({{current}} din {{total}})",
     "loadError": "Imaginea nu a putut fi încărcată",
     "imageAlt": "Imagine proprietate {{current}} din {{total}}",
-    "resetZoom": "Reset zoom"
+    "resetZoom": "Reset zoom",
+    "annotate": {
+      "label": "Adnotare",
+      "done": "Gata",
+      "save": "Salvare",
+      "hint": "Desenați pe imagine pentru adnotare"
+    }
   }
 }

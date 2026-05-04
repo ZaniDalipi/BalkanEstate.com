@@ -619,6 +619,12 @@
     "next": "Следващо изображение ({{current}} от {{total}})",
     "loadError": "Изображението не можа да бъде заредено",
     "imageAlt": "Изображение на имот {{current}} от {{total}}",
-    "resetZoom": "Reset zoom"
+    "resetZoom": "Reset zoom",
+    "annotate": {
+      "label": "Анотиране",
+      "done": "Готово",
+      "save": "Запази",
+      "hint": "Рисувайте върху изображението за анотация"
+    }
   }
 }

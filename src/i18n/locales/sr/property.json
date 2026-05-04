@@ -619,6 +619,12 @@
     "next": "Следећа слика ({{current}} од {{total}})",
     "loadError": "Слика није могла бити учитана",
     "imageAlt": "Слика некретнине {{current}} од {{total}}",
-    "resetZoom": "Reset zoom"
+    "resetZoom": "Reset zoom",
+    "annotate": {
+      "label": "Белешка",
+      "done": "Готово",
+      "save": "Сачувај",
+      "hint": "Цртајте по слици за белешке"
+    }
   }
 }

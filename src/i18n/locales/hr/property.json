@@ -619,6 +619,12 @@
     "next": "Sljedeća slika ({{current}} od {{total}})",
     "loadError": "Slika se nije mogla učitati",
     "imageAlt": "Slika nekretnine {{current}} od {{total}}",
-    "resetZoom": "Reset zoom"
+    "resetZoom": "Reset zoom",
+    "annotate": {
+      "label": "Bilješka",
+      "done": "Gotovo",
+      "save": "Spremi",
+      "hint": "Crtajte po slici za bilješke"
+    }
   }
 }
