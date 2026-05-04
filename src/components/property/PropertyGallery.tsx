@@ -434,8 +434,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                         // Camera pan L↔R. Scale 1.08 gives 4% overflow each side,
                         // exactly matching the 4% travel so edges never show.
                         const sign = currentImageIndex % 2 === 0 ? 1 : -1;
-                        kbInitial = { scale: 1.08, x: `${4 * sign}%`,  y: '0%' };
-                        kbAnimate = { scale: 1.08, x: `${-4 * sign}%`, y: '0%' };
+                        kbInitial = { scale: 1.14, x: `${7 * sign}%`,  y: '0%' };
+                        kbAnimate = { scale: 1.14, x: `${-7 * sign}%`, y: '0%' };
                       } else {
                         kbInitial = { scale: 1, x: '0%', y: '0%' };
                         kbAnimate = { scale: 1, x: '0%', y: '0%' };
@@ -693,7 +693,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             {/* Right-side gradient overlay with property info — desktop only */}
             <div
               className="hidden sm:flex absolute inset-0 z-[2] pointer-events-none items-center justify-end"
-              style={{ background: 'linear-gradient(to left, rgba(5,15,50,0.72) 0%, rgba(5,15,50,0.58) 22%, rgba(5,15,50,0.30) 48%, rgba(5,15,50,0.04) 68%, transparent 82%)' }}
+              style={{ background: 'linear-gradient(to left, rgba(5,15,50,0.92) 0%, rgba(5,15,50,0.78) 22%, rgba(5,15,50,0.45) 48%, rgba(5,15,50,0.08) 68%, transparent 84%)' }}
             >
               <div className="w-[46%] sm:w-[42%] pr-6 sm:pr-10 pl-4 py-6">
                 {(property.title || property.address) && (
