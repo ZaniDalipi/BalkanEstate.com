@@ -375,7 +375,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
            fill edge-to-edge via object-cover; portrait photos are preserved with object-contain
            and a blurred LQIP backdrop on the side bars. ── */}
       <div
-        className="relative w-full bg-neutral-900 overflow-hidden aspect-[16/9] min-h-[420px] sm:min-h-[360px]"
+        className="relative w-full bg-neutral-900 overflow-hidden aspect-[16/9] min-h-[520px] sm:min-h-[360px]"
         style={{ maxHeight: '75vh' }}
       >
 
@@ -431,9 +431,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
                       let kbInitial, kbAnimate;
                       if (isWide) {
+                        // Pure camera pan left↔right — alternates direction each image.
+                        // Scale stays at 1.03 just enough to hide the 3% travel at each edge.
                         const sign = currentImageIndex % 2 === 0 ? 1 : -1;
-                        kbInitial = { scale: 1,    x: `${1.5 * sign}%`, y: '0%' };
-                        kbAnimate = { scale: 1.05, x: `${-1.5 * sign}%`, y: '0%' };
+                        kbInitial = { scale: 1.03, x: `${3 * sign}%`,  y: '0%' };
+                        kbAnimate = { scale: 1.03, x: `${-3 * sign}%`, y: '0%' };
                       } else {
                         kbInitial = { scale: 1, x: '0%', y: '0%' };
                         kbAnimate = { scale: 1, x: '0%', y: '0%' };
