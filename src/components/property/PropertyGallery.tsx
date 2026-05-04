@@ -48,21 +48,10 @@ interface PropertyGalleryProps {
  * />
  * ```
  */
-// Zillow-style crossfade between images: pure opacity, with a tiny direction-aware
-// x-drift so swiping forward/back still feels intentional but doesn't dominate.
 const imageSlideVariants = {
-  enter: (dir: number) => ({
-    opacity: 0,
-    x: dir > 0 ? '2%' : '-2%',
-  }),
-  center: {
-    opacity: 1,
-    x: '0%',
-  },
-  exit: (dir: number) => ({
-    opacity: 0,
-    x: dir > 0 ? '-1%' : '1%',
-  }),
+  enter: (dir: number) => ({ x: dir > 0 ? '100%' : '-100%' }),
+  center: { x: '0%' },
+  exit: (dir: number) => ({ x: dir > 0 ? '-100%' : '100%' }),
 };
 
 const KEN_BURNS_DURATION = 6;
@@ -424,8 +413,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     animate="center"
                     exit="exit"
                     transition={{
-                      opacity: { duration: 0.6, ease: 'easeInOut' },
-                      x: { duration: 0.6, ease: 'easeOut' },
+                      x: { duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] },
                     }}
                   >
                     {(() => {
