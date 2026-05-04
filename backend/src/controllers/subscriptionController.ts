@@ -826,6 +826,50 @@ export const syncProSubscription = async (req: Request, res: Response): Promise<
 };
 
 /**
+ * @desc    Extends the current user's active/expiring subscription by 30 days.
+ * @route   POST /api/subscriptions/extend-month
+ * @access  Private
+ */
+export const extendSubscriptionByMonth = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user?._id;
+    if (!userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
+
+    const subscription = await Subscription.findOne({
+      userId,
+      status: { $in: ['active', 'grace', 'trial', 'pending_cancellation', 'expired'] },
+    }).sort({ expirationDate: -1 });
+
+    if (!subscription) {
+      res.status(404).json({ message: 'No subscription found to extend' });
+      return;
+    }
+
+    const base = subscription.expirationDate > new Date() ? subscription.expirationDate : new Date();
+    const newExpiration = new Date(base.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    subscription.expirationDate = newExpiration;
+    subscription.status = 'active';
+    subscription.expiryWarningSent = false;
+    subscription.lastUpdated = new Date();
+    await subscription.save();
+
+    subscriptionLogger.info(`Subscription ${subscription._id} extended by 1 month for user ${userId}`);
+
+    res.status(200).json({
+      message: 'Subscription extended by 1 month',
+      expirationDate: newExpiration.toISOString(),
+    });
+  } catch (error: any) {
+    subscriptionLogger.error('Error extending subscription:', error);
+    res.status(500).json({ message: 'Error extending subscription' });
+  }
+};
+
+/**
  * @desc    Returns subscription expiry status for the current user.
  *          Used by the frontend to decide whether to show expiry warning/expired modals.
  * @route   GET /api/subscriptions/expiry-check

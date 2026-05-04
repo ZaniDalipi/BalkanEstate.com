@@ -42,9 +42,42 @@ const SubscriptionExpiryModals: React.FC<Props> = ({
   const [productInfo, setProductInfo] = useState<ProductInfo | null>(null);
   const [loadingProduct, setLoadingProduct] = useState(false);
 
+  const [extendingMonth, setExtendingMonth] = useState(false);
+  const [extendSuccess, setExtendSuccess] = useState(false);
+  const [extendError, setExtendError] = useState<string | null>(null);
+
   const user = state.currentUser;
   const userRole: 'buyer' | 'private_seller' | 'agent' =
     user?.role === 'agent' ? 'agent' : user?.role === 'buyer' ? 'buyer' : 'private_seller';
+
+  // ── Extend subscription by 1 month ───────────────────────────────────────
+
+  const handleExtendMonth = useCallback(async () => {
+    setExtendingMonth(true);
+    setExtendError(null);
+    try {
+      const token = tokenService.getAccessToken();
+      const res = await fetch(`${API_URL}/subscriptions/extend-month`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || 'Failed to extend subscription');
+      }
+      setExtendSuccess(true);
+      window.dispatchEvent(new Event('subscriptionUpdated'));
+      setTimeout(() => {
+        markWarningDismissed(expiryInfo.expirationDate);
+        onDismissWarning();
+      }, 1800);
+    } catch (err: any) {
+      setExtendError(err.message ?? 'Something went wrong');
+    } finally {
+      setExtendingMonth(false);
+    }
+  }, [expiryInfo.expirationDate, onDismissWarning]);
 
   // ── Fetch product details then open PaymentWindow ─────────────────────────
 
@@ -160,21 +193,39 @@ const SubscriptionExpiryModals: React.FC<Props> = ({
                   <li>Priority notifications</li>
                 </ul>
               </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={handleDismissWarning}
-                  className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                >
-                  Remind me later
-                </button>
-                <button
-                  onClick={fetchProductAndOpenPayment}
-                  disabled={loadingProduct}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold hover:from-amber-600 hover:to-orange-600 transition-all shadow-md disabled:opacity-70"
-                >
-                  {loadingProduct ? 'Loading…' : 'Renew Now →'}
-                </button>
-              </div>
+              {extendError && (
+                <p className="text-red-500 dark:text-red-400 text-xs text-center mb-3">{extendError}</p>
+              )}
+              {extendSuccess ? (
+                <div className="py-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-300 text-sm font-medium text-center">
+                  ✓ Subscription extended by 1 month!
+                </div>
+              ) : (
+                <>
+                  <div className="flex gap-3 mb-2">
+                    <button
+                      onClick={handleDismissWarning}
+                      className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    >
+                      Remind me later
+                    </button>
+                    <button
+                      onClick={fetchProductAndOpenPayment}
+                      disabled={loadingProduct || extendingMonth}
+                      className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold hover:from-amber-600 hover:to-orange-600 transition-all shadow-md disabled:opacity-70"
+                    >
+                      {loadingProduct ? 'Loading…' : 'Renew Now →'}
+                    </button>
+                  </div>
+                  <button
+                    onClick={handleExtendMonth}
+                    disabled={extendingMonth || loadingProduct}
+                    className="w-full py-2.5 rounded-xl border border-amber-400 dark:border-amber-600 text-amber-600 dark:text-amber-400 text-sm font-medium hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors disabled:opacity-70"
+                  >
+                    {extendingMonth ? 'Extending…' : '+ Extend 1 Month'}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
