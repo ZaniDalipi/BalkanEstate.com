@@ -234,7 +234,7 @@
     "loading": "Loading virtual tour...",
     "exit": "Dil nga Turi",
     "floor": "Kati {{floor}}",
-    "hint": "Tërhiq për të parë përreth \u2022 Rrotulloj për zmadhim",
+    "hint": "Tërhiq për të parë përreth • Rrotulloj për zmadhim",
     "entering": "Duke hyrë në ndërtesë...",
     "tourButton": "Tur 360°"
   },
@@ -618,6 +618,7 @@
     "previous": "Imazhi i mëparshëm ({{current}} nga {{total}})",
     "next": "Imazhi tjetër ({{current}} nga {{total}})",
     "loadError": "Imazhi nuk mund të ngarkohej",
-    "imageAlt": "Imazhi i pronës {{current}} nga {{total}}"
+    "imageAlt": "Imazhi i pronës {{current}} nga {{total}}",
+    "resetZoom": "Reset zoom"
   }
 }

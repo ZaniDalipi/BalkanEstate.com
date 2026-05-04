@@ -627,6 +627,7 @@
     "previous": "Previous image ({{current}} of {{total}})",
     "next": "Next image ({{current}} of {{total}})",
     "loadError": "Image could not be loaded",
-    "imageAlt": "Property image {{current}} of {{total}}"
+    "imageAlt": "Property image {{current}} of {{total}}",
+    "resetZoom": "Reset zoom"
   }
 }
