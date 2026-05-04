@@ -441,7 +441,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
                       return (
                         <motion.div
-                          className="absolute inset-0 flex items-center justify-center"
+                          className={`absolute inset-0${isWide ? '' : ' flex items-center justify-center'}`}
                           initial={kbInitial}
                           animate={kbAnimate}
                           transition={{ duration: KEN_BURNS_DURATION, ease: 'linear' }}
@@ -459,7 +459,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                             fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
                             decoding={currentImageIndex === 0 ? 'sync' : 'async'}
                             loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
-                            className="h-full w-auto pointer-events-none select-none"
+                            className={`pointer-events-none select-none${isWide ? ' w-full h-full object-cover' : ' h-full w-auto'}`}
                             draggable={false}
                             onLoad={handleMainImageLoad}
                             onError={() => setMainImageError(true)}
