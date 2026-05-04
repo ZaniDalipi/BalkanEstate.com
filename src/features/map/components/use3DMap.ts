@@ -558,16 +558,19 @@ export function use3DMap(props: Map3DBuildingsProps) {
     let actualBuildingHeight = totalHeightM;
     if (buildingFeature && buildingFeature.properties) {
       const props = buildingFeature.properties;
-      if (props.render_height) {
-        actualBuildingHeight = props.render_height;
-      } else if (props['building:levels']) {
-        actualBuildingHeight = props['building:levels'] * 3.5;
+      const renderHeight = Number(props.render_height);
+      const levels = Number(props['building:levels']);
+      if (Number.isFinite(renderHeight) && renderHeight > 0) {
+        actualBuildingHeight = renderHeight;
+      } else if (Number.isFinite(levels) && levels > 0) {
+        actualBuildingHeight = levels * 3.5;
       }
     }
     // Use the larger of our calculated height or the map's height
     const finalBuildingHeight = Math.max(totalHeightM, actualBuildingHeight);
-    // Recalculate floor height based on actual building
-    const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
+    // Recalculate floor height based on actual building (guard against zero floors)
+    const safeFloors = totalFlrs > 0 ? totalFlrs : 1;
+    const adjustedFloorHeight = finalBuildingHeight / safeFloors;
 
     // Scale up the building coordinates to fully cover the original and prevent z-fighting
     const scaleFactor = 1.05; // 5% larger to fully cover original building
@@ -592,32 +595,12 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // First, try to hide the original building by setting a filter that excludes buildings at this location
-    // We'll do this by creating a small exclusion zone around the property
+    // Let the custom building cover the original via z-ordering. We previously
+    // attempted a `setFilter('3d-buildings', ['<', ['get', 'render_height'], 5])`
+    // here, but `render_height` is absent on many features and MapLibre then
+    // logs "Expected value to be of type number, but found null instead." We
+    // clear any prior filter to be safe.
     if (mapInstance.getLayer('3d-buildings')) {
-      // Get the current filter and add exclusion for this building's area
-      const latTolerance = 0.0003; // ~30m tolerance
-      const lngTolerance = 0.0003;
-
-      // Apply filter to exclude the original building (by checking if building is within our area)
-      // This uses a bounding box check
-      mapInstance.setFilter('3d-buildings', [
-        'any',
-        ['<', ['get', 'render_height'], 5], // Keep short buildings
-        ['all',
-          ['any',
-            ['<', ['geometry-type'], 'Polygon'], // Keep non-polygons
-            ['any',
-              // Keep buildings outside our exclusion zone
-              // We can't easily filter by geometry center, so use a workaround
-              // by relying on the custom building to cover the original
-            ]
-          ]
-        ]
-      ]);
-
-      // Alternative: Just let the custom building cover the original
-      // Remove the filter and rely on proper z-ordering
       mapInstance.setFilter('3d-buildings', null);
     }
 
