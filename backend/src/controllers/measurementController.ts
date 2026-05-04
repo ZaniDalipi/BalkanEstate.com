@@ -192,6 +192,12 @@ export const updateMeasurement = async (req: Request, res: Response): Promise<vo
       return;
     }
 
+    // DEBUG
+    if (user.savedMeasurements && user.savedMeasurements.length > 0) {
+      const first = user.savedMeasurements[0] as any;
+      apiLogger.info(`DEBUG update - incoming id: "${id}", _doc.id: "${first._doc?.id}", .id: "${first.id}", ._id: "${first._id}", toObject: ${JSON.stringify(first.toObject())}`);
+    }
+
     const measurementIndex = user.savedMeasurements?.findIndex(
       m => (m as any)._doc?.id === id
     );
