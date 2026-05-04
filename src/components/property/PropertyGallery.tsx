@@ -65,9 +65,35 @@ const imageSlideVariants = {
   }),
 };
 
-// Ken Burns constants — pan/scale animation for the gallery frame.
-const KEN_BURNS_DURATION = 8; // seconds; shorter = more visible at 5 s auto-rotate
-const CONTAINER_ASPECT = 16 / 9; // 1.778
+const KEN_BURNS_DURATION = 6;
+const CONTAINER_ASPECT = 16 / 9;
+
+// Direction-aware pan presets — no scale ever, so the full image stays visible.
+// Bars (letterbox areas) absorb the translation so nothing gets cropped.
+
+// Wide images (aspect > container): object-contain shows top/bottom bars → pan y-only
+const KB_WIDE = [
+  { initial: { x: '0%', y: '4%'  }, animate: { x: '0%', y: '-4%' } },
+  { initial: { x: '0%', y: '-4%' }, animate: { x: '0%', y: '4%'  } },
+  { initial: { x: '0%', y: '4%'  }, animate: { x: '0%', y: '-4%' } },
+  { initial: { x: '0%', y: '-4%' }, animate: { x: '0%', y: '4%'  } },
+] as const;
+
+// Narrow images (aspect < container): object-contain shows side bars → pan x-only
+const KB_NARROW = [
+  { initial: { x: '5%',  y: '0%' }, animate: { x: '-5%', y: '0%' } },
+  { initial: { x: '-5%', y: '0%' }, animate: { x: '5%',  y: '0%' } },
+  { initial: { x: '5%',  y: '0%' }, animate: { x: '-5%', y: '0%' } },
+  { initial: { x: '-5%', y: '0%' }, animate: { x: '5%',  y: '0%' } },
+] as const;
+
+// Exact-fit images (aspect ≈ container): no bars → very subtle diagonal
+const KB_EXACT = [
+  { initial: { x: '1%',  y: '0.5%'  }, animate: { x: '-1%', y: '-0.5%' } },
+  { initial: { x: '-1%', y: '-0.5%' }, animate: { x: '1%',  y: '0.5%'  } },
+  { initial: { x: '1%',  y: '-0.5%' }, animate: { x: '-1%', y: '0.5%'  } },
+  { initial: { x: '-1%', y: '0.5%'  }, animate: { x: '1%',  y: '-0.5%' } },
+] as const;
 
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   property,
@@ -429,31 +455,18 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     }}
                   >
                     {(() => {
-                      // Image is rendered h-full w-auto: always fills the container
-                      // top-to-bottom. Width follows the image's natural aspect ratio.
-                      //
-                      // relWidth = image width relative to container width (when h=100%):
-                      //   < 1 → portrait/4:3 → side bars → pan within bars (full image visible)
-                      //   > 1 → ultra-wide   → sides overflow → pan within overflow (cinematic)
-                      //   ≈ 1 → exact 16:9   → no travel room → subtle scale only
-                      const relWidth = imageAspect / CONTAINER_ASPECT;
-                      const horizTravel = Math.abs(relWidth - 1) / 2; // available pan space
-                      const panX = Math.min(horizTravel * 0.70, 0.12) * 100;
-                      const exactFit = horizTravel < 0.015;
-                      const sign = currentImageIndex % 2 === 0 ? 1 : -1;
-
-                      const kbInitial = exactFit
-                        ? { scale: 1,    x: '0%' }
-                        : { scale: 1,    x: `${panX * sign}%` };
-                      const kbAnimate = exactFit
-                        ? { scale: 1.03, x: '0%' }
-                        : { scale: 1,    x: `${-panX * sign}%` };
+                      const TOLERANCE = 0.05 * CONTAINER_ASPECT;
+                      const kbTable =
+                        imageAspect > CONTAINER_ASPECT + TOLERANCE ? KB_WIDE :
+                        imageAspect < CONTAINER_ASPECT - TOLERANCE ? KB_NARROW :
+                        KB_EXACT;
+                      const kb = kbTable[currentImageIndex % kbTable.length];
 
                       return (
                         <motion.div
-                          className="absolute inset-0 flex items-center justify-center"
-                          initial={kbInitial}
-                          animate={kbAnimate}
+                          className="absolute inset-0"
+                          initial={kb.initial}
+                          animate={kb.animate}
                           transition={{ duration: KEN_BURNS_DURATION, ease: 'linear' }}
                           style={{ willChange: 'transform' }}
                         >
@@ -469,7 +482,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                             fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
                             decoding={currentImageIndex === 0 ? 'sync' : 'async'}
                             loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
-                            className="h-full w-auto pointer-events-none select-none"
+                            className="w-full h-full object-contain pointer-events-none select-none"
                             draggable={false}
                             onLoad={handleMainImageLoad}
                             onError={() => setMainImageError(true)}
