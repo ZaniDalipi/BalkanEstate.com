@@ -695,7 +695,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               className="hidden sm:flex absolute inset-0 z-[2] pointer-events-none items-center justify-end"
               style={{ background: 'linear-gradient(to left, rgba(5,15,50,0.92) 0%, rgba(5,15,50,0.78) 22%, rgba(5,15,50,0.45) 48%, rgba(5,15,50,0.08) 68%, transparent 84%)' }}
             >
-              <div className="w-[38%] sm:w-[34%] pr-6 sm:pr-10 pl-2 py-6">
+              <div className="w-[38%] sm:w-[34%] pr-6 sm:pr-10 pl-10 sm:pl-8 py-6">
                 {(property.title || property.address) && (
                   <h2 className="text-white font-bold text-xl sm:text-2xl lg:text-3xl leading-tight mb-2 drop-shadow-lg">
                     {property.title || property.address}
