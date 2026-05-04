@@ -68,33 +68,6 @@ const imageSlideVariants = {
 const KEN_BURNS_DURATION = 6;
 const CONTAINER_ASPECT = 16 / 9;
 
-// Direction-aware pan presets — no scale ever, so the full image stays visible.
-// Bars (letterbox areas) absorb the translation so nothing gets cropped.
-
-// Wide images (aspect > container): object-contain shows top/bottom bars → pan y-only
-const KB_WIDE = [
-  { initial: { x: '0%', y: '4%'  }, animate: { x: '0%', y: '-4%' } },
-  { initial: { x: '0%', y: '-4%' }, animate: { x: '0%', y: '4%'  } },
-  { initial: { x: '0%', y: '4%'  }, animate: { x: '0%', y: '-4%' } },
-  { initial: { x: '0%', y: '-4%' }, animate: { x: '0%', y: '4%'  } },
-] as const;
-
-// Narrow images (aspect < container): object-contain shows side bars → pan x-only
-const KB_NARROW = [
-  { initial: { x: '5%',  y: '0%' }, animate: { x: '-5%', y: '0%' } },
-  { initial: { x: '-5%', y: '0%' }, animate: { x: '5%',  y: '0%' } },
-  { initial: { x: '5%',  y: '0%' }, animate: { x: '-5%', y: '0%' } },
-  { initial: { x: '-5%', y: '0%' }, animate: { x: '5%',  y: '0%' } },
-] as const;
-
-// Exact-fit images (aspect ≈ container): no bars → very subtle diagonal
-const KB_EXACT = [
-  { initial: { x: '1%',  y: '0.5%'  }, animate: { x: '-1%', y: '-0.5%' } },
-  { initial: { x: '-1%', y: '-0.5%' }, animate: { x: '1%',  y: '0.5%'  } },
-  { initial: { x: '1%',  y: '-0.5%' }, animate: { x: '-1%', y: '0.5%'  } },
-  { initial: { x: '-1%', y: '0.5%'  }, animate: { x: '1%',  y: '-0.5%' } },
-] as const;
-
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   property,
   onOpenEditor,
@@ -455,18 +428,23 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     }}
                   >
                     {(() => {
-                      const TOLERANCE = 0.05 * CONTAINER_ASPECT;
-                      const kbTable =
-                        imageAspect > CONTAINER_ASPECT + TOLERANCE ? KB_WIDE :
-                        imageAspect < CONTAINER_ASPECT - TOLERANCE ? KB_NARROW :
-                        KB_EXACT;
-                      const kb = kbTable[currentImageIndex % kbTable.length];
+                      const isNarrow = imageAspect < CONTAINER_ASPECT;
+
+                      let kbInitial, kbAnimate;
+                      if (isNarrow) {
+                        const sign = currentImageIndex % 2 === 0 ? 1 : -1;
+                        kbInitial = { scale: 1.06, x: `${5 * sign}%` };
+                        kbAnimate = { scale: 1.06, x: `${-5 * sign}%` };
+                      } else {
+                        kbInitial = { scale: 1, x: '0%', y: '0%' };
+                        kbAnimate = { scale: 1, x: '0%', y: '0%' };
+                      }
 
                       return (
                         <motion.div
-                          className="absolute inset-0"
-                          initial={kb.initial}
-                          animate={kb.animate}
+                          className="absolute inset-0 flex items-center justify-center"
+                          initial={kbInitial}
+                          animate={kbAnimate}
                           transition={{ duration: KEN_BURNS_DURATION, ease: 'linear' }}
                           style={{ willChange: 'transform' }}
                         >
@@ -482,7 +460,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                             fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
                             decoding={currentImageIndex === 0 ? 'sync' : 'async'}
                             loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
-                            className="w-full h-full object-contain pointer-events-none select-none"
+                            className="h-full w-auto pointer-events-none select-none"
                             draggable={false}
                             onLoad={handleMainImageLoad}
                             onError={() => setMainImageError(true)}
