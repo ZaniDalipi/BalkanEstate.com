@@ -611,7 +611,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                         <iframe
                           src={videoInfo.embedUrl}
                           className="border-0 h-full"
-                          style={{ width: '340px', maxWidth: '100%' }}
+                          style={{ width: '480px', maxWidth: '100%' }}
                           allowFullScreen
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
                           title="Property Video Tour"
