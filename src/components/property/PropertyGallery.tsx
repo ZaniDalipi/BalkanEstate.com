@@ -48,21 +48,10 @@ interface PropertyGalleryProps {
  * />
  * ```
  */
-// Zillow-style crossfade between images: pure opacity, with a tiny direction-aware
-// x-drift so swiping forward/back still feels intentional but doesn't dominate.
 const imageSlideVariants = {
-  enter: (dir: number) => ({
-    opacity: 0,
-    x: dir > 0 ? '2%' : '-2%',
-  }),
-  center: {
-    opacity: 1,
-    x: '0%',
-  },
-  exit: (dir: number) => ({
-    opacity: 0,
-    x: dir > 0 ? '-1%' : '1%',
-  }),
+  enter: (dir: number) => ({ x: dir > 0 ? '100%' : '-100%' }),
+  center: { x: '0%' },
+  exit: (dir: number) => ({ x: dir > 0 ? '-100%' : '100%' }),
 };
 
 const KEN_BURNS_DURATION = 6;
@@ -375,8 +364,12 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
            fill edge-to-edge via object-cover; portrait photos are preserved with object-contain
            and a blurred LQIP backdrop on the side bars. ── */}
       <div
-        className="relative w-full bg-neutral-900 overflow-hidden aspect-[16/9] min-h-[520px] sm:min-h-[360px]"
-        style={{ maxHeight: '75vh' }}
+        className={`relative w-full bg-neutral-900 overflow-hidden ${
+          viewMode === 'video' && (videoPlatform === 'tiktok' || videoPlatform === 'instagram')
+            ? 'aspect-[9/16] sm:aspect-[16/9]'
+            : 'aspect-[16/9]'
+        }`}
+        style={{ maxHeight: '90vh' }}
       >
 
         {/* ── PHOTOS ── */}
@@ -420,8 +413,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     animate="center"
                     exit="exit"
                     transition={{
-                      opacity: { duration: 0.6, ease: 'easeInOut' },
-                      x: { duration: 0.6, ease: 'easeOut' },
+                      x: { duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] },
                     }}
                   >
                     {(() => {
@@ -443,25 +435,26 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
                       return (
                         <motion.div
-                          className={`absolute inset-0${isWide ? '' : ' flex items-center justify-center'}`}
+                          className="absolute inset-0 flex items-center justify-center"
                           initial={kbInitial}
                           animate={kbAnimate}
                           transition={{ duration: KEN_BURNS_DURATION, ease: 'linear' }}
                           style={{ willChange: 'transform' }}
                         >
                           <img
-                            src={optimizeCloudinaryUrl(currentImageUrl, { width: 900, quality: 'auto' })}
-                            srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 900, 1400])}
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 900px"
+                            src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
+                            srcSet={cloudinarySrcSet(currentImageUrl, [640, 960, 1200, 1920])}
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
                             alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
-                            width={900}
-                            height={600}
+                            width={1200}
+                            height={800}
+                            crossOrigin="anonymous"
                             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                             // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
                             fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
                             decoding={currentImageIndex === 0 ? 'sync' : 'async'}
                             loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
-                            className={`pointer-events-none select-none${isWide ? ' w-full h-full object-cover' : ' h-full w-auto'}`}
+                            className={`pointer-events-none select-none w-full h-full ${isWide ? 'object-cover' : 'object-contain'}`}
                             draggable={false}
                             onLoad={handleMainImageLoad}
                             onError={() => setMainImageError(true)}
