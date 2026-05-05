@@ -367,7 +367,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
         className={`relative w-full bg-neutral-900 overflow-hidden ${
           viewMode === 'video' && (videoPlatform === 'tiktok' || videoPlatform === 'instagram')
             ? 'aspect-[9/16] sm:aspect-[16/9] sm:min-h-[360px]'
-            : 'aspect-[16/9] min-h-[520px] sm:min-h-[360px]'
+            : 'sm:aspect-[16/9] min-h-[520px] sm:min-h-[360px]'
         }`}
         style={{ maxHeight: '75vh' }}
       >
