@@ -49,14 +49,18 @@ const buildSafeUserResponse = (user: IUser) => ({
     trialEndDate: user.trialEndDate,
     trialExpiring: user.isTrialExpiring(),
   } : {}),
-  // Only return minimal subscription info, not the full internal object
+  // Subscription info — include all fields needed by frontend limit checks
+  subscriptionPlan: user.subscriptionPlan,
   subscription: user.subscription ? {
     tier: user.subscription.tier,
     status: user.subscription.status,
     listingsLimit: user.subscription.listingsLimit,
     activeListingsCount: user.subscription.activeListingsCount,
+    listingsCreatedThisMonth: user.subscription.listingsCreatedThisMonth || 0,
+    monthResetDate: user.subscription.monthResetDate,
     promotionCoupons: user.subscription.promotionCoupons,
     savedSearchesLimit: user.subscription.savedSearchesLimit,
+    expiresAt: user.subscription.expiresAt,
   } : undefined,
 });
 
@@ -491,6 +495,21 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     // Password is correct - reset login attempts
     await user.resetLoginAttempts();
+
+    // CRITICAL: Initialize monthResetDate if not set (prevents false resets on hard refresh)
+    // Use atomic operation to prevent race conditions
+    if (user.subscription && !user.subscription.monthResetDate) {
+      await User.updateOne(
+        { _id: user._id, 'subscription.monthResetDate': { $exists: false } },
+        {
+          $set: {
+            'subscription.monthResetDate': new Date(),
+          },
+        }
+      );
+      // Update local object for response
+      user.subscription.monthResetDate = new Date();
+    }
 
     // Log successful login
     activityLogger.logLogin(String(user._id), user.email, req);
@@ -934,8 +953,23 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       }
 
       // Sync listingsLimit for all paid tiers based on their actual DB Product value
-      if (listingsLimit > 0 && user.subscription.listingsLimit !== listingsLimit && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer') {
-        user.subscription.listingsLimit = listingsLimit;
+      // BUT: respect admin overrides — when an admin manually sets a custom limit
+      // via /admin/subscriptions/listing-limit/:userId, they update both
+      // user.subscription.listingsLimit and user.activeListingsLimit to the same value.
+      // If activeListingsLimit differs from the product default, that's the admin
+      // override and must be preserved (otherwise getMe stomps it on every call).
+      if (listingsLimit > 0 && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer') {
+        const hasAdminOverride =
+          typeof user.activeListingsLimit === 'number' &&
+          user.activeListingsLimit !== listingsLimit;
+
+        if (hasAdminOverride) {
+          // Preserve admin's custom limit on subscription.listingsLimit
+          user.subscription.listingsLimit = user.activeListingsLimit as number;
+        } else if (user.subscription.listingsLimit !== listingsLimit) {
+          // No override — sync to product default
+          user.subscription.listingsLimit = listingsLimit;
+        }
       }
 
     }
@@ -977,6 +1011,8 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
           productId: subscriptionProductId,
           listingsLimit: user.subscription.listingsLimit,
           activeListingsCount: user.subscription.activeListingsCount,
+          listingsCreatedThisMonth: user.subscription.listingsCreatedThisMonth || 0,
+          monthResetDate: user.subscription.monthResetDate,
           privateSellerCount: user.subscription.privateSellerCount,
           agentCount: user.subscription.agentCount,
           promotionCoupons: user.subscription.promotionCoupons,

@@ -50,6 +50,7 @@ const SubscriptionExpiryModals: React.FC<Props> = ({
   const userRole: 'buyer' | 'private_seller' | 'agent' =
     user?.role === 'agent' ? 'agent' : user?.role === 'buyer' ? 'buyer' : 'private_seller';
 
+<<<<<<< HEAD
   // ── Extend subscription by 1 month ───────────────────────────────────────
 
   const handleExtendMonth = useCallback(async () => {
@@ -78,14 +79,50 @@ const SubscriptionExpiryModals: React.FC<Props> = ({
       setExtendingMonth(false);
     }
   }, [expiryInfo.expirationDate, onDismissWarning]);
+=======
+  // ── Reactivate subscription directly (no payment) ───────────────────────
+
+  const handleReactivate = useCallback(async () => {
+    if (!expiryInfo.productId) return;
+    onDismissExpired();
+    setLoadingProduct(true);
+    try {
+      const token = tokenService.getAccessToken();
+      if (!token) {
+        window.location.href = '/account';
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/payments/reactivate-subscription`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ productId: expiryInfo.productId }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || 'Failed to reactivate subscription');
+      }
+
+      const data = await response.json();
+      handlePaymentSuccess();
+    } catch (error) {
+      // Fallback to payment window if reactivation fails
+      fetchProductAndOpenPayment();
+    } finally {
+      setLoadingProduct(false);
+    }
+  }, [expiryInfo.productId, onDismissExpired]);
+>>>>>>> main
 
   // ── Fetch product details then open PaymentWindow ─────────────────────────
 
   const fetchProductAndOpenPayment = useCallback(async () => {
     if (!expiryInfo.productId) return;
-    // Count as dismissed so the modal won't reappear on the next login while
-    // the user is deciding whether to complete payment.
-    onDismissExpired();
     setLoadingProduct(true);
     try {
       const token = tokenService.getAccessToken();
@@ -126,7 +163,7 @@ const SubscriptionExpiryModals: React.FC<Props> = ({
     } finally {
       setLoadingProduct(false);
     }
-  }, [expiryInfo.productId, onDismissExpired]);
+  }, [expiryInfo.productId]);
 
   const handlePaymentSuccess = useCallback(() => {
     setShowPaymentWindow(false);
@@ -193,6 +230,7 @@ const SubscriptionExpiryModals: React.FC<Props> = ({
                   <li>Priority notifications</li>
                 </ul>
               </div>
+<<<<<<< HEAD
               {extendError && (
                 <p className="text-red-500 dark:text-red-400 text-xs text-center mb-3">{extendError}</p>
               )}
@@ -226,6 +264,23 @@ const SubscriptionExpiryModals: React.FC<Props> = ({
                   </button>
                 </>
               )}
+=======
+              <div className="flex gap-3">
+                <button
+                  onClick={handleDismissWarning}
+                  className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                >
+                  Remind me later
+                </button>
+                <button
+                  onClick={handleReactivate}
+                  disabled={loadingProduct}
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold hover:from-amber-600 hover:to-orange-600 transition-all shadow-md disabled:opacity-70"
+                >
+                  {loadingProduct ? 'Loading…' : 'Renew Now →'}
+                </button>
+              </div>
+>>>>>>> main
             </div>
           </div>
         </div>
@@ -265,7 +320,7 @@ const SubscriptionExpiryModals: React.FC<Props> = ({
                   {isFinalPhase ? 'No, thanks' : 'Maybe later'}
                 </button>
                 <button
-                  onClick={fetchProductAndOpenPayment}
+                  onClick={handleReactivate}
                   disabled={loadingProduct}
                   className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 text-white text-sm font-semibold hover:from-red-600 hover:to-rose-700 transition-all shadow-md disabled:opacity-70"
                 >

@@ -234,7 +234,7 @@
     "loading": "Loading virtual tour...",
     "exit": "Izađi iz ture",
     "floor": "Kat {{floor}}",
-    "hint": "Povucite za gledanje \u2022 Skrolajte za zum",
+    "hint": "Povucite za gledanje • Skrolajte za zum",
     "entering": "Ulazim u zgradu...",
     "tourButton": "360° Tura"
   },
@@ -618,6 +618,14 @@
     "previous": "Prethodna slika ({{current}} od {{total}})",
     "next": "Sljedeća slika ({{current}} od {{total}})",
     "loadError": "Slika se nije mogla učitati",
-    "imageAlt": "Slika nekretnine {{current}} od {{total}}"
+    "imageAlt": "Slika nekretnine {{current}} od {{total}}",
+    "resetZoom": "Reset zoom",
+    "annotate": {
+      "label": "Bilješka",
+      "done": "Gotovo",
+      "save": "Spremi",
+      "hint": "Crtajte po slici za bilješke",
+      "sendToChat": "Pošalji"
+    }
   }
 }

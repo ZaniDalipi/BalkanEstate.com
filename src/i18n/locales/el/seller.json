@@ -7,6 +7,10 @@
     "sharedLimit": "Κοινό όριο: {{used}}/{{limit}} συνολικές αγγελίες",
     "asRole": "({{count}} ως {{role}})",
     "listings": "Αγγελίες",
+    "monthlyListings": "Αυτόν τον μήνα",
+    "monthlyRemaining": "{{count}} εναπομένουσες αγγελίες αυτόν τον μήνα",
+    "monthlyAvailable": "{{count}} διαθέσιμες αγγελίες αυτόν τον μήνα",
+    "monthlyLimitReached": "Το μηνιαίο όριο επιτεύχθηκε. Επαναφορά τον επόμενο μήνα.",
     "limitReachedShared": "Το κοινό όριο επιτεύχθηκε και για τους δύο ρόλους.",
     "limitReachedUpgrade": "Το όριο αγγελιών επιτεύχθηκε. Αναβαθμίστε σε Pro για 30 αγγελίες!",
     "remainingListings": "{{count}} εναπομένουσες αγγελίες",
@@ -661,12 +665,16 @@
     "proSubscriptionRequired": "Απαιτείται Συνδρομή Pro",
     "agentProRequiredMessage": "Οι πράκτορες πρέπει να έχουν ενεργή συνδρομή Pro για να δημοσιεύσουν καταχωρήσεις. Εγγραφείτε τώρα για 30 ενεργές καταχωρήσεις!",
     "switchRoleRequired": "Απαιτείται Αλλαγή Ρόλου",
-    "buyerCannotCreateListing": "Οι αγοραστές δεν μπορούν να δημιουργήσουν καταχωρήσεις ακινήτων. Παρακαλώ αλλάξτε σε ρόλο Ιδιώτη Πωλητή ή Πράκτορα."
+    "buyerCannotCreateListing": "Οι αγοραστές δεν μπορούν να δημιουργήσουν καταχωρήσεις ακινήτων. Παρακαλώ αλλάξτε σε ρόλο Ιδιώτη Πωλητή ή Πράκτορα.",
+    "monthlyLimitReached": "Το Μηνιαίο Όριο Καταχωρήσεων Έχει Επιτευχθεί",
+    "monthlyLimitMessage": "Χρησιμοποιήσατε όλες τις καταχωρήσεις σας αυτό το μήνα. Επαναφορά στην αρχή του επόμενου μήνα.",
+    "monthlyLimitMessageWithCount": "Χρησιμοποιήσατε {{used}} από {{limit}} καταχωρήσεις αυτό το μήνα. Επαναφορά στην αρχή του επόμενου μήνα."
   },
   "actions": {
     "subscribeToPro": "Εγγραφή στο Pro",
     "viewMyListings": "Δείτε τις Καταχωρήσεις μου",
-    "switchRole": "Αλλαγή Ρόλου"
+    "switchRole": "Αλλαγή Ρόλου",
+    "requestMoreListings": "Ζητήστε Περισσότερες Καταχωρήσεις"
   },
   "listings": {
     "confirmSold": "Are you sure you want to mark this property as sold? This action cannot be undone.",

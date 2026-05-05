@@ -85,6 +85,7 @@
     "dayLeft": "zi rămasă",
     "daysLeft": "zile rămase",
     "listingLimit": "Limită de Anunțuri",
+    "listingUsage": "{{used}} din {{limit}} această lună",
     "remaining": "rămase",
     "couponSubscription": "Abonament cu Cupon",
     "cancellationPending": "Anulare Abonament în Așteptare",

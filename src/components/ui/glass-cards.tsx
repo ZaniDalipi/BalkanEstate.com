@@ -77,23 +77,20 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
 
         gsap.set(card, {
             scale: 1,
-            transformOrigin: "center top"
+            transformOrigin: "center top",
+            willChange: 'transform',
         });
 
         const trigger = ScrollTrigger.create({
             trigger: container,
             start: "top center",
             end: "bottom center",
-            scrub: 0.6,
+            scrub: 0.4,
             onUpdate: (self) => {
-                const progress = self.progress;
-                const scale = gsap.utils.interpolate(1, targetScale, progress);
-                gsap.to(card, {
+                const scale = gsap.utils.interpolate(1, targetScale, self.progress);
+                gsap.set(card, {
                     scale: Math.max(scale, targetScale),
                     transformOrigin: "center top",
-                    duration: 0.3,
-                    ease: "power2.out",
-                    overwrite: true
                 });
             }
         });
@@ -173,12 +170,10 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                     borderRadius: isMobile ? '20px' : '28px',
                     background: `linear-gradient(
                         145deg,
-                        rgba(255, 255, 255, 0.85),
-                        rgba(255, 255, 255, 0.65) 40%,
-                        rgba(248, 250, 252, 0.75) 100%
+                        rgba(255, 255, 255, 0.97),
+                        rgba(255, 255, 255, 0.93) 40%,
+                        rgba(248, 250, 252, 0.95) 100%
                     )`,
-                    backdropFilter: 'blur(40px) saturate(200%)',
-                    WebkitBackdropFilter: 'blur(40px) saturate(200%)',
                     border: '1px solid rgba(255, 255, 255, 0.6)',
                     boxShadow: `
                         inset 0 1px 0 rgba(255, 255, 255, 0.9),
@@ -272,7 +267,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                                         ? 'rgba(14, 165, 233, 0.9)'
                                         : 'rgba(2, 82, 205, 0.9)',
                                     color: '#fff',
-                                    backdropFilter: 'blur(8px)'
+                                    backdropFilter: 'none'
                                 }}>
                                     {property.listingType === 'rent' ? t('featured.forRent') : t('featured.forSale')}
                                 </span>
@@ -287,7 +282,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                                     letterSpacing: '0.05em',
                                     background: 'rgba(245, 158, 11, 0.9)',
                                     color: '#fff',
-                                    backdropFilter: 'blur(8px)'
+                                    backdropFilter: 'none'
                                 }}>
                                     Promoted
                                 </span>
@@ -302,7 +297,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                                     letterSpacing: '0.05em',
                                     background: 'rgba(16, 185, 129, 0.9)',
                                     color: '#fff',
-                                    backdropFilter: 'blur(8px)'
+                                    backdropFilter: 'none'
                                 }}>
                                     New
                                 </span>
@@ -417,8 +412,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                                         gap: '0.4rem',
                                         padding: '0.5rem 0.85rem',
                                         borderRadius: '12px',
-                                        background: 'rgba(248, 250, 252, 0.8)',
-                                        backdropFilter: 'blur(8px)',
+                                        background: 'rgba(248, 250, 252, 0.95)',
                                         border: '1px solid rgba(226, 232, 240, 0.6)',
                                         transition: 'all 0.2s ease'
                                     }}
@@ -510,7 +504,7 @@ const MobilePropertyCard: React.FC<{ property: PropertyCardData; color: string; 
                 borderRadius: '20px',
                 overflow: 'hidden',
                 background: 'rgba(255,255,255,0.95)',
-                backdropFilter: 'blur(20px)',
+                backdropFilter: 'none',
                 border: '1px solid rgba(255,255,255,0.6)',
                 boxShadow: `0 8px 32px -8px ${color.replace('0.7', '0.15')}, 0 2px 8px rgba(0,0,0,0.04)`,
                 cursor: 'pointer',
@@ -618,9 +612,7 @@ export const StackedCards: React.FC<StackedCardsProps> = ({
                     justifyContent: 'space-between',
                     padding: '1.25rem 1.5rem',
                     borderRadius: '20px',
-                    background: 'rgba(255,255,255,0.7)',
-                    backdropFilter: 'blur(20px) saturate(180%)',
-                    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                    background: 'rgba(255,255,255,0.97)',
                     border: '1px solid rgba(255,255,255,0.6)',
                     boxShadow: '0 4px 20px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.9)',
                     position: 'relative',

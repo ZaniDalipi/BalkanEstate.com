@@ -12,7 +12,7 @@ import {
   activateTestProSubscription,
   syncProSubscription,
   getExpiryCheck,
-  extendSubscriptionByMonth,
+  requestMoreListings,
 } from '../controllers/subscriptionController';
 import { protect } from '../middleware/auth';
 
@@ -29,6 +29,7 @@ router.get('/expiry-check', getExpiryCheck); // Lightweight expiry status check 
 router.post('/extend-month', extendSubscriptionByMonth); // Extend current subscription by 30 days
 router.post('/activate-test-pro', activateTestProSubscription); // Development only - must be before /:id
 router.post('/sync-pro', syncProSubscription); // Sync user.proSubscription with active Subscription
+router.post('/request-more-listings', requestMoreListings); // User request for more listings via email
 
 router.get('/:id', getSubscriptionById);
 router.post('/:id/cancel', cancelSubscription);

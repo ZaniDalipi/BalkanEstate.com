@@ -28,7 +28,8 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
 const COUNTRIES = ['All', 'Albania', 'Serbia', 'Croatia', 'Greece', 'Montenegro', 'North Macedonia', 'Bulgaria', 'Kosovo', 'Slovenia', 'Bosnia & Herzegovina', 'Romania'];
 
 interface ApiNewsArticle {
-  _id: string;
+  id?: string;
+  _id?: string;
   title: string;
   excerpt: string;
   country: string;
@@ -41,8 +42,8 @@ interface ApiNewsArticle {
 }
 
 function transformApiNews(articles: ApiNewsArticle[]): NewsItem[] {
-  return articles.map(a => ({
-    id: a._id,
+  return articles.map((a, i) => ({
+    id: a.id || a._id || String(i),
     title: a.title,
     excerpt: a.excerpt,
     country: a.country,

@@ -336,6 +336,7 @@ const UserManager: React.FC = () => {
         handleEditUser={handleEditUser}
         formatDate={formatDate}
         getRoleBadgeColor={getRoleBadgeColor}
+        onUserUpdated={refetch}
       />
     </div>
   );

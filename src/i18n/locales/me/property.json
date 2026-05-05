@@ -559,5 +559,14 @@
     "updating": "Ažuriranje...",
     "cancelViewing": "Otkaži razgledanje",
     "requested": "Zatraženo"
+  },
+  "imageViewer": {
+    "annotate": {
+      "label": "Bilješka",
+      "done": "Gotovo",
+      "save": "Sačuvaj",
+      "hint": "Crtajte po slici za bilješke",
+      "sendToChat": "Pošalji"
+    }
   }
 }

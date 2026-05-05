@@ -7,6 +7,10 @@
     "sharedLimit": "Dijeljeni limit: {{used}}/{{limit}} ukupno oglasa",
     "asRole": "({{count}} kao {{role}})",
     "listings": "Oglasi",
+    "monthlyListings": "Ovaj mjesec",
+    "monthlyRemaining": "{{count}} preostalih oglasa ovaj mjesec",
+    "monthlyAvailable": "{{count}} dostupnih oglasa ovaj mjesec",
+    "monthlyLimitReached": "Mjesečni limit dosegnut. Resetira se sljedećeg mjeseca.",
     "limitReachedShared": "Dijeljeni limit dosegnut za obje uloge.",
     "limitReachedUpgrade": "Limit oglasa dosegnut. Nadogradite na Pro za 30 oglasa!",
     "remainingListings": "{{count}} preostalih oglasa",
@@ -661,12 +665,16 @@
     "proSubscriptionRequired": "Potrebna Pro Pretplata",
     "agentProRequiredMessage": "Agenti moraju imati aktivnu Pro pretplatu za objavljivanje oglasa. Pretplatite se sada za 30 aktivnih oglasa!",
     "switchRoleRequired": "Potrebna Promjena Uloge",
-    "buyerCannotCreateListing": "Kupci ne mogu kreirati oglase za nekretnine. Molimo prebacite se na ulogu Privatnog Prodavača ili Agenta."
+    "buyerCannotCreateListing": "Kupci ne mogu kreirati oglase za nekretnine. Molimo prebacite se na ulogu Privatnog Prodavača ili Agenta.",
+    "monthlyLimitReached": "Mjesečni Limit Oglasa Dosegnut",
+    "monthlyLimitMessage": "Iskoristili ste sve oglase ovog mjeseca. Obnavlja se početkom sljedećeg mjeseca.",
+    "monthlyLimitMessageWithCount": "Iskoristili ste {{used}} od {{limit}} oglasa ovog mjeseca. Obnavlja se početkom sljedećeg mjeseca."
   },
   "actions": {
     "subscribeToPro": "Pretplati se na Pro",
     "viewMyListings": "Pogledaj Moje Oglase",
-    "switchRole": "Promijeni Ulogu"
+    "switchRole": "Promijeni Ulogu",
+    "requestMoreListings": "Zatraži Više Oglasa"
   },
   "listings": {
     "confirmSold": "Are you sure you want to mark this property as sold? This action cannot be undone.",

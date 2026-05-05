@@ -85,6 +85,7 @@
     "dayLeft": "dan preostao",
     "daysLeft": "dana preostalo",
     "listingLimit": "Limit Oglasa",
+    "listingUsage": "{{used}} od {{limit}} ovog mjeseca",
     "remaining": "preostalo",
     "couponSubscription": "Kupon Pretplata",
     "cancellationPending": "Otkazivanje Pretplate na Čekanju",

@@ -128,6 +128,43 @@ export const createSubscription = async (req: Request, res: Response): Promise<v
       },
     };
 
+    // Initialize modern unified subscription system
+    const monthStart = new Date(startDate);
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+
+    // Map product tier to subscription tier
+    let subscriptionTier: 'free' | 'pro' | 'agency_owner' | 'agency_agent' | 'buyer' = 'pro';
+    if (product.tier === 'agency') {
+      subscriptionTier = user.agency?.role === 'owner' ? 'agency_owner' : 'agency_agent';
+    } else if (product.tier === 'buyer') {
+      subscriptionTier = 'buyer';
+    } else if (product.tier === 'free') {
+      subscriptionTier = 'free';
+    }
+
+    user.subscription = {
+      tier: subscriptionTier,
+      status: 'active',
+      startDate,
+      expiresAt: expirationDate,
+      listingsLimit: product.listingsLimit || 20,
+      activeListingsCount: 0,
+      privateSellerCount: 0,
+      agentCount: 0,
+      listingsCreatedThisMonth: 0,
+      monthResetDate: monthStart,
+      promotionCoupons: product.promotionCoupons ? {
+        monthly: product.promotionCoupons,
+        available: product.promotionCoupons,
+        used: 0,
+        rollover: 0,
+        lastRefresh: monthStart,
+      } : undefined,
+      savedSearchesLimit: product.savedSearchesLimit,
+      totalPaid: product.price,
+    };
+
     await user.save();
 
     res.status(201).json({
@@ -269,8 +306,8 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
             agencyId: user.agencyId,
             agencyName: user.agencyName,
             listingsLimit: user.subscription.listingsLimit || 30,
-            monthlyListingsCreated: user.subscription.monthlyListingsCreated || 0,
-            listingsMonthResetDate: user.subscription.listingsMonthResetDate,
+            listingsCreatedThisMonth: user.subscription.listingsCreatedThisMonth || 0,
+            monthResetDate: user.subscription.monthResetDate,
           },
         });
         return;
@@ -915,5 +952,55 @@ export const getExpiryCheck = async (req: Request, res: Response): Promise<void>
   } catch (error: any) {
     subscriptionLogger.error('Error checking subscription expiry:', error);
     res.status(500).json({ message: 'Error checking subscription expiry' });
+  }
+};
+
+/**
+ * @desc    User requests more listings via email to admin
+ * @route   POST /api/subscriptions/request-more-listings
+ * @access  Private
+ */
+export const requestMoreListings = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user?._id;
+    const { message } = req.body;
+
+    if (!userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const { sendListingRequestEmail } = await import('../services/emailService');
+
+    // Get current product to show price per listing
+    const product = user.subscriptionPlan ?
+      await Product.findOne({ productId: user.subscriptionPlan }) :
+      null;
+    const pricePerMonth = product?.price || 0;
+
+    await sendListingRequestEmail({
+      userEmail: user.email,
+      userName: user.name,
+      userRole: user.role,
+      message: message || '',
+      currentPlan: user.subscriptionPlan || 'Free',
+      currentListingLimit: user.subscription?.listingsLimit || 0,
+      pricePerMonth,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Your request has been sent to our team. We will review it shortly.'
+    });
+  } catch (error: any) {
+    subscriptionLogger.error('Error requesting more listings:', error.message || error);
+    subscriptionLogger.error('Stack:', error.stack);
+    res.status(500).json({ message: 'Failed to send request' });
   }
 };
