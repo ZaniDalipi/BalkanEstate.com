@@ -399,7 +399,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
            and a blurred LQIP backdrop on the side bars. ── */}
       <div
         className={`relative w-full bg-neutral-900 overflow-hidden ${
-          viewMode === 'video' && (videoPlatform === 'tiktok' || videoPlatform === 'instagram')
+          viewMode === 'video' && videoPlatform === 'tiktok'
             ? 'aspect-[9/16] sm:aspect-[16/9]'
             : 'aspect-[16/9]'
         }`}
@@ -606,14 +606,28 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 ) : (
                   <>
                     {/* External video player for YouTube, Vimeo, Facebook, Instagram, and full TikTok URLs */}
-                    <iframe
-                      src={videoInfo.embedUrl}
-                      className="absolute inset-0 w-full h-full border-0"
-                      style={{ minHeight: '100%', minWidth: '100%' }}
-                      allowFullScreen
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-                      title="Property Video Tour"
-                    />
+                    {videoInfo.platform === 'instagram' ? (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black">
+                        <iframe
+                          src={videoInfo.embedUrl}
+                          className="border-0 h-full"
+                          style={{ width: '340px', maxWidth: '100%' }}
+                          allowFullScreen
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                          title="Property Video Tour"
+                          scrolling="no"
+                        />
+                      </div>
+                    ) : (
+                      <iframe
+                        src={videoInfo.embedUrl}
+                        className="absolute inset-0 w-full h-full border-0"
+                        style={{ minHeight: '100%', minWidth: '100%' }}
+                        allowFullScreen
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                        title="Property Video Tour"
+                      />
+                    )}
                   </>
                 )}
                 {/* Platform badge */}
