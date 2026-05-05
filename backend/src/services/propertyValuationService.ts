@@ -10,7 +10,15 @@ import Property from '../models/Property';
 import CityMarketData from '../models/CityMarketData';
 import mongoose from 'mongoose';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY || '' });
+let _ai: GoogleGenAI | null = null;
+const getAI = () => {
+  if (!_ai) {
+    const apiKey = process.env.GOOGLE_AI_API_KEY;
+    if (!apiKey) throw new Error('GOOGLE_AI_API_KEY is not configured');
+    _ai = new GoogleGenAI({ apiKey });
+  }
+  return _ai;
+};
 
 // Retry configuration for handling transient errors
 const MAX_RETRIES = 5;
@@ -334,7 +342,7 @@ Respond ONLY with valid JSON in this exact format:
 
   try {
     const result = await retryWithBackoff(() =>
-      ai.models.generateContent({
+      getAI().models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
       })
