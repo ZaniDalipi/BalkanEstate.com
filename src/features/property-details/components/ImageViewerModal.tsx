@@ -136,9 +136,13 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
         const ctx = off.getContext('2d')!;
         ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, W, H);
-        const s = Math.min(W / imgEl.naturalWidth, H / imgEl.naturalHeight);
-        const rw = imgEl.naturalWidth * s, rh = imgEl.naturalHeight * s;
-        ctx.drawImage(imgEl, (W - rw) / 2, (H - rh) / 2, rw, rh);
+        try {
+            const s = Math.min(W / imgEl.naturalWidth, H / imgEl.naturalHeight);
+            const rw = imgEl.naturalWidth * s, rh = imgEl.naturalHeight * s;
+            ctx.drawImage(imgEl, (W - rw) / 2, (H - rh) / 2, rw, rh);
+        } catch (e) {
+            console.error('Failed to draw image on canvas (may be cross-origin):', e);
+        }
         strokes.forEach(stroke => drawStroke(ctx, stroke));
         return off;
     }, [strokes]);
@@ -157,36 +161,42 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
         const off = buildAnnotatedCanvas();
         if (!off) return;
         setIsSendingToChat(true);
-        off.toBlob(async (blob) => {
-            if (!blob) { setIsSendingToChat(false); return; }
-            try {
-                let convId = state.conversations?.find((c: { property?: { id: string }; id: string }) => c.property?.id === propertyId)?.id;
-                if (!convId) {
-                    const newConv = await createConversation(propertyId);
-                    convId = newConv.id;
-                    dispatch({ type: 'CREATE_CONVERSATION', payload: newConv });
+        try {
+            off.toBlob(async (blob) => {
+                if (!blob) { setIsSendingToChat(false); return; }
+                try {
+                    let convId = state.conversations?.find((c: { property?: { id: string }; id: string }) => c.property?.id === propertyId)?.id;
+                    if (!convId) {
+                        const newConv = await createConversation(propertyId);
+                        convId = newConv.id;
+                        dispatch({ type: 'CREATE_CONVERSATION', payload: newConv });
+                    }
+                    const file = new File([blob], 'annotated-property.png', { type: 'image/png' });
+                    const imageUrl = await uploadMessageImage(convId, file);
+                    await sendMessage(convId, {
+                        id: `msg-${Date.now()}`,
+                        text: '',
+                        imageUrl,
+                        senderId: state.currentUser?.id || '',
+                        timestamp: Date.now(),
+                        isRead: false,
+                    } as Parameters<typeof sendMessage>[1]);
+                    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+                    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
+                    dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: convId });
+                    window.history.pushState({}, '', '/inbox');
+                    onClose();
+                } catch (err) {
+                    console.error('Failed to send annotated image:', err);
+                    dispatch({ type: 'SHOW_ALERT', payload: { type: 'error', title: t('property:imageViewer.annotate.sendError', 'Error'), message: t('property:imageViewer.annotate.sendFailed', 'Failed to send annotated image.') } });
+                    setIsSendingToChat(false);
                 }
-                const file = new File([blob], 'annotated-property.png', { type: 'image/png' });
-                const imageUrl = await uploadMessageImage(convId, file);
-                await sendMessage(convId, {
-                    id: `msg-${Date.now()}`,
-                    text: '',
-                    imageUrl,
-                    senderId: state.currentUser?.id || '',
-                    timestamp: Date.now(),
-                    isRead: false,
-                } as Parameters<typeof sendMessage>[1]);
-                dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
-                dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: convId });
-                window.history.pushState({}, '', '/inbox');
-                onClose();
-            } catch {
-                dispatch({ type: 'SHOW_ALERT', payload: { type: 'error', title: t('property:imageViewer.annotate.sendError', 'Error'), message: t('property:imageViewer.annotate.sendFailed', 'Failed to send annotated image.') } });
-            } finally {
-                setIsSendingToChat(false);
-            }
-        }, 'image/png');
+            }, 'image/png');
+        } catch (err) {
+            console.error('Failed to export canvas:', err);
+            dispatch({ type: 'SHOW_ALERT', payload: { type: 'error', title: t('property:imageViewer.annotate.sendError', 'Error'), message: t('property:imageViewer.annotate.sendFailed', 'Failed to send annotated image.') } });
+            setIsSendingToChat(false);
+        }
     }, [propertyId, isSendingToChat, buildAnnotatedCanvas, state, dispatch, onClose, t]);
 
     // ── Zoom helpers ─────────────────────────────────────────────────────────
@@ -237,12 +247,12 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
             const dy = e.touches[0].clientY - e.touches[1].clientY;
             const dist = Math.sqrt(dx * dx + dy * dy);
             setZoom(Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchStartZoom.current * (dist / pinchStartDist.current))));
-            e.preventDefault();
+            try { e.preventDefault(); } catch (e) { /* passive listener, ignored */ }
         } else if (e.touches.length === 1 && zoomRef.current > 1 && panOriginRef.current) {
             const { clientX: x, clientY: y } = e.touches[0];
             const c = clampPan(x - panOriginRef.current.x, y - panOriginRef.current.y, zoomRef.current);
             setPanX(c.x); setPanY(c.y);
-            e.preventDefault();
+            try { e.preventDefault(); } catch (e) { /* passive listener, ignored */ }
         }
     }, [clampPan]);
 
@@ -266,7 +276,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
     }, [goNext, goPrev, onClose]);
 
     const handleWheel = useCallback((e: React.WheelEvent) => {
-        e.preventDefault();
+        try { e.preventDefault(); } catch (e) { /* passive listener, ignored */ }
         const newZ = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoomRef.current * (e.deltaY < 0 ? 1.15 : 0.87)));
         setZoom(newZ);
         if (newZ === 1) { setPanX(0); setPanY(0); }
@@ -274,14 +284,12 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
 
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
         if (annotateMode || zoomRef.current <= 1) return;
-        e.preventDefault();
         isMouseDraggingRef.current = true;
         mouseDragOriginRef.current = { x: e.clientX - panXRef.current, y: e.clientY - panYRef.current };
     }, [annotateMode]);
 
     const handleMouseMove = useCallback((e: React.MouseEvent) => {
         if (!isMouseDraggingRef.current || !mouseDragOriginRef.current) return;
-        e.preventDefault();
         const c = clampPan(e.clientX - mouseDragOriginRef.current.x, e.clientY - mouseDragOriginRef.current.y, zoomRef.current);
         setPanX(c.x); setPanY(c.y);
     }, [clampPan]);
@@ -554,6 +562,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                             loading="eager"
                             decoding="async"
                             draggable={false}
+                            crossOrigin="anonymous"
                             className={`max-w-full max-h-full object-contain select-none transition-opacity duration-200 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                             style={{ userSelect: 'none', pointerEvents: 'none' }}
                             onLoad={() => setImageLoaded(true)}

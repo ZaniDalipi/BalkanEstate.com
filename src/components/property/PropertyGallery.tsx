@@ -448,6 +448,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                             alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
                             width={1200}
                             height={800}
+                            crossOrigin="anonymous"
                             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                             // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
                             fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
