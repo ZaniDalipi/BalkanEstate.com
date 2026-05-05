@@ -48,7 +48,10 @@ export const getMeasurements = async (req: Request, res: Response): Promise<void
       return;
     }
 
-    const measurements = user.savedMeasurements || [];
+    const measurements = (user.savedMeasurements || []).map(m => {
+      const obj = (m as any).toObject();
+      return { ...obj, id: (m as any)._id.toString() };
+    });
     const isPro = user.proSubscription?.isActive || user.isSubscribed;
     const maxAllowed = isPro ? MAX_MEASUREMENTS_PRO : MAX_MEASUREMENTS_FREE;
 
@@ -199,9 +202,9 @@ export const updateMeasurement = async (req: Request, res: Response): Promise<vo
       updateFields['savedMeasurements.$.notes'] = notes?.trim().substring(0, 500);
     }
 
-    // Use raw MongoDB query to match on the stored 'id' field directly
+    // Look up by _id (the value the frontend always receives from getMeasurements)
     const result = await User.updateOne(
-      { _id: userId, 'savedMeasurements.id': id },
+      { _id: userId, 'savedMeasurements._id': id },
       { $set: updateFields }
     );
 
@@ -213,7 +216,7 @@ export const updateMeasurement = async (req: Request, res: Response): Promise<vo
     // Fetch the updated measurement to return it
     const updatedUser = await User.findOne(
       { _id: userId },
-      { savedMeasurements: { $elemMatch: { id } } }
+      { savedMeasurements: { $elemMatch: { _id: id } } }
     );
     const measurement = updatedUser?.savedMeasurements?.[0];
 
@@ -243,10 +246,10 @@ export const deleteMeasurement = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    // Use raw MongoDB $pull to remove by stored 'id' field directly
+    // Look up by _id (the value the frontend always receives from getMeasurements)
     const result = await User.updateOne(
-      { _id: userId, 'savedMeasurements.id': id },
-      { $pull: { savedMeasurements: { id } } }
+      { _id: userId, 'savedMeasurements._id': id },
+      { $pull: { savedMeasurements: { _id: id } } }
     );
 
     if (result.matchedCount === 0) {
@@ -284,7 +287,7 @@ export const getMeasurementById = async (req: Request, res: Response): Promise<v
 
     const user = await User.findOne(
       { _id: userId },
-      { savedMeasurements: { $elemMatch: { id } } }
+      { savedMeasurements: { $elemMatch: { _id: id } } }
     );
 
     if (!user || !user.savedMeasurements || user.savedMeasurements.length === 0) {
@@ -292,9 +295,10 @@ export const getMeasurementById = async (req: Request, res: Response): Promise<v
       return;
     }
 
+    const m = user.savedMeasurements[0] as any;
     res.status(200).json({
       success: true,
-      measurement: user.savedMeasurements[0],
+      measurement: { ...m.toObject(), id: m._id.toString() },
     });
   } catch (error: any) {
     apiLogger.error('Error getting measurement:', error);
