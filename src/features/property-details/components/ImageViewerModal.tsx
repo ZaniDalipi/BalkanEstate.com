@@ -2,11 +2,14 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon, BuildingOfficeIcon } from '@/constants';
 import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
+import { useAppContext } from '@/context/AppContext';
+import { createConversation, sendMessage, uploadMessageImage } from '../../../../services/apiService';
 
 interface ImageViewerModalProps {
     images: { url: string; tag: string }[];
     startIndex: number;
     onClose: () => void;
+    propertyId?: string;
 }
 
 type Point = { x: number; y: number };
@@ -20,11 +23,13 @@ const DOUBLE_TAP_MS = 300;
 const COLORS = ['#EF4444', '#F97316', '#EAB308', '#22C55E', '#3B82F6', '#A855F7', '#FFFFFF', '#111827'];
 const WIDTHS = [3, 7, 14];
 
-const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex, onClose }) => {
+const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex, onClose, propertyId }) => {
     const { t } = useTranslation(['property']);
+    const { state, dispatch } = useAppContext();
     const [currentIndex, setCurrentIndex] = useState(startIndex);
     const [imageError, setImageError] = useState(false);
     const [imageLoaded, setImageLoaded] = useState(false);
+    const [isSendingToChat, setIsSendingToChat] = useState(false);
 
     // Zoom / pan
     const [zoom, setZoom] = useState(1);
@@ -53,6 +58,10 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
     const pinchStartDist = useRef(0);
     const pinchStartZoom = useRef(1);
     const panOriginRef = useRef<{ x: number; y: number } | null>(null);
+
+    // Mouse drag tracking
+    const isMouseDraggingRef = useRef(false);
+    const mouseDragOriginRef = useRef<{ x: number; y: number } | null>(null);
 
     // ── Canvas draw ──────────────────────────────────────────────────────────
     const drawStroke = (ctx: CanvasRenderingContext2D, s: Stroke) => {
@@ -117,10 +126,10 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
     const undo = useCallback(() => setStrokes(s => s.slice(0, -1)), []);
     const clearAnnotations = useCallback(() => setStrokes([]), []);
 
-    const downloadAnnotated = useCallback(() => {
+    const buildAnnotatedCanvas = useCallback((): HTMLCanvasElement | null => {
         const canvas = canvasRef.current;
         const imgEl = imageElRef.current;
-        if (!canvas || !imgEl) return;
+        if (!canvas || !imgEl) return null;
         const W = canvas.offsetWidth, H = canvas.offsetHeight;
         const off = document.createElement('canvas');
         off.width = W; off.height = H;
@@ -131,11 +140,54 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
         const rw = imgEl.naturalWidth * s, rh = imgEl.naturalHeight * s;
         ctx.drawImage(imgEl, (W - rw) / 2, (H - rh) / 2, rw, rh);
         strokes.forEach(stroke => drawStroke(ctx, stroke));
+        return off;
+    }, [strokes]);
+
+    const downloadAnnotated = useCallback(() => {
+        const off = buildAnnotatedCanvas();
+        if (!off) return;
         const a = document.createElement('a');
         a.download = 'annotated-property.jpg';
         a.href = off.toDataURL('image/jpeg', 0.92);
         a.click();
-    }, [strokes]);
+    }, [buildAnnotatedCanvas]);
+
+    const sendAnnotatedToChat = useCallback(async () => {
+        if (!propertyId || isSendingToChat) return;
+        const off = buildAnnotatedCanvas();
+        if (!off) return;
+        setIsSendingToChat(true);
+        off.toBlob(async (blob) => {
+            if (!blob) { setIsSendingToChat(false); return; }
+            try {
+                let convId = state.conversations?.find((c: { property?: { id: string }; id: string }) => c.property?.id === propertyId)?.id;
+                if (!convId) {
+                    const newConv = await createConversation(propertyId);
+                    convId = newConv.id;
+                    dispatch({ type: 'CREATE_CONVERSATION', payload: newConv });
+                }
+                const file = new File([blob], 'annotated-property.png', { type: 'image/png' });
+                const imageUrl = await uploadMessageImage(convId, file);
+                await sendMessage(convId, {
+                    id: `msg-${Date.now()}`,
+                    text: '',
+                    imageUrl,
+                    senderId: state.currentUser?.id || '',
+                    timestamp: Date.now(),
+                    isRead: false,
+                } as Parameters<typeof sendMessage>[1]);
+                dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
+                dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: convId });
+                window.history.pushState({}, '', '/inbox');
+                onClose();
+            } catch {
+                dispatch({ type: 'SHOW_ALERT', payload: { type: 'error', title: t('property:imageViewer.annotate.sendError', 'Error'), message: t('property:imageViewer.annotate.sendFailed', 'Failed to send annotated image.') } });
+            } finally {
+                setIsSendingToChat(false);
+            }
+        }, 'image/png');
+    }, [propertyId, isSendingToChat, buildAnnotatedCanvas, state, dispatch, onClose, t]);
 
     // ── Zoom helpers ─────────────────────────────────────────────────────────
     const resetZoom = useCallback(() => { setZoom(1); setPanX(0); setPanY(0); }, []);
@@ -214,11 +266,29 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
     }, [goNext, goPrev, onClose]);
 
     const handleWheel = useCallback((e: React.WheelEvent) => {
-        if (!e.ctrlKey && !e.metaKey) return;
         e.preventDefault();
         const newZ = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoomRef.current * (e.deltaY < 0 ? 1.15 : 0.87)));
         setZoom(newZ);
         if (newZ === 1) { setPanX(0); setPanY(0); }
+    }, []);
+
+    const handleMouseDown = useCallback((e: React.MouseEvent) => {
+        if (annotateMode || zoomRef.current <= 1) return;
+        e.preventDefault();
+        isMouseDraggingRef.current = true;
+        mouseDragOriginRef.current = { x: e.clientX - panXRef.current, y: e.clientY - panYRef.current };
+    }, [annotateMode]);
+
+    const handleMouseMove = useCallback((e: React.MouseEvent) => {
+        if (!isMouseDraggingRef.current || !mouseDragOriginRef.current) return;
+        e.preventDefault();
+        const c = clampPan(e.clientX - mouseDragOriginRef.current.x, e.clientY - mouseDragOriginRef.current.y, zoomRef.current);
+        setPanX(c.x); setPanY(c.y);
+    }, [clampPan]);
+
+    const handleMouseUp = useCallback(() => {
+        isMouseDraggingRef.current = false;
+        mouseDragOriginRef.current = null;
     }, []);
 
     // ── Effects ──────────────────────────────────────────────────────────────
@@ -395,19 +465,39 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                         </svg>
                     </button>
 
-                    {/* Download */}
-                    <button
-                        type="button"
-                        onClick={downloadAnnotated}
-                        disabled={strokes.length === 0}
-                        className="ml-auto flex items-center gap-1.5 px-3 h-9 rounded-full text-xs font-semibold text-white bg-white/20 hover:bg-white/30 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                        aria-label="Download annotated image"
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                        </svg>
-                        {t('property:imageViewer.annotate.save', 'Save')}
-                    </button>
+                    {/* Download + Send to Chat */}
+                    <div className="ml-auto flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={downloadAnnotated}
+                            disabled={strokes.length === 0}
+                            className="flex items-center gap-1.5 px-3 h-9 rounded-full text-xs font-semibold text-white bg-white/20 hover:bg-white/30 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            aria-label="Download annotated image"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            {t('property:imageViewer.annotate.save', 'Save')}
+                        </button>
+                        {propertyId && (
+                            <button
+                                type="button"
+                                onClick={sendAnnotatedToChat}
+                                disabled={strokes.length === 0 || isSendingToChat}
+                                className="flex items-center gap-1.5 px-3 h-9 rounded-full text-xs font-semibold text-white bg-primary hover:bg-primary/80 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                aria-label="Send annotated image to chat"
+                            >
+                                {isSendingToChat ? (
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"/>
+                                ) : (
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/>
+                                    </svg>
+                                )}
+                                {t('property:imageViewer.annotate.sendToChat', 'Send')}
+                            </button>
+                        )}
+                    </div>
                 </div>
             )}
 
@@ -418,6 +508,10 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                 onTouchMove={annotateMode ? undefined : handleTouchMove}
                 onTouchEnd={annotateMode ? undefined : handleTouchEnd}
                 onWheel={handleWheel}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
                 style={{ touchAction: isZoomed || annotateMode ? 'none' : 'pan-y' }}
             >
                 {/* Blurred LQIP backdrop */}
@@ -436,9 +530,9 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                     style={{
                         transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
                         transformOrigin: 'center center',
-                        transition: pinchStartDist.current > 0 ? 'none' : 'transform 0.15s ease-out',
+                        transition: pinchStartDist.current > 0 || isMouseDraggingRef.current ? 'none' : 'transform 0.15s ease-out',
                         willChange: 'transform',
-                        cursor: annotateMode ? 'crosshair' : isZoomed ? 'grab' : 'zoom-in',
+                        cursor: annotateMode ? 'crosshair' : isZoomed ? (isMouseDraggingRef.current ? 'grabbing' : 'grab') : 'zoom-in',
                     }}
                     onDoubleClick={annotateMode ? undefined : (isZoomed ? resetZoom : () => setZoom(2))}
                 >

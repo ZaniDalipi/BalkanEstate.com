@@ -624,7 +624,8 @@
       "label": "Adnotare",
       "done": "Gata",
       "save": "Salvare",
-      "hint": "Desenați pe imagine pentru adnotare"
+      "hint": "Desenați pe imagine pentru adnotare",
+      "sendToChat": "Trimite"
     }
   }
 }

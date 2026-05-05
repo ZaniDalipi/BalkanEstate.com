@@ -624,7 +624,8 @@
       "label": "Shënim",
       "done": "Gatë",
       "save": "Ruaj",
-      "hint": "Vizato mbi imazh për të shtuar shënime"
+      "hint": "Vizato mbi imazh për të shtuar shënime",
+      "sendToChat": "Dërgo"
     }
   }
 }

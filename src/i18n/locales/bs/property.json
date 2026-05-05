@@ -624,7 +624,8 @@
       "label": "Bilješka",
       "done": "Gotovo",
       "save": "Spremi",
-      "hint": "Crtajte po slici za bilješke"
+      "hint": "Crtajte po slici za bilješke",
+      "sendToChat": "Pošalji"
     }
   }
 }
