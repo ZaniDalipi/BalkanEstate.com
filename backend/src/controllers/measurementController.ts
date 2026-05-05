@@ -48,7 +48,10 @@ export const getMeasurements = async (req: Request, res: Response): Promise<void
       return;
     }
 
-    const measurements = user.savedMeasurements || [];
+    const measurements = (user.savedMeasurements || []).map(m => {
+      const obj = (m as any).toObject();
+      return { ...obj, id: (m as any)._id.toString() };
+    });
     const isPro = user.proSubscription?.isActive || user.isSubscribed;
     const maxAllowed = isPro ? MAX_MEASUREMENTS_PRO : MAX_MEASUREMENTS_FREE;
 
@@ -185,38 +188,42 @@ export const updateMeasurement = async (req: Request, res: Response): Promise<vo
 
     const { name, address, notes } = req.body;
 
-    const user = await User.findById(userId);
-
-    if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return;
+    // Build update fields conditionally
+    const updateFields: Record<string, any> = {
+      'savedMeasurements.$.updatedAt': new Date(),
+    };
+    if (name) {
+      updateFields['savedMeasurements.$.name'] = name.trim().substring(0, 100);
+    }
+    if (address !== undefined) {
+      updateFields['savedMeasurements.$.address'] = address?.trim().substring(0, 200);
+    }
+    if (notes !== undefined) {
+      updateFields['savedMeasurements.$.notes'] = notes?.trim().substring(0, 500);
     }
 
-    const measurementIndex = user.savedMeasurements?.findIndex(m => m.id === id);
+    // Look up by _id (the value the frontend always receives from getMeasurements)
+    const result = await User.updateOne(
+      { _id: userId, 'savedMeasurements._id': id },
+      { $set: updateFields }
+    );
 
-    if (measurementIndex === undefined || measurementIndex === -1) {
+    if (result.matchedCount === 0) {
       res.status(404).json({ message: 'Measurement not found' });
       return;
     }
 
-    // Update allowed fields
-    if (name) {
-      user.savedMeasurements![measurementIndex].name = name.trim().substring(0, 100);
-    }
-    if (address !== undefined) {
-      user.savedMeasurements![measurementIndex].address = address?.trim().substring(0, 200);
-    }
-    if (notes !== undefined) {
-      user.savedMeasurements![measurementIndex].notes = notes?.trim().substring(0, 500);
-    }
-    user.savedMeasurements![measurementIndex].updatedAt = new Date();
-
-    await user.save();
+    // Fetch the updated measurement to return it
+    const updatedUser = await User.findOne(
+      { _id: userId },
+      { savedMeasurements: { $elemMatch: { _id: id } } }
+    );
+    const measurement = updatedUser?.savedMeasurements?.[0];
 
     res.status(200).json({
       success: true,
       message: 'Measurement updated successfully',
-      measurement: user.savedMeasurements![measurementIndex],
+      measurement,
     });
   } catch (error: any) {
     apiLogger.error('Error updating measurement:', error);
@@ -239,27 +246,23 @@ export const deleteMeasurement = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    const user = await User.findById(userId);
+    // Look up by _id (the value the frontend always receives from getMeasurements)
+    const result = await User.updateOne(
+      { _id: userId, 'savedMeasurements._id': id },
+      { $pull: { savedMeasurements: { _id: id } } }
+    );
 
-    if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return;
-    }
-
-    const measurementIndex = user.savedMeasurements?.findIndex(m => m.id === id);
-
-    if (measurementIndex === undefined || measurementIndex === -1) {
+    if (result.matchedCount === 0) {
       res.status(404).json({ message: 'Measurement not found' });
       return;
     }
 
-    user.savedMeasurements!.splice(measurementIndex, 1);
-    await user.save();
+    const updatedUser = await User.findById(userId).select('savedMeasurements');
 
     res.status(200).json({
       success: true,
       message: 'Measurement deleted successfully',
-      count: user.savedMeasurements?.length || 0,
+      count: updatedUser?.savedMeasurements?.length || 0,
     });
   } catch (error: any) {
     apiLogger.error('Error deleting measurement:', error);
@@ -282,23 +285,20 @@ export const getMeasurementById = async (req: Request, res: Response): Promise<v
       return;
     }
 
-    const user = await User.findById(userId).select('savedMeasurements');
+    const user = await User.findOne(
+      { _id: userId },
+      { savedMeasurements: { $elemMatch: { _id: id } } }
+    );
 
-    if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return;
-    }
-
-    const measurement = user.savedMeasurements?.find(m => m.id === id);
-
-    if (!measurement) {
+    if (!user || !user.savedMeasurements || user.savedMeasurements.length === 0) {
       res.status(404).json({ message: 'Measurement not found' });
       return;
     }
 
+    const m = user.savedMeasurements[0] as any;
     res.status(200).json({
       success: true,
-      measurement,
+      measurement: { ...m.toObject(), id: m._id.toString() },
     });
   } catch (error: any) {
     apiLogger.error('Error getting measurement:', error);
