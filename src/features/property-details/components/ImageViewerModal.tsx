@@ -158,6 +158,10 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
 
     const sendAnnotatedToChat = useCallback(async () => {
         if (!propertyId || isSendingToChat) return;
+        if (!state.isAuthenticated) {
+            dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
+            return;
+        }
         const off = buildAnnotatedCanvas();
         if (!off) return;
         setIsSendingToChat(true);

@@ -549,7 +549,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           images={imagesForCurrentCategory}
           startIndex={currentImageIndex}
           onClose={() => setIsViewerOpen(false)}
-          propertyId={property.id}
+          propertyId={!isOwner ? property.id : undefined}
         />
       )}
       {isFloorPlanOpen && property.floorplanUrl && (
