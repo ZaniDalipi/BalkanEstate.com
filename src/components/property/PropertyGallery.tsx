@@ -1,7 +1,7 @@
 // PropertyGallery Component
 // Image gallery with carousel, street view, video player, and interactive controls
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '../../../types';
