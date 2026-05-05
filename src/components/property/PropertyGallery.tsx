@@ -1,7 +1,7 @@
 // PropertyGallery Component
 // Image gallery with carousel, street view, video player, and interactive controls
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '../../../types';
@@ -115,11 +115,12 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   const [videoEnded, setVideoEnded] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = React.useRef<HTMLVideoElement>(null);
+  const tiktokBlockquoteRef = useRef<HTMLDivElement>(null);
 
   // Determine video platform from URL
   const getVideoPlatform = useCallback((url: string): string => {
     if (!url) return 'unknown';
-    if (url.includes('tiktok.com') || url.includes('vm.tiktok.com') || url.includes('m.tiktok.com')) return 'tiktok';
+    if (url.includes('tiktok.com') || url.includes('vm.tiktok.com') || url.includes('vt.tiktok.com') || url.includes('m.tiktok.com')) return 'tiktok';
     if (url.includes('instagram.com')) return 'instagram';
     if (url.includes('facebook.com') || url.includes('fb.watch')) return 'facebook';
     if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
@@ -172,8 +173,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   // Helper to convert video URLs to embed format
   // Supports: YouTube, Vimeo, TikTok, Instagram, Facebook (all known URL variations)
-  const getVideoEmbedUrl = useCallback((url: string): { embedUrl: string; platform: string } => {
+  const getVideoEmbedUrl = useCallback((url: string): { embedUrl: string; platform: string; tiktokInfo?: { username: string; id: string } } => {
     if (!url) return { embedUrl: '', platform: 'unknown' };
+
+    // Remove query parameters and trailing slashes for consistent matching
+    const cleanUrl = url.split('?')[0].replace(/\/$/, '');
 
     // --- YouTube ---
     // watch?v=ID, watch?feature=share&v=ID (v= as first or later param)
@@ -182,60 +186,63 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
       return { embedUrl: `https://www.youtube.com/embed/${ytParamMatch[1]}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`, platform: 'youtube' };
     }
     // embed/ID, shorts/ID, v/ID (legacy), live/ID
-    const ytPathMatch = url.match(/youtube\.com\/(?:embed|shorts|v|live)\/([a-zA-Z0-9_-]{11})/);
+    const ytPathMatch = cleanUrl.match(/youtube\.com\/(?:embed|shorts|v|live)\/([a-zA-Z0-9_-]{11})/);
     if (ytPathMatch) {
       return { embedUrl: `https://www.youtube.com/embed/${ytPathMatch[1]}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`, platform: 'youtube' };
     }
     // youtu.be/ID short links
-    const ytShortMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+    const ytShortMatch = cleanUrl.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
     if (ytShortMatch) {
       return { embedUrl: `https://www.youtube.com/embed/${ytShortMatch[1]}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`, platform: 'youtube' };
     }
 
     // --- Vimeo ---
     // player.vimeo.com/video/ID (already an embed URL)
-    const vimeoPlayerMatch = url.match(/player\.vimeo\.com\/video\/(\d+)/);
+    const vimeoPlayerMatch = cleanUrl.match(/player\.vimeo\.com\/video\/(\d+)/);
     if (vimeoPlayerMatch) {
       return { embedUrl: `https://player.vimeo.com/video/${vimeoPlayerMatch[1]}?autoplay=1&playsinline=1`, platform: 'vimeo' };
     }
     // vimeo.com/channels/xxx/ID, vimeo.com/groups/xxx/videos/ID, vimeo.com/manage/videos/ID
-    const vimeoPathMatch = url.match(/vimeo\.com\/(?:channels\/[\w]+\/|groups\/[\w]+\/videos\/|manage\/videos\/)(\d+)/);
+    const vimeoPathMatch = cleanUrl.match(/vimeo\.com\/(?:channels\/[\w]+\/|groups\/[\w]+\/videos\/|manage\/videos\/)(\d+)/);
     if (vimeoPathMatch) {
       return { embedUrl: `https://player.vimeo.com/video/${vimeoPathMatch[1]}?autoplay=1&playsinline=1`, platform: 'vimeo' };
     }
     // vimeo.com/ID (standard - must be after path-based matches to avoid false positives)
-    const vimeoStdMatch = url.match(/vimeo\.com\/(\d+)/);
+    const vimeoStdMatch = cleanUrl.match(/vimeo\.com\/(\d+)/);
     if (vimeoStdMatch) {
       return { embedUrl: `https://player.vimeo.com/video/${vimeoStdMatch[1]}?autoplay=1&playsinline=1`, platform: 'vimeo' };
     }
 
     // --- TikTok ---
-    // tiktok.com/@username/video/ID (full URL)
-    const tiktokFullMatch = url.match(/tiktok\.com\/@[\w.-]+\/video\/(\d+)/);
+    // tiktok.com/@username/video/ID (full URL - numeric ID)
+    const tiktokFullMatch = cleanUrl.match(/tiktok\.com\/@([\w.-]+)\/video\/(\d+)/);
     if (tiktokFullMatch) {
-      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokFullMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
+      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokFullMatch[2]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok', tiktokInfo: { username: tiktokFullMatch[1], id: tiktokFullMatch[2] } };
     }
-    // m.tiktok.com/v/ID (mobile URL)
-    const tiktokMobileMatch = url.match(/m\.tiktok\.com\/v\/(\d+)/);
+    // m.tiktok.com/v/ID (mobile URL - numeric ID)
+    const tiktokMobileMatch = cleanUrl.match(/m\.tiktok\.com\/v\/(\d+)/);
     if (tiktokMobileMatch) {
-      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokMobileMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
+      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokMobileMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok', tiktokInfo: { username: '', id: tiktokMobileMatch[1] } };
     }
-    // vm.tiktok.com/CODE/ (short URL - alphanumeric)
-    const tiktokVmMatch = url.match(/vm\.tiktok\.com\/([\w]+)/);
+    // vm.tiktok.com/CODE/ or vt.tiktok.com/CODE/ (short URLs - use blockquote embed)
+    const tiktokVmMatch = cleanUrl.match(/v[mt]\.tiktok\.com\/([^\s/?#]+)/);
     if (tiktokVmMatch) {
-      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokVmMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
+      return { embedUrl: `blockquote:${url}`, platform: 'tiktok', tiktokInfo: { username: '', id: tiktokVmMatch[1] } };
     }
-    // tiktok.com/t/CODE/ (another short URL format)
-    const tiktokTMatch = url.match(/tiktok\.com\/t\/([\w]+)/);
+    // tiktok.com/t/CODE/ (share link short format - use blockquote embed)
+    const tiktokTMatch = cleanUrl.match(/tiktok\.com\/t\/([^\s/?#]+)/);
     if (tiktokTMatch) {
-      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokTMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
+      return { embedUrl: `blockquote:${url}`, platform: 'tiktok', tiktokInfo: { username: '', id: tiktokTMatch[1] } };
     }
 
     // --- Instagram ---
-    // instagram.com/reel/CODE, /p/CODE, /tv/CODE (IGTV)
-    const instagramMatch = url.match(/instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/);
+    // Handles: /reel/, /reels/, /p/, /tv/, /share/reel/, /share/p/ — all with optional query params
+    // First, strip query parameters entirely from the full URL
+    const instagramClean = url.split('?')[0].replace(/\/$/, '');
+    const instagramMatch = instagramClean.match(/instagram\.com\/(?:share\/)?(reel|reels|p|tv)\/([A-Za-z0-9_-]+)/);
     if (instagramMatch) {
-      return { embedUrl: `https://www.instagram.com/${instagramMatch[1]}/${instagramMatch[2]}/embed/`, platform: 'instagram' };
+      const type = instagramMatch[1] === 'reels' ? 'reel' : instagramMatch[1];
+      return { embedUrl: `https://www.instagram.com/${type}/${instagramMatch[2]}/embed/`, platform: 'instagram' };
     }
 
     // --- Facebook ---
@@ -245,17 +252,17 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
       return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
     }
     // facebook.com/share/v/CODE/ (share links)
-    const fbShareMatch = url.match(/facebook\.com\/share\/v\/([A-Za-z0-9_-]+)/);
+    const fbShareMatch = cleanUrl.match(/facebook\.com\/share\/v\/([A-Za-z0-9_-]+)/);
     if (fbShareMatch) {
       return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
     }
     // facebook.com/watch/?v=ID, /videos/ID, /reel/ID
-    const fbVideoMatch = url.match(/facebook\.com\/(?:watch\/?\?v=|[\w.]+\/videos\/|reel\/)(\d+)/);
+    const fbVideoMatch = cleanUrl.match(/facebook\.com\/(?:watch\/?\?v=|[\w.]+\/videos\/|reel\/)(\d+)/);
     if (fbVideoMatch) {
       return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
     }
     // fb.watch/CODE/ (short links)
-    const fbWatchMatch = url.match(/fb\.watch\/([A-Za-z0-9_-]+)/);
+    const fbWatchMatch = cleanUrl.match(/fb\.watch\/([A-Za-z0-9_-]+)/);
     if (fbWatchMatch) {
       return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
     }
@@ -265,6 +272,33 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   }, []);
 
   const videoInfo = useMemo(() => getVideoEmbedUrl(externalVideoUrl), [externalVideoUrl, getVideoEmbedUrl]);
+
+  // Load TikTok embed script for blockquote rendering
+  useEffect(() => {
+    if (videoPlatform === 'tiktok' && videoInfo.embedUrl.startsWith('blockquote:') && viewMode === 'video') {
+      const existingScript = document.querySelector('script[src*="tiktok.com/embed.js"]');
+      if (!existingScript) {
+        const script = document.createElement('script');
+        script.src = 'https://www.tiktok.com/embed.js';
+        script.async = true;
+        script.onload = () => {
+          setTimeout(() => {
+            if ((window as any).tiktokEmbed?.lib?.render) {
+              (window as any).tiktokEmbed.lib.render(tiktokBlockquoteRef.current);
+            }
+          }, 100);
+        };
+        document.body.appendChild(script);
+      } else {
+        // Script already loaded, process blockquotes
+        setTimeout(() => {
+          if ((window as any).tiktokEmbed?.lib?.render) {
+            (window as any).tiktokEmbed.lib.render(tiktokBlockquoteRef.current);
+          }
+        }, 100);
+      }
+    }
+  }, [videoPlatform, videoInfo.embedUrl, viewMode]);
 
   // Combine all images
   const allImages = useMemo(() => {
@@ -365,7 +399,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
            and a blurred LQIP backdrop on the side bars. ── */}
       <div
         className={`relative w-full bg-neutral-900 overflow-hidden ${
-          viewMode === 'video' && (videoPlatform === 'tiktok' || videoPlatform === 'instagram')
+          viewMode === 'video' && videoPlatform === 'tiktok'
             ? 'aspect-[9/16] sm:aspect-[16/9]'
             : 'aspect-[16/9]'
         }`}
@@ -532,17 +566,70 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   </svg>
                 </button>
               </>
-            ) : (
+            ) : videoInfo.embedUrl ? (
               <>
-                {/* External video player for YouTube, Vimeo, Facebook */}
-                <iframe
-                  src={videoInfo.embedUrl}
-                  className="absolute inset-0 w-full h-full border-0"
-                  style={{ minHeight: '100%', minWidth: '100%' }}
-                  allowFullScreen
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-                  title="Property Video Tour"
-                />
+                {/* TikTok short link handling - use blockquote embed directly */}
+                {videoInfo.platform === 'tiktok' && videoInfo.embedUrl.startsWith('blockquote:') ? (
+                  <div
+                    ref={tiktokBlockquoteRef}
+                    className="absolute inset-0 w-full h-full flex items-center justify-center bg-black overflow-auto"
+                  >
+                    <blockquote
+                      className="tiktok-embed"
+                      cite={externalVideoUrl}
+                      data-video-id={videoInfo.tiktokInfo?.id}
+                      style={{
+                        maxWidth: '605px',
+                        minWidth: '325px',
+                        margin: 'auto',
+                      }}
+                    >
+                      <section>
+                        <a
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          href={externalVideoUrl}
+                          className="block text-center p-8"
+                        >
+                          <div className="flex flex-col items-center gap-4">
+                            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                              <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+                              </svg>
+                            </div>
+                            <span className="text-white text-sm">Loading TikTok video...</span>
+                          </div>
+                        </a>
+                      </section>
+                    </blockquote>
+                  </div>
+                ) : (
+                  <>
+                    {/* External video player for YouTube, Vimeo, Facebook, Instagram, and full TikTok URLs */}
+                    {videoInfo.platform === 'instagram' ? (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black">
+                        <iframe
+                          src={videoInfo.embedUrl}
+                          className="border-0 h-full"
+                          style={{ width: '480px', maxWidth: '100%' }}
+                          allowFullScreen
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                          title="Property Video Tour"
+                          scrolling="no"
+                        />
+                      </div>
+                    ) : (
+                      <iframe
+                        src={videoInfo.embedUrl}
+                        className="absolute inset-0 w-full h-full border-0"
+                        style={{ minHeight: '100%', minWidth: '100%' }}
+                        allowFullScreen
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                        title="Property Video Tour"
+                      />
+                    )}
+                  </>
+                )}
                 {/* Platform badge */}
                 <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 bg-black/70 backdrop-blur-sm text-white font-semibold px-3 py-1.5 rounded-full text-xs">
                   {videoInfo.platform === 'youtube' && (
@@ -573,6 +660,29 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   <span className="capitalize">{t('property:gallery.videoTour', 'Video Tour')}</span>
                 </div>
               </>
+            ) : (
+              <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-neutral-900 to-neutral-800 p-6">
+                <div className="text-center">
+                  <svg className="w-16 h-16 text-neutral-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-neutral-300 text-sm mb-4">
+                    {t('property:gallery.videoEmbedNotSupported', 'This video link cannot be embedded directly')}
+                  </p>
+                  <a
+                    href={externalVideoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary to-primary-dark text-white font-medium rounded-lg hover:shadow-lg transition-shadow"
+                  >
+                    {t('property:gallery.openVideo', 'Open Video')}
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
             )}
           </div>
         ) : viewMode === 'streetview' ? (
