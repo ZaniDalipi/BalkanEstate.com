@@ -112,6 +112,7 @@ export interface CityMarketData {
   country: string;
   countryCode: string;
   avgPricePerSqm: number;
+  listingAvgPricePerSqm?: number;
   medianPrice: number;
   priceGrowthYoY: number;
   priceGrowthMoM: number;

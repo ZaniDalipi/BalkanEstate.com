@@ -40,15 +40,15 @@
     "other": "Other"
   },
   "features": {
-    "bedrooms": "Bedrooms",
+    "bedrooms": "Spavaće sobe",
     "bedroom": "Spavaća soba",
-    "beds": "Beds",
+    "beds": "Spavaće sobe",
     "bed": "Spavaća soba",
-    "bathrooms": "Bathrooms",
+    "bathrooms": "Kupatila",
     "bathroom": "Kupatilo",
-    "baths": "Baths",
+    "baths": "Kupatila",
     "bath": "Kupatilo",
-    "livingRooms": "Living Rooms",
+    "livingRooms": "Dnevne sobe",
     "livingRoom": "Dnevna soba",
     "area": "Area",
     "sqft": "Square Meters",
@@ -559,5 +559,14 @@
     "updating": "Ažuriranje...",
     "cancelViewing": "Otkaži razgledanje",
     "requested": "Zatraženo"
+  },
+  "imageViewer": {
+    "annotate": {
+      "label": "Bilješka",
+      "done": "Gotovo",
+      "save": "Sačuvaj",
+      "hint": "Crtajte po slici za bilješke",
+      "sendToChat": "Pošalji"
+    }
   }
 }

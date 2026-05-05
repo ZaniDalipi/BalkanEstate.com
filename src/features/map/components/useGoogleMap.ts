@@ -524,8 +524,56 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
   // Create clusterer once marker library is available
   const createClusterer = useCallback((mapInstance: google.maps.Map) => {
+    // Cluster click: zoom into the cluster's exact visual position with smooth animation.
+    //
+    // Why event.latLng instead of cluster.position:
+    //   cluster.position = weighted centroid of ALL markers inside the cluster, which
+    //   can be far from where the cluster bubble is drawn on screen (especially for
+    //   clusters that span multiple countries). event.latLng is the lat/lng directly
+    //   under the user's click — always the visual center of the cluster marker.
+    //
+    // Why bounds-derived zoom:
+    //   A fixed +3 delta may not be enough to expand a large cluster. We estimate the
+    //   correct target zoom from the cluster's geographic span so it reliably breaks apart.
+    const onClusterClick = (event: google.maps.MapMouseEvent, cluster: { position?: google.maps.LatLng | google.maps.LatLngLiteral | null; bounds?: google.maps.LatLngBounds }, map: google.maps.Map) => {
+      // Anchor on the exact click position, fall back to cluster.position if unavailable
+      const center = event.latLng ?? cluster.position;
+      if (!center) return;
+
+      map.setCenter(center); // synchronous snap — zoom steps will be correctly anchored
+
+      const fromZoom = map.getZoom() ?? 10;
+      let toZoom = fromZoom + 3; // sensible default
+
+      if (cluster.bounds) {
+        const ne = cluster.bounds.getNorthEast();
+        const sw = cluster.bounds.getSouthWest();
+        const maxSpan = Math.max(
+          Math.abs(ne.lat() - sw.lat()),
+          Math.abs(ne.lng() - sw.lng()),
+        );
+        if (maxSpan > 0) {
+          // Each zoom level halves the geographic span visible on screen.
+          // log2(360 / span) gives the zoom at which this span fills ~360° = whole world.
+          // Adding 1 ensures we zoom past the cluster boundary so it breaks apart.
+          const estimated = Math.round(Math.log2(360 / maxSpan)) + 1;
+          toZoom = Math.min(Math.max(fromZoom + 2, estimated), 16);
+        }
+      }
+
+      const animateZoom = (cur: number) => {
+        if (cur >= toZoom) return;
+        setTimeout(() => {
+          map.setZoom(cur + 1);
+          animateZoom(cur + 1);
+        }, 120);
+      };
+      animateZoom(fromZoom);
+    };
+
     const clusterer = new MarkerClusterer({
       map: mapInstance,
+      onClusterClick,
       algorithm: new SuperClusterAlgorithm({
         radius: 60,
         maxZoom: 15,
@@ -883,34 +931,14 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     return offsets;
   }, [validProperties]);
 
-  // Create all markers for the given properties (synchronous, no batching)
+  // Build or update map markers. First call does a full clear + entrance animation.
+  // Subsequent calls diff against existing markers to avoid the "all markers disappear"
+  // flicker that was visible when zooming or panning triggered a property list refresh.
   const createAllMarkers = useCallback((props: Property[], mapToUse: google.maps.Map) => {
     if (!clustererRef.current) return;
 
-    // Clear existing markers
-    clustererRef.current.clearMarkers();
-    markersRef.current.clear();
-    markerDivsRef.current.clear();
-
-    // Remove promoted markers from map
-    promotedMarkersRef.current.forEach(marker => {
-      marker.map = null;
-    });
-    promotedMarkersRef.current = [];
-
-    if (props.length === 0) return;
-
-    // Play entrance fly-in animation on first marker load
-    const shouldAnimateEntrance = !hasAnimatedEntranceRef.current;
-    if (shouldAnimateEntrance) hasAnimatedEntranceRef.current = true;
-    const goldenAngle = 137.508 * (Math.PI / 180);
-    const maxStagger = 2000;
-
-    const regularMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
-    const promotedMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
-
-    for (let i = 0; i < props.length; i++) {
-      const property = props[i];
+    // Inner helper: build one marker div + AdvancedMarkerElement
+    const makeMarker = (property: Property, animate: boolean, idx: number, total: number) => {
       const markerDiv = document.createElement('div');
       markerDiv.className = 'property-marker';
       markerDiv.dataset.propertyId = property.id;
@@ -925,7 +953,6 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         borderWidth = 3;
       }
 
-      // Add animation class for promoted markers
       if (isActivelyPromoted && property.promotionTier) {
         markerDiv.classList.add(`promoted-marker-${property.promotionTier}`);
       }
@@ -946,32 +973,31 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
       `;
 
-      // Entrance fly-in animation after splash screen
-      if (shouldAnimateEntrance) {
-        const angle = i * goldenAngle;
-        const distance = 400 + (i % 7) * 80;
+      if (animate) {
+        const goldenAngle = 137.508 * (Math.PI / 180);
+        const maxStagger = 2000;
+        const angle = idx * goldenAngle;
+        const distance = 400 + (idx % 7) * 80;
         const flyX = Math.round(Math.cos(angle) * distance);
         const flyY = Math.round(Math.sin(angle) * distance);
         const flyR = Math.round(Math.cos(angle * 2) * 25);
-        const delay = props.length > 1 ? Math.round((i / (props.length - 1)) * maxStagger) : 0;
+        const delay = total > 1 ? Math.round((idx / (total - 1)) * maxStagger) : 0;
         markerDiv.classList.add('gmarker-entrance-fly');
         markerDiv.style.setProperty('--fly-x', `${flyX}px`);
         markerDiv.style.setProperty('--fly-y', `${flyY}px`);
         markerDiv.style.setProperty('--fly-r', `${flyR}deg`);
         markerDiv.style.setProperty('--fly-delay', `${delay}ms`);
-        // Clean up animation class after it completes to restore normal hover/transitions
-        const cleanupTime = delay + 900;
         setTimeout(() => {
           markerDiv.classList.remove('gmarker-entrance-fly');
           markerDiv.style.removeProperty('--fly-x');
           markerDiv.style.removeProperty('--fly-y');
           markerDiv.style.removeProperty('--fly-r');
           markerDiv.style.removeProperty('--fly-delay');
-        }, cleanupTime);
+        }, delay + 900);
       }
+
       markerDiv.textContent = price;
 
-      // Hover handlers - don't override if highlighted from list
       markerDiv.onmouseenter = () => {
         if (!markerDiv.classList.contains('marker-highlighted') && !markerDiv.classList.contains('gmarker-entrance-fly')) {
           markerDiv.style.transform = 'scale(1.25) translateY(-2px)';
@@ -986,7 +1012,6 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
           markerDiv.style.zIndex = isActivelyPromoted ? '100' : '1';
         }
       };
-
       markerDiv.onclick = (e) => {
         e.stopPropagation();
         setSelectedProperty(property);
@@ -1003,28 +1028,98 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         zIndex: isActivelyPromoted ? 100 : 1,
       });
 
-      // Separate promoted markers from regular ones
-      if (isActivelyPromoted) {
-        // Add promoted markers directly to map (not clustered)
-        marker.map = mapToUse;
-        promotedMarkers.push(marker);
-      } else {
-        regularMarkers.push(marker);
+      return { marker, markerDiv, isActivelyPromoted };
+    };
+
+    const isFirstLoad = !hasAnimatedEntranceRef.current;
+
+    if (isFirstLoad) {
+      // First load: full clear + recreate with entrance fly-in animation
+      clustererRef.current.clearMarkers();
+      markersRef.current.clear();
+      markerDivsRef.current.clear();
+      promotedMarkersRef.current.forEach(m => { m.map = null; });
+      promotedMarkersRef.current = [];
+
+      if (props.length === 0) return;
+      hasAnimatedEntranceRef.current = true;
+
+      const regularMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
+      const promotedMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
+
+      for (let i = 0; i < props.length; i++) {
+        const { marker, markerDiv, isActivelyPromoted } = makeMarker(props[i], true, i, props.length);
+        markersRef.current.set(props[i].id, marker);
+        markerDivsRef.current.set(props[i].id, markerDiv);
+        if (isActivelyPromoted) {
+          marker.map = mapToUse;
+          promotedMarkers.push(marker);
+        } else {
+          regularMarkers.push(marker);
+        }
       }
 
-      markersRef.current.set(property.id, marker);
-      markerDivsRef.current.set(property.id, markerDiv);
+      clustererRef.current.addMarkers(regularMarkers);
+      promotedMarkersRef.current = promotedMarkers;
+
+      if ((window as any).__balkanestateSplashDone) {
+        setTimeout(() => { delete (window as any).__balkanestateSplashDone; }, 3500);
+      }
+      return;
     }
 
-    // Add regular markers to clusterer (promoted stay individual on map)
-    clustererRef.current.addMarkers(regularMarkers);
-    promotedMarkersRef.current = promotedMarkers;
+    // Subsequent updates: diff-based — keep markers that are still valid,
+    // remove those that left the viewport, add newly visible ones.
+    // This eliminates the "all markers gone for 150ms" flicker on zoom/pan.
+    if (props.length === 0) {
+      clustererRef.current.clearMarkers();
+      markersRef.current.clear();
+      markerDivsRef.current.clear();
+      promotedMarkersRef.current.forEach(m => { m.map = null; });
+      promotedMarkersRef.current = [];
+      return;
+    }
 
-    // Clean up splash flag if it exists (may have been set by SplashScreen)
-    if (shouldAnimateEntrance && (window as any).__balkanestateSplashDone) {
-      setTimeout(() => {
-        delete (window as any).__balkanestateSplashDone;
-      }, 3500);
+    const newPropIds = new Set(props.map(p => p.id));
+
+    // Remove markers no longer in the incoming list
+    const staleRegular: google.maps.marker.AdvancedMarkerElement[] = [];
+    markersRef.current.forEach((marker, id) => {
+      if (!newPropIds.has(id)) {
+        staleRegular.push(marker);
+        markersRef.current.delete(id);
+        markerDivsRef.current.delete(id);
+      }
+    });
+    promotedMarkersRef.current = promotedMarkersRef.current.filter(marker => {
+      const div = marker.content as HTMLElement;
+      const id = div?.dataset?.propertyId;
+      if (id && !newPropIds.has(id)) { marker.map = null; return false; }
+      return true;
+    });
+    if (staleRegular.length > 0) {
+      clustererRef.current.removeMarkers(staleRegular, true); // noDraw — batch with add below
+    }
+
+    // Add markers for properties not yet on the map
+    const toAdd = props.filter(p => !markersRef.current.has(p.id));
+    const newRegular: google.maps.marker.AdvancedMarkerElement[] = [];
+    for (const property of toAdd) {
+      const { marker, markerDiv, isActivelyPromoted } = makeMarker(property, false, 0, 0);
+      markersRef.current.set(property.id, marker);
+      markerDivsRef.current.set(property.id, markerDiv);
+      if (isActivelyPromoted) {
+        marker.map = mapToUse;
+        promotedMarkersRef.current.push(marker);
+      } else {
+        newRegular.push(marker);
+      }
+    }
+
+    if (newRegular.length > 0) {
+      clustererRef.current.addMarkers(newRegular, false); // triggers single cluster re-render
+    } else if (staleRegular.length > 0) {
+      clustererRef.current.render(); // only removals happened — force cluster refresh
     }
   }, [colocatedOffsets]);
 

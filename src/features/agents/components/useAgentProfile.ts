@@ -551,7 +551,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             const messageText = `Property Appraisal Request:\n\nAddress: ${appraisalForm.address}\nProperty Type: ${appraisalForm.propertyType}\nNotes: ${appraisalForm.notes || 'No additional notes'}`;
 
             // Actually send the message to the conversation
-            await sendMessage(conversation.id, { text: messageText });
+            await sendMessage(conversation.id, { text: messageText } as any);
 
             // Redirect to inbox
             dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
@@ -588,7 +588,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             const messageText = `Consultation Request:\n\nPreferred Date: ${consultationForm.date}\nPreferred Time: ${consultationForm.time}\nTopic: ${consultationForm.topic}\nNotes: ${consultationForm.notes || 'No additional notes'}`;
 
             // Actually send the message to the conversation
-            await sendMessage(conversation.id, { text: messageText });
+            await sendMessage(conversation.id, { text: messageText } as any);
 
             dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
             window.history.pushState({ page: 'inbox' }, '', '/inbox');

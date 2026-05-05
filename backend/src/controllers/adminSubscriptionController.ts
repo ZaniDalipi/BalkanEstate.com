@@ -12,11 +12,13 @@ import PaymentRecord from '../models/PaymentRecord';
 import SubscriptionEvent from '../models/SubscriptionEvent';
 import User from '../models/User';
 import Agency from '../models/Agency';
+import Product from '../models/Product';
 import { adminLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
 import { getObjectIdParam } from '../utils/validateParams';
 import { escapeRegex } from '../utils/escapeRegex';
 import { PRO_TIER_LIMITS, ENTERPRISE_TIER_LIMITS, FREE_TIER_LIMITS } from '../config/subscriptionConstants';
+import { createNotificationWithPush } from '../services/engagementService';
 
 /**
  * @desc    Get all subscriptions with pagination and filters
@@ -521,7 +523,7 @@ export const adjustListingLimit = async (req: Request, res: Response): Promise<v
   try {
     const userId = getObjectIdParam(req, res, 'userId');
     if (!userId) return;
-    const { listingsLimit, reason } = req.body;
+    const { listingsLimit, reason, sendNotification } = req.body;
 
     if (listingsLimit === undefined || listingsLimit === null || Number(listingsLimit) < 0) {
       res.status(400).json({ message: 'listingsLimit must be a non-negative number' });
@@ -535,6 +537,7 @@ export const adjustListingLimit = async (req: Request, res: Response): Promise<v
     }
 
     const newLimit = Number(listingsLimit);
+    const oldLimit = user.subscription?.listingsLimit ?? 0;
 
     // Update unified subscription object — initialize if missing
     if (!user.subscription) {
@@ -584,6 +587,28 @@ export const adjustListingLimit = async (req: Request, res: Response): Promise<v
     invalidateCache('/api/properties');
 
     adminLogger.info(`[Admin] Listing limit for user ${userId} set to ${newLimit} by admin ${(req as any).user?._id}`);
+
+    // Invalidate user caches so they get fresh data on next request
+    invalidateCache(`/api/auth/me/${userId}`);
+    invalidateCache(`/api/users/${userId}`);
+
+    // Send notification to user about listing limit increase (if enabled)
+    if (sendNotification !== false) {
+      await createNotificationWithPush({
+        userId,
+        type: 'listing_limit_increased',
+        title: 'Listing Limit Increased',
+        message: `Your monthly listing limit has been increased to ${newLimit} listings. You can now create more listings this month!`,
+        icon: 'check-circle',
+        priority: 'high',
+        data: {
+          newLimit,
+          previousLimit: oldLimit,
+        },
+      }).catch((err) => {
+        adminLogger.error(`[Admin] Failed to send notification for listing limit increase:`, err);
+      });
+    }
 
     res.json({
       success: true,
@@ -1204,6 +1229,425 @@ export const manageUserSubscription = async (req: Request, res: Response): Promi
   }
 };
 
+/**
+ * @desc    Get carryover stats for a user (testing)
+ * @route   GET /api/admin/subscriptions/carryover/:userId
+ * @access  Admin
+ */
+export const getCarryoverStats = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = getObjectIdParam(req, res, 'userId');
+    if (!userId) return;
+
+    const user = await User.findById(userId).lean();
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const product = await Product.findOne({ productId: user.subscriptionPlan }).lean();
+
+    res.json({
+      success: true,
+      userId: user._id,
+      email: user.email,
+      name: user.name,
+      subscriptionPlan: user.subscriptionPlan,
+      product: product
+        ? {
+            productId: product.productId,
+            name: product.name,
+            listingsLimit: product.listingsLimit,
+            billingPeriod: product.billingPeriod,
+            tier: product.tier,
+          }
+        : null,
+      monthlyListing: {
+        listingsCreatedThisMonth: user.subscription?.listingsCreatedThisMonth ?? 0,
+        monthResetDate: user.subscription?.monthResetDate ?? null,
+      },
+      activeListingsCount: user.subscription?.activeListingsCount ?? 0,
+    });
+  } catch (error: any) {
+    adminLogger.error('[Admin] Error getting carryover stats:', error);
+    res.status(500).json({ message: 'Error getting carryover stats' });
+  }
+};
+
+/**
+ * @desc    Manually trigger subscription renewal (for testing carryover)
+ * @route   POST /api/admin/subscriptions/trigger-renewal/:userId
+ * @access  Admin
+ */
+export const triggerSubscriptionRenewal = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = getObjectIdParam(req, res, 'userId');
+    if (!userId) return;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    if (!user.subscription) {
+      res.status(400).json({ message: 'User has no subscription' });
+      return;
+    }
+
+    const subscription = await Subscription.findOne({
+      userId,
+      status: { $in: ['active', 'grace', 'pending_cancellation'] },
+    });
+
+    if (!subscription) {
+      res.status(404).json({ message: 'No active subscription found' });
+      return;
+    }
+
+    const product = await Product.findOne({ productId: subscription.productId });
+    if (!product) {
+      res.status(404).json({ message: `Product not found: ${subscription.productId}` });
+      return;
+    }
+
+    // Calculate new expiration date
+    const newExpirationDate = new Date();
+    if (product.billingPeriod === 'yearly') {
+      newExpirationDate.setFullYear(newExpirationDate.getFullYear() + 1);
+    } else {
+      newExpirationDate.setMonth(newExpirationDate.getMonth() + 1);
+    }
+
+    // Update subscription
+    subscription.expirationDate = newExpirationDate;
+    subscription.renewalDate = newExpirationDate;
+    subscription.status = 'active';
+    subscription.autoRenewing = true;
+    subscription.lastUpdated = new Date();
+    await subscription.save();
+
+    // Reset monthly counter on renewal
+    user.subscription.listingsCreatedThisMonth = 0;
+    user.subscription.monthResetDate = new Date();
+
+    user.markModified('subscription');
+    await user.save();
+
+    // Fetch updated user
+    const updatedUser = await User.findById(userId).lean();
+
+    res.json({
+      success: true,
+      message: 'Subscription renewal triggered successfully',
+      subscription: {
+        expirationDate: subscription.expirationDate,
+        status: subscription.status,
+      },
+      monthlyListing: {
+        listingsCreatedThisMonth: updatedUser?.subscription?.listingsCreatedThisMonth ?? 0,
+        monthResetDate: updatedUser?.subscription?.monthResetDate ?? null,
+      },
+    });
+  } catch (error: any) {
+    adminLogger.error('[Admin] Error triggering renewal:', error);
+    res.status(500).json({ message: 'Error triggering renewal', error: error.message });
+  }
+};
+
+/**
+ * @desc    Update monthly listing fields directly (for testing)
+ * @route   PATCH /api/admin/subscriptions/monthly-listing/:userId
+ * @access  Admin
+ */
+export const updateCarryoverFields = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = getObjectIdParam(req, res, 'userId');
+    if (!userId) return;
+
+    const {
+      listingsCreatedThisMonth,
+      monthResetDate,
+    } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    if (!user.subscription) {
+      res.status(400).json({ message: 'User has no subscription' });
+      return;
+    }
+
+    // Update only provided fields
+    if (listingsCreatedThisMonth !== undefined) {
+      user.subscription.listingsCreatedThisMonth = listingsCreatedThisMonth;
+    }
+    if (monthResetDate !== undefined) {
+      user.subscription.monthResetDate = new Date(monthResetDate);
+    }
+
+    user.markModified('subscription');
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Monthly listing fields updated',
+      monthlyListing: {
+        listingsCreatedThisMonth: user.subscription?.listingsCreatedThisMonth ?? 0,
+        monthResetDate: user.subscription?.monthResetDate ?? null,
+      },
+    });
+  } catch (error: any) {
+    adminLogger.error('[Admin] Error updating monthly listing fields:', error);
+    res.status(500).json({ message: 'Error updating monthly listing fields' });
+  }
+};
+
+/**
+ * @desc    Get Product configuration (for understanding tier limits)
+ * @route   GET /api/admin/subscriptions/product-config/:productId
+ * @access  Admin
+ */
+export const getProductConfig = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+
+    if (!productId) {
+      res.status(400).json({ message: 'productId is required' });
+      return;
+    }
+
+    const product = await Product.findOne({ productId }).lean();
+    if (!product) {
+      res.status(404).json({ message: `Product not found: ${productId}` });
+      return;
+    }
+
+    res.json({
+      success: true,
+      product: {
+        productId: product.productId,
+        name: product.name,
+        tier: product.tier,
+        listingsLimit: product.listingsLimit,
+        billingPeriod: product.billingPeriod,
+        price: product.price,
+        currency: product.currency,
+        isActive: product.isActive,
+        isVisible: product.isVisible,
+        promotionCoupons: product.promotionCoupons,
+      },
+    });
+  } catch (error: any) {
+    adminLogger.error('[Admin] Error getting product config:', error);
+    res.status(500).json({ message: 'Error getting product config' });
+  }
+};
+
+/**
+ * @desc    List all products (for testing)
+ * @route   GET /api/admin/subscriptions/products
+ * @access  Admin
+ */
+export const getAllProducts = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const products = await Product.find({}).lean() as any[];
+
+    res.json({
+      success: true,
+      products: products.map((p: any) => ({
+        productId: p.productId,
+        name: p.name,
+        tier: p.tier,
+        listingsLimit: p.listingsLimit,
+        billingPeriod: p.billingPeriod,
+        price: p.price,
+        isActive: p.isActive,
+        isVisible: p.isVisible,
+      })),
+    });
+  } catch (error: any) {
+    adminLogger.error('[Admin] Error getting products:', error);
+    res.status(500).json({ message: 'Error getting products' });
+  }
+};
+
+/**
+ * @desc    Update user's monthly listing counter
+ * @route   PATCH /api/admin/users/:userId/listing-counter
+ * @access  Admin
+ * @body    { listingsCreatedThisMonth: number, resetMonth: boolean }
+ */
+/**
+ * @desc    Update user's monthly listing counter
+ * @route   PATCH /api/admin/users/:userId/listing-counter
+ * @access  Admin
+ * @body    { listingsCreatedThisMonth: number, resetMonth: boolean }
+ *
+ * IMPORTANT: Only explicit value changes are allowed. No automatic resets.
+ * If resetMonth is true, monthResetDate is updated to current date.
+ * Changes are reflected immediately in database and cached invalidated.
+ */
+export const updateUserListingCounter = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { userId } = req.params;
+    const { listingsCreatedThisMonth, resetMonth } = req.body;
+
+    // ===== VALIDATION =====
+    // 1. Validate userId format
+    const userIdStr = typeof userId === 'string' ? userId : String(userId);
+    if (!userIdStr || !mongoose.Types.ObjectId.isValid(userIdStr)) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid user ID format',
+      });
+      return;
+    }
+
+    // 2. Validate listingsCreatedThisMonth
+    if (typeof listingsCreatedThisMonth !== 'number') {
+      res.status(400).json({
+        success: false,
+        message: 'listingsCreatedThisMonth must be a number',
+      });
+      return;
+    }
+
+    if (!Number.isInteger(listingsCreatedThisMonth)) {
+      res.status(400).json({
+        success: false,
+        message: 'listingsCreatedThisMonth must be a whole number',
+      });
+      return;
+    }
+
+    if (listingsCreatedThisMonth < 0) {
+      res.status(400).json({
+        success: false,
+        message: 'listingsCreatedThisMonth cannot be negative',
+      });
+      return;
+    }
+
+    if (listingsCreatedThisMonth > 999) {
+      res.status(400).json({
+        success: false,
+        message: 'listingsCreatedThisMonth cannot exceed 999',
+      });
+      return;
+    }
+
+    // 3. Validate resetMonth flag
+    if (typeof resetMonth !== 'boolean' && resetMonth !== undefined) {
+      res.status(400).json({
+        success: false,
+        message: 'resetMonth must be a boolean',
+      });
+      return;
+    }
+
+    // ===== FETCH USER =====
+    const user = await User.findById(userIdStr);
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+      return;
+    }
+
+    // ===== CHECK FOR CHANGES =====
+    const currentCounter = user.subscription?.listingsCreatedThisMonth ?? 0;
+    const hasCounterChanged = listingsCreatedThisMonth !== currentCounter;
+    const hasResetRequested = resetMonth === true;
+
+    if (!hasCounterChanged && !hasResetRequested) {
+      res.status(400).json({
+        success: false,
+        message: 'No changes to apply. Counter and reset flag are the same.',
+      });
+      return;
+    }
+
+    // ===== BUILD UPDATE OBJECT =====
+    const updateData: Record<string, any> = {};
+
+    if (hasCounterChanged) {
+      updateData['subscription.listingsCreatedThisMonth'] = Math.floor(listingsCreatedThisMonth);
+    }
+
+    if (hasResetRequested) {
+      updateData['subscription.monthResetDate'] = new Date();
+    }
+
+    // ===== UPDATE DATABASE =====
+    const updatedUser = await User.findByIdAndUpdate(
+      userIdStr,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update user',
+      });
+      return;
+    }
+
+    // ===== INVALIDATE CACHE =====
+    invalidateCache(`/api/auth/me/${userIdStr}`);
+    invalidateCache(`/api/auth/user/${userIdStr}`);
+    invalidateCache('/api/admin/subscriptions');
+
+    // ===== AUDIT LOG =====
+    adminLogger.info('[Admin] Updated user listing counter', {
+      adminId: (req.user as any)?._id,
+      adminEmail: (req.user as any)?.email,
+      userId: userIdStr,
+      userEmail: user.email,
+      changes: {
+        counterChanged: hasCounterChanged,
+        previousCounter: currentCounter,
+        newCounter: listingsCreatedThisMonth,
+        resetMonthDate: hasResetRequested,
+      },
+      timestamp: new Date().toISOString(),
+    });
+
+    // ===== RETURN SUCCESS RESPONSE =====
+    res.status(200).json({
+      success: true,
+      message: 'Listing counter updated successfully',
+      user: {
+        id: String(updatedUser._id),
+        email: updatedUser.email,
+        name: updatedUser.name,
+        subscription: {
+          tier: updatedUser.subscription?.tier,
+          listingsCreatedThisMonth: updatedUser.subscription?.listingsCreatedThisMonth || 0,
+          monthResetDate: updatedUser.subscription?.monthResetDate,
+          listingsLimit: updatedUser.subscription?.listingsLimit,
+          activeListingsCount: updatedUser.subscription?.activeListingsCount,
+        },
+      },
+    });
+  } catch (error: any) {
+    adminLogger.error('[Admin] Error updating user listing counter', {
+      userId: req.params.userId,
+      error: error.message,
+      stack: error.stack,
+    });
+    res.status(500).json({
+      success: false,
+      message: 'Error updating listing counter: ' + (error.message || 'Unknown error'),
+    });
+  }
+};
+
 export default {
   getAllSubscriptions,
   getSubscriptionById,
@@ -1219,4 +1663,10 @@ export default {
   deactivateAgencySubscription,
   getAgencySubscriptionHistory,
   manageUserSubscription,
+  getCarryoverStats,
+  updateUserListingCounter,
+  triggerSubscriptionRenewal,
+  updateCarryoverFields,
+  getProductConfig,
+  getAllProducts,
 };

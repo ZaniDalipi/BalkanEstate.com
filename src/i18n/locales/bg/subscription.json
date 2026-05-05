@@ -106,6 +106,7 @@
     "dayLeft": "day left",
     "daysLeft": "days left",
     "listingLimit": "Listing Limit",
+    "listingUsage": "{{used}} of {{limit}} this month",
     "remaining": "remaining",
     "couponSubscription": "Coupon Subscription",
     "cancellationPending": "Subscription Cancellation Pending",

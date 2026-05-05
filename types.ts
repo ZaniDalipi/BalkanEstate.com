@@ -148,6 +148,8 @@ export interface User {
         activeListingsCount: number;
         privateSellerCount: number;
         agentCount: number;
+        listingsCreatedThisMonth?: number; // Monthly counter for listing creation
+        monthResetDate?: Date | string; // When the monthly counter resets
         promotionCoupons?: {
             monthly: number;
             available: number;

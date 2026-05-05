@@ -6,6 +6,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ContactFormData, ContactFormErrors } from '../types';
+import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 
 interface ContactFormProps {
   formData: ContactFormData;
@@ -13,6 +14,7 @@ interface ContactFormProps {
   isSubmitting: boolean;
   submitError: string | null;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  onPhoneChange?: (fullPhone: string) => void;
   onSubmit: (e: React.FormEvent) => void;
 }
 
@@ -31,6 +33,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
   isSubmitting,
   submitError,
   onChange,
+  onPhoneChange = () => {},
   onSubmit,
 }) => {
   const { t } = useTranslation(['contact', 'common']);
@@ -94,22 +97,16 @@ const ContactForm: React.FC<ContactFormProps> = ({
       </div>
 
       {/* Phone (optional) */}
-      <div className="relative">
-        <input
-          type="tel"
-          id="contact-phone"
-          name="phone"
-          value={formData.phone}
-          onChange={onChange}
-          className={`${inputClasses} ${errors.phone ? 'border-red-300 focus:ring-red-200' : ''}`}
-          placeholder=" "
-          autoComplete="tel"
-          aria-invalid={!!errors.phone}
-          aria-describedby={errors.phone ? 'phone-error' : undefined}
-        />
-        <label htmlFor="contact-phone" className={labelClasses}>
+      <div>
+        <label className="block text-sm font-medium text-neutral-600 mb-1.5">
           {t('contact:form.phone', 'Phone (optional)')}
         </label>
+        <PhoneInput
+          value={formData.phone}
+          onChange={onPhoneChange}
+          error={errors.phone}
+          disabled={isSubmitting}
+        />
         {errors.phone && (
           <p id="phone-error" className={errorClasses}>{errors.phone}</p>
         )}

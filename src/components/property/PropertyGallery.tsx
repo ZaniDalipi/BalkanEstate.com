@@ -1,17 +1,17 @@
 // PropertyGallery Component
 // Image gallery with carousel, street view, video player, and interactive controls
 
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '../../../types';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
-  PencilIcon,
   BuildingOfficeIcon,
 } from '../../../constants';
-import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
+import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 
 interface PropertyGalleryProps {
   property: Property;
@@ -23,6 +23,8 @@ interface PropertyGalleryProps {
   currentImageIndex?: number;
   onCategoryChange?: (category: PropertyImageTag | 'all') => void;
   onImageIndexChange?: (index: number) => void;
+  isFavorited?: boolean;
+  onFavoriteClick?: () => void;
 }
 
 /**
@@ -46,6 +48,15 @@ interface PropertyGalleryProps {
  * />
  * ```
  */
+const imageSlideVariants = {
+  enter: (dir: number) => ({ x: dir > 0 ? '100%' : '-100%' }),
+  center: { x: '0%' },
+  exit: (dir: number) => ({ x: dir > 0 ? '-100%' : '100%' }),
+};
+
+const KEN_BURNS_DURATION = 6;
+const CONTAINER_ASPECT = 16 / 9;
+
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   property,
   onOpenEditor,
@@ -55,6 +66,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   currentImageIndex: controlledIndex,
   onCategoryChange,
   onImageIndexChange,
+  isFavorited = false,
+  onFavoriteClick,
 }) => {
   const { t } = useTranslation(['property']);
 
@@ -90,8 +103,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   }, [onImageIndexChange, controlledIndex, internalIndex]);
 
   const [mainImageError, setMainImageError] = useState(false);
-  const [mainImageLoaded, setMainImageLoaded] = useState(false);
   const [viewMode, setViewMode] = useState<'photos' | 'streetview' | 'video'>('photos');
+  const [imageAspect, setImageAspect] = useState<number>(CONTAINER_ASPECT);
+  const handleMainImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+      setImageAspect(img.naturalWidth / img.naturalHeight);
+    }
+  }, []);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -311,25 +330,18 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   const currentImageUrl = imagesForCurrentCategory[currentImageIndex]?.url || property.imageUrl;
 
-  // Reset error/loaded state when image changes
   useEffect(() => {
     setMainImageError(false);
-    setMainImageLoaded(false);
   }, [currentImageUrl]);
 
-  // Preload adjacent images so navigation feels instant
+  // Eagerly preload all gallery images at display-size (900px) so every
+  // swipe and auto-rotate feels instant.
   useEffect(() => {
-    if (imagesForCurrentCategory.length <= 1) return;
-    const prevIndex = (currentImageIndex - 1 + imagesForCurrentCategory.length) % imagesForCurrentCategory.length;
-    const nextIndex = (currentImageIndex + 1) % imagesForCurrentCategory.length;
-    [prevIndex, nextIndex].forEach((idx) => {
-      const url = imagesForCurrentCategory[idx]?.url;
-      if (url) {
-        const img = new Image();
-        img.src = optimizeCloudinaryUrl(url, { width: 1200, quality: 'auto' });
-      }
+    imagesForCurrentCategory.forEach((item) => {
+      const el = new Image();
+      el.src = optimizeCloudinaryUrl(item.url, { width: 900, quality: 'auto' });
     });
-  }, [currentImageIndex, imagesForCurrentCategory]);
+  }, [imagesForCurrentCategory]);
 
   const handleCategorySelect = useCallback((tag: PropertyImageTag | 'all') => {
     setActiveCategory(tag);
@@ -340,7 +352,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
   }, [setActiveCategory, onImageIndexChange]);
 
+  // 1 = forward/next, -1 = backward/prev
+  const [slideDirection, setSlideDirection] = useState(1);
+
   const handleNextImage = useCallback(() => {
+    setSlideDirection(1);
     const newIndex = (currentImageIndex + 1) % imagesForCurrentCategory.length;
     if (onImageIndexChange) {
       onImageIndexChange(newIndex);
@@ -349,7 +365,16 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
   }, [currentImageIndex, imagesForCurrentCategory.length, onImageIndexChange]);
 
+  // Auto-rotate every 5 s in photos mode; resets whenever the user manually navigates
+  // (handleNextImage recreates on index change, which restarts the interval)
+  useEffect(() => {
+    if (viewMode !== 'photos' || imagesForCurrentCategory.length <= 1) return;
+    const timer = setInterval(handleNextImage, 5000);
+    return () => clearInterval(timer);
+  }, [viewMode, imagesForCurrentCategory.length, handleNextImage]);
+
   const handlePrevImage = useCallback(() => {
+    setSlideDirection(-1);
     const newIndex = (currentImageIndex - 1 + imagesForCurrentCategory.length) % imagesForCurrentCategory.length;
     if (onImageIndexChange) {
       onImageIndexChange(newIndex);
@@ -358,66 +383,128 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
   }, [currentImageIndex, imagesForCurrentCategory.length, onImageIndexChange]);
 
-  // Get category label for display
-  const getCategoryEmoji = (category: PropertyImageTag | 'all'): string => {
-    const emojiMap: Record<string, string> = {
-      all: '📷',
-      exterior: '🏠',
-      interior: '🛋️',
-      bedroom: '🛏️',
-      bathroom: '🚿',
-      kitchen: '🍳',
-      living_room: '🛋️',
-      garden: '🌳',
-      pool: '🏊',
-      view: '🌅',
-      other: '📸',
-    };
-    return emojiMap[category] || '📷';
-  };
+  const handleDotNav = useCallback((index: number) => {
+    setSlideDirection(index > currentImageIndex ? 1 : -1);
+    if (onImageIndexChange) {
+      onImageIndexChange(index);
+    } else {
+      setInternalIndex(index);
+    }
+  }, [currentImageIndex, onImageIndexChange]);
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
-      <div className="relative w-full h-[280px] xs:h-[340px] sm:h-[420px] md:h-[500px] lg:h-[560px] landscape:h-[60vh] landscape:min-h-[280px] bg-neutral-900 overflow-hidden">
-        {viewMode === 'photos' ? (
-          <button
+    <div className="overflow-hidden shadow-sm border-b border-neutral-200">
+      {/* ── Gallery frame — fixed 16:9 aspect ratio (Zillow standard). Landscape photos
+           fill edge-to-edge via object-cover; portrait photos are preserved with object-contain
+           and a blurred LQIP backdrop on the side bars. ── */}
+      <div
+        className={`relative w-full bg-neutral-900 overflow-hidden ${
+          viewMode === 'video' && (videoPlatform === 'tiktok' || videoPlatform === 'instagram')
+            ? 'aspect-[9/16] sm:aspect-[16/9]'
+            : 'aspect-[16/9]'
+        }`}
+        style={{ maxHeight: '90vh' }}
+      >
+
+        {/* ── PHOTOS ── */}
+        {viewMode === 'photos' && (
+          <motion.button
             onClick={onOpenViewer}
-            className="relative w-full h-full flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-t-xl overflow-hidden"
+            drag={imagesForCurrentCategory.length > 1 ? 'x' : false}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.08}
+            dragMomentum={false}
+            onDragEnd={(_, info) => {
+              if (info.offset.x < -50) handleNextImage();
+              else if (info.offset.x > 50) handlePrevImage();
+            }}
+            className="absolute inset-0 focus:outline-none cursor-pointer overflow-hidden"
+            style={{ touchAction: 'pan-y' }}
+            aria-label={t('property:gallery.viewImages', 'View property images')}
           >
             {mainImageError ? (
-              <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
-                <BuildingOfficeIcon className="w-24 h-24 text-neutral-400" />
+              <div className="w-full h-full bg-gradient-to-br from-neutral-700 to-neutral-800 flex items-center justify-center">
+                <BuildingOfficeIcon className="w-20 h-20 text-neutral-500" />
               </div>
             ) : (
               <>
-                {/* LQIP blur-up placeholder – visible until the sharp image loads */}
+                {/* LQIP blurred background — fills letterbox bars on desktop object-contain */}
                 <img
                   src={getPropertyImagePlaceholder(currentImageUrl) || optimizeCloudinaryUrl(currentImageUrl, { width: 40, quality: 'auto:eco' })}
                   alt=""
                   aria-hidden="true"
-                  className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-60"
+                  className="absolute inset-0 w-full h-full object-cover blur-3xl scale-110 pointer-events-none select-none"
                 />
-                {/* Main sharp image – fades in once loaded */}
-                <img
-                  key={currentImageUrl}
-                  src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
-                  srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 1200, 1920])}
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
-                  alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} for ${property.listingType === 'rent' ? 'rent' : 'sale'} in ${property.city}, ${property.country} - ${property.address}`}
-                  width={1200}
-                  height={800}
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
-                  fetchpriority="high"
-                  decoding="async"
-                  className={`relative max-w-full max-h-full object-contain transition-opacity duration-300 ${mainImageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                  onLoad={() => setMainImageLoaded(true)}
-                  onError={() => setMainImageError(true)}
-                />
+
+                {/* AnimatePresence at the outer level so exit animations complete before unmount */}
+                <AnimatePresence initial={false} custom={slideDirection}>
+                  <motion.div
+                    key={currentImageUrl}
+                    className="absolute inset-0"
+                    custom={slideDirection}
+                    variants={imageSlideVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{
+                      x: { duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] },
+                    }}
+                  >
+                    {(() => {
+                      // Animate only images that fill the container (wide / landscape).
+                      // Narrow images with side bars stay completely still.
+                      const isWide = imageAspect >= CONTAINER_ASPECT;
+
+                      let kbInitial, kbAnimate;
+                      if (isWide) {
+                        // Camera pan L↔R. Scale 1.08 gives 4% overflow each side,
+                        // exactly matching the 4% travel so edges never show.
+                        const sign = currentImageIndex % 2 === 0 ? 1 : -1;
+                        kbInitial = { scale: 1.14, x: `${7 * sign}%`,  y: '0%' };
+                        kbAnimate = { scale: 1.14, x: `${-7 * sign}%`, y: '0%' };
+                      } else {
+                        kbInitial = { scale: 1, x: '0%', y: '0%' };
+                        kbAnimate = { scale: 1, x: '0%', y: '0%' };
+                      }
+
+                      return (
+                        <motion.div
+                          className="absolute inset-0 flex items-center justify-center"
+                          initial={kbInitial}
+                          animate={kbAnimate}
+                          transition={{ duration: KEN_BURNS_DURATION, ease: 'linear' }}
+                          style={{ willChange: 'transform' }}
+                        >
+                          <img
+                            src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
+                            srcSet={cloudinarySrcSet(currentImageUrl, [640, 960, 1200, 1920])}
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
+                            alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
+                            width={1200}
+                            height={800}
+                            crossOrigin="anonymous"
+                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                            // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
+                            fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
+                            decoding={currentImageIndex === 0 ? 'sync' : 'async'}
+                            loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
+                            className={`pointer-events-none select-none w-full h-full ${isWide ? 'object-cover' : 'object-contain'}`}
+                            draggable={false}
+                            onLoad={handleMainImageLoad}
+                            onError={() => setMainImageError(true)}
+                          />
+                        </motion.div>
+                      );
+                    })()}
+                  </motion.div>
+                </AnimatePresence>
               </>
             )}
-          </button>
-        ) : viewMode === 'video' && hasVideo ? (
+          </motion.button>
+        )}
+
+        {/* ── VIDEO ── */}
+        {viewMode === 'video' && hasVideo ? (
           // Video player - supports both generated videos (mp4) and external embeds
           <div className="relative w-full h-full bg-black flex items-center justify-center overflow-hidden">
             {/* Generated video (direct mp4 playback) */}
@@ -612,286 +699,334 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           </div>
         ) : null}
 
-        {/* 360 Tour Badge - Top Left - Shows after video ends */}
-        {videoEnded && property.virtualTour360Url && viewMode === 'photos' && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              if (onNavigateTo3DTour) {
-                onNavigateTo3DTour();
-              }
-            }}
-            className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold px-3 py-2 sm:px-4 sm:py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all shadow-lg animate-pulse hover:animate-none"
-          >
-            <svg className="w-5 h-5 sm:w-5 sm:h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-              <path d="M2 12h20" />
-            </svg>
-            <span className="text-xs sm:text-sm">{t('property:gallery.enter3DTour', 'Enter 3D Tour')}</span>
-          </button>
-        )}
-
-        {/* Action Buttons (Annotate, 3D Tour) - Horizontal on mobile, vertical on larger screens */}
+        {/* ── OVERLAYS (photos mode only) ── */}
         {viewMode === 'photos' && (
           <>
-            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-2 z-10">
+            {/* 3D Tour badge – top-left */}
+            {videoEnded && property.virtualTour360Url && (
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onOpenEditor(currentImageUrl);
-                }}
-                className="flex items-center justify-center bg-white/90 backdrop-blur-sm text-neutral-800 rounded-full hover:scale-105 transition-transform shadow-md w-10 h-10 sm:w-auto sm:h-auto sm:gap-2 sm:px-4 sm:py-2"
+                onClick={(e) => { e.stopPropagation(); onNavigateTo3DTour?.(); }}
+                className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs font-semibold rounded-full px-3 py-1.5 shadow-lg hover:scale-105 active:scale-95 transition-all animate-pulse hover:animate-none"
               >
-                <PencilIcon className="w-5 h-5 sm:w-5 sm:h-5" />
-                <span className="hidden sm:inline font-semibold text-sm">{t('actions.annotate')}</span>
+                <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                  <path d="M2 12h20" />
+                </svg>
+                <span>{t('property:gallery.enter3DTour', 'Enter 3D Tour')}</span>
               </button>
+            )}
 
-            </div>
+            {/* Favorite button */}
+            {onFavoriteClick && (
+              <motion.button
+                onClick={(e) => { e.stopPropagation(); onFavoriteClick(); }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.92 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
+                aria-label={isFavorited ? t('property:actions.removeFavorite', 'Remove from favorites') : t('property:actions.addFavorite', 'Add to favorites')}
+              >
+                <svg
+                  className={`w-5 h-5 transition-colors ${isFavorited ? 'text-red-500 fill-current' : 'text-neutral-600'}`}
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </motion.button>
+            )}
 
-            {/* Navigation Controls */}
+            {/* Nav arrows – outer edges */}
             {imagesForCurrentCategory.length > 1 && (
               <>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePrevImage();
-                  }}
-                  className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white active:bg-neutral-100 transition-colors shadow-md z-10 w-11 h-11 flex items-center justify-center"
-                  aria-label="Previous image"
+                <motion.button
+                  onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
+                  whileHover={{ scale: 1.08, backgroundColor: 'rgba(255,255,255,0.95)' }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center"
+                  aria-label={t('property:gallery.prevImage', 'Previous image')}
                 >
                   <ChevronLeftIcon className="w-5 h-5 text-neutral-800" />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNextImage();
-                  }}
-                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white active:bg-neutral-100 transition-colors shadow-md z-10 w-11 h-11 flex items-center justify-center"
-                  aria-label="Next image"
+                </motion.button>
+                <motion.button
+                  onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
+                  whileHover={{ scale: 1.08, backgroundColor: 'rgba(255,255,255,0.95)' }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center"
+                  aria-label={t('property:gallery.nextImage', 'Next image')}
                 >
                   <ChevronRightIcon className="w-5 h-5 text-neutral-800" />
-                </button>
-
-                {/* Image Counter & Category Badge - Top left corner */}
-                <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 flex flex-col gap-1.5" style={{ marginTop: property.virtualTour360Url ? '40px' : '0' }}>
-                  {/* Category Badge - Shows when not viewing 'all' */}
-                  {activeCategory !== 'all' && (
-                    <div className="flex items-center gap-1.5 bg-primary/90 backdrop-blur-sm px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-lg animate-fade-in">
-                      <span className="text-sm">{getCategoryEmoji(activeCategory)}</span>
-                      <span className="text-white text-[11px] sm:text-xs font-semibold capitalize">
-                        {t(`photos.categories.${activeCategory}`, { defaultValue: activeCategory.replace('_', ' ') })}
-                      </span>
-                    </div>
-                  )}
-                  {/* Image Counter */}
-                  <div className="flex items-center bg-black/60 backdrop-blur-sm px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full" role="status" aria-live="polite">
-                    <span className="text-white text-[11px] sm:text-xs font-medium whitespace-nowrap">
-                      {currentImageIndex + 1} / {imagesForCurrentCategory.length}
-                    </span>
-                  </div>
-                </div>
+                </motion.button>
               </>
             )}
-          </>
-        )}
 
-        {/* Building Floor Overlay - Shows apartment position in building */}
-        {viewMode === 'photos' && property.propertyType === 'apartment' && property.floorNumber && property.totalFloors && property.totalFloors > 1 && (
-          <div className="absolute bottom-[calc(2.5rem-1px)] sm:bottom-[calc(3rem-1px)] left-2 sm:left-3 z-10 animate-fade-in">
-            <div className="bg-slate-900/85 backdrop-blur-sm rounded-xl shadow-lg border border-slate-700/50 overflow-hidden w-[52px] sm:w-[60px]">
-              {/* Building visualization */}
-              <div className="relative px-2 sm:px-2.5 pt-2 sm:pt-2.5 pb-1">
-                {/* Roof */}
-                <div className="mx-auto w-0 h-0 border-l-[14px] sm:border-l-[16px] border-r-[14px] sm:border-r-[16px] border-b-[6px] sm:border-b-[7px] border-l-transparent border-r-transparent border-b-slate-600 mb-px" />
-                {/* Building outline */}
-                <div
-                  className="relative mx-auto w-7 sm:w-8 rounded-b-sm overflow-hidden border border-slate-600/80 bg-slate-800/60"
-                  style={{ height: `${Math.min(Math.max(property.totalFloors * 7, 35), 80)}px` }}
-                >
-                  {Array.from({ length: property.totalFloors }).map((_, i) => {
-                    const floor = property.totalFloors! - i;
-                    const isHighlighted = floor === property.floorNumber;
-                    return (
-                      <div
-                        key={floor}
-                        className="absolute left-0 right-0 border-b border-slate-700/40"
-                        style={{
-                          height: `${100 / property.totalFloors!}%`,
-                          top: `${(i / property.totalFloors!) * 100}%`,
-                          background: isHighlighted
-                            ? 'linear-gradient(90deg, rgba(34, 197, 94, 0.9), rgba(22, 163, 74, 0.9))'
-                            : 'transparent',
-                          boxShadow: isHighlighted ? '0 0 6px rgba(34, 197, 94, 0.5)' : 'none',
-                        }}
-                      >
-                        {isHighlighted && (
-                          <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-green-400/20 to-emerald-400/20" />
-                        )}
-                      </div>
-                    );
-                  })}
-                  {/* Window dots for non-highlighted floors */}
-                  {property.totalFloors <= 12 && Array.from({ length: property.totalFloors }).map((_, i) => {
-                    const floor = property.totalFloors! - i;
-                    if (floor === property.floorNumber) return null;
-                    return (
-                      <div
-                        key={`win-${floor}`}
-                        className="absolute left-1/2 -translate-x-1/2 flex gap-0.5"
-                        style={{
-                          top: `${((i + 0.35) / property.totalFloors!) * 100}%`,
-                        }}
-                      >
-                        <div className="w-1 h-0.5 bg-slate-600/60 rounded-[0.5px]" />
-                        <div className="w-1 h-0.5 bg-slate-600/60 rounded-[0.5px]" />
-                      </div>
-                    );
-                  })}
-                </div>
-                {/* Ground */}
-                <div className="w-9 sm:w-10 h-0.5 mx-auto bg-slate-600 rounded-b" />
-              </div>
-              {/* Floor label */}
-              <div className="px-1 py-1 text-center border-t border-slate-700/50">
-                <div className="text-[10px] sm:text-xs font-bold text-green-400 leading-none">
-                  {property.floorNumber}/{property.totalFloors}
-                </div>
-                <div className="text-[7px] sm:text-[8px] text-slate-400 leading-tight mt-0.5">
-                  {t('property:gallery.floor', 'floor')}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Property Type & Listing Chip - Bottom right overlay */}
-        {viewMode === 'photos' && property.propertyType && (
-          <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 z-10 flex items-center gap-1.5 animate-fade-in">
-            <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-xl backdrop-saturate-150 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-full border border-white/25 shadow-[0_4px_20px_rgba(0,0,0,0.15)]">
-              {property.propertyType === 'apartment' && (
-                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
-                </svg>
+            {/* Mobile-only bottom badge: type | sale/rent */}
+            <div className="sm:hidden absolute bottom-3 right-3 z-[3] flex items-center gap-1.5 bg-black/70 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full pointer-events-none">
+              {property.propertyType && (
+                <>
+                  <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                  </svg>
+                  <span className="capitalize">{t(`property:propertyTypes.${property.propertyType}`, property.propertyType)}</span>
+                  <span className="opacity-50">|</span>
+                </>
               )}
-              {property.propertyType === 'house' && (
-                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                </svg>
-              )}
-              {property.propertyType === 'villa' && (
-                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3L2 12h3v8h6v-5h2v5h6v-8h3L12 3z" />
-                </svg>
-              )}
-              {property.propertyType === 'land' && (
-                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
-                </svg>
-              )}
-              {!['apartment', 'house', 'villa', 'land'].includes(property.propertyType) && (
-                <BuildingOfficeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90" />
-              )}
-              <span className="text-white text-[11px] sm:text-xs font-semibold capitalize">
-                {t(`property:propertyTypes.${property.propertyType}`, property.propertyType)}
-              </span>
-              <span className="w-px h-3 bg-white/30" />
-              <span className={`text-[11px] sm:text-xs font-bold ${
-                property.listingType === 'rent' ? 'text-blue-300' : 'text-emerald-300'
-              }`}>
+              <span className={property.listingType === 'rent' ? 'text-blue-300' : 'text-emerald-400'}>
                 {property.listingType === 'rent' ? t('property:gallery.forRent', 'Rent') : t('property:gallery.forSale', 'Sale')}
               </span>
             </div>
+
+            {/* Right-side gradient overlay with property info — desktop only */}
+            <div
+              className="hidden sm:flex absolute inset-0 z-[2] pointer-events-none items-center justify-end"
+              style={{ background: 'linear-gradient(to left, rgba(5,15,50,0.92) 0%, rgba(5,15,50,0.78) 22%, rgba(5,15,50,0.45) 48%, rgba(5,15,50,0.08) 68%, transparent 84%)' }}
+            >
+              <div className="w-[38%] sm:w-[34%] pr-6 sm:pr-10 pl-10 sm:pl-8 py-6">
+                {(property.title || property.address) && (
+                  <h2 className="text-white font-bold text-xl sm:text-2xl lg:text-3xl leading-tight mb-2 drop-shadow-lg">
+                    {property.title || property.address}
+                  </h2>
+                )}
+                {(property.city || property.country) && (
+                  <div className="flex items-center gap-1.5 text-white/80 text-sm mb-3">
+                    <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                    </svg>
+                    <span>{[property.city, property.country].filter(Boolean).join(', ')}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-1.5 flex-wrap mb-3">
+                  {property.propertyType && (
+                    <span className="flex items-center gap-1 bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full capitalize">
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                      </svg>
+                      {t(`property:propertyTypes.${property.propertyType}`, property.propertyType)}
+                    </span>
+                  )}
+                  {property.beds ? (
+                    <span className="bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                      {property.beds} {t('property:specs.beds', 'Beds')}
+                    </span>
+                  ) : null}
+                  {property.baths ? (
+                    <span className="bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                      {property.baths} {t('property:specs.baths', 'Baths')}
+                    </span>
+                  ) : null}
+                  {property.sqft ? (
+                    <span className="bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                      {property.sqft} m²
+                    </span>
+                  ) : null}
+                </div>
+                {property.price ? (
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-white font-bold text-2xl sm:text-3xl drop-shadow-lg">
+                      € {property.price.toLocaleString()}{property.listingType === 'rent' ? t('property:seo.perMonth', '/mo') : ''}
+                    </span>
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full flex-shrink-0 ${
+                      property.listingType === 'rent' ? 'bg-blue-500 text-white' : 'bg-emerald-500 text-white'
+                    }`}>
+                      {property.listingType === 'rent' ? t('property:gallery.forRent', 'For Rent') : t('property:gallery.forSale', 'For Sale')}
+                    </span>
+                  </div>
+                ) : null}
+                {imagesForCurrentCategory.length > 1 && (
+                  <div className="text-white/60 text-sm font-medium" role="status" aria-live="polite">
+                    {currentImageIndex + 1} / {imagesForCurrentCategory.length}
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* LiquidGlassSwitch — overlaid at bottom-center of gallery frame (desktop only) */}
+        <div className="hidden sm:block absolute bottom-5 left-1/2 -translate-x-1/2 z-[5] pointer-events-auto">
+          <LiquidGlassSwitch
+            options={[
+              ...(hasVideo ? [{
+                value: 'video',
+                label: t('actions.video', 'Video'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                ),
+              }] : []),
+              {
+                value: 'photos',
+                label: t('actions.photos'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="9" cy="9" r="2" />
+                    <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+                  </svg>
+                ),
+              },
+              {
+                value: 'streetview',
+                label: t('actions.streetView'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="5" r="3" />
+                    <path d="M12 8v4" />
+                    <path d="M8 21l4-9 4 9" />
+                  </svg>
+                ),
+              },
+            ]}
+            value={viewMode}
+            onChange={handleViewModeChange}
+            size="md"
+          />
+        </div>
+
+      </div>
+
+      {/* ── Thumbnail strip + category tabs ── */}
+      <div className="bg-white border-t border-neutral-100 px-4 sm:px-5 pt-4 pb-4">
+
+        {/* Mobile LiquidGlassSwitch — below the image */}
+        <div className="sm:hidden flex justify-center mb-4">
+          <LiquidGlassSwitch
+            options={[
+              ...(hasVideo ? [{
+                value: 'video',
+                label: t('actions.video', 'Video'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                ),
+              }] : []),
+              {
+                value: 'photos',
+                label: t('actions.photos'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="9" cy="9" r="2" />
+                    <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+                  </svg>
+                ),
+              },
+              {
+                value: 'streetview',
+                label: t('actions.streetView'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="5" r="3" />
+                    <path d="M12 8v4" />
+                    <path d="M8 21l4-9 4 9" />
+                  </svg>
+                ),
+              },
+            ]}
+            value={viewMode}
+            onChange={handleViewModeChange}
+            size="md"
+          />
+        </div>
+
+        {/* Header row: camera icon + "Photos" label + category pills */}
+        <div className="flex items-center gap-2 mb-3 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center gap-1.5 flex-shrink-0 mr-1">
+            <svg className="w-4 h-4 text-neutral-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="9" cy="9" r="2" />
+              <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+            </svg>
+            <span className="text-sm font-bold text-neutral-800">{t('property:photos.title', 'Photos')}</span>
+          </div>
+
+          {/* All pill */}
+          <button
+            onClick={() => { if (viewMode !== 'photos') setViewMode('photos'); handleCategorySelect('all'); }}
+            className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
+              activeCategory === 'all' && viewMode === 'photos'
+                ? 'bg-primary text-white border-primary'
+                : 'bg-neutral-100 text-neutral-600 border-neutral-200 hover:bg-neutral-200'
+            }`}
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="9" cy="9" r="2" />
+              <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+            </svg>
+            {t('property:photos.all', 'All')} {allImages.length}
+          </button>
+
+          {/* Per-tag pills */}
+          {(Object.keys(categorizedImages) as PropertyImageTag[]).map((tag) => (
+            <button
+              key={tag}
+              onClick={() => { if (viewMode !== 'photos') setViewMode('photos'); handleCategorySelect(tag); }}
+              className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold capitalize transition-all border ${
+                activeCategory === tag && viewMode === 'photos'
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-neutral-100 text-neutral-600 border-neutral-200 hover:bg-neutral-200'
+              }`}
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+              </svg>
+              {t(`property:photos.categories.${tag}`, { defaultValue: tag.replace('_', ' ') })} {categorizedImages[tag]?.length || 0}
+            </button>
+          ))}
+        </div>
+
+        {/* Thumbnail row — large cards filling card width */}
+        {viewMode === 'photos' ? (
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 sm:-mx-5 px-4 sm:px-5 pb-1">
+            {imagesForCurrentCategory.map((img, index) => (
+              <button
+                key={img.url}
+                onClick={() => {
+                  setSlideDirection(index > currentImageIndex ? 1 : -1);
+                  if (onImageIndexChange) { onImageIndexChange(index); } else { setInternalIndex(index); }
+                }}
+                className={`flex-shrink-0 w-[155px] h-[110px] sm:w-[195px] sm:h-[140px] rounded-xl overflow-hidden transition-all border-2 ${
+                  index === currentImageIndex
+                    ? 'border-primary shadow-lg'
+                    : 'border-transparent hover:border-neutral-300'
+                }`}
+              >
+                <img
+                  src={optimizeCloudinaryUrl(img.url, { width: 390, quality: 'auto', crop: 'fill' })}
+                  alt=""
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </button>
+            ))}
+            {imagesForCurrentCategory.length > 5 && (
+              <button
+                onClick={handleNextImage}
+                className="flex-shrink-0 w-10 h-[110px] sm:h-[140px] bg-neutral-100 hover:bg-neutral-200 rounded-xl flex items-center justify-center transition-colors"
+              >
+                <ChevronRightIcon className="w-5 h-5 text-neutral-600" />
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="pb-1">
+            <button
+              onClick={() => setViewMode('photos')}
+              className="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
+            >
+              <ChevronLeftIcon className="w-3 h-3" />
+              {t('property:gallery.backToPhotos', 'Back to Photos')}
+            </button>
           </div>
         )}
 
-        {/* View Mode Toggle (Video / Photos / Street View) - Liquid Glass Style */}
-        <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 z-10">
-          {/* Mobile version - smaller */}
-          <div className="sm:hidden">
-            <LiquidGlassSwitch
-              options={[
-                // Video option (only if property has video)
-                ...(hasVideo ? [{
-                  value: 'video',
-                  label: t('actions.video', 'Video'),
-                  icon: (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polygon points="5 3 19 12 5 21 5 3" />
-                    </svg>
-                  ),
-                }] : []),
-                {
-                  value: 'photos',
-                  label: t('actions.photos'),
-                  icon: (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="3" width="18" height="18" rx="2" />
-                      <circle cx="9" cy="9" r="2" />
-                      <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
-                    </svg>
-                  ),
-                },
-                {
-                  value: 'streetview',
-                  label: t('actions.streetView'),
-                  icon: (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="5" r="3" />
-                      <path d="M12 8v4" />
-                      <path d="M8 21l4-9 4 9" />
-                    </svg>
-                  ),
-                },
-              ]}
-              value={viewMode}
-              onChange={handleViewModeChange}
-              size="sm"
-            />
-          </div>
-          {/* Desktop version - medium */}
-          <div className="hidden sm:block">
-            <LiquidGlassSwitch
-              options={[
-                // Video option (only if property has video)
-                ...(hasVideo ? [{
-                  value: 'video',
-                  label: t('actions.video', 'Video'),
-                  icon: (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polygon points="5 3 19 12 5 21 5 3" />
-                    </svg>
-                  ),
-                }] : []),
-                {
-                  value: 'photos',
-                  label: t('actions.photos'),
-                  icon: (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="3" width="18" height="18" rx="2" />
-                      <circle cx="9" cy="9" r="2" />
-                      <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
-                    </svg>
-                  ),
-                },
-                {
-                  value: 'streetview',
-                  label: t('actions.streetView'),
-                  icon: (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="5" r="3" />
-                      <path d="M12 8v4" />
-                      <path d="M8 21l4-9 4 9" />
-                    </svg>
-                  ),
-                },
-              ]}
-              value={viewMode}
-              onChange={handleViewModeChange}
-              size="md"
-            />
-          </div>
-        </div>
       </div>
     </div>
   );

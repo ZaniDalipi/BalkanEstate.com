@@ -220,18 +220,31 @@ export function usePropertyManager() {
   };
 
   const handleTogglePromoted = async (property: Property) => {
+    const promoting = !property.isPromoted;
     try {
       await apiRequest(`/admin/properties/${property._id}`, {
         method: 'PATCH',
-        body: { isPromoted: !property.isPromoted },
+        body: { isPromoted: promoting },
         requiresAuth: true,
       });
 
-      // Update local state instead of refetching entire list
+      const now = new Date();
+      const promotionEndDate = promoting
+        ? new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+        : undefined;
+
       setProperties(prev => prev.map(p =>
-        p._id === property._id ? { ...p, isPromoted: !p.isPromoted } : p
+        p._id === property._id
+          ? {
+              ...p,
+              isPromoted: promoting,
+              promotionTier: promoting ? (p.promotionTier ?? 'standard') : undefined,
+              promotionStartDate: promoting ? now : undefined,
+              promotionEndDate,
+            }
+          : p
       ));
-      setSuccessMessage(`Property ${property.isPromoted ? 'unpromoted' : 'promoted'} successfully`);
+      setSuccessMessage(`Property ${promoting ? 'promoted for 1 week' : 'unpromoted'} successfully`);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       setError('Failed to update property');

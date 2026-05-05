@@ -214,9 +214,173 @@ export function useDeleteUser() {
   });
 }
 
-// ============================================================================
-// Discount Codes Hooks
-// ============================================================================
+/**
+ * useUpdateUserListingCounter - Admin mutation for the monthly listing counter.
+ *
+ * Flow:
+ * 1. Optimistic update: patches every matching users[] cache entry immediately
+ *    so the admin UI reflects the change the moment Apply is clicked.
+ * 2. Server call: PATCH /admin/users/:userId/listing-counter persists to DB.
+ * 3. On error: rollback the optimistic patch to the prior snapshot.
+ * 4. On settle: invalidate all user caches so admin and user-facing views
+ *    (/auth/me, /admin/users, /subscriptions/current) refresh to the new truth.
+ */
+export function useUpdateUserListingCounter() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      userId,
+      listingsCreatedThisMonth,
+      resetMonth,
+    }: {
+      userId: string;
+      listingsCreatedThisMonth: number;
+      resetMonth: boolean;
+    }) => {
+      const { apiRequest } = await import('@/src/shared/api');
+      return apiRequest<{
+        success: boolean;
+        message?: string;
+        user?: {
+          subscription?: {
+            listingsCreatedThisMonth?: number;
+            monthResetDate?: string;
+            listingsLimit?: number;
+          };
+        };
+      }>(`/admin/users/${userId}/listing-counter`, {
+        method: 'PATCH',
+        body: { listingsCreatedThisMonth, resetMonth },
+        requiresAuth: true,
+      });
+    },
+
+    // Optimistic update — patches every admin users list cache entry so the
+    // change is visible instantly. We snapshot prior state for rollback on error.
+    onMutate: async ({ userId, listingsCreatedThisMonth, resetMonth }) => {
+      await queryClient.cancelQueries({ queryKey: adminKeys.users({}) });
+      const previous = queryClient.getQueriesData<{ users: unknown[] }>({
+        queryKey: adminKeys.users({}),
+      });
+
+      queryClient.setQueriesData<any>({ queryKey: adminKeys.users({}) }, (old: any) => {
+        if (!old?.users) return old;
+        return {
+          ...old,
+          users: old.users.map((u: any) =>
+            u?._id === userId
+              ? {
+                  ...u,
+                  subscription: {
+                    ...(u.subscription || {}),
+                    listingsCreatedThisMonth,
+                    ...(resetMonth ? { monthResetDate: new Date().toISOString() } : {}),
+                  },
+                }
+              : u
+          ),
+        };
+      });
+
+      return { previous };
+    },
+
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        context.previous.forEach(([key, data]) => {
+          queryClient.setQueryData(key, data);
+        });
+      }
+    },
+
+    // Always refetch to reconcile with the server's authoritative value.
+    onSettled: () => {
+      invalidateAllUserCaches(queryClient);
+    },
+  });
+}
+
+/**
+ * useUpdateUserListingLimit - Admin mutation for the user's listing limit.
+ *
+ * Flow:
+ * 1. Optimistic update: patches every matching users[] cache entry immediately
+ *    so the admin UI reflects the change the moment Apply is clicked.
+ * 2. Server call: PATCH /admin/subscriptions/listing-limit/:userId persists to DB.
+ * 3. On error: rollback the optimistic patch to the prior snapshot.
+ * 4. On settle: invalidate all user caches so admin and user-facing views
+ *    refresh to the new truth without losing the updated value.
+ */
+export function useUpdateUserListingLimit() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      userId,
+      listingsLimit,
+      sendNotification,
+    }: {
+      userId: string;
+      listingsLimit: number;
+      sendNotification?: boolean;
+    }) => {
+      const { apiRequest } = await import('@/src/shared/api');
+      return apiRequest<{
+        success: boolean;
+        message?: string;
+        listingsLimit?: number;
+      }>(`/admin/subscriptions/listing-limit/${userId}`, {
+        method: 'PATCH',
+        body: { listingsLimit, reason: 'Admin manual override', sendNotification },
+        requiresAuth: true,
+      });
+    },
+
+    // Optimistic update — patches every admin users list cache entry so the
+    // change is visible instantly. We snapshot prior state for rollback on error.
+    onMutate: async ({ userId, listingsLimit }) => {
+      await queryClient.cancelQueries({ queryKey: adminKeys.users({}) });
+      const previous = queryClient.getQueriesData<{ users: unknown[] }>({
+        queryKey: adminKeys.users({}),
+      });
+
+      queryClient.setQueriesData<any>({ queryKey: adminKeys.users({}) }, (old: any) => {
+        if (!old?.users) return old;
+        return {
+          ...old,
+          users: old.users.map((u: any) =>
+            u?._id === userId
+              ? {
+                  ...u,
+                  activeListingsLimit: listingsLimit,
+                  subscription: {
+                    ...(u.subscription || {}),
+                    listingsLimit,
+                  },
+                }
+              : u
+          ),
+        };
+      });
+
+      return { previous };
+    },
+
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        context.previous.forEach(([key, data]) => {
+          queryClient.setQueryData(key, data);
+        });
+      }
+    },
+
+    // Always refetch to reconcile with the server's authoritative value.
+    onSettled: () => {
+      invalidateAllUserCaches(queryClient);
+    },
+  });
+}
 
 /**
  * Helper function to invalidate all discount-related caches across the app

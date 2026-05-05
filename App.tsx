@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense, startTransition } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense, startTransition, useReducer } from 'react';
 import { useSubscriptionExpiry } from './src/features/subscription/hooks/useSubscriptionExpiry';
 import { useTranslation } from 'react-i18next';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
@@ -1057,29 +1057,30 @@ const AppWrapper: React.FC = () => {
     const { state, dispatch, checkAuthStatus, handleOAuthCallback } = useAppContext();
     const { t } = useTranslation('common');
 
-    // Show splash only on first visit or after login/register
     const hasVisited = useRef(localStorage.getItem('balkanestate_visited') === 'true');
     const [showSplash, setShowSplash] = useState(!hasVisited.current);
-    const prevAuthenticated = useRef(state.isAuthenticated);
 
-    // Show splash only for explicit login/signup, not session restore
-    useEffect(() => {
-        if (!prevAuthenticated.current && state.isAuthenticated) {
-            const justAuthed = sessionStorage.getItem('balkanestate_just_authed');
-            if (justAuthed) {
-                sessionStorage.removeItem('balkanestate_just_authed');
-                setShowSplash(true);
-            }
-        }
-        prevAuthenticated.current = state.isAuthenticated;
-    }, [state.isAuthenticated]);
+    // Read synchronously during render — avoids a one-frame flash of the main layout.
+    // login()/signup()/handleOAuthCallback() set this key BEFORE dispatching state
+    // changes, so by the time React re-renders AppWrapper the flag is already true.
+    const justAuthed = sessionStorage.getItem('balkanestate_just_authed') === 'true';
+    const shouldShowSplash = showSplash || justAuthed;
+
+    // Used to guarantee a re-render after handleSplashComplete even when showSplash
+    // was already false (returning users). Without this, setShowSplash(false) is a
+    // no-op and React never re-reads justAuthed from sessionStorage, leaving the app
+    // stuck behind the 0.01-opacity overlay with no splash visible.
+    const [, forceUpdate] = useReducer((n: number) => n + 1, 0);
 
     const handleSplashComplete = useCallback(() => {
         setShowSplash(false);
+        // Clear the post-login flag so subsequent renders don't re-trigger the splash
+        sessionStorage.removeItem('balkanestate_just_authed');
+        // Always increment so React re-renders even when showSplash was already false
+        forceUpdate();
         localStorage.setItem('balkanestate_visited', 'true');
-        // Signal map markers to play entrance fly-in animation
         (window as any).__balkanestateSplashDone = Date.now();
-    }, []);
+    }, [forceUpdate]);
 
     // Monitor user's email verification status and clear pending verification when verified
     useEffect(() => {
@@ -1136,7 +1137,7 @@ const AppWrapper: React.FC = () => {
 
     // While splash is active, render app content behind it so resources start loading
     // But skip splash if user needs email verification (show that immediately instead)
-    if (showSplash && !state.pendingEmailVerification) {
+    if (shouldShowSplash && !state.pendingEmailVerification) {
         return (
             <>
                 {/* Render main layout behind the splash so map/resources start loading */}

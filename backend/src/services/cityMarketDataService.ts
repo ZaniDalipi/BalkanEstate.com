@@ -256,7 +256,7 @@ async function fetchCityDataFromGemini(cities: Array<{ city: string; country: st
 
   const citiesList = cities.map(c => `${c.city}, ${c.country}`).join('; ');
 
-  const prompt = `You are a real estate market analyst. Provide current 2025 real estate market data for these Balkan cities: ${citiesList}
+  const prompt = `You are a real estate market analyst. Provide current 2025 real estate SALE market data for these Balkan cities: ${citiesList}
 
 For each city, provide realistic market data based on general economic trends, tourism, and typical Balkan real estate patterns. Return ONLY valid JSON array format with this structure:
 
@@ -265,8 +265,8 @@ For each city, provide realistic market data based on general economic trends, t
     "city": "City Name",
     "country": "Country Name",
     "countryCode": "XX",
-    "avgPricePerSqm": <number in EUR>,
-    "medianPrice": <number in EUR for 70sqm apartment>,
+    "avgPricePerSqm": <number in EUR, for-sale properties only — NOT rental prices>,
+    "medianPrice": <number in EUR for 70sqm apartment, for sale>,
     "priceGrowthYoY": <percentage, can be negative>,
     "averageDaysOnMarket": <number of days>,
     "demandScore": <0-100, higher = more demand>,
@@ -278,10 +278,17 @@ For each city, provide realistic market data based on general economic trends, t
   }
 ]
 
-Guidelines:
-- Capital cities typically have higher prices (€1500-2500/sqm)
-- Coastal/tourist cities have good rental yields (5-8%)
-- Smaller cities have lower prices (€800-1500/sqm)
+Guidelines for avgPricePerSqm (for-sale prices only, NOT rental):
+- Albania (Tirana): €800-1,400/sqm; coastal (Sarande, Vlore): €700-1,200/sqm
+- Serbia (Belgrade): €1,500-2,500/sqm; smaller Serbian cities: €600-1,200/sqm
+- Montenegro coastal (Budva, Kotor): €2,000-4,000/sqm; Podgorica: €1,000-1,800/sqm
+- Croatia coastal (Split, Dubrovnik area): €3,000-5,000/sqm; Zagreb: €2,000-3,500/sqm
+- Bosnia (Sarajevo): €1,200-2,000/sqm; smaller cities: €600-1,200/sqm
+- North Macedonia (Skopje): €1,000-1,800/sqm; smaller cities: €500-900/sqm
+- Bulgaria (Sofia): €1,200-2,000/sqm; coastal: €800-1,500/sqm
+- Romania (Bucharest): €1,500-2,500/sqm; other cities: €800-1,500/sqm
+- Kosovo (Pristina): €700-1,200/sqm
+- Greece: coastal/islands €2,000-5,000/sqm; mainland cities €1,000-2,000/sqm
 - Rising markets have 8-15% YoY growth
 - Stable markets have 2-7% YoY growth
 - Declining markets have -3% to 2% growth
@@ -322,36 +329,45 @@ async function calculateMarketDataFromProperties(city: string, country: string):
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const properties = await Property.find({
+    const activeProperties = await Property.find({
       city,
       country,
-      status: { $in: ['active', 'sold'] },
+      status: 'active',
+      listingType: 'sale',
     });
 
-    if (properties.length < 3) {
-      return null; // Not enough data for price calculations
-    }
+    const soldProperties = await Property.find({
+      city,
+      country,
+      status: 'sold',
+      updatedAt: { $gte: thirtyDaysAgo },
+    });
 
-    const prices = properties.map(p => p.price / (p.sqft || 70)); // Price per sqft, default 70 if missing
-    const avgPricePerSqm = (prices.reduce((a, b) => a + b, 0) / prices.length) * 10.764; // Convert sqft to sqm
+    const listingsCount = activeProperties.length;
+    const soldLastMonth = soldProperties.length;
 
-    const activeDays = properties
-      .filter(p => p.status === 'active' && p.createdAt)
+    // Price per m² is based only on active (for-sale) listings.
+    // sqft field stores m² (despite the name). Filter unrealistic values (below €300 or above €7,500/m²).
+    const MIN_PRICE_PER_SQM = 300;
+    const MAX_PRICE_PER_SQM = 7500;
+    const validPricesPerSqm = activeProperties
+      .map(p => p.price / (p.sqft || 80))
+      .filter(v => v >= MIN_PRICE_PER_SQM && v <= MAX_PRICE_PER_SQM);
+
+    const avgPricePerSqm = validPricesPerSqm.length >= 3
+      ? validPricesPerSqm.reduce((a, b) => a + b, 0) / validPricesPerSqm.length
+      : null;
+
+    const activeDays = activeProperties
+      .filter(p => p.createdAt)
       .map(p => Math.floor((Date.now() - p.createdAt.getTime()) / (1000 * 60 * 60 * 24)));
 
     const averageDaysOnMarket = activeDays.length > 0
       ? activeDays.reduce((a, b) => a + b, 0) / activeDays.length
       : 45;
 
-    // Count only active listings (available properties)
-    const listingsCount = properties.filter(p => p.status === 'active').length;
-
-    const soldLastMonth = properties.filter(
-      p => p.status === 'sold' && p.updatedAt && p.updatedAt > thirtyDaysAgo
-    ).length;
-
     return {
-      avgPricePerSqm: Math.round(avgPricePerSqm),
+      ...(avgPricePerSqm !== null ? { listingAvgPricePerSqm: Math.round(avgPricePerSqm) } : {}),
       listingsCount,
       averageDaysOnMarket: Math.round(averageDaysOnMarket),
       soldLastMonth,
@@ -364,32 +380,42 @@ async function calculateMarketDataFromProperties(city: string, country: string):
 }
 
 /**
- * Get live listing counts from the Property collection for a city
- * This is always current and doesn't depend on scheduled updates
+ * Get live city stats from the Property collection for a city.
+ * Always current — does not depend on scheduled updates.
+ * Returns listing counts AND the avg price per m² from active for-sale listings.
  */
-async function getLiveListingCounts(city: string, country: string): Promise<{ listingsCount: number; soldLastMonth: number }> {
+async function getLiveCityStats(city: string, country: string): Promise<{
+  listingsCount: number;
+  soldLastMonth: number;
+  listingAvgPricePerSqm?: number;
+}> {
   try {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const cityRegex = { $regex: new RegExp(`^${escapeRegex(city)}$`, 'i') };
+    const countryRegex = { $regex: new RegExp(`^${escapeRegex(country)}$`, 'i') };
 
-    // Count active listings
-    const listingsCount = await Property.countDocuments({
-      city: { $regex: new RegExp(`^${escapeRegex(city)}$`, 'i') },
-      country: { $regex: new RegExp(`^${escapeRegex(country)}$`, 'i') },
-      status: 'active',
-    });
+    const [activeProperties, soldLastMonth] = await Promise.all([
+      Property.find({ city: cityRegex, country: countryRegex, status: 'active', listingType: 'sale' }, { price: 1, sqft: 1 }).lean(),
+      Property.countDocuments({ city: cityRegex, country: countryRegex, status: 'sold', updatedAt: { $gte: thirtyDaysAgo } }),
+    ]);
 
-    // Count properties sold in the last 30 days
-    const soldLastMonth = await Property.countDocuments({
-      city: { $regex: new RegExp(`^${escapeRegex(city)}$`, 'i') },
-      country: { $regex: new RegExp(`^${escapeRegex(country)}$`, 'i') },
-      status: 'sold',
-      updatedAt: { $gte: thirtyDaysAgo },
-    });
+    const listingsCount = activeProperties.length;
 
-    return { listingsCount, soldLastMonth };
+    const MIN_PRICE_PER_SQM = 300;
+    const MAX_PRICE_PER_SQM = 7500;
+    // sqft field stores m² (despite the name — frontend always displays it as m²)
+    const validPrices = activeProperties
+      .map((p: { price: number; sqft?: number }) => p.price / (p.sqft || 80))
+      .filter((v: number) => v >= MIN_PRICE_PER_SQM && v <= MAX_PRICE_PER_SQM);
+
+    const listingAvgPricePerSqm = validPrices.length >= 3
+      ? Math.round(validPrices.reduce((a: number, b: number) => a + b, 0) / validPrices.length)
+      : undefined;
+
+    return { listingsCount, soldLastMonth, listingAvgPricePerSqm };
   } catch (error) {
-    apiLogger.error(`Error getting live listing counts for ${city}:`, error);
+    apiLogger.error(`Error getting live city stats for ${city}:`, error);
     return { listingsCount: 0, soldLastMonth: 0 };
   }
 }
@@ -432,23 +458,27 @@ export async function updateAllCityMarketData(): Promise<void> {
             continue;
           }
 
-          // Merge Gemini and calculated data
+          // Merge: Gemini provides market-wide metrics; calculated provides live listing stats.
+          // avgPricePerSqm always comes from Gemini (market reference).
+          // listingAvgPricePerSqm comes from active platform listings (when enough exist).
           const marketData: Partial<ICityMarketData> = {
             city: cityInfo.city,
             country: cityInfo.country,
             countryCode: cityInfo.countryCode,
             ...(geminiCityData || {}),
-            ...(calculatedData || {}),
+            ...(calculatedData ? {
+              listingsCount: calculatedData.listingsCount,
+              soldLastMonth: calculatedData.soldLastMonth,
+              averageDaysOnMarket: calculatedData.averageDaysOnMarket,
+              ...(calculatedData.listingAvgPricePerSqm
+                ? { listingAvgPricePerSqm: calculatedData.listingAvgPricePerSqm }
+                : {}),
+            } : {}),
             lastUpdated: new Date(),
             featured: true,
             displayOrder: cityIndex,
+            dataSource: geminiCityData ? 'gemini' : 'calculated',
           };
-
-          // If we have Gemini data but also calculated data, blend them
-          if (geminiCityData && calculatedData) {
-            marketData.avgPricePerSqm = Math.round((geminiCityData.avgPricePerSqm + calculatedData.avgPricePerSqm!) / 2);
-            marketData.dataSource = 'gemini';
-          }
 
           await CityMarketData.findOneAndUpdate(
             { city: cityInfo.city, country: cityInfo.country },
@@ -520,14 +550,17 @@ export async function getFeaturedCities(limit: number = 12): Promise<CityMarketD
       .limit(limit)
       .lean<CityMarketDataLean[]>();
 
-    // Enrich each city with live listing counts from the Property collection
+    // Enrich each city with live stats from the Property collection
     const enrichedCities = await Promise.all(
       cities.map(async (city) => {
-        const liveCounts = await getLiveListingCounts(city.city, city.country);
+        const liveStats = await getLiveCityStats(city.city, city.country);
         return {
           ...city,
-          listingsCount: liveCounts.listingsCount,
-          soldLastMonth: liveCounts.soldLastMonth,
+          listingsCount: liveStats.listingsCount,
+          soldLastMonth: liveStats.soldLastMonth,
+          ...(liveStats.listingAvgPricePerSqm !== undefined
+            ? { listingAvgPricePerSqm: liveStats.listingAvgPricePerSqm }
+            : {}),
         };
       })
     );
@@ -548,14 +581,17 @@ export async function getCitiesByCountry(country: string): Promise<CityMarketDat
       .sort({ demandScore: -1, avgPricePerSqm: 1 })
       .lean<CityMarketDataLean[]>();
 
-    // Enrich each city with live listing counts from the Property collection
+    // Enrich each city with live stats from the Property collection
     const enrichedCities = await Promise.all(
       cities.map(async (city) => {
-        const liveCounts = await getLiveListingCounts(city.city, city.country);
+        const liveStats = await getLiveCityStats(city.city, city.country);
         return {
           ...city,
-          listingsCount: liveCounts.listingsCount,
-          soldLastMonth: liveCounts.soldLastMonth,
+          listingsCount: liveStats.listingsCount,
+          soldLastMonth: liveStats.soldLastMonth,
+          ...(liveStats.listingAvgPricePerSqm !== undefined
+            ? { listingAvgPricePerSqm: liveStats.listingAvgPricePerSqm }
+            : {}),
         };
       })
     );
@@ -578,12 +614,15 @@ export async function getCityMarketData(city: string, country: string): Promise<
       return null;
     }
 
-    // Enrich with live listing counts
-    const liveCounts = await getLiveListingCounts(city, country);
+    // Enrich with live stats
+    const liveStats = await getLiveCityStats(city, country);
     return {
       ...data,
-      listingsCount: liveCounts.listingsCount,
-      soldLastMonth: liveCounts.soldLastMonth,
+      listingsCount: liveStats.listingsCount,
+      soldLastMonth: liveStats.soldLastMonth,
+      ...(liveStats.listingAvgPricePerSqm !== undefined
+        ? { listingAvgPricePerSqm: liveStats.listingAvgPricePerSqm }
+        : {}),
     };
   } catch (error) {
     apiLogger.error(`Error fetching market data for ${city}:`, error);

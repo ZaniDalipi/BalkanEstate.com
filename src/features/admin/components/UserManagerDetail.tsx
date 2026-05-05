@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   XMarkIcon,
@@ -8,7 +8,9 @@ import {
 } from '@/constants';
 import { User, UserEditForm } from './useUserManager';
 import { apiRequest } from '@/src/shared/api';
+import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import { approveLicense, rejectLicense } from '../api/adminApi';
+import { useUpdateUserListingCounter, useUpdateUserListingLimit } from '../hooks/useAdminData';
 
 interface UserManagerDetailProps {
   // Detail modal
@@ -25,6 +27,8 @@ interface UserManagerDetailProps {
   handleEditUser: (user: User) => void;
   formatDate: (dateString: string) => string;
   getRoleBadgeColor: (role: string) => string;
+  // Callback to refresh user data after updates
+  onUserUpdated?: () => void;
 }
 
 const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
@@ -40,6 +44,7 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
   handleEditUser,
   formatDate,
   getRoleBadgeColor,
+  onUserUpdated,
 }) => {
   const { t } = useTranslation('admin');
 
@@ -179,7 +184,7 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
               </div>
 
               {/* Subscription Info */}
-              <SubscriptionPanel viewingUser={viewingUser} />
+              <SubscriptionPanel viewingUser={viewingUser} onUpdate={onUserUpdated} />
 
               {/* Agency Info */}
               {viewingUser.agencyName && (
@@ -269,11 +274,9 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t('userDetail.phone')}
                 </label>
-                <input
-                  type="tel"
-                  value={editForm.phone}
-                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                <PhoneInput
+                  value={editForm.phone || ''}
+                  onChange={(v) => setEditForm({ ...editForm, phone: v })}
                 />
               </div>
 
@@ -409,36 +412,136 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
 };
 
 // ─── Subscription info + listing-limit override panel ───────────────────────
-function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
+function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpdate?: () => void }) {
   const { t } = useTranslation('admin');
   const currentLimit = viewingUser.subscription?.listingsLimit ?? 0;
   const [inputLimit, setInputLimit] = useState(String(currentLimit));
-  const [saving, setSaving] = useState(false);
+  const [displayLimit, setDisplayLimit] = useState(currentLimit);
   const [saved, setSaved] = useState(false);
   const [err, setErr] = useState('');
+  const [sendNotification, setSendNotification] = useState(true);
+
+  // Monthly counter editor state
+  const currentMonthlyCounter = viewingUser.subscription?.listingsCreatedThisMonth ?? 0;
+  const [inputMonthlyCounter, setInputMonthlyCounter] = useState(String(currentMonthlyCounter));
+  const [savedMonthly, setSavedMonthly] = useState(false);
+  const [errMonthly, setErrMonthly] = useState('');
+  const [resetMonthCheckbox, setResetMonthCheckbox] = useState(false);
+
+  // React Query mutations — handle optimistic update + cache invalidation
+  const counterMutation = useUpdateUserListingCounter();
+  const limitMutation = useUpdateUserListingLimit();
+  const savingMonthly = counterMutation.isPending;
+  const saving = limitMutation.isPending;
+
+  // Sync inputs only when switching to a different user. Doing so on counter
+  // changes would stomp on the admin's in-progress edits; optimistic updates
+  // already keep the "current:" label in sync with the server.
+  useEffect(() => {
+    setInputLimit(String(currentLimit));
+    setDisplayLimit(currentLimit);
+    setInputMonthlyCounter(String(currentMonthlyCounter));
+    setSaved(false);
+    setSavedMonthly(false);
+    setErr('');
+    setErrMonthly('');
+    setResetMonthCheckbox(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewingUser._id]);
+
+  // Track if value has changed from original
+  const hasLimitChanged = Number(inputLimit) !== displayLimit;
+  const hasCounterChanged = Number(inputMonthlyCounter) !== currentMonthlyCounter;
 
   const formatDisplayDate = (dateStr?: string) => {
     if (!dateStr) return '—';
     return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
-  const handleSave = async () => {
-    const val = Number(inputLimit);
-    if (isNaN(val) || val < 0) { setErr(t('userDetail.invalidNumber')); return; }
-    setSaving(true); setErr('');
-    try {
-      await apiRequest(`/admin/subscriptions/listing-limit/${viewingUser._id}`, {
-        method: 'PATCH',
-        body: { listingsLimit: val, reason: 'Admin manual override' },
-        requiresAuth: true,
-      });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch (e: any) {
-      setErr(e.message || 'Error saving');
-    } finally {
-      setSaving(false);
+  // Validation: ensure value is valid integer >= 0
+  const validateNumber = (value: string): { valid: boolean; error?: string } => {
+    const num = Number(value);
+    if (value.trim() === '') return { valid: false, error: 'Value cannot be empty' };
+    if (isNaN(num)) return { valid: false, error: 'Must be a valid number' };
+    if (!Number.isInteger(num)) return { valid: false, error: 'Must be a whole number' };
+    if (num < 0) return { valid: false, error: 'Cannot be negative' };
+    if (num > 999) return { valid: false, error: 'Value too large (max 999)' };
+    return { valid: true };
+  };
+
+  const handleSave = () => {
+    // Validation
+    const validation = validateNumber(inputLimit);
+    if (!validation.valid) {
+      setErr(validation.error || 'Invalid value');
+      return;
     }
+
+    const val = Number(inputLimit);
+    if (val === displayLimit) {
+      setErr('No change from current value');
+      return;
+    }
+
+    setErr('');
+    limitMutation.mutate(
+      {
+        userId: viewingUser._id,
+        listingsLimit: val,
+        sendNotification,
+      },
+      {
+        onSuccess: (response) => {
+          if (!response.success) {
+            setErr(response.message || 'Failed to update listing limit');
+            return;
+          }
+          // Persist the new value in local state — optimistic update
+          // already patched the React Query cache, so the parent's
+          // viewingUser will reflect this on next render too.
+          setInputLimit(String(val));
+          setDisplayLimit(val);
+          setSaved(true);
+          setTimeout(() => setSaved(false), 3000);
+        },
+        onError: (e: any) => {
+          setErr(e?.message || 'Error saving listing limit');
+        },
+      }
+    );
+  };
+
+  const handleSaveMonthlyCounter = () => {
+    const validation = validateNumber(inputMonthlyCounter);
+    if (!validation.valid) {
+      setErrMonthly(validation.error || 'Invalid value');
+      return;
+    }
+
+    const val = Number(inputMonthlyCounter);
+    if (val === currentMonthlyCounter && !resetMonthCheckbox) {
+      setErrMonthly('No change from current value');
+      return;
+    }
+
+    setErrMonthly('');
+    counterMutation.mutate(
+      {
+        userId: viewingUser._id,
+        listingsCreatedThisMonth: val,
+        resetMonth: resetMonthCheckbox,
+      },
+      {
+        onSuccess: () => {
+          setSavedMonthly(true);
+          setTimeout(() => setSavedMonthly(false), 3000);
+          setResetMonthCheckbox(false);
+        },
+        onError: (e: any) => {
+          setErrMonthly(e?.message || 'Failed to update counter');
+        },
+      }
+    );
   };
 
   return (
@@ -504,28 +607,95 @@ function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
         <label className="text-xs font-semibold text-gray-600 block mb-1">
           {t('userDetail.listingLimitOverride')}
           <span className="font-normal text-gray-400 ml-1">
-            (sub.listingsLimit: {currentLimit} · activeListingsLimit: {viewingUser.activeListingsLimit ?? '—'} · {viewingUser.subscription?.activeListingsCount ?? 0} active)
+            (sub.listingsLimit: {displayLimit} · activeListingsLimit: {viewingUser.activeListingsLimit ?? '—'} · {viewingUser.subscription?.activeListingsCount ?? 0} active)
           </span>
         </label>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-2">
           <input
             type="number"
             min={0}
+            max={999}
             value={inputLimit}
-            onChange={e => { setInputLimit(e.target.value); setSaved(false); }}
+            onChange={e => {
+              setInputLimit(e.target.value);
+              setSaved(false);
+              setErr('');
+            }}
             className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            disabled={saving}
           />
           <button
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || !hasLimitChanged}
             className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed font-medium transition-colors"
+            title={!hasLimitChanged ? 'No changes to save' : 'Save changes'}
           >
             {saving ? t('userDetail.saving') : saved ? t('userDetail.saved') : t('userDetail.apply')}
           </button>
-          <span className="text-xs text-gray-400">{t('userDetail.listingsPerMonth')}</span>
+          <span className="text-xs text-gray-400">listings/month</span>
         </div>
-        {err && <p className="text-xs text-red-500 mt-1">{err}</p>}
-        {saved && <p className="text-xs text-green-600 mt-1">{t('userDetail.limitUpdated')}</p>}
+        <label className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-100 p-1 rounded mb-2">
+          <input
+            type="checkbox"
+            checked={sendNotification}
+            onChange={e => setSendNotification(e.target.checked)}
+            className="w-4 h-4 rounded border-gray-300 cursor-pointer"
+            disabled={saving}
+          />
+          <span className="text-xs text-gray-600">Notify user of limit increase</span>
+        </label>
+        {err && <p className="text-xs text-red-600 font-medium mt-1">{err}</p>}
+        {saved && <p className="text-xs text-green-600 font-medium mt-1">✓ Limit updated successfully</p>}
+      </div>
+
+      {/* Monthly listing counter */}
+      <div className="border-t border-green-200 pt-3">
+        <label className="text-xs font-semibold text-gray-600 block mb-1">
+          {t('userDetail.monthlyListingCounter', 'Monthly Listing Counter')}
+          <span className="font-normal text-gray-400 ml-1">
+            (current: {currentMonthlyCounter})
+          </span>
+        </label>
+        <div className="flex items-center gap-2 mb-2">
+          <input
+            type="number"
+            min={0}
+            max={999}
+            value={inputMonthlyCounter}
+            onChange={e => {
+              setInputMonthlyCounter(e.target.value);
+              setSavedMonthly(false);
+              setErrMonthly('');
+            }}
+            className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            disabled={savingMonthly}
+          />
+          <button
+            onClick={handleSaveMonthlyCounter}
+            disabled={savingMonthly || (!hasCounterChanged && !resetMonthCheckbox)}
+            className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed font-medium transition-colors"
+            title={!hasCounterChanged && !resetMonthCheckbox ? 'No changes to save' : 'Save changes'}
+          >
+            {savingMonthly ? t('userDetail.saving') : savedMonthly ? t('userDetail.saved') : t('userDetail.apply')}
+          </button>
+        </div>
+        <label className="flex items-center gap-2 text-sm mb-2 cursor-pointer hover:bg-gray-100 p-1 rounded">
+          <input
+            type="checkbox"
+            checked={resetMonthCheckbox}
+            onChange={e => {
+              setResetMonthCheckbox(e.target.checked);
+              setSavedMonthly(false);
+              setErrMonthly('');
+            }}
+            className="w-4 h-4 rounded border-gray-300 cursor-pointer"
+            disabled={savingMonthly}
+          />
+          <span className="text-xs text-gray-600">Reset monthResetDate to today</span>
+          {resetMonthCheckbox && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Will update</span>}
+        </label>
+        {errMonthly && <p className="text-xs text-red-600 font-medium mt-1">{errMonthly}</p>}
+        {savedMonthly && <p className="text-xs text-green-600 font-medium mt-1">✓ Counter updated successfully</p>}
       </div>
     </div>
   );

@@ -7,6 +7,10 @@
     "sharedLimit": "Shared Limit: {{used}}/{{limit}} total listings",
     "asRole": "({{count}} as {{role}})",
     "listings": "Listings",
+    "monthlyListings": "This month",
+    "monthlyRemaining": "{{count}} listing(s) remaining this month",
+    "monthlyAvailable": "{{count}} listing(s) available this month",
+    "monthlyLimitReached": "Monthly limit reached. Resets next month.",
     "limitReachedShared": "Shared limit reached across both roles.",
     "limitReachedUpgrade": "Listing limit reached. Upgrade to Pro for 30 listings!",
     "remainingListings": "{{count}} listing(s) remaining",
@@ -661,12 +665,16 @@
     "proSubscriptionRequired": "Pro Subscription Required",
     "agentProRequiredMessage": "Agents must have an active Pro subscription to post listings. Subscribe now to get 30 active listings!",
     "switchRoleRequired": "Switch Role Required",
-    "buyerCannotCreateListing": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings."
+    "buyerCannotCreateListing": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings.",
+    "monthlyLimitReached": "Mjesečni Limit Oglasa Dosegnut",
+    "monthlyLimitMessage": "Iskoristili ste sve oglase ovog mjeseca. Obnavlja se početkom sljedećeg mjeseca.",
+    "monthlyLimitMessageWithCount": "Iskoristili ste {{used}} od {{limit}} oglasa ovog mjeseca. Obnavlja se početkom sljedećeg mjeseca."
   },
   "actions": {
     "subscribeToPro": "Subscribe to Pro",
     "viewMyListings": "View My Listings",
-    "switchRole": "Switch Role"
+    "switchRole": "Switch Role",
+    "requestMoreListings": "Request More Listings"
   },
   "listings": {
     "confirmSold": "Are you sure you want to mark this property as sold? This action cannot be undone.",

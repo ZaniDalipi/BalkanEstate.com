@@ -182,13 +182,37 @@ export const BuildingLibraryIcon: React.FC<{ className?: string }> = ({ classNam
 
 export const BedIcon: React.FC<{ className?: string }> = ({ className }) => (
     React.createElement(Icon, { className: className },
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" })
+        // Headboard post
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M3 8v11" }),
+        // Footboard post
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M21 13v6" }),
+        // Bottom rail
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M3 19h18" }),
+        // Mattress platform with rounded headboard
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M5 13V10a2 2 0 012-2h10a2 2 0 012 2v3" }),
+        // Mattress top rail
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M3 13h18" }),
+        // Left pillow
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M8 10v2" }),
+        // Right pillow
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M15 10v2" }),
     )
 );
 
 export const BathIcon: React.FC<{ className?: string }> = ({ className }) => (
     React.createElement(Icon, { className: className },
-      React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M8.25 7.5V6a2.25 2.25 0 012.25-2.25h3a2.25 2.25 0 012.25 2.25v1.5m-9.75 3V21a2.25 2.25 0 002.25 2.25h9.75a2.25 2.25 0 002.25-2.25v-9.75M8.25 7.5h9.75M12 13.5v2.25" })
+        // Tub body
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M4 12h16v3a5 5 0 01-5 5H9a5 5 0 01-5-5v-3z" }),
+        // Faucet pipe
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M8 12V8.5a2.5 2.5 0 015 0V12" }),
+        // Left rim support
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M2 12h2" }),
+        // Right rim support
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M20 12h2" }),
+        // Left drain leg
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M5.5 19l-1 2" }),
+        // Right drain leg
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M18.5 19l1 2" }),
     )
 );
 
@@ -394,10 +418,20 @@ export const ScaleIcon: React.FC<{ className?: string }> = ({ className }) => (
 
 export const LivingRoomIcon: React.FC<{ className?: string }> = ({ className }) => (
     React.createElement(Icon, { className: className },
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M20 9H4a1 1 0 00-1 1v4a1 1 0 001 1h16a1 1 0 001-1v-4a1 1 0 00-1-1z" }),
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M5 15h14v2H5v-2z" }),
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M7 17v2h2v-2H7z" }),
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M15 17v2h2v-2h-2z" })
+        // Sofa backrest
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M5 13V9a2 2 0 012-2h10a2 2 0 012 2v4" }),
+        // Left armrest
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M3 13a2 2 0 012 2v3" }),
+        // Right armrest
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M21 13a2 2 0 00-2 2v3" }),
+        // Seat cushion row
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M3 15h18v3H3z" }),
+        // Left leg
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18v2" }),
+        // Right leg
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M18 18v2" }),
+        // Cushion divider
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M12 15v3" }),
     )
 );
 

@@ -17,6 +17,7 @@ const CityRecommendations: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
   const [cities, setCities] = useState<CityMarketData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showListingPrice, setShowListingPrice] = useState<Record<string, boolean>>({});
   // Read ?country= URL param to pre-select a country on mount
   const [selectedCountry, setSelectedCountry] = useState<string>(() => {
     const params = new URLSearchParams(window.location.search);
@@ -385,13 +386,35 @@ const CityRecommendations: React.FC = () => {
                 <div className="p-4">
                   {/* Price Headline Section */}
                   <div className="flex items-stretch gap-3 mb-4">
-                    {/* Avg Price per sqm - Primary metric */}
                     <div className="flex-1 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-3 border border-primary/10">
-                      <p className="text-[11px] font-medium text-neutral-500 mb-1">{t('cityCard.avgPricePerSqm')}</p>
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-[11px] font-medium text-neutral-500">Avg. Price /m²</p>
+                        {city.listingAvgPricePerSqm && (
+                          <div className="flex gap-0.5 bg-neutral-100 rounded-full p-0.5">
+                            <button
+                              onClick={e => { e.stopPropagation(); setShowListingPrice(prev => ({ ...prev, [city._id]: false })); }}
+                              className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${!showListingPrice[city._id] ? 'bg-white text-primary shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
+                            >
+                              Market
+                            </button>
+                            <button
+                              onClick={e => { e.stopPropagation(); setShowListingPrice(prev => ({ ...prev, [city._id]: true })); }}
+                              className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${showListingPrice[city._id] ? 'bg-white text-blue-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
+                            >
+                              Listings
+                            </button>
+                          </div>
+                        )}
+                      </div>
                       <div className="flex items-baseline gap-1">
-                        <span className="text-xl font-extrabold text-neutral-900">€{city.avgPricePerSqm.toLocaleString()}</span>
+                        <span className="text-xl font-extrabold text-neutral-900">
+                          €{(showListingPrice[city._id] && city.listingAvgPricePerSqm ? city.listingAvgPricePerSqm : city.avgPricePerSqm).toLocaleString()}
+                        </span>
                         <span className="text-xs font-medium text-neutral-400">/m²</span>
                       </div>
+                      <p className="text-[10px] text-neutral-400 mt-1">
+                        {showListingPrice[city._id] ? `${city.listingsCount} active listings` : 'Market research'}
+                      </p>
                     </div>
                     {/* Typical Property Price */}
                     <div className="flex-1 bg-neutral-50 rounded-xl p-3 border border-neutral-100">

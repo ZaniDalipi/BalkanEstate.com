@@ -56,8 +56,10 @@ class NotificationService {
   }
 
   async initialize(): Promise<void> {
-    // Request permission on initialization
-    await this.requestPermission();
+    // Only read existing permission — never prompt on load (must come from a user gesture)
+    if ('Notification' in window && Notification.permission === 'granted') {
+      this.hasPermission = true;
+    }
   }
 }
 

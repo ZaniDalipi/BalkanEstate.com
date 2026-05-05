@@ -7,6 +7,10 @@
     "sharedLimit": "Limită partajată: {{used}}/{{limit}} anunțuri în total",
     "asRole": "({{count}} ca {{role}})",
     "listings": "Anunțuri",
+    "monthlyListings": "Luna aceasta",
+    "monthlyRemaining": "{{count}} anunțuri rămase luna aceasta",
+    "monthlyAvailable": "{{count}} anunțuri disponibile luna aceasta",
+    "monthlyLimitReached": "Limita lunară atinsă. Se resetează luna viitoare.",
     "limitReachedShared": "Limita partajată atinsă pentru ambele roluri.",
     "limitReachedUpgrade": "Limita anunțurilor atinsă. Fă upgrade la Pro pentru 30 anunțuri!",
     "remainingListings": "{{count}} anunțuri rămase",
@@ -661,12 +665,16 @@
     "proSubscriptionRequired": "Abonament Pro Necesar",
     "agentProRequiredMessage": "Agenții trebuie să aibă un abonament Pro activ pentru a posta anunțuri. Abonați-vă acum pentru 30 de anunțuri active!",
     "switchRoleRequired": "Schimbare de Rol Necesară",
-    "buyerCannotCreateListing": "Cumpărătorii nu pot crea anunțuri de proprietăți. Vă rugăm treceți la rolul de Vânzător Privat sau Agent."
+    "buyerCannotCreateListing": "Cumpărătorii nu pot crea anunțuri de proprietăți. Vă rugăm treceți la rolul de Vânzător Privat sau Agent.",
+    "monthlyLimitReached": "Limita Lunară de Anunțuri Atinsă",
+    "monthlyLimitMessage": "Ați folosit toate anunțurile acestei luni. Se resetează la începutul lunii viitoare.",
+    "monthlyLimitMessageWithCount": "Ați folosit {{used}} din {{limit}} anunțuri această lună. Se resetează la începutul lunii viitoare."
   },
   "actions": {
     "subscribeToPro": "Abonează-te la Pro",
     "viewMyListings": "Vezi Anunțurile Mele",
-    "switchRole": "Schimbă Rolul"
+    "switchRole": "Schimbă Rolul",
+    "requestMoreListings": "Solicită Mai Multe Anunțuri"
   },
   "listings": {
     "confirmSold": "Are you sure you want to mark this property as sold? This action cannot be undone.",

@@ -11,6 +11,7 @@ import CredentialsSection from '@/src/features/credentials/components/Credential
 import { Credential } from '@/src/features/credentials/api/credentialApi';
 import { EditFormData } from './useAgentProfile';
 import ServiceAreaMapPicker from './ServiceAreaMapPicker';
+import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 
 // Shared input classes (module-level to avoid recreation)
 const inputCls =
@@ -274,14 +275,9 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     {t('profilePage.editModal.officePhone')}
                                 </label>
-                                <input
-                                    type="tel"
+                                <PhoneInput
                                     value={editForm.officePhone}
-                                    onChange={e =>
-                                        setEditForm({ ...editForm, officePhone: e.target.value })
-                                    }
-                                    className={inputCls}
-                                    placeholder="+381 11 123 4567"
+                                    onChange={fullPhone => setEditForm({ ...editForm, officePhone: fullPhone })}
                                 />
                             </div>
                             <div>
