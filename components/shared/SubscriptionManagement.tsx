@@ -146,10 +146,6 @@ const PERIOD_TO_MONTHS: Record<string, number> = {
 // NOTE: These match the new product seeder values
 const LISTING_LIMITS: Record<string, number> = {
   free: 3,
-  seller_pro_monthly: 20,  // 20 listings per month
-  seller_pro_yearly: 250,  // 250 listings per year
-  seller_enterprise_yearly: 750, // 750 listings for enterprise
-  // New tiers (from new monetization system)
   free_tier: 3,
   pro_monthly: 20,  // 20 listings per month
   pro_yearly: 250,  // 250 listings per year
@@ -165,9 +161,8 @@ const PLAN_COLORS: Record<string, string> = {
   buyer_monthly: 'linear-gradient(135deg, #3b82f6 0%, #4f46e5 100%)',
   buyer_pro_monthly: 'linear-gradient(135deg, #3b82f6 0%, #4f46e5 100%)',
   buyer_pro_yearly: 'linear-gradient(135deg, #6366f1 0%, #9333ea 100%)',
-  seller_pro_monthly: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-  seller_pro_yearly: 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)',
-  seller_enterprise_yearly: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)',
+  pro_monthly: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+  pro_yearly: 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)',
   agency_yearly: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)',  // Enterprise for agency creators (same orange)
   agency_agent_yearly: 'linear-gradient(135deg, #10b981 0%, #0d9488 100%)',
 };
@@ -178,11 +173,8 @@ const PLAN_TIERS: Record<string, number> = {
   buyer_monthly: 1,          // Buyer Pro
   buyer_pro_monthly: 1,
   buyer_pro_yearly: 2,
-  seller_pro_monthly: 1,
   pro_monthly: 1,
-  seller_pro_yearly: 2,
   pro_yearly: 2,
-  seller_enterprise_yearly: 3,
   agency_yearly: 3,          // Enterprise for agency creators
   agency_agent_yearly: 2,
 };

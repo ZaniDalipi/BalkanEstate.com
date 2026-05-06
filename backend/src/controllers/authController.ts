@@ -18,6 +18,7 @@ import { setRefreshTokenCookie, clearRefreshTokenCookie, getRefreshTokenFromRequ
 import { FREE_TIER_LIMITS, PRO_TIER_LIMITS, ENTERPRISE_TIER_LIMITS } from '../config/subscriptionConstants';
 import { buildFrontendRedirectUrl } from '../utils/redirectValidation';
 import { validateLicenseNumber } from '../utils/licenseValidation';
+import { normalizeProductId } from '../utils/productIdNormalizer';
 
 /**
  * Build a sanitized user response object for public-facing auth endpoints (login/signup).
@@ -836,7 +837,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
 
     if (dbSubscription) {
       const productId = dbSubscription.productId;
-      subscriptionProductId = productId;
+      subscriptionProductId = normalizeProductId(productId);
       subscriptionStatus = dbSubscription.status;
 
       // Look up product limits from DB - single source of truth

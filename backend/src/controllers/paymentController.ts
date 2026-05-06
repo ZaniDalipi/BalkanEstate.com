@@ -11,6 +11,7 @@ import { processSubscriptionPayment } from '../services/subscriptionPaymentServi
 import { paymentProviderFactory } from '../services/paymentProviderFactory';
 import emailService from '../services/emailService';
 import { paymentLogger } from '../utils/logger';
+import { normalizeProductId } from '../utils/productIdNormalizer';
 
 // Stripe is not used - Paddle and PaySera are the active payment providers
 // Keeping Stripe initialization for legacy webhook handling only
@@ -1003,7 +1004,7 @@ export const reactivateSubscription = async (req: Request, res: Response): Promi
     user.isSubscribed = true;
     user.subscriptionStatus = 'active';
     user.subscriptionExpiresAt = newExpirationDate;
-    user.subscriptionPlan = productId;
+    user.subscriptionPlan = normalizeProductId(productId);
     if (product) {
       user.subscriptionProductName = product.name;
     }

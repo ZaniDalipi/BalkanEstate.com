@@ -809,9 +809,6 @@ function SubscriptionEditPanel({ editingUser }: { editingUser: User }) {
           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
         >
           <option value="">— Select Plan —</option>
-          <option value="seller_pro_monthly">Seller Pro Monthly</option>
-          <option value="seller_pro_yearly">Seller Pro Yearly</option>
-          <option value="seller_enterprise_yearly">Seller Enterprise Yearly</option>
           <option value="buyer_monthly">Buyer Monthly</option>
           <option value="buyer_yearly">Buyer Yearly</option>
           <option value="pro_monthly">Pro Monthly</option>

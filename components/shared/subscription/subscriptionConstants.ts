@@ -76,9 +76,6 @@ export const PERIOD_TO_MONTHS: Record<string, number> = {
 // Map product IDs to listing limits (fallbacks — real values come from DB Product records)
 export const LISTING_LIMITS: Record<string, number> = {
   free: 3,
-  seller_pro_monthly: 20,
-  seller_pro_yearly: 250,
-  seller_enterprise_yearly: 500,
   free_tier: 3,
   pro_monthly: 20,
   pro_yearly: 250,
@@ -91,11 +88,8 @@ export const LISTING_LIMITS: Record<string, number> = {
 export const PLAN_TIERS: Record<string, number> = {
   free: 0,
   free_tier: 0,
-  seller_pro_monthly: 1,
   pro_monthly: 1,
-  seller_pro_yearly: 1,
   pro_yearly: 1,
-  seller_enterprise_yearly: 2,
   enterprise_yearly: 2,
   agency_yearly: 3,
   agency_agent_yearly: 2,
@@ -105,11 +99,8 @@ export const PLAN_TIERS: Record<string, number> = {
 export const PLAN_COLORS: Record<string, string> = {
   free: 'from-gray-400 to-gray-500',
   free_tier: 'from-gray-400 to-gray-500',
-  seller_pro_monthly: 'from-blue-500 to-indigo-600',
   pro_monthly: 'from-blue-500 to-indigo-600',
-  seller_pro_yearly: 'from-blue-600 to-purple-700',
   pro_yearly: 'from-blue-600 to-purple-700',
-  seller_enterprise_yearly: 'from-purple-600 to-pink-600',
   enterprise_yearly: 'from-purple-600 to-pink-600',
   agency_yearly: 'from-teal-500 to-emerald-600',
   agency_agent_yearly: 'from-emerald-500 to-teal-600',

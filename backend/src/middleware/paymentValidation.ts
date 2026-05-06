@@ -7,6 +7,7 @@
 
 import { body, param, validationResult, type ValidationChain } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
+import { normalizeProductId } from '../utils/productIdNormalizer';
 
 /**
  * Supported country codes for Balkan countries
@@ -14,16 +15,19 @@ import { Request, Response, NextFunction } from 'express';
 const SUPPORTED_COUNTRY_CODES = ['GR', 'HR', 'BG', 'RO', 'SI', 'RS', 'AL', 'BA', 'MK', 'ME', 'XK'];
 
 /**
- * Supported plan names
+ * Supported plan names (includes both old and new IDs for backward compatibility)
+ * Old IDs are normalized to canonical IDs after validation
  */
 const SUPPORTED_PLAN_NAMES = [
   'buyer_pro_monthly',
   'pro_monthly',
   'pro_yearly',
   'enterprise',
+  'agency_yearly',
+  // Legacy IDs (will be normalized to canonical IDs)
   'seller_pro_monthly',
   'seller_pro_yearly',
-  'agency_yearly',
+  'seller_enterprise_yearly',
 ];
 
 /**
@@ -138,3 +142,17 @@ export const validateFreeSubscription: (ValidationChain | typeof handleValidatio
 
   handleValidationErrors,
 ];
+
+/**
+ * Middleware to normalize product IDs after validation
+ * Maps old IDs to canonical IDs transparently
+ */
+export const normalizeProductIds = (req: Request, res: Response, next: NextFunction): void => {
+  if (req.body?.productId) {
+    req.body.productId = normalizeProductId(req.body.productId);
+  }
+  if (req.body?.planName) {
+    req.body.planName = normalizeProductId(req.body.planName);
+  }
+  next();
+};

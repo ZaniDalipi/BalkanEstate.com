@@ -8,6 +8,7 @@ import { getGooglePlayService } from '../services/googlePlayService';
 import { getAppStoreService } from '../services/appStoreService';
 import { subscriptionLogger } from '../utils/logger';
 import { getObjectIdParam } from '../utils/validateParams';
+import { normalizeProductId } from '../utils/productIdNormalizer';
 
 /**
  * @desc    Create a new subscription (web purchases)
@@ -291,7 +292,7 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
             _id: `agency_agent_${userId}`,
             userId: userId,
             store: 'agency_coupon',
-            productId: 'agency_agent_yearly',
+            productId: normalizeProductId('agency_agent_yearly'),
             startDate: user.agency?.joinedAt || user.createdAt,
             renewalDate: expiresAt,
             expirationDate: expiresAt,
@@ -320,7 +321,7 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
             _id: `user_${userId}`,
             userId: userId,
             store: user.subscriptionSource || 'web',
-            productId: user.subscriptionPlan || user.proSubscription.plan || 'pro_monthly',
+            productId: normalizeProductId(user.subscriptionPlan || user.proSubscription.plan || 'pro_monthly'),
             startDate: user.proSubscription.startedAt || user.subscriptionStartedAt,
             renewalDate: user.proSubscription.expiresAt,
             expirationDate: user.proSubscription.expiresAt,
@@ -346,7 +347,7 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
         _id: subscription._id,
         userId: subscription.userId,
         store: subscription.store,
-        productId: subscription.productId,
+        productId: normalizeProductId(subscription.productId),
         // SECURITY: purchaseToken and transactionId are internal store identifiers - not exposed to client
         startDate: subscription.startDate,
         renewalDate: subscription.renewalDate,
