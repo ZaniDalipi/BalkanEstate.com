@@ -1,6 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { IngestStats, ListingSource } from '../api/listingSourceApi';
+import { useListingIngestProgress } from '../hooks/useListingIngestProgress';
+import ListingIngestProgressBar from './ListingIngestProgressBar';
 
 interface Props {
   source: ListingSource;
@@ -52,6 +54,7 @@ const ListingFeedRow: React.FC<Props> = ({
   onClearImports,
 }) => {
   const { t } = useTranslation(['listingFeeds', 'common']);
+  const progress = useListingIngestProgress(isRunning ? source.id : undefined);
 
   const busy = isDeleting || isClearing;
   const hasImports = source.listingsImported > 0 || source.listingsUpdated > 0;
@@ -116,7 +119,7 @@ const ListingFeedRow: React.FC<Props> = ({
               </div>
             )}
 
-            {lastRun && (
+            {lastRun && !isRunning && (
               <div className="mt-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-2 py-1">
                 {t('listingFeeds:runResult', {
                   fetched: lastRun.fetched,
@@ -126,6 +129,8 @@ const ListingFeedRow: React.FC<Props> = ({
                 })}
               </div>
             )}
+
+            <ListingIngestProgressBar progress={progress} isRunning={isRunning} />
           </div>
 
           {/* Action buttons */}

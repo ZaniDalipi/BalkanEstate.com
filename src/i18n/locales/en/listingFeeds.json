@@ -25,6 +25,7 @@
   "imported": "Imported",
   "updated": "Updated",
   "failed": "Failed",
+  "syncing": "Processing",
   "runResult": "Fetched {{fetched}}, imported {{imported}}, updated {{updated}}, failed {{failed}}",
   "wizardDesc": "Paste your website or feed URL — we'll probe it and detect the format automatically.",
   "detectButton": "Detect & connect",

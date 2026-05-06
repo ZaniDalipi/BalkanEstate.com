@@ -2,7 +2,7 @@ import ListingSource, { type IListingSource } from '../models/ListingSource';
 import Property from '../models/Property';
 import { getAdapter } from './listingAdapters';
 import { normalize } from './listingNormalizerService';
-import { emitPropertyCreated, emitPropertyUpdated } from '../sockets/propertySocket';
+import { emitPropertyCreated, emitPropertyUpdated, emitListingIngestProgress } from '../sockets/propertySocket';
 import { cronLogger } from '../utils/logger';
 
 export interface IngestStats {
@@ -57,7 +57,8 @@ export const runSource = async (source: IListingSource, options: RunOptions = {}
     const rehostImages = Boolean((source.adapterConfig as Record<string, unknown> | undefined)?.rehostImages);
     const emitNew = (source.adapterConfig as Record<string, unknown> | undefined)?.emitNewListingEvents === true;
 
-    for (const raw of raws) {
+    for (let i = 0; i < raws.length; i++) {
+      const raw = raws[i];
       try {
         const normalized = await normalize(raw, source, { rehostImages });
         const existing = await Property.findOne({ source: source.slug, sourceListingId: raw.id }).select('_id');
@@ -84,6 +85,19 @@ export const runSource = async (source: IListingSource, options: RunOptions = {}
         stats.errors.push(`${raw.id}: ${msg}`);
         log.info(`[ingest] ${source.slug}: failed listing ${raw.id} — ${msg}`);
       }
+
+      emitListingIngestProgress(String(source._id), {
+        fetched: stats.fetched,
+        processed: i + 1,
+        imported: stats.imported,
+        updated: stats.updated,
+        failed: stats.failed,
+        currentItem: {
+          id: raw.id,
+          title: (raw.raw as Record<string, unknown>)?.title as string | undefined,
+          url: raw.url,
+        },
+      });
     }
 
     source.listingsImported += stats.imported;

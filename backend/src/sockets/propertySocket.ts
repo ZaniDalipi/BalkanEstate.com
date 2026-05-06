@@ -296,6 +296,28 @@ export const emitPropertiesBulkUpdate = (action: 'created' | 'updated' | 'delete
 };
 
 /**
+ * Emit listing ingest progress event
+ * Call this during listing source sync to show real-time progress
+ */
+export const emitListingIngestProgress = (sourceId: string, progress: {
+  fetched: number;
+  processed: number;
+  imported: number;
+  updated: number;
+  failed: number;
+  currentItem?: { id: string; title?: string; url?: string };
+}) => {
+  if (!ioInstance) return;
+
+  ioInstance.emit('listing:ingestProgress', {
+    sourceId,
+    ...progress,
+    timestamp: new Date().toISOString(),
+  });
+  socketLogger.info(`📤 [Ingest] progress for source ${sourceId}: processed=${progress.processed}/${progress.fetched}`);
+};
+
+/**
  * Check if change stream is active
  */
 export const isChangeStreamActive = () => changeStreamActive;
