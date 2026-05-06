@@ -12,45 +12,58 @@ interface SocialVideoEmbedProps {
 // Detect platform from URL
 const detectPlatform = (url: string): 'tiktok' | 'instagram' | null => {
   if (!url) return null;
-  if (url.includes('tiktok.com') || url.includes('vm.tiktok.com') || url.includes('m.tiktok.com')) return 'tiktok';
+  if (url.includes('tiktok.com') || url.includes('vm.tiktok.com') || url.includes('vt.tiktok.com') || url.includes('m.tiktok.com')) return 'tiktok';
   if (url.includes('instagram.com')) return 'instagram';
   return null;
 };
 
 // Extract TikTok video ID and username from all URL formats
 const extractTikTokInfo = (url: string): { id: string; username: string } => {
+  // Remove query parameters and trailing slashes for cleaner matching
+  const cleanUrl = url.split('?')[0].replace(/\/$/, '');
+
   // Format: tiktok.com/@username/video/1234567890
-  const fullMatch = url.match(/tiktok\.com\/@([\w.-]+)\/video\/(\d+)/);
+  const fullMatch = cleanUrl.match(/tiktok\.com\/@([\w.-]+)\/video\/(\d+)/);
   if (fullMatch) {
     return { username: fullMatch[1], id: fullMatch[2] };
   }
   // Format: m.tiktok.com/v/1234567890 (mobile)
-  const mobileMatch = url.match(/m\.tiktok\.com\/v\/(\d+)/);
+  const mobileMatch = cleanUrl.match(/m\.tiktok\.com\/v\/(\d+)/);
   if (mobileMatch) {
     return { username: '', id: mobileMatch[1] };
   }
-  // Format: vm.tiktok.com/ZMrxxxxxxx/ (short URL - alphanumeric)
-  const vmMatch = url.match(/vm\.tiktok\.com\/(\w+)/);
+  // Format: vm.tiktok.com/ZMrxxxxxxx/ (short URL - accept any non-whitespace characters)
+  const vmMatch = cleanUrl.match(/vm\.tiktok\.com\/([^\s/?#]+)/);
   if (vmMatch) {
     return { username: '', id: vmMatch[1] };
   }
-  // Format: tiktok.com/t/ZTRxxxxx/ (another short URL format)
-  const tMatch = url.match(/tiktok\.com\/t\/(\w+)/);
+  // Format: vt.tiktok.com/ZMrxxxxxxx/ (another short domain used by mobile sharing)
+  const vtMatch = cleanUrl.match(/vt\.tiktok\.com\/([^\s/?#]+)/);
+  if (vtMatch) {
+    return { username: '', id: vtMatch[1] };
+  }
+  // Format: tiktok.com/t/ZTRxxxxx/ (another short URL format - accept any non-whitespace)
+  const tMatch = cleanUrl.match(/tiktok\.com\/t\/([^\s/?#]+)/);
   if (tMatch) {
     return { username: '', id: tMatch[1] };
   }
   return { username: '', id: '' };
 };
 
-// Extract Instagram post/reel/tv ID
+// Extract Instagram post/reel/tv ID, handling all URL formats and query parameters
 const extractInstagramId = (url: string): string => {
-  const match = url.match(/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/);
+  // Strip query parameters and trailing slashes
+  const cleanUrl = url.split('?')[0].replace(/\/$/, '');
+  // Handles: /reel/, /reels/, /p/, /tv/, /share/reel/, /share/p/
+  const match = cleanUrl.match(/instagram\.com\/(?:share\/)?(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/);
   return match?.[1] || '';
 };
 
 // Check if Instagram URL is a reel or IGTV (video content, not a static post)
 const isInstagramReel = (url: string): boolean => {
-  return url.includes('/reel/') || url.includes('/tv/');
+  // Strip query parameters and trailing slashes
+  const cleanUrl = url.split('?')[0].replace(/\/$/, '');
+  return cleanUrl.includes('/reel/') || cleanUrl.includes('/reels/') || cleanUrl.includes('/tv/') || cleanUrl.includes('/share/reel');
 };
 
 export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) => {
@@ -65,47 +78,44 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
 
   const [embedFailed, setEmbedFailed] = useState(false);
 
-  // Load TikTok embed script with retry
+  // Check if TikTok ID is numeric (full URL) or alphanumeric (short code)
+  const isNumericId = /^\d+$/.test(tiktokInfo.id);
+
+  // Load TikTok embed script
   useEffect(() => {
     if (platform !== 'tiktok' || !tiktokInfo.id) return;
 
-    const loadAndRender = () => {
-      const existingScript = document.querySelector('script[src*="tiktok.com/embed.js"]');
-      if (!existingScript) {
-        const script = document.createElement('script');
-        script.src = 'https://www.tiktok.com/embed.js';
-        script.async = true;
-        script.onerror = () => setEmbedFailed(true);
-        document.body.appendChild(script);
-      } else {
-        // Re-process embeds if script already loaded
-        setTimeout(() => {
-          if ((window as any).tiktokEmbed?.lib?.render) {
-            (window as any).tiktokEmbed.lib.render();
-          }
-        }, 100);
-      }
-    };
+    const existingScript = document.querySelector('script[src*="tiktok.com/embed.js"]');
+    if (!existingScript) {
+      const script = document.createElement('script');
+      script.src = 'https://www.tiktok.com/embed.js';
+      script.async = true;
+      script.onerror = () => setEmbedFailed(true);
+      document.body.appendChild(script);
+    } else {
+      setTimeout(() => {
+        if ((window as any).tiktokEmbed?.lib?.render) {
+          (window as any).tiktokEmbed.lib.render(tiktokContainerRef.current);
+        }
+      }, 100);
+    }
 
-    loadAndRender();
-
-    // Retry rendering after delays in case script loaded slowly
-    const retries = [1000, 3000, 5000];
+    // Retry rendering
+    const retries = [500, 1500, 3000];
     const timers = retries.map(delay =>
       setTimeout(() => {
         if ((window as any).tiktokEmbed?.lib?.render) {
-          (window as any).tiktokEmbed.lib.render();
+          (window as any).tiktokEmbed.lib.render(tiktokContainerRef.current);
         }
       }, delay)
     );
 
-    // If still not rendered after 8s, show fallback
+    // Timeout check
     const fallbackTimer = setTimeout(() => {
-      if (tiktokContainerRef.current) {
-        const iframe = tiktokContainerRef.current.querySelector('iframe');
-        if (!iframe) setEmbedFailed(true);
+      if (tiktokContainerRef.current && !tiktokContainerRef.current.querySelector('iframe')) {
+        setEmbedFailed(true);
       }
-    }, 8000);
+    }, 5000);
 
     return () => {
       timers.forEach(clearTimeout);
@@ -136,13 +146,12 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
     ? `https://www.instagram.com/reel/${instagramId}/`
     : `https://www.instagram.com/p/${instagramId}/`;
 
-  // Instagram embed iframe URL - same format as PropertyGallery uses
   const instagramEmbedUrl = isReel
     ? `https://www.instagram.com/reel/${instagramId}/embed/`
     : `https://www.instagram.com/p/${instagramId}/embed/`;
 
   // TikTok cite URL
-  const tiktokCiteUrl = tiktokInfo.username
+  const tiktokCiteUrl = tiktokInfo.username && isNumericId
     ? `https://www.tiktok.com/@${tiktokInfo.username}/video/${tiktokInfo.id}`
     : videoUrl;
 
@@ -207,7 +216,7 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
             <blockquote
               className="tiktok-embed"
               cite={tiktokCiteUrl}
-              data-video-id={tiktokInfo.id}
+              {...(isNumericId && { 'data-video-id': tiktokInfo.id })}
               style={{
                 maxWidth: '605px',
                 minWidth: '325px',

@@ -626,11 +626,14 @@
     "previous": "Previous image ({{current}} of {{total}})",
     "next": "Next image ({{current}} of {{total}})",
     "loadError": "Image could not be loaded",
-    "imageAlt": "Property image {{current}} of {{total}}"
-  },
-  "source": {
-    "listedOn": "Listed on {{source}}",
-    "viewOriginal": "View on {{source}}",
-    "importedAt": "Imported {{date}}"
+    "imageAlt": "Property image {{current}} of {{total}}",
+    "resetZoom": "Reset zoom",
+    "annotate": {
+      "label": "Annotate",
+      "done": "Done",
+      "save": "Save",
+      "hint": "Draw on the image to annotate",
+      "sendToChat": "Send"
+    }
   }
 }

@@ -618,11 +618,14 @@
     "previous": "Предишно изображение ({{current}} от {{total}})",
     "next": "Следващо изображение ({{current}} от {{total}})",
     "loadError": "Изображението не можа да бъде заредено",
-    "imageAlt": "Изображение на имот {{current}} от {{total}}"
-  },
-  "source": {
-    "listedOn": "Публикувано на {{source}}",
-    "viewOriginal": "Виж в {{source}}",
-    "importedAt": "Импортирано {{date}}"
+    "imageAlt": "Изображение на имот {{current}} от {{total}}",
+    "resetZoom": "Reset zoom",
+    "annotate": {
+      "label": "Анотиране",
+      "done": "Готово",
+      "save": "Запази",
+      "hint": "Рисувайте върху изображението за анотация",
+      "sendToChat": "Изпрати"
+    }
   }
 }

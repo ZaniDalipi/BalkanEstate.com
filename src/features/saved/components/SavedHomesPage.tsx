@@ -100,7 +100,7 @@ const SavedPropertiesPage: React.FC = () => {
     const agentIdentifier = agent.agentId || agent.id;
     setDirection('up');
     dispatch({ type: 'SET_SELECTED_AGENT', payload: agentIdentifier });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agentProfile' });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
     window.history.pushState({}, '', `/agents/${agentIdentifier}`);
   };
 
@@ -110,18 +110,12 @@ const SavedPropertiesPage: React.FC = () => {
     window.history.pushState({}, '', '/agents');
   };
 
-  const handleAgencyClick = async (agency: any) => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/agencies/${agency.id || agency._id}`);
-      if (response.ok) {
-        const data = await response.json();
-        setDirection('up');
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agency });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
-      }
-    } catch (error) {
-      // Error navigating to agency
-    }
+  const handleAgencyClick = (agency: any) => {
+    const agencySlug = agency.slug || agency.id || agency._id;
+    setDirection('up');
+    dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencySlug });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
+    window.history.pushState({}, '', `/agencies/${agencySlug}`);
   };
 
   const handleBrowseAgencies = () => {

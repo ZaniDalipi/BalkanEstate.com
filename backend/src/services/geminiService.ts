@@ -1,14 +1,25 @@
 import { GoogleGenAI, Type } from '@google/genai';
 import { apiLogger } from '../utils/logger';
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GOOGLE_AI_API_KEY || '',
-  httpOptions: {
-    headers: {
-      'Referer': process.env.FRONTEND_URL || 'https://balkanestateai.com',
-    },
-  },
-});
+let ai: GoogleGenAI | null = null;
+
+const getAI = (): GoogleGenAI => {
+  if (!ai) {
+    const apiKey = process.env.GOOGLE_AI_API_KEY;
+    if (!apiKey) {
+      throw new Error('GOOGLE_AI_API_KEY is not configured');
+    }
+    ai = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'Referer': process.env.FRONTEND_URL || 'https://balkanestateai.com',
+        },
+      },
+    });
+  }
+  return ai;
+};
 
 // ============================================================================
 // Types
@@ -143,7 +154,7 @@ Remember: Write the ENTIRE response in ${language}.
 
   try {
     const result = await retryWithBackoff(() =>
-      ai.models.generateContent({
+      getAI().models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
       })
@@ -302,7 +313,7 @@ export const generateDescriptionFromImages = async (
   };
 
   const result = await retryWithBackoff(() =>
-    ai.models.generateContent({
+    getAI().models.generateContent({
       model: 'gemini-2.5-flash',
       contents: { parts: [{ text: prompt }, ...imageParts] },
       config: {
@@ -384,7 +395,7 @@ If a location type doesn't apply (e.g., sea for landlocked cities), use 999 to i
   };
 
   const result = await retryWithBackoff(() =>
-    ai.models.generateContent({
+    getAI().models.generateContent({
       model: 'gemini-2.5-flash',
       contents: { parts: [{ text: prompt }] },
       config: {
@@ -568,7 +579,7 @@ export const getAiChatResponse = async (
   };
 
   const result = await retryWithBackoff(() =>
-    ai.models.generateContent({
+    getAI().models.generateContent({
       model: 'gemini-2.5-flash',
       contents: systemPrompt,
       config: {
@@ -660,7 +671,7 @@ export const generateSearchName = async (filters: Record<string, any>): Promise<
     `;
 
   const result = await retryWithBackoff(() =>
-    ai.models.generateContent({
+    getAI().models.generateContent({
       model: 'gemini-2.5-flash',
       contents: prompt,
     })
@@ -696,7 +707,7 @@ export const generateSearchNameFromCoords = async (
     `;
 
   const result = await retryWithBackoff(() =>
-    ai.models.generateContent({
+    getAI().models.generateContent({
       model: 'gemini-2.5-flash',
       contents: prompt,
     })

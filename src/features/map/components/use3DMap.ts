@@ -538,6 +538,35 @@ export function use3DMap(props: Map3DBuildingsProps) {
       }
     }
 
+    // 3. Fallback: querySourceFeatures queries raw tile data, not just rendered screen features.
+    // This is more reliable in production where tiles may load after the first idle event.
+    if (!buildingFeature) {
+      const buildingLayer = mapInstance.getLayer('3d-buildings') as any;
+      const vectorSourceId: string | undefined = buildingLayer?.source;
+      if (vectorSourceId) {
+        try {
+          const sourceFeatures = mapInstance.querySourceFeatures(vectorSourceId, {
+            sourceLayer: 'building',
+          }) as maplibregl.MapGeoJSONFeature[];
+
+          const maxAcceptableDistance = 0.0005; // ~55m
+          let minDist = Infinity;
+          for (const feature of sourceFeatures) {
+            const centroid = getBuildingCentroid(feature);
+            if (centroid) {
+              const dist = getDistance(latitude, longitude, centroid.lat, centroid.lng);
+              if (dist < maxAcceptableDistance && dist < minDist) {
+                minDist = dist;
+                buildingFeature = feature;
+              }
+            }
+          }
+        } catch {
+          // querySourceFeatures not supported or source unavailable
+        }
+      }
+    }
+
     // Extract coordinates from the building feature
     if (buildingFeature) {
       if (buildingFeature.geometry.type === 'Polygon') {
@@ -558,16 +587,19 @@ export function use3DMap(props: Map3DBuildingsProps) {
     let actualBuildingHeight = totalHeightM;
     if (buildingFeature && buildingFeature.properties) {
       const props = buildingFeature.properties;
-      if (props.render_height) {
-        actualBuildingHeight = props.render_height;
-      } else if (props['building:levels']) {
-        actualBuildingHeight = props['building:levels'] * 3.5;
+      const renderHeight = Number(props.render_height);
+      const levels = Number(props['building:levels']);
+      if (Number.isFinite(renderHeight) && renderHeight > 0) {
+        actualBuildingHeight = renderHeight;
+      } else if (Number.isFinite(levels) && levels > 0) {
+        actualBuildingHeight = levels * 3.5;
       }
     }
     // Use the larger of our calculated height or the map's height
     const finalBuildingHeight = Math.max(totalHeightM, actualBuildingHeight);
-    // Recalculate floor height based on actual building
-    const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
+    // Recalculate floor height based on actual building (guard against zero floors)
+    const safeFloors = totalFlrs > 0 ? totalFlrs : 1;
+    const adjustedFloorHeight = finalBuildingHeight / safeFloors;
 
     // Scale up the building coordinates to fully cover the original and prevent z-fighting
     const scaleFactor = 1.05; // 5% larger to fully cover original building
@@ -592,32 +624,12 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // First, try to hide the original building by setting a filter that excludes buildings at this location
-    // We'll do this by creating a small exclusion zone around the property
+    // Let the custom building cover the original via z-ordering. We previously
+    // attempted a `setFilter('3d-buildings', ['<', ['get', 'render_height'], 5])`
+    // here, but `render_height` is absent on many features and MapLibre then
+    // logs "Expected value to be of type number, but found null instead." We
+    // clear any prior filter to be safe.
     if (mapInstance.getLayer('3d-buildings')) {
-      // Get the current filter and add exclusion for this building's area
-      const latTolerance = 0.0003; // ~30m tolerance
-      const lngTolerance = 0.0003;
-
-      // Apply filter to exclude the original building (by checking if building is within our area)
-      // This uses a bounding box check
-      mapInstance.setFilter('3d-buildings', [
-        'any',
-        ['<', ['get', 'render_height'], 5], // Keep short buildings
-        ['all',
-          ['any',
-            ['<', ['geometry-type'], 'Polygon'], // Keep non-polygons
-            ['any',
-              // Keep buildings outside our exclusion zone
-              // We can't easily filter by geometry center, so use a workaround
-              // by relying on the custom building to cover the original
-            ]
-          ]
-        ]
-      ]);
-
-      // Alternative: Just let the custom building cover the original
-      // Remove the filter and rely on proper z-ordering
       mapInstance.setFilter('3d-buildings', null);
     }
 
@@ -953,6 +965,19 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
     map.current = mapInstance;
 
+    // Provide a transparent fallback for any sprite icons missing from the
+    // OpenFreeMap style so MapLibre stops logging "Image X could not be loaded".
+    mapInstance.on('styleimagemissing', (e) => {
+      const id = e.id;
+      if (mapInstance.hasImage(id)) return;
+      const size = 1;
+      mapInstance.addImage(id, {
+        width: size,
+        height: size,
+        data: new Uint8Array(size * size * 4),
+      });
+    });
+
     // Track bearing changes for compass overlay
     mapInstance.on('rotate', () => {
       setCurrentBearing(mapInstance.getBearing());
@@ -1014,13 +1039,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
           }
         }
 
-        // Verify the source exists before adding layer
-        if (!mapInstance.getSource(buildingSource)) {
-          // Error removed
-          return;
-        }
-
-        try {
+        // Only add the layer if the source is available
+        if (mapInstance.getSource(buildingSource)) {
+          try {
           // Add 3D buildings layer - OneGeo style dark grey buildings
           mapInstance.addLayer(
             {
@@ -1052,10 +1073,11 @@ export function use3DMap(props: Map3DBuildingsProps) {
             },
             labelLayerId
           );
-        } catch (error) {
-          // Error removed
-        }
-      }
+          } catch (error) {
+            // Error removed
+          }
+        } // end if (getSource)
+      } // end if (!getLayer)
 
       // Add the property marker (always shows blue dot, orientation indicator only if provided)
       addPropertyMarker(mapInstance, lat, lng, orientation);

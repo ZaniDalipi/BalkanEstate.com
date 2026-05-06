@@ -560,9 +560,13 @@
     "cancelViewing": "Ακύρωση Επίσκεψης",
     "requested": "Ζητήθηκε"
   },
-  "source": {
-    "listedOn": "Δημοσιεύτηκε στο {{source}}",
-    "viewOriginal": "Δείτε στο {{source}}",
-    "importedAt": "Εισαγωγή {{date}}"
+  "imageViewer": {
+    "annotate": {
+      "label": "Σχολιασμός",
+      "done": "Τέλος",
+      "save": "Αποθήκευση",
+      "hint": "Σχεδιάστε στην εικόνα για να προσθέσετε σχόλια",
+      "sendToChat": "Αποστολή"
+    }
   }
 }

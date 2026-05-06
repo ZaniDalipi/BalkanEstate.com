@@ -975,7 +975,7 @@ const MainLayout: React.FC = () => {
               </div>
             )}
 
-            <main id="main-content" data-scroll-container className={`flex flex-col flex-1 overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden h-full min-h-0' : 'overflow-y-auto'}`}>
+            <main id="main-content" data-scroll-container className={`relative flex flex-col flex-1 overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden h-full min-h-0' : 'overflow-y-auto'}`}>
                 <AppContent onToggleSidebar={() => setIsSidebarOpen(true)} />
             </main>
 

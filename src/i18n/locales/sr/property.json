@@ -618,11 +618,14 @@
     "previous": "Претходна слика ({{current}} од {{total}})",
     "next": "Следећа слика ({{current}} од {{total}})",
     "loadError": "Слика није могла бити учитана",
-    "imageAlt": "Слика некретнине {{current}} од {{total}}"
-  },
-  "source": {
-    "listedOn": "Objavljeno na {{source}}",
-    "viewOriginal": "Pogledaj na {{source}}",
-    "importedAt": "Uvezeno {{date}}"
+    "imageAlt": "Слика некретнине {{current}} од {{total}}",
+    "resetZoom": "Reset zoom",
+    "annotate": {
+      "label": "Белешка",
+      "done": "Готово",
+      "save": "Сачувај",
+      "hint": "Цртајте по слици за белешке",
+      "sendToChat": "Pošalji"
+    }
   }
 }

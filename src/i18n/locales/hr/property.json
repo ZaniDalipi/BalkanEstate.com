@@ -618,11 +618,14 @@
     "previous": "Prethodna slika ({{current}} od {{total}})",
     "next": "Sljedeća slika ({{current}} od {{total}})",
     "loadError": "Slika se nije mogla učitati",
-    "imageAlt": "Slika nekretnine {{current}} od {{total}}"
-  },
-  "source": {
-    "listedOn": "Objavljeno na {{source}}",
-    "viewOriginal": "Pogledaj na {{source}}",
-    "importedAt": "Uvezeno {{date}}"
+    "imageAlt": "Slika nekretnine {{current}} od {{total}}",
+    "resetZoom": "Reset zoom",
+    "annotate": {
+      "label": "Bilješka",
+      "done": "Gotovo",
+      "save": "Spremi",
+      "hint": "Crtajte po slici za bilješke",
+      "sendToChat": "Pošalji"
+    }
   }
 }

@@ -618,11 +618,14 @@
     "previous": "Imazhi i mëparshëm ({{current}} nga {{total}})",
     "next": "Imazhi tjetër ({{current}} nga {{total}})",
     "loadError": "Imazhi nuk mund të ngarkohej",
-    "imageAlt": "Imazhi i pronës {{current}} nga {{total}}"
-  },
-  "source": {
-    "listedOn": "Listuar në {{source}}",
-    "viewOriginal": "Shih në {{source}}",
-    "importedAt": "Importuar {{date}}"
+    "imageAlt": "Imazhi i pronës {{current}} nga {{total}}",
+    "resetZoom": "Reset zoom",
+    "annotate": {
+      "label": "Shënim",
+      "done": "Gatë",
+      "save": "Ruaj",
+      "hint": "Vizato mbi imazh për të shtuar shënime",
+      "sendToChat": "Dërgo"
+    }
   }
 }

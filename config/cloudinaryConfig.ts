@@ -96,7 +96,7 @@ export const getPropertyImagePlaceholder = (imageUrl: string | undefined): strin
   if (!imageUrl) return '';
   const uploadMatch = imageUrl.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(v\d+\/.+)$/);
   if (!uploadMatch) return '';
-  return `${uploadMatch[1]}w_40,c_fill,q_10,e_blur:500,f_auto/${uploadMatch[2]}`;
+  return `${uploadMatch[1]}w_20,c_fill,q_10,e_blur:500,f_auto/${uploadMatch[2]}`;
 };
 
 /**
@@ -161,6 +161,29 @@ export const SUPPORTED_CITIES = [
 // ============================================================================
 
 /**
+ * Strips Cloudinary transform segments from the path portion of an upload URL.
+ * Handles both versioned URLs (v1234/...) and unversioned URLs with baked-in
+ * transforms (c_fill,ar_16:9/my_image.jpg).
+ *
+ * Cloudinary transform tokens always follow the pattern: shortKey_value
+ * e.g. c_fill, w_1200, g_auto, ar_16:9, e_blur:500
+ * Real path segments (folders, filenames) do not match this pattern.
+ */
+const stripCloudinaryTransforms = (rest: string): string => {
+  const parts = rest.split('/');
+  const versionIdx = parts.findIndex(p => /^v\d+$/.test(p));
+  if (versionIdx !== -1) {
+    return parts.slice(versionIdx).join('/');
+  }
+  // No version segment — strip any leading transform segments.
+  // A transform segment has all comma-separated tokens matching key_value (1-3 char key).
+  const firstNonTransform = parts.findIndex(
+    p => !p.split(',').every(token => /^[a-z]{1,3}_/.test(token))
+  );
+  return firstNonTransform !== -1 ? parts.slice(firstNonTransform).join('/') : rest;
+};
+
+/**
  * Optimizes a Cloudinary-uploaded image URL by injecting transformation parameters.
  *
  * Cloudinary upload URLs follow this format:
@@ -210,19 +233,23 @@ export const optimizeCloudinaryUrl = (
   const width = clampDimension(rawWidth, 4096);
   const height = clampDimension(rawHeight, 4096);
 
-  // Handle Cloudinary upload URLs
-  const uploadMatch = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(v\d+\/.+)$/);
-  if (uploadMatch) {
-    const transforms: string[] = [`f_${format}`, `q_${quality}`];
-    if (width) transforms.push(`w_${width}`);
-    if (height) transforms.push(`h_${height}`);
-    if (crop) transforms.push(`c_${crop}`);
-    if (gravity) transforms.push(`g_${gravity}`);
-    return `${uploadMatch[1]}${transforms.join(',')}/${uploadMatch[2]}`;
-  }
-
-  // Handle Cloudinary URLs that already have transforms (don't double-transform)
+  // Handle Cloudinary upload URLs — including those with existing transforms baked in.
+  // We find the version segment (v{digits}) to separate any pre-existing transforms
+  // from the versioned public ID, then rebuild the URL with only the requested options.
+  // This prevents pre-existing crops (e.g. c_fill,ar_16:9) from silently cropping images.
   if (url.includes('res.cloudinary.com') && url.includes('/image/upload/')) {
+    const uploadBaseMatch = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/);
+    if (uploadBaseMatch) {
+      const [, base, rest] = uploadBaseMatch;
+      const cleanPath = stripCloudinaryTransforms(rest);
+
+      const transforms: string[] = [`f_${format}`, `q_${quality}`];
+      if (width) transforms.push(`w_${width}`);
+      if (height) transforms.push(`h_${height}`);
+      if (crop) transforms.push(`c_${crop}`);
+      if (gravity) transforms.push(`g_${gravity}`);
+      return `${base}${transforms.join(',')}/${cleanPath}`;
+    }
     return url;
   }
 
@@ -256,7 +283,7 @@ export const cloudinarySrcSet = (
   if (!/^https?:\/\//i.test(url)) return '';
 
   // Only generate srcSet for Cloudinary upload URLs
-  const uploadMatch = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(v\d+\/.+)$/);
+  const uploadMatch = url.match(/^https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/.+$/);
   if (!uploadMatch) return '';
 
   return widths

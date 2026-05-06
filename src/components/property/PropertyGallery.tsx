@@ -1,18 +1,17 @@
 // PropertyGallery Component
 // Image gallery with carousel, street view, video player, and interactive controls
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '../../../types';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
-  PencilIcon,
   BuildingOfficeIcon,
 } from '../../../constants';
-import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
+import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 
 interface PropertyGalleryProps {
   property: Property;
@@ -24,6 +23,8 @@ interface PropertyGalleryProps {
   currentImageIndex?: number;
   onCategoryChange?: (category: PropertyImageTag | 'all') => void;
   onImageIndexChange?: (index: number) => void;
+  isFavorited?: boolean;
+  onFavoriteClick?: () => void;
 }
 
 /**
@@ -48,10 +49,13 @@ interface PropertyGalleryProps {
  * ```
  */
 const imageSlideVariants = {
-  enter: (dir: number) => ({ opacity: 0, x: dir > 0 ? '6%' : '-6%' }),
-  center: { opacity: 1, x: 0 },
-  exit: (dir: number) => ({ opacity: 0, x: dir > 0 ? '-6%' : '6%' }),
+  enter: (dir: number) => ({ x: dir > 0 ? '100%' : '-100%' }),
+  center: { x: '0%' },
+  exit: (dir: number) => ({ x: dir > 0 ? '-100%' : '100%' }),
 };
+
+const KEN_BURNS_DURATION = 6;
+const CONTAINER_ASPECT = 16 / 9;
 
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   property,
@@ -62,6 +66,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   currentImageIndex: controlledIndex,
   onCategoryChange,
   onImageIndexChange,
+  isFavorited = false,
+  onFavoriteClick,
 }) => {
   const { t } = useTranslation(['property']);
 
@@ -97,19 +103,24 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   }, [onImageIndexChange, controlledIndex, internalIndex]);
 
   const [mainImageError, setMainImageError] = useState(false);
-  const [mainImageLoaded, setMainImageLoaded] = useState(false);
-  const [imageNaturalRatio, setImageNaturalRatio] = useState<number | null>(null);
-  const imageRatiosRef = React.useRef<Record<string, number>>({});
   const [viewMode, setViewMode] = useState<'photos' | 'streetview' | 'video'>('photos');
+  const [imageAspect, setImageAspect] = useState<number>(CONTAINER_ASPECT);
+  const handleMainImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+      setImageAspect(img.naturalWidth / img.naturalHeight);
+    }
+  }, []);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = React.useRef<HTMLVideoElement>(null);
+  const tiktokBlockquoteRef = useRef<HTMLDivElement>(null);
 
   // Determine video platform from URL
   const getVideoPlatform = useCallback((url: string): string => {
     if (!url) return 'unknown';
-    if (url.includes('tiktok.com') || url.includes('vm.tiktok.com') || url.includes('m.tiktok.com')) return 'tiktok';
+    if (url.includes('tiktok.com') || url.includes('vm.tiktok.com') || url.includes('vt.tiktok.com') || url.includes('m.tiktok.com')) return 'tiktok';
     if (url.includes('instagram.com')) return 'instagram';
     if (url.includes('facebook.com') || url.includes('fb.watch')) return 'facebook';
     if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
@@ -162,8 +173,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   // Helper to convert video URLs to embed format
   // Supports: YouTube, Vimeo, TikTok, Instagram, Facebook (all known URL variations)
-  const getVideoEmbedUrl = useCallback((url: string): { embedUrl: string; platform: string } => {
+  const getVideoEmbedUrl = useCallback((url: string): { embedUrl: string; platform: string; tiktokInfo?: { username: string; id: string } } => {
     if (!url) return { embedUrl: '', platform: 'unknown' };
+
+    // Remove query parameters and trailing slashes for consistent matching
+    const cleanUrl = url.split('?')[0].replace(/\/$/, '');
 
     // --- YouTube ---
     // watch?v=ID, watch?feature=share&v=ID (v= as first or later param)
@@ -172,60 +186,63 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
       return { embedUrl: `https://www.youtube.com/embed/${ytParamMatch[1]}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`, platform: 'youtube' };
     }
     // embed/ID, shorts/ID, v/ID (legacy), live/ID
-    const ytPathMatch = url.match(/youtube\.com\/(?:embed|shorts|v|live)\/([a-zA-Z0-9_-]{11})/);
+    const ytPathMatch = cleanUrl.match(/youtube\.com\/(?:embed|shorts|v|live)\/([a-zA-Z0-9_-]{11})/);
     if (ytPathMatch) {
       return { embedUrl: `https://www.youtube.com/embed/${ytPathMatch[1]}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`, platform: 'youtube' };
     }
     // youtu.be/ID short links
-    const ytShortMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+    const ytShortMatch = cleanUrl.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
     if (ytShortMatch) {
       return { embedUrl: `https://www.youtube.com/embed/${ytShortMatch[1]}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`, platform: 'youtube' };
     }
 
     // --- Vimeo ---
     // player.vimeo.com/video/ID (already an embed URL)
-    const vimeoPlayerMatch = url.match(/player\.vimeo\.com\/video\/(\d+)/);
+    const vimeoPlayerMatch = cleanUrl.match(/player\.vimeo\.com\/video\/(\d+)/);
     if (vimeoPlayerMatch) {
       return { embedUrl: `https://player.vimeo.com/video/${vimeoPlayerMatch[1]}?autoplay=1&playsinline=1`, platform: 'vimeo' };
     }
     // vimeo.com/channels/xxx/ID, vimeo.com/groups/xxx/videos/ID, vimeo.com/manage/videos/ID
-    const vimeoPathMatch = url.match(/vimeo\.com\/(?:channels\/[\w]+\/|groups\/[\w]+\/videos\/|manage\/videos\/)(\d+)/);
+    const vimeoPathMatch = cleanUrl.match(/vimeo\.com\/(?:channels\/[\w]+\/|groups\/[\w]+\/videos\/|manage\/videos\/)(\d+)/);
     if (vimeoPathMatch) {
       return { embedUrl: `https://player.vimeo.com/video/${vimeoPathMatch[1]}?autoplay=1&playsinline=1`, platform: 'vimeo' };
     }
     // vimeo.com/ID (standard - must be after path-based matches to avoid false positives)
-    const vimeoStdMatch = url.match(/vimeo\.com\/(\d+)/);
+    const vimeoStdMatch = cleanUrl.match(/vimeo\.com\/(\d+)/);
     if (vimeoStdMatch) {
       return { embedUrl: `https://player.vimeo.com/video/${vimeoStdMatch[1]}?autoplay=1&playsinline=1`, platform: 'vimeo' };
     }
 
     // --- TikTok ---
-    // tiktok.com/@username/video/ID (full URL)
-    const tiktokFullMatch = url.match(/tiktok\.com\/@[\w.-]+\/video\/(\d+)/);
+    // tiktok.com/@username/video/ID (full URL - numeric ID)
+    const tiktokFullMatch = cleanUrl.match(/tiktok\.com\/@([\w.-]+)\/video\/(\d+)/);
     if (tiktokFullMatch) {
-      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokFullMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
+      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokFullMatch[2]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok', tiktokInfo: { username: tiktokFullMatch[1], id: tiktokFullMatch[2] } };
     }
-    // m.tiktok.com/v/ID (mobile URL)
-    const tiktokMobileMatch = url.match(/m\.tiktok\.com\/v\/(\d+)/);
+    // m.tiktok.com/v/ID (mobile URL - numeric ID)
+    const tiktokMobileMatch = cleanUrl.match(/m\.tiktok\.com\/v\/(\d+)/);
     if (tiktokMobileMatch) {
-      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokMobileMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
+      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokMobileMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok', tiktokInfo: { username: '', id: tiktokMobileMatch[1] } };
     }
-    // vm.tiktok.com/CODE/ (short URL - alphanumeric)
-    const tiktokVmMatch = url.match(/vm\.tiktok\.com\/([\w]+)/);
+    // vm.tiktok.com/CODE/ or vt.tiktok.com/CODE/ (short URLs - use blockquote embed)
+    const tiktokVmMatch = cleanUrl.match(/v[mt]\.tiktok\.com\/([^\s/?#]+)/);
     if (tiktokVmMatch) {
-      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokVmMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
+      return { embedUrl: `blockquote:${url}`, platform: 'tiktok', tiktokInfo: { username: '', id: tiktokVmMatch[1] } };
     }
-    // tiktok.com/t/CODE/ (another short URL format)
-    const tiktokTMatch = url.match(/tiktok\.com\/t\/([\w]+)/);
+    // tiktok.com/t/CODE/ (share link short format - use blockquote embed)
+    const tiktokTMatch = cleanUrl.match(/tiktok\.com\/t\/([^\s/?#]+)/);
     if (tiktokTMatch) {
-      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokTMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
+      return { embedUrl: `blockquote:${url}`, platform: 'tiktok', tiktokInfo: { username: '', id: tiktokTMatch[1] } };
     }
 
     // --- Instagram ---
-    // instagram.com/reel/CODE, /p/CODE, /tv/CODE (IGTV)
-    const instagramMatch = url.match(/instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/);
+    // Handles: /reel/, /reels/, /p/, /tv/, /share/reel/, /share/p/ — all with optional query params
+    // First, strip query parameters entirely from the full URL
+    const instagramClean = url.split('?')[0].replace(/\/$/, '');
+    const instagramMatch = instagramClean.match(/instagram\.com\/(?:share\/)?(reel|reels|p|tv)\/([A-Za-z0-9_-]+)/);
     if (instagramMatch) {
-      return { embedUrl: `https://www.instagram.com/${instagramMatch[1]}/${instagramMatch[2]}/embed/`, platform: 'instagram' };
+      const type = instagramMatch[1] === 'reels' ? 'reel' : instagramMatch[1];
+      return { embedUrl: `https://www.instagram.com/${type}/${instagramMatch[2]}/embed/`, platform: 'instagram' };
     }
 
     // --- Facebook ---
@@ -235,17 +252,17 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
       return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
     }
     // facebook.com/share/v/CODE/ (share links)
-    const fbShareMatch = url.match(/facebook\.com\/share\/v\/([A-Za-z0-9_-]+)/);
+    const fbShareMatch = cleanUrl.match(/facebook\.com\/share\/v\/([A-Za-z0-9_-]+)/);
     if (fbShareMatch) {
       return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
     }
     // facebook.com/watch/?v=ID, /videos/ID, /reel/ID
-    const fbVideoMatch = url.match(/facebook\.com\/(?:watch\/?\?v=|[\w.]+\/videos\/|reel\/)(\d+)/);
+    const fbVideoMatch = cleanUrl.match(/facebook\.com\/(?:watch\/?\?v=|[\w.]+\/videos\/|reel\/)(\d+)/);
     if (fbVideoMatch) {
       return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
     }
     // fb.watch/CODE/ (short links)
-    const fbWatchMatch = url.match(/fb\.watch\/([A-Za-z0-9_-]+)/);
+    const fbWatchMatch = cleanUrl.match(/fb\.watch\/([A-Za-z0-9_-]+)/);
     if (fbWatchMatch) {
       return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
     }
@@ -255,6 +272,33 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   }, []);
 
   const videoInfo = useMemo(() => getVideoEmbedUrl(externalVideoUrl), [externalVideoUrl, getVideoEmbedUrl]);
+
+  // Load TikTok embed script for blockquote rendering
+  useEffect(() => {
+    if (videoPlatform === 'tiktok' && videoInfo.embedUrl.startsWith('blockquote:') && viewMode === 'video') {
+      const existingScript = document.querySelector('script[src*="tiktok.com/embed.js"]');
+      if (!existingScript) {
+        const script = document.createElement('script');
+        script.src = 'https://www.tiktok.com/embed.js';
+        script.async = true;
+        script.onload = () => {
+          setTimeout(() => {
+            if ((window as any).tiktokEmbed?.lib?.render) {
+              (window as any).tiktokEmbed.lib.render(tiktokBlockquoteRef.current);
+            }
+          }, 100);
+        };
+        document.body.appendChild(script);
+      } else {
+        // Script already loaded, process blockquotes
+        setTimeout(() => {
+          if ((window as any).tiktokEmbed?.lib?.render) {
+            (window as any).tiktokEmbed.lib.render(tiktokBlockquoteRef.current);
+          }
+        }, 100);
+      }
+    }
+  }, [videoPlatform, videoInfo.embedUrl, viewMode]);
 
   // Combine all images
   const allImages = useMemo(() => {
@@ -286,57 +330,18 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   const currentImageUrl = imagesForCurrentCategory[currentImageIndex]?.url || property.imageUrl;
 
-  // Reset error/loaded state when image changes
   useEffect(() => {
     setMainImageError(false);
-    setMainImageLoaded(false);
-    // Apply cached ratio immediately — avoids the reset-to-null that races with onLoad on preloaded images
-    const cached = imageRatiosRef.current[currentImageUrl];
-    if (cached) setImageNaturalRatio(cached);
   }, [currentImageUrl]);
 
-  // Inject <link rel="preload"> for the first (LCP) image so the browser fetches
-  // it at the highest priority before the <img> element even renders.
+  // Eagerly preload all gallery images at display-size (900px) so every
+  // swipe and auto-rotate feels instant.
   useEffect(() => {
-    const firstUrl = property.imageUrl;
-    if (!firstUrl) return;
-    const link = document.createElement('link');
-    link.rel = 'preload';
-    link.as = 'image';
-    link.href = optimizeCloudinaryUrl(firstUrl, { width: 1200, quality: 'auto' });
-    const srcset = cloudinarySrcSet(firstUrl, [480, 768, 1200]);
-    if (srcset) {
-      link.setAttribute('imagesrcset', srcset);
-      link.setAttribute('imagesizes', '(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px');
-    }
-    link.setAttribute('fetchpriority', 'high');
-    document.head.appendChild(link);
-    return () => {
-      if (document.head.contains(link)) document.head.removeChild(link);
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Eagerly preload first 4 images when the listing opens so swipes feel instant
-  useEffect(() => {
-    imagesForCurrentCategory.slice(1, 5).forEach((item) => {
+    imagesForCurrentCategory.forEach((item) => {
       const el = new Image();
-      el.src = optimizeCloudinaryUrl(item.url, { width: 1200, quality: 'auto' });
+      el.src = optimizeCloudinaryUrl(item.url, { width: 900, quality: 'auto' });
     });
   }, [imagesForCurrentCategory]);
-
-  // Preload adjacent images so navigation feels instant
-  useEffect(() => {
-    if (imagesForCurrentCategory.length <= 1) return;
-    const prevIndex = (currentImageIndex - 1 + imagesForCurrentCategory.length) % imagesForCurrentCategory.length;
-    const nextIndex = (currentImageIndex + 1) % imagesForCurrentCategory.length;
-    [prevIndex, nextIndex].forEach((idx) => {
-      const url = imagesForCurrentCategory[idx]?.url;
-      if (url) {
-        const img = new Image();
-        img.src = optimizeCloudinaryUrl(url, { width: 1200, quality: 'auto' });
-      }
-    });
-  }, [currentImageIndex, imagesForCurrentCategory]);
 
   const handleCategorySelect = useCallback((tag: PropertyImageTag | 'all') => {
     setActiveCategory(tag);
@@ -360,6 +365,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
   }, [currentImageIndex, imagesForCurrentCategory.length, onImageIndexChange]);
 
+  // Auto-rotate every 5 s in photos mode; resets whenever the user manually navigates
+  // (handleNextImage recreates on index change, which restarts the interval)
+  useEffect(() => {
+    if (viewMode !== 'photos' || imagesForCurrentCategory.length <= 1) return;
+    const timer = setInterval(handleNextImage, 5000);
+    return () => clearInterval(timer);
+  }, [viewMode, imagesForCurrentCategory.length, handleNextImage]);
+
   const handlePrevImage = useCallback(() => {
     setSlideDirection(-1);
     const newIndex = (currentImageIndex - 1 + imagesForCurrentCategory.length) % imagesForCurrentCategory.length;
@@ -379,30 +392,18 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
   }, [currentImageIndex, onImageIndexChange]);
 
-  // Get category label for display
-  const getCategoryEmoji = (category: PropertyImageTag | 'all'): string => {
-    const emojiMap: Record<string, string> = {
-      all: '📷',
-      exterior: '🏠',
-      interior: '🛋️',
-      bedroom: '🛏️',
-      bathroom: '🚿',
-      kitchen: '🍳',
-      living_room: '🛋️',
-      garden: '🌳',
-      pool: '🏊',
-      view: '🌅',
-      other: '📸',
-    };
-    return emojiMap[category] || '📷';
-  };
-
   return (
-    <div className="overflow-hidden sm:rounded-xl sm:shadow-lg sm:border sm:border-neutral-200">
-      {/* ── Gallery frame ── */}
+    <div className="overflow-hidden shadow-sm border-b border-neutral-200">
+      {/* ── Gallery frame — fixed 16:9 aspect ratio (Zillow standard). Landscape photos
+           fill edge-to-edge via object-cover; portrait photos are preserved with object-contain
+           and a blurred LQIP backdrop on the side bars. ── */}
       <div
-        className="relative w-full bg-neutral-900 overflow-hidden"
-        style={{ aspectRatio: imageNaturalRatio ? String(imageNaturalRatio) : '16/9', maxHeight: '90vh' }}
+        className={`relative w-full bg-neutral-900 overflow-hidden ${
+          viewMode === 'video' && videoPlatform === 'tiktok'
+            ? 'aspect-[9/16] sm:aspect-[16/9]'
+            : 'aspect-[16/9]'
+        }`}
+        style={{ maxHeight: '90vh' }}
       >
 
         {/* ── PHOTOS ── */}
@@ -411,11 +412,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             onClick={onOpenViewer}
             drag={imagesForCurrentCategory.length > 1 ? 'x' : false}
             dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.18}
+            dragElastic={0.08}
             dragMomentum={false}
             onDragEnd={(_, info) => {
-              if (info.offset.x < -60) handleNextImage();
-              else if (info.offset.x > 60) handlePrevImage();
+              if (info.offset.x < -50) handleNextImage();
+              else if (info.offset.x > 50) handlePrevImage();
             }}
             className="absolute inset-0 focus:outline-none cursor-pointer overflow-hidden"
             style={{ touchAction: 'pan-y' }}
@@ -427,59 +428,76 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               </div>
             ) : (
               <>
-                {/* LQIP: permanent blurred background — handles loading state */}
+                {/* LQIP blurred background — fills letterbox bars on desktop object-contain */}
                 <img
                   src={getPropertyImagePlaceholder(currentImageUrl) || optimizeCloudinaryUrl(currentImageUrl, { width: 40, quality: 'auto:eco' })}
                   alt=""
                   aria-hidden="true"
-                  className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 pointer-events-none select-none"
+                  className="absolute inset-0 w-full h-full object-cover blur-3xl scale-110 pointer-events-none select-none"
                 />
-                {/* Sharp image: AnimatePresence for direction-aware crossfade */}
+
+                {/* AnimatePresence at the outer level so exit animations complete before unmount */}
                 <AnimatePresence initial={false} custom={slideDirection}>
-                  <motion.img
+                  <motion.div
                     key={currentImageUrl}
-                    src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
-                    srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 1200, 1920])}
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
-                    alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
-                    width={1200}
-                    height={800}
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
-                    fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
-                    decoding="async"
-                    loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
+                    className="absolute inset-0"
                     custom={slideDirection}
                     variants={imageSlideVariants}
                     initial="enter"
                     animate="center"
                     exit="exit"
-                    transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
-                    draggable={false}
-                    ref={(el: HTMLImageElement | null) => {
-                      // Handle already-cached images that fire load synchronously before effects run
-                      if (el?.complete && el.naturalWidth && el.naturalHeight) {
-                        const ratio = el.naturalWidth / el.naturalHeight;
-                        imageRatiosRef.current[currentImageUrl] = ratio;
-                        setImageNaturalRatio(ratio);
-                        setMainImageLoaded(true);
-                      }
+                    transition={{
+                      x: { duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] },
                     }}
-                    onLoad={(e) => {
-                      const img = e.currentTarget;
-                      if (img.naturalWidth && img.naturalHeight) {
-                        const ratio = img.naturalWidth / img.naturalHeight;
-                        imageRatiosRef.current[currentImageUrl] = ratio;
-                        setImageNaturalRatio(ratio);
+                  >
+                    {(() => {
+                      // Animate only images that fill the container (wide / landscape).
+                      // Narrow images with side bars stay completely still.
+                      const isWide = imageAspect >= CONTAINER_ASPECT;
+
+                      let kbInitial, kbAnimate;
+                      if (isWide) {
+                        // Camera pan L↔R. Scale 1.08 gives 4% overflow each side,
+                        // exactly matching the 4% travel so edges never show.
+                        const sign = currentImageIndex % 2 === 0 ? 1 : -1;
+                        kbInitial = { scale: 1.14, x: `${7 * sign}%`,  y: '0%' };
+                        kbAnimate = { scale: 1.14, x: `${-7 * sign}%`, y: '0%' };
+                      } else {
+                        kbInitial = { scale: 1, x: '0%', y: '0%' };
+                        kbAnimate = { scale: 1, x: '0%', y: '0%' };
                       }
-                      setMainImageLoaded(true);
-                    }}
-                    onError={() => setMainImageError(true)}
-                  />
+
+                      return (
+                        <motion.div
+                          className="absolute inset-0 flex items-center justify-center"
+                          initial={kbInitial}
+                          animate={kbAnimate}
+                          transition={{ duration: KEN_BURNS_DURATION, ease: 'linear' }}
+                          style={{ willChange: 'transform' }}
+                        >
+                          <img
+                            src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
+                            srcSet={cloudinarySrcSet(currentImageUrl, [640, 960, 1200, 1920])}
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
+                            alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
+                            width={1200}
+                            height={800}
+                            crossOrigin="anonymous"
+                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                            // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
+                            fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
+                            decoding={currentImageIndex === 0 ? 'sync' : 'async'}
+                            loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
+                            className={`pointer-events-none select-none w-full h-full ${isWide ? 'object-cover' : 'object-contain'}`}
+                            draggable={false}
+                            onLoad={handleMainImageLoad}
+                            onError={() => setMainImageError(true)}
+                          />
+                        </motion.div>
+                      );
+                    })()}
+                  </motion.div>
                 </AnimatePresence>
-                {/* Subtle bottom vignette – just enough to make chip/counter readable */}
-                <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-[1]" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.32) 0%, transparent 100%)' }} />
               </>
             )}
           </motion.button>
@@ -548,17 +566,70 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   </svg>
                 </button>
               </>
-            ) : (
+            ) : videoInfo.embedUrl ? (
               <>
-                {/* External video player for YouTube, Vimeo, Facebook */}
-                <iframe
-                  src={videoInfo.embedUrl}
-                  className="absolute inset-0 w-full h-full border-0"
-                  style={{ minHeight: '100%', minWidth: '100%' }}
-                  allowFullScreen
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-                  title="Property Video Tour"
-                />
+                {/* TikTok short link handling - use blockquote embed directly */}
+                {videoInfo.platform === 'tiktok' && videoInfo.embedUrl.startsWith('blockquote:') ? (
+                  <div
+                    ref={tiktokBlockquoteRef}
+                    className="absolute inset-0 w-full h-full flex items-center justify-center bg-black overflow-auto"
+                  >
+                    <blockquote
+                      className="tiktok-embed"
+                      cite={externalVideoUrl}
+                      data-video-id={videoInfo.tiktokInfo?.id}
+                      style={{
+                        maxWidth: '605px',
+                        minWidth: '325px',
+                        margin: 'auto',
+                      }}
+                    >
+                      <section>
+                        <a
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          href={externalVideoUrl}
+                          className="block text-center p-8"
+                        >
+                          <div className="flex flex-col items-center gap-4">
+                            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                              <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+                              </svg>
+                            </div>
+                            <span className="text-white text-sm">Loading TikTok video...</span>
+                          </div>
+                        </a>
+                      </section>
+                    </blockquote>
+                  </div>
+                ) : (
+                  <>
+                    {/* External video player for YouTube, Vimeo, Facebook, Instagram, and full TikTok URLs */}
+                    {videoInfo.platform === 'instagram' ? (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black">
+                        <iframe
+                          src={videoInfo.embedUrl}
+                          className="border-0 h-full"
+                          style={{ width: '480px', maxWidth: '100%' }}
+                          allowFullScreen
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                          title="Property Video Tour"
+                          scrolling="no"
+                        />
+                      </div>
+                    ) : (
+                      <iframe
+                        src={videoInfo.embedUrl}
+                        className="absolute inset-0 w-full h-full border-0"
+                        style={{ minHeight: '100%', minWidth: '100%' }}
+                        allowFullScreen
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                        title="Property Video Tour"
+                      />
+                    )}
+                  </>
+                )}
                 {/* Platform badge */}
                 <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 bg-black/70 backdrop-blur-sm text-white font-semibold px-3 py-1.5 rounded-full text-xs">
                   {videoInfo.platform === 'youtube' && (
@@ -589,6 +660,29 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   <span className="capitalize">{t('property:gallery.videoTour', 'Video Tour')}</span>
                 </div>
               </>
+            ) : (
+              <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-neutral-900 to-neutral-800 p-6">
+                <div className="text-center">
+                  <svg className="w-16 h-16 text-neutral-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-neutral-300 text-sm mb-4">
+                    {t('property:gallery.videoEmbedNotSupported', 'This video link cannot be embedded directly')}
+                  </p>
+                  <a
+                    href={externalVideoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary to-primary-dark text-white font-medium rounded-lg hover:shadow-lg transition-shadow"
+                  >
+                    {t('property:gallery.openVideo', 'Open Video')}
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
             )}
           </div>
         ) : viewMode === 'streetview' ? (
@@ -637,18 +731,27 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               </button>
             )}
 
-            {/* Edit button – top-right */}
-            <motion.button
-              onClick={(e) => { e.stopPropagation(); onOpenEditor(currentImageUrl); }}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.92 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="absolute top-3 right-3 z-10 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
-            >
-              <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800" />
-            </motion.button>
+            {/* Favorite button */}
+            {onFavoriteClick && (
+              <motion.button
+                onClick={(e) => { e.stopPropagation(); onFavoriteClick(); }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.92 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
+                aria-label={isFavorited ? t('property:actions.removeFavorite', 'Remove from favorites') : t('property:actions.addFavorite', 'Add to favorites')}
+              >
+                <svg
+                  className={`w-5 h-5 transition-colors ${isFavorited ? 'text-red-500 fill-current' : 'text-neutral-600'}`}
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </motion.button>
+            )}
 
-            {/* Nav arrows – center sides */}
+            {/* Nav arrows – outer edges */}
             {imagesForCurrentCategory.length > 1 && (
               <>
                 <motion.button
@@ -656,158 +759,108 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   whileHover={{ scale: 1.08, backgroundColor: 'rgba(255,255,255,0.95)' }}
                   whileTap={{ scale: 0.9 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 sm:w-10 sm:h-10 bg-white/80 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center"
                   aria-label={t('property:gallery.prevImage', 'Previous image')}
                 >
-                  <ChevronLeftIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800" />
+                  <ChevronLeftIcon className="w-5 h-5 text-neutral-800" />
                 </motion.button>
                 <motion.button
                   onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
                   whileHover={{ scale: 1.08, backgroundColor: 'rgba(255,255,255,0.95)' }}
                   whileTap={{ scale: 0.9 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 sm:w-10 sm:h-10 bg-white/80 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center"
                   aria-label={t('property:gallery.nextImage', 'Next image')}
                 >
-                  <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800" />
+                  <ChevronRightIcon className="w-5 h-5 text-neutral-800" />
                 </motion.button>
               </>
             )}
 
-            {/* Bottom-right: image counter + property chip — no overlap with anything */}
-            <div className="absolute bottom-4 right-3 z-10 flex items-center gap-2">
-              {imagesForCurrentCategory.length > 1 && (
-                <div className="bg-black/55 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-full" role="status" aria-live="polite">
-                  {currentImageIndex + 1} / {imagesForCurrentCategory.length}
-                </div>
-              )}
+            {/* Mobile-only bottom badge: type | sale/rent */}
+            <div className="sm:hidden absolute bottom-3 right-3 z-[3] flex items-center gap-1.5 bg-black/70 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full pointer-events-none">
               {property.propertyType && (
-                <div className="bg-black/40 backdrop-blur-sm border border-white/20 text-white text-[11px] sm:text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5">
-                  {property.propertyType === 'apartment' && <svg className="w-3 h-3 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" /></svg>}
-                  {property.propertyType === 'house' && <svg className="w-3 h-3 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>}
-                  {property.propertyType === 'villa' && <svg className="w-3 h-3 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3L2 12h3v8h6v-5h2v5h6v-8h3L12 3z" /></svg>}
-                  {property.propertyType === 'land' && <svg className="w-3 h-3 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" /></svg>}
-                  {!['apartment', 'house', 'villa', 'land'].includes(property.propertyType) && <BuildingOfficeIcon className="w-3 h-3 text-white/90" />}
+                <>
+                  <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                  </svg>
                   <span className="capitalize">{t(`property:propertyTypes.${property.propertyType}`, property.propertyType)}</span>
-                  <span className="w-px h-2.5 bg-white/40" />
-                  <span className={property.listingType === 'rent' ? 'text-blue-300' : 'text-emerald-300'}>
-                    {property.listingType === 'rent' ? t('property:gallery.forRent', 'Rent') : t('property:gallery.forSale', 'Sale')}
-                  </span>
-                </div>
+                  <span className="opacity-50">|</span>
+                </>
               )}
+              <span className={property.listingType === 'rent' ? 'text-blue-300' : 'text-emerald-400'}>
+                {property.listingType === 'rent' ? t('property:gallery.forRent', 'Rent') : t('property:gallery.forSale', 'Sale')}
+              </span>
             </div>
 
-            {/* Floor widget – desktop only, bottom-left (no mobile clutter) */}
-            {property.propertyType === 'apartment' && property.floorNumber && property.totalFloors && property.totalFloors > 1 && (
-              <div className="hidden sm:block absolute bottom-4 left-3 z-10 animate-fade-in">
-                <div className="bg-slate-900/85 backdrop-blur-sm rounded-xl shadow-lg border border-slate-700/50 overflow-hidden w-[60px]">
-                  <div className="relative px-2.5 pt-2.5 pb-1">
-                    <div className="mx-auto w-0 h-0 border-l-[16px] border-r-[16px] border-b-[7px] border-l-transparent border-r-transparent border-b-slate-600 mb-px" />
-                    <div className="relative mx-auto w-8 rounded-b-sm overflow-hidden border border-slate-600/80 bg-slate-800/60" style={{ height: `${Math.min(Math.max(property.totalFloors * 7, 35), 80)}px` }}>
-                      {Array.from({ length: property.totalFloors }).map((_, i) => {
-                        const floor = property.totalFloors! - i;
-                        const isHighlighted = floor === property.floorNumber;
-                        return (
-                          <div
-                            key={floor}
-                            className="absolute left-0 right-0 border-b border-slate-700/40"
-                            style={{
-                              height: `${100 / property.totalFloors!}%`,
-                              top: `${(i / property.totalFloors!) * 100}%`,
-                              background: isHighlighted ? 'linear-gradient(90deg,rgba(34,197,94,0.9),rgba(22,163,74,0.9))' : 'transparent',
-                              boxShadow: isHighlighted ? '0 0 6px rgba(34,197,94,0.5)' : 'none',
-                            }}
-                          >
-                            {isHighlighted && <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-green-400/20 to-emerald-400/20" />}
-                          </div>
-                        );
-                      })}
-                      {property.totalFloors <= 12 && Array.from({ length: property.totalFloors }).map((_, i) => {
-                        const floor = property.totalFloors! - i;
-                        if (floor === property.floorNumber) return null;
-                        return (
-                          <div key={`w-${floor}`} className="absolute left-1/2 -translate-x-1/2 flex gap-0.5" style={{ top: `${((i + 0.35) / property.totalFloors!) * 100}%` }}>
-                            <div className="w-1 h-0.5 bg-slate-600/60 rounded-[0.5px]" />
-                            <div className="w-1 h-0.5 bg-slate-600/60 rounded-[0.5px]" />
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <div className="w-10 h-0.5 mx-auto bg-slate-600 rounded-b" />
+            {/* Right-side gradient overlay with property info — desktop only */}
+            <div
+              className="hidden sm:flex absolute inset-0 z-[2] pointer-events-none items-center justify-end"
+              style={{ background: 'linear-gradient(to left, rgba(5,15,50,0.92) 0%, rgba(5,15,50,0.78) 22%, rgba(5,15,50,0.45) 48%, rgba(5,15,50,0.08) 68%, transparent 84%)' }}
+            >
+              <div className="w-[38%] sm:w-[34%] pr-6 sm:pr-10 pl-10 sm:pl-8 py-6">
+                {(property.title || property.address) && (
+                  <h2 className="text-white font-bold text-xl sm:text-2xl lg:text-3xl leading-tight mb-2 drop-shadow-lg">
+                    {property.title || property.address}
+                  </h2>
+                )}
+                {(property.city || property.country) && (
+                  <div className="flex items-center gap-1.5 text-white/80 text-sm mb-3">
+                    <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                    </svg>
+                    <span>{[property.city, property.country].filter(Boolean).join(', ')}</span>
                   </div>
-                  <div className="px-1 py-1 text-center border-t border-slate-700/50">
-                    <div className="text-xs font-bold text-green-400 leading-none">{property.floorNumber}/{property.totalFloors}</div>
-                    <div className="text-[8px] text-slate-400 leading-tight mt-0.5">{t('property:gallery.floor', 'floor')}</div>
-                  </div>
+                )}
+                <div className="flex items-center gap-1.5 flex-wrap mb-3">
+                  {property.propertyType && (
+                    <span className="flex items-center gap-1 bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full capitalize">
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                      </svg>
+                      {t(`property:propertyTypes.${property.propertyType}`, property.propertyType)}
+                    </span>
+                  )}
+                  {property.beds ? (
+                    <span className="bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                      {property.beds} {t('property:specs.beds', 'Beds')}
+                    </span>
+                  ) : null}
+                  {property.baths ? (
+                    <span className="bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                      {property.baths} {t('property:specs.baths', 'Baths')}
+                    </span>
+                  ) : null}
+                  {property.sqft ? (
+                    <span className="bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                      {property.sqft} m²
+                    </span>
+                  ) : null}
                 </div>
+                {property.price ? (
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-white font-bold text-2xl sm:text-3xl drop-shadow-lg">
+                      € {property.price.toLocaleString()}{property.listingType === 'rent' ? t('property:seo.perMonth', '/mo') : ''}
+                    </span>
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full flex-shrink-0 ${
+                      property.listingType === 'rent' ? 'bg-blue-500 text-white' : 'bg-emerald-500 text-white'
+                    }`}>
+                      {property.listingType === 'rent' ? t('property:gallery.forRent', 'For Rent') : t('property:gallery.forSale', 'For Sale')}
+                    </span>
+                  </div>
+                ) : null}
+                {imagesForCurrentCategory.length > 1 && (
+                  <div className="text-white/60 text-sm font-medium" role="status" aria-live="polite">
+                    {currentImageIndex + 1} / {imagesForCurrentCategory.length}
+                  </div>
+                )}
               </div>
-            )}
-
-            {/* Progress bar – Zillow-style thin indicator at very bottom of frame */}
-            {imagesForCurrentCategory.length > 1 && (
-              <div
-                className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/20 z-10 cursor-pointer"
-                onClick={(e) => {
-                  const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-                  const pct = (e.clientX - rect.left) / rect.width;
-                  handleDotNav(Math.min(Math.floor(pct * imagesForCurrentCategory.length), imagesForCurrentCategory.length - 1));
-                }}
-              >
-                <motion.div
-                  className="h-full bg-white/80"
-                  animate={{ width: `${((currentImageIndex + 1) / imagesForCurrentCategory.length) * 100}%` }}
-                  transition={{ duration: 0.25, ease: 'easeOut' }}
-                />
-              </div>
-            )}
+            </div>
           </>
         )}
 
-      </div>
-
-      {/* ── View Mode Toggle – below gallery frame, zero overlap ── */}
-      <div className="flex justify-center px-4 py-2.5 sm:py-3 bg-white border-t border-neutral-200">
-        <div className="sm:hidden">
-          <LiquidGlassSwitch
-            options={[
-              ...(hasVideo ? [{
-                value: 'video',
-                label: t('actions.video', 'Video'),
-                icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="5 3 19 12 5 21 5 3" />
-                  </svg>
-                ),
-              }] : []),
-              {
-                value: 'photos',
-                label: t('actions.photos'),
-                icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="9" cy="9" r="2" />
-                    <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
-                  </svg>
-                ),
-              },
-              {
-                value: 'streetview',
-                label: t('actions.streetView'),
-                icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="5" r="3" />
-                    <path d="M12 8v4" />
-                    <path d="M8 21l4-9 4 9" />
-                  </svg>
-                ),
-              },
-            ]}
-            value={viewMode}
-            onChange={handleViewModeChange}
-            size="sm"
-          />
-        </div>
-        <div className="hidden sm:block">
+        {/* LiquidGlassSwitch — overlaid at bottom-center of gallery frame (desktop only) */}
+        <div className="hidden sm:block absolute bottom-5 left-1/2 -translate-x-1/2 z-[5] pointer-events-auto">
           <LiquidGlassSwitch
             options={[
               ...(hasVideo ? [{
@@ -847,6 +900,147 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             size="md"
           />
         </div>
+
+      </div>
+
+      {/* ── Thumbnail strip + category tabs ── */}
+      <div className="bg-white border-t border-neutral-100 px-4 sm:px-5 pt-4 pb-4">
+
+        {/* Mobile LiquidGlassSwitch — below the image */}
+        <div className="sm:hidden flex justify-center mb-4">
+          <LiquidGlassSwitch
+            options={[
+              ...(hasVideo ? [{
+                value: 'video',
+                label: t('actions.video', 'Video'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                ),
+              }] : []),
+              {
+                value: 'photos',
+                label: t('actions.photos'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="9" cy="9" r="2" />
+                    <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+                  </svg>
+                ),
+              },
+              {
+                value: 'streetview',
+                label: t('actions.streetView'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="5" r="3" />
+                    <path d="M12 8v4" />
+                    <path d="M8 21l4-9 4 9" />
+                  </svg>
+                ),
+              },
+            ]}
+            value={viewMode}
+            onChange={handleViewModeChange}
+            size="md"
+          />
+        </div>
+
+        {/* Header row: camera icon + "Photos" label + category pills */}
+        <div className="flex items-center gap-2 mb-3 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center gap-1.5 flex-shrink-0 mr-1">
+            <svg className="w-4 h-4 text-neutral-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="9" cy="9" r="2" />
+              <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+            </svg>
+            <span className="text-sm font-bold text-neutral-800">{t('property:photos.title', 'Photos')}</span>
+          </div>
+
+          {/* All pill */}
+          <button
+            onClick={() => { if (viewMode !== 'photos') setViewMode('photos'); handleCategorySelect('all'); }}
+            className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
+              activeCategory === 'all' && viewMode === 'photos'
+                ? 'bg-primary text-white border-primary'
+                : 'bg-neutral-100 text-neutral-600 border-neutral-200 hover:bg-neutral-200'
+            }`}
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="9" cy="9" r="2" />
+              <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+            </svg>
+            {t('property:photos.all', 'All')} {allImages.length}
+          </button>
+
+          {/* Per-tag pills */}
+          {(Object.keys(categorizedImages) as PropertyImageTag[]).map((tag) => (
+            <button
+              key={tag}
+              onClick={() => { if (viewMode !== 'photos') setViewMode('photos'); handleCategorySelect(tag); }}
+              className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold capitalize transition-all border ${
+                activeCategory === tag && viewMode === 'photos'
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-neutral-100 text-neutral-600 border-neutral-200 hover:bg-neutral-200'
+              }`}
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+              </svg>
+              {t(`property:photos.categories.${tag}`, { defaultValue: tag.replace('_', ' ') })} {categorizedImages[tag]?.length || 0}
+            </button>
+          ))}
+        </div>
+
+        {/* Thumbnail row — large cards filling card width */}
+        {viewMode === 'photos' ? (
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 sm:-mx-5 px-4 sm:px-5 pb-1">
+            {imagesForCurrentCategory.map((img, index) => (
+              <button
+                key={img.url}
+                onClick={() => {
+                  setSlideDirection(index > currentImageIndex ? 1 : -1);
+                  if (onImageIndexChange) { onImageIndexChange(index); } else { setInternalIndex(index); }
+                }}
+                className={`flex-shrink-0 w-[155px] h-[110px] sm:w-[195px] sm:h-[140px] rounded-xl overflow-hidden transition-all border-2 ${
+                  index === currentImageIndex
+                    ? 'border-primary shadow-lg'
+                    : 'border-transparent hover:border-neutral-300'
+                }`}
+              >
+                <img
+                  src={optimizeCloudinaryUrl(img.url, { width: 390, quality: 'auto', crop: 'fill' })}
+                  alt=""
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </button>
+            ))}
+            {imagesForCurrentCategory.length > 5 && (
+              <button
+                onClick={handleNextImage}
+                className="flex-shrink-0 w-10 h-[110px] sm:h-[140px] bg-neutral-100 hover:bg-neutral-200 rounded-xl flex items-center justify-center transition-colors"
+              >
+                <ChevronRightIcon className="w-5 h-5 text-neutral-600" />
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="pb-1">
+            <button
+              onClick={() => setViewMode('photos')}
+              className="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
+            >
+              <ChevronLeftIcon className="w-3 h-3" />
+              {t('property:gallery.backToPhotos', 'Back to Photos')}
+            </button>
+          </div>
+        )}
+
       </div>
     </div>
   );

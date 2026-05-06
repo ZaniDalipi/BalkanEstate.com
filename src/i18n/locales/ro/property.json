@@ -618,11 +618,14 @@
     "previous": "Imaginea anterioară ({{current}} din {{total}})",
     "next": "Imaginea următoare ({{current}} din {{total}})",
     "loadError": "Imaginea nu a putut fi încărcată",
-    "imageAlt": "Imagine proprietate {{current}} din {{total}}"
-  },
-  "source": {
-    "listedOn": "Publicat pe {{source}}",
-    "viewOriginal": "Vezi pe {{source}}",
-    "importedAt": "Importat {{date}}"
+    "imageAlt": "Imagine proprietate {{current}} din {{total}}",
+    "resetZoom": "Reset zoom",
+    "annotate": {
+      "label": "Adnotare",
+      "done": "Gata",
+      "save": "Salvare",
+      "hint": "Desenați pe imagine pentru adnotare",
+      "sendToChat": "Trimite"
+    }
   }
 }

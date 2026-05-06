@@ -6,6 +6,7 @@ import {
   deleteVideo,
   addVideoToListing,
   getVideoPreview,
+  resolveTikTokShortLink,
 } from '../controllers/videoController';
 import { protect } from '../middleware/auth';
 
@@ -17,6 +18,50 @@ const router = express.Router();
  *   name: Videos
  *   description: Property video generation endpoints
  */
+
+/**
+ * @swagger
+ * /api/videos/resolve-tiktok-short-link:
+ *   post:
+ *     summary: Resolve TikTok short link to get video ID and username
+ *     tags: [Videos]
+ *     description: Follows a TikTok short link redirect to extract the video ID and username
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - url
+ *             properties:
+ *               url:
+ *                 type: string
+ *                 description: TikTok short link (vm.tiktok.com, vt.tiktok.com, or tiktok.com/t/)
+ *                 example: https://vm.tiktok.com/ZM2Rp4pyJ/
+ *     responses:
+ *       200:
+ *         description: Successfully resolved TikTok link
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 videoId:
+ *                   type: string
+ *                   description: Numeric video ID
+ *                 username:
+ *                   type: string
+ *                   description: TikTok username
+ *                 fullUrl:
+ *                   type: string
+ *                   description: Resolved full TikTok URL
+ *       400:
+ *         description: Invalid short link or unable to extract video ID
+ *       502:
+ *         description: Failed to follow redirect
+ */
+router.post('/resolve-tiktok-short-link', resolveTikTokShortLink);
 
 /**
  * @swagger

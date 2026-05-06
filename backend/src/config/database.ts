@@ -26,30 +26,51 @@ mongoose.set('toObject', {
 });
 
 const connectDB = async (): Promise<void> => {
+  let mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/balkan-estate';
+
+  // In development, fall back to in-memory MongoDB if local connection fails
+  const isDev = process.env.NODE_ENV !== 'production';
+
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/balkan-estate';
-
-    await mongoose.connect(mongoURI);
-
+    await mongoose.connect(mongoURI, { serverSelectionTimeoutMS: 5000 });
     dbLogger.info('MongoDB connected successfully');
-
-    // Initialize database (fix indexes, etc.)
-    await initializeDatabase();
-
-    mongoose.connection.on('error', (err) => {
-      dbLogger.error('MongoDB connection error:', err);
-    });
-
-    mongoose.connection.on('disconnected', () => {
-      dbLogger.info('MongoDB disconnected');
-    });
-
   } catch (error) {
-    dbLogger.error('Error connecting to MongoDB:', error);
-    dbLogger.error('⚠️  Server will continue running but database operations will fail');
-    dbLogger.error('💡 Make sure MongoDB is running: brew services start mongodb-community (macOS) or sudo systemctl start mongod (Linux)');
-    // Don't exit - allow server to start for debugging
+    if (isDev && !process.env.MONGODB_URI) {
+      dbLogger.warn('Local MongoDB unavailable — starting in-memory MongoDB for development');
+      try {
+        const { MongoMemoryServer } = await import('mongodb-memory-server');
+        const memServer = await MongoMemoryServer.create({
+          binary: { version: '7.0.14', platform: 'linux', arch: 'x64', os: { os: 'linux', dist: 'ubuntu', release: '22.04' } },
+        });
+        mongoURI = memServer.getUri();
+        process.env.MONGODB_URI = mongoURI;
+        await mongoose.connect(mongoURI);
+        dbLogger.info('✅ Connected to in-memory MongoDB (data resets on restart)');
+      } catch (memError) {
+        dbLogger.error('Failed to start in-memory MongoDB:', memError);
+        dbLogger.error('⚠️  Server will continue running but database operations will fail');
+        return;
+      }
+    } else {
+      dbLogger.error('Error connecting to MongoDB:', error);
+      dbLogger.error('⚠️  Server will continue running but database operations will fail');
+      return;
+    }
   }
+
+  try {
+    await initializeDatabase();
+  } catch (initError) {
+    dbLogger.warn('Database initialization skipped:', initError);
+  }
+
+  mongoose.connection.on('error', (err) => {
+    dbLogger.error('MongoDB connection error:', err);
+  });
+
+  mongoose.connection.on('disconnected', () => {
+    dbLogger.info('MongoDB disconnected');
+  });
 };
 
 export default connectDB;

@@ -560,9 +560,13 @@
     "cancelViewing": "Откажи преглед",
     "requested": "Побарано"
   },
-  "source": {
-    "listedOn": "Објавено на {{source}}",
-    "viewOriginal": "Види на {{source}}",
-    "importedAt": "Увезено {{date}}"
+  "imageViewer": {
+    "annotate": {
+      "label": "Белешка",
+      "done": "Готово",
+      "save": "Зачувај",
+      "hint": "Цртајте на сликата за белешки",
+      "sendToChat": "Испрати"
+    }
   }
 }
