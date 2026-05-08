@@ -89,5 +89,18 @@
     "jsonLdDesc": "Pages with embedded schema.org RealEstateListing JSON-LD.",
     "customApi": "Custom API",
     "customApiDesc": "REST endpoint with optional bearer / API-key auth and pagination."
-  }
+  },
+  "fetched": "Fetched",
+  "deferred": "Deferred",
+  "syncComplete": "Sync complete",
+  "syncFinished": "Finished",
+  "syncingProgress": "Syncing {{processed}} of {{total}} listings",
+  "monthlyLimit": "Monthly listing limit",
+  "deferredHint": "{{count}} listing(s) reached your monthly limit and will be imported automatically next month.",
+  "nowProcessing": "Now processing",
+  "recentItems": "Recent items ({{count}})",
+  "waitingForFirstItem": "Waiting for the first item…",
+  "noItemsProcessed": "No items have been processed yet.",
+  "hideAndContinue": "Hide & keep syncing",
+  "viewDetails": "View details"
 }

@@ -2,7 +2,19 @@ import * as cheerio from 'cheerio';
 import type { AnyNode } from 'domhandler';
 import type { IListingSource } from '../../models/ListingSource';
 import { httpGet } from './httpClient';
+import { looksLikeListingPath } from '../listingDetectorService';
+import { isValidListingItem } from '../listingNormalizerService';
 import type { FetchOptions, RawListing, SourceAdapter } from './types';
+
+const isUsableHref = (href: string): boolean => {
+  if (!href) return false;
+  const trimmed = href.trim();
+  if (!trimmed) return false;
+  // Skip empty fragment / pseudo-protocol / non-navigational links.
+  if (trimmed.startsWith('#') || trimmed.startsWith('javascript:') ||
+      trimmed.startsWith('mailto:') || trimmed.startsWith('tel:')) return false;
+  return true;
+};
 
 interface SelectorMap {
   /** CSS selector that matches each listing card on the index page. */
@@ -118,11 +130,22 @@ export class HtmlScrapeAdapter implements SourceAdapter {
       const $ = cheerio.load(String(response.data));
       const items = $(cfg.selectors.listingItem);
 
+      const seenUrls = new Set<string>();
       for (const el of items.toArray()) {
         const root = $(el);
         const linkVal = pick($, root, cfg.selectors.link);
-        if (!linkVal) continue;
+        if (!linkVal || !isUsableHref(linkVal)) continue;
         const detailUrl = resolveUrl(url, linkVal);
+
+        // Reject anything that doesn't look like a listing detail page.
+        let pathname = '';
+        try { pathname = new URL(detailUrl).pathname; } catch { continue; }
+        if (!looksLikeListingPath(pathname)) continue;
+
+        // De-duplicate within a single index page.
+        if (seenUrls.has(detailUrl)) continue;
+        seenUrls.add(detailUrl);
+
         const id = pick($, root, cfg.selectors.id) || detailUrl;
 
         const item: Record<string, unknown> = {
@@ -155,6 +178,16 @@ export class HtmlScrapeAdapter implements SourceAdapter {
           } catch {
             // ignore detail-page failures
           }
+        }
+
+        // Final sanity check — only emit if the card actually looks like a
+        // real estate listing (has title/desc + price-or-location). If
+        // followDetails ran, the detailHtml will likely supplement missing
+        // fields during normalization, so be lenient when it's present.
+        const sanityCheckPayload: Record<string, unknown> = { ...item };
+        delete sanityCheckPayload.detailHtml;
+        if (!item.detailHtml && !isValidListingItem(sanityCheckPayload)) {
+          continue;
         }
 
         out.push({ id: String(id), url: detailUrl, raw: item });

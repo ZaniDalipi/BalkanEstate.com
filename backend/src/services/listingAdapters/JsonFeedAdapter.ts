@@ -5,7 +5,11 @@ import { httpGet } from './httpClient';
 import type { FetchOptions, RawListing, SourceAdapter } from './types';
 
 interface JsonFeedAdapterConfig {
-  endpoint: string;
+  /** Remote endpoint to fetch. Required unless `inlineJson` is provided. */
+  endpoint?: string;
+  /** Inline JSON payload (string). Used when the user pasted a JSON sample
+   *  without an API URL — the import re-uses the pasted data once. */
+  inlineJson?: string;
   /** JSONPath to the array of items inside the response payload, e.g. "$.results" or "$.data.listings". */
   itemsPath: string;
   /** JSONPath (relative to each item) yielding the source listing id, e.g. "$.id". */
@@ -52,28 +56,56 @@ export class JsonFeedAdapter implements SourceAdapter {
 
   async fetchListings(source: IListingSource, options: FetchOptions = {}): Promise<RawListing[]> {
     const cfg = (source.adapterConfig ?? {}) as unknown as JsonFeedAdapterConfig;
-    if (!cfg.endpoint || !cfg.itemsPath || !cfg.idPath) {
-      throw new Error(`JsonFeedAdapter: endpoint, itemsPath and idPath are required (source ${source.slug})`);
+    if (!cfg.itemsPath || !cfg.idPath) {
+      throw new Error(`JsonFeedAdapter: itemsPath and idPath are required (source ${source.slug})`);
+    }
+    if (!cfg.endpoint && !cfg.inlineJson) {
+      throw new Error(`JsonFeedAdapter: either endpoint or inlineJson must be provided (source ${source.slug})`);
     }
 
     const limit = options.limit ?? cfg.limit;
     const out: RawListing[] = [];
     const since = options.since?.getTime();
+
+    // Inline JSON path: parse once, no HTTP, no pagination.
+    if (cfg.inlineJson && !cfg.endpoint) {
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(cfg.inlineJson);
+      } catch (err) {
+        throw new Error(`JsonFeedAdapter: inlineJson is not valid JSON (source ${source.slug}): ${(err as Error).message}`);
+      }
+      const items = queryArray(parsed, cfg.itemsPath);
+      for (const item of items) {
+        const id = queryFirst(item, cfg.idPath);
+        if (id == null) continue;
+        if (!isValidListingItem(item as Record<string, unknown>)) continue;
+        const url = cfg.urlPath ? (queryFirst(item, cfg.urlPath) as string | undefined) : undefined;
+        out.push({ id: String(id), url, raw: item as Record<string, unknown> });
+        if (limit && out.length >= limit) break;
+      }
+      return out;
+    }
+
+    // Below this point we require `cfg.endpoint` (the inlineJson branch above
+    // returned early). Narrow it for the type checker.
+    const endpoint = cfg.endpoint as string;
+
     const pagination = cfg.pagination;
     const maxPages = pagination?.maxPages ?? 1;
     let page = 1;
     let cursor: string | undefined;
 
     for (let i = 0; i < maxPages; i++) {
-      let url = cfg.endpoint;
+      let url = endpoint;
       if (pagination?.type === 'page' && pagination.pageParam) {
         const params: Record<string, string | number> = { [pagination.pageParam]: page };
         if (pagination.sizeParam && pagination.pageSize) params[pagination.sizeParam] = pagination.pageSize;
-        url = buildUrl(cfg.endpoint, params);
+        url = buildUrl(endpoint, params);
       } else if (pagination?.type === 'offset' && pagination.pageParam && pagination.pageSize) {
-        url = buildUrl(cfg.endpoint, { [pagination.pageParam]: (page - 1) * pagination.pageSize });
+        url = buildUrl(endpoint, { [pagination.pageParam]: (page - 1) * pagination.pageSize });
       } else if (pagination?.type === 'cursor' && pagination.cursorParam && cursor) {
-        url = buildUrl(cfg.endpoint, { [pagination.cursorParam]: cursor });
+        url = buildUrl(endpoint, { [pagination.cursorParam]: cursor });
       }
 
       const response = await httpGet<unknown>(url, {

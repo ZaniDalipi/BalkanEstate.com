@@ -183,7 +183,20 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
     try {
       let result: DetectResult;
       if (method === 'sampleJson') {
-        result = await detectFeed('sampleJson', { sampleJson: sampleJson.trim() });
+        const trimmed = sampleJson.trim();
+        if (!trimmed) {
+          setError('Please paste a JSON sample to analyze.');
+          return;
+        }
+        // Quick client-side validation so the user gets a fast, clear error
+        // instead of a generic 422 from the server.
+        try {
+          JSON.parse(trimmed);
+        } catch (parseErr) {
+          setError(`Invalid JSON — ${(parseErr as Error).message.split('\n')[0]}`);
+          return;
+        }
+        result = await detectFeed('sampleJson', { sampleJson: trimmed });
       } else if (method === 'customApi') {
         inferName(apiUrl);
         result = await detectFeed('customApi', {
@@ -210,15 +223,34 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
     setStep('saving');
     setError(null);
     try {
+      const trimmedApiUrl = apiUrl.trim();
       const baseUrl =
-        method === 'customApi' ? apiUrl.trim() :
-        method === 'sampleJson' ? (apiUrl.trim() || detected.adapterConfig.url as string || 'manual://imported') :
+        method === 'customApi' ? trimmedApiUrl :
+        method === 'sampleJson' ? (trimmedApiUrl || (detected.adapterConfig.url as string | undefined) || 'manual://imported') :
         url.trim();
+
+      // For sampleJson with NO API URL we wire the pasted JSON inline so the
+      // first sync can replay it; with an API URL we use the URL as endpoint.
+      let adapterConfig: Record<string, unknown> = { ...detected.adapterConfig };
+      if (method === 'sampleJson') {
+        if (trimmedApiUrl) {
+          adapterConfig.endpoint = trimmedApiUrl;
+          delete adapterConfig.inlineJson;
+        } else {
+          adapterConfig.inlineJson = sampleJson.trim();
+          delete adapterConfig.endpoint;
+        }
+      }
+
+      const sourceName = name.trim() || (baseUrl && !baseUrl.startsWith('manual://')
+        ? (() => { try { return new URL(baseUrl).hostname; } catch { return 'My feed'; } })()
+        : 'Pasted JSON');
+
       const input: ListingSourceInput = {
-        name: name.trim() || (baseUrl ? new URL(baseUrl).hostname : 'My feed'),
+        name: sourceName,
         baseUrl,
         adapterType: detected.adapterType,
-        adapterConfig: detected.adapterConfig,
+        adapterConfig,
         fieldMap: editingFieldMap,
         enabled: true,
       };

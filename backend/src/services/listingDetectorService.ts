@@ -25,27 +25,113 @@ export interface DetectResult {
  * URL-path fragments commonly used for individual listing detail pages
  * across Balkan / European real-estate sites. Used to discriminate
  * "listing card" anchors from navigation/footer/agency links.
+ *
+ * Trailing-dash variants (e.g. `/oglas-`) catch URL slugs like
+ * `/oglas-stan-zagreb-12345` that don't have a path-segment break.
  */
 const LISTING_URL_FRAGMENTS = [
+  // Balkan
   '/oglas/', '/oglasi/', '/oglas-', '/oglasi-',
-  '/nekretnina/', '/nekretnine/', '/nekretnina-',
-  '/imovina/', '/imobil/',
-  '/listing/', '/listings/',
-  '/property/', '/properties/',
-  '/inmueble/', '/immobilien/', '/immobilier/',
-  '/objava/', '/objave/',
-  '/apartman/', '/apartmani/', '/stan/', '/stanovi/',
-  '/kuca/', '/kuće/', '/kuce/',
-  '/anuntul/', '/anunt/',
-  '/detail/', '/details/',
-  '/p/', '/l/', '/o/',
+  '/nekretnina/', '/nekretnine/', '/nekretnina-', '/nekretnine-',
+  '/imovina/', '/imobil/', '/imot/',
+  '/objava/', '/objave/', '/objavi/',
+  '/apartman/', '/apartmani/', '/apartman-',
+  '/stan/', '/stanovi/', '/stan-', '/stanovi-',
+  '/kuca/', '/kuće/', '/kuce/', '/kuca-', '/kuće-', '/kuce-',
+  '/poslovni-prostor/', '/poslovni-',
+  '/zemljiste/', '/zemljište/', '/zemljiste-',
+  '/garaza/', '/garaza-',
+  '/vikendica/', '/vikendica-',
+  '/lokal/', '/lokali/',
+  // English / generic
+  '/listing/', '/listings/', '/listing-',
+  '/property/', '/properties/', '/property-',
+  '/real-estate/', '/realestate/',
+  '/home/', '/homes/', '/house/', '/houses/',
+  '/apartment/', '/apartments/', '/apt/',
+  '/estate/', '/estates/',
+  '/rental/', '/rentals/',
+  '/for-sale/', '/for-rent/',
+  '/sale/', '/rent/',
+  '/detail/', '/details/', '/-detail-', '/detail-',
+  // Romance / Germanic
+  '/inmueble/', '/inmuebles/', '/casa/', '/pisos/', '/piso/', '/vivienda/',
+  '/immobilien/', '/wohnung/', '/haus/',
+  '/immobilier/', '/appartement/', '/maison/',
+  '/imovel/', '/imoveis/',
+  // Romanian
+  '/anunt/', '/anuntul/', '/anunturi/', '/anunturi-',
+  // Greek
+  '/akinita/', '/akinhta/', '/diamerisma/',
+  // Bulgarian
+  '/imot/', '/imoti/', '/apartament/',
+  // Common slug prefixes (single letter)
+  '/p/', '/l/', '/o/', '/a/', '/h/',
 ];
 
-const looksLikeListingPath = (pathname: string): boolean => {
+/**
+ * URL-path fragments that indicate the link is NOT a listing detail page.
+ * Used to filter out navigation, agency profiles, contact pages, etc.
+ */
+const NON_LISTING_URL_FRAGMENTS = [
+  '/login', '/signin', '/register', '/signup', '/account', '/profile', '/dashboard',
+  '/contact', '/kontakt', '/about', '/o-nama', '/about-us', '/help', '/faq', '/support',
+  '/terms', '/privacy', '/policy', '/cookie', '/legal', '/impressum',
+  '/blog', '/news', '/article', '/articles', '/post', '/press',
+  '/agent/', '/agents/', '/agencija/', '/agencije/', '/agency/', '/agencies/',
+  '/team', '/staff', '/career', '/jobs',
+  '/sitemap', '/robots', '/feed', '/rss', '/atom',
+  '/cart', '/checkout', '/order', '/payment',
+  '/search', '/filter', '/category', '/kategorija', '/tag/', '/tags/',
+  '/map', '/karta', '/locations', '/lokacije',
+  '/wp-admin', '/wp-login', '/wp-content', '/admin',
+  '/?', '/#', // tracker / fragment-only links
+  '/share', '/print', '/email', '/mailto:',
+  '/services', '/usluge', '/offers', '/special',
+  '/calculator', '/kalkulator', '/mortgage', '/hipoteka',
+  '/page/', '/strana/', '/stranica/', // pagination URLs
+  '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.zip',
+  '.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp',
+  '.mp4', '.mp3', '.mov', '.avi',
+];
+
+/**
+ * File extensions that are clearly not listing pages.
+ */
+const NON_LISTING_EXTENSIONS = /\.(pdf|doc|docx|xls|xlsx|zip|rar|jpg|jpeg|png|gif|svg|webp|mp4|mp3|mov|avi|css|js|xml|json|txt)$/i;
+
+export const looksLikeListingPath = (pathname: string): boolean => {
+  if (!pathname) return false;
   const lower = pathname.toLowerCase();
-  if (LISTING_URL_FRAGMENTS.some(f => lower.includes(f))) return true;
-  // Numeric-id detail pages like /property/12345 or /oglas/12345
-  if (/\/\d{3,}(?:[/-]|$)/.test(lower)) return true;
+
+  // Quick reject: known non-listing paths.
+  if (NON_LISTING_URL_FRAGMENTS.some(f => lower.includes(f))) return false;
+  if (NON_LISTING_EXTENSIONS.test(lower)) return false;
+
+  // Reject trivially short URLs (unlikely to be listing detail pages).
+  if (lower.length < 4) return false;
+
+  // Strong positive: matches a known listing fragment AND has a slug-like tail.
+  const hasFragment = LISTING_URL_FRAGMENTS.some(f => lower.includes(f));
+  if (hasFragment) {
+    // Must have at least one descriptive segment after the fragment — otherwise
+    // it's likely a category index page like /properties/ or /oglasi/.
+    const idx = LISTING_URL_FRAGMENTS.findIndex(f => lower.includes(f));
+    if (idx >= 0) {
+      const fragment = LISTING_URL_FRAGMENTS[idx];
+      const after = lower.slice(lower.indexOf(fragment) + fragment.length);
+      // Need either a numeric id or a multi-char slug after the fragment.
+      if (/\d{2,}/.test(after) || after.replace(/[/-]/g, '').length >= 3) {
+        return true;
+      }
+    }
+  }
+
+  // Numeric-id detail pages: /property/12345, /oglas/12345, /-12345, /id/12345
+  if (/\/\d{4,}(?:[/-]|$)/.test(lower)) return true;
+  // Slug + numeric id at end: /modern-apartment-zagreb-1234
+  if (/-\d{3,}(?:[/-]|$)/.test(lower)) return true;
+
   return false;
 };
 
@@ -457,6 +543,17 @@ const detectHtmlScrape = (
   const uniqueAnchors = anchors.filter(a => (seenUrl.has(a.abs) ? false : (seenUrl.add(a.abs), true)));
   if (uniqueAnchors.length < 2) return null;
 
+  // 2.5 Filter out anchors that look like agency/agent profile links rather
+  // than property detail pages. Many real-estate portals link agency listings
+  // alongside actual property listings — we want only the latter.
+  const NEGATIVE_KEYWORDS = /(agencija|agencije|agency|agencies|agent|agenti|agents|broker|broker-?id)/i;
+  const filteredAnchors = uniqueAnchors.filter(a => {
+    let pn = '';
+    try { pn = new URL(a.abs).pathname.toLowerCase(); } catch { return false; }
+    return !NEGATIVE_KEYWORDS.test(pn);
+  });
+  if (filteredAnchors.length < 2) return null;
+
   // 3. For each anchor, walk up to find the closest ancestor with a class that
   //    looks like a listing card (e.g. ".listing-item", ".oglas", ".property-card").
   //    Score class names by how listing-y they sound.
@@ -482,7 +579,7 @@ const detectHtmlScrape = (
 
   // 4. Tally which selector covers the most anchors → that's the listing card.
   const selectorCounts = new Map<string, number>();
-  for (const a of uniqueAnchors) {
+  for (const a of filteredAnchors) {
     const card = findCardAncestor(a.el);
     if (!card) continue;
     selectorCounts.set(card.selector, (selectorCounts.get(card.selector) ?? 0) + 1);
@@ -654,6 +751,33 @@ const wpFieldMap = (): Record<string, string> => ({
   city: '_embedded.wp:term[0][0].name',
 });
 
+/** Walk a nested object and return all leaf paths (with values) up to a depth limit. */
+const flattenSamplePaths = (
+  obj: unknown,
+  path = '',
+  depth = 0,
+  out: Array<{ path: string; key: string; value: unknown }> = []
+): Array<{ path: string; key: string; value: unknown }> => {
+  if (depth > 3 || obj == null) return out;
+  if (typeof obj !== 'object') return out;
+  if (Array.isArray(obj)) {
+    if (obj.length > 0 && typeof obj[0] === 'object') {
+      flattenSamplePaths(obj[0], `${path}[0]`, depth + 1, out);
+    }
+    return out;
+  }
+  for (const [key, val] of Object.entries(obj as Record<string, unknown>)) {
+    const childPath = path ? `${path}.${key}` : key;
+    if (val != null && (typeof val !== 'object' || Array.isArray(val))) {
+      out.push({ path: childPath, key, value: val });
+    }
+    if (val !== null && typeof val === 'object') {
+      flattenSamplePaths(val, childPath, depth + 1, out);
+    }
+  }
+  return out;
+};
+
 /** Build a fieldMap by inspecting the keys of a sample JSON object. */
 const buildJsonFieldMap = (sample: Record<string, unknown>): Record<string, string> => {
   const map: Record<string, string> = {};
@@ -701,10 +825,16 @@ const buildJsonFieldMap = (sample: Record<string, unknown>): Record<string, stri
     // Identifiers
     [/^(id|_id|uid|listing_id|property_id)$/i, 'id'],
   ];
-  for (const key of Object.keys(sample)) {
+
+  // Walk top-level keys first (so they win over nested ones), then nested.
+  const paths = flattenSamplePaths(sample);
+  // Sort: shallower paths first so top-level keys are preferred over nested.
+  paths.sort((a, b) => a.path.split('.').length - b.path.split('.').length);
+
+  for (const { path, key } of paths) {
     for (const [re, prop] of keyHints) {
       if (re.test(key) && !Object.values(map).includes(prop)) {
-        map[prop] = key;
+        map[prop] = path;
         break;
       }
     }
@@ -713,47 +843,99 @@ const buildJsonFieldMap = (sample: Record<string, unknown>): Record<string, stri
 };
 
 /**
+ * Recursively walk a parsed JSON value looking for the deepest array of
+ * objects that has at least one item — that's almost certainly the listings
+ * array (e.g. `{ status: 'ok', meta: {...}, data: { listings: [ ... ] } }`).
+ */
+const findItemsArray = (
+  obj: unknown,
+  path = '$',
+  depth = 0
+): { items: Record<string, unknown>[]; path: string } | null => {
+  if (obj == null || depth > 6) return null;
+  if (Array.isArray(obj)) {
+    if (obj.length > 0 && obj.every((v) => v && typeof v === 'object' && !Array.isArray(v))) {
+      return { items: obj as Record<string, unknown>[], path };
+    }
+    return null;
+  }
+  if (typeof obj !== 'object') return null;
+  // Prefer named keys that conventionally hold listings.
+  const preferredKeys = ['listings', 'items', 'results', 'data', 'records', 'rows', 'properties', 'nekretnine', 'oglasi', 'anunturi', 'ofertas'];
+  for (const k of preferredKeys) {
+    if (k in (obj as Record<string, unknown>)) {
+      const r = findItemsArray((obj as Record<string, unknown>)[k], `${path}.${k}`, depth + 1);
+      if (r) return r;
+    }
+  }
+  // Fall back to any nested array.
+  for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+    const r = findItemsArray(v, `${path}.${k}`, depth + 1);
+    if (r) return r;
+  }
+  return null;
+};
+
+/**
  * Analyze a pasted JSON string (single object or array) and build a fieldMap
- * from it. Does not make any network requests.
+ * from it. Tolerant of:
+ *   - Top-level arrays:                 [{...}, {...}]
+ *   - Wrapped arrays:                   { data: [{...}] }, { results: [{...}] }
+ *   - Deeply nested arrays:             { response: { meta: {...}, data: { listings: [{...}] } } }
+ *   - Single-listing objects:           { title: ..., price: ... }
+ *   - Plain objects with metadata only: rejected with a friendly error.
+ *
+ * Does not make any network requests.
  */
 export const detectFromJsonSample = (jsonString: string): DetectResult => {
+  const trimmed = jsonString.trim();
+  if (!trimmed) {
+    throw new Error('Please paste a JSON sample to analyze.');
+  }
+
   let parsed: unknown;
   try {
-    parsed = JSON.parse(jsonString.trim());
-  } catch {
-    throw new Error('Invalid JSON — please paste a valid JSON object or array of listings');
+    parsed = JSON.parse(trimmed);
+  } catch (err) {
+    const msg = (err as Error).message.split('\n')[0];
+    throw new Error(`Invalid JSON — ${msg}. Make sure to paste a complete JSON object or array.`);
   }
 
   let items: Record<string, unknown>[] = [];
   let itemsPath = '$[*]';
 
   if (Array.isArray(parsed)) {
-    items = parsed as Record<string, unknown>[];
+    items = (parsed as unknown[]).filter((v): v is Record<string, unknown> => v !== null && typeof v === 'object' && !Array.isArray(v));
   } else if (parsed && typeof parsed === 'object') {
-    for (const key of ['data', 'items', 'results', 'listings', 'properties', 'nekretnine']) {
-      const val = (parsed as Record<string, unknown>)[key];
-      if (Array.isArray(val) && val.length > 0) {
-        items = val as Record<string, unknown>[];
-        itemsPath = `$.${key}[*]`;
-        break;
-      }
-    }
-    if (items.length === 0) {
+    // First try a recursive search for the deepest object-array.
+    const found = findItemsArray(parsed);
+    if (found) {
+      items = found.items;
+      itemsPath = found.path === '$' ? '$[*]' : `${found.path}[*]`;
+    } else {
+      // No array found — treat the whole object as a single listing.
       items = [parsed as Record<string, unknown>];
       itemsPath = '$';
     }
   } else {
-    throw new Error('JSON must be an object or array of listings');
+    throw new Error('JSON must be an object or array of listings, not a primitive value.');
   }
 
-  if (items.length === 0) throw new Error('No items found in the provided JSON');
-
-  // Filter to only items that look like real listings
-  const validItems = items.filter(item => isValidListingItem(item));
-  if (validItems.length === 0) {
+  if (items.length === 0) {
     throw new Error(
-      'No items in the JSON look like real estate listings. ' +
-      'Listings must have at least (title or description) and (price or location/city/country).'
+      'The JSON parsed correctly, but no listing-shaped objects were found. ' +
+      'Make sure your sample is either an array of listings, or an object containing one (e.g. { "data": [ ... ] }).'
+    );
+  }
+
+  const validItems = items.filter((item) => isValidListingItem(item));
+  if (validItems.length === 0) {
+    // Provide a helpful summary of what keys are present so the user can adjust.
+    const sampleKeys = Object.keys(items[0]).slice(0, 10).join(', ');
+    throw new Error(
+      `Found ${items.length} object(s), but none look like real-estate listings. ` +
+      `A listing should have at least one of: title/name, price, address/city, or property details ` +
+      `(beds, area, etc). Keys in your sample: ${sampleKeys || '(none)'}.`
     );
   }
 
@@ -763,7 +945,7 @@ export const detectFromJsonSample = (jsonString: string): DetectResult => {
     adapterConfig: { itemsPath, idPath: '$.id', urlPath: '$.url' },
     fieldMap: buildJsonFieldMap(sample),
     sample,
-    hint: `JSON sample analyzed — ${validItems.length} valid item(s) detected out of ${items.length}`,
+    hint: `JSON sample analyzed — ${validItems.length} valid listing(s) detected out of ${items.length}`,
   };
 };
 

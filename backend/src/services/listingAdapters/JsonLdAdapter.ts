@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio';
 import type { IListingSource } from '../../models/ListingSource';
 import { isValidListingItem } from '../listingNormalizerService';
+import { looksLikeListingPath } from '../listingDetectorService';
 import { httpGet } from './httpClient';
 import type { FetchOptions, RawListing, SourceAdapter } from './types';
 
@@ -108,9 +109,19 @@ export class JsonLdAdapter implements SourceAdapter {
         const response = await httpGet<string>(pageUrl, { ...requestOpts, responseType: 'text' });
         const $ = cheerio.load(String(response.data));
         const linkSel = cfg.linkSelector as string;
+        const seen = new Set<string>();
         $(linkSel).each((_, el) => {
           const href = $(el).attr('href');
-          if (href) urls.push(resolveUrl(pageUrl, href));
+          if (!href || href.startsWith('#') || href.startsWith('javascript:') ||
+              href.startsWith('mailto:') || href.startsWith('tel:')) return;
+          const abs = resolveUrl(pageUrl, href);
+          let pathname = '';
+          try { pathname = new URL(abs).pathname; } catch { return; }
+          // Only keep URLs that look like a listing detail page.
+          if (!looksLikeListingPath(pathname)) return;
+          if (seen.has(abs)) return;
+          seen.add(abs);
+          urls.push(abs);
         });
         if (cfg.nextPageSelector) {
           const nextHref = $(cfg.nextPageSelector).attr('href');

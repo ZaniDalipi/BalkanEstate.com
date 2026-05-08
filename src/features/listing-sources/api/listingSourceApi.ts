@@ -42,8 +42,14 @@ export interface IngestStats {
   imported: number;
   updated: number;
   failed: number;
+  deferred?: number;
   errors: string[];
   durationMs: number;
+  monthlyUsage?: {
+    monthlyAllowance: number;
+    created: number;
+    remaining: number;
+  };
 }
 
 export interface RecentImportedListing {

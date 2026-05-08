@@ -227,34 +227,69 @@ const knownPropertyKeys = new Set<string>([
 ]);
 
 /**
+ * Regex patterns matching keys that indicate a real-estate-listing-shaped
+ * field. Matched case-insensitively and with `includes` semantics, so e.g.
+ * `propertyTitle`, `listing_name`, `naslov_oglasa` and `house_price` all hit.
+ */
+const CONTENT_KEY_RE = /(title|name|naslov|naziv|description|opis|content|summary|heading|headline|subject)/i;
+const LOCATION_KEY_RE = /(address|street|city|country|state|region|town|location|grad|zemlja|drzava|ulica|adresa|postal|zip|lat|lng|lon|coord|geo|place|district|county|kraj)/i;
+const PRICE_KEY_RE = /(price|amount|cost|rent|fee|cijena|cena|preis|prix|precio|valor|asking|monthly|priceeur|price_eur|listing_price|property_price)/i;
+const PROPERTY_KEY_RE = /(beds?|bedroom|baths?|bathroom|sqft|sqm|m2|area|surface|sobe|kupatil|povrsina|tip|type|categor|kategorij|zimmer|chamber|bagno|imag|photo|image|slika|foto|gallery|room|stan|kuca|apartment|villa|land|plot|parcel|garage|parking|floor|sprat|etaz|etag|year|built|godinu|baujahr|condition|stanje|construction|view|pogled|aussicht|heating|grijanje|furnishing|nameste)/i;
+
+/**
+ * Walk an object and check if any (possibly-nested) key matches the regex.
+ * Bounded to depth 4 so we don't burn time on huge payloads.
+ */
+const hasMatchingKey = (
+  obj: unknown,
+  re: RegExp,
+  depth = 0
+): boolean => {
+  if (obj == null || depth > 4) return false;
+  if (Array.isArray(obj)) {
+    return obj.some((v) => hasMatchingKey(v, re, depth + 1));
+  }
+  if (typeof obj !== 'object') return false;
+  for (const [key, val] of Object.entries(obj as Record<string, unknown>)) {
+    if (re.test(key)) {
+      // The key matches — but ensure the value isn't empty / null / empty array.
+      if (val == null) continue;
+      if (Array.isArray(val) && val.length === 0) continue;
+      if (typeof val === 'string' && val.trim() === '') continue;
+      if (typeof val === 'object' && Object.keys(val as object).length === 0) continue;
+      return true;
+    }
+    // Also recurse into nested objects so deep keys can satisfy the check.
+    if (typeof val === 'object' && hasMatchingKey(val, re, depth + 1)) return true;
+  }
+  return false;
+};
+
+/**
  * Validate that a raw listing looks like a real estate listing.
- * Requires at least: (title OR description) AND (price OR address/city/country)
- * Tolerates various field name variations (title, name, naslov, naziv, etc.)
- * This prevents accidentally ingesting page metadata or non-listing content.
+ *
+ * Permissive: at least ONE strong real-estate signal must be present. Strong
+ * signals are price, location, or a dedicated property attribute (beds, area,
+ * rooms, image gallery, propertyType, etc.). Title alone is not enough since
+ * news articles, blog posts, and product pages all have titles.
+ *
+ * Tolerant of nested objects and arbitrary key naming styles (snake_case,
+ * camelCase, accented Slavic terms, German/French/Spanish/Greek/Romanian
+ * keys, etc.) by using regex `includes` matching against keys.
  */
 export const isValidListingItem = (raw: Record<string, unknown>): boolean => {
-  // Check for content fields (title/description)
-  const contentFields = ['title', 'name', 'naslov', 'naziv', 'description', 'opis', 'content', 'summary'];
-  const hasContent = contentFields.some(f => {
-    const v = raw[f];
-    return v != null && String(v).trim().length > 0;
-  });
+  if (!raw || typeof raw !== 'object') return false;
+  const hasContent = hasMatchingKey(raw, CONTENT_KEY_RE);
+  const hasPrice = hasMatchingKey(raw, PRICE_KEY_RE);
+  const hasLocation = hasMatchingKey(raw, LOCATION_KEY_RE);
+  const hasPropertyAttr = hasMatchingKey(raw, PROPERTY_KEY_RE);
 
-  // Check for location fields
-  const locationFields = ['address', 'city', 'country', 'lat', 'lng', 'grad', 'zemlja', 'ulica'];
-  const hasLocation = locationFields.some(f => {
-    const v = raw[f];
-    return v != null && String(v).trim().length > 0;
-  });
-
-  // Check for price (must be present and non-empty)
-  const priceFields = ['price', 'cijena', 'cena', 'preis', 'prix', 'precio'];
-  const hasPrice = priceFields.some(f => {
-    const v = raw[f];
-    return v != null && String(v).trim() !== '';
-  });
-
-  return hasContent && (hasPrice || hasLocation);
+  // Need at least one identifying real-estate signal beyond just text content.
+  // Title + any of (price | location | property attribute) → it's a listing.
+  // No content but price + location → still a listing (sparse feed entry).
+  if (hasContent && (hasPrice || hasLocation || hasPropertyAttr)) return true;
+  if (hasPrice && hasLocation) return true;
+  return false;
 };
 
 /**

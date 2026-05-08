@@ -16,7 +16,7 @@ import { processMonthlyCouponRefresh } from '../services/monthlyCouponService';
 import { fetchAndStoreNews, cleanupOldNews } from '../services/newsService';
 import { startPropertyStatsJob, stopPropertyStatsJob } from '../jobs/computePropertyStatsJob';
 import { processExpiredRentals } from '../jobs/rentalExpiryJob';
-import { processListingIngest } from '../jobs/listingIngestJob';
+import { processListingIngest, processDeferredListingReplay } from '../jobs/listingIngestJob';
 
 // Helper to check if MongoDB is connected before running a job
 const isMongoConnected = (): boolean => {
@@ -49,6 +49,7 @@ let newsFetchTask: cron.ScheduledTask | null = null;
 let newsCleanupTask: cron.ScheduledTask | null = null;
 let rentalExpiryTask: cron.ScheduledTask | null = null;
 let listingIngestTask: cron.ScheduledTask | null = null;
+let deferredReplayTask: cron.ScheduledTask | null = null;
 
 export const startCronJobs = () => {
   // Check for subscriptions expiring in 1 day - runs daily at 10 AM
@@ -445,7 +446,16 @@ export const startCronJobs = () => {
     });
   });
 
-  cronLogger.info('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails, monthly coupons, news fetch, property stats, rental expiry, listing ingest)');
+  // Replay deferred listings (those skipped because their owning user hit the
+  // monthly limit). Runs hourly on the 1st of each month — month-boundary
+  // logic resets the user's counter on first save, so we just keep retrying.
+  deferredReplayTask = cron.schedule('15 * 1 * *', async () => {
+    await withDbConnection('deferred listing replay', async () => {
+      await processDeferredListingReplay();
+    });
+  });
+
+  cronLogger.info('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails, monthly coupons, news fetch, property stats, rental expiry, listing ingest, deferred replay)');
 };
 
 export const stopCronJobs = () => {
@@ -466,6 +476,7 @@ export const stopCronJobs = () => {
   if (newsCleanupTask) newsCleanupTask.stop();
   if (rentalExpiryTask) rentalExpiryTask.stop();
   if (listingIngestTask) listingIngestTask.stop();
+  if (deferredReplayTask) deferredReplayTask.stop();
   stopPropertyStatsJob();
   cronLogger.info('🛑 All cron jobs stopped');
 };

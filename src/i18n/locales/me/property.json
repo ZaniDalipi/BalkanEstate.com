@@ -560,12 +560,11 @@
     "cancelViewing": "Otkaži razgledanje",
     "requested": "Zatraženo"
   },
-<<<<<<< HEAD
   "source": {
     "listedOn": "Objavljeno na {{source}}",
     "viewOriginal": "Pogledaj na {{source}}",
     "importedAt": "Uvezeno {{date}}"
-=======
+  },
   "imageViewer": {
     "annotate": {
       "label": "Bilješka",
@@ -574,6 +573,5 @@
       "hint": "Crtajte po slici za bilješke",
       "sendToChat": "Pošalji"
     }
->>>>>>> main
   }
 }

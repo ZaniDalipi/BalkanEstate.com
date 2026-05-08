@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { IngestStats, ListingSource } from '../api/listingSourceApi';
 import { useListingIngestProgress } from '../hooks/useListingIngestProgress';
 import ListingIngestProgressBar from './ListingIngestProgressBar';
+import ListingIngestProgressModal from './ListingIngestProgressModal';
 
 interface Props {
   source: ListingSource;
@@ -55,6 +56,14 @@ const ListingFeedRow: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation(['listingFeeds', 'common']);
   const progress = useListingIngestProgress(isRunning ? source.id : undefined);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  // Open the progress modal automatically when this row's sync starts. Don't
+  // auto-close it when the run finishes — the user may want to inspect the
+  // results — but do let them close it manually.
+  useEffect(() => {
+    if (isRunning) setModalOpen(true);
+  }, [isRunning]);
 
   const busy = isDeleting || isClearing;
   const hasImports = source.listingsImported > 0 || source.listingsUpdated > 0;
@@ -120,13 +129,23 @@ const ListingFeedRow: React.FC<Props> = ({
             )}
 
             {lastRun && !isRunning && (
-              <div className="mt-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-2 py-1">
-                {t('listingFeeds:runResult', {
-                  fetched: lastRun.fetched,
-                  imported: lastRun.imported,
-                  updated: lastRun.updated,
-                  failed: lastRun.failed,
-                })}
+              <div className="mt-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-2 py-1 flex items-center justify-between gap-2 flex-wrap">
+                <span>
+                  {t('listingFeeds:runResult', {
+                    fetched: lastRun.fetched,
+                    imported: lastRun.imported,
+                    updated: lastRun.updated,
+                    failed: lastRun.failed,
+                  })}
+                  {(lastRun.deferred ?? 0) > 0 && ` · ${t('listingFeeds:deferred')}: ${lastRun.deferred}`}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(true)}
+                  className="text-emerald-800 hover:underline font-semibold whitespace-nowrap"
+                >
+                  {t('listingFeeds:viewDetails')}
+                </button>
               </div>
             )}
 
@@ -189,6 +208,15 @@ const ListingFeedRow: React.FC<Props> = ({
           </div>
         </div>
       </div>
+
+      <ListingIngestProgressModal
+        source={source}
+        isOpen={modalOpen}
+        isRunning={isRunning}
+        progress={progress}
+        finalStats={lastRun}
+        onClose={() => setModalOpen(false)}
+      />
     </div>
   );
 };
