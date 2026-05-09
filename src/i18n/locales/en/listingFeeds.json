@@ -107,6 +107,27 @@
     "fieldMapHint": "Map your source's fields to BalkanEstate property fields. Example: { \"title\": \"name\", \"price\": \"price.amount\" }",
     "enableNow": "Enable this feed immediately"
   },
+  "preview": {
+    "title": "Review listings before importing",
+    "subtitle": "Found {{total}} listings from {{source}}. Select the ones you want to keep.",
+    "fetching": "Fetching listings from source…",
+    "fetchingShort": "Fetching…",
+    "modalLabel": "Review listings",
+    "badgeNew": "New",
+    "badgeUpdate": "Update",
+    "newCount": "{{count}} new",
+    "updateCount": "{{count}} updates",
+    "selectedCount": "{{count}} of {{total}} selected",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "confirmImport": "Import {{count}} listings",
+    "noSelection": "Select at least one listing",
+    "cancel": "Cancel",
+    "empty": "No listings found on this source.",
+    "untitled": "Untitled listing",
+    "beds": "bd",
+    "baths": "ba"
+  },
   "adapter": {
     "rss": "RSS / Atom feed",
     "rssDesc": "Standard RSS or Atom feed of new listings.",

@@ -8,6 +8,8 @@ import {
   update,
   remove,
   runNow,
+  preview,
+  confirmImport,
   stats,
 } from '../controllers/listingSourceController';
 
@@ -24,6 +26,8 @@ router.put('/:id', logAdminAction('UPDATE_LISTING_SOURCE'), update);
 router.delete('/:id', logAdminAction('DELETE_LISTING_SOURCE'), remove);
 
 router.post('/:id/run', logAdminAction('RUN_LISTING_SOURCE'), runNow);
+router.post('/:id/preview', logAdminAction('PREVIEW_LISTING_SOURCE'), preview);
+router.post('/:id/confirm-import', logAdminAction('CONFIRM_LISTING_SOURCE_IMPORT'), confirmImport);
 router.get('/:id/stats', logAdminAction('LISTING_SOURCE_STATS'), stats);
 
 export default router;

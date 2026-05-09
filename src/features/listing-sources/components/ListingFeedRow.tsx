@@ -8,6 +8,7 @@ interface Props {
   source: ListingSource;
   selected: boolean;
   isRunning: boolean;
+  isPreviewing?: boolean;
   isDeleting: boolean;
   isToggling: boolean;
   isClearing: boolean;
@@ -42,6 +43,7 @@ const ListingFeedRow: React.FC<Props> = ({
   source,
   selected,
   isRunning,
+  isPreviewing = false,
   isDeleting,
   isToggling,
   isClearing,
@@ -58,6 +60,7 @@ const ListingFeedRow: React.FC<Props> = ({
   const [modalOpen, setModalOpen] = useState(false);
 
   const busy = isDeleting || isClearing;
+  const fetchingPreview = isPreviewing && !isRunning;
   const hasImports = source.listingsImported > 0 || source.listingsUpdated > 0;
 
   const c = session?.current;
@@ -123,6 +126,14 @@ const ListingFeedRow: React.FC<Props> = ({
               </div>
             )}
 
+            {/* Inline fetching-preview banner */}
+            {fetchingPreview && (
+              <div className="mt-2 w-full bg-violet-50 border border-violet-200 rounded-lg px-3 py-2 flex items-center gap-2">
+                <Spinner />
+                <span className="text-xs text-violet-900 font-medium">{t('listingFeeds:preview.fetching')}</span>
+              </div>
+            )}
+
             {/* Inline running banner — opens the modal on click */}
             {isRunning && (
               <button
@@ -183,11 +194,15 @@ const ListingFeedRow: React.FC<Props> = ({
             <button
               type="button"
               onClick={onRun}
-              disabled={isRunning || busy}
+              disabled={isRunning || fetchingPreview || busy}
               className="px-3 py-1.5 text-sm rounded-lg bg-primary text-white hover:bg-primary-dark disabled:opacity-50 flex items-center gap-1.5"
             >
-              {isRunning && <Spinner />}
-              {isRunning ? t('listingFeeds:running') : t('listingFeeds:runNow')}
+              {(isRunning || fetchingPreview) && <Spinner />}
+              {isRunning
+                ? t('listingFeeds:running')
+                : fetchingPreview
+                  ? t('listingFeeds:preview.fetchingShort')
+                  : t('listingFeeds:runNow')}
             </button>
 
             {hasImports && (

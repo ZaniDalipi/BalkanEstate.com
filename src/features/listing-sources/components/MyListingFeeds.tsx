@@ -5,6 +5,7 @@ import { useListingFeeds } from '../hooks/useListingFeeds';
 import AddFeedWizard from './AddFeedWizard';
 import ListingFeedForm from './ListingFeedForm';
 import ListingFeedRow from './ListingFeedRow';
+import ListingPreviewModal from './ListingPreviewModal';
 
 type View = 'list' | 'add' | 'edit';
 
@@ -19,16 +20,21 @@ const MyListingFeeds: React.FC = () => {
     loading,
     error,
     runningIds,
+    previewingIds,
     deletingIds,
     togglingIds,
     clearingIds,
     lastRun,
+    pendingPreview,
+    confirmingPreview,
     selectedIds,
     isAllSelected,
     isSomeSelected,
     bulkDeleting,
     deleteFeed,
-    runFeed,
+    previewFeed,
+    confirmFeed,
+    cancelPreview,
     toggleEnabled,
     clearImports,
     upsertFeed,
@@ -81,6 +87,18 @@ const MyListingFeeds: React.FC = () => {
 
   return (
     <div>
+      {/* Review modal — shown when a preview has been fetched and is awaiting user approval */}
+      {pendingPreview && (
+        <ListingPreviewModal
+          sourceName={pendingPreview.sourceName}
+          previewId={pendingPreview.previewId}
+          items={pendingPreview.items}
+          onConfirm={confirmFeed}
+          onCancel={cancelPreview}
+          isConfirming={confirmingPreview}
+        />
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
         <div>
@@ -183,6 +201,7 @@ const MyListingFeeds: React.FC = () => {
               source={source}
               selected={selectedIds.has(source.id)}
               isRunning={runningIds.has(source.id)}
+              isPreviewing={previewingIds.has(source.id)}
               isDeleting={deletingIds.has(source.id)}
               isToggling={togglingIds.has(source.id)}
               isClearing={clearingIds.has(source.id)}
@@ -190,7 +209,7 @@ const MyListingFeeds: React.FC = () => {
               onSelect={() => toggleSelected(source.id)}
               onEdit={() => { setEditing(source); setView('edit'); }}
               onDelete={() => handleDelete(source.id)}
-              onRun={() => runFeed(source.id)}
+              onRun={() => previewFeed(source.id)}
               onToggleEnabled={() => void toggleEnabled(source)}
               onClearImports={() => handleClearImports(source)}
             />

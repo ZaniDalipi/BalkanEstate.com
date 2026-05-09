@@ -2,14 +2,25 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   type IngestStats,
   type ListingSource,
+  type PreviewListing,
+  type PreviewResult,
   bulkDeleteMyListingSources,
   clearMyListingSourceImports,
+  confirmMyListingSourceImport,
   deleteMyListingSource,
   listMyListingSources,
+  previewMyListingSource,
   runMyListingSource,
   updateMyListingSource,
 } from '../api/listingSourceApi';
 import { useListingIngestProgressContext } from '../context/ListingIngestProgressContext';
+
+export interface PendingPreview {
+  sourceId: string;
+  sourceName: string;
+  previewId: string;
+  items: PreviewListing[];
+}
 
 export interface UseListingFeedsReturn {
   // Data
@@ -18,10 +29,14 @@ export interface UseListingFeedsReturn {
   error: string | null;
   // Per-row operation state
   runningIds: Set<string>;
+  previewingIds: Set<string>;
   deletingIds: Set<string>;
   togglingIds: Set<string>;
   clearingIds: Set<string>;
   lastRun: Record<string, IngestStats>;
+  // Preview state
+  pendingPreview: PendingPreview | null;
+  confirmingPreview: boolean;
   // Selection state (for bulk ops)
   selectedIds: Set<string>;
   isAllSelected: boolean;
@@ -31,6 +46,9 @@ export interface UseListingFeedsReturn {
   refresh: () => Promise<void>;
   deleteFeed: (id: string) => Promise<void>;
   runFeed: (id: string) => void;
+  previewFeed: (id: string) => void;
+  confirmFeed: (approvedIds: string[]) => void;
+  cancelPreview: () => void;
   toggleEnabled: (source: ListingSource) => Promise<void>;
   clearImports: (id: string) => Promise<void>;
   upsertFeed: (source: ListingSource) => void;
@@ -48,12 +66,15 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [runningIds, setRunningIds] = useState<Set<string>>(new Set());
+  const [previewingIds, setPreviewingIds] = useState<Set<string>>(new Set());
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
   const [clearingIds, setClearingIds] = useState<Set<string>>(new Set());
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [lastRun, setLastRun] = useState<Record<string, IngestStats>>({});
+  const [pendingPreview, setPendingPreview] = useState<PendingPreview | null>(null);
+  const [confirmingPreview, setConfirmingPreview] = useState(false);
   const { registerSync, failSession } = useListingIngestProgressContext();
 
   const refresh = useCallback(async () => {
@@ -108,12 +129,8 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
   }, []);
 
   /**
-   * Fire-and-forget the sync. Returns immediately so the user can navigate
-   * elsewhere; the global ListingIngestProgressContext (subscribed via socket)
-   * keeps the dock and modal in sync regardless of which page the user is on.
-   *
-   * The HTTP request resolves with the final IngestStats once the backend has
-   * finished — that's used to update the source list and lastRun summary.
+   * Fire-and-forget direct sync (bypasses review). Kept for backwards compat
+   * and for future "force sync" scenarios where review is skipped intentionally.
    */
   const runFeed = useCallback((id: string): void => {
     const source = sources.find((s) => s.id === id);
@@ -133,8 +150,6 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
       } catch (e) {
         const msg = (e as Error).message || 'Sync failed';
         setError(msg);
-        // Surface the failure on the dock/modal so the user sees it even if
-        // they navigated away from this page.
         failSession(id, msg);
       } finally {
         setRunningIds((prev) => {
@@ -145,6 +160,69 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
       }
     })();
   }, [sources, registerSync, failSession]);
+
+  /**
+   * Fetch listings from the source and open the review modal so the user can
+   * choose which ones to import. Does NOT save anything until confirmFeed().
+   */
+  const previewFeed = useCallback((id: string): void => {
+    const source = sources.find((s) => s.id === id);
+    if (!source) return;
+
+    setPreviewingIds((prev) => new Set(prev).add(id));
+    setError(null);
+
+    void (async () => {
+      try {
+        const result: PreviewResult = await previewMyListingSource(id, { limit: 100 });
+        setPendingPreview({
+          sourceId: id,
+          sourceName: source.name,
+          previewId: result.previewId,
+          items: result.items,
+        });
+      } catch (e) {
+        setError((e as Error).message || 'Failed to fetch listings');
+      } finally {
+        setPreviewingIds((prev) => { const n = new Set(prev); n.delete(id); return n; });
+      }
+    })();
+  }, [sources]);
+
+  /**
+   * Import the listings the user approved in the review modal.
+   * Triggers the normal socket-based progress flow.
+   */
+  const confirmFeed = useCallback((approvedIds: string[]): void => {
+    if (!pendingPreview) return;
+    const { sourceId, sourceName, previewId } = pendingPreview;
+
+    setPendingPreview(null);
+    setConfirmingPreview(true);
+    setRunningIds((prev) => new Set(prev).add(sourceId));
+    registerSync(sourceId, sourceName);
+
+    void (async () => {
+      try {
+        const { stats } = await confirmMyListingSourceImport(sourceId, previewId, approvedIds);
+        setLastRun((prev) => ({ ...prev, [sourceId]: stats }));
+        try {
+          setSources(await listMyListingSources());
+        } catch { /* refresh failure non-fatal */ }
+      } catch (e) {
+        const msg = (e as Error).message || 'Import failed';
+        setError(msg);
+        failSession(sourceId, msg);
+      } finally {
+        setConfirmingPreview(false);
+        setRunningIds((prev) => { const n = new Set(prev); n.delete(sourceId); return n; });
+      }
+    })();
+  }, [pendingPreview, registerSync, failSession]);
+
+  const cancelPreview = useCallback(() => {
+    setPendingPreview(null);
+  }, []);
 
   const toggleEnabled = useCallback(async (source: ListingSource) => {
     setTogglingIds((prev) => new Set(prev).add(source.id));
@@ -227,10 +305,13 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
     loading,
     error,
     runningIds,
+    previewingIds,
     deletingIds,
     togglingIds,
     clearingIds,
     lastRun,
+    pendingPreview,
+    confirmingPreview,
     selectedIds,
     isAllSelected,
     isSomeSelected,
@@ -238,6 +319,9 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
     refresh,
     deleteFeed,
     runFeed,
+    previewFeed,
+    confirmFeed,
+    cancelPreview,
     toggleEnabled,
     clearImports,
     upsertFeed,

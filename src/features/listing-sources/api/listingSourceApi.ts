@@ -168,6 +168,50 @@ export const getMyListingSourceStats = async (id: string): Promise<ListingSource
   return apiRequest<ListingSourceStats>(`${BASE}/${id}/stats`, { requiresAuth: true });
 };
 
+export interface PreviewListing {
+  rawId: string;
+  title?: string;
+  price?: number;
+  city?: string;
+  country?: string;
+  propertyType?: string;
+  beds?: number;
+  baths?: number;
+  sqft?: number;
+  imageUrl?: string;
+  sourceUrl?: string;
+  isNew: boolean;
+}
+
+export interface PreviewResult {
+  previewId: string;
+  items: PreviewListing[];
+  fetched: number;
+}
+
+export const previewMyListingSource = async (
+  id: string,
+  options?: { limit?: number }
+): Promise<PreviewResult> => {
+  const params = options?.limit ? `?limit=${options.limit}` : '';
+  return apiRequest<PreviewResult>(`${BASE}/${id}/preview${params}`, {
+    method: 'POST',
+    requiresAuth: true,
+  });
+};
+
+export const confirmMyListingSourceImport = async (
+  id: string,
+  previewId: string,
+  approvedIds: string[]
+): Promise<{ stats: IngestStats }> => {
+  return apiRequest<{ stats: IngestStats }>(`${BASE}/${id}/confirm-import`, {
+    method: 'POST',
+    body: { previewId, approvedIds },
+    requiresAuth: true,
+  });
+};
+
 export interface DetectResult {
   adapterType: ListingAdapterType;
   adapterConfig: Record<string, unknown>;
