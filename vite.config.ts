@@ -439,6 +439,9 @@ export default defineConfig(({ mode }) => {
       esbuild: {
         // Drop console.log and debugger in production
         drop: isProduction ? ['console', 'debugger'] : [],
+        // Safari compatibility: explicit target for esbuild to ensure proper transpilation
+        // of optional chaining and other ES2020+ features
+        target: 'es2019',
       },
       // Preview server configuration (for testing builds locally)
       preview: {
