@@ -959,11 +959,44 @@ export const detectFromJsonSample = (jsonString: string): DetectResult => {
   const sample = validItems[0];
   return {
     adapterType: 'jsonFeed',
-    adapterConfig: { itemsPath, idPath: '$.id', urlPath: '$.url' },
+    adapterConfig: {
+      itemsPath,
+      idPath: detectIdPath(sample),
+      urlPath: detectUrlPath(sample),
+    },
     fieldMap: buildJsonFieldMap(sample),
     sample,
     hint: `JSON sample analyzed — ${validItems.length} valid listing(s) detected out of ${items.length}`,
   };
+};
+
+/**
+ * Pick a JSONPath to the listing's stable identifier. Walks the sample's
+ * top-level keys and matches common id field names. Returns `$.id` as a
+ * sensible default when nothing matches (the adapter falls back to a
+ * synthetic id if the path resolves to null).
+ */
+const detectIdPath = (sample: Record<string, unknown>): string => {
+  const candidates = ['id', '_id', 'uid', 'uuid', 'listing_id', 'property_id', 'listingId', 'propertyId'];
+  for (const key of candidates) {
+    if (key in sample) {
+      const val = sample[key];
+      // Mongo extended JSON: { _id: { $oid: '...' } } — point at $oid so the adapter gets a string.
+      if (val && typeof val === 'object' && !Array.isArray(val) && '$oid' in (val as Record<string, unknown>)) {
+        return `$.${key}.$oid`;
+      }
+      return `$.${key}`;
+    }
+  }
+  return '$.id';
+};
+
+/** Pick a JSONPath to the listing's canonical URL, falling back to `$.url`. */
+const detectUrlPath = (sample: Record<string, unknown>): string => {
+  for (const key of ['url', 'link', 'permalink', 'href', 'listing_url', 'property_url', 'sourceUrl', 'source_url']) {
+    if (key in sample && typeof sample[key] === 'string') return `$.${key}`;
+  }
+  return '$.url';
 };
 
 /**
