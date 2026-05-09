@@ -76,28 +76,32 @@ const allModels = [
 ];
 
 /**
- * Syncs products from seed data to the database.
- * Ensures all pricing and features are up-to-date without requiring manual seed commands.
- * This runs automatically on every server startup.
+ * Seeds missing products from seed data into the database.
+ * Only inserts products that do not exist yet — existing products are never overwritten,
+ * so admin changes made via the PricingManager UI are preserved across deployments.
  */
 const syncProductPricing = async (): Promise<void> => {
   try {
-    // Import PRODUCTS from seedProducts
     const { PRODUCTS } = await import('../scripts/seedProducts');
 
-    let upsertedCount = 0;
+    let insertedCount = 0;
+    let skippedCount = 0;
     const errors: string[] = [];
 
     for (const productData of PRODUCTS) {
       try {
-        // Use findOneAndUpdate with upsert to keep existing data but sync pricing
+        // $setOnInsert only writes data when creating a new document.
+        // If the product already exists it is left completely unchanged.
         const result = await Product.findOneAndUpdate(
           { productId: productData.productId },
-          productData,
-          { upsert: true, new: true }
+          { $setOnInsert: productData },
+          { upsert: true, new: false }
         );
-        if (result) {
-          upsertedCount++;
+        if (result === null) {
+          // null means the document did not exist before → was just inserted
+          insertedCount++;
+        } else {
+          skippedCount++;
         }
       } catch (error: any) {
         errors.push(`${productData.productId}: ${error.message}`);
@@ -108,7 +112,7 @@ const syncProductPricing = async (): Promise<void> => {
       dbLogger.warn(`⚠️  Product sync had ${errors.length} error(s): ${errors.join('; ')}`);
     }
 
-    dbLogger.info(`✅ Product pricing synced (${upsertedCount} products updated/created)`);
+    dbLogger.info(`✅ Products synced (${insertedCount} new, ${skippedCount} existing preserved)`);
   } catch (error: any) {
     dbLogger.error('❌ Error syncing product pricing:', error.message);
     // Don't throw - let app continue even if product sync fails
@@ -183,10 +187,9 @@ export const initializeDatabase = async (): Promise<void> => {
     // Ensure all property documents have the same attributes across environments
     await ensurePropertySchemaSync();
 
-    // Sync product pricing from seed data on every startup
-    // This ensures frontend and backend pricing are always in sync without manual commands
+    // Seed any missing products on startup (existing products are never overwritten)
     try {
-      dbLogger.info('🔄 Syncing product pricing from seed data...');
+      dbLogger.info('🔄 Checking for missing products...');
       await syncProductPricing();
     } catch (error) {
       dbLogger.error('❌ Error syncing product pricing:', error);
