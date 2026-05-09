@@ -1,5 +1,10 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSocket } from '@/shared/hooks/useSocket';
+import {
+  type PreviewListing,
+  confirmMyListingSourceImport,
+  previewMyListingSource,
+} from '../api/listingSourceApi';
 
 export interface ListingIngestProgressEvent {
   sourceId: string;
@@ -45,6 +50,19 @@ export interface SyncSession {
   notified: boolean;
 }
 
+export interface PendingPreview {
+  sourceId: string;
+  sourceName: string;
+  previewId: string;
+  items: PreviewListing[];
+}
+
+export interface FetchingPreview {
+  sourceId: string;
+  sourceName: string;
+  startedAt: number;
+}
+
 interface ContextValue {
   sessions: Map<string, SyncSession>;
   registerSync: (sourceId: string, sourceName: string) => void;
@@ -52,12 +70,28 @@ interface ContextValue {
   failSession: (sourceId: string, errorMessage: string) => void;
   dismissSession: (sourceId: string) => void;
   getSession: (sourceId: string) => SyncSession | undefined;
+  // ── Preview state (shared across the whole app) ──────────────────────────
+  pendingPreview: PendingPreview | null;
+  fetchingPreviews: Map<string, FetchingPreview>;
+  confirmingPreview: boolean;
+  /** Kick off a preview fetch. Resolves once the modal is queued or rejects on failure. */
+  startPreview: (sourceId: string, sourceName: string, limit?: number) => Promise<void>;
+  /** Confirm the currently-pending preview, importing the approved subset. */
+  confirmPreview: (approvedIds: string[]) => Promise<void>;
+  /** Close the modal without importing. */
+  cancelPreview: () => void;
+  /** Subscribe to "import confirmed" events so a feature page can refresh its list. */
+  onImportConfirmed: (handler: (sourceId: string) => void) => () => void;
 }
 
 const ListingIngestProgressContext = createContext<ContextValue | null>(null);
 
 export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sessions, setSessions] = useState<Map<string, SyncSession>>(new Map());
+  const [pendingPreview, setPendingPreview] = useState<PendingPreview | null>(null);
+  const [fetchingPreviews, setFetchingPreviews] = useState<Map<string, FetchingPreview>>(new Map());
+  const [confirmingPreview, setConfirmingPreview] = useState(false);
+  const [importHandlers] = useState<Set<(sourceId: string) => void>>(() => new Set());
   const socket = useSocket();
 
   const registerSync = useCallback((sourceId: string, sourceName: string) => {
@@ -172,9 +206,101 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
     };
   }, [socket]);
 
+  const startPreview = useCallback(
+    async (sourceId: string, sourceName: string, limit = 100): Promise<void> => {
+      setFetchingPreviews((prev) => {
+        const next = new Map(prev);
+        next.set(sourceId, { sourceId, sourceName, startedAt: Date.now() });
+        return next;
+      });
+      try {
+        const result = await previewMyListingSource(sourceId, { limit });
+        setPendingPreview({
+          sourceId,
+          sourceName,
+          previewId: result.previewId,
+          items: result.items,
+        });
+      } finally {
+        setFetchingPreviews((prev) => {
+          if (!prev.has(sourceId)) return prev;
+          const next = new Map(prev);
+          next.delete(sourceId);
+          return next;
+        });
+      }
+    },
+    []
+  );
+
+  const cancelPreview = useCallback(() => {
+    setPendingPreview(null);
+  }, []);
+
+  const confirmPreview = useCallback(
+    async (approvedIds: string[]): Promise<void> => {
+      const preview = pendingPreview;
+      if (!preview) return;
+      const { sourceId, sourceName, previewId } = preview;
+      setConfirmingPreview(true);
+      // Register the sync session immediately so the dock transitions from
+      // "review" → "syncing" without a gap.
+      registerSync(sourceId, sourceName);
+      try {
+        await confirmMyListingSourceImport(sourceId, previewId, approvedIds);
+        setPendingPreview(null);
+        for (const handler of importHandlers) handler(sourceId);
+      } catch (err) {
+        failSession(sourceId, (err as Error).message || 'Import failed');
+        throw err;
+      } finally {
+        setConfirmingPreview(false);
+      }
+    },
+    [pendingPreview, registerSync, failSession, importHandlers]
+  );
+
+  const onImportConfirmed = useCallback(
+    (handler: (sourceId: string) => void): (() => void) => {
+      importHandlers.add(handler);
+      return () => {
+        importHandlers.delete(handler);
+      };
+    },
+    [importHandlers]
+  );
+
   const value = useMemo<ContextValue>(
-    () => ({ sessions, registerSync, markDone, failSession, dismissSession, getSession }),
-    [sessions, registerSync, markDone, failSession, dismissSession, getSession]
+    () => ({
+      sessions,
+      registerSync,
+      markDone,
+      failSession,
+      dismissSession,
+      getSession,
+      pendingPreview,
+      fetchingPreviews,
+      confirmingPreview,
+      startPreview,
+      confirmPreview,
+      cancelPreview,
+      onImportConfirmed,
+    }),
+    [
+      sessions,
+      registerSync,
+      markDone,
+      failSession,
+      dismissSession,
+      getSession,
+      pendingPreview,
+      fetchingPreviews,
+      confirmingPreview,
+      startPreview,
+      confirmPreview,
+      cancelPreview,
+      onImportConfirmed,
+    ]
   );
 
   return (

@@ -5,7 +5,6 @@ import { useListingFeeds } from '../hooks/useListingFeeds';
 import AddFeedWizard from './AddFeedWizard';
 import ListingFeedForm from './ListingFeedForm';
 import ListingFeedRow from './ListingFeedRow';
-import ListingPreviewModal from './ListingPreviewModal';
 
 type View = 'list' | 'add' | 'edit';
 
@@ -25,16 +24,12 @@ const MyListingFeeds: React.FC = () => {
     togglingIds,
     clearingIds,
     lastRun,
-    pendingPreview,
-    confirmingPreview,
     selectedIds,
     isAllSelected,
     isSomeSelected,
     bulkDeleting,
     deleteFeed,
     previewFeed,
-    confirmFeed,
-    cancelPreview,
     toggleEnabled,
     clearImports,
     upsertFeed,
@@ -87,17 +82,8 @@ const MyListingFeeds: React.FC = () => {
 
   return (
     <div>
-      {/* Review modal — shown when a preview has been fetched and is awaiting user approval */}
-      {pendingPreview && (
-        <ListingPreviewModal
-          sourceName={pendingPreview.sourceName}
-          previewId={pendingPreview.previewId}
-          items={pendingPreview.items}
-          onConfirm={confirmFeed}
-          onCancel={cancelPreview}
-          isConfirming={confirmingPreview}
-        />
-      )}
+      {/* Review modal lives at app root via ListingIngestDock so it stays
+          mounted across navigation — see context/ListingIngestProgressContext. */}
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">

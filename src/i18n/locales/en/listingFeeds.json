@@ -53,6 +53,7 @@
   "dockDone": "Sync complete",
   "dockFailed": "Sync failed",
   "dockDismiss": "Dismiss",
+  "dockFetchingPreview": "Fetching listings…",
   "phaseError": "Sync failed",
   "syncFailed": "Sync failed",
   "runResult": "Fetched {{fetched}}, imported {{imported}}, updated {{updated}}, failed {{failed}}",

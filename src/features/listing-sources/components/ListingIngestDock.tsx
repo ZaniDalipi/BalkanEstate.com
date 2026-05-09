@@ -1,11 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import {
   useListingIngestProgressContext,
+  type FetchingPreview,
   type SyncSession,
 } from '../context/ListingIngestProgressContext';
 import ListingIngestProgressModal from './ListingIngestProgressModal';
+import ListingPreviewModal from './ListingPreviewModal';
 import type { ListingSource } from '../api/listingSourceApi';
 
 /**
@@ -45,7 +47,15 @@ const sessionToSource = (session: SyncSession): ListingSource => ({
  */
 const ListingIngestDock: React.FC = () => {
   const { t } = useTranslation(['listingFeeds']);
-  const { sessions, dismissSession } = useListingIngestProgressContext();
+  const {
+    sessions,
+    dismissSession,
+    fetchingPreviews,
+    pendingPreview,
+    confirmingPreview,
+    confirmPreview,
+    cancelPreview,
+  } = useListingIngestProgressContext();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   // Schedule auto-dismiss 15s after a session is marked done — unless the
@@ -62,9 +72,23 @@ const ListingIngestDock: React.FC = () => {
   }, [sessions, dismissSession, expandedId]);
 
   const sessionsArr = useMemo(() => Array.from(sessions.values()), [sessions]);
+  const fetchingArr = useMemo(() => Array.from(fetchingPreviews.values()), [fetchingPreviews]);
   const expandedSession = expandedId ? sessions.get(expandedId) : undefined;
 
-  if (sessionsArr.length === 0) return null;
+  const handleConfirmPreview = useCallback(
+    (approvedIds: string[]) => {
+      void confirmPreview(approvedIds).catch(() => {
+        /* errors are surfaced via dock + context.failSession */
+      });
+    },
+    [confirmPreview]
+  );
+
+  // Render whenever there's any active state — sync session, in-flight
+  // preview fetch, or a queued review modal. Otherwise no DOM at all.
+  const hasAnyActivity =
+    sessionsArr.length > 0 || fetchingArr.length > 0 || pendingPreview != null;
+  if (!hasAnyActivity) return null;
   if (typeof document === 'undefined') return null;
 
   // Portal both the floating dock and the expanded modal to <body> so they
@@ -77,6 +101,9 @@ const ListingIngestDock: React.FC = () => {
         aria-live="polite"
         aria-atomic="false"
       >
+        {fetchingArr.map((fetching) => (
+          <FetchingCard key={`fetching-${fetching.sourceId}`} fetching={fetching} t={t} />
+        ))}
         {sessionsArr.map((session) => (
           <DockCard
             key={session.sourceId}
@@ -101,10 +128,65 @@ const ListingIngestDock: React.FC = () => {
           onMinimize={() => setExpandedId(null)}
         />
       )}
+
+      {pendingPreview && (
+        <ListingPreviewModal
+          sourceName={pendingPreview.sourceName}
+          previewId={pendingPreview.previewId}
+          items={pendingPreview.items}
+          onConfirm={handleConfirmPreview}
+          onCancel={cancelPreview}
+          isConfirming={confirmingPreview}
+        />
+      )}
     </>,
     document.body
   );
 };
+
+interface FetchingCardProps {
+  fetching: FetchingPreview;
+  t: (key: string, opts?: Record<string, unknown>) => string;
+}
+
+/**
+ * Compact dock card shown while a preview fetch is in flight. Gives the user
+ * confidence the fetch is alive even when they navigate away from the feeds
+ * page — the actual review modal pops up at the same place once items arrive.
+ */
+const FetchingCard: React.FC<FetchingCardProps> = ({ fetching, t }) => (
+  <div className="bg-white rounded-2xl shadow-2xl shadow-black/15 border border-gray-200 overflow-hidden animate-slide-up">
+    <div className="px-3 sm:px-4 py-3 flex items-center gap-3">
+      <div className="relative flex-shrink-0 w-9 h-9">
+        <svg className="w-9 h-9 -rotate-90" viewBox="0 0 36 36">
+          <circle cx="18" cy="18" r="15" fill="none" className="stroke-gray-200" strokeWidth="3" />
+          <circle
+            cx="18" cy="18" r="15" fill="none"
+            className="stroke-blue-500 origin-center"
+            strokeWidth="3" strokeLinecap="round"
+            strokeDasharray="24 94.25"
+            style={{ animation: 'dock-spin 1.1s linear infinite', transformOrigin: '18px 18px' }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-[9px] font-bold uppercase text-blue-600">…</span>
+        </div>
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-bold text-gray-900 truncate">{fetching.sourceName}</div>
+        <div className="text-xs text-gray-500 truncate">
+          {t('listingFeeds:dockFetchingPreview')}
+        </div>
+      </div>
+    </div>
+    <div className="h-0.5 bg-gray-100 overflow-hidden relative">
+      <div
+        className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-blue-500 to-transparent"
+        style={{ animation: 'dock-indet 1.4s ease-in-out infinite' }}
+      />
+    </div>
+  </div>
+);
 
 interface DockCardProps {
   session: SyncSession;

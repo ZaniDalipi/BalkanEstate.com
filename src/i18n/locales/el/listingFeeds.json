@@ -137,6 +137,7 @@
   "dockDiscovering": "Discovering listings…",
   "dockDone": "Sync complete",
   "dockDismiss": "Dismiss",
+  "dockFetchingPreview": "Fetching listings…",
   "dockFailed": "Sync failed",
   "phaseError": "Sync failed",
   "syncFailed": "Sync failed"

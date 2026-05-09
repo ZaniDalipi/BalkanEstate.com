@@ -2,25 +2,19 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   type IngestStats,
   type ListingSource,
-  type PreviewListing,
-  type PreviewResult,
   bulkDeleteMyListingSources,
   clearMyListingSourceImports,
-  confirmMyListingSourceImport,
   deleteMyListingSource,
   listMyListingSources,
-  previewMyListingSource,
   runMyListingSource,
   updateMyListingSource,
 } from '../api/listingSourceApi';
-import { useListingIngestProgressContext } from '../context/ListingIngestProgressContext';
+import {
+  type PendingPreview,
+  useListingIngestProgressContext,
+} from '../context/ListingIngestProgressContext';
 
-export interface PendingPreview {
-  sourceId: string;
-  sourceName: string;
-  previewId: string;
-  items: PreviewListing[];
-}
+export type { PendingPreview };
 
 export interface UseListingFeedsReturn {
   // Data
@@ -65,17 +59,38 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
   const [sources, setSources] = useState<ListingSource[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [runningIds, setRunningIds] = useState<Set<string>>(new Set());
-  const [previewingIds, setPreviewingIds] = useState<Set<string>>(new Set());
+  const [localRunningIds, setLocalRunningIds] = useState<Set<string>>(new Set());
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
   const [clearingIds, setClearingIds] = useState<Set<string>>(new Set());
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [lastRun, setLastRun] = useState<Record<string, IngestStats>>({});
-  const [pendingPreview, setPendingPreview] = useState<PendingPreview | null>(null);
-  const [confirmingPreview, setConfirmingPreview] = useState(false);
-  const { registerSync, failSession } = useListingIngestProgressContext();
+  const {
+    sessions,
+    registerSync,
+    failSession,
+    pendingPreview,
+    fetchingPreviews,
+    confirmingPreview,
+    startPreview,
+    confirmPreview,
+    cancelPreview,
+    onImportConfirmed,
+  } = useListingIngestProgressContext();
+  const previewingIds = useMemo(
+    () => new Set(fetchingPreviews.keys()),
+    [fetchingPreviews]
+  );
+  // A source is "running" if it's in our local set (direct runFeed) or has an
+  // in-flight sync session in the context (confirm-import path or another tab).
+  const runningIds = useMemo(() => {
+    const merged = new Set(localRunningIds);
+    for (const s of sessions.values()) {
+      if (!s.isDone) merged.add(s.sourceId);
+    }
+    return merged;
+  }, [localRunningIds, sessions]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -136,7 +151,7 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
     const source = sources.find((s) => s.id === id);
     if (!source) return;
 
-    setRunningIds((prev) => new Set(prev).add(id));
+    setLocalRunningIds((prev) => new Set(prev).add(id));
     setError(null);
     registerSync(id, source.name);
 
@@ -152,7 +167,7 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
         setError(msg);
         failSession(id, msg);
       } finally {
-        setRunningIds((prev) => {
+        setLocalRunningIds((prev) => {
           const n = new Set(prev);
           n.delete(id);
           return n;
@@ -164,65 +179,45 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
   /**
    * Fetch listings from the source and open the review modal so the user can
    * choose which ones to import. Does NOT save anything until confirmFeed().
+   *
+   * State (in-flight set, preview result) lives in the context provider, so
+   * the dock and modal can be rendered at the app root and stay visible
+   * across navigations.
    */
   const previewFeed = useCallback((id: string): void => {
     const source = sources.find((s) => s.id === id);
     if (!source) return;
-
-    setPreviewingIds((prev) => new Set(prev).add(id));
     setError(null);
-
-    void (async () => {
-      try {
-        const result: PreviewResult = await previewMyListingSource(id, { limit: 100 });
-        setPendingPreview({
-          sourceId: id,
-          sourceName: source.name,
-          previewId: result.previewId,
-          items: result.items,
-        });
-      } catch (e) {
-        setError((e as Error).message || 'Failed to fetch listings');
-      } finally {
-        setPreviewingIds((prev) => { const n = new Set(prev); n.delete(id); return n; });
-      }
-    })();
-  }, [sources]);
+    void startPreview(id, source.name).catch((e) => {
+      setError((e as Error).message || 'Failed to fetch listings');
+    });
+  }, [sources, startPreview]);
 
   /**
-   * Import the listings the user approved in the review modal.
-   * Triggers the normal socket-based progress flow.
+   * Import the listings the user approved. Delegates to the context so the
+   * dock can react to the same state. We refresh our local source list when
+   * the import completes via `onImportConfirmed`.
    */
   const confirmFeed = useCallback((approvedIds: string[]): void => {
-    if (!pendingPreview) return;
-    const { sourceId, sourceName, previewId } = pendingPreview;
+    void confirmPreview(approvedIds).catch((e) => {
+      setError((e as Error).message || 'Import failed');
+    });
+  }, [confirmPreview]);
 
-    setPendingPreview(null);
-    setConfirmingPreview(true);
-    setRunningIds((prev) => new Set(prev).add(sourceId));
-    registerSync(sourceId, sourceName);
-
-    void (async () => {
-      try {
-        const { stats } = await confirmMyListingSourceImport(sourceId, previewId, approvedIds);
-        setLastRun((prev) => ({ ...prev, [sourceId]: stats }));
+  // Refresh the local source list (lastRun stats, counters) whenever an
+  // import confirmed elsewhere in the app — so this page stays in sync even
+  // if the user triggered the import from a different surface.
+  useEffect(() => {
+    return onImportConfirmed(() => {
+      void (async () => {
         try {
           setSources(await listMyListingSources());
-        } catch { /* refresh failure non-fatal */ }
-      } catch (e) {
-        const msg = (e as Error).message || 'Import failed';
-        setError(msg);
-        failSession(sourceId, msg);
-      } finally {
-        setConfirmingPreview(false);
-        setRunningIds((prev) => { const n = new Set(prev); n.delete(sourceId); return n; });
-      }
-    })();
-  }, [pendingPreview, registerSync, failSession]);
-
-  const cancelPreview = useCallback(() => {
-    setPendingPreview(null);
-  }, []);
+        } catch {
+          /* refresh failure non-fatal */
+        }
+      })();
+    });
+  }, [onImportConfirmed]);
 
   const toggleEnabled = useCallback(async (source: ListingSource) => {
     setTogglingIds((prev) => new Set(prev).add(source.id));

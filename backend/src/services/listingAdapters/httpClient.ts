@@ -25,6 +25,12 @@ const robotsCache = new Map<string, RobotsCacheEntry>();
 const ROBOTS_TTL_MS = 24 * 60 * 60 * 1000;
 
 const lastRequestAt = new Map<string, number>();
+/**
+ * Per-host serialisation tail. We chain throttle waits on this promise so
+ * parallel callers against the same host actually space out by `delay`
+ * instead of all firing at once after a single sleep window.
+ */
+const hostQueue = new Map<string, Promise<void>>();
 
 const hostOf = (url: string): string => {
   try {
@@ -90,10 +96,18 @@ export const httpGet = async <T = unknown>(url: string, options: RequestOptions 
 
   const host = hostOf(url);
   if (host) {
-    const last = lastRequestAt.get(host) ?? 0;
-    const wait = last + delay - Date.now();
-    if (wait > 0) await sleep(wait);
-    lastRequestAt.set(host, Date.now());
+    // Chain the throttle wait on the host's queue so concurrent callers
+    // serialise rather than racing on a shared `lastRequestAt` value.
+    const tail = hostQueue.get(host) ?? Promise.resolve();
+    const released = tail.then(async () => {
+      const last = lastRequestAt.get(host) ?? 0;
+      const wait = last + delay - Date.now();
+      if (wait > 0) await sleep(wait);
+      lastRequestAt.set(host, Date.now());
+    });
+    hostQueue.set(host, released);
+    await released;
+    if (hostQueue.get(host) === released) hostQueue.delete(host);
   }
 
   // Build a realistic browser-like header set so anti-bot middleware (Cloudflare,

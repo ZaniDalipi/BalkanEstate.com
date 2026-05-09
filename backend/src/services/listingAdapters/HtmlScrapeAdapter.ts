@@ -53,6 +53,10 @@ interface HtmlScrapeAdapterConfig {
   limit?: number;
   /** When true, fetch each detail page and include its HTML in `raw.detailHtml` for the normalizer to mine. */
   followDetails?: boolean;
+  /** Max concurrent detail-page fetches. Defaults to 4 — set higher for fast/large hosts. */
+  detailConcurrency?: number;
+  /** Per-host delay specifically for detail fetches. Falls back to requestDelayMs / 300ms. */
+  detailRequestDelayMs?: number;
 }
 
 const ATTR_PREFIX = 'attr:';
@@ -95,6 +99,39 @@ const resolveUrl = (base: string, href: string): string => {
   }
 };
 
+/** Default cap for concurrent detail-page fetches against the same source. */
+const DEFAULT_DETAIL_CONCURRENCY = 4;
+/** Default delay between sequential per-host requests when followDetails is on. */
+const DEFAULT_DETAIL_DELAY_MS = 300;
+
+/**
+ * Run `worker` over `items` with at most `concurrency` in flight at once.
+ * Maintains input order in the result array. Failures are mapped to `undefined`
+ * — the caller decides how to treat them (we don't want one slow detail page
+ * to abort the whole adapter run).
+ */
+const pMap = async <T, R>(
+  items: T[],
+  worker: (item: T, index: number) => Promise<R>,
+  concurrency: number
+): Promise<(R | undefined)[]> => {
+  const results = new Array<R | undefined>(items.length);
+  let cursor = 0;
+  const runners = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (true) {
+      const i = cursor++;
+      if (i >= items.length) return;
+      try {
+        results[i] = await worker(items[i], i);
+      } catch {
+        results[i] = undefined;
+      }
+    }
+  });
+  await Promise.all(runners);
+  return results;
+};
+
 export class HtmlScrapeAdapter implements SourceAdapter {
   readonly type = 'htmlScrape' as const;
 
@@ -120,6 +157,21 @@ export class HtmlScrapeAdapter implements SourceAdapter {
       requestDelayMs: cfg.requestDelayMs,
       respectRobotsTxt: cfg.respectRobotsTxt,
     };
+    const detailRequestOpts = {
+      ...requestOpts,
+      // Detail pages reuse the same host we just fetched — let them go fast.
+      requestDelayMs: cfg.detailRequestDelayMs ?? DEFAULT_DETAIL_DELAY_MS,
+      responseType: 'text' as const,
+    };
+    const detailConcurrency = Math.max(1, cfg.detailConcurrency ?? DEFAULT_DETAIL_CONCURRENCY);
+
+    /**
+     * Stub the per-listing item without fetching its detail page. We collect
+     * stubs synchronously and parallelise the actual detail HTTP calls in a
+     * single batch at the end of each page — fixes the worst slowness in the
+     * preview/import flow when `followDetails` is on.
+     */
+    const stubs: RawListing[] = [];
 
     let pageUrl: string | undefined = cfg.indexUrl;
     let pageNum = cfg.pageStart ?? 1;
@@ -139,17 +191,13 @@ export class HtmlScrapeAdapter implements SourceAdapter {
         if (!linkVal || !isUsableHref(linkVal)) continue;
         const detailUrl = resolveUrl(url, linkVal);
 
-        // Reject anything that doesn't look like a listing detail page.
         let pathname = '';
         try { pathname = new URL(detailUrl).pathname; } catch { continue; }
         if (!looksLikeListingPath(pathname)) continue;
-
-        // De-duplicate within a single index page.
         if (seenUrls.has(detailUrl)) continue;
         seenUrls.add(detailUrl);
 
         const id = pick($, root, cfg.selectors.id) || detailUrl;
-
         const item: Record<string, unknown> = {
           title: pick($, root, cfg.selectors.title),
           price: pick($, root, cfg.selectors.price),
@@ -164,7 +212,6 @@ export class HtmlScrapeAdapter implements SourceAdapter {
           propertyType: pick($, root, cfg.selectors.propertyType),
           url: detailUrl,
         };
-
         if (cfg.selectors.extras) {
           const extras: Record<string, string | undefined> = {};
           for (const [k, sel] of Object.entries(cfg.selectors.extras)) {
@@ -173,37 +220,17 @@ export class HtmlScrapeAdapter implements SourceAdapter {
           item.extras = extras;
         }
 
-        if (cfg.followDetails) {
-          try {
-            const detail = await httpGet<string>(detailUrl, { ...requestOpts, responseType: 'text' });
-            item.detailHtml = String(detail.data);
-          } catch {
-            // ignore detail-page failures
-          }
-        }
+        // Defer the decision to drop items without a detailHtml until after
+        // the parallel detail fetch — `followDetails` items are validated post-fetch.
+        if (!cfg.followDetails && !isValidListingItem(item)) continue;
 
-        // Final sanity check — only emit if the card actually looks like a
-        // real estate listing (has title/desc + price-or-location). If
-        // followDetails ran, the detailHtml will likely supplement missing
-        // fields during normalization, so be lenient when it's present.
-        const sanityCheckPayload: Record<string, unknown> = { ...item };
-        delete sanityCheckPayload.detailHtml;
-        if (!item.detailHtml && !isValidListingItem(sanityCheckPayload)) {
-          continue;
-        }
-
-        out.push({ id: String(id), url: detailUrl, raw: item });
+        stubs.push({ id: String(id), url: detailUrl, raw: item });
         producedFromCards++;
-        if (limit && out.length >= limit) return out;
+        if (limit && stubs.length >= limit) break;
       }
 
-      // Fallback: if the saved selectors produced 0 items on this page (page
-      // structure changed, selectors were wrong, or the page is dynamically
-      // rendered), scan every anchor on the page for ones that look like
-      // listing detail URLs. With followDetails=true the normalizer will
-      // pull title/price/images straight from each detail page, so we don't
-      // need any per-card selectors to ingest the listing successfully.
-      if (producedFromCards === 0) {
+      // Fallback: 0 items via selectors → mine every anchor on the page.
+      if (producedFromCards === 0 && (!limit || stubs.length < limit)) {
         for (const a of $('a[href]').toArray()) {
           const href = $(a).attr('href');
           if (!href || !isUsableHref(href)) continue;
@@ -212,12 +239,8 @@ export class HtmlScrapeAdapter implements SourceAdapter {
           try { pathname = new URL(detailUrl).pathname; } catch { continue; }
           if (!looksLikeListingPath(pathname)) continue;
 
-          // Require at least 2 path segments OR a 3+-digit numeric component
-          // to avoid picking up single-word navigation links (/hr, /en, /de)
-          // and simple category pages (/novogradnje, /apartmani, /hoteli).
           const pathParts = pathname.split('/').filter(Boolean);
           if (pathParts.length < 2 && !/\d{3,}/.test(pathname)) continue;
-
           if (seenUrls.has(detailUrl)) continue;
           seenUrls.add(detailUrl);
 
@@ -225,32 +248,14 @@ export class HtmlScrapeAdapter implements SourceAdapter {
             title: $(a).attr('title') || $(a).text().trim() || undefined,
             url: detailUrl,
           };
+          if (!cfg.followDetails && !isValidListingItem(item)) continue;
 
-          if (cfg.followDetails) {
-            try {
-              const detail = await httpGet<string>(detailUrl, { ...requestOpts, responseType: 'text' });
-              item.detailHtml = String(detail.data);
-            } catch {
-              // detail-page fetch failures are non-fatal — without detailHtml
-              // the normalizer falls back to whatever we extracted from the anchor.
-            }
-          }
-
-          // Apply the same validation as the main loop: items without a detail
-          // page must have listing signals (price/location/property keys).
-          // Items with detailHtml are passed through — the normalizer extracts
-          // the signals from the fetched HTML.
-          const sanityPayload = { ...item };
-          delete sanityPayload.detailHtml;
-          if (!item.detailHtml && !isValidListingItem(sanityPayload)) {
-            continue;
-          }
-
-          out.push({ id: detailUrl, url: detailUrl, raw: item });
-          if (limit && out.length >= limit) return out;
+          stubs.push({ id: detailUrl, url: detailUrl, raw: item });
+          if (limit && stubs.length >= limit) break;
         }
       }
 
+      if (limit && stubs.length >= limit) break;
       if (cfg.nextPageSelector) {
         const next = $(cfg.nextPageSelector).attr('href');
         pageUrl = next ? resolveUrl(url, next) : undefined;
@@ -259,6 +264,37 @@ export class HtmlScrapeAdapter implements SourceAdapter {
       } else {
         pageUrl = undefined;
       }
+    }
+
+    const capped = limit ? stubs.slice(0, limit) : stubs;
+
+    if (!cfg.followDetails) return capped;
+
+    // Parallel detail-page fetches — the big perf win. The httpClient queues
+    // per-host so we still respect the polite delay, just in a tight loop
+    // rather than one-at-a-time across the whole page.
+    const detailHtmls = await pMap(
+      capped,
+      async (stub) => {
+        const detail = await httpGet<string>(stub.url ?? '', detailRequestOpts);
+        return String(detail.data);
+      },
+      detailConcurrency
+    );
+
+    for (let i = 0; i < capped.length; i++) {
+      const stub = capped[i];
+      const html = detailHtmls[i];
+      const raw = stub.raw as Record<string, unknown>;
+      if (typeof html === 'string' && html.length > 0) {
+        raw.detailHtml = html;
+      }
+      // Skip the item only if neither the index card nor the detail page
+      // produced any listing-shaped signals.
+      const sanity: Record<string, unknown> = { ...raw };
+      delete sanity.detailHtml;
+      if (!raw.detailHtml && !isValidListingItem(sanity)) continue;
+      out.push(stub);
     }
 
     return out;
