@@ -6,7 +6,7 @@ import type { PreviewListing } from '../api/listingSourceApi';
 interface ListingPreviewModalProps {
   sourceName: string;
   previewId: string;
-  items: PreviewListing[];
+  items?: PreviewListing[];
   onConfirm: (approvedIds: string[]) => void;
   onCancel: () => void;
   isConfirming: boolean;
@@ -79,19 +79,22 @@ const PreviewCard: React.FC<{
 
 const ListingPreviewModal: React.FC<ListingPreviewModalProps> = ({
   sourceName,
-  previewId,
-  items,
+  previewId: _previewId,
+  items: itemsProp,
   onConfirm,
   onCancel,
   isConfirming,
 }) => {
   const { t } = useTranslation('listingFeeds');
+  // Defensive: backend errors / mid-render undefined props shouldn't crash the
+  // modal — render an empty list and let the user cancel cleanly.
+  const items = useMemo<PreviewListing[]>(() => Array.isArray(itemsProp) ? itemsProp : [], [itemsProp]);
   const [selected, setSelected] = useState<Set<string>>(() => new Set(items.map((i) => i.rawId)));
 
   const newCount = useMemo(() => items.filter((i) => i.isNew).length, [items]);
   const updateCount = items.length - newCount;
 
-  const isAllSelected = selected.size === items.length;
+  const isAllSelected = items.length > 0 && selected.size === items.length;
   const isSomeSelected = selected.size > 0 && selected.size < items.length;
 
   const toggleItem = useCallback((rawId: string) => {

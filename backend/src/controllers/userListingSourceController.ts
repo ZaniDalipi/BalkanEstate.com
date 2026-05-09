@@ -3,12 +3,14 @@ import { Types } from 'mongoose';
 import ListingSource from '../models/ListingSource';
 import Property from '../models/Property';
 import { runSource } from '../services/listingIngestService';
+import { previewSource, getPreviewSession, deletePreviewSession } from '../services/listingPreviewService';
 import {
   detectFeedForUrl,
   detectFromJsonSample,
   detectFeedForUrlWithAuth,
 } from '../services/listingDetectorService';
 import { resolveId } from '../utils/idObfuscation';
+import type { RawListing } from '../services/listingAdapters/types';
 
 /**
  * User-facing listing-source endpoints. All handlers require `req.user`
@@ -255,6 +257,131 @@ export const runNow = async (req: Request, res: Response): Promise<void> => {
     const msg = (err as Error).message || 'Sync failed';
     res.status(500).json({
       message: msg,
+      code: 'INGEST_FAILED',
+    });
+  }
+};
+
+/**
+ * POST /api/listing-sources/:id/preview
+ * Fetch listings from the adapter without saving anything. Returns a previewId
+ * and array of display items so the user can review/select before importing.
+ * Limited to 100 items by default to keep the review modal manageable.
+ */
+export const preview = async (req: Request, res: Response): Promise<void> => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+  const id = requireValidId(req, res);
+  if (!id) return;
+
+  const source = await ListingSource.findOne({ _id: id, userId });
+  if (!source) {
+    res.status(404).json({ message: 'ListingSource not found' });
+    return;
+  }
+  if (!source.enabled) {
+    res.status(400).json({
+      message: 'Source is disabled — enable it before fetching listings.',
+      code: 'SOURCE_DISABLED',
+    });
+    return;
+  }
+
+  let limit = 50;
+  if (req.query.limit !== undefined) {
+    const parsed = Number(req.query.limit);
+    if (!Number.isFinite(parsed) || parsed < 1) {
+      res.status(400).json({
+        message: 'limit must be a positive integer between 1 and 200',
+        code: 'INVALID_LIMIT',
+      });
+      return;
+    }
+    limit = Math.max(1, Math.min(200, Math.floor(parsed)));
+  }
+
+  try {
+    const result = await previewSource(source, limit);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({
+      message: (err as Error).message || 'Preview failed',
+      code: 'PREVIEW_FAILED',
+    });
+  }
+};
+
+/**
+ * POST /api/listing-sources/:id/confirm-import
+ * Import only the listings the user approved in the review modal.
+ * Body: { previewId: string, approvedIds: string[] }
+ * Only approved items are saved and counted toward the monthly limit.
+ */
+export const confirmImport = async (req: Request, res: Response): Promise<void> => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+  const id = requireValidId(req, res);
+  if (!id) return;
+
+  const source = await ListingSource.findOne({ _id: id, userId });
+  if (!source) {
+    res.status(404).json({ message: 'ListingSource not found' });
+    return;
+  }
+
+  const { previewId, approvedIds } = (req.body ?? {}) as {
+    previewId?: string;
+    approvedIds?: string[];
+  };
+  if (!previewId || !Array.isArray(approvedIds)) {
+    res.status(400).json({ message: 'previewId and approvedIds[] are required' });
+    return;
+  }
+
+  const session = getPreviewSession(previewId);
+  if (!session) {
+    res.status(410).json({
+      message: 'Preview session expired. Please fetch listings again.',
+      code: 'PREVIEW_EXPIRED',
+    });
+    return;
+  }
+
+  // Hard guard: reject mismatched session/source pairs.
+  if (session.sourceId !== String(source._id)) {
+    res.status(403).json({ message: 'Preview session does not belong to this source' });
+    return;
+  }
+
+  const approvedSet = new Set(approvedIds);
+  const preFetched: RawListing[] = approvedIds
+    .filter((rawId) => approvedSet.has(rawId) && session.rawMap[rawId])
+    .map((rawId) => session.rawMap[rawId]);
+
+  deletePreviewSession(previewId);
+
+  if (preFetched.length === 0) {
+    res.json({
+      stats: {
+        sourceSlug: source.slug,
+        fetched: 0,
+        imported: 0,
+        updated: 0,
+        failed: 0,
+        deferred: 0,
+        errors: [],
+        durationMs: 0,
+      },
+    });
+    return;
+  }
+
+  try {
+    const stats = await runSource(source, { preFetched });
+    res.json({ stats });
+  } catch (err) {
+    res.status(500).json({
+      message: (err as Error).message || 'Import failed',
       code: 'INGEST_FAILED',
     });
   }

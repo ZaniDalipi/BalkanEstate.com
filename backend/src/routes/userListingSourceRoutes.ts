@@ -7,6 +7,8 @@ import {
   update,
   remove,
   runNow,
+  preview,
+  confirmImport,
   stats,
   detect,
   bulkDelete,
@@ -31,6 +33,8 @@ router.put('/:id', update);
 router.delete('/:id', remove);
 
 router.post('/:id/run', runNow);
+router.post('/:id/preview', preview);
+router.post('/:id/confirm-import', confirmImport);
 router.post('/:id/clear-imports', clearImports);
 router.get('/:id/stats', stats);
 
