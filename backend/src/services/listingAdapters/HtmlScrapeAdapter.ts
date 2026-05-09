@@ -131,6 +131,8 @@ export class HtmlScrapeAdapter implements SourceAdapter {
       const items = $(cfg.selectors.listingItem);
 
       const seenUrls = new Set<string>();
+      let producedFromCards = 0;
+
       for (const el of items.toArray()) {
         const root = $(el);
         const linkVal = pick($, root, cfg.selectors.link);
@@ -191,7 +193,46 @@ export class HtmlScrapeAdapter implements SourceAdapter {
         }
 
         out.push({ id: String(id), url: detailUrl, raw: item });
+        producedFromCards++;
         if (limit && out.length >= limit) return out;
+      }
+
+      // Fallback: if the saved selectors produced 0 items on this page (page
+      // structure changed, selectors were wrong, or the page is dynamically
+      // rendered), scan every anchor on the page for ones that look like
+      // listing detail URLs. With followDetails=true the normalizer will
+      // pull title/price/images straight from each detail page, so we don't
+      // need any per-card selectors to ingest the listing successfully.
+      if (producedFromCards === 0) {
+        for (const a of $('a[href]').toArray()) {
+          const href = $(a).attr('href');
+          if (!href || !isUsableHref(href)) continue;
+          const detailUrl = resolveUrl(url, href);
+          let pathname = '';
+          try { pathname = new URL(detailUrl).pathname; } catch { continue; }
+          if (!looksLikeListingPath(pathname)) continue;
+          if (seenUrls.has(detailUrl)) continue;
+          seenUrls.add(detailUrl);
+
+          const item: Record<string, unknown> = {
+            title: $(a).attr('title') || $(a).text().trim() || undefined,
+            url: detailUrl,
+          };
+
+          if (cfg.followDetails) {
+            try {
+              const detail = await httpGet<string>(detailUrl, { ...requestOpts, responseType: 'text' });
+              item.detailHtml = String(detail.data);
+            } catch {
+              // detail-page fetch failures are non-fatal — without detailHtml
+              // the normalizer falls back to whatever we extracted from the
+              // anchor itself.
+            }
+          }
+
+          out.push({ id: detailUrl, url: detailUrl, raw: item });
+          if (limit && out.length >= limit) return out;
+        }
       }
 
       if (cfg.nextPageSelector) {
