@@ -89,6 +89,25 @@ const parsePrice = (input: unknown): ParsedPrice | null => {
   return { price: num, currency, isRent };
 };
 
+const extractPriceFromText = (text: unknown): ParsedPrice | null => {
+  if (!text || typeof text !== 'string') return null;
+  // Match patterns like: "€250,000", "$1.2M", "250000 RSD", "Price: €500/mo"
+  const patterns = [
+    /(?:price[:\s]+)?(€|EUR|USD|\$|GBP|£|RSD|HRK|kn|MKD|BAM|RON|BGN|ALL|HUF)\s*([\d.,]+(?:[KMB])?)/gi,
+    /([\d.,]+(?:[KMB])?)\s*(€|EUR|USD|\$|GBP|£|RSD|HRK|kn|MKD|BAM|RON|BGN|ALL|HUF)/gi,
+  ];
+  for (const pattern of patterns) {
+    const match = pattern.exec(text);
+    if (match) {
+      const currency = match[1] && /[€$£KMBA]/.test(match[1]) ? match[1] : match[2];
+      const numStr = match[1] && /[€$£KMBA]/.test(match[1]) ? match[2] : match[1];
+      const parsed = parsePrice(`${currency}${numStr}`);
+      if (parsed && parsed.price > 0) return parsed;
+    }
+  }
+  return null;
+};
+
 const parseInt0 = (input: unknown): number | null => {
   if (input == null) return null;
   if (typeof input === 'number') return Math.trunc(input);
@@ -101,6 +120,55 @@ const parseFloatLoose = (input: unknown): number | null => {
   if (typeof input === 'number' && Number.isFinite(input)) return input;
   const cleaned = String(input).replace(',', '.').match(/-?\d+(?:\.\d+)?/);
   return cleaned ? parseFloat(cleaned[0]) : null;
+};
+
+const extractBedsFromText = (text: unknown): number | null => {
+  if (!text || typeof text !== 'string') return null;
+  const patterns = [
+    /(\d+)\s*(?:bed(?:room)?s?|soba|sobi|sobe|chambre|habitación|zimmer)/i,
+    /(?:bed(?:room)?s?|soba|sobi|sobe)[\s:]*(\d+)/i,
+  ];
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) {
+      const num = parseInt(match[1], 10);
+      if (num > 0 && num <= 20) return num;
+    }
+  }
+  return null;
+};
+
+const extractBathsFromText = (text: unknown): number | null => {
+  if (!text || typeof text !== 'string') return null;
+  const patterns = [
+    /(\d+)\s*(?:bath(?:room)?s?|kupatil|wc|bathroom|salle\s+de\s+bain|badezimmer)/i,
+    /(?:bath(?:room)?s?|kupatil|wc)[\s:]*(\d+)/i,
+  ];
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) {
+      const num = parseInt(match[1], 10);
+      if (num > 0 && num <= 10) return num;
+    }
+  }
+  return null;
+};
+
+const extractSqftFromText = (text: unknown): number | null => {
+  if (!text || typeof text !== 'string') return null;
+  const patterns = [
+    /(\d+(?:[.,]\d+)?)\s*(?:m²|m2|sqm|sq\s*m|square\s*meter|quadrat|qm|qm|superficie|površina)/i,
+    /(?:m²|m2|sqm|sq\s*m)[\s:]*(\d+(?:[.,]\d+)?)/i,
+    /(\d+(?:[.,]\d+)?)\s*(?:sq\s*ft|sqft|ft²)/i,
+  ];
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) {
+      const num = parseFloat(match[1].replace(',', '.'));
+      if (num > 0 && num < 100000) return num;
+    }
+  }
+  return null;
 };
 
 const mapPropertyType = (raw: unknown): IProperty['propertyType'] | undefined => {
@@ -317,7 +385,15 @@ export const normalize = async (
   // Don't carry the raw HTML blob into sourceMetadata — it's huge and adds nothing.
   if ('detailHtml' in mapped) delete mapped.detailHtml;
 
-  const parsedPrice = parsePrice(mapped.price);
+  let parsedPrice = parsePrice(mapped.price);
+  // Aggressive fallback: scan description and title for price patterns
+  if (!parsedPrice && typeof mapped.description === 'string') {
+    parsedPrice = extractPriceFromText(mapped.description);
+  }
+  if (!parsedPrice && typeof mapped.title === 'string') {
+    parsedPrice = extractPriceFromText(mapped.title);
+  }
+
   const explicitListing = mapListingType(mapped.listingType);
   const listingType: IProperty['listingType'] =
     explicitListing ?? (parsedPrice?.isRent ? 'rent' : 'sale');
@@ -393,6 +469,16 @@ export const normalize = async (
     if (!knownPropertyKeys.has(k)) sourceMetadata[k] = v;
   }
 
+  // Fallback extraction from description for structured fields
+  const description = (mapped.description as string | undefined) ?? '';
+  let beds = parseInt0(mapped.beds);
+  let baths = parseInt0(mapped.baths);
+  let sqft = parseFloatLoose(mapped.sqft);
+
+  if (!beds && description) beds = extractBedsFromText(description);
+  if (!baths && description) baths = extractBathsFromText(description);
+  if (!sqft && description) sqft = extractSqftFromText(description);
+
   const property: Partial<IProperty> = {
     sellerId,
     createdByName,
@@ -406,13 +492,13 @@ export const normalize = async (
     address,
     city: city || 'Unknown',
     country: country || 'Unknown',
-    beds: parseInt0(mapped.beds) ?? 0,
-    baths: parseInt0(mapped.baths) ?? 0,
+    beds: beds ?? 0,
+    baths: baths ?? 0,
     livingRooms: parseInt0(mapped.livingRooms) ?? 0,
-    sqft: parseFloatLoose(mapped.sqft) ?? 0,
+    sqft: sqft ?? 0,
     yearBuilt: parseInt0(mapped.yearBuilt) ?? 0,
     parking: parseInt0(mapped.parking) ?? 0,
-    description: (mapped.description as string | undefined) ?? '',
+    description,
     specialFeatures: Array.isArray(mapped.specialFeatures) ? (mapped.specialFeatures as string[]) : [],
     materials: Array.isArray(mapped.materials) ? (mapped.materials as string[]) : [],
     amenities: categorizeAmenities(Array.isArray(mapped.amenities) ? (mapped.amenities as unknown[]) : []),

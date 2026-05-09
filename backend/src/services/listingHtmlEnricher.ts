@@ -217,7 +217,64 @@ const extractGalleryImages = ($: cheerio.CheerioAPI, base: string, target: Mappe
       if (first) found.push(resolveUrl(base, first));
     }
   });
+
+  // Extract from common gallery container patterns (div with data-image, background-image, etc.)
+  const gallerySelectors = [
+    '[data-image]',
+    '[data-src]',
+    '[data-original]',
+    '[data-image-url]',
+    '[data-gallery-image]',
+    '[data-photo]',
+  ];
+  for (const selector of gallerySelectors) {
+    $(selector).each((_, el) => {
+      const $el = $(el);
+      let url = $el.attr('data-image') ?? $el.attr('data-src') ?? $el.attr('data-original') ?? $el.attr('data-image-url');
+      if (!url) {
+        const bg = $el.attr('style');
+        if (bg) {
+          const match = bg.match(/url\(['"]?([^'")\]]+)['"]?\)/i);
+          if (match) url = match[1];
+        }
+      }
+      if (url) found.push(resolveUrl(base, url));
+    });
+  }
+
   pushImages(target, found);
+};
+
+const extractStructuredPriceFromHtml = ($: cheerio.CheerioAPI, target: Mapped): void => {
+  if (target.price) return;
+  // Look for common price displays in HTML
+  const selectors = ['[data-price]', '[data-list-price]', '[data-asking-price]', '.price', '.listing-price', '[itemprop="price"]'];
+  for (const selector of selectors) {
+    const el = $(selector).first();
+    if (el.length) {
+      const val = el.attr('data-price') ?? el.attr('data-list-price') ?? el.attr('data-asking-price') ?? el.text();
+      if (val) {
+        target.price = val.trim();
+        return;
+      }
+    }
+  }
+};
+
+const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped): void => {
+  // Extract address/city/country from structured elements if not already present
+  if (!target.address) {
+    const addrEl = $('[itemprop="streetAddress"]').first();
+    if (addrEl.length) target.address = addrEl.text().trim();
+  }
+  if (!target.city) {
+    const cityEl = $('[itemprop="addressLocality"]').first();
+    if (cityEl.length) target.city = cityEl.text().trim();
+  }
+  if (!target.country) {
+    const countryEl = $('[itemprop="addressCountry"]').first();
+    if (countryEl.length) target.country = countryEl.text().trim();
+  }
 };
 
 /**
@@ -236,10 +293,12 @@ export const enrichFromDetailHtml = (
   } catch {
     return target;
   }
-  // Order matters: JSON-LD is most authoritative, then OG, then microdata, then gallery.
+  // Order matters: JSON-LD is most authoritative, then OG, then microdata, then gallery, then structured patterns.
   extractJsonLd($, baseUrl, target);
   extractOpenGraph($, baseUrl, target);
   extractMicrodata($, baseUrl, target);
   extractGalleryImages($, baseUrl, target);
+  extractStructuredPriceFromHtml($, target);
+  extractStructuredLocationFromHtml($, target);
   return target;
 };
