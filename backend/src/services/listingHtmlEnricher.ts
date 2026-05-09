@@ -278,6 +278,88 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
 };
 
 /**
+ * Smart text extraction: Look for beds, baths, sqft, and price patterns
+ * in the page text. Useful for sites without structured data.
+ */
+const extractSmartFieldsFromText = ($: cheerio.CheerioAPI, target: Mapped): void => {
+  // Collect all text from the page, prioritizing visible content
+  const textContent = $('h1, h2, h3, .price, .info, .details, [data-price], [data-beds], [data-baths], [data-area], body')
+    .text()
+    .split('\n')
+    .map(line => line.trim())
+    .filter(Boolean)
+    .join(' ');
+
+  // Only scan if we have reasonable text content
+  if (!textContent || textContent.length < 20) return;
+
+  // Smart price extraction
+  if (!target.price) {
+    const priceMatch = textContent.match(
+      /(?:price|cost|asking|€|EUR|\$|USD|RSD|kn|HRK)[:\s]*\s*([€$]?\s*[\d.,]+\s*(?:€|EUR|USD|RSD|kn|HRK)?)/i
+    );
+    if (priceMatch && priceMatch[1]) {
+      target.price = priceMatch[1].trim();
+    }
+  }
+
+  // Smart beds extraction
+  if (!target.beds) {
+    const bedsMatch = textContent.match(
+      /(\d+)\s*(?:bed(?:room)?s?|soba|sobi|sobe|chambre|habitación|zimmer|chambers)/i
+    );
+    if (bedsMatch && bedsMatch[1]) {
+      const num = parseInt(bedsMatch[1], 10);
+      if (num > 0 && num <= 20) target.beds = num;
+    }
+  }
+
+  // Smart baths extraction
+  if (!target.baths) {
+    const bathsMatch = textContent.match(
+      /(\d+)\s*(?:bath(?:room)?s?|kupatil|wc|bathroom|salle\s+de\s+bain|badezimmer|toilets?)/i
+    );
+    if (bathsMatch && bathsMatch[1]) {
+      const num = parseInt(bathsMatch[1], 10);
+      if (num > 0 && num <= 10) target.baths = num;
+    }
+  }
+
+  // Smart sqft/area extraction
+  if (!target.sqft) {
+    const areaMatch = textContent.match(
+      /(\d+(?:[.,]\d+)?)\s*(?:m²|m2|sqm|sq\s*m|square\s*meter|quadrat|qm|superficie|površina)/i
+    );
+    if (areaMatch && areaMatch[1]) {
+      const num = parseFloat(areaMatch[1].replace(',', '.'));
+      if (num > 0 && num < 100000) target.sqft = num;
+    }
+  }
+
+  // Smart living rooms extraction
+  if (!target.livingRooms) {
+    const roomsMatch = textContent.match(
+      /(\d+)\s*(?:living\s+room|salon|dnevna|dnevni|sitting\s+room|wohnzimmer)/i
+    );
+    if (roomsMatch && roomsMatch[1]) {
+      const num = parseInt(roomsMatch[1], 10);
+      if (num > 0 && num <= 10) target.livingRooms = num;
+    }
+  }
+
+  // Smart parking extraction
+  if (!target.parking) {
+    const parkingMatch = textContent.match(
+      /(\d+)\s*(?:parking\s+(?:spot|space)?|parkirali?ste|garage|garaza|space)/i
+    );
+    if (parkingMatch && parkingMatch[1]) {
+      const num = parseInt(parkingMatch[1], 10);
+      if (num > 0 && num <= 10) target.parking = num;
+    }
+  }
+};
+
+/**
  * Main entry point. Mutates `target` in-place with any fields it can extract
  * from the supplied detail-page HTML. Returns the same object for chaining.
  */
@@ -293,12 +375,14 @@ export const enrichFromDetailHtml = (
   } catch {
     return target;
   }
-  // Order matters: JSON-LD is most authoritative, then OG, then microdata, then gallery, then structured patterns.
+  // Order matters: JSON-LD is most authoritative, then OG, then microdata, then gallery,
+  // then structured patterns, finally smart text extraction (lowest priority fallback).
   extractJsonLd($, baseUrl, target);
   extractOpenGraph($, baseUrl, target);
   extractMicrodata($, baseUrl, target);
   extractGalleryImages($, baseUrl, target);
   extractStructuredPriceFromHtml($, target);
   extractStructuredLocationFromHtml($, target);
+  extractSmartFieldsFromText($, target);
   return target;
 };

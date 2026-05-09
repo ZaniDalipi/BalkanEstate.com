@@ -81,6 +81,45 @@ const pick = ($: cheerio.CheerioAPI, root: AnyCheerio, sel?: string): string | u
   return $el.text().trim() || undefined;
 };
 
+/**
+ * Smart extraction: if a specific selector didn't find anything, try to mine
+ * common patterns from the element's text content (e.g., price, beds, area).
+ */
+const smartExtract = (
+  text: string | undefined,
+  field: 'price' | 'beds' | 'baths' | 'sqft'
+): string | undefined => {
+  if (!text) return undefined;
+
+  switch (field) {
+    case 'price': {
+      const priceMatch = text.match(
+        /(?:price|cost|asking|€|EUR|\$|USD|RSD|kn|HRK)[:\s]*\s*([€$]?\s*[\d.,]+\s*(?:€|EUR|USD|RSD|kn|HRK)?)/i
+      );
+      return priceMatch?.[1]?.trim();
+    }
+    case 'beds': {
+      const bedsMatch = text.match(
+        /(\d+)\s*(?:bed(?:room)?s?|soba|sobi|sobe|chambre|habitación|zimmer)/i
+      );
+      return bedsMatch?.[1];
+    }
+    case 'baths': {
+      const bathsMatch = text.match(
+        /(\d+)\s*(?:bath(?:room)?s?|kupatil|wc|bathroom|salle\s+de\s+bain|badezimmer)/i
+      );
+      return bathsMatch?.[1];
+    }
+    case 'sqft': {
+      const sqftMatch = text.match(
+        /(\d+(?:[.,]\d+)?)\s*(?:m²|m2|sqm|sq\s*m|square\s*meter|quadrat|qm|powierzch|powierzchnia|površina)/i
+      );
+      return sqftMatch?.[1];
+    }
+  }
+  return undefined;
+};
+
 const pickAll = ($: cheerio.CheerioAPI, root: AnyCheerio, sel: string): string[] => {
   const out: string[] = [];
   const [css, accessor] = sel.includes('|') ? sel.split('|').map((s) => s.trim()) : [sel, undefined];
@@ -198,15 +237,17 @@ export class HtmlScrapeAdapter implements SourceAdapter {
         seenUrls.add(detailUrl);
 
         const id = pick($, root, cfg.selectors.id) || detailUrl;
+        // Extract fields using selectors, then try smart extraction as fallback
+        const cardText = root.text();
         const item: Record<string, unknown> = {
           title: pick($, root, cfg.selectors.title),
-          price: pick($, root, cfg.selectors.price),
+          price: pick($, root, cfg.selectors.price) || smartExtract(cardText, 'price'),
           description: pick($, root, cfg.selectors.description),
           city: pick($, root, cfg.selectors.city),
           address: pick($, root, cfg.selectors.address),
-          beds: pick($, root, cfg.selectors.beds),
-          baths: pick($, root, cfg.selectors.baths),
-          sqft: pick($, root, cfg.selectors.sqft),
+          beds: pick($, root, cfg.selectors.beds) || smartExtract(cardText, 'beds'),
+          baths: pick($, root, cfg.selectors.baths) || smartExtract(cardText, 'baths'),
+          sqft: pick($, root, cfg.selectors.sqft) || smartExtract(cardText, 'sqft'),
           image: pick($, root, cfg.selectors.image),
           images: cfg.selectors.images ? pickAll($, root, cfg.selectors.images) : undefined,
           propertyType: pick($, root, cfg.selectors.propertyType),

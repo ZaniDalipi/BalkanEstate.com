@@ -469,15 +469,37 @@ export const normalize = async (
     if (!knownPropertyKeys.has(k)) sourceMetadata[k] = v;
   }
 
-  // Fallback extraction from description for structured fields
+  // Fallback extraction from all text fields for structured fields
   const description = (mapped.description as string | undefined) ?? '';
+  const title = (mapped.title as string | undefined) ?? '';
+  const fullText = [title, description, JSON.stringify(mapped.extras ?? {})].join(' ');
+
   let beds = parseInt0(mapped.beds);
   let baths = parseInt0(mapped.baths);
   let sqft = parseFloatLoose(mapped.sqft);
+  let parking = parseInt0(mapped.parking);
+  let livingRooms = parseInt0(mapped.livingRooms);
 
-  if (!beds && description) beds = extractBedsFromText(description);
-  if (!baths && description) baths = extractBathsFromText(description);
-  if (!sqft && description) sqft = extractSqftFromText(description);
+  // Try extraction from all text if not found
+  if (!beds && fullText) beds = extractBedsFromText(fullText);
+  if (!baths && fullText) baths = extractBathsFromText(fullText);
+  if (!sqft && fullText) sqft = extractSqftFromText(fullText);
+
+  // Add smart extraction for parking and living rooms
+  if (!parking && fullText) {
+    const parkMatch = fullText.match(/(\d+)\s*(?:parking|parkirali?ste|garage|garaza|space)/i);
+    if (parkMatch && parkMatch[1]) {
+      const num = parseInt(parkMatch[1], 10);
+      if (num > 0 && num <= 10) parking = num;
+    }
+  }
+  if (!livingRooms && fullText) {
+    const roomMatch = fullText.match(/(\d+)\s*(?:living\s+room|salon|dnevna|dnevni|sitting\s+room)/i);
+    if (roomMatch && roomMatch[1]) {
+      const num = parseInt(roomMatch[1], 10);
+      if (num > 0 && num <= 10) livingRooms = num;
+    }
+  }
 
   const property: Partial<IProperty> = {
     sellerId,
@@ -494,10 +516,10 @@ export const normalize = async (
     country: country || 'Unknown',
     beds: beds ?? 0,
     baths: baths ?? 0,
-    livingRooms: parseInt0(mapped.livingRooms) ?? 0,
+    livingRooms: livingRooms ?? 0,
     sqft: sqft ?? 0,
     yearBuilt: parseInt0(mapped.yearBuilt) ?? 0,
-    parking: parseInt0(mapped.parking) ?? 0,
+    parking: parking ?? 0,
     description,
     specialFeatures: Array.isArray(mapped.specialFeatures) ? (mapped.specialFeatures as string[]) : [],
     materials: Array.isArray(mapped.materials) ? (mapped.materials as string[]) : [],
