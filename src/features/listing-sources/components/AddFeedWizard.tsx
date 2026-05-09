@@ -9,6 +9,51 @@ import {
   createMyListingSource,
 } from '../api/listingSourceApi';
 
+/**
+ * Normalize MongoDB Extended JSON ({ "$oid": "..." }, { "$date": ... }, etc.)
+ * into plain JSON values. Lets users paste raw exports from Compass/Atlas/mongoexport
+ * without manually stripping the wrappers.
+ */
+const normalizeMongoExtendedJson = (input: unknown): unknown => {
+  if (Array.isArray(input)) return input.map(normalizeMongoExtendedJson);
+  if (input && typeof input === 'object') {
+    const obj = input as Record<string, unknown>;
+    const keys = Object.keys(obj);
+    if (keys.length === 1) {
+      const k = keys[0];
+      const v = obj[k];
+      if (k === '$oid' && typeof v === 'string') return v;
+      if (k === '$date') {
+        if (typeof v === 'string' || typeof v === 'number') return v;
+        if (v && typeof v === 'object' && '$numberLong' in (v as object)) {
+          const n = Number((v as { $numberLong: string }).$numberLong);
+          return Number.isFinite(n) ? new Date(n).toISOString() : v;
+        }
+      }
+      if (k === '$numberLong' || k === '$numberInt' || k === '$numberDouble' || k === '$numberDecimal') {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : v;
+      }
+    }
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(obj)) {
+      out[k] = normalizeMongoExtendedJson(v);
+    }
+    return out;
+  }
+  return input;
+};
+
+const sanitizeJsonInput = (raw: string): string => {
+  // Strip BOM, smart quotes, trailing commas — common copy-paste corruption.
+  return raw
+    .replace(/^﻿/, '')
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/,(\s*[}\]])/g, '$1')
+    .trim();
+};
+
 interface Props {
   onCancel: () => void;
   onSaved: (source: ListingSource) => void;
@@ -183,20 +228,22 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
     try {
       let result: DetectResult;
       if (method === 'sampleJson') {
-        const trimmed = sampleJson.trim();
-        if (!trimmed) {
+        const sanitized = sanitizeJsonInput(sampleJson);
+        if (!sanitized) {
           setError('Please paste a JSON sample to analyze.');
           return;
         }
-        // Quick client-side validation so the user gets a fast, clear error
-        // instead of a generic 422 from the server.
+        let parsed: unknown;
         try {
-          JSON.parse(trimmed);
+          parsed = JSON.parse(sanitized);
         } catch (parseErr) {
           setError(`Invalid JSON — ${(parseErr as Error).message.split('\n')[0]}`);
           return;
         }
-        result = await detectFeed('sampleJson', { sampleJson: trimmed });
+        // Strip MongoDB Extended JSON wrappers ($oid/$date/etc.) so users can
+        // paste raw exports from Compass/mongoexport without manual cleanup.
+        const normalized = normalizeMongoExtendedJson(parsed);
+        result = await detectFeed('sampleJson', { sampleJson: JSON.stringify(normalized) });
       } else if (method === 'customApi') {
         inferName(apiUrl);
         result = await detectFeed('customApi', {

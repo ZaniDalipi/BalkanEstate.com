@@ -904,8 +904,52 @@ const findItemsArray = (
  *
  * Does not make any network requests.
  */
+/**
+ * Recursively unwrap MongoDB Extended JSON ({ $oid, $date, $numberLong, ... })
+ * so users can paste raw exports from Compass / mongoexport / Atlas without
+ * manual cleanup. Plain values pass through untouched.
+ */
+const unwrapMongoExtendedJson = (input: unknown): unknown => {
+  if (Array.isArray(input)) return input.map(unwrapMongoExtendedJson);
+  if (input && typeof input === 'object') {
+    const obj = input as Record<string, unknown>;
+    const keys = Object.keys(obj);
+    if (keys.length === 1) {
+      const k = keys[0];
+      const v = obj[k];
+      if (k === '$oid' && typeof v === 'string') return v;
+      if (k === '$date') {
+        if (typeof v === 'string' || typeof v === 'number') return v;
+        if (v && typeof v === 'object' && '$numberLong' in (v as object)) {
+          const n = Number((v as { $numberLong: string }).$numberLong);
+          return Number.isFinite(n) ? new Date(n).toISOString() : v;
+        }
+      }
+      if (k === '$numberLong' || k === '$numberInt' || k === '$numberDouble' || k === '$numberDecimal') {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : v;
+      }
+    }
+    const out: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      out[key] = unwrapMongoExtendedJson(value);
+    }
+    return out;
+  }
+  return input;
+};
+
+const sanitizePastedJson = (raw: string): string => {
+  return raw
+    .replace(/^﻿/, '')          // Strip BOM
+    .replace(/[“”]/g, '"')  // Smart double quotes → "
+    .replace(/[‘’]/g, "'")  // Smart single quotes → '
+    .replace(/,(\s*[}\]])/g, '$1')    // Trailing commas before }/]
+    .trim();
+};
+
 export const detectFromJsonSample = (jsonString: string): DetectResult => {
-  const trimmed = jsonString.trim();
+  const trimmed = sanitizePastedJson(jsonString);
   if (!trimmed) {
     throw new Error('Please paste a JSON sample to analyze.');
   }
@@ -917,6 +961,7 @@ export const detectFromJsonSample = (jsonString: string): DetectResult => {
     const msg = (err as Error).message.split('\n')[0];
     throw new Error(`Invalid JSON — ${msg}. Make sure to paste a complete JSON object or array.`);
   }
+  parsed = unwrapMongoExtendedJson(parsed);
 
   let items: Record<string, unknown>[] = [];
   let itemsPath = '$[*]';
