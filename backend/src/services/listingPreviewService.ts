@@ -72,6 +72,29 @@ const num = (v: unknown): number | undefined => {
 const OG_IMAGE_RE =
   /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']|<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i;
 
+const PRICE_HTML_RE =
+  /(?:€|\bEUR\b|\bUSD\b|\$|\bGBP\b|£|\bRSD\b|\bHRK\b|\bkn\b|\bMKD\b|\bBAM\b|\bRON\b|\bBGN\b|\bALL\b|\bHUF\b)\s*[\d.,]{2,}|[\d.,]{2,}\s*(?:€|\bEUR\b|\bUSD\b|\$|\bGBP\b|£|\bRSD\b|\bHRK\b|\bkn\b|\bMKD\b|\bBAM\b|\bRON\b|\bBGN\b|\bALL\b|\bHUF\b)/i;
+
+const AREA_HTML_RE = /\b\d+(?:[.,]\d+)?\s*(?:m²|m2|sqm|sq\s*ft|square\s*meters)\b/i;
+
+const LISTING_JSONLD_RE =
+  /"@type"\s*:\s*"(?:RealEstateListing|Residence|Apartment|House|SingleFamilyResidence|Product|Place)"/i;
+
+/**
+ * Heuristic: does this fetched detail page actually look like a real estate
+ * listing? We require at least one strong content signal (price OR area OR
+ * structured listing JSON-LD). This is the last-line filter that drops
+ * navigation/category/about pages that slipped past the URL-based filters
+ * in the adapter.
+ */
+const isLikelyListingHtml = (html: string): boolean => {
+  if (!html) return true; // No detail HTML to check — defer to the adapter's URL filter.
+  if (LISTING_JSONLD_RE.test(html)) return true;
+  if (PRICE_HTML_RE.test(html)) return true;
+  if (AREA_HTML_RE.test(html)) return true;
+  return false;
+};
+
 const extractPreviewItem = (raw: RawListing): Omit<PreviewListing, 'isNew'> => {
   const r = raw.raw;
   const loc = r.location as Record<string, unknown> | undefined;
@@ -103,7 +126,16 @@ export const previewSource = async (
   limit: number
 ): Promise<{ previewId: string; items: PreviewListing[]; fetched: number }> => {
   const adapter = getAdapter(source);
-  const raws = await adapter.fetchListings(source, { limit });
+  const allRaws = await adapter.fetchListings(source, { limit });
+
+  // Drop items whose fetched detail page has no real-estate content signals.
+  // Items without detailHtml pass through (URL-based filtering already applied
+  // upstream in the adapter). This catches navigation/category pages that
+  // slipped past looksLikeListingPath but obviously aren't listings.
+  const raws = allRaws.filter((raw) => {
+    const html = (raw.raw as Record<string, unknown> | undefined)?.detailHtml;
+    return typeof html === 'string' ? isLikelyListingHtml(html) : true;
+  });
 
   const existingIds = new Set<string>();
   if (raws.length > 0) {

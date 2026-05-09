@@ -73,13 +73,29 @@ const getRemainingMonthlyCapacity = async (
   }
 };
 
-const incrementUserMonthlyCounter = async (userId: unknown): Promise<void> => {
+/**
+ * Mirror the counter updates that propertyController applies on a native
+ * create so imported listings are properly "registered" against the user:
+ * they count toward the active total, the role-specific bucket, and the
+ * profile-visible listings count.
+ */
+const incrementUserCountersForImport = async (userId: unknown): Promise<void> => {
   if (!userId) return;
   try {
+    const user = await User.findById(userId).select('role').lean();
+    const role = (user as { role?: string } | null)?.role;
+    const roleCountField = role === 'agent' ? 'subscription.agentCount' : 'subscription.privateSellerCount';
+
     await User.updateOne(
       { _id: userId },
       {
-        $inc: { 'subscription.listingsCreatedThisMonth': 1 },
+        $inc: {
+          'subscription.listingsCreatedThisMonth': 1,
+          'subscription.activeListingsCount': 1,
+          [roleCountField]: 1,
+          listingsCount: 1,
+          totalListingsCreated: 1,
+        },
         $setOnInsert: { 'subscription.monthResetDate': new Date() },
       }
     );
@@ -226,7 +242,7 @@ export const runSource = async (
           if (wasInsert) {
             stats.imported++;
             if (source.userId) {
-              await incrementUserMonthlyCounter(source.userId);
+              await incrementUserCountersForImport(source.userId);
               remaining--;
             }
             if (emitNew && property) emitPropertyCreated(property.toObject());
