@@ -278,83 +278,106 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
 };
 
 /**
- * Smart text extraction: Look for beds, baths, sqft, and price patterns
- * in the page text. Useful for sites without structured data.
+ * Smart text extraction with strict context. Only fills target fields that
+ * weren't already populated by JSON-LD/OG/microdata (the more reliable sources).
+ *
+ * Conservative on purpose: we'd rather miss a field than fabricate one. False
+ * positives have a real cost — they end up as wrong data in the listings page.
  */
 const extractSmartFieldsFromText = ($: cheerio.CheerioAPI, target: Mapped): void => {
-  // Collect all text from the page, prioritizing visible content
-  const textContent = $('h1, h2, h3, .price, .info, .details, [data-price], [data-beds], [data-baths], [data-area], body')
-    .text()
-    .split('\n')
-    .map(line => line.trim())
-    .filter(Boolean)
-    .join(' ');
+  // Strip noise (navigation, scripts, styles, footer) before scanning so we
+  // don't pick up "20 results", "5 stars", site-wide phone numbers, etc.
+  const $clone = cheerio.load($.html());
+  $clone('nav, header, footer, script, style, noscript, .menu, .navigation, .breadcrumb, .header, .footer, .nav, .ads, .advert, [role="navigation"], [role="banner"], [role="contentinfo"]').remove();
 
-  // Only scan if we have reasonable text content
+  // Prefer the main content area; fall back to body if no main is identified.
+  const mainScope = $clone('main, article, [itemtype*="Product"], [itemtype*="Place"], [class*="listing"], [class*="property"], [id*="listing"], [id*="property"]').first();
+  const scope = mainScope.length ? mainScope : $clone('body');
+
+  const textContent = scope
+    .text()
+    .replace(/\s+/g, ' ')
+    .trim();
+
   if (!textContent || textContent.length < 20) return;
 
-  // Smart price extraction
-  if (!target.price) {
-    const priceMatch = textContent.match(
-      /(?:price|cost|asking|€|EUR|\$|USD|RSD|kn|HRK)[:\s]*\s*([€$]?\s*[\d.,]+\s*(?:€|EUR|USD|RSD|kn|HRK)?)/i
-    );
-    if (priceMatch && priceMatch[1]) {
-      target.price = priceMatch[1].trim();
+  // Helper: parse a numeric string and validate against a sane range.
+  const parseRanged = (s: string, min: number, max: number, allowDecimals = false): number | null => {
+    const cleaned = allowDecimals ? s.replace(',', '.') : s.replace(/[.,\s]/g, '');
+    const n = allowDecimals ? parseFloat(cleaned) : parseInt(cleaned, 10);
+    if (!Number.isFinite(n) || n < min || n > max) return null;
+    return n;
+  };
+
+  // Smart price extraction — currency must be adjacent to a sufficiently large number.
+  if (target.price == null || target.price === '') {
+    const pricePatterns = [
+      /(?:€|EUR|\$|USD|£|GBP|RSD|kn|HRK|BAM|MKD)\s*([\d][\d.,\s]*[\d](?:\s*[KMB])?)(?!\d)/i,
+      /(?<!\d)([\d][\d.,\s]*[\d](?:\s*[KMB])?)\s*(?:€|EUR|\$|USD|£|GBP|RSD|kn|HRK|BAM|MKD)\b/i,
+    ];
+    for (const re of pricePatterns) {
+      const m = textContent.match(re);
+      if (!m) continue;
+      const numStr = m[1].replace(/[^\d.,KMB]/gi, '');
+      const num = parseFloat(numStr.replace(/[.,](?=\d{3}\b)/g, '').replace(',', '.'));
+      if (!Number.isFinite(num) || num < 100 || num > 100_000_000) continue;
+      target.price = m[0].trim();
+      break;
     }
   }
 
-  // Smart beds extraction
-  if (!target.beds) {
-    const bedsMatch = textContent.match(
-      /(\d+)\s*(?:bed(?:room)?s?|soba|sobi|sobe|chambre|habitación|zimmer|chambers)/i
+  // Beds — require word boundary, reject anything outside 1..15.
+  if (target.beds == null || target.beds === '') {
+    const m = textContent.match(
+      /(?<![.\d])(\d{1,2})\s*(?:bed(?:room)?s?|soba|sobi|sobe|chambre[s]?|habitaci[oó]n(?:es)?|zimmer|schlafzimmer)\b/i
     );
-    if (bedsMatch && bedsMatch[1]) {
-      const num = parseInt(bedsMatch[1], 10);
-      if (num > 0 && num <= 20) target.beds = num;
+    if (m) {
+      const n = parseRanged(m[1], 1, 15);
+      if (n != null) target.beds = n;
     }
   }
 
-  // Smart baths extraction
-  if (!target.baths) {
-    const bathsMatch = textContent.match(
-      /(\d+)\s*(?:bath(?:room)?s?|kupatil|wc|bathroom|salle\s+de\s+bain|badezimmer|toilets?)/i
+  // Baths — full words only; `wc` is too prone to false matches.
+  if (target.baths == null || target.baths === '') {
+    const m = textContent.match(
+      /(?<![.\d])(\d{1,2})\s*(?:bath(?:room)?s?|kupatil[ao]?|toilets?|salle\s+de\s+bain|badezimmer|ba[nñ]os?)\b/i
     );
-    if (bathsMatch && bathsMatch[1]) {
-      const num = parseInt(bathsMatch[1], 10);
-      if (num > 0 && num <= 10) target.baths = num;
+    if (m) {
+      const n = parseRanged(m[1], 1, 10);
+      if (n != null) target.baths = n;
     }
   }
 
-  // Smart sqft/area extraction
-  if (!target.sqft) {
-    const areaMatch = textContent.match(
-      /(\d+(?:[.,]\d+)?)\s*(?:m²|m2|sqm|sq\s*m|square\s*meter|quadrat|qm|superficie|površina)/i
+  // Area — require explicit m² / m2 / sqm unit and avoid letter-prefixed false hits.
+  if (target.sqft == null || target.sqft === '') {
+    const m = textContent.match(
+      /(?<![A-Za-z])(\d{2,5}(?:[.,]\d{1,2})?)\s*(?:m²|m2|sqm|sq\.?\s*m\.?|square\s*meters?|qm|kvadrata?)\b/i
     );
-    if (areaMatch && areaMatch[1]) {
-      const num = parseFloat(areaMatch[1].replace(',', '.'));
-      if (num > 0 && num < 100000) target.sqft = num;
+    if (m) {
+      const n = parseRanged(m[1], 10, 50_000, true);
+      if (n != null) target.sqft = n;
     }
   }
 
-  // Smart living rooms extraction
-  if (!target.livingRooms) {
-    const roomsMatch = textContent.match(
-      /(\d+)\s*(?:living\s+room|salon|dnevna|dnevni|sitting\s+room|wohnzimmer)/i
+  // Living rooms — explicit phrase only.
+  if (target.livingRooms == null || target.livingRooms === '') {
+    const m = textContent.match(
+      /(?<![.\d])(\d{1,2})\s*(?:living\s+rooms?|sitting\s+rooms?|dnevn[ai]\s+sob[ae]|wohnzimmer|salon)s?\b/i
     );
-    if (roomsMatch && roomsMatch[1]) {
-      const num = parseInt(roomsMatch[1], 10);
-      if (num > 0 && num <= 10) target.livingRooms = num;
+    if (m) {
+      const n = parseRanged(m[1], 1, 5);
+      if (n != null) target.livingRooms = n;
     }
   }
 
-  // Smart parking extraction
-  if (!target.parking) {
-    const parkingMatch = textContent.match(
-      /(\d+)\s*(?:parking\s+(?:spot|space)?|parkirali?ste|garage|garaza|space)/i
+  // Parking — explicit "parking" or "garage" with a count, not a free-floating number.
+  if (target.parking == null || target.parking === '') {
+    const m = textContent.match(
+      /(?<![.\d])(\d{1,2})\s*(?:parking\s+(?:spots?|spaces?|places?)|parking\s+lots?|parkir(?:ali[sš]ta?|no\s+mjesto)|garage[s]?|garaž[ae]|stellpl[aä]tze?)\b/i
     );
-    if (parkingMatch && parkingMatch[1]) {
-      const num = parseInt(parkingMatch[1], 10);
-      if (num > 0 && num <= 10) target.parking = num;
+    if (m) {
+      const n = parseRanged(m[1], 1, 10);
+      if (n != null) target.parking = n;
     }
   }
 };

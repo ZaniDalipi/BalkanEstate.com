@@ -91,19 +91,20 @@ const parsePrice = (input: unknown): ParsedPrice | null => {
 
 const extractPriceFromText = (text: unknown): ParsedPrice | null => {
   if (!text || typeof text !== 'string') return null;
-  // Match patterns like: "€250,000", "$1.2M", "250000 RSD", "Price: €500/mo"
+  const t = text.replace(/\s+/g, ' ');
+  // Currency must be adjacent to the number. Reject sub-100 (likely fees,
+  // deposits, or service charges) and >100M (typo / wrong currency).
   const patterns = [
-    /(?:price[:\s]+)?(€|EUR|USD|\$|GBP|£|RSD|HRK|kn|MKD|BAM|RON|BGN|ALL|HUF)\s*([\d.,]+(?:[KMB])?)/gi,
-    /([\d.,]+(?:[KMB])?)\s*(€|EUR|USD|\$|GBP|£|RSD|HRK|kn|MKD|BAM|RON|BGN|ALL|HUF)/gi,
+    /(€|EUR|USD|\$|GBP|£|RSD|HRK|kn|MKD|BAM|RON|BGN|ALL|HUF)\s*([\d][\d.,\s]*[\d](?:\s*[KMB])?)(?!\d)/i,
+    /(?<!\d)([\d][\d.,\s]*[\d](?:\s*[KMB])?)\s*(€|EUR|USD|\$|GBP|£|RSD|HRK|kn|MKD|BAM|RON|BGN|ALL|HUF)\b/i,
   ];
   for (const pattern of patterns) {
-    const match = pattern.exec(text);
-    if (match) {
-      const currency = match[1] && /[€$£KMBA]/.test(match[1]) ? match[1] : match[2];
-      const numStr = match[1] && /[€$£KMBA]/.test(match[1]) ? match[2] : match[1];
-      const parsed = parsePrice(`${currency}${numStr}`);
-      if (parsed && parsed.price > 0) return parsed;
-    }
+    const match = pattern.exec(t);
+    if (!match) continue;
+    const currency = /[€$£]|EUR|USD|GBP|RSD|HRK|kn|MKD|BAM|RON|BGN|ALL|HUF/i.test(match[1]) ? match[1] : match[2];
+    const numStr = currency === match[1] ? match[2] : match[1];
+    const parsed = parsePrice(`${currency}${numStr}`);
+    if (parsed && parsed.price >= 100 && parsed.price <= 100_000_000) return parsed;
   }
   return null;
 };
@@ -122,17 +123,22 @@ const parseFloatLoose = (input: unknown): number | null => {
   return cleaned ? parseFloat(cleaned[0]) : null;
 };
 
+// Strict extraction with word boundaries + plausible numeric ranges. Conservative
+// on purpose — we'd rather leave a field unknown than fabricate one. False
+// positives end up as wrong data on the public listing page.
+
 const extractBedsFromText = (text: unknown): number | null => {
   if (!text || typeof text !== 'string') return null;
+  const t = text.replace(/\s+/g, ' ');
   const patterns = [
-    /(\d+)\s*(?:bed(?:room)?s?|soba|sobi|sobe|chambre|habitación|zimmer)/i,
-    /(?:bed(?:room)?s?|soba|sobi|sobe)[\s:]*(\d+)/i,
+    /(?<![.\d])(\d{1,2})\s*(?:bed(?:room)?s?|soba|sobi|sobe|chambre[s]?|habitaci[oó]n(?:es)?|zimmer|schlafzimmer)\b/i,
+    /\b(?:bed(?:room)?s?|soba|sobi|sobe|chambres?|habitaci[oó]nes?|zimmer)\s*[:#=]\s*(\d{1,2})\b/i,
   ];
   for (const pattern of patterns) {
-    const match = text.match(pattern);
+    const match = t.match(pattern);
     if (match && match[1]) {
       const num = parseInt(match[1], 10);
-      if (num > 0 && num <= 20) return num;
+      if (num >= 1 && num <= 15) return num;
     }
   }
   return null;
@@ -140,15 +146,17 @@ const extractBedsFromText = (text: unknown): number | null => {
 
 const extractBathsFromText = (text: unknown): number | null => {
   if (!text || typeof text !== 'string') return null;
+  const t = text.replace(/\s+/g, ' ');
+  // `wc` removed — it appears in slugs/IDs and false-matches constantly.
   const patterns = [
-    /(\d+)\s*(?:bath(?:room)?s?|kupatil|wc|bathroom|salle\s+de\s+bain|badezimmer)/i,
-    /(?:bath(?:room)?s?|kupatil|wc)[\s:]*(\d+)/i,
+    /(?<![.\d])(\d{1,2})\s*(?:bath(?:room)?s?|kupatil[ao]?|toilets?|salle\s+de\s+bain|badezimmer|ba[nñ]os?)\b/i,
+    /\b(?:bath(?:room)?s?|kupatil[ao]?|toilets?)\s*[:#=]\s*(\d{1,2})\b/i,
   ];
   for (const pattern of patterns) {
-    const match = text.match(pattern);
+    const match = t.match(pattern);
     if (match && match[1]) {
       const num = parseInt(match[1], 10);
-      if (num > 0 && num <= 10) return num;
+      if (num >= 1 && num <= 10) return num;
     }
   }
   return null;
@@ -156,16 +164,18 @@ const extractBathsFromText = (text: unknown): number | null => {
 
 const extractSqftFromText = (text: unknown): number | null => {
   if (!text || typeof text !== 'string') return null;
+  const t = text.replace(/\s+/g, ' ');
+  // m² requires a digit-then-unit shape and rejects letter prefixes (e.g. "M2 engine")
   const patterns = [
-    /(\d+(?:[.,]\d+)?)\s*(?:m²|m2|sqm|sq\s*m|square\s*meter|quadrat|qm|qm|superficie|površina)/i,
-    /(?:m²|m2|sqm|sq\s*m)[\s:]*(\d+(?:[.,]\d+)?)/i,
-    /(\d+(?:[.,]\d+)?)\s*(?:sq\s*ft|sqft|ft²)/i,
+    /(?<![A-Za-z])(\d{2,5}(?:[.,]\d{1,2})?)\s*(?:m²|m2|sqm|sq\.?\s*m\.?|square\s*meters?|qm|kvadrata?)\b/i,
+    /(?<![A-Za-z])(\d{2,5}(?:[.,]\d{1,2})?)\s*(?:sq\s*ft|sqft|ft²)\b/i,
   ];
   for (const pattern of patterns) {
-    const match = text.match(pattern);
+    const match = t.match(pattern);
     if (match && match[1]) {
       const num = parseFloat(match[1].replace(',', '.'));
-      if (num > 0 && num < 100000) return num;
+      // Realistic property areas: 10 m² (tiny studio) to 50,000 m² (large estate)
+      if (Number.isFinite(num) && num >= 10 && num <= 50_000) return num;
     }
   }
   return null;
@@ -386,7 +396,12 @@ export const normalize = async (
   if ('detailHtml' in mapped) delete mapped.detailHtml;
 
   let parsedPrice = parsePrice(mapped.price);
-  // Aggressive fallback: scan description and title for price patterns
+  // Reject implausible prices from the field map (e.g. price field actually
+  // pointed at year/zip/area). Real listing prices are between €100 and €100M.
+  if (parsedPrice && (parsedPrice.price < 100 || parsedPrice.price > 100_000_000)) {
+    parsedPrice = null;
+  }
+  // Conservative fallback: scan description and title for price patterns.
   if (!parsedPrice && typeof mapped.description === 'string') {
     parsedPrice = extractPriceFromText(mapped.description);
   }
@@ -469,10 +484,13 @@ export const normalize = async (
     if (!knownPropertyKeys.has(k)) sourceMetadata[k] = v;
   }
 
-  // Fallback extraction from all text fields for structured fields
+  // Fallback extraction. We deliberately scan only title + description (not
+  // arbitrary `extras` JSON) because stringifying nested objects creates many
+  // numeric noise tokens like view counts, IDs, etc., and the extractors
+  // above are tuned for natural-language text.
   const description = (mapped.description as string | undefined) ?? '';
   const title = (mapped.title as string | undefined) ?? '';
-  const fullText = [title, description, JSON.stringify(mapped.extras ?? {})].join(' ');
+  const fullText = [title, description].filter(Boolean).join(' ').replace(/\s+/g, ' ');
 
   let beds = parseInt0(mapped.beds);
   let baths = parseInt0(mapped.baths);
@@ -480,24 +498,37 @@ export const normalize = async (
   let parking = parseInt0(mapped.parking);
   let livingRooms = parseInt0(mapped.livingRooms);
 
-  // Try extraction from all text if not found
+  // Range-validate values that came from the field map too — a fieldMap
+  // pointed at the wrong key still produces garbage (e.g. `beds = 2024` from
+  // a year field). Drop any out-of-range value rather than persist it.
+  if (beds != null && (beds < 1 || beds > 15)) beds = null;
+  if (baths != null && (baths < 1 || baths > 10)) baths = null;
+  if (sqft != null && (sqft < 10 || sqft > 50_000)) sqft = null;
+  if (parking != null && (parking < 1 || parking > 10)) parking = null;
+  if (livingRooms != null && (livingRooms < 1 || livingRooms > 5)) livingRooms = null;
+
+  // Try extraction from text only if the fieldMap didn't populate it.
   if (!beds && fullText) beds = extractBedsFromText(fullText);
   if (!baths && fullText) baths = extractBathsFromText(fullText);
   if (!sqft && fullText) sqft = extractSqftFromText(fullText);
 
-  // Add smart extraction for parking and living rooms
+  // Parking — explicit phrase only; reject bare digit + "space" (matches anything).
   if (!parking && fullText) {
-    const parkMatch = fullText.match(/(\d+)\s*(?:parking|parkirali?ste|garage|garaza|space)/i);
+    const parkMatch = fullText.match(
+      /(?<![.\d])(\d{1,2})\s*(?:parking\s+(?:spots?|spaces?|places?)|parking\s+lots?|parkir(?:ali[sš]ta?|no\s+mjesto)|garage[s]?|garaž[ae]|stellpl[aä]tze?)\b/i
+    );
     if (parkMatch && parkMatch[1]) {
       const num = parseInt(parkMatch[1], 10);
-      if (num > 0 && num <= 10) parking = num;
+      if (num >= 1 && num <= 10) parking = num;
     }
   }
   if (!livingRooms && fullText) {
-    const roomMatch = fullText.match(/(\d+)\s*(?:living\s+room|salon|dnevna|dnevni|sitting\s+room)/i);
+    const roomMatch = fullText.match(
+      /(?<![.\d])(\d{1,2})\s*(?:living\s+rooms?|sitting\s+rooms?|dnevn[ai]\s+sob[ae]|wohnzimmer|salon)s?\b/i
+    );
     if (roomMatch && roomMatch[1]) {
       const num = parseInt(roomMatch[1], 10);
-      if (num > 0 && num <= 10) livingRooms = num;
+      if (num >= 1 && num <= 5) livingRooms = num;
     }
   }
 
