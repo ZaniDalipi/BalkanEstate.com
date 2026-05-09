@@ -177,7 +177,7 @@ export default defineConfig(({ mode }) => {
             ]
           },
           workbox: {
-            globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+            globPatterns: ['**/*.{js,css,ico,png,svg,woff,woff2}'],
             maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB limit
             // Safari Mobile fix: import a script that strips response.redirected
             // from navigation responses before Safari can reject them with
