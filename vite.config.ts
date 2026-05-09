@@ -430,7 +430,9 @@ export default defineConfig(({ mode }) => {
         // Optimize CSS code splitting
         cssCodeSplit: true,
         // Security: Clear console logs in production build
-        target: 'es2020',
+        // Use ES2019 for better Safari compatibility (es2020 has optional chaining/nullish
+        // coalescing that Safari sometimes doesn't handle correctly)
+        target: 'es2019',
         // Ensure hashes change only when content changes
         assetsInlineLimit: 4096, // Inline assets smaller than 4kb
       },
