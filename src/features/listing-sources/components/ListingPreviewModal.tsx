@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import type { PreviewListing } from '../api/listingSourceApi';
@@ -14,19 +14,33 @@ interface ListingPreviewModalProps {
 
 const formatPrice = (price?: number): string => {
   if (!price) return '';
-  return new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(price);
+  return new Intl.NumberFormat('en-EU', {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  }).format(price);
 };
 
-const PreviewCard: React.FC<{
+interface PreviewCardProps {
   item: PreviewListing;
   checked: boolean;
   onToggle: () => void;
-}> = ({ item, checked, onToggle }) => {
+}
+
+const PreviewCard: React.FC<PreviewCardProps> = ({ item, checked, onToggle }) => {
   const { t } = useTranslation('listingFeeds');
+  const [imgFailed, setImgFailed] = useState(false);
+
+  const meta: string[] = [];
+  if (item.city) meta.push(item.city + (item.country ? `, ${item.country}` : ''));
+  if (item.propertyType) meta.push(item.propertyType);
+  if (item.beds != null) meta.push(`${item.beds} ${t('preview.beds')}`);
+  if (item.baths != null) meta.push(`${item.baths} ${t('preview.baths')}`);
+  if (item.sqft != null) meta.push(`${item.sqft} m²`);
 
   return (
     <label
-      className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors select-none ${
+      className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors select-none ${
         checked ? 'bg-primary/5 border-primary/30' : 'bg-white border-gray-200 hover:border-gray-300'
       }`}
     >
@@ -34,28 +48,38 @@ const PreviewCard: React.FC<{
         type="checkbox"
         checked={checked}
         onChange={onToggle}
-        className="mt-1 w-4 h-4 flex-shrink-0 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary/30"
+        className="w-4 h-4 flex-shrink-0 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary/30"
       />
 
-      {item.imageUrl && (
-        <img
-          src={item.imageUrl}
-          alt=""
-          className="w-16 h-12 object-cover rounded-lg flex-shrink-0 bg-gray-100"
-          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
-        />
-      )}
+      {/* Thumbnail — show placeholder when no image or load error */}
+      <div className="w-16 h-12 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+        {item.imageUrl && !imgFailed ? (
+          <img
+            src={item.imageUrl}
+            alt=""
+            className="w-full h-full object-cover"
+            onError={() => setImgFailed(true)}
+            loading="lazy"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+              d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+            <polyline strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+              points="9 22 9 12 15 12 15 22" />
+          </svg>
+        )}
+      </div>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <span className="text-sm font-medium text-gray-900 truncate">
+          <span className="text-sm font-medium text-gray-900 line-clamp-1">
             {item.title || t('preview.untitled')}
           </span>
           <span
             className={`flex-shrink-0 text-xs px-1.5 py-0.5 rounded-full font-medium ${
-              item.isNew
-                ? 'bg-green-100 text-green-700'
-                : 'bg-blue-100 text-blue-700'
+              item.isNew ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
             }`}
           >
             {item.isNew ? t('preview.badgeNew') : t('preview.badgeUpdate')}
@@ -66,11 +90,12 @@ const PreviewCard: React.FC<{
           {item.price != null && (
             <span className="font-semibold text-gray-800">{formatPrice(item.price)}</span>
           )}
-          {item.city && <span>{item.city}{item.country ? `, ${item.country}` : ''}</span>}
-          {item.propertyType && <span className="capitalize">{item.propertyType}</span>}
-          {item.beds != null && <span>{item.beds} {t('preview.beds')}</span>}
-          {item.baths != null && <span>{item.baths} {t('preview.baths')}</span>}
-          {item.sqft != null && <span>{item.sqft} m²</span>}
+          {meta.map((m, i) => (
+            <span key={i} className="capitalize">{m}</span>
+          ))}
+          {meta.length === 0 && item.sourceUrl && (
+            <span className="truncate text-gray-400 max-w-[200px]">{item.sourceUrl}</span>
+          )}
         </div>
       </div>
     </label>
@@ -86,10 +111,17 @@ const ListingPreviewModal: React.FC<ListingPreviewModalProps> = ({
   isConfirming,
 }) => {
   const { t } = useTranslation('listingFeeds');
-  // Defensive: backend errors / mid-render undefined props shouldn't crash the
-  // modal — render an empty list and let the user cancel cleanly.
-  const items = useMemo<PreviewListing[]>(() => Array.isArray(itemsProp) ? itemsProp : [], [itemsProp]);
-  const [selected, setSelected] = useState<Set<string>>(() => new Set(items.map((i) => i.rawId)));
+  const items = useMemo<PreviewListing[]>(
+    () => (Array.isArray(itemsProp) ? itemsProp : []),
+    [itemsProp]
+  );
+
+  // Initialize to all-selected after mount to avoid stale-closure issues with
+  // React's lazy useState initialiser when items arrive from async state.
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    setSelected(new Set(items.map((i) => i.rawId)));
+  }, [items]);
 
   const newCount = useMemo(() => items.filter((i) => i.isNew).length, [items]);
   const updateCount = items.length - newCount;
@@ -121,10 +153,11 @@ const ListingPreviewModal: React.FC<ListingPreviewModalProps> = ({
       aria-modal="true"
       aria-label={t('preview.modalLabel')}
     >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={isConfirming ? undefined : onCancel} />
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={isConfirming ? undefined : onCancel}
+      />
 
-      {/* Panel */}
       <div className="relative z-10 w-full max-w-2xl bg-white rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="px-6 pt-6 pb-4 border-b border-gray-100">
@@ -141,13 +174,10 @@ const ListingPreviewModal: React.FC<ListingPreviewModalProps> = ({
                 onClick={onCancel}
                 aria-label={t('common:close')}
                 className="text-gray-400 hover:text-gray-600 text-xl leading-none font-bold flex-shrink-0"
-              >
-                ×
-              </button>
+              >×</button>
             )}
           </div>
 
-          {/* Summary chips */}
           {items.length > 0 && (
             <div className="mt-3 flex items-center gap-2 flex-wrap">
               {newCount > 0 && (
@@ -169,7 +199,7 @@ const ListingPreviewModal: React.FC<ListingPreviewModalProps> = ({
           )}
         </div>
 
-        {/* Select all toolbar */}
+        {/* Select-all toolbar */}
         {items.length > 0 && (
           <div className="px-6 py-2 border-b border-gray-100 flex items-center gap-3 bg-gray-50">
             <label className="flex items-center gap-2 cursor-pointer select-none">

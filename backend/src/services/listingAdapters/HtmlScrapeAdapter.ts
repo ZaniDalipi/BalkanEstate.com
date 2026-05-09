@@ -211,6 +211,13 @@ export class HtmlScrapeAdapter implements SourceAdapter {
           let pathname = '';
           try { pathname = new URL(detailUrl).pathname; } catch { continue; }
           if (!looksLikeListingPath(pathname)) continue;
+
+          // Require at least 2 path segments OR a 3+-digit numeric component
+          // to avoid picking up single-word navigation links (/hr, /en, /de)
+          // and simple category pages (/novogradnje, /apartmani, /hoteli).
+          const pathParts = pathname.split('/').filter(Boolean);
+          if (pathParts.length < 2 && !/\d{3,}/.test(pathname)) continue;
+
           if (seenUrls.has(detailUrl)) continue;
           seenUrls.add(detailUrl);
 
@@ -225,9 +232,18 @@ export class HtmlScrapeAdapter implements SourceAdapter {
               item.detailHtml = String(detail.data);
             } catch {
               // detail-page fetch failures are non-fatal — without detailHtml
-              // the normalizer falls back to whatever we extracted from the
-              // anchor itself.
+              // the normalizer falls back to whatever we extracted from the anchor.
             }
+          }
+
+          // Apply the same validation as the main loop: items without a detail
+          // page must have listing signals (price/location/property keys).
+          // Items with detailHtml are passed through — the normalizer extracts
+          // the signals from the fetched HTML.
+          const sanityPayload = { ...item };
+          delete sanityPayload.detailHtml;
+          if (!item.detailHtml && !isValidListingItem(sanityPayload)) {
+            continue;
           }
 
           out.push({ id: detailUrl, url: detailUrl, raw: item });

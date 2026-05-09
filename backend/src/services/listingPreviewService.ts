@@ -68,6 +68,10 @@ const num = (v: unknown): number | undefined => {
   return Number.isFinite(n) && n > 0 ? n : undefined;
 };
 
+// Match both attribute-order variants of <meta property="og:image">
+const OG_IMAGE_RE =
+  /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']|<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i;
+
 const extractPreviewItem = (raw: RawListing): Omit<PreviewListing, 'isNew'> => {
   const r = raw.raw;
   const loc = r.location as Record<string, unknown> | undefined;
@@ -81,7 +85,15 @@ const extractPreviewItem = (raw: RawListing): Omit<PreviewListing, 'isNew'> => {
   const baths = num(r.baths ?? r.bathrooms ?? r.kupatila);
   const sqft = num(r.sqft ?? r.sqm ?? r.m2 ?? r.area ?? r.surface);
   const imgs = Array.isArray(r.images) ? (r.images as unknown[]) : [];
-  const imageUrl = str(r.imageUrl ?? r.image_url ?? r.image ?? r.photo ?? r.thumbnail ?? imgs[0]);
+
+  let imageUrl = str(r.imageUrl ?? r.image_url ?? r.image ?? r.photo ?? r.thumbnail ?? imgs[0]);
+
+  // For HTML-scraped items the raw fields may be absent; fall back to the
+  // OpenGraph image tag embedded in the fetched detail page HTML.
+  if (!imageUrl && typeof r.detailHtml === 'string') {
+    const m = (r.detailHtml as string).match(OG_IMAGE_RE);
+    if (m) imageUrl = str(m[1] ?? m[2]);
+  }
 
   return { rawId: raw.id, title, price, city, country, propertyType, beds, baths, sqft, imageUrl, sourceUrl: raw.url };
 };
