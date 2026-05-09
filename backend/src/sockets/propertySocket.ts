@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
 import mongoose from 'mongoose';
 import { socketLogger } from '../utils/logger';
+import { encodeId } from '../utils/idObfuscation';
 
 // Store the io instance for emitting from controllers
 let ioInstance: Server | null = null;
@@ -313,8 +314,13 @@ export const emitListingIngestProgress = (sourceId: string, progress: {
 }) => {
   if (!ioInstance) return;
 
+  // The frontend stores sessions under the obfuscated (encoded) ID, which is
+  // what the global Mongoose toJSON transform produces. Encode here so the
+  // socket event's sourceId matches what the client registered.
+  const encodedSourceId = encodeId(sourceId);
+
   ioInstance.emit('listing:ingestProgress', {
-    sourceId,
+    sourceId: encodedSourceId,
     ...progress,
     timestamp: new Date().toISOString(),
   });
