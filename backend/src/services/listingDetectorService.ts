@@ -70,67 +70,89 @@ const LISTING_URL_FRAGMENTS = [
 ];
 
 /**
- * URL-path fragments that indicate the link is NOT a listing detail page.
- * Used to filter out navigation, agency profiles, contact pages, etc.
+ * Path segments that, when they appear as the FIRST segment of the path,
+ * mean we're looking at navigation/marketing/account pages rather than a
+ * listing detail page. Compared against the leading segment only — never
+ * substrings — so they don't accidentally reject e.g. `/listings/tag-xyz`.
+ *
+ * Locale prefixes (e.g. `/en/`, `/sq-al/`) are stripped before this check.
  */
-const NON_LISTING_URL_FRAGMENTS = [
-  '/login', '/signin', '/register', '/signup', '/account', '/profile', '/dashboard',
-  '/contact', '/kontakt', '/about', '/o-nama', '/about-us', '/help', '/faq', '/support',
-  '/terms', '/privacy', '/policy', '/cookie', '/legal', '/impressum',
-  '/blog', '/news', '/article', '/articles', '/post', '/press',
-  '/agent/', '/agents/', '/agencija/', '/agencije/', '/agency/', '/agencies/',
-  '/team', '/staff', '/career', '/jobs',
-  '/sitemap', '/robots', '/feed', '/rss', '/atom',
-  '/cart', '/checkout', '/order', '/payment',
-  '/search', '/filter', '/category', '/kategorija', '/tag/', '/tags/',
-  '/map', '/karta', '/locations', '/lokacije',
-  '/wp-admin', '/wp-login', '/wp-content', '/admin',
-  '/?', '/#', // tracker / fragment-only links
-  '/share', '/print', '/email', '/mailto:',
-  '/services', '/usluge', '/offers', '/special',
-  '/calculator', '/kalkulator', '/mortgage', '/hipoteka',
-  '/page/', '/strana/', '/stranica/', // pagination URLs
-  '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.zip',
-  '.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp',
-  '.mp4', '.mp3', '.mov', '.avi',
-];
+const NON_LISTING_LEADING_SEGMENTS = new Set<string>([
+  'login', 'signin', 'register', 'signup', 'account', 'profile', 'dashboard',
+  'contact', 'kontakt', 'about', 'o-nama', 'about-us', 'help', 'faq', 'support',
+  'terms', 'privacy', 'policy', 'cookie', 'cookies', 'legal', 'impressum',
+  'blog', 'news', 'novosti', 'vesti', 'articles', 'press', 'media',
+  'team', 'staff', 'career', 'careers', 'jobs',
+  'sitemap', 'robots.txt', 'feed', 'rss', 'atom',
+  'cart', 'checkout', 'order', 'payment', 'pay',
+  'search', 'pretraga', 'filter', 'tag', 'tags',
+  'map', 'karta', 'locations', 'lokacije',
+  'wp-admin', 'wp-login', 'wp-content', 'admin',
+  'services', 'usluge',
+  'calculator', 'kalkulator', 'mortgage', 'hipoteka',
+  'auth', 'logout', 'forgot-password', 'reset-password', 'verify',
+]);
+
+/**
+ * Locale-prefix segments we strip before evaluating a path. These match the
+ * common 2-letter ISO codes plus 5-letter `xx-yy` variants used by Balkan
+ * portals (e.g. /sq-al/, /sr-rs/, /hr-hr/).
+ */
+const LOCALE_SEGMENT_RE = /^([a-z]{2}|[a-z]{2}-[a-z]{2})$/i;
 
 /**
  * File extensions that are clearly not listing pages.
  */
 const NON_LISTING_EXTENSIONS = /\.(pdf|doc|docx|xls|xlsx|zip|rar|jpg|jpeg|png|gif|svg|webp|mp4|mp3|mov|avi|css|js|xml|json|txt)$/i;
 
+/**
+ * Returns true if the URL pathname looks like an individual real-estate
+ * listing detail page.
+ *
+ * Strategy (positive-first — false negatives are far worse than false
+ * positives because the adapter applies a second `isValidListingItem`
+ * sanity check on the actual content):
+ *
+ *  1. Strip leading locale segment (`/en/`, `/sq-al/`, …)
+ *  2. Reject extension-style asset URLs
+ *  3. Reject when the leading segment is a known nav/account/marketing path
+ *  4. Accept if the URL contains any listing-y fragment AND has either a
+ *     ≥3-digit numeric id or a slug ≥3 chars after it
+ *  5. Accept any path ending in a long numeric id (4+ digits) — common for
+ *     id-based detail URLs even on sites whose taxonomy we don't recognise
+ */
 export const looksLikeListingPath = (pathname: string): boolean => {
-  if (!pathname) return false;
+  if (!pathname || pathname === '/' || pathname.length < 3) return false;
   const lower = pathname.toLowerCase();
-
-  // Quick reject: known non-listing paths.
-  if (NON_LISTING_URL_FRAGMENTS.some(f => lower.includes(f))) return false;
   if (NON_LISTING_EXTENSIONS.test(lower)) return false;
 
-  // Reject trivially short URLs (unlikely to be listing detail pages).
-  if (lower.length < 4) return false;
+  // Drop leading slash and split into segments
+  const rawSegments = lower.replace(/^\/+/, '').replace(/\/+$/, '').split('/');
+  // Strip a leading locale segment (e.g. /en/property/123 → /property/123)
+  const segments = rawSegments.length > 1 && LOCALE_SEGMENT_RE.test(rawSegments[0])
+    ? rawSegments.slice(1)
+    : rawSegments;
+  if (segments.length === 0) return false;
 
-  // Strong positive: matches a known listing fragment AND has a slug-like tail.
-  const hasFragment = LISTING_URL_FRAGMENTS.some(f => lower.includes(f));
-  if (hasFragment) {
-    // Must have at least one descriptive segment after the fragment — otherwise
-    // it's likely a category index page like /properties/ or /oglasi/.
-    const idx = LISTING_URL_FRAGMENTS.findIndex(f => lower.includes(f));
-    if (idx >= 0) {
-      const fragment = LISTING_URL_FRAGMENTS[idx];
-      const after = lower.slice(lower.indexOf(fragment) + fragment.length);
-      // Need either a numeric id or a multi-char slug after the fragment.
-      if (/\d{2,}/.test(after) || after.replace(/[/-]/g, '').length >= 3) {
-        return true;
-      }
-    }
+  // Reject if the first segment is clearly nav/marketing
+  if (NON_LISTING_LEADING_SEGMENTS.has(segments[0])) return false;
+  // Reject `/agent/<slug>`, `/agency/<slug>` etc. (allow agent listings under deeper paths)
+  if (/^(agent|agents|agencija|agencije|agency|agencies|broker|brokers)$/.test(segments[0])) {
+    return false;
   }
 
-  // Numeric-id detail pages: /property/12345, /oglas/12345, /-12345, /id/12345
+  // Has a known listing fragment somewhere in the path?
+  const matchedFragment = LISTING_URL_FRAGMENTS.find((f) => lower.includes(f));
+  if (matchedFragment) {
+    const after = lower.slice(lower.indexOf(matchedFragment) + matchedFragment.length);
+    // Need a slug or numeric id after the fragment (otherwise it's likely
+    // a category index page like /properties/ or /oglasi/).
+    if (/\d{2,}/.test(after) || after.replace(/[/-]/g, '').length >= 3) return true;
+  }
+
+  // No fragment matched — fall back to "looks like a numeric id detail page".
   if (/\/\d{4,}(?:[/-]|$)/.test(lower)) return true;
-  // Slug + numeric id at end: /modern-apartment-zagreb-1234
-  if (/-\d{3,}(?:[/-]|$)/.test(lower)) return true;
+  if (/-\d{4,}(?:[/-]|$)/.test(lower)) return true;
 
   return false;
 };

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import {
   useListingIngestProgressContext,
@@ -64,8 +65,12 @@ const ListingIngestDock: React.FC = () => {
   const expandedSession = expandedId ? sessions.get(expandedId) : undefined;
 
   if (sessionsArr.length === 0) return null;
+  if (typeof document === 'undefined') return null;
 
-  return (
+  // Portal both the floating dock and the expanded modal to <body> so they
+  // float above any transformed/scrolled ancestor instead of being trapped
+  // inside it.
+  return createPortal(
     <>
       <div
         className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[4000] flex flex-col gap-2 max-w-[calc(100vw-2rem)] sm:max-w-sm"
@@ -90,14 +95,14 @@ const ListingIngestDock: React.FC = () => {
           isRunning={!expandedSession.isDone}
           session={expandedSession}
           onClose={() => {
-            // If the run is finished, closing the modal also dismisses the dock card.
             if (expandedSession.isDone) dismissSession(expandedSession.sourceId);
             setExpandedId(null);
           }}
           onMinimize={() => setExpandedId(null)}
         />
       )}
-    </>
+    </>,
+    document.body
   );
 };
 
@@ -108,7 +113,19 @@ interface DockCardProps {
   t: (key: string, opts?: Record<string, unknown>) => string;
 }
 
-const DockCard: React.FC<DockCardProps> = ({ session, onExpand, onDismiss, t }) => {
+interface DockCardState {
+  phase: 'discovering' | 'syncing' | 'done' | 'error';
+  fetched: number;
+  processed: number;
+  imported: number;
+  updated: number;
+  failed: number;
+  deferred: number;
+  percentage: number;
+  errorMessage?: string;
+}
+
+const computeDockState = (session: SyncSession): DockCardState => {
   const c = session.current;
   const fetched = c?.fetched ?? 0;
   const processed = c?.processed ?? 0;
@@ -116,15 +133,42 @@ const DockCard: React.FC<DockCardProps> = ({ session, onExpand, onDismiss, t }) 
   const updated = c?.updated ?? 0;
   const failed = c?.failed ?? 0;
   const deferred = c?.deferred ?? 0;
-  const percentage = fetched > 0 ? Math.min(100, (processed / fetched) * 100) : 0;
-  const isDone = session.isDone;
-  const isDiscovering = !isDone && fetched === 0;
+  const percentage = fetched > 0 ? Math.min(100, Math.round((processed / fetched) * 100)) : 0;
 
-  const statusLabel = isDone
-    ? t('listingFeeds:dockDone')
-    : isDiscovering
-      ? t('listingFeeds:dockDiscovering')
-      : t('listingFeeds:dockSyncing', { processed, total: fetched });
+  // Error state: done + zero everything + we have a message
+  const isFailureWithMessage = Boolean(
+    session.isDone && c?.message && fetched === 0 && imported === 0 && updated === 0
+  );
+
+  let phase: DockCardState['phase'];
+  if (isFailureWithMessage) phase = 'error';
+  else if (session.isDone) phase = 'done';
+  else if (fetched === 0) phase = 'discovering';
+  else phase = 'syncing';
+
+  return {
+    phase, fetched, processed, imported, updated, failed, deferred, percentage,
+    errorMessage: c?.message,
+  };
+};
+
+const DockCard: React.FC<DockCardProps> = ({ session, onExpand, onDismiss, t }) => {
+  const state = computeDockState(session);
+  const { phase, fetched, processed, imported, updated, failed, deferred, percentage, errorMessage } = state;
+
+  const statusLabel: string = (() => {
+    switch (phase) {
+      case 'error': return t('listingFeeds:dockFailed');
+      case 'done': return t('listingFeeds:dockDone');
+      case 'discovering': return t('listingFeeds:dockDiscovering');
+      case 'syncing': return t('listingFeeds:dockSyncing', { processed, total: fetched });
+    }
+  })();
+
+  const ringColor =
+    phase === 'error' ? 'stroke-red-500'
+    : phase === 'done' ? 'stroke-emerald-500'
+    : 'stroke-blue-500';
 
   return (
     <div className="bg-white rounded-2xl shadow-2xl shadow-black/15 border border-gray-200 overflow-hidden animate-slide-up">
@@ -135,28 +179,40 @@ const DockCard: React.FC<DockCardProps> = ({ session, onExpand, onDismiss, t }) 
       >
         <div className="flex items-center gap-3">
           <div className="relative flex-shrink-0 w-9 h-9">
-            {/* Circular progress */}
             <svg className="w-9 h-9 -rotate-90" viewBox="0 0 36 36">
               <circle cx="18" cy="18" r="15" fill="none" className="stroke-gray-200" strokeWidth="3" />
-              <circle
-                cx="18"
-                cy="18"
-                r="15"
-                fill="none"
-                className={isDone ? 'stroke-emerald-500' : 'stroke-blue-500'}
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeDasharray={`${(percentage / 100) * 94.25} 94.25`}
-                style={{ transition: 'stroke-dasharray 0.3s ease' }}
-              />
+              {phase === 'discovering' ? (
+                // Indeterminate: rotating arc
+                <circle
+                  cx="18" cy="18" r="15" fill="none"
+                  className="stroke-blue-500 origin-center"
+                  strokeWidth="3" strokeLinecap="round"
+                  strokeDasharray="24 94.25"
+                  style={{ animation: 'dock-spin 1.1s linear infinite', transformOrigin: '18px 18px' }}
+                />
+              ) : (
+                <circle
+                  cx="18" cy="18" r="15" fill="none"
+                  className={ringColor}
+                  strokeWidth="3" strokeLinecap="round"
+                  strokeDasharray={`${(percentage / 100) * 94.25} 94.25`}
+                  style={{ transition: 'stroke-dasharray 0.3s ease' }}
+                />
+              )}
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              {isDone ? (
+              {phase === 'done' ? (
                 <svg viewBox="0 0 24 24" className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
+              ) : phase === 'error' ? (
+                <svg viewBox="0 0 24 24" className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              ) : phase === 'discovering' ? (
+                <span className="text-[9px] font-bold uppercase text-blue-600">…</span>
               ) : (
-                <span className="text-[10px] font-bold tabular-nums text-gray-700">{Math.round(percentage)}%</span>
+                <span className="text-[10px] font-bold tabular-nums text-gray-700">{percentage}%</span>
               )}
             </div>
           </div>
@@ -164,14 +220,16 @@ const DockCard: React.FC<DockCardProps> = ({ session, onExpand, onDismiss, t }) 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold text-gray-900 truncate">{session.sourceName}</span>
-              {!isDone && (
+              {(phase === 'discovering' || phase === 'syncing') && (
                 <span className="relative flex h-1.5 w-1.5 flex-shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
                 </span>
               )}
             </div>
-            <div className="text-xs text-gray-500 truncate">{statusLabel}</div>
+            <div className={`text-xs truncate ${phase === 'error' ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
+              {statusLabel}
+            </div>
             {(imported > 0 || updated > 0 || failed > 0 || deferred > 0) && (
               <div className="flex items-center gap-2 mt-1 text-[10px] font-semibold tabular-nums">
                 {imported > 0 && <span className="text-emerald-600">+{imported}</span>}
@@ -179,6 +237,9 @@ const DockCard: React.FC<DockCardProps> = ({ session, onExpand, onDismiss, t }) 
                 {deferred > 0 && <span className="text-amber-600">⏱{deferred}</span>}
                 {failed > 0 && <span className="text-red-600">✕{failed}</span>}
               </div>
+            )}
+            {phase === 'error' && errorMessage && (
+              <div className="text-[10px] text-red-500 mt-1 line-clamp-2 leading-snug">{errorMessage}</div>
             )}
           </div>
 
@@ -199,11 +260,19 @@ const DockCard: React.FC<DockCardProps> = ({ session, onExpand, onDismiss, t }) 
       </button>
 
       {/* Bottom progress bar */}
-      <div className="h-0.5 bg-gray-100 overflow-hidden">
-        <div
-          className={`h-full transition-all duration-300 ease-out ${isDone ? 'bg-emerald-500' : 'bg-gradient-to-r from-emerald-400 to-blue-500'}`}
-          style={{ width: `${Math.max(percentage, isDiscovering ? 6 : 0)}%` }}
-        />
+      <div className="h-0.5 bg-gray-100 overflow-hidden relative">
+        {phase === 'discovering' ? (
+          <div className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-blue-500 to-transparent" style={{ animation: 'dock-indet 1.4s ease-in-out infinite' }} />
+        ) : (
+          <div
+            className={`h-full transition-all duration-300 ease-out ${
+              phase === 'error' ? 'bg-red-400'
+              : phase === 'done' ? 'bg-emerald-500'
+              : 'bg-gradient-to-r from-emerald-400 to-blue-500'
+            }`}
+            style={{ width: `${percentage}%` }}
+          />
+        )}
       </div>
       <style>{`
         @keyframes slide-up {
@@ -211,6 +280,13 @@ const DockCard: React.FC<DockCardProps> = ({ session, onExpand, onDismiss, t }) 
           to { opacity: 1; transform: translateY(0); }
         }
         .animate-slide-up { animation: slide-up 0.25s ease-out; }
+        @keyframes dock-spin {
+          to { transform: rotate(360deg); }
+        }
+        @keyframes dock-indet {
+          0% { left: -33%; }
+          100% { left: 100%; }
+        }
       `}</style>
     </div>
   );

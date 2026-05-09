@@ -54,7 +54,7 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [lastRun, setLastRun] = useState<Record<string, IngestStats>>({});
-  const { registerSync } = useListingIngestProgressContext();
+  const { registerSync, failSession } = useListingIngestProgressContext();
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -131,7 +131,11 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
           setSources(await listMyListingSources());
         } catch { /* listing refresh failure shouldn't surface as a sync error */ }
       } catch (e) {
-        setError((e as Error).message);
+        const msg = (e as Error).message || 'Sync failed';
+        setError(msg);
+        // Surface the failure on the dock/modal so the user sees it even if
+        // they navigated away from this page.
+        failSession(id, msg);
       } finally {
         setRunningIds((prev) => {
           const n = new Set(prev);
@@ -140,7 +144,7 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
         });
       }
     })();
-  }, [sources, registerSync]);
+  }, [sources, registerSync, failSession]);
 
   const toggleEnabled = useCallback(async (source: ListingSource) => {
     setTogglingIds((prev) => new Set(prev).add(source.id));

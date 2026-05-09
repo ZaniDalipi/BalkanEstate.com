@@ -225,10 +225,39 @@ export const runNow = async (req: Request, res: Response): Promise<void> => {
     res.status(404).json({ message: 'ListingSource not found' });
     return;
   }
+  if (!source.enabled) {
+    res.status(400).json({
+      message: 'Source is disabled — enable it before running a sync.',
+      code: 'SOURCE_DISABLED',
+    });
+    return;
+  }
+
+  // Validate query params at the API boundary
   const fullRefresh = req.query.fullRefresh === 'true';
-  const limit = req.query.limit ? Math.max(1, Math.min(200, Number(req.query.limit))) : 50;
-  const stats = await runSource(source, { fullRefresh, limit });
-  res.json({ stats });
+  let limit = 50;
+  if (req.query.limit !== undefined) {
+    const parsed = Number(req.query.limit);
+    if (!Number.isFinite(parsed) || parsed < 1) {
+      res.status(400).json({
+        message: 'limit must be a positive integer between 1 and 200',
+        code: 'INVALID_LIMIT',
+      });
+      return;
+    }
+    limit = Math.max(1, Math.min(200, Math.floor(parsed)));
+  }
+
+  try {
+    const stats = await runSource(source, { fullRefresh, limit });
+    res.json({ stats });
+  } catch (err) {
+    const msg = (err as Error).message || 'Sync failed';
+    res.status(500).json({
+      message: msg,
+      code: 'INGEST_FAILED',
+    });
+  }
 };
 
 /** GET /api/listing-sources/:id/stats — counters + last 20 ingested listings. */

@@ -150,25 +150,35 @@ const ListingIngestProgressModal: React.FC<Props> = ({
   }, [current, finalStats]);
 
   const monthlyUsage = current?.monthlyUsage ?? finalStats?.monthlyUsage;
-  const percentage = stats.fetched > 0 ? Math.min(100, (stats.processed / stats.fetched) * 100) : 0;
+  const percentage = stats.fetched > 0 ? Math.min(100, Math.round((stats.processed / stats.fetched) * 100)) : 0;
+  const errorMessage = current?.message ?? (finalStats?.errors && finalStats.errors[0]);
+  const isDone = session?.isDone ?? !isRunning;
 
-  // Heading copy depends on which phase we're in.
-  const phase: 'discovering' | 'syncing' | 'finished' = !isRunning && (finalStats || stats.processed > 0)
-    ? 'finished'
-    : stats.fetched === 0
-      ? 'discovering'
-      : 'syncing';
+  // Heading copy depends on which phase we're in. We have an explicit error
+  // phase when the run finished without producing any items and we have a
+  // descriptive backend message — surface it to the user instead of a silent
+  // "0 imported" success.
+  const phase: 'discovering' | 'syncing' | 'finished' | 'error' =
+    isDone && errorMessage && stats.fetched === 0 && stats.imported === 0 && stats.updated === 0
+      ? 'error'
+      : isDone
+        ? 'finished'
+        : stats.fetched === 0
+          ? 'discovering'
+          : 'syncing';
 
   const phaseLabel: Record<typeof phase, string> = {
     discovering: t('listingFeeds:phaseDiscovering'),
     syncing: t('listingFeeds:phaseSyncing', { processed: stats.processed, total: stats.fetched }),
     finished: t('listingFeeds:phaseFinished'),
+    error: t('listingFeeds:phaseError'),
   };
 
   const phaseDot = {
     discovering: 'bg-blue-500 animate-pulse',
     syncing: 'bg-emerald-500 animate-pulse',
     finished: 'bg-emerald-500',
+    error: 'bg-red-500',
   }[phase];
 
   const sourceUrl = source.baseUrl && !source.baseUrl.startsWith('manual://') ? source.baseUrl : null;
@@ -202,33 +212,55 @@ const ListingIngestProgressModal: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Progress bar — large, gradient, animated */}
+        {/* Progress bar */}
         <div>
           <div className="flex items-baseline justify-between mb-2 text-sm">
             <span className="text-gray-600 font-medium">
               {stats.fetched > 0
                 ? t('listingFeeds:processedOfTotal', { processed: stats.processed, total: stats.fetched })
-                : t('listingFeeds:findingListings')}
+                : phase === 'error'
+                  ? t('listingFeeds:phaseError')
+                  : t('listingFeeds:findingListings')}
             </span>
-            <span className="text-gray-900 font-bold tabular-nums">{Math.round(percentage)}%</span>
+            <span className={`font-bold tabular-nums ${phase === 'error' ? 'text-red-600' : 'text-gray-900'}`}>
+              {phase === 'discovering' ? '…' : `${percentage}%`}
+            </span>
           </div>
           <div className="relative w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ease-out ${
-                phase === 'finished'
-                  ? 'bg-emerald-500'
-                  : 'bg-gradient-to-r from-emerald-400 via-emerald-500 to-blue-500'
-              }`}
-              style={{ width: `${Math.max(percentage, phase === 'discovering' ? 6 : 0)}%` }}
-            />
-            {phase !== 'finished' && (
+            {phase === 'discovering' ? (
               <div
-                className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent rounded-full animate-shimmer pointer-events-none"
+                className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-blue-500 to-transparent rounded-full"
+                style={{ animation: 'modal-indet 1.4s ease-in-out infinite' }}
+              />
+            ) : (
+              <div
+                className={`h-full rounded-full transition-all duration-500 ease-out ${
+                  phase === 'error' ? 'bg-red-400'
+                  : phase === 'finished' ? 'bg-emerald-500'
+                  : 'bg-gradient-to-r from-emerald-400 via-emerald-500 to-blue-500'
+                }`}
+                style={{ width: `${percentage}%` }}
+              />
+            )}
+            {phase === 'syncing' && (
+              <div
+                className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent rounded-full pointer-events-none"
                 style={{ animation: 'shimmer 1.6s linear infinite' }}
               />
             )}
           </div>
         </div>
+
+        {/* Error banner — shown when the backend reports a failure */}
+        {phase === 'error' && errorMessage && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 flex items-start gap-3">
+            <div className="text-red-500 flex-shrink-0 w-5 h-5 mt-0.5" aria-hidden="true">{Icons.alert}</div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-red-900">{t('listingFeeds:syncFailed')}</p>
+              <p className="text-xs text-red-700 mt-0.5 break-words">{errorMessage}</p>
+            </div>
+          </div>
+        )}
 
         {/* Stat grid — 2 cols on phone, 5 on desktop */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
@@ -360,11 +392,15 @@ const ListingIngestProgressModal: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* Local keyframes for shimmer (Tailwind doesn't ship one). */}
+      {/* Local keyframes (Tailwind doesn't ship these). */}
       <style>{`
         @keyframes shimmer {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(300%); }
+        }
+        @keyframes modal-indet {
+          0% { left: -33%; }
+          100% { left: 100%; }
         }
       `}</style>
     </Modal>

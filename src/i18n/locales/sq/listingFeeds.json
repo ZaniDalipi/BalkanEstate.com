@@ -115,5 +115,8 @@
   "dockSyncing": "Syncing {{processed}} / {{total}}",
   "dockDiscovering": "Discovering listings…",
   "dockDone": "Sync complete",
-  "dockDismiss": "Dismiss"
+  "dockDismiss": "Dismiss",
+  "dockFailed": "Sync failed",
+  "phaseError": "Sync failed",
+  "syncFailed": "Sync failed"
 }

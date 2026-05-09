@@ -49,6 +49,7 @@ interface ContextValue {
   sessions: Map<string, SyncSession>;
   registerSync: (sourceId: string, sourceName: string) => void;
   markDone: (sourceId: string) => void;
+  failSession: (sourceId: string, errorMessage: string) => void;
   dismissSession: (sourceId: string) => void;
   getSession: (sourceId: string) => SyncSession | undefined;
 }
@@ -81,6 +82,30 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
       if (!existing) return prev;
       const next = new Map(prev);
       next.set(sourceId, { ...existing, isDone: true });
+      return next;
+    });
+  }, []);
+
+  const failSession = useCallback((sourceId: string, errorMessage: string) => {
+    setSessions((prev) => {
+      const existing = prev.get(sourceId);
+      if (!existing) return prev;
+      const next = new Map(prev);
+      // Synthesise a "done with error" event so the dock/modal pick up the
+      // failure even when no socket events arrived (e.g. immediate HTTP 4xx).
+      const synthetic: ListingIngestProgressEvent = {
+        sourceId,
+        fetched: existing.current?.fetched ?? 0,
+        processed: existing.current?.processed ?? 0,
+        imported: existing.current?.imported ?? 0,
+        updated: existing.current?.updated ?? 0,
+        failed: existing.current?.failed ?? 0,
+        deferred: existing.current?.deferred ?? 0,
+        done: true,
+        message: errorMessage,
+        timestamp: new Date().toISOString(),
+      };
+      next.set(sourceId, { ...existing, current: synthetic, isDone: true });
       return next;
     });
   }, []);
@@ -148,8 +173,8 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
   }, [socket]);
 
   const value = useMemo<ContextValue>(
-    () => ({ sessions, registerSync, markDone, dismissSession, getSession }),
-    [sessions, registerSync, markDone, dismissSession, getSession]
+    () => ({ sessions, registerSync, markDone, failSession, dismissSession, getSession }),
+    [sessions, registerSync, markDone, failSession, dismissSession, getSession]
   );
 
   return (

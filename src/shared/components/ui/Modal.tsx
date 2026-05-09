@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback, useRef, memo } from 'react';
+import { createPortal } from 'react-dom';
 import { XMarkIcon } from '../../constants';
 
 interface ModalProps {
@@ -134,7 +135,13 @@ const Modal: React.FC<ModalProps> = ({
 
   const bp = breakpointClasses[fullScreenBreakpoint];
 
-  return (
+  // Render the modal in a portal anchored to <body> so transformed/scrolled
+  // ancestors can't pin its `position: fixed` element inside their box.
+  // Without this, any parent with `transform`, `filter`, `perspective`, or
+  // `will-change` becomes the containing block for fixed children.
+  if (typeof document === 'undefined') return null;
+
+  const modalContent = (
     <div
       className={bp.backdrop}
       onClick={handleBackdropClick}
@@ -169,6 +176,8 @@ const Modal: React.FC<ModalProps> = ({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default memo(Modal);
