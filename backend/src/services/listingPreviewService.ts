@@ -82,16 +82,23 @@ const LISTING_JSONLD_RE =
 
 /**
  * Heuristic: does this fetched detail page actually look like a real estate
- * listing? We require at least one strong content signal (price OR area OR
- * structured listing JSON-LD). This is the last-line filter that drops
- * navigation/category/about pages that slipped past the URL-based filters
- * in the adapter.
+ * listing? We require at least one of:
+ * - Structured JSON-LD schema (most authoritative)
+ * - Visible price or area in the HTML (common patterns)
+ * - A title extracted from the index card (trusts the adapter's URL filtering)
+ *
+ * This is permissive by design. We'd rather let a non-listing through the
+ * preview (user can reject it) than drop a real listing because its detail
+ * page doesn't display price/area prominently.
  */
-const isLikelyListingHtml = (html: string): boolean => {
-  if (!html) return true; // No detail HTML to check — defer to the adapter's URL filter.
-  if (LISTING_JSONLD_RE.test(html)) return true;
-  if (PRICE_HTML_RE.test(html)) return true;
-  if (AREA_HTML_RE.test(html)) return true;
+const isLikelyListingHtml = (html: string, hasTitle: boolean): boolean => {
+  if (!html) return true; // No detail HTML to check — trust the adapter.
+  if (LISTING_JSONLD_RE.test(html)) return true; // JSON-LD is authoritative.
+  if (PRICE_HTML_RE.test(html)) return true; // Price visible.
+  if (AREA_HTML_RE.test(html)) return true; // Area visible.
+  // If we have a title from the index card, trust the adapter's URL filter.
+  if (hasTitle) return true;
+  // No signals at all — probably not a listing.
   return false;
 };
 
@@ -130,11 +137,13 @@ export const previewSource = async (
 
   // Drop items whose fetched detail page has no real-estate content signals.
   // Items without detailHtml pass through (URL-based filtering already applied
-  // upstream in the adapter). This catches navigation/category pages that
-  // slipped past looksLikeListingPath but obviously aren't listings.
+  // upstream in the adapter). If the index card already extracted a title,
+  // trust the adapter's filtering and don't drop it just because the detail
+  // page doesn't display price/area visibly.
   const raws = allRaws.filter((raw) => {
     const html = (raw.raw as Record<string, unknown> | undefined)?.detailHtml;
-    return typeof html === 'string' ? isLikelyListingHtml(html) : true;
+    const hasTitle = Boolean(raw.raw?.title ?? raw.raw?.name ?? raw.raw?.naslov ?? raw.raw?.naziv);
+    return typeof html === 'string' ? isLikelyListingHtml(html, hasTitle) : true;
   });
 
   const existingIds = new Set<string>();
