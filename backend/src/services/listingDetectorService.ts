@@ -75,22 +75,23 @@ const LISTING_URL_FRAGMENTS = [
  * listing detail page. Compared against the leading segment only — never
  * substrings — so they don't accidentally reject e.g. `/listings/tag-xyz`.
  *
+ * Kept tight on purpose: false negatives (rejecting real listings) are far
+ * worse than false positives, because the adapter applies a second
+ * `isValidListingItem` content check before persisting anything.
+ *
  * Locale prefixes (e.g. `/en/`, `/sq-al/`) are stripped before this check.
  */
 const NON_LISTING_LEADING_SEGMENTS = new Set<string>([
-  'login', 'signin', 'register', 'signup', 'account', 'profile', 'dashboard',
-  'contact', 'kontakt', 'about', 'o-nama', 'about-us', 'help', 'faq', 'support',
-  'terms', 'privacy', 'policy', 'cookie', 'cookies', 'legal', 'impressum',
-  'blog', 'news', 'novosti', 'vesti', 'articles', 'press', 'media',
-  'team', 'staff', 'career', 'careers', 'jobs',
-  'sitemap', 'robots.txt', 'feed', 'rss', 'atom',
-  'cart', 'checkout', 'order', 'payment', 'pay',
-  'search', 'pretraga', 'filter', 'tag', 'tags',
-  'map', 'karta', 'locations', 'lokacije',
-  'wp-admin', 'wp-login', 'wp-content', 'admin',
-  'services', 'usluge',
-  'calculator', 'kalkulator', 'mortgage', 'hipoteka',
-  'auth', 'logout', 'forgot-password', 'reset-password', 'verify',
+  // Auth / account
+  'login', 'signin', 'register', 'signup', 'logout', 'auth',
+  'account', 'profile', 'dashboard', 'my-account',
+  // Marketing / static
+  'about', 'about-us', 'contact', 'kontakt', 'help', 'faq', 'support',
+  'terms', 'privacy', 'policy', 'legal', 'impressum',
+  // System
+  'sitemap', 'robots.txt', 'wp-admin', 'wp-login', 'admin',
+  // Cart / checkout
+  'cart', 'checkout',
 ]);
 
 /**
@@ -115,11 +116,10 @@ const NON_LISTING_EXTENSIONS = /\.(pdf|doc|docx|xls|xlsx|zip|rar|jpg|jpeg|png|gi
  *
  *  1. Strip leading locale segment (`/en/`, `/sq-al/`, …)
  *  2. Reject extension-style asset URLs
- *  3. Reject when the leading segment is a known nav/account/marketing path
- *  4. Accept if the URL contains any listing-y fragment AND has either a
- *     ≥3-digit numeric id or a slug ≥3 chars after it
- *  5. Accept any path ending in a long numeric id (4+ digits) — common for
- *     id-based detail URLs even on sites whose taxonomy we don't recognise
+ *  3. Reject only an explicit, tight blacklist of nav/account leading segments
+ *  4. Reject obvious agency/agent profile pages (their leading segment alone)
+ *  5. Accept any URL containing a known listing-y fragment
+ *  6. Accept any path with a 3+ digit numeric segment (id-style detail URLs)
  */
 export const looksLikeListingPath = (pathname: string): boolean => {
   if (!pathname || pathname === '/' || pathname.length < 3) return false;
@@ -136,23 +136,18 @@ export const looksLikeListingPath = (pathname: string): boolean => {
 
   // Reject if the first segment is clearly nav/marketing
   if (NON_LISTING_LEADING_SEGMENTS.has(segments[0])) return false;
-  // Reject `/agent/<slug>`, `/agency/<slug>` etc. (allow agent listings under deeper paths)
+  // Reject `/agent/<slug>`, `/agency/<slug>` etc. (agency/agent profile pages)
   if (/^(agent|agents|agencija|agencije|agency|agencies|broker|brokers)$/.test(segments[0])) {
     return false;
   }
 
-  // Has a known listing fragment somewhere in the path?
-  const matchedFragment = LISTING_URL_FRAGMENTS.find((f) => lower.includes(f));
-  if (matchedFragment) {
-    const after = lower.slice(lower.indexOf(matchedFragment) + matchedFragment.length);
-    // Need a slug or numeric id after the fragment (otherwise it's likely
-    // a category index page like /properties/ or /oglasi/).
-    if (/\d{2,}/.test(after) || after.replace(/[/-]/g, '').length >= 3) return true;
-  }
+  // Permissive accept: any listing-y fragment anywhere in the path.
+  if (LISTING_URL_FRAGMENTS.some((f) => lower.includes(f))) return true;
 
-  // No fragment matched — fall back to "looks like a numeric id detail page".
-  if (/\/\d{4,}(?:[/-]|$)/.test(lower)) return true;
-  if (/-\d{4,}(?:[/-]|$)/.test(lower)) return true;
+  // Numeric-id detail pages: /property/12345, /oglas/12345, /-12345, /id/12345
+  if (/\/\d{3,}(?:[/-]|$)/.test(lower)) return true;
+  // Slug + numeric id at end: /modern-apartment-zagreb-1234
+  if (/-\d{3,}(?:[/-]|$)/.test(lower)) return true;
 
   return false;
 };
