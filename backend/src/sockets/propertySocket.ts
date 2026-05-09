@@ -306,6 +306,8 @@ export const emitListingIngestProgress = (sourceId: string, progress: {
   updated: number;
   failed: number;
   deferred?: number;
+  done?: boolean;
+  message?: string;
   currentItem?: { id: string; title?: string; url?: string };
   monthlyUsage?: { monthlyAllowance: number; remaining: number };
 }) => {

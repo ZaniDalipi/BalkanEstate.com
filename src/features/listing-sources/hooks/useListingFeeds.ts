@@ -9,6 +9,7 @@ import {
   runMyListingSource,
   updateMyListingSource,
 } from '../api/listingSourceApi';
+import { useListingIngestProgressContext } from '../context/ListingIngestProgressContext';
 
 export interface UseListingFeedsReturn {
   // Data
@@ -29,7 +30,7 @@ export interface UseListingFeedsReturn {
   // Single-source actions
   refresh: () => Promise<void>;
   deleteFeed: (id: string) => Promise<void>;
-  runFeed: (id: string) => Promise<void>;
+  runFeed: (id: string) => void;
   toggleEnabled: (source: ListingSource) => Promise<void>;
   clearImports: (id: string) => Promise<void>;
   upsertFeed: (source: ListingSource) => void;
@@ -53,6 +54,7 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [lastRun, setLastRun] = useState<Record<string, IngestStats>>({});
+  const { registerSync } = useListingIngestProgressContext();
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -105,19 +107,40 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
     }
   }, []);
 
-  const runFeed = useCallback(async (id: string) => {
+  /**
+   * Fire-and-forget the sync. Returns immediately so the user can navigate
+   * elsewhere; the global ListingIngestProgressContext (subscribed via socket)
+   * keeps the dock and modal in sync regardless of which page the user is on.
+   *
+   * The HTTP request resolves with the final IngestStats once the backend has
+   * finished — that's used to update the source list and lastRun summary.
+   */
+  const runFeed = useCallback((id: string): void => {
+    const source = sources.find((s) => s.id === id);
+    if (!source) return;
+
     setRunningIds((prev) => new Set(prev).add(id));
     setError(null);
-    try {
-      const stats = await runMyListingSource(id);
-      setLastRun((prev) => ({ ...prev, [id]: stats }));
-      setSources(await listMyListingSources());
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setRunningIds((prev) => { const n = new Set(prev); n.delete(id); return n; });
-    }
-  }, []);
+    registerSync(id, source.name);
+
+    void (async () => {
+      try {
+        const stats = await runMyListingSource(id);
+        setLastRun((prev) => ({ ...prev, [id]: stats }));
+        try {
+          setSources(await listMyListingSources());
+        } catch { /* listing refresh failure shouldn't surface as a sync error */ }
+      } catch (e) {
+        setError((e as Error).message);
+      } finally {
+        setRunningIds((prev) => {
+          const n = new Set(prev);
+          n.delete(id);
+          return n;
+        });
+      }
+    })();
+  }, [sources, registerSync]);
 
   const toggleEnabled = useCallback(async (source: ListingSource) => {
     setTogglingIds((prev) => new Set(prev).add(source.id));

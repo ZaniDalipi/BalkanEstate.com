@@ -155,6 +155,18 @@ export const runSource = async (
   }
 
   try {
+    // Emit a kick-off event so the frontend dock/modal know the run is alive
+    // and can transition out of the "discovering" placeholder state before any
+    // actual work has been processed.
+    emitListingIngestProgress(String(source._id), {
+      fetched: 0,
+      processed: 0,
+      imported: 0,
+      updated: 0,
+      failed: 0,
+      deferred: 0,
+    });
+
     let raws: RawListing[];
     if (options.preFetched) {
       raws = options.preFetched;
@@ -168,6 +180,17 @@ export const runSource = async (
       raws = await adapter.fetchListings(source, { since, limit });
     }
     stats.fetched = raws.length;
+
+    // Tell the frontend how many items we found so the progress bar can
+    // show "0 of N processed" instead of indefinitely hanging at 0/0.
+    emitListingIngestProgress(String(source._id), {
+      fetched: stats.fetched,
+      processed: 0,
+      imported: 0,
+      updated: 0,
+      failed: 0,
+      deferred: 0,
+    });
 
     const rehostImages = Boolean(
       (source.adapterConfig as Record<string, unknown> | undefined)?.rehostImages
@@ -267,6 +290,26 @@ export const runSource = async (
   log.info(
     `[ingest] ${source.slug}: done — fetched=${stats.fetched} imported=${stats.imported} updated=${stats.updated} deferred=${stats.deferred} failed=${stats.failed} (${stats.durationMs}ms)`
   );
+
+  // Final progress event — guarantees the frontend transitions to "done" even
+  // when 0 items were fetched (e.g. site blocked us, adapter raised early).
+  emitListingIngestProgress(String(source._id), {
+    fetched: stats.fetched,
+    processed: stats.fetched,
+    imported: stats.imported,
+    updated: stats.updated,
+    failed: stats.failed,
+    deferred: stats.deferred,
+    done: true,
+    message: stats.errors.length > 0 ? stats.errors[0] : undefined,
+    monthlyUsage: stats.monthlyUsage
+      ? {
+          monthlyAllowance: stats.monthlyUsage.monthlyAllowance,
+          remaining: Math.max(0, stats.monthlyUsage.remaining),
+        }
+      : undefined,
+  });
+
   return stats;
 };
 

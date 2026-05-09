@@ -190,7 +190,7 @@ const MyListingFeeds: React.FC = () => {
               onSelect={() => toggleSelected(source.id)}
               onEdit={() => { setEditing(source); setView('edit'); }}
               onDelete={() => handleDelete(source.id)}
-              onRun={() => void runFeed(source.id)}
+              onRun={() => runFeed(source.id)}
               onToggleEnabled={() => void toggleEnabled(source)}
               onClearImports={() => handleClearImports(source)}
             />

@@ -102,5 +102,18 @@
   "waitingForFirstItem": "Waiting for the first item…",
   "noItemsProcessed": "No items have been processed yet.",
   "hideAndContinue": "Hide & keep syncing",
-  "viewDetails": "View details"
+  "viewDetails": "View details",
+  "minimizeAndUseApp": "Minimize & use the app",
+  "phaseDiscovering": "Discovering listings…",
+  "phaseSyncing": "Syncing {{processed}} / {{total}} listings",
+  "phaseFinished": "Sync complete",
+  "processedOfTotal": "{{processed}} of {{total}} processed",
+  "findingListings": "Finding listings on the source…",
+  "lookingForListings": "Looking for listings — this can take up to a minute on large sites.",
+  "rowSyncingDiscovering": "Discovering listings…",
+  "rowSyncingProgress": "Syncing — {{processed}}/{{total}} ({{pct}}%) · {{imported}} imported",
+  "dockSyncing": "Syncing {{processed}} / {{total}}",
+  "dockDiscovering": "Discovering listings…",
+  "dockDone": "Sync complete",
+  "dockDismiss": "Dismiss"
 }

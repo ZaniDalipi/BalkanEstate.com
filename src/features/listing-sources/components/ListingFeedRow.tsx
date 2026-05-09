@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { IngestStats, ListingSource } from '../api/listingSourceApi';
-import { useListingIngestProgress } from '../hooks/useListingIngestProgress';
-import ListingIngestProgressBar from './ListingIngestProgressBar';
+import { useSyncSession } from '../context/ListingIngestProgressContext';
 import ListingIngestProgressModal from './ListingIngestProgressModal';
 
 interface Props {
@@ -55,18 +54,17 @@ const ListingFeedRow: React.FC<Props> = ({
   onClearImports,
 }) => {
   const { t } = useTranslation(['listingFeeds', 'common']);
-  const progress = useListingIngestProgress(isRunning ? source.id : undefined);
+  const session = useSyncSession(source.id);
   const [modalOpen, setModalOpen] = useState(false);
-
-  // Open the progress modal automatically when this row's sync starts. Don't
-  // auto-close it when the run finishes — the user may want to inspect the
-  // results — but do let them close it manually.
-  useEffect(() => {
-    if (isRunning) setModalOpen(true);
-  }, [isRunning]);
 
   const busy = isDeleting || isClearing;
   const hasImports = source.listingsImported > 0 || source.listingsUpdated > 0;
+
+  const c = session?.current;
+  const liveImported = c?.imported ?? 0;
+  const liveProcessed = c?.processed ?? 0;
+  const liveTotal = c?.fetched ?? 0;
+  const livePct = liveTotal > 0 ? Math.round((liveProcessed / liveTotal) * 100) : 0;
 
   return (
     <div
@@ -75,7 +73,6 @@ const ListingFeedRow: React.FC<Props> = ({
       } ${busy ? 'opacity-50 pointer-events-none' : ''}`}
     >
       <div className="flex items-start gap-3">
-        {/* Selection checkbox */}
         <input
           type="checkbox"
           checked={selected}
@@ -84,9 +81,7 @@ const ListingFeedRow: React.FC<Props> = ({
           className="mt-1.5 w-4 h-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary/30 cursor-pointer flex-shrink-0"
         />
 
-        {/* Main content */}
         <div className="flex-1 flex items-start justify-between gap-4 flex-wrap">
-          {/* Info column */}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
               <h3 className="font-semibold text-gray-900 truncate">{source.name}</h3>
@@ -128,6 +123,30 @@ const ListingFeedRow: React.FC<Props> = ({
               </div>
             )}
 
+            {/* Inline running banner — opens the modal on click */}
+            {isRunning && (
+              <button
+                type="button"
+                onClick={() => setModalOpen(true)}
+                className="mt-2 w-full text-left bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 flex items-center justify-between gap-3 hover:bg-blue-100 transition-colors group"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="relative flex h-2 w-2 flex-shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+                  </span>
+                  <span className="text-xs text-blue-900 font-medium truncate">
+                    {liveTotal > 0
+                      ? t('listingFeeds:rowSyncingProgress', { processed: liveProcessed, total: liveTotal, pct: livePct, imported: liveImported })
+                      : t('listingFeeds:rowSyncingDiscovering')}
+                  </span>
+                </div>
+                <span className="text-xs text-blue-700 font-semibold whitespace-nowrap group-hover:underline">
+                  {t('listingFeeds:viewDetails')} →
+                </span>
+              </button>
+            )}
+
             {lastRun && !isRunning && (
               <div className="mt-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-2 py-1 flex items-center justify-between gap-2 flex-wrap">
                 <span>
@@ -148,11 +167,8 @@ const ListingFeedRow: React.FC<Props> = ({
                 </button>
               </div>
             )}
-
-            <ListingIngestProgressBar progress={progress} isRunning={isRunning} />
           </div>
 
-          {/* Action buttons */}
           <div className="flex items-center gap-2 shrink-0 flex-wrap">
             <button
               type="button"
@@ -213,9 +229,10 @@ const ListingFeedRow: React.FC<Props> = ({
         source={source}
         isOpen={modalOpen}
         isRunning={isRunning}
-        progress={progress}
+        session={session}
         finalStats={lastRun}
         onClose={() => setModalOpen(false)}
+        onMinimize={() => setModalOpen(false)}
       />
     </div>
   );
