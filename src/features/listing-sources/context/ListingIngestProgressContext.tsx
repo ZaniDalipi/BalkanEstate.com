@@ -91,6 +91,7 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
   const [pendingPreview, setPendingPreview] = useState<PendingPreview | null>(null);
   const [fetchingPreviews, setFetchingPreviews] = useState<Map<string, FetchingPreview>>(new Map());
   const [confirmingPreview, setConfirmingPreview] = useState(false);
+  const [confirmingSourceId, setConfirmingSourceId] = useState<string | null>(null);
   const [importHandlers] = useState<Set<(sourceId: string) => void>>(() => new Set());
   const socket = useSocket();
 
@@ -206,6 +207,21 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
     };
   }, [socket]);
 
+  // When a confirmed import's session completes, close the preview modal and
+  // refresh the sources list. This ensures the modal stays open while the
+  // actual import is running, preventing a race where items appear before
+  // the modal closes.
+  useEffect(() => {
+    if (!confirmingSourceId || !pendingPreview) return;
+
+    const session = sessions.get(confirmingSourceId);
+    if (session?.isDone) {
+      setPendingPreview(null);
+      setConfirmingSourceId(null);
+      for (const handler of importHandlers) handler(confirmingSourceId);
+    }
+  }, [confirmingSourceId, pendingPreview, sessions, importHandlers]);
+
   const startPreview = useCallback(
     async (sourceId: string, sourceName: string, limit = 100): Promise<void> => {
       setFetchingPreviews((prev) => {
@@ -243,21 +259,25 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
       if (!preview) return;
       const { sourceId, sourceName, previewId } = preview;
       setConfirmingPreview(true);
+      setConfirmingSourceId(sourceId);
       // Register the sync session immediately so the dock transitions from
       // "review" → "syncing" without a gap.
       registerSync(sourceId, sourceName);
       try {
         await confirmMyListingSourceImport(sourceId, previewId, approvedIds);
-        setPendingPreview(null);
-        for (const handler of importHandlers) handler(sourceId);
+        // Don't clear pendingPreview here. Keep it open with confirmingPreview=true
+        // until the sync session completes (tracked via confirmingSourceId).
+        // This ensures the modal stays visible while the actual import is running
+        // and prevents a race where items appear before the modal closes.
       } catch (err) {
         failSession(sourceId, (err as Error).message || 'Import failed');
+        setConfirmingSourceId(null);
         throw err;
       } finally {
         setConfirmingPreview(false);
       }
     },
-    [pendingPreview, registerSync, failSession, importHandlers]
+    [pendingPreview, registerSync, failSession]
   );
 
   const onImportConfirmed = useCallback(
