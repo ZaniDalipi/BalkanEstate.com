@@ -242,7 +242,18 @@ const extractGalleryImages = ($: cheerio.CheerioAPI, base: string, target: Mappe
     });
   }
 
-  pushImages(target, found);
+  // Filter out tracking pixels, icons, and other non-listing images.
+  const meaningful = found.filter((u) => {
+    const lower = u.toLowerCase();
+    // Skip tracking pixels and 1x1 spacers
+    if (/[?&](w|width|h|height)=1\b/.test(lower)) return false;
+    // Skip common icon/logo/avatar paths
+    if (/(\/icon|\/logo|\/avatar|\/sprite|\/blank|\/pixel|\/spacer|\/placeholder)/i.test(lower)) return false;
+    // Skip known tracker domains
+    if (/(doubleclick|google-analytics|facebook\.net\/tr|pixel\.)/i.test(lower)) return false;
+    return true;
+  });
+  pushImages(target, meaningful);
 };
 
 const extractStructuredPriceFromHtml = ($: cheerio.CheerioAPI, target: Mapped): void => {

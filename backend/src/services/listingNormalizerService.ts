@@ -37,11 +37,18 @@ export const getExternalSellerId = async (): Promise<Types.ObjectId> => {
 const PROPERTY_TYPE_MAP: Record<string, IProperty['propertyType']> = {
   apartment: 'apartment', stan: 'apartment', apartman: 'apartment', diamerisma: 'apartment',
   flat: 'apartment', appartement: 'apartment', wohnung: 'apartment',
+  studio: 'apartment', garsonjera: 'apartment', garsonijera: 'apartment',
+  jednosoban: 'apartment', dvosoban: 'apartment', trosoban: 'apartment',
+  penthouse: 'villa', attic: 'villa',
   house: 'house', kuca: 'house', kuća: 'house', vivienda: 'house', maison: 'house', haus: 'house',
-  villa: 'villa', vila: 'villa', vil: 'villa',
+  bungalow: 'house', chalet: 'house', cottage: 'house', farmhouse: 'house',
+  villa: 'villa', vila: 'villa', vil: 'villa', mansion: 'villa',
   land: 'land', zemljiste: 'land', zemljište: 'land', plac: 'land', plot: 'land', terreno: 'land',
+  parcel: 'land', parcela: 'land', teren: 'land', njiva: 'land',
   commercial: 'other', poslovni: 'other', office: 'other', store: 'other',
-  garage: 'other', garaza: 'other',
+  lokal: 'other', poslovni_prostor: 'other', retail: 'other', warehouse: 'other',
+  garage: 'other', garaza: 'other', garaža: 'other',
+  room: 'other', soba: 'other', kamer: 'other',
 };
 
 const LISTING_TYPE_MAP: Record<string, IProperty['listingType']> = {
@@ -75,10 +82,14 @@ const parsePrice = (input: unknown): ParsedPrice | null => {
     .replace(/(po\s+(mesecu|mjesecu)|mes\.|mjesečno|μήνα|monatlich)/gi, '')
     .trim();
 
-  // Detect EU format (1.234,56) vs US format (1,234.56)
-  if (/,\d{1,2}$/.test(numeric) && /\./.test(numeric)) {
+  // Space-separated thousands (Eastern European style: "150 000 EUR")
+  if (/^\d[\d\s]*\d$/.test(numeric.trim()) && numeric.includes(' ')) {
+    numeric = numeric.replace(/\s/g, '');
+  } else if (/,\d{1,2}$/.test(numeric) && /\./.test(numeric)) {
+    // EU format: 1.234,56
     numeric = numeric.replace(/\./g, '').replace(',', '.');
   } else if (/,\d{3}/.test(numeric) && !/\./.test(numeric)) {
+    // US format: 1,234,567
     numeric = numeric.replace(/,/g, '');
   } else {
     numeric = numeric.replace(/[\s']/g, '').replace(',', '.');
@@ -165,13 +176,15 @@ const extractBathsFromText = (text: unknown): number | null => {
 const extractSqftFromText = (text: unknown): number | null => {
   if (!text || typeof text !== 'string') return null;
   const t = text.replace(/\s+/g, ' ');
+  // Remove space-as-thousands-separator adjacent to digits (e.g. "1 500 m²" → "1500 m²")
+  const tClean = t.replace(/(\d) (\d{3})\b/g, '$1$2').replace(/(\d) (\d{3})\b/g, '$1$2');
   // m² requires a digit-then-unit shape and rejects letter prefixes (e.g. "M2 engine")
   const patterns = [
     /(?<![A-Za-z])(\d{2,5}(?:[.,]\d{1,2})?)\s*(?:m²|m2|sqm|sq\.?\s*m\.?|square\s*meters?|qm|kvadrata?)\b/i,
     /(?<![A-Za-z])(\d{2,5}(?:[.,]\d{1,2})?)\s*(?:sq\s*ft|sqft|ft²)\b/i,
   ];
   for (const pattern of patterns) {
-    const match = t.match(pattern);
+    const match = tClean.match(pattern);
     if (match && match[1]) {
       const num = parseFloat(match[1].replace(',', '.'));
       // Realistic property areas: 10 m² (tiny studio) to 50,000 m² (large estate)

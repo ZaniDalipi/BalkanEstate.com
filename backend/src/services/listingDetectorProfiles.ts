@@ -402,6 +402,108 @@ export const BALKAN_SITE_PROFILES: Record<string, SiteProfile> = {
     image: 'img|attr:src',
     nextPageSelector: 'a[rel="next"]',
   },
+
+  // ── Romania ────────────────────────────────────────────────────────────────
+
+  /**
+   * imobiliare.ro  (Romania's largest property portal)
+   */
+  'imobiliare.ro': {
+    listingItem: 'article.card, .listing-card, [class*="result-item"], li.search-result',
+    link: 'a.card__link, a[class*="title"], h2 a, h3 a',
+    title: 'h2, h3, [class*="title"]',
+    price: '[class*="price"], .pret, .price',
+    image: 'img[class*="card"]|attr:src, img|attr:src',
+    location: '[class*="location"], .localitate',
+    sqft: '[class*="suprafata"], [class*="surface"]',
+    nextPageSelector: 'a[rel="next"], .pagination a.next',
+    pageParam: 'page',
+  },
+
+  /**
+   * storia.ro  (OLX group Romanian property portal)
+   */
+  'storia.ro': {
+    listingItem: 'article[data-cy="listing-item"], .css-1dbjc4n, article',
+    link: 'a[href*="/oferta/"], h3 a, a[class*="title"]',
+    title: 'h3, [class*="title"]',
+    price: '[aria-label*="price"], [class*="price"], strong',
+    image: 'img|attr:src',
+    location: '[class*="location"], [class*="address"]',
+    nextPageSelector: 'a[rel="next"]',
+    pageParam: 'page',
+  },
+
+  // ── Greece ─────────────────────────────────────────────────────────────────
+
+  /**
+   * spitogatos.gr  (Greece's main property portal)
+   */
+  'spitogatos.gr': {
+    listingItem: '.listing-item, .classified, article.result',
+    link: 'a.listing-title, h2 a, h3 a',
+    title: 'h2, h3, [class*="title"]',
+    price: '[class*="price"], .price',
+    image: 'img|attr:src',
+    location: '[class*="location"], [class*="area"]',
+    nextPageSelector: 'a[rel="next"]',
+    pageParam: 'page',
+  },
+
+  /**
+   * xe.gr  (Greek classifieds, large real-estate section)
+   */
+  'xe.gr': {
+    listingItem: '.classified-item, .listing-item, article',
+    link: 'a.title, h3 a, a[class*="title"]',
+    title: 'h3, .title',
+    price: '[class*="price"], .xe-price',
+    image: 'img|attr:src',
+    nextPageSelector: 'a[rel="next"]',
+    pageParam: 'page',
+  },
+
+  // ── Additional Balkan portals ───────────────────────────────────────────────
+
+  /**
+   * nekretnine.rs  (Serbian portal)
+   */
+  'nekretnine.rs': {
+    listingItem: '.property-item, .listing-item, article.ad, .oglas',
+    link: 'a.property-title, h3 a, h2 a',
+    title: 'h3, h2, [class*="title"]',
+    price: '[class*="price"], .cena',
+    image: 'img|attr:src',
+    location: '[class*="location"], [class*="mesto"]',
+    sqft: '[class*="kvadrat"], [class*="povrs"]',
+    nextPageSelector: 'a[rel="next"]',
+    pageParam: 'page',
+  },
+
+  /**
+   * oglasi.me  (Montenegrin classifieds)
+   */
+  'oglasi.me': {
+    listingItem: '.classified, .ad-item, li.oglas, article',
+    link: 'h3 a, a[class*="title"]',
+    title: 'h3',
+    price: '[class*="price"], .cijena',
+    image: 'img|attr:src',
+    nextPageSelector: 'a[rel="next"]',
+  },
+
+  /**
+   * domy.cz / bazos.cz (Czech portals sometimes used in the region)
+   */
+  'sreality.cz': {
+    listingItem: 'article.property, .property-item, li.estate-items__list-item',
+    link: 'a.title, h2 a, h3 a',
+    title: 'h2, h3, .title',
+    price: '[class*="price"], .norm-price',
+    image: 'img|attr:src',
+    nextPageSelector: 'a[rel="next"]',
+    pageParam: 'strana',
+  },
 };
 
 /** Find a matching site profile for a given absolute URL. */

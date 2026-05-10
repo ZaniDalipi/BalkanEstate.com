@@ -69,6 +69,7 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
   const {
     sessions,
     registerSync,
+    markDone,
     failSession,
     pendingPreview,
     fetchingPreviews,
@@ -167,14 +168,22 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
         setError(msg);
         failSession(id, msg);
       } finally {
+        // The session (updated by socket events) is now the authoritative
+        // source for "done" state. Only remove from localRunningIds — the
+        // session's isDone flag drives the final transition in runningIds.
         setLocalRunningIds((prev) => {
           const n = new Set(prev);
           n.delete(id);
           return n;
         });
+        // Ensure the session is marked done in case the final socket event
+        // raced with (or arrived before) the HTTP response. The session's
+        // isDone flag is already set by the socket handler if it arrived
+        // first — calling markDone again is a safe no-op when already done.
+        markDone(id);
       }
     })();
-  }, [sources, registerSync, failSession]);
+  }, [sources, registerSync, markDone, failSession]);
 
   /**
    * Fetch listings from the source and open the review modal so the user can

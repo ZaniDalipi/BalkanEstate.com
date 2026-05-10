@@ -346,16 +346,20 @@ export class HtmlScrapeAdapter implements SourceAdapter {
     }
 
     const capped = limit ? stubs.slice(0, limit) : stubs;
+    // Report how many listing URLs we found before starting detail fetches.
+    options.onProgress?.(capped.length, 0);
 
     if (!cfg.followDetails) return capped;
 
     // Parallel detail-page fetches — the big perf win. The httpClient queues
     // per-host so we still respect the polite delay, just in a tight loop
     // rather than one-at-a-time across the whole page.
+    let detailsCompleted = 0;
     const detailHtmls = await pMap(
       capped,
       async (stub) => {
         const detail = await httpGet<string>(stub.url ?? '', detailRequestOpts);
+        options.onProgress?.(capped.length, ++detailsCompleted);
         return String(detail.data);
       },
       detailConcurrency

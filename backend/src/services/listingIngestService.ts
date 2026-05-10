@@ -193,7 +193,20 @@ export const runSource = async (
       log.info(
         `[ingest] ${source.slug}: starting (since=${since?.toISOString() ?? 'none'}, limit=${limit}, remaining=${remaining})`
       );
-      raws = await adapter.fetchListings(source, { since, limit });
+      raws = await adapter.fetchListings(source, {
+        since,
+        limit,
+        onProgress: (discovered, detailsFetched) => {
+          emitListingIngestProgress(String(source._id), {
+            fetched: discovered,
+            processed: detailsFetched,
+            imported: 0,
+            updated: 0,
+            failed: 0,
+            deferred: 0,
+          });
+        },
+      });
     }
     stats.fetched = raws.length;
 
