@@ -1,10 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type ListingSource } from '../api/listingSourceApi';
+import { type TermsStatus, getTermsStatus } from '../api/listingSourceApi';
 import { useListingFeeds } from '../hooks/useListingFeeds';
 import AddFeedWizard from './AddFeedWizard';
 import ListingFeedForm from './ListingFeedForm';
 import ListingFeedRow from './ListingFeedRow';
+import ListingSourcesAlphaTerms from './ListingSourcesAlphaTerms';
 
 type View = 'list' | 'add' | 'edit';
 
@@ -14,6 +16,31 @@ const MyListingFeeds: React.FC = () => {
   const [editing, setEditing] = useState<ListingSource | null>(null);
   const selectAllRef = useRef<HTMLInputElement>(null);
 
+  // ── Terms-acceptance gate ────────────────────────────────────────────────
+  const [termsStatus, setTermsStatus] = useState<TermsStatus | null>(null);
+  const [termsLoading, setTermsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const status = await getTermsStatus();
+        if (!cancelled) setTermsStatus(status);
+      } catch {
+        // If the check fails treat as not-yet-accepted; they can try again after
+        if (!cancelled) setTermsStatus({ accepted: false, version: '1.0', acceptedAt: null });
+      } finally {
+        if (!cancelled) setTermsLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const handleTermsAccepted = useCallback((status: TermsStatus) => {
+    setTermsStatus(status);
+  }, []);
+
+  // ── Listing feeds state ──────────────────────────────────────────────────
   const {
     sources,
     loading,
@@ -66,6 +93,16 @@ const MyListingFeeds: React.FC = () => {
     void bulkDeleteSelected();
   };
 
+  // ── Terms gate ───────────────────────────────────────────────────────────
+  if (termsLoading) {
+    return <div className="text-center py-12 text-gray-500">{t('common:loading')}</div>;
+  }
+
+  if (!termsStatus?.accepted) {
+    return <ListingSourcesAlphaTerms onAccepted={handleTermsAccepted} />;
+  }
+
+  // ── Normal views ─────────────────────────────────────────────────────────
   if (view === 'add') {
     return <AddFeedWizard onCancel={() => setView('list')} onSaved={handleSaved} />;
   }
@@ -88,8 +125,22 @@ const MyListingFeeds: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">{t('listingFeeds:title')}</h2>
-          <p className="text-sm text-gray-600 mt-1">{t('listingFeeds:description')}</p>
+          <div className="flex items-center gap-2 mb-1">
+            <h2 className="text-2xl font-bold text-gray-900">{t('listingFeeds:title')}</h2>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-amber-800 text-xs font-bold uppercase tracking-wider">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+              Alpha
+            </span>
+          </div>
+          <p className="text-sm text-gray-600">{t('listingFeeds:description')}</p>
+          {termsStatus?.acceptedAt && (
+            <p className="text-xs text-gray-400 mt-1">
+              {t('listingFeeds:termsAcceptedOn', 'Terms accepted on')}{' '}
+              {new Date(termsStatus.acceptedAt).toLocaleDateString(undefined, {
+                year: 'numeric', month: 'long', day: 'numeric',
+              })}
+            </p>
+          )}
         </div>
         <button
           type="button"
@@ -98,6 +149,19 @@ const MyListingFeeds: React.FC = () => {
         >
           {t('listingFeeds:addFeed')}
         </button>
+      </div>
+
+      {/* Alpha data-quality notice */}
+      <div className="mb-4 flex gap-3 items-start bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-800">
+        <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span>
+          <strong>{t('listingFeeds:alphaNoticeTitle', 'Alpha feature — review all imported data.')}</strong>{' '}
+          {t('listingFeeds:alphaNoticeBody',
+            'Imported prices, areas, and descriptions may be inaccurate. Always verify and edit each property before publishing.'
+          )}
+        </span>
       </div>
 
       {/* Error banner */}

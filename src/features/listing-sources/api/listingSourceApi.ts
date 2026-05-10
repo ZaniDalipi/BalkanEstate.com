@@ -232,3 +232,20 @@ export const detectFeed = async (
     requiresAuth: true,
   });
 };
+
+export interface TermsStatus {
+  accepted: boolean;
+  version: string;
+  acceptedAt: string | null;
+}
+
+export const getTermsStatus = async (): Promise<TermsStatus> => {
+  return apiRequest<TermsStatus>(`${BASE}/terms-status`, { requiresAuth: true });
+};
+
+export const acceptTerms = async (): Promise<{ accepted: boolean; version: string }> => {
+  return apiRequest<{ accepted: boolean; version: string }>(`${BASE}/accept-terms`, {
+    method: 'POST',
+    requiresAuth: true,
+  });
+};

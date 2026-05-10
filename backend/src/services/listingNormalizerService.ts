@@ -436,7 +436,9 @@ const knownPropertyKeys = new Set<string>([
 const CONTENT_KEY_RE = /(title|name|naslov|naziv|description|opis|content|summary|heading|headline|subject)/i;
 const LOCATION_KEY_RE = /(address|street|city|country|state|region|town|location|grad|zemlja|drzava|ulica|adresa|postal|zip|lat|lng|lon|coord|geo|place|district|county|kraj)/i;
 const PRICE_KEY_RE = /(price|amount|cost|rent|fee|cijena|cena|preis|prix|precio|valor|asking|monthly|priceeur|price_eur|listing_price|property_price)/i;
-const PROPERTY_KEY_RE = /(beds?|bedroom|baths?|bathroom|sqft|sqm|m2|area|surface|sobe|kupatil|povrsina|tip|type|categor|kategorij|zimmer|chamber|bagno|imag|photo|image|slika|foto|gallery|room|stan|kuca|apartment|villa|land|plot|parcel|garage|parking|floor|sprat|etaz|etag|year|built|godinu|baujahr|condition|stanje|construction|view|pogled|aussicht|heating|grijanje|furnishing|nameste)/i;
+// Excludes generic keys like "categories"/"type" that appear on non-listing objects (news posts, products).
+// Only keys that are unambiguously property-specific are allowed here.
+const PROPERTY_KEY_RE = /\b(beds?|bedroom|baths?|bathroom|sqft|sqm|m2|area|surface|sobe|kupatil|povrsina|zimmer|chamber|bagno|imag|photo|image|slika|foto|gallery|stan|kuca|apartment|villa|land|plot|parcel|garage|parking|floor|sprat|etaz|etag|baujahr|condition|stanje|construction|pogled|aussicht|grijanje|nameste)\b/i;
 
 /**
  * Walk an object and check if any (possibly-nested) key matches the regex.
@@ -492,6 +494,79 @@ export const isValidListingItem = (raw: Record<string, unknown>): boolean => {
   if (hasContent && (hasPrice || hasLocation || hasPropertyAttr)) return true;
   if (hasPrice && hasLocation) return true;
   return false;
+};
+
+/**
+ * Price pattern in text: number (possibly formatted with dots/commas/spaces as
+ * thousands separators) followed by a currency symbol or code within 10 chars.
+ */
+const TEXT_PRICE_RE = /\b\d[\d\s.,]{1,14}(?:€|EUR|USD|\$|£|GBP|CHF|RSD|BAM|HRK|RON|BGN|MKD|ALL|HUF|kn)\b/i;
+
+/**
+ * Property spec keywords in text — presence of any makes it very likely to be
+ * a listing rather than a news article or blog post.
+ */
+const TEXT_PROPERTY_RE =
+  /\b(?:bedroom|bed|bath|sqft|sqm|m²|m2|floor|apartment|villa|house|studio|duplex|penthouse|soba|kupatilo|sprat|kvadrat|povrsina|apartman|stan|kuca|garsonijera|vila|zimmer|wohnung|haus|chambre|pièce|appartement|maison|habitaci[oó]n|piso|vivienda|appartamento|camera|mansarda|stanza)\b/i;
+
+/**
+ * Headlines that strongly signal a news / editorial article rather than a
+ * property listing. Matched against the item title only.
+ */
+const NEWS_TITLE_RE =
+  /\b(?:trendovi|trend|analiz[ae]|izvješ[ct]aj|izvještaj|report|interview|vijest|news|update|novosti|pregled|market\s+update|market\s+report|guide|vodič|savjet|tip|kako\s+|što\s+|zašto\s+|kada\s+|why\s+|how\s+to\s+|best\s+(?:time|place|way)|top\s+\d|invest|prognoz[ae]|forecast|review|mišljenje|opinion)\b/i;
+
+/**
+ * Stricter validation for RSS feed items.
+ *
+ * RSS items from WordPress sites with mixed content (news + listings) all pass
+ * `isValidListingItem` because they share keys like `categories` which matches
+ * the broad PROPERTY_KEY_RE. This function adds text-level checks:
+ *
+ * 1. If the title looks like a news headline, reject immediately.
+ * 2. Otherwise require the item's text content to contain EITHER:
+ *    - A price pattern (number + currency), OR
+ *    - A property-spec keyword (bedroom, m2, apartment, …)
+ *
+ * Falls through to `isValidListingItem` for items that have rich key sets
+ * (e.g. scraped JSON with explicit `beds`, `price` keys).
+ */
+export const isValidRssItem = (raw: Record<string, unknown>): boolean => {
+  if (!raw || typeof raw !== 'object') return false;
+
+  // Extract all text strings from the item (title, description, content, link, categories…)
+  const collectText = (obj: unknown, depth = 0): string[] => {
+    if (depth > 3 || obj == null) return [];
+    if (typeof obj === 'string') return [obj];
+    if (typeof obj === 'number') return [String(obj)];
+    if (Array.isArray(obj)) return obj.flatMap((v) => collectText(v, depth + 1));
+    if (typeof obj === 'object') {
+      return Object.values(obj as Record<string, unknown>).flatMap((v) => collectText(v, depth + 1));
+    }
+    return [];
+  };
+
+  const texts = collectText(raw);
+  const fullText = texts.join(' ');
+
+  // 1. If the title (first non-empty text value) looks like a news headline, reject.
+  const title = (raw.title as string | undefined) ?? texts.find((t) => t.length > 3) ?? '';
+  if (NEWS_TITLE_RE.test(title)) return false;
+
+  // 2. If we find a price in the text, it's almost certainly a listing.
+  if (TEXT_PRICE_RE.test(fullText)) return true;
+
+  // 3. Property spec keywords in title or content → listing.
+  if (TEXT_PROPERTY_RE.test(fullText)) return true;
+
+  // 4. URL path contains known listing path fragments (e.g. /properties/, /listing/).
+  const link = (raw.link as string | undefined) ?? (raw.url as string | undefined) ?? '';
+  if (link && /\/(properties?|listing|nekretnin|oglas|imot|apartment|villa|for-sale|for-rent|sale|rent)\//i.test(link)) {
+    return true;
+  }
+
+  // 5. Fall back to the structural key check (handles rich JSON items from JSON feeds).
+  return isValidListingItem(raw);
 };
 
 /**

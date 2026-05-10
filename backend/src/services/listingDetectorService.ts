@@ -6,7 +6,7 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 import type { AnyNode } from 'domhandler';
 import Parser from 'rss-parser';
-import { isValidListingItem } from './listingNormalizerService';
+import { isValidListingItem, isValidRssItem } from './listingNormalizerService';
 import { findSiteProfile } from './listingDetectorProfiles';
 
 const TIMEOUT = 12_000;
@@ -491,9 +491,13 @@ const probeRss = async (url: string): Promise<Record<string, unknown>[] | null> 
     const parser = new Parser({ timeout: TIMEOUT, headers: { 'User-Agent': BROWSER_UA } });
     const feed = await parser.parseURL(url);
     if (feed.items && feed.items.length > 0) {
-      // Filter to only items that look like real listings
-      const validItems = (feed.items as Record<string, unknown>[]).filter(item => isValidListingItem(item));
-      if (validItems.length > 0) return validItems;
+      // Use the stricter RSS-aware validator so news articles on WordPress
+      // sites (which always have a `categories` key) don't slip through.
+      const validItems = (feed.items as Record<string, unknown>[]).filter(item => isValidRssItem(item));
+      // Require at least 30% of feed items to look like listings — a low
+      // ratio means we're looking at a mixed blog/news feed, not a property feed.
+      const ratio = validItems.length / feed.items.length;
+      if (validItems.length > 0 && ratio >= 0.3) return validItems;
     }
     return null;
   } catch {
@@ -501,14 +505,26 @@ const probeRss = async (url: string): Promise<Record<string, unknown>[] | null> 
   }
 };
 
-/** Try WordPress REST API. */
+/** Try WordPress REST API — first via property CPT, then generic posts. */
 const probeWordPress = async (baseUrl: string): Promise<Record<string, unknown>[] | null> => {
   const origin = new URL(baseUrl).origin;
-  const data = await tryUrl(`${origin}/wp-json/wp/v2/posts?per_page=3&_embed`, 'json');
+
+  // Try dedicated property CPTs first (WP Property, Easy Property Listings, etc.)
+  const cptSlugs = ['property', 'listing', 'listings', 'real-estate', 'nekretnine', 'oglas'];
+  for (const cpt of cptSlugs) {
+    const data = await tryUrl(`${origin}/wp-json/wp/v2/${cpt}?per_page=5&_embed`, 'json');
+    if (Array.isArray(data) && data.length > 0) {
+      const validItems = (data as Record<string, unknown>[]).filter(item => isValidRssItem(item));
+      if (validItems.length > 0) return validItems;
+    }
+  }
+
+  // Generic posts endpoint — use stricter RSS validator to reject news/blog posts
+  const data = await tryUrl(`${origin}/wp-json/wp/v2/posts?per_page=10&_embed`, 'json');
   if (Array.isArray(data) && data.length > 0) {
-    // Filter to only items that look like real listings
-    const validItems = (data as Record<string, unknown>[]).filter(item => isValidListingItem(item));
-    if (validItems.length > 0) return validItems;
+    const validItems = (data as Record<string, unknown>[]).filter(item => isValidRssItem(item));
+    // Only accept if most posts look like listings (not a mixed news/listing site)
+    if (validItems.length > 0 && validItems.length / data.length >= 0.4) return validItems;
   }
   return null;
 };
@@ -1217,7 +1233,54 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
 
   // ── 3. Common RSS paths ──────────────────────────────────────────────────────
   const origin = (() => { try { return new URL(url).origin; } catch { return ''; } })();
-  for (const path of ['/feed', '/feed/', '/rss.xml', '/atom.xml', '/rss', '/?feed=rss2']) {
+  const inputPath = (() => { try { return new URL(url).pathname; } catch { return '/'; } })();
+
+  // Try property-specific feed paths first. WordPress + real-estate plugins
+  // (WP Property, Easy Property Listings, IMPress Listings, Estatik, etc.)
+  // expose a dedicated CPT feed that contains only listing posts, not news.
+  // These must come BEFORE the generic /feed which mixes everything.
+  const propertyCptPaths = [
+    '/?feed=rss2&post_type=property',
+    '/?feed=rss2&post_type=listing',
+    '/?feed=rss2&post_type=listings',
+    '/?feed=rss2&post_type=real-estate',
+    '/?feed=rss2&post_type=nekretnine',
+    '/?feed=rss2&post_type=oglas',
+    '/feed/?post_type=property',
+    '/feed/?post_type=listing',
+    '/properties/feed/',
+    '/property/feed/',
+    '/listings/feed/',
+    '/listing/feed/',
+    '/nekretnine/feed/',
+    '/oglasi/feed/',
+    '/for-sale/feed/',
+    '/properties-for-sale/feed/',
+    '/for-rent/feed/',
+    '/real-estate/feed/',
+  ];
+  // Also probe the scoped path of the user's URL (e.g. /properties-for-sale-croatia/ → add /feed/ suffix)
+  if (inputPath && inputPath !== '/' && !inputPath.endsWith('/feed/')) {
+    const scoped = inputPath.endsWith('/') ? `${inputPath}feed/` : `${inputPath}/feed/`;
+    propertyCptPaths.unshift(scoped);
+  }
+
+  for (const path of propertyCptPaths) {
+    const candidate = `${origin}${path}`;
+    const items = await probeRss(candidate);
+    if (items) {
+      return {
+        adapterType: 'rss',
+        adapterConfig: { feedUrls: [candidate] },
+        fieldMap: rssFieldMap(),
+        sample: items[0],
+        hint: `Property RSS feed found at ${candidate}`,
+      };
+    }
+  }
+
+  // Generic fallback feeds — only use if all property-specific ones failed.
+  for (const path of ['/rss.xml', '/atom.xml', '/rss', '/?feed=rss2', '/feed/', '/feed']) {
     const candidate = `${origin}${path}`;
     const items = await probeRss(candidate);
     if (items) {

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Types } from 'mongoose';
 import ListingSource from '../models/ListingSource';
+import ListingSourceTermsAcceptance from '../models/ListingSourceTermsAcceptance';
 import Property from '../models/Property';
 import { runSource } from '../services/listingIngestService';
 import { previewSource, getPreviewSession, deletePreviewSession } from '../services/listingPreviewService';
@@ -472,4 +473,51 @@ export const detect = async (req: Request, res: Response): Promise<void> => {
   } catch (err) {
     res.status(422).json({ message: (err as Error).message });
   }
+};
+
+/** Current ToS document version. Bump this string to require re-acceptance. */
+const CURRENT_TERMS_VERSION = '1.0';
+
+/** GET /listing-sources/terms-status — check if the caller has accepted the current ToS. */
+export const getTermsStatus = async (req: Request, res: Response): Promise<void> => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+
+  const record = await ListingSourceTermsAcceptance.findOne({
+    userId: new Types.ObjectId(userId),
+    version: CURRENT_TERMS_VERSION,
+  });
+
+  res.json({
+    accepted: !!record,
+    version: CURRENT_TERMS_VERSION,
+    acceptedAt: record?.acceptedAt ?? null,
+  });
+};
+
+/** POST /listing-sources/accept-terms — record the caller's acceptance of the current ToS. */
+export const acceptTerms = async (req: Request, res: Response): Promise<void> => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+
+  const ip =
+    (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim() ||
+    req.socket.remoteAddress ||
+    undefined;
+
+  await ListingSourceTermsAcceptance.findOneAndUpdate(
+    { userId: new Types.ObjectId(userId), version: CURRENT_TERMS_VERSION },
+    {
+      $setOnInsert: {
+        userId: new Types.ObjectId(userId),
+        version: CURRENT_TERMS_VERSION,
+        acceptedAt: new Date(),
+        ip,
+        userAgent: req.headers['user-agent']?.substring(0, 512),
+      },
+    },
+    { upsert: true, new: true }
+  );
+
+  res.json({ accepted: true, version: CURRENT_TERMS_VERSION });
 };

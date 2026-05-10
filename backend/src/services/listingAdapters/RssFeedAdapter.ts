@@ -1,6 +1,6 @@
 import Parser from 'rss-parser';
 import type { IListingSource } from '../../models/ListingSource';
-import { isValidListingItem } from '../listingNormalizerService';
+import { isValidRssItem } from '../listingNormalizerService';
 import { httpGet } from './httpClient';
 import type { FetchOptions, RawListing, SourceAdapter } from './types';
 
@@ -43,7 +43,7 @@ export class RssFeedAdapter implements SourceAdapter {
         const id = item.guid || item.link || (item as unknown as { id?: string }).id;
         if (!id) continue;
         // Validate that this item looks like a real listing (not news or other content)
-        if (!isValidListingItem(item as unknown as Record<string, unknown>)) continue;
+        if (!isValidRssItem(item as unknown as Record<string, unknown>)) continue;
         const pub = item.isoDate || item.pubDate;
         if (options.since && pub) {
           const ts = new Date(pub).getTime();

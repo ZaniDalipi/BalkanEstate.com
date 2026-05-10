@@ -13,6 +13,8 @@ import {
   detect,
   bulkDelete,
   clearImports,
+  getTermsStatus,
+  acceptTerms,
 } from '../controllers/userListingSourceController';
 
 const router = express.Router();
@@ -25,6 +27,8 @@ router.get('/', list);
 router.post('/', create);
 
 // Static routes — must precede /:id so they aren't parsed as an ObjectId param.
+router.get('/terms-status', getTermsStatus);
+router.post('/accept-terms', acceptTerms);
 router.post('/detect', detect);
 router.post('/bulk-delete', bulkDelete);
 
