@@ -86,8 +86,14 @@ const parsePrice = (input: unknown): ParsedPrice | null => {
   if (/^\d[\d\s]*\d$/.test(numeric.trim()) && numeric.includes(' ')) {
     numeric = numeric.replace(/\s/g, '');
   } else if (/,\d{1,2}$/.test(numeric) && /\./.test(numeric)) {
-    // EU format: 1.234,56
+    // EU format with decimal comma: 1.234,56
     numeric = numeric.replace(/\./g, '').replace(',', '.');
+  } else if (/^\d{1,3}(\.\d{3})+$/.test(numeric.trim())) {
+    // Dot-as-thousands with no decimal: 1.200.000 (Croatian/Balkan style)
+    numeric = numeric.replace(/\./g, '');
+  } else if (/^\d{1,3}(,\d{3})+$/.test(numeric.trim())) {
+    // Comma-as-thousands with no decimal: 1,200,000 (US/UK style)
+    numeric = numeric.replace(/,/g, '');
   } else if (/,\d{3}/.test(numeric) && !/\./.test(numeric)) {
     // US format: 1,234,567
     numeric = numeric.replace(/,/g, '');
@@ -142,8 +148,8 @@ const extractBedsFromText = (text: unknown): number | null => {
   if (!text || typeof text !== 'string') return null;
   const t = text.replace(/\s+/g, ' ');
   const patterns = [
-    /(?<![.\d])(\d{1,2})\s*(?:bed(?:room)?s?|soba|sobi|sobe|chambre[s]?|habitaci[oó]n(?:es)?|zimmer|schlafzimmer)\b/i,
-    /\b(?:bed(?:room)?s?|soba|sobi|sobe|chambres?|habitaci[oó]nes?|zimmer)\s*[:#=]\s*(\d{1,2})\b/i,
+    /(?<![.\d])(\d{1,2})\s*(?:bed(?:room)?s?|spava[cć][ae]\s+sobe?|soba|sobi|sobe|chambre[s]?|habitaci[oó]n(?:es)?|zimmer|schlafzimmer)\b/i,
+    /\b(?:bed(?:room)?s?|spava[cć][ae]\s+sobe?|soba|sobi|sobe|chambres?|habitaci[oó]nes?|zimmer)\s*[:#=]\s*(\d{1,2})\b/i,
   ];
   for (const pattern of patterns) {
     const match = t.match(pattern);

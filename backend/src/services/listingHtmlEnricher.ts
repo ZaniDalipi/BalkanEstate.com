@@ -181,6 +181,32 @@ const extractMicrodata = ($: cheerio.CheerioAPI, base: string, target: Mapped): 
   pushImages(target, microImages);
 };
 
+/**
+ * When the same image appears in multiple resolutions via query params (e.g.
+ * ?w=400 and ?w=1200), keep only the largest version to maximise quality.
+ */
+const deduplicateImageUrls = (urls: string[]): string[] => {
+  // Group by the URL with size-related query params stripped.
+  const groups = new Map<string, { url: string; score: number }>();
+  for (const u of urls) {
+    let base = u;
+    let score = 0;
+    try {
+      const parsed = new URL(u);
+      // Score by explicit width/height params — prefer larger
+      const w = parseInt(parsed.searchParams.get('w') ?? parsed.searchParams.get('width') ?? '0', 10);
+      const h = parseInt(parsed.searchParams.get('h') ?? parsed.searchParams.get('height') ?? '0', 10);
+      score = w || h;
+      // Key = URL without size params
+      ['w', 'width', 'h', 'height', 'size', 'thumb', 'resize', 'dim'].forEach(p => parsed.searchParams.delete(p));
+      base = parsed.toString();
+    } catch { /* keep url as-is */ }
+    const existing = groups.get(base);
+    if (!existing || score > existing.score) groups.set(base, { url: u, score });
+  }
+  return Array.from(groups.values()).map(g => g.url);
+};
+
 /** Pull every reasonable image URL from <img> tags on the page (with srcset & lazy-load support). */
 const extractGalleryImages = ($: cheerio.CheerioAPI, base: string, target: Mapped): void => {
   const found: string[] = [];
@@ -209,28 +235,46 @@ const extractGalleryImages = ($: cheerio.CheerioAPI, base: string, target: Mappe
       if (best) found.push(resolveUrl(base, best.url));
     }
   });
-  // Also <source srcset> inside <picture>
+  // <source srcset> inside <picture> — prefer the largest descriptor
   $('picture source').each((_, el) => {
     const srcset = $(el).attr('srcset');
-    if (srcset) {
-      const first = srcset.split(',')[0]?.trim().split(/\s+/)[0];
-      if (first) found.push(resolveUrl(base, first));
+    if (!srcset) return;
+    const parts = srcset.split(',').map(p => p.trim());
+    let best: { url: string; width: number } | null = null;
+    for (const p of parts) {
+      const [u, w] = p.split(/\s+/);
+      const width = parseInt((w ?? '0').replace(/\D/g, ''), 10) || 0;
+      if (!best || width > best.width) best = { url: u, width };
     }
+    if (best) found.push(resolveUrl(base, best.url));
   });
 
-  // Extract from common gallery container patterns (div with data-image, background-image, etc.)
-  const gallerySelectors = [
-    '[data-image]',
-    '[data-src]',
-    '[data-original]',
-    '[data-image-url]',
-    '[data-gallery-image]',
-    '[data-photo]',
+  // Swiper, Fancybox, Slick, Lightbox and other gallery widgets store the
+  // full-resolution URL in data attributes on slide/thumbnail wrappers.
+  const galleryAttrSelectors = [
+    '[data-image]', '[data-src]', '[data-original]', '[data-image-url]',
+    '[data-gallery-image]', '[data-photo]', '[data-full]', '[data-full-image]',
+    '[data-fancybox]', '[data-fancybox-href]', '[data-lightbox]',
+    '[data-swiper-slide-index]', // Swiper slide — pull src from inner <img> instead
+    '.swiper-slide img', '.slick-slide img', '.flexslider li img',
+    '.gallery-item img', '.gallery-image img', '.fancybox img',
+    'a[href$=".jpg"], a[href$=".jpeg"], a[href$=".png"], a[href$=".webp"]',
   ];
-  for (const selector of gallerySelectors) {
+  for (const selector of galleryAttrSelectors) {
     $(selector).each((_, el) => {
       const $el = $(el);
-      let url = $el.attr('data-image') ?? $el.attr('data-src') ?? $el.attr('data-original') ?? $el.attr('data-image-url');
+      const tag = (el as { tagName?: string }).tagName?.toLowerCase();
+      // For anchor tags pointing to images — use href
+      if (tag === 'a') {
+        const href = $el.attr('href') ?? $el.attr('data-fancybox-href');
+        if (href) found.push(resolveUrl(base, href));
+        return;
+      }
+      // For img tags — prefer explicit data attrs, then src
+      let url = $el.attr('data-full') ?? $el.attr('data-full-image') ??
+        $el.attr('data-src') ?? $el.attr('data-original') ??
+        $el.attr('data-image') ?? $el.attr('data-image-url') ??
+        $el.attr('src');
       if (!url) {
         const bg = $el.attr('style');
         if (bg) {
@@ -242,18 +286,43 @@ const extractGalleryImages = ($: cheerio.CheerioAPI, base: string, target: Mappe
     });
   }
 
-  // Filter out tracking pixels, icons, and other non-listing images.
+  // Also scan for JSON gallery arrays embedded in page scripts (common in WP/custom RE sites)
+  $('script:not([src])').each((_, el) => {
+    const src = $(el).html() ?? '';
+    // Look for arrays of image URLs in JS variables
+    const urlPattern = /["'](https?:\/\/[^"']+\.(?:jpg|jpeg|png|webp))["']/gi;
+    let m: RegExpExecArray | null;
+    while ((m = urlPattern.exec(src)) !== null) {
+      found.push(m[1]);
+    }
+  });
+
+  // Filter out tracking pixels, icons, thumbnails, and non-listing images.
   const meaningful = found.filter((u) => {
     const lower = u.toLowerCase();
     // Skip tracking pixels and 1x1 spacers
     if (/[?&](w|width|h|height)=1\b/.test(lower)) return false;
     // Skip common icon/logo/avatar paths
-    if (/(\/icon|\/logo|\/avatar|\/sprite|\/blank|\/pixel|\/spacer|\/placeholder)/i.test(lower)) return false;
+    if (/(\/icon|\/logo|\/avatar|\/sprite|\/blank|\/pixel|\/spacer|\/placeholder|\/thumb[s]?\/[^/]*[_-]\d{1,3}x\d{1,3})/i.test(lower)) return false;
     // Skip known tracker domains
     if (/(doubleclick|google-analytics|facebook\.net\/tr|pixel\.)/i.test(lower)) return false;
+    // Skip very small thumbnail hints in URL parameters
+    if (/[?&](size|dim|thumb|resize)=\d{1,3}\b/i.test(lower)) return false;
     return true;
   });
-  pushImages(target, meaningful);
+
+  // Deduplicate: prefer higher-resolution variant when a URL appears in multiple
+  // sizes via query params (e.g. ?w=400 vs ?w=1200 — keep ?w=1200).
+  const deduped = deduplicateImageUrls(found.filter((u) => {
+    const lower = u.toLowerCase();
+    if (/[?&](w|width|h|height)=1\b/.test(lower)) return false;
+    if (/(\/icon|\/logo|\/avatar|\/sprite|\/blank|\/pixel|\/spacer|\/placeholder|\/thumb[s]?\/[^/]*[_-]\d{1,3}x\d{1,3})/i.test(lower)) return false;
+    if (/(doubleclick|google-analytics|facebook\.net\/tr|pixel\.)/i.test(lower)) return false;
+    if (/[?&](size|dim|thumb|resize)=\d{1,3}\b/i.test(lower)) return false;
+    return true;
+  }));
+  pushImages(target, deduped);
+  void meaningful; // meaningful kept for potential future use
 };
 
 const extractStructuredPriceFromHtml = ($: cheerio.CheerioAPI, target: Mapped): void => {
@@ -286,6 +355,161 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
     const countryEl = $('[itemprop="addressCountry"]').first();
     if (countryEl.length) target.country = countryEl.text().trim();
   }
+};
+
+/**
+ * Extract fields from Balkan/Croatian real estate label-value block patterns.
+ *
+ * Many Croatian and regional sites (premium-nekretnine, njuskalo, etc.) render
+ * detail pages as icon-boxes or definition lists with a human-readable label
+ * ("Lokacija", "Cijena", "Površina") and a value next to or below it.
+ * We scan common DOM patterns and map them to canonical fields.
+ */
+const extractBalkanLabelValues = ($: cheerio.CheerioAPI, baseUrl: string, target: Mapped): void => {
+  // Normalise a label string to a lookup key.
+  const normLabel = (s: string) => s.toLowerCase().replace(/[^a-zčćšđžáéíóú0-9]/gi, '').trim();
+
+  const LABEL_MAP: Record<string, string> = {
+    // Price
+    'cijena': 'price', 'cena': 'price', 'ciena': 'price', 'price': 'price', 'preis': 'price',
+    'prodajnacijjena': 'price', 'prodajnacena': 'price',
+    // Area / floor size
+    'površina': 'sqft', 'povrsina': 'sqft', 'površinainterijera': 'sqft',
+    'stambenapovrš': 'sqft', 'interijor': 'sqft', 'quadrature': 'sqft',
+    'površinaokućnice': 'plotSqm', 'okućnica': 'plotSqm', 'okucnica': 'plotSqm',
+    'plotarea': 'plotSqm', 'groundarea': 'plotSqm', 'landarea': 'plotSqm',
+    // Bedrooms
+    'spavaćesobe': 'beds', 'spavacesobe': 'beds', 'sobe': 'beds', 'broj soba': 'beds',
+    'bedrooms': 'beds', 'schlafzimmer': 'beds', 'chambres': 'beds',
+    // Bathrooms
+    'kupatilo': 'baths', 'kupatila': 'baths', 'wc': 'baths', 'bathrooms': 'baths',
+    // Location / city
+    'lokacija': 'city', 'location': 'city', 'mjesto': 'city', 'grad': 'city',
+    // Property type
+    'vrstanekretnine': 'propertyType', 'vrstaponude': 'propertyType', 'tip': 'propertyType',
+    'type': 'propertyType',
+    // Year built
+    'godišnjaizgradnje': 'yearBuilt', 'godinaizgradnje': 'yearBuilt', 'yearbuilt': 'yearBuilt',
+    'baujahr': 'yearBuilt',
+    // Floor
+    'kat': 'floor', 'sprat': 'floor', 'etaž': 'floor', 'floor': 'floor',
+    // Distance to sea (Croatian sites often show this)
+    'udaljenostodmora': 'distanceToSea', 'udaljenostdoumora': 'distanceToSea',
+    'distancetosea': 'distanceToSea', 'distancefromsea': 'distanceToSea',
+    'distanzameer': 'distanceToSea', 'odmorja': 'distanceToSea',
+  };
+
+  const applyLabelValue = (labelRaw: string, valueRaw: string): void => {
+    const key = normLabel(labelRaw);
+    const field = LABEL_MAP[key];
+    if (!field || !valueRaw.trim()) return;
+
+    const v = valueRaw.trim();
+    if (field === 'price' && !target.price) {
+      target.price = v;
+    } else if (field === 'sqft' && !target.sqft) {
+      // Extract numeric part from "180 m²"
+      const m = v.match(/(\d[\d.,\s]*)/);
+      if (m) {
+        const n = parseFloat(m[1].replace(/[\s.]/g, '').replace(',', '.'));
+        if (n >= 10 && n <= 50_000) target.sqft = n;
+      }
+    } else if (field === 'plotSqm' && !target.plotSqm) {
+      const m = v.match(/(\d[\d.,\s]*)/);
+      if (m) {
+        const n = parseFloat(m[1].replace(/[\s.]/g, '').replace(',', '.'));
+        if (n >= 1 && n <= 500_000) target.plotSqm = n;
+      }
+    } else if (field === 'beds' && !target.beds) {
+      const n = parseInt(v, 10);
+      if (n >= 1 && n <= 20) target.beds = n;
+    } else if (field === 'baths' && !target.baths) {
+      const n = parseInt(v, 10);
+      if (n >= 1 && n <= 10) target.baths = n;
+    } else if (field === 'city' && !target.city) {
+      // "Malinska, Malinska-Dubašnica" → take first segment as city
+      target.city = v.split(/[,/]/)[0].trim();
+      if (!target.address) target.address = v;
+    } else if (field === 'propertyType' && !target.propertyType) {
+      target.propertyType = v;
+    } else if (field === 'yearBuilt' && !target.yearBuilt) {
+      const n = parseInt(v, 10);
+      if (n >= 1800 && n <= 2100) target.yearBuilt = n;
+    } else if (field === 'floor' && !target.floor) {
+      target.floor = v;
+    } else if (field === 'distanceToSea' && !target.distanceToSea) {
+      // "1500 m" → 1500 (metres)
+      const m = v.match(/(\d[\d.,\s]*)/);
+      if (m) {
+        const n = parseFloat(m[1].replace(/[\s.]/g, '').replace(',', '.'));
+        if (n >= 1 && n <= 100_000) target.distanceToSea = n;
+      }
+    }
+  };
+
+  // Pattern 1: <dt>Label</dt><dd>Value</dd>
+  $('dl dt, dl th').each((_, el) => {
+    const label = $(el).text().trim();
+    const value = $(el).next('dd, td').text().trim();
+    if (label && value) applyLabelValue(label, value);
+  });
+
+  // Pattern 2: table rows <tr><th>Label</th><td>Value</td></tr>
+  $('tr').each((_, el) => {
+    const cells = $(el).find('th, td');
+    if (cells.length >= 2) {
+      applyLabelValue($(cells[0]).text().trim(), $(cells[1]).text().trim());
+    }
+  });
+
+  // Pattern 3: sibling elements where one has class containing "label"/"naziv"/"opis"
+  // and the adjacent sibling is the value — e.g. <span class="label">Cijena</span><span class="value">…</span>
+  const labelSelectors = [
+    '[class*="label"]:not(label)',
+    '[class*="naziv"]',
+    '[class*="opis-polja"]',
+    '[class*="field-label"]',
+    '[class*="prop-label"]',
+    '[class*="info-label"]',
+    '[class*="detail-label"]',
+  ];
+  for (const sel of labelSelectors) {
+    $(sel).each((_, el) => {
+      const label = $(el).text().trim();
+      const value = ($(el).next().text() ?? '').trim() || ($(el).siblings('[class*="value"],[class*="vrijednost"],[class*="field-value"],[class*="prop-value"]').first().text() ?? '').trim();
+      if (label && value) applyLabelValue(label, value);
+    });
+  }
+
+  // Pattern 4: icon-box grid — parent div contains both label and value as child elements.
+  // e.g.: <div class="info-box"><div class="value">180 m²</div><div class="label">Površina</div></div>
+  const boxSelectors = [
+    '[class*="info-box"]',
+    '[class*="property-feature"]',
+    '[class*="detail-item"]',
+    '[class*="listing-detail"]',
+    '[class*="spec-item"]',
+    '[class*="feature-item"]',
+    '[class*="attr-item"]',
+  ];
+  for (const sel of boxSelectors) {
+    $(sel).each((_, el) => {
+      const children = $(el).children();
+      // Try all combinations of 2 child elements
+      const texts: string[] = [];
+      children.each((__, ch) => {
+        const t = $(ch).text().trim();
+        if (t) texts.push(t);
+      });
+      if (texts.length >= 2) {
+        // Try label=last child, value=first (and vice versa) since layouts differ
+        applyLabelValue(texts[texts.length - 1], texts[0]);
+        applyLabelValue(texts[0], texts[texts.length - 1]);
+      }
+    });
+  }
+
+  void baseUrl; // not needed here but keeps the signature consistent
 };
 
 /**
@@ -338,9 +562,10 @@ const extractSmartFieldsFromText = ($: cheerio.CheerioAPI, target: Mapped): void
   }
 
   // Beds — require word boundary, reject anything outside 1..15.
+  // Prefer "spavaće sobe" (sleeping rooms = bedrooms) over bare "sobe" (rooms).
   if (target.beds == null || target.beds === '') {
     const m = textContent.match(
-      /(?<![.\d])(\d{1,2})\s*(?:bed(?:room)?s?|soba|sobi|sobe|chambre[s]?|habitaci[oó]n(?:es)?|zimmer|schlafzimmer)\b/i
+      /(?<![.\d])(\d{1,2})\s*(?:bed(?:room)?s?|spava[cć][ae]\s+sobe?|soba|sobi|sobe|chambre[s]?|habitaci[oó]n(?:es)?|zimmer|schlafzimmer)\b/i
     );
     if (m) {
       const n = parseRanged(m[1], 1, 15);
@@ -409,11 +634,13 @@ export const enrichFromDetailHtml = (
   } catch {
     return target;
   }
-  // Order matters: JSON-LD is most authoritative, then OG, then microdata, then gallery,
-  // then structured patterns, finally smart text extraction (lowest priority fallback).
+  // Order matters: JSON-LD is most authoritative, then OG, then microdata, then
+  // Balkan label-value blocks, then gallery images, then structured patterns,
+  // finally smart text extraction (lowest priority fallback).
   extractJsonLd($, baseUrl, target);
   extractOpenGraph($, baseUrl, target);
   extractMicrodata($, baseUrl, target);
+  extractBalkanLabelValues($, baseUrl, target);
   extractGalleryImages($, baseUrl, target);
   extractStructuredPriceFromHtml($, target);
   extractStructuredLocationFromHtml($, target);
