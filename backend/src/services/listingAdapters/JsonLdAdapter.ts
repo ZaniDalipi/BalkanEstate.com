@@ -134,9 +134,15 @@ export class JsonLdAdapter implements SourceAdapter {
       throw new Error(`JsonLdAdapter: provide listingUrls OR (indexUrl + linkSelector) (source ${source.slug})`);
     }
 
+    // Report total URL count before starting individual page fetches so the
+    // frontend transitions from "discovering" to "syncing N/total" immediately.
+    options.onProgress?.(urls.length, 0);
+
+    let fetched = 0;
     for (const url of urls) {
       try {
         const result = await this.parsePage(url, accepted);
+        options.onProgress?.(urls.length, ++fetched);
         if (!result) continue;
         const { jsonLd, detailHtml } = result;
 
@@ -160,6 +166,7 @@ export class JsonLdAdapter implements SourceAdapter {
         if (limit && out.length >= limit) break;
       } catch {
         // skip failed page; orchestrator records per-listing failures
+        options.onProgress?.(urls.length, ++fetched);
       }
     }
 

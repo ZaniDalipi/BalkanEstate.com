@@ -265,10 +265,11 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
       registerSync(sourceId, sourceName);
       try {
         await confirmMyListingSourceImport(sourceId, previewId, approvedIds);
-        // Don't clear pendingPreview here. Keep it open with confirmingPreview=true
-        // until the sync session completes (tracked via confirmingSourceId).
-        // This ensures the modal stays visible while the actual import is running
-        // and prevents a race where items appear before the modal closes.
+        // The HTTP response returning guarantees the backend has finished
+        // running runSource (the controller awaits it). Mark the session done
+        // here as a safety net in case the final socket event was missed or
+        // arrived before the session was registered.
+        markDone(sourceId);
       } catch (err) {
         failSession(sourceId, (err as Error).message || 'Import failed');
         setConfirmingSourceId(null);
@@ -277,7 +278,7 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
         setConfirmingPreview(false);
       }
     },
-    [pendingPreview, registerSync, failSession]
+    [pendingPreview, registerSync, markDone, failSession]
   );
 
   const onImportConfirmed = useCallback(
