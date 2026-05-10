@@ -136,6 +136,9 @@ const refreshTokenProactively = async (): Promise<boolean> => {
 
   isRefreshing = true;
 
+  const abortController = new AbortController();
+  const timeoutId = setTimeout(() => abortController.abort(), 8000);
+
   try {
     // Refresh token is sent via httpOnly cookie automatically
     const response = await fetch(`${API_URL}/auth/refresh-token`, {
@@ -143,6 +146,7 @@ const refreshTokenProactively = async (): Promise<boolean> => {
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({}),
+      signal: abortController.signal,
     });
 
     if (!response.ok) {
@@ -166,9 +170,10 @@ const refreshTokenProactively = async (): Promise<boolean> => {
     }
 
     return false;
-  } catch (error) {
+  } catch {
     return false;
   } finally {
+    clearTimeout(timeoutId);
     isRefreshing = false;
   }
 };

@@ -64,6 +64,18 @@ root.render(
 // block the critical rendering path (LCP/FCP). VitePWA's injectRegister
 // is set to null so we handle it manually here.
 if ('serviceWorker' in navigator) {
+  // When a new SW takes control (skipWaiting + clientsClaim), any lazy-loaded
+  // chunks cached under old content-hash URLs become unreachable. Reload
+  // proactively so the user gets the new bundle cleanly rather than hitting
+  // a chunk-load error. The prevController guard prevents a spurious reload
+  // on first install (controller: null → SW).
+  const prevController = navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (prevController) {
+      window.location.reload();
+    }
+  });
+
   window.addEventListener('load', async () => {
     try {
       const { registerSW } = await import('virtual:pwa-register');
