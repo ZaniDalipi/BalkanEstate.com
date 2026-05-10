@@ -358,57 +358,215 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
 };
 
 /**
- * Extract fields from Balkan/Croatian real estate label-value block patterns.
- *
- * Many Croatian and regional sites (premium-nekretnine, njuskalo, etc.) render
- * detail pages as icon-boxes or definition lists with a human-readable label
- * ("Lokacija", "Cijena", "Površina") and a value next to or below it.
- * We scan common DOM patterns and map them to canonical fields.
+ * Extract fields from Balkan/European real estate label-value block patterns.
+ * Covers Croatian, Bosnian, Serbian (Latin+Cyrillic), Slovenian, Macedonian,
+ * Bulgarian, Albanian, Romanian, Greek, Hungarian, German, French, Italian,
+ * and English — matching labels as displayed on detail pages.
  */
 const extractBalkanLabelValues = ($: cheerio.CheerioAPI, baseUrl: string, target: Mapped): void => {
-  // Normalise a label string to a lookup key.
-  const normLabel = (s: string) => s.toLowerCase().replace(/[^a-zčćšđžáéíóú0-9]/gi, '').trim();
+  // Strip separators and non-letter/digit chars; keep all Unicode scripts
+  // (Cyrillic, Greek, Latin with diacritics, etc.).
+  const normLabel = (s: string): string =>
+    s.toLowerCase()
+      .replace(/[\s\-_./:()|]+/g, '')
+      .replace(/[^\p{L}\d]/gu, '')
+      .trim();
 
+  // Maps normalised label → canonical target field.
   const LABEL_MAP: Record<string, string> = {
-    // Price
-    'cijena': 'price', 'cena': 'price', 'ciena': 'price', 'price': 'price', 'preis': 'price',
-    'prodajnacijjena': 'price', 'prodajnacena': 'price',
-    // Area / floor size
-    'površina': 'sqft', 'povrsina': 'sqft', 'površinainterijera': 'sqft',
-    'stambenapovrš': 'sqft', 'interijor': 'sqft', 'quadrature': 'sqft',
-    'površinaokućnice': 'plotSqm', 'okućnica': 'plotSqm', 'okucnica': 'plotSqm',
-    'plotarea': 'plotSqm', 'groundarea': 'plotSqm', 'landarea': 'plotSqm',
-    // Bedrooms
-    'spavaćesobe': 'beds', 'spavacesobe': 'beds', 'sobe': 'beds', 'broj soba': 'beds',
-    'bedrooms': 'beds', 'schlafzimmer': 'beds', 'chambres': 'beds',
-    // Bathrooms
-    'kupatilo': 'baths', 'kupatila': 'baths', 'wc': 'baths', 'bathrooms': 'baths',
-    // Location / city
-    'lokacija': 'city', 'location': 'city', 'mjesto': 'city', 'grad': 'city',
-    // Property type
-    'vrstanekretnine': 'propertyType', 'vrstaponude': 'propertyType', 'tip': 'propertyType',
-    'type': 'propertyType',
-    // Year built
-    'godišnjaizgradnje': 'yearBuilt', 'godinaizgradnje': 'yearBuilt', 'yearbuilt': 'yearBuilt',
-    'baujahr': 'yearBuilt',
-    // Floor
-    'kat': 'floor', 'sprat': 'floor', 'etaž': 'floor', 'floor': 'floor',
-    // Distance to sea (Croatian sites often show this)
-    'udaljenostodmora': 'distanceToSea', 'udaljenostdoumora': 'distanceToSea',
-    'distancetosea': 'distanceToSea', 'distancefromsea': 'distanceToSea',
-    'distanzameer': 'distanceToSea', 'odmorja': 'distanceToSea',
+    // ── Price ──────────────────────────────────────────────────────────────
+    // HR/BA
+    'cijena': 'price', 'cjena': 'price', 'prodajnacijjena': 'price', 'cijenaponude': 'price',
+    // SR Latin / SL
+    'cena': 'price', 'prodajnacena': 'price', 'prodajnicena': 'price',
+    // SR/MK/BG Cyrillic
+    'цена': 'price', 'продажнацена': 'price', 'продажна': 'price',
+    // RO
+    'pret': 'price', 'pretul': 'price', 'costul': 'price', 'pretzul': 'price',
+    // AL
+    'çmimi': 'price', 'cmimi': 'price', 'çmimiishitjes': 'price', 'cmimiishitjes': 'price',
+    // GR
+    'τιμή': 'price', 'τιμη': 'price', 'τιμήπώλησης': 'price', 'τιμηπωλησης': 'price',
+    // HU
+    'ár': 'price', 'ar': 'price', 'eladásiár': 'price', 'eladasiar': 'price',
+    // DE
+    'preis': 'price', 'kaufpreis': 'price', 'verkaufspreis': 'price', 'mietpreis': 'price', 'kaltmiete': 'price',
+    // FR
+    'prix': 'price', 'prixdevente': 'price', 'prixdachat': 'price', 'loyer': 'price',
+    // IT
+    'prezzo': 'price', 'prezzovendita': 'price', 'affitto': 'price',
+    // EN
+    'price': 'price', 'askingprice': 'price', 'listprice': 'price', 'salesprice': 'price', 'rentalprice': 'price',
+
+    // ── Area / Floor size ─────────────────────────────────────────────────
+    // HR/BA/SR Latin
+    'površina': 'sqft', 'povrsina': 'sqft', 'površinainterijera': 'sqft', 'povrsinainterijera': 'sqft',
+    'stambenapovrš': 'sqft', 'stambena': 'sqft', 'stambenapovrsi': 'sqft',
+    // SR/MK Cyrillic
+    'површина': 'sqft', 'квадратура': 'sqft', 'стамбена': 'sqft',
+    // BG Cyrillic
+    'площ': 'sqft', 'жилищнаплощ': 'sqft', 'застроена': 'sqft', 'ползваема': 'sqft',
+    // RO
+    'suprafata': 'sqft', 'suprafaţa': 'sqft', 'suprafatautila': 'sqft', 'suprafatautil': 'sqft',
+    'suprafataconstruita': 'sqft', 'suprafatabrutа': 'sqft',
+    // AL
+    'sipërfaqja': 'sqft', 'siperfaqja': 'sqft', 'sipërfaqe': 'sqft', 'siperfaqe': 'sqft',
+    // GR
+    'εμβαδόν': 'sqft', 'εμβαδον': 'sqft', 'εμβαδό': 'sqft',
+    // HU
+    'alapterület': 'sqft', 'alapterulet': 'sqft', 'hasznosalapterület': 'sqft',
+    // DE
+    'fläche': 'sqft', 'flache': 'sqft', 'wohnfläche': 'sqft', 'wohnflache': 'sqft',
+    'nutzfläche': 'sqft', 'nutzflache': 'sqft',
+    // FR
+    'surface': 'sqft', 'surfacehabitable': 'sqft', 'superficiehabitable': 'sqft',
+    // IT
+    'superficie': 'sqft', 'superficieabitabile': 'sqft', 'superficieutile': 'sqft',
+    // EN
+    'area': 'sqft', 'floorarea': 'sqft', 'livingarea': 'sqft', 'internalarea': 'sqft',
+    'size': 'sqft', 'propertysize': 'sqft', 'interiorsize': 'sqft',
+
+    // ── Plot / Land area ──────────────────────────────────────────────────
+    // HR/BA/SR Latin
+    'površinaokućnice': 'plotSqm', 'površinaokucnice': 'plotSqm', 'okućnica': 'plotSqm', 'okucnica': 'plotSqm',
+    'površinaparcele': 'plotSqm', 'površinazem': 'plotSqm',
+    // SR/MK Cyrillic
+    'површинапарцеле': 'plotSqm', 'плац': 'plotSqm', 'парцела': 'plotSqm',
+    // BG
+    'площназемя': 'plotSqm', 'дворна': 'plotSqm', 'парцел': 'plotSqm',
+    // RO
+    'suprafataterean': 'plotSqm', 'suprafatatotala': 'plotSqm',
+    // DE
+    'grundfläche': 'plotSqm', 'grundflache': 'plotSqm', 'grundstücksfläche': 'plotSqm',
+    // EN
+    'plotarea': 'plotSqm', 'landarea': 'plotSqm', 'plotsize': 'plotSqm',
+    'lotsize': 'plotSqm', 'groundarea': 'plotSqm', 'yardsize': 'plotSqm',
+
+    // ── Bedrooms ──────────────────────────────────────────────────────────
+    // HR/BA/SR Latin
+    'spavaćesobe': 'beds', 'spavacesobe': 'beds', 'sobe': 'beds', 'spavaona': 'beds', 'brojsoba': 'beds',
+    // SR Cyrillic
+    'спаваћесобе': 'beds', 'собе': 'beds', 'бројсоби': 'beds', 'спаваоница': 'beds',
+    // MK Cyrillic
+    'соби': 'beds', 'броисоби': 'beds', 'спални': 'beds',
+    // BG Cyrillic
+    'спалня': 'beds', 'стаи': 'beds', 'броистаи': 'beds',
+    // SL
+    'spalnice': 'beds', 'številosob': 'beds',
+    // RO
+    'dormitoare': 'beds', 'camere': 'beds', 'camerededormit': 'beds', 'numarcamere': 'beds',
+    // AL
+    'dhomagjumi': 'beds', 'numridhomave': 'beds', 'dhoma': 'beds',
+    // GR
+    'υπνοδωμάτια': 'beds', 'υπνοδωματια': 'beds', 'κρεβατοκάμαρες': 'beds',
+    // HU
+    'hálószoba': 'beds', 'haloszoba': 'beds', 'szobák': 'beds', 'szobak': 'beds',
+    // DE
+    'schlafzimmer': 'beds', 'zimmeranzahl': 'beds',
+    // FR
+    'chambre': 'beds', 'chambres': 'beds', 'chambresàcoucher': 'beds',
+    // IT
+    'camera': 'beds', 'cameradaletto': 'beds',
+    // EN
+    'bedrooms': 'beds', 'bedroom': 'beds', 'beds': 'beds', 'numberofbedrooms': 'beds',
+
+    // ── Bathrooms ─────────────────────────────────────────────────────────
+    // HR/BA/SR
+    'kupatilo': 'baths', 'kupatila': 'baths', 'kupaonica': 'baths', 'toalet': 'baths',
+    // SR Cyrillic
+    'купатило': 'baths', 'тоалет': 'baths',
+    // BG
+    'баня': 'baths', 'бани': 'baths',
+    // RO
+    'baie': 'baths', 'bai': 'baths',
+    // AL
+    'banjo': 'baths', 'tualet': 'baths',
+    // GR
+    'μπάνιο': 'baths', 'μπανιο': 'baths', 'λουτρό': 'baths',
+    // HU
+    'fürdőszoba': 'baths', 'furdoszoba': 'baths',
+    // DE
+    'badezimmer': 'baths', 'bäder': 'baths',
+    // FR
+    'salledebain': 'baths', 'salledebains': 'baths',
+    // IT
+    'bagno': 'baths', 'bagni': 'baths',
+    // EN
+    'bathrooms': 'baths', 'bathroom': 'baths', 'baths': 'baths',
+
+    // ── Location / City ───────────────────────────────────────────────────
+    // HR/BA/SR Latin
+    'lokacija': 'city', 'mjesto': 'city', 'grad': 'city', 'adresa': 'city', 'općina': 'city', 'opcina': 'city',
+    // SR Cyrillic
+    'локација': 'city', 'место': 'city', 'град': 'city', 'адреса': 'city', 'општина': 'city',
+    // MK Cyrillic
+    'локациjа': 'city',
+    // BG Cyrillic
+    'местоположение': 'city', 'населеноместо': 'city', 'квартал': 'city', 'адрес': 'city',
+    // SL
+    'kraj': 'city',
+    // RO
+    'locatie': 'city', 'locaţie': 'city', 'localitate': 'city', 'oras': 'city', 'oraş': 'city',
+    // AL
+    'vendndodhja': 'city', 'qyteti': 'city',
+    // GR
+    'τοποθεσία': 'city', 'τοποθεσια': 'city', 'πόλη': 'city', 'πολη': 'city', 'περιοχή': 'city',
+    // HU
+    'helyszín': 'city', 'helyszin': 'city', 'város': 'city', 'varos': 'city', 'cím': 'city',
+    // DE
+    'lage': 'city', 'ort': 'city', 'stadt': 'city', 'standort': 'city', 'lageort': 'city',
+    // FR
+    'emplacement': 'city', 'ville': 'city', 'adresse': 'city',
+    // IT
+    'posizione': 'city', 'città': 'city', 'citta': 'city', 'indirizzo': 'city',
+    // EN
+    'location': 'city', 'city': 'city', 'address': 'city', 'town': 'city', 'district': 'city',
+
+    // ── Property type ─────────────────────────────────────────────────────
+    'vrstanekretnine': 'propertyType', 'vrstaponude': 'propertyType', 'tipnekretnine': 'propertyType',
+    'врстанекретнине': 'propertyType', 'тип': 'propertyType', 'видимот': 'propertyType',
+    'tipproprietate': 'propertyType', 'tipologie': 'propertyType',
+    'immobilienart': 'propertyType', 'objektart': 'propertyType',
+    'type': 'propertyType', 'propertytype': 'propertyType', 'typedebien': 'propertyType',
+
+    // ── Year built ────────────────────────────────────────────────────────
+    'godinaizgradnje': 'yearBuilt', 'godišnjaizgradnje': 'yearBuilt', 'godgradnje': 'yearBuilt',
+    'годинаградње': 'yearBuilt', 'годнастрояване': 'yearBuilt',
+    'anconstructie': 'yearBuilt', 'anconstruire': 'yearBuilt',
+    'vitacostruizione': 'yearBuilt', 'annodiristruzione': 'yearBuilt',
+    'baujahr': 'yearBuilt', 'építésiév': 'yearBuilt', 'epitesiév': 'yearBuilt',
+    'annéedeconstruction': 'yearBuilt',
+    'yearbuilt': 'yearBuilt', 'built': 'yearBuilt', 'constructionyear': 'yearBuilt',
+
+    // ── Floor ─────────────────────────────────────────────────────────────
+    'kat': 'floor', 'sprat': 'floor', 'etaža': 'floor', 'etaza': 'floor', 'etažnost': 'floor',
+    'спрат': 'floor', 'кат': 'floor', 'етаж': 'floor',
+    'etaj': 'floor', 'korridor': 'floor',
+    'stockwerk': 'floor', 'etage': 'floor', 'obergeschoss': 'floor',
+    'emelet': 'floor', 'piano': 'floor',
+    'floor': 'floor', 'floornumber': 'floor', 'storey': 'floor',
+
+    // ── Distance to sea ───────────────────────────────────────────────────
+    'udaljenostodmora': 'distanceToSea', 'udaljenostdoumora': 'distanceToSea', 'odmorja': 'distanceToSea',
+    'удаљеностодмора': 'distanceToSea', 'разстояниедоморе': 'distanceToSea',
+    'distantafatademare': 'distanceToSea', 'distantadalamare': 'distanceToSea',
+    'distanzevomeer': 'distanceToSea', 'meeresnähe': 'distanceToSea',
+    'distancetosea': 'distanceToSea', 'distancefromsea': 'distanceToSea', 'distancetothesea': 'distanceToSea',
+    'απόστασηαπόθάλασσα': 'distanceToSea', 'tengerközelség': 'distanceToSea',
   };
 
   const applyLabelValue = (labelRaw: string, valueRaw: string): void => {
+    if (!labelRaw || !valueRaw) return;
     const key = normLabel(labelRaw);
     const field = LABEL_MAP[key];
-    if (!field || !valueRaw.trim()) return;
+    if (!field) return;
 
     const v = valueRaw.trim();
+    if (!v) return;
+
     if (field === 'price' && !target.price) {
       target.price = v;
     } else if (field === 'sqft' && !target.sqft) {
-      // Extract numeric part from "180 m²"
       const m = v.match(/(\d[\d.,\s]*)/);
       if (m) {
         const n = parseFloat(m[1].replace(/[\s.]/g, '').replace(',', '.'));
@@ -427,7 +585,6 @@ const extractBalkanLabelValues = ($: cheerio.CheerioAPI, baseUrl: string, target
       const n = parseInt(v, 10);
       if (n >= 1 && n <= 10) target.baths = n;
     } else if (field === 'city' && !target.city) {
-      // "Malinska, Malinska-Dubašnica" → take first segment as city
       target.city = v.split(/[,/]/)[0].trim();
       if (!target.address) target.address = v;
     } else if (field === 'propertyType' && !target.propertyType) {
@@ -438,7 +595,6 @@ const extractBalkanLabelValues = ($: cheerio.CheerioAPI, baseUrl: string, target
     } else if (field === 'floor' && !target.floor) {
       target.floor = v;
     } else if (field === 'distanceToSea' && !target.distanceToSea) {
-      // "1500 m" → 1500 (metres)
       const m = v.match(/(\d[\d.,\s]*)/);
       if (m) {
         const n = parseFloat(m[1].replace(/[\s.]/g, '').replace(',', '.'));
@@ -449,9 +605,7 @@ const extractBalkanLabelValues = ($: cheerio.CheerioAPI, baseUrl: string, target
 
   // Pattern 1: <dt>Label</dt><dd>Value</dd>
   $('dl dt, dl th').each((_, el) => {
-    const label = $(el).text().trim();
-    const value = $(el).next('dd, td').text().trim();
-    if (label && value) applyLabelValue(label, value);
+    applyLabelValue($(el).text().trim(), $(el).next('dd, td').text().trim());
   });
 
   // Pattern 2: table rows <tr><th>Label</th><td>Value</td></tr>
@@ -462,54 +616,60 @@ const extractBalkanLabelValues = ($: cheerio.CheerioAPI, baseUrl: string, target
     }
   });
 
-  // Pattern 3: sibling elements where one has class containing "label"/"naziv"/"opis"
-  // and the adjacent sibling is the value — e.g. <span class="label">Cijena</span><span class="value">…</span>
+  // Pattern 3: sibling label/value elements
   const labelSelectors = [
-    '[class*="label"]:not(label)',
-    '[class*="naziv"]',
-    '[class*="opis-polja"]',
-    '[class*="field-label"]',
-    '[class*="prop-label"]',
-    '[class*="info-label"]',
-    '[class*="detail-label"]',
+    '[class*="label"]:not(label)', '[class*="naziv"]', '[class*="opis-polja"]',
+    '[class*="field-label"]', '[class*="prop-label"]', '[class*="info-label"]',
+    '[class*="detail-label"]', '[class*="spec-label"]', '[class*="attr-label"]',
+    '[class*="feature-label"]', '[class*="property-label"]',
   ];
   for (const sel of labelSelectors) {
     $(sel).each((_, el) => {
       const label = $(el).text().trim();
-      const value = ($(el).next().text() ?? '').trim() || ($(el).siblings('[class*="value"],[class*="vrijednost"],[class*="field-value"],[class*="prop-value"]').first().text() ?? '').trim();
-      if (label && value) applyLabelValue(label, value);
+      const valueEl = $(el).next();
+      const value = valueEl.text().trim()
+        || $(el).siblings('[class*="value"],[class*="vrijednost"],[class*="field-value"],[class*="prop-value"],[class*="info-value"],[class*="detail-value"]').first().text().trim();
+      applyLabelValue(label, value);
     });
   }
 
-  // Pattern 4: icon-box grid — parent div contains both label and value as child elements.
-  // e.g.: <div class="info-box"><div class="value">180 m²</div><div class="label">Površina</div></div>
+  // Pattern 4: icon-box / feature-item grids (label + value as sibling children)
   const boxSelectors = [
-    '[class*="info-box"]',
-    '[class*="property-feature"]',
-    '[class*="detail-item"]',
-    '[class*="listing-detail"]',
-    '[class*="spec-item"]',
-    '[class*="feature-item"]',
-    '[class*="attr-item"]',
+    '[class*="info-box"]', '[class*="property-feature"]', '[class*="detail-item"]',
+    '[class*="listing-detail"]', '[class*="spec-item"]', '[class*="feature-item"]',
+    '[class*="attr-item"]', '[class*="attribute-item"]', '[class*="param-item"]',
+    '[class*="characteristic"]', '[class*="property-info"]', '[class*="prop-item"]',
   ];
   for (const sel of boxSelectors) {
     $(sel).each((_, el) => {
-      const children = $(el).children();
-      // Try all combinations of 2 child elements
       const texts: string[] = [];
-      children.each((__, ch) => {
+      $(el).children().each((__, ch) => {
         const t = $(ch).text().trim();
         if (t) texts.push(t);
       });
       if (texts.length >= 2) {
-        // Try label=last child, value=first (and vice versa) since layouts differ
+        // Try both orderings since some sites put label first, others last
         applyLabelValue(texts[texts.length - 1], texts[0]);
         applyLabelValue(texts[0], texts[texts.length - 1]);
       }
     });
   }
 
-  void baseUrl; // not needed here but keeps the signature consistent
+  // Pattern 5: scan for "Label: Value" text in spans/divs/paragraphs
+  $('span, div, p, li').each((_, el) => {
+    const $el = $(el);
+    // Skip elements that have children (only look at leaf text)
+    if ($el.children().length > 1) return;
+    const text = $el.text().trim();
+    const colonIdx = text.indexOf(':');
+    if (colonIdx > 0 && colonIdx < text.length - 1 && colonIdx < 40) {
+      const label = text.slice(0, colonIdx).trim();
+      const value = text.slice(colonIdx + 1).trim();
+      if (label && value && label.length < 40) applyLabelValue(label, value);
+    }
+  });
+
+  void baseUrl;
 };
 
 /**
@@ -547,8 +707,8 @@ const extractSmartFieldsFromText = ($: cheerio.CheerioAPI, target: Mapped): void
   // Smart price extraction — currency must be adjacent to a sufficiently large number.
   if (target.price == null || target.price === '') {
     const pricePatterns = [
-      /(?:€|EUR|\$|USD|£|GBP|RSD|kn|HRK|BAM|MKD)\s*([\d][\d.,\s]*[\d](?:\s*[KMB])?)(?!\d)/i,
-      /(?<!\d)([\d][\d.,\s]*[\d](?:\s*[KMB])?)\s*(?:€|EUR|\$|USD|£|GBP|RSD|kn|HRK|BAM|MKD)\b/i,
+      /(?:€|EUR|USD|\$|£|GBP|CHF|RSD|HRK|kn|MKD|ден|BAM|KM|RON|BGN|лв\.?|ALL|Lek|HUF|Ft|TRY|TL|PLN|CZK|SEK|NOK|DKK)\s*([\d][\d.,\s]*[\d](?:\s*[KMB])?)(?!\d)/i,
+      /(?<!\d)([\d][\d.,\s]*[\d](?:\s*[KMB])?)\s*(?:€|EUR|USD|\$|£|GBP|CHF|RSD|HRK|kn|MKD|ден|BAM|KM|RON|BGN|лв\.?|ALL|Lek|HUF|Ft|TRY|TL|PLN|CZK|SEK|NOK|DKK)\b/i,
     ];
     for (const re of pricePatterns) {
       const m = textContent.match(re);
