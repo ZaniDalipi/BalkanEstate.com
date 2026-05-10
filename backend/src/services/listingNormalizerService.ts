@@ -52,18 +52,116 @@ const PROPERTY_TYPE_MAP: Record<string, IProperty['propertyType']> = {
 };
 
 const LISTING_TYPE_MAP: Record<string, IProperty['listingType']> = {
-  sale: 'sale', prodaja: 'sale', prodaje: 'sale', forsale: 'sale', for_sale: 'sale',
-  rent: 'rent', najam: 'rent', iznajmljivanje: 'rent', forrent: 'rent', for_rent: 'rent',
-  rental: 'rent', rentals: 'rent',
+  // English
+  sale: 'sale', forsale: 'sale', for_sale: 'sale',
+  // Croatian / Bosnian / Serbian
+  prodaja: 'sale', prodaje: 'sale', kupoprodaja: 'sale',
+  // Romanian
+  vanzare: 'sale', devanzare: 'sale',
+  // Albanian
+  shitje: 'sale',
+  // Greek
+  πωληση: 'sale', πωλειται: 'sale',
+  // Hungarian
+  elado: 'sale', eladas: 'sale',
+  // German
+  kauf: 'sale', kaufen: 'sale', verkauf: 'sale',
+  // Bulgarian / Macedonian (Cyrillic)
+  продажба: 'sale', продажа: 'sale',
+  // Rent / English
+  rent: 'rent', rental: 'rent', rentals: 'rent', forrent: 'rent', for_rent: 'rent', lease: 'rent',
+  // Croatian / Bosnian / Serbian
+  najam: 'rent', iznajmljivanje: 'rent', zakup: 'rent',
+  // Romanian
+  inchiriere: 'rent', chirii: 'rent',
+  // Albanian
+  qira: 'rent',
+  // Greek
+  ενοικιο: 'rent', ενοικιαση: 'rent',
+  // Hungarian
+  kiado: 'rent', berlet: 'rent',
+  // German
+  miete: 'rent', vermieten: 'rent', mietung: 'rent',
+  // Bulgarian / Macedonian
+  наем: 'rent', 'под наем': 'rent', кирија: 'rent',
 };
 
-const RENT_PRICE_HINTS = /(\/\s*mo|\/\s*month|month\b|mes\.|mesec|mjesec|mjesečno|monatlich|μήνα|po mesecu)/i;
+const RENT_PRICE_HINTS = /(\/\s*mo|\/\s*month|month\b|mes\.|mesec|mjesec|m(jese|ese)čno|monatlich|monat\b|μήνα|po mesecu|par\s+mois|al\s+mes|affitto|loyer|aluguel|kira\b|bérlet)/i;
 
 interface ParsedPrice {
   price: number;
   currency?: string;
   isRent?: boolean;
 }
+
+/**
+ * Convert a raw numeric string (after stripping currency/suffix) into a
+ * plain float string, handling all European real-estate price formats:
+ *   "1.200.000"    → "1200000"   dot-thousands (Croatian/Balkan/Greek)
+ *   "1,200,000"    → "1200000"   comma-thousands (US/UK)
+ *   "1.200.000,50" → "1200000.5" EU: dot-thousands + comma-decimal
+ *   "1,200,000.50" → "1200000.5" US: comma-thousands + dot-decimal
+ *   "1.200,50"     → "1200.5"    EU short
+ *   "1,200.50"     → "1200.5"    US short
+ *   "1 200 000"    → "1200000"   space-thousands (French/Slavic)
+ *   "1 200,50"     → "1200.5"    space-thousands + comma-decimal
+ *   "1.200"        → "1200"      single dot with 3-digit group → thousands
+ *   "1,200"        → "1200"      single comma with 3-digit group → thousands
+ *   "120.5"        → "120.5"     plain decimal
+ *   "120,5"        → "120.5"     comma decimal (Balkan style)
+ */
+const normalizePriceNumeric = (raw: string): string => {
+  // Collapse typographic spaces and apostrophe-thousands first.
+  let s = raw.replace(/['   ]/g, ' ');
+
+  // Consolidate spaces between digits (space-as-thousands separator).
+  if (/\d [ \t]+\d/.test(s)) {
+    s = s.replace(/(\d)[ \t]+(?=\d)/g, '$1');
+  }
+
+  const dots   = (s.match(/\./g) ?? []).length;
+  const commas = (s.match(/,/g) ?? []).length;
+
+  if (!dots && !commas) return s;
+
+  // EU: dot-thousands + comma-decimal  e.g. "1.200.000,50" / "1.200,50"
+  if (commas === 1 && /,\d{1,2}$/.test(s) && dots >= 1) {
+    return s.replace(/\./g, '').replace(',', '.');
+  }
+
+  // US: comma-thousands + dot-decimal  e.g. "1,200,000.50" / "1,200.50"
+  if (dots === 1 && /\.\d{1,2}$/.test(s) && commas >= 1) {
+    return s.replace(/,/g, '');
+  }
+
+  // Pure dot-thousands (all segments exactly 3 digits): "1.200.000"
+  if (!commas && /^\d{1,3}(\.\d{3})+$/.test(s.trim())) {
+    return s.replace(/\./g, '');
+  }
+
+  // Pure comma-thousands (all segments exactly 3 digits): "1,200,000"
+  if (!dots && /^\d{1,3}(,\d{3})+$/.test(s.trim())) {
+    return s.replace(/,/g, '');
+  }
+
+  // Single dot — ambiguous; use digit-count heuristic.
+  // ".nnn" (3 digits) → thousands separator;  ".n" / ".nn" → decimal.
+  if (dots === 1 && !commas) {
+    const afterDot = s.split('.')[1] ?? '';
+    if (afterDot.length === 3) return s.replace('.', '');
+    return s;
+  }
+
+  // Single comma — same heuristic.
+  if (commas === 1 && !dots) {
+    const afterComma = s.split(',')[1] ?? '';
+    if (afterComma.length === 3) return s.replace(',', '');
+    return s.replace(',', '.');
+  }
+
+  // Fallback: strip separators (rare mixed formats).
+  return s.replace(/[.,]/g, '');
+};
 
 const parsePrice = (input: unknown): ParsedPrice | null => {
   if (input == null) return null;
@@ -72,34 +170,30 @@ const parsePrice = (input: unknown): ParsedPrice | null => {
   if (!str) return null;
 
   const isRent = RENT_PRICE_HINTS.test(str);
-  const currencyMatch = str.match(/(€|EUR|USD|\$|GBP|£|RSD|HRK|kn|MKD|BAM|RON|BGN|ALL|HUF)/i);
-  const currency = currencyMatch?.[0]?.toUpperCase().replace('€', 'EUR').replace('$', 'USD').replace('£', 'GBP');
 
-  // Strip currency symbols/codes and rent suffixes; normalize EU/US thousand separators.
+  // All currencies used across Balkan + wider Europe.
+  const CURRENCY_RE = /(€|EUR|USD|\$|GBP|£|CHF|RSD|HRK|kn|MKD|ден|BAM|KM|RON|BGN|лв\.?|ALL|Lek|HUF|Ft|TRY|TL|PLN|CZK|SEK|NOK|DKK|UAH|RUB)/i;
+  const currencyMatch = str.match(CURRENCY_RE);
+  let currency = currencyMatch?.[0]?.trim()
+    .replace(/€/g, 'EUR').replace(/\$/g, 'USD').replace(/£/g, 'GBP')
+    .replace(/kn/gi, 'HRK').replace(/km/gi, 'BAM')
+    .replace(/лв\.?/gi, 'BGN').replace(/ден/gi, 'MKD')
+    .replace(/lek/gi, 'ALL').replace(/ft/gi, 'HUF')
+    .replace(/tl/gi, 'TRY')
+    .toUpperCase();
+  // If no currency symbol was found, leave it undefined rather than guessing.
+  if (currency === undefined) currency = undefined;
+
+  // Strip everything except digits and separator characters.
   let numeric = str
-    .replace(/(€|EUR|USD|\$|GBP|£|RSD|HRK|kn|MKD|BAM|RON|BGN|ALL|HUF)/gi, '')
-    .replace(/\/\s*(mo|month)\b/gi, '')
-    .replace(/(po\s+(mesecu|mjesecu)|mes\.|mjesečno|μήνα|monatlich)/gi, '')
+    .replace(new RegExp(CURRENCY_RE.source, 'gi'), '')
+    .replace(/\/\s*(mo|month|mese|monat|mois)\b/gi, '')
+    .replace(/(po\s+m(ese|jese)cu|mes\.|m(jese|ese)čno|μήνα|monatlich|par\s+mois|al\s+mes)/gi, '')
     .trim();
 
-  // Space-separated thousands (Eastern European style: "150 000 EUR")
-  if (/^\d[\d\s]*\d$/.test(numeric.trim()) && numeric.includes(' ')) {
-    numeric = numeric.replace(/\s/g, '');
-  } else if (/,\d{1,2}$/.test(numeric) && /\./.test(numeric)) {
-    // EU format with decimal comma: 1.234,56
-    numeric = numeric.replace(/\./g, '').replace(',', '.');
-  } else if (/^\d{1,3}(\.\d{3})+$/.test(numeric.trim())) {
-    // Dot-as-thousands with no decimal: 1.200.000 (Croatian/Balkan style)
-    numeric = numeric.replace(/\./g, '');
-  } else if (/^\d{1,3}(,\d{3})+$/.test(numeric.trim())) {
-    // Comma-as-thousands with no decimal: 1,200,000 (US/UK style)
-    numeric = numeric.replace(/,/g, '');
-  } else if (/,\d{3}/.test(numeric) && !/\./.test(numeric)) {
-    // US format: 1,234,567
-    numeric = numeric.replace(/,/g, '');
-  } else {
-    numeric = numeric.replace(/[\s']/g, '').replace(',', '.');
-  }
+  if (!numeric) return null;
+
+  numeric = normalizePriceNumeric(numeric);
 
   const num = parseFloat(numeric);
   if (!Number.isFinite(num)) return null;
@@ -112,13 +206,13 @@ const extractPriceFromText = (text: unknown): ParsedPrice | null => {
   // Currency must be adjacent to the number. Reject sub-100 (likely fees,
   // deposits, or service charges) and >100M (typo / wrong currency).
   const patterns = [
-    /(€|EUR|USD|\$|GBP|£|RSD|HRK|kn|MKD|BAM|RON|BGN|ALL|HUF)\s*([\d][\d.,\s]*[\d](?:\s*[KMB])?)(?!\d)/i,
-    /(?<!\d)([\d][\d.,\s]*[\d](?:\s*[KMB])?)\s*(€|EUR|USD|\$|GBP|£|RSD|HRK|kn|MKD|BAM|RON|BGN|ALL|HUF)\b/i,
+    /(€|EUR|USD|\$|GBP|£|CHF|RSD|HRK|kn|MKD|ден|BAM|KM|RON|BGN|лв\.?|ALL|Lek|HUF|Ft|TRY|TL|PLN|CZK|SEK|NOK|DKK)\s*([\d][\d.,\s]*[\d](?:\s*[KMB])?)(?!\d)/i,
+    /(?<!\d)([\d][\d.,\s]*[\d](?:\s*[KMB])?)\s*(€|EUR|USD|\$|GBP|£|CHF|RSD|HRK|kn|MKD|ден|BAM|KM|RON|BGN|лв\.?|ALL|Lek|HUF|Ft|TRY|TL|PLN|CZK|SEK|NOK|DKK)\b/i,
   ];
   for (const pattern of patterns) {
     const match = pattern.exec(t);
     if (!match) continue;
-    const currency = /[€$£]|EUR|USD|GBP|RSD|HRK|kn|MKD|BAM|RON|BGN|ALL|HUF/i.test(match[1]) ? match[1] : match[2];
+    const currency = /[€$£]|EUR|USD|GBP|CHF|RSD|HRK|kn|MKD|ден|BAM|KM|RON|BGN|лв\.?|ALL|Lek|HUF|Ft|TRY|TL|PLN|CZK|SEK|NOK|DKK/i.test(match[1]) ? match[1] : match[2];
     const numStr = currency === match[1] ? match[2] : match[1];
     const parsed = parsePrice(`${currency}${numStr}`);
     if (parsed && parsed.price >= 100 && parsed.price <= 100_000_000) return parsed;
@@ -148,8 +242,8 @@ const extractBedsFromText = (text: unknown): number | null => {
   if (!text || typeof text !== 'string') return null;
   const t = text.replace(/\s+/g, ' ');
   const patterns = [
-    /(?<![.\d])(\d{1,2})\s*(?:bed(?:room)?s?|spava[cć][ae]\s+sobe?|soba|sobi|sobe|chambre[s]?|habitaci[oó]n(?:es)?|zimmer|schlafzimmer)\b/i,
-    /\b(?:bed(?:room)?s?|spava[cć][ae]\s+sobe?|soba|sobi|sobe|chambres?|habitaci[oó]nes?|zimmer)\s*[:#=]\s*(\d{1,2})\b/i,
+    /(?<![.\d])(\d{1,2})\s*(?:bed(?:room)?s?|spava[cć][ae]\s*sobe?|soba|sobi|sobe|spalni[ce]?|стаи|соби|спалн[яи]|chambre[s]?|habitaci[oó]n(?:es)?|zimmer|schlafzimmer|camera(?:\s+da\s+letto)?|camere|szoba|hálószoba|υπνοδωμάτι[αo]|dormitor(?:e|oa)?)\b/i,
+    /\b(?:bed(?:room)?s?|soba|sobi|sobe|spalni[ce]?|chambre|habitaci[oó]n|zimmer|camera|szoba|υπνοδωμάτι[αo]|dormitor)\s*[:#=]\s*(\d{1,2})\b/i,
   ];
   for (const pattern of patterns) {
     const match = t.match(pattern);
@@ -166,8 +260,8 @@ const extractBathsFromText = (text: unknown): number | null => {
   const t = text.replace(/\s+/g, ' ');
   // `wc` removed — it appears in slugs/IDs and false-matches constantly.
   const patterns = [
-    /(?<![.\d])(\d{1,2})\s*(?:bath(?:room)?s?|kupatil[ao]?|toilets?|salle\s+de\s+bain|badezimmer|ba[nñ]os?)\b/i,
-    /\b(?:bath(?:room)?s?|kupatil[ao]?|toilets?)\s*[:#=]\s*(\d{1,2})\b/i,
+    /(?<![.\d])(\d{1,2})\s*(?:bath(?:room)?s?|kupatil[ao]?|baie|bai|bagn[oi]|badeziemmer|fürdő\w*|μπάνι[οα]?|toalet|тоалет|купатил[оа]?|баня)\b/i,
+    /\b(?:bath(?:room)?s?|kupatil[ao]?|baie|bagno)\s*[:#=]\s*(\d{1,2})\b/i,
   ];
   for (const pattern of patterns) {
     const match = t.match(pattern);
@@ -186,7 +280,7 @@ const extractSqftFromText = (text: unknown): number | null => {
   const tClean = t.replace(/(\d) (\d{3})\b/g, '$1$2').replace(/(\d) (\d{3})\b/g, '$1$2');
   // m² requires a digit-then-unit shape and rejects letter prefixes (e.g. "M2 engine")
   const patterns = [
-    /(?<![A-Za-z])(\d{2,5}(?:[.,]\d{1,2})?)\s*(?:m²|m2|sqm|sq\.?\s*m\.?|square\s*meters?|qm|kvadrata?)\b/i,
+    /(?<![A-Za-z])(\d{2,5}(?:[.,]\d{1,2})?)\s*(?:m²|m2|sqm|sq\.?\s*m\.?|square\s*meters?|qm|kvadrata?|mp|mq)\b/i,
     /(?<![A-Za-z])(\d{2,5}(?:[.,]\d{1,2})?)\s*(?:sq\s*ft|sqft|ft²)\b/i,
   ];
   for (const pattern of patterns) {
