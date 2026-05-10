@@ -148,7 +148,6 @@ const refreshTokenProactively = async (): Promise<boolean> => {
       body: JSON.stringify({}),
       signal: abortController.signal,
     });
-    clearTimeout(timeoutId);
 
     if (!response.ok) {
       tokenService.clearTokens();
@@ -171,10 +170,10 @@ const refreshTokenProactively = async (): Promise<boolean> => {
     }
 
     return false;
-  } catch (error) {
-    clearTimeout(timeoutId);
+  } catch {
     return false;
   } finally {
+    clearTimeout(timeoutId);
     isRefreshing = false;
   }
 };
