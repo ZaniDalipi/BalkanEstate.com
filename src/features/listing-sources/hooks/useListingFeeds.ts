@@ -208,10 +208,15 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
    * the import completes via `onImportConfirmed`.
    */
   const confirmFeed = useCallback((approvedIds: string[]): void => {
-    void confirmPreview(approvedIds).catch((e) => {
+    const capturedSourceId = pendingPreview?.sourceId;
+    void confirmPreview(approvedIds).then((stats) => {
+      if (stats && capturedSourceId) {
+        setLastRun((prev) => ({ ...prev, [capturedSourceId]: stats }));
+      }
+    }).catch((e) => {
       setError((e as Error).message || 'Import failed');
     });
-  }, [confirmPreview]);
+  }, [confirmPreview, pendingPreview]);
 
   // Refresh the local source list (lastRun stats, counters) whenever an
   // import confirmed elsewhere in the app — so this page stays in sync even

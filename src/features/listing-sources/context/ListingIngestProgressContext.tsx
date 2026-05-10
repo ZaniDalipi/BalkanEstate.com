@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSocket } from '@/shared/hooks/useSocket';
 import {
+  type IngestStats,
   type PreviewListing,
   confirmMyListingSourceImport,
   previewMyListingSource,
@@ -48,6 +49,8 @@ export interface SyncSession {
   isDone: boolean;
   /** Once true, a dock notification has been shown for this completion. */
   notified: boolean;
+  /** Final ingest stats captured from the API response (confirm-import path). */
+  finalStats?: IngestStats;
 }
 
 export interface PendingPreview {
@@ -77,7 +80,7 @@ interface ContextValue {
   /** Kick off a preview fetch. Resolves once the modal is queued or rejects on failure. */
   startPreview: (sourceId: string, sourceName: string, limit?: number) => Promise<void>;
   /** Confirm the currently-pending preview, importing the approved subset. */
-  confirmPreview: (approvedIds: string[]) => Promise<void>;
+  confirmPreview: (approvedIds: string[]) => Promise<IngestStats | null>;
   /** Close the modal without importing. */
   cancelPreview: () => void;
   /** Subscribe to "import confirmed" events so a feature page can refresh its list. */
@@ -254,9 +257,9 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
   }, []);
 
   const confirmPreview = useCallback(
-    async (approvedIds: string[]): Promise<void> => {
+    async (approvedIds: string[]): Promise<IngestStats | null> => {
       const preview = pendingPreview;
-      if (!preview) return;
+      if (!preview) return null;
       const { sourceId, sourceName, previewId } = preview;
       setConfirmingPreview(true);
       setConfirmingSourceId(sourceId);
@@ -264,12 +267,22 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
       // "review" → "syncing" without a gap.
       registerSync(sourceId, sourceName);
       try {
-        await confirmMyListingSourceImport(sourceId, previewId, approvedIds);
+        const result = await confirmMyListingSourceImport(sourceId, previewId, approvedIds);
+        // Store final stats in the session so the dock modal can display them
+        // even after socket events are gone (the "keep track of it" case).
+        setSessions((prev) => {
+          const existing = prev.get(sourceId);
+          if (!existing) return prev;
+          const next = new Map(prev);
+          next.set(sourceId, { ...existing, finalStats: result.stats });
+          return next;
+        });
         // The HTTP response returning guarantees the backend has finished
         // running runSource (the controller awaits it). Mark the session done
         // here as a safety net in case the final socket event was missed or
         // arrived before the session was registered.
         markDone(sourceId);
+        return result.stats;
       } catch (err) {
         failSession(sourceId, (err as Error).message || 'Import failed');
         setConfirmingSourceId(null);

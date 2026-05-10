@@ -121,6 +121,7 @@ const ListingIngestDock: React.FC = () => {
           isOpen={!!expandedSession}
           isRunning={!expandedSession.isDone}
           session={expandedSession}
+          finalStats={expandedSession.finalStats}
           onClose={() => {
             if (expandedSession.isDone) dismissSession(expandedSession.sourceId);
             setExpandedId(null);
