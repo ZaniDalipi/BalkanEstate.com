@@ -564,18 +564,33 @@ const extractBalkanLabelValues = ($: cheerio.CheerioAPI, baseUrl: string, target
     const v = valueRaw.trim();
     if (!v) return;
 
-    if (field === 'price' && !target.price) {
-      target.price = v;
+    if (field === 'price') {
+      // Override if no price yet, OR if the existing value is a bare integer < 1000
+      // (likely a dot-thousands price that JSON already collapsed: "620.000" → 620).
+      const existing = target.price;
+      const existingIsCollapsed = typeof existing === 'number' && existing < 1000;
+      if (!existing || existingIsCollapsed) target.price = v;
     } else if (field === 'sqft' && !target.sqft) {
-      const m = v.match(/(\d[\d.,\s]*)/);
+      // Extract the leading numeric part, using the same separator logic as
+      // normalizePriceNumeric so "1.500 m²" → 1500 but "180.5 m²" → 180.5.
+      const m = v.match(/(\d[\d.,\s]*\d|\d)/);
       if (m) {
-        const n = parseFloat(m[1].replace(/[\s.]/g, '').replace(',', '.'));
+        const raw = m[1].replace(/ /g, ' ').trim();
+        // Dot-thousands: "1.500" → if 3 digits after last dot and no comma, strip dot
+        const stripped = /^\d{1,3}(\.\d{3})+$/.test(raw)
+          ? raw.replace(/\./g, '')
+          : raw.replace(/\s/g, '').replace(',', '.');
+        const n = parseFloat(stripped);
         if (n >= 10 && n <= 50_000) target.sqft = n;
       }
     } else if (field === 'plotSqm' && !target.plotSqm) {
-      const m = v.match(/(\d[\d.,\s]*)/);
+      const m = v.match(/(\d[\d.,\s]*\d|\d)/);
       if (m) {
-        const n = parseFloat(m[1].replace(/[\s.]/g, '').replace(',', '.'));
+        const raw = m[1].replace(/ /g, ' ').trim();
+        const stripped = /^\d{1,3}(\.\d{3})+$/.test(raw)
+          ? raw.replace(/\./g, '')
+          : raw.replace(/\s/g, '').replace(',', '.');
+        const n = parseFloat(stripped);
         if (n >= 1 && n <= 500_000) target.plotSqm = n;
       }
     } else if (field === 'beds' && !target.beds) {
@@ -670,6 +685,85 @@ const extractBalkanLabelValues = ($: cheerio.CheerioAPI, baseUrl: string, target
   });
 
   void baseUrl;
+};
+
+/**
+ * Extract beds and baths from data-attributes and CSS classes that appear on
+ * modern real estate sites where the count is stored in a widget attribute
+ * rather than plain text (e.g. <span data-bedrooms="3"> or <div class="rooms">3</div>).
+ */
+const extractStructuredBedsAndBaths = ($: cheerio.CheerioAPI, target: Mapped): void => {
+  // ── Beds ──────────────────────────────────────────────────────────────────
+  if (!target.beds) {
+    // data-* attributes
+    const bedAttrs = ['data-bedrooms', 'data-beds', 'data-rooms', 'data-num-rooms',
+      'data-num-bedrooms', 'data-bedroom-count', 'data-room-count'];
+    for (const attr of bedAttrs) {
+      const el = $(`[${attr}]`).first();
+      if (el.length) {
+        const n = parseInt(el.attr(attr) ?? '', 10);
+        if (n >= 1 && n <= 20) { target.beds = n; break; }
+      }
+    }
+  }
+  if (!target.beds) {
+    // CSS class selectors — extract the numeric text content
+    const bedSelectors = [
+      '.bedrooms .count, .bedrooms .value, .bedrooms .num',
+      '.rooms .count, .rooms .value, .rooms-count',
+      '.property-rooms, .listing-rooms',
+      '[class*="bedrooms"] [class*="count"], [class*="bedrooms"] [class*="value"]',
+      '[class*="rooms"] [class*="count"], [class*="rooms"] [class*="value"]',
+      '[class*="sobe"] [class*="broj"], [class*="sobe"] [class*="count"]',
+    ];
+    for (const sel of bedSelectors) {
+      const el = $(sel).first();
+      if (el.length) {
+        const n = parseInt(el.text().trim(), 10);
+        if (n >= 1 && n <= 20) { target.beds = n; break; }
+      }
+    }
+  }
+
+  // ── Baths ─────────────────────────────────────────────────────────────────
+  if (!target.baths) {
+    const bathAttrs = ['data-bathrooms', 'data-baths', 'data-num-bathrooms', 'data-bathroom-count'];
+    for (const attr of bathAttrs) {
+      const el = $(`[${attr}]`).first();
+      if (el.length) {
+        const n = parseInt(el.attr(attr) ?? '', 10);
+        if (n >= 1 && n <= 10) { target.baths = n; break; }
+      }
+    }
+  }
+  if (!target.baths) {
+    const bathSelectors = [
+      '.bathrooms .count, .bathrooms .value, .bathrooms .num',
+      '.baths .count, .baths .value, .baths-count',
+      '[class*="bathrooms"] [class*="count"], [class*="bathrooms"] [class*="value"]',
+      '[class*="kupatilo"] [class*="count"], [class*="kupatilo"] [class*="value"]',
+      '[class*="bath"] [class*="count"], [class*="bath"] [class*="value"]',
+    ];
+    for (const sel of bathSelectors) {
+      const el = $(sel).first();
+      if (el.length) {
+        const n = parseInt(el.text().trim(), 10);
+        if (n >= 1 && n <= 10) { target.baths = n; break; }
+      }
+    }
+  }
+
+  // ── Area from data attributes ─────────────────────────────────────────────
+  if (!target.sqft) {
+    const areaAttrs = ['data-area', 'data-sqm', 'data-size', 'data-floor-area', 'data-surface'];
+    for (const attr of areaAttrs) {
+      const el = $(`[${attr}]`).first();
+      if (el.length) {
+        const n = parseFloat(el.attr(attr) ?? '');
+        if (n >= 10 && n <= 50_000) { target.sqft = n; break; }
+      }
+    }
+  }
 };
 
 /**
@@ -794,13 +888,13 @@ export const enrichFromDetailHtml = (
   } catch {
     return target;
   }
-  // Order matters: JSON-LD is most authoritative, then OG, then microdata, then
-  // Balkan label-value blocks, then gallery images, then structured patterns,
-  // finally smart text extraction (lowest priority fallback).
+  // Order matters: JSON-LD → OG → microdata → label blocks → data-attributes →
+  // gallery images → structured CSS patterns → smart text (lowest priority).
   extractJsonLd($, baseUrl, target);
   extractOpenGraph($, baseUrl, target);
   extractMicrodata($, baseUrl, target);
   extractBalkanLabelValues($, baseUrl, target);
+  extractStructuredBedsAndBaths($, target);
   extractGalleryImages($, baseUrl, target);
   extractStructuredPriceFromHtml($, target);
   extractStructuredLocationFromHtml($, target);

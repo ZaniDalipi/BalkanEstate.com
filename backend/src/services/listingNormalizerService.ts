@@ -111,11 +111,14 @@ interface ParsedPrice {
  *   "120,5"        → "120.5"     comma decimal (Balkan style)
  */
 const normalizePriceNumeric = (raw: string): string => {
-  // Collapse typographic spaces and apostrophe-thousands first.
-  let s = raw.replace(/['   ]/g, ' ');
+  // Collapse all Unicode whitespace variants and apostrophe/quote thousands separators.
+  //   = non-breaking space (very common on European RE sites),   = thin space,
+  //   = narrow no-break space,   = figure space,   = punctuation space.
+  let s = raw.replace(/[       　'’]/g, ' ').trim();
 
-  // Consolidate spaces between digits (space-as-thousands separator).
-  if (/\d [ \t]+\d/.test(s)) {
+  // Consolidate ANY spaces between digits into nothing (space-as-thousands separator).
+  // Single space between digit groups: "1 200 000" or "620 000" → "1200000" / "620000"
+  if (/\d[ \t]+\d/.test(s)) {
     s = s.replace(/(\d)[ \t]+(?=\d)/g, '$1');
   }
 
@@ -134,7 +137,7 @@ const normalizePriceNumeric = (raw: string): string => {
     return s.replace(/,/g, '');
   }
 
-  // Pure dot-thousands (all segments exactly 3 digits): "1.200.000"
+  // Pure dot-thousands (all segments exactly 3 digits): "1.200.000" / "620.000"
   if (!commas && /^\d{1,3}(\.\d{3})+$/.test(s.trim())) {
     return s.replace(/\./g, '');
   }
@@ -144,8 +147,9 @@ const normalizePriceNumeric = (raw: string): string => {
     return s.replace(/,/g, '');
   }
 
-  // Single dot — ambiguous; use digit-count heuristic.
-  // ".nnn" (3 digits) → thousands separator;  ".n" / ".nn" → decimal.
+  // Single dot — use digit-count heuristic:
+  // ".nnn" (exactly 3 digits after dot) → thousands separator ("620.000" → 620000)
+  // ".n" / ".nn" → decimal point ("120.5" → 120.5)
   if (dots === 1 && !commas) {
     const afterDot = s.split('.')[1] ?? '';
     if (afterDot.length === 3) return s.replace('.', '');
@@ -165,7 +169,14 @@ const normalizePriceNumeric = (raw: string): string => {
 
 const parsePrice = (input: unknown): ParsedPrice | null => {
   if (input == null) return null;
-  if (typeof input === 'number' && Number.isFinite(input)) return { price: input };
+  // For bare numbers (e.g. from JSON-LD "price": 620), return directly only
+  // when it's already in a plausible RE range. Sub-1000 values are often
+  // dot-thousands strings that the JSON parser already collapsed (620.000→620),
+  // so we return null to let the HTML label extractor take priority.
+  if (typeof input === 'number' && Number.isFinite(input)) {
+    if (input < 1000) return null;
+    return { price: input };
+  }
   const str = String(input).trim();
   if (!str) return null;
 
