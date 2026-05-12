@@ -7,6 +7,28 @@ import Footer from './Footer';
 import { API_URL } from '../../src/shared/api/config';
 import { useHowItWorksPrices } from '../../src/shared/query/hooks';
 
+// Helper function to replace placeholders in feature strings with actual product values
+const replacePlaceholdersInFeature = (feature: any, product: any): string => {
+  if (typeof feature !== 'string') {
+    return typeof feature === 'object' ? feature.name || feature : String(feature);
+  }
+
+  if (!product) return feature;
+
+  let result = feature;
+  if (result.includes('{listingsLimit}') && product.listingsLimit) {
+    result = result.replace('{listingsLimit}', product.listingsLimit);
+  }
+  if (result.includes('{promotionCoupons}') && product.promotionCoupons) {
+    result = result.replace('{promotionCoupons}', product.promotionCoupons);
+  }
+  if (result.includes('{teamMembersLimit}') && product.teamMembersLimit) {
+    result = result.replace('{teamMembersLimit}', product.teamMembersLimit);
+  }
+
+  return result;
+};
+
 interface SiteVideo {
   _id: string;
   key: string;
@@ -1385,7 +1407,7 @@ const HowItWorksPage: React.FC = () => {
                       ]).map((feature: any, idx: number) => (
                         <li key={idx} className="flex items-center gap-2">
                           <CheckIcon className="w-5 h-5 text-orange-200 flex-shrink-0" />
-                          <span className="text-sm">{typeof feature === 'string' ? feature : feature.name || feature}</span>
+                          <span className="text-sm">{replacePlaceholdersInFeature(feature, prices.enterprise.product)}</span>
                         </li>
                       ))}
                     </ul>
@@ -1521,7 +1543,7 @@ const HowItWorksPage: React.FC = () => {
                   ]).map((feature: any, idx: number) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-neutral-600">
                       <CheckIcon className="w-5 h-5 text-purple-500" />
-                      {typeof feature === 'string' ? feature : feature.name || feature}
+                      {replacePlaceholdersInFeature(feature, prices.agentPro.productMonthly)}
                     </li>
                   ))}
                 </ul>
@@ -1555,7 +1577,7 @@ const HowItWorksPage: React.FC = () => {
                   ]).map((feature: any, idx: number) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-purple-100">
                       <CheckIcon className="w-5 h-5 text-purple-200" />
-                      {typeof feature === 'string' ? feature : feature.name || feature}
+                      {replacePlaceholdersInFeature(feature, prices.agencyAgent.product)}
                     </li>
                   ))}
                 </ul>
@@ -1637,7 +1659,7 @@ const HowItWorksPage: React.FC = () => {
                   ]).map((feature: any, idx: number) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-neutral-600">
                       <CheckIcon className="w-5 h-5 text-blue-500" />
-                      {typeof feature === 'string' ? feature : feature.name || feature}
+                      {replacePlaceholdersInFeature(feature, prices.buyerFree.product)}
                     </li>
                   ))}
                 </ul>
@@ -1669,7 +1691,7 @@ const HowItWorksPage: React.FC = () => {
                   ]).map((feature: any, idx: number) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-blue-100">
                       <CheckIcon className="w-5 h-5 text-blue-200" />
-                      {typeof feature === 'string' ? feature : feature.name || feature}
+                      {replacePlaceholdersInFeature(feature, prices.buyerPro.product)}
                     </li>
                   ))}
                 </ul>
@@ -1839,7 +1861,7 @@ const HowItWorksPage: React.FC = () => {
                   ]).map((feature: any, idx: number) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-neutral-600">
                       <CheckIcon className="w-5 h-5 text-green-500" />
-                      {typeof feature === 'string' ? feature : feature.name || feature}
+                      {replacePlaceholdersInFeature(feature, prices.sellerFree.product)}
                     </li>
                   ))}
                 </ul>
@@ -1877,7 +1899,7 @@ const HowItWorksPage: React.FC = () => {
                   ]).map((feature: any, idx: number) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-green-100">
                       <CheckIcon className="w-5 h-5 text-green-200" />
-                      {typeof feature === 'string' ? feature : feature.name || feature}
+                      {replacePlaceholdersInFeature(feature, prices.sellerPro.productMonthly)}
                     </li>
                   ))}
                 </ul>

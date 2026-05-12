@@ -100,68 +100,90 @@ export function useHowItWorksPrices() {
 
   const isLoading = sellerLoading || buyerLoading || agentLoading;
 
+  // Helper to find product by ID
+  const findProductById = (products: Product[], productId: string) =>
+    products.find(p => p.productId === productId);
+
   const prices = {
     // Agencies
     enterprise: {
       productId: 'seller_enterprise_yearly',
-      price: sellerProducts.find(p => p.productId === 'seller_enterprise_yearly')?.price,
-      billingPeriod: sellerProducts.find(p => p.productId === 'seller_enterprise_yearly')?.billingPeriod,
-      name: sellerProducts.find(p => p.productId === 'seller_enterprise_yearly')?.name,
-      features: sellerProducts.find(p => p.productId === 'seller_enterprise_yearly')?.features,
+      product: findProductById(sellerProducts, 'seller_enterprise_yearly'),
+      price: findProductById(sellerProducts, 'seller_enterprise_yearly')?.price,
+      billingPeriod: findProductById(sellerProducts, 'seller_enterprise_yearly')?.billingPeriod,
+      name: findProductById(sellerProducts, 'seller_enterprise_yearly')?.name,
+      features: findProductById(sellerProducts, 'seller_enterprise_yearly')?.features,
+      listingsLimit: findProductById(sellerProducts, 'seller_enterprise_yearly')?.listingsLimit,
+      teamMembersLimit: findProductById(sellerProducts, 'seller_enterprise_yearly')?.teamMembersLimit,
+      promotionCoupons: findProductById(sellerProducts, 'seller_enterprise_yearly')?.promotionCoupons,
     },
 
     // Sellers
     sellerPro: {
       productId: 'seller_pro_monthly',
-      monthlyPrice: sellerProducts.find(p => p.productId === 'seller_pro_monthly')?.price,
-      monthlyBillingPeriod: sellerProducts.find(p => p.productId === 'seller_pro_monthly')?.billingPeriod,
-      yearlyPrice: sellerProducts.find(p => p.productId === 'seller_pro_yearly')?.price,
-      yearlyBillingPeriod: sellerProducts.find(p => p.productId === 'seller_pro_yearly')?.billingPeriod,
-      monthlyName: sellerProducts.find(p => p.productId === 'seller_pro_monthly')?.name,
-      yearlyName: sellerProducts.find(p => p.productId === 'seller_pro_yearly')?.name,
-      monthlyFeatures: sellerProducts.find(p => p.productId === 'seller_pro_monthly')?.features,
-      yearlyFeatures: sellerProducts.find(p => p.productId === 'seller_pro_yearly')?.features,
+      productMonthly: findProductById(sellerProducts, 'seller_pro_monthly'),
+      productYearly: findProductById(sellerProducts, 'seller_pro_yearly'),
+      monthlyPrice: findProductById(sellerProducts, 'seller_pro_monthly')?.price,
+      monthlyBillingPeriod: findProductById(sellerProducts, 'seller_pro_monthly')?.billingPeriod,
+      yearlyPrice: findProductById(sellerProducts, 'seller_pro_yearly')?.price,
+      yearlyBillingPeriod: findProductById(sellerProducts, 'seller_pro_yearly')?.billingPeriod,
+      monthlyName: findProductById(sellerProducts, 'seller_pro_monthly')?.name,
+      yearlyName: findProductById(sellerProducts, 'seller_pro_yearly')?.name,
+      monthlyFeatures: findProductById(sellerProducts, 'seller_pro_monthly')?.features,
+      yearlyFeatures: findProductById(sellerProducts, 'seller_pro_yearly')?.features,
+      listingsLimit: findProductById(sellerProducts, 'seller_pro_monthly')?.listingsLimit,
+      promotionCoupons: findProductById(sellerProducts, 'seller_pro_monthly')?.promotionCoupons,
     },
 
     sellerFree: {
       productId: 'seller_free',
-      price: sellerProducts.find(p => p.productId === 'seller_free')?.price ?? 0,
-      features: sellerProducts.find(p => p.productId === 'seller_free')?.features,
+      product: findProductById(sellerProducts, 'seller_free'),
+      price: findProductById(sellerProducts, 'seller_free')?.price ?? 0,
+      features: findProductById(sellerProducts, 'seller_free')?.features,
+      listingsLimit: findProductById(sellerProducts, 'seller_free')?.listingsLimit,
     },
 
     // Agents
     agentPro: {
       productId: 'agent_pro',
-      monthlyPrice: agentProducts.find(p => p.productId === 'agent_pro_monthly')?.price,
-      monthlyBillingPeriod: agentProducts.find(p => p.productId === 'agent_pro_monthly')?.billingPeriod,
-      yearlyPrice: agentProducts.find(p => p.productId === 'agent_pro_yearly')?.price,
-      yearlyBillingPeriod: agentProducts.find(p => p.productId === 'agent_pro_yearly')?.billingPeriod,
-      monthlyName: agentProducts.find(p => p.productId === 'agent_pro_monthly')?.name,
-      yearlyName: agentProducts.find(p => p.productId === 'agent_pro_yearly')?.name,
-      monthlyFeatures: agentProducts.find(p => p.productId === 'agent_pro_monthly')?.features,
-      yearlyFeatures: agentProducts.find(p => p.productId === 'agent_pro_yearly')?.features,
+      productMonthly: findProductById(agentProducts, 'agent_pro_monthly'),
+      productYearly: findProductById(agentProducts, 'agent_pro_yearly'),
+      monthlyPrice: findProductById(agentProducts, 'agent_pro_monthly')?.price,
+      monthlyBillingPeriod: findProductById(agentProducts, 'agent_pro_monthly')?.billingPeriod,
+      yearlyPrice: findProductById(agentProducts, 'agent_pro_yearly')?.price,
+      yearlyBillingPeriod: findProductById(agentProducts, 'agent_pro_yearly')?.billingPeriod,
+      monthlyName: findProductById(agentProducts, 'agent_pro_monthly')?.name,
+      yearlyName: findProductById(agentProducts, 'agent_pro_yearly')?.name,
+      monthlyFeatures: findProductById(agentProducts, 'agent_pro_monthly')?.features,
+      yearlyFeatures: findProductById(agentProducts, 'agent_pro_yearly')?.features,
+      listingsLimit: findProductById(agentProducts, 'agent_pro_monthly')?.listingsLimit,
+      promotionCoupons: findProductById(agentProducts, 'agent_pro_monthly')?.promotionCoupons,
     },
 
     agencyAgent: {
       productId: 'agent_agency_coupon',
-      price: agentProducts.find(p => p.productId === 'agent_agency_coupon')?.price ?? 0,
-      features: agentProducts.find(p => p.productId === 'agent_agency_coupon')?.features,
+      product: findProductById(agentProducts, 'agent_agency_coupon'),
+      price: findProductById(agentProducts, 'agent_agency_coupon')?.price ?? 0,
+      features: findProductById(agentProducts, 'agent_agency_coupon')?.features,
+      listingsLimit: findProductById(agentProducts, 'agent_agency_coupon')?.listingsLimit,
     },
 
     // Buyers
     buyerFree: {
       productId: 'buyer_free',
-      price: buyerProducts.find(p => p.productId === 'buyer_free')?.price ?? 0,
-      features: buyerProducts.find(p => p.productId === 'buyer_free')?.features,
+      product: findProductById(buyerProducts, 'buyer_free'),
+      price: findProductById(buyerProducts, 'buyer_free')?.price ?? 0,
+      features: findProductById(buyerProducts, 'buyer_free')?.features,
     },
 
     buyerPro: {
       productId: 'buyer_pro',
-      price: buyerProducts.find(p => p.productId === 'buyer_pro')?.price,
-      billingPeriod: buyerProducts.find(p => p.productId === 'buyer_pro')?.billingPeriod,
-      trialPeriodDays: buyerProducts.find(p => p.productId === 'buyer_pro')?.trialPeriodDays,
-      name: buyerProducts.find(p => p.productId === 'buyer_pro')?.name,
-      features: buyerProducts.find(p => p.productId === 'buyer_pro')?.features,
+      product: findProductById(buyerProducts, 'buyer_pro'),
+      price: findProductById(buyerProducts, 'buyer_pro')?.price,
+      billingPeriod: findProductById(buyerProducts, 'buyer_pro')?.billingPeriod,
+      trialPeriodDays: findProductById(buyerProducts, 'buyer_pro')?.trialPeriodDays,
+      name: findProductById(buyerProducts, 'buyer_pro')?.name,
+      features: findProductById(buyerProducts, 'buyer_pro')?.features,
     },
   };
 
