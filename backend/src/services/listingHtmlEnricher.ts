@@ -553,6 +553,212 @@ const extractBalkanLabelValues = ($: cheerio.CheerioAPI, baseUrl: string, target
     'distanzevomeer': 'distanceToSea', 'meeresnähe': 'distanceToSea',
     'distancetosea': 'distanceToSea', 'distancefromsea': 'distanceToSea', 'distancetothesea': 'distanceToSea',
     'απόστασηαπόθάλασσα': 'distanceToSea', 'tengerközelség': 'distanceToSea',
+
+    // ── Living rooms ──────────────────────────────────────────────────────
+    // HR/BA/SR Latin
+    'dnevnasoba': 'livingRooms', 'dnevnasobe': 'livingRooms', 'brojosobna': 'livingRooms',
+    'salon': 'livingRooms', 'boravak': 'livingRooms', 'boravišnisob': 'livingRooms',
+    // SR/MK Cyrillic
+    'дневнасоба': 'livingRooms', 'дневнасобе': 'livingRooms', 'дневни': 'livingRooms',
+    // BG
+    'дневна': 'livingRooms', 'хол': 'livingRooms',
+    // SL
+    'dnevnaoba': 'livingRooms', 'dnevnisobor': 'livingRooms',
+    // RO
+    'cameradeziua': 'livingRooms', 'cameradestat': 'livingRooms', 'salonro': 'livingRooms',
+    // AL
+    'dhomaejeteses': 'livingRooms', 'dhomaeqeteses': 'livingRooms',
+    // GR
+    'καθιστικό': 'livingRooms', 'καθιστικο': 'livingRooms', 'σαλόνι': 'livingRooms',
+    // HU
+    'nappali': 'livingRooms', 'nappaliszoba': 'livingRooms',
+    // DE
+    'wohnzimmer': 'livingRooms', 'wohnraum': 'livingRooms',
+    // FR
+    'séjour': 'livingRooms', 'sejour': 'livingRooms', 'salonsejourou': 'livingRooms',
+    // IT
+    'soggiorno': 'livingRooms', 'salone': 'livingRooms',
+    // EN
+    'livingroom': 'livingRooms', 'livingrooms': 'livingRooms', 'sittingroom': 'livingRooms',
+    'lounge': 'livingRooms', 'receptionrooms': 'livingRooms',
+
+    // ── Total floors in building ──────────────────────────────────────────
+    // HR/BA/SR Latin
+    'ukupnokatova': 'totalFloors', 'ukupnospratova': 'totalFloors', 'ukupnoetaža': 'totalFloors',
+    'ukupnoetaza': 'totalFloors', 'brojetaza': 'totalFloors', 'katnost': 'totalFloors',
+    // SR Cyrillic
+    'укупноспратова': 'totalFloors', 'укупноетажа': 'totalFloors', 'катност': 'totalFloors',
+    // BG
+    'броетажи': 'totalFloors', 'общоетажи': 'totalFloors',
+    // RO
+    'numaretaje': 'totalFloors', 'totaletaje': 'totalFloors',
+    // DE
+    'gesamtstockwerke': 'totalFloors', 'gesamtgeschosse': 'totalFloors', 'anzahlstockwerke': 'totalFloors',
+    // EN
+    'totalfloors': 'totalFloors', 'numberoffloors': 'totalFloors', 'floorsintotal': 'totalFloors',
+    'buildingfloors': 'totalFloors', 'totalstoreys': 'totalFloors',
+
+    // ── Parking ───────────────────────────────────────────────────────────
+    // HR/BA/SR Latin
+    'parking': 'parking', 'parkiralište': 'parking', 'parkiraliste': 'parking',
+    'parkirnomjesto': 'parking', 'garaža': 'parking', 'garaza': 'parking', 'garažno': 'parking',
+    'garazno': 'parking',
+    // SR Cyrillic
+    'паркинг': 'parking', 'гаража': 'parking', 'паркиралиште': 'parking',
+    // BG
+    'паркомясто': 'parking', 'гараж': 'parking',
+    // RO
+    'parcare': 'parking', 'garage': 'parking', 'locparcare': 'parking',
+    // DE
+    'stellplatz': 'parking', 'garagenstellplatz': 'parking', 'tiefgarage': 'parking',
+    // EN
+    'parkingspaces': 'parking', 'parkingspots': 'parking', 'garageplaces': 'parking',
+
+    // ── Furnishing ────────────────────────────────────────────────────────
+    // HR/BA/SR Latin
+    'namještenost': 'furnishing', 'namjestenost': 'furnishing', 'oprema': 'furnishing',
+    'namješteno': 'furnishing', 'namjesteno': 'furnishing', 'namještaj': 'furnishing',
+    // SR Cyrillic
+    'намештеност': 'furnishing', 'намештено': 'furnishing',
+    // BG
+    'обзавеждане': 'furnishing', 'обзаведен': 'furnishing',
+    // RO
+    'mobilare': 'furnishing', 'mobilat': 'furnishing', 'dotare': 'furnishing',
+    // AL
+    'mobilim': 'furnishing', 'mobiluar': 'furnishing',
+    // GR
+    'επίπλωση': 'furnishing', 'επιπλωση': 'furnishing', 'επιπλωμένο': 'furnishing',
+    // HU
+    'bútorozottság': 'furnishing', 'butorozottsag': 'furnishing',
+    // DE
+    'einrichtung': 'furnishing', 'möbliert': 'furnishing', 'moebliert': 'furnishing',
+    'möblierung': 'furnishing',
+    // FR
+    'ameublement': 'furnishing', 'meublé': 'furnishing', 'meuble': 'furnishing',
+    // IT
+    'arredamento': 'furnishing', 'arredato': 'furnishing',
+    // EN
+    'furnishing': 'furnishing', 'furnished': 'furnishing', 'furnishings': 'furnishing',
+
+    // ── Heating type ──────────────────────────────────────────────────────
+    // HR/BA/SR Latin
+    'grijanje': 'heatingType', 'vrstagrija': 'heatingType', 'tipgrijanja': 'heatingType',
+    'centralnogrijanje': 'heatingType', 'centralnogrianj': 'heatingType',
+    // SR Cyrillic
+    'грејање': 'heatingType', 'централногрејање': 'heatingType',
+    // SL
+    'ogrevanje': 'heatingType', 'sistemogrevanja': 'heatingType',
+    // BG
+    'отопление': 'heatingType', 'видотопление': 'heatingType',
+    // RO
+    'incalzire': 'heatingType', 'tipincalzire': 'heatingType', 'sistemincalzire': 'heatingType',
+    // AL
+    'ngrohje': 'heatingType', 'sistemngrohjes': 'heatingType',
+    // GR
+    'θέρμανση': 'heatingType', 'θερμανση': 'heatingType',
+    // HU
+    'fűtés': 'heatingType', 'futes': 'heatingType', 'fűtésmód': 'heatingType',
+    // DE
+    'heizung': 'heatingType', 'heizungsart': 'heatingType', 'heizungstyp': 'heatingType',
+    // FR
+    'chauffage': 'heatingType', 'typedechauffage': 'heatingType',
+    // IT
+    'riscaldamento': 'heatingType', 'tipodiriscaldamento': 'heatingType',
+    // EN
+    'heating': 'heatingType', 'heatingtype': 'heatingType', 'heatingsystem': 'heatingType',
+
+    // ── Condition / state ─────────────────────────────────────────────────
+    // HR/BA/SR Latin
+    'stanje': 'condition', 'stanjenekretni': 'condition', 'stanjeuređen': 'condition',
+    // SR Cyrillic
+    'стање': 'condition', 'стањенекретнине': 'condition',
+    // SL
+    'stanjepremoženja': 'condition',
+    // BG
+    'състояние': 'condition', 'видсъстояние': 'condition',
+    // RO
+    'stare': 'condition', 'stareproprietate': 'condition', 'stareclad': 'condition',
+    // AL
+    'gjendja': 'condition', 'gjendjaepronesise': 'condition',
+    // GR
+    'κατάσταση': 'condition', 'κατασταση': 'condition',
+    // HU
+    'állapot': 'condition', 'allapot': 'condition', 'ingatlanállapota': 'condition',
+    // DE
+    'zustand': 'condition', 'objektzustand': 'condition', 'zustandsbeschreibung': 'condition',
+    // FR
+    'état': 'condition', 'etat': 'condition', 'étatdubien': 'condition',
+    // IT
+    'condizione': 'condition', 'stato': 'condition', 'statoimmobile': 'condition',
+    // EN
+    'condition': 'condition', 'propertycondition': 'condition', 'buildingcondition': 'condition',
+
+    // ── View type ─────────────────────────────────────────────────────────
+    // HR/BA/SR Latin
+    'pogled': 'viewType', 'poglednamore': 'viewType', 'poglednagore': 'viewType',
+    'poglednagrad': 'viewType', 'tipapogleda': 'viewType',
+    // SR Cyrillic
+    'поглед': 'viewType', 'погледнаморе': 'viewType',
+    // BG
+    'изглед': 'viewType', 'гледка': 'viewType', 'видизглед': 'viewType',
+    // RO
+    'vedere': 'viewType', 'tipvedere': 'viewType',
+    // DE
+    'aussicht': 'viewType', 'ausblick': 'viewType', 'blickrichtung': 'viewType',
+    // FR
+    'vue': 'viewType', 'typdevue': 'viewType',
+    // IT
+    'vista': 'viewType', 'tipodivista': 'viewType',
+    // EN
+    'view': 'viewType', 'viewtype': 'viewType', 'propertyview': 'viewType',
+
+    // ── Energy rating ─────────────────────────────────────────────────────
+    // HR/BA/SR Latin
+    'energetskirazred': 'energyRating', 'energetskiceptifikat': 'energyRating',
+    'energetskaklasa': 'energyRating',
+    // SR Cyrillic
+    'енергетскиразред': 'energyRating',
+    // BG
+    'енергийнакласа': 'energyRating', 'енергетиченрейтинг': 'energyRating',
+    // RO
+    'clasaenergetica': 'energyRating', 'certificatenergetica': 'energyRating',
+    // DE
+    'energieklasse': 'energyRating', 'energieausweis': 'energyRating', 'effizienzklasse': 'energyRating',
+    // FR
+    'classeenergetique': 'energyRating', 'diagnosticpe': 'energyRating',
+    // IT
+    'classeenergetica': 'energyRating', 'certificazioneenergetica': 'energyRating',
+    // EN
+    'energyrating': 'energyRating', 'energyclass': 'energyRating', 'epcrating': 'energyRating',
+    'energyefficiency': 'energyRating',
+
+    // ── Orientation ───────────────────────────────────────────────────────
+    // HR/BA/SR Latin
+    'orijentacija': 'orientation', 'stransvijetstrane': 'orientation',
+    // SR Cyrillic
+    'оријентација': 'orientation', 'страна': 'orientation',
+    // BG
+    'изложение': 'orientation', 'ориентация': 'orientation',
+    // DE
+    'ausrichtung': 'orientation', 'himmelsrichtung': 'orientation',
+    // EN
+    'orientation': 'orientation', 'facing': 'orientation', 'aspect': 'orientation',
+
+    // ── Distance to center ────────────────────────────────────────────────
+    // HR/BA/SR Latin
+    'udaljenostodcentra': 'distanceToCenter', 'udaljenostdocentra': 'distanceToCenter',
+    'odcentragrada': 'distanceToCenter',
+    // SR Cyrillic
+    'удаљеностодцентра': 'distanceToCenter',
+    // BG
+    'разстояниедоцентъра': 'distanceToCenter',
+    // RO
+    'distantafatadecentru': 'distanceToCenter',
+    // DE
+    'distanzzumzentrum': 'distanceToCenter', 'entfernungzumzentrum': 'distanceToCenter',
+    // EN
+    'distancetocenter': 'distanceToCenter', 'distancetocitycentre': 'distanceToCenter',
+    'distancefromcenter': 'distanceToCenter',
   };
 
   const applyLabelValue = (labelRaw: string, valueRaw: string): void => {
@@ -610,12 +816,107 @@ const extractBalkanLabelValues = ($: cheerio.CheerioAPI, baseUrl: string, target
     } else if (field === 'floor' && !target.floor) {
       target.floor = v;
     } else if (field === 'distanceToSea' && !target.distanceToSea) {
-      const m = v.match(/(\d[\d.,\s]*)/);
-      if (m) {
-        const n = parseFloat(m[1].replace(/[\s.]/g, '').replace(',', '.'));
-        if (n >= 1 && n <= 100_000) target.distanceToSea = n;
-      }
+      const n = parseDistanceValue(v);
+      if (n != null) target.distanceToSea = n;
+    } else if (field === 'livingRooms' && !target.livingRooms) {
+      const n = parseInt(v, 10);
+      if (n >= 1 && n <= 5) target.livingRooms = n;
+    } else if (field === 'totalFloors' && !target.totalFloors) {
+      const n = parseInt(v, 10);
+      if (n >= 1 && n <= 100) target.totalFloors = n;
+    } else if (field === 'parking' && !target.parking) {
+      const n = parseInt(v, 10);
+      if (n >= 1 && n <= 10) target.parking = n;
+    } else if (field === 'furnishing' && !target.furnishing) {
+      target.furnishing = mapFurnishingValue(v);
+    } else if (field === 'heatingType' && !target.heatingType) {
+      target.heatingType = mapHeatingValue(v);
+    } else if (field === 'condition' && !target.condition) {
+      target.condition = mapConditionValue(v);
+    } else if (field === 'viewType' && !target.viewType) {
+      target.viewType = mapViewValue(v);
+    } else if (field === 'energyRating' && !target.energyRating) {
+      const m = v.match(/\b([A-G][+]?)\b/);
+      if (m) target.energyRating = m[1].toUpperCase();
+    } else if (field === 'orientation' && !target.orientation) {
+      target.orientation = mapOrientationValue(v);
+    } else if (field === 'distanceToCenter' && !target.distanceToCenter) {
+      const n = parseDistanceValue(v);
+      if (n != null) target.distanceToCenter = n;
     }
+  };
+
+  /** Parse a distance string like "500m", "1.2 km", "800 metara" → number in metres. */
+  const parseDistanceValue = (v: string): number | null => {
+    const m = v.match(/(\d[\d.,\s]*\d|\d)\s*(km|m\b|mi\b|km\b|kilomet|meter|metar|metre)/i);
+    if (!m) {
+      const plain = v.match(/(\d[\d.,\s]*\d|\d)/);
+      if (plain) {
+        const n = parseFloat(plain[1].replace(/[\s.]/g, '').replace(',', '.'));
+        if (n >= 1 && n <= 100_000) return n;
+      }
+      return null;
+    }
+    const rawNum = parseFloat(m[1].replace(/[\s]/g, '').replace(',', '.'));
+    const unit = m[2].toLowerCase();
+    const metres = /km|kilomet/i.test(unit) ? rawNum * 1000 : rawNum;
+    if (metres >= 1 && metres <= 200_000) return metres;
+    return null;
+  };
+
+  const mapFurnishingValue = (v: string): string | undefined => {
+    const l = v.toLowerCase();
+    if (/\b(fully.?furn|kompletno|potpu(no|njen)|namješteno|opreml|vollmöbl|complet|arredato|meublé)\b/i.test(l)) return 'furnished';
+    if (/\b(semi|djelomič|teilmöbl|partiel|parzialmente|félbúto)\b/i.test(l)) return 'semi-furnished';
+    if (/\b(unfurn|nije|nenamy|bez\s*nam|ohne.?möb|non.?meub|non.?arred|bútorozatlan)\b/i.test(l)) return 'unfurnished';
+    if (/\b(furn|namješten|namešten|opremljen|möbliert|meublé|arredato|bútorozot)\b/i.test(l)) return 'furnished';
+    return undefined;
+  };
+
+  const mapHeatingValue = (v: string): string | undefined => {
+    const l = v.toLowerCase();
+    if (/\b(central|district|daljinsko|centralno|fernwärme|téléchauf)\b/i.test(l)) return 'central';
+    if (/\b(electr|elek|struj|elektr|elektro|électr|eletric)\b/i.test(l)) return 'electric';
+    if (/\b(gas|gaz|plin)\b/i.test(l)) return 'gas';
+    if (/\b(oil|mazut|loži|heiz[öo]l|fioul|gasoil)\b/i.test(l)) return 'oil';
+    if (/\b(heat.?pump|topl[oi]n[sa]\s*pumpa|wärmepumpe|pompe.?chaleur)\b/i.test(l)) return 'heat-pump';
+    if (/\b(solar|solarno|solaire)\b/i.test(l)) return 'solar';
+    if (/\b(wood|drv[ao]|bois|legna|holz|biomass|peć)\b/i.test(l)) return 'wood';
+    return undefined;
+  };
+
+  const mapConditionValue = (v: string): string | undefined => {
+    const l = v.toLowerCase();
+    if (/\b(new|novo|novo?gradnja|neubau|neuf|nuovo)\b/i.test(l)) return 'new';
+    if (/\b(excellent|odlič|izvrs|ausgezeich|excell|eccellente|kiváló)\b/i.test(l)) return 'excellent';
+    if (/\b(good|dobr[ao]|gut|bon|buono|jó)\b/i.test(l)) return 'good';
+    if (/\b(fair|srednje|prihvatl|befriedi|passable|discreto)\b/i.test(l)) return 'fair';
+    if (/\b(renovat|needs.?work|za.?renovir|umbaubedürf|rénov|da.?ristruttur|felújítand)\b/i.test(l)) return 'needs-renovation';
+    return undefined;
+  };
+
+  const mapViewValue = (v: string): string | undefined => {
+    const l = v.toLowerCase();
+    if (/\b(sea|more|meer|mer|mare|tenger|θάλ|deniz)\b/i.test(l)) return 'sea';
+    if (/\b(mountain|planin|berg|montagne|montagna|hegy)\b/i.test(l)) return 'mountain';
+    if (/\b(city|grad|stadt|ville|città|città|város)\b/i.test(l)) return 'city';
+    if (/\b(park|parque|parc|parco)\b/i.test(l)) return 'park';
+    if (/\b(garden|vrt|garten|jardin|giardino|kert)\b/i.test(l)) return 'garden';
+    if (/\b(street|ulica|straße|rue|strada|utca)\b/i.test(l)) return 'street';
+    return undefined;
+  };
+
+  const mapOrientationValue = (v: string): string | undefined => {
+    const l = v.toLowerCase().replace(/\s+/g, '');
+    if (/\b(northeast|severoistok|nordost|nordest)\b/i.test(l)) return 'northEast';
+    if (/\b(northwest|severozapad|nordwest|nordovest)\b/i.test(l)) return 'northWest';
+    if (/\b(southeast|jugoistok|südost|sudest)\b/i.test(l)) return 'southEast';
+    if (/\b(southwest|jugozapad|südwest|sudovest)\b/i.test(l)) return 'southWest';
+    if (/\b(north|sever|sjever|nord|nord|север)\b/i.test(l)) return 'north';
+    if (/\b(south|jug|sud|sud|юг)\b/i.test(l)) return 'south';
+    if (/\b(east|istok|ost|est|восток)\b/i.test(l)) return 'east';
+    if (/\b(west|zapad|west|ovest|запад)\b/i.test(l)) return 'west';
+    return undefined;
   };
 
   // Pattern 1: <dt>Label</dt><dd>Value</dd>

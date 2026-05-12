@@ -569,6 +569,95 @@ export const isValidRssItem = (raw: Record<string, unknown>): boolean => {
   return isValidListingItem(raw);
 };
 
+// ── Enum value mappers ─────────────────────────────────────────────────────
+// Each function returns the canonical enum string or undefined if nothing matches.
+
+type Furnishing = 'furnished' | 'semi-furnished' | 'unfurnished';
+type HeatingType = 'central' | 'electric' | 'gas' | 'oil' | 'heat-pump' | 'solar' | 'wood' | 'none';
+type Condition = 'new' | 'excellent' | 'good' | 'fair' | 'needs-renovation';
+type ViewType = 'sea' | 'mountain' | 'city' | 'park' | 'garden' | 'street';
+type EnergyRating = 'A+' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+type Orientation = 'north' | 'south' | 'east' | 'west' | 'northEast' | 'northWest' | 'southEast' | 'southWest';
+
+const FURNISHING_VALS = new Set<Furnishing>(['furnished', 'semi-furnished', 'unfurnished']);
+const HEATING_VALS = new Set<HeatingType>(['central', 'electric', 'gas', 'oil', 'heat-pump', 'solar', 'wood', 'none']);
+const CONDITION_VALS = new Set<Condition>(['new', 'excellent', 'good', 'fair', 'needs-renovation']);
+const VIEW_VALS = new Set<ViewType>(['sea', 'mountain', 'city', 'park', 'garden', 'street']);
+const ORIENTATION_VALS = new Set<Orientation>(['north', 'south', 'east', 'west', 'northEast', 'northWest', 'southEast', 'southWest']);
+
+const mapFurnishing = (v: unknown): Furnishing | undefined => {
+  if (!v) return undefined;
+  const s = String(v).toLowerCase().trim();
+  if (FURNISHING_VALS.has(s as Furnishing)) return s as Furnishing;
+  if (/fully.?furn|kompletno|potpu(no|njen)|namješteno|vollmöbl|complet|arredato/i.test(s)) return 'furnished';
+  if (/semi|djelomič|teilmöbl|partiel|parzialmente/i.test(s)) return 'semi-furnished';
+  if (/unfurn|nije\s*namj|bez\s*nam|ohne.?möb|non.?meub|non.?arred/i.test(s)) return 'unfurnished';
+  if (/\b(furn|namješten|namešten|opremljen|möbliert|meublé|arredato)\b/i.test(s)) return 'furnished';
+  return undefined;
+};
+
+const mapHeatingType = (v: unknown): HeatingType | undefined => {
+  if (!v) return undefined;
+  const s = String(v).toLowerCase().trim();
+  if (HEATING_VALS.has(s as HeatingType)) return s as HeatingType;
+  if (/central|district|daljinsko|centralno|fernwärme/i.test(s)) return 'central';
+  if (/electr|elek|struj|elektr/i.test(s)) return 'electric';
+  if (/\bgas\b|\bgaz\b|\bplin\b/i.test(s)) return 'gas';
+  if (/\boil\b|mazut|loži|heiz[öo]l|fioul/i.test(s)) return 'oil';
+  if (/heat.?pump|topl[oi]n[sa]\s*pumpa|wärmepumpe|pompe.?chaleur/i.test(s)) return 'heat-pump';
+  if (/solar|solarno|solaire/i.test(s)) return 'solar';
+  if (/wood|drv[ao]|bois|legna|holz|biomass|peć/i.test(s)) return 'wood';
+  return undefined;
+};
+
+const mapCondition = (v: unknown): Condition | undefined => {
+  if (!v) return undefined;
+  const s = String(v).toLowerCase().trim();
+  if (CONDITION_VALS.has(s as Condition)) return s as Condition;
+  if (/\bnew\b|novo?gradnja|neubau|neuf|nuovo/i.test(s)) return 'new';
+  if (/excellent|odlič|izvrs|ausgezeich|eccellente/i.test(s)) return 'excellent';
+  if (/\bgood\b|\bdobr[ao]\b|\bgut\b|\bbon\b|\bbuono\b/i.test(s)) return 'good';
+  if (/fair|srednje|prihvatl|befriedi|passable|discreto/i.test(s)) return 'fair';
+  if (/renovat|needs.?work|za.?renovir|umbaubedürf|rénov|da.?ristruttur/i.test(s)) return 'needs-renovation';
+  return undefined;
+};
+
+const mapViewType = (v: unknown): ViewType | undefined => {
+  if (!v) return undefined;
+  const s = String(v).toLowerCase().trim();
+  if (VIEW_VALS.has(s as ViewType)) return s as ViewType;
+  if (/\bsea\b|\bmore\b|\bmeer\b|\bmer\b|\bmare\b|\bmorje\b|\btengerpart\b/i.test(s)) return 'sea';
+  if (/mountain|planin|berg|montagne|montagna|hegy/i.test(s)) return 'mountain';
+  if (/\bcity\b|\bgrad\b|\bstadt\b|\bville\b|\bcittà\b|\bváros\b/i.test(s)) return 'city';
+  if (/\bpark\b/i.test(s)) return 'park';
+  if (/garden|vrt|garten|jardin|giardino|kert/i.test(s)) return 'garden';
+  if (/street|ulica|straße|rue|strada|utca/i.test(s)) return 'street';
+  return undefined;
+};
+
+const mapEnergyRating = (v: unknown): EnergyRating | undefined => {
+  if (!v) return undefined;
+  const m = String(v).trim().match(/\b([A-G][+]?)\b/);
+  const ratings = new Set<EnergyRating>(['A+', 'A', 'B', 'C', 'D', 'E', 'F', 'G']);
+  if (m && ratings.has(m[1].toUpperCase() as EnergyRating)) return m[1].toUpperCase() as EnergyRating;
+  return undefined;
+};
+
+const mapOrientation = (v: unknown): Orientation | undefined => {
+  if (!v) return undefined;
+  const s = String(v).toLowerCase().trim();
+  if (ORIENTATION_VALS.has(s as Orientation)) return s as Orientation;
+  if (/northeast|severoistok|nordost|nordest/i.test(s)) return 'northEast';
+  if (/northwest|severozapad|nordwest|nordovest/i.test(s)) return 'northWest';
+  if (/southeast|jugoistok|südost|sudest/i.test(s)) return 'southEast';
+  if (/southwest|jugozapad|südwest|sudovest/i.test(s)) return 'southWest';
+  if (/\bnorth\b|\bsever\b|\bsjever\b|\bnord\b|\bсевер\b/i.test(s)) return 'north';
+  if (/\bsouth\b|\bjug\b|\bsud\b|\bюг\b/i.test(s)) return 'south';
+  if (/\beast\b|\bistok\b|\bost\b|\best\b|\bвосток\b/i.test(s)) return 'east';
+  if (/\bwest\b|\bzapad\b|\bzapada\b|\bовест\b/i.test(s)) return 'west';
+  return undefined;
+};
+
 /**
  * Convert an adapter's RawListing into a `Property` document.
  * The result is `Partial<IProperty>` because the orchestrator merges
@@ -731,6 +820,32 @@ export const normalize = async (
     }
   }
 
+  // ── Optional enum fields ─────────────────────────────────────────────────
+  const floorNumber = parseInt0(mapped.floor ?? mapped.floorNumber);
+  const totalFloors = parseInt0(mapped.totalFloors);
+
+  // Try field map first; fall back to scanning the listing description.
+  let furnishing = mapFurnishing(mapped.furnishing);
+  if (!furnishing && fullText) furnishing = mapFurnishing(fullText) ?? undefined;
+
+  let heatingType = mapHeatingType(mapped.heatingType);
+  // Don't scan free text for heating — too many false positives in descriptions.
+
+  let condition = mapCondition(mapped.condition);
+  if (!condition && fullText) condition = mapCondition(fullText) ?? undefined;
+
+  let viewType = mapViewType(mapped.viewType);
+  if (!viewType && fullText) viewType = mapViewType(fullText) ?? undefined;
+
+  const energyRating = mapEnergyRating(mapped.energyRating);
+  const orientation = mapOrientation(mapped.orientation);
+
+  // Distances — enricher stores in metres; keep as-is.
+  const distanceToSea = parseFloatLoose(mapped.distanceToSea);
+  const distanceToCenter = parseFloatLoose(mapped.distanceToCenter);
+  const distanceToSchool = parseFloatLoose(mapped.distanceToSchool);
+  const distanceToHospital = parseFloatLoose(mapped.distanceToHospital);
+
   const property: Partial<IProperty> = {
     sellerId,
     createdByName,
@@ -750,6 +865,18 @@ export const normalize = async (
     sqft: sqft ?? 0,
     yearBuilt: parseInt0(mapped.yearBuilt) ?? 0,
     parking: parking ?? 0,
+    ...(floorNumber != null && floorNumber >= 0 && floorNumber <= 100 && { floorNumber }),
+    ...(totalFloors != null && totalFloors >= 1 && totalFloors <= 100 && { totalFloors }),
+    ...(furnishing && { furnishing }),
+    ...(heatingType && { heatingType }),
+    ...(condition && { condition }),
+    ...(viewType && { viewType }),
+    ...(energyRating && { energyRating }),
+    ...(orientation && { orientation }),
+    ...(distanceToSea != null && distanceToSea > 0 && { distanceToSea }),
+    ...(distanceToCenter != null && distanceToCenter > 0 && { distanceToCenter }),
+    ...(distanceToSchool != null && distanceToSchool > 0 && { distanceToSchool }),
+    ...(distanceToHospital != null && distanceToHospital > 0 && { distanceToHospital }),
     description,
     specialFeatures: Array.isArray(mapped.specialFeatures) ? (mapped.specialFeatures as string[]) : [],
     materials: Array.isArray(mapped.materials) ? (mapped.materials as string[]) : [],
