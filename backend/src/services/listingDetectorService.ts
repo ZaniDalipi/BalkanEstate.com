@@ -5,7 +5,6 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import type { AnyNode } from 'domhandler';
-import Parser from 'rss-parser';
 import { isValidListingItem, isValidRssItem } from './listingNormalizerService';
 import { findSiteProfile } from './listingDetectorProfiles';
 
@@ -456,19 +455,6 @@ const discoverSitemapUrls = async (pageUrl: string): Promise<{
   return { urls: filtered.slice(0, SITEMAP_RETURN_LIMIT), source: usedSitemap };
 };
 
-/** Extract the first RSS/Atom feed URL from a page's <head>. */
-const findFeedLinkInHtml = (html: string, baseUrl: string): string | null => {
-  const $ = cheerio.load(html);
-  const el = $('link[rel="alternate"][type="application/rss+xml"], link[rel="alternate"][type="application/atom+xml"]').first();
-  const href = el.attr('href');
-  if (!href) return null;
-  try {
-    return new URL(href, baseUrl).toString();
-  } catch {
-    return href;
-  }
-};
-
 /** Check if page has JSON-LD with real-estate types. */
 const findJsonLdInHtml = (html: string): boolean => {
   const $ = cheerio.load(html);
@@ -483,26 +469,6 @@ const findJsonLdInHtml = (html: string): boolean => {
     } catch {/* ignore */}
   });
   return found;
-};
-
-/** Try to validate a URL looks like an RSS/Atom feed with real estate listings. */
-const probeRss = async (url: string): Promise<Record<string, unknown>[] | null> => {
-  try {
-    const parser = new Parser({ timeout: TIMEOUT, headers: { 'User-Agent': BROWSER_UA } });
-    const feed = await parser.parseURL(url);
-    if (feed.items && feed.items.length > 0) {
-      // Use the stricter RSS-aware validator so news articles on WordPress
-      // sites (which always have a `categories` key) don't slip through.
-      const validItems = (feed.items as Record<string, unknown>[]).filter(item => isValidRssItem(item));
-      // Require at least 30% of feed items to look like listings — a low
-      // ratio means we're looking at a mixed blog/news feed, not a property feed.
-      const ratio = validItems.length / feed.items.length;
-      if (validItems.length > 0 && ratio >= 0.3) return validItems;
-    }
-    return null;
-  } catch {
-    return null;
-  }
 };
 
 /** Try WordPress REST API — first via property CPT, then generic posts. */
@@ -752,14 +718,6 @@ const probeJsonFeed = async (url: string): Promise<{ items: Record<string, unkno
   }
   return null;
 };
-
-/** Build a best-effort fieldMap from an RSS item. */
-const rssFieldMap = (): Record<string, string> => ({
-  title: 'title',
-  description: 'content:encoded',
-  imageUrl: 'enclosure.url',
-  city: 'categories',
-});
 
 /** Build a best-effort fieldMap from JSON-LD keys. */
 const jsonLdFieldMap = (): Record<string, string> => ({
@@ -1141,43 +1099,13 @@ export const detectFeedForUrlWithAuth = async (
 export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> => {
   const url = rawUrl.trim();
 
-  // ── 1. Probe the URL directly as RSS ────────────────────────────────────────
-  const rssItems = await probeRss(url);
-  if (rssItems) {
-    const sample = rssItems[0];
-    return {
-      adapterType: 'rss',
-      adapterConfig: { feedUrls: [url] },
-      fieldMap: rssFieldMap(),
-      sample,
-      hint: `RSS/Atom feed detected — ${rssItems.length} item(s) found`,
-    };
-  }
-
-  // ── 2. Fetch the page HTML and look for clues ────────────────────────────────
+  // ── 1. Fetch the page HTML ────────────────────────────────────────────────────
   const fetched = await fetchPageStrict(url);
   const html = fetched.html;
-  // Capture a non-blocking-error reason so we can surface it later if all
-  // detection paths fail (instead of silently saying "could not auto-detect").
   const fetchFailureReason = html === null ? (fetched as { reason: string }).reason : null;
 
   if (html && typeof html === 'string') {
-    // 2a. RSS/Atom link in <head>
-    const feedLink = findFeedLinkInHtml(html, url);
-    if (feedLink) {
-      const items = await probeRss(feedLink);
-      if (items) {
-        return {
-          adapterType: 'rss',
-          adapterConfig: { feedUrls: [feedLink] },
-          fieldMap: rssFieldMap(),
-          sample: items[0],
-          hint: `RSS/Atom feed found via page <head>: ${feedLink}`,
-        };
-      }
-    }
-
-    // 2b. JSON-LD embedded in page
+    // 1a. JSON-LD embedded in page (Schema.org RealEstateListing etc.)
     if (findJsonLdInHtml(html)) {
       return {
         adapterType: 'jsonLd',
@@ -1187,9 +1115,9 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
       };
     }
 
-    // 2c. Embedded SPA state (Next.js, Nuxt, window.__INITIAL_STATE__)
-    //     Many modern Balkan portals (cityexpert.rs, indomio.rs, etc.) embed their
-    //     entire page data as JSON so we can read it without DOM scraping.
+    // 1b. Embedded SPA state (Next.js __NEXT_DATA__, Nuxt __NUXT__, window.__INITIAL_STATE__).
+    //     Modern portals (cityexpert.rs, indomio.rs, etc.) embed the full page
+    //     data as structured JSON — most reliable source of field-rich listings.
     const spaData = extractEmbeddedSpaListings(html);
     if (spaData) {
       const validItems = spaData.items.filter(i => isValidListingItem(i));
@@ -1210,14 +1138,16 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
       }
     }
 
-    // 2d. WordPress indicators → probe WP REST
+    // 1c. WordPress site — probe structured REST API endpoints (property CPTs first,
+    //     then generic posts). This gives real JSON with all fields, no news mixing.
     if (html.includes('/wp-content/') || html.includes('wp-json')) {
       const wpItems = await probeWordPress(url);
       if (wpItems) {
+        const origin = new URL(url).origin;
         return {
           adapterType: 'customApi',
           adapterConfig: {
-            url: `${new URL(url).origin}/wp-json/wp/v2/posts`,
+            url: `${origin}/wp-json/wp/v2/posts`,
             params: { per_page: 20, _embed: true },
             itemsPath: '$[*]',
             idPath: '$.id',
@@ -1225,94 +1155,13 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
           },
           fieldMap: wpFieldMap(),
           sample: wpItems[0],
-          hint: 'WordPress REST API detected',
+          hint: 'WordPress REST API detected — structured JSON listing data',
         };
       }
     }
   }
 
-  // ── 3. Common RSS paths ──────────────────────────────────────────────────────
-  const origin = (() => { try { return new URL(url).origin; } catch { return ''; } })();
-  const inputPath = (() => { try { return new URL(url).pathname; } catch { return '/'; } })();
-
-  // Try property-specific feed paths first. WordPress + real-estate plugins
-  // (WP Property, Easy Property Listings, IMPress Listings, Estatik, etc.)
-  // expose a dedicated CPT feed that contains only listing posts, not news.
-  // These must come BEFORE the generic /feed which mixes everything.
-  const propertyCptPaths = [
-    '/?feed=rss2&post_type=property',
-    '/?feed=rss2&post_type=listing',
-    '/?feed=rss2&post_type=listings',
-    '/?feed=rss2&post_type=real-estate',
-    '/?feed=rss2&post_type=nekretnine',
-    '/?feed=rss2&post_type=oglas',
-    '/feed/?post_type=property',
-    '/feed/?post_type=listing',
-    '/properties/feed/',
-    '/property/feed/',
-    '/listings/feed/',
-    '/listing/feed/',
-    '/nekretnine/feed/',
-    '/oglasi/feed/',
-    '/for-sale/feed/',
-    '/properties-for-sale/feed/',
-    '/for-rent/feed/',
-    '/real-estate/feed/',
-  ];
-  // Also probe the scoped path of the user's URL (e.g. /properties-for-sale-croatia/ → add /feed/ suffix)
-  if (inputPath && inputPath !== '/' && !inputPath.endsWith('/feed/')) {
-    const scoped = inputPath.endsWith('/') ? `${inputPath}feed/` : `${inputPath}/feed/`;
-    propertyCptPaths.unshift(scoped);
-  }
-
-  for (const path of propertyCptPaths) {
-    const candidate = `${origin}${path}`;
-    const items = await probeRss(candidate);
-    if (items) {
-      return {
-        adapterType: 'rss',
-        adapterConfig: { feedUrls: [candidate] },
-        fieldMap: rssFieldMap(),
-        sample: items[0],
-        hint: `Property RSS feed found at ${candidate}`,
-      };
-    }
-  }
-
-  // Generic fallback feeds — only use if all property-specific ones failed.
-  for (const path of ['/rss.xml', '/atom.xml', '/rss', '/?feed=rss2', '/feed/', '/feed']) {
-    const candidate = `${origin}${path}`;
-    const items = await probeRss(candidate);
-    if (items) {
-      return {
-        adapterType: 'rss',
-        adapterConfig: { feedUrls: [candidate] },
-        fieldMap: rssFieldMap(),
-        sample: items[0],
-        hint: `RSS feed found at ${candidate}`,
-      };
-    }
-  }
-
-  // ── 4. WordPress REST on origin ──────────────────────────────────────────────
-  const wpItems = await probeWordPress(url);
-  if (wpItems) {
-    return {
-      adapterType: 'customApi',
-      adapterConfig: {
-        url: `${origin}/wp-json/wp/v2/posts`,
-        params: { per_page: 20, _embed: true },
-        itemsPath: '$[*]',
-        idPath: '$.id',
-        urlPath: '$.link',
-      },
-      fieldMap: wpFieldMap(),
-      sample: wpItems[0],
-      hint: 'WordPress REST API detected',
-    };
-  }
-
-  // ── 5. URL itself as JSON feed ───────────────────────────────────────────────
+  // ── 2. URL itself as a JSON feed ─────────────────────────────────────────────
   const jsonResult = await probeJsonFeed(url);
   if (jsonResult) {
     const sample = jsonResult.items[0];
@@ -1325,15 +1174,35 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
     };
   }
 
-  // ── 6. Known Balkan portal profile → then generic HTML card detection ────────
+  // ── 3. WordPress REST on origin (when HTML fetch failed or WP wasn't detectable) ──
+  const origin = (() => { try { return new URL(url).origin; } catch { return ''; } })();
+  if (origin) {
+    const wpItems = await probeWordPress(url);
+    if (wpItems) {
+      return {
+        adapterType: 'customApi',
+        adapterConfig: {
+          url: `${origin}/wp-json/wp/v2/posts`,
+          params: { per_page: 20, _embed: true },
+          itemsPath: '$[*]',
+          idPath: '$.id',
+          urlPath: '$.link',
+        },
+        fieldMap: wpFieldMap(),
+        sample: wpItems[0],
+        hint: 'WordPress REST API detected — structured JSON listing data',
+      };
+    }
+  }
+
+  // ── 4. Known Balkan portal profile → then generic HTML card detection ─────────
   if (html && typeof html === 'string') {
-    // 6a. Check against known-site profiles (nekretnine.hr, 4zida.rs, etc.)
+    // 4a. Known-site profiles (nekretnine.hr, 4zida.rs, etc.)
     const profile = findSiteProfile(url);
     if (profile) {
       const $ = cheerio.load(html);
       const cardCount = $(profile.listingItem).length;
       if (cardCount >= 2) {
-        // Build a sample from the first card
         const firstCard = $(profile.listingItem).first();
         const pickText = (sel?: string) => sel ? firstCard.find(sel.split('|')[0]).first().text().trim() || undefined : undefined;
         const pickAttr = (sel?: string) => {
@@ -1386,7 +1255,7 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
       }
     }
 
-    // 6b. Generic heuristic: find listing-like anchors and identify card container
+    // 4b. Generic heuristic: find listing-like anchors and identify card container
     const scrape = detectHtmlScrape(html, url);
     if (scrape) {
       return {
@@ -1412,10 +1281,8 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
     }
   }
 
-  // ── 7. Sitemap discovery: works even when the page is JS-rendered ───────────
-  // Most real-estate portals expose a /sitemap.xml referenced in robots.txt.
-  // Fetch the listing detail pages individually and let the JsonLdAdapter parse
-  // each one (it already handles JSON-LD + we'll enrich with OpenGraph too).
+  // ── 5. Sitemap discovery — most reliable for JS-heavy portals ─────────────────
+  //     Fetch detail pages individually and parse JSON-LD / OpenGraph from each.
   const sitemap = await discoverSitemapUrls(url);
   if (sitemap && sitemap.urls.length >= 3) {
     return {
@@ -1430,16 +1297,17 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
     };
   }
 
-  // ── Nothing found ────────────────────────────────────────────────────────────
+  // ── Nothing found ─────────────────────────────────────────────────────────────
   if (fetchFailureReason) {
     throw new Error(
       `Could not auto-detect listings: ${fetchFailureReason} ` +
-      'Try pasting a direct RSS, JSON, or Atom feed URL, or a JSON sample from the agency portal.'
+      'Try pasting a direct JSON feed URL or a JSON sample from the agency portal.'
     );
   }
   throw new Error(
-    'Could not auto-detect a supported feed format. The page may render its listings ' +
-    'entirely in JavaScript (we don\'t run JS), or the site has no recognizable listing markup. ' +
-    'Try pasting a direct RSS, JSON, or Atom feed URL, or a JSON sample from the agency portal.'
+    'Could not auto-detect a supported listing format. The site may render ' +
+    'listings entirely in JavaScript (we don\'t run JS), or has no recognizable ' +
+    'listing structure. Try the "Paste JSON sample" option, or contact the site ' +
+    'owner to ask for their API or JSON export.'
   );
 };

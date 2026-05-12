@@ -342,18 +342,112 @@ const extractStructuredPriceFromHtml = ($: cheerio.CheerioAPI, target: Mapped): 
 };
 
 const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped): void => {
-  // Extract address/city/country from structured elements if not already present
+  // 1. itemprop attributes (most structured)
   if (!target.address) {
-    const addrEl = $('[itemprop="streetAddress"]').first();
-    if (addrEl.length) target.address = addrEl.text().trim();
+    const el = $('[itemprop="streetAddress"]').first();
+    if (el.length) target.address = el.text().trim();
   }
   if (!target.city) {
-    const cityEl = $('[itemprop="addressLocality"]').first();
-    if (cityEl.length) target.city = cityEl.text().trim();
+    const el = $('[itemprop="addressLocality"]').first();
+    if (el.length) target.city = el.text().trim();
   }
   if (!target.country) {
-    const countryEl = $('[itemprop="addressCountry"]').first();
-    if (countryEl.length) target.country = countryEl.text().trim();
+    const el = $('[itemprop="addressCountry"]').first();
+    if (el.length) target.country = el.text().trim();
+  }
+
+  // 2. data-* attributes
+  if (!target.city) {
+    const el = $('[data-city]').first();
+    if (el.length) target.city = (el.attr('data-city') ?? '').trim() || undefined;
+  }
+  if (!target.lat) {
+    const el = $('[data-lat]').first();
+    if (el.length) target.lat = el.attr('data-lat');
+  }
+  if (!target.lng) {
+    const el = $('[data-lng],[data-lon]').first();
+    if (el.length) target.lng = el.attr('data-lng') ?? el.attr('data-lon');
+  }
+
+  // 3. CSS class selectors for location chips/headers common on Balkan RE sites
+  if (!target.city) {
+    const locationSelectors = [
+      '[class*="location-city"]', '[class*="city-name"]', '[class*="property-city"]',
+      '[class*="listing-city"]', '[class*="grad"]', '[class*="lokacija"]',
+      '.location .city', '.property-location .city',
+      '[data-field="city"]', '[data-field="location"]',
+    ];
+    for (const sel of locationSelectors) {
+      const el = $(sel).first();
+      const text = el.text().trim();
+      if (text && text.length < 80 && text.length > 1) {
+        target.city = text.split(/[,/]/)[0].trim();
+        break;
+      }
+    }
+  }
+
+  // 4. Location header chips — e.g. "Shijak Albania" in a single element.
+  //    Look for elements that combine city + country and split them apart.
+  if (!target.city || !target.country) {
+    const chipSelectors = [
+      '[class*="location"]', '[class*="address"]', '[class*="adresa"]',
+      '[class*="property-address"]', '[class*="listing-address"]',
+    ];
+    outer: for (const sel of chipSelectors) {
+      const elements = $(sel).toArray();
+      for (const el of elements) {
+        if (target.city && target.country) break outer;
+        const $el = $(el);
+        if ($el.children().length > 3) continue;
+        const text = $el.text().replace(/\s+/g, ' ').trim();
+        if (!text || text.length < 2 || text.length > 120) continue;
+        const commaIdx = text.indexOf(',');
+        if (commaIdx > 0) {
+          if (!target.city) target.city = text.slice(0, commaIdx).trim();
+          if (!target.country) target.country = text.slice(commaIdx + 1).trim();
+        } else {
+          const words = text.split(' ');
+          if (words.length === 2) {
+            if (!target.city) target.city = words[0];
+            if (!target.country) target.country = words[1];
+          } else if (words.length > 2 && !target.address) {
+            target.address = text;
+            if (!target.city) target.city = words.slice(0, -1).join(' ');
+          }
+        }
+      }
+      if (target.city) break;
+    }
+  }
+
+  // 5. Property ID from data-attributes or common display patterns
+  if (!target.propertyId) {
+    const idAttrs = ['data-property-id', 'data-listing-id', 'data-id', 'data-ref'];
+    for (const attr of idAttrs) {
+      const el = $(`[${attr}]`).first();
+      const val = el.attr(attr)?.trim();
+      if (val && val.length <= 50 && !/^https?:\/\//.test(val)) {
+        target.propertyId = val;
+        break;
+      }
+    }
+  }
+  // "Property ID: Eon140479" style text pattern anywhere on page
+  if (!target.propertyId) {
+    const idPattern = /(?:property\s*id|listing\s*id|ref(?:erence)?\s*(?:no|#|id)?|id\s*(?:oglasa|nekretnine|ponude)|objektnummer|id\s*imobil)[:\s#]*([A-Za-z0-9\-_]+)/i;
+    const leafElements = $('*').toArray();
+    for (const el of leafElements) {
+      if (target.propertyId) break;
+      const $el = $(el);
+      if ($el.children().length > 0) continue;
+      const text = $el.text().trim();
+      const m = text.match(idPattern);
+      if (m && m[1] && m[1].length >= 3 && m[1].length <= 50) {
+        target.propertyId = m[1];
+      }
+    }
   }
 };
 
@@ -759,6 +853,38 @@ const extractBalkanLabelValues = ($: cheerio.CheerioAPI, baseUrl: string, target
     // EN
     'distancetocenter': 'distanceToCenter', 'distancetocitycentre': 'distanceToCenter',
     'distancefromcenter': 'distanceToCenter',
+
+    // ── Property / listing ID ─────────────────────────────────────────────
+    // EN
+    'propertyid': 'propertyId', 'listingid': 'propertyId', 'referenceid': 'propertyId',
+    'refid': 'propertyId', 'ref': 'propertyId', 'id': 'propertyId', 'mlsid': 'propertyId',
+    // HR/BA/SR
+    'šifraoglasa': 'propertyId', 'sifraoglasa': 'propertyId', 'idoglasa': 'propertyId',
+    'referenca': 'propertyId', 'oznaka': 'propertyId', 'sifra': 'propertyId',
+    // SR Cyrillic
+    'шифраогласа': 'propertyId', 'ознака': 'propertyId', 'шифра': 'propertyId',
+    // AL
+    'idproneesise': 'propertyId',
+    // DE
+    'objektnummer': 'propertyId', 'immobilienid': 'propertyId', 'referenznummer': 'propertyId',
+    // FR
+    'referencebien': 'propertyId', 'numerobien': 'propertyId',
+    // IT
+    'codiceimmobile': 'propertyId', 'riferimento': 'propertyId',
+
+    // ── Listing type (sale vs rent) ───────────────────────────────────────
+    // HR/BA/SR
+    'vrstaprodaje': 'listingType', 'tipoglasa': 'listingType',
+    'transakcija': 'listingType', 'nacinprodaje': 'listingType',
+    // SR Cyrillic
+    'врстапродаjе': 'listingType', 'трансакциjа': 'listingType',
+    // EN
+    'dealtype': 'listingType', 'transactiontype': 'listingType', 'offertype': 'listingType',
+    'listingtype': 'listingType',
+    // DE
+    'angebotsart': 'listingType', 'transaktionsart': 'listingType',
+    // AL
+    'llojioferte': 'listingType', 'transaksion': 'listingType',
   };
 
   const applyLabelValue = (labelRaw: string, valueRaw: string): void => {
@@ -843,6 +969,13 @@ const extractBalkanLabelValues = ($: cheerio.CheerioAPI, baseUrl: string, target
     } else if (field === 'distanceToCenter' && !target.distanceToCenter) {
       const n = parseDistanceValue(v);
       if (n != null) target.distanceToCenter = n;
+    } else if (field === 'propertyId' && !target.propertyId) {
+      // Store the external listing ID if it looks reasonable (not a long URL/hash).
+      if (v.length <= 50 && !/^https?:\/\//.test(v)) target.propertyId = v;
+    } else if (field === 'listingType' && !target.listingType) {
+      const lv = v.toLowerCase();
+      if (/\b(sale|prodaj|shitj|vanzar|πωλ|eladó|verkauf|kauf|продаж)\b/i.test(lv)) target.listingType = 'sale';
+      else if (/\b(rent|najam|qira|chirie|ενοικ|kiadó|miete|наем|кирија)\b/i.test(lv)) target.listingType = 'rent';
     }
   };
 

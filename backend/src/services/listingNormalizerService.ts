@@ -425,7 +425,7 @@ const knownPropertyKeys = new Set<string>([
   'tourUrl', 'virtualTour360Url', 'videoUrl', 'distanceToCenter', 'distanceToSea',
   'distanceToSchool', 'distanceToHospital', 'specialFeatures', 'materials', 'floorplanUrl',
   'minimumLeaseDuration', 'maximumLeaseDuration', 'availableFrom', 'utilitiesIncluded',
-  'internetIncluded', 'tenantRequirements', 'maxOccupants',
+  'internetIncluded', 'tenantRequirements', 'maxOccupants', 'propertyId',
 ]);
 
 /**
@@ -697,7 +697,10 @@ export const normalize = async (
     parsedPrice = extractPriceFromText(mapped.title);
   }
 
-  const explicitListing = mapListingType(mapped.listingType);
+  // Determine listing type: explicit field → title/description text scan → price hint → default sale.
+  const explicitListing = mapListingType(mapped.listingType)
+    ?? mapListingType(mapped.title)
+    ?? mapListingType(mapped.description);
   const listingType: IProperty['listingType'] =
     explicitListing ?? (parsedPrice?.isRent ? 'rent' : 'sale');
 
@@ -893,6 +896,7 @@ export const normalize = async (
     saves: 0,
     inquiries: 0,
     lastRenewed: new Date(),
+    ...(typeof mapped.propertyId === 'string' && mapped.propertyId ? { propertyId: mapped.propertyId } : {}),
     source: source.slug,
     sourceListingId: raw.id,
     sourceUrl: raw.url,
