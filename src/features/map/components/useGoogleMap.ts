@@ -524,51 +524,37 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
   // Create clusterer once marker library is available
   const createClusterer = useCallback((mapInstance: google.maps.Map) => {
-    // Cluster click: zoom into the cluster's exact visual position with smooth animation.
-    //
-    // Why event.latLng instead of cluster.position:
-    //   cluster.position = weighted centroid of ALL markers inside the cluster, which
-    //   can be far from where the cluster bubble is drawn on screen (especially for
-    //   clusters that span multiple countries). event.latLng is the lat/lng directly
-    //   under the user's click — always the visual center of the cluster marker.
-    //
-    // Why bounds-derived zoom:
-    //   A fixed +3 delta may not be enough to expand a large cluster. We estimate the
-    //   correct target zoom from the cluster's geographic span so it reliably breaks apart.
-    const onClusterClick = (event: google.maps.MapMouseEvent, cluster: { position?: google.maps.LatLng | google.maps.LatLngLiteral | null; bounds?: google.maps.LatLngBounds }, map: google.maps.Map) => {
-      // Anchor on the exact click position, fall back to cluster.position if unavailable
-      const center = event.latLng ?? cluster.position;
-      if (!center) return;
+    const onClusterClick = (
+      event: google.maps.MapMouseEvent,
+      cluster: any,
+      map: google.maps.Map
+    ) => {
+      // Use the actual click position for centering
+      const clickLat = event.latLng?.lat();
+      const clickLng = event.latLng?.lng();
 
-      map.setCenter(center); // synchronous snap — zoom steps will be correctly anchored
+      if (clickLat === undefined || clickLng === undefined) return;
 
-      const fromZoom = map.getZoom() ?? 10;
-      let toZoom = fromZoom + 3; // sensible default
+      const currentZoom = map.getZoom() ?? 10;
+      const targetZoom = Math.min(currentZoom + 4, 18);
 
-      if (cluster.bounds) {
-        const ne = cluster.bounds.getNorthEast();
-        const sw = cluster.bounds.getSouthWest();
-        const maxSpan = Math.max(
-          Math.abs(ne.lat() - sw.lat()),
-          Math.abs(ne.lng() - sw.lng()),
-        );
-        if (maxSpan > 0) {
-          // Each zoom level halves the geographic span visible on screen.
-          // log2(360 / span) gives the zoom at which this span fills ~360° = whole world.
-          // Adding 1 ensures we zoom past the cluster boundary so it breaks apart.
-          const estimated = Math.round(Math.log2(360 / maxSpan)) + 1;
-          toZoom = Math.min(Math.max(fromZoom + 2, estimated), 16);
-        }
-      }
+      // Pan directly to click position with smooth animation
+      map.panTo({ lat: clickLat, lng: clickLng });
 
-      const animateZoom = (cur: number) => {
-        if (cur >= toZoom) return;
-        setTimeout(() => {
-          map.setZoom(cur + 1);
-          animateZoom(cur + 1);
-        }, 120);
-      };
-      animateZoom(fromZoom);
+      // Then zoom in smoothly
+      setTimeout(() => {
+        const zoomSteps = Math.abs(targetZoom - currentZoom);
+        let currentZoomLevel = currentZoom;
+
+        const zoomInterval = setInterval(() => {
+          if (currentZoomLevel >= targetZoom) {
+            clearInterval(zoomInterval);
+            return;
+          }
+          currentZoomLevel++;
+          map.setZoom(currentZoomLevel);
+        }, 80);
+      }, 400);
     };
 
     const clusterer = new MarkerClusterer({
