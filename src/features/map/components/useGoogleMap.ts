@@ -536,39 +536,10 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     //   A fixed +3 delta may not be enough to expand a large cluster. We estimate the
     //   correct target zoom from the cluster's geographic span so it reliably breaks apart.
     const onClusterClick = (event: google.maps.MapMouseEvent, cluster: { position?: google.maps.LatLng | google.maps.LatLngLiteral | null; bounds?: google.maps.LatLngBounds }, map: google.maps.Map) => {
-      // Anchor on the exact click position, fall back to cluster.position if unavailable
-      const center = event.latLng ?? cluster.position;
-      if (!center) return;
+      if (!cluster.bounds) return;
 
-      map.setCenter(center); // synchronous snap — zoom steps will be correctly anchored
-
-      const fromZoom = map.getZoom() ?? 10;
-      let toZoom = fromZoom + 3; // sensible default
-
-      if (cluster.bounds) {
-        const ne = cluster.bounds.getNorthEast();
-        const sw = cluster.bounds.getSouthWest();
-        const maxSpan = Math.max(
-          Math.abs(ne.lat() - sw.lat()),
-          Math.abs(ne.lng() - sw.lng()),
-        );
-        if (maxSpan > 0) {
-          // Each zoom level halves the geographic span visible on screen.
-          // log2(360 / span) gives the zoom at which this span fills ~360° = whole world.
-          // Adding 1 ensures we zoom past the cluster boundary so it breaks apart.
-          const estimated = Math.round(Math.log2(360 / maxSpan)) + 1;
-          toZoom = Math.min(Math.max(fromZoom + 2, estimated), 16);
-        }
-      }
-
-      const animateZoom = (cur: number) => {
-        if (cur >= toZoom) return;
-        setTimeout(() => {
-          map.setZoom(cur + 1);
-          animateZoom(cur + 1);
-        }, 120);
-      };
-      animateZoom(fromZoom);
+      // Use fitBounds to properly zoom into the cluster's visual area with padding
+      map.fitBounds(cluster.bounds, { top: 80, right: 60, bottom: 80, left: 60 });
     };
 
     const clusterer = new MarkerClusterer({
