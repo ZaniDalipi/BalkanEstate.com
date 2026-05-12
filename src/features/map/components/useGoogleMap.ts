@@ -524,22 +524,45 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
   // Create clusterer once marker library is available
   const createClusterer = useCallback((mapInstance: google.maps.Map) => {
-    // Cluster click: zoom into the cluster's exact visual position with smooth animation.
-    //
-    // Why event.latLng instead of cluster.position:
-    //   cluster.position = weighted centroid of ALL markers inside the cluster, which
-    //   can be far from where the cluster bubble is drawn on screen (especially for
-    //   clusters that span multiple countries). event.latLng is the lat/lng directly
-    //   under the user's click — always the visual center of the cluster marker.
-    //
-    // Why bounds-derived zoom:
-    //   A fixed +3 delta may not be enough to expand a large cluster. We estimate the
-    //   correct target zoom from the cluster's geographic span so it reliably breaks apart.
-    const onClusterClick = (event: google.maps.MapMouseEvent, cluster: { position?: google.maps.LatLng | google.maps.LatLngLiteral | null; bounds?: google.maps.LatLngBounds }, map: google.maps.Map) => {
-      if (!cluster.bounds) return;
+    const onClusterClick = (
+      event: google.maps.MapMouseEvent,
+      cluster: any,
+      map: google.maps.Map
+    ) => {
+      // Calculate bounds from cluster markers
+      let bounds = new google.maps.LatLngBounds();
+      let hasMarkers = false;
 
-      // Use fitBounds to properly zoom into the cluster's visual area with padding
-      map.fitBounds(cluster.bounds, { top: 80, right: 60, bottom: 80, left: 60 });
+      if (cluster.markers && Array.isArray(cluster.markers)) {
+        for (const marker of cluster.markers) {
+          if (marker.position) {
+            bounds.extend(marker.position);
+            hasMarkers = true;
+          }
+        }
+      }
+
+      if (!hasMarkers) return;
+
+      // Smooth animation to the cluster - zoom out first, then pan and zoom in
+      const currentZoom = map.getZoom() || 10;
+      const currentCenter = map.getCenter();
+
+      // Step 1: Zoom out slightly for cinematic effect
+      map.setZoom(currentZoom - 1);
+
+      // Step 2: Pan to cluster center with animation
+      setTimeout(() => {
+        const clusterCenter = bounds.getCenter();
+        if (clusterCenter) {
+          map.panTo(clusterCenter);
+        }
+
+        // Step 3: Fit bounds with padding
+        setTimeout(() => {
+          map.fitBounds(bounds, { top: 100, right: 80, bottom: 100, left: 80 });
+        }, 300);
+      }, 200);
     };
 
     const clusterer = new MarkerClusterer({
