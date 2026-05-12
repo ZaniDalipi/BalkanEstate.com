@@ -849,6 +849,8 @@ export const normalize = async (
   const distanceToSchool = parseFloatLoose(mapped.distanceToSchool);
   const distanceToHospital = parseFloatLoose(mapped.distanceToHospital);
 
+  // If price is 0 (couldn't extract), mark as negotiable so it shows "Contact for price"
+  const finalPrice = parsedPrice?.price ?? 0;
   const property: Partial<IProperty> = {
     sellerId,
     createdByName,
@@ -857,8 +859,8 @@ export const normalize = async (
     listingType,
     title: (mapped.title as string | undefined) ?? undefined,
     status: 'active',
-    price: parsedPrice?.price ?? 0,
-    isNegotiable: parsedPrice?.price === 0 ? true : Boolean(mapped.isNegotiable),
+    price: finalPrice,
+    isNegotiable: finalPrice === 0 ? true : Boolean(mapped.isNegotiable),
     address,
     city: city || 'Unknown',
     country: country || 'Unknown',

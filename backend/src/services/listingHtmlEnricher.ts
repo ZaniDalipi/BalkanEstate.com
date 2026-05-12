@@ -327,16 +327,46 @@ const extractGalleryImages = ($: cheerio.CheerioAPI, base: string, target: Mappe
 
 const extractStructuredPriceFromHtml = ($: cheerio.CheerioAPI, target: Mapped): void => {
   if (target.price) return;
-  // Look for common price displays in HTML
-  const selectors = ['[data-price]', '[data-list-price]', '[data-asking-price]', '.price', '.listing-price', '[itemprop="price"]'];
+
+  // 1. Known data-* attributes
+  const selectors = [
+    '[data-price]', '[data-list-price]', '[data-asking-price]', '[data-amount]',
+    '.price', '.listing-price', '.property-price', '[itemprop="price"]',
+  ];
   for (const selector of selectors) {
     const el = $(selector).first();
     if (el.length) {
-      const val = el.attr('data-price') ?? el.attr('data-list-price') ?? el.attr('data-asking-price') ?? el.text();
-      if (val) {
+      const val = el.attr('data-price') ?? el.attr('data-list-price') ??
+                  el.attr('data-asking-price') ?? el.attr('data-amount') ?? el.text();
+      if (val && /[\d€$£]/.test(val)) {
         target.price = val.trim();
         return;
       }
+    }
+  }
+
+  // 2. Scan all data-* attributes for price-like values
+  const allElements = $('*').toArray();
+  for (const el of allElements) {
+    const attrs = (el as any).attribs || {};
+    for (const [key, value] of Object.entries(attrs)) {
+      if (!key.startsWith('data-')) continue;
+      if (!value || typeof value !== 'string') continue;
+      // Price pattern: number + currency (€, $, EUR, etc.)
+      if (/^\d[\d,.\s]*(?:€|USD|\$|EUR|GBP|£|CHF|RON|BGN|HRK|BAM|RSD|ALL)/.test(value)) {
+        target.price = value;
+        return;
+      }
+    }
+  }
+
+  // 3. Look for price in aria-label or title attributes (common on modern sites)
+  const ariaElements = $('[aria-label*="price"], [aria-label*="Price"], [title*="price"], [title*="Price"]').toArray();
+  for (const el of ariaElements) {
+    const label = $(el).attr('aria-label') || $(el).attr('title') || '';
+    if (/\d[\d,.\s]*(?:€|USD|\$|EUR)/.test(label)) {
+      target.price = label;
+      return;
     }
   }
 };
@@ -389,62 +419,123 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
   }
 
   // 4. Location header chips — e.g. "Shijak Albania" in a single element.
-  //    Look for elements that combine city + country and split them apart.
+  //    Scan breadcrumbs, headers, and any location-like text.
   if (!target.city || !target.country) {
     const chipSelectors = [
       '[class*="location"]', '[class*="address"]', '[class*="adresa"]',
       '[class*="property-address"]', '[class*="listing-address"]',
+      '[class*="breadcrumb"]', '.breadcrumb', 'nav.breadcrumb',
+      'h1', 'h2', '[class*="title"]', '[class*="header"]',
+      '[class*="place"]', '[class*="geo"]', '[class*="region"]',
+      'nav', 'nav .location', 'header .location',
     ];
     outer: for (const sel of chipSelectors) {
       const elements = $(sel).toArray();
       for (const el of elements) {
         if (target.city && target.country) break outer;
         const $el = $(el);
-        if ($el.children().length > 3) continue;
-        const text = $el.text().replace(/\s+/g, ' ').trim();
-        if (!text || text.length < 2 || text.length > 120) continue;
+        // For headers/titles, include up to 5 children; for other selectors, keep tight
+        const tagName = ((el as any).tagName || '').toLowerCase();
+        const maxChildren = /^h[1-6]$|title/i.test(tagName) ? 5 : 3;
+        if ($el.children().length > maxChildren) continue;
+        let text = $el.text().replace(/\s+/g, ' ').trim();
+        // Skip if too long or too short
+        if (!text || text.length < 2 || text.length > 180) continue;
+        // Remove common noise (word count, currency, numbers at start/end)
+        text = text.replace(/^\s*\d+\s*(property|listing|properties|m²|sqm|beds?|m\d)?[,\s]*/, '')
+                   .replace(/\s*(\d+\s*(?:property|listing|properties))?$/, '')
+                   .trim();
+
+        // Try splitting by comma first (most reliable)
         const commaIdx = text.indexOf(',');
-        if (commaIdx > 0) {
-          if (!target.city) target.city = text.slice(0, commaIdx).trim();
-          if (!target.country) target.country = text.slice(commaIdx + 1).trim();
-        } else {
-          const words = text.split(' ');
-          if (words.length === 2) {
-            if (!target.city) target.city = words[0];
-            if (!target.country) target.country = words[1];
-          } else if (words.length > 2 && !target.address) {
-            target.address = text;
-            if (!target.city) target.city = words.slice(0, -1).join(' ');
+        if (commaIdx > 0 && commaIdx < text.length - 1) {
+          const part1 = text.slice(0, commaIdx).trim();
+          const part2 = text.slice(commaIdx + 1).trim();
+          if (!target.city && part1.length < 60) target.city = part1;
+          if (!target.country && part2.length < 60) target.country = part2;
+          if (target.city && target.country) break outer;
+          continue;
+        }
+
+        // Try breadcrumb separators
+        if (/\s*\/\s+|\s*>\s*|\s*»\s*|\s*·\s*/.test(text)) {
+          const parts = text.split(/\s*(?:\/|>|»|·)\s+/).filter(p => p.length > 0);
+          if (parts.length >= 2) {
+            if (!target.city) target.city = parts[0];
+            if (!target.country && parts.length >= 2) target.country = parts[parts.length - 1];
+            if (target.city && target.country) break outer;
+            continue;
           }
+        }
+
+        // Try space-separated (last word likely country, rest is city)
+        const words = text.split(/\s+/);
+        if (words.length === 2) {
+          if (!target.city) target.city = words[0];
+          if (!target.country) target.country = words[1];
+          if (target.city && target.country) break outer;
+        } else if (words.length > 2) {
+          // For "8700 m² Land in Xhafzotaj, Durres" → extract last two words as city/country
+          const lastWord = words[words.length - 1];
+          const secondLast = words[words.length - 2];
+          if (!target.address) target.address = text;
+          if (!target.city && secondLast.length < 50) target.city = secondLast;
+          if (!target.country && lastWord.length < 50) target.country = lastWord;
         }
       }
       if (target.city) break;
     }
   }
 
-  // 5. Property ID from data-attributes or common display patterns
+  // 5. Property ID — aggressive scanning of all possible sources
   if (!target.propertyId) {
-    const idAttrs = ['data-property-id', 'data-listing-id', 'data-id', 'data-ref'];
+    // 5a. Known data-* attributes (property-id, listing-id, ref, etc.)
+    const idAttrs = ['data-property-id', 'data-listing-id', 'data-id', 'data-ref', 'data-sku', 'data-code'];
     for (const attr of idAttrs) {
       const el = $(`[${attr}]`).first();
       const val = el.attr(attr)?.trim();
-      if (val && val.length <= 50 && !/^https?:\/\//.test(val)) {
+      if (val && val.length >= 2 && val.length <= 50 && !/^https?:\/\/|^\/|^\d{4}-\d{2}/.test(val)) {
         target.propertyId = val;
         break;
       }
     }
   }
-  // "Property ID: Eon140479" style text pattern anywhere on page
+
+  // 5b. Scan ALL data-* attributes for ID-like values (if not found by name)
   if (!target.propertyId) {
-    const idPattern = /(?:property\s*id|listing\s*id|ref(?:erence)?\s*(?:no|#|id)?|id\s*(?:oglasa|nekretnine|ponude)|objektnummer|id\s*imobil)[:\s#]*([A-Za-z0-9\-_]+)/i;
+    const allElements = $('*').toArray();
+    for (const el of allElements) {
+      const attrs = (el as any).attribs || {};
+      for (const [key, value] of Object.entries(attrs)) {
+        if (!key.startsWith('data-')) continue;
+        if (!value || typeof value !== 'string') continue;
+        // Skip obvious non-IDs: URLs, dates, colors, CSS, long strings
+        if (/^https?:|^\d{4}-\d{2}|^#[0-9A-F]{3,6}$|^(px|em|rem|%|rgba)/.test(value)) continue;
+        // ID-like: alphanumeric, hyphen, underscore, max 50 chars
+        if (/^[A-Za-z0-9\-_]+$/.test(value) && value.length >= 2 && value.length <= 50) {
+          // Prefer attributes with "id", "ref", "code" in their name
+          if (/id|ref|code|sku|listing|property/.test(key.toLowerCase())) {
+            target.propertyId = value;
+            break;
+          }
+        }
+      }
+      if (target.propertyId) break;
+    }
+  }
+
+  // 5c. Text pattern search: "Property ID: Eon140479", "Ref #123", etc.
+  if (!target.propertyId) {
+    const idPattern = /(?:property\s*id|listing\s*id|ref(?:erence)?|reference\s*no|ref\s*(?:no|#|id)?|id\s*(?:oglasa|nekretnine|ponude|imobil|proneese)|objektnummer|sifra\s*oglasa|number|code|sku)[:\s#]*([A-Za-z0-9\-_]+)/i;
     const leafElements = $('*').toArray();
     for (const el of leafElements) {
       if (target.propertyId) break;
       const $el = $(el);
       if ($el.children().length > 0) continue;
       const text = $el.text().trim();
+      if (text.length < 3 || text.length > 200) continue;
       const m = text.match(idPattern);
-      if (m && m[1] && m[1].length >= 3 && m[1].length <= 50) {
+      if (m && m[1] && m[1].length >= 2 && m[1].length <= 50) {
         target.propertyId = m[1];
       }
     }
