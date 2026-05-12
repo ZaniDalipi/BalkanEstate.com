@@ -529,40 +529,32 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       cluster: any,
       map: google.maps.Map
     ) => {
-      // Calculate bounds from cluster markers
-      let bounds = new google.maps.LatLngBounds();
-      let hasMarkers = false;
+      // Use the actual click position for centering
+      const clickLat = event.latLng?.lat();
+      const clickLng = event.latLng?.lng();
 
-      if (cluster.markers && Array.isArray(cluster.markers)) {
-        for (const marker of cluster.markers) {
-          if (marker.position) {
-            bounds.extend(marker.position);
-            hasMarkers = true;
-          }
-        }
-      }
+      if (clickLat === undefined || clickLng === undefined) return;
 
-      if (!hasMarkers) return;
+      const currentZoom = map.getZoom() ?? 10;
+      const targetZoom = Math.min(currentZoom + 4, 18);
 
-      // Smooth animation to the cluster - zoom out first, then pan and zoom in
-      const currentZoom = map.getZoom() || 10;
-      const currentCenter = map.getCenter();
+      // Pan directly to click position with smooth animation
+      map.panTo({ lat: clickLat, lng: clickLng });
 
-      // Step 1: Zoom out slightly for cinematic effect
-      map.setZoom(currentZoom - 1);
-
-      // Step 2: Pan to cluster center with animation
+      // Then zoom in smoothly
       setTimeout(() => {
-        const clusterCenter = bounds.getCenter();
-        if (clusterCenter) {
-          map.panTo(clusterCenter);
-        }
+        const zoomSteps = Math.abs(targetZoom - currentZoom);
+        let currentZoomLevel = currentZoom;
 
-        // Step 3: Fit bounds with padding
-        setTimeout(() => {
-          map.fitBounds(bounds, { top: 100, right: 80, bottom: 100, left: 80 });
-        }, 300);
-      }, 200);
+        const zoomInterval = setInterval(() => {
+          if (currentZoomLevel >= targetZoom) {
+            clearInterval(zoomInterval);
+            return;
+          }
+          currentZoomLevel++;
+          map.setZoom(currentZoomLevel);
+        }, 80);
+      }, 400);
     };
 
     const clusterer = new MarkerClusterer({
