@@ -1552,10 +1552,10 @@ const HowItWorksPage: React.FC = () => {
                     t('howItWorks:agents.agency.features.branding'),
                     t('howItWorks:agents.agency.features.collaboration'),
                     t('howItWorks:agents.agency.features.support'),
-                  ].map((feature, idx) => (
+                  ]).map((feature: any, idx: number) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-purple-100">
                       <CheckIcon className="w-5 h-5 text-purple-200" />
-                      {feature}
+                      {typeof feature === 'string' ? feature : feature.name || feature}
                     </li>
                   ))}
                 </ul>
