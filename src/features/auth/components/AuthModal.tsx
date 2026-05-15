@@ -329,14 +329,9 @@ const AuthPage: React.FC = () => {
     };
 
     const handleBackdropClick = (e: React.MouseEvent) => {
-        // Only handle clicks directly on the backdrop, not on the modal content
-        if (e.target === e.currentTarget) {
-            if (hasUnsavedChanges) {
-                setShowCloseConfirmation(true);
-            } else {
-                handleClose();
-            }
-        }
+        // Prevent closing the modal by clicking outside - user must use the close button
+        // This protects against accidental form submission cancellation
+        e.stopPropagation();
     };
 
     const handleConfirmClose = () => {
@@ -928,7 +923,13 @@ const AuthPage: React.FC = () => {
 
                     {/* Close button with glass effect */}
                     <button
-                        onClick={handleClose}
+                        onClick={() => {
+                            if (hasUnsavedChanges) {
+                                setShowCloseConfirmation(true);
+                            } else {
+                                handleClose();
+                            }
+                        }}
                         className="absolute top-4 right-4 z-10 p-2 rounded-full
                                    bg-white/60 backdrop-blur-sm border border-white/50
                                    text-neutral-500 hover:text-neutral-800 hover:bg-white/80
