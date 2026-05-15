@@ -21,6 +21,7 @@ import {
 import { API_URL } from '@/src/shared/api/config';
 import { Upload, ImageIcon, X } from 'lucide-react';
 import PhoneInput, { validateFullPhone } from '@/src/shared/components/ui/PhoneInput';
+import ConfirmationModal from '@/shared/components/ui/ConfirmationModal';
 
 const AGENCY_TYPES = [
   { value: 'standard', label: 'Standard' },
@@ -85,7 +86,7 @@ const defaultBusinessHours = {
 };
 
 const CreateAgencyPage: React.FC = () => {
-  const { t } = useTranslation(['agencies', 'common']);
+  const { t } = useTranslation(['agencies', 'common', 'modals']);
   const { state, dispatch } = useAppContext();
   const [error, setError] = useState('');
   const [availableCities, setAvailableCities] = useState<string[]>([]);
@@ -93,6 +94,8 @@ const CreateAgencyPage: React.FC = () => {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
+  const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const [formData, setFormData] = useState<AgencyFormData>({
     name: '',
@@ -200,6 +203,16 @@ const CreateAgencyPage: React.FC = () => {
       }
     }
   }, [state.pendingAgencyData, state.currentUser]);
+
+  // Track unsaved changes
+  useEffect(() => {
+    const hasChanges = formData.name.trim() !== '' ||
+                      formData.description.trim() !== '' ||
+                      formData.address.trim() !== '' ||
+                      formData.city.trim() !== '' ||
+                      logoFile !== null;
+    setHasUnsavedChanges(hasChanges);
+  }, [formData, logoFile]);
 
   // Update cities when country changes
   useEffect(() => {
@@ -345,6 +358,18 @@ const CreateAgencyPage: React.FC = () => {
   };
 
   const handleGoBack = () => {
+    if (hasUnsavedChanges) {
+      setShowCloseConfirmation(true);
+    } else {
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+      window.history.pushState({}, '', '/account');
+    }
+  };
+
+  const handleConfirmGoBack = () => {
+    setShowCloseConfirmation(false);
+    // Clear pending agency data when confirming to leave
+    dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: null });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
     window.history.pushState({}, '', '/account');
   };
@@ -362,6 +387,17 @@ const CreateAgencyPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Confirmation modal for unsaved changes */}
+      <ConfirmationModal
+        isOpen={showCloseConfirmation}
+        onClose={() => setShowCloseConfirmation(false)}
+        onConfirm={handleConfirmGoBack}
+        title={t('confirmation.unsavedChanges.title', 'Unsaved Changes')}
+        message={t('confirmation.unsavedChanges.message', 'You have unsaved changes. Are you sure you want to leave?')}
+        confirmLabel={t('confirmation.unsavedChanges.confirm', 'Leave')}
+        cancelLabel={t('common.cancel', 'Cancel')}
+        type="warning"
+      />
       {/* Hero Header */}
       <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 py-12 sm:py-16">
         <div className="absolute inset-0 opacity-10">

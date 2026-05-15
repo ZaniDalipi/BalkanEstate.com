@@ -5,6 +5,7 @@ import { AppleIcon, EnvelopeIcon, GoogleIcon, LogoIcon, XMarkIcon, EyeIcon } fro
 import SocialLoginPopup from './SocialLoginPopup';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { ALL_PHONE_COUNTRY_CODES, PHONE_FORMAT_PATTERNS, formatPhoneNumber, getPhonePlaceholder, BALKAN_PHONE_CODES } from '@/constants/phoneCountryCodes';
+import ConfirmationModal from '@/shared/components/ui/ConfirmationModal';
 
 type SocialProvider = 'google' | 'apple';
 
@@ -220,7 +221,7 @@ const PasswordRequirementsIndicator: React.FC<{ requirements: PasswordRequiremen
 };
 
 const AuthPage: React.FC = () => {
-    const { t: rawT } = useTranslation(['auth', 'common']);
+    const { t: rawT } = useTranslation(['auth', 'common', 'modals']);
     const t = rawT as (key: string, defaultValue?: string, options?: Record<string, string>) => string;
     const { state, dispatch, login, signup, requestPasswordReset, loginWithSocial } = useAppContext();
 
@@ -255,6 +256,10 @@ const AuthPage: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    // Unsaved changes tracking
+    const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
     useEffect(() => {
         // Fetch available OAuth providers
         const fetchProviders = async () => {
@@ -275,7 +280,17 @@ const AuthPage: React.FC = () => {
         setIsLoading(false);
         setFieldErrors({});
         setTouched({});
+        setHasUnsavedChanges(false);
     }, [state.isAuthModalOpen, state.authModalView]);
+
+    // Track unsaved changes
+    useEffect(() => {
+        const hasChanges = email.trim() !== '' ||
+                          password.trim() !== '' ||
+                          confirmPassword.trim() !== '' ||
+                          phoneNumber.trim() !== '';
+        setHasUnsavedChanges(hasChanges);
+    }, [email, password, confirmPassword, phoneNumber]);
 
     // Keep the browser URL in sync with the auth modal state
     const prevPathRef = useRef<string | null>(null);
@@ -304,6 +319,29 @@ const AuthPage: React.FC = () => {
             window.history.pushState({}, '', buildLocalizedPath('/search'));
         }
         dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: false } });
+        // Reset form state
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        setPhoneNumber('');
+        setPhoneCountryCode(ALL_PHONE_COUNTRY_CODES[0].code);
+        setHasUnsavedChanges(false);
+    };
+
+    const handleBackdropClick = (e: React.MouseEvent) => {
+        // Only handle clicks directly on the backdrop, not on the modal content
+        if (e.target === e.currentTarget) {
+            if (hasUnsavedChanges) {
+                setShowCloseConfirmation(true);
+            } else {
+                handleClose();
+            }
+        }
+    };
+
+    const handleConfirmClose = () => {
+        setShowCloseConfirmation(false);
+        handleClose();
     };
 
     const handleBlur = (field: 'email' | 'password' | 'confirmPassword' | 'phone') => {
@@ -837,6 +875,18 @@ const AuthPage: React.FC = () => {
                 />
             )}
 
+            {/* Confirmation modal for unsaved changes */}
+            <ConfirmationModal
+                isOpen={showCloseConfirmation}
+                onClose={() => setShowCloseConfirmation(false)}
+                onConfirm={handleConfirmClose}
+                title={t('confirmation.unsavedChanges.title', 'Unsaved Changes')}
+                message={t('confirmation.unsavedChanges.message', 'You have unsaved changes. Are you sure you want to leave?')}
+                confirmLabel={t('confirmation.unsavedChanges.confirm', 'Leave')}
+                cancelLabel={t('common.cancel', 'Cancel')}
+                type="warning"
+            />
+
             {/* CSS Keyframes for magical animations */}
             <style>{`
                 @keyframes float {
@@ -852,7 +902,7 @@ const AuthPage: React.FC = () => {
             {/* Backdrop with animated gradient */}
             <div
                 className="fixed inset-0 z-[5000] flex justify-center items-start md:items-center p-0 md:p-4 overflow-y-auto overflow-x-hidden"
-                onClick={handleClose}
+                onClick={handleBackdropClick}
             >
                 {/* Glassmorphism backdrop */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-neutral-900/60 to-primary/30 backdrop-blur-md" />
