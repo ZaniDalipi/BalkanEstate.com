@@ -877,9 +877,10 @@ const AuthPage: React.FC = () => {
                 onConfirm={handleConfirmClose}
                 title={t('confirmation.unsavedChanges.title', 'Unsaved Changes')}
                 message={t('confirmation.unsavedChanges.message', 'You have unsaved changes. Are you sure you want to leave?')}
-                confirmLabel={t('confirmation.unsavedChanges.confirm', 'Leave')}
-                cancelLabel={t('common.cancel', 'Cancel')}
-                type="warning"
+                confirmLabel={t('confirmation.unsavedChanges.confirm', 'Discard')}
+                cancelLabel={t('common.cancel', 'Keep Editing')}
+                type="danger"
+                cancelPrimary
             />
 
             {/* CSS Keyframes for magical animations */}

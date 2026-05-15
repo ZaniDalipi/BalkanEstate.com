@@ -882,7 +882,8 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
         message="You have unsaved changes. Are you sure you want to close this form?"
         confirmLabel="Discard"
         cancelLabel="Keep Editing"
-        type="warning"
+        type="danger"
+        cancelPrimary
       />
 
       {/* Overlay — clicking outside shows confirmation instead of closing immediately */}
