@@ -67,7 +67,7 @@ const SellerAvatar: React.FC<{ avatarUrl?: string; name: string; type: string; s
         decoding="async"
         width={64}
         height={64}
-        className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        className={`w-full h-full object-cover object-center transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
         onError={() => setError(true)}
         onLoad={() => setLoaded(true)}
       />
@@ -244,11 +244,11 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
 
-            {/* Navigation arrows - appear on hover */}
+            {/* Navigation arrows — always visible on touch, hover-revealed on pointer */}
             {hasMultipleImages && !isSold && !isRented && (
               <>
                 <button
-                  className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-6 h-6 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 focus:outline-none"
+                  className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
                   onClick={handlePrevImage}
                   aria-label="Previous image"
                 >
@@ -257,7 +257,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                   </svg>
                 </button>
                 <button
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-6 h-6 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 focus:outline-none"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
                   onClick={handleNextImage}
                   aria-label="Next image"
                 >
@@ -268,24 +268,25 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               </>
             )}
 
-            {/* Image dots/counter */}
+            {/* Image dots/counter — min 28px tap targets */}
             {hasMultipleImages && (
-              <div className="absolute bottom-2 left-0 right-0 flex justify-center items-center gap-1 z-20 pointer-events-none">
+              <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center z-20 pointer-events-none">
                 {allImages.length <= 7 ? (
                   allImages.map((_, i) => (
                     <button
                       key={i}
-                      className={`pointer-events-auto rounded-full transition-all duration-200 focus:outline-none ${
-                        i === currentImageIndex
-                          ? 'w-3 h-1.5 bg-white'
-                          : 'w-1.5 h-1.5 bg-white/60 hover:bg-white/80'
-                      }`}
+                      className="pointer-events-auto min-w-[28px] min-h-[28px] flex items-center justify-center focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
                       onClick={(e) => { e.stopPropagation(); setSlideDirection(i > currentImageIndex ? 'right' : 'left'); setCurrentImageIndex(i); }}
-                      aria-label={`Image ${i + 1}`}
-                    />
+                      aria-label={`Image ${i + 1} of ${allImages.length}`}
+                      aria-current={i === currentImageIndex ? 'true' : undefined}
+                    >
+                      <span className={`block rounded-full transition-all duration-200 ${
+                        i === currentImageIndex ? 'w-3 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/60'
+                      }`} />
+                    </button>
                   ))
                 ) : (
-                  <span className="bg-black/50 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-0.5 rounded-full pointer-events-none">
+                  <span className="pointer-events-none bg-black/50 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-0.5 rounded-full">
                     {currentImageIndex + 1} / {allImages.length}
                   </span>
                 )}

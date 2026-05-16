@@ -13,11 +13,11 @@ interface FeaturedPropertiesSectionProps {
 const PropertyCard: React.FC<{
   property: Property;
   onClick: () => void;
-  index: number;
-}> = ({ property, onClick, index }) => {
+}> = ({ property, onClick }) => {
   const { t } = useTranslation(['home']);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
+  const [imageError, setImageError] = useState(false);
   const touchStartXRef = useRef<number | null>(null);
 
   const allImages = useMemo(() => {
@@ -28,7 +28,7 @@ const PropertyCard: React.FC<{
     return [...base, ...extras.filter((u: string) => !base.includes(u))].slice(0, 10);
   }, [property.imageUrl, (property as any).images]);
 
-  const currentImageUrl = allImages[currentImageIndex] ?? property.imageUrl;
+  const currentImageUrl = allImages[currentImageIndex] ?? property.imageUrl ?? '';
   const hasMultipleImages = allImages.length > 1;
 
   const handlePrevImage = useCallback((e: React.MouseEvent) => {
@@ -78,7 +78,7 @@ const PropertyCard: React.FC<{
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {property.imageUrl ? (
+        {property.imageUrl && !imageError ? (
         <>
           {/* LQIP blur-up placeholder */}
           <img
@@ -99,34 +99,35 @@ const PropertyCard: React.FC<{
             <img
               src={optimizeCloudinaryUrl(currentImageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill' })}
               srcSet={currentImageIndex === 0 ? cloudinarySrcSet(currentImageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill' }) : undefined}
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
-              alt={property.address}
+              sizes="(max-width: 640px) calc(50vw - 20px), (max-width: 1024px) calc(50vw - 32px), 33vw"
+              alt={property.title || property.address || 'Property image'}
               width={400}
               height={300}
               style={{ transition: 'transform 600ms ease-in-out' }}
               className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-[1.02]"
               loading="lazy"
               decoding="async"
+              onError={() => setImageError(true)}
             />
           </div>
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
-          {/* Navigation arrows */}
+          {/* Navigation arrows — always visible on touch, hover-revealed on pointer */}
           {hasMultipleImages && (
             <>
               <button
-                className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-6 h-6 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 focus:outline-none"
+                className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
                 onClick={handlePrevImage}
-                aria-label="Previous image"
+                aria-label={t('home:featured.prevImage', 'Previous image')}
               >
                 <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
               <button
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-6 h-6 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 focus:outline-none"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
                 onClick={handleNextImage}
-                aria-label="Next image"
+                aria-label={t('home:featured.nextImage', 'Next image')}
               >
                 <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -136,22 +137,23 @@ const PropertyCard: React.FC<{
           )}
           {/* Image dots/counter */}
           {hasMultipleImages && (
-            <div className="absolute bottom-2 left-0 right-0 flex justify-center items-center gap-1 z-30 pointer-events-none">
+            <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center z-30 pointer-events-none">
               {allImages.length <= 7 ? (
                 allImages.map((_, i) => (
                   <button
                     key={i}
-                    className={`pointer-events-auto rounded-full transition-all duration-200 focus:outline-none ${
-                      i === currentImageIndex
-                        ? 'w-3 h-1.5 bg-white'
-                        : 'w-1.5 h-1.5 bg-white/60 hover:bg-white/80'
-                    }`}
+                    className="pointer-events-auto min-w-[28px] min-h-[28px] flex items-center justify-center focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
                     onClick={(e) => { e.stopPropagation(); setSlideDirection(i > currentImageIndex ? 'right' : 'left'); setCurrentImageIndex(i); }}
-                    aria-label={`Image ${i + 1}`}
-                  />
+                    aria-label={`Image ${i + 1} of ${allImages.length}`}
+                    aria-current={i === currentImageIndex ? 'true' : undefined}
+                  >
+                    <span className={`block rounded-full transition-all duration-200 ${
+                      i === currentImageIndex ? 'w-3 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/60'
+                    }`} />
+                  </button>
                 ))
               ) : (
-                <span className="bg-black/50 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-0.5 rounded-full pointer-events-none">
+                <span className="pointer-events-none bg-black/50 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-0.5 rounded-full">
                   {currentImageIndex + 1} / {allImages.length}
                 </span>
               )}
@@ -159,12 +161,12 @@ const PropertyCard: React.FC<{
           )}
         </>
         ) : (
-        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300">
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300">
           <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
         </div>
         )}
         {/* Badges */}
-        <div className="absolute top-2.5 left-2.5 flex gap-1.5">
+        <div className="absolute top-2.5 left-2.5 flex gap-1.5 z-10">
           {property.isPromoted && property.promotionTier && property.promotionTier !== 'standard' && (
             <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-amber-500 text-white">
               {t('home:featured.promoted')}
@@ -182,8 +184,8 @@ const PropertyCard: React.FC<{
           )}
         </div>
         {/* Price overlay */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent pt-8 pb-2.5 px-3">
-          <span className="text-lg font-bold text-white">
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent pt-8 pb-2 px-3">
+          <span className="text-sm sm:text-base font-bold text-white leading-tight">
             {(property as any).isNegotiable ? t('home:featured.byNegotiation', 'By Negotiation') : formatPrice(property.price, property.currency)}
           </span>
         </div>
@@ -259,14 +261,12 @@ const FeaturedPropertiesSection: React.FC<FeaturedPropertiesSectionProps> = ({
 
         {/* Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
-          {properties.slice(0, 6).map((property, i) => (
-            <div key={property.id}>
-              <PropertyCard
-                property={property}
-                onClick={() => onPropertyClick(property)}
-                index={i}
-              />
-            </div>
+          {properties.slice(0, 6).map((property) => (
+            <PropertyCard
+              key={property.id}
+              property={property}
+              onClick={() => onPropertyClick(property)}
+            />
           ))}
         </div>
 
