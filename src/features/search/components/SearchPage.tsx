@@ -309,7 +309,16 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                     <>
                         {/* Mobile-only: floating search bar overlay (tablet uses SearchHeader instead) */}
                         {isMobile && (
-                            <div className="absolute top-0 left-0 right-0 z-[100] px-2 landscape:px-1.5 pb-2 landscape:pb-1.5 pointer-events-none" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 8px)' }}>
+                            <div
+                                className="absolute top-0 left-0 right-0 z-[100] pb-2 landscape:pb-1.5 pointer-events-none"
+                                style={{
+                                    // max() ensures the bar clears the status bar on Android devices
+                                    // where env(safe-area-inset-top) is 0 but content renders under the bar
+                                    paddingTop: 'max(calc(env(safe-area-inset-top, 0px) + 8px), 52px)',
+                                    paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 8px)',
+                                    paddingRight: 'calc(env(safe-area-inset-right, 0px) + 8px)',
+                                }}
+                            >
                                 <div ref={searchWrapperRef} className="pointer-events-auto w-full space-y-2">
                                     <div
                                         className="w-full bg-white/60 backdrop-blur-xl rounded-full p-1 flex items-center gap-0.5 sm:gap-1 border border-white/40"
