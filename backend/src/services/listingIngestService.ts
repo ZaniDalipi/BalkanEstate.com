@@ -221,9 +221,8 @@ export const runSource = async (
       deferred: 0,
     });
 
-    const rehostImages = Boolean(
-      (source.adapterConfig as Record<string, unknown> | undefined)?.rehostImages
-    );
+    const rehostImages =
+      (source.adapterConfig as Record<string, unknown> | undefined)?.rehostImages !== false;
     const emitNew =
       (source.adapterConfig as Record<string, unknown> | undefined)?.emitNewListingEvents === true;
     const deferUntil = firstOfNextMonth();

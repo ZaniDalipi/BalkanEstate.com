@@ -698,6 +698,96 @@ const detectHtmlScrape = (
   };
 };
 
+/**
+ * Detect pagination in the fetched HTML.
+ *
+ * Returns either:
+ *  - { type: 'nextSelector', selector } — a CSS selector for the "next page" anchor
+ *  - { type: 'pageParam', param }       — a URL query param like "page" or "str"
+ *  - null when no pagination is found
+ */
+const detectPagination = (
+  html: string,
+  pageUrl: string
+): { type: 'nextSelector'; selector: string } | { type: 'pageParam'; param: string } | null => {
+  const $ = cheerio.load(html);
+
+  // 1. <link rel="next"> is the most reliable (SEO standard)
+  const linkNext = $('link[rel="next"]').attr('href');
+  if (linkNext) {
+    try {
+      const nextUrl = new URL(linkNext, pageUrl);
+      const currentUrl = new URL(pageUrl);
+      // If next URL adds/changes a query param → use pageParam
+      for (const [key, val] of nextUrl.searchParams) {
+        if (!currentUrl.searchParams.has(key) || currentUrl.searchParams.get(key) !== val) {
+          const n = parseInt(val, 10);
+          if (Number.isFinite(n) && n >= 1 && n <= 9999) {
+            return { type: 'pageParam', param: key };
+          }
+        }
+      }
+    } catch { /* ignore */ }
+    return { type: 'nextSelector', selector: 'link[rel="next"]' };
+  }
+
+  // 2. Anchor/button with rel="next" attribute
+  const anchorNext = $('a[rel="next"], button[rel="next"]');
+  if (anchorNext.length) {
+    const cls = (anchorNext.first().attr('class') || '').split(/\s+/).filter(Boolean);
+    return { type: 'nextSelector', selector: cls.length ? `a.${cls[0]}` : 'a[rel="next"]' };
+  }
+
+  // 3. Common class patterns for "next page" anchors
+  const nextCandidates = [
+    'a[class*="next-page"]', 'a[class*="nextPage"]', 'a[class*="next_page"]',
+    'a[class*="pagination-next"]', 'a[class*="pager-next"]',
+    '.pagination a.next', '.pager a.next', 'nav.pagination a.next',
+    'a.next', '.next > a', '[class*="pagination"] a[class*="next"]',
+    // Albanian / Balkan portals
+    'a[class*="sledeća"]', 'a[class*="sljedeca"]', 'a[class*="naredna"]',
+  ];
+  for (const sel of nextCandidates) {
+    if ($(sel).length > 0 && $(sel).attr('href')) {
+      return { type: 'nextSelector', selector: sel };
+    }
+  }
+
+  // 4. Common aria-label / title attributes
+  const ariaNext = $('a[aria-label*="Next"], a[aria-label*="next"], a[title*="Next"], a[title*="next"]');
+  if (ariaNext.length && ariaNext.attr('href')) {
+    return { type: 'nextSelector', selector: 'a[aria-label*="Next"]' };
+  }
+
+  // 5. URL-based: if the current URL has ?page=N or ?str=N, derive pageParam
+  try {
+    const cu = new URL(pageUrl);
+    for (const [key, val] of cu.searchParams) {
+      const n = parseInt(val, 10);
+      if (/^(page|p|str|offset|start|from|seite|pagina|pagine|pg)$/i.test(key) &&
+          Number.isFinite(n) && n >= 0 && n <= 9999) {
+        return { type: 'pageParam', param: key };
+      }
+    }
+  } catch { /* ignore */ }
+
+  // 6. Path-based: URL ends in /page/N or /p/N or /N
+  const pathPageMatch = pageUrl.match(/\/(page|p|str|seite|pagina)\/(\d+)\/?$/i);
+  if (pathPageMatch) {
+    // Can't use pageParam for path-based pagination — caller must use nextSelector or skip
+    // Look for a next anchor whose href matches the same pattern
+    const nextNum = parseInt(pathPageMatch[2], 10) + 1;
+    const nextPath = `${pathPageMatch[1]}/${nextNum}`;
+    const pathNext = $(`a[href*="/${nextPath}"]`).first();
+    if (pathNext.length) {
+      const cls = (pathNext.attr('class') || '').split(/\s+/).filter(Boolean);
+      return { type: 'nextSelector', selector: cls.length ? `a.${cls[0]}` : `a[href*="/${nextPath}"]` };
+    }
+  }
+
+  return null;
+};
+
 /** Try fetching the URL itself as a JSON array/object. */
 const probeJsonFeed = async (url: string): Promise<{ items: Record<string, unknown>[]; itemsPath: string } | null> => {
   const data = await tryUrl(url, 'json');
@@ -1220,6 +1310,7 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
           image: pickAttr(profile.image),
           url: rawLink ? (() => { try { return new URL(rawLink, url).toString(); } catch { return rawLink; } })() : undefined,
         };
+        const autoPagination = profile.nextPageSelector || profile.pageParam ? null : detectPagination(html, url);
         return {
           adapterType: 'htmlScrape',
           adapterConfig: {
@@ -1234,12 +1325,14 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
               ...(profile.location && { location: profile.location }),
               ...(profile.sqft && { sqft: profile.sqft }),
             },
-            ...(profile.nextPageSelector && { nextPageSelector: profile.nextPageSelector }),
-            ...(profile.pageParam && { pageParam: profile.pageParam }),
+            ...(profile.nextPageSelector ? { nextPageSelector: profile.nextPageSelector } :
+                autoPagination?.type === 'nextSelector' ? { nextPageSelector: autoPagination.selector } : {}),
+            ...(profile.pageParam ? { pageParam: profile.pageParam } :
+                autoPagination?.type === 'pageParam' ? { pageParam: autoPagination.param } : {}),
             followDetails: true,
             requestDelayMs: 2000,
             respectRobotsTxt: true,
-            maxPages: 5,
+            maxPages: 20,
           },
           fieldMap: {
             title: 'title',
@@ -1258,15 +1351,18 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
     // 4b. Generic heuristic: find listing-like anchors and identify card container
     const scrape = detectHtmlScrape(html, url);
     if (scrape) {
+      const pagination = detectPagination(html, url);
       return {
         adapterType: 'htmlScrape',
         adapterConfig: {
           indexUrl: url,
           selectors: scrape.selectors,
+          ...(pagination?.type === 'nextSelector' ? { nextPageSelector: pagination.selector } : {}),
+          ...(pagination?.type === 'pageParam' ? { pageParam: pagination.param } : {}),
           followDetails: true,
           requestDelayMs: 2000,
           respectRobotsTxt: true,
-          maxPages: 5,
+          maxPages: 20,
         },
         fieldMap: {
           title: 'title',
@@ -1276,7 +1372,7 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
           sourceUrl: 'url',
         },
         sample: scrape.sample,
-        hint: `HTML listing page — found ${scrape.count} listing card(s) on the page`,
+        hint: `HTML listing page — found ${scrape.count} listing card(s) on the page${pagination ? ` (pagination: ${pagination.type === 'pageParam' ? `?${pagination.param}=N` : pagination.selector})` : ''}`,
       };
     }
   }

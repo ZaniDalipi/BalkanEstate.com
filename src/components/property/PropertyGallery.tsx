@@ -10,23 +10,22 @@ import {
   ChevronRightIcon,
   BuildingOfficeIcon,
 } from '../../../constants';
-import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder, getOptimizedExternalImage, getOptimizedExternalImageSrcSet } from '../../../config/cloudinaryConfig';
+import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
 
 const isCloudinaryUrl = (url: string): boolean =>
   typeof url === 'string' && url.includes('res.cloudinary.com');
 
-/** Returns an optimized src for any image — Cloudinary upload or external URL. */
+/** Returns an optimized src — Cloudinary transform for uploads, backend proxy for external URLs. */
 const getImageSrc = (url: string, width: number): string => {
   if (!url) return '';
   if (isCloudinaryUrl(url)) return optimizeCloudinaryUrl(url, { width, quality: 'auto' });
-  return getOptimizedExternalImage(url, { width, quality: 'auto:good', format: 'auto' }) || url;
+  return `/api/image-proxy?url=${encodeURIComponent(url)}`;
 };
 
-/** Returns srcSet only for Cloudinary images; external images are proxied via Cloudinary fetch. */
+/** srcSet is only meaningful for Cloudinary images; proxied external images don't support it. */
 const getImageSrcSet = (url: string, widths: number[]): string => {
-  if (!url) return '';
-  if (isCloudinaryUrl(url)) return cloudinarySrcSet(url, widths);
-  return getOptimizedExternalImageSrcSet(url, widths);
+  if (!url || !isCloudinaryUrl(url)) return '';
+  return cloudinarySrcSet(url, widths);
 };
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 
