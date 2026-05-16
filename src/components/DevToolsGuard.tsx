@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 const HOLD_DURATION = 2000;
-const POLL_INTERVAL = 500;
-const SIZE_THRESHOLD = 160;
+const POLL_INTERVAL = 1000;
+const SIZE_THRESHOLD = 100;
 
 function generateRefId(): string {
   const h = (n: number, len: number) => Math.floor(n).toString(16).padStart(len, '0');
@@ -11,8 +11,18 @@ function generateRefId(): string {
   return `${h(t / 1000, 8)}-${h(r(), 4)}-${h(r(), 4)}-${h(r(), 4)}-${h(r(), 12)}`;
 }
 
+function isMobileDevice(): boolean {
+  return (
+    /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    window.matchMedia('(pointer: coarse)').matches
+  );
+}
+
 function isDevToolsOpen(): boolean {
   if (typeof window === 'undefined') return false;
+  // Mobile browsers have no DevTools — the outer/inner size diff is always
+  // large there due to browser chrome (address bar, nav bar), so skip entirely.
+  if (isMobileDevice()) return false;
   return (
     window.outerWidth - window.innerWidth > SIZE_THRESHOLD ||
     window.outerHeight - window.innerHeight > SIZE_THRESHOLD
@@ -37,14 +47,24 @@ const DevToolsGuard: React.FC = () => {
     progressRef.current = 0;
   }, []);
 
-  // Poll for devtools open state
   useEffect(() => {
     if (!import.meta.env.PROD) return;
 
+    // Check immediately on mount (catches devtools already open at load time)
+    if (isDevToolsOpen()) triggerBlock();
+
+    // Poll as fallback for cases the resize event misses
     const poll = setInterval(() => {
       if (isDevToolsOpen()) triggerBlock();
     }, POLL_INTERVAL);
 
+    // Instant detection: devtools docking/undocking resizes the viewport
+    const onResize = () => {
+      if (isDevToolsOpen()) triggerBlock();
+    };
+    window.addEventListener('resize', onResize);
+
+    // Keyboard shortcut detection (capture phase fires before anything else)
     const onKey = (e: KeyboardEvent) => {
       const isDevShortcut =
         e.key === 'F12' ||
@@ -56,6 +76,7 @@ const DevToolsGuard: React.FC = () => {
 
     return () => {
       clearInterval(poll);
+      window.removeEventListener('resize', onResize);
       document.removeEventListener('keydown', onKey, true);
     };
   }, [triggerBlock]);
@@ -70,7 +91,6 @@ const DevToolsGuard: React.FC = () => {
     if (pct < 100) {
       rafRef.current = requestAnimationFrame(animateProgress);
     } else {
-      // Verified — dismiss the guard
       holdingRef.current = false;
       holdStartRef.current = null;
       setBlocked(false);
@@ -133,7 +153,6 @@ const DevToolsGuard: React.FC = () => {
             draggable={false}
             className="relative w-full py-4 rounded-full border-2 border-blue-500 overflow-hidden select-none cursor-pointer"
           >
-            {/* Hold progress fill */}
             <div
               className="absolute inset-0 bg-blue-100"
               style={{
