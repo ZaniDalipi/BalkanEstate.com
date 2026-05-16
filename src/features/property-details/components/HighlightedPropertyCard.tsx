@@ -447,11 +447,9 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
       console.error('HighlightedPropertyCard: Cannot open property - invalid URL');
       return;
     }
-    // Set selected property for state management
-    dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
     // Open in new tab without navigating current page
     window.open(propertyUrl, '_blank', 'noopener,noreferrer');
-  }, [dispatch, property]);
+  }, [property]);
 
   const handleFavoriteClick = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
