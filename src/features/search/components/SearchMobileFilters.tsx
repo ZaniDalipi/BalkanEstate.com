@@ -60,7 +60,11 @@ const SearchMobileFilters: React.FC<SearchMobileFiltersProps> = ({
     t,
 }) => (
     <div className="bg-white h-full w-full flex flex-col" role="dialog" aria-modal="true" aria-labelledby="filters-title">
-        <div className="flex-shrink-0 p-3 sm:p-4 border-b border-neutral-200 flex justify-between items-center landscape:p-2">
+        {/* Header: top padding must clear the notch/Dynamic Island in standalone PWA mode */}
+        <div
+            className="flex-shrink-0 px-3 sm:px-4 pb-3 sm:pb-4 border-b border-neutral-200 flex justify-between items-center"
+            style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)' }}
+        >
             <h2 id="filters-title" className="text-base sm:text-lg font-bold text-neutral-800">{t('search:filters.title')}</h2>
             <button
                 onClick={onClose}

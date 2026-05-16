@@ -654,6 +654,48 @@ html[data-zoom] #root {
 }
 
 /* ============================================================================
+   Premium Gallery Image Slide Transitions
+   Directional slide + scale + fade — iOS/macOS style photo navigation
+   ============================================================================ */
+
+@keyframes gallerySlideInRight {
+  0% {
+    transform: translateX(10%) scale(1.04);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes gallerySlideInLeft {
+  0% {
+    transform: translateX(-10%) scale(1.04);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-gallery-right {
+  animation: gallerySlideInRight 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-gallery-left {
+  animation: gallerySlideInLeft 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-gallery-right,
+  .animate-gallery-left {
+    animation: fadeIn 0.15s ease-out both !important;
+  }
+}
+
+/* ============================================================================
    Micro-interaction Animations — Subtle polish for interactive elements
    ============================================================================ */
 
@@ -1146,3 +1188,99 @@ html[data-zoom] #root {
   height: 0;
   overflow: hidden;
 }
+
+/* =============================================================================
+   PWA / Safe-Area Utilities
+   These are used by fixed/sticky UI chrome to respect notch, Dynamic Island,
+   and home-indicator areas on iOS and Android devices.
+   ============================================================================= */
+
+/* Padding utilities using CSS env() — use these via style prop when Tailwind
+   arbitrary values would be verbose (e.g. calc combinations). */
+
+/* Full safe-area padding on all four sides */
+.safe-area-padding {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+}
+
+/* Individual directional helpers */
+.pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+.pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.pl-safe { padding-left: env(safe-area-inset-left, 0px); }
+.pr-safe { padding-right: env(safe-area-inset-right, 0px); }
+
+/* Margin variants for absolute/fixed elements */
+.mt-safe { margin-top: env(safe-area-inset-top, 0px); }
+.mb-safe { margin-bottom: env(safe-area-inset-bottom, 0px); }
+.ml-safe { margin-left: env(safe-area-inset-left, 0px); }
+.mr-safe { margin-right: env(safe-area-inset-right, 0px); }
+
+/* Bottom nav clearance: nav height (3.5rem ≈ 56px) + home indicator */
+.pb-nav-safe {
+  padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* Landscape compact mode for bottom nav items */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Bottom nav items: smaller and label-less in landscape */
+  .bottom-nav-label {
+    display: none;
+  }
+  .bottom-nav-special-btn {
+    width: 2rem;
+    height: 2rem;
+    margin-top: -0.5rem;
+  }
+}
+
+/* Prevent iOS overscroll rubber-band on modal/drawer backgrounds */
+.overscroll-none {
+  overscroll-behavior: none;
+}
+
+/* iOS momentum scrolling for scrollable containers */
+.scroll-touch {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fix for iOS Safari height in standalone PWA mode */
+@supports (-webkit-touch-callout: none) {
+  /* Ensure full-height layouts fill the display including safe areas */
+  .h-screen-safe {
+    height: 100vh;
+    height: -webkit-fill-available;
+    height: 100dvh;
+  }
+
+  /* Ensure content doesn't extend under the Dynamic Island / notch */
+  .top-safe-area {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
+
+/* Prevent content jump when virtual keyboard appears on iOS */
+@supports (height: 100dvh) {
+  .min-h-dvh {
+    min-height: 100dvh;
+  }
+  .h-dvh {
+    height: 100dvh;
+  }
+}
+
+/* High-contrast focus ring for accessibility in PWA (no browser chrome) */
+@media (display-mode: standalone) {
+  :focus-visible {
+    outline: 2px solid #0252CD;
+    outline-offset: 2px;
+  }
+
+  /* In standalone PWA, links should show pointer cursor */
+  a, button, [role="button"] {
+    cursor: pointer;
+  }
+}
+

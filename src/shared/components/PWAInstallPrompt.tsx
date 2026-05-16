@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Download, Smartphone, Share } from 'lucide-react';
+import { usePWAEnvironment } from '@/src/app/hooks/usePWAEnvironment';
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -19,10 +20,10 @@ declare global {
 
 export function PWAInstallPrompt() {
   const { t } = useTranslation(['common']);
+  const { isPWA, isIOS: isIOSDevice } = usePWAEnvironment();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
@@ -37,20 +38,10 @@ export function PWAInstallPrompt() {
       }
     }
 
-    // Check if running as standalone PWA
-    const isStandaloneMode =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as Navigator & { standalone?: boolean }).standalone === true ||
-      document.referrer.includes('android-app://');
-
-    setIsStandalone(isStandaloneMode);
-
-    if (isStandaloneMode) {
-      return; // Don't show install prompt if already installed
+    if (isPWA) {
+      return; // Already installed — don't show install prompt
     }
 
-    // Detect iOS
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream;
     setIsIOS(isIOSDevice);
 
     // Track session start time so the delay is based on actual time on site
@@ -90,7 +81,7 @@ export function PWAInstallPrompt() {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, []);
+  }, [isPWA, isIOSDevice]);
 
   const handleInstall = useCallback(async () => {
     if (!deferredPrompt) return;
@@ -115,12 +106,15 @@ export function PWAInstallPrompt() {
   }, []);
 
   // Don't render if standalone, dismissed, or no prompt available
-  if (isStandalone || dismissed || !showPrompt) {
+  if (isPWA || dismissed || !showPrompt) {
     return null;
   }
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-50 md:left-auto md:right-4 md:max-w-sm animate-in slide-in-from-bottom-4">
+    <div
+      className="fixed left-4 right-4 z-50 md:left-auto md:right-4 md:max-w-sm animate-in slide-in-from-bottom-4"
+      style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}
+    >
       <div className="bg-white rounded-2xl shadow-2xl border border-neutral-200 overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-primary to-primary-dark p-4 text-white">

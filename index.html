@@ -5,15 +5,19 @@
 
     <!-- Ziggy Polyfill: Prevents errors from external scripts expecting Laravel Ziggy -->
     <script>
-      window.Ziggy = window.Ziggy || {
-        url: window.location.origin,
-        port: null,
-        defaults: {},
-        routes: {}
-      };
-      window.route = window.route || function(name) {
-        return window.location.href;
-      };
+      (function() {
+        if (typeof window !== 'undefined' && !window.Ziggy) {
+          window.Ziggy = {
+            url: window.location.origin,
+            port: null,
+            defaults: {},
+            routes: {}
+          };
+          window.route = function(name) {
+            return window.location.href;
+          };
+        }
+      })();
     </script>
 
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3e%3cpath fill='%230252CD' d='M2 21V16L5 14.5V21H2Z M3 15V11L6 9.5V15H3Z M11 21V16L14 14V21H11Z M12 15V10L15 8V15H12Z M13 9V5L16 3V9H13Z'/%3e%3cpath fill='%234A8FE7' d='M5 14.5L8 16V21H5V14.5Z M6 9.5L9 11V15H6V9.5Z M14 14L18 16V21H14V14Z M15 8L19 10V15H15V8Z M16 3L20 5V9H16V3Z'/%3e%3cpath fill='%236BA3F5' d='M2 16L5 14.5L8 16L5 17.5Z M3 11L6 9.5L9 11L6 12.5Z M11 16L14 14L18 16L14 18Z M12 10L15 8L19 10L15 12Z M13 5L16 3L20 5L16 7Z'/%3e%3c/svg%3e" />
@@ -102,8 +106,44 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png" />
 
-    <!-- Apple Splash Screens (for PWA launch) -->
-    <link rel="apple-touch-startup-image" href="/icons/icon-512x512.png" />
+    <!-- Apple Splash Screens (for PWA launch on iOS) -->
+    <!-- iPhone 16 Pro Max (430×932 → 1320×2868 @3x) -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/icons/splash/splash-1320x2868.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)" href="/icons/splash/splash-2868x1320.png" />
+    <!-- iPhone 16 Pro (393×852 → 1206x2622 @3x) -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/icons/splash/splash-1206x2622.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)" href="/icons/splash/splash-2622x1206.png" />
+    <!-- iPhone 15 Pro Max / 14 Plus (430×932 @3x) — same as 16 Pro Max slot above -->
+    <!-- iPhone 15 Pro / 14 Pro (393×852 @3x) — same as 16 Pro slot above -->
+    <!-- iPhone 14 / 13 / 12 (390×844 @3x) -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/icons/splash/splash-1170x2532.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)" href="/icons/splash/splash-2532x1170.png" />
+    <!-- iPhone 11 Pro Max / XS Max (414×896 @3x) -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/icons/splash/splash-1242x2688.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)" href="/icons/splash/splash-2688x1242.png" />
+    <!-- iPhone 11 / XR (414×896 @2x) -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/icons/splash/splash-828x1792.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" href="/icons/splash/splash-1792x828.png" />
+    <!-- iPhone X / XS / 11 Pro (375×812 @3x) -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/icons/splash/splash-1125x2436.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)" href="/icons/splash/splash-2436x1125.png" />
+    <!-- iPhone 8 Plus / 7 Plus / 6s Plus (414×736 @3x) -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/icons/splash/splash-1242x2208.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)" href="/icons/splash/splash-2208x1242.png" />
+    <!-- iPhone 8 / 7 / 6s (375×667 @2x) -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/icons/splash/splash-750x1334.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" href="/icons/splash/splash-1334x750.png" />
+    <!-- iPad Pro 12.9" (1024×1366 @2x) -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/icons/splash/splash-2048x2732.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" href="/icons/splash/splash-2732x2048.png" />
+    <!-- iPad Pro 11" / Air (834×1194 @2x) -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/icons/splash/splash-1668x2388.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" href="/icons/splash/splash-2388x1668.png" />
+    <!-- iPad 9th gen / Air 2 (768×1024 @2x) -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/icons/splash/splash-1536x2048.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" href="/icons/splash/splash-2048x1536.png" />
+    <!-- Fallback for unmatched devices -->
+    <link rel="apple-touch-startup-image" href="/icons/splash/splash-1170x2532.png" />
 
     <!-- Microsoft Tiles -->
     <meta name="msapplication-TileImage" content="/icons/icon-144x144.png" />

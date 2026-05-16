@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { BuildingOfficeIcon } from '@/constants';
@@ -13,10 +13,54 @@ interface FeaturedPropertiesSectionProps {
 const PropertyCard: React.FC<{
   property: Property;
   onClick: () => void;
-  index: number;
-}> = ({ property, onClick, index }) => {
+}> = ({ property, onClick }) => {
   const { t } = useTranslation(['home']);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
+  const [imageError, setImageError] = useState(false);
+  const touchStartXRef = useRef<number | null>(null);
+
+  const allImages = useMemo(() => {
+    const base = property.imageUrl ? [property.imageUrl] : [];
+    const extras = ((property as any).images || []).map((img: any) =>
+      typeof img === 'string' ? img : img.url
+    ).filter(Boolean) as string[];
+    return [...base, ...extras.filter((u: string) => !base.includes(u))].slice(0, 10);
+  }, [property.imageUrl, (property as any).images]);
+
+  const currentImageUrl = allImages[currentImageIndex] ?? property.imageUrl ?? '';
+  const hasMultipleImages = allImages.length > 1;
+
+  const handlePrevImage = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSlideDirection('left');
+    setCurrentImageIndex(prev => (prev - 1 + allImages.length) % allImages.length);
+  }, [allImages.length]);
+
+  const handleNextImage = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSlideDirection('right');
+    setCurrentImageIndex(prev => (prev + 1) % allImages.length);
+  }, [allImages.length]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartXRef.current === null) return;
+    const diff = touchStartXRef.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        setSlideDirection('right');
+        setCurrentImageIndex(prev => (prev + 1) % allImages.length);
+      } else {
+        setSlideDirection('left');
+        setCurrentImageIndex(prev => (prev - 1 + allImages.length) % allImages.length);
+      }
+    }
+    touchStartXRef.current = null;
+  }, [allImages.length]);
 
   const formatPrice = (price: number, currency?: string) => {
     const symbol = currency === 'USD' ? '$' : '€';
@@ -29,8 +73,12 @@ const PropertyCard: React.FC<{
       className="group text-left bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg hover:border-neutral-300 hover:-translate-y-1 active:scale-[0.98] transition-all duration-200 w-full"
     >
       {/* Image */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-neutral-200">
-        {property.imageUrl ? (
+      <div
+        className="relative aspect-[4/3] overflow-hidden bg-neutral-200"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        {property.imageUrl && !imageError ? (
         <>
           {/* LQIP blur-up placeholder */}
           <img
@@ -43,27 +91,81 @@ const PropertyCard: React.FC<{
             height={30}
             className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-80"
           />
-          <img
-            src={optimizeCloudinaryUrl(property.imageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill' })}
-            srcSet={cloudinarySrcSet(property.imageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill' })}
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
-            alt={property.address}
-            width={400}
-            height={300}
-            style={{ transition: 'transform 500ms ease, opacity 300ms ease' }}
-            className={`relative w-full h-full object-cover ${imageLoaded ? 'group-hover:scale-105 opacity-100' : 'opacity-0'}`}
-            loading="lazy"
-            decoding="async"
-            onLoad={() => setImageLoaded(true)}
-          />
+          {/* Animation wrapper — key triggers remount+animation on image change */}
+          <div
+            key={currentImageIndex}
+            className={`absolute inset-0 ${slideDirection === 'right' ? 'animate-gallery-right' : 'animate-gallery-left'}`}
+          >
+            <img
+              src={optimizeCloudinaryUrl(currentImageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })}
+              srcSet={cloudinarySrcSet(currentImageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })}
+              sizes="(max-width: 640px) calc(50vw - 20px), (max-width: 1024px) calc(50vw - 32px), 33vw"
+              alt={property.title || property.address || 'Property image'}
+              width={400}
+              height={300}
+              style={{ transition: 'transform 600ms ease-in-out' }}
+              className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-[1.02]"
+              loading="lazy"
+              decoding="async"
+              onError={() => setImageError(true)}
+            />
+          </div>
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+          {/* Navigation arrows — always visible on touch, hover-revealed on pointer */}
+          {hasMultipleImages && (
+            <>
+              <button
+                className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
+                onClick={handlePrevImage}
+                aria-label={t('home:featured.prevImage', 'Previous image')}
+              >
+                <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
+                onClick={handleNextImage}
+                aria-label={t('home:featured.nextImage', 'Next image')}
+              >
+                <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </>
+          )}
+          {/* Image indicator — max 3 dots + count */}
+          {hasMultipleImages && (
+            <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center z-30 pointer-events-none gap-1">
+              {allImages.slice(0, 3).map((_, i) => (
+                <button
+                  key={i}
+                  className="pointer-events-auto min-w-[28px] min-h-[28px] flex items-center justify-center focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
+                  onClick={(e) => { e.stopPropagation(); setSlideDirection(i > currentImageIndex ? 'right' : 'left'); setCurrentImageIndex(i); }}
+                  aria-label={`Image ${i + 1} of ${allImages.length}`}
+                  aria-current={i === currentImageIndex ? 'true' : undefined}
+                >
+                  <span className={`block rounded-full transition-all duration-200 ${
+                    i === currentImageIndex ? 'w-3 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/60'
+                  }`} />
+                </button>
+              ))}
+              {allImages.length > 3 && (
+                <span className="pointer-events-none bg-black/40 backdrop-blur-sm text-white text-[10px] font-medium px-1.5 py-0.5 rounded-full">
+                  +{allImages.length - 3}
+                </span>
+              )}
+            </div>
+          )}
         </>
         ) : (
-        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300">
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300">
           <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
         </div>
         )}
         {/* Badges */}
-        <div className="absolute top-2.5 left-2.5 flex gap-1.5">
+        <div className="absolute top-2.5 left-2.5 flex gap-1.5 z-10">
           {property.isPromoted && property.promotionTier && property.promotionTier !== 'standard' && (
             <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-amber-500 text-white">
               {t('home:featured.promoted')}
@@ -81,9 +183,9 @@ const PropertyCard: React.FC<{
           )}
         </div>
         {/* Price overlay */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent pt-8 pb-2.5 px-3">
-          <span className="text-lg font-bold text-white">
-            {formatPrice(property.price, property.currency)}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent pt-8 pb-2 px-3">
+          <span className="text-sm sm:text-base font-bold text-white leading-tight">
+            {(property as any).isNegotiable ? t('home:featured.byNegotiation', 'By Negotiation') : formatPrice(property.price, property.currency)}
           </span>
         </div>
       </div>
@@ -158,14 +260,12 @@ const FeaturedPropertiesSection: React.FC<FeaturedPropertiesSectionProps> = ({
 
         {/* Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
-          {properties.slice(0, 6).map((property, i) => (
-            <div key={property.id}>
-              <PropertyCard
-                property={property}
-                onClick={() => onPropertyClick(property)}
-                index={i}
-              />
-            </div>
+          {properties.slice(0, 6).map((property) => (
+            <PropertyCard
+              key={property.id}
+              property={property}
+              onClick={() => onPropertyClick(property)}
+            />
           ))}
         </div>
 

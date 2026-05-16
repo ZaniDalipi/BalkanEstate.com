@@ -106,7 +106,13 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
     // Note: Header is hidden entirely on property details via App.tsx showHeader logic
     // PropertyDetailsPage has its own complete header with back, share, favorite, profile
     return (
-      <header className="fixed top-2 right-3 z-[1001]">
+      <header
+        className="fixed z-[1001]"
+        style={{
+          top: 'calc(env(safe-area-inset-top, 0px) + 8px)',
+          right: 'calc(env(safe-area-inset-right, 0px) + 12px)',
+        }}
+      >
         <nav
           className="flex items-center gap-1 sm:gap-1.5 md:gap-2 lg:gap-3 bg-white/70 backdrop-blur-xl p-1 sm:p-1.5 rounded-full border border-white/40"
           style={{ boxShadow: '0 6px 6px rgba(0,0,0,0.12), 0 0 20px rgba(0,0,0,0.06), inset 2px 2px 1px 0 rgba(255,255,255,0.6), inset -1px -1px 1px 1px rgba(255,255,255,0.5)' }}
@@ -143,7 +149,10 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   }
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-20 flex-shrink-0">
+    <header
+      className="bg-white shadow-sm sticky top-0 z-20 flex-shrink-0"
+      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+    >
       <div className="max-w-screen-xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="flex justify-between items-center py-1.5 sm:py-2">
           <div className="flex items-center">

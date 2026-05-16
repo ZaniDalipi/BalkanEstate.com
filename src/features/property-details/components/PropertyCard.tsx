@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo, useRef } from 'react';
+import React, { useState, useCallback, memo, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
@@ -68,7 +68,7 @@ const SellerAvatar: React.FC<{ avatarUrl?: string; name: string; type: string; s
         decoding="async"
         width={64}
         height={64}
-        className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        className={`w-full h-full object-cover object-center transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
         onError={() => setError(true)}
         onLoad={() => setLoaded(true)}
       />
@@ -94,7 +94,49 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 }) => {
   const { t, i18n } = useTranslation(['property', 'rental', 'common']);
   const [imageError, setImageError] = useState(!property.imageUrl);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
+  const touchStartXRef = useRef<number | null>(null);
+
+  const allImages = useMemo(() => {
+    const base = property.imageUrl ? [property.imageUrl] : [];
+    const extras = (property.images || []).map(img => img.url).filter(Boolean);
+    return [...base, ...extras.filter(u => !base.includes(u))].slice(0, 10);
+  }, [property.imageUrl, property.images]);
+
+  const currentImageUrl = allImages[currentImageIndex] ?? property.imageUrl;
+  const hasMultipleImages = allImages.length > 1;
+
+  const handlePrevImage = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSlideDirection('left');
+    setCurrentImageIndex(prev => (prev - 1 + allImages.length) % allImages.length);
+  }, [allImages.length]);
+
+  const handleNextImage = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSlideDirection('right');
+    setCurrentImageIndex(prev => (prev + 1) % allImages.length);
+  }, [allImages.length]);
+
+  const handleImageTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+  }, []);
+
+  const handleImageTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartXRef.current === null) return;
+    const diff = touchStartXRef.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        setSlideDirection('right');
+        setCurrentImageIndex(prev => (prev + 1) % allImages.length);
+      } else {
+        setSlideDirection('left');
+        setCurrentImageIndex(prev => (prev - 1 + allImages.length) % allImages.length);
+      }
+    }
+    touchStartXRef.current = null;
+  }, [allImages.length]);
 
   // Safe access with fallbacks
   const safeProperty = {
@@ -105,7 +147,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
     baths: property?.baths ?? 0,
     livingRooms: property?.livingRooms ?? 0,
     sqft: property?.sqft ?? 0,
-    seller: property?.seller || { type: 'private' as const, name: 'Unknown', phone: '' },
+    seller: property?.seller || { type: 'private' as const, name: '', phone: '' },
   };
 
   const isNew = property?.createdAt && (Date.now() - property.createdAt < 3 * 24 * 60 * 60 * 1000);
@@ -163,7 +205,11 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
           </div>
         ) : (
-          <div className="relative w-full aspect-[4/3] overflow-hidden bg-neutral-200">
+          <div
+            className="relative w-full aspect-[4/3] overflow-hidden bg-neutral-200"
+            onTouchStart={handleImageTouchStart}
+            onTouchEnd={handleImageTouchEnd}
+          >
             {/* LQIP blur-up background – tiny placeholder visible while main image loads */}
             <img
               src={getPropertyImagePlaceholder(property.imageUrl) || optimizeCloudinaryUrl(property.imageUrl, { width: 40, quality: 'auto:eco', crop: 'fill' })}
@@ -175,25 +221,77 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               height={30}
               className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-80"
             />
-            {/* Main image - server-cropped to 4:3 for consistent cards */}
-            <img
-              src={optimizeCloudinaryUrl(property.imageUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })}
-              srcSet={`${optimizeCloudinaryUrl(property.imageUrl, { width: 320, height: 240, quality: 'auto', crop: 'fill', gravity: 'auto' })} 320w, ${optimizeCloudinaryUrl(property.imageUrl, { width: 480, height: 360, quality: 'auto', crop: 'fill', gravity: 'auto' })} 480w, ${optimizeCloudinaryUrl(property.imageUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })} 640w`}
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
-              loading="lazy"
-              decoding="async"
-              width={640}
-              height={480}
-              style={{ transition: 'transform 8s cubic-bezier(0.05, 0, 0.2, 1), opacity 300ms ease' }}
-              className={`relative w-full h-full object-cover scale-100 ${
-                isSold || isRented ? 'grayscale' : 'group-hover:scale-[1.02]'
-              } ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-              onLoad={() => setImageLoaded(true)}
-              onError={() => setImageError(true)}
-            />
+            {/* Main image — animation wrapper drives directional slide */}
+            <div
+              key={currentImageIndex}
+              className={`absolute inset-0 ${slideDirection === 'right' ? 'animate-gallery-right' : 'animate-gallery-left'}`}
+            >
+              <img
+                src={optimizeCloudinaryUrl(currentImageUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })}
+                srcSet={`${optimizeCloudinaryUrl(currentImageUrl, { width: 320, height: 240, quality: 'auto', crop: 'fill', gravity: 'auto' })} 320w, ${optimizeCloudinaryUrl(currentImageUrl, { width: 480, height: 360, quality: 'auto', crop: 'fill', gravity: 'auto' })} 480w, ${optimizeCloudinaryUrl(currentImageUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })} 640w`}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
+                loading="lazy"
+                decoding="async"
+                width={640}
+                height={480}
+                style={{ transition: 'transform 600ms ease-in-out' }}
+                className={`absolute inset-0 w-full h-full object-cover object-center ${
+                  isSold || isRented ? 'grayscale' : 'group-hover:scale-[1.02]'
+                }`}
+                onError={() => setImageError(true)}
+              />
+            </div>
             {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
+
+            {/* Navigation arrows — always visible on touch, hover-revealed on pointer */}
+            {hasMultipleImages && !isSold && !isRented && (
+              <>
+                <button
+                  className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
+                  onClick={handlePrevImage}
+                  aria-label="Previous image"
+                >
+                  <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
+                  onClick={handleNextImage}
+                  aria-label="Next image"
+                >
+                  <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </>
+            )}
+
+            {/* Image indicator — max 3 dots + count */}
+            {hasMultipleImages && (
+              <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center z-20 pointer-events-none gap-1">
+                {allImages.slice(0, 3).map((_, i) => (
+                  <button
+                    key={i}
+                    className="pointer-events-auto min-w-[28px] min-h-[28px] flex items-center justify-center focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
+                    onClick={(e) => { e.stopPropagation(); setSlideDirection(i > currentImageIndex ? 'right' : 'left'); setCurrentImageIndex(i); }}
+                    aria-label={`Image ${i + 1} of ${allImages.length}`}
+                    aria-current={i === currentImageIndex ? 'true' : undefined}
+                  >
+                    <span className={`block rounded-full transition-all duration-200 ${
+                      i === currentImageIndex ? 'w-3 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/60'
+                    }`} />
+                  </button>
+                ))}
+                {allImages.length > 3 && (
+                  <span className="pointer-events-none bg-black/40 backdrop-blur-sm text-white text-[10px] font-medium px-1.5 py-0.5 rounded-full">
+                    +{allImages.length - 3}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -488,7 +586,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
             {/* Seller Info */}
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-neutral-800 truncate">{safeProperty.seller.name}</p>
+              {safeProperty.seller.name && (
+                <p className="text-xs font-semibold text-neutral-800 truncate">{safeProperty.seller.name}</p>
+              )}
               <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-[1px] rounded-full ${
                 safeProperty.seller.type === 'agent'
                   ? 'bg-blue-50 text-blue-600'

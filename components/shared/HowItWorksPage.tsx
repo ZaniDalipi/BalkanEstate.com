@@ -5,6 +5,29 @@ import { buildLocalizedPath } from '../../src/utils/languageRouting';
 import { HowItWorksTab } from '../../types';
 import Footer from './Footer';
 import { API_URL } from '../../src/shared/api/config';
+import { useHowItWorksPrices } from '../../src/shared/query/hooks';
+
+// Helper function to replace placeholders in feature strings with actual product values
+const replacePlaceholdersInFeature = (feature: any, product: any): string => {
+  if (typeof feature !== 'string') {
+    return typeof feature === 'object' ? feature.name || feature : String(feature);
+  }
+
+  if (!product) return feature;
+
+  let result = feature;
+  if (result.includes('{listingsLimit}') && product.listingsLimit) {
+    result = result.replace('{listingsLimit}', product.listingsLimit);
+  }
+  if (result.includes('{promotionCoupons}') && product.promotionCoupons) {
+    result = result.replace('{promotionCoupons}', product.promotionCoupons);
+  }
+  if (result.includes('{teamMembersLimit}') && product.teamMembersLimit) {
+    result = result.replace('{teamMembersLimit}', product.teamMembersLimit);
+  }
+
+  return result;
+};
 
 interface SiteVideo {
   _id: string;
@@ -201,6 +224,7 @@ const HowItWorksPage: React.FC = () => {
   const { state, dispatch } = useAppContext();
   const activeTab = state.howItWorksTab;
   const [videos, setVideos] = useState<Record<string, SiteVideo[]>>({});
+  const { prices, isLoading: pricesLoading } = useHowItWorksPrices();
 
   // Fetch how-it-works videos from database (admin-managed)
   useEffect(() => {
@@ -1362,17 +1386,17 @@ const HowItWorksPage: React.FC = () => {
               <div className="relative">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-8">
                   <div>
-                    <span className="text-orange-200 font-medium">{t('howItWorks:agencies.pricing.planName')}</span>
+                    <span className="text-orange-200 font-medium">{prices.enterprise.name || t('howItWorks:agencies.pricing.planName')}</span>
                     <div className="flex items-baseline gap-2 mt-2">
-                      <span className="text-5xl font-bold">{t('howItWorks:agencies.pricing.price')}</span>
-                      <span className="text-xl text-orange-200">{t('howItWorks:agencies.pricing.period')}</span>
+                      <span className="text-5xl font-bold">€{prices.enterprise.price ?? t('howItWorks:agencies.pricing.price').replace('€', '')}</span>
+                      <span className="text-xl text-orange-200">/{prices.enterprise.billingPeriod || 'year'}</span>
                     </div>
                     <p className="text-orange-100 mt-2">{t('howItWorks:agencies.pricing.tagline')}</p>
                   </div>
                   <div className="bg-white/20 backdrop-blur rounded-2xl p-6 w-full md:w-auto">
                     <h4 className="font-semibold mb-4 text-center">{t('howItWorks:agencies.pricing.whatsIncluded')}</h4>
                     <ul className="space-y-3">
-                      {[
+                      {(prices.enterprise.features || [
                         t('howItWorks:agencies.pricing.features.listings'),
                         t('howItWorks:agencies.pricing.features.teamMembers'),
                         t('howItWorks:agencies.pricing.features.promotions'),
@@ -1380,10 +1404,10 @@ const HowItWorksPage: React.FC = () => {
                         t('howItWorks:agencies.pricing.features.ai'),
                         t('howItWorks:agencies.pricing.features.accountManager'),
                         t('howItWorks:agencies.pricing.features.analytics'),
-                      ].map((feature, idx) => (
+                      ]).map((feature: any, idx: number) => (
                         <li key={idx} className="flex items-center gap-2">
                           <CheckIcon className="w-5 h-5 text-orange-200 flex-shrink-0" />
-                          <span className="text-sm">{feature}</span>
+                          <span className="text-sm">{replacePlaceholdersInFeature(feature, prices.enterprise.product)}</span>
                         </li>
                       ))}
                     </ul>
@@ -1499,23 +1523,27 @@ const HowItWorksPage: React.FC = () => {
                 </div>
                 <div className="mb-6">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold text-neutral-800">{t('howItWorks:agents.independent.price')}</span>
-                    <span className="text-neutral-500">{t('howItWorks:agents.independent.period')}</span>
+                    <span className="text-4xl font-bold text-neutral-800">€{prices.agentPro.monthlyPrice ?? t('howItWorks:agents.independent.price').replace('€', '')}</span>
+                    <span className="text-neutral-500">/{prices.agentPro.monthlyBillingPeriod || 'month'}</span>
                   </div>
-                  <p className="text-sm text-purple-600 mt-1">{t('howItWorks:agents.independent.yearlyNote')}</p>
+                  <p className="text-sm text-purple-600 mt-1">
+                    {prices.agentPro.yearlyPrice
+                      ? `or €${prices.agentPro.yearlyPrice}/year (save 33%)`
+                      : t('howItWorks:agents.independent.yearlyNote')}
+                  </p>
                 </div>
                 <ul className="space-y-3 mb-6">
-                  {[
+                  {(prices.agentPro.monthlyFeatures || [
                     t('howItWorks:agents.independent.features.listings'),
                     t('howItWorks:agents.independent.features.promotions'),
                     t('howItWorks:agents.independent.features.profile'),
                     t('howItWorks:agents.independent.features.ai'),
                     t('howItWorks:agents.independent.features.analytics'),
                     t('howItWorks:agents.independent.features.support'),
-                  ].map((feature, idx) => (
+                  ]).map((feature: any, idx: number) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-neutral-600">
                       <CheckIcon className="w-5 h-5 text-purple-500" />
-                      {feature}
+                      {replacePlaceholdersInFeature(feature, prices.agentPro.productMonthly)}
                     </li>
                   ))}
                 </ul>
@@ -1536,20 +1564,20 @@ const HowItWorksPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2 mb-6">
-                  <span className="text-4xl font-bold">{t('howItWorks:agents.agency.price')}</span>
-                  <span className="text-purple-200">{t('howItWorks:agents.agency.period')}</span>
+                  <span className="text-4xl font-bold">€{prices.agencyAgent.price ?? 0}</span>
+                  <span className="text-purple-200">/year</span>
                 </div>
                 <ul className="space-y-3 mb-6">
-                  {[
+                  {(prices.agencyAgent.features || [
                     t('howItWorks:agents.agency.features.listings'),
                     t('howItWorks:agents.agency.features.promotions'),
                     t('howItWorks:agents.agency.features.branding'),
                     t('howItWorks:agents.agency.features.collaboration'),
                     t('howItWorks:agents.agency.features.support'),
-                  ].map((feature, idx) => (
+                  ]).map((feature: any, idx: number) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-purple-100">
                       <CheckIcon className="w-5 h-5 text-purple-200" />
-                      {feature}
+                      {replacePlaceholdersInFeature(feature, prices.agencyAgent.product)}
                     </li>
                   ))}
                 </ul>
@@ -1614,24 +1642,24 @@ const HowItWorksPage: React.FC = () => {
               <div className="bg-white rounded-2xl border border-neutral-200 p-8 hover:shadow-lg transition-shadow">
                 <span className="text-blue-600 font-medium text-sm">{t('howItWorks:buyers.freePlan.title')}</span>
                 <div className="flex items-baseline gap-2 mt-2 mb-6">
-                  <span className="text-4xl font-bold text-neutral-800">{t('howItWorks:buyers.freePlan.price')}</span>
-                  <span className="text-neutral-500">{t('howItWorks:buyers.freePlan.period')}</span>
+                  <span className="text-4xl font-bold text-neutral-800">€{prices.buyerFree.price ?? 0}</span>
+                  <span className="text-neutral-500">forever</span>
                 </div>
                 <p className="text-neutral-600 mb-6">
                   {t('howItWorks:buyers.freePlan.tagline')}
                 </p>
                 <ul className="space-y-3 mb-6">
-                  {[
+                  {(prices.buyerFree.features || [
                     t('howItWorks:buyers.freePlan.features.browse'),
                     t('howItWorks:buyers.freePlan.features.mapSearch'),
                     t('howItWorks:buyers.freePlan.features.favorites'),
                     t('howItWorks:buyers.freePlan.features.contact'),
                     t('howItWorks:buyers.freePlan.features.insights'),
                     t('howItWorks:buyers.freePlan.features.profiles'),
-                  ].map((feature, idx) => (
+                  ]).map((feature: any, idx: number) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-neutral-600">
                       <CheckIcon className="w-5 h-5 text-blue-500" />
-                      {feature}
+                      {replacePlaceholdersInFeature(feature, prices.buyerFree.product)}
                     </li>
                   ))}
                 </ul>
@@ -1640,18 +1668,18 @@ const HowItWorksPage: React.FC = () => {
               {/* Buyer Pro Plan */}
               <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-8 text-white relative overflow-hidden">
                 <div className="absolute top-4 right-4 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full">
-                  {t('howItWorks:buyers.proPlan.trial')}
+                  {prices.buyerPro.trialPeriodDays ? `${prices.buyerPro.trialPeriodDays}-DAY FREE TRIAL` : t('howItWorks:buyers.proPlan.trial')}
                 </div>
                 <span className="text-blue-200 font-medium text-sm">{t('howItWorks:buyers.proPlan.title')}</span>
                 <div className="flex items-baseline gap-2 mt-2 mb-6">
-                  <span className="text-4xl font-bold">{t('howItWorks:buyers.proPlan.price')}</span>
-                  <span className="text-blue-200">{t('howItWorks:buyers.proPlan.period')}</span>
+                  <span className="text-4xl font-bold">€{prices.buyerPro.price ?? t('howItWorks:buyers.proPlan.price').replace('€', '')}</span>
+                  <span className="text-blue-200">/{prices.buyerPro.billingPeriod || 'month'}</span>
                 </div>
                 <p className="text-blue-100 mb-6">
                   {t('howItWorks:buyers.proPlan.tagline')}
                 </p>
                 <ul className="space-y-3 mb-6">
-                  {[
+                  {(prices.buyerPro.features || [
                     t('howItWorks:buyers.proPlan.features.notifications'),
                     t('howItWorks:buyers.proPlan.features.savedSearches'),
                     t('howItWorks:buyers.proPlan.features.earlyAccess'),
@@ -1660,10 +1688,10 @@ const HowItWorksPage: React.FC = () => {
                     t('howItWorks:buyers.proPlan.features.calculator'),
                     t('howItWorks:buyers.proPlan.features.mortgage'),
                     t('howItWorks:buyers.proPlan.features.adFree'),
-                  ].map((feature, idx) => (
+                  ]).map((feature: any, idx: number) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-blue-100">
                       <CheckIcon className="w-5 h-5 text-blue-200" />
-                      {feature}
+                      {replacePlaceholdersInFeature(feature, prices.buyerPro.product)}
                     </li>
                   ))}
                 </ul>
@@ -1816,24 +1844,24 @@ const HowItWorksPage: React.FC = () => {
               <div className="bg-white rounded-2xl border border-neutral-200 p-8 hover:shadow-lg transition-shadow">
                 <span className="text-green-600 font-medium text-sm">{t('howItWorks:sellers.freePlan.title')}</span>
                 <div className="flex items-baseline gap-2 mt-2 mb-6">
-                  <span className="text-4xl font-bold text-neutral-800">{t('howItWorks:sellers.freePlan.price')}</span>
-                  <span className="text-neutral-500">{t('howItWorks:sellers.freePlan.period')}</span>
+                  <span className="text-4xl font-bold text-neutral-800">€{prices.sellerFree.price ?? 0}</span>
+                  <span className="text-neutral-500">/month</span>
                 </div>
                 <p className="text-neutral-600 mb-6">
                   {t('howItWorks:sellers.freePlan.tagline')}
                 </p>
                 <ul className="space-y-3 mb-6">
-                  {[
+                  {(prices.sellerFree.features || [
                     t('howItWorks:sellers.freePlan.features.listings'),
                     t('howItWorks:sellers.freePlan.features.searches'),
                     t('howItWorks:sellers.freePlan.features.ai'),
                     t('howItWorks:sellers.freePlan.features.photos'),
                     t('howItWorks:sellers.freePlan.features.messaging'),
                     t('howItWorks:sellers.freePlan.features.analytics'),
-                  ].map((feature, idx) => (
+                  ]).map((feature: any, idx: number) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-neutral-600">
                       <CheckIcon className="w-5 h-5 text-green-500" />
-                      {feature}
+                      {replacePlaceholdersInFeature(feature, prices.sellerFree.product)}
                     </li>
                   ))}
                 </ul>
@@ -1847,16 +1875,20 @@ const HowItWorksPage: React.FC = () => {
                 <span className="text-green-200 font-medium text-sm">{t('howItWorks:sellers.proPlan.title')}</span>
                 <div className="mt-2 mb-6">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold">{t('howItWorks:sellers.proPlan.price')}</span>
-                    <span className="text-green-200">{t('howItWorks:sellers.proPlan.period')}</span>
+                    <span className="text-4xl font-bold">€{prices.sellerPro.monthlyPrice ?? t('howItWorks:sellers.proPlan.price').replace('€', '')}</span>
+                    <span className="text-green-200">/{prices.sellerPro.monthlyBillingPeriod || 'month'}</span>
                   </div>
-                  <p className="text-sm text-green-200 mt-1">{t('howItWorks:sellers.proPlan.yearlyNote')}</p>
+                  <p className="text-sm text-green-200 mt-1">
+                    {prices.sellerPro.yearlyPrice
+                      ? `or €${prices.sellerPro.yearlyPrice}/year (save 33%)`
+                      : t('howItWorks:sellers.proPlan.yearlyNote')}
+                  </p>
                 </div>
                 <p className="text-green-100 mb-6">
                   {t('howItWorks:sellers.proPlan.tagline')}
                 </p>
                 <ul className="space-y-3 mb-6">
-                  {[
+                  {(prices.sellerPro.monthlyFeatures || [
                     t('howItWorks:sellers.proPlan.features.listings'),
                     t('howItWorks:sellers.proPlan.features.promotions'),
                     t('howItWorks:sellers.proPlan.features.ai'),
@@ -1864,10 +1896,10 @@ const HowItWorksPage: React.FC = () => {
                     t('howItWorks:sellers.proPlan.features.analytics'),
                     t('howItWorks:sellers.proPlan.features.leads'),
                     t('howItWorks:sellers.proPlan.features.support'),
-                  ].map((feature, idx) => (
+                  ]).map((feature: any, idx: number) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-green-100">
                       <CheckIcon className="w-5 h-5 text-green-200" />
-                      {feature}
+                      {replacePlaceholdersInFeature(feature, prices.sellerPro.productMonthly)}
                     </li>
                   ))}
                 </ul>

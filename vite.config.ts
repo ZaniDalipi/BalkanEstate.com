@@ -430,13 +430,18 @@ export default defineConfig(({ mode }) => {
         // Optimize CSS code splitting
         cssCodeSplit: true,
         // Security: Clear console logs in production build
-        target: 'es2020',
+        // Use ES2019 for better Safari compatibility (es2020 has optional chaining/nullish
+        // coalescing that Safari sometimes doesn't handle correctly)
+        target: 'es2019',
         // Ensure hashes change only when content changes
         assetsInlineLimit: 4096, // Inline assets smaller than 4kb
       },
       esbuild: {
         // Drop console.log and debugger in production
         drop: isProduction ? ['console', 'debugger'] : [],
+        // Safari compatibility: explicit target for esbuild to ensure proper transpilation
+        // of optional chaining and other ES2020+ features
+        target: 'es2019',
       },
       // Preview server configuration (for testing builds locally)
       preview: {

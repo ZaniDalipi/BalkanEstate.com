@@ -387,18 +387,26 @@ export function useSearchPage() {
                     },
                     (error) => {
                         if (highAccuracy && error.code === error.POSITION_UNAVAILABLE) {
+                            // kCLErrorLocationUnknown: CoreLocation couldn't get a fix yet.
+                            // Retry once with low accuracy (network-based) which resolves faster.
                             getLocation(false);
                         } else {
                             handleGeoError(error);
                         }
                     },
-                    { enableHighAccuracy: highAccuracy, timeout: 10000, maximumAge: 0 }
+                    {
+                        enableHighAccuracy: highAccuracy,
+                        timeout: 6000,
+                        // Allow a 5-minute cached position — prevents CoreLocation from being
+                        // triggered on every page load, which causes kCLErrorLocationUnknown
+                        // when a fresh GPS fix isn't immediately available.
+                        maximumAge: 300000,
+                    }
                 );
             }
         };
 
         getLocation();
-        timeoutId = window.setTimeout(() => getLocation(), 5000);
         return () => clearTimeout(timeoutId);
     }, []);
 

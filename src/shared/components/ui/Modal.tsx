@@ -155,12 +155,27 @@ const Modal: React.FC<ModalProps> = ({
         aria-describedby={ariaDescribedBy}
         className={bp.content}
         onClick={handleContentClick}
+        style={
+          // On mobile the sm/md variants go full-height; shift content below the notch
+          (fullScreenBreakpoint === 'sm' || fullScreenBreakpoint === 'md')
+            ? { paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1rem)' }
+            : undefined
+        }
       >
         <button
           ref={closeButtonRef}
           onClick={onClose}
           className={bp.closeBtn}
           aria-label="Close modal"
+          style={
+            // lg/always use position:fixed for the close button — must account for notch
+            (fullScreenBreakpoint === 'lg' || fullScreenBreakpoint === 'always')
+              ? {
+                  top: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)',
+                  right: 'calc(env(safe-area-inset-right, 0px) + 0.75rem)',
+                }
+              : undefined
+          }
         >
           <XMarkIcon className={bp.closeIcon} />
         </button>

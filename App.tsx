@@ -897,7 +897,7 @@ const MainLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white font-sans overflow-x-hidden max-w-full" style={{ height: '100dvh' }}>
+    <div className="min-h-screen bg-white font-sans overflow-x-hidden max-w-full" style={{ height: '100dvh', WebkitTapHighlightColor: 'transparent' }}>
         <Suspense fallback={null}>
           <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
         </Suspense>
@@ -908,8 +908,11 @@ const MainLayout: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsSidebarOpen(true)}
-            className="md:hidden fixed left-3 z-[200] bg-white/90 backdrop-blur-md rounded-full p-2.5 shadow-lg border border-neutral-200/60 active:scale-95 transition-transform"
-            style={{ top: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
+            className="md:hidden fixed z-[200] bg-white/90 backdrop-blur-md rounded-full p-2.5 shadow-lg border border-neutral-200/60 active:scale-95 transition-transform"
+            style={{
+              top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
+              left: 'calc(env(safe-area-inset-left, 0px) + 12px)',
+            }}
             aria-label={t('common:aria.openMenu', 'Open menu')}
           >
             <svg className="w-5 h-5 text-neutral-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -925,7 +928,14 @@ const MainLayout: React.FC = () => {
 
             {/* PWA Top Bar - mobile navigation bar with back button and title */}
             {showPWATopBar && (
-              <div className="bg-white/95 backdrop-blur-md border-b border-neutral-200/60 flex-shrink-0 z-20" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+              <div
+                className="bg-white/95 backdrop-blur-md border-b border-neutral-200/60 flex-shrink-0 z-20"
+                style={{
+                  paddingTop: 'env(safe-area-inset-top, 0px)',
+                  paddingLeft: 'env(safe-area-inset-left, 0px)',
+                  paddingRight: 'env(safe-area-inset-right, 0px)',
+                }}
+              >
                 <div className="grid grid-cols-[auto_1fr_auto] items-center h-11 px-1">
                   {/* Left: Hamburger menu for main tabs, Back button for detail pages */}
                   {isMainTabView ? (
@@ -977,7 +987,17 @@ const MainLayout: React.FC = () => {
               </div>
             )}
 
-            <main id="main-content" data-scroll-container className={`relative flex flex-col flex-1 overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden h-full min-h-0' : 'overflow-y-auto'}`}>
+            {/*
+              Bottom padding for non-full-height views on mobile:
+              BottomNav is fixed bottom-0 (~48px tall) + safe-area-inset-bottom.
+              Full-height views (search, inbox, property) handle their own internal scroll.
+            */}
+            <main
+              id="main-content"
+              data-scroll-container
+              className={`relative flex flex-col flex-1 overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden h-full min-h-0' : 'overflow-y-auto'}`}
+              style={!isFullHeightView && isMobile ? { paddingBottom: 'calc(3.5rem + env(safe-area-inset-bottom, 0px))' } : undefined}
+            >
                 <AppContent onToggleSidebar={() => setIsSidebarOpen(true)} />
             </main>
 
