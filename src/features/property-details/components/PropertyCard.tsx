@@ -596,8 +596,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   const handleCardClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
 
-    // Check for modifier keys for new tab
-    const isNewTabModifier = e.ctrlKey || e.metaKey;
     const propertyUrl = getPropertyUrl();
 
     if (!propertyUrl) {
@@ -607,13 +605,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
 
     dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
 
-    if (isNewTabModifier) {
-      // Ctrl/Cmd + Click opens in new tab
-      window.open(propertyUrl, '_blank', 'noopener,noreferrer');
-    } else {
-      // Regular click navigates in same tab
-      window.history.pushState({}, '', propertyUrl);
-    }
+    // Always open in new tab
+    window.open(propertyUrl, '_blank', 'noopener,noreferrer');
   }, [dispatch, property, getPropertyUrl]);
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
