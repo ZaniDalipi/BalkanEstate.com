@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo, useRef } from 'react';
+import React, { useState, useCallback, memo, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
@@ -94,6 +94,43 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   const { t, i18n } = useTranslation(['property', 'rental', 'common']);
   const [imageError, setImageError] = useState(!property.imageUrl);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const touchStartXRef = useRef<number | null>(null);
+
+  const allImages = useMemo(() => {
+    const base = property.imageUrl ? [property.imageUrl] : [];
+    const extras = (property.images || []).map(img => img.url).filter(Boolean);
+    return [...base, ...extras.filter(u => !base.includes(u))].slice(0, 10);
+  }, [property.imageUrl, property.images]);
+
+  const currentImageUrl = allImages[currentImageIndex] ?? property.imageUrl;
+  const hasMultipleImages = allImages.length > 1;
+
+  const handlePrevImage = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex(prev => (prev - 1 + allImages.length) % allImages.length);
+  }, [allImages.length]);
+
+  const handleNextImage = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex(prev => (prev + 1) % allImages.length);
+  }, [allImages.length]);
+
+  const handleImageTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+  }, []);
+
+  const handleImageTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartXRef.current === null) return;
+    const diff = touchStartXRef.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) {
+      setCurrentImageIndex(prev => diff > 0
+        ? (prev + 1) % allImages.length
+        : (prev - 1 + allImages.length) % allImages.length
+      );
+    }
+    touchStartXRef.current = null;
+  }, [allImages.length]);
 
   // Safe access with fallbacks
   const safeProperty = {
@@ -104,7 +141,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
     baths: property?.baths ?? 0,
     livingRooms: property?.livingRooms ?? 0,
     sqft: property?.sqft ?? 0,
-    seller: property?.seller || { type: 'private' as const, name: 'Unknown', phone: '' },
+    seller: property?.seller || { type: 'private' as const, name: '', phone: '' },
   };
 
   const isNew = property?.createdAt && (Date.now() - property.createdAt < 3 * 24 * 60 * 60 * 1000);
@@ -162,7 +199,11 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
           </div>
         ) : (
-          <div className="relative w-full aspect-[4/3] overflow-hidden bg-neutral-200">
+          <div
+            className="relative w-full aspect-[4/3] overflow-hidden bg-neutral-200"
+            onTouchStart={handleImageTouchStart}
+            onTouchEnd={handleImageTouchEnd}
+          >
             {/* LQIP blur-up background – tiny placeholder visible while main image loads */}
             <img
               src={getPropertyImagePlaceholder(property.imageUrl) || optimizeCloudinaryUrl(property.imageUrl, { width: 40, quality: 'auto:eco', crop: 'fill' })}
@@ -176,23 +217,71 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             />
             {/* Main image - server-cropped to 4:3 for consistent cards */}
             <img
-              src={optimizeCloudinaryUrl(property.imageUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })}
-              srcSet={`${optimizeCloudinaryUrl(property.imageUrl, { width: 320, height: 240, quality: 'auto', crop: 'fill', gravity: 'auto' })} 320w, ${optimizeCloudinaryUrl(property.imageUrl, { width: 480, height: 360, quality: 'auto', crop: 'fill', gravity: 'auto' })} 480w, ${optimizeCloudinaryUrl(property.imageUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })} 640w`}
+              src={optimizeCloudinaryUrl(currentImageUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })}
+              srcSet={currentImageIndex === 0 ? `${optimizeCloudinaryUrl(currentImageUrl, { width: 320, height: 240, quality: 'auto', crop: 'fill', gravity: 'auto' })} 320w, ${optimizeCloudinaryUrl(currentImageUrl, { width: 480, height: 360, quality: 'auto', crop: 'fill', gravity: 'auto' })} 480w, ${optimizeCloudinaryUrl(currentImageUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })} 640w` : undefined}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
               loading="lazy"
               decoding="async"
               width={640}
               height={480}
-              style={{ transition: 'transform 400ms cubic-bezier(0.22, 1, 0.36, 1), opacity 300ms ease' }}
+              style={{ transition: 'transform 600ms ease-in-out, opacity 300ms ease' }}
               className={`relative w-full h-full object-cover scale-100 ${
                 isSold || isRented ? 'grayscale' : 'group-hover:scale-[1.02]'
-              } ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              } ${currentImageIndex === 0 ? (imageLoaded ? 'opacity-100' : 'opacity-0') : 'opacity-100'}`}
               onLoad={() => setImageLoaded(true)}
               onError={() => setImageError(true)}
             />
             {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
+
+            {/* Navigation arrows - appear on hover */}
+            {hasMultipleImages && !isSold && !isRented && (
+              <>
+                <button
+                  className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-6 h-6 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 focus:outline-none"
+                  onClick={handlePrevImage}
+                  aria-label="Previous image"
+                >
+                  <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-6 h-6 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 focus:outline-none"
+                  onClick={handleNextImage}
+                  aria-label="Next image"
+                >
+                  <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </>
+            )}
+
+            {/* Image dots/counter */}
+            {hasMultipleImages && (
+              <div className="absolute bottom-2 left-0 right-0 flex justify-center items-center gap-1 z-20 pointer-events-none">
+                {allImages.length <= 7 ? (
+                  allImages.map((_, i) => (
+                    <button
+                      key={i}
+                      className={`pointer-events-auto rounded-full transition-all duration-200 focus:outline-none ${
+                        i === currentImageIndex
+                          ? 'w-3 h-1.5 bg-white'
+                          : 'w-1.5 h-1.5 bg-white/60 hover:bg-white/80'
+                      }`}
+                      onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i); }}
+                      aria-label={`Image ${i + 1}`}
+                    />
+                  ))
+                ) : (
+                  <span className="bg-black/50 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-0.5 rounded-full pointer-events-none">
+                    {currentImageIndex + 1} / {allImages.length}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -482,7 +571,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
             {/* Seller Info */}
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-neutral-800 truncate">{safeProperty.seller.name}</p>
+              {safeProperty.seller.name && (
+                <p className="text-xs font-semibold text-neutral-800 truncate">{safeProperty.seller.name}</p>
+              )}
               <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-[1px] rounded-full ${
                 safeProperty.seller.type === 'agent'
                   ? 'bg-blue-50 text-blue-600'

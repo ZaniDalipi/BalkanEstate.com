@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { BuildingOfficeIcon } from '@/constants';
@@ -17,6 +17,45 @@ const PropertyCard: React.FC<{
 }> = ({ property, onClick, index }) => {
   const { t } = useTranslation(['home']);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const touchStartXRef = useRef<number | null>(null);
+
+  const allImages = useMemo(() => {
+    const base = property.imageUrl ? [property.imageUrl] : [];
+    const extras = ((property as any).images || []).map((img: any) =>
+      typeof img === 'string' ? img : img.url
+    ).filter(Boolean) as string[];
+    return [...base, ...extras.filter((u: string) => !base.includes(u))].slice(0, 10);
+  }, [property.imageUrl, (property as any).images]);
+
+  const currentImageUrl = allImages[currentImageIndex] ?? property.imageUrl;
+  const hasMultipleImages = allImages.length > 1;
+
+  const handlePrevImage = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex(prev => (prev - 1 + allImages.length) % allImages.length);
+  }, [allImages.length]);
+
+  const handleNextImage = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex(prev => (prev + 1) % allImages.length);
+  }, [allImages.length]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartXRef.current === null) return;
+    const diff = touchStartXRef.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) {
+      setCurrentImageIndex(prev => diff > 0
+        ? (prev + 1) % allImages.length
+        : (prev - 1 + allImages.length) % allImages.length
+      );
+    }
+    touchStartXRef.current = null;
+  }, [allImages.length]);
 
   const formatPrice = (price: number, currency?: string) => {
     const symbol = currency === 'USD' ? '$' : '€';
@@ -29,7 +68,11 @@ const PropertyCard: React.FC<{
       className="group text-left bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg hover:border-neutral-300 hover:-translate-y-1 active:scale-[0.98] transition-all duration-200 w-full"
     >
       {/* Image */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-neutral-200">
+      <div
+        className="relative aspect-[4/3] overflow-hidden bg-neutral-200"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         {property.imageUrl ? (
         <>
           {/* LQIP blur-up placeholder */}
@@ -44,18 +87,66 @@ const PropertyCard: React.FC<{
             className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-80"
           />
           <img
-            src={optimizeCloudinaryUrl(property.imageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill' })}
-            srcSet={cloudinarySrcSet(property.imageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill' })}
+            src={optimizeCloudinaryUrl(currentImageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill' })}
+            srcSet={currentImageIndex === 0 ? cloudinarySrcSet(currentImageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill' }) : undefined}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
             alt={property.address}
             width={400}
             height={300}
-            style={{ transition: 'transform 500ms ease, opacity 300ms ease' }}
-            className={`relative w-full h-full object-cover ${imageLoaded ? 'group-hover:scale-105 opacity-100' : 'opacity-0'}`}
+            style={{ transition: 'transform 600ms ease-in-out, opacity 300ms ease' }}
+            className={`relative w-full h-full object-cover ${currentImageIndex === 0 ? (imageLoaded ? 'group-hover:scale-[1.02] opacity-100' : 'opacity-0') : 'group-hover:scale-[1.02] opacity-100'}`}
             loading="lazy"
             decoding="async"
             onLoad={() => setImageLoaded(true)}
           />
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+          {/* Navigation arrows */}
+          {hasMultipleImages && (
+            <>
+              <button
+                className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-6 h-6 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 focus:outline-none"
+                onClick={handlePrevImage}
+                aria-label="Previous image"
+              >
+                <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-6 h-6 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 focus:outline-none"
+                onClick={handleNextImage}
+                aria-label="Next image"
+              >
+                <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </>
+          )}
+          {/* Image dots/counter */}
+          {hasMultipleImages && (
+            <div className="absolute bottom-2 left-0 right-0 flex justify-center items-center gap-1 z-30 pointer-events-none">
+              {allImages.length <= 7 ? (
+                allImages.map((_, i) => (
+                  <button
+                    key={i}
+                    className={`pointer-events-auto rounded-full transition-all duration-200 focus:outline-none ${
+                      i === currentImageIndex
+                        ? 'w-3 h-1.5 bg-white'
+                        : 'w-1.5 h-1.5 bg-white/60 hover:bg-white/80'
+                    }`}
+                    onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i); }}
+                    aria-label={`Image ${i + 1}`}
+                  />
+                ))
+              ) : (
+                <span className="bg-black/50 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-0.5 rounded-full pointer-events-none">
+                  {currentImageIndex + 1} / {allImages.length}
+                </span>
+              )}
+            </div>
+          )}
         </>
         ) : (
         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300">
@@ -83,7 +174,7 @@ const PropertyCard: React.FC<{
         {/* Price overlay */}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent pt-8 pb-2.5 px-3">
           <span className="text-lg font-bold text-white">
-            {formatPrice(property.price, property.currency)}
+            {(property as any).isNegotiable ? t('home:featured.byNegotiation', 'By Negotiation') : formatPrice(property.price, property.currency)}
           </span>
         </div>
       </div>

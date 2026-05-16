@@ -3,7 +3,7 @@
  * Displays a compact mini card when clicking on a property marker
  */
 
-import React from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
@@ -24,9 +24,31 @@ interface MapPropertyPopupProps {
 
 const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, onViewDetails }) => {
   const { t } = useTranslation(['property']);
-  const imageUrl = property.images?.[0]
-    ? (typeof property.images[0] === 'string' ? property.images[0] : property.images[0].url)
-    : property.imageUrl;
+  const allImages = (() => {
+    const base = property.imageUrl ? [property.imageUrl] : [];
+    const extras = (property.images || []).map((img: any) =>
+      typeof img === 'string' ? img : img.url
+    ).filter(Boolean) as string[];
+    const combined = [...base, ...extras.filter((u: string) => !base.includes(u))];
+    return combined.slice(0, 8);
+  })();
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const touchStartXRef = useRef<number | null>(null);
+  const imageUrl = allImages[currentImageIndex] ?? property.imageUrl;
+  const hasMultipleImages = allImages.length > 1;
+
+  const handlePrevImage = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setCurrentImageIndex(prev => (prev - 1 + allImages.length) % allImages.length);
+  }, [allImages.length]);
+
+  const handleNextImage = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setCurrentImageIndex(prev => (prev + 1) % allImages.length);
+  }, [allImages.length]);
 
   const isActivelyPromoted = property.isPromoted &&
     property.promotionEndDate &&
@@ -66,7 +88,7 @@ const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, 
             alt={property.title || property.address}
             loading="lazy"
             decoding="async"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-600 ease-in-out"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
@@ -75,6 +97,47 @@ const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, 
         )}
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+        {/* Navigation arrows */}
+        {hasMultipleImages && (
+          <>
+            <button
+              onClick={handlePrevImage}
+              className="absolute left-1 top-1/2 -translate-y-1/2 z-20 w-5 h-5 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center transition-colors focus:outline-none"
+              aria-label="Previous image"
+            >
+              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              onClick={handleNextImage}
+              className="absolute right-1 top-1/2 -translate-y-1/2 z-20 w-5 h-5 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center transition-colors focus:outline-none"
+              aria-label="Next image"
+            >
+              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </>
+        )}
+        {/* Dot indicators */}
+        {hasMultipleImages && (
+          <div className="absolute bottom-1 left-0 right-0 flex justify-center gap-1 z-20 pointer-events-none">
+            {allImages.slice(0, 5).map((_, i) => (
+              <button
+                key={i}
+                className={`pointer-events-auto rounded-full transition-all duration-200 focus:outline-none ${
+                  i === currentImageIndex ? 'w-2.5 h-1 bg-white' : 'w-1 h-1 bg-white/60'
+                }`}
+                onClick={(e) => { e.stopPropagation(); e.preventDefault(); setCurrentImageIndex(i); }}
+                aria-label={`Image ${i + 1}`}
+              />
+            ))}
+            {allImages.length > 5 && (
+              <span className="text-[8px] text-white/80 self-center ml-0.5">+{allImages.length - 5}</span>
+            )}
+          </div>
+        )}
 
         {/* Promotion badge */}
         {isActivelyPromoted && property.promotionTier && (
