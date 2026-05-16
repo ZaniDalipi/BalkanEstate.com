@@ -7,6 +7,7 @@ import * as cheerio from 'cheerio';
 import type { AnyNode } from 'domhandler';
 import { isValidListingItem, isValidRssItem } from './listingNormalizerService';
 import { findSiteProfile } from './listingDetectorProfiles';
+import { fetchWithBrowser } from './listingAdapters/browserClient';
 
 const TIMEOUT = 12_000;
 
@@ -1393,17 +1394,120 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
     };
   }
 
+  // ── 6. JavaScript-rendered site — retry with headless Chromium ──────────────
+  //     Many modern portals (React/Next.js/Vue) serve near-empty HTML to bots.
+  //     Launch a real browser, wait for network to settle, then re-run all
+  //     detection steps on the fully-rendered DOM.
+  let browserHtml: string | null = null;
+  try {
+    const result = await fetchWithBrowser(url, { waitUntil: 'networkidle', settleMs: 1000 });
+    browserHtml = result.html;
+  } catch (browserErr) {
+    // Browser fetch failed — swallow and fall through to the final error
+  }
+
+  if (browserHtml && browserHtml.length > 500) {
+    // Re-run JSON-LD check on browser-rendered HTML
+    if (findJsonLdInHtml(browserHtml)) {
+      return {
+        adapterType: 'jsonLd',
+        adapterConfig: { listingUrls: [url], usePlaywright: true },
+        fieldMap: jsonLdFieldMap(),
+        hint: 'Schema.org JSON-LD detected after JavaScript rendering (headless browser)',
+      };
+    }
+
+    // Re-run SPA state check
+    const spaData = extractEmbeddedSpaListings(browserHtml);
+    if (spaData) {
+      const validItems = spaData.items.filter(i => isValidListingItem(i));
+      if (validItems.length >= 2) {
+        const sample = validItems[0];
+        return {
+          adapterType: 'jsonFeed',
+          adapterConfig: {
+            endpoint: url,
+            itemsPath: spaData.itemsPath,
+            idPath: '$.id',
+            urlPath: '$.url',
+            usePlaywright: true,
+          },
+          fieldMap: buildJsonFieldMap(sample),
+          sample,
+          hint: `Embedded ${spaData.source} data detected after JavaScript rendering — ${validItems.length} listing(s)`,
+        };
+      }
+    }
+
+    // Re-run HTML card detection
+    const profile = findSiteProfile(url);
+    if (profile) {
+      const $ = cheerio.load(browserHtml);
+      const cardCount = $(profile.listingItem).length;
+      if (cardCount >= 2) {
+        const pagination = detectPagination(browserHtml, url);
+        return {
+          adapterType: 'htmlScrape',
+          adapterConfig: {
+            indexUrl: url,
+            selectors: {
+              listingItem: profile.listingItem,
+              link: profile.link,
+              title: profile.title,
+              price: profile.price,
+              image: profile.image,
+              ...(profile.location && { location: profile.location }),
+              ...(profile.sqft && { sqft: profile.sqft }),
+            },
+            ...(profile.nextPageSelector ? { nextPageSelector: profile.nextPageSelector } :
+                pagination?.type === 'nextSelector' ? { nextPageSelector: pagination.selector } : {}),
+            ...(profile.pageParam ? { pageParam: profile.pageParam } :
+                pagination?.type === 'pageParam' ? { pageParam: pagination.param } : {}),
+            followDetails: true,
+            requestDelayMs: 2500,
+            respectRobotsTxt: true,
+            maxPages: 20,
+            usePlaywright: true,
+          },
+          fieldMap: { title: 'title', price: 'price', city: 'location', sqft: 'sqft', imageUrl: 'image', sourceUrl: 'url' },
+          hint: `Known site: ${new URL(url).hostname} — ${cardCount} listing card(s) detected after JavaScript rendering`,
+        };
+      }
+    }
+
+    const scrape = detectHtmlScrape(browserHtml, url);
+    if (scrape) {
+      const pagination = detectPagination(browserHtml, url);
+      return {
+        adapterType: 'htmlScrape',
+        adapterConfig: {
+          indexUrl: url,
+          selectors: scrape.selectors,
+          ...(pagination?.type === 'nextSelector' ? { nextPageSelector: pagination.selector } : {}),
+          ...(pagination?.type === 'pageParam' ? { pageParam: pagination.param } : {}),
+          followDetails: true,
+          requestDelayMs: 2500,
+          respectRobotsTxt: true,
+          maxPages: 20,
+          usePlaywright: true,
+        },
+        fieldMap: { title: 'title', price: 'price', description: 'description', imageUrl: 'image', sourceUrl: 'url' },
+        sample: scrape.sample,
+        hint: `JavaScript-rendered listing page — ${scrape.count} card(s) found after headless browser rendering`,
+      };
+    }
+  }
+
   // ── Nothing found ─────────────────────────────────────────────────────────────
-  if (fetchFailureReason) {
+  if (fetchFailureReason && !browserHtml) {
     throw new Error(
       `Could not auto-detect listings: ${fetchFailureReason} ` +
       'Try pasting a direct JSON feed URL or a JSON sample from the agency portal.'
     );
   }
   throw new Error(
-    'Could not auto-detect a supported listing format. The site may render ' +
-    'listings entirely in JavaScript (we don\'t run JS), or has no recognizable ' +
-    'listing structure. Try the "Paste JSON sample" option, or contact the site ' +
-    'owner to ask for their API or JSON export.'
+    'Could not auto-detect a supported listing format. The site may use a custom ' +
+    'layout that our detector does not recognize. Try the "Paste JSON sample" option, ' +
+    'or contact the site owner to ask for their API or JSON export.'
   );
 };

@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import type { AnyNode } from 'domhandler';
 import type { IListingSource } from '../../models/ListingSource';
 import { httpGet } from './httpClient';
+import { fetchWithBrowser } from './browserClient';
 import { looksLikeListingPath } from '../listingDetectorService';
 import { isValidListingItem } from '../listingNormalizerService';
 import type { FetchOptions, RawListing, SourceAdapter } from './types';
@@ -57,6 +58,8 @@ interface HtmlScrapeAdapterConfig {
   detailConcurrency?: number;
   /** Per-host delay specifically for detail fetches. Falls back to requestDelayMs / 300ms. */
   detailRequestDelayMs?: number;
+  /** When true, use a headless Chromium browser instead of plain HTTP for index and detail fetches. */
+  usePlaywright?: boolean;
 }
 
 const ATTR_PREFIX = 'attr:';
@@ -178,8 +181,6 @@ const resolveUrl = (base: string, href: string): string => {
 
 /** Default cap for concurrent detail-page fetches against the same source. */
 const DEFAULT_DETAIL_CONCURRENCY = 4;
-/** Default delay between sequential per-host requests when followDetails is on. */
-const DEFAULT_DETAIL_DELAY_MS = 300;
 
 /**
  * Run `worker` over `items` with at most `concurrency` in flight at once.
@@ -228,19 +229,26 @@ export class HtmlScrapeAdapter implements SourceAdapter {
     const limit = options.limit ?? cfg.limit;
     const out: RawListing[] = [];
     const maxPages = cfg.maxPages ?? 1;
+    const usePlaywright = cfg.usePlaywright === true;
 
     const requestOpts = {
       userAgent: cfg.userAgent,
       requestDelayMs: cfg.requestDelayMs,
       respectRobotsTxt: cfg.respectRobotsTxt,
     };
-    const detailRequestOpts = {
-      ...requestOpts,
-      // Detail pages reuse the same host we just fetched — let them go fast.
-      requestDelayMs: cfg.detailRequestDelayMs ?? DEFAULT_DETAIL_DELAY_MS,
-      responseType: 'text' as const,
+    const detailConcurrency = usePlaywright
+      ? 1  // Playwright tabs are expensive — serialise detail fetches
+      : Math.max(1, cfg.detailConcurrency ?? DEFAULT_DETAIL_CONCURRENCY);
+
+    /** Fetch a page HTML — via Playwright when needed, plain HTTP otherwise. */
+    const fetchHtml = async (url: string): Promise<string> => {
+      if (usePlaywright) {
+        const r = await fetchWithBrowser(url, { waitUntil: 'networkidle', settleMs: 800 });
+        return r.html;
+      }
+      const r = await httpGet<string>(url, { ...requestOpts, responseType: 'text' });
+      return String(r.data);
     };
-    const detailConcurrency = Math.max(1, cfg.detailConcurrency ?? DEFAULT_DETAIL_CONCURRENCY);
 
     /**
      * Stub the per-listing item without fetching its detail page. We collect
@@ -255,8 +263,8 @@ export class HtmlScrapeAdapter implements SourceAdapter {
 
     for (let i = 0; i < maxPages && pageUrl; i++) {
       const url: string = cfg.pageParam ? this.withPageParam(cfg.indexUrl, cfg.pageParam, pageNum) : pageUrl;
-      const response = await httpGet<string>(url, { ...requestOpts, responseType: 'text' });
-      const $ = cheerio.load(String(response.data));
+      const pageHtml = await fetchHtml(url);
+      const $ = cheerio.load(pageHtml);
       const items = $(cfg.selectors.listingItem);
 
       const seenUrls = new Set<string>();
@@ -358,9 +366,9 @@ export class HtmlScrapeAdapter implements SourceAdapter {
     const detailHtmls = await pMap(
       capped,
       async (stub) => {
-        const detail = await httpGet<string>(stub.url ?? '', detailRequestOpts);
+        const html = await fetchHtml(stub.url ?? '');
         options.onProgress?.(capped.length, ++detailsCompleted);
-        return String(detail.data);
+        return html;
       },
       detailConcurrency
     );
