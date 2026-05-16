@@ -98,7 +98,7 @@ const PropertyCard: React.FC<{
           >
             <img
               src={optimizeCloudinaryUrl(currentImageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill' })}
-              srcSet={currentImageIndex === 0 ? cloudinarySrcSet(currentImageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill' }) : undefined}
+              srcSet={cloudinarySrcSet(currentImageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill' })}
               sizes="(max-width: 640px) calc(50vw - 20px), (max-width: 1024px) calc(50vw - 32px), 33vw"
               alt={property.title || property.address || 'Property image'}
               width={400}
@@ -135,28 +135,22 @@ const PropertyCard: React.FC<{
               </button>
             </>
           )}
-          {/* Image dots/counter */}
+          {/* Image dots indicator — always visible, tappable */}
           {hasMultipleImages && (
-            <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center z-30 pointer-events-none">
-              {allImages.length <= 7 ? (
-                allImages.map((_, i) => (
-                  <button
-                    key={i}
-                    className="pointer-events-auto min-w-[28px] min-h-[28px] flex items-center justify-center focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
-                    onClick={(e) => { e.stopPropagation(); setSlideDirection(i > currentImageIndex ? 'right' : 'left'); setCurrentImageIndex(i); }}
-                    aria-label={`Image ${i + 1} of ${allImages.length}`}
-                    aria-current={i === currentImageIndex ? 'true' : undefined}
-                  >
-                    <span className={`block rounded-full transition-all duration-200 ${
-                      i === currentImageIndex ? 'w-3 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/60'
-                    }`} />
-                  </button>
-                ))
-              ) : (
-                <span className="pointer-events-none bg-black/50 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-0.5 rounded-full">
-                  {currentImageIndex + 1} / {allImages.length}
-                </span>
-              )}
+            <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center z-30 pointer-events-none gap-1">
+              {allImages.map((_, i) => (
+                <button
+                  key={i}
+                  className="pointer-events-auto min-w-[28px] min-h-[28px] flex items-center justify-center focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
+                  onClick={(e) => { e.stopPropagation(); setSlideDirection(i > currentImageIndex ? 'right' : 'left'); setCurrentImageIndex(i); }}
+                  aria-label={`Image ${i + 1} of ${allImages.length}`}
+                  aria-current={i === currentImageIndex ? 'true' : undefined}
+                >
+                  <span className={`block rounded-full transition-all duration-200 ${
+                    i === currentImageIndex ? 'w-3 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/60'
+                  }`} />
+                </button>
+              ))}
             </div>
           )}
         </>

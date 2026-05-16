@@ -227,7 +227,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             >
               <img
                 src={optimizeCloudinaryUrl(currentImageUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })}
-                srcSet={currentImageIndex === 0 ? `${optimizeCloudinaryUrl(currentImageUrl, { width: 320, height: 240, quality: 'auto', crop: 'fill', gravity: 'auto' })} 320w, ${optimizeCloudinaryUrl(currentImageUrl, { width: 480, height: 360, quality: 'auto', crop: 'fill', gravity: 'auto' })} 480w, ${optimizeCloudinaryUrl(currentImageUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })} 640w` : undefined}
+                srcSet={`${optimizeCloudinaryUrl(currentImageUrl, { width: 320, height: 240, quality: 'auto', crop: 'fill', gravity: 'auto' })} 320w, ${optimizeCloudinaryUrl(currentImageUrl, { width: 480, height: 360, quality: 'auto', crop: 'fill', gravity: 'auto' })} 480w, ${optimizeCloudinaryUrl(currentImageUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })} 640w`}
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
                 loading="lazy"
@@ -268,28 +268,22 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               </>
             )}
 
-            {/* Image dots/counter — min 28px tap targets */}
+            {/* Image dots indicator — always visible, tappable */}
             {hasMultipleImages && (
-              <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center z-20 pointer-events-none">
-                {allImages.length <= 7 ? (
-                  allImages.map((_, i) => (
-                    <button
-                      key={i}
-                      className="pointer-events-auto min-w-[28px] min-h-[28px] flex items-center justify-center focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
-                      onClick={(e) => { e.stopPropagation(); setSlideDirection(i > currentImageIndex ? 'right' : 'left'); setCurrentImageIndex(i); }}
-                      aria-label={`Image ${i + 1} of ${allImages.length}`}
-                      aria-current={i === currentImageIndex ? 'true' : undefined}
-                    >
-                      <span className={`block rounded-full transition-all duration-200 ${
-                        i === currentImageIndex ? 'w-3 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/60'
-                      }`} />
-                    </button>
-                  ))
-                ) : (
-                  <span className="pointer-events-none bg-black/50 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-0.5 rounded-full">
-                    {currentImageIndex + 1} / {allImages.length}
-                  </span>
-                )}
+              <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center z-20 pointer-events-none gap-1">
+                {allImages.map((_, i) => (
+                  <button
+                    key={i}
+                    className="pointer-events-auto min-w-[28px] min-h-[28px] flex items-center justify-center focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
+                    onClick={(e) => { e.stopPropagation(); setSlideDirection(i > currentImageIndex ? 'right' : 'left'); setCurrentImageIndex(i); }}
+                    aria-label={`Image ${i + 1} of ${allImages.length}`}
+                    aria-current={i === currentImageIndex ? 'true' : undefined}
+                  >
+                    <span className={`block rounded-full transition-all duration-200 ${
+                      i === currentImageIndex ? 'w-3 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/60'
+                    }`} />
+                  </button>
+                ))}
               </div>
             )}
           </div>
