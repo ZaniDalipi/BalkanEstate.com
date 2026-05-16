@@ -34,6 +34,7 @@ const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, 
   })();
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
   const touchStartXRef = useRef<number | null>(null);
   const imageUrl = allImages[currentImageIndex] ?? property.imageUrl;
   const hasMultipleImages = allImages.length > 1;
@@ -41,12 +42,14 @@ const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, 
   const handlePrevImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+    setSlideDirection('left');
     setCurrentImageIndex(prev => (prev - 1 + allImages.length) % allImages.length);
   }, [allImages.length]);
 
   const handleNextImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+    setSlideDirection('right');
     setCurrentImageIndex(prev => (prev + 1) % allImages.length);
   }, [allImages.length]);
 
@@ -83,13 +86,18 @@ const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, 
       {/* Image container */}
       <div className="relative h-24 rounded-t-xl overflow-hidden bg-gray-100">
         {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={property.title || property.address}
-            loading="lazy"
-            decoding="async"
-            className="w-full h-full object-cover transition-transform duration-600 ease-in-out"
-          />
+          <div
+            key={currentImageIndex}
+            className={`absolute inset-0 ${slideDirection === 'right' ? 'animate-gallery-right' : 'animate-gallery-left'}`}
+          >
+            <img
+              src={imageUrl}
+              alt={property.title || property.address}
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover object-center"
+            />
+          </div>
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
             <span className="text-2xl opacity-50">🏠</span>
@@ -129,7 +137,7 @@ const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, 
                 className={`pointer-events-auto rounded-full transition-all duration-200 focus:outline-none ${
                   i === currentImageIndex ? 'w-2.5 h-1 bg-white' : 'w-1 h-1 bg-white/60'
                 }`}
-                onClick={(e) => { e.stopPropagation(); e.preventDefault(); setCurrentImageIndex(i); }}
+                onClick={(e) => { e.stopPropagation(); e.preventDefault(); setSlideDirection(i > currentImageIndex ? 'right' : 'left'); setCurrentImageIndex(i); }}
                 aria-label={`Image ${i + 1}`}
               />
             ))}

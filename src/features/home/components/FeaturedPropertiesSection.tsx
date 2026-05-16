@@ -16,8 +16,8 @@ const PropertyCard: React.FC<{
   index: number;
 }> = ({ property, onClick, index }) => {
   const { t } = useTranslation(['home']);
-  const [imageLoaded, setImageLoaded] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
   const touchStartXRef = useRef<number | null>(null);
 
   const allImages = useMemo(() => {
@@ -33,11 +33,13 @@ const PropertyCard: React.FC<{
 
   const handlePrevImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    setSlideDirection('left');
     setCurrentImageIndex(prev => (prev - 1 + allImages.length) % allImages.length);
   }, [allImages.length]);
 
   const handleNextImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    setSlideDirection('right');
     setCurrentImageIndex(prev => (prev + 1) % allImages.length);
   }, [allImages.length]);
 
@@ -49,10 +51,13 @@ const PropertyCard: React.FC<{
     if (touchStartXRef.current === null) return;
     const diff = touchStartXRef.current - e.changedTouches[0].clientX;
     if (Math.abs(diff) > 40) {
-      setCurrentImageIndex(prev => diff > 0
-        ? (prev + 1) % allImages.length
-        : (prev - 1 + allImages.length) % allImages.length
-      );
+      if (diff > 0) {
+        setSlideDirection('right');
+        setCurrentImageIndex(prev => (prev + 1) % allImages.length);
+      } else {
+        setSlideDirection('left');
+        setCurrentImageIndex(prev => (prev - 1 + allImages.length) % allImages.length);
+      }
     }
     touchStartXRef.current = null;
   }, [allImages.length]);
@@ -84,21 +89,26 @@ const PropertyCard: React.FC<{
             decoding="async"
             width={40}
             height={30}
-            className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-80"
+            className="absolute inset-0 w-full h-full object-cover object-center blur-2xl scale-150 opacity-80"
           />
-          <img
-            src={optimizeCloudinaryUrl(currentImageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill' })}
-            srcSet={currentImageIndex === 0 ? cloudinarySrcSet(currentImageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill' }) : undefined}
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
-            alt={property.address}
-            width={400}
-            height={300}
-            style={{ transition: 'transform 600ms ease-in-out, opacity 300ms ease' }}
-            className={`relative w-full h-full object-cover ${currentImageIndex === 0 ? (imageLoaded ? 'group-hover:scale-[1.02] opacity-100' : 'opacity-0') : 'group-hover:scale-[1.02] opacity-100'}`}
-            loading="lazy"
-            decoding="async"
-            onLoad={() => setImageLoaded(true)}
-          />
+          {/* Animation wrapper — key triggers remount+animation on image change */}
+          <div
+            key={currentImageIndex}
+            className={`absolute inset-0 ${slideDirection === 'right' ? 'animate-gallery-right' : 'animate-gallery-left'}`}
+          >
+            <img
+              src={optimizeCloudinaryUrl(currentImageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill' })}
+              srcSet={currentImageIndex === 0 ? cloudinarySrcSet(currentImageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill' }) : undefined}
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
+              alt={property.address}
+              width={400}
+              height={300}
+              style={{ transition: 'transform 600ms ease-in-out' }}
+              className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-[1.02]"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
           {/* Navigation arrows */}
@@ -136,7 +146,7 @@ const PropertyCard: React.FC<{
                         ? 'w-3 h-1.5 bg-white'
                         : 'w-1.5 h-1.5 bg-white/60 hover:bg-white/80'
                     }`}
-                    onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i); }}
+                    onClick={(e) => { e.stopPropagation(); setSlideDirection(i > currentImageIndex ? 'right' : 'left'); setCurrentImageIndex(i); }}
                     aria-label={`Image ${i + 1}`}
                   />
                 ))

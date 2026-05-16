@@ -369,7 +369,7 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                                         key={resolvedAvatarUrl}
                                         src={resolvedAvatarUrl}
                                         alt={agent.name}
-                                        className="w-full h-full object-cover"
+                                        className="w-full h-full object-cover object-center"
                                         onError={() => setImgError(true)}
                                     />
                                 ) : (

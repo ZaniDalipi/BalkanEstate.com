@@ -93,8 +93,8 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 }) => {
   const { t, i18n } = useTranslation(['property', 'rental', 'common']);
   const [imageError, setImageError] = useState(!property.imageUrl);
-  const [imageLoaded, setImageLoaded] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
   const touchStartXRef = useRef<number | null>(null);
 
   const allImages = useMemo(() => {
@@ -108,11 +108,13 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
   const handlePrevImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    setSlideDirection('left');
     setCurrentImageIndex(prev => (prev - 1 + allImages.length) % allImages.length);
   }, [allImages.length]);
 
   const handleNextImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    setSlideDirection('right');
     setCurrentImageIndex(prev => (prev + 1) % allImages.length);
   }, [allImages.length]);
 
@@ -124,10 +126,13 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
     if (touchStartXRef.current === null) return;
     const diff = touchStartXRef.current - e.changedTouches[0].clientX;
     if (Math.abs(diff) > 40) {
-      setCurrentImageIndex(prev => diff > 0
-        ? (prev + 1) % allImages.length
-        : (prev - 1 + allImages.length) % allImages.length
-      );
+      if (diff > 0) {
+        setSlideDirection('right');
+        setCurrentImageIndex(prev => (prev + 1) % allImages.length);
+      } else {
+        setSlideDirection('left');
+        setCurrentImageIndex(prev => (prev - 1 + allImages.length) % allImages.length);
+      }
     }
     touchStartXRef.current = null;
   }, [allImages.length]);
@@ -215,23 +220,27 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               height={30}
               className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-80"
             />
-            {/* Main image - server-cropped to 4:3 for consistent cards */}
-            <img
-              src={optimizeCloudinaryUrl(currentImageUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })}
-              srcSet={currentImageIndex === 0 ? `${optimizeCloudinaryUrl(currentImageUrl, { width: 320, height: 240, quality: 'auto', crop: 'fill', gravity: 'auto' })} 320w, ${optimizeCloudinaryUrl(currentImageUrl, { width: 480, height: 360, quality: 'auto', crop: 'fill', gravity: 'auto' })} 480w, ${optimizeCloudinaryUrl(currentImageUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })} 640w` : undefined}
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
-              loading="lazy"
-              decoding="async"
-              width={640}
-              height={480}
-              style={{ transition: 'transform 600ms ease-in-out, opacity 300ms ease' }}
-              className={`relative w-full h-full object-cover scale-100 ${
-                isSold || isRented ? 'grayscale' : 'group-hover:scale-[1.02]'
-              } ${currentImageIndex === 0 ? (imageLoaded ? 'opacity-100' : 'opacity-0') : 'opacity-100'}`}
-              onLoad={() => setImageLoaded(true)}
-              onError={() => setImageError(true)}
-            />
+            {/* Main image — animation wrapper drives directional slide */}
+            <div
+              key={currentImageIndex}
+              className={`absolute inset-0 ${slideDirection === 'right' ? 'animate-gallery-right' : 'animate-gallery-left'}`}
+            >
+              <img
+                src={optimizeCloudinaryUrl(currentImageUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })}
+                srcSet={currentImageIndex === 0 ? `${optimizeCloudinaryUrl(currentImageUrl, { width: 320, height: 240, quality: 'auto', crop: 'fill', gravity: 'auto' })} 320w, ${optimizeCloudinaryUrl(currentImageUrl, { width: 480, height: 360, quality: 'auto', crop: 'fill', gravity: 'auto' })} 480w, ${optimizeCloudinaryUrl(currentImageUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })} 640w` : undefined}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
+                loading="lazy"
+                decoding="async"
+                width={640}
+                height={480}
+                style={{ transition: 'transform 600ms ease-in-out' }}
+                className={`absolute inset-0 w-full h-full object-cover object-center ${
+                  isSold || isRented ? 'grayscale' : 'group-hover:scale-[1.02]'
+                }`}
+                onError={() => setImageError(true)}
+              />
+            </div>
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
 
@@ -271,7 +280,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                           ? 'w-3 h-1.5 bg-white'
                           : 'w-1.5 h-1.5 bg-white/60 hover:bg-white/80'
                       }`}
-                      onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i); }}
+                      onClick={(e) => { e.stopPropagation(); setSlideDirection(i > currentImageIndex ? 'right' : 'left'); setCurrentImageIndex(i); }}
                       aria-label={`Image ${i + 1}`}
                     />
                   ))
