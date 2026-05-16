@@ -89,6 +89,9 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     if (property?.id) trackView(property);
   }, [property?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // State for similar properties interest dialog
+  const [showSimilarPropertiesDialog, setShowSimilarPropertiesDialog] = useState(false);
+
   // Calculate similar properties for the interest dialog
   const similarPropertiesForDialog = useMemo(() => {
     if (!state.properties?.length || !property?.id) return [];
@@ -183,9 +186,6 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
   // State for promotion modal
   const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false);
-
-  // State for similar properties interest dialog
-  const [showSimilarPropertiesDialog, setShowSimilarPropertiesDialog] = useState(false);
 
   // State for rental status management
   const [showRentedModal, setShowRentedModal] = useState(false);
