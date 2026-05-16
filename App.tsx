@@ -59,7 +59,6 @@ function lazyWithRetry(importFn: () => Promise<{ default: React.ComponentType<an
 // Core layout components (lazy loaded - can render after initial paint)
 const Sidebar = lazyWithRetry(() => import('./components/shared/Sidebar'));
 const Header = lazyWithRetry(() => import('./components/shared/Header'));
-const DevToolsGuard = lazy(() => import('./src/components/DevToolsGuard'));
 
 
 // Lazy load all pages and conditional components to reduce initial bundle
@@ -1261,9 +1260,6 @@ const App: React.FC = () => {
                       </Suspense>
 
                       <AppWrapper />
-                      <Suspense fallback={null}>
-                        <DevToolsGuard />
-                      </Suspense>
                     </NavigationProvider>
                   </AnimationProvider>
                 </ConfirmationProvider>
