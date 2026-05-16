@@ -105,6 +105,37 @@ export const ALL_PHONE_COUNTRY_CODES: PhoneCountryCode[] = [
     ...INTERNATIONAL_PHONE_CODES,
 ];
 
+// Detect user's country code from their location, defaulting to Macedonia
+export const getDefaultPhoneCountryCode = async (): Promise<string> => {
+    try {
+        // Try to detect country from IP using ipapi.co (free, no API key needed)
+        const response = await fetch('https://ipapi.co/json/', {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch location');
+
+        const data = await response.json() as { country_code?: string };
+        const detectedCountry = data.country_code?.toUpperCase();
+
+        if (!detectedCountry) throw new Error('No country code found');
+
+        // Find matching phone country code
+        const matching = ALL_PHONE_COUNTRY_CODES.find(
+            (pcc) => pcc.country === detectedCountry
+        );
+
+        if (matching) return matching.code;
+
+        // Not found, use Macedonia as fallback
+        return '+389';
+    } catch (error) {
+        // On any error, default to Macedonia (+389)
+        return '+389';
+    }
+};
+
 // Phone number format patterns per country code (digit groupings)
 export const PHONE_FORMAT_PATTERNS: Record<string, number[]> = {
     // Balkan countries

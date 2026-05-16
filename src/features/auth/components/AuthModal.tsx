@@ -4,7 +4,7 @@ import { useAppContext } from '@/context/AppContext';
 import { AppleIcon, EnvelopeIcon, GoogleIcon, LogoIcon, XMarkIcon, EyeIcon } from '@/constants';
 import SocialLoginPopup from './SocialLoginPopup';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
-import { ALL_PHONE_COUNTRY_CODES, PHONE_FORMAT_PATTERNS, formatPhoneNumber, getPhonePlaceholder, BALKAN_PHONE_CODES } from '@/constants/phoneCountryCodes';
+import { ALL_PHONE_COUNTRY_CODES, PHONE_FORMAT_PATTERNS, formatPhoneNumber, getPhonePlaceholder, BALKAN_PHONE_CODES, getDefaultPhoneCountryCode } from '@/constants/phoneCountryCodes';
 import ConfirmationModal from '@/shared/components/ui/ConfirmationModal';
 
 type SocialProvider = 'google' | 'apple';
@@ -234,7 +234,7 @@ const AuthPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [phoneCountryCode, setPhoneCountryCode] = useState<string>(ALL_PHONE_COUNTRY_CODES[0].code);
+    const [phoneCountryCode, setPhoneCountryCode] = useState<string>('+389'); // Default to Macedonia, will be detected
     const [phoneNumber, setPhoneNumber] = useState('');
 
     // Field-level errors for custom validation
@@ -273,6 +273,17 @@ const AuthPage: React.FC = () => {
         };
         fetchProviders();
     }, []);
+
+    // Detect user's location and set default phone country code
+    useEffect(() => {
+        const detectLocation = async () => {
+            const detectedCode = await getDefaultPhoneCountryCode();
+            setPhoneCountryCode(detectedCode);
+        };
+        if (state.isAuthModalOpen) {
+            detectLocation();
+        }
+    }, [state.isAuthModalOpen]);
 
     useEffect(() => {
         // Reset state when modal opens or view changes
