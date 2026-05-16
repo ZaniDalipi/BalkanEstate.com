@@ -89,7 +89,7 @@ const PropertyCard: React.FC<{
             decoding="async"
             width={40}
             height={30}
-            className="absolute inset-0 w-full h-full object-contain object-center blur-2xl scale-125 opacity-80"
+            className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-80"
           />
           {/* Animation wrapper — key triggers remount+animation on image change */}
           <div
@@ -97,14 +97,14 @@ const PropertyCard: React.FC<{
             className={`absolute inset-0 ${slideDirection === 'right' ? 'animate-gallery-right' : 'animate-gallery-left'}`}
           >
             <img
-              src={optimizeCloudinaryUrl(currentImageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill' })}
-              srcSet={cloudinarySrcSet(currentImageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill' })}
+              src={optimizeCloudinaryUrl(currentImageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })}
+              srcSet={cloudinarySrcSet(currentImageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })}
               sizes="(max-width: 640px) calc(50vw - 20px), (max-width: 1024px) calc(50vw - 32px), 33vw"
               alt={property.title || property.address || 'Property image'}
               width={400}
               height={300}
               style={{ transition: 'transform 600ms ease-in-out' }}
-              className="absolute inset-0 w-full h-full object-contain object-center group-hover:scale-[1.02]"
+              className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-[1.02]"
               loading="lazy"
               decoding="async"
               onError={() => setImageError(true)}
