@@ -28,6 +28,7 @@ import {
   SocialVideoEmbed,
 } from '@/src/components/property';
 import SimilarProperties from '@/src/components/property/SimilarProperties';
+import SimilarPropertiesInterestDialog from './SimilarPropertiesInterestDialog';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import { useRecentlyViewed } from '@/src/hooks/useRecentlyViewed';
@@ -88,6 +89,56 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     if (property?.id) trackView(property);
   }, [property?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Calculate similar properties for the interest dialog
+  const similarPropertiesForDialog = useMemo(() => {
+    if (!state.properties?.length || !property?.id) return [];
+
+    try {
+      const priceLow = property.price * 0.7;
+      const priceHigh = property.price * 1.3;
+
+      const scored = state.properties
+        .filter(p => {
+          if (!p?.id) return false;
+          if (p.id === property.id) return false;
+          if (p.status !== 'active' && p.status !== 'rented') return false;
+          return true;
+        })
+        .map(p => {
+          let score = 0;
+          if (p.city === property.city) score += 50;
+          if (p.country === property.country) score += 20;
+          if (p.propertyType === property.propertyType) score += 15;
+          if (p.listingType === property.listingType) score += 10;
+          if (p.price >= priceLow && p.price <= priceHigh) score += 10;
+          if (property.beds > 0 && Math.abs(p.beds - property.beds) <= 1) score += 5;
+          return { property: p, score };
+        })
+        .filter(s => s.score >= 30)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3)
+        .map(s => s.property);
+
+      return scored;
+    } catch (error) {
+      console.error('PropertyDetailsPage: Error calculating similar properties for dialog', error);
+      return [];
+    }
+  }, [state.properties, property?.id, property?.city, property?.country, property?.propertyType, property?.listingType, property?.price, property?.beds]);
+
+  // Show similar properties dialog after a delay
+  useEffect(() => {
+    if (!property?.id || showSimilarPropertiesDialog) return;
+
+    const timer = setTimeout(() => {
+      if (similarPropertiesForDialog.length > 0) {
+        setShowSimilarPropertiesDialog(true);
+      }
+    }, 2000); // Show dialog after 2 seconds
+
+    return () => clearTimeout(timer);
+  }, [property?.id, similarPropertiesForDialog, showSimilarPropertiesDialog]);
+
   // Enable real-time updates - refresh when this property is updated
   useRealtimeProperties({
     onPropertyUpdated: (data) => {
@@ -132,6 +183,9 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
   // State for promotion modal
   const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false);
+
+  // State for similar properties interest dialog
+  const [showSimilarPropertiesDialog, setShowSimilarPropertiesDialog] = useState(false);
 
   // State for rental status management
   const [showRentedModal, setShowRentedModal] = useState(false);
@@ -1038,6 +1092,22 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
         property={property}
         isOpen={showStickyScheduleModal}
         onClose={() => setShowStickyScheduleModal(false)}
+      />
+
+      {/* Similar properties interest dialog */}
+      <SimilarPropertiesInterestDialog
+        isOpen={showSimilarPropertiesDialog}
+        onClose={() => setShowSimilarPropertiesDialog(false)}
+        property={property}
+        similarProperties={similarPropertiesForDialog}
+        onPropertyClick={(selectedProperty) => {
+          // Optional: Add analytics or tracking when user clicks on a similar property
+          try {
+            console.log('User interested in similar property:', selectedProperty.id);
+          } catch (error) {
+            console.error('Error tracking similar property click:', error);
+          }
+        }}
       />
 
       {/* Animation styles */}
