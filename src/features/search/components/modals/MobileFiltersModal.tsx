@@ -38,9 +38,16 @@ const MobileFiltersModal: React.FC<MobileFiltersModalProps> = ({
             <div className="relative w-full h-full" onClick={onClose}>
                 <div className="absolute inset-0 bg-white" onClick={e => e.stopPropagation()}>
                     <div className="bg-white h-full w-full flex flex-col">
-                        <div className="flex-shrink-0 p-4 border-b border-neutral-200 flex justify-between items-center">
+                        <div
+                            className="flex-shrink-0 px-4 pb-4 border-b border-neutral-200 flex justify-between items-center"
+                            style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1rem)' }}
+                        >
                             <h2 className="text-lg font-bold text-neutral-800">{t('filters.title')}</h2>
-                            <button onClick={onClose} className="p-2 text-neutral-500 hover:text-neutral-800">
+                            <button
+                                onClick={onClose}
+                                className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 text-neutral-500 hover:text-neutral-800 rounded-full hover:bg-neutral-100 transition-colors"
+                                aria-label="Close filters"
+                            >
                                 <XMarkIcon className="w-6 h-6" />
                             </button>
                         </div>
