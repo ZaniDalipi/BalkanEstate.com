@@ -135,10 +135,10 @@ const PropertyCard: React.FC<{
               </button>
             </>
           )}
-          {/* Image dots indicator — max 7 dots + count for rest */}
+          {/* Image indicator — max 3 dots + count */}
           {hasMultipleImages && (
             <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center z-30 pointer-events-none gap-1">
-              {allImages.slice(0, 7).map((_, i) => (
+              {allImages.slice(0, 3).map((_, i) => (
                 <button
                   key={i}
                   className="pointer-events-auto min-w-[28px] min-h-[28px] flex items-center justify-center focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
@@ -151,9 +151,9 @@ const PropertyCard: React.FC<{
                   }`} />
                 </button>
               ))}
-              {allImages.length > 7 && (
+              {allImages.length > 3 && (
                 <span className="pointer-events-none bg-black/40 backdrop-blur-sm text-white text-[10px] font-medium px-1.5 py-0.5 rounded-full">
-                  +{allImages.length - 7}
+                  +{allImages.length - 3}
                 </span>
               )}
             </div>
