@@ -960,15 +960,12 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <FeaturedAgencies />
             </div>
 
-            {/* Seller/Agent Listings Suggestions */}
-            {property.seller && (property.seller.agencyId || property.seller.agencyName) && (
+            {/* Seller/Agent Listings Suggestions - shown on every listing */}
+            {property.seller && (
               <div className="mt-4 sm:mt-6 lg:mt-8 animate-slide-up" style={{ animationDelay: '550ms' }}>
-                <h3 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-3 sm:mb-4">
-                  {t('property:moreListing', 'More listings from this agent')}
-                </h3>
                 <UserListingsSuggestions
                   userId={property.seller.id || ''}
-                  userName={property.seller.name || 'Agent'}
+                  userName={property.seller.name || ''}
                   userRole={property.seller.type === 'agent' ? UserRole.AGENT : UserRole.PRIVATE_SELLER}
                   agencyId={property.seller.agencyId}
                   agencyName={property.seller.agencyName}

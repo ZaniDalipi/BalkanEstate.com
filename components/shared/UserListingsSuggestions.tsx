@@ -56,27 +56,23 @@ const UserListingsSuggestions: React.FC<UserListingsSuggestionsProps> = ({
     }
   }, [state.properties, userId, userRole, agencyId, agencyName]);
 
-  if (userListings.length === 0) {
-    return (
-      <div className="bg-white/40 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/30 text-center">
-        <p className="text-neutral-600 text-sm">
-          {userRole === UserRole.AGENT && agencyId
-            ? t('account:suggestions.noAgencyListings', 'No active listings from your agency yet')
-            : t('account:suggestions.noListings', 'No active listings yet. Start listing properties to see them here.')}
-        </p>
-      </div>
-    );
-  }
+  if (userListings.length === 0) return null;
 
-  const title =
-    userRole === UserRole.AGENT && agencyId
-      ? t('account:suggestions.agencyListings', 'Agency Listings')
-      : t('account:suggestions.yourListings', 'Your Listings');
+  const hasAgency = userRole === UserRole.AGENT && (agencyId || agencyName);
+
+  const title = hasAgency
+    ? t('account:suggestions.agencyListings', 'More from {{agency}}', { agency: agencyName || 'this agency' })
+    : t('account:suggestions.sellerListings', 'More from {{name}}', { name: userName || 'this seller' });
 
   return (
     <div>
-      <h4 className="text-lg font-semibold text-neutral-700 mb-4">{title}</h4>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-3 sm:mb-4">{title}</h2>
+      <p className="text-sm text-neutral-500 mb-4">
+        {hasAgency
+          ? t('account:suggestions.agencySubtitle', 'Other active listings from {{agency}}', { agency: agencyName || 'this agency' })
+          : t('account:suggestions.sellerSubtitle', 'Other active listings from this seller')}
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {userListings.map(property => (
           <PropertyCard key={property.id} property={property} />
         ))}
