@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { XMarkIcon, MapPinIcon } from '@/constants';
@@ -25,8 +25,6 @@ const SimilarPropertiesInterestDialog: React.FC<SimilarPropertiesInterestDialogP
   const { t } = useTranslation(['property', 'common']);
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
 
-  if (!isOpen) return null;
-
   // Validate and filter similar properties
   const validSimilarProperties = useMemo(() => {
     if (!Array.isArray(similarProperties)) {
@@ -36,9 +34,7 @@ const SimilarPropertiesInterestDialog: React.FC<SimilarPropertiesInterestDialogP
     return similarProperties.filter(p => p?.id && p?.imageUrl && p.id !== property?.id).slice(0, 3);
   }, [similarProperties, property?.id]);
 
-  if (validSimilarProperties.length === 0) {
-    return null;
-  }
+  if (!isOpen || validSimilarProperties.length === 0) return null;
 
   const handlePropertyClick = (similarProperty: Property) => {
     if (!similarProperty?.id) {
