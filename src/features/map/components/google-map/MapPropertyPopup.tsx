@@ -122,7 +122,7 @@ const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, 
               alt={property.title || property.address || 'Property image'}
               loading="lazy"
               decoding="async"
-              className="absolute inset-0 w-full h-full object-cover object-center"
+              className="absolute inset-0 w-full h-full object-contain object-center"
               onError={() => setImageError(true)}
             />
           </div>

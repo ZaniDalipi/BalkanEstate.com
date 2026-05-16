@@ -218,7 +218,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               decoding="async"
               width={40}
               height={30}
-              className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-80"
+              className="absolute inset-0 w-full h-full object-contain blur-2xl scale-125 opacity-80"
             />
             {/* Main image — animation wrapper drives directional slide */}
             <div
@@ -235,7 +235,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 width={640}
                 height={480}
                 style={{ transition: 'transform 600ms ease-in-out' }}
-                className={`absolute inset-0 w-full h-full object-cover object-center ${
+                className={`absolute inset-0 w-full h-full object-contain object-center ${
                   isSold || isRented ? 'grayscale' : 'group-hover:scale-[1.02]'
                 }`}
                 onError={() => setImageError(true)}

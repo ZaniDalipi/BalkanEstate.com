@@ -89,7 +89,7 @@ const PropertyCard: React.FC<{
             decoding="async"
             width={40}
             height={30}
-            className="absolute inset-0 w-full h-full object-cover object-center blur-2xl scale-150 opacity-80"
+            className="absolute inset-0 w-full h-full object-contain object-center blur-2xl scale-125 opacity-80"
           />
           {/* Animation wrapper — key triggers remount+animation on image change */}
           <div
@@ -104,7 +104,7 @@ const PropertyCard: React.FC<{
               width={400}
               height={300}
               style={{ transition: 'transform 600ms ease-in-out' }}
-              className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-[1.02]"
+              className="absolute inset-0 w-full h-full object-contain object-center group-hover:scale-[1.02]"
               loading="lazy"
               decoding="async"
               onError={() => setImageError(true)}
