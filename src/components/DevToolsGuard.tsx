@@ -39,6 +39,8 @@ const DevToolsGuard: React.FC = () => {
 
   // Poll for devtools open state
   useEffect(() => {
+    if (!import.meta.env.PROD) return;
+
     const poll = setInterval(() => {
       if (isDevToolsOpen()) triggerBlock();
     }, POLL_INTERVAL);
