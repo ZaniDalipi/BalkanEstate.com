@@ -16,6 +16,7 @@ import { API_URL } from '../../src/shared/api/config';
 import MapLocationPicker from '../../src/features/seller/components/MapLocationPicker';
 import { ChevronLeft, ChevronRight, X, Upload, ImageIcon } from 'lucide-react';
 import PhoneInput, { validateFullPhone } from '../../src/shared/components/ui/PhoneInput';
+import ConfirmationModal from '../../src/shared/components/ui/ConfirmationModal';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -102,6 +103,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
 
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -371,6 +373,23 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
   const handleBack = () => {
     setFieldErrors({});
     setStep(s => Math.max(s - 1, 1));
+  };
+
+  const hasUnsavedChanges = () =>
+    formData.name.trim() !== '' ||
+    formData.description.trim() !== '' ||
+    formData.email.trim() !== '' ||
+    formData.phone.trim() !== '' ||
+    formData.city.trim() !== '' ||
+    logoFile !== null;
+
+  const requestClose = () => {
+    if (isCreating) return;
+    if (hasUnsavedChanges()) {
+      setShowCloseConfirmation(true);
+    } else {
+      onClose();
+    }
   };
 
   const getUserRole = (): 'buyer' | 'private_seller' | 'agent' =>
@@ -854,12 +873,25 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
 
   return (
     <>
-      {/* Overlay */}
+      {/* Confirm discard dialog */}
+      <ConfirmationModal
+        isOpen={showCloseConfirmation}
+        onClose={() => setShowCloseConfirmation(false)}
+        onConfirm={() => { setShowCloseConfirmation(false); onClose(); }}
+        title="Discard Changes?"
+        message="You have unsaved changes. Are you sure you want to close this form?"
+        confirmLabel="Discard"
+        cancelLabel="Keep Editing"
+        type="danger"
+        cancelPrimary
+      />
+
+      {/* Overlay — clicking outside shows confirmation instead of closing immediately */}
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50
                    flex items-stretch sm:items-center justify-center
                    sm:p-4"
-        onClick={() => { if (!isCreating) onClose(); }}
+        onClick={requestClose}
       >
         {/* Dialog */}
         <div
@@ -887,7 +919,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
               </div>
             </div>
             <button
-              onClick={() => { if (!isCreating) onClose(); }}
+              onClick={requestClose}
               disabled={isCreating}
               className="p-2 hover:bg-gray-100 rounded-xl transition-colors ml-3 flex-shrink-0 disabled:opacity-40"
               aria-label="Close"
@@ -992,7 +1024,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
             ) : (
               <button
                 type="button"
-                onClick={() => { if (!isCreating) onClose(); }}
+                onClick={requestClose}
                 disabled={isCreating}
                 className="flex-1 px-4 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors text-sm disabled:opacity-40"
               >

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { XMarkIcon } from '../../constants';
 import { createAvatar } from '@dicebear/core';
 import { avataaars } from '@dicebear/collection';
+import ConfirmationModal from '../../src/shared/components/ui/ConfirmationModal';
 
 // ─── DiceBear Avataaars customization options ────────────────────────────────
 
@@ -235,6 +236,7 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
   const [uploadPreview, setUploadPreview] = useState<string | null>(null);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadError, setUploadError] = useState('');
+  const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const isFemale = gender === 'female';
@@ -331,12 +333,36 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
     setDragActive(false);
   }, []);
 
+  const hasUnsavedChanges = activeTab === 'create' || uploadFile !== null;
+
+  const requestClose = () => {
+    if (isUploading) return;
+    if (hasUnsavedChanges) {
+      setShowCloseConfirmation(true);
+    } else {
+      onClose();
+    }
+  };
+
   if (!isOpen) return null;
 
   return createPortal(
+    <>
+      {/* Confirmation modal for unsaved changes */}
+      <ConfirmationModal
+        isOpen={showCloseConfirmation}
+        onClose={() => setShowCloseConfirmation(false)}
+        onConfirm={() => { setShowCloseConfirmation(false); onClose(); }}
+        title="Discard Changes?"
+        message="You have unsaved avatar changes. Are you sure you want to close?"
+        confirmLabel="Discard"
+        cancelLabel="Keep Editing"
+        type="danger"
+        cancelPrimary
+      />
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={requestClose} />
 
       {/* Modal - Liquid Glass */}
       <div className="relative bg-white/60 backdrop-blur-2xl rounded-3xl shadow-[0_8px_64px_rgba(0,0,0,0.18)] border border-white/40 w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col ring-1 ring-white/20">
@@ -346,7 +372,7 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
             {t('account:avatar.customizeYourAvatar')}
           </h2>
           <button
-            onClick={onClose}
+            onClick={requestClose}
             className="p-1.5 rounded-full hover:bg-white/40 backdrop-blur-sm transition-all"
           >
             <XMarkIcon className="w-5 h-5 text-neutral-500" />
@@ -637,7 +663,8 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
           )}
         </div>
       </div>
-    </div>,
+    </div>
+    </>,
     document.body
   );
 };

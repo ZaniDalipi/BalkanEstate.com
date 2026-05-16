@@ -4,7 +4,8 @@ import { useAppContext } from '@/context/AppContext';
 import { AppleIcon, EnvelopeIcon, GoogleIcon, LogoIcon, XMarkIcon, EyeIcon } from '@/constants';
 import SocialLoginPopup from './SocialLoginPopup';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
-import { ALL_PHONE_COUNTRY_CODES, PHONE_FORMAT_PATTERNS, formatPhoneNumber, getPhonePlaceholder, BALKAN_PHONE_CODES } from '@/constants/phoneCountryCodes';
+import { ALL_PHONE_COUNTRY_CODES, PHONE_FORMAT_PATTERNS, formatPhoneNumber, getPhonePlaceholder, BALKAN_PHONE_CODES, getDefaultPhoneCountryCode } from '@/constants/phoneCountryCodes';
+import ConfirmationModal from '@/shared/components/ui/ConfirmationModal';
 
 type SocialProvider = 'google' | 'apple';
 
@@ -220,7 +221,7 @@ const PasswordRequirementsIndicator: React.FC<{ requirements: PasswordRequiremen
 };
 
 const AuthPage: React.FC = () => {
-    const { t: rawT } = useTranslation(['auth', 'common']);
+    const { t: rawT } = useTranslation(['auth', 'common', 'modals']);
     const t = rawT as (key: string, defaultValue?: string, options?: Record<string, string>) => string;
     const { state, dispatch, login, signup, requestPasswordReset, loginWithSocial } = useAppContext();
 
@@ -233,7 +234,7 @@ const AuthPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [phoneCountryCode, setPhoneCountryCode] = useState<string>(ALL_PHONE_COUNTRY_CODES[0].code);
+    const [phoneCountryCode, setPhoneCountryCode] = useState<string>('+389'); // Default to Macedonia, will be detected
     const [phoneNumber, setPhoneNumber] = useState('');
 
     // Field-level errors for custom validation
@@ -255,6 +256,10 @@ const AuthPage: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    // Unsaved changes tracking
+    const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
     useEffect(() => {
         // Fetch available OAuth providers
         const fetchProviders = async () => {
@@ -269,13 +274,34 @@ const AuthPage: React.FC = () => {
         fetchProviders();
     }, []);
 
+    // Detect user's location and set default phone country code
+    useEffect(() => {
+        const detectLocation = async () => {
+            const detectedCode = await getDefaultPhoneCountryCode();
+            setPhoneCountryCode(detectedCode);
+        };
+        if (state.isAuthModalOpen) {
+            detectLocation();
+        }
+    }, [state.isAuthModalOpen]);
+
     useEffect(() => {
         // Reset state when modal opens or view changes
         setError(null);
         setIsLoading(false);
         setFieldErrors({});
         setTouched({});
+        setHasUnsavedChanges(false);
     }, [state.isAuthModalOpen, state.authModalView]);
+
+    // Track unsaved changes
+    useEffect(() => {
+        const hasChanges = email.trim() !== '' ||
+                          password.trim() !== '' ||
+                          confirmPassword.trim() !== '' ||
+                          phoneNumber.trim() !== '';
+        setHasUnsavedChanges(hasChanges);
+    }, [email, password, confirmPassword, phoneNumber]);
 
     // Keep the browser URL in sync with the auth modal state
     const prevPathRef = useRef<string | null>(null);
@@ -304,6 +330,24 @@ const AuthPage: React.FC = () => {
             window.history.pushState({}, '', buildLocalizedPath('/search'));
         }
         dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: false } });
+        // Reset form state
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        setPhoneNumber('');
+        setPhoneCountryCode(ALL_PHONE_COUNTRY_CODES[0].code);
+        setHasUnsavedChanges(false);
+    };
+
+    const handleBackdropClick = (e: React.MouseEvent) => {
+        // Prevent closing the modal by clicking outside - user must use the close button
+        // This protects against accidental form submission cancellation
+        e.stopPropagation();
+    };
+
+    const handleConfirmClose = () => {
+        setShowCloseConfirmation(false);
+        handleClose();
     };
 
     const handleBlur = (field: 'email' | 'password' | 'confirmPassword' | 'phone') => {
@@ -837,6 +881,19 @@ const AuthPage: React.FC = () => {
                 />
             )}
 
+            {/* Confirmation modal for unsaved changes */}
+            <ConfirmationModal
+                isOpen={showCloseConfirmation}
+                onClose={() => setShowCloseConfirmation(false)}
+                onConfirm={handleConfirmClose}
+                title={t('confirmation.unsavedChanges.title', 'Unsaved Changes')}
+                message={t('confirmation.unsavedChanges.message', 'You have unsaved changes. Are you sure you want to leave?')}
+                confirmLabel={t('confirmation.unsavedChanges.confirm', 'Discard')}
+                cancelLabel={t('common.cancel', 'Keep Editing')}
+                type="danger"
+                cancelPrimary
+            />
+
             {/* CSS Keyframes for magical animations */}
             <style>{`
                 @keyframes float {
@@ -852,7 +909,7 @@ const AuthPage: React.FC = () => {
             {/* Backdrop with animated gradient */}
             <div
                 className="fixed inset-0 z-[5000] flex justify-center items-start md:items-center p-0 md:p-4 overflow-y-auto overflow-x-hidden"
-                onClick={handleClose}
+                onClick={handleBackdropClick}
             >
                 {/* Glassmorphism backdrop */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-neutral-900/60 to-primary/30 backdrop-blur-md" />
@@ -878,7 +935,13 @@ const AuthPage: React.FC = () => {
 
                     {/* Close button with glass effect */}
                     <button
-                        onClick={handleClose}
+                        onClick={() => {
+                            if (hasUnsavedChanges) {
+                                setShowCloseConfirmation(true);
+                            } else {
+                                handleClose();
+                            }
+                        }}
                         className="absolute top-4 right-4 z-10 p-2 rounded-full
                                    bg-white/60 backdrop-blur-sm border border-white/50
                                    text-neutral-500 hover:text-neutral-800 hover:bg-white/80

@@ -15,6 +15,8 @@ export interface ConfirmationModalProps {
   type?: ConfirmationType;
   isLoading?: boolean;
   icon?: React.ReactNode;
+  /** When true, the cancel button is styled as the primary action and confirm as secondary */
+  cancelPrimary?: boolean;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -28,6 +30,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   type = 'danger',
   isLoading = false,
   icon,
+  cancelPrimary = false,
 }) => {
   const { t } = useTranslation(['common']);
   const confirmButtonRef = useRef<HTMLButtonElement>(null);
@@ -155,7 +158,11 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               ref={cancelButtonRef}
               onClick={onClose}
               disabled={isLoading}
-              className="px-5 py-2.5 rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-neutral-200 text-neutral-800 hover:bg-neutral-300 focus:ring-neutral-400 disabled:opacity-50"
+              className={`px-5 py-2.5 rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 ${
+                cancelPrimary
+                  ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                  : 'bg-neutral-200 text-neutral-800 hover:bg-neutral-300 focus:ring-neutral-400'
+              }`}
             >
               {resolvedCancelLabel}
             </button>
@@ -163,7 +170,11 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               ref={confirmButtonRef}
               onClick={onConfirm}
               disabled={isLoading}
-              className={`px-5 py-2.5 rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 text-white ${styles.confirmButton} disabled:opacity-50 flex items-center justify-center gap-2`}
+              className={`px-5 py-2.5 rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 flex items-center justify-center gap-2 ${
+                cancelPrimary
+                  ? 'border border-red-300 text-red-600 hover:bg-red-50 focus:ring-red-400'
+                  : `text-white ${styles.confirmButton}`
+              }`}
             >
               {isLoading && (
                 <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
