@@ -10,7 +10,24 @@ import {
   ChevronRightIcon,
   BuildingOfficeIcon,
 } from '../../../constants';
-import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
+import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder, getOptimizedExternalImage, getOptimizedExternalImageSrcSet } from '../../../config/cloudinaryConfig';
+
+const isCloudinaryUrl = (url: string): boolean =>
+  typeof url === 'string' && url.includes('res.cloudinary.com');
+
+/** Returns an optimized src for any image — Cloudinary upload or external URL. */
+const getImageSrc = (url: string, width: number): string => {
+  if (!url) return '';
+  if (isCloudinaryUrl(url)) return optimizeCloudinaryUrl(url, { width, quality: 'auto' });
+  return getOptimizedExternalImage(url, { width, quality: 'auto:good', format: 'auto' }) || url;
+};
+
+/** Returns srcSet only for Cloudinary images; external images are proxied via Cloudinary fetch. */
+const getImageSrcSet = (url: string, widths: number[]): string => {
+  if (!url) return '';
+  if (isCloudinaryUrl(url)) return cloudinarySrcSet(url, widths);
+  return getOptimizedExternalImageSrcSet(url, widths);
+};
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 
 interface PropertyGalleryProps {
@@ -339,7 +356,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   useEffect(() => {
     imagesForCurrentCategory.forEach((item) => {
       const el = new Image();
-      el.src = optimizeCloudinaryUrl(item.url, { width: 900, quality: 'auto' });
+      el.src = getImageSrc(item.url, 900);
     });
   }, [imagesForCurrentCategory]);
 
@@ -430,7 +447,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               <>
                 {/* LQIP blurred background — fills letterbox bars on desktop object-contain */}
                 <img
-                  src={getPropertyImagePlaceholder(currentImageUrl) || optimizeCloudinaryUrl(currentImageUrl, { width: 40, quality: 'auto:eco' })}
+                  src={getPropertyImagePlaceholder(currentImageUrl) || getImageSrc(currentImageUrl, 40)}
                   alt=""
                   aria-hidden="true"
                   className="absolute inset-0 w-full h-full object-cover blur-3xl scale-110 pointer-events-none select-none"
@@ -476,13 +493,13 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                           style={{ willChange: 'transform' }}
                         >
                           <img
-                            src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
-                            srcSet={cloudinarySrcSet(currentImageUrl, [640, 960, 1200, 1920])}
+                            src={getImageSrc(currentImageUrl, 1200)}
+                            srcSet={getImageSrcSet(currentImageUrl, [640, 960, 1200, 1920])}
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
                             alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
                             width={1200}
                             height={800}
-                            crossOrigin="anonymous"
+                            {...(isCloudinaryUrl(currentImageUrl) ? { crossOrigin: 'anonymous' as const } : {})}
                             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                             // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
                             fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
@@ -1012,7 +1029,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 }`}
               >
                 <img
-                  src={optimizeCloudinaryUrl(img.url, { width: 390, quality: 'auto', crop: 'fill' })}
+                  src={getImageSrc(img.url, 390)}
                   alt=""
                   className="w-full h-full object-cover"
                   loading="lazy"

@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 
 interface NumberInputWithSteppersProps {
     label: string;
-    value: number;
+    value: number | null | undefined;
     onChange: (value: number) => void;
     min?: number;
     max?: number;
@@ -16,13 +16,14 @@ interface NumberInputWithSteppersProps {
  */
 const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({
     label,
-    value,
+    value: rawValue,
     onChange,
     min = 0,
     max,
     step = 1,
     placeholder
 }) => {
+    const value = rawValue ?? min ?? 0;
     const id = useMemo(() => `number-input-${label.toLowerCase().replace(/\s+/g, '-')}`, [label]);
 
     const decrement = () => {
