@@ -11,8 +11,18 @@ function generateRefId(): string {
   return `${h(t / 1000, 8)}-${h(r(), 4)}-${h(r(), 4)}-${h(r(), 4)}-${h(r(), 12)}`;
 }
 
+function isMobileDevice(): boolean {
+  return (
+    /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    window.matchMedia('(pointer: coarse)').matches
+  );
+}
+
 function isDevToolsOpen(): boolean {
   if (typeof window === 'undefined') return false;
+  // Mobile browsers have no DevTools — the outer/inner size diff is always
+  // large there due to browser chrome (address bar, nav bar), so skip entirely.
+  if (isMobileDevice()) return false;
   return (
     window.outerWidth - window.innerWidth > SIZE_THRESHOLD ||
     window.outerHeight - window.innerHeight > SIZE_THRESHOLD
