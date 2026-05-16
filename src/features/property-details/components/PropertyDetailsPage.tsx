@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Property, PropertyImageTag, UserRole } from '@/types';
+import { Property, PropertyImageTag } from '@/types';
 import { useAppContext } from '@/context/AppContext';
 import { useRealtimeProperties, useProperty } from '@/src/features/properties/hooks';
 import { ArrowLeftIcon, SparklesIcon, UserIcon } from '@/constants';
@@ -28,7 +28,6 @@ import {
   SocialVideoEmbed,
 } from '@/src/components/property';
 import SimilarProperties from '@/src/components/property/SimilarProperties';
-import UserListingsSuggestions from '@/components/shared/UserListingsSuggestions';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import { useRecentlyViewed } from '@/src/hooks/useRecentlyViewed';
@@ -960,18 +959,6 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <FeaturedAgencies />
             </div>
 
-            {/* Seller/Agent Listings Suggestions - shown on every listing */}
-            {property.seller && (
-              <div className="mt-4 sm:mt-6 lg:mt-8 animate-slide-up" style={{ animationDelay: '550ms' }}>
-                <UserListingsSuggestions
-                  userId={property.seller.id || ''}
-                  userName={property.seller.name || ''}
-                  userRole={property.seller.type === 'agent' ? UserRole.AGENT : UserRole.PRIVATE_SELLER}
-                  agencyId={property.seller.agencyId}
-                  agencyName={property.seller.agencyName}
-                />
-              </div>
-            )}
           </div>
 
           {/* Right Column - Contact Sidebar (Desktop only - mobile version shown above) */}
