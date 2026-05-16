@@ -603,9 +603,12 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       return;
     }
 
+    // Set selected property for state management
+    dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
+
     // Always open in new tab without navigating current page
     window.open(propertyUrl, '_blank', 'noopener,noreferrer');
-  }, [property, getPropertyUrl]);
+  }, [dispatch, property, getPropertyUrl]);
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
