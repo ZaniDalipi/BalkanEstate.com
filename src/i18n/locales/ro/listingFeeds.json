@@ -80,7 +80,7 @@
   },
   "preview": {
     "title": "Review listings before importing",
-    "subtitle": "Found {{total}} listings from {{source}}. Select the ones you want to keep.",
+    "subtitle": "Found {{total}} listings from {{source}}. Check the ones you want to import.",
     "fetching": "Fetching listings from source…",
     "fetchingShort": "Fetching…",
     "modalLabel": "Review listings",
@@ -92,7 +92,7 @@
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
     "confirmImport": "Import {{count}} listings",
-    "noSelection": "Select at least one listing",
+    "noSelection": "Check the listings you want to import",
     "cancel": "Cancel",
     "empty": "No listings found on this source.",
     "untitled": "Untitled listing",

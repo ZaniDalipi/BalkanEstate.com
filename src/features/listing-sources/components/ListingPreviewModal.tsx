@@ -99,7 +99,8 @@ const ListingPreviewModal: React.FC<ListingPreviewModalProps> = ({
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
-  useEffect(() => { setSelected(new Set(items.map((i) => i.rawId))); }, [items]);
+  // Reset selection to empty when items change — user picks what they need.
+  useEffect(() => { setSelected(new Set()); }, [items]);
 
   const newCount = useMemo(() => items.filter((i) => i.isNew).length, [items]);
   const updateCount = items.length - newCount;
