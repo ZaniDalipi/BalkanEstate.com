@@ -334,14 +334,30 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     setMainImageError(false);
   }, [currentImageUrl]);
 
-  // Eagerly preload all gallery images at display-size (900px) so every
-  // swipe and auto-rotate feels instant.
+  // Preload all gallery images at display size when the category changes.
+  // This runs in the background — lower priority so it doesn't block the current image.
   useEffect(() => {
     imagesForCurrentCategory.forEach((item) => {
       const el = new Image();
-      el.src = optimizeCloudinaryUrl(item.url, { width: 900, quality: 'auto' });
+      el.src = optimizeCloudinaryUrl(item.url, { width: 1200, quality: 'auto' });
     });
   }, [imagesForCurrentCategory]);
+
+  // High-priority preload of adjacent images whenever the slide index changes.
+  // This ensures the next/prev images are always in the browser cache before the user swipes.
+  useEffect(() => {
+    const len = imagesForCurrentCategory.length;
+    if (len <= 1) return;
+    [-1, 1, 2].forEach((offset) => {
+      const idx = ((currentImageIndex + offset) % len + len) % len;
+      const item = imagesForCurrentCategory[idx];
+      if (item?.url) {
+        const el = new Image();
+        el.fetchPriority = 'high';
+        el.src = optimizeCloudinaryUrl(item.url, { width: 1200, quality: 'auto' });
+      }
+    });
+  }, [currentImageIndex, imagesForCurrentCategory]);
 
   const handleCategorySelect = useCallback((tag: PropertyImageTag | 'all') => {
     setActiveCategory(tag);
@@ -1013,6 +1029,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               >
                 <img
                   src={optimizeCloudinaryUrl(img.url, { width: 390, quality: 'auto', crop: 'fill' })}
+                  srcSet={`${optimizeCloudinaryUrl(img.url, { width: 195, quality: 'auto', crop: 'fill' })} 195w, ${optimizeCloudinaryUrl(img.url, { width: 390, quality: 'auto', crop: 'fill' })} 390w`}
+                  sizes="(max-width: 640px) 155px, 195px"
                   alt=""
                   className="w-full h-full object-cover"
                   loading="lazy"

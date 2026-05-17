@@ -5,6 +5,7 @@ import { Property } from '@/types';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { apiRequest } from '@/src/shared/api';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
+import ConfirmationModal from '@/src/shared/components/ui/ConfirmationModal';
 
 interface ScheduleViewingModalProps {
     property: Property;
@@ -104,6 +105,7 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
     // Availability from backend (with property.visitAvailability as fallback)
     const [availability, setAvailability] = useState<AvailabilityData | null>(null);
     const [loadingAvailability, setLoadingAvailability] = useState(true);
+    const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
 
     /** Build availability from the property's own visitAvailability config (no booking info) */
     const buildLocalAvailability = useCallback((): AvailabilityData => {
@@ -300,6 +302,17 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
     const canProceedToDetails = selectedDate && selectedTime;
     const canProceedToConfirm = name.trim() && email.trim() && isValidEmail(email);
 
+    const hasUnsavedChanges = !isSubmitted && (selectedDate || selectedTime || name || email || phone || message);
+
+    const requestClose = () => {
+        if (isSubmitting) return;
+        if (hasUnsavedChanges) {
+            setShowCloseConfirmation(true);
+        } else {
+            onClose();
+        }
+    };
+
     const location = [property.address, property.city, property.country].filter(Boolean).join(', ');
     const formattedDate = selectedDate
         ? new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
@@ -308,9 +321,23 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
     if (!isOpen) return null;
 
     return createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+        <>
+            {/* Confirmation modal for unsaved changes */}
+            <ConfirmationModal
+                isOpen={showCloseConfirmation}
+                onClose={() => setShowCloseConfirmation(false)}
+                onConfirm={() => { setShowCloseConfirmation(false); onClose(); }}
+                title="Discard Changes?"
+                message="You have unsaved changes to your viewing request. Are you sure you want to close?"
+                confirmLabel="Discard"
+                cancelLabel="Keep Editing"
+                type="danger"
+                cancelPrimary
+            />
+
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                {/* Backdrop */}
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={requestClose} />
 
             {/* Modal */}
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden animate-in zoom-in-95 fade-in duration-200">
@@ -322,7 +349,7 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                             <p className="text-xs text-blue-100 mt-0.5 truncate">{property.title || `${property.propertyType} in ${property.city}`}</p>
                         </div>
                         <button
-                            onClick={onClose}
+                            onClick={requestClose}
                             className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all flex-shrink-0 ml-3"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -695,7 +722,8 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                     </div>
                 )}
             </div>
-        </div>,
+            </div>
+        </>,
         document.body
     );
 };

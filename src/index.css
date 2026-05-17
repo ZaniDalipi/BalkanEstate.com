@@ -654,6 +654,48 @@ html[data-zoom] #root {
 }
 
 /* ============================================================================
+   Premium Gallery Image Slide Transitions
+   Directional slide + scale + fade — iOS/macOS style photo navigation
+   ============================================================================ */
+
+@keyframes gallerySlideInRight {
+  0% {
+    transform: translateX(10%) scale(1.04);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes gallerySlideInLeft {
+  0% {
+    transform: translateX(-10%) scale(1.04);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-gallery-right {
+  animation: gallerySlideInRight 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-gallery-left {
+  animation: gallerySlideInLeft 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-gallery-right,
+  .animate-gallery-left {
+    animation: fadeIn 0.15s ease-out both !important;
+  }
+}
+
+/* ============================================================================
    Micro-interaction Animations — Subtle polish for interactive elements
    ============================================================================ */
 

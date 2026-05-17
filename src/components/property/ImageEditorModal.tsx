@@ -292,8 +292,11 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
 
   return (
     <div className="fixed inset-0 z-[1100] bg-black flex flex-col">
-      {/* Compact Mobile Toolbar */}
-      <div className="bg-gray-900 px-2 py-2 sm:px-4 sm:py-3 flex items-center justify-between gap-2 sm:gap-4 flex-shrink-0">
+      {/* Compact Mobile Toolbar — top padding clears the notch/Dynamic Island */}
+      <div
+        className="bg-gray-900 px-2 pb-2 sm:px-4 sm:pb-3 flex items-center justify-between gap-2 sm:gap-4 flex-shrink-0"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)' }}
+      >
         {/* Close button */}
         <button
           onClick={onClose}
