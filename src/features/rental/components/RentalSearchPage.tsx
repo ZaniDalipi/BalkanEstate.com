@@ -414,7 +414,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                             <div
                                 className="absolute top-0 left-0 right-0 z-[100] pb-2 landscape:pb-1.5 pointer-events-none"
                                 style={{
-                                    paddingTop: 'max(calc(env(safe-area-inset-top, 0px) + 8px), 52px)',
+                                    paddingTop: 'var(--floating-search-top-pad)',
                                     paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 8px)',
                                     paddingRight: 'calc(env(safe-area-inset-right, 0px) + 8px)',
                                 }}

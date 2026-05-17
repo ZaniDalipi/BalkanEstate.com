@@ -312,9 +312,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                             <div
                                 className="absolute top-0 left-0 right-0 z-[100] pb-2 landscape:pb-1.5 pointer-events-none"
                                 style={{
-                                    // max() ensures the bar clears the status bar on Android devices
-                                    // where env(safe-area-inset-top) is 0 but content renders under the bar
-                                    paddingTop: 'max(calc(env(safe-area-inset-top, 0px) + 8px), 52px)',
+                                    paddingTop: 'var(--floating-search-top-pad)',
                                     paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 8px)',
                                     paddingRight: 'calc(env(safe-area-inset-right, 0px) + 8px)',
                                 }}
