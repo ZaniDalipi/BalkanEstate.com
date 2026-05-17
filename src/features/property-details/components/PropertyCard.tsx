@@ -483,11 +483,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           })()}
         </div>
         {/* Title */}
-        {property.title && (
-          <h3 className="text-sm sm:text-base font-bold text-neutral-900 mb-1.5 line-clamp-1 group-hover:text-primary transition-colors duration-300">
-            {property.title}
-          </h3>
-        )}
+        <h3 className="text-sm sm:text-base font-bold text-neutral-900 mb-1.5 line-clamp-1 group-hover:text-primary transition-colors duration-300">
+          {property.title || `${safeProperty.beds > 0 ? safeProperty.beds + '-Bed ' : ''}${propertyTypeLabel} ${isRental ? t('property:forRent', 'for Rent') : t('property:forSale', 'for Sale')}`}
+        </h3>
 
         {/* Location - Clickable for navigation */}
         <div className="flex items-center gap-1.5 mb-3">

@@ -198,11 +198,11 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                 '@type': 'ListItem',
                                 position: i + 1,
                                 url: `${window.location.origin}/property/${generatePropertySlug(p)}`,
-                                name: `${p.beds ? p.beds + '-Bed ' : ''}${p.propertyType || 'Property'} in ${p.city}, ${p.country}`,
+                                name: p.title || `${p.beds ? p.beds + '-Bed ' : ''}${p.propertyType || 'Property'} in ${p.city}, ${p.country}`,
                                 ...(p.imageUrl && { image: p.imageUrl }),
                                 item: {
                                     '@type': 'RealEstateListing',
-                                    name: `${p.beds ? p.beds + '-Bed ' : ''}${p.propertyType || 'Property'} in ${p.city}, ${p.country}`,
+                                    name: p.title || `${p.beds ? p.beds + '-Bed ' : ''}${p.propertyType || 'Property'} in ${p.city}, ${p.country}`,
                                     url: `${window.location.origin}/property/${generatePropertySlug(p)}`,
                                     ...(p.imageUrl && { image: p.imageUrl }),
                                     ...(p.price && {

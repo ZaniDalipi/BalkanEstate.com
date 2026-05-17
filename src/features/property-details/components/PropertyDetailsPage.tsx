@@ -469,22 +469,24 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     return () => window.removeEventListener('popstate', handlePopState);
   }, [dispatch]);
 
-  // Generate keyword-rich SEO title (matches target keywords like "3-Bed Apartment in Budva, Montenegro")
   const propertyTypeLabel = property.propertyType
     ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1)
     : 'Property';
   const isRentalProperty = property.listingType === 'rent';
   const listingAction = isRentalProperty ? t('property:seo.forRent', 'Rent') : t('property:seo.forSale', 'Sale');
   const priceStr = `€${property.price?.toLocaleString()}${isRentalProperty ? t('property:seo.perMonth', '/mo') : ''}`;
-  const seoTitle = t('property:seo.title', {
-    beds: property.beds,
-    type: propertyTypeLabel,
-    listingAction,
-    city: property.city,
-    country: property.country,
-    price: property.price?.toLocaleString(),
-    defaultValue: `${property.beds}-Bed ${propertyTypeLabel} for ${listingAction} in ${property.city}, ${property.country} - ${priceStr}`,
-  });
+  const bedsPrefix = property.beds > 0 ? `${property.beds}-Bed ` : '';
+  const seoTitle = property.title
+    ? `${property.title} – ${property.city}, ${property.country}`
+    : t('property:seo.title', {
+        beds: property.beds,
+        type: propertyTypeLabel,
+        listingAction,
+        city: property.city,
+        country: property.country,
+        price: property.price?.toLocaleString(),
+        defaultValue: `${bedsPrefix}${propertyTypeLabel} for ${listingAction} in ${property.city}, ${property.country} - ${priceStr}`,
+      });
 
   // Generate SEO description
   const seoDescription = t('property:seo.description', {
