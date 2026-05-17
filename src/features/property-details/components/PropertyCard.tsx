@@ -9,12 +9,15 @@ import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { formatPrice } from '@/utils/currency';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
-import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '@/config/cloudinaryConfig';
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import PropertyImage from '@/src/components/ui/PropertyImage';
 
 interface PropertyCardProps {
   property: Property;
   showToast?: (message: string, type: 'success' | 'error') => void;
   showCompareButton?: boolean;
+  /** Pass true for cards visible above the fold so the browser prioritises their images */
+  priority?: boolean;
 }
 
 // Props for the pure inner component
@@ -26,6 +29,7 @@ interface PropertyCardInnerProps {
   comparisonCount: number;
   showToast?: (message: string, type: 'success' | 'error') => void;
   showCompareButton?: boolean;
+  priority?: boolean;
   onCardClick: (e: React.MouseEvent) => void;
   onFavoriteClick: (e: React.MouseEvent) => void;
   onCompareClick: (e: React.MouseEvent) => void;
@@ -86,13 +90,13 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   isInComparison,
   showToast,
   showCompareButton,
+  priority = false,
   onCardClick,
   onFavoriteClick,
   onCompareClick,
   onLocationClick,
 }) => {
   const { t, i18n } = useTranslation(['property', 'rental', 'common']);
-  const [imageError, setImageError] = useState(!property.imageUrl);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
   const touchStartXRef = useRef<number | null>(null);
@@ -199,48 +203,25 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
     >
       {/* Image Section */}
       <div className="relative overflow-hidden">
-        {imageError ? (
-          <div className="w-full aspect-[4/3] bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
-            <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
-          </div>
-        ) : (
+        <div
+          className="relative w-full aspect-[4/3] overflow-hidden bg-neutral-200"
+          onTouchStart={handleImageTouchStart}
+          onTouchEnd={handleImageTouchEnd}
+        >
+          {/* Directional slide wrapper — keyed so a new PropertyImage mounts (and fades in) on each slide */}
           <div
-            className="relative w-full aspect-[4/3] overflow-hidden bg-neutral-200"
-            onTouchStart={handleImageTouchStart}
-            onTouchEnd={handleImageTouchEnd}
+            key={currentImageIndex}
+            className={`absolute inset-0 ${slideDirection === 'right' ? 'animate-gallery-right' : 'animate-gallery-left'}`}
           >
-            {/* LQIP blur-up background – tiny placeholder visible while main image loads */}
-            <img
-              src={getPropertyImagePlaceholder(property.imageUrl) || optimizeCloudinaryUrl(property.imageUrl, { width: 40, quality: 'auto:eco', crop: 'fill' })}
-              alt=""
-              aria-hidden="true"
-              loading="lazy"
-              decoding="async"
-              width={40}
-              height={30}
-              className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-80"
+            <PropertyImage
+              src={currentImageUrl}
+              alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
+              priority={priority}
+              widths={[320, 480, 640]}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              imgClassName={isSold || isRented ? 'grayscale' : 'group-hover:scale-[1.02] transition-transform duration-300'}
             />
-            {/* Main image — animation wrapper drives directional slide */}
-            <div
-              key={currentImageIndex}
-              className={`absolute inset-0 ${slideDirection === 'right' ? 'animate-gallery-right' : 'animate-gallery-left'}`}
-            >
-              <img
-                src={optimizeCloudinaryUrl(currentImageUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })}
-                srcSet={`${optimizeCloudinaryUrl(currentImageUrl, { width: 320, height: 240, quality: 'auto', crop: 'fill', gravity: 'auto' })} 320w, ${optimizeCloudinaryUrl(currentImageUrl, { width: 480, height: 360, quality: 'auto', crop: 'fill', gravity: 'auto' })} 480w, ${optimizeCloudinaryUrl(currentImageUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })} 640w`}
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
-                loading="lazy"
-                decoding="async"
-                width={640}
-                height={480}
-                style={{ transition: 'transform 600ms ease-in-out' }}
-                className={`absolute inset-0 w-full h-full object-cover object-center ${
-                  isSold || isRented ? 'grayscale' : 'group-hover:scale-[1.02]'
-                }`}
-                onError={() => setImageError(true)}
-              />
-            </div>
+          </div>
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
 
@@ -292,7 +273,6 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               </div>
             )}
           </div>
-        )}
 
         {/* Top badges row */}
         <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
@@ -644,7 +624,7 @@ PropertyCardInner.displayName = 'PropertyCardInner';
  * When context changes (e.g., savedHomes toggle), this wrapper re-renders but
  * PropertyCardInner only re-renders if its specific props actually changed.
  */
-const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCompareButton }) => {
+const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCompareButton, priority }) => {
   const { state, dispatch, toggleSavedHome, updateSearchPageState } = useAppContext();
   const { setDirection } = useNavigationDirection();
 
@@ -767,6 +747,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       comparisonCount={comparisonCount}
       showToast={showToast}
       showCompareButton={showCompareButton}
+      priority={priority}
       onCardClick={handleCardClick}
       onFavoriteClick={handleFavoriteClick}
       onCompareClick={handleCompareClick}
