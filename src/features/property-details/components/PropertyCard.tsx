@@ -93,6 +93,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 }) => {
   const { t, i18n } = useTranslation(['property', 'rental', 'common']);
   const [imageError, setImageError] = useState(!property.imageUrl);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
   const touchStartXRef = useRef<number | null>(null);
@@ -209,12 +210,12 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             onTouchStart={handleImageTouchStart}
             onTouchEnd={handleImageTouchEnd}
           >
-            {/* LQIP blur-up background – tiny placeholder visible while main image loads */}
+            {/* LQIP blur-up background — must be eager so it renders before the main image arrives */}
             <img
               src={getPropertyImagePlaceholder(property.imageUrl) || optimizeCloudinaryUrl(property.imageUrl, { width: 40, quality: 'auto:eco', crop: 'fill' })}
               alt=""
               aria-hidden="true"
-              loading="lazy"
+              loading="eager"
               decoding="async"
               width={40}
               height={30}
@@ -234,10 +235,11 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 decoding="async"
                 width={640}
                 height={480}
-                style={{ transition: 'transform 600ms ease-in-out' }}
+                style={{ transition: 'opacity 300ms ease, transform 600ms ease-in-out' }}
                 className={`absolute inset-0 w-full h-full object-cover object-center ${
-                  isSold || isRented ? 'grayscale' : 'group-hover:scale-[1.02]'
-                }`}
+                  imageLoaded ? 'opacity-100' : 'opacity-0'
+                } ${isSold || isRented ? 'grayscale' : 'group-hover:scale-[1.02]'}`}
+                onLoad={() => setImageLoaded(true)}
                 onError={() => setImageError(true)}
               />
             </div>

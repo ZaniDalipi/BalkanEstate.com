@@ -7,7 +7,7 @@ import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { BuildingOfficeIcon } from '@/constants';
 import { generatePropertySlug } from '@/utils/slug';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
-import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
+import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '@/config/cloudinaryConfig';
 
 interface RentalPropertyCardProps {
     property: Property;
@@ -53,12 +53,12 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
             <div className="relative aspect-[16/10] overflow-hidden bg-neutral-200">
                 {property.imageUrl ? (
                 <>
-                    {/* LQIP blur-up placeholder */}
+                    {/* LQIP blur-up placeholder — must be eager so it shows before the main image arrives */}
                     <img
                         src={getPropertyImagePlaceholder(property.imageUrl) || optimizeCloudinaryUrl(property.imageUrl, { width: 40, quality: 'auto:eco' })}
                         alt=""
                         aria-hidden="true"
-                        loading="lazy"
+                        loading="eager"
                         decoding="async"
                         width={40}
                         height={25}
