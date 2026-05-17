@@ -2,22 +2,14 @@ import React, { useCallback, useMemo, useRef, useEffect, memo, useState } from '
 import { Property } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import Footer from '@/components/shared/Footer';
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 
-// Optimize Cloudinary URL for faster loading
-const optimizeCloudinaryUrl = (url: string, width: number = 400): string => {
-  if (!url || !url.includes('cloudinary.com')) return url;
-  if (url.includes('/upload/')) {
-    return url.replace('/upload/', `/upload/w_${width},c_fill,f_auto,q_auto/`);
-  }
-  return url;
-};
-
-// Image preloader utility - preloads optimized images before they're needed
+// Preloads optimised card-size images before they scroll into view
 const preloadImages = (urls: string[]) => {
   urls.forEach(url => {
     if (url) {
       const img = new Image();
-      img.src = optimizeCloudinaryUrl(url, 400);
+      img.src = optimizeCloudinaryUrl(url, { width: 640, quality: 'auto', crop: 'fill' });
     }
   });
 };
@@ -35,9 +27,11 @@ interface VirtualizedPropertyGridProps {
 const PropertyItem = memo(({
   property,
   onHover,
+  priority,
 }: {
   property: Property;
   onHover?: (id: string | null) => void;
+  priority?: boolean;
 }) => {
   const handleMouseEnter = useCallback(() => {
     onHover?.(property.id);
@@ -53,12 +47,13 @@ const PropertyItem = memo(({
       onMouseLeave={handleMouseLeave}
       style={{ contain: 'layout style paint' }}
     >
-      <PropertyCard property={property} />
+      <PropertyCard property={property} priority={priority} />
     </div>
   );
 }, (prevProps, nextProps) => {
   return prevProps.property.id === nextProps.property.id &&
-         prevProps.onHover === nextProps.onHover;
+         prevProps.onHover === nextProps.onHover &&
+         prevProps.priority === nextProps.priority;
 });
 
 PropertyItem.displayName = 'PropertyItem';
@@ -155,13 +150,17 @@ const VirtualizedPropertyGrid: React.FC<VirtualizedPropertyGridProps> = ({
               gap: `${gap}px`,
             }}
           >
-            {row.map((property) => (
-              <PropertyItem
-                key={property.id}
-                property={property}
-                onHover={onPropertyHover}
-              />
-            ))}
+            {row.map((property, colIndex) => {
+              const overallIndex = rowIndex * columns + colIndex;
+              return (
+                <PropertyItem
+                  key={property.id}
+                  property={property}
+                  onHover={onPropertyHover}
+                  priority={overallIndex < 6}
+                />
+              );
+            })}
           </div>
         ))}
 

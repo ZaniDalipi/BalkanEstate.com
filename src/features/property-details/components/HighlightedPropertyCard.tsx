@@ -5,7 +5,8 @@ import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, LivingRoomIcon
 import { useAppContext } from '@/context/AppContext';
 import { generatePropertySlug } from '@/utils/slug';
 import { formatPrice } from '@/utils/currency';
-import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import PropertyImage from '@/src/components/ui/PropertyImage';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 
 // Chevron Icons
@@ -213,27 +214,14 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
               index === currentImageIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
             }`}
           >
-            {imageErrors.has(index) ? (
-              <div className="w-full h-full bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
-                <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
-              </div>
-            ) : (
-              <img
-                src={optimizeCloudinaryUrl(imgUrl, { width: 800, height: 600, quality: 'auto', crop: 'fill', gravity: 'auto' })}
-                srcSet={`${optimizeCloudinaryUrl(imgUrl, { width: 400, height: 300, quality: 'auto', crop: 'fill', gravity: 'auto' })} 400w, ${optimizeCloudinaryUrl(imgUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })} 640w, ${optimizeCloudinaryUrl(imgUrl, { width: 800, height: 600, quality: 'auto', crop: 'fill', gravity: 'auto' })} 800w`}
-                alt={`${property.title || propertyTypeLabel} - Image ${index + 1}`}
-                loading={index === 0 ? 'eager' : 'lazy'}
-                decoding="async"
-                sizes="(max-width: 768px) 100vw, 42vw"
-                width={800}
-                height={600}
-                style={{ transition: 'transform 8s cubic-bezier(0.05, 0, 0.2, 1)' }}
-                className={`w-full h-full object-cover ${
-                  isHovered ? 'scale-[1.02]' : 'scale-100'
-                }`}
-                onError={() => handleImageError(index)}
-              />
-            )}
+            <PropertyImage
+              src={imgUrl}
+              alt={`${property.title || propertyTypeLabel} - Image ${index + 1}`}
+              priority={index === 0}
+              widths={[400, 640, 800]}
+              sizes="(max-width: 768px) 100vw, 42vw"
+              imgClassName={isHovered ? 'scale-[1.02] transition-transform duration-[8000ms] ease-[cubic-bezier(0.05,0,0.2,1)]' : 'scale-100 transition-transform duration-[8000ms]'}
+            />
           </div>
         ))}
 
