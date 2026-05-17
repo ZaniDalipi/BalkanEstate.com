@@ -371,7 +371,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                         )}
 
                         {/* Floating List/Map toggle - shows on both mobile and tablet (Zillow-style) */}
-                        <div className="absolute bottom-24 xs:bottom-28 sm:bottom-24 md:bottom-6 landscape:bottom-14 left-0 right-0 z-[100] p-3 sm:p-4 landscape:p-2 pointer-events-none flex justify-center" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)' }}>
+                        <div className="absolute bottom-28 xs:bottom-32 sm:bottom-28 md:bottom-6 landscape:bottom-16 left-0 right-0 z-[100] p-3 sm:p-4 landscape:p-2 pointer-events-none flex justify-center" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)' }}>
                             {/* Map hint tooltip - positioned to point at Map button */}
                             {showMapHint && (
                                 <div className="absolute bottom-full right-1/2 translate-x-[70%] mb-2 pointer-events-auto animate-bounce">

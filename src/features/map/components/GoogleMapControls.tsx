@@ -361,7 +361,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
       {isMobile && !hideControls && (
         <>
           {/* Mobile layer menu FAB */}
-          <div className="absolute bottom-28 left-3 z-[1003]">
+          <div className="absolute bottom-32 left-3 z-[1003]">
             {isLayerMenuOpen && (
               <div className="absolute bottom-full left-0 mb-3 animate-fade-in">
                 <div
