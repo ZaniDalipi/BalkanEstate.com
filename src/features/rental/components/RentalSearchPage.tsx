@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, memo } from 'react';
+import React, { useState, useEffect, useRef, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import MapComponent from '@/src/features/map/components/MapComponent';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
@@ -130,28 +130,60 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
 
     // Pagination with infinite scroll (matches buy page)
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
     const loadMoreRef = useRef<HTMLDivElement>(null);
 
+    // Stable filter key for change detection
+    const filtersKey = useMemo(() => JSON.stringify(filters), [filters]);
+
     // Reset pagination when filters change
-    const filtersKey = JSON.stringify(filters);
     useEffect(() => {
         setVisibleCount(ITEMS_PER_PAGE);
     }, [filtersKey]);
 
-    // Infinite scroll observer
+    // Filter-change skeleton: show shimmer cards briefly so users see the list refresh
+    const [isSearchFiltering, setIsSearchFiltering] = useState(false);
+    const [animateFilteredCards, setAnimateFilteredCards] = useState(false);
+    const isFirstFilterRender = useRef(true);
+    const filteringTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    useEffect(() => {
+        if (isFirstFilterRender.current) {
+            isFirstFilterRender.current = false;
+            return;
+        }
+        setIsSearchFiltering(true);
+        setAnimateFilteredCards(false);
+        if (filteringTimer.current) clearTimeout(filteringTimer.current);
+        filteringTimer.current = setTimeout(() => {
+            setIsSearchFiltering(false);
+            setAnimateFilteredCards(true);
+        }, 800);
+        return () => { if (filteringTimer.current) clearTimeout(filteringTimer.current); };
+    }, [filtersKey]);
+    useEffect(() => {
+        if (!animateFilteredCards) return;
+        const t = setTimeout(() => setAnimateFilteredCards(false), 2000);
+        return () => clearTimeout(t);
+    }, [animateFilteredCards]);
+
+    // Infinite scroll observer — rootMargin fires early so skeletons appear before true bottom
     useEffect(() => {
         if (!loadMoreRef.current) return;
         const observer = new IntersectionObserver(
             (entries) => {
-                if (entries[0].isIntersecting && visibleCount < listProperties.length) {
-                    setVisibleCount(prev => Math.min(prev + ITEMS_PER_PAGE, listProperties.length));
+                if (entries[0].isIntersecting && !isLoadingMore && visibleCount < listProperties.length) {
+                    setIsLoadingMore(true);
+                    setTimeout(() => {
+                        setVisibleCount(prev => Math.min(prev + ITEMS_PER_PAGE, listProperties.length));
+                        setIsLoadingMore(false);
+                    }, 400);
                 }
             },
-            { rootMargin: '200px' }
+            { rootMargin: '200px', threshold: 0 }
         );
         observer.observe(loadMoreRef.current);
         return () => observer.disconnect();
-    }, [visibleCount, listProperties.length]);
+    }, [visibleCount, listProperties.length, isLoadingMore]);
 
     const showSplitView = !isMobile && !isTablet;
     const showViewToggle = isMobile || isTablet;
@@ -341,10 +373,10 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                             </div>
                         </div>
                         <div className="p-3">
-                        {isLoading ? (
+                        {(isLoading || isSearchFiltering) ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {[...Array(6)].map((_, i) => (
-                                    <PropertyCardSkeleton key={i} />
+                                    <PropertyCardSkeleton key={i} index={i} />
                                 ))}
                             </div>
                         ) : error ? (
@@ -377,16 +409,19 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                             property={property}
                                             index={index}
                                             onHover={setHoveredPropertyId}
-                                            animateEntrance={animateCards}
+                                            animateEntrance={animateCards || animateFilteredCards}
                                         />
                                     ))}
                                 </div>
                                 {visibleCount < listProperties.length && (
-                                    <div ref={loadMoreRef} className="text-center p-4">
-                                        <div className="flex justify-center items-center space-x-2 text-neutral-500">
-                                            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                            <span>{t('common:loadingMore', 'Loading more...')}</span>
-                                        </div>
+                                    <div ref={loadMoreRef}>
+                                        {isLoadingMore && (
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                                                {Array.from({ length: Math.min(ITEMS_PER_PAGE, listProperties.length - visibleCount) }).map((_, i) => (
+                                                    <PropertyCardSkeleton key={i} index={i} />
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </>
