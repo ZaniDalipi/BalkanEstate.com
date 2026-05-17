@@ -87,6 +87,17 @@ const saveAnnotations = (propertyId: string | undefined, annotations: Annotation
 const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, propertyId, onClose }) => {
     const { t } = useTranslation(['property', 'common']);
 
+    const [isMobile, setIsMobile] = useState(() =>
+        typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches
+    );
+
+    useEffect(() => {
+        const mq = window.matchMedia('(max-width: 639px)');
+        const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+        mq.addEventListener('change', handler);
+        return () => mq.removeEventListener('change', handler);
+    }, []);
+
     const getRoomLabel = (type: RoomType): string => {
         const labels: Record<RoomType, string> = {
             bedroom: t('property:floorPlan.viewer.rooms.bedroom', 'Bedroom'),
@@ -547,6 +558,73 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
         Math.abs(level - transform.scale) < Math.abs(ZOOM_LEVELS[closest] - transform.scale) ? i : closest
     , 0);
 
+    // ── Mobile: static view ──────────────────────────────────────────────────
+    if (isMobile) {
+        return (
+            <div
+                className="fixed inset-0 bg-black/95 z-[6000] flex flex-col"
+                role="dialog"
+                aria-modal="true"
+                aria-label={t('property:floorPlan.viewer.ariaLabel', 'Floor plan viewer')}
+            >
+                {/* Close button */}
+                <div className="absolute top-3 right-3 z-30">
+                    <button
+                        onClick={onClose}
+                        className="p-2 bg-neutral-800/90 text-white/80 hover:text-white hover:bg-red-500/50 rounded-lg backdrop-blur-md transition-colors border border-white/10"
+                        aria-label={t('property:floorPlan.viewer.close', 'Close floor plan viewer')}
+                    >
+                        <XMarkIcon className="w-5 h-5" />
+                    </button>
+                </div>
+
+                {/* Loading */}
+                {isLoading && (
+                    <div className="absolute inset-0 z-20 flex items-center justify-center">
+                        <div className="flex flex-col items-center gap-4">
+                            <div className="w-10 h-10 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                            <span className="text-white/60 text-sm">{t('property:floorPlan.viewer.loading', 'Loading floor plan...')}</span>
+                        </div>
+                    </div>
+                )}
+
+                {/* Error */}
+                {hasError && (
+                    <div className="absolute inset-0 z-20 flex items-center justify-center px-6">
+                        <div className="flex flex-col items-center gap-4 p-6 bg-neutral-900/90 rounded-2xl border border-red-500/30 w-full max-w-xs">
+                            <svg className="w-12 h-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                            </svg>
+                            <p className="text-white/70 text-sm text-center">{t('property:floorPlan.viewer.loadFailedDesc', 'The floor plan image could not be loaded.')}</p>
+                            <div className="flex gap-3">
+                                <button onClick={() => { setHasError(false); setIsLoading(true); }} className="px-4 py-2 bg-white/10 text-white text-sm rounded-lg">
+                                    {t('common:retry', 'Retry')}
+                                </button>
+                                <button onClick={onClose} className="px-4 py-2 bg-red-500/20 text-red-300 text-sm rounded-lg">
+                                    {t('common:close', 'Close')}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Static image — fitted to screen, no interaction */}
+                <div className="flex-1 flex items-center justify-center p-4 pt-14">
+                    <img
+                        src={imageUrl}
+                        alt={t('property:floorPlan.viewer.floorPlanAlt', 'Floor Plan')}
+                        className={`max-w-full max-h-full object-contain rounded select-none ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+                        style={{ transition: 'opacity 0.2s' }}
+                        onLoad={(e) => { setImageDimensions({ width: e.currentTarget.naturalWidth, height: e.currentTarget.naturalHeight }); setIsLoading(false); setHasError(false); }}
+                        onError={() => { setIsLoading(false); setHasError(true); }}
+                        onDragStart={(e) => e.preventDefault()}
+                    />
+                </div>
+            </div>
+        );
+    }
+
+    // ── Desktop: interactive view ─────────────────────────────────────────────
     return (
         <div
             className="fixed inset-0 bg-black/90 z-[6000] flex flex-col"
