@@ -45,6 +45,8 @@ export interface IngestStats {
   deferred?: number;
   errors: string[];
   durationMs: number;
+  /** Count of all properties from this source currently missing address, city, or price. */
+  incompleteCount?: number;
   monthlyUsage?: {
     monthlyAllowance: number;
     created: number;

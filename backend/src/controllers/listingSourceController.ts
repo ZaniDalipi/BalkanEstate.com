@@ -141,6 +141,18 @@ export const confirmImport = async (req: Request, res: Response): Promise<void> 
   }
 
   const stats = await runSource(source, { preFetched });
+
+  if (stats.imported > 0) {
+    stats.incompleteCount = await Property.countDocuments({
+      source: source.slug,
+      $or: [
+        { address: { $in: [null, undefined, ''] } },
+        { city: { $in: [null, undefined, ''] } },
+        { price: { $in: [null, undefined, 0] } },
+      ],
+    });
+  }
+
   res.json({ stats });
 };
 

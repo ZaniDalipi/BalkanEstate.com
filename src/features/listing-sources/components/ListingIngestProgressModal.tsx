@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from '@/shared/components/ui/Modal';
+import { useAppContext } from '@/context/AppContext';
 import type {
   ProcessedItem,
   SyncSession,
@@ -114,6 +115,7 @@ const ListingIngestProgressModal: React.FC<Props> = ({
   onMinimize,
 }) => {
   const { t } = useTranslation(['listingFeeds', 'common']);
+  const { dispatch } = useAppContext();
   const listRef = useRef<HTMLDivElement>(null);
 
   const current = session?.current ?? null;
@@ -367,6 +369,46 @@ const ListingIngestProgressModal: React.FC<Props> = ({
             </div>
           )}
         </div>
+
+        {/* Incomplete listings banner — shown in the finished phase when imports have gaps */}
+        {phase === 'finished' && stats.imported > 0 && (finalStats?.incompleteCount ?? 0) > 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 flex items-start gap-3">
+            <div className="text-amber-500 flex-shrink-0 w-5 h-5 mt-0.5" aria-hidden="true">{Icons.alert}</div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-amber-900">{t('listingFeeds:incompleteListingsTitle')}</p>
+              <p className="text-xs text-amber-700 mt-0.5 leading-relaxed">
+                {t('listingFeeds:incompleteListingsBody', { count: finalStats?.incompleteCount })}
+              </p>
+              <button
+                type="button"
+                onClick={() => { onClose(); dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'my-listings' }); }}
+                className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800 hover:text-amber-900 underline underline-offset-2 transition-colors"
+              >
+                {t('listingFeeds:incompleteListingsReview')}
+                <span aria-hidden="true">{Icons.external}</span>
+              </button>
+            </div>
+          </div>
+        )}
+        {phase === 'finished' && stats.imported > 0 && !finalStats?.incompleteCount && (
+          <div className="bg-blue-50 border border-blue-200 rounded-2xl px-4 py-3 flex items-start gap-3">
+            <div className="text-blue-400 flex-shrink-0 w-5 h-5 mt-0.5" aria-hidden="true">{Icons.alert}</div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-blue-900">{t('listingFeeds:incompleteListingsTitle')}</p>
+              <p className="text-xs text-blue-700 mt-0.5 leading-relaxed">
+                {t('listingFeeds:incompleteListingsBodyGeneric')}
+              </p>
+              <button
+                type="button"
+                onClick={() => { onClose(); dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'my-listings' }); }}
+                className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-blue-800 hover:text-blue-900 underline underline-offset-2 transition-colors"
+              >
+                {t('listingFeeds:incompleteListingsReview')}
+                <span aria-hidden="true">{Icons.external}</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="flex items-center justify-end gap-2 pt-1">

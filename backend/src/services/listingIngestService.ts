@@ -22,6 +22,8 @@ export interface IngestStats {
   deferred: number;
   errors: string[];
   durationMs: number;
+  /** Count of imported properties that are missing address, city, or price. */
+  incompleteCount?: number;
   monthlyUsage?: {
     monthlyAllowance: number;
     created: number;
