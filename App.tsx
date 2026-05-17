@@ -1155,29 +1155,6 @@ const AppWrapper: React.FC = () => {
         checkAuthStatus();
     }, [checkAuthStatus, handleOAuthCallback, dispatch]);
 
-    // While splash is active, render app content behind it so resources start loading
-    // But skip splash if user needs email verification (show that immediately instead)
-    if (shouldShowSplash && !state.pendingEmailVerification) {
-        return (
-            <>
-                {/* Render main layout behind the splash so map/resources start loading */}
-                <div className="fixed inset-0 pointer-events-none" aria-hidden="true" style={{ opacity: 0.01, contain: 'strict' }}>
-                    {!state.isAuthenticating && <MainLayout />}
-                </div>
-                <Suspense fallback={<FullScreenLoader />}>
-                    <SplashScreen
-                        onComplete={handleSplashComplete}
-                        userName={state.currentUser?.name || state.currentUser?.email?.split('@')[0]}
-                    />
-                </Suspense>
-            </>
-        );
-    }
-
-    if (state.isAuthenticating) {
-        return <FullScreenLoader />;
-    }
-
     // Allow password reset and email verification pages to bypass onboarding and verification check
     const isAuthFlowPage = window.location.pathname.includes('reset-password') ||
                            window.location.pathname.includes('verify-email');
@@ -1190,32 +1167,59 @@ const AppWrapper: React.FC = () => {
                                    !state.currentUser.isEmailVerified &&
                                    !isAuthFlowPage;
 
-    if (needsEmailVerification && state.currentUser) {
-        return (
+    // Determine app body — always rendered at the same position in the tree so that
+    // the splash screen (rendered as an overlay below) never causes MainLayout to
+    // unmount/remount. Previously the hidden-div + conditional-return pattern caused
+    // MainLayout to live in a different DOM position before vs after the splash,
+    // which made React tear it down and rebuild it — appearing as a ~10 s "restart".
+    let appBody: React.ReactNode;
+    if (state.isAuthenticating) {
+        appBody = <FullScreenLoader />;
+    } else if (state.pendingEmailVerification && state.currentUser?.isEmailVerified === false) {
+        appBody = (
+            <Suspense fallback={<FullScreenLoader />}>
+                <EmailVerificationRequired email={state.pendingEmailVerification} />
+            </Suspense>
+        );
+    } else if (needsEmailVerification && state.currentUser) {
+        appBody = (
             <Suspense fallback={<FullScreenLoader />}>
                 <EmailVerificationRequired email={state.currentUser.email} />
             </Suspense>
         );
-    }
-
-    // Render 404 page outside MainLayout for true full-screen (no sidebar)
-    if (state.activeView === 'not-found') {
-        return (
+    } else if (state.activeView === 'not-found') {
+        appBody = (
             <Suspense fallback={<FullScreenLoader />}>
                 <NotFoundPage />
             </Suspense>
         );
+    } else {
+        appBody = (
+            <>
+                <MainLayout />
+                <Suspense fallback={null}>
+                    {state.isAuthModalOpen && <AuthPage />}
+                    <CookieConsent />
+                    <PWAInstallPrompt />
+                    <PushNotificationPrompt />
+                </Suspense>
+            </>
+        );
     }
 
+    // The splash is a fixed overlay — it never wraps or replaces appBody, so appBody
+    // stays mounted in the same position the whole time and resources load during the splash.
     return (
         <>
-            <MainLayout />
-            <Suspense fallback={null}>
-                {state.isAuthModalOpen && <AuthPage />}
-                <CookieConsent />
-                <PWAInstallPrompt />
-                <PushNotificationPrompt />
-            </Suspense>
+            {appBody}
+            {shouldShowSplash && !state.pendingEmailVerification && (
+                <Suspense fallback={<FullScreenLoader />}>
+                    <SplashScreen
+                        onComplete={handleSplashComplete}
+                        userName={state.currentUser?.name || state.currentUser?.email?.split('@')[0]}
+                    />
+                </Suspense>
+            )}
         </>
     );
 }
