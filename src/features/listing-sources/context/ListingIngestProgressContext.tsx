@@ -76,11 +76,10 @@ interface ContextValue {
   // ── Preview state (shared across the whole app) ──────────────────────────
   pendingPreview: PendingPreview | null;
   fetchingPreviews: Map<string, FetchingPreview>;
-  confirmingPreview: boolean;
   /** Kick off a preview fetch. Resolves once the modal is queued or rejects on failure. */
   startPreview: (sourceId: string, sourceName: string, limit?: number) => Promise<void>;
-  /** Confirm the currently-pending preview, importing the approved subset. */
-  confirmPreview: (approvedIds: string[]) => Promise<IngestStats | null>;
+  /** Confirm the currently-pending preview. Closes the modal immediately and runs the import in the background via the dock. */
+  confirmPreview: (approvedIds: string[]) => void;
   /** Close the modal without importing. */
   cancelPreview: () => void;
   /** Subscribe to "import confirmed" events so a feature page can refresh its list. */
@@ -93,8 +92,6 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
   const [sessions, setSessions] = useState<Map<string, SyncSession>>(new Map());
   const [pendingPreview, setPendingPreview] = useState<PendingPreview | null>(null);
   const [fetchingPreviews, setFetchingPreviews] = useState<Map<string, FetchingPreview>>(new Map());
-  const [confirmingPreview, setConfirmingPreview] = useState(false);
-  const [confirmingSourceId, setConfirmingSourceId] = useState<string | null>(null);
   const [importHandlers] = useState<Set<(sourceId: string) => void>>(() => new Set());
   const socket = useSocket();
 
@@ -210,21 +207,6 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
     };
   }, [socket]);
 
-  // When a confirmed import's session completes, close the preview modal and
-  // refresh the sources list. This ensures the modal stays open while the
-  // actual import is running, preventing a race where items appear before
-  // the modal closes.
-  useEffect(() => {
-    if (!confirmingSourceId || !pendingPreview) return;
-
-    const session = sessions.get(confirmingSourceId);
-    if (session?.isDone) {
-      setPendingPreview(null);
-      setConfirmingSourceId(null);
-      for (const handler of importHandlers) handler(confirmingSourceId);
-    }
-  }, [confirmingSourceId, pendingPreview, sessions, importHandlers]);
-
   const startPreview = useCallback(
     async (sourceId: string, sourceName: string, limit = 100): Promise<void> => {
       setFetchingPreviews((prev) => {
@@ -257,41 +239,34 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
   }, []);
 
   const confirmPreview = useCallback(
-    async (approvedIds: string[]): Promise<IngestStats | null> => {
+    (approvedIds: string[]): void => {
       const preview = pendingPreview;
-      if (!preview) return null;
+      if (!preview) return;
       const { sourceId, sourceName, previewId } = preview;
-      setConfirmingPreview(true);
-      setConfirmingSourceId(sourceId);
-      // Register the sync session immediately so the dock transitions from
-      // "review" → "syncing" without a gap.
+
+      // Register the dock session and close the modal immediately so the user
+      // isn't stuck watching a spinner. The actual import runs in the background
+      // and the dock card tracks its progress.
       registerSync(sourceId, sourceName);
-      try {
-        const result = await confirmMyListingSourceImport(sourceId, previewId, approvedIds);
-        // Store final stats in the session so the dock modal can display them
-        // even after socket events are gone (the "keep track of it" case).
-        setSessions((prev) => {
-          const existing = prev.get(sourceId);
-          if (!existing) return prev;
-          const next = new Map(prev);
-          next.set(sourceId, { ...existing, finalStats: result.stats });
-          return next;
+      setPendingPreview(null);
+
+      confirmMyListingSourceImport(sourceId, previewId, approvedIds)
+        .then((result) => {
+          setSessions((prev) => {
+            const existing = prev.get(sourceId);
+            if (!existing) return prev;
+            const next = new Map(prev);
+            next.set(sourceId, { ...existing, finalStats: result.stats });
+            return next;
+          });
+          markDone(sourceId);
+          for (const handler of importHandlers) handler(sourceId);
+        })
+        .catch((err) => {
+          failSession(sourceId, (err as Error).message || 'Import failed');
         });
-        // The HTTP response returning guarantees the backend has finished
-        // running runSource (the controller awaits it). Mark the session done
-        // here as a safety net in case the final socket event was missed or
-        // arrived before the session was registered.
-        markDone(sourceId);
-        return result.stats;
-      } catch (err) {
-        failSession(sourceId, (err as Error).message || 'Import failed');
-        setConfirmingSourceId(null);
-        throw err;
-      } finally {
-        setConfirmingPreview(false);
-      }
     },
-    [pendingPreview, registerSync, markDone, failSession]
+    [pendingPreview, registerSync, markDone, failSession, importHandlers]
   );
 
   const onImportConfirmed = useCallback(
@@ -314,7 +289,6 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
       getSession,
       pendingPreview,
       fetchingPreviews,
-      confirmingPreview,
       startPreview,
       confirmPreview,
       cancelPreview,
@@ -329,7 +303,6 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
       getSession,
       pendingPreview,
       fetchingPreviews,
-      confirmingPreview,
       startPreview,
       confirmPreview,
       cancelPreview,

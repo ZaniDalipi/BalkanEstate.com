@@ -127,7 +127,11 @@
     "empty": "No listings found on this source.",
     "untitled": "Untitled listing",
     "beds": "bd",
-    "baths": "ba"
+    "baths": "ba",
+    "cancelConfirmTitle": "Cancel this review?",
+    "cancelConfirmBody": "Your selections will be lost. You can start a new preview anytime.",
+    "cancelConfirmYes": "Yes, cancel",
+    "cancelConfirmNo": "Keep reviewing"
   },
   "adapter": {
     "rss": "RSS / Atom feed",

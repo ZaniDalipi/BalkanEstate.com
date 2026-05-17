@@ -52,7 +52,6 @@ const ListingIngestDock: React.FC = () => {
     dismissSession,
     fetchingPreviews,
     pendingPreview,
-    confirmingPreview,
     confirmPreview,
     cancelPreview,
   } = useListingIngestProgressContext();
@@ -76,11 +75,7 @@ const ListingIngestDock: React.FC = () => {
   const expandedSession = expandedId ? sessions.get(expandedId) : undefined;
 
   const handleConfirmPreview = useCallback(
-    (approvedIds: string[]) => {
-      void confirmPreview(approvedIds).catch(() => {
-        /* errors are surfaced via dock + context.failSession */
-      });
-    },
+    (approvedIds: string[]) => { confirmPreview(approvedIds); },
     [confirmPreview]
   );
 
@@ -137,7 +132,7 @@ const ListingIngestDock: React.FC = () => {
           items={pendingPreview.items}
           onConfirm={handleConfirmPreview}
           onCancel={cancelPreview}
-          isConfirming={confirmingPreview}
+          isConfirming={false}
         />
       )}
     </>,
