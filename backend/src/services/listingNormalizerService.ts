@@ -6,6 +6,7 @@ import type { RawListing } from './listingAdapters';
 import { geocodeAddress } from './geocodingService';
 import { uploadFromUrl } from './cloudinaryService';
 import { enrichFromDetailHtml } from './listingHtmlEnricher';
+import { CITY_SLUG_MAP, COUNTRY_SLUG_MAP } from './locationLookup';
 import User from '../models/User';
 import { cronLogger } from '../utils/logger';
 
@@ -723,24 +724,9 @@ export const normalize = async (
   if ((!city || !country) && raw.url) {
     try {
       const pathParts = new URL(raw.url).pathname.toLowerCase().split('/').map(p => p.replace(/[-_]/g, '')).filter(Boolean);
-      const QUICK_CITIES: Record<string, string> = {
-        'tirana': 'Tirana', 'tirane': 'Tirana', 'durres': 'Durrës', 'vlore': 'Vlorë',
-        'pristina': 'Pristina', 'prishtina': 'Pristina', 'skopje': 'Skopje',
-        'podgorica': 'Podgorica', 'budva': 'Budva', 'kotor': 'Kotor', 'budvanrivijera': 'Budva',
-        'sarajevo': 'Sarajevo', 'beograd': 'Belgrade', 'belgrade': 'Belgrade',
-        'novisad': 'Novi Sad', 'zagreb': 'Zagreb', 'split': 'Split', 'dubrovnik': 'Dubrovnik',
-        'sofia': 'Sofia', 'varna': 'Varna', 'bucharest': 'Bucharest', 'cluj': 'Cluj-Napoca',
-        'athens': 'Athens', 'thessaloniki': 'Thessaloniki', 'ljubljana': 'Ljubljana',
-      };
-      const QUICK_COUNTRIES: Record<string, string> = {
-        'albania': 'Albania', 'al': 'Albania', 'kosovo': 'Kosovo', 'mk': 'North Macedonia',
-        'montenegro': 'Montenegro', 'ba': 'Bosnia and Herzegovina', 'bih': 'Bosnia and Herzegovina',
-        'serbia': 'Serbia', 'croatia': 'Croatia', 'hrvatska': 'Croatia',
-        'bulgaria': 'Bulgaria', 'romania': 'Romania', 'greece': 'Greece', 'slovenia': 'Slovenia',
-      };
       for (const part of pathParts) {
-        if (!country) country = QUICK_COUNTRIES[part];
-        if (!city) city = QUICK_CITIES[part];
+        if (!country) country = COUNTRY_SLUG_MAP[part];
+        if (!city) city = CITY_SLUG_MAP[part];
         if (city && country) break;
       }
     } catch { /* ignore */ }

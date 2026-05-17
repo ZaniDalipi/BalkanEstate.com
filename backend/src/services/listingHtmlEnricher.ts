@@ -13,6 +13,7 @@
  * data extracted from the index card is treated as preferred.
  */
 import * as cheerio from 'cheerio';
+import { CITY_SLUG_MAP, COUNTRY_SLUG_MAP } from './locationLookup';
 
 type Mapped = Record<string, unknown>;
 
@@ -391,63 +392,6 @@ const extractStructuredPriceFromHtml = ($: cheerio.CheerioAPI, target: Mapped): 
   }
 };
 
-/** Well-known Balkan/European cities → canonical name (keyed by slug for URL matching). */
-const KNOWN_CITIES: Record<string, string> = {
-  // Albania
-  'tirana': 'Tirana', 'tirane': 'Tirana', 'tiranes': 'Tirana',
-  'durres': 'Durrës', 'durresi': 'Durrës', 'durresso': 'Durrës',
-  'vlore': 'Vlorë', 'vlora': 'Vlorë', 'shkoder': 'Shkodër',
-  'elbasan': 'Elbasan', 'korce': 'Korçë', 'fier': 'Fier',
-  'berat': 'Berat', 'lushnje': 'Lushnjë', 'pogradec': 'Pogradec',
-  'gjirokaster': 'Gjirokastër', 'sarand': 'Sarandë',
-  // Kosovo
-  'pristina': 'Pristina', 'prishtina': 'Pristina', 'prizren': 'Prizren',
-  'peja': 'Pejë', 'gjakova': 'Gjakovë', 'mitrovica': 'Mitrovicë',
-  // North Macedonia
-  'skopje': 'Skopje', 'bitola': 'Bitola', 'ohrid': 'Ohrid',
-  'tetovo': 'Tetovo', 'kumanovo': 'Kumanovo',
-  // Montenegro
-  'podgorica': 'Podgorica', 'niksic': 'Nikšić', 'budva': 'Budva',
-  'kotor': 'Kotor', 'hercegnovi': 'Herceg Novi', 'bar': 'Bar',
-  'tivat': 'Tivat', 'ulcinj': 'Ulcinj',
-  // Bosnia and Herzegovina
-  'sarajevo': 'Sarajevo', 'mostar': 'Mostar', 'banjaluka': 'Banja Luka',
-  'tuzla': 'Tuzla', 'zenica': 'Zenica',
-  // Serbia
-  'beograd': 'Belgrade', 'belgrade': 'Belgrade', 'novisad': 'Novi Sad',
-  'nis': 'Niš', 'kragujevac': 'Kragujevac', 'subotica': 'Subotica',
-  // Croatia
-  'zagreb': 'Zagreb', 'split': 'Split', 'rijeka': 'Rijeka',
-  'osijek': 'Osijek', 'dubrovnik': 'Dubrovnik', 'zadar': 'Zadar',
-  'pula': 'Pula', 'varazdin': 'Varaždin',
-  // Bulgaria
-  'sofia': 'Sofia', 'plovdiv': 'Plovdiv', 'varna': 'Varna',
-  'burgas': 'Burgas', 'stara zagora': 'Stara Zagora',
-  // Romania
-  'bucharest': 'Bucharest', 'bucuresti': 'Bucharest', 'cluj': 'Cluj-Napoca',
-  'timisoara': 'Timișoara', 'iasi': 'Iași', 'constanta': 'Constanța',
-  // Greece
-  'athens': 'Athens', 'athina': 'Athens', 'thessaloniki': 'Thessaloniki',
-  'patras': 'Patras', 'heraklion': 'Heraklion',
-  // Slovenia
-  'ljubljana': 'Ljubljana', 'maribor': 'Maribor',
-};
-
-/** Country slug → canonical name. */
-const KNOWN_COUNTRIES: Record<string, string> = {
-  'albania': 'Albania', 'al': 'Albania', 'shqiperia': 'Albania', 'shqiperi': 'Albania',
-  'kosovo': 'Kosovo', 'kosova': 'Kosovo',
-  'northmacedonia': 'North Macedonia', 'macedonia': 'North Macedonia', 'mk': 'North Macedonia',
-  'montenegro': 'Montenegro', 'crna-gora': 'Montenegro', 'crna_gora': 'Montenegro',
-  'bosniaandherzegovina': 'Bosnia and Herzegovina', 'bih': 'Bosnia and Herzegovina', 'ba': 'Bosnia and Herzegovina',
-  'serbia': 'Serbia', 'srbija': 'Serbia',
-  'croatia': 'Croatia', 'hrvatska': 'Croatia',
-  'bulgaria': 'Bulgaria', 'bulgarija': 'Bulgaria',
-  'romania': 'Romania', 'ro': 'Romania',
-  'greece': 'Greece', 'ellada': 'Greece', 'gr': 'Greece',
-  'slovenia': 'Slovenia', 'si': 'Slovenia',
-  'turkey': 'Turkey', 'turkiye': 'Turkey',
-};
 
 const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped, baseUrl = ''): void => {
   // 1. itemprop attributes (most structured)
@@ -619,11 +563,11 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
         .filter(Boolean);
       for (const part of pathParts) {
         if (!target.country) {
-          const country = KNOWN_COUNTRIES[part];
+          const country = COUNTRY_SLUG_MAP[part];
           if (country) target.country = country;
         }
         if (!target.city) {
-          const city = KNOWN_CITIES[part];
+          const city = CITY_SLUG_MAP[part];
           if (city) target.city = city;
         }
         if (target.city && target.country) break;
