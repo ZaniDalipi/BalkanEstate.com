@@ -419,15 +419,17 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
   }
 
   // 4. Location header chips — e.g. "Shijak Albania" in a single element.
-  //    Scan breadcrumbs, headers, and any location-like text.
+  //    Deliberately excludes h1/h2/title — those are almost always the property
+  //    title, not the address, and including them caused the title to be stored
+  //    in the address field on sites like Century 21 Albania.
   if (!target.city || !target.country) {
     const chipSelectors = [
       '[class*="location"]', '[class*="address"]', '[class*="adresa"]',
       '[class*="property-address"]', '[class*="listing-address"]',
+      '[class*="property-location"]', '[class*="listing-location"]',
       '[class*="breadcrumb"]', '.breadcrumb', 'nav.breadcrumb',
-      'h1', 'h2', '[class*="title"]', '[class*="header"]',
       '[class*="place"]', '[class*="geo"]', '[class*="region"]',
-      'nav', 'nav .location', 'header .location',
+      'nav .location', 'header .location', 'footer .location',
     ];
     outer: for (const sel of chipSelectors) {
       const elements = $(sel).toArray();
@@ -609,6 +611,7 @@ const extractBalkanLabelValues = ($: cheerio.CheerioAPI, baseUrl: string, target
     'superficie': 'sqft', 'superficieabitabile': 'sqft', 'superficieutile': 'sqft',
     // EN
     'area': 'sqft', 'floorarea': 'sqft', 'livingarea': 'sqft', 'internalarea': 'sqft',
+    'grossarea': 'sqft', 'interiorarea': 'sqft', 'usablearea': 'sqft', 'netarea': 'sqft',
     'size': 'sqft', 'propertysize': 'sqft', 'interiorsize': 'sqft',
 
     // ── Plot / Land area ──────────────────────────────────────────────────
@@ -876,6 +879,7 @@ const extractBalkanLabelValues = ($: cheerio.CheerioAPI, baseUrl: string, target
     // IT
     'condizione': 'condition', 'stato': 'condition', 'statoimmobile': 'condition',
     // EN
+    'status': 'condition', 'propertystatus': 'condition',
     'condition': 'condition', 'propertycondition': 'condition', 'buildingcondition': 'condition',
 
     // ── View type ─────────────────────────────────────────────────────────

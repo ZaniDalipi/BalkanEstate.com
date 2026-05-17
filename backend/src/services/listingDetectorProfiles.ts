@@ -367,6 +367,44 @@ export const BALKAN_SITE_PROFILES: Record<string, SiteProfile> = {
   // ── Albania & Kosovo ───────────────────────────────────────────────────────
 
   /**
+   * century21albania.com / c21albania.com  (Century 21 Albania — Everest RE platform)
+   *
+   * The Everest Real Estate platform (everest.al) is a WordPress-based SaaS
+   * used by Albanian agencies. Property IDs follow the "everest{N}" pattern.
+   *
+   * Detail page layout (from visual inspection):
+   *   Top bar:   pin icon + address  |  tag icon + "Property ID: everest{N}"
+   *   Gallery:   swiper/fancybox of full-res images
+   *   Heading:   h1 with title  (e.g. "Bulevardi i Ri, Apartament 2+1 me Qira")
+   *   Price:     right-aligned   "500 € /month"
+   *   Features:  icon boxes — Gross Area, Interior Area, Bedrooms, Floor, Status
+   *   Map + description below.
+   */
+  'century21albania.com': {
+    listingItem: '.property-item, .col-md-4 .property, .properties-list .property, article.property',
+    link: 'a.property-title, h4 a, h3 a, a[href*="/property/"]',
+    title: 'h4, h3, .property-title',
+    price: '.property-price, [class*="price"]',
+    image: 'img.attachment-thumbnail|attr:src, img[class*="property"]|attr:src, img|attr:src',
+    location: '.property-location, .property-address, [class*="location"]',
+    sqft: '[class*="area"], [class*="size"], [class*="surface"]',
+    nextPageSelector: 'a.next.page-numbers, a[rel="next"], .pagination a.next',
+    pageParam: 'page',
+  },
+
+  'c21albania.com': {
+    listingItem: '.property-item, .col-md-4 .property, .properties-list .property, article.property',
+    link: 'a.property-title, h4 a, h3 a, a[href*="/property/"]',
+    title: 'h4, h3, .property-title',
+    price: '.property-price, [class*="price"]',
+    image: 'img.attachment-thumbnail|attr:src, img[class*="property"]|attr:src, img|attr:src',
+    location: '.property-location, .property-address, [class*="location"]',
+    sqft: '[class*="area"], [class*="size"], [class*="surface"]',
+    nextPageSelector: 'a.next.page-numbers, a[rel="next"], .pagination a.next',
+    pageParam: 'page',
+  },
+
+  /**
    * merrjep.com  (Albanian classifieds)
    */
   'merrjep.com': {
