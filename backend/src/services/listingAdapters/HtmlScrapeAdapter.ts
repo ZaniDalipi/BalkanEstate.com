@@ -330,6 +330,7 @@ export class HtmlScrapeAdapter implements SourceAdapter {
       const url: string = cfg.pageParam ? this.withPageParam(cfg.indexUrl, cfg.pageParam, pageNum) : pageUrl;
       if (visitedPageUrls.has(url)) break; // stop on cycle
       visitedPageUrls.add(url);
+      const stubsBeforePage = stubs.length;
       const pageHtml = await fetchHtml(url);
       const $ = cheerio.load(pageHtml);
       const items = $(cfg.selectors.listingItem);
@@ -420,6 +421,15 @@ export class HtmlScrapeAdapter implements SourceAdapter {
         // This makes pagination work for sources whose config pre-dates auto-detection.
         pageUrl = autoDetectNextPage($, url);
       }
+
+      // Emit per-page progress so the frontend transitions from "Discovering"
+      // to "Syncing N listings found" while pages are still being fetched.
+      // This prevents the UI from appearing frozen on large multi-page sites.
+      options.onProgress?.(stubs.length, 0);
+
+      // If this page produced zero new items the site is probably blocking us
+      // or we've gone past the last real page — stop to avoid churning.
+      if (stubs.length === stubsBeforePage) break;
     }
 
     const capped = limit ? stubs.slice(0, limit) : stubs;
