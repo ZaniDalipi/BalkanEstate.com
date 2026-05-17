@@ -815,10 +815,12 @@ const PropertyList = memo<PropertyListProps>((props) => {
                     setTimeout(() => {
                         setVisibleCount(prev => prev + ITEMS_PER_PAGE);
                         setIsLoadingMore(false);
-                    }, 300); // Small delay to show loading and prevent rapid firing
+                    }, 400);
                 }
             },
-            { threshold: 1.0 }
+            // threshold 0 fires as soon as the sentinel enters the viewport,
+            // giving a head-start so skeletons appear before the user hits the true bottom
+            { threshold: 0, rootMargin: '200px' }
         );
 
         const currentRef = loadMoreRef.current;
@@ -1005,8 +1007,14 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                         ))}
                                     </div>
                                     {visibleCount < properties.length && (
-                                        <div ref={loadMoreRef} className="text-center p-8 md:p-4">
-                                            {isLoadingMore && <span>{t('common:loadingMore')}</span>}
+                                        <div ref={loadMoreRef}>
+                                            {isLoadingMore && (
+                                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 xl:gap-6 mt-4">
+                                                    {Array.from({ length: Math.min(ITEMS_PER_PAGE, properties.length - visibleCount) }).map((_, i) => (
+                                                        <PropertyCardSkeleton key={i} index={i} />
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </>
@@ -1129,18 +1137,19 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                                     property={prop}
                                                     index={index}
                                                     onHover={onPropertyHover}
-                                                    animateEntrance={animateCards}
+                                                    animateEntrance={animateCards || animateFilteredCards}
                                                 />
                                             ))}
                                         </div>
                                         {visibleCount < properties.length && (
-                                            <div ref={loadMoreRef} className="text-center p-8">
-                                                {isLoadingMore ? (
-                                                    <div className="flex justify-center items-center space-x-2 text-neutral-500">
-                                                        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                                        <span>Loading more...</span>
+                                            <div ref={loadMoreRef}>
+                                                {isLoadingMore && (
+                                                    <div className="grid grid-cols-1 gap-4 mt-4 px-4">
+                                                        {Array.from({ length: Math.min(ITEMS_PER_PAGE, properties.length - visibleCount) }).map((_, i) => (
+                                                            <PropertyCardSkeleton key={i} index={i} />
+                                                        ))}
                                                     </div>
-                                                ) : <div className="h-1"></div>}
+                                                )}
                                             </div>
                                         )}
                                     </>
