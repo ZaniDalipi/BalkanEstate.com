@@ -270,7 +270,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     }, [propertyToEdit]);
 
     // Handle country selection
-    const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const handleCountryChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         const countryName = e.target.value;
         setSelectedCountry(countryName);
         setSelectedCity(''); // Reset city when country changes
@@ -283,16 +283,15 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         } else {
             setAvailableCities([]);
         }
-    };
+    }, []);
 
     // Handle city selection
-    const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const handleCityChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         const cityName = e.target.value;
         setSelectedCity(cityName);
 
         const city = availableCities.find(c => c.name === cityName);
         if (city) {
-            // Set coordinates to city center and default address to "City, Country"
             setListingData(prev => ({
                 ...prev,
                 lat: city.lat,
@@ -300,7 +299,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 streetAddress: `${cityName}, ${selectedCountry}`,
             }));
         }
-    };
+    }, [availableCities, selectedCountry]);
 
     // Zoom level - moderate zoom to allow easy navigation and exploration
     const getZoomLevel = useMemo(() => {
@@ -314,22 +313,20 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         return countryData?.cities.find(c => c.name === selectedCity) || null;
     }, [selectedCountry, selectedCity]);
 
-    const handleMapLocationChange = (newLat: number, newLng: number) => {
-        // Log removed
+    const handleMapLocationChange = useCallback((newLat: number, newLng: number) => {
         setListingData(prev => ({
             ...prev,
             lat: newLat,
             lng: newLng,
         }));
-    };
+    }, []);
 
-    const handleMapAddressChange = (searchedLocation: string) => {
-        // Update the street address field with the searched location
+    const handleMapAddressChange = useCallback((searchedLocation: string) => {
         setListingData(prev => ({
             ...prev,
             streetAddress: searchedLocation,
         }));
-    };
+    }, []);
 
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         // Handle case when user cancels file picker - don't clear existing images
@@ -468,7 +465,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         }
     };
 
-    const removeImage = (indexToRemove: number) => {
+    const removeImage = useCallback((indexToRemove: number) => {
         setImages(prevImages => prevImages.filter((_, index) => index !== indexToRemove));
         setListingData(prev => {
             const newTags = prev.image_tags
@@ -476,17 +473,17 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 .map(tag => (tag.index > indexToRemove ? { ...tag, index: tag.index - 1 } : tag));
             return { ...prev, image_tags: newTags };
         });
-    };
+    }, []);
 
     // --- Drag & Drop Handlers ---
-    const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>, index: number) => {
         dragItem.current = index;
         e.currentTarget.style.opacity = '0.5';
-    };
+    }, []);
 
-    const handleDragEnter = (_e: React.DragEvent<HTMLDivElement>, index: number) => {
+    const handleDragEnter = useCallback((_e: React.DragEvent<HTMLDivElement>, index: number) => {
         dragOverItem.current = index;
-    };
+    }, []);
 
     const handleDrop = useCallback(() => {
         if (dragItem.current === null || dragOverItem.current === null || dragItem.current === dragOverItem.current) {
@@ -518,11 +515,11 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     }, [images, listingData.image_tags]);
 
 
-    const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+    const handleDragEnd = useCallback((e: React.DragEvent<HTMLDivElement>) => {
         e.currentTarget.style.opacity = '1';
         dragItem.current = null;
         dragOverItem.current = null;
-    };
+    }, []);
 
 
     const handleGenerate = async () => {
@@ -597,16 +594,16 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         }
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
         const isNumeric = type === 'number';
         setListingData(prev => ({
             ...prev,
             [name]: isNumeric ? (value === '' ? '' : Number(value)) : value
         }));
-    };
+    }, []);
 
-    const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handlePriceChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const rawValue = e.target.value;
         const numericString = rawValue.replace(/[^0-9]/g, '');
         const numberValue = numericString === '' ? 0 : Number(numericString);
@@ -615,18 +612,20 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             ...prev,
             price: numberValue
         }));
-    };
+    }, []);
 
-    const handleImageTagChange = (index: number, tag: string) => {
-        const newImageTags = [...listingData.image_tags];
-        const existingTagIndex = newImageTags.findIndex(t => t.index === index);
-        if (existingTagIndex > -1) {
-            newImageTags[existingTagIndex].tag = tag;
-        } else {
-            newImageTags.push({ index, tag });
-        }
-        setListingData(prev => ({ ...prev, image_tags: newImageTags }));
-    };
+    const handleImageTagChange = useCallback((index: number, tag: string) => {
+        setListingData(prev => {
+            const newImageTags = [...prev.image_tags];
+            const existingTagIndex = newImageTags.findIndex(t => t.index === index);
+            if (existingTagIndex > -1) {
+                newImageTags[existingTagIndex] = { ...newImageTags[existingTagIndex], tag };
+            } else {
+                newImageTags.push({ index, tag });
+            }
+            return { ...prev, image_tags: newImageTags };
+        });
+    }, []);
 
     // --- Preview Handlers ---
     const [previewProperty, setPreviewProperty] = useState<Property | null>(null);

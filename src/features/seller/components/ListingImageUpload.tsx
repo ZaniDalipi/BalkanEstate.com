@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SpinnerIcon } from '@/constants';
 import { ListingData, ImageData, ALL_VALID_TAGS, UploadIcon, InfoIcon, ImageTagSelector } from './ListingFormHelpers';
@@ -22,7 +22,7 @@ interface ListingImageUploadProps {
     setFloorplanImage: React.Dispatch<React.SetStateAction<ImageData>>;
 }
 
-const ListingImageUpload: React.FC<ListingImageUploadProps> = ({
+const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
     images,
     listingData,
     floorplanImage,
@@ -143,6 +143,6 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = ({
             )}
         </>
     );
-};
+});
 
 export default ListingImageUpload;

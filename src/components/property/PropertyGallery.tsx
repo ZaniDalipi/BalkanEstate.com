@@ -381,12 +381,28 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
   }, [currentImageIndex, imagesForCurrentCategory.length, onImageIndexChange]);
 
-  // Auto-rotate every 5 s in photos mode; resets whenever the user manually navigates
-  // (handleNextImage recreates on index change, which restarts the interval)
+  // Auto-rotate every 5 s in photos mode; pauses when the tab is hidden
   useEffect(() => {
     if (viewMode !== 'photos' || imagesForCurrentCategory.length <= 1) return;
-    const timer = setInterval(handleNextImage, 5000);
-    return () => clearInterval(timer);
+
+    let timer: ReturnType<typeof setInterval> | null = null;
+
+    const start = () => {
+      if (!document.hidden) {
+        timer = setInterval(handleNextImage, 5000);
+      }
+    };
+    const stop = () => {
+      if (timer) { clearInterval(timer); timer = null; }
+    };
+    const onVisibility = () => document.hidden ? stop() : start();
+
+    start();
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      stop();
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
   }, [viewMode, imagesForCurrentCategory.length, handleNextImage]);
 
   const handlePrevImage = useCallback(() => {

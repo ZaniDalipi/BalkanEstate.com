@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ListingData, TagListInput, TriStateCheckbox, labelClasses, selectClasses } from './ListingFormHelpers';
 
@@ -14,7 +14,7 @@ const chevronIcon = (
     </div>
 );
 
-const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = ({
+const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
     listingData,
     setListingData,
     handleInputChange,
@@ -240,6 +240,6 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = ({
             )}
         </>
     );
-};
+});
 
 export default ListingPropertyFeatures;
