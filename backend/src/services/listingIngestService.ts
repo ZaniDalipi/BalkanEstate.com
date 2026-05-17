@@ -189,7 +189,7 @@ export const runSource = async (
     } else {
       const adapter = getAdapter(source);
       const since = options.fullRefresh ? undefined : source.lastSuccessAt;
-      const limit = options.limit ?? 500;
+      const limit = options.limit ?? 5000;
       log.info(
         `[ingest] ${source.slug}: starting (since=${since?.toISOString() ?? 'none'}, limit=${limit}, remaining=${remaining})`
       );

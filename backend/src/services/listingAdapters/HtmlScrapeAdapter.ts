@@ -183,6 +183,68 @@ const resolveUrl = (base: string, href: string): string => {
 const DEFAULT_DETAIL_CONCURRENCY = 4;
 
 /**
+ * Try to find the "next page" URL from a page's live HTML.
+ * Tries <link rel="next">, a[rel="next"], common pagination CSS patterns,
+ * and text-based next anchors — in priority order.
+ * Returns undefined when no credible next link is found so the loop can stop.
+ */
+const autoDetectNextPage = ($: cheerio.CheerioAPI, currentUrl: string): string | undefined => {
+  // 1. <link rel="next"> in <head>
+  const linkNext = $('link[rel="next"]').attr('href');
+  if (linkNext && isUsableHref(linkNext)) return resolveUrl(currentUrl, linkNext);
+
+  // 2. <a rel="next"> anywhere in the body
+  const aRelNext = $('a[rel="next"]').first().attr('href');
+  if (aRelNext && isUsableHref(aRelNext)) return resolveUrl(currentUrl, aRelNext);
+
+  // 3. Common CSS class / structural patterns (ordered by specificity)
+  const paginationCssSelectors = [
+    '.pagination a.next',
+    '.pagination li.next a',
+    '.pagination li.active + li a',
+    '.pager a.next',
+    '.pager li.next a',
+    '.pager-next a',
+    'nav[aria-label*="paginat" i] a[aria-label*="next" i]',
+    'nav[aria-label*="paginat" i] a[aria-label*="sljedeć" i]',
+    'nav[aria-label*="paginat" i] a[aria-label*="sledeć" i]',
+    'a[class*="next-page"]',
+    'a[class*="nextpage"]',
+    'a[class*="pagination-next"]',
+    'a[class*="page-next"]',
+    '.wp-pagenavi a.nextpostslink',
+    '.nav-links a.next',
+    'li.next > a',
+    'a.next',
+  ];
+  for (const sel of paginationCssSelectors) {
+    const href = $(sel).first().attr('href');
+    if (href && isUsableHref(href)) return resolveUrl(currentUrl, href);
+  }
+
+  // 4. Text / symbol-based next anchors within pagination containers.
+  //    We only look inside known pagination wrappers to avoid false positives.
+  const nextLabels = ['Next', 'next', '›', '»', 'Naprijed', 'Dalje', 'Sledeća', 'Sljedeća', 'Suivant', 'Weiter'];
+  const paginationContainers = $('[class*="paginat"], [class*="pager"], nav[role="navigation"]');
+  if (paginationContainers.length > 0) {
+    for (const label of nextLabels) {
+      let found: string | undefined;
+      paginationContainers.find('a').each((_, el) => {
+        if (found) return;
+        const text = $(el).text().trim();
+        if (text === label || text.startsWith(label)) {
+          const href = $(el).attr('href');
+          if (href && isUsableHref(href)) found = resolveUrl(currentUrl, href);
+        }
+      });
+      if (found) return found;
+    }
+  }
+
+  return undefined;
+};
+
+/**
  * Run `worker` over `items` with at most `concurrency` in flight at once.
  * Maintains input order in the result array. Failures are mapped to `undefined`
  * — the caller decides how to treat them (we don't want one slow detail page
@@ -228,7 +290,8 @@ export class HtmlScrapeAdapter implements SourceAdapter {
 
     const limit = options.limit ?? cfg.limit;
     const out: RawListing[] = [];
-    const maxPages = cfg.maxPages ?? 1;
+    // Default to 500 pages — pagination stops naturally when no next link is found.
+    const maxPages = cfg.maxPages ?? 500;
     const usePlaywright = cfg.usePlaywright === true;
 
     const requestOpts = {
@@ -257,12 +320,16 @@ export class HtmlScrapeAdapter implements SourceAdapter {
      * preview/import flow when `followDetails` is on.
      */
     const stubs: RawListing[] = [];
+    // Guard against sites whose "next" link loops back to a visited page.
+    const visitedPageUrls = new Set<string>();
 
     let pageUrl: string | undefined = cfg.indexUrl;
     let pageNum = cfg.pageStart ?? 1;
 
     for (let i = 0; i < maxPages && pageUrl; i++) {
       const url: string = cfg.pageParam ? this.withPageParam(cfg.indexUrl, cfg.pageParam, pageNum) : pageUrl;
+      if (visitedPageUrls.has(url)) break; // stop on cycle
+      visitedPageUrls.add(url);
       const pageHtml = await fetchHtml(url);
       const $ = cheerio.load(pageHtml);
       const items = $(cfg.selectors.listingItem);
@@ -349,7 +416,9 @@ export class HtmlScrapeAdapter implements SourceAdapter {
       } else if (cfg.pageParam) {
         pageNum++;
       } else {
-        pageUrl = undefined;
+        // No pagination config — try to find the next-page link from the live HTML.
+        // This makes pagination work for sources whose config pre-dates auto-detection.
+        pageUrl = autoDetectNextPage($, url);
       }
     }
 
