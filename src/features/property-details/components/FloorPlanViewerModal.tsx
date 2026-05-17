@@ -130,11 +130,20 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
     const imageContainerRef = useRef<HTMLDivElement>(null);
     const imageRef = useRef<HTMLImageElement>(null);
     const annotationInputRef = useRef<HTMLInputElement>(null);
+    // Snapshot of transform at the start of a pinch gesture — prevents drift
+    const touchStartTransformRef = useRef({ scale: 1, x: 0, y: 0 });
+    // Always-current transform for sync access in event handlers
+    const transformRef = useRef({ scale: 1, x: 0, y: 0 });
 
     // Persist annotations to localStorage whenever they change
     useEffect(() => {
         saveAnnotations(propertyId, annotations);
     }, [annotations, propertyId]);
+
+    // Keep transformRef in sync for sync access in event handlers
+    useEffect(() => {
+        transformRef.current = transform;
+    }, [transform]);
 
     // Fit image to container on load
     const fitToScreen = useCallback(() => {
@@ -251,9 +260,26 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
         }));
     }, [isPanning, panStart]);
 
+    // Clamp translation so at least 80px of the image always stays visible
+    const clampTransform = useCallback((t: { scale: number; x: number; y: number }) => {
+        const container = imageContainerRef.current;
+        if (!container || imageDimensions.width === 0) return t;
+        const cw = container.clientWidth;
+        const ch = container.clientHeight;
+        const imgW = imageDimensions.width * t.scale;
+        const imgH = imageDimensions.height * t.scale;
+        const margin = 80;
+        return {
+            ...t,
+            x: Math.min(cw - margin, Math.max(margin - imgW, t.x)),
+            y: Math.min(ch - margin, Math.max(margin - imgH, t.y)),
+        };
+    }, [imageDimensions]);
+
     const handleMouseUp = useCallback(() => {
         setIsPanning(false);
-    }, []);
+        setTransform(prev => clampTransform(prev));
+    }, [clampTransform]);
 
     // Touch handlers for mobile pinch-to-zoom and pan
     const getTouchDistance = (touches: React.TouchList) => {
@@ -283,8 +309,9 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                 if (!container) return;
                 const rect = container.getBoundingClientRect();
                 const touch = e.touches[0];
-                const imgX = ((touch.clientX - rect.left - transform.x) / transform.scale / imageDimensions.width) * 100;
-                const imgY = ((touch.clientY - rect.top - transform.y) / transform.scale / imageDimensions.height) * 100;
+                const cur = transformRef.current;
+                const imgX = ((touch.clientX - rect.left - cur.x) / cur.scale / imageDimensions.width) * 100;
+                const imgY = ((touch.clientY - rect.top - cur.y) / cur.scale / imageDimensions.height) * 100;
 
                 if (imgX >= 0 && imgX <= 100 && imgY >= 0 && imgY <= 100) {
                     const newId = `ann-${Date.now()}`;
@@ -298,16 +325,22 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
             // Double-tap detection
             const now = Date.now();
             if (now - lastTapRef.current < 300) {
-                // Double tap - toggle zoom
+                // Double tap — zoom in to tap point, or reset to fit if already zoomed
                 const container = imageContainerRef.current;
                 if (container) {
-                    const nextScale = transform.scale < 2 ? 3 : 1;
-                    const rect = container.getBoundingClientRect();
-                    const pivotX = e.touches[0].clientX - rect.left;
-                    const pivotY = e.touches[0].clientY - rect.top;
-                    const newX = pivotX - (pivotX - transform.x) * (nextScale / transform.scale);
-                    const newY = pivotY - (pivotY - transform.y) * (nextScale / transform.scale);
-                    setTransform({ scale: nextScale, x: newX, y: newY });
+                    const cur = transformRef.current;
+                    if (cur.scale < 2) {
+                        const nextScale = 3;
+                        const rect = container.getBoundingClientRect();
+                        const pivotX = e.touches[0].clientX - rect.left;
+                        const pivotY = e.touches[0].clientY - rect.top;
+                        const newX = pivotX - (pivotX - cur.x) * (nextScale / cur.scale);
+                        const newY = pivotY - (pivotY - cur.y) * (nextScale / cur.scale);
+                        setTransform({ scale: nextScale, x: newX, y: newY });
+                    } else {
+                        // Zoom back out to fit
+                        fitToScreen();
+                    }
                 }
                 lastTapRef.current = 0;
                 return;
@@ -315,17 +348,20 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
             lastTapRef.current = now;
 
             // Single finger pan
+            const cur = transformRef.current;
             setIsPanning(true);
-            setPanStart({ x: e.touches[0].clientX - transform.x, y: e.touches[0].clientY - transform.y });
+            setPanStart({ x: e.touches[0].clientX - cur.x, y: e.touches[0].clientY - cur.y });
         } else if (e.touches.length === 2) {
-            // Pinch zoom
+            // Pinch zoom — snapshot current transform so pivot stays stable throughout gesture
             setIsPanning(false);
+            const cur = transformRef.current;
+            touchStartTransformRef.current = { ...cur };
             const dist = getTouchDistance(e.touches);
             setTouchStartDistance(dist);
-            setTouchStartScale(transform.scale);
+            setTouchStartScale(cur.scale);
             setTouchStartCenter(getTouchCenter(e.touches));
         }
-    }, [mode, transform, imageDimensions]);
+    }, [mode, imageDimensions, fitToScreen]);
 
     const handleTouchMove = useCallback((e: React.TouchEvent) => {
         e.preventDefault();
@@ -346,28 +382,37 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
             if (!container) return;
 
             const rect = container.getBoundingClientRect();
+            // Use the snapshotted pivot so it never drifts as transform updates
             const pivotX = touchStartCenter.x - rect.left;
             const pivotY = touchStartCenter.y - rect.top;
 
-            // Calculate new position with both scale and pan applied
-            const dx = currentCenter.x - touchStartCenter.x;
-            const dy = currentCenter.y - touchStartCenter.y;
+            const { x: startX, y: startY, scale: startScale } = touchStartTransformRef.current;
+            const scaledX = pivotX - (pivotX - startX) * (newScale / startScale);
+            const scaledY = pivotY - (pivotY - startY) * (newScale / startScale);
 
-            const baseX = pivotX - (pivotX - transform.x) * (newScale / transform.scale);
-            const baseY = pivotY - (pivotY - transform.y) * (newScale / transform.scale);
+            // Allow the pinch center to also pan simultaneously
+            const panDeltaX = currentCenter.x - touchStartCenter.x;
+            const panDeltaY = currentCenter.y - touchStartCenter.y;
 
-            setTransform({ scale: newScale, x: baseX + dx, y: baseY + dy });
+            setTransform({ scale: newScale, x: scaledX + panDeltaX, y: scaledY + panDeltaY });
         }
-    }, [isPanning, panStart, touchStartDistance, touchStartScale, touchStartCenter, transform]);
+    }, [isPanning, panStart, touchStartDistance, touchStartScale, touchStartCenter]);
 
     const handleTouchEnd = useCallback((e: React.TouchEvent) => {
         if (e.touches.length < 2) {
             setTouchStartDistance(null);
         }
-        if (e.touches.length === 0) {
+        if (e.touches.length === 1) {
+            // One finger remaining after pinch — start panning from current position
+            const cur = transformRef.current;
+            setIsPanning(true);
+            setPanStart({ x: e.touches[0].clientX - cur.x, y: e.touches[0].clientY - cur.y });
+        } else if (e.touches.length === 0) {
             setIsPanning(false);
+            // Clamp so the image can't be left completely off-screen
+            setTransform(prev => clampTransform(prev));
         }
-    }, []);
+    }, [clampTransform]);
 
     // Double-click zoom (desktop)
     const handleDoubleClick = useCallback((e: React.MouseEvent) => {
