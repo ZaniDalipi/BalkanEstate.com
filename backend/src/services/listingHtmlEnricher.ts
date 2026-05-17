@@ -328,17 +328,22 @@ const extractGalleryImages = ($: cheerio.CheerioAPI, base: string, target: Mappe
 const extractStructuredPriceFromHtml = ($: cheerio.CheerioAPI, target: Mapped): void => {
   if (target.price) return;
 
-  // 1. Known data-* attributes
+  // 1. Known data-* attributes and CSS class selectors (priority order)
   const selectors = [
     '[data-price]', '[data-list-price]', '[data-asking-price]', '[data-amount]',
+    '[data-sale-price]', '[data-regular-price]', '[data-final-price]',
     '.price', '.listing-price', '.property-price', '[itemprop="price"]',
+    '.asking-price', '.price-tag', '.price-value', '.price-amount',
+    '[class*="asking"]', '[class*="price-box"]', '[class*="price-wrap"]',
+    '[class*="sale-price"]', '[class*="offer-price"]', '[class*="list-price"]',
   ];
   for (const selector of selectors) {
     const el = $(selector).first();
     if (el.length) {
       const val = el.attr('data-price') ?? el.attr('data-list-price') ??
-                  el.attr('data-asking-price') ?? el.attr('data-amount') ?? el.text();
-      if (val && /[\d€$£]/.test(val)) {
+                  el.attr('data-asking-price') ?? el.attr('data-amount') ??
+                  el.attr('data-sale-price') ?? el.attr('content') ?? el.text();
+      if (val && /[\d€$£]/.test(val) && val.trim().length < 60) {
         target.price = val.trim();
         return;
       }
@@ -369,9 +374,82 @@ const extractStructuredPriceFromHtml = ($: cheerio.CheerioAPI, target: Mapped): 
       return;
     }
   }
+
+  // 4. Keyword-prefixed price in visible text: "Price: 250.000 €", "Cijena: 85 000 EUR"
+  const PRICE_LABEL_RE = /(?:price|cijena|cena|cjena|çmimi|preis|prix|prezzo|pret|ár|τιμή|цена)\s*[:–-]\s*((?:€|EUR|USD|\$|£|ALL|Lek|RSD|BAM|KM|MKD|RON|BGN|лв)?\s*[\d][\d\s.,]*[\d]\s*(?:€|EUR|USD|\$|£|ALL|Lek|RSD|BAM|KM|MKD|RON|BGN|лв)?)/i;
+  const leafNodes = $('p, li, span, div, td, th, strong, b, h3, h4, h5').toArray();
+  for (const el of leafNodes) {
+    const $el = $(el);
+    if ($el.children('p, div, ul, ol, table').length) continue; // skip containers
+    const text = $el.text().replace(/\s+/g, ' ').trim();
+    if (text.length < 3 || text.length > 200) continue;
+    const m = text.match(PRICE_LABEL_RE);
+    if (m?.[1]) {
+      target.price = m[1].trim();
+      return;
+    }
+  }
 };
 
-const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped): void => {
+/** Well-known Balkan/European cities → canonical name (keyed by slug for URL matching). */
+const KNOWN_CITIES: Record<string, string> = {
+  // Albania
+  'tirana': 'Tirana', 'tirane': 'Tirana', 'tiranes': 'Tirana',
+  'durres': 'Durrës', 'durresi': 'Durrës', 'durresso': 'Durrës',
+  'vlore': 'Vlorë', 'vlora': 'Vlorë', 'shkoder': 'Shkodër',
+  'elbasan': 'Elbasan', 'korce': 'Korçë', 'fier': 'Fier',
+  'berat': 'Berat', 'lushnje': 'Lushnjë', 'pogradec': 'Pogradec',
+  'gjirokaster': 'Gjirokastër', 'sarand': 'Sarandë',
+  // Kosovo
+  'pristina': 'Pristina', 'prishtina': 'Pristina', 'prizren': 'Prizren',
+  'peja': 'Pejë', 'gjakova': 'Gjakovë', 'mitrovica': 'Mitrovicë',
+  // North Macedonia
+  'skopje': 'Skopje', 'bitola': 'Bitola', 'ohrid': 'Ohrid',
+  'tetovo': 'Tetovo', 'kumanovo': 'Kumanovo',
+  // Montenegro
+  'podgorica': 'Podgorica', 'niksic': 'Nikšić', 'budva': 'Budva',
+  'kotor': 'Kotor', 'hercegnovi': 'Herceg Novi', 'bar': 'Bar',
+  'tivat': 'Tivat', 'ulcinj': 'Ulcinj',
+  // Bosnia and Herzegovina
+  'sarajevo': 'Sarajevo', 'mostar': 'Mostar', 'banjaluka': 'Banja Luka',
+  'tuzla': 'Tuzla', 'zenica': 'Zenica',
+  // Serbia
+  'beograd': 'Belgrade', 'belgrade': 'Belgrade', 'novisad': 'Novi Sad',
+  'nis': 'Niš', 'kragujevac': 'Kragujevac', 'subotica': 'Subotica',
+  // Croatia
+  'zagreb': 'Zagreb', 'split': 'Split', 'rijeka': 'Rijeka',
+  'osijek': 'Osijek', 'dubrovnik': 'Dubrovnik', 'zadar': 'Zadar',
+  'pula': 'Pula', 'varazdin': 'Varaždin',
+  // Bulgaria
+  'sofia': 'Sofia', 'plovdiv': 'Plovdiv', 'varna': 'Varna',
+  'burgas': 'Burgas', 'stara zagora': 'Stara Zagora',
+  // Romania
+  'bucharest': 'Bucharest', 'bucuresti': 'Bucharest', 'cluj': 'Cluj-Napoca',
+  'timisoara': 'Timișoara', 'iasi': 'Iași', 'constanta': 'Constanța',
+  // Greece
+  'athens': 'Athens', 'athina': 'Athens', 'thessaloniki': 'Thessaloniki',
+  'patras': 'Patras', 'heraklion': 'Heraklion',
+  // Slovenia
+  'ljubljana': 'Ljubljana', 'maribor': 'Maribor',
+};
+
+/** Country slug → canonical name. */
+const KNOWN_COUNTRIES: Record<string, string> = {
+  'albania': 'Albania', 'al': 'Albania', 'shqiperia': 'Albania', 'shqiperi': 'Albania',
+  'kosovo': 'Kosovo', 'kosova': 'Kosovo',
+  'northmacedonia': 'North Macedonia', 'macedonia': 'North Macedonia', 'mk': 'North Macedonia',
+  'montenegro': 'Montenegro', 'crna-gora': 'Montenegro', 'crna_gora': 'Montenegro',
+  'bosniaandherzegovina': 'Bosnia and Herzegovina', 'bih': 'Bosnia and Herzegovina', 'ba': 'Bosnia and Herzegovina',
+  'serbia': 'Serbia', 'srbija': 'Serbia',
+  'croatia': 'Croatia', 'hrvatska': 'Croatia',
+  'bulgaria': 'Bulgaria', 'bulgarija': 'Bulgaria',
+  'romania': 'Romania', 'ro': 'Romania',
+  'greece': 'Greece', 'ellada': 'Greece', 'gr': 'Greece',
+  'slovenia': 'Slovenia', 'si': 'Slovenia',
+  'turkey': 'Turkey', 'turkiye': 'Turkey',
+};
+
+const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped, baseUrl = ''): void => {
   // 1. itemprop attributes (most structured)
   if (!target.address) {
     const el = $('[itemprop="streetAddress"]').first();
@@ -384,6 +462,26 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
   if (!target.country) {
     const el = $('[itemprop="addressCountry"]').first();
     if (el.length) target.country = el.text().trim();
+  }
+
+  // 1b. Geo meta tags (<meta name="geo.placename" content="Tirana, Albania">)
+  const geoPlacename = $('meta[name="geo.placename"]').attr('content')?.trim();
+  if (geoPlacename) {
+    const parts = geoPlacename.split(',').map(p => p.trim()).filter(Boolean);
+    if (!target.city && parts[0]) target.city = parts[0];
+    if (!target.country && parts[1]) target.country = parts[1];
+  }
+  if (!target.country) {
+    const geoRegion = $('meta[name="geo.region"]').attr('content')?.trim();
+    if (geoRegion) target.country = geoRegion.split('-')[0]?.trim() || geoRegion;
+  }
+  if (!target.lat) {
+    const icbm = $('meta[name="ICBM"]').attr('content')?.trim();
+    if (icbm) {
+      const [lat, lng] = icbm.split(',').map(s => s.trim());
+      if (lat) target.lat = lat;
+      if (lng) target.lng = lng;
+    }
   }
 
   // 2. data-* attributes
@@ -486,6 +584,72 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
         }
       }
       if (target.city) break;
+    }
+  }
+
+  // 4b. Page <title> — often contains "City, Country" or "in City" patterns
+  if (!target.city || !target.country) {
+    const titleText = $('title').first().text().replace(/\s+/g, ' ').trim();
+    if (titleText) {
+      // "Apartment in Tirana, Albania — Agency" or "Villa Tirana Albania"
+      const inMatch = titleText.match(/\bin\s+([A-ZČŠŽĆĐ][a-zA-ZčšžćđÀ-ÿ\s]{1,30}?)(?:\s*,\s*([A-ZČŠŽĆĐ][a-zA-ZčšžćđÀ-ÿ\s]{1,30}))?(?:\s*[-|·–—|]|$)/);
+      if (inMatch) {
+        if (!target.city && inMatch[1]?.trim()) target.city = inMatch[1].trim();
+        if (!target.country && inMatch[2]?.trim()) target.country = inMatch[2].trim();
+      }
+      // "Apartment, Tirana, Albania" — last two comma-separated segments before separator
+      if (!target.city || !target.country) {
+        const segments = titleText.split(/\s*[-–—|·]\s*/)[0].split(',').map(s => s.trim()).filter(Boolean);
+        if (segments.length >= 3) {
+          const last = segments[segments.length - 1];
+          const secondLast = segments[segments.length - 2];
+          if (!target.country && last.length < 40 && /^[A-ZČŠŽĆĐ]/.test(last)) target.country = last;
+          if (!target.city && secondLast.length < 40 && /^[A-ZČŠŽĆĐ]/.test(secondLast)) target.city = secondLast;
+        }
+      }
+    }
+  }
+
+  // 4c. URL path — extract city/country from slug segments like /albania/tirana/
+  if ((!target.city || !target.country) && baseUrl) {
+    try {
+      const pathParts = new URL(baseUrl).pathname.toLowerCase()
+        .split('/')
+        .map(p => p.replace(/[-_]/g, ''))
+        .filter(Boolean);
+      for (const part of pathParts) {
+        if (!target.country) {
+          const country = KNOWN_COUNTRIES[part];
+          if (country) target.country = country;
+        }
+        if (!target.city) {
+          const city = KNOWN_CITIES[part];
+          if (city) target.city = city;
+        }
+        if (target.city && target.country) break;
+      }
+    } catch { /* ignore invalid URLs */ }
+  }
+
+  // 4d. Keyword-prefixed location in visible text:
+  //     "Location: Tirana, Albania", "Lokacija: Zagreb", "Grad: Beograd"
+  if (!target.city) {
+    const LOC_LABEL_RE = /(?:location|lokacija|ciudad|lage|emplacement|posizione|τοποθεσία|vendndodhja|locatie|helyszín|адреса|адрес|lokacija|grad|city|address)\s*[:–-]\s*([^,\n\r<]{2,60}?)(?:\s*,\s*([^,\n\r<]{2,40}?))?(?:\s*$|\s*[<\n])/i;
+    const visibleEls = $('p, li, span, div, td, th').toArray();
+    for (const el of visibleEls) {
+      const $el = $(el);
+      if ($el.children('p, div, ul, ol, table').length) continue;
+      const text = $el.text().replace(/\s+/g, ' ').trim();
+      if (text.length < 5 || text.length > 300) continue;
+      const m = text.match(LOC_LABEL_RE);
+      if (m?.[1]) {
+        const city = m[1].trim().replace(/[.,;]$/, '');
+        if (city.length < 60 && city.length > 1) {
+          if (!target.city) target.city = city;
+          if (!target.country && m[2]?.trim()) target.country = m[2].trim().replace(/[.,;]$/, '');
+          break;
+        }
+      }
     }
   }
 
@@ -1426,7 +1590,7 @@ export const enrichFromDetailHtml = (
   extractStructuredBedsAndBaths($, target);
   extractGalleryImages($, baseUrl, target);
   extractStructuredPriceFromHtml($, target);
-  extractStructuredLocationFromHtml($, target);
+  extractStructuredLocationFromHtml($, target, baseUrl);
   extractSmartFieldsFromText($, target);
   return target;
 };

@@ -708,8 +708,44 @@ export const normalize = async (
 
   let lat = parseFloatLoose(mapped.lat);
   let lng = parseFloatLoose(mapped.lng);
-  const city = (mapped.city as string | undefined)?.toString().trim();
-  const country = (mapped.country as string | undefined)?.toString().trim();
+  let city = (mapped.city as string | undefined)?.toString().trim();
+  let country = (mapped.country as string | undefined)?.toString().trim();
+
+  // If we have address but no city/country, attempt to extract them:
+  // "Rruga Myslym Shyri, Tirana, Albania" → city=Tirana, country=Albania
+  if (mapped.address && (!city || !country)) {
+    const addrStr = (mapped.address as string).trim();
+    const addrParts = addrStr.split(',').map(p => p.trim()).filter(Boolean);
+    if (addrParts.length >= 2 && !city) city = addrParts[addrParts.length - 2];
+    if (addrParts.length >= 2 && !country) country = addrParts[addrParts.length - 1];
+  }
+  // Last resort: try to extract city from the listing URL path using known city slugs.
+  if ((!city || !country) && raw.url) {
+    try {
+      const pathParts = new URL(raw.url).pathname.toLowerCase().split('/').map(p => p.replace(/[-_]/g, '')).filter(Boolean);
+      const QUICK_CITIES: Record<string, string> = {
+        'tirana': 'Tirana', 'tirane': 'Tirana', 'durres': 'Durrës', 'vlore': 'Vlorë',
+        'pristina': 'Pristina', 'prishtina': 'Pristina', 'skopje': 'Skopje',
+        'podgorica': 'Podgorica', 'budva': 'Budva', 'kotor': 'Kotor', 'budvanrivijera': 'Budva',
+        'sarajevo': 'Sarajevo', 'beograd': 'Belgrade', 'belgrade': 'Belgrade',
+        'novisad': 'Novi Sad', 'zagreb': 'Zagreb', 'split': 'Split', 'dubrovnik': 'Dubrovnik',
+        'sofia': 'Sofia', 'varna': 'Varna', 'bucharest': 'Bucharest', 'cluj': 'Cluj-Napoca',
+        'athens': 'Athens', 'thessaloniki': 'Thessaloniki', 'ljubljana': 'Ljubljana',
+      };
+      const QUICK_COUNTRIES: Record<string, string> = {
+        'albania': 'Albania', 'al': 'Albania', 'kosovo': 'Kosovo', 'mk': 'North Macedonia',
+        'montenegro': 'Montenegro', 'ba': 'Bosnia and Herzegovina', 'bih': 'Bosnia and Herzegovina',
+        'serbia': 'Serbia', 'croatia': 'Croatia', 'hrvatska': 'Croatia',
+        'bulgaria': 'Bulgaria', 'romania': 'Romania', 'greece': 'Greece', 'slovenia': 'Slovenia',
+      };
+      for (const part of pathParts) {
+        if (!country) country = QUICK_COUNTRIES[part];
+        if (!city) city = QUICK_CITIES[part];
+        if (city && country) break;
+      }
+    } catch { /* ignore */ }
+  }
+
   const address = (mapped.address as string | undefined)?.toString().trim() || city || country || 'Unknown';
 
   if ((lat == null || lng == null) && city && country) {

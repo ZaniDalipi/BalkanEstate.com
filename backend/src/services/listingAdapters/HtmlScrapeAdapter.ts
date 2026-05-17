@@ -108,10 +108,10 @@ const smartExtract = (
       // Require currency symbol/code adjacent to a number with reasonable magnitude.
       // Reject sub-100 numbers (likely fees, not listing prices) and >100M (typo).
       const patterns = [
-        // €1,234,567 / EUR 250.000 / $500K
-        /(?:€|EUR|\$|USD|£|GBP|RSD|kn|HRK|BAM|MKD)\s*([\d][\d.,\s]*[\d](?:\s*[KMB])?)(?!\d)/i,
-        // 1,234,567 € / 250.000 EUR
-        /(?<!\d)([\d][\d.,\s]*[\d](?:\s*[KMB])?)\s*(?:€|EUR|\$|USD|£|GBP|RSD|kn|HRK|BAM|MKD)\b/i,
+        // €1,234,567 / EUR 250.000 / $500K / ALL 5,000,000
+        /(?:€|EUR|\$|USD|£|GBP|RSD|kn|HRK|BAM|KM|MKD|ден|RON|BGN|лв\.?|ALL|Lek|HUF|Ft|TRY|TL)\s*([\d][\d.,\s]*[\d](?:\s*[KMB])?)(?!\d)/i,
+        // 1,234,567 € / 250.000 EUR / 5.000.000 ALL
+        /(?<!\d)([\d][\d.,\s]*[\d](?:\s*[KMB])?)\s*(?:€|EUR|\$|USD|£|GBP|RSD|kn|HRK|BAM|KM|MKD|ден|RON|BGN|лв\.?|ALL|Lek|HUF|Ft|TRY|TL)\b/i,
       ];
       for (const re of patterns) {
         const m = t.match(re);
