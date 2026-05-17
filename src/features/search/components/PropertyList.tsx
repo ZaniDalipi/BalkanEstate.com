@@ -779,6 +779,34 @@ const PropertyList = memo<PropertyListProps>((props) => {
       setVisibleCount(ITEMS_PER_PAGE);
     }, [filtersKey]);
 
+    // Show skeleton placeholders briefly when search filters change,
+    // so users see a clear "refreshing" signal instead of an instant jump.
+    const [isSearchFiltering, setIsSearchFiltering] = useState(false);
+    const [animateFilteredCards, setAnimateFilteredCards] = useState(false);
+    const isFirstFilterRender = useRef(true);
+    const filteringTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    useEffect(() => {
+      if (isFirstFilterRender.current) {
+        isFirstFilterRender.current = false;
+        return;
+      }
+      setIsSearchFiltering(true);
+      setAnimateFilteredCards(false);
+      if (filteringTimer.current) clearTimeout(filteringTimer.current);
+      filteringTimer.current = setTimeout(() => {
+        setIsSearchFiltering(false);
+        setAnimateFilteredCards(true);
+      }, 800);
+      return () => {
+        if (filteringTimer.current) clearTimeout(filteringTimer.current);
+      };
+    }, [filtersKey]);
+    useEffect(() => {
+      if (!animateFilteredCards) return;
+      const t = setTimeout(() => setAnimateFilteredCards(false), 2000);
+      return () => clearTimeout(t);
+    }, [animateFilteredCards]);
+
     useEffect(() => {
         const observer = new IntersectionObserver(
             (entries) => {
@@ -956,7 +984,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                         </div>
                         <div className="p-4 md:p-3 relative z-0">
                             <PropertyListStyles />
-                            {isLoadingProperties ? (
+                            {(isLoadingProperties || isSearchFiltering) ? (
                                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 xl:gap-6">
                                     {Array.from({ length: 6 }).map((_, index) => (
                                         <PropertyCardSkeleton key={index} index={index} />
@@ -972,7 +1000,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                                 property={prop}
                                                 index={index}
                                                 onHover={onPropertyHover}
-                                                animateEntrance={animateCards}
+                                                animateEntrance={animateCards || animateFilteredCards}
                                             />
                                         ))}
                                     </div>
