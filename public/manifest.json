@@ -22,13 +22,13 @@
   },
   "icons": [
     {
-      "src": "/icons/Logo.svg",
+      "src": "/icons/logo-3d.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/icons/Logo.svg",
+      "src": "/icons/logo-3d.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "maskable"

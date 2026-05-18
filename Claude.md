@@ -1,92 +1,114 @@
-# BalkanEstate.com — Claude Code Guidelines
+# CLAUDE.md
 
-## Project Overview
-Full-stack real estate platform for the Balkans region (10 countries, 10 languages). Buyers browse/save properties; sellers/agents list and manage them; built-in messaging, scheduling, mortgage calculator, and neighborhood insights.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Stack**: React 18 + TypeScript + Vite · Tailwind CSS · Framer Motion · react-i18next · Express/Node.js · MongoDB/Mongoose · Cloudinary CDN
+## Commands
 
----
-
-## Architecture Principles
-
-### Directory Layout
-```
-src/
-├── components/property/   # Shared property UI components (Gallery, Info, Contact, Photos, Map)
-├── features/              # Feature-sliced modules
-│   ├── property-details/  # PropertyDetailsPage orchestrator + sub-components
-│   ├── properties/        # Hooks (useProperty, useRealtimeProperties)
-│   ├── rental/            # Rental-specific UI (ScheduleViewingModal, etc.)
-│   ├── messaging/         # Inbox + ConversationView
-│   └── ...
-├── i18n/locales/          # Translation JSON files (en/bg/bs/el/hr/me/mk/ro/sq/sr)
-├── context/               # AppContext (global state via useReducer)
-├── hooks/                 # Shared hooks (useSwipeGesture, useLocalizedNavigation, …)
-├── services/              # API service (apiService.ts)
-├── config/                # Cloudinary config, constants
-└── types/                 # Shared TypeScript types (Property, Agency, User, …)
-constants/
-└── icons.ts               # All SVG icon components (stroke-based, 24×24)
+### Frontend (root)
+```bash
+npm run dev          # Vite dev server on :3000
+npm run build        # Production build
+npm test             # Vitest unit tests
+npm run test:e2e     # Playwright end-to-end tests
+npm run test:coverage
 ```
 
-### Key Patterns
-- **Feature-sliced**: page-level orchestration in `features/`, reusable UI in `components/`
-- **Controlled/uncontrolled gallery**: `PropertyGallery` supports both modes via optional controlled props (`activeCategory`, `currentImageIndex`, callbacks)
-- **i18n**: always use `t('namespace:key', 'fallback')`. All labels live in `src/i18n/locales/{lang}/property.json` (and other namespace files). Never hard-code user-visible strings.
-- **Icons**: defined in `constants/icons.ts` as `React.createElement` (`.ts` file, not `.tsx`). Use the `Icon` base (stroke) or `SolidIcon` base (fill).
-- **Images**: always route through `optimizeCloudinaryUrl(url, { width, quality })` and `cloudinarySrcSet`. Never use raw Cloudinary URLs directly.
-- **Translations namespace**: `property` namespace is the primary one for `PropertyInfo`, `PropertyContact`, `PropertyGallery`, `PropertyDetailsPage`.
+### Backend (`/backend`)
+```bash
+npm run dev          # Express server on :5001
+npm test             # Jest + mongodb-memory-server
+```
+
+### Single test
+```bash
+npx vitest run src/path/to/file.test.ts
+npx jest --testPathPattern=path/to/file.test.ts  # backend
+```
 
 ---
 
-## Translation Rules
-- Keys live in `src/i18n/locales/{lang}/property.json` (and other namespace JSONs).
-- Correct keys for property stats: `features.bedrooms`, `features.bathrooms`, `features.livingRooms`, `features.area`
-- **Do not** use `features.beds` or `features.baths` — those are legacy aliases.
-- When adding a new key, add it to **all 10 locales** (en bg bs el hr me mk ro sq sr). If a translation is unknown, copy the English value temporarily — never leave a key missing.
-- Montenegrin (`me`) is similar to Serbian (`sr`) / Bosnian (`bs`) — use those as reference.
+## Architecture
+
+### State Management
+Three layers — pick the right one:
+
+| Layer | Tool | Use for |
+|-------|------|---------|
+| Server state | TanStack Query v5 | API data (properties, agents, listings) |
+| Client state | Zustand | `filterStore` (persisted) · `uiStore` (modals, selections) |
+| Local state | `useState` | Component-only ephemeral state |
+
+### Feature-Sliced Design
+Each feature owns its slice: `src/features/[feature]/{api,components,hooks,types}`.
+Shared UI goes in `src/components/`, shared utilities in `src/shared/`.
+
+Query keys are centralised in `src/shared/query/queryKeys.ts` — always use that file instead of inline strings.
+
+### HTTP Client
+All API calls go through `src/shared/api/httpClient.ts`. It handles:
+- Access token injection (in-memory only — never localStorage)
+- Automatic 401 → refresh token rotation (httpOnly cookie)
+- CSRF double-submit cookie (`X-CSRF-Token` header on mutations)
+- Response payload encryption for sensitive endpoints (auth, profile)
+- Emits a `session-expired` custom DOM event when refresh fails — listen for this to redirect to login
 
 ---
 
-## Styling Conventions
-- Tailwind only. No inline styles unless strictly needed for dynamic values or CSS env() functions.
-- Safe-area padding for sticky bars: `style={{ paddingBottom: 'calc(Xrem + env(safe-area-inset-bottom, 0px))' }}`
-- Mobile-first: design for `< 640px` first, then `sm:` / `lg:` breakpoints.
-- **Sticky bottom bar** is `lg:hidden` — desktop has the PropertyContact sidebar instead.
-- Z-index ladder: gallery overlays `z-[1]`, gallery frame `z-[2000]`, modals `z-[9999]`, image viewer `z-[6000]`.
+## Error & Validation Handling
+
+### Three-tier error boundary stack
+```
+ErrorBoundary          ← catches React render errors; reports to Sentry
+  └── QueryErrorBoundary  ← catches TanStack Query fetch errors
+        └── component logic  ← httpClient-level (401 refresh, session-expired event)
+```
+
+`src/app/components/ErrorBoundary.tsx` — wrap page-level trees here.
+`src/app/components/QueryErrorBoundary.tsx` — wrap any tree that runs queries.
+
+### Validation pattern
+All client-side validation lives in `src/shared/utils/validation.ts`. Every function returns `{ isValid: boolean; error?: string }`.
+
+```ts
+import { validateEmail, validatePhone, validatePassword, validatePrice,
+         validateCoordinates, validatePropertyTitle,
+         validatePropertyDescription, sanitizeText,
+         validateSearchQuery } from '@/shared/utils/validation';
+
+const result = validateEmail(input);
+if (!result.isValid) {
+  setError(result.error);   // show inline field error
+  return;
+}
+// proceed
+```
+
+Rules:
+- Validate at system boundaries only (form submit, API response ingestion).
+- Use `sanitizeText` (DOMPurify) before rendering any user-generated string as HTML.
+- Never duplicate validation logic in components — add to `validation.ts` and import.
+
+### CSRF
+Mutations (POST/PUT/PATCH/DELETE) automatically receive the `X-CSRF-Token` header via `httpClient`. Call `ensureCsrfToken()` before the first mutation if the user hasn't made a GET request yet (e.g., deep-link straight to a form).
 
 ---
 
-## Property Gallery (`PropertyGallery.tsx`)
-- Container height is **dynamic** — set via `aspectRatio` inline style derived from each image's `naturalWidth / naturalHeight` captured in `onLoad` and cached in `imageRatiosRef` (a `useRef<Record<string, number>>`).
-- Default aspect ratio before load: `16/9`. Max height: `90vh`.
-- Images use `object-contain` so the full image is always visible; a blurred LQIP fills any letterbox bars.
-- Swipe gesture handled by Framer Motion `drag="x"` on `motion.button`; keyboard handled by `useEffect` + `window.addEventListener`.
-- Preloads adjacent images eagerly so swipe feels instant.
+## PWA / Mobile Layout
+
+- `@media (display-mode: standalone)` block in `src/index.css` adds status-bar safe area padding.
+- CSS custom property `--floating-search-top-pad` switches between browser (8px) and PWA (`max(safe-area-inset-top + 8px, 44px)`) values — use it for any overlay that must clear the notch.
+- Viewport meta uses `viewport-fit=cover` so `env(safe-area-inset-*)` variables work correctly.
 
 ---
 
-## Sticky Bottom Bar (`PropertyDetailsPage.tsx`)
-- Mobile-only (`lg:hidden`), fixed to bottom with safe-area inset.
-- Shows: agent avatar (with `onError` fallback to initials) + ripple-ring pulse animation + green online dot + Call button + Schedule Tour button.
-- Hidden for property owners (`isOwner`) and sold properties.
-- Opens its own `ScheduleViewingModal` instance (separate from the one inside `PropertyContact`).
-- Avatar error state (`sellerAvatarError`) is reset via `useEffect` when `property.seller?.avatarUrl` changes.
+## i18n
+
+Locales: `src/i18n/locales/{lang}/{namespace}.json` for 10 languages (en, sq, bs, bg, hr, el, mk, me, ro, sr).
+Every new translation key must be added to all 10 locale files simultaneously.
 
 ---
 
-## Schedule Viewing Modal (`ScheduleViewingModal.tsx`)
-- 3-step flow: datetime → contact details → confirm.
-- Fetches availability from `/viewings/availability/{propertyId}` on open; falls back to `property.visitAvailability` if API unavailable.
-- Times displayed in **12-hour AM/PM** format (`formatTime12h` helper). Time slots are a horizontally scrollable pill row (snap-x, overflow-x-auto).
-- Dates shown as a grid (day name + short date). Booked slots are visually disabled with strikethrough.
+## Images
 
----
-
-## Code Style
-- No comments unless the WHY is non-obvious.
-- No `console.log` in committed code.
-- TypeScript strict — no `any`. Use `unknown` at boundaries.
-- `useCallback` / `useMemo` only when there's a real re-render cost — not by default.
-- Prefer editing existing files over creating new ones.
-- When changing a shared icon, verify no other consumer is broken.
+Always use `optimizeCloudinaryUrl(url, { width, quality })` and `cloudinarySrcSet()` — never raw Cloudinary URLs.
+LQIP uses `width: 40, quality: 'auto:eco'`.
