@@ -582,7 +582,8 @@
     "commercial": "Comercial",
     "office": "Birou",
     "garage": "Garaj",
-    "other": "Altele"
+    "other": "Altele",
+    "luxuryVilla": "Luxury Villa"
   },
   "conditions": {
     "new": "Nou",

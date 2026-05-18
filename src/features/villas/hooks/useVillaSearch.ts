@@ -11,8 +11,8 @@ import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { serializeBounds } from '@/src/features/rental/hooks/useRentalSearch';
 
 const VILLA_DEFAULTS: Partial<Filters> = {
-    listingType: 'rent',
-    propertyType: 'villa',
+    listingType: 'any',
+    propertyType: 'luxury-villa',
     beds: 3,
     minPrice: 500,
 };
@@ -53,8 +53,7 @@ export function useVillaSearch() {
         setError(null);
         try {
             const params = new URLSearchParams();
-            params.set('listingType', 'rent');
-            params.set('propertyType', 'villa');
+            params.set('propertyType', 'luxury-villa');
             params.set('limit', '3000');
 
             const response = await fetch(`${API_CONFIG.BASE_URL}/properties?${params.toString()}`);
@@ -65,7 +64,7 @@ export function useVillaSearch() {
                 ...p,
                 id: p.id || p._id,
                 sellerId: p.sellerId?.id || p.sellerId?._id || p.sellerId,
-                listingType: p.listingType || 'rent',
+                listingType: p.listingType || 'sale',
                 rentedAt: p.rentedAt ? new Date(p.rentedAt).getTime() : undefined,
                 rentedUntil: p.rentedUntil ? new Date(p.rentedUntil).getTime() : undefined,
                 availableFrom: p.availableFrom ? new Date(p.availableFrom).getTime() : undefined,
@@ -186,7 +185,7 @@ export function useVillaSearch() {
     }, [drawnBoundsJSON]);
 
     const baseFilteredProperties = useMemo(() => {
-        const filtered = filterProperties(villaProperties, { ...filters, propertyType: 'villa', listingType: 'rent' });
+        const filtered = filterProperties(villaProperties, { ...filters, propertyType: 'luxury-villa' });
         const now = Date.now();
 
         const boundsToUse = drawnBounds || mapBounds;
@@ -246,8 +245,7 @@ export function useVillaSearch() {
     }, []);
 
     const handleFilterChange = useCallback((key: keyof Filters, value: any) => {
-        // Prevent overriding the locked villa/rent defaults
-        if (key === 'propertyType' || key === 'listingType') return;
+        if (key === 'propertyType') return; // always locked to luxury-villa
         setFilters(prev => ({ ...prev, [key]: value }));
     }, []);
 

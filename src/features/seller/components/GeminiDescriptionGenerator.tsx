@@ -129,7 +129,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     ) : null;
 
     const isRental = listingData.listingType === 'rent';
-    const isLuxuryVilla = isRental && listingData.propertyType === 'villa';
+    const isLuxuryVilla = listingData.propertyType === 'luxury-villa';
     const currencySymbol = getCurrencySymbol(selectedCountry);
 
     return (
@@ -163,8 +163,8 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                     onChange={(val) => setListingData(prev => ({
                         ...prev,
                         listingType: val as 'sale' | 'rent',
-                        // Auto-suggest daily period for villa rentals
-                        ...(val === 'rent' && prev.propertyType === 'villa' ? { rentPeriod: 'daily' } : {}),
+                        // Auto-suggest daily period for luxury villa rentals
+                        ...(val === 'rent' && prev.propertyType === 'luxury-villa' ? { rentPeriod: 'daily' } : {}),
                     }))}
                 />
             </div>
@@ -259,6 +259,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         <option value="house">{t('seller:propertyTypes.house')}</option>
                                         <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
                                         <option value="villa">{t('seller:propertyTypes.villa')}</option>
+                                        <option value="luxury-villa">{t('seller:propertyTypes.luxuryVilla', 'Luxury Villa')}</option>
                                         <option value="land">{t('seller:propertyTypes.land')}</option>
                                         <option value="other">{t('seller:propertyTypes.other')}</option>
                                     </select>

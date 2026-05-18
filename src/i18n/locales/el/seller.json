@@ -582,7 +582,8 @@
     "commercial": "Επαγγελματικός Χώρος",
     "office": "Γραφείο",
     "garage": "Γκαράζ",
-    "other": "Άλλο"
+    "other": "Άλλο",
+    "luxuryVilla": "Luxury Villa"
   },
   "conditions": {
     "new": "Νέο",

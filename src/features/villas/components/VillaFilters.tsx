@@ -51,9 +51,28 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({ filters, onFilterChange, on
     const viewChipActive = 'bg-secondary/10 text-primary-dark border-secondary font-semibold';
     const viewChipInactive = 'bg-white/60 text-gray-500 border-gray-200 hover:border-secondary/50 hover:text-primary';
 
+    const listingTypeChipBase = 'flex-1 text-center px-3 py-1 rounded-full text-[11px] font-semibold border transition-all cursor-pointer';
+
     if (compact) {
         return (
             <div className="px-3 py-2 space-y-2">
+                {/* Listing type: Any / For Sale / For Rent */}
+                <div>
+                    <label className={labelClasses}>{t('villas:filters.listingType', 'Type')}</label>
+                    <div className="flex gap-1.5">
+                        {(['any', 'sale', 'rent'] as const).map(lt => {
+                            const labels = { any: t('common:any'), sale: t('villas:filters.forSale', 'For Sale'), rent: t('villas:filters.forRent', 'For Rent') };
+                            const isActive = (filters.listingType || 'any') === lt;
+                            return (
+                                <button key={lt} type="button" onClick={() => onFilterChange('listingType', lt)}
+                                    className={`${listingTypeChipBase} ${isActive ? viewChipActive : viewChipInactive}`}>
+                                    {labels[lt]}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
                 {/* View type chips */}
                 <div>
                     <label className={labelClasses}>{t('villas:filters.viewType', 'Setting')}</label>
@@ -185,6 +204,23 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({ filters, onFilterChange, on
     // Full layout for mobile modal
     return (
         <div className="space-y-3 p-4">
+            {/* Listing type */}
+            <div>
+                <label className="block text-xs font-medium text-gray-400 mb-1.5">{t('villas:filters.listingType', 'Type')}</label>
+                <div className="flex gap-2">
+                    {(['any', 'sale', 'rent'] as const).map(lt => {
+                        const labels = { any: t('common:any'), sale: t('villas:filters.forSale', 'For Sale'), rent: t('villas:filters.forRent', 'For Rent') };
+                        const isActive = (filters.listingType || 'any') === lt;
+                        return (
+                            <button key={lt} type="button" onClick={() => onFilterChange('listingType', lt)}
+                                className={`flex-1 text-center px-3 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${isActive ? viewChipActive : viewChipInactive}`}>
+                                {labels[lt]}
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+
             {/* View type chips */}
             <div>
                 <label className="block text-xs font-medium text-gray-400 mb-1.5">{t('villas:filters.viewType', 'Setting')}</label>

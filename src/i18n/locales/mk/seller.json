@@ -582,7 +582,8 @@
     "commercial": "Комерцијален",
     "office": "Канцеларија",
     "garage": "Гаража",
-    "other": "Друго"
+    "other": "Друго",
+    "luxuryVilla": "Luxury Villa"
   },
   "conditions": {
     "new": "Ново",

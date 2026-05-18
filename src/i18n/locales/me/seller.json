@@ -582,7 +582,8 @@
     "commercial": "Commercial",
     "office": "Office",
     "garage": "Garage",
-    "other": "Other"
+    "other": "Other",
+    "luxuryVilla": "Luxury Villa"
   },
   "conditions": {
     "new": "New",

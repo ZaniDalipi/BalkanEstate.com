@@ -26,7 +26,10 @@
     "panoramic": "Panoramic",
     "furnishing": "Furnishing",
     "reset": "Reset",
-    "search": "Search Villas"
+    "search": "Search Villas",
+    "listingType": "Type",
+    "forSale": "For Sale",
+    "forRent": "For Rent"
   },
   "seo": {
     "title": "Luxury Villas for Rent in the Balkans | BalkanEstate",

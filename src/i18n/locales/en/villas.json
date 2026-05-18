@@ -41,6 +41,9 @@
     "sqftHigh": "Largest First",
     "search": "Search Villas",
     "reset": "Reset",
-    "searchCity": "Search by location..."
+    "searchCity": "Search by location...",
+    "listingType": "Type",
+    "forSale": "For Sale",
+    "forRent": "For Rent"
   }
 }

@@ -194,12 +194,13 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
                             <option value="house">{t('seller:propertyTypes.house')}</option>
                             <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
                             <option value="villa">{t('seller:propertyTypes.villa')}</option>
+                            <option value="luxury-villa">{t('seller:propertyTypes.luxuryVilla', 'Luxury Villa')}</option>
                             <option value="land">{t('seller:propertyTypes.land')}</option>
                             <option value="other">{t('seller:propertyTypes.other')}</option>
                         </select>
                         <label htmlFor="propertyType" className={floatingSelectLabelClasses}>{t('seller:form.propertyType')}</label>
                     </div>
-                    {listingData.propertyType === 'villa' && listingData.listingType === 'rent' && (
+                    {listingData.propertyType === 'luxury-villa' && (
                         <div className="mt-1.5 flex items-center gap-1.5 px-2 py-1 rounded-lg bg-secondary/10 border border-secondary/30 w-fit">
                             <span className="text-sm leading-none">🏛️</span>
                             <span className="text-[11px] font-semibold text-primary-dark">{t('seller:createListing.luxuryVillaBadge', 'Appears in Luxury Villas')}</span>
@@ -246,7 +247,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
                         </div>
                     </>
                 )}
-                {(listingData.propertyType === 'house' || listingData.propertyType === 'villa') && (
+                {(listingData.propertyType === 'house' || listingData.propertyType === 'villa' || listingData.propertyType === 'luxury-villa') && (
                     <div className="md:col-span-2 flex justify-center">
                         <div className="w-full max-w-xs">
                             <NumberInputWithSteppers label={t('seller:createListing.fields.totalFloors')} value={listingData.totalFloors} min={1} onChange={(val) => setListingData(p => ({ ...p, totalFloors: val }))} />

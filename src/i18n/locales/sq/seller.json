@@ -329,7 +329,8 @@
     "commercial": "Komerciale",
     "office": "Zyrë",
     "garage": "Garazh",
-    "other": "Tjetër"
+    "other": "Tjetër",
+    "luxuryVilla": "Luxury Villa"
   },
   "conditions": {
     "new": "E Re",

@@ -28,7 +28,7 @@ export interface ListingData {
     image_tags: { index: number; tag: string; }[];
     tourUrl: string; // URL for video (YouTube, TikTok, Instagram, Vimeo, Facebook)
     virtualTour360Url: string; // URL for 360 virtual tour (Matterport, Kuula, etc.)
-    propertyType: 'house' | 'apartment' | 'villa' | 'land' | 'other';
+    propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
     floorNumber: number;
     totalFloors: number;
     lat: number;

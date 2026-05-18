@@ -602,8 +602,8 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         const isNumeric = type === 'number';
         setListingData(prev => {
             const updated = { ...prev, [name]: isNumeric ? (value === '' ? '' : Number(value)) : value };
-            // Auto-set daily rent period when switching to villa while renting
-            if (name === 'propertyType' && value === 'villa' && prev.listingType === 'rent') {
+            // Auto-set daily rent period when switching to luxury villa while renting
+            if (name === 'propertyType' && value === 'luxury-villa' && prev.listingType === 'rent') {
                 updated.rentPeriod = 'daily';
             }
             return updated;
@@ -698,7 +698,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     return;
                 }
             }
-            if ((listingData.propertyType === 'house' || listingData.propertyType === 'villa') && (!listingData.totalFloors || listingData.totalFloors < 1)) {
+            if ((listingData.propertyType === 'house' || listingData.propertyType === 'villa' || listingData.propertyType === 'luxury-villa') && (!listingData.totalFloors || listingData.totalFloors < 1)) {
                 showError(t('validation:invalidFloorCount'), t('newListing:validation.houseTotalFloors'));
                 setIsSubmitting(false);
                 return;
