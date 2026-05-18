@@ -72,12 +72,13 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
     >
       <div
         className={`bg-white shadow-xl p-4 md:p-6 w-full ${sizeClass} relative overflow-y-auto h-full sm:h-auto rounded-none sm:rounded-lg max-h-full sm:max-h-[95vh] md:max-h-[90vh]`}
+        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1rem)' }}
         onClick={handleContentClick}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
       >
-        <button type="button" onClick={onClose} className="absolute top-3 right-3 sm:top-4 sm:right-4 text-neutral-500 hover:text-neutral-800 z-10 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="Close modal">
+        <button type="button" onClick={onClose} className="absolute right-3 sm:right-4 text-neutral-500 hover:text-neutral-800 z-10 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" style={{ top: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)' }} aria-label="Close modal">
           <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
         {title && <h2 id={titleId} className="text-base sm:text-lg md:text-xl font-bold text-neutral-800 mb-3 text-center pr-10">{title}</h2>}
