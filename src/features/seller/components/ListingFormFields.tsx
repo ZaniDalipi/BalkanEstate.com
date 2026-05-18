@@ -188,15 +188,23 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
 
             {/* Property Type Selection */}
             <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-end">
-                <div className="relative">
-                    <select name="propertyType" id="propertyType" value={listingData.propertyType} onChange={handleInputChange} className={`${floatingInputClasses} border-neutral-300`}>
-                        <option value="house">{t('seller:propertyTypes.house')}</option>
-                        <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
-                        <option value="villa">{t('seller:propertyTypes.villa')}</option>
-                        <option value="land">{t('seller:propertyTypes.land')}</option>
-                        <option value="other">{t('seller:propertyTypes.other')}</option>
-                    </select>
-                    <label htmlFor="propertyType" className={floatingSelectLabelClasses}>{t('seller:form.propertyType')}</label>
+                <div>
+                    <div className="relative">
+                        <select name="propertyType" id="propertyType" value={listingData.propertyType} onChange={handleInputChange} className={`${floatingInputClasses} border-neutral-300`}>
+                            <option value="house">{t('seller:propertyTypes.house')}</option>
+                            <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
+                            <option value="villa">{t('seller:propertyTypes.villa')}</option>
+                            <option value="land">{t('seller:propertyTypes.land')}</option>
+                            <option value="other">{t('seller:propertyTypes.other')}</option>
+                        </select>
+                        <label htmlFor="propertyType" className={floatingSelectLabelClasses}>{t('seller:form.propertyType')}</label>
+                    </div>
+                    {listingData.propertyType === 'villa' && listingData.listingType === 'rent' && (
+                        <div className="mt-1.5 flex items-center gap-1.5 px-2 py-1 rounded-lg bg-secondary/10 border border-secondary/30 w-fit">
+                            <span className="text-sm leading-none">🏛️</span>
+                            <span className="text-[11px] font-semibold text-primary-dark">{t('seller:createListing.luxuryVillaBadge', 'Appears in Luxury Villas')}</span>
+                        </div>
+                    )}
                 </div>
                 {listingData.propertyType === 'apartment' && (
                     <>

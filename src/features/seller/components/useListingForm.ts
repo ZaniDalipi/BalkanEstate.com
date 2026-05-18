@@ -600,10 +600,14 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
         const isNumeric = type === 'number';
-        setListingData(prev => ({
-            ...prev,
-            [name]: isNumeric ? (value === '' ? '' : Number(value)) : value
-        }));
+        setListingData(prev => {
+            const updated = { ...prev, [name]: isNumeric ? (value === '' ? '' : Number(value)) : value };
+            // Auto-set daily rent period when switching to villa while renting
+            if (name === 'propertyType' && value === 'villa' && prev.listingType === 'rent') {
+                updated.rentPeriod = 'daily';
+            }
+            return updated;
+        });
     };
 
     const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {

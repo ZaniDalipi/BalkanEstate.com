@@ -314,7 +314,12 @@
       "bathroom": "Баня",
       "other": "Други",
       "selectTag": "Избери Етикет"
-    }
+    },
+    "luxuryVillaBanner": {
+      "title": "Luxury Villas Collection",
+      "hint": "This listing will appear in the exclusive Luxury Villas tab — visible to premium buyers searching for high-end Balkan retreats."
+    },
+    "luxuryVillaBadge": "Appears in Luxury Villas"
   },
   "listings": {
     "confirmSold": "Are you sure you want to mark this property as sold? This action cannot be undone.",

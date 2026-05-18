@@ -314,7 +314,12 @@
       "bathroom": "Μπάνιο",
       "other": "Άλλο",
       "selectTag": "Επιλέξτε Ετικέτα"
-    }
+    },
+    "luxuryVillaBanner": {
+      "title": "Luxury Villas Collection",
+      "hint": "This listing will appear in the exclusive Luxury Villas tab — visible to premium buyers searching for high-end Balkan retreats."
+    },
+    "luxuryVillaBadge": "Appears in Luxury Villas"
   },
   "myListings": {
     "title": "Οι Αγγελίες Μου",

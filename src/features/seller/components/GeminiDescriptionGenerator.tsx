@@ -129,6 +129,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     ) : null;
 
     const isRental = listingData.listingType === 'rent';
+    const isLuxuryVilla = isRental && listingData.propertyType === 'villa';
     const currencySymbol = getCurrencySymbol(selectedCountry);
 
     return (
@@ -159,12 +160,27 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         },
                     ]}
                     value={listingData.listingType}
-                    onChange={(val) => setListingData(prev => ({ ...prev, listingType: val as 'sale' | 'rent' }))}
+                    onChange={(val) => setListingData(prev => ({
+                        ...prev,
+                        listingType: val as 'sale' | 'rent',
+                        // Auto-suggest daily period for villa rentals
+                        ...(val === 'rent' && prev.propertyType === 'villa' ? { rentPeriod: 'daily' } : {}),
+                    }))}
                 />
             </div>
 
-            {/* Rental indicator */}
-            {isRental && (
+            {/* Rental / Luxury Villa indicator */}
+            {isLuxuryVilla ? (
+                <div className="flex items-center gap-3 p-3 mb-6 rounded-xl border border-secondary/40 bg-secondary/5">
+                    <div className="p-2 rounded-full bg-secondary/10 flex-shrink-0">
+                        <span className="text-lg leading-none">🏛️</span>
+                    </div>
+                    <div>
+                        <span className="text-sm font-bold text-primary-dark">{t('seller:createListing.luxuryVillaBanner.title', 'Luxury Villas Collection')}</span>
+                        <p className="text-xs text-primary/70">{t('seller:createListing.luxuryVillaBanner.hint', 'This listing will appear in the exclusive Luxury Villas tab — visible to premium buyers searching for high-end Balkan retreats.')}</p>
+                    </div>
+                </div>
+            ) : isRental && (
                 <div className="flex items-center gap-3 p-3 glass-fieldset border-blue-200 mb-6">
                     <div className="p-2 rounded-full bg-blue-50">
                         <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

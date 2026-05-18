@@ -314,7 +314,12 @@
       "bathroom": "Banja",
       "other": "Tjetër",
       "selectTag": "Zgjidh Etiketën"
-    }
+    },
+    "luxuryVillaBanner": {
+      "title": "Luxury Villas Collection",
+      "hint": "This listing will appear in the exclusive Luxury Villas tab — visible to premium buyers searching for high-end Balkan retreats."
+    },
+    "luxuryVillaBadge": "Appears in Luxury Villas"
   },
   "propertyTypes": {
     "apartment": "Apartament",
