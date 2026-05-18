@@ -182,6 +182,72 @@ Raw URL → optimizeCloudinaryUrl(url, { width, quality }) → <img src>
 
 ---
 
+## Error Handling
+
+### Three-Tier Stack
+
+```
+ErrorBoundary  (src/app/components/ErrorBoundary.tsx)
+  │  catches React render exceptions; reports to Sentry
+  └── QueryErrorBoundary  (src/app/components/QueryErrorBoundary.tsx)
+        │  catches TanStack Query fetch errors; shows retry UI
+        └── httpClient  (src/shared/api/httpClient.ts)
+              ├── 401 → automatic access-token refresh via httpOnly-cookie refresh token
+              ├── refresh failure → emits `session-expired` DOM event → redirect to login
+              └── mutation methods (POST/PUT/PATCH/DELETE) → auto-inject X-CSRF-Token header
+```
+
+Use `ErrorBoundary` around page-level trees and `QueryErrorBoundary` around any subtree that runs queries.
+
+### httpClient Session Flow
+
+```
+request → 401?
+            ├── No  → resolve response
+            └── Yes → POST /auth/refresh (httpOnly cookie)
+                         ├── success → retry original request with new access token
+                         └── failure → dispatchEvent('session-expired') → app redirects to /login
+```
+
+Access tokens are held **in-memory only** (via `tokenService`). Never write them to `localStorage` or cookies.
+
+---
+
+## Validation
+
+### Client-Side — `src/shared/utils/validation.ts`
+
+All validation returns `ValidationResult`:
+
+```ts
+interface ValidationResult {
+  isValid: boolean;
+  error?: string;   // human-readable, suitable for inline field errors
+}
+```
+
+Available validators:
+
+| Function | Validates |
+|----------|-----------|
+| `validateEmail` | RFC 5322 format, max 254 chars |
+| `validatePhone` | International format (+countrycode, 7–15 digits) |
+| `validatePassword` | Strength requirements (length, uppercase, digit, special char) |
+| `validatePrice` | Numeric range, no negatives |
+| `validateCoordinates` | Lat/lng bounds |
+| `validatePropertyTitle` | Min/max length, allowed chars |
+| `validatePropertyDescription` | Min/max length |
+| `sanitizeText` | DOMPurify — strip XSS before rendering user HTML |
+| `validateSearchQuery` | Max length, no injection patterns |
+
+**Rule**: validate at system boundaries (form submit, API response ingestion). Do not duplicate logic in components — extend `validation.ts` and import.
+
+### CSRF Protection
+
+Double-submit cookie pattern: the backend sets `__csrf` on every GET response. `httpClient` reads it with `getCsrfToken()` and sends it as `X-CSRF-Token` on every mutation. For pages reached by deep-link (no prior GET), call `ensureCsrfToken()` before the first mutation — it fetches `GET /health` to bootstrap the cookie.
+
+---
+
 ## Security Notes
 - All API mutations use CSRF cookie (`credentials: 'include'`)
 - JWT stored in httpOnly cookies (not localStorage)
