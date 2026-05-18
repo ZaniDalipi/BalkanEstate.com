@@ -178,7 +178,7 @@
     "comparing": "Споредување",
     "addToCompare": "Додај за споредба",
     "removeFromCompare": "Отстрани од споредба",
-    "compareLimit": "Можете да споредите до 4 недвижности одеднаш.",
+    "compareLimit": "Можете да споредите до 5 недвижности одеднаш.",
     "virtualTour": "Виртуелна тура",
     "view360": "360° Поглед",
     "floorPlan": "Основ",
@@ -296,7 +296,10 @@
     "yearBuilt": "Година на градба",
     "parking": "Паркинг",
     "specialFeatures": "Специјални карактеристики",
-    "materials": "Материјали"
+    "materials": "Материјали",
+    "best": "Најдобро",
+    "viewProperty": "Погледај",
+    "removeFromComparison": "Отстрани"
   },
   "map": {
     "beds": "Кревети",
