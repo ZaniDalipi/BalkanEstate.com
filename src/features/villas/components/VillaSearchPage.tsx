@@ -1,0 +1,533 @@
+import React, { useState, useEffect, useRef, memo } from 'react';
+import { useTranslation } from 'react-i18next';
+import MapComponent from '@/src/features/map/components/MapComponent';
+import PropertyCard from '@/src/features/property-details/components/PropertyCard';
+import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
+import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
+import VillaFilters from './VillaFilters';
+import Toast from '@/components/shared/Toast';
+import { useVillaSearch } from '../hooks/useVillaSearch';
+import { Squares2x2Icon, MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, MagnifyingGlassIcon, Bars3Icon } from '@/constants';
+import DefaultAvatar from '@/components/shared/DefaultAvatar';
+import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
+import { Button } from '@/components/ui/liquid-glass-button';
+import { Helmet } from 'react-helmet-async';
+import { SEO } from '@/src/components/seo';
+import Footer from '@/components/shared/Footer';
+import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
+import { NominatimResult, Property } from '@/types';
+
+const ITEMS_PER_PAGE = 20;
+
+const LOCATION_HIGHLIGHTS = ['Julian Alps', 'Lake Ohrid', 'Bay of Kotor', 'Pirin Mountains', 'Budva Riviera'];
+
+const VillaCardAnimationStyles = () => (
+    <style>{`
+    @keyframes villaCardSlideUp {
+      0% { opacity: 0; transform: translateY(30px) scale(0.97); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .villa-card-entrance-fly {
+      opacity: 0;
+      animation: villaCardSlideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation-delay: var(--card-delay, 0ms);
+    }
+  `}</style>
+);
+
+const AnimatedPropertyCard = memo<{
+    property: Property;
+    index: number;
+    onHover?: (id: string | null) => void;
+    animateEntrance?: boolean;
+}>(({ property, index, onHover, animateEntrance }) => {
+    const entranceDelay = animateEntrance ? Math.min(index * 60, 1200) : 0;
+    return (
+        <div
+            className={animateEntrance ? 'villa-card-entrance-fly' : undefined}
+            style={animateEntrance ? { '--card-delay': `${entranceDelay}ms` } as React.CSSProperties : undefined}
+            onMouseEnter={() => onHover?.(property.id)}
+            onMouseLeave={() => onHover?.(null)}
+        >
+            <PropertyCard property={property} />
+        </div>
+    );
+});
+
+interface VillaSearchPageProps {
+    onToggleSidebar: () => void;
+}
+
+const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) => {
+    const { t } = useTranslation(['villas', 'search', 'common']);
+    const { getLocalizedPath } = useLocalizedNavigation();
+
+    const {
+        state,
+        dispatch,
+        isLoading,
+        error,
+        filters,
+        isAuthenticated,
+        mobileView,
+        setMobileView,
+        isMobile,
+        isTablet,
+        isDrawing,
+        flyToTarget,
+        hoveredPropertyId,
+        setHoveredPropertyId,
+        userLocation,
+        mapBounds,
+        drawnBounds,
+        baseFilteredProperties,
+        listProperties,
+        toggleDrawing,
+        handleDrawComplete,
+        handleFilterChange,
+        handleSearch,
+        handleResetFilters,
+        handleSortChange,
+        handleMapMove,
+        handleRecenterOnUser,
+        handleResetView,
+        onFlyComplete,
+        suggestions,
+        searchWrapperRef,
+        isSearchingLocation,
+        isQueryInputFocused,
+        setIsQueryInputFocused,
+        handleSuggestionClick,
+        isSaving,
+        handleSaveSearchArea,
+        toast,
+        setToast,
+    } = useVillaSearch();
+
+    const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
+
+    const [animateCards, setAnimateCards] = useState(true);
+    const prevLoadingRef = useRef(true);
+    useEffect(() => {
+        if (prevLoadingRef.current && !isLoading) {
+            setAnimateCards(true);
+            const timer = setTimeout(() => setAnimateCards(false), 2500);
+            return () => clearTimeout(timer);
+        }
+        prevLoadingRef.current = isLoading;
+    }, [isLoading]);
+
+    const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+    const loadMoreRef = useRef<HTMLDivElement>(null);
+
+    const filtersKey = JSON.stringify(filters);
+    useEffect(() => {
+        setVisibleCount(ITEMS_PER_PAGE);
+    }, [filtersKey]);
+
+    useEffect(() => {
+        if (!loadMoreRef.current) return;
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && visibleCount < listProperties.length) {
+                    setVisibleCount(prev => Math.min(prev + ITEMS_PER_PAGE, listProperties.length));
+                }
+            },
+            { rootMargin: '200px' }
+        );
+        observer.observe(loadMoreRef.current);
+        return () => observer.disconnect();
+    }, [visibleCount, listProperties.length]);
+
+    const showSplitView = !isMobile && !isTablet;
+    const showViewToggle = isMobile || isTablet;
+
+    const mapProps = {
+        properties: baseFilteredProperties,
+        onMapMove: handleMapMove,
+        userLocation,
+        onSaveSearch: handleSaveSearchArea,
+        isSaving,
+        isAuthenticated,
+        mapBounds,
+        drawnBounds,
+        onDrawComplete: handleDrawComplete,
+        isDrawing,
+        onDrawStart: toggleDrawing,
+        flyToTarget,
+        onFlyComplete,
+        onRecenter: handleRecenterOnUser,
+        onResetView: handleResetView,
+        isMobile,
+        searchMode: 'manual' as const,
+        hoveredPropertyId,
+    };
+
+    const handleListVilla = () => {
+        dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-rental' });
+        window.history.pushState({}, '', getLocalizedPath('/create-rental'));
+    };
+
+    const hasActiveFilters = filters.query || filters.country !== 'any' || filters.minPrice || filters.maxPrice || filters.beds || filters.viewType !== 'any' || filters.hasPool || filters.hasGarden || ((filters.amenities as string[] | undefined)?.length ?? 0) > 0;
+
+    return (
+        <div className="relative flex h-full w-full flex-col lg:flex-row">
+            <SEO
+                title={t('villas:seo.title', 'Luxury Villas for Rent | BalkanEstate — Exclusive Properties')}
+                description={t('villas:seo.description', 'Browse exclusive luxury villas for rent across the Balkans. Mountain retreats, lake-shore estates, and sea-view properties in Montenegro, Albania, North Macedonia and beyond.')}
+                canonical={`${window.location.origin}/villas${window.location.search}`}
+                type="website"
+            />
+
+            <Toast show={toast.show} message={toast.message} type={toast.type} onClose={() => setToast({ ...toast, show: false })} />
+
+            {/* Page background */}
+            <div className="absolute inset-0 z-0" style={{ background: 'linear-gradient(135deg, #f8f9fc 0%, #eef1f8 50%, #f0f4fa 100%)' }} />
+
+            <div className={`flex h-full w-full flex-col lg:flex-row transition-all duration-300 relative ${isFiltersOpen && (isMobile || isTablet) ? 'blur-sm pointer-events-none' : ''}`}>
+                {/* Left Panel */}
+                <div className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] lg:flex-shrink-0 lg:border-r lg:border-gray-200 ${showViewToggle && mobileView === 'list' ? 'translate-x-0' : showViewToggle ? '-translate-x-full' : ''} lg:translate-x-0 transition-transform duration-300`} style={{ background: 'linear-gradient(180deg, rgba(248,249,252,0.98) 0%, rgba(238,241,248,0.95) 100%)' }}>
+                    {/* Spacer for floating mobile header */}
+                    {isMobile && <div className="h-14 flex-shrink-0" />}
+
+                    {/* Desktop header */}
+                    <div className="hidden lg:block sticky top-0 z-20" style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                        {/* Luxury hero banner */}
+                        <div className="relative overflow-hidden flex-shrink-0" style={{ height: '140px' }}>
+                            {/* Cinematic gradient backdrop */}
+                            <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #0f2027 0%, #203a43 40%, #2c5364 70%, #1a3a2a 100%)' }} />
+                            {/* Amber radial highlight */}
+                            <div className="absolute inset-0 opacity-25" style={{ background: 'radial-gradient(ellipse at 30% 50%, rgba(251,191,36,0.4) 0%, transparent 60%)' }} />
+                            {/* Subtle noise texture overlay */}
+                            <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'1\'/%3E%3C/svg%3E")', backgroundSize: '256px 256px' }} />
+                            {/* Content */}
+                            <div className="relative z-10 flex flex-col justify-center h-full px-5">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="text-amber-400 text-[10px] font-bold tracking-widest uppercase">
+                                                {t('villas:hero.tagline', 'Exclusive Collection')}
+                                            </span>
+                                        </div>
+                                        <h1 className="text-2xl font-bold text-white mb-0.5">
+                                            {t('villas:title', 'Luxury Villas')}
+                                        </h1>
+                                        <p className="text-blue-200/80 text-xs mb-2">
+                                            {listProperties.length} {t('villas:hero.subtitle', 'exclusive villas available')}
+                                        </p>
+                                        {/* Location highlights */}
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                            {LOCATION_HIGHLIGHTS.map(loc => (
+                                                <span key={loc} className="px-2 py-0.5 rounded-full text-[10px] font-medium text-amber-300/90 border border-amber-400/25 bg-amber-400/10">
+                                                    {loc}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <Button variant="accent" size="sm" onClick={handleListVilla} className="font-semibold rounded-xl flex-shrink-0 ml-4">
+                                        + {t('villas:createListing', 'List Your Villa')}
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* City Search Bar */}
+                        <div className="px-4 py-3">
+                            <div ref={searchWrapperRef} className="relative">
+                                <div className="relative">
+                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+                                    <input
+                                        type="text"
+                                        value={filters.query}
+                                        onChange={(e) => handleFilterChange('query', e.target.value)}
+                                        onFocus={() => setIsQueryInputFocused(true)}
+                                        onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
+                                        placeholder={t('villas:filters.searchCity', 'Search by location...')}
+                                        className="glass-input w-full pl-9 pr-9 py-2 text-sm"
+                                        aria-label={t('villas:filters.searchCity', 'Search by location...')}
+                                    />
+                                    {filters.query && (
+                                        <button
+                                            onClick={() => handleFilterChange('query', '')}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-600 transition-colors"
+                                            aria-label={t('common:aria.clearSearch')}
+                                        >
+                                            <XMarkIcon className="w-4 h-4" />
+                                        </button>
+                                    )}
+                                </div>
+                                {isQueryInputFocused && suggestions.length > 0 && (
+                                    <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 max-h-60 overflow-y-auto glass-scrollbar">
+                                        {suggestions.map((suggestion: NominatimResult, index: number) => (
+                                            <button key={index} onClick={() => handleSuggestionClick(suggestion)} className="w-full text-left px-3 py-2.5 text-sm hover:bg-gray-100 transition-colors flex items-center gap-2 border-b border-gray-200 last:border-b-0">
+                                                <MapIcon className="w-4 h-4 text-gray-300 flex-shrink-0" />
+                                                <span className="truncate text-gray-600">{suggestion.display_name}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                                {isSearchingLocation && (
+                                    <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 p-3 text-center">
+                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-amber-400 mx-auto" />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Desktop Filters */}
+                    <div className="hidden lg:block" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                        <VillaFilters
+                            filters={filters}
+                            onFilterChange={handleFilterChange}
+                            onSearch={handleSearch}
+                            onReset={handleResetFilters}
+                            onSaveSearch={handleSaveSearchArea}
+                            isSaving={isSaving}
+                            compact
+                        />
+                    </div>
+
+                    {/* Property List */}
+                    <div className="flex-1 overflow-y-auto pb-28 lg:pb-3 glass-scrollbar" data-scroll-container aria-live="polite">
+                        {/* Results bar */}
+                        <div className="sticky top-0 bg-white z-[100] border-b border-neutral-200">
+                            <div className="p-4 flex items-center justify-between">
+                                <div className="flex items-center gap-2 min-w-0">
+                                    <p className="text-xs text-neutral-500 font-semibold flex-shrink-0">{t('search:resultsFound', { count: listProperties.length })}</p>
+                                    {filters.query && (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 text-xs font-medium truncate max-w-[140px]">
+                                            <MapIcon className="w-3 h-3 flex-shrink-0" />
+                                            <span className="truncate">{filters.query}</span>
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                    {hasActiveFilters && (
+                                        <button
+                                            onClick={handleResetFilters}
+                                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-50 text-red-600 text-xs font-semibold hover:bg-red-100 active:bg-red-200 transition-colors"
+                                        >
+                                            <XMarkIcon className="w-3.5 h-3.5" />
+                                            {t('common:reset', 'Reset')}
+                                        </button>
+                                    )}
+                                    <div className="relative z-[101]">
+                                        <select
+                                            value={filters.sortBy || 'newest'}
+                                            onChange={(e) => handleSortChange(e.target.value)}
+                                            className="block w-full text-xs bg-white border border-neutral-300 rounded-xl text-neutral-900 px-3 py-1.5 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30 transition-all appearance-none pr-8"
+                                        >
+                                            <option value="newest">{t('search:sort.newest')}</option>
+                                            <option value="oldest">{t('search:sort.oldest')}</option>
+                                            <option value="price_asc">{t('search:sort.priceAsc')}</option>
+                                            <option value="price_desc">{t('search:sort.priceDesc')}</option>
+                                            <option value="beds_desc">{t('search:sort.bedsDesc')}</option>
+                                            <option value="sqft_desc">{t('search:sort.areaDesc')}</option>
+                                            <option value="featured">{t('search:sort.featured')}</option>
+                                        </select>
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-500">
+                                            <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-3">
+                            {isLoading ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {[...Array(6)].map((_, i) => <PropertyCardSkeleton key={i} />)}
+                                </div>
+                            ) : error ? (
+                                <div className="text-center py-12">
+                                    <p className="text-sm text-red-400 mb-2">{error}</p>
+                                    <button onClick={handleSearch} className="text-sm text-blue-600 hover:underline">{t('common:tryAgain')}</button>
+                                </div>
+                            ) : listProperties.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <div className="text-4xl mb-3 opacity-60">🏛️</div>
+                                    <h3 className="text-lg font-semibold text-gray-600 mb-1">{t('villas:noProperties', 'No luxury villas found')}</h3>
+                                    <p className="text-sm text-gray-400 mb-4">{t('villas:noPropertiesHint', 'Try adjusting your filters or expanding your search area')}</p>
+                                    <button onClick={handleResetFilters} className="text-sm text-amber-600 font-medium hover:underline">
+                                        {t('villas:filters.reset', 'Reset')}
+                                    </button>
+                                </div>
+                            ) : (
+                                <>
+                                    <VillaCardAnimationStyles />
+                                    <HighlightedPropertiesSection properties={listProperties} />
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        {listProperties.slice(0, visibleCount).map((property, index) => (
+                                            <AnimatedPropertyCard
+                                                key={property.id}
+                                                property={property}
+                                                index={index}
+                                                onHover={setHoveredPropertyId}
+                                                animateEntrance={animateCards}
+                                            />
+                                        ))}
+                                    </div>
+                                    {visibleCount < listProperties.length && (
+                                        <div ref={loadMoreRef} className="text-center p-4">
+                                            <div className="flex justify-center items-center space-x-2 text-neutral-500">
+                                                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                                <span>{t('common:loadingMore', 'Loading more...')}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                            <div className="mt-8 overflow-x-hidden">
+                                <Footer contained />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Panel: Map */}
+                <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden">
+                    <div className="absolute inset-0 overflow-hidden">
+                        <MapComponent {...mapProps} />
+                    </div>
+                </div>
+
+                {/* Mobile/Tablet overlays */}
+                {showViewToggle && !isFiltersOpen && (
+                    <>
+                        {isMobile && (
+                            <div
+                                className="absolute top-0 left-0 right-0 z-[100] pb-2 landscape:pb-1.5 pointer-events-none"
+                                style={{
+                                    paddingTop: 'max(calc(env(safe-area-inset-top, 0px) + 8px), 52px)',
+                                    paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 8px)',
+                                    paddingRight: 'calc(env(safe-area-inset-right, 0px) + 8px)',
+                                }}
+                            >
+                                <div ref={searchWrapperRef} className="pointer-events-auto w-full space-y-2">
+                                    <div
+                                        className="w-full bg-white/60 backdrop-blur-xl rounded-full p-1 flex items-center gap-0.5 sm:gap-1 border border-white/40"
+                                        style={{ boxShadow: '0 8px 32px rgba(31, 38, 135, 0.15), inset 0 0 20px rgba(255, 255, 255, 0.3)' }}
+                                    >
+                                        <button
+                                            onClick={onToggleSidebar}
+                                            className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-400/50"
+                                            aria-label={t('common:aria.openMenu')}
+                                        >
+                                            <Bars3Icon className="w-6 h-6 text-neutral-800" />
+                                        </button>
+                                        <div className="flex-1 min-w-0 relative">
+                                            <div className="relative">
+                                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                <input
+                                                    type="text"
+                                                    value={filters.query}
+                                                    onChange={(e) => handleFilterChange('query', e.target.value)}
+                                                    onFocus={() => setIsQueryInputFocused(true)}
+                                                    onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
+                                                    placeholder={t('villas:filters.searchCity', 'Search villas...')}
+                                                    className="w-full pl-9 pr-8 py-2 text-sm bg-transparent border-none outline-none placeholder-gray-400"
+                                                    aria-label={t('villas:filters.searchCity', 'Search villas...')}
+                                                />
+                                                {filters.query && (
+                                                    <button onClick={() => handleFilterChange('query', '')} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" aria-label={t('common:aria.clearSearch')}>
+                                                        <XMarkIcon className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                            {isQueryInputFocused && suggestions.length > 0 && (
+                                                <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 max-h-60 overflow-y-auto glass-scrollbar rounded-xl">
+                                                    {suggestions.map((suggestion: NominatimResult, index: number) => (
+                                                        <button key={index} onClick={() => handleSuggestionClick(suggestion)} className="w-full text-left px-3 py-2.5 text-sm hover:bg-gray-100 transition-colors flex items-center gap-2 border-b border-gray-200 last:border-b-0">
+                                                            <MapIcon className="w-4 h-4 text-gray-300 flex-shrink-0" />
+                                                            <span className="truncate text-gray-600">{suggestion.display_name}</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            {isSearchingLocation && (
+                                                <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 p-3 text-center rounded-xl">
+                                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-amber-400 mx-auto" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <button
+                                            onClick={() => setIsFiltersOpen(true)}
+                                            className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-400/50"
+                                            aria-label={t('common:aria.openFilters')}
+                                        >
+                                            <AdjustmentsHorizontalIcon className="w-6 h-6 text-neutral-800" />
+                                        </button>
+                                        {isAuthenticated && state.currentUser && (
+                                            <button
+                                                onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' })}
+                                                className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-400/50 mr-0.5"
+                                                aria-label={t('common:aria.myAccount')}
+                                            >
+                                                <div className="w-8 h-8 rounded-full overflow-hidden">
+                                                    {state.currentUser.avatarUrl ? (
+                                                        <img src={state.currentUser.avatarUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" aria-hidden="true" />
+                                                    ) : (
+                                                        <DefaultAvatar gender={state.currentUser.gender} seed={state.currentUser.id || state.currentUser.name} avatarOptions={state.currentUser.avatarOptions} />
+                                                    )}
+                                                </div>
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Floating List/Map toggle */}
+                        <div className="absolute bottom-24 xs:bottom-28 sm:bottom-24 md:bottom-6 landscape:bottom-14 left-0 right-0 z-[100] p-3 sm:p-4 landscape:p-2 pointer-events-none flex justify-center" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)' }}>
+                            <div className="pointer-events-auto mx-auto w-fit" role="tablist" aria-label={t('common:aria.viewToggle')}>
+                                <LiquidGlassSwitch
+                                    options={[
+                                        { value: 'list', label: t('search:map.list'), icon: <Squares2x2Icon className="w-full h-full" /> },
+                                        { value: 'map', label: t('search:map.showMap'), icon: <MapIcon className="w-full h-full" /> },
+                                    ]}
+                                    value={mobileView}
+                                    onChange={(val) => setMobileView(val as 'list' | 'map')}
+                                    size="md"
+                                />
+                            </div>
+                        </div>
+                    </>
+                )}
+            </div>
+
+            {/* Mobile Filters Modal */}
+            {(isMobile || isTablet) && isFiltersOpen && (
+                <div className="fixed inset-0 z-30 flex flex-col">
+                    <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setIsFiltersOpen(false)} />
+                    <div className="relative w-full h-full flex items-end sm:items-center justify-center p-0 sm:p-4">
+                        <div className="w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col">
+                            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-amber-500 text-lg">🏛️</span>
+                                    <h2 className="text-base font-bold text-gray-900">{t('villas:filters.title', 'Villa Filters')}</h2>
+                                </div>
+                                <button onClick={() => setIsFiltersOpen(false)} className="p-2 rounded-full hover:bg-gray-100 transition-colors" aria-label={t('common:aria.closeFilters', 'Close filters')}>
+                                    <XMarkIcon className="w-5 h-5 text-gray-500" />
+                                </button>
+                            </div>
+                            <div className="overflow-y-auto glass-scrollbar flex-1">
+                                <VillaFilters
+                                    filters={filters}
+                                    onFilterChange={handleFilterChange}
+                                    onSearch={() => { handleSearch(); setIsFiltersOpen(false); }}
+                                    onReset={handleResetFilters}
+                                    onSaveSearch={handleSaveSearchArea}
+                                    isSaving={isSaving}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default VillaSearchPage;

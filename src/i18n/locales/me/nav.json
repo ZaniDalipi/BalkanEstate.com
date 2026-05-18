@@ -106,6 +106,8 @@
     "valuation": "Procjena",
     "mortgageCalculator": "Kalkulator",
     "cityDashboard": "Gradska tabla",
-    "default": "BalkanEstate"
-  }
+    "default": "BalkanEstate",
+    "villas": "Luxury Villas"
+  },
+  "villas": "Luxury Villas"
 }

@@ -106,6 +106,8 @@
     "valuation": "Αποτίμηση",
     "mortgageCalculator": "Υπολογιστής",
     "cityDashboard": "Πίνακας Πόλης",
-    "default": "BalkanEstate"
-  }
+    "default": "BalkanEstate",
+    "villas": "Luxury Villas"
+  },
+  "villas": "Luxury Villas"
 }

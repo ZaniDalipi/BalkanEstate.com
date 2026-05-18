@@ -106,6 +106,8 @@
     "valuation": "Vlerësimi",
     "mortgageCalculator": "Kalkulatori",
     "cityDashboard": "Paneli i Qytetit",
-    "default": "BalkanEstate"
-  }
+    "default": "BalkanEstate",
+    "villas": "Luxury Villas"
+  },
+  "villas": "Luxury Villas"
 }

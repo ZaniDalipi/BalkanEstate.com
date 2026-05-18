@@ -1,0 +1,46 @@
+{
+  "title": "Luxury Villas",
+  "propertiesFound": "exclusive villas available",
+  "createListing": "List Your Villa",
+  "loading": "Discovering luxury villas...",
+  "fetchError": "Failed to fetch villas",
+  "noProperties": "No luxury villas found",
+  "noPropertiesHint": "Try adjusting your filters or expanding your search area",
+  "seo": {
+    "title": "Luxury Villas for Rent | BalkanEstate — Exclusive Properties",
+    "description": "Browse exclusive luxury villas for rent across the Balkans. Mountain retreats, lake-shore estates, and sea-view properties in Montenegro, Albania, North Macedonia and beyond."
+  },
+  "hero": {
+    "tagline": "Exclusive Collection",
+    "subtitle": "exclusive villas available"
+  },
+  "filters": {
+    "title": "Villa Filters",
+    "country": "Country",
+    "allCountries": "All Countries",
+    "minRent": "Min Rent",
+    "maxRent": "Max Rent",
+    "noLimit": "No limit",
+    "minBeds": "Bedrooms",
+    "viewType": "Setting",
+    "mountain": "Mountain",
+    "sea": "Sea View",
+    "lakeForest": "Lake / Forest",
+    "cityView": "City View",
+    "amenities": "Premium Amenities",
+    "pool": "Pool",
+    "garden": "Garden",
+    "sauna": "Sauna",
+    "wineCellar": "Wine Cellar",
+    "panoramic": "Panoramic View",
+    "furnishing": "Furnishing",
+    "sortBy": "Sort by",
+    "newest": "Newest First",
+    "priceLow": "Rent: Low to High",
+    "priceHigh": "Rent: High to Low",
+    "sqftHigh": "Largest First",
+    "search": "Search Villas",
+    "reset": "Reset",
+    "searchCity": "Search by location..."
+  }
+}

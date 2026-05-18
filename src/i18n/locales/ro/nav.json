@@ -106,6 +106,8 @@
     "valuation": "Evaluare",
     "mortgageCalculator": "Calculator",
     "cityDashboard": "Panou Oraș",
-    "default": "BalkanEstate"
-  }
+    "default": "BalkanEstate",
+    "villas": "Luxury Villas"
+  },
+  "villas": "Luxury Villas"
 }
