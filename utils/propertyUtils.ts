@@ -58,7 +58,9 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
         const minSqftMatch = filters.minSqft ? p.sqft >= filters.minSqft : true;
         const maxSqftMatch = filters.maxSqft ? p.sqft <= filters.maxSqft : true;
         const sellerTypeMatch = filters.sellerType !== 'any' ? p.seller.type === filters.sellerType : true;
-        const propertyTypeMatch = filters.propertyType !== 'any' ? p.propertyType === filters.propertyType : true;
+        const propertyTypeMatch = filters.propertyType !== 'any'
+            ? p.propertyType === filters.propertyType
+            : p.propertyType !== 'luxury-villa'; // luxury-villa is exclusive to the Luxury Villas tab
 
         // Advanced filters
         const minYearBuiltMatch = filters.minYearBuilt ? p.yearBuilt >= filters.minYearBuilt : true;
