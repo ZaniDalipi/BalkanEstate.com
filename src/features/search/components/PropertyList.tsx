@@ -1057,7 +1057,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
     
     // Mobile Layout
     return (
-        <div className="flex flex-col bg-white h-full" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 80px)' }}>
+        <div className="flex flex-col bg-white h-full" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 70px)' }}>
             {showFilters && (
                  <div className="p-4 flex-shrink-0">
                     <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm max-w-sm mx-auto">

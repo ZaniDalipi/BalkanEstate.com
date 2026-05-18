@@ -449,7 +449,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                             <div
                                 className="absolute top-0 left-0 right-0 z-[100] pb-2 landscape:pb-1.5 pointer-events-none"
                                 style={{
-                                    paddingTop: 'max(calc(env(safe-area-inset-top, 0px) + 8px), 52px)',
+                                    paddingTop: 'var(--floating-search-top-pad)',
                                     paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 8px)',
                                     paddingRight: 'calc(env(safe-area-inset-right, 0px) + 8px)',
                                 }}
@@ -540,7 +540,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                         )}
 
                         {/* Floating List/Map toggle */}
-                        <div className="absolute bottom-24 xs:bottom-28 sm:bottom-24 md:bottom-6 landscape:bottom-14 left-0 right-0 z-[100] p-3 sm:p-4 landscape:p-2 pointer-events-none flex justify-center" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)' }}>
+                        <div className="absolute bottom-28 xs:bottom-32 sm:bottom-28 md:bottom-6 landscape:bottom-16 left-0 right-0 z-[100] p-3 sm:p-4 landscape:p-2 pointer-events-none flex justify-center" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)' }}>
                             <div className="pointer-events-auto mx-auto w-fit" role="tablist" aria-label={t('common:aria.viewToggle')}>
                                 <LiquidGlassSwitch
                                     options={[
