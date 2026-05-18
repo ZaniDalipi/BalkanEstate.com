@@ -123,7 +123,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         listingType: propertyToEdit?.listingType || initialType as any,
     });
     const [language, setLanguage] = useState('English');
-    const [aiPropertyType, setAiPropertyType] = useState<'house' | 'apartment' | 'villa' | 'land' | 'other'>('house');
+    const [aiPropertyType, setAiPropertyType] = useState<'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other'>('house');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [wantToPromote, setWantToPromote] = useState(false);
     const [pendingPropertyData, setPendingPropertyData] = useState<Property | null>(null);
