@@ -42,7 +42,7 @@ export interface PropertyAnalysisResult {
   materials: string[];
   description: string;
   image_tags: ImageTag[];
-  property_type: 'house' | 'apartment' | 'villa' | 'other';
+  property_type: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'other';
   floor_number?: number;
   total_floors?: number;
 }
@@ -179,7 +179,7 @@ export const generateDescriptionFromImages = async (
   images: Buffer[],
   mimeTypes: string[],
   language: string,
-  propertyType: 'house' | 'apartment' | 'villa' | 'land' | 'other',
+  propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other',
   location?: LocationContext
 ): Promise<PropertyAnalysisResult> => {
   // Convert buffers to base64 inline data parts for Gemini API

@@ -50,7 +50,7 @@ export const createValuationController = async (req: Request, res: Response): Pr
     }
 
     // Validate property type
-    const validPropertyTypes = ['house', 'apartment', 'villa', 'land', 'other'];
+    const validPropertyTypes = ['house', 'apartment', 'villa', 'luxury-villa', 'land', 'other'];
     if (!validPropertyTypes.includes(propertyType)) {
       res.status(400).json({
         success: false,
