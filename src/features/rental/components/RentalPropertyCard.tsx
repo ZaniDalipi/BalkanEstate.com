@@ -18,8 +18,13 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
     const { t } = useTranslation(['rental', 'common', 'property']);
     const { dispatch } = useAppContext();
     const handleClick = () => {
-        dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-        window.history.pushState({}, '', buildLocalizedPath(`/property/${generatePropertySlug(property)}`));
+        const propertyUrl = buildLocalizedPath(`/property/${generatePropertySlug(property)}`);
+        if (!propertyUrl) {
+            console.error('RentalPropertyCard: Cannot open property - invalid URL');
+            return;
+        }
+        // Open in new tab without navigating current page
+        window.open(propertyUrl, '_blank', 'noopener,noreferrer');
     };
 
     const currencySymbol = getCurrencySymbol(property.country);

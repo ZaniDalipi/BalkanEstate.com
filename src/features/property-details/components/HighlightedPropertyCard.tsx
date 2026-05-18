@@ -430,9 +430,14 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
 
   const handleCardClick = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();
-    dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-    window.history.pushState({}, '', buildLocalizedPath(`/property/${generatePropertySlug(property)}`));
-  }, [dispatch, property]);
+    const propertyUrl = buildLocalizedPath(`/property/${generatePropertySlug(property)}`);
+    if (!propertyUrl) {
+      console.error('HighlightedPropertyCard: Cannot open property - invalid URL');
+      return;
+    }
+    // Open in new tab without navigating current page
+    window.open(propertyUrl, '_blank', 'noopener,noreferrer');
+  }, [property]);
 
   const handleFavoriteClick = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();

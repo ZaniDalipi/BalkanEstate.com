@@ -6,6 +6,7 @@ import SubscriptionManagement from './SubscriptionManagement';
 import ProfileStatistics from './ProfileStatistics';
 import MyPromotions from './MyPromotions';
 import MyMeasurements from './MyMeasurements';
+import UserListingsSuggestions from './UserListingsSuggestions';
 
 const ViewingRequestsTab = lazy(() => import('./ViewingRequestsTab'));
 const MyBusinessListings = lazy(() => import('./MyBusinessListings'));
@@ -2058,6 +2059,14 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                 </button>
             </div>
         </form>
+
+        {/* Suggestions Section */}
+        {(user.role === UserRole.AGENT || user.role === UserRole.PRIVATE_SELLER) && (
+            <div className="mt-8 border-t border-white/30 pt-8">
+                <h3 className="text-xl font-bold text-neutral-800 mb-4">{t('account:suggestions.title', 'Your Suggestions')}</h3>
+                <UserListingsSuggestions userId={user.id} userName={user.name} userRole={user.role} agencyId={user.agencyId} agencyName={user.agencyName} />
+            </div>
+        )}
 
         {/* Push Notifications */}
         <div className="mt-8 border-t border-white/30 pt-6">
