@@ -23,14 +23,6 @@ interface ListingFormFieldsProps {
     cityData: CityData | null;
 }
 
-const chevronIcon = (
-    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
-        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-        </svg>
-    </div>
-);
-
 const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
     listingData,
     setListingData,
@@ -263,6 +255,41 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                 <NumberInputWithSteppers label={t('seller:createListing.fields.parkingSpots')} value={listingData.parking_spots} onChange={(val) => setListingData(p => ({ ...p, parking_spots: val }))} />
             </fieldset>
         </>
+    );
+}, (prev, next) => {
+    // Only the fields ListingFormFields actually renders; ignore description, image_tags, amenities, etc.
+    const d0 = prev.listingData;
+    const d1 = next.listingData;
+    return (
+        d0.lat === d1.lat &&
+        d0.lng === d1.lng &&
+        d0.streetAddress === d1.streetAddress &&
+        d0.title === d1.title &&
+        d0.propertyId === d1.propertyId &&
+        d0.price === d1.price &&
+        d0.isNegotiable === d1.isNegotiable &&
+        d0.propertyType === d1.propertyType &&
+        d0.totalFloors === d1.totalFloors &&
+        d0.floorNumber === d1.floorNumber &&
+        d0.orientation === d1.orientation &&
+        d0.bedrooms === d1.bedrooms &&
+        d0.bathrooms === d1.bathrooms &&
+        d0.livingRooms === d1.livingRooms &&
+        d0.sq_meters === d1.sq_meters &&
+        d0.year_built === d1.year_built &&
+        d0.parking_spots === d1.parking_spots &&
+        prev.selectedCountry === next.selectedCountry &&
+        prev.selectedCity === next.selectedCity &&
+        prev.availableCities === next.availableCities &&
+        prev.getZoomLevel === next.getZoomLevel &&
+        prev.cityData === next.cityData &&
+        prev.handleCountryChange === next.handleCountryChange &&
+        prev.handleCityChange === next.handleCityChange &&
+        prev.handleInputChange === next.handleInputChange &&
+        prev.handlePriceChange === next.handlePriceChange &&
+        prev.handleMapLocationChange === next.handleMapLocationChange &&
+        prev.handleMapAddressChange === next.handleMapAddressChange &&
+        prev.setListingData === next.setListingData
     );
 });
 

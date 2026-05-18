@@ -134,7 +134,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     return (
         <>
         {generatingModal}
-        <form onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') e.preventDefault(); }}>
+        <form className="listing-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') e.preventDefault(); }}>
             {/* Listing Type Toggle: Sale / Rent */}
             <div className="flex justify-center mb-6">
                 <LiquidGlassControl
@@ -616,7 +616,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
                     <ListingImageUpload
                         images={images}
-                        listingData={listingData}
+                        imageTags={listingData.image_tags}
                         floorplanImage={floorplanImage}
                         isCompressing={isCompressing}
                         isUploading={isUploading}

@@ -1,11 +1,11 @@
 import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SpinnerIcon } from '@/constants';
-import { ListingData, ImageData, ALL_VALID_TAGS, UploadIcon, InfoIcon, ImageTagSelector } from './ListingFormHelpers';
+import { ImageData, ALL_VALID_TAGS, UploadIcon, InfoIcon, ImageTagSelector } from './ListingFormHelpers';
 
 interface ListingImageUploadProps {
     images: ImageData[];
-    listingData: ListingData;
+    imageTags: { index: number; tag: string }[];
     floorplanImage: ImageData;
     isCompressing: boolean;
     isUploading: boolean;
@@ -24,7 +24,7 @@ interface ListingImageUploadProps {
 
 const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
     images,
-    listingData,
+    imageTags,
     floorplanImage,
     isCompressing,
     isUploading,
@@ -77,7 +77,7 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
                                         <img src={img.previewUrl} alt={`preview ${index}`} className="w-full h-24 object-cover rounded-lg mb-2 border border-gray-200" />
                                         <button type="button" aria-label="Remove image" onClick={() => removeImage(index)} className="absolute top-1 right-1 bg-red-500/80 backdrop-blur-sm text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity z-10">&times;</button>
                                         <ImageTagSelector
-                                            value={listingData.image_tags.find(t => t.index === index)?.tag || 'other'}
+                                            value={imageTags.find(t => t.index === index)?.tag || 'other'}
                                             options={ALL_VALID_TAGS}
                                             onChange={(tag) => handleImageTagChange(index, tag)}
                                         />

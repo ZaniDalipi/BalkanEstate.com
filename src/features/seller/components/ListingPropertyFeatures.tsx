@@ -240,6 +240,31 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
             )}
         </>
     );
+}, (prev, next) => {
+    // Only compare fields this component actually renders; skip description, price, image_tags, etc.
+    const d0 = prev.listingData;
+    const d1 = next.listingData;
+    return (
+        d0.specialFeatures === d1.specialFeatures &&
+        d0.materials === d1.materials &&
+        d0.amenities === d1.amenities &&
+        d0.propertyType === d1.propertyType &&
+        d0.hasBalcony === d1.hasBalcony &&
+        d0.hasGarden === d1.hasGarden &&
+        d0.hasElevator === d1.hasElevator &&
+        d0.hasSecurity === d1.hasSecurity &&
+        d0.hasAirConditioning === d1.hasAirConditioning &&
+        d0.hasPool === d1.hasPool &&
+        d0.petsAllowed === d1.petsAllowed &&
+        d0.furnishing === d1.furnishing &&
+        d0.heatingType === d1.heatingType &&
+        d0.condition === d1.condition &&
+        d0.viewType === d1.viewType &&
+        d0.energyRating === d1.energyRating &&
+        d0.orientation === d1.orientation &&
+        prev.setListingData === next.setListingData &&
+        prev.handleInputChange === next.handleInputChange
+    );
 });
 
 export default ListingPropertyFeatures;
