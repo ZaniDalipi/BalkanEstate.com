@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, memo } from 'react';
 
 export interface GlassControlOption {
   value: string;
@@ -30,7 +30,7 @@ interface LiquidGlassControlProps {
  *   onChange={setListingType}
  * />
  */
-export const LiquidGlassControl: React.FC<LiquidGlassControlProps> = ({
+export const LiquidGlassControl: React.FC<LiquidGlassControlProps> = memo(({
   options,
   value,
   onChange,
@@ -157,6 +157,6 @@ export const LiquidGlassControl: React.FC<LiquidGlassControlProps> = ({
       {/* Glass distortion filter is provided globally by LiquidGlassFilter in App.tsx */}
     </div>
   );
-};
+});
 
 export default LiquidGlassControl;

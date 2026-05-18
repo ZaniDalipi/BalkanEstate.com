@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback, memo } from 'react';
 
 interface NumberInputWithSteppersProps {
     label: string;
@@ -9,24 +9,24 @@ interface NumberInputWithSteppersProps {
     step?: number;
 }
 
-const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label, value, onChange, min = 0, max, step = 1 }) => {
+const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = memo(({ label, value, onChange, min = 0, max, step = 1 }) => {
     const id = useMemo(() => `number-input-${label.toLowerCase().replace(/\s+/g, '-')}`, [label]);
 
-    const handleIncrement = () => {
+    const handleIncrement = useCallback(() => {
         const newValue = (value || 0) + step;
         if (max === undefined || newValue <= max) {
             onChange(newValue);
         }
-    };
+    }, [value, step, max, onChange]);
 
-    const handleDecrement = () => {
+    const handleDecrement = useCallback(() => {
         const newValue = (value || 0) - step;
         if (min === undefined || newValue >= min) {
             onChange(newValue);
         }
-    };
+    }, [value, step, min, onChange]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const inputValue = e.target.value;
         if (inputValue === '') {
             onChange(min ?? 0);
@@ -39,14 +39,14 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
             if (max !== undefined && clampedValue > max) clampedValue = max;
             onChange(clampedValue);
         }
-    };
+    }, [min, max, onChange]);
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             e.preventDefault();
             (e.target as HTMLInputElement).blur();
         }
-    };
+    }, []);
 
     const canDecrement = min === undefined || value > min;
     const canIncrement = max === undefined || value < max;
@@ -58,7 +58,7 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
                 <button
                     type="button"
                     onClick={handleDecrement}
-                    disabled={value <= min}
+                    disabled={!canDecrement}
                     className="flex-shrink-0 w-12 sm:w-14 h-full flex items-center justify-center text-xl sm:text-2xl font-medium text-neutral-600 hover:bg-neutral-100 active:bg-neutral-200 disabled:text-neutral-300 disabled:cursor-not-allowed transition-colors"
                     aria-label={`Decrease ${label}`}
                 >
@@ -78,7 +78,7 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
                 <button
                     type="button"
                     onClick={handleIncrement}
-                    disabled={max !== undefined && value >= max}
+                    disabled={!canIncrement}
                     className="flex-shrink-0 w-12 sm:w-14 h-full flex items-center justify-center text-xl sm:text-2xl font-medium text-neutral-600 hover:bg-neutral-100 active:bg-neutral-200 disabled:text-neutral-300 disabled:cursor-not-allowed transition-colors"
                     aria-label={`Increase ${label}`}
                 >
@@ -89,6 +89,6 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
             </div>
         </div>
     );
-};
+});
 
 export default NumberInputWithSteppers;

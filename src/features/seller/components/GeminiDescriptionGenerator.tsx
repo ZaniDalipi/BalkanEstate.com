@@ -52,6 +52,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
         handleDragStart, handleDragEnter, handleDragEnd, handleDrop,
         handleGenerate,
         handleInputChange, handlePriceChange, handleImageTagChange,
+        handleListingTypeChange, handleVisitAvailabilityChange, handleVisitDayToggle,
         handleGoToPreview, handleBackToForm,
         handleSubmit,
         handlePromotionPaymentSuccess, handlePostWithoutPromotion,
@@ -134,7 +135,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     return (
         <>
         {generatingModal}
-        <form onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') e.preventDefault(); }}>
+        <form className="listing-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') e.preventDefault(); }}>
             {/* Listing Type Toggle: Sale / Rent */}
             <div className="flex justify-center mb-6">
                 <LiquidGlassControl
@@ -159,7 +160,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         },
                     ]}
                     value={listingData.listingType}
-                    onChange={(val) => setListingData(prev => ({ ...prev, listingType: val as 'sale' | 'rent' }))}
+                    onChange={handleListingTypeChange}
                 />
             </div>
 
@@ -501,10 +502,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 <input
                                     type="checkbox"
                                     checked={listingData.visitAvailability.enabled}
-                                    onChange={(e) => setListingData(prev => ({
-                                        ...prev,
-                                        visitAvailability: { ...prev.visitAvailability, enabled: e.target.checked }
-                                    }))}
+                                    onChange={(e) => handleVisitAvailabilityChange({ enabled: e.target.checked })}
                                     className="rounded text-amber-500 focus:ring-amber-500/30 w-4 h-4 bg-gray-100/60 border-gray-300"
                                 />
                                 <span className="text-sm font-medium text-gray-500">{t('seller:createListing.visitAvailability.enable', 'Enable scheduling')}</span>
@@ -532,15 +530,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                                 type="button"
                                                 variant={listingData.visitAvailability.days.includes(day) ? 'accent' : 'glass'}
                                                 size="sm"
-                                                onClick={() => {
-                                                    const days = listingData.visitAvailability.days.includes(day)
-                                                        ? listingData.visitAvailability.days.filter(d => d !== day)
-                                                        : [...listingData.visitAvailability.days, day];
-                                                    setListingData(prev => ({
-                                                        ...prev,
-                                                        visitAvailability: { ...prev.visitAvailability, days }
-                                                    }));
-                                                }}
+                                                onClick={() => handleVisitDayToggle(day)}
                                                 className={`rounded-lg ${!listingData.visitAvailability.days.includes(day) ? 'text-gray-400' : ''}`}
                                             >
                                                 {label}
@@ -556,10 +546,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         <input
                                             type="time"
                                             value={listingData.visitAvailability.startTime}
-                                            onChange={(e) => setListingData(prev => ({
-                                                ...prev,
-                                                visitAvailability: { ...prev.visitAvailability, startTime: e.target.value }
-                                            }))}
+                                            onChange={(e) => handleVisitAvailabilityChange({ startTime: e.target.value })}
                                             className="glass-input w-full px-3 py-2 text-sm"
                                         />
                                     </div>
@@ -568,10 +555,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         <input
                                             type="time"
                                             value={listingData.visitAvailability.endTime}
-                                            onChange={(e) => setListingData(prev => ({
-                                                ...prev,
-                                                visitAvailability: { ...prev.visitAvailability, endTime: e.target.value }
-                                            }))}
+                                            onChange={(e) => handleVisitAvailabilityChange({ endTime: e.target.value })}
                                             className="glass-input w-full px-3 py-2 text-sm"
                                         />
                                     </div>
@@ -579,10 +563,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         <label className="block text-xs font-medium text-gray-400 mb-1">{t('seller:createListing.visitAvailability.slotDuration', 'Slot Duration')}</label>
                                         <select
                                             value={listingData.visitAvailability.slotDurationMinutes}
-                                            onChange={(e) => setListingData(prev => ({
-                                                ...prev,
-                                                visitAvailability: { ...prev.visitAvailability, slotDurationMinutes: Number(e.target.value) }
-                                            }))}
+                                            onChange={(e) => handleVisitAvailabilityChange({ slotDurationMinutes: Number(e.target.value) })}
                                             className="glass-select w-full px-3 py-2 text-sm"
                                         >
                                             <option value={15}>15 min</option>
@@ -599,10 +580,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                     <input
                                         type="text"
                                         value={listingData.visitAvailability.notes || ''}
-                                        onChange={(e) => setListingData(prev => ({
-                                            ...prev,
-                                            visitAvailability: { ...prev.visitAvailability, notes: e.target.value }
-                                        }))}
+                                        onChange={(e) => handleVisitAvailabilityChange({ notes: e.target.value })}
                                         className="glass-input w-full px-3 py-2 text-sm"
                                         placeholder={t('seller:createListing.visitAvailability.notesPlaceholder', 'e.g., Ring bell at gate, parking available...')}
                                     />
@@ -616,7 +594,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
                     <ListingImageUpload
                         images={images}
-                        listingData={listingData}
+                        imageTags={listingData.image_tags}
                         floorplanImage={floorplanImage}
                         isCompressing={isCompressing}
                         isUploading={isUploading}
