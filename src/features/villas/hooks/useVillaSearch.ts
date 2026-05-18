@@ -11,7 +11,7 @@ import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { serializeBounds } from '@/src/features/rental/hooks/useRentalSearch';
 
 const VILLA_DEFAULTS: Partial<Filters> = {
-    listingType: 'any',
+    listingType: 'rent',
     propertyType: 'luxury-villa',
     beds: 3,
     minPrice: 500,
@@ -53,6 +53,7 @@ export function useVillaSearch() {
         setError(null);
         try {
             const params = new URLSearchParams();
+            params.set('listingType', 'rent');
             params.set('propertyType', 'luxury-villa');
             params.set('limit', '3000');
 
@@ -64,7 +65,7 @@ export function useVillaSearch() {
                 ...p,
                 id: p.id || p._id,
                 sellerId: p.sellerId?.id || p.sellerId?._id || p.sellerId,
-                listingType: p.listingType || 'sale',
+                listingType: p.listingType || 'rent',
                 rentedAt: p.rentedAt ? new Date(p.rentedAt).getTime() : undefined,
                 rentedUntil: p.rentedUntil ? new Date(p.rentedUntil).getTime() : undefined,
                 availableFrom: p.availableFrom ? new Date(p.availableFrom).getTime() : undefined,
@@ -185,7 +186,7 @@ export function useVillaSearch() {
     }, [drawnBoundsJSON]);
 
     const baseFilteredProperties = useMemo(() => {
-        const filtered = filterProperties(villaProperties, { ...filters, propertyType: 'luxury-villa' });
+        const filtered = filterProperties(villaProperties, { ...filters, propertyType: 'luxury-villa', listingType: 'rent' });
         const now = Date.now();
 
         const boundsToUse = drawnBounds || mapBounds;
@@ -245,7 +246,7 @@ export function useVillaSearch() {
     }, []);
 
     const handleFilterChange = useCallback((key: keyof Filters, value: any) => {
-        if (key === 'propertyType') return; // always locked to luxury-villa
+        if (key === 'propertyType' || key === 'listingType') return; // locked to luxury-villa + rent
         setFilters(prev => ({ ...prev, [key]: value }));
     }, []);
 
