@@ -328,7 +328,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         }));
     }, []);
 
-    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
         // Handle case when user cancels file picker - don't clear existing images
         if (!e.target.files || e.target.files.length === 0) {
             // Reset the input so the same file can be selected again
@@ -416,9 +416,9 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             // Reset input so the same files can be selected again if needed
             e.target.value = '';
         }
-    };
+    }, [images, showWarning, showError, t]);
 
-    const handleFloorplanImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFloorplanImageChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
 
@@ -463,7 +463,27 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 setIsCompressing(false);
             }
         }
-    };
+    }, [showError, t]);
+
+    const handleListingTypeChange = useCallback((val: string) => {
+        setListingData(prev => ({ ...prev, listingType: val as 'sale' | 'rent' }));
+    }, []);
+
+    const handleVisitAvailabilityChange = useCallback((patch: Partial<ListingData['visitAvailability']>) => {
+        setListingData(prev => ({
+            ...prev,
+            visitAvailability: { ...prev.visitAvailability, ...patch },
+        }));
+    }, []);
+
+    const handleVisitDayToggle = useCallback((day: number) => {
+        setListingData(prev => {
+            const days = prev.visitAvailability.days.includes(day)
+                ? prev.visitAvailability.days.filter(d => d !== day)
+                : [...prev.visitAvailability.days, day];
+            return { ...prev, visitAvailability: { ...prev.visitAvailability, days } };
+        });
+    }, []);
 
     const removeImage = useCallback((indexToRemove: number) => {
         setImages(prevImages => prevImages.filter((_, index) => index !== indexToRemove));
@@ -1283,6 +1303,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         handleDragStart, handleDragEnter, handleDragEnd, handleDrop,
         handleGenerate,
         handleInputChange, handlePriceChange, handleImageTagChange,
+        handleListingTypeChange, handleVisitAvailabilityChange, handleVisitDayToggle,
         handleGoToPreview, handleBackToForm,
         handleSubmit,
         handlePromotionPaymentSuccess, handlePostWithoutPromotion,
