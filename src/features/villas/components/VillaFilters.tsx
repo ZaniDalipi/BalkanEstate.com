@@ -48,8 +48,8 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({ filters, onFilterChange, on
     const activeAmenities: string[] = (filters.amenities as string[]) || [];
 
     const viewChipBase = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all cursor-pointer whitespace-nowrap';
-    const viewChipActive = 'bg-amber-500/15 text-amber-700 border-amber-400';
-    const viewChipInactive = 'bg-white/60 text-gray-500 border-gray-200 hover:border-amber-300 hover:text-amber-600';
+    const viewChipActive = 'bg-secondary/10 text-primary-dark border-secondary font-semibold';
+    const viewChipInactive = 'bg-white/60 text-gray-500 border-gray-200 hover:border-secondary/50 hover:text-primary';
 
     if (compact) {
         return (

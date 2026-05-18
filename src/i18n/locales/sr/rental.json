@@ -84,7 +84,23 @@
     "updateListing": "Ažuriraj oglas za iznajmljivanje",
     "createSuccess": "Oglas za iznajmljivanje je uspešno objavljen!",
     "updateSuccess": "Oglas za iznajmljivanje je uspešno ažuriran!",
-    "redirecting": "Preusmeravanje na vašu kontrolnu tablu..."
+    "redirecting": "Preusmeravanje na vašu kontrolnu tablu...",
+    "checkInTime": "Check-in Time",
+    "checkOutTime": "Check-out Time",
+    "cleaningFee": "Cleaning Fee",
+    "cancellationPolicy": "Cancellation Policy",
+    "cancellationPolicies": {
+      "select": "Select a policy",
+      "flexible": "Flexible — Full refund 24h before check-in",
+      "moderate": "Moderate — Full refund 5 days before check-in",
+      "strict": "Strict — 50% refund up to 1 week before",
+      "nonRefundable": "Non-refundable"
+    },
+    "breakfastIncluded": "Breakfast",
+    "towelsIncluded": "Towels & Linen",
+    "parkingIncluded": "Parking",
+    "guestRequirements": "Guest Requirements",
+    "guestRequirementsHint": "e.g. no parties, no smoking, ID verification required (press Enter to add)"
   },
   "details": {
     "rentalTerms": "Uslovi iznajmljivanja",
@@ -108,7 +124,28 @@
     "tenantRequirements": "Uslovi za zakupce",
     "contactLandlord": "Kontaktirajte zakupodavca",
     "scheduleViewing": "Zakažite razgledanje",
-    "rentThisProperty": "Iznajmite ovu nekretninu"
+    "rentThisProperty": "Iznajmite ovu nekretninu",
+    "stayDuration": "Stay Duration",
+    "stayDurationWeeks": "Stay Duration",
+    "minNights": "{{min}} nights min",
+    "maxNights": "up to {{max}} nights",
+    "minToMaxNights": "{{min}}–{{max}} nights",
+    "minWeeks": "{{min}} weeks min",
+    "maxWeeks": "up to {{max}} weeks",
+    "minToMaxWeeks": "{{min}}–{{max}} weeks",
+    "checkInOut": "Check-in / Check-out",
+    "cleaningFee": "Cleaning Fee",
+    "cancellationPolicy": "Cancellation Policy",
+    "cancellation": {
+      "flexible": "Flexible — Full refund 24h before check-in",
+      "moderate": "Moderate — Full refund 5 days before",
+      "strict": "Strict — 50% refund up to 1 week before",
+      "nonRefundable": "Non-refundable"
+    },
+    "breakfastIncluded": "Breakfast",
+    "towelsIncluded": "Towels & Linen",
+    "parkingIncluded": "Parking",
+    "guestRequirements": "Guest Requirements"
   },
   "affordability": {
     "title": "Pristupačnost kirije",

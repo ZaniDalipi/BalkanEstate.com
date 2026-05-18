@@ -196,9 +196,9 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                         {/* Luxury hero banner */}
                         <div className="relative overflow-hidden flex-shrink-0" style={{ height: '140px' }}>
                             {/* Cinematic gradient backdrop */}
-                            <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #0f2027 0%, #203a43 40%, #2c5364 70%, #1a3a2a 100%)' }} />
+                            <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #003A96 0%, #0252CD 55%, #003080 100%)' }} />
                             {/* Amber radial highlight */}
-                            <div className="absolute inset-0 opacity-25" style={{ background: 'radial-gradient(ellipse at 30% 50%, rgba(251,191,36,0.4) 0%, transparent 60%)' }} />
+                            <div className="absolute inset-0 opacity-25" style={{ background: 'radial-gradient(ellipse at 30% 50%, rgba(255,165,0,0.3) 0%, transparent 60%)' }} />
                             {/* Subtle noise texture overlay */}
                             <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'1\'/%3E%3C/svg%3E")', backgroundSize: '256px 256px' }} />
                             {/* Content */}
@@ -206,7 +206,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-amber-400 text-[10px] font-bold tracking-widest uppercase">
+                                            <span className="text-secondary text-[10px] font-bold tracking-widest uppercase">
                                                 {t('villas:hero.tagline', 'Exclusive Collection')}
                                             </span>
                                         </div>
@@ -219,7 +219,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                         {/* Location highlights */}
                                         <div className="flex items-center gap-1.5 flex-wrap">
                                             {LOCATION_HIGHLIGHTS.map(loc => (
-                                                <span key={loc} className="px-2 py-0.5 rounded-full text-[10px] font-medium text-amber-300/90 border border-amber-400/25 bg-amber-400/10">
+                                                <span key={loc} className="px-2 py-0.5 rounded-full text-[10px] font-medium text-secondary/80 border border-secondary/30 bg-secondary/10">
                                                     {loc}
                                                 </span>
                                             ))}
@@ -269,7 +269,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                 )}
                                 {isSearchingLocation && (
                                     <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 p-3 text-center">
-                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-amber-400 mx-auto" />
+                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-secondary mx-auto" />
                                     </div>
                                 )}
                             </div>
@@ -297,7 +297,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                 <div className="flex items-center gap-2 min-w-0">
                                     <p className="text-xs text-neutral-500 font-semibold flex-shrink-0">{t('search:resultsFound', { count: listProperties.length })}</p>
                                     {filters.query && (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 text-xs font-medium truncate max-w-[140px]">
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary/10 text-primary text-xs font-medium truncate max-w-[140px]">
                                             <MapIcon className="w-3 h-3 flex-shrink-0" />
                                             <span className="truncate">{filters.query}</span>
                                         </span>
@@ -317,7 +317,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                         <select
                                             value={filters.sortBy || 'newest'}
                                             onChange={(e) => handleSortChange(e.target.value)}
-                                            className="block w-full text-xs bg-white border border-neutral-300 rounded-xl text-neutral-900 px-3 py-1.5 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30 transition-all appearance-none pr-8"
+                                            className="block w-full text-xs bg-white border border-neutral-300 rounded-xl text-neutral-900 px-3 py-1.5 focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/30 transition-all appearance-none pr-8"
                                         >
                                             <option value="newest">{t('search:sort.newest')}</option>
                                             <option value="oldest">{t('search:sort.oldest')}</option>
@@ -350,7 +350,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     <div className="text-4xl mb-3 opacity-60">🏛️</div>
                                     <h3 className="text-lg font-semibold text-gray-600 mb-1">{t('villas:noProperties', 'No luxury villas found')}</h3>
                                     <p className="text-sm text-gray-400 mb-4">{t('villas:noPropertiesHint', 'Try adjusting your filters or expanding your search area')}</p>
-                                    <button onClick={handleResetFilters} className="text-sm text-amber-600 font-medium hover:underline">
+                                    <button onClick={handleResetFilters} className="text-sm text-secondary font-medium hover:underline">
                                         {t('villas:filters.reset', 'Reset')}
                                     </button>
                                 </div>
@@ -412,7 +412,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     >
                                         <button
                                             onClick={onToggleSidebar}
-                                            className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-400/50"
+                                            className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-secondary/50"
                                             aria-label={t('common:aria.openMenu')}
                                         >
                                             <Bars3Icon className="w-6 h-6 text-neutral-800" />
@@ -448,13 +448,13 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             )}
                                             {isSearchingLocation && (
                                                 <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 p-3 text-center rounded-xl">
-                                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-amber-400 mx-auto" />
+                                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-secondary mx-auto" />
                                                 </div>
                                             )}
                                         </div>
                                         <button
                                             onClick={() => setIsFiltersOpen(true)}
-                                            className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-400/50"
+                                            className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-secondary/50"
                                             aria-label={t('common:aria.openFilters')}
                                         >
                                             <AdjustmentsHorizontalIcon className="w-6 h-6 text-neutral-800" />
@@ -462,7 +462,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                         {isAuthenticated && state.currentUser && (
                                             <button
                                                 onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' })}
-                                                className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-400/50 mr-0.5"
+                                                className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-secondary/50 mr-0.5"
                                                 aria-label={t('common:aria.myAccount')}
                                             >
                                                 <div className="w-8 h-8 rounded-full overflow-hidden">
@@ -505,7 +505,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                         <div className="w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col">
                             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-amber-500 text-lg">🏛️</span>
+                                    <span className="text-secondary text-lg">🏛️</span>
                                     <h2 className="text-base font-bold text-gray-900">{t('villas:filters.title', 'Villa Filters')}</h2>
                                 </div>
                                 <button onClick={() => setIsFiltersOpen(false)} className="p-2 rounded-full hover:bg-gray-100 transition-colors" aria-label={t('common:aria.closeFilters', 'Close filters')}>
