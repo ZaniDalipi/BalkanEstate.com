@@ -141,11 +141,15 @@ const PushNotificationPrompt: React.FC<PushNotificationPromptProps> = ({ delay =
             {localError && (
               <p className="text-xs text-red-600 mt-2 flex items-center gap-1">
                 <AlertCircle className="w-3 h-3 flex-shrink-0" />
-                {t('messages:pushPrompt.error_hint', 'Please check your browser settings and try again.')}
+                {localError.toLowerCase().includes('maximum') || localError.toLowerCase().includes('device')
+                  ? t('messages:pushPrompt.error_hint_devices', 'Please try again or remove an older device from settings.')
+                  : localError.toLowerCase().includes('permission') || localError.toLowerCase().includes('blocked') || localError.toLowerCase().includes('denied')
+                    ? t('messages:pushPrompt.error_hint_browser', 'Please check your browser settings and try again.')
+                    : t('messages:pushPrompt.error_hint_generic', 'Please try again.')}
               </p>
             )}
             <div className="flex items-center gap-2 mt-3">
-              {!localError && (
+              {(!localError || localError.toLowerCase().includes('maximum') || localError.toLowerCase().includes('device')) && (
                 <button
                   onClick={handleEnable}
                   disabled={subscribing || isLoading}
