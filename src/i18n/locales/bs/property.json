@@ -37,7 +37,8 @@
     "commercial": "Komercijalno",
     "office": "Kancelarija",
     "garage": "Garaža",
-    "other": "Ostalo"
+    "other": "Ostalo",
+    "luxury-villa": "Luxury Villa"
   },
   "features": {
     "bedrooms": "Spavaće sobe",
@@ -311,7 +312,8 @@
       "apartment": "Stan",
       "villa": "Vila",
       "land": "Zemljište",
-      "other": "Ostalo"
+      "other": "Ostalo",
+      "luxury-villa": "Luxury Villa"
     },
     "promotedListings": "Promovisani oglasi",
     "agentHint": "Kliknite za preporuke!",

@@ -37,7 +37,8 @@
     "commercial": "Spațiu Comercial",
     "office": "Birou",
     "garage": "Garaj",
-    "other": "Altele"
+    "other": "Altele",
+    "luxury-villa": "Luxury Villa"
   },
   "features": {
     "bedrooms": "Dormitoare",
@@ -311,7 +312,8 @@
       "apartment": "Apartament",
       "villa": "Vilă",
       "land": "Teren",
-      "other": "Altele"
+      "other": "Altele",
+      "luxury-villa": "Luxury Villa"
     },
     "promotedListings": "Anunțuri Promovate",
     "agentHint": "Click pentru recomandări!",

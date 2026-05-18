@@ -37,7 +37,8 @@
     "commercial": "Επαγγελματικός Χώρος",
     "office": "Γραφείο",
     "garage": "Γκαράζ",
-    "other": "Άλλο"
+    "other": "Άλλο",
+    "luxury-villa": "Luxury Villa"
   },
   "features": {
     "bedrooms": "Υπνοδωμάτια",
@@ -311,7 +312,8 @@
       "apartment": "Διαμέρισμα",
       "villa": "Βίλα",
       "land": "Οικόπεδο",
-      "other": "Άλλο"
+      "other": "Άλλο",
+      "luxury-villa": "Luxury Villa"
     },
     "promotedListings": "Προωθημένες Αγγελίες",
     "agentHint": "Κλικ για προτάσεις!",

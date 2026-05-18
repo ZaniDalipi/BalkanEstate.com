@@ -60,6 +60,7 @@ export function useRentalSearch() {
         try {
             const params = new URLSearchParams();
             params.set('listingType', 'rent');
+            params.set('excludePropertyType', 'luxury-villa'); // luxury villas live in the Luxury Villas tab only
             params.set('limit', '3000');
 
             const response = await fetch(`${API_CONFIG.BASE_URL}/properties?${params.toString()}`);

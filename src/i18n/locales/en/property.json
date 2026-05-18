@@ -44,7 +44,8 @@
     "commercial": "Commercial",
     "office": "Office",
     "garage": "Garage",
-    "other": "Other"
+    "other": "Other",
+    "luxury-villa": "Luxury Villa"
   },
   "features": {
     "bedrooms": "Bedrooms",
@@ -330,7 +331,8 @@
       "apartment": "Apartment",
       "villa": "Villa",
       "land": "Land",
-      "other": "Other"
+      "other": "Other",
+      "luxury-villa": "Luxury Villa"
     },
     "promotedListings": "Promoted Listings",
     "agentHint": "Click for recommendations!",

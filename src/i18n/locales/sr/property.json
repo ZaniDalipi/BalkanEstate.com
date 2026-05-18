@@ -37,7 +37,8 @@
     "commercial": "Пословни Простор",
     "office": "Канцеларија",
     "garage": "Гаража",
-    "other": "Остало"
+    "other": "Остало",
+    "luxury-villa": "Luxury Villa"
   },
   "features": {
     "bedrooms": "Спаваће Собе",
@@ -311,7 +312,8 @@
       "apartment": "Стан",
       "villa": "Вила",
       "land": "Земљиште",
-      "other": "Остало"
+      "other": "Остало",
+      "luxury-villa": "Luxury Villa"
     },
     "promotedListings": "Промовисани Огласи",
     "agentHint": "Кликни за препоруке!",

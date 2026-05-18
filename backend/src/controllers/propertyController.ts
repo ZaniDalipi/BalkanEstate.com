@@ -134,6 +134,11 @@ export const getProperties = async (
       filter.propertyType = propertyType;
     }
 
+    // Exclude specific property types (e.g. luxury-villa is exclusive to its own tab)
+    if (req.query.excludePropertyType) {
+      filter.propertyType = { ...filter.propertyType, $ne: req.query.excludePropertyType };
+    }
+
     if (city) {
       // Case-insensitive exact match using collation (index-friendly, unlike $regex)
       filter.city = city as string;

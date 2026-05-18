@@ -37,7 +37,8 @@
     "commercial": "Търговски обект",
     "office": "Офис",
     "garage": "Гараж",
-    "other": "Друго"
+    "other": "Друго",
+    "luxury-villa": "Luxury Villa"
   },
   "features": {
     "bedrooms": "Спални",
@@ -311,7 +312,8 @@
       "apartment": "Апартамент",
       "villa": "Вила",
       "land": "Земя",
-      "other": "Друго"
+      "other": "Друго",
+      "luxury-villa": "Luxury Villa"
     },
     "promotedListings": "Промотирани обяви",
     "agentHint": "Кликнете за препоръки!",
