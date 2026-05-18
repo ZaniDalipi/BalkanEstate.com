@@ -138,6 +138,14 @@ export interface Property {
   maxOccupants?: number;
   rentedUntil?: number;
   rentalHistory?: RentalHistoryEntry[];
+  // Daily rental fields (short-stay / luxury villa)
+  checkInTime?: string;
+  checkOutTime?: string;
+  cleaningFee?: number;
+  cancellationPolicy?: 'flexible' | 'moderate' | 'strict' | 'non-refundable';
+  breakfastIncluded?: boolean;
+  towelsIncluded?: boolean;
+  parkingIncluded?: boolean;
   // Visit/viewing availability
   visitAvailability?: VisitAvailability;
   // Currency

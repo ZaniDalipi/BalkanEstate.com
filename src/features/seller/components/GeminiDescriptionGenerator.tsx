@@ -410,21 +410,33 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                     </div>
                                 </div>
 
-                                {/* Min Lease */}
+                                {/* Min Stay — label adapts to rentPeriod */}
                                 <NumberInputWithSteppers
-                                    label={t('rental:form.minLeaseDuration')}
+                                    label={
+                                        listingData.rentPeriod === 'daily'
+                                            ? t('rental:form.minStayNights', 'Min Stay (nights)')
+                                            : listingData.rentPeriod === 'weekly'
+                                                ? t('rental:form.minStayWeeks', 'Min Stay (weeks)')
+                                                : t('rental:form.minLeaseDuration')
+                                    }
                                     value={listingData.minimumLeaseDuration}
                                     min={1}
-                                    max={60}
+                                    max={listingData.rentPeriod === 'daily' ? 365 : listingData.rentPeriod === 'weekly' ? 52 : 60}
                                     onChange={(val) => setListingData(prev => ({ ...prev, minimumLeaseDuration: val }))}
                                 />
 
-                                {/* Max Lease */}
+                                {/* Max Stay — label adapts to rentPeriod */}
                                 <NumberInputWithSteppers
-                                    label={t('rental:form.maxLeaseDuration')}
+                                    label={
+                                        listingData.rentPeriod === 'daily'
+                                            ? t('rental:form.maxStayNights', 'Max Stay (nights)')
+                                            : listingData.rentPeriod === 'weekly'
+                                                ? t('rental:form.maxStayWeeks', 'Max Stay (weeks)')
+                                                : t('rental:form.maxLeaseDuration')
+                                    }
                                     value={listingData.maximumLeaseDuration}
                                     min={1}
-                                    max={120}
+                                    max={listingData.rentPeriod === 'daily' ? 365 : listingData.rentPeriod === 'weekly' ? 52 : 120}
                                     onChange={(val) => setListingData(prev => ({ ...prev, maximumLeaseDuration: val }))}
                                 />
 
@@ -449,6 +461,72 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                     max={20}
                                     onChange={(val) => setListingData(prev => ({ ...prev, maxOccupants: val }))}
                                 />
+
+                                {/* ── Daily-rental-only fields ── */}
+                                {listingData.rentPeriod === 'daily' && (<>
+                                    {/* Check-in Time */}
+                                    <div>
+                                        <label htmlFor="checkInTime" className={`${labelClasses} !text-blue-500`}>{t('rental:form.checkInTime', 'Check-in Time')}</label>
+                                        <input
+                                            type="time"
+                                            id="checkInTime"
+                                            value={listingData.checkInTime}
+                                            onChange={(e) => setListingData(prev => ({ ...prev, checkInTime: e.target.value }))}
+                                            className={inputBaseClasses}
+                                        />
+                                    </div>
+
+                                    {/* Check-out Time */}
+                                    <div>
+                                        <label htmlFor="checkOutTime" className={`${labelClasses} !text-blue-500`}>{t('rental:form.checkOutTime', 'Check-out Time')}</label>
+                                        <input
+                                            type="time"
+                                            id="checkOutTime"
+                                            value={listingData.checkOutTime}
+                                            onChange={(e) => setListingData(prev => ({ ...prev, checkOutTime: e.target.value }))}
+                                            className={inputBaseClasses}
+                                        />
+                                    </div>
+
+                                    {/* Cleaning Fee */}
+                                    <div>
+                                        <label htmlFor="cleaningFee" className={`${labelClasses} !text-blue-500`}>{t('rental:form.cleaningFee', 'Cleaning Fee')}</label>
+                                        <div className="relative">
+                                            <input
+                                                type="number"
+                                                id="cleaningFee"
+                                                value={listingData.cleaningFee > 0 ? listingData.cleaningFee : ''}
+                                                onChange={(e) => setListingData(prev => ({ ...prev, cleaningFee: Number(e.target.value) || 0 }))}
+                                                className={`${inputBaseClasses} pl-10`}
+                                                placeholder="0"
+                                                min={0}
+                                            />
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">{currencySymbol}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Cancellation Policy */}
+                                    <div>
+                                        <label htmlFor="cancellationPolicy" className={`${labelClasses} !text-blue-500`}>{t('rental:form.cancellationPolicy', 'Cancellation Policy')}</label>
+                                        <div className="relative">
+                                            <select
+                                                id="cancellationPolicy"
+                                                value={listingData.cancellationPolicy}
+                                                onChange={(e) => setListingData(prev => ({ ...prev, cancellationPolicy: e.target.value as any }))}
+                                                className={selectClasses}
+                                            >
+                                                <option value="">{t('rental:form.cancellationPolicies.select', 'Select a policy')}</option>
+                                                <option value="flexible">{t('rental:form.cancellationPolicies.flexible', 'Flexible — Full refund 24h before check-in')}</option>
+                                                <option value="moderate">{t('rental:form.cancellationPolicies.moderate', 'Moderate — Full refund 5 days before check-in')}</option>
+                                                <option value="strict">{t('rental:form.cancellationPolicies.strict', 'Strict — 50% refund up to 1 week before')}</option>
+                                                <option value="non-refundable">{t('rental:form.cancellationPolicies.nonRefundable', 'Non-refundable')}</option>
+                                            </select>
+                                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                                                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>)}
                             </div>
 
                             {/* Inclusions */}
@@ -473,17 +551,55 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         />
                                         <span className="text-sm text-gray-600">{t('rental:form.internetIncluded')}</span>
                                     </label>
+                                    {/* Daily-only inclusions */}
+                                    {listingData.rentPeriod === 'daily' && (<>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={listingData.breakfastIncluded}
+                                                onChange={(e) => setListingData(prev => ({ ...prev, breakfastIncluded: e.target.checked }))}
+                                                className="rounded text-blue-500 focus:ring-blue-500/30 w-4 h-4 bg-gray-100/60 border-gray-300"
+                                            />
+                                            <span className="text-sm text-gray-600">{t('rental:form.breakfastIncluded', 'Breakfast')}</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={listingData.towelsIncluded}
+                                                onChange={(e) => setListingData(prev => ({ ...prev, towelsIncluded: e.target.checked }))}
+                                                className="rounded text-blue-500 focus:ring-blue-500/30 w-4 h-4 bg-gray-100/60 border-gray-300"
+                                            />
+                                            <span className="text-sm text-gray-600">{t('rental:form.towelsIncluded', 'Towels & Linen')}</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={listingData.parkingIncluded}
+                                                onChange={(e) => setListingData(prev => ({ ...prev, parkingIncluded: e.target.checked }))}
+                                                className="rounded text-blue-500 focus:ring-blue-500/30 w-4 h-4 bg-gray-100/60 border-gray-300"
+                                            />
+                                            <span className="text-sm text-gray-600">{t('rental:form.parkingIncluded', 'Parking')}</span>
+                                        </label>
+                                    </>)}
                                 </div>
                             </div>
 
-                            {/* Tenant Requirements */}
+                            {/* Tenant / Guest Requirements */}
                             <div>
                                 <TagListInput
                                     tags={listingData.tenantRequirements}
                                     setTags={(tags) => setListingData(prev => ({ ...prev, tenantRequirements: tags }))}
-                                    label={t('rental:form.tenantRequirements')}
+                                    label={
+                                        listingData.rentPeriod === 'daily'
+                                            ? t('rental:form.guestRequirements', 'Guest Requirements')
+                                            : t('rental:form.tenantRequirements')
+                                    }
                                 />
-                                <p className="mt-1 text-xs text-gray-300">{t('rental:form.tenantRequirementsHint')}</p>
+                                <p className="mt-1 text-xs text-gray-300">
+                                    {listingData.rentPeriod === 'daily'
+                                        ? t('rental:form.guestRequirementsHint', 'e.g. no parties, no smoking, ID verification required (press Enter to add)')
+                                        : t('rental:form.tenantRequirementsHint')}
+                                </p>
                             </div>
                         </fieldset>
                     )}

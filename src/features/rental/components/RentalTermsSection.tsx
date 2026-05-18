@@ -14,9 +14,12 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
 
     const currencySymbol = getCurrencySymbol(property.country);
 
-    const rentPeriodLabel = property.rentPeriod === 'weekly'
+    const isDaily = property.rentPeriod === 'daily';
+    const isWeekly = property.rentPeriod === 'weekly';
+
+    const rentPeriodLabel = isWeekly
         ? t('rental:details.weekly')
-        : property.rentPeriod === 'daily'
+        : isDaily
             ? t('rental:details.daily')
             : t('rental:details.monthly');
 
@@ -25,6 +28,13 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
         : null;
 
     const isAvailableNow = !availableDate || availableDate <= new Date();
+
+    const cancellationPolicyLabel: Record<string, string> = {
+        flexible: t('rental:details.cancellation.flexible', 'Flexible — Full refund 24h before check-in'),
+        moderate: t('rental:details.cancellation.moderate', 'Moderate — Full refund 5 days before'),
+        strict: t('rental:details.cancellation.strict', 'Strict — 50% refund up to 1 week before'),
+        'non-refundable': t('rental:details.cancellation.nonRefundable', 'Non-refundable'),
+    };
 
     return (
         <div className="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
@@ -71,7 +81,7 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
                         </div>
                     )}
 
-                    {/* Lease Duration */}
+                    {/* Stay / Lease Duration */}
                     {(property.minimumLeaseDuration || property.maximumLeaseDuration) && (
                         <div className="flex items-start gap-3">
                             <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
@@ -80,13 +90,82 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
                                 </svg>
                             </div>
                             <div>
-                                <p className="text-xs text-neutral-500">{t('rental:details.leaseDuration')}</p>
+                                <p className="text-xs text-neutral-500">
+                                    {isDaily
+                                        ? t('rental:details.stayDuration', 'Stay Duration')
+                                        : isWeekly
+                                            ? t('rental:details.stayDurationWeeks', 'Stay Duration')
+                                            : t('rental:details.leaseDuration')}
+                                </p>
                                 <p className="text-sm font-semibold text-neutral-800">
-                                    {property.minimumLeaseDuration && property.maximumLeaseDuration
-                                        ? t('rental:details.minToMaxMonths', { min: property.minimumLeaseDuration, max: property.maximumLeaseDuration })
-                                        : property.minimumLeaseDuration
-                                            ? t('rental:details.minMonths', { min: property.minimumLeaseDuration })
-                                            : t('rental:details.maxMonths', { max: property.maximumLeaseDuration })}
+                                    {isDaily
+                                        ? property.minimumLeaseDuration && property.maximumLeaseDuration
+                                            ? t('rental:details.minToMaxNights', { min: property.minimumLeaseDuration, max: property.maximumLeaseDuration, defaultValue: `{{min}}–{{max}} nights` })
+                                            : property.minimumLeaseDuration
+                                                ? t('rental:details.minNights', { min: property.minimumLeaseDuration, defaultValue: `{{min}} nights min` })
+                                                : t('rental:details.maxNights', { max: property.maximumLeaseDuration, defaultValue: `up to {{max}} nights` })
+                                        : isWeekly
+                                            ? property.minimumLeaseDuration && property.maximumLeaseDuration
+                                                ? t('rental:details.minToMaxWeeks', { min: property.minimumLeaseDuration, max: property.maximumLeaseDuration, defaultValue: `{{min}}–{{max}} weeks` })
+                                                : property.minimumLeaseDuration
+                                                    ? t('rental:details.minWeeks', { min: property.minimumLeaseDuration, defaultValue: `{{min}} weeks min` })
+                                                    : t('rental:details.maxWeeks', { max: property.maximumLeaseDuration, defaultValue: `up to {{max}} weeks` })
+                                            : property.minimumLeaseDuration && property.maximumLeaseDuration
+                                                ? t('rental:details.minToMaxMonths', { min: property.minimumLeaseDuration, max: property.maximumLeaseDuration })
+                                                : property.minimumLeaseDuration
+                                                    ? t('rental:details.minMonths', { min: property.minimumLeaseDuration })
+                                                    : t('rental:details.maxMonths', { max: property.maximumLeaseDuration })}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Check-in / Check-out times (daily only) */}
+                    {isDaily && property.checkInTime && (
+                        <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                                <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-xs text-neutral-500">{t('rental:details.checkInOut', 'Check-in / Check-out')}</p>
+                                <p className="text-sm font-semibold text-neutral-800">
+                                    {property.checkInTime}{property.checkOutTime ? ` / ${property.checkOutTime}` : ''}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Cleaning Fee (daily only) */}
+                    {isDaily && property.cleaningFee != null && property.cleaningFee > 0 && (
+                        <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-yellow-50 flex items-center justify-center flex-shrink-0">
+                                <svg className="w-4 h-4 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-xs text-neutral-500">{t('rental:details.cleaningFee', 'Cleaning Fee')}</p>
+                                <p className="text-sm font-semibold text-neutral-800">
+                                    {currencySymbol}{new Intl.NumberFormat('de-DE').format(property.cleaningFee)}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Cancellation Policy (daily only) */}
+                    {isDaily && property.cancellationPolicy && (
+                        <div className="flex items-start gap-3 sm:col-span-2">
+                            <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
+                                <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-xs text-neutral-500">{t('rental:details.cancellationPolicy', 'Cancellation Policy')}</p>
+                                <p className="text-sm font-semibold text-neutral-800">
+                                    {cancellationPolicyLabel[property.cancellationPolicy] ?? property.cancellationPolicy}
                                 </p>
                             </div>
                         </div>
@@ -155,12 +234,67 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
                             </p>
                         </div>
                     </div>
+
+                    {/* Breakfast (daily only) */}
+                    {isDaily && (
+                        <div className="flex items-start gap-3">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${property.breakfastIncluded ? 'bg-green-50' : 'bg-neutral-50'}`}>
+                                <svg className={`w-4 h-4 ${property.breakfastIncluded ? 'text-green-600' : 'text-neutral-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-xs text-neutral-500">{t('rental:details.breakfastIncluded', 'Breakfast')}</p>
+                                <p className={`text-sm font-semibold ${property.breakfastIncluded ? 'text-green-700' : 'text-neutral-500'}`}>
+                                    {property.breakfastIncluded ? t('rental:details.yes') : t('rental:details.no')}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Towels & Linen (daily only) */}
+                    {isDaily && (
+                        <div className="flex items-start gap-3">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${property.towelsIncluded ? 'bg-green-50' : 'bg-neutral-50'}`}>
+                                <svg className={`w-4 h-4 ${property.towelsIncluded ? 'text-green-600' : 'text-neutral-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-xs text-neutral-500">{t('rental:details.towelsIncluded', 'Towels & Linen')}</p>
+                                <p className={`text-sm font-semibold ${property.towelsIncluded ? 'text-green-700' : 'text-neutral-500'}`}>
+                                    {property.towelsIncluded ? t('rental:details.yes') : t('rental:details.no')}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Parking (daily only) */}
+                    {isDaily && (
+                        <div className="flex items-start gap-3">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${property.parkingIncluded ? 'bg-green-50' : 'bg-neutral-50'}`}>
+                                <svg className={`w-4 h-4 ${property.parkingIncluded ? 'text-green-600' : 'text-neutral-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2 1h8l2-1zM13 6h2.5a2.5 2.5 0 010 5H13V6z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-xs text-neutral-500">{t('rental:details.parkingIncluded', 'Parking')}</p>
+                                <p className={`text-sm font-semibold ${property.parkingIncluded ? 'text-green-700' : 'text-neutral-500'}`}>
+                                    {property.parkingIncluded ? t('rental:details.yes') : t('rental:details.no')}
+                                </p>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
-                {/* Tenant Requirements */}
+                {/* Tenant / Guest Requirements */}
                 {property.tenantRequirements && property.tenantRequirements.length > 0 && (
                     <div className="mt-5 pt-4 border-t border-neutral-100">
-                        <p className="text-xs text-neutral-500 mb-2">{t('rental:details.tenantRequirements')}</p>
+                        <p className="text-xs text-neutral-500 mb-2">
+                            {isDaily
+                                ? t('rental:details.guestRequirements', 'Guest Requirements')
+                                : t('rental:details.tenantRequirements')}
+                        </p>
                         <div className="flex flex-wrap gap-2">
                             {property.tenantRequirements.map((req, index) => (
                                 <span
