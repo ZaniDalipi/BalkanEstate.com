@@ -134,10 +134,10 @@ const PWAInstallPrompt = lazy(() => import('./src/shared/components/PWAInstallPr
 // Microsoft Clarity - Heatmaps & Session Recordings (lazy loaded)
 const ClarityInit = lazy(() => import('./src/app/components/ClarityInit'));
 
-// Loading fallback component with simple logo animation
+// Loading fallback component with animated logo
 const PageLoader: React.FC = () => (
   <div className="flex flex-col items-center justify-center min-h-[50vh]">
-    <LogoIcon className="w-12 h-12 text-primary animate-pulse" />
+    <LogoLoader size="md" showText={false} />
   </div>
 );
 
