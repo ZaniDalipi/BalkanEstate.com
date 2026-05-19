@@ -675,4 +675,16 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
   );
 };
 
-export default MapLocationPicker;
+export default React.memo(MapLocationPicker, (prev, next) =>
+  prev.lat === next.lat &&
+  prev.lng === next.lng &&
+  prev.address === next.address &&
+  prev.zoom === next.zoom &&
+  prev.country === next.country &&
+  prev.city === next.city &&
+  prev.cityLat === next.cityLat &&
+  prev.cityLng === next.cityLng &&
+  prev.autoDetectLocation === next.autoDetectLocation &&
+  prev.onLocationChange === next.onLocationChange &&
+  prev.onAddressChange === next.onAddressChange
+);

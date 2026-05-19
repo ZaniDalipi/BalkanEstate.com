@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RocketLaunchIcon, EyeIconSolid, ChatBubbleLeftRightIconSolid, BoltIconSolid, StarIconSolid, FireIcon } from '@/constants';
 import { usePromotionSelector, extensionTierStyles } from './usePromotionSelector';
@@ -569,4 +569,4 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
   );
 };
 
-export default PromotionSelector;
+export default memo(PromotionSelector);

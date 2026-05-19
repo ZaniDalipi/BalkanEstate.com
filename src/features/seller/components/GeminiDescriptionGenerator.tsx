@@ -793,7 +793,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 pendingPropertyData={pendingPropertyData!}
                 onPaymentSuccess={handlePromotionPaymentSuccess}
                 onSkip={handlePostWithoutPromotion}
-                onBack={() => setStep('form')}
+                onBack={handleBackToForm}
                 isSubmitting={isSubmitting}
                 inModal={false}
             />

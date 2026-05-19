@@ -1209,7 +1209,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     };
 
     // Handler for when promotion payment succeeds
-    const handlePromotionPaymentSuccess = async (promotionData: { tier: string; duration: number; hasUrgent: boolean; couponCode?: string }) => {
+    const handlePromotionPaymentSuccess = useCallback(async (promotionData: { tier: string; duration: number; hasUrgent: boolean; couponCode?: string }) => {
         if (!pendingPropertyData || !currentUser) return;
 
         try {
@@ -1246,10 +1246,10 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         } finally {
             setIsSubmitting(false);
         }
-    };
+    }, [pendingPropertyData, currentUser, createListing, updateUser, dispatch, showError, t]);
 
     // Handler for when user skips promotion or payment fails
-    const handlePostWithoutPromotion = async () => {
+    const handlePostWithoutPromotion = useCallback(async () => {
         if (!pendingPropertyData || !currentUser) return;
 
         try {
@@ -1272,7 +1272,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         } finally {
             setIsSubmitting(false);
         }
-    };
+    }, [pendingPropertyData, currentUser, createListing, updateUser, dispatch, showError, t]);
 
     return {
         // State

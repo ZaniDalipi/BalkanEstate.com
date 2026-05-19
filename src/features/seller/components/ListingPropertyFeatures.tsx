@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ListingData, TagListInput, TriStateCheckbox, labelClasses, selectClasses } from './ListingFormHelpers';
 
@@ -21,16 +21,27 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
 }) => {
     const { t } = useTranslation(['newListing', 'seller', 'common']);
 
+    const setSpecialFeatures = useCallback((tags: string[]) => setListingData(p => ({ ...p, specialFeatures: tags })), [setListingData]);
+    const setMaterials       = useCallback((tags: string[]) => setListingData(p => ({ ...p, materials: tags })),       [setListingData]);
+    const setAmenities       = useCallback((tags: string[]) => setListingData(p => ({ ...p, amenities: tags })),       [setListingData]);
+    const setHasBalcony      = useCallback((val: boolean | undefined) => setListingData(p => ({ ...p, hasBalcony: val })),          [setListingData]);
+    const setHasGarden       = useCallback((val: boolean | undefined) => setListingData(p => ({ ...p, hasGarden: val })),           [setListingData]);
+    const setHasElevator     = useCallback((val: boolean | undefined) => setListingData(p => ({ ...p, hasElevator: val })),         [setListingData]);
+    const setHasSecurity     = useCallback((val: boolean | undefined) => setListingData(p => ({ ...p, hasSecurity: val })),         [setListingData]);
+    const setHasAirConditioning = useCallback((val: boolean | undefined) => setListingData(p => ({ ...p, hasAirConditioning: val })), [setListingData]);
+    const setHasPool         = useCallback((val: boolean | undefined) => setListingData(p => ({ ...p, hasPool: val })),             [setListingData]);
+    const setPetsAllowed     = useCallback((val: boolean | undefined) => setListingData(p => ({ ...p, petsAllowed: val })),         [setListingData]);
+
     return (
         <>
             {/* Special Features, Materials & Amenities */}
-            <fieldset><TagListInput label={t('seller:createListing.fields.specialFeatures')} tags={listingData.specialFeatures} setTags={(tags) => setListingData(p => ({ ...p, specialFeatures: tags }))} /></fieldset>
-            <fieldset><TagListInput label={t('seller:createListing.fields.materials')} tags={listingData.materials} setTags={(tags) => setListingData(p => ({ ...p, materials: tags }))} /></fieldset>
+            <fieldset><TagListInput label={t('seller:createListing.fields.specialFeatures')} tags={listingData.specialFeatures} setTags={setSpecialFeatures} /></fieldset>
+            <fieldset><TagListInput label={t('seller:createListing.fields.materials')} tags={listingData.materials} setTags={setMaterials} /></fieldset>
             <fieldset>
                 <TagListInput
                     label={t('seller:createListing.fields.amenities')}
                     tags={listingData.amenities}
-                    setTags={(tags) => setListingData(p => ({ ...p, amenities: tags }))}
+                    setTags={setAmenities}
                 />
                 <p className="text-xs text-gray-400 mt-1">{t('seller:createListing.fields.amenitiesHint')}</p>
             </fieldset>
@@ -45,43 +56,43 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
                         <TriStateCheckbox
                             label={t('seller:createListing.propertyFeatures.balconyTerrace')}
                             value={listingData.hasBalcony}
-                            onChange={(val) => setListingData(p => ({ ...p, hasBalcony: val }))}
+                            onChange={setHasBalcony}
                         />
                     )}
                     <TriStateCheckbox
                         label={listingData.propertyType === 'land' ? t('seller:createListing.propertyFeatures.hasVegetation', 'Has Vegetation/Trees') : t('seller:createListing.propertyFeatures.gardenYard')}
                         value={listingData.hasGarden}
-                        onChange={(val) => setListingData(p => ({ ...p, hasGarden: val }))}
+                        onChange={setHasGarden}
                     />
                     {listingData.propertyType !== 'land' && (
                         <TriStateCheckbox
                             label={t('seller:createListing.propertyFeatures.elevator')}
                             value={listingData.hasElevator}
-                            onChange={(val) => setListingData(p => ({ ...p, hasElevator: val }))}
+                            onChange={setHasElevator}
                         />
                     )}
                     <TriStateCheckbox
                         label={listingData.propertyType === 'land' ? t('seller:createListing.propertyFeatures.fencedSecured', 'Fenced/Secured') : t('seller:createListing.propertyFeatures.securitySystem')}
                         value={listingData.hasSecurity}
-                        onChange={(val) => setListingData(p => ({ ...p, hasSecurity: val }))}
+                        onChange={setHasSecurity}
                     />
                     {listingData.propertyType !== 'land' && (
                         <TriStateCheckbox
                             label={t('seller:createListing.propertyFeatures.airConditioning')}
                             value={listingData.hasAirConditioning}
-                            onChange={(val) => setListingData(p => ({ ...p, hasAirConditioning: val }))}
+                            onChange={setHasAirConditioning}
                         />
                     )}
                     <TriStateCheckbox
                         label={listingData.propertyType === 'land' ? t('seller:createListing.propertyFeatures.hasWaterSource', 'Has Water Source') : t('seller:createListing.propertyFeatures.swimmingPool')}
                         value={listingData.hasPool}
-                        onChange={(val) => setListingData(p => ({ ...p, hasPool: val }))}
+                        onChange={setHasPool}
                     />
                     {listingData.propertyType !== 'land' && (
                         <TriStateCheckbox
                             label={t('seller:createListing.propertyFeatures.petsAllowed')}
                             value={listingData.petsAllowed}
-                            onChange={(val) => setListingData(p => ({ ...p, petsAllowed: val }))}
+                            onChange={setPetsAllowed}
                         />
                     )}
                 </div>
