@@ -126,6 +126,7 @@ const SplashScreen = lazy(() => import('./src/components/ui/SplashScreen'));
 
 // Global liquid glass SVG filter (needed for glass buttons & controls)
 import { LiquidGlassFilter } from './components/ui/liquid-glass-button';
+import { LogoLoader } from './src/shared/components/ui/LogoLoader';
 
 // PWA Install Prompt (lazy loaded)
 const PWAInstallPrompt = lazy(() => import('./src/shared/components/PWAInstallPrompt'));
@@ -622,10 +623,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     if (isLoadingAgency || !selectedAgency) {
       return (
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">{t('common:loadingAgency')}</p>
-          </div>
+          <LogoLoader size="md" showText={true} />
         </div>
       );
     }
@@ -643,9 +641,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     return (
       <Suspense fallback={
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          </div>
+          <LogoLoader size="md" showText={false} />
         </div>
       }>
         <EmailVerificationRequired email={state.pendingEmailVerification} />
@@ -1063,11 +1059,9 @@ const MainLayout: React.FC = () => {
 };
 
 const FullScreenLoader: React.FC = () => {
-    const { t } = useTranslation('common');
     return (
         <div className="w-screen h-screen flex flex-col items-center justify-center bg-neutral-50">
-            <LogoIcon className="w-16 h-16 text-primary animate-pulse" />
-            <p className="mt-4 text-neutral-600 font-semibold">{t('common:splash.loading')}</p>
+            <LogoLoader size="lg" showText={true} />
         </div>
     );
 };
