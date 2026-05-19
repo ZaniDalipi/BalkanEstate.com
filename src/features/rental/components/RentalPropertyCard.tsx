@@ -8,6 +8,7 @@ import { generatePropertySlug } from '@/utils/slug';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import PropertyImage from '@/src/components/ui/PropertyImage';
+import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 
 interface RentalPropertyCardProps {
     property: Property;
@@ -18,8 +19,13 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
     const { t } = useTranslation(['rental', 'common', 'property']);
     const { dispatch } = useAppContext();
     const handleClick = () => {
-        dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-        window.history.pushState({}, '', buildLocalizedPath(`/property/${generatePropertySlug(property)}`));
+        const url = buildLocalizedPath(`/property/${generatePropertySlug(property)}`);
+        if (shouldOpenInNewTab()) {
+            window.open(url, '_blank', 'noopener,noreferrer');
+        } else {
+            dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
+            window.history.pushState({}, '', url);
+        }
     };
 
     const currencySymbol = getCurrencySymbol(property.country);
