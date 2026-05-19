@@ -1,6 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import Conversation from '../models/Conversation';
+import { resolveId, encodeId } from '../utils/idObfuscation';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -99,14 +100,17 @@ export const setupChatSocket = (io: Server) => {
     // Join conversation rooms - WITH AUTHORIZATION CHECK
     socket.on('join-conversation', async (conversationId: string) => {
       try {
-        // Check if already authorized for this conversation (cached)
-        if (socket.authorizedConversations?.has(conversationId)) {
-          socket.join(conversationId);
+        // Resolve encoded or raw ID to raw hex ObjectId string
+        const rawId = resolveId(conversationId) || conversationId;
+
+        // Check if already authorized for this conversation (cached by raw hex)
+        if (socket.authorizedConversations?.has(rawId)) {
+          socket.join(rawId);
           return;
         }
 
         // Validate that this user is a participant in the conversation
-        const conversation = await Conversation.findById(conversationId).select('buyerId sellerId');
+        const conversation = await Conversation.findById(rawId).select('buyerId sellerId');
 
         if (!conversation) {
           socket.emit('error', { message: 'Conversation not found' });
@@ -121,15 +125,15 @@ export const setupChatSocket = (io: Server) => {
           return;
         }
 
-        // User is authorized - cache this and join the room
-        socket.authorizedConversations?.add(conversationId);
-        socket.join(conversationId);
+        // User is authorized - cache raw hex and join the room (rooms keyed by raw hex)
+        socket.authorizedConversations?.add(rawId);
+        socket.join(rawId);
 
         // Track user in conversation room
-        if (!conversationRooms.has(conversationId)) {
-          conversationRooms.set(conversationId, new Set());
+        if (!conversationRooms.has(rawId)) {
+          conversationRooms.set(rawId, new Set());
         }
-        conversationRooms.get(conversationId)?.add(userId);
+        conversationRooms.get(rawId)?.add(userId);
       } catch {
         socket.emit('error', { message: 'Error joining conversation' });
       }
@@ -137,8 +141,9 @@ export const setupChatSocket = (io: Server) => {
 
     // Leave conversation room
     socket.on('leave-conversation', (conversationId: string) => {
-      socket.leave(conversationId);
-      conversationRooms.get(conversationId)?.delete(userId);
+      const rawId = resolveId(conversationId) || conversationId;
+      socket.leave(rawId);
+      conversationRooms.get(rawId)?.delete(userId);
       // Keep authorization cached in case they rejoin
     });
 
@@ -150,8 +155,10 @@ export const setupChatSocket = (io: Server) => {
         return;
       }
 
-      // Verify the sender is authorized for this conversation
-      if (!socket.authorizedConversations?.has(data.conversationId)) {
+      const rawId = resolveId(data.conversationId) || data.conversationId;
+
+      // Verify the sender is authorized for this conversation (stored as raw hex)
+      if (!socket.authorizedConversations?.has(rawId)) {
         socket.emit('error', { message: 'Not authorized to send messages in this conversation' });
         return;
       }
@@ -164,8 +171,10 @@ export const setupChatSocket = (io: Server) => {
       }
 
       // Broadcast to all users in the conversation room except sender
-      socket.to(data.conversationId).emit('message-received', {
-        conversationId: data.conversationId,
+      // Encode conversationId back so frontend handlers can match by encoded ID
+      const encodedId = encodeId(rawId) || rawId;
+      socket.to(rawId).emit('message-received', {
+        conversationId: encodedId,
         message: data.message,
       });
     });
@@ -173,12 +182,14 @@ export const setupChatSocket = (io: Server) => {
     // Handle typing indicator - only if authorized
     socket.on('typing', (data: { conversationId: string; isTyping: boolean }) => {
       if (!checkSocketRateLimit(socket.id)) return;
-      if (!socket.authorizedConversations?.has(data.conversationId)) {
+      const rawId = resolveId(data.conversationId) || data.conversationId;
+      if (!socket.authorizedConversations?.has(rawId)) {
         return; // Silently ignore if not authorized
       }
 
-      socket.to(data.conversationId).emit('user-typing', {
-        conversationId: data.conversationId,
+      const encodedId = encodeId(rawId) || rawId;
+      socket.to(rawId).emit('user-typing', {
+        conversationId: encodedId,
         userId,
         isTyping: data.isTyping,
       });
@@ -186,12 +197,14 @@ export const setupChatSocket = (io: Server) => {
 
     // Handle message read status - only if authorized
     socket.on('mark-read', (data: { conversationId: string; messageIds: string[] }) => {
-      if (!socket.authorizedConversations?.has(data.conversationId)) {
+      const rawId = resolveId(data.conversationId) || data.conversationId;
+      if (!socket.authorizedConversations?.has(rawId)) {
         return; // Silently ignore if not authorized
       }
 
-      socket.to(data.conversationId).emit('messages-read', {
-        conversationId: data.conversationId,
+      const encodedId = encodeId(rawId) || rawId;
+      socket.to(rawId).emit('messages-read', {
+        conversationId: encodedId,
         messageIds: data.messageIds,
         readBy: userId,
       });

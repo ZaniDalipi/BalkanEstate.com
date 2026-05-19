@@ -13,7 +13,7 @@ import { incrementInquiryCount } from '../utils/statsUpdater';
 import { apiLogger } from '../utils/logger';
 import { sanitizeConversation } from '../utils/responseSanitizer';
 import { getObjectIdParam } from '../utils/validateParams';
-import { resolveId } from '../utils/idObfuscation';
+import { resolveId, encodeId } from '../utils/idObfuscation';
 
 const { isValidObjectId } = mongoose;
 
@@ -390,7 +390,7 @@ export const sendMessage = async (
     // Emit WebSocket event to conversation room for real-time delivery
     const io = getSocketInstance();
     if (io) {
-     const conversationId = String((conversation as any)._id);
+      const rawConversationId = String((conversation as any)._id);
 
       // SECURITY: Only send safe message fields — exclude imagePublicId (internal Cloudinary ID) and __v
       const safeMessage = {
@@ -407,13 +407,13 @@ export const sendMessage = async (
         updatedAt: message.updatedAt,
       };
 
-      io.to(conversationId).emit('message-received', {
-        conversationId: conversationId,
+      // Rooms are keyed by raw hex; emit encoded ID so frontend handlers can match
+      io.to(rawConversationId).emit('message-received', {
+        conversationId: encodeId(rawConversationId) || rawConversationId,
         message: safeMessage,
       });
 
-      apiLogger.info(`📨 Emitted message to conversation room: ${conversationId}`);
-
+      apiLogger.info(`📨 Emitted message to conversation room: ${rawConversationId}`);
     }
 
     // Include security warnings if any (from server-side filtering)
