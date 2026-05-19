@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { User, UserRole } from '@/types';
 import { useAppContext } from '@/context/AppContext';
@@ -461,4 +461,4 @@ const RoleCard: React.FC<RoleCardProps> = ({
     );
 };
 
-export default RoleSelector;
+export default memo(RoleSelector);
