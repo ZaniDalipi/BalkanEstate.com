@@ -30,7 +30,7 @@ import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 import { apiLogger } from '../../src/shared/utils/logger';
 import { tokenService } from '../../src/shared/api/tokenService';
-import PushNotificationToggle from '../../src/features/notifications/components/PushNotificationToggle';
+import NotificationSettingsSection from '../../src/features/notifications/components/NotificationSettingsSection';
 
 // Common languages spoken in the Balkan region
 const BALKAN_LANGUAGES = [
@@ -869,6 +869,9 @@ const SecuritySettings: React.FC<{ logoutAllDevices: () => Promise<void> }> = ({
                 <h2 className="text-2xl font-bold text-neutral-800 mb-2">{t('security.title')}</h2>
                 <p className="text-neutral-600">{t('security.description')}</p>
             </div>
+
+            {/* Notification Settings */}
+            <NotificationSettingsSection />
 
             {/* Change Password */}
             <ChangePasswordSection />
@@ -2068,10 +2071,9 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
             </div>
         )}
 
-        {/* Push Notifications */}
-        <div className="mt-8 border-t border-white/30 pt-6">
-            <h3 className="text-sm font-semibold text-neutral-700 mb-2">{t('account:notifications.title', 'Notification Settings')}</h3>
-            <PushNotificationToggle />
+        {/* Notification Settings */}
+        <div className="mt-8 border-t border-white/30 pt-8">
+            <NotificationSettingsSection />
         </div>
 
         {/* Change Password Section */}
