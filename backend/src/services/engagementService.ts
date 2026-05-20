@@ -11,6 +11,7 @@ import Property from '../models/Property';
 import User from '../models/User';
 import emailService from './emailService';
 import { sendPushToUser } from './pushNotificationService';
+import { getSocketInstance } from '../utils/socketInstance';
 import { apiLogger } from '../utils/logger';
 
 // ============================================================================
@@ -451,6 +452,20 @@ export async function createNotificationWithPush(
   }
 ): Promise<INotification> {
   const notification = await Notification.create(data);
+
+  // Emit real-time socket event so the frontend notification center updates instantly
+  const io = getSocketInstance();
+  if (io) {
+    io.to(`user:${String(data.userId)}`).emit('new-notification', {
+      _id: String(notification._id),
+      type: notification.type,
+      title: notification.title,
+      message: notification.message,
+      isRead: false,
+      createdAt: notification.createdAt,
+      data: notification.data,
+    });
+  }
 
   // Send push notification (non-blocking, fire-and-forget)
   sendPushToUser(String(data.userId), notification).catch((err) => {

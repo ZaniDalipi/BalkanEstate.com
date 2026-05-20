@@ -178,7 +178,7 @@
     "comparing": "Uspoređivanje",
     "addToCompare": "Dodaj za Usporedbu",
     "removeFromCompare": "Ukloni iz Usporedbe",
-    "compareLimit": "Možete usporediti do 4 nekretnine odjednom.",
+    "compareLimit": "Možete usporediti do 5 nekretnina odjednom.",
     "virtualTour": "Virtualna Tura",
     "view360": "360° Pregled",
     "floorPlan": "Tlocrt",
@@ -296,7 +296,10 @@
     "yearBuilt": "Godina Gradnje",
     "parking": "Parking",
     "specialFeatures": "Posebne Značajke",
-    "materials": "Materijali"
+    "materials": "Materijali",
+    "best": "Najbolje",
+    "viewProperty": "Pogledaj",
+    "removeFromComparison": "Ukloni"
   },
   "map": {
     "beds": "Spavaće Sobe",

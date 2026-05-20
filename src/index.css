@@ -284,6 +284,37 @@ fieldset {
   text-shadow: none;
 }
 
+/*
+ * Listing form performance: disable backdrop-filter on all glass elements
+ * inside the listing form. On a solid white page the blur is invisible anyway,
+ * but every blurred element creates a separate compositor layer which forces
+ * the browser to re-composite on every scroll frame — causing visible lag.
+ * Removing backdrop-filter collapses all elements into one GPU layer so
+ * scroll is handled entirely in hardware.
+ */
+.listing-form .glass-input,
+.listing-form .glass-select,
+.listing-form .glass-btn,
+.listing-form .glass-btn-primary,
+.listing-form .glass-btn-accent,
+.listing-form .glass-fieldset,
+.listing-form .glass-badge,
+.listing-form .glass-panel,
+.listing-form .glass-panel-light {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Also speed up transitions inside the form — 'transition: all' is expensive */
+.listing-form .glass-input,
+.listing-form .glass-select {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.listing-form .glass-btn {
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
 .text-glow-amber {
   text-shadow: none;
 }
@@ -1271,8 +1302,20 @@ html[data-zoom] #root {
   }
 }
 
+/* Floating search bar top padding:
+   - Browser: env() is 0 so we use a small fixed gap (8px).
+   - PWA standalone: status bar is part of the viewport; use safe-area-inset-top
+     plus a small gap, with a 44px floor for Android devices that report 0. */
+:root {
+  --floating-search-top-pad: calc(env(safe-area-inset-top, 0px) + 8px);
+}
+
 /* High-contrast focus ring for accessibility in PWA (no browser chrome) */
 @media (display-mode: standalone) {
+  :root {
+    --floating-search-top-pad: max(calc(env(safe-area-inset-top, 0px) + 8px), 44px);
+  }
+
   :focus-visible {
     outline: 2px solid #0252CD;
     outline-offset: 2px;

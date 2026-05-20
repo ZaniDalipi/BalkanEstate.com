@@ -178,7 +178,7 @@
     "comparing": "În Comparație",
     "addToCompare": "Adaugă la Comparație",
     "removeFromCompare": "Elimină din Comparație",
-    "compareLimit": "Puteți compara până la 4 proprietăți odată.",
+    "compareLimit": "Puteți compara până la 5 proprietăți odată.",
     "virtualTour": "Tur Virtual",
     "view360": "Vedere 360°",
     "floorPlan": "Plan de Etaj",
@@ -296,7 +296,10 @@
     "yearBuilt": "Anul Construcției",
     "parking": "Parcare",
     "specialFeatures": "Caracteristici Speciale",
-    "materials": "Materiale"
+    "materials": "Materiale",
+    "best": "Cel mai bun",
+    "viewProperty": "Vezi",
+    "removeFromComparison": "Elimină"
   },
   "map": {
     "beds": "Dormitoare",

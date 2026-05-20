@@ -5,6 +5,7 @@ import { useAppContext } from '@/context/AppContext';
 import { AppleIcon, EnvelopeIcon, GoogleIcon, LogoIcon, EyeIcon } from '@/constants';
 import SocialLoginPopup from './SocialLoginPopup';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import { validateEmail } from '@/shared/utils/validation';
 
 type SocialProvider = 'google' | 'apple';
 
@@ -25,17 +26,6 @@ interface FieldErrors {
     password?: string;
 }
 
-const validateEmail = (email: string, t?: (key: string, defaultValue?: string) => string): string | null => {
-    const tr = t || ((key: string, defaultValue?: string) => defaultValue || key);
-    if (!email.trim()) {
-        return tr('auth:validation.email.required', 'Please enter your email address');
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        return tr('auth:validation.email.invalid', 'Please enter a valid email address');
-    }
-    return null;
-};
 
 const ValidationError: React.FC<{ message?: string; show: boolean }> = ({ message, show }) => (
     <div className={`overflow-hidden transition-all duration-300 ease-out ${show && message ? 'max-h-20 opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
@@ -104,8 +94,8 @@ const LoginPage: React.FC = () => {
     const handleBlur = (field: 'email' | 'password') => {
         setTouched(prev => ({ ...prev, [field]: true }));
         if (field === 'email') {
-            const emailError = validateEmail(email, t as any);
-            setFieldErrors(prev => ({ ...prev, email: emailError || undefined }));
+            const emailResult = validateEmail(email);
+            setFieldErrors(prev => ({ ...prev, email: emailResult.isValid ? undefined : emailResult.error }));
         } else if (field === 'password') {
             if (!password.trim()) {
                 setFieldErrors(prev => ({ ...prev, password: t('auth:validation.pleaseEnterPassword', 'Please enter your password') }));
@@ -118,7 +108,8 @@ const LoginPage: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const emailError = validateEmail(email, t as any);
+        const emailResult = validateEmail(email);
+        const emailError = emailResult.isValid ? null : emailResult.error;
         let passwordError: string | null = null;
         if (!password.trim()) {
             passwordError = t('auth:validation.pleaseEnterPassword', 'Please enter your password');
@@ -191,7 +182,7 @@ const LoginPage: React.FC = () => {
                 }
             `}</style>
 
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-neutral-50 to-primary/10 p-4">
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-neutral-50 to-primary/10 p-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1rem)' }}>
                 <div className="w-full max-w-md">
                     <div className="bg-white/80 backdrop-blur-2xl rounded-3xl shadow-2xl shadow-black/10 border border-white/50 p-6 sm:p-8">
                         {/* Logo */}

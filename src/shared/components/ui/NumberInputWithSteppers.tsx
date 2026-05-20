@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback, memo } from 'react';
 
 interface NumberInputWithSteppersProps {
     label: string;
@@ -14,7 +14,7 @@ interface NumberInputWithSteppersProps {
  * Number input with glass-styled +/- stepper buttons
  * Validates against min/max and prevents invalid values
  */
-const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({
+const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = memo(({
     label,
     value: rawValue,
     onChange,
@@ -26,17 +26,17 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({
     const value = rawValue ?? min ?? 0;
     const id = useMemo(() => `number-input-${label.toLowerCase().replace(/\s+/g, '-')}`, [label]);
 
-    const decrement = () => {
+    const decrement = useCallback(() => {
         const newVal = value - step;
         onChange(min !== undefined ? Math.max(newVal, min) : newVal);
-    };
+    }, [value, step, min, onChange]);
 
-    const increment = () => {
+    const increment = useCallback(() => {
         const newVal = value + step;
         onChange(max !== undefined ? Math.min(newVal, max) : newVal);
-    };
+    }, [value, step, max, onChange]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const inputValue = e.target.value;
 
         if (inputValue === '') {
@@ -52,9 +52,9 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({
             if (max !== undefined && clampedValue > max) clampedValue = max;
             onChange(clampedValue);
         }
-    };
+    }, [min, max, step, onChange]);
 
-    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
         const inputValue = e.target.value;
 
         if (inputValue === '' || isNaN(Number(inputValue))) {
@@ -67,14 +67,14 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({
         if (min !== undefined && clampedValue < min) clampedValue = min;
         if (max !== undefined && clampedValue > max) clampedValue = max;
         onChange(clampedValue);
-    };
+    }, [min, max, onChange]);
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             e.preventDefault();
             (e.target as HTMLInputElement).blur();
         }
-    };
+    }, []);
 
     const canDecrement = min === undefined || value > min;
     const canIncrement = max === undefined || value < max;
@@ -124,6 +124,6 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({
             </div>
         </div>
     );
-};
+});
 
 export default NumberInputWithSteppers;

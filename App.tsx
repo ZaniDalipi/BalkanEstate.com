@@ -128,6 +128,7 @@ const SplashScreen = lazy(() => import('./src/components/ui/SplashScreen'));
 
 // Global liquid glass SVG filter (needed for glass buttons & controls)
 import { LiquidGlassFilter } from './components/ui/liquid-glass-button';
+import { LogoLoader } from './src/shared/components/ui/LogoLoader';
 
 // PWA Install Prompt (lazy loaded)
 const PWAInstallPrompt = lazy(() => import('./src/shared/components/PWAInstallPrompt'));
@@ -135,10 +136,10 @@ const PWAInstallPrompt = lazy(() => import('./src/shared/components/PWAInstallPr
 // Microsoft Clarity - Heatmaps & Session Recordings (lazy loaded)
 const ClarityInit = lazy(() => import('./src/app/components/ClarityInit'));
 
-// Loading fallback component with simple logo animation
+// Loading fallback component with animated logo
 const PageLoader: React.FC = () => (
   <div className="flex flex-col items-center justify-center min-h-[50vh]">
-    <LogoIcon className="w-12 h-12 text-primary animate-pulse" />
+    <LogoLoader size="md" showText={false} />
   </div>
 );
 
@@ -624,10 +625,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     if (isLoadingAgency || !selectedAgency) {
       return (
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">{t('common:loadingAgency')}</p>
-          </div>
+          <LogoLoader size="md" showText={true} />
         </div>
       );
     }
@@ -645,9 +643,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     return (
       <Suspense fallback={
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          </div>
+          <LogoLoader size="md" showText={false} />
         </div>
       }>
         <EmailVerificationRequired email={state.pendingEmailVerification} />
@@ -1065,11 +1061,9 @@ const MainLayout: React.FC = () => {
 };
 
 const FullScreenLoader: React.FC = () => {
-    const { t } = useTranslation('common');
     return (
         <div className="w-screen h-screen flex flex-col items-center justify-center bg-neutral-50">
-            <LogoIcon className="w-16 h-16 text-primary animate-pulse" />
-            <p className="mt-4 text-neutral-600 font-semibold">{t('common:splash.loading')}</p>
+            <LogoLoader size="lg" showText={true} />
         </div>
     );
 };
@@ -1157,29 +1151,6 @@ const AppWrapper: React.FC = () => {
         checkAuthStatus();
     }, [checkAuthStatus, handleOAuthCallback, dispatch]);
 
-    // While splash is active, render app content behind it so resources start loading
-    // But skip splash if user needs email verification (show that immediately instead)
-    if (shouldShowSplash && !state.pendingEmailVerification) {
-        return (
-            <>
-                {/* Render main layout behind the splash so map/resources start loading */}
-                <div className="fixed inset-0 pointer-events-none" aria-hidden="true" style={{ opacity: 0.01, contain: 'strict' }}>
-                    {!state.isAuthenticating && <MainLayout />}
-                </div>
-                <Suspense fallback={<FullScreenLoader />}>
-                    <SplashScreen
-                        onComplete={handleSplashComplete}
-                        userName={state.currentUser?.name || state.currentUser?.email?.split('@')[0]}
-                    />
-                </Suspense>
-            </>
-        );
-    }
-
-    if (state.isAuthenticating) {
-        return <FullScreenLoader />;
-    }
-
     // Allow password reset and email verification pages to bypass onboarding and verification check
     const isAuthFlowPage = window.location.pathname.includes('reset-password') ||
                            window.location.pathname.includes('verify-email');
@@ -1192,32 +1163,59 @@ const AppWrapper: React.FC = () => {
                                    !state.currentUser.isEmailVerified &&
                                    !isAuthFlowPage;
 
-    if (needsEmailVerification && state.currentUser) {
-        return (
+    // Determine app body — always rendered at the same position in the tree so that
+    // the splash screen (rendered as an overlay below) never causes MainLayout to
+    // unmount/remount. Previously the hidden-div + conditional-return pattern caused
+    // MainLayout to live in a different DOM position before vs after the splash,
+    // which made React tear it down and rebuild it — appearing as a ~10 s "restart".
+    let appBody: React.ReactNode;
+    if (state.isAuthenticating) {
+        appBody = <FullScreenLoader />;
+    } else if (state.pendingEmailVerification && state.currentUser?.isEmailVerified === false) {
+        appBody = (
+            <Suspense fallback={<FullScreenLoader />}>
+                <EmailVerificationRequired email={state.pendingEmailVerification} />
+            </Suspense>
+        );
+    } else if (needsEmailVerification && state.currentUser) {
+        appBody = (
             <Suspense fallback={<FullScreenLoader />}>
                 <EmailVerificationRequired email={state.currentUser.email} />
             </Suspense>
         );
-    }
-
-    // Render 404 page outside MainLayout for true full-screen (no sidebar)
-    if (state.activeView === 'not-found') {
-        return (
+    } else if (state.activeView === 'not-found') {
+        appBody = (
             <Suspense fallback={<FullScreenLoader />}>
                 <NotFoundPage />
             </Suspense>
         );
+    } else {
+        appBody = (
+            <>
+                <MainLayout />
+                <Suspense fallback={null}>
+                    {state.isAuthModalOpen && <AuthPage />}
+                    <CookieConsent />
+                    <PWAInstallPrompt />
+                    <PushNotificationPrompt />
+                </Suspense>
+            </>
+        );
     }
 
+    // The splash is a fixed overlay — it never wraps or replaces appBody, so appBody
+    // stays mounted in the same position the whole time and resources load during the splash.
     return (
         <>
-            <MainLayout />
-            <Suspense fallback={null}>
-                {state.isAuthModalOpen && <AuthPage />}
-                <CookieConsent />
-                <PWAInstallPrompt />
-                <PushNotificationPrompt />
-            </Suspense>
+            {appBody}
+            {shouldShowSplash && !state.pendingEmailVerification && (
+                <Suspense fallback={<FullScreenLoader />}>
+                    <SplashScreen
+                        onComplete={handleSplashComplete}
+                        userName={state.currentUser?.name || state.currentUser?.email?.split('@')[0]}
+                    />
+                </Suspense>
+            )}
         </>
     );
 }

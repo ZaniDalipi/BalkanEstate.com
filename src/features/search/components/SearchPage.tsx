@@ -175,6 +175,28 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
 
     return (
         <div className={`relative flex h-full w-full flex-col lg:flex-row ${(isMobile || isTablet) && isFiltersOpen ? 'overflow-hidden' : ''}`}>
+            {/* Search progress bar — shown while properties are loading */}
+            {isLoadingProperties && (
+                <div
+                    className="fixed top-0 left-0 right-0 z-[9999] h-0.5 overflow-hidden"
+                    role="progressbar"
+                    aria-label="Loading properties"
+                >
+                    <div
+                        className="h-full bg-blue-600"
+                        style={{
+                            animation: 'search-progress 2s ease-in-out infinite',
+                        }}
+                    />
+                    <style>{`
+                        @keyframes search-progress {
+                            0%   { width: 0%;   margin-left: 0%; }
+                            50%  { width: 70%;  margin-left: 15%; }
+                            100% { width: 0%;   margin-left: 100%; }
+                        }
+                    `}</style>
+                </div>
+            )}
             {/* Dynamic SEO for Search Page */}
             <SEO
                 title={seoTitle}
@@ -198,11 +220,11 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                 '@type': 'ListItem',
                                 position: i + 1,
                                 url: `${window.location.origin}/property/${generatePropertySlug(p)}`,
-                                name: `${p.beds ? p.beds + '-Bed ' : ''}${p.propertyType || 'Property'} in ${p.city}, ${p.country}`,
+                                name: p.title || `${p.beds ? p.beds + '-Bed ' : ''}${p.propertyType || 'Property'} in ${p.city}, ${p.country}`,
                                 ...(p.imageUrl && { image: p.imageUrl }),
                                 item: {
                                     '@type': 'RealEstateListing',
-                                    name: `${p.beds ? p.beds + '-Bed ' : ''}${p.propertyType || 'Property'} in ${p.city}, ${p.country}`,
+                                    name: p.title || `${p.beds ? p.beds + '-Bed ' : ''}${p.propertyType || 'Property'} in ${p.city}, ${p.country}`,
                                     url: `${window.location.origin}/property/${generatePropertySlug(p)}`,
                                     ...(p.imageUrl && { image: p.imageUrl }),
                                     ...(p.price && {
@@ -309,7 +331,14 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                     <>
                         {/* Mobile-only: floating search bar overlay (tablet uses SearchHeader instead) */}
                         {isMobile && (
-                            <div className="absolute top-0 left-0 right-0 z-[100] px-2 landscape:px-1.5 pb-2 landscape:pb-1.5 pointer-events-none" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 8px)' }}>
+                            <div
+                                className="absolute top-0 left-0 right-0 z-[100] pb-2 landscape:pb-1.5 pointer-events-none"
+                                style={{
+                                    paddingTop: 'var(--floating-search-top-pad)',
+                                    paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 8px)',
+                                    paddingRight: 'calc(env(safe-area-inset-right, 0px) + 8px)',
+                                }}
+                            >
                                 <div ref={searchWrapperRef} className="pointer-events-auto w-full space-y-2">
                                     <div
                                         className="w-full bg-white/60 backdrop-blur-xl rounded-full p-1 flex items-center gap-0.5 sm:gap-1 border border-white/40"
@@ -364,7 +393,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                         )}
 
                         {/* Floating List/Map toggle - shows on both mobile and tablet (Zillow-style) */}
-                        <div className="absolute bottom-24 xs:bottom-28 sm:bottom-24 md:bottom-6 landscape:bottom-14 left-0 right-0 z-[100] p-3 sm:p-4 landscape:p-2 pointer-events-none flex justify-center" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)' }}>
+                        <div className="absolute bottom-28 xs:bottom-32 sm:bottom-28 md:bottom-6 landscape:bottom-16 left-0 right-0 z-[100] p-3 sm:p-4 landscape:p-2 pointer-events-none flex justify-center" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)' }}>
                             {/* Map hint tooltip - positioned to point at Map button */}
                             {showMapHint && (
                                 <div className="absolute bottom-full right-1/2 translate-x-[70%] mb-2 pointer-events-auto animate-bounce">

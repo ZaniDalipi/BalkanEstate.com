@@ -1,4 +1,5 @@
 import React from 'react';
+import { LogoLoader } from './LogoLoader';
 
 export interface SpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -56,7 +57,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
         bg-white/80 backdrop-blur-sm z-50
       `}
     >
-      <Spinner size="lg" />
+      <LogoLoader size="md" showText={false} />
       {message && <p className="mt-4 text-gray-600 font-medium">{message}</p>}
     </div>
   );

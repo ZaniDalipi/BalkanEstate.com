@@ -14,24 +14,26 @@ import { apiLogger } from '../utils/logger';
 // VAPID Configuration
 // ============================================================================
 
-const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || '';
-const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
+// Read VAPID_SUBJECT at module level (it has a safe default and never changes)
 const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'mailto:support@balkanestateai.com';
 
 let isConfigured = false;
 
 /**
  * Initialize web-push with VAPID credentials.
- * Called once at server startup.
+ * Called once at server startup, after dotenv has loaded env vars.
  */
 export function initializePushService(): void {
-  if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
+  const vapidPublicKey = process.env.VAPID_PUBLIC_KEY || '';
+  const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY || '';
+
+  if (!vapidPublicKey || !vapidPrivateKey) {
     apiLogger.warn('⚠️  Push notifications disabled: VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY not set');
     return;
   }
 
   try {
-    webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+    webpush.setVapidDetails(VAPID_SUBJECT, vapidPublicKey, vapidPrivateKey);
     isConfigured = true;
     apiLogger.info('✅ Push notification service initialized');
   } catch (error) {
@@ -43,7 +45,7 @@ export function initializePushService(): void {
  * Get the VAPID public key for client-side subscription.
  */
 export function getVapidPublicKey(): string {
-  return VAPID_PUBLIC_KEY;
+  return process.env.VAPID_PUBLIC_KEY || '';
 }
 
 // ============================================================================

@@ -361,14 +361,15 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
       {isMobile && !hideControls && (
         <>
           {/* Mobile layer menu FAB */}
-          <div className="absolute bottom-28 left-3 z-[1003]">
+          <div className="absolute bottom-32 left-3 z-[1003]">
             {isLayerMenuOpen && (
               <div className="absolute bottom-full left-0 mb-3 animate-fade-in">
                 <div
-                  className="flex flex-col gap-1 p-2.5 rounded-2xl shadow-2xl border border-white/40 min-w-[180px]"
+                  className="flex flex-col gap-1 p-2.5 rounded-2xl shadow-2xl border border-white/40 min-w-[180px] overflow-y-auto"
                   style={{
                     background: 'rgba(255, 255, 255, 0.92)',
                     backdropFilter: 'blur(20px) saturate(180%)',
+                    maxHeight: 'calc(100dvh - 260px)',
                   }}
                 >
                   {/* Map Styles */}
@@ -491,8 +492,8 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
             </button>
           </div>
 
-          {/* Mobile controls - top right */}
-          <div className="absolute top-16 right-2 z-[999]">
+          {/* Mobile controls - top right: sits below the floating search bar */}
+          <div className="absolute right-2 z-[999]" style={{ top: 'calc(var(--floating-search-top-pad, 8px) + 60px)' }}>
             <div className="flex flex-col gap-1.5 items-end">
               <div
                 className="flex items-center gap-1 p-1.5 rounded-2xl shadow-xl border border-white/30"
@@ -569,9 +570,9 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
             </div>
           )}
 
-          {/* Climate Risk Legend for mobile */}
+          {/* Climate Risk Legend for mobile: sits below the floating search bar */}
           {selectedClimateRisk !== 'none' && (
-            <div className="absolute top-16 left-2 z-[1000] animate-fade-in">
+            <div className="absolute left-2 z-[1000] animate-fade-in" style={{ top: 'calc(var(--floating-search-top-pad, 8px) + 60px)' }}>
               <ClimateRiskLegend riskType={selectedClimateRisk} />
             </div>
           )}

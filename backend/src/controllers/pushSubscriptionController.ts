@@ -52,10 +52,12 @@ export const subscribe = async (req: Request, res: Response): Promise<void> => {
     const existingSubs = await pushService.getUserSubscriptions(userId);
     const isUpdatingExisting = existingSubs.some(s => s.endpoint === subscription.endpoint);
     if (!isUpdatingExisting && existingSubs.length >= MAX_SUBSCRIPTIONS_PER_USER) {
-      res.status(409).json({
-        message: `Maximum of ${MAX_SUBSCRIPTIONS_PER_USER} devices allowed. Please remove an existing device first.`,
-      });
-      return;
+      // Auto-evict oldest subscription to make room for the new device
+      const sorted = [...existingSubs].sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+      await pushService.removeSubscription(userId, sorted[0].endpoint);
+      apiLogger.info(`Auto-evicted oldest push subscription for user ${userId} to make room for new device`);
     }
 
     const userAgent = req.headers['user-agent'];
