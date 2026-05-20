@@ -162,6 +162,7 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
       payload: {
         filters: updatedFilters,
         activeFilters: updatedFilters,
+        mobileView: 'map',
       },
     });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
