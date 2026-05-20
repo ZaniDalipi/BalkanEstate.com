@@ -80,17 +80,56 @@ const ToggleRow: React.FC<ToggleRowProps> = ({ icon, label, description, checked
 
 // ─── Push notification card ────────────────────────────────────────────────────
 
+const isDev = import.meta.env.DEV;
+const isSecureContext = typeof window !== 'undefined' && window.isSecureContext;
+
 const PushSection: React.FC = () => {
   const { t } = useTranslation(['account']);
   const { isSupported, permission, isSubscribed, isLoading, subscribe, unsubscribe, error } = usePushNotifications();
+  const [testSent, setTestSent] = useState(false);
 
   const handleToggle = async () => {
     if (isSubscribed) await unsubscribe();
     else await subscribe();
   };
 
+  const sendTestNotification = async () => {
+    const perm = await Notification.requestPermission();
+    if (perm === 'granted') {
+      new Notification('BalkanEstate — Test Notification', {
+        body: 'Browser notifications are working correctly in development.',
+        icon: '/icons/icon-192x192.png',
+        tag: 'dev-test',
+      });
+      setTestSent(true);
+      setTimeout(() => setTestSent(false), 3000);
+    }
+  };
+
   const statusBanner = () => {
     if (!isSupported && permission === 'unsupported') {
+      if (isDev && !isSecureContext) {
+        return (
+          <div className="mt-3 space-y-2">
+            <div className="flex items-start gap-2 rounded-xl bg-amber-50/60 border border-amber-200/50 px-3 py-2.5 text-xs text-amber-800">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <span>
+                <strong>Development mode:</strong> Web Push requires HTTPS or{' '}
+                <code className="font-mono bg-amber-100/60 px-1 rounded">localhost</code>. Access the app via{' '}
+                <code className="font-mono bg-amber-100/60 px-1 rounded">http://localhost:PORT</code> instead of an IP address to enable full push subscription testing.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={sendTestNotification}
+              className="w-full flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 px-3 py-2 text-xs font-medium text-primary transition-colors"
+            >
+              <Bell className="w-3.5 h-3.5" />
+              {testSent ? 'Notification sent!' : 'Send test browser notification'}
+            </button>
+          </div>
+        );
+      }
       return (
         <div className="mt-3 flex items-start gap-2 rounded-xl bg-amber-50/60 border border-amber-200/50 px-3 py-2.5 text-xs text-amber-800">
           <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
