@@ -557,6 +557,15 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
 
   // Scroll to top when active view changes
   useEffect(() => {
+    // Reset any browser zoom that was triggered by focused inputs (iOS auto-zoom)
+    const viewport = document.querySelector('meta[name=viewport]');
+    if (viewport) {
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover');
+      setTimeout(() => {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, viewport-fit=cover');
+      }, 300);
+    }
+
     // Scroll window to top
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
 
