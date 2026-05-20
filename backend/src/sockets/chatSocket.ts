@@ -94,6 +94,9 @@ export const setupChatSocket = (io: Server) => {
     // Store user's socket connection
     userSockets.set(userId, socket.id);
 
+    // Join a user-specific room so we can target this user from any service
+    socket.join(`user:${userId}`);
+
     // Initialize authorized conversations set for this socket
     socket.authorizedConversations = new Set();
 

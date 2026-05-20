@@ -99,18 +99,18 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                 if (prev.some(m => m.id === message.id)) return prev;
 
                 playNotificationSound();
-                // Determine who the "other person" is based on current user's role
-                const isCurrentUserBuyer = String(conversation.buyer?.id || conversation.buyerId) === String(currentUserId);
-                const otherPerson = isCurrentUserBuyer
-                    ? (conversation.seller || property?.seller)
-                    : (conversation.buyer || { name: 'User' });
-
-                if (otherPerson && property) {
-                    notificationService.showNewMessageNotification(
-                        otherPerson.name || 'User',
-                        message.text || '[Image]',
-                        `${property.address}, ${property.city}`
-                    );
+                // Only show browser notification when the user is not actively viewing this conversation
+                if (document.hidden && Notification.permission === 'granted') {
+                    const isCurrentUserBuyer = String(conversation.buyer?.id || conversation.buyerId) === String(currentUserId);
+                    const otherPerson = isCurrentUserBuyer
+                        ? (conversation.seller || property?.seller)
+                        : (conversation.buyer || { name: 'User' });
+                    const senderName = otherPerson?.name || 'Someone';
+                    notificationService.showNotification(`New message from ${senderName}`, {
+                        body: message.text || '[Image]',
+                        tag: `msg-${conversation.id}`,
+                        requireInteraction: false,
+                    });
                 }
 
                 dispatch({ type: 'ADD_MESSAGE', payload: { conversationId: conversation.id, message } });
