@@ -9,20 +9,26 @@ import request from 'supertest';
 import express from 'express';
 
 let mongoServer: MongoMemoryServer;
+let mongoAvailable = false;
 
 // Setup before all tests
 beforeAll(async () => {
-  // Create an in-memory MongoDB instance
-  mongoServer = await MongoMemoryServer.create();
-  const mongoUri = mongoServer.getUri();
-
-  // Connect mongoose to the in-memory database
-  await mongoose.connect(mongoUri);
+  try {
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
+    await mongoose.connect(mongoUri);
+    mongoAvailable = true;
+  } catch (err) {
+    // MongoDB binary unavailable in this environment (e.g. no network access).
+    // Tests that mock the DB (unit tests) will still run; integration tests
+    // that actually hit mongoose will fail on their own.
+    console.warn('[setup] MongoMemoryServer unavailable — skipping DB setup. Unit tests will still run.');
+  }
 });
 
 // Cleanup after each test
 afterEach(async () => {
-  // Clear all collections after each test
+  if (!mongoAvailable) return;
   const collections = mongoose.connection.collections;
   for (const key in collections) {
     await collections[key].deleteMany({});
@@ -31,7 +37,7 @@ afterEach(async () => {
 
 // Cleanup after all tests
 afterAll(async () => {
-  // Disconnect and stop the in-memory database
+  if (!mongoAvailable) return;
   await mongoose.disconnect();
   await mongoServer.stop();
 });
