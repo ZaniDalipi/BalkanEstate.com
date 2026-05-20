@@ -449,6 +449,7 @@ export interface Conversation {
     participants?: string[]; // user ID and seller ID (for backwards compatibility)
     messages: Message[];
     lastMessage?: Message;
+    lastMessageAt?: string | number;
     createdAt: number;
     isRead: boolean;
     buyerUnreadCount: number;
