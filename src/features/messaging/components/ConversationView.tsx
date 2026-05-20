@@ -141,9 +141,29 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
 
     const playNotificationSound = () => {
         try {
-            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZSA0PVanl8LBhGgU7k9n0zoAwBSh+zPLaizsIGGS57OihUBELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURE=');
-            audio.volume = 0.3;
-            audio.play().catch(() => {});
+            const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+            const master = ctx.createGain();
+            master.gain.setValueAtTime(0.18, ctx.currentTime);
+            master.connect(ctx.destination);
+
+            const playTone = (freq: number, startTime: number, duration: number) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, startTime);
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(1, startTime + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                osc.connect(gain);
+                gain.connect(master);
+                osc.start(startTime);
+                osc.stop(startTime + duration);
+            };
+
+            // Two-tone soft chime: C6 → E6
+            playTone(1046.5, ctx.currentTime, 0.35);
+            playTone(1318.5, ctx.currentTime + 0.12, 0.45);
+            setTimeout(() => ctx.close(), 700);
         } catch {
             // Silently ignore audio errors
         }
