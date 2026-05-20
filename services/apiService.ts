@@ -976,8 +976,9 @@ export const getConversations = async (): Promise<Conversation[]> => {
     });
 
     // Filter out any null or invalid conversations
+    // Backend returns `id` (encoded) not `_id` after sanitization
     const validConversations = response.conversations?.filter(
-      (conv: any) => conv && conv._id
+      (conv: any) => conv && (conv.id || conv._id)
     ) || [];
 
     return validConversations.map(transformBackendConversation);
