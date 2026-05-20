@@ -561,9 +561,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
             {/* Seller Info */}
             <div className="min-w-0 flex-1">
-              {safeProperty.seller.name && (
-                <p className="text-xs font-semibold text-neutral-800 truncate">{safeProperty.seller.name}</p>
-              )}
+              <p className="text-xs font-semibold text-neutral-800 truncate">
+                {safeProperty.seller.name || (safeProperty.seller.type === 'agent' ? t('property:seller.agent') : t('property:seller.private'))}
+              </p>
               <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-[1px] rounded-full ${
                 safeProperty.seller.type === 'agent'
                   ? 'bg-blue-50 text-blue-600'
@@ -571,28 +571,23 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               }`}>
                 {safeProperty.seller.type === 'agent' ? t('property:seller.agent') : t('property:seller.private')}
               </span>
+              {safeProperty.seller.type === 'agent' && safeProperty.seller.agencyName && (
+                <p className="text-[10px] text-neutral-500 truncate mt-0.5">{safeProperty.seller.agencyName}</p>
+              )}
             </div>
 
             {/* Agency Logo (if agent with agency) */}
-            {safeProperty.seller.type === 'agent' && safeProperty.seller.agencyName && (
+            {safeProperty.seller.type === 'agent' && safeProperty.seller.agencyLogo && (
               <div className="flex items-center gap-1.5 flex-shrink-0 bg-neutral-50 px-2 py-1.5 rounded-lg border border-neutral-200">
-                {safeProperty.seller.agencyLogo ? (
-                  <img
-                    src={optimizeCloudinaryUrl(safeProperty.seller.agencyLogo, { width: 48, quality: 'auto', crop: 'fill' })}
-                    alt={`${safeProperty.seller.agencyName} - Real Estate Agency`}
-                    loading="lazy"
-                    decoding="async"
-                    width={24}
-                    height={24}
-                    className="w-6 h-6 rounded object-contain bg-white"
-                  />
-                ) : (
-                  <BuildingOfficeIcon className="w-5 h-5 text-primary" />
-                )}
-                <div className="hidden sm:block">
-                  <p className="text-[9px] text-neutral-500 leading-none">{t('property:seller.agency')}</p>
-                  <p className="text-[10px] font-medium text-neutral-700 truncate max-w-[60px]">{safeProperty.seller.agencyName}</p>
-                </div>
+                <img
+                  src={optimizeCloudinaryUrl(safeProperty.seller.agencyLogo, { width: 48, quality: 'auto', crop: 'fill' })}
+                  alt={`${safeProperty.seller.agencyName} - Real Estate Agency`}
+                  loading="lazy"
+                  decoding="async"
+                  width={24}
+                  height={24}
+                  className="w-6 h-6 rounded object-contain bg-white"
+                />
               </div>
             )}
           </div>

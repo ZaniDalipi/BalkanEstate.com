@@ -26,7 +26,23 @@ export class PropertyMapper {
       materials: dto.materials || [],
       amenities: dto.amenities || [],
       imageUrl: dto.imageUrl || dto.images?.[0]?.url || '',
-      seller: dto.seller,
+      seller: (() => {
+        // API returns populated sellerId object + createdAsRole; fall back to dto.seller for cached data
+        const sellerUser = dto.sellerId && typeof dto.sellerId === 'object' ? dto.sellerId : null;
+        if (sellerUser) {
+          return {
+            type: dto.createdAsRole === 'agent' ? 'agent' : 'private',
+            name: sellerUser.name || '',
+            avatarUrl: sellerUser.avatarUrl,
+            phone: sellerUser.phone || '',
+            agencyName: sellerUser.agencyName,
+            agencyLogo: sellerUser.agencyLogo,
+            agencyId: sellerUser.agencyId ? String(sellerUser.agencyId) : undefined,
+            agentId: sellerUser.agentId ? String(sellerUser.agentId) : undefined,
+          };
+        }
+        return dto.seller;
+      })(),
       propertyType: dto.propertyType,
       soldAt: dto.soldAt,
       tourUrl: dto.tourUrl,

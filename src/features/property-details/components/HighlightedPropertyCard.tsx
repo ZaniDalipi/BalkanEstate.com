@@ -386,7 +386,9 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
               type={property.seller.type}
             />
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-neutral-800 truncate">{property.seller.name}</p>
+              <p className="text-xs font-semibold text-neutral-800 truncate">
+                {property.seller.name || (property.seller.type === 'agent' ? t('property:seller.agent') : t('property:seller.private'))}
+              </p>
               <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-[1px] rounded-full ${
                 property.seller.type === 'agent'
                   ? 'bg-blue-50 text-blue-600'
@@ -394,6 +396,9 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
               }`}>
                 {property.seller.type === 'agent' ? t('property:seller.agent') : t('property:seller.private')}
               </span>
+              {property.seller.type === 'agent' && property.seller.agencyName && (
+                <p className="text-[10px] text-neutral-500 truncate mt-0.5">{property.seller.agencyName}</p>
+              )}
             </div>
           </div>
 

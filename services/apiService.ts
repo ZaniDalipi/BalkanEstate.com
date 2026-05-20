@@ -1121,11 +1121,16 @@ export const subscribe = async (_plan: string): Promise<{ success: true }> => {
 
 // Transform backend property to frontend Property type
 function transformBackendProperty(backendProp: any): Property {
-  const seller = backendProp.sellerId;
+  const seller = backendProp.sellerId && typeof backendProp.sellerId === 'object'
+    ? backendProp.sellerId
+    : {};
+  const rawSellerId = typeof backendProp.sellerId === 'string'
+    ? backendProp.sellerId
+    : (seller.id || seller._id || '');
 
   return {
     id: backendProp.id || backendProp._id,
-    sellerId: seller.id || seller._id || seller,
+    sellerId: rawSellerId,
     listingType: backendProp.listingType || 'sale',
     status: backendProp.status,
     title: backendProp.title,
@@ -1160,13 +1165,14 @@ function transformBackendProperty(backendProp: any): Property {
     lat: backendProp.lat,
     lng: backendProp.lng,
     seller: {
-      type: backendProp.createdAsRole === 'agent' ? 'agent' : 'private', // Use createdAsRole, not seller.role
-      name: seller.name,
-      phone: seller.phone,
+      type: backendProp.createdAsRole === 'agent' ? 'agent' : 'private',
+      name: seller.name || '',
+      phone: seller.phone || '',
       avatarUrl: seller.avatarUrl,
       agencyName: seller.agencyName,
       agencyLogo: seller.agencyLogo,
       agencyId: seller.agencyId,
+      agentId: seller.agentId,
     },
     propertyId: backendProp.propertyId,
     propertyType: backendProp.propertyType,
