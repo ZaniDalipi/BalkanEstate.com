@@ -298,13 +298,34 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
     // FIX: Add missing reducer case for marking a conversation as read.
     case 'MARK_CONVERSATION_AS_READ': {
         const conversationId = action.payload;
+        const userId = state.currentUser?.id;
         return {
             ...state,
-            conversations: state.conversations.map(c =>
-                c.id === conversationId
-                    ? { ...c, messages: c.messages.map(m => ({ ...m, isRead: true })) }
-                    : c
-            )
+            conversations: state.conversations.map(c => {
+                if (c.id !== conversationId) return c;
+                const isBuyer = String(c.buyerId) === String(userId);
+                return {
+                    ...c,
+                    messages: c.messages.map(m => ({ ...m, isRead: true })),
+                    buyerUnreadCount: isBuyer ? 0 : c.buyerUnreadCount,
+                    sellerUnreadCount: !isBuyer ? 0 : c.sellerUnreadCount,
+                };
+            })
+        };
+    }
+    case 'INCREMENT_CONVERSATION_UNREAD': {
+        const { conversationId, forUserId } = action.payload as { conversationId: string; forUserId: string };
+        return {
+            ...state,
+            conversations: state.conversations.map(c => {
+                if (c.id !== conversationId) return c;
+                const isBuyer = String(c.buyerId) === String(forUserId);
+                return {
+                    ...c,
+                    buyerUnreadCount: isBuyer ? (c.buyerUnreadCount || 0) + 1 : c.buyerUnreadCount,
+                    sellerUnreadCount: !isBuyer ? (c.sellerUnreadCount || 0) + 1 : c.sellerUnreadCount,
+                };
+            })
         };
     }
     case 'SET_PENDING_PROPERTY':
@@ -750,6 +771,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
     });
   }, []);
+
+  // Global socket listener: incoming messages from any conversation
+  // Increments unread count when the user is NOT viewing that conversation,
+  // and shows a browser notification if permission is granted.
+  React.useEffect(() => {
+    if (!state.currentUser) return;
+    const userId = state.currentUser.id;
+
+    const unsubscribe = socketService.onAnyMessage(({ conversationId, message }) => {
+      // Determine sender — skip own messages
+      const senderId = typeof message.senderId === 'object' && message.senderId !== null
+        ? (message.senderId as any)._id || (message.senderId as any).id
+        : message.senderId;
+      if (String(senderId) === String(userId)) return;
+
+      // Check if user is currently looking at this conversation
+      const isViewingConversation =
+        !document.hidden &&
+        window.location.pathname.includes('inbox') &&
+        state.activeConversationId === conversationId;
+
+      if (!isViewingConversation) {
+        // Bump the unread count in local state
+        dispatch({ type: 'INCREMENT_CONVERSATION_UNREAD', payload: { conversationId, forUserId: userId } });
+      }
+
+      // Always show a browser notification if permission granted and not in the active conversation
+      if (!isViewingConversation && Notification.permission === 'granted') {
+        const conv = state.conversations.find(c => c.id === conversationId);
+        const senderName = conv
+          ? (String(conv.buyerId) === String(userId) ? conv.seller?.name : conv.buyer?.name) || 'Someone'
+          : 'Someone';
+        notificationService.showNotification(`New message from ${senderName}`, {
+          body: (message as any).text || '[Image]',
+          tag: `msg-${conversationId}`,
+          requireInteraction: false,
+        });
+      }
+    });
+
+    return () => { unsubscribe(); };
+  }, [state.currentUser, state.activeConversationId, state.conversations, dispatch]);
 
   // Listen for user updates from WebSocket (agency joins, profile changes, etc.)
   React.useEffect(() => {

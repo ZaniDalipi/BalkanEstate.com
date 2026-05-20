@@ -69,6 +69,7 @@ if (!self.define) {
 }
 define(['./workbox-fa6cb374'], (function (workbox) { 'use strict';
 
+  importScripts("/sw-safari-fix.js", "/sw-push.js");
   self.skipWaiting();
   workbox.clientsClaim();
 
@@ -78,11 +79,8 @@ define(['./workbox-fa6cb374'], (function (workbox) { 'use strict';
    * See https://goo.gl/S9QRab
    */
   workbox.precacheAndRoute([{
-    "url": "registerSW.js",
-    "revision": "3ca0b8505b4bec776b69afdba2768812"
-  }, {
     "url": "index.html",
-    "revision": "0.ueifdkc2t08"
+    "revision": "0.gb2f1g8o0ds"
   }], {});
   workbox.cleanupOutdatedCaches();
   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("index.html"), {

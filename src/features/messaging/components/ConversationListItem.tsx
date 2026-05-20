@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Conversation } from '@/types';
 import { useAppContext } from '@/context/AppContext';
 import { BuildingOfficeIcon, UserCircleIcon } from '@/constants';
+import { markConversationAsRead } from '@/services/apiService';
 
 interface ConversationListItemProps {
     conversation: Conversation;
@@ -36,6 +37,8 @@ const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversatio
         onSelect();
         if (unreadCount > 0) {
             dispatch({ type: 'MARK_CONVERSATION_AS_READ', payload: conversation.id });
+            // Sync with backend (fire-and-forget — don't block UI)
+            markConversationAsRead(conversation.id).catch(() => {});
         }
     };
 

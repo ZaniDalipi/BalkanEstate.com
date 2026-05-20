@@ -8,6 +8,8 @@ import {
 import { useAppContext } from '@/context/AppContext';
 import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 import { apiRequest } from '@/src/shared/api';
+import { socketService } from '@/services/socketService';
+import { notificationService } from '@/services/notificationService';
 
 interface NotificationData {
   propertyId?: string;
@@ -221,9 +223,7 @@ const NotificationCenter: React.FC = () => {
 
     // Fetch when tab becomes visible again
     const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        fetchUnreadCount();
-      }
+      if (!document.hidden) fetchUnreadCount();
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
@@ -232,6 +232,33 @@ const NotificationCenter: React.FC = () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [fetchUnreadCount, checkForUserDataRefresh]);
+
+  // Real-time notification updates via socket
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const unsubscribe = socketService.onNewNotification((data: Notification) => {
+      // Increment badge
+      setUnreadCount(prev => prev + 1);
+
+      // Prepend to list if panel is open
+      setNotifications(prev => {
+        if (prev.some(n => n._id === data._id)) return prev;
+        return [data, ...prev];
+      });
+
+      // Browser notification — always show if permission granted and tab is not focused
+      if (Notification.permission === 'granted' && document.hidden) {
+        notificationService.showNotification(data.title, {
+          body: data.message,
+          tag: `notif-${data._id}`,
+          requireInteraction: false,
+        });
+      }
+    });
+
+    return () => { unsubscribe(); };
+  }, [isAuthenticated]);
 
   // Fetch notifications when dropdown opens
   useEffect(() => {

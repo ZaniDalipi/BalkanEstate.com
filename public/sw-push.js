@@ -111,6 +111,17 @@ function getActionsForType(type) {
         { action: 'view', title: 'Review' },
         { action: 'dismiss', title: 'Dismiss' },
       ];
+    case 'new_listing':
+      return [
+        { action: 'view', title: 'View Property' },
+        { action: 'dismiss', title: 'Dismiss' },
+      ];
+    case 'price_drop':
+    case 'price_increase':
+      return [
+        { action: 'view', title: 'See Price' },
+        { action: 'dismiss', title: 'Dismiss' },
+      ];
     default:
       return [
         { action: 'view', title: 'Open' },
