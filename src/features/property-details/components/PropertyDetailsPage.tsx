@@ -83,10 +83,11 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   });
 
   // Track recently viewed for homepage carousel
+  // Track again when freshProperty loads so localStorage gets the full seller data
   const { trackView } = useRecentlyViewed();
   useEffect(() => {
-    if (property?.id) trackView(property);
-  }, [property?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (property?.id && property?.seller?.name) trackView(property);
+  }, [property?.id, property?.seller?.name]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Enable real-time updates - refresh when this property is updated
   useRealtimeProperties({

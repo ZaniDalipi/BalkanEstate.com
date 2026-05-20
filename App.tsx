@@ -24,6 +24,7 @@ import { realEstateFAQs } from './src/components/seo';
 const Analytics = lazy(() => import('./src/components/marketing/Analytics'));
 import { UserRole, HowItWorksTab, AdminSection, AgencyDashboardSection, Agency, AppView } from './types';
 import { API_CONFIG, SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE, ROUTES, HOW_IT_WORKS_TABS, ADMIN_SECTIONS, AGENCY_DASHBOARD_SECTIONS } from './src/shared/constants/app.constants';
+import { transformBackendProperty } from './src/features/properties/api/propertyApi';
 
 // Inline LogoIcon to avoid importing all icons from constants
 const LogoIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -203,13 +204,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
           .then(data => {
             setIsLoadingPropertyFromUrl(false);
             if (data.property) {
-              // Transform backend property to frontend format
-              // Backend now returns obfuscated `id` (not raw `_id`)
-              const property = {
-                ...data.property,
-                id: data.property.id || data.property._id,
-                sellerId: data.property.sellerId?.id || data.property.sellerId?._id || data.property.sellerId,
-              };
+              const property = transformBackendProperty(data.property);
               dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
             } else {
               dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'not-found' });
@@ -237,12 +232,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
           })
           .then(data => {
             if (data.property) {
-              // Transform backend property to frontend format (backend now uses obfuscated id)
-              const property = {
-                ...data.property,
-                id: data.property.id || data.property._id,
-                sellerId: data.property.sellerId?.id || data.property.sellerId?._id || data.property.sellerId,
-              };
+              const property = transformBackendProperty(data.property);
               dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: property });
               dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
             }
