@@ -1,12 +1,23 @@
 {
   "title": "Luxury Villas",
-  "propertiesFound": "exclusive villas available",
+  "propertiesFound": "{{count}} exclusive villas",
   "createListing": "List Your Villa",
+  "noProperties": "No luxury villas found",
+  "noPropertiesHint": "Try a different location or adjust your filters to discover our curated collection",
+  "clearFilters": "Clear all filters",
+  "discoveringVillas": "Discovering exclusive villas...",
+  "fromPerNight": "from {{price}}/night",
+  "exclusiveCollection": "✦ EXCLUSIVE COLLECTION ✦",
+  "curatedRetreats": "Curated Balkan retreats",
+  "loading": "Discovering exclusive villas...",
+  "fetchError": "Failed to fetch villas",
   "hero": {
-    "tagline": "Exclusive Collection",
-    "subtitle": "exclusive villas available"
+    "tagline": "✦ EXCLUSIVE COLLECTION ✦",
+    "subtitle": "exclusive villas available",
+    "curatedSubtitle": "Curated Balkan retreats"
   },
   "filters": {
+    "title": "Villa Filters",
     "viewType": "Setting",
     "mountain": "Mountain",
     "sea": "Sea View",
@@ -15,6 +26,9 @@
     "country": "Country",
     "allCountries": "All Countries",
     "minBeds": "Bedrooms",
+    "pricePerNight": "Price / Night",
+    "minRentPerNight": "Min €/night",
+    "maxRentPerNight": "Max €/night",
     "minRent": "Min Rent",
     "maxRent": "Max Rent",
     "noLimit": "No limit",
@@ -27,6 +41,13 @@
     "furnishing": "Furnishing",
     "reset": "Reset",
     "search": "Search Villas",
+    "searchCity": "Search by location...",
+    "activeFilters": "{{count}} active filters",
+    "sortBy": "Sort by",
+    "newest": "Newest First",
+    "priceLow": "Rent: Low to High",
+    "priceHigh": "Rent: High to Low",
+    "sqftHigh": "Largest First",
     "listingType": "Type",
     "forSale": "For Sale",
     "forRent": "For Rent"
@@ -34,10 +55,5 @@
   "seo": {
     "title": "Luxury Villas for Rent in the Balkans | BalkanEstate",
     "description": "Discover exclusive luxury villas for rent in the Balkans. Mountain retreats, lakeside estates, and coastal villas in Croatia, Montenegro, Albania, and more."
-  },
-  "loading": "Discovering exclusive villas...",
-  "empty": {
-    "title": "No Villas Found",
-    "subtitle": "Try adjusting your filters to discover more exclusive properties."
   }
 }
