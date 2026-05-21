@@ -13,8 +13,6 @@ import { serializeBounds } from '@/src/features/rental/hooks/useRentalSearch';
 const VILLA_DEFAULTS: Partial<Filters> = {
     listingType: 'rent',
     propertyType: 'luxury-villa',
-    beds: 3,
-    minPrice: 500,
 };
 
 export function useVillaSearch() {

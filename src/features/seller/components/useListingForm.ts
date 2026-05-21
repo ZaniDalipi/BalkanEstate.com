@@ -625,10 +625,18 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
         const isNumeric = type === 'number';
-        setListingData(prev => ({
-            ...prev,
-            [name]: isNumeric ? (value === '' ? '' : Number(value)) : value
-        }));
+        setListingData(prev => {
+            const updated: ListingData = {
+                ...prev,
+                [name]: isNumeric ? (value === '' ? '' : Number(value)) : value,
+            };
+            // Luxury villas are always rent + daily
+            if (name === 'propertyType' && value === 'luxury-villa') {
+                updated.listingType = 'rent';
+                updated.rentPeriod = 'daily';
+            }
+            return updated;
+        });
     }, []);
 
     const handlePriceChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
