@@ -14,6 +14,7 @@ import { QueryErrorBoundary } from './src/app/components/QueryErrorBoundary';
 import { AnimationProvider } from './src/components/ui/Animations';
 import { ViewTransition, NavigationProvider } from './src/components/ui/ViewTransition';
 import { useZoomCompensation } from './src/app/hooks/useZoomCompensation';
+import { usePWALinkInterceptor } from './src/shared/hooks/usePWALinkInterceptor';
 // Lazy load SEO components (don't block initial render)
 const SEO = lazy(() => import('./src/components/seo').then(m => ({ default: m.SEO })));
 const OrganizationSchema = lazy(() => import('./src/components/seo').then(m => ({ default: m.OrganizationSchema })));
@@ -147,6 +148,10 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
   const [selectedAgency, setSelectedAgency] = useState<Agency | null>(null);
   const [isLoadingAgency, setIsLoadingAgency] = useState(false);
   const [isLoadingPropertyFromUrl, setIsLoadingPropertyFromUrl] = useState(false);
+
+  // In PWA standalone mode, intercept <a href> clicks to internal pages so the
+  // OS never opens a second browser window — navigation stays within the app.
+  usePWALinkInterceptor();
 
   // Listen for session expiration events from httpClient
   useEffect(() => {

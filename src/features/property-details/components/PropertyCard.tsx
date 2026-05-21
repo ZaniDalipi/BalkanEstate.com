@@ -11,6 +11,7 @@ import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import PropertyImage from '@/src/components/ui/PropertyImage';
+import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 
 interface PropertyCardProps {
   property: Property;
@@ -673,23 +674,14 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   // Stable handlers using refs - won't cause PropertyCardInner re-renders
   const handleCardClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-
-    const propertyUrl = getPropertyUrl();
-
-    if (!propertyUrl) {
-      console.error('PropertyCard: Cannot navigate - invalid URL');
-      return;
+    const url = buildLocalizedPath(`/property/${generatePropertySlug(property)}`);
+    if (shouldOpenInNewTab()) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
+      window.history.pushState({}, '', url);
     }
-
-    // Open in new tab without navigating current page
-    window.open(propertyUrl, '_blank', 'noopener,noreferrer');
-  }, [property, getPropertyUrl]);
-
-  const handleContextMenu = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    // Don't prevent default - let browser show native context menu
-    // Users can use Ctrl+Click (Cmd+Click on Mac) to open in new tab
-  }, []);
+  }, [dispatch, property]);
 
   const handleFavoriteClick = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
