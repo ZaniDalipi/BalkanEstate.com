@@ -393,15 +393,11 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
   const promotedInnerClass = getPromotedMarkerInnerClass(property);
   const nightModeClass = shouldGlow ? 'night-mode-marker-pulse' : '';
 
-  // Luxury villa: amber pill with ✦ prefix and brand-blue text
+  // Luxury villa: rich metallic gold gradient pill — stands out as premium on any map
   const isLuxuryVilla = property.propertyType === 'luxury-villa';
   const displayPrice = isLuxuryVilla ? `✦ ${price}` : price;
-  const pillFill = isLuxuryVilla ? '#FFA500' : markerColor;
-  const pillText = isLuxuryVilla ? '#0252CD' : 'white';
-  const pillStroke = isLuxuryVilla ? '#0252CD' : strokeColorFinal;
-  const pillStrokeW = isLuxuryVilla ? 1.5 : ringWidth;
   const pillFilter = isLuxuryVilla
-    ? 'drop-shadow(0 0 6px rgba(255,165,0,0.55)) drop-shadow(0 2px 5px rgba(0,0,0,0.25))'
+    ? 'drop-shadow(0 0 7px rgba(212,168,0,0.85)) drop-shadow(0 0 14px rgba(200,140,0,0.45)) drop-shadow(0 2px 4px rgba(0,0,0,0.4))'
     : baseFilter;
 
   // Calculate dimensions based on price length - use pill shape for longer prices
@@ -413,13 +409,28 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
   const borderRadius = scaledHeight / 2; // Pill shape
   const hoverScale = isHovered ? 1.15 : 1;
 
+  // Build SVG — luxury villa gets a metallic gold gradient with dark border + text
+  const luxuryGradientDef = isLuxuryVilla ? `
+    <defs>
+      <linearGradient id="lvGold_s" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#F5DC6E"/>
+        <stop offset="45%" stop-color="#E8B820"/>
+        <stop offset="100%" stop-color="#B8860B"/>
+      </linearGradient>
+    </defs>` : '';
+  const pillFill    = isLuxuryVilla ? 'url(#lvGold_s)' : markerColor;
+  const pillText    = isLuxuryVilla ? '#2C1A00' : 'white';
+  const pillStroke  = isLuxuryVilla ? '#7A5000' : strokeColorFinal;
+  const pillStrokeW = isLuxuryVilla ? 1.5 : ringWidth;
+
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
     <div class="promoted-marker-wrapper ${nightModeClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px;">
       <div class="${promotedInnerClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px; transform: scale(${hoverScale}); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
         <svg width="${scaledWidth}" height="${scaledHeight}" viewBox="0 0 ${baseWidth} ${baseHeight}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${pillFilter};">
+            ${luxuryGradientDef}
             <rect x="${pillStrokeW / 2}" y="${pillStrokeW / 2}" width="${baseWidth - pillStrokeW}" height="${baseHeight - pillStrokeW}" rx="${(baseHeight - pillStrokeW) / 2}" fill="${pillFill}" stroke="${pillStroke}" stroke-width="${pillStrokeW}"/>
-            <text x="${baseWidth / 2}" y="${baseHeight / 2 + 1}" font-family="Inter, sans-serif" font-size="${11}" font-weight="bold" fill="${pillText}" text-anchor="middle" dominant-baseline="middle">${displayPrice}</text>
+            <text x="${baseWidth / 2}" y="${baseHeight / 2 + 1}" font-family="Inter, sans-serif" font-size="${11}" font-weight="800" fill="${pillText}" text-anchor="middle" dominant-baseline="middle">${displayPrice}</text>
         </svg>
       </div>
     </div>
@@ -505,20 +516,29 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
   const scale = isHovered ? 1.25 : 1;
   const promotedInnerClass = getPromotedMarkerInnerClass(property);
 
-  // Luxury villa: amber/gold house with blue text, crown at roof peak, golden glow
+  // Luxury villa: rich metallic gold house marker — unmistakably premium
   const isLuxuryVilla = property.propertyType === 'luxury-villa';
-  const finalMarkerColor = isLuxuryVilla ? '#FFA500' : markerColor;
-  const finalTextColor   = isLuxuryVilla ? '#0252CD' : 'white';
-  const finalPointerColor = isLuxuryVilla ? '#003A96' : pointerColor;
-  const luxuryCrown = isLuxuryVilla
-    ? `<text x="35" y="10" font-family="Inter,sans-serif" font-size="10" font-weight="900" fill="#0252CD" text-anchor="middle" dominant-baseline="middle">✦</text>`
-    : '';
-  const finalStrokeColor = isLuxuryVilla ? '#0252CD' : strokeColorFinal;
-  const finalStrokeWidth = isLuxuryVilla ? 2 : strokeWidth;
+  const finalPointerColor = isLuxuryVilla ? '#5C3A00' : pointerColor;
+  const finalTextColor    = isLuxuryVilla ? '#2C1A00' : 'white';
+  const finalStrokeColor  = isLuxuryVilla ? '#7A5000' : strokeColorFinal;
+  const finalStrokeWidth  = isLuxuryVilla ? 2 : strokeWidth;
   const finalFilter = isLuxuryVilla
-    ? `drop-shadow(0 0 8px rgba(255,165,0,0.65)) drop-shadow(0 4px 10px rgba(0,0,0,0.35))`
+    ? `drop-shadow(0 0 10px rgba(212,168,0,0.9)) drop-shadow(0 0 20px rgba(200,140,0,0.5)) drop-shadow(0 4px 10px rgba(0,0,0,0.4))`
     : baseFilter;
   const priceY = isLuxuryVilla ? '33' : '30';
+  // Gold gradient for the house fill + ✦ crown at roof peak
+  const luxuryDefs = isLuxuryVilla ? `
+    <defs>
+      <linearGradient id="lvGold_d" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#F5DC6E"/>
+        <stop offset="45%" stop-color="#E8B820"/>
+        <stop offset="100%" stop-color="#B8860B"/>
+      </linearGradient>
+    </defs>` : '';
+  const finalMarkerColor = isLuxuryVilla ? 'url(#lvGold_d)' : markerColor;
+  const luxuryCrown = isLuxuryVilla
+    ? `<text x="35" y="10" font-family="Inter,sans-serif" font-size="11" font-weight="900" fill="#2C1A00" text-anchor="middle" dominant-baseline="middle">✦</text>`
+    : '';
   const nightModeClass = shouldGlow ? 'night-mode-marker-pulse' : '';
 
   // Calculate scaled dimensions based on zoom
@@ -533,6 +553,7 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
     <div class="promoted-marker-wrapper ${nightModeClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px;">
       <div class="${promotedInnerClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px;">
         <svg width="${scaledWidth}" height="${scaledHeight}" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${finalFilter}; transform-origin: bottom center; transform: scale(${scale}); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            ${luxuryDefs}
             <path d="M35 56L25 44H45L35 56Z" fill="${finalPointerColor}" />
             <path d="M65 24.5V44H5V24.5L35 5L65 24.5Z" fill="${finalMarkerColor}" stroke="${finalStrokeColor}" stroke-width="${finalStrokeWidth}" />
             ${luxuryCrown}
