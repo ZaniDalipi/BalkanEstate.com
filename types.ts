@@ -395,6 +395,7 @@ export interface Property {
     currency?: string;
     // Price discount
     hasDiscount?: boolean;
+    isNegotiable?: boolean;
 }
 
 export interface RentalHistoryEntry {
