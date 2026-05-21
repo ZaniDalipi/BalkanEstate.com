@@ -262,6 +262,7 @@ const PROPERTY_TYPE_COLORS: Record<
   house: '#0252CD',
   apartment: '#28a745',
   villa: '#6f42c1',
+  'luxury-villa': '#FFA500', // Amber/gold — exclusive to the Luxury Villas tab
   land: '#8B4513',    // Brown for land
   other: '#6c757d',
 };
@@ -392,8 +393,19 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
   const promotedInnerClass = getPromotedMarkerInnerClass(property);
   const nightModeClass = shouldGlow ? 'night-mode-marker-pulse' : '';
 
+  // Luxury villa: amber pill with ✦ prefix and brand-blue text
+  const isLuxuryVilla = property.propertyType === 'luxury-villa';
+  const displayPrice = isLuxuryVilla ? `✦ ${price}` : price;
+  const pillFill = isLuxuryVilla ? '#FFA500' : markerColor;
+  const pillText = isLuxuryVilla ? '#0252CD' : 'white';
+  const pillStroke = isLuxuryVilla ? '#0252CD' : strokeColorFinal;
+  const pillStrokeW = isLuxuryVilla ? 1.5 : ringWidth;
+  const pillFilter = isLuxuryVilla
+    ? 'drop-shadow(0 0 6px rgba(255,165,0,0.55)) drop-shadow(0 2px 5px rgba(0,0,0,0.25))'
+    : baseFilter;
+
   // Calculate dimensions based on price length - use pill shape for longer prices
-  const baseWidth = getMarkerWidthForPrice(price);
+  const baseWidth = getMarkerWidthForPrice(displayPrice);
   const baseHeight = 28;
   const scaledWidth = Math.round(baseWidth * zoomScale);
   const scaledHeight = Math.round(baseHeight * zoomScale);
@@ -405,9 +417,9 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
   const svgHtml = `
     <div class="promoted-marker-wrapper ${nightModeClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px;">
       <div class="${promotedInnerClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px; transform: scale(${hoverScale}); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
-        <svg width="${scaledWidth}" height="${scaledHeight}" viewBox="0 0 ${baseWidth} ${baseHeight}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter};">
-            <rect x="${ringWidth / 2}" y="${ringWidth / 2}" width="${baseWidth - ringWidth}" height="${baseHeight - ringWidth}" rx="${(baseHeight - ringWidth) / 2}" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${ringWidth}"/>
-            <text x="${baseWidth / 2}" y="${baseHeight / 2 + 1}" font-family="Inter, sans-serif" font-size="${11}" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
+        <svg width="${scaledWidth}" height="${scaledHeight}" viewBox="0 0 ${baseWidth} ${baseHeight}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${pillFilter};">
+            <rect x="${pillStrokeW / 2}" y="${pillStrokeW / 2}" width="${baseWidth - pillStrokeW}" height="${baseHeight - pillStrokeW}" rx="${(baseHeight - pillStrokeW) / 2}" fill="${pillFill}" stroke="${pillStroke}" stroke-width="${pillStrokeW}"/>
+            <text x="${baseWidth / 2}" y="${baseHeight / 2 + 1}" font-family="Inter, sans-serif" font-size="${11}" font-weight="bold" fill="${pillText}" text-anchor="middle" dominant-baseline="middle">${displayPrice}</text>
         </svg>
       </div>
     </div>
@@ -492,6 +504,21 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
 
   const scale = isHovered ? 1.25 : 1;
   const promotedInnerClass = getPromotedMarkerInnerClass(property);
+
+  // Luxury villa: amber/gold house with blue text, crown at roof peak, golden glow
+  const isLuxuryVilla = property.propertyType === 'luxury-villa';
+  const finalMarkerColor = isLuxuryVilla ? '#FFA500' : markerColor;
+  const finalTextColor   = isLuxuryVilla ? '#0252CD' : 'white';
+  const finalPointerColor = isLuxuryVilla ? '#003A96' : pointerColor;
+  const luxuryCrown = isLuxuryVilla
+    ? `<text x="35" y="10" font-family="Inter,sans-serif" font-size="10" font-weight="900" fill="#0252CD" text-anchor="middle" dominant-baseline="middle">✦</text>`
+    : '';
+  const finalStrokeColor = isLuxuryVilla ? '#0252CD' : strokeColorFinal;
+  const finalStrokeWidth = isLuxuryVilla ? 2 : strokeWidth;
+  const finalFilter = isLuxuryVilla
+    ? `drop-shadow(0 0 8px rgba(255,165,0,0.65)) drop-shadow(0 4px 10px rgba(0,0,0,0.35))`
+    : baseFilter;
+  const priceY = isLuxuryVilla ? '33' : '30';
   const nightModeClass = shouldGlow ? 'night-mode-marker-pulse' : '';
 
   // Calculate scaled dimensions based on zoom
@@ -505,10 +532,11 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
   const svgHtml = `
     <div class="promoted-marker-wrapper ${nightModeClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px;">
       <div class="${promotedInnerClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px;">
-        <svg width="${scaledWidth}" height="${scaledHeight}" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transform-origin: bottom center; transform: scale(${scale}); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
-            <path d="M35 56L25 44H45L35 56Z" fill="${pointerColor}" />
-            <path d="M65 24.5V44H5V24.5L35 5L65 24.5Z" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${strokeWidth}" />
-            <text x="35" y="30" font-family="Inter, sans-serif" font-size="${fontSize}" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
+        <svg width="${scaledWidth}" height="${scaledHeight}" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${finalFilter}; transform-origin: bottom center; transform: scale(${scale}); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            <path d="M35 56L25 44H45L35 56Z" fill="${finalPointerColor}" />
+            <path d="M65 24.5V44H5V24.5L35 5L65 24.5Z" fill="${finalMarkerColor}" stroke="${finalStrokeColor}" stroke-width="${finalStrokeWidth}" />
+            ${luxuryCrown}
+            <text x="35" y="${priceY}" font-family="Inter, sans-serif" font-size="${fontSize}" font-weight="bold" fill="${finalTextColor}" text-anchor="middle" dominant-baseline="middle">${price}</text>
         </svg>
       </div>
     </div>

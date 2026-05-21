@@ -143,16 +143,26 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                     ))}
                 </select>
 
-                {/* Beds select */}
-                <select
-                    value={filters.beds ?? ''}
-                    onChange={(e) => onFilterChange('beds', e.target.value ? Number(e.target.value) : null)}
-                    className="flex-shrink-0 glass-select text-[11px] h-7 px-2 py-0 w-[72px] rounded-lg ml-1.5"
-                    aria-label={t('villas:filters.minBeds', 'Bedrooms')}
-                >
-                    <option value="">{t('common:any', 'Beds')}</option>
-                    {[3, 4, 5].map(n => <option key={n} value={n}>{n}+</option>)}
-                </select>
+                {/* Beds quick chips — 3+, 4+, 5+ */}
+                <div className="flex items-center gap-1 flex-shrink-0 ml-1.5">
+                    {([null, 3, 4, 5] as (number | null)[]).map(n => {
+                        const isActive = (filters.beds ?? null) === n;
+                        return (
+                            <button
+                                key={n ?? 'any'}
+                                type="button"
+                                onClick={() => onFilterChange('beds', n)}
+                                className={`flex-shrink-0 h-7 px-2.5 rounded-lg text-[11px] font-semibold border transition-all ${
+                                    isActive
+                                        ? 'bg-[#FFA500]/15 text-[#0252CD] border-[#FFA500]'
+                                        : 'bg-white text-gray-500 border-gray-200 hover:border-[#FFA500]/60 hover:text-[#0252CD]'
+                                }`}
+                            >
+                                {n === null ? t('common:any', 'Any') : `${n}+`} 🛏️
+                            </button>
+                        );
+                    })}
+                </div>
 
                 {/* Min price */}
                 <input
@@ -181,9 +191,9 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                 {hasActiveFilters && (
                     <button
                         onClick={onReset}
-                        className="flex-shrink-0 text-[11px] text-gray-400 hover:text-gray-700 whitespace-nowrap transition-colors px-1 mr-2"
+                        className="flex-shrink-0 text-[11px] text-red-400 hover:text-red-600 whitespace-nowrap transition-colors px-1.5 py-1 rounded-lg hover:bg-red-50 mr-1.5 border border-red-200 font-medium"
                     >
-                        {t('villas:filters.reset', 'Reset')}
+                        ✕ {t('villas:filters.reset', 'Reset')}
                     </button>
                 )}
 
@@ -192,20 +202,11 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                     <button
                         onClick={onSaveSearch}
                         disabled={isSaving}
-                        className="flex-shrink-0 text-[11px] text-[#0252CD] hover:text-[#0252CD]/70 whitespace-nowrap transition-colors px-1 mr-2 border border-[#0252CD]/25 rounded-lg py-1 disabled:opacity-50"
+                        className="flex-shrink-0 text-[11px] text-[#0252CD] hover:text-[#0252CD]/70 whitespace-nowrap transition-colors px-1.5 py-1 border border-[#0252CD]/30 rounded-lg hover:bg-[#0252CD]/5 disabled:opacity-50"
                     >
-                        {isSaving ? t('search:saving', 'Saving…') : t('search:saveSearch', 'Save')}
+                        {isSaving ? t('search:saving', 'Saving…') : t('search:saveSearch', 'Save Search')}
                     </button>
                 )}
-
-                {/* Search button */}
-                <button
-                    onClick={onSearch}
-                    className="flex-shrink-0 h-7 px-3 rounded-lg text-[11px] font-semibold text-white whitespace-nowrap transition-colors"
-                    style={{ background: '#0252CD' }}
-                >
-                    {t('villas:filters.search', 'Search')}
-                </button>
             </div>
         );
     }
@@ -253,14 +254,25 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                 </div>
                 <div>
                     <label className={fullLabelClasses}>{t('villas:filters.minBeds', 'Bedrooms')}</label>
-                    <select
-                        value={filters.beds ?? ''}
-                        onChange={(e) => onFilterChange('beds', e.target.value ? Number(e.target.value) : null)}
-                        className={fullSelectClasses}
-                    >
-                        <option value="">{t('common:any', 'Any')}</option>
-                        {[3, 4, 5].map(n => <option key={n} value={n}>{n}+</option>)}
-                    </select>
+                    <div className="flex gap-2">
+                        {([null, 3, 4, 5] as (number | null)[]).map(n => {
+                            const isActive = (filters.beds ?? null) === n;
+                            return (
+                                <button
+                                    key={n ?? 'any'}
+                                    type="button"
+                                    onClick={() => onFilterChange('beds', n)}
+                                    className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
+                                        isActive
+                                            ? 'bg-[#FFA500]/15 text-[#0252CD] border-[#FFA500]'
+                                            : 'bg-white text-gray-500 border-gray-200 hover:border-[#FFA500]/60 hover:text-[#0252CD]'
+                                    }`}
+                                >
+                                    {n === null ? t('common:any', 'Any') : `${n}+ 🛏️`}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
 
