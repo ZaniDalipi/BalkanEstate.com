@@ -131,6 +131,14 @@ export interface IProperty extends Document {
   currentTenantName?: string; // Name of current tenant (private, owner-only)
   currentRentalNotes?: string; // Private notes about the current rental
   rentalHistory?: IRentalHistoryEntry[]; // Past rental periods for income tracking
+  // Daily rental fields (short-stay / luxury villa)
+  checkInTime?: string;
+  checkOutTime?: string;
+  cleaningFee?: number;
+  cancellationPolicy?: 'flexible' | 'moderate' | 'strict' | 'non-refundable';
+  breakfastIncluded?: boolean;
+  towelsIncluded?: boolean;
+  parkingIncluded?: boolean;
   // Visit/viewing availability
   visitAvailability?: IVisitAvailability;
   createdAt: Date;
@@ -542,6 +550,17 @@ const PropertySchema: Schema = new Schema(
         notes: { type: String },
       },
     ],
+    // Daily rental fields (short-stay / luxury villa)
+    checkInTime: { type: String },
+    checkOutTime: { type: String },
+    cleaningFee: { type: Number, min: 0 },
+    cancellationPolicy: {
+      type: String,
+      enum: ['flexible', 'moderate', 'strict', 'non-refundable'],
+    },
+    breakfastIncluded: { type: Boolean },
+    towelsIncluded: { type: Boolean },
+    parkingIncluded: { type: Boolean },
     // Visit/viewing availability
     visitAvailability: {
       enabled: { type: Boolean, default: false },

@@ -130,21 +130,8 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                 {/* Thin divider */}
                 <div className="flex-shrink-0 w-px h-5 bg-gray-200 mx-2.5" />
 
-                {/* Country select */}
-                <select
-                    value={filters.country}
-                    onChange={(e) => onFilterChange('country', e.target.value)}
-                    className="flex-shrink-0 glass-select text-[11px] h-7 px-2 py-0 w-[88px] rounded-lg"
-                    aria-label={t('villas:filters.country', 'Country')}
-                >
-                    <option value="any">{t('villas:filters.allCountries', 'All')}</option>
-                    {BALKAN_LOCATIONS.map(c => (
-                        <option key={c.code} value={c.name}>{c.name}</option>
-                    ))}
-                </select>
-
-                {/* Beds quick chips — 3+, 4+, 5+ */}
-                <div className="flex items-center gap-1 flex-shrink-0 ml-1.5">
+                {/* Beds quick chips — Any / 3+ / 4+ / 5+ */}
+                <div className="flex items-center gap-1 flex-shrink-0">
                     {([null, 3, 4, 5] as (number | null)[]).map(n => {
                         const isActive = (filters.beds ?? null) === n;
                         return (
@@ -163,6 +150,22 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                         );
                     })}
                 </div>
+
+                {/* Thin divider */}
+                <div className="flex-shrink-0 w-px h-5 bg-gray-200 mx-2.5" />
+
+                {/* Country select */}
+                <select
+                    value={filters.country}
+                    onChange={(e) => onFilterChange('country', e.target.value)}
+                    className="flex-shrink-0 glass-select text-[11px] h-7 px-2 py-0 w-[88px] rounded-lg"
+                    aria-label={t('villas:filters.country', 'Country')}
+                >
+                    <option value="any">{t('villas:filters.allCountries', 'All')}</option>
+                    {BALKAN_LOCATIONS.map(c => (
+                        <option key={c.code} value={c.name}>{c.name}</option>
+                    ))}
+                </select>
 
                 {/* Min price */}
                 <input

@@ -100,6 +100,15 @@ export function buildPreviewProperty(
             tenantRequirements: listingData.tenantRequirements || [],
             maxOccupants: Number(listingData.maxOccupants) || 1,
         } : {}),
+        ...(listingData.propertyType === 'luxury-villa' ? {
+            checkInTime: listingData.checkInTime || '14:00',
+            checkOutTime: listingData.checkOutTime || '11:00',
+            cleaningFee: Number(listingData.cleaningFee) || 0,
+            cancellationPolicy: listingData.cancellationPolicy || undefined,
+            breakfastIncluded: listingData.breakfastIncluded ?? false,
+            towelsIncluded: listingData.towelsIncluded ?? false,
+            parkingIncluded: listingData.parkingIncluded ?? false,
+        } : {}),
         ...(listingData.visitAvailability.enabled ? {
             visitAvailability: listingData.visitAvailability,
         } : {}),
@@ -969,6 +978,16 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     internetIncluded: listingData.internetIncluded ?? false,
                     tenantRequirements: listingData.tenantRequirements || [],
                     maxOccupants: Number(listingData.maxOccupants) || 1,
+                } : {}),
+                // Daily rental / luxury villa fields
+                ...(listingData.propertyType === 'luxury-villa' ? {
+                    checkInTime: listingData.checkInTime || '14:00',
+                    checkOutTime: listingData.checkOutTime || '11:00',
+                    cleaningFee: Number(listingData.cleaningFee) || 0,
+                    cancellationPolicy: listingData.cancellationPolicy || undefined,
+                    breakfastIncluded: listingData.breakfastIncluded ?? false,
+                    towelsIncluded: listingData.towelsIncluded ?? false,
+                    parkingIncluded: listingData.parkingIncluded ?? false,
                 } : {}),
                 // Visit availability (for all listing types)
                 ...(listingData.visitAvailability.enabled ? {

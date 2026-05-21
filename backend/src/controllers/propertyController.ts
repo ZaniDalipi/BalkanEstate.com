@@ -865,6 +865,9 @@ export const createProperty = async (
       'rentPeriod', 'securityDeposit', 'minimumLeaseDuration', 'maximumLeaseDuration',
       'availableFrom', 'utilitiesIncluded', 'internetIncluded',
       'tenantRequirements', 'maxOccupants',
+      // Daily rental / luxury villa fields
+      'checkInTime', 'checkOutTime', 'cleaningFee', 'cancellationPolicy',
+      'breakfastIncluded', 'towelsIncluded', 'parkingIncluded',
       'visitAvailability',
     ] as const;
 
@@ -1051,6 +1054,9 @@ export const updateProperty = async (
       'rentPeriod', 'securityDeposit', 'minimumLeaseDuration', 'maximumLeaseDuration',
       'availableFrom', 'utilitiesIncluded', 'internetIncluded',
       'tenantRequirements', 'maxOccupants',
+      // Daily rental / luxury villa fields
+      'checkInTime', 'checkOutTime', 'cleaningFee', 'cancellationPolicy',
+      'breakfastIncluded', 'towelsIncluded', 'parkingIncluded',
       // Visit availability
       'visitAvailability',
     ];
