@@ -746,6 +746,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
     }
   }, [property.city, property.country, dispatch]);
 
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+  }, []);
+
   // Early return for invalid/incomplete properties
   if (!hasRequiredFields) {
     return (
