@@ -354,7 +354,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setTimeout(() => setIsFocused(false), 200)}
                 placeholder={t('home:hero.searchPlaceholder')}
-                className="flex-1 py-3.5 sm:py-5 px-3 text-sm sm:text-base text-slate-900 placeholder-slate-400 bg-transparent outline-none focus:outline-none focus:ring-0 min-w-0"
+                className="flex-1 py-3.5 sm:py-5 px-3 text-base text-slate-900 placeholder-slate-400 bg-transparent outline-none focus:outline-none focus:ring-0 min-w-0"
                 style={{ boxShadow: 'none' }}
                 aria-label={t('home:hero.searchPlaceholder')}
               />
