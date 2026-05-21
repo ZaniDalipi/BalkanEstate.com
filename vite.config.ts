@@ -86,12 +86,6 @@ export default defineConfig(({ mode }) => {
             },
             icons: [
               {
-                src: '/icons/Logo.svg',
-                sizes: 'any',
-                type: 'image/svg+xml',
-                purpose: 'any'
-              },
-              {
                 src: '/icons/icon-72x72.png',
                 sizes: '72x72',
                 type: 'image/png',
