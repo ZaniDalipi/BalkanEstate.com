@@ -19,8 +19,6 @@ import { NominatimResult, Property } from '@/types';
 
 const ITEMS_PER_PAGE = 20;
 
-const LOCATION_HIGHLIGHTS = ['Julian Alps', 'Lake Ohrid', 'Bay of Kotor', 'Pirin Mountains', 'Budva Riviera'];
-
 /* CSS animation keyframes for villa card entrance */
 const VillaCardAnimationStyles = () => (
     <style>{`
@@ -235,111 +233,85 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
             <Toast show={toast.show} message={toast.message} type={toast.type} onClose={() => setToast({ ...toast, show: false })} />
 
             {/* Page background */}
-            <div className="absolute inset-0 z-0" style={{ background: 'linear-gradient(135deg, #f8f9fc 0%, #eef1f8 50%, #f0f4fa 100%)' }} />
+            <div className="absolute inset-0 z-0 bg-gray-50" />
 
             <div className={`flex h-full w-full flex-col lg:flex-row transition-all duration-300 relative ${isFiltersOpen && (isMobile || isTablet) ? 'blur-sm pointer-events-none' : ''}`}>
 
                 {/* Left Panel: Search + Filters + Property List */}
                 <div
                     className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] lg:flex-shrink-0 lg:border-r lg:border-gray-200 ${showViewToggle && mobileView === 'list' ? 'translate-x-0' : showViewToggle ? '-translate-x-full' : ''} lg:translate-x-0 transition-transform duration-300`}
-                    style={{ background: 'linear-gradient(180deg, rgba(248,249,252,0.98) 0%, rgba(238,241,248,0.95) 100%)' }}
+                    style={{ background: '#F8F9FC' }}
                 >
                     {/* Spacer for floating mobile/tablet header */}
                     {(isMobile || isTablet) && <div className="h-14 flex-shrink-0" />}
 
-                    {/* Desktop header — sticky */}
-                    <div
-                        className="hidden lg:block sticky top-0 z-20"
-                        style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}
-                    >
-                        {/* Luxury hero banner */}
-                        <div className="relative overflow-hidden flex-shrink-0" style={{ height: '140px' }}>
-                            {/* Deep blue gradient */}
-                            <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #003A96 0%, #0252CD 55%, #003080 100%)' }} />
-                            {/* Amber radial highlight */}
-                            <div className="absolute inset-0 opacity-25" style={{ background: 'radial-gradient(ellipse at 30% 50%, rgba(255,165,0,0.3) 0%, transparent 60%)' }} />
-                            {/* Animated shimmer overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse" />
-                            {/* Subtle noise texture overlay */}
-                            <div
-                                className="absolute inset-0 opacity-5"
-                                style={{
-                                    backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'1\'/%3E%3C/svg%3E")',
-                                    backgroundSize: '256px 256px',
-                                }}
-                            />
-                            {/* Content */}
-                            <div className="relative z-10 flex flex-col justify-center h-full px-5">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-secondary text-[10px] font-bold tracking-widest uppercase">
-                                                {t('villas:exclusiveCollection', '✦ EXCLUSIVE COLLECTION ✦')}
-                                            </span>
-                                        </div>
-                                        <h1 className="text-2xl font-bold text-white mb-0.5">
-                                            {t('villas:title', 'Luxury Villas')}
-                                        </h1>
-                                        <p className="text-blue-200/80 text-xs mb-2">
-                                            {listProperties.length > 0
-                                                ? `${listProperties.length} ${t('villas:hero.subtitle', 'exclusive villas available')}`
-                                                : t('villas:curatedRetreats', 'Curated Balkan retreats')
-                                            }
-                                            {minResultPrice != null && (
-                                                <span className="ml-2 text-secondary/80 font-medium">
-                                                    · {t('villas:fromPerNight', 'from {{price}}/night', { price: `€${minResultPrice.toLocaleString()}` })}
+                    {/* Desktop header — sticky, new 3-tier design */}
+                    <div className="hidden lg:block sticky top-0 z-20">
+
+                        {/* Tier 1: Blue brand bar — 56px, amber bottom border */}
+                        <div
+                            className="flex items-center justify-between px-4"
+                            style={{ height: '56px', background: '#0252CD', borderBottom: '3px solid #FFA500' }}
+                        >
+                            {/* Left: brand + stats */}
+                            <div className="flex items-center gap-3 min-w-0">
+                                <span className="text-xl flex-shrink-0">🏛️</span>
+                                <span className="text-white font-bold text-base tracking-tight flex-shrink-0">
+                                    {t('villas:title', 'Luxury Villas')}
+                                </span>
+                                {listProperties.length > 0 && (
+                                    <>
+                                        <span className="text-blue-300/60 text-sm flex-shrink-0">·</span>
+                                        <span className="text-blue-200 text-sm flex-shrink-0">
+                                            {listProperties.length} {listProperties.length === 1 ? t('villas:villa', 'villa') : t('villas:villas', 'villas')}
+                                        </span>
+                                        {minResultPrice != null && (
+                                            <>
+                                                <span className="text-blue-300/60 text-sm flex-shrink-0">·</span>
+                                                <span className="text-sm flex-shrink-0" style={{ color: '#FFA500' }}>
+                                                    {t('villas:fromPerNight', 'from {{price}}/night', { price: `€${minResultPrice.toLocaleString()}` })}
                                                 </span>
-                                            )}
-                                        </p>
-                                        {/* Location highlights */}
-                                        <div className="flex items-center gap-1.5 flex-wrap">
-                                            {LOCATION_HIGHLIGHTS.map(loc => (
-                                                <span
-                                                    key={loc}
-                                                    className="px-2 py-0.5 rounded-full text-[10px] font-medium text-secondary/80 border border-secondary/30 bg-secondary/10"
-                                                >
-                                                    {loc}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <Button
-                                        variant="accent"
-                                        size="sm"
-                                        onClick={handleListVilla}
-                                        className="font-semibold rounded-xl flex-shrink-0 ml-4"
-                                    >
-                                        + {t('villas:createListing', 'List Your Villa')}
-                                    </Button>
-                                </div>
+                                            </>
+                                        )}
+                                    </>
+                                )}
                             </div>
+                            {/* Right: List Your Villa CTA */}
+                            <button
+                                onClick={handleListVilla}
+                                className="flex-shrink-0 ml-4 h-8 px-3 rounded-lg text-xs font-bold transition-opacity hover:opacity-90 active:opacity-80"
+                                style={{ background: '#FFA500', color: '#0252CD' }}
+                            >
+                                + {t('villas:createListing', 'List Your Villa')}
+                            </button>
                         </div>
 
-                        {/* City Search Bar */}
-                        <div className="px-4 py-3">
-                            <div ref={searchWrapperRef} className="relative">
-                                <div className="relative">
-                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
-                                    <input
-                                        type="text"
-                                        value={filters.query}
-                                        onChange={(e) => handleFilterChange('query', e.target.value)}
-                                        onFocus={() => setIsQueryInputFocused(true)}
-                                        onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
-                                        placeholder={t('villas:filters.searchCity', 'Search by location...')}
-                                        className="glass-input w-full pl-9 pr-9 py-2 text-sm"
-                                        aria-label={t('villas:filters.searchCity', 'Search by location...')}
-                                    />
-                                    {filters.query && (
-                                        <button
-                                            onClick={() => handleFilterChange('query', '')}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-600 transition-colors"
-                                            aria-label={t('common:aria.clearSearch')}
-                                        >
-                                            <XMarkIcon className="w-4 h-4" />
-                                        </button>
-                                    )}
-                                </div>
+                        {/* Tier 2: Search bar — 44px white */}
+                        <div
+                            className="flex items-center px-4"
+                            style={{ height: '44px', background: '#FFFFFF', borderBottom: '1px solid rgba(0,0,0,0.07)' }}
+                        >
+                            <div ref={searchWrapperRef} className="relative w-full">
+                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+                                <input
+                                    type="text"
+                                    value={filters.query}
+                                    onChange={(e) => handleFilterChange('query', e.target.value)}
+                                    onFocus={() => setIsQueryInputFocused(true)}
+                                    onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
+                                    placeholder={t('villas:filters.searchCity', 'Search by location...')}
+                                    className="w-full pl-9 pr-9 py-1.5 text-sm bg-transparent border-none outline-none placeholder-gray-300 text-gray-800"
+                                    aria-label={t('villas:filters.searchCity', 'Search by location...')}
+                                />
+                                {filters.query && (
+                                    <button
+                                        onClick={() => handleFilterChange('query', '')}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-600 transition-colors"
+                                        aria-label={t('common:aria.clearSearch')}
+                                    >
+                                        <XMarkIcon className="w-4 h-4" />
+                                    </button>
+                                )}
                                 {isQueryInputFocused && suggestions.length > 0 && (
                                     <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 max-h-60 overflow-y-auto glass-scrollbar">
                                         {suggestions.map((suggestion: NominatimResult, index: number) => (
@@ -356,40 +328,63 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                 )}
                                 {isSearchingLocation && (
                                     <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 p-3 text-center">
-                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-secondary mx-auto" />
+                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#FFA500] mx-auto" />
                                     </div>
                                 )}
                             </div>
                         </div>
-                    </div>
 
-                    {/* Desktop Filters */}
-                    <div className="hidden lg:block" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                        <VillaFilters
-                            filters={filters}
-                            onFilterChange={handleFilterChange}
-                            onSearch={handleSearch}
-                            onReset={handleResetFilters}
-                            onSaveSearch={handleSaveSearchArea}
-                            isSaving={isSaving}
-                            compact
-                        />
+                        {/* Tier 3: VillaFilters compact chip row — ~52px */}
+                        <div style={{ background: '#FFFFFF', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                            <VillaFilters
+                                filters={filters}
+                                onFilterChange={handleFilterChange}
+                                onSearch={handleSearch}
+                                onReset={handleResetFilters}
+                                onSaveSearch={handleSaveSearchArea}
+                                isSaving={isSaving}
+                                compact
+                            />
+                        </div>
                     </div>
 
                     {/* Property List */}
                     <div className="flex-1 overflow-y-auto pb-28 lg:pb-3 glass-scrollbar" data-scroll-container aria-live="polite">
 
                         {/* Results bar */}
-                        <div className="sticky top-0 bg-white z-[100] border-b border-neutral-200">
-                            <div className="p-4 flex items-center justify-between">
-                                <div className="flex items-center gap-2 min-w-0">
-                                    <p className="text-xs text-neutral-500 font-semibold flex-shrink-0">
-                                        {listProperties.length} {listProperties.length === 1 ? 'villa' : 'villas'}
+                        <div className="sticky top-0 bg-white border-b border-gray-100 z-[100]">
+                            <div className="px-4 py-2.5 flex items-center justify-between gap-2">
+                                {/* Left: count + active filter chips */}
+                                <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                                    <p className="text-xs font-semibold text-gray-700 flex-shrink-0">
+                                        {listProperties.length}{' '}
+                                        <span className="text-gray-400 font-normal">
+                                            {t('villas:exclusiveVillas', 'exclusive villas')}
+                                        </span>
                                     </p>
                                     {filters.query && (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary/10 text-primary text-xs font-medium truncate max-w-[140px]">
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFA500]/10 text-[#0252CD] text-[11px] font-medium max-w-[140px]">
                                             <MapIcon className="w-3 h-3 flex-shrink-0" />
                                             <span className="truncate">{filters.query}</span>
+                                            <button
+                                                onClick={() => handleFilterChange('query', '')}
+                                                className="flex-shrink-0 hover:text-red-400 transition-colors"
+                                                aria-label={t('common:aria.clearSearch')}
+                                            >
+                                                <XMarkIcon className="w-3 h-3" />
+                                            </button>
+                                        </span>
+                                    )}
+                                    {filters.country && filters.country !== 'any' && (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFA500]/10 text-[#0252CD] text-[11px] font-medium">
+                                            <span>{filters.country}</span>
+                                            <button
+                                                onClick={() => handleFilterChange('country', 'any')}
+                                                className="flex-shrink-0 hover:text-red-400 transition-colors"
+                                                aria-label={t('common:aria.clearFilter', 'Clear country filter')}
+                                            >
+                                                <XMarkIcon className="w-3 h-3" />
+                                            </button>
                                         </span>
                                     )}
                                     {minResultPrice != null && listProperties.length > 0 && (
@@ -398,13 +393,15 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                         </span>
                                     )}
                                 </div>
+
+                                {/* Right: reset + sort */}
                                 <div className="flex items-center gap-2 flex-shrink-0">
                                     {hasActiveFilters && (
                                         <button
                                             onClick={handleResetFilters}
-                                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-50 text-red-600 text-xs font-semibold hover:bg-red-100 active:bg-red-200 transition-colors"
+                                            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-red-50 text-red-500 text-[11px] font-semibold hover:bg-red-100 transition-colors"
                                         >
-                                            <XMarkIcon className="w-3.5 h-3.5" />
+                                            <XMarkIcon className="w-3 h-3" />
                                             {t('common:reset', 'Reset')}
                                         </button>
                                     )}
@@ -413,7 +410,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             value={filters.sortBy || 'newest'}
                                             onChange={(e) => handleSortChange(e.target.value)}
                                             aria-label={t('search:filters.sortBy', 'Sort properties by')}
-                                            className="block w-full text-xs bg-white border border-neutral-300 rounded-xl text-neutral-900 px-3 py-1.5 focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/30 transition-all appearance-none pr-8"
+                                            className="block text-xs bg-white border border-gray-200 rounded-xl text-gray-700 px-3 py-1.5 pr-7 focus:outline-none focus:border-[#0252CD]/40 focus:ring-1 focus:ring-[#0252CD]/20 transition-all appearance-none"
                                         >
                                             <option value="newest">{t('search:sort.newest')}</option>
                                             <option value="oldest">{t('search:sort.oldest')}</option>
@@ -423,7 +420,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             <option value="sqft_desc">{t('search:sort.areaDesc')}</option>
                                             <option value="featured">{t('search:sort.featured')}</option>
                                         </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-500">
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
                                             <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                                 <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                                             </svg>
@@ -433,12 +430,16 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                             </div>
                         </div>
 
-                        <div className="p-3">
+                        {/* Card grid / loading / empty states */}
+                        <div className="p-3 pt-2 bg-gray-50">
                             {(isLoading || isSearchFiltering) ? (
                                 /* Premium loading state */
                                 <>
-                                    <div className="flex items-center justify-center gap-2 py-4 mb-2">
-                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-secondary" />
+                                    <div className="flex flex-col items-center justify-center gap-3 py-8 mb-2">
+                                        <div className="relative">
+                                            <div className="w-10 h-10 rounded-full border-2 border-gray-100" />
+                                            <div className="absolute inset-0 w-10 h-10 rounded-full border-2 border-t-[#0252CD] border-r-[#FFA500] animate-spin" />
+                                        </div>
                                         <span className="text-xs text-gray-400 font-medium">
                                             {t('villas:discoveringVillas', 'Discovering exclusive villas...')}
                                         </span>
@@ -450,28 +451,28 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                             ) : error ? (
                                 <div className="text-center py-12">
                                     <p className="text-sm text-red-400 mb-2">{error}</p>
-                                    <button onClick={handleSearch} className="text-sm text-blue-600 hover:underline">
+                                    <button onClick={handleSearch} className="text-sm text-[#0252CD] hover:underline">
                                         {t('common:tryAgain')}
                                     </button>
                                 </div>
                             ) : listProperties.length === 0 ? (
                                 /* Premium empty state */
-                                <div className="text-center py-16">
-                                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center">
-                                        <span className="text-3xl">🏛️</span>
+                                <div className="flex justify-center py-12">
+                                    <div className="bg-white rounded-2xl shadow-sm p-10 text-center max-w-sm w-full">
+                                        <div className="text-5xl mb-4">🏛️</div>
+                                        <h3 className="text-gray-800 font-bold text-xl mb-2">
+                                            {t('villas:noProperties', 'No luxury villas found')}
+                                        </h3>
+                                        <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                                            {t('villas:noPropertiesHint', 'Try a different location or adjust your filters to discover our curated collection')}
+                                        </p>
+                                        <button
+                                            onClick={handleResetFilters}
+                                            className="bg-primary text-white rounded-xl px-5 py-2.5 font-semibold text-sm hover:opacity-90 transition-opacity"
+                                        >
+                                            {t('villas:clearFilters', 'Clear Filters')}
+                                        </button>
                                     </div>
-                                    <h3 className="text-lg font-bold text-gray-700 mb-2">
-                                        {t('villas:noProperties', 'No luxury villas found')}
-                                    </h3>
-                                    <p className="text-sm text-gray-400 mb-6 max-w-xs mx-auto">
-                                        {t('villas:noPropertiesHint', 'Try a different location or adjust your filters to discover our curated collection')}
-                                    </p>
-                                    <button
-                                        onClick={handleResetFilters}
-                                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary-dark transition-colors"
-                                    >
-                                        {t('villas:clearFilters', 'Clear all filters')}
-                                    </button>
                                 </div>
                             ) : (
                                 <>
@@ -615,13 +616,19 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             </button>
                                         )}
                                     </div>
-                                    {/* Premium luxury label pill */}
+                                    {/* Luxury label pill — improved */}
                                     <div className="flex justify-center">
-                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/90 text-white text-[11px] font-semibold backdrop-blur-sm shadow-sm">
+                                        <span
+                                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-white text-[11px] font-semibold backdrop-blur-sm shadow-sm"
+                                            style={{ background: '#0252CD' }}
+                                        >
                                             <span>🏛️</span>
-                                            <span>{t('villas:title', 'Luxury Villas')}</span>
+                                            <span>{t('villas:title', 'LUXURY VILLAS')}</span>
                                             {activeFilterCount > 0 && (
-                                                <span className="ml-0.5 px-1.5 py-0.5 rounded-full bg-secondary text-primary-dark text-[10px] font-bold">
+                                                <span
+                                                    className="ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold"
+                                                    style={{ background: '#FFA500', color: '#0252CD' }}
+                                                >
                                                     {activeFilterCount}
                                                 </span>
                                             )}
@@ -663,12 +670,15 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                         >
                             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-secondary text-lg">🏛️</span>
+                                    <span className="text-lg">🏛️</span>
                                     <h2 className="text-base font-bold text-gray-900">
                                         {t('villas:filters.title', 'Villa Filters')}
                                     </h2>
                                     {activeFilterCount > 0 && (
-                                        <span className="px-2 py-0.5 rounded-full bg-secondary/15 text-primary-dark text-[11px] font-bold">
+                                        <span
+                                            className="px-2 py-0.5 rounded-full text-[11px] font-bold"
+                                            style={{ background: '#FFA500', color: '#0252CD' }}
+                                        >
                                             {activeFilterCount}
                                         </span>
                                     )}
