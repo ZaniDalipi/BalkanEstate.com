@@ -395,10 +395,7 @@ export interface Property {
     currency?: string;
     // Price discount
     hasDiscount?: boolean;
-    // Universal-listings ingestion: present when this listing was imported from a third-party site.
-    source?: string;
-    sourceUrl?: string;
-    sourceFetchedAt?: number;
+    isNegotiable?: boolean;
 }
 
 export interface RentalHistoryEntry {
@@ -453,6 +450,7 @@ export interface Conversation {
     participants?: string[]; // user ID and seller ID (for backwards compatibility)
     messages: Message[];
     lastMessage?: Message;
+    lastMessageAt?: string | number;
     createdAt: number;
     isRead: boolean;
     buyerUnreadCount: number;

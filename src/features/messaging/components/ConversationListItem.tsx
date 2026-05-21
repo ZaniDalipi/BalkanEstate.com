@@ -11,6 +11,36 @@ interface ConversationListItemProps {
     onSelect: () => void;
 }
 
+function formatRelativeTime(ts: number | string | undefined): string {
+    if (!ts) return '';
+    const date = new Date(ts);
+    if (isNaN(date.getTime())) return '';
+    const now = Date.now();
+    const diff = now - date.getTime();
+    const mins = Math.floor(diff / 60_000);
+    const hours = Math.floor(diff / 3_600_000);
+    const days = Math.floor(diff / 86_400_000);
+    if (mins < 1) return 'now';
+    if (mins < 60) return `${mins}m`;
+    if (hours < 24) return `${hours}h`;
+    if (days < 7) return date.toLocaleDateString(undefined, { weekday: 'short' });
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+// WhatsApp-style read receipt ticks
+const SingleTick = () => (
+    <svg viewBox="0 0 16 11" className="w-4 h-3 fill-none stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="1.5,5.5 5.5,9.5 14.5,1.5" />
+    </svg>
+);
+
+const DoubleTick = ({ read }: { read: boolean }) => (
+    <svg viewBox="0 0 20 11" className={`w-5 h-3 fill-none stroke-current ${read ? 'text-blue-500' : 'text-neutral-400'}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="1.5,5.5 5.5,9.5 14.5,1.5" />
+        <polyline points="6,5.5 10,9.5 19,1.5" />
+    </svg>
+);
+
 const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversation, isSelected, onSelect }) => {
     const { t } = useTranslation(['messages']);
     const { state, dispatch } = useAppContext();
@@ -24,11 +54,32 @@ const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversatio
         ? conversation.messages[conversation.messages.length - 1]
         : conversation.lastMessage || null;
 
-    // Determine if current user is buyer or seller, and use appropriate unread count
+    // Determine if current user is buyer or seller
     const isBuyer = String(conversation.buyerId) === String(currentUserId);
+
+    // MY unread count (messages sent to me that I haven't read)
     const unreadCount = isBuyer ? conversation.buyerUnreadCount : conversation.sellerUnreadCount;
 
-    // Get the other person's name for displaying in message preview
+    // THEIR unread count (messages I sent that they haven't read — for read receipts)
+    const theirUnreadCount = isBuyer ? conversation.sellerUnreadCount : conversation.buyerUnreadCount;
+
+    // Resolve last message sender ID (handles populated objects)
+    const lastMsgSenderId = lastMessage
+        ? (typeof lastMessage.senderId === 'object' && lastMessage.senderId !== null
+            ? (lastMessage.senderId as any)._id || (lastMessage.senderId as any).id
+            : lastMessage.senderId)
+        : null;
+    const lastMessageByMe = lastMessage ? String(lastMsgSenderId) === String(currentUserId) : false;
+
+    // Show receipt only when I sent the last message
+    const showReceipt = lastMessageByMe;
+    // theirUnreadCount === 0 means they've read my last message
+    const messageRead = theirUnreadCount === 0;
+
+    // Timestamp: prefer lastMessageAt, fall back to lastMessage.timestamp, then conversation.createdAt
+    const timestamp = conversation.lastMessageAt || lastMessage?.timestamp || conversation.createdAt;
+    const timeLabel = formatRelativeTime(timestamp);
+
     const otherPersonName = isBuyer
         ? (conversation.seller?.name || property?.seller?.name || t('messages:inbox.seller', 'Seller'))
         : (conversation.buyer?.name || t('messages:inbox.buyer', 'Buyer'));
@@ -37,12 +88,10 @@ const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversatio
         onSelect();
         if (unreadCount > 0) {
             dispatch({ type: 'MARK_CONVERSATION_AS_READ', payload: conversation.id });
-            // Sync with backend (fire-and-forget — don't block UI)
             markConversationAsRead(conversation.id).catch(() => {});
         }
     };
 
-    // Display label: property address or agent/seller name for direct conversations
     const displayTitle = property
         ? (property.title || property.address)
         : otherPersonName;
@@ -52,23 +101,28 @@ const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversatio
             ? t('messages:inbox.directAgentConversation', 'Direct Agent Conversation')
             : t('messages:inbox.directConversation', 'Direct Conversation'));
 
+    const hasUnread = unreadCount > 0;
+
     return (
         <button
             onClick={handleClick}
-            className={`w-full text-left p-4 flex items-start gap-3 transition-all duration-200 border-b border-neutral-100 ${
+            className={`w-full text-left px-4 py-3.5 flex items-center gap-3 transition-all duration-150 border-b border-neutral-100 ${
                 isSelected
-                    ? 'bg-gradient-to-r from-primary-light to-primary-light/70 shadow-sm'
-                    : 'hover:bg-neutral-50 hover:shadow-sm'
+                    ? 'bg-primary/8 border-l-2 border-l-primary'
+                    : hasUnread
+                        ? 'bg-blue-50/50 hover:bg-blue-50'
+                        : 'hover:bg-neutral-50'
             }`}
         >
+            {/* Avatar / thumbnail */}
             <div className="relative flex-shrink-0">
                 {!property ? (
-                    <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center rounded-md">
-                        <UserCircleIcon className="w-8 h-8 text-primary/60" />
+                    <div className="w-14 h-14 bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center rounded-full">
+                        <UserCircleIcon className="w-7 h-7 text-primary/60" />
                     </div>
                 ) : imageError ? (
-                    <div className="w-16 h-16 bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center rounded-md">
-                        <BuildingOfficeIcon className="w-8 h-8 text-neutral-400" />
+                    <div className="w-14 h-14 bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center rounded-xl">
+                        <BuildingOfficeIcon className="w-7 h-7 text-neutral-400" />
                     </div>
                 ) : (
                     <img
@@ -76,38 +130,55 @@ const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversatio
                         alt={property.address}
                         loading="lazy"
                         decoding="async"
-                        className="w-16 h-16 object-cover rounded-md"
+                        className="w-14 h-14 object-cover rounded-xl"
                         onError={() => setImageError(true)}
                     />
                 )}
-                {unreadCount > 0 && (
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-600 rounded-full border-2 border-white shadow-md"></div>
+
+                {/* Unread dot — positioned outside thumbnail */}
+                {hasUnread && (
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow ring-2 ring-white">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
                 )}
             </div>
-            <div className="flex-grow overflow-hidden">
-                <div className="flex justify-between items-center">
-                    <p className={`font-bold text-sm truncate ${isSelected ? 'text-primary-dark' : 'text-neutral-800'}`}>
+
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+                {/* Row 1: title + time */}
+                <div className="flex items-center justify-between gap-2 mb-0.5">
+                    <p className={`text-sm truncate ${
+                        hasUnread ? 'font-bold text-neutral-900' : isSelected ? 'font-semibold text-primary-dark' : 'font-semibold text-neutral-800'
+                    }`}>
                         {displayTitle}
                     </p>
-                    {unreadCount > 0 && (
-                         <span className="bg-primary text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ml-2">
-                            {unreadCount}
-                        </span>
-                    )}
+                    <span className={`text-[11px] flex-shrink-0 ${hasUnread ? 'text-primary font-semibold' : 'text-neutral-400'}`}>
+                        {timeLabel}
+                    </span>
                 </div>
-                <p className="text-xs text-neutral-500 truncate">{displaySubtitle}</p>
+
+                {/* Row 2: subtitle */}
+                <p className="text-xs text-neutral-500 truncate mb-0.5">{displaySubtitle}</p>
+
+                {/* Row 3: message preview + read receipt / unread badge */}
                 {lastMessage && (
-                    <p className={`text-xs mt-1 truncate ${unreadCount > 0 ? 'font-bold text-neutral-800' : 'text-neutral-600'}`}>
-                        {(() => {
-                            // Handle both string IDs and populated sender objects
-                            const senderId = typeof lastMessage.senderId === 'object' && lastMessage.senderId !== null
-                                ? (lastMessage.senderId as any)._id || (lastMessage.senderId as any).id
-                                : lastMessage.senderId;
-                            const isFromCurrentUser = String(senderId) === String(currentUserId);
-                            return isFromCurrentUser ? `${t('messages:inbox.you', 'You')}: ` : `${otherPersonName}: `;
-                        })()}
-                        {lastMessage.text || t('messages:inbox.image', 'Image')}
-                    </p>
+                    <div className="flex items-center justify-between gap-2">
+                        <p className={`text-xs truncate flex-1 ${hasUnread ? 'font-semibold text-neutral-800' : 'text-neutral-500'}`}>
+                            <span className={`${lastMessageByMe ? 'text-neutral-400' : ''}`}>
+                                {lastMessageByMe
+                                    ? `${t('messages:inbox.you', 'You')}: `
+                                    : `${otherPersonName}: `}
+                            </span>
+                            {lastMessage.text || t('messages:inbox.image', '📷 Image')}
+                        </p>
+
+                        {/* Read receipt for my sent messages */}
+                        {showReceipt && !hasUnread && (
+                            <span className="flex-shrink-0">
+                                <DoubleTick read={messageRead} />
+                            </span>
+                        )}
+                    </div>
                 )}
             </div>
         </button>

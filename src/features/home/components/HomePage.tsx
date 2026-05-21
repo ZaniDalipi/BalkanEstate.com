@@ -11,7 +11,9 @@ import { getAgencies } from '@/src/features/agencies/api/agencyApi';
 import { getFeaturedCities } from '@/src/features/cities/api/cityApi';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { generatePropertySlug } from '@/utils/slug';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import HeroSection from './HeroSection';
+import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import AppShowcaseSection from './AppShowcaseSection';
 import QuickAccessSection from './QuickAccessSection';
 import Footer from '@/components/shared/Footer';
@@ -162,6 +164,7 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
       payload: {
         filters: updatedFilters,
         activeFilters: updatedFilters,
+        mobileView: 'map',
       },
     });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
@@ -174,8 +177,13 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
   }, [dispatch, navigate]);
 
   const handlePropertyClick = useCallback((property: Property) => {
-    dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-    navigate(`/property/${generatePropertySlug(property)}`, { direction: 'up' });
+    const url = buildLocalizedPath(`/property/${generatePropertySlug(property)}`);
+    if (shouldOpenInNewTab()) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
+      navigate(`/property/${generatePropertySlug(property)}`, { direction: 'up' });
+    }
   }, [dispatch, navigate]);
 
   const handleCategoryClick = useCallback((propertyType: string, listingType?: string) => {

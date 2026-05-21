@@ -1372,6 +1372,7 @@ function transformBackendConversation(backendConv: any): Conversation {
     } : undefined,
     messages: [],
     lastMessage: backendConv.lastMessage ? transformBackendMessage(backendConv.lastMessage) : undefined,
+    lastMessageAt: backendConv.lastMessageAt ? new Date(backendConv.lastMessageAt).getTime() : undefined,
     createdAt: new Date(backendConv.createdAt).getTime(),
     isRead: backendConv.buyerUnreadCount === 0 && backendConv.sellerUnreadCount === 0,
     buyerUnreadCount: backendConv.buyerUnreadCount || 0,

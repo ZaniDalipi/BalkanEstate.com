@@ -8,6 +8,7 @@ import User, { IUser } from '../models/User';
 import { SECURITY_WARNING } from '../utils/messageFilter';
 import cloudinary from '../config/cloudinary';
 import { sendNewMessageNotification } from '../services/emailService';
+import { createNotificationWithPush } from '../services/engagementService';
 import { getSocketInstance } from '../utils/socketInstance';
 import { incrementInquiryCount } from '../utils/statsUpdater';
 import { apiLogger } from '../utils/logger';
@@ -323,6 +324,9 @@ export const sendMessage = async (
       return;
     }
 
+    // Capture recipient ID before any populate calls change the field type
+    const recipientObjectId = isBuyer ? conversation.sellerId : conversation.buyerId;
+
     // Create message (E2E encrypted or plain text)
     // If text is provided, it will be sanitized by pre-save hook
     const messageData: any = {
@@ -414,6 +418,26 @@ export const sendMessage = async (
       });
 
       apiLogger.info(`📨 Emitted message to conversation room: ${rawConversationId}`);
+    }
+
+    // Create in-app + push notification for the recipient (fire-and-forget)
+    try {
+      const sender = req.user as IUser;
+      const senderName = sender.name || 'Someone';
+      const messagePreview = text ? text.substring(0, 100) + (text.length > 100 ? '…' : '') : '[Image]';
+      const rawConvId = String((conversation as any)._id);
+
+      createNotificationWithPush({
+        userId: recipientObjectId,
+        type: 'new_message',
+        title: `New message from ${senderName}`,
+        message: messagePreview,
+        data: { conversationId: encodeId(rawConvId) || rawConvId },
+      }).catch((err: any) => {
+        apiLogger.error('In-app notification failed:', err);
+      });
+    } catch {
+      // Non-blocking — never fail the request over a notification error
     }
 
     // Include security warnings if any (from server-side filtering)

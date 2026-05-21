@@ -78,27 +78,31 @@ const InboxPage: React.FC = () => {
 
     if (conversations.length === 0 && !activeConversationId) {
         return (
-            <div className="min-h-[calc(100vh-64px)] w-full flex flex-col items-center justify-center p-4 sm:p-8 text-center">
-                <EnvelopeIcon className="w-12 h-12 sm:w-16 sm:h-16 text-neutral-300 mb-4" />
-                <h2 className="text-xl sm:text-2xl font-bold text-neutral-800">{t('messages:inbox.emptyInbox')}</h2>
-                <p className="text-sm sm:text-base text-neutral-600 mt-2 max-w-md">
-                    {t('messages:inbox.inquireToStart')}
-                </p>
-                <div className="mt-6 sm:mt-8 w-full max-w-4xl">
-                    <h3 className="text-base sm:text-lg font-semibold text-neutral-700 mb-4">{t('messages:inbox.featuredProperties')}</h3>
-                    {isLoadingProperties ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                            {[1, 2, 3].map(i => (
-                                <div key={i} className="rounded-xl bg-neutral-100 animate-pulse h-64" />
-                            ))}
-                        </div>
-                    ) : featuredProperties.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                            {featuredProperties.map(prop => (
-                                <PropertyCard key={prop.id} property={prop} />
-                            ))}
-                        </div>
-                    ) : null}
+            <div className="h-[calc(100vh-64px)] w-full overflow-y-auto">
+                <div className="flex flex-col items-center px-4 sm:px-8 pt-12 pb-10 text-center">
+                    <EnvelopeIcon className="w-12 h-12 sm:w-16 sm:h-16 text-neutral-300 mb-4" />
+                    <h2 className="text-xl sm:text-2xl font-bold text-neutral-800">{t('messages:inbox.emptyInbox')}</h2>
+                    <p className="text-sm sm:text-base text-neutral-600 mt-2 max-w-md">
+                        {t('messages:inbox.inquireToStart')}
+                    </p>
+                    <div className="mt-8 w-full max-w-4xl text-left">
+                        <h3 className="text-base sm:text-lg font-semibold text-neutral-700 mb-4 text-center">
+                            {t('messages:inbox.featuredProperties')}
+                        </h3>
+                        {isLoadingProperties ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                                {[1, 2, 3].map(i => (
+                                    <div key={i} className="rounded-xl bg-neutral-100 animate-pulse h-64" />
+                                ))}
+                            </div>
+                        ) : featuredProperties.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                                {featuredProperties.map(prop => (
+                                    <PropertyCard key={prop.id} property={prop} />
+                                ))}
+                            </div>
+                        ) : null}
+                    </div>
                 </div>
             </div>
         );
