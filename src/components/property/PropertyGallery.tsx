@@ -113,7 +113,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   }, []);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(() => {
+    try {
+      const saved = localStorage.getItem('videoMuted');
+      return saved !== null ? saved === 'true' : false;
+    } catch {
+      return false;
+    }
+  });
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const tiktokBlockquoteRef = useRef<HTMLDivElement>(null);
 
@@ -565,9 +572,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 {/* Sound toggle button */}
                 <button
                   onClick={() => {
-                    setIsMuted(!isMuted);
+                    const next = !isMuted;
+                    setIsMuted(next);
+                    try { localStorage.setItem('videoMuted', String(next)); } catch {}
                     if (videoRef.current) {
-                      videoRef.current.muted = !isMuted;
+                      videoRef.current.muted = next;
                     }
                   }}
                   className="absolute top-3 right-3 z-20 flex items-center justify-center w-10 h-10 bg-black/60 backdrop-blur-sm text-white rounded-full hover:bg-black/80 transition-colors"
