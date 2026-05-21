@@ -234,6 +234,14 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 internetIncluded: propertyToEdit.internetIncluded || false,
                 tenantRequirements: propertyToEdit.tenantRequirements || [],
                 maxOccupants: propertyToEdit.maxOccupants || 1,
+                // Daily rental fields (short-stay / luxury villa)
+                checkInTime: propertyToEdit.checkInTime || '14:00',
+                checkOutTime: propertyToEdit.checkOutTime || '11:00',
+                cleaningFee: propertyToEdit.cleaningFee || 0,
+                cancellationPolicy: propertyToEdit.cancellationPolicy || '',
+                breakfastIncluded: propertyToEdit.breakfastIncluded || false,
+                towelsIncluded: propertyToEdit.towelsIncluded || false,
+                parkingIncluded: propertyToEdit.parkingIncluded || false,
                 // Visit availability
                 visitAvailability: propertyToEdit.visitAvailability || {
                     enabled: false,

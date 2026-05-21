@@ -387,6 +387,14 @@ export interface Property {
     internetIncluded?: boolean;
     tenantRequirements?: string[];
     maxOccupants?: number;
+    // Daily rental fields (short-stay / luxury villa)
+    checkInTime?: string;
+    checkOutTime?: string;
+    cleaningFee?: number;
+    cancellationPolicy?: 'flexible' | 'moderate' | 'strict' | 'non-refundable';
+    breakfastIncluded?: boolean;
+    towelsIncluded?: boolean;
+    parkingIncluded?: boolean;
     // Visit scheduling
     visitAvailability?: VisitAvailability;
     // Rental history
