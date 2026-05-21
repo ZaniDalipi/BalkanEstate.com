@@ -11,6 +11,7 @@ import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import PropertyImage from '@/src/components/ui/PropertyImage';
+import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 
 interface PropertyCardProps {
   property: Property;
@@ -34,6 +35,7 @@ interface PropertyCardInnerProps {
   onFavoriteClick: (e: React.MouseEvent) => void;
   onCompareClick: (e: React.MouseEvent) => void;
   onLocationClick: (e: React.MouseEvent, type: 'city' | 'country') => void;
+  onContextMenu: (e: React.MouseEvent) => void;
 }
 
 // Seller Avatar component with error handling
@@ -95,6 +97,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   onFavoriteClick,
   onCompareClick,
   onLocationClick,
+  onContextMenu,
 }) => {
   const { t, i18n } = useTranslation(['property', 'rental', 'common']);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -196,6 +199,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
         isSold || isRented ? 'hover:shadow-md' : 'hover:shadow-lg hover:-translate-y-1 hover:scale-[1.01]'
       }`}
       onClick={onCardClick}
+      onContextMenu={onContextMenu}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCardClick(e as any); } }}
       role="article"
       tabIndex={0}
@@ -648,11 +652,35 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   const updateSearchPageStateRef = useRef(updateSearchPageState);
   updateSearchPageStateRef.current = updateSearchPageState;
 
+  // Generate property URL
+  const getPropertyUrl = useCallback(() => {
+    if (!property?.id) {
+      console.warn('PropertyCard: Invalid property ID for URL generation');
+      return null;
+    }
+    try {
+      const slug = generatePropertySlug(property);
+      if (!slug) {
+        console.warn('PropertyCard: Failed to generate property slug');
+        return null;
+      }
+      return buildLocalizedPath(`/property/${slug}`);
+    } catch (error) {
+      console.error('PropertyCard: Error generating property URL:', error);
+      return null;
+    }
+  }, [property]);
+
   // Stable handlers using refs - won't cause PropertyCardInner re-renders
   const handleCardClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-    window.history.pushState({}, '', buildLocalizedPath(`/property/${generatePropertySlug(property)}`));
+    const url = buildLocalizedPath(`/property/${generatePropertySlug(property)}`);
+    if (shouldOpenInNewTab()) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
+      window.history.pushState({}, '', url);
+    }
   }, [dispatch, property]);
 
   const handleFavoriteClick = useCallback(async (e: React.MouseEvent) => {
@@ -718,6 +746,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
     }
   }, [property.city, property.country, dispatch]);
 
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+  }, []);
+
   // Early return for invalid/incomplete properties
   if (!hasRequiredFields) {
     return (
@@ -752,6 +784,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       onFavoriteClick={handleFavoriteClick}
       onCompareClick={handleCompareClick}
       onLocationClick={handleLocationClick}
+      onContextMenu={handleContextMenu}
     />
   );
 };

@@ -8,6 +8,7 @@ import { formatPrice } from '@/utils/currency';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import PropertyImage from '@/src/components/ui/PropertyImage';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 
 // Chevron Icons
 const ChevronLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -430,8 +431,13 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
 
   const handleCardClick = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();
-    dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-    window.history.pushState({}, '', buildLocalizedPath(`/property/${generatePropertySlug(property)}`));
+    const url = buildLocalizedPath(`/property/${generatePropertySlug(property)}`);
+    if (shouldOpenInNewTab()) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
+      window.history.pushState({}, '', url);
+    }
   }, [dispatch, property]);
 
   const handleFavoriteClick = useCallback(async (e: React.MouseEvent) => {

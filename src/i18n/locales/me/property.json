@@ -179,7 +179,7 @@
     "comparing": "Comparing",
     "addToCompare": "Add to Compare",
     "removeFromCompare": "Remove from Compare",
-    "compareLimit": "You can compare up to 4 properties at a time.",
+    "compareLimit": "You can compare up to 5 properties at a time.",
     "virtualTour": "Virtual Tour",
     "view360": "360° View",
     "floorPlan": "Floor Plan",
@@ -297,7 +297,10 @@
     "yearBuilt": "Year Built",
     "parking": "Parking",
     "specialFeatures": "Special Features",
-    "materials": "Materials"
+    "materials": "Materials",
+    "best": "Najbolje",
+    "viewProperty": "Pogledaj",
+    "removeFromComparison": "Ukloni"
   },
   "map": {
     "beds": "Beds",

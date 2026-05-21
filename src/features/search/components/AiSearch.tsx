@@ -11,6 +11,7 @@ import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { useAppContext } from '@/context/AppContext';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import AiMessageLimitModal from './AiMessageLimitModal';
+import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 
 // --- Web Speech API types ---
 interface SpeechRecognitionEvent extends Event { results: SpeechRecognitionResultList; resultIndex: number; }
@@ -362,8 +363,13 @@ const SwipeModal: React.FC<{
         const property = properties[currentIndex];
         if (!property) return;
         onClose();
-        dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-        window.history.pushState({}, '', buildLocalizedPath(`/property/${generatePropertySlug(property)}`));
+        const url = buildLocalizedPath(`/property/${generatePropertySlug(property)}`);
+        if (shouldOpenInNewTab()) {
+            window.open(url, '_blank', 'noopener,noreferrer');
+        } else {
+            dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
+            window.history.pushState({}, '', url);
+        }
     }, [currentIndex, properties, onClose, dispatch]);
 
     // Close on Escape

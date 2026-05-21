@@ -179,7 +179,7 @@
     "comparing": "Упоређивање",
     "addToCompare": "Додај за Поређење",
     "removeFromCompare": "Уклони из Поређења",
-    "compareLimit": "Можете упоредити до 4 некретнине одједном.",
+    "compareLimit": "Можете упоредити до 5 некретнина одједном.",
     "virtualTour": "Виртуелна Тура",
     "view360": "360° Поглед",
     "floorPlan": "План Стана",
@@ -297,7 +297,10 @@
     "yearBuilt": "Година Изградње",
     "parking": "Паркинг",
     "specialFeatures": "Посебне Карактеристике",
-    "materials": "Материјали"
+    "materials": "Материјали",
+    "best": "Najbolje",
+    "viewProperty": "Pogledaj",
+    "removeFromComparison": "Ukloni"
   },
   "map": {
     "beds": "Собе",

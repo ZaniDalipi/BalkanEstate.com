@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, Orientation, ListingType, RentPeriod, VisitAvailability } from '@/types';
 import { Button } from '@/components/ui/liquid-glass-button';
@@ -193,7 +193,7 @@ export const ImageTagSelector: React.FC<{
     value: string;
     options: string[];
     onChange: (tag: string) => void;
-}> = ({ value, options, onChange }) => {
+}> = memo(({ value, options, onChange }) => {
     const { t } = useTranslation(['seller']);
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -254,14 +254,14 @@ export const ImageTagSelector: React.FC<{
             )}
         </div>
     );
-};
+});
 
 
 export const TagListInput: React.FC<{
     tags: string[];
     setTags: (tags: string[]) => void;
     label: string;
-}> = ({ tags, setTags, label }) => {
+}> = memo(({ tags, setTags, label }) => {
     const { t } = useTranslation(['seller']);
     const [inputValue, setInputValue] = useState('');
     const inputId = `tag-input-${label.toLowerCase().replace(/\s+/g, '-')}`;
@@ -306,14 +306,14 @@ export const TagListInput: React.FC<{
             </div>
         </div>
     );
-};
+});
 
 // Tri-State Checkbox Component (No/Any/Yes)
 export const TriStateCheckbox: React.FC<{
     label: string;
     value: boolean | undefined;
     onChange: (value: boolean | undefined) => void;
-}> = ({ label, value, onChange }) => {
+}> = memo(({ label, value, onChange }) => {
     const { t } = useTranslation(['seller']);
     const handleClick = () => {
         if (value === undefined) {
@@ -359,4 +359,4 @@ export const TriStateCheckbox: React.FC<{
             </div>
         </div>
     );
-};
+});

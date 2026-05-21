@@ -179,7 +179,7 @@
     "comparing": "Duke Krahasuar",
     "addToCompare": "Shto për Krahasim",
     "removeFromCompare": "Largo nga Krahasimi",
-    "compareLimit": "Mund të krahasoni deri në 4 prona njëkohësisht.",
+    "compareLimit": "Mund të krahasoni deri në 5 prona njëkohësisht.",
     "virtualTour": "Tur Virtual",
     "view360": "Pamje 360°",
     "floorPlan": "Planimetria",
@@ -297,7 +297,10 @@
     "yearBuilt": "Viti i Ndërtimit",
     "parking": "Parkim",
     "specialFeatures": "Veçori të Veçanta",
-    "materials": "Materialet"
+    "materials": "Materialet",
+    "best": "Më i miri",
+    "viewProperty": "Shiko",
+    "removeFromComparison": "Hiqe"
   },
   "map": {
     "beds": "Dhoma",

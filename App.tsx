@@ -14,6 +14,7 @@ import { QueryErrorBoundary } from './src/app/components/QueryErrorBoundary';
 import { AnimationProvider } from './src/components/ui/Animations';
 import { ViewTransition, NavigationProvider } from './src/components/ui/ViewTransition';
 import { useZoomCompensation } from './src/app/hooks/useZoomCompensation';
+import { usePWALinkInterceptor } from './src/shared/hooks/usePWALinkInterceptor';
 // Lazy load SEO components (don't block initial render)
 const SEO = lazy(() => import('./src/components/seo').then(m => ({ default: m.SEO })));
 const OrganizationSchema = lazy(() => import('./src/components/seo').then(m => ({ default: m.OrganizationSchema })));
@@ -127,6 +128,7 @@ const SplashScreen = lazy(() => import('./src/components/ui/SplashScreen'));
 
 // Global liquid glass SVG filter (needed for glass buttons & controls)
 import { LiquidGlassFilter } from './components/ui/liquid-glass-button';
+import { LogoLoader } from './src/shared/components/ui/LogoLoader';
 
 // PWA Install Prompt (lazy loaded)
 const PWAInstallPrompt = lazy(() => import('./src/shared/components/PWAInstallPrompt'));
@@ -134,10 +136,10 @@ const PWAInstallPrompt = lazy(() => import('./src/shared/components/PWAInstallPr
 // Microsoft Clarity - Heatmaps & Session Recordings (lazy loaded)
 const ClarityInit = lazy(() => import('./src/app/components/ClarityInit'));
 
-// Loading fallback component with simple logo animation
+// Loading fallback component with animated logo
 const PageLoader: React.FC = () => (
   <div className="flex flex-col items-center justify-center min-h-[50vh]">
-    <LogoIcon className="w-12 h-12 text-primary animate-pulse" />
+    <LogoLoader size="md" showText={false} />
   </div>
 );
 
@@ -147,6 +149,10 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
   const [selectedAgency, setSelectedAgency] = useState<Agency | null>(null);
   const [isLoadingAgency, setIsLoadingAgency] = useState(false);
   const [isLoadingPropertyFromUrl, setIsLoadingPropertyFromUrl] = useState(false);
+
+  // In PWA standalone mode, intercept <a href> clicks to internal pages so the
+  // OS never opens a second browser window — navigation stays within the app.
+  usePWALinkInterceptor();
 
   // Listen for session expiration events from httpClient
   useEffect(() => {
@@ -559,6 +565,15 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
 
   // Scroll to top when active view changes
   useEffect(() => {
+    // Reset any browser zoom that was triggered by focused inputs (iOS auto-zoom)
+    const viewport = document.querySelector('meta[name=viewport]');
+    if (viewport) {
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover');
+      setTimeout(() => {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, viewport-fit=cover');
+      }, 300);
+    }
+
     // Scroll window to top
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
 
@@ -625,10 +640,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     if (isLoadingAgency || !selectedAgency) {
       return (
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">{t('common:loadingAgency')}</p>
-          </div>
+          <LogoLoader size="md" showText={true} />
         </div>
       );
     }
@@ -646,9 +658,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     return (
       <Suspense fallback={
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          </div>
+          <LogoLoader size="md" showText={false} />
         </div>
       }>
         <EmailVerificationRequired email={state.pendingEmailVerification} />
@@ -1070,11 +1080,9 @@ const MainLayout: React.FC = () => {
 };
 
 const FullScreenLoader: React.FC = () => {
-    const { t } = useTranslation('common');
     return (
         <div className="w-screen h-screen flex flex-col items-center justify-center bg-neutral-50">
-            <LogoIcon className="w-16 h-16 text-primary animate-pulse" />
-            <p className="mt-4 text-neutral-600 font-semibold">{t('common:splash.loading')}</p>
+            <LogoLoader size="lg" showText={true} />
         </div>
     );
 };

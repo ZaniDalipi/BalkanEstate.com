@@ -177,7 +177,7 @@
     "comparing": "Сравнява се",
     "addToCompare": "Добави за сравнение",
     "removeFromCompare": "Премахни от сравнението",
-    "compareLimit": "Можете да сравнявате до 4 имота едновременно.",
+    "compareLimit": "Можете да сравнявате до 5 имота едновременно.",
     "virtualTour": "Виртуална обиколка",
     "view360": "360° изглед",
     "floorPlan": "План на етажа",
@@ -297,7 +297,10 @@
     "yearBuilt": "Година на строеж",
     "parking": "Паркинг",
     "specialFeatures": "Специални характеристики",
-    "materials": "Материали"
+    "materials": "Материали",
+    "best": "Най-добро",
+    "viewProperty": "Виж",
+    "removeFromComparison": "Премахни"
   },
   "map": {
     "beds": "Спални",

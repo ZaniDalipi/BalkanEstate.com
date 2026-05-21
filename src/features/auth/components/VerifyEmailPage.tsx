@@ -89,7 +89,7 @@ const VerifyEmailPage: React.FC<VerifyEmailPageProps> = ({ onVerificationComplet
   // Loading state while verifying
   if (isVerifying) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10 p-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1rem)' }}>
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
           <div className="flex justify-center mb-6">
             <LogoIcon className="w-12 h-12" />
@@ -111,7 +111,7 @@ const VerifyEmailPage: React.FC<VerifyEmailPageProps> = ({ onVerificationComplet
   // Success state
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10 p-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1rem)' }}>
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
           <div className="flex justify-center mb-6">
             <LogoIcon className="w-12 h-12" />
@@ -142,7 +142,7 @@ const VerifyEmailPage: React.FC<VerifyEmailPageProps> = ({ onVerificationComplet
   // Resend success state
   if (resendSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10 p-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1rem)' }}>
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
           <div className="flex justify-center mb-6">
             <LogoIcon className="w-12 h-12" />
@@ -173,7 +173,7 @@ const VerifyEmailPage: React.FC<VerifyEmailPageProps> = ({ onVerificationComplet
 
   // Error/Resend form state
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10 p-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1rem)' }}>
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
         <div className="flex justify-center mb-6">
           <LogoIcon className="w-12 h-12" />

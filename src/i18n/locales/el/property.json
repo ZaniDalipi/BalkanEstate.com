@@ -179,7 +179,7 @@
     "comparing": "Σε Σύγκριση",
     "addToCompare": "Προσθήκη στη Σύγκριση",
     "removeFromCompare": "Αφαίρεση από τη Σύγκριση",
-    "compareLimit": "Μπορείτε να συγκρίνετε έως 4 ακίνητα τη φορά.",
+    "compareLimit": "Μπορείτε να συγκρίνετε έως 5 ακίνητα τη φορά.",
     "virtualTour": "Εικονική Ξενάγηση",
     "view360": "Προβολή 360°",
     "floorPlan": "Κάτοψη",
@@ -297,7 +297,10 @@
     "yearBuilt": "Έτος Κατασκευής",
     "parking": "Πάρκινγκ",
     "specialFeatures": "Ειδικά Χαρακτηριστικά",
-    "materials": "Υλικά"
+    "materials": "Υλικά",
+    "best": "Καλύτερο",
+    "viewProperty": "Προβολή",
+    "removeFromComparison": "Αφαίρεση"
   },
   "map": {
     "beds": "Υπνοδωμάτια",

@@ -330,7 +330,7 @@ const RegisterPage: React.FC = () => {
                 }
             `}</style>
 
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-neutral-50 to-primary/10 p-4">
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-neutral-50 to-primary/10 p-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1rem)' }}>
                 <div className="w-full max-w-md">
                     <div className="bg-white/80 backdrop-blur-2xl rounded-3xl shadow-2xl shadow-black/10 border border-white/50 p-6 sm:p-8">
                         {/* Logo */}
