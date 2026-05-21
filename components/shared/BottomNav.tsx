@@ -14,10 +14,11 @@ const BottomNav: React.FC = () => {
     const { activeView, isAuthenticated, currentUser, conversations } = state;
     const { orientation } = usePWAEnvironment();
 
-    // Calculate total unread messages
+    // Calculate total unread messages using the per-conversation unread count fields
     const totalUnreadCount = conversations.reduce((total, conversation) => {
-        const unreadCount = conversation.messages?.filter(m => !m.isRead && m.senderId !== currentUser?.id).length || 0;
-        return total + unreadCount;
+        const isBuyer = String(conversation.buyerId) === String(currentUser?.id);
+        const unread = isBuyer ? (conversation.buyerUnreadCount || 0) : (conversation.sellerUnreadCount || 0);
+        return total + unread;
     }, 0);
 
     const handleNavClick = (view: AppView) => {
@@ -123,7 +124,7 @@ const BottomNav: React.FC = () => {
                                 )}
                                 {item.badge !== undefined && item.badge > 0 && (
                                     <span
-                                        className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1"
+                                        className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 ring-2 ring-white shadow"
                                         aria-hidden="true"
                                     >
                                         {item.badge > 99 ? '99+' : item.badge}

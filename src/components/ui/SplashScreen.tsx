@@ -8,12 +8,12 @@ import { AppleHelloEnglishEffect } from '@/src/components/ui/apple-hello-effect'
 /*  Logo                                                               */
 /* ------------------------------------------------------------------ */
 const SplashLogo: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <g fillRule="evenodd">
-      <path fill="#003A96" d="M12 21V5L10 7V23L12 21Z M4 21V10L2 12V23L4 21Z" />
-      <path fill="#0252CD" d="M12 5H20V21H12V5Z M4 10H10V21H4V10Z" />
-    </g>
-  </svg>
+  <img
+    src="/icons/logo-3d.svg"
+    alt="BalkanEstate"
+    className={className}
+    draggable={false}
+  />
 );
 
 /* ------------------------------------------------------------------ */

@@ -85,7 +85,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
     if (isInComparison) {
       dispatch({ type: 'REMOVE_FROM_COMPARISON', payload: property.id });
     } else {
-      if (state.comparisonList.length >= 4) {
+      if (state.comparisonList.length >= 5) {
         dispatch({
           type: 'SHOW_ALERT',
           payload: {

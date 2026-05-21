@@ -175,6 +175,28 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
 
     return (
         <div className={`relative flex h-full w-full flex-col lg:flex-row ${(isMobile || isTablet) && isFiltersOpen ? 'overflow-hidden' : ''}`}>
+            {/* Search progress bar — shown while properties are loading */}
+            {isLoadingProperties && (
+                <div
+                    className="fixed top-0 left-0 right-0 z-[9999] h-0.5 overflow-hidden"
+                    role="progressbar"
+                    aria-label="Loading properties"
+                >
+                    <div
+                        className="h-full bg-blue-600"
+                        style={{
+                            animation: 'search-progress 2s ease-in-out infinite',
+                        }}
+                    />
+                    <style>{`
+                        @keyframes search-progress {
+                            0%   { width: 0%;   margin-left: 0%; }
+                            50%  { width: 70%;  margin-left: 15%; }
+                            100% { width: 0%;   margin-left: 100%; }
+                        }
+                    `}</style>
+                </div>
+            )}
             {/* Dynamic SEO for Search Page */}
             <SEO
                 title={seoTitle}

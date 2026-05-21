@@ -14,11 +14,54 @@ import { cronLogger } from '../utils/logger';
 import Favorite from '../models/Favorite';
 import PropertyAlert from '../models/PropertyAlert';
 import PriceHistory from '../models/PriceHistory';
+import Notification from '../models/Notification';
 import { sendPropertyAlert, sendPriceDropAlert, sendSavedSearchPriceDropAlert, sendNewListingsDigest } from '../services/emailService';
+import { sendPushToUser } from '../services/pushNotificationService';
 
 // Subscription tiers that have access to property alerts
 const ALERT_ELIGIBLE_TIERS = ['buyer', 'pro', 'agency_owner', 'agency_agent'];
 const ALERT_ELIGIBLE_STATUSES = ['active', 'trial', 'grace', 'pending_cancellation'];
+
+async function sendNewListingPush(userId: string, searchName: string, propertyId: string, propertyTitle: string, count: number): Promise<void> {
+  try {
+    const title = count === 1 ? 'New property found!' : `${count} new properties found!`;
+    const message = count === 1
+      ? `"${propertyTitle}" matches your search "${searchName}"`
+      : `${count} new properties match your search "${searchName}"`;
+    const notification = await Notification.create({
+      userId,
+      type: 'new_listing',
+      title,
+      message,
+      priority: 'high',
+      data: { actionUrl: `/properties/${propertyId}`, propertyId },
+    });
+    sendPushToUser(userId, notification).catch(() => {});
+  } catch (err) {
+    cronLogger.error('Failed to send new listing push notification:', err);
+  }
+}
+
+async function sendPriceChangePush(userId: string, propertyId: string, propertyTitle: string, previousPrice: number, newPrice: number, percentageChange: number, isPriceDrop: boolean): Promise<void> {
+  try {
+    const type = isPriceDrop ? 'price_drop' : 'price_increase';
+    const title = isPriceDrop ? 'Price reduced!' : 'Price updated';
+    const message = isPriceDrop
+      ? `${propertyTitle} dropped ${percentageChange}% to €${newPrice.toLocaleString()}`
+      : `${propertyTitle} increased ${percentageChange}% to €${newPrice.toLocaleString()}`;
+    const notification = await Notification.create({
+      userId,
+      type,
+      title,
+      message,
+      priority: isPriceDrop ? 'high' : 'normal',
+      data: { actionUrl: `/properties/${propertyId}`, propertyId, previousPrice, newPrice },
+    });
+    sendPushToUser(userId, notification).catch(() => {});
+  } catch (err) {
+    cronLogger.error('Failed to send price change push notification:', err);
+  }
+}
 
 /**
  * Check if a property matches saved search filters
@@ -276,6 +319,16 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
               { emailSent: true, emailSentAt: new Date() }
             );
           }
+
+          // Send push notification for instant alerts
+          const firstProperty = matchingProperties[0];
+          await sendNewListingPush(
+            String(user._id),
+            search.name,
+            String(firstProperty._id),
+            firstProperty.title || `${firstProperty.address}, ${firstProperty.city}`,
+            matchingProperties.length
+          );
         } else {
           // Send digest for multiple properties or non-instant frequency
           await sendNewListingsDigest({
@@ -419,6 +472,16 @@ export async function processPriceDropAlerts(): Promise<void> {
           { emailSent: true, emailSentAt: new Date() }
         );
 
+        await sendPriceChangePush(
+          String(user._id),
+          String(property._id),
+          property.title || `${property.address}, ${property.city}`,
+          savedPrice,
+          currentPrice,
+          percentageDrop,
+          true
+        );
+
         alertsSent++;
       } catch (emailError) {
         cronLogger.error('   Failed to send price drop email:', emailError);
@@ -554,6 +617,16 @@ async function processSavedSearchPriceDropAlerts(): Promise<void> {
               imageUrl: property.imageUrl,
             },
           });
+
+          await sendPriceChangePush(
+            String(user._id),
+            String(property._id),
+            property.title || `${property.address}, ${property.city}`,
+            previousPrice,
+            newPrice,
+            percentageChange,
+            isPriceDrop
+          );
 
           alertsSent++;
           cronLogger.info(`   ✉️ Sent price ${changeLabel} alert to ${user.email} (saved search: "${search.name}", property: ${property.title || property.address})`);
@@ -752,6 +825,14 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
           { emailSent: true, emailSentAt: new Date() }
         );
 
+        await sendNewListingPush(
+          String(user._id),
+          search.name,
+          String(property._id),
+          property.title || `${property.address}, ${property.city}`,
+          1
+        );
+
         alertsSent++;
         cronLogger.info(`   ✉️ Instant alert email sent to ${user.email}`);
       } catch (emailError) {
@@ -850,6 +931,7 @@ export async function processInstantPriceDropForProperty(
         });
 
         await Favorite.updateOne({ _id: favorite._id }, { lastAlertedPrice: newPrice });
+        await sendPriceChangePush(String(user._id), String(property._id), property.title || `${property.address}, ${property.city}`, previousPrice, newPrice, percentageChange, isPriceDrop);
         alertsSent++;
         cronLogger.info(`   ✉️ Sent price ${changeLabel} alert to ${user.email} (favorite)`);
       } catch (err) {
@@ -916,6 +998,7 @@ export async function processInstantPriceDropForProperty(
           },
         });
 
+        await sendPriceChangePush(String(user._id), String(property._id), property.title || `${property.address}, ${property.city}`, previousPrice, newPrice, percentageChange, isPriceDrop);
         alertedUserIds.add(String(user._id));
         alertsSent++;
         cronLogger.info(`   ✉️ Sent price ${changeLabel} alert to ${user.email} (saved search: "${search.name}")`);

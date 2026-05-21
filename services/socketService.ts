@@ -27,6 +27,8 @@ class SocketService {
   private deleteHandlers: Set<(conversationId: string) => void> = new Set();
   private userUpdateHandlers: Set<(data: any) => void> = new Set();
   private agencyUpdateHandlers: Map<string, Set<(data: any) => void>> = new Map();
+  private newNotificationHandlers: Set<(data: any) => void> = new Set();
+  private globalMessageHandlers: Set<(data: { conversationId: string; message: Message }) => void> = new Set();
   private currentUserId: string | null = null;
 
   // Property real-time handlers
@@ -84,11 +86,18 @@ class SocketService {
 
     // Handle incoming messages
     this.socket.on('message-received', (data: { conversationId: string; message: Message }) => {
-      // Message received
+      // Dispatch to conversation-specific handlers
       const handlers = this.messageHandlers.get(data.conversationId);
       if (handlers) {
         handlers.forEach(handler => handler(data.message));
       }
+      // Dispatch to global handlers (for unread counts, browser notifications)
+      this.globalMessageHandlers.forEach(handler => handler(data));
+    });
+
+    // Handle real-time notification events
+    this.socket.on('new-notification', (data: any) => {
+      this.newNotificationHandlers.forEach(handler => handler(data));
     });
 
     // Handle typing indicators
@@ -368,6 +377,18 @@ class SocketService {
     return () => {
       this.propertyBulkHandlers.delete(handler);
     };
+  }
+
+  /** Subscribe to real-time notification events from the backend */
+  onNewNotification(handler: (data: any) => void) {
+    this.newNotificationHandlers.add(handler);
+    return () => { this.newNotificationHandlers.delete(handler); };
+  }
+
+  /** Subscribe to ALL incoming messages across all conversations */
+  onAnyMessage(handler: (data: { conversationId: string; message: Message }) => void) {
+    this.globalMessageHandlers.add(handler);
+    return () => { this.globalMessageHandlers.delete(handler); };
   }
 
   /**

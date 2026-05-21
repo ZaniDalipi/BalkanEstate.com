@@ -17,6 +17,9 @@ export type NotificationType =
   | 'agency_coupon_redeemed' // Agent redeemed a coupon for your agency
   | 'agency_join_request'   // New join request from an agent
   | 'listing_limit_increased' // Listing limit increased by admin
+  | 'new_listing'           // New property matches a saved search
+  | 'price_drop'            // Price decreased on a watched property
+  | 'price_increase'        // Price increased on a watched property
   | 'system';               // System notifications
 
 export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
@@ -73,6 +76,9 @@ const NotificationSchema: Schema = new Schema(
         'agency_coupon_redeemed',
         'agency_join_request',
         'listing_limit_increased',
+        'new_listing',
+        'price_drop',
+        'price_increase',
         'system',
       ],
       required: true,

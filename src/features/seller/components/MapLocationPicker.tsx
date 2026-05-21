@@ -372,7 +372,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
       } finally {
         setIsSearching(false);
       }
-    }, 400);
+    }, 250);
   };
 
   // Handle result selection

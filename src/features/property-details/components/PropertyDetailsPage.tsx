@@ -960,6 +960,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <h3 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-3 sm:mb-4">{t('property:featuredAgencies')}</h3>
               <FeaturedAgencies />
             </div>
+
           </div>
 
           {/* Right Column - Contact Sidebar (Desktop only - mobile version shown above) */}

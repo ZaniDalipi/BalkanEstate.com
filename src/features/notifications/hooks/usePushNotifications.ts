@@ -64,7 +64,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
 
   const vapidKeyRef = useRef<string | null>(null);
 
-  // Check support and current subscription status on mount
+  // Check support, VAPID availability, and current subscription status on mount
   useEffect(() => {
     const checkStatus = async () => {
       // Feature detection
@@ -76,6 +76,20 @@ export function usePushNotifications(): UsePushNotificationsReturn {
           isLoading: false,
           error: null,
         });
+        return;
+      }
+
+      // Check if server has VAPID configured (cache key for subsequent subscribe calls)
+      try {
+        const data = await apiRequest<VapidKeyResponse>('/push/vapid-public-key');
+        if (!data?.publicKey) {
+          setState({ isSupported: false, permission: 'unsupported', isSubscribed: false, isLoading: false, error: null });
+          return;
+        }
+        vapidKeyRef.current = data.publicKey;
+      } catch {
+        // Server not configured or unreachable — hide the toggle silently
+        setState({ isSupported: false, permission: 'unsupported', isSubscribed: false, isLoading: false, error: null });
         return;
       }
 

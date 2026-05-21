@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { SparklesIcon, MapPinIcon } from '@/constants';
@@ -52,6 +53,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
         handleDragStart, handleDragEnter, handleDragEnd, handleDrop,
         handleGenerate,
         handleInputChange, handlePriceChange, handleImageTagChange,
+        handleListingTypeChange, handleVisitAvailabilityChange, handleVisitDayToggle,
         handleGoToPreview, handleBackToForm,
         handleSubmit,
         handlePromotionPaymentSuccess, handlePostWithoutPromotion,
@@ -104,29 +106,32 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     }
 
     /* AI Generation modal overlay - shown while analyzing images */
-    const generatingModal = isGenerating ? (
-        <div className="fixed inset-0 z-[5000] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
-            <div className="bg-white/90 backdrop-blur-xl rounded-3xl p-8 sm:p-10 shadow-2xl border border-white/50 max-w-sm w-full mx-4 text-center">
-                {/* Animated spinner */}
-                <div className="relative w-20 h-20 mx-auto mb-6">
-                    <div className="absolute inset-0 rounded-full border-4 border-gray-200" />
-                    <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-purple-500 border-r-blue-400 animate-spin" />
-                    <div className="absolute inset-2 flex items-center justify-center">
-                        <SparklesIcon className="w-8 h-8 text-purple-500" />
+    const generatingModal = isGenerating
+        ? createPortal(
+            <div className="fixed inset-0 z-[5000] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
+                <div className="bg-white/90 backdrop-blur-xl rounded-3xl p-8 sm:p-10 shadow-2xl border border-white/50 max-w-sm w-full mx-4 text-center">
+                    {/* Animated spinner */}
+                    <div className="relative w-20 h-20 mx-auto mb-6">
+                        <div className="absolute inset-0 rounded-full border-4 border-gray-200" />
+                        <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-purple-500 border-r-blue-400 animate-spin" />
+                        <div className="absolute inset-2 flex items-center justify-center">
+                            <SparklesIcon className="w-8 h-8 text-purple-500" />
+                        </div>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">
+                        {t('seller:createListing.progress.analyzing', 'Analyzing your images...')}
+                    </h3>
+                    <p className="text-sm text-gray-500 mb-5">
+                        {t('seller:createListing.progress.analyzingHint', 'Our AI is identifying rooms, features, and details from your photos. This may take a moment.')}
+                    </p>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                        <div className="bg-gradient-to-r from-purple-500 via-blue-400 to-cyan-400 h-2.5 rounded-full animate-pulse w-2/3" />
                     </div>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                    {t('seller:createListing.progress.analyzing', 'Analyzing your images...')}
-                </h3>
-                <p className="text-sm text-gray-500 mb-5">
-                    {t('seller:createListing.progress.analyzingHint', 'Our AI is identifying rooms, features, and details from your photos. This may take a moment.')}
-                </p>
-                <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                    <div className="bg-gradient-to-r from-purple-500 via-blue-400 to-cyan-400 h-2.5 rounded-full animate-pulse w-2/3" />
-                </div>
-            </div>
-        </div>
-    ) : null;
+            </div>,
+            document.body
+        )
+        : null;
 
     const isRental = listingData.listingType === 'rent';
     const currencySymbol = getCurrencySymbol(selectedCountry);
@@ -134,7 +139,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     return (
         <>
         {generatingModal}
-        <form onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') e.preventDefault(); }}>
+        <form className="listing-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') e.preventDefault(); }}>
             {/* Listing Type Toggle: Sale / Rent */}
             <div className="flex justify-center mb-6">
                 <LiquidGlassControl
@@ -159,7 +164,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         },
                     ]}
                     value={listingData.listingType}
-                    onChange={(val) => setListingData(prev => ({ ...prev, listingType: val as 'sale' | 'rent' }))}
+                    onChange={handleListingTypeChange}
                 />
             </div>
 
@@ -501,10 +506,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 <input
                                     type="checkbox"
                                     checked={listingData.visitAvailability.enabled}
-                                    onChange={(e) => setListingData(prev => ({
-                                        ...prev,
-                                        visitAvailability: { ...prev.visitAvailability, enabled: e.target.checked }
-                                    }))}
+                                    onChange={(e) => handleVisitAvailabilityChange({ enabled: e.target.checked })}
                                     className="rounded text-amber-500 focus:ring-amber-500/30 w-4 h-4 bg-gray-100/60 border-gray-300"
                                 />
                                 <span className="text-sm font-medium text-gray-500">{t('seller:createListing.visitAvailability.enable', 'Enable scheduling')}</span>
@@ -532,15 +534,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                                 type="button"
                                                 variant={listingData.visitAvailability.days.includes(day) ? 'accent' : 'glass'}
                                                 size="sm"
-                                                onClick={() => {
-                                                    const days = listingData.visitAvailability.days.includes(day)
-                                                        ? listingData.visitAvailability.days.filter(d => d !== day)
-                                                        : [...listingData.visitAvailability.days, day];
-                                                    setListingData(prev => ({
-                                                        ...prev,
-                                                        visitAvailability: { ...prev.visitAvailability, days }
-                                                    }));
-                                                }}
+                                                onClick={() => handleVisitDayToggle(day)}
                                                 className={`rounded-lg ${!listingData.visitAvailability.days.includes(day) ? 'text-gray-400' : ''}`}
                                             >
                                                 {label}
@@ -556,10 +550,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         <input
                                             type="time"
                                             value={listingData.visitAvailability.startTime}
-                                            onChange={(e) => setListingData(prev => ({
-                                                ...prev,
-                                                visitAvailability: { ...prev.visitAvailability, startTime: e.target.value }
-                                            }))}
+                                            onChange={(e) => handleVisitAvailabilityChange({ startTime: e.target.value })}
                                             className="glass-input w-full px-3 py-2 text-sm"
                                         />
                                     </div>
@@ -568,10 +559,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         <input
                                             type="time"
                                             value={listingData.visitAvailability.endTime}
-                                            onChange={(e) => setListingData(prev => ({
-                                                ...prev,
-                                                visitAvailability: { ...prev.visitAvailability, endTime: e.target.value }
-                                            }))}
+                                            onChange={(e) => handleVisitAvailabilityChange({ endTime: e.target.value })}
                                             className="glass-input w-full px-3 py-2 text-sm"
                                         />
                                     </div>
@@ -579,10 +567,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         <label className="block text-xs font-medium text-gray-400 mb-1">{t('seller:createListing.visitAvailability.slotDuration', 'Slot Duration')}</label>
                                         <select
                                             value={listingData.visitAvailability.slotDurationMinutes}
-                                            onChange={(e) => setListingData(prev => ({
-                                                ...prev,
-                                                visitAvailability: { ...prev.visitAvailability, slotDurationMinutes: Number(e.target.value) }
-                                            }))}
+                                            onChange={(e) => handleVisitAvailabilityChange({ slotDurationMinutes: Number(e.target.value) })}
                                             className="glass-select w-full px-3 py-2 text-sm"
                                         >
                                             <option value={15}>15 min</option>
@@ -599,10 +584,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                     <input
                                         type="text"
                                         value={listingData.visitAvailability.notes || ''}
-                                        onChange={(e) => setListingData(prev => ({
-                                            ...prev,
-                                            visitAvailability: { ...prev.visitAvailability, notes: e.target.value }
-                                        }))}
+                                        onChange={(e) => handleVisitAvailabilityChange({ notes: e.target.value })}
                                         className="glass-input w-full px-3 py-2 text-sm"
                                         placeholder={t('seller:createListing.visitAvailability.notesPlaceholder', 'e.g., Ring bell at gate, parking available...')}
                                     />
@@ -616,7 +598,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
                     <ListingImageUpload
                         images={images}
-                        listingData={listingData}
+                        imageTags={listingData.image_tags}
                         floorplanImage={floorplanImage}
                         isCompressing={isCompressing}
                         isUploading={isUploading}

@@ -449,6 +449,7 @@ export interface Conversation {
     participants?: string[]; // user ID and seller ID (for backwards compatibility)
     messages: Message[];
     lastMessage?: Message;
+    lastMessageAt?: string | number;
     createdAt: number;
     isRead: boolean;
     buyerUnreadCount: number;
@@ -816,6 +817,7 @@ export type AppAction =
     | { type: 'ADD_MESSAGE', payload: { conversationId: string, message: Message } }
     | { type: 'CREATE_OR_ADD_MESSAGE', payload: { propertyId: string, message: Message } }
     | { type: 'MARK_CONVERSATION_AS_READ', payload: string }
+    | { type: 'INCREMENT_CONVERSATION_UNREAD', payload: { conversationId: string; forUserId: string } }
     | { type: 'SET_PENDING_PROPERTY', payload: Property | null }
     | { type: 'SET_PENDING_SUBSCRIPTION', payload: PendingSubscription | null }
     | { type: 'SET_PENDING_AGENCY_DATA', payload: any | null }

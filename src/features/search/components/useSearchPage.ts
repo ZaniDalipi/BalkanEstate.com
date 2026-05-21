@@ -42,6 +42,7 @@ export function useSearchPage() {
     const searchWrapperRef = useRef<HTMLDivElement>(null);
     const [isSearchingLocation, setIsSearchingLocation] = useState(false);
     const debounceTimer = useRef<number | null>(null);
+    const queryDebounceTimer = useRef<number | null>(null);
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
     const [showAllOnMobile, setShowAllOnMobile] = useState(false); // Track if filters were reset on mobile
     const [showMapHint, setShowMapHint] = useState(false); // Show hint about map view on mobile
@@ -636,13 +637,23 @@ export function useSearchPage() {
                 updateSearchPageState({
                     filters: newFilters,
                     activeFilters: newFilters,
-                    drawnBoundsJSON: serializeBounds(bounds), // Set the country bounds as the search area
+                    drawnBoundsJSON: serializeBounds(bounds),
                 });
                 return;
             }
         }
 
-        // Apply filters in real-time by updating both filters and activeFilters
+        // Debounce query text input to avoid triggering re-renders on every keystroke
+        if (name === 'query') {
+            updateSearchPageState({ filters: newFilters }); // Update displayed value immediately
+            if (queryDebounceTimer.current) clearTimeout(queryDebounceTimer.current);
+            queryDebounceTimer.current = window.setTimeout(() => {
+                updateSearchPageState({ activeFilters: newFilters });
+            }, 300);
+            return;
+        }
+
+        // Apply other filters in real-time
         updateSearchPageState({ filters: newFilters, activeFilters: newFilters });
     }, [filters, updateSearchPageState]);
 

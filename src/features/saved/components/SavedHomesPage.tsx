@@ -15,6 +15,8 @@ import FeaturedAgencies from '@/components/FeaturedAgencies';
 import Footer from '@/components/shared/Footer';
 import { getSavedAgents } from '@/src/features/agents/api/agentApi';
 import { getAgencyFavorites } from '@/src/features/saved/api/savedApi';
+import { generatePropertySlug } from '@/utils/slug';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import StarRating from '@/components/shared/StarRating';
 import { FloatingSphere, Decorative3DStyles } from '@/components/shared/Decorative3D';
 import SavedItemsHeroBanner from '@/components/shared/SavedItemsHeroBanner';
@@ -122,6 +124,13 @@ const SavedPropertiesPage: React.FC = () => {
     setDirection('forward');
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
     window.history.pushState({}, '', '/agencies');
+  };
+
+  const handleViewComparedProperty = (property: Property) => {
+    setDirection('up');
+    dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
+    setComparisonModalOpen(false);
+    window.history.pushState({}, '', buildLocalizedPath(`/property/${generatePropertySlug(property)}`));
   };
 
   const renderAgentCard = (agent: Agent) => (
@@ -453,6 +462,8 @@ const SavedPropertiesPage: React.FC = () => {
           isOpen={isComparisonModalOpen}
           onClose={() => setComparisonModalOpen(false)}
           properties={selectedForComparison}
+          onRemove={(id) => dispatch({ type: 'REMOVE_FROM_COMPARISON', payload: id })}
+          onViewProperty={handleViewComparedProperty}
       />
 
       {/* Modern Hero Banner with Tabs */}
