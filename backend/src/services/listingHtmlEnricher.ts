@@ -393,6 +393,25 @@ const extractStructuredPriceFromHtml = ($: cheerio.CheerioAPI, target: Mapped): 
 };
 
 
+// Generic words that appear in breadcrumbs/navigation and are never city names.
+const LOCATION_NOISE = new Set([
+  'home', 'back', 'all', 'search', 'results', 'more', 'next', 'previous', 'page',
+  'properties', 'listings', 'real estate', 'for sale', 'for rent', 'rent', 'buy', 'sell',
+  'contact', 'about', 'help', 'login', 'register', 'account', 'menu',
+  // Albanian
+  'prona', 'ne shitje', 'me qira', 'kreu',
+  // Croatian / Bosnian / Serbian
+  'nekretnine', 'prodaja', 'najam', 'pretraga', 'pocetna', 'početna',
+  // Bulgarian / Romanian / Greek
+  'начало', 'имоти', 'acasa', 'proprietati', 'αρχική', 'ακίνητα',
+]);
+
+const isNoisyLocationText = (text: string): boolean => {
+  const lower = text.toLowerCase().trim();
+  return LOCATION_NOISE.has(lower) || lower.length < 2 || lower.length > 60
+    || /^\d+$/.test(lower);          // bare numbers
+};
+
 const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped, baseUrl = ''): void => {
   // 1. itemprop attributes (most structured)
   if (!target.address) {
@@ -454,8 +473,11 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
       const el = $(sel).first();
       const text = el.text().trim();
       if (text && text.length < 80 && text.length > 1) {
-        target.city = text.split(/[,/]/)[0].trim();
-        break;
+        const candidate = text.split(/[,/]/)[0].trim();
+        if (!isNoisyLocationText(candidate)) {
+          target.city = candidate;
+          break;
+        }
       }
     }
   }
@@ -495,19 +517,23 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
         if (commaIdx > 0 && commaIdx < text.length - 1) {
           const part1 = text.slice(0, commaIdx).trim();
           const part2 = text.slice(commaIdx + 1).trim();
-          if (!target.city && part1.length < 60) target.city = part1;
-          if (!target.country && part2.length < 60) target.country = part2;
+          if (!target.city && !isNoisyLocationText(part1)) target.city = part1;
+          if (!target.country && !isNoisyLocationText(part2)) target.country = part2;
           if (target.city && target.country) break outer;
           continue;
         }
 
-        // Try breadcrumb separators
+        // Try breadcrumb separators — take the last meaningful segments
         if (/\s*\/\s+|\s*>\s*|\s*»\s*|\s*·\s*/.test(text)) {
-          const parts = text.split(/\s*(?:\/|>|»|·)\s+/).filter(p => p.length > 0);
+          const parts = text.split(/\s*(?:\/|>|»|·)\s+/)
+            .map(p => p.trim()).filter(p => p.length > 0 && !isNoisyLocationText(p));
           if (parts.length >= 2) {
-            if (!target.city) target.city = parts[0];
-            if (!target.country && parts.length >= 2) target.country = parts[parts.length - 1];
+            if (!target.city) target.city = parts[parts.length - 2] ?? parts[0];
+            if (!target.country) target.country = parts[parts.length - 1];
             if (target.city && target.country) break outer;
+            continue;
+          } else if (parts.length === 1) {
+            if (!target.city) target.city = parts[0];
             continue;
           }
         }
@@ -515,16 +541,16 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
         // Try space-separated (last word likely country, rest is city)
         const words = text.split(/\s+/);
         if (words.length === 2) {
-          if (!target.city) target.city = words[0];
-          if (!target.country) target.country = words[1];
+          if (!target.city && !isNoisyLocationText(words[0])) target.city = words[0];
+          if (!target.country && !isNoisyLocationText(words[1])) target.country = words[1];
           if (target.city && target.country) break outer;
         } else if (words.length > 2) {
-          // For "8700 m² Land in Xhafzotaj, Durres" → extract last two words as city/country
+          // For "8700 m² Land in Xhafzotaj, Durres" → last two words as city/country
           const lastWord = words[words.length - 1];
           const secondLast = words[words.length - 2];
           if (!target.address) target.address = text;
-          if (!target.city && secondLast.length < 50) target.city = secondLast;
-          if (!target.country && lastWord.length < 50) target.country = lastWord;
+          if (!target.city && !isNoisyLocationText(secondLast)) target.city = secondLast;
+          if (!target.country && !isNoisyLocationText(lastWord)) target.country = lastWord;
         }
       }
       if (target.city) break;

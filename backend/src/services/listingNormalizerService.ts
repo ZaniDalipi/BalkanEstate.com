@@ -719,13 +719,18 @@ export const normalize = async (
   let city = (mapped.city as string | undefined)?.toString().trim();
   let country = (mapped.country as string | undefined)?.toString().trim();
 
-  // If we have address but no city/country, attempt to extract them:
-  // "Rruga Myslym Shyri, Tirana, Albania" → city=Tirana, country=Albania
+  // If we have address but no city/country, try to extract them — but only
+  // accept parts that match our lookup tables to avoid setting "City Center"
+  // or "Neighborhood" as the city name.
   if (mapped.address && (!city || !country)) {
     const addrStr = (mapped.address as string).trim();
     const addrParts = addrStr.split(',').map(p => p.trim()).filter(Boolean);
-    if (addrParts.length >= 2 && !city) city = addrParts[addrParts.length - 2];
-    if (addrParts.length >= 2 && !country) country = addrParts[addrParts.length - 1];
+    // Walk parts in reverse (country usually last, city second-to-last)
+    for (const part of [...addrParts].reverse()) {
+      const slug = part.toLowerCase().replace(/[-\s]/g, '');
+      if (!country && COUNTRY_SLUG_MAP[slug]) { country = COUNTRY_SLUG_MAP[slug]; continue; }
+      if (!city   && CITY_SLUG_MAP[slug])    { city    = CITY_SLUG_MAP[slug];    continue; }
+    }
   }
   // Last resort: try to extract city from the listing URL path using known city slugs.
   if ((!city || !country) && raw.url) {
@@ -739,11 +744,24 @@ export const normalize = async (
     } catch { /* ignore */ }
   }
 
-  const address = (mapped.address as string | undefined)?.toString().trim() || city || country || 'Unknown';
+  // Build the address string. Clear it if it only contains city/country names so
+  // we don't store "Tirana, Albania" as a street address.
+  const rawAddress = (mapped.address as string | undefined)?.toString().trim();
+  let address: string | undefined;
+  if (rawAddress) {
+    const parts = rawAddress.split(',').map(p => p.trim()).filter(Boolean);
+    const allPartsAreLocations = parts.length > 0 && parts.every(p => {
+      const slug = p.toLowerCase().replace(/[-\s]/g, '');
+      return CITY_SLUG_MAP[slug] !== undefined || COUNTRY_SLUG_MAP[slug] !== undefined
+        || (city && p.toLowerCase() === city.toLowerCase())
+        || (country && p.toLowerCase() === country.toLowerCase());
+    });
+    address = allPartsAreLocations ? undefined : rawAddress;
+  }
 
   if ((lat == null || lng == null) && city && country) {
     try {
-      const geo = await geocodeAddress(address, city, country);
+      const geo = await geocodeAddress(address ?? `${city}, ${country}`, city, country);
       if (geo) {
         lat = lat ?? geo.lat;
         lng = lng ?? geo.lng;
@@ -890,9 +908,9 @@ export const normalize = async (
     status: 'active',
     price: finalPrice,
     isNegotiable: finalPrice === 0 ? true : Boolean(mapped.isNegotiable),
-    address,
-    city: city || 'Unknown',
-    country: country || 'Unknown',
+    address: address || undefined,
+    city: city || undefined,
+    country: country || undefined,
     beds: beds ?? 0,
     baths: baths ?? 0,
     livingRooms: livingRooms ?? 0,
