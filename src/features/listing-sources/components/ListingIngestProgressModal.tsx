@@ -44,6 +44,7 @@ interface CrawlHeroProps {
 }
 
 const CrawlHero: React.FC<CrawlHeroProps> = memo(({ phase, fetched, processed, currentTitle, currentUrl, sourceHost }) => {
+  const { t } = useTranslation('listingFeeds');
   const isActive = phase === 'discovering' || phase === 'syncing';
 
   return (
@@ -92,7 +93,7 @@ const CrawlHero: React.FC<CrawlHeroProps> = memo(({ phase, fetched, processed, c
               <div className="w-5 h-5">{Ico.globe}</div>
             </div>
             <div>
-              <p className="text-emerald-300 font-semibold text-sm tracking-wide">Scanning the web…</p>
+              <p className="text-emerald-300 font-semibold text-sm tracking-wide">{t('crawlScanning')}</p>
               <p className="text-emerald-600 text-xs mt-0.5 font-mono">{sourceHost}</p>
             </div>
             <div className="flex items-center gap-1.5">
@@ -110,7 +111,7 @@ const CrawlHero: React.FC<CrawlHeroProps> = memo(({ phase, fetched, processed, c
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] text-emerald-500 font-mono uppercase tracking-widest flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" style={{ animation: 'pulse-dot 1s infinite' }}/>
-                Fetching listing {processed + 1} of {fetched}
+                {t('crawlFetchingListing', { current: processed + 1, total: fetched })}
               </span>
               <span className="text-[10px] text-gray-600 font-mono">{Math.round((processed / Math.max(1, fetched)) * 100)}%</span>
             </div>
@@ -126,7 +127,7 @@ const CrawlHero: React.FC<CrawlHeroProps> = memo(({ phase, fetched, processed, c
             )}
             {!currentUrl && !currentTitle && (
               <div className="bg-black/40 rounded-lg px-3 py-2">
-                <span className="text-gray-500 text-[11px] font-mono">Waiting for next listing…</span>
+                <span className="text-gray-500 text-[11px] font-mono">{t('crawlWaitingNext')}</span>
               </div>
             )}
           </div>
@@ -139,7 +140,7 @@ const CrawlHero: React.FC<CrawlHeroProps> = memo(({ phase, fetched, processed, c
                  style={{ animation: 'pop-in 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards' }}>
               <div className="w-5 h-5">{Ico.check}</div>
             </div>
-            <p className="text-emerald-300 font-semibold text-sm">Import complete</p>
+            <p className="text-emerald-300 font-semibold text-sm">{t('importComplete')}</p>
           </>
         )}
 
@@ -149,7 +150,7 @@ const CrawlHero: React.FC<CrawlHeroProps> = memo(({ phase, fetched, processed, c
             <div className="w-11 h-11 rounded-full bg-red-500/20 border border-red-400/40 text-red-400 flex items-center justify-center">
               <div className="w-5 h-5">{Ico.warn}</div>
             </div>
-            <p className="text-red-300 font-semibold text-sm">Import failed</p>
+            <p className="text-red-300 font-semibold text-sm">{t('importFailed')}</p>
           </>
         )}
       </div>
@@ -182,20 +183,27 @@ StatRow.displayName = 'StatRow';
 
 // ─── LiveFeedItem ─────────────────────────────────────────────────────────────
 
-const BADGE: Record<ProcessedItem['status'], { label: string; cls: string }> = {
-  imported: { label: 'New',     cls: 'bg-emerald-100 text-emerald-700 ring-emerald-200' },
-  updated:  { label: 'Updated', cls: 'bg-blue-100 text-blue-700 ring-blue-200' },
-  deferred: { label: 'Queued',  cls: 'bg-amber-100 text-amber-700 ring-amber-200' },
-  failed:   { label: 'Failed',  cls: 'bg-red-100 text-red-700 ring-red-200' },
+const BADGE_CLS: Record<ProcessedItem['status'], string> = {
+  imported: 'bg-emerald-100 text-emerald-700 ring-emerald-200',
+  updated:  'bg-blue-100 text-blue-700 ring-blue-200',
+  deferred: 'bg-amber-100 text-amber-700 ring-amber-200',
+  failed:   'bg-red-100 text-red-700 ring-red-200',
+};
+
+const BADGE_KEY: Record<ProcessedItem['status'], string> = {
+  imported: 'statNew',
+  updated:  'statUpdated',
+  deferred: 'statQueued',
+  failed:   'statFailed',
 };
 
 const FeedItem: React.FC<{ item: ProcessedItem; isFirst: boolean }> = memo(({ item, isFirst }) => {
-  const badge = BADGE[item.status];
+  const { t } = useTranslation('listingFeeds');
   return (
     <div className="flex items-center gap-2.5 px-3 py-2.5 border-b border-gray-50 last:border-0"
          style={{ animation: isFirst ? 'slide-up-in 0.25s ease-out forwards' : 'none' }}>
-      <span className={`text-[10px] font-bold uppercase tracking-wide rounded-full px-2 py-0.5 ring-1 flex-shrink-0 ${badge.cls}`}>
-        {badge.label}
+      <span className={`text-[10px] font-bold uppercase tracking-wide rounded-full px-2 py-0.5 ring-1 flex-shrink-0 ${BADGE_CLS[item.status]}`}>
+        {t(BADGE_KEY[item.status])}
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-sm text-gray-800 font-medium truncate leading-tight">{item.title || item.id}</p>
@@ -258,11 +266,11 @@ const ListingIngestProgressModal: React.FC<Props> = ({
   try { sourceHost = sourceUrl ? new URL(sourceUrl).hostname.replace(/^www\./, '') : ''; } catch { /* */ }
 
   const statItems: StatItem[] = [
-    { label: 'Scanned',  value: stats.fetched,   color: 'text-gray-500',    icon: Ico.globe  },
-    { label: 'New',      value: stats.imported,  color: 'text-emerald-600', icon: Ico.plus   },
-    { label: 'Updated',  value: stats.updated,   color: 'text-blue-600',    icon: Ico.arrow  },
-    { label: 'Queued',   value: stats.deferred,  color: 'text-amber-600',   icon: Ico.clock  },
-    { label: 'Failed',   value: stats.failed,    color: 'text-red-500',     icon: Ico.warn   },
+    { label: t('statScanned'),  value: stats.fetched,   color: 'text-gray-500',    icon: Ico.globe  },
+    { label: t('statNew'),      value: stats.imported,  color: 'text-emerald-600', icon: Ico.plus   },
+    { label: t('statUpdated'),  value: stats.updated,   color: 'text-blue-600',    icon: Ico.arrow  },
+    { label: t('statQueued'),   value: stats.deferred,  color: 'text-amber-600',   icon: Ico.clock  },
+    { label: t('statFailed'),   value: stats.failed,    color: 'text-red-500',     icon: Ico.warn   },
   ];
 
   const incompleteCount = finalStats?.incompleteCount ?? 0;
@@ -274,7 +282,7 @@ const ListingIngestProgressModal: React.FC<Props> = ({
         {/* ── Header ── */}
         <div className="flex items-center gap-3 pr-8">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-blue-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 flex-shrink-0">
-            <div className="w-4.5 h-4.5">{Ico.globe}</div>
+            <div className="w-5 h-5">{Ico.globe}</div>
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="text-base font-bold text-gray-900 truncate leading-tight">{source.name}</h2>
@@ -285,10 +293,10 @@ const ListingIngestProgressModal: React.FC<Props> = ({
                 'bg-emerald-400 animate-pulse'
               }`}/>
               <span className="text-xs text-gray-500 truncate">
-                {phase === 'discovering' ? 'Discovering listings…'
-                 : phase === 'syncing' ? `Syncing ${stats.processed} / ${stats.fetched}`
-                 : phase === 'finished' ? 'Import complete'
-                 : 'Import failed'}
+                {phase === 'discovering' ? t('phaseDiscovering')
+                 : phase === 'syncing' ? t('phaseSyncing', { processed: stats.processed, total: stats.fetched })
+                 : phase === 'finished' ? t('phaseFinished')
+                 : t('phaseError')}
               </span>
               {sourceHost && <><span className="text-gray-300 text-xs">·</span><span className="text-xs text-gray-400 truncate">{sourceHost}</span></>}
             </div>
@@ -309,7 +317,7 @@ const ListingIngestProgressModal: React.FC<Props> = ({
         {phase !== 'error' && (
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-xs text-gray-500">
-              <span>{stats.fetched > 0 ? `${stats.processed} of ${stats.fetched} listings processed` : 'Searching…'}</span>
+              <span>{stats.fetched > 0 ? t('processedOfTotal', { processed: stats.processed, total: stats.fetched }) : t('progressSearching')}</span>
               <span className="font-bold text-gray-700 tabular-nums">{phase === 'discovering' ? '…' : `${pct}%`}</span>
             </div>
             <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -366,21 +374,21 @@ const ListingIngestProgressModal: React.FC<Props> = ({
         <div>
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              {recentItems.length > 0 ? `${recentItems.length} listings processed` : 'Live activity'}
+              {recentItems.length > 0 ? t('listingsProcessedCount', { count: recentItems.length }) : t('liveActivityLabel')}
             </p>
             {isRunning && phase === 'syncing' && (
               <span className="text-[10px] text-emerald-600 font-mono flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"/>
-                live
+                {t('liveBadge')}
               </span>
             )}
           </div>
           {recentItems.length === 0 ? (
             <div className="text-center py-7 bg-gray-50/70 rounded-xl border border-dashed border-gray-200">
               <p className="text-sm text-gray-400">
-                {phase === 'discovering' ? 'Looking for listings — this can take a minute on large sites.' :
-                 phase === 'syncing' ? 'Waiting for first listing…' :
-                 'No items processed.'}
+                {phase === 'discovering' ? t('lookingForListings') :
+                 phase === 'syncing' ? t('waitingForFirstItem') :
+                 t('noItemsProcessed')}
               </p>
             </div>
           ) : (
