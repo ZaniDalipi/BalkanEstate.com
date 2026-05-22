@@ -89,6 +89,55 @@ const LISTING_TYPE_MAP: Record<string, IProperty['listingType']> = {
 
 const RENT_PRICE_HINTS = /(\/\s*mo|\/\s*month|month\b|mes\.|mesec|mjesec|m(jese|ese)čno|monatlich|monat\b|μήνα|po mesecu|par\s+mois|al\s+mes|affitto|loyer|aluguel|kira\b|bérlet)/i;
 
+// Patterns that identify non-address segments to strip from raw address strings.
+// Covers phone labels + numbers, email labels, UI button text across Balkan languages.
+const ADDRESS_NOISE_PATTERNS: RegExp[] = [
+  // Phone labels (Latin + Cyrillic variants) followed by the number
+  /телефон\s*:?\s*[\d\s()+\-./]*/gi,
+  /telefon\s*:?\s*[\d\s()+\-./]*/gi,
+  /tel\.?\s*:?\s*[\d\s()+\-./]*/gi,
+  /phone\s*:?\s*[\d\s()+\-./]*/gi,
+  /тел\.?\s*:?\s*[\d\s()+\-./]*/gi,
+  /τηλ\.?\s*:?\s*[\d\s()+\-./]*/gi,
+  /mob\.?\s*:?\s*[\d\s()+\-./]*/gi,
+  /mobitel\s*:?\s*[\d\s()+\-./]*/gi,
+  /fax\s*:?\s*[\d\s()+\-./]*/gi,
+  /факс\s*:?\s*[\d\s()+\-./]*/gi,
+  // Bare international phone numbers not preceded by address digits
+  /(?<![,\w])\+?\d[\d\s()\-./]{7,}/g,
+  // Email addresses
+  /[\w.+-]+@[\w.-]+\.\w{2,}/g,
+  // UI button / navigation labels (Balkan languages)
+  /\bоткажи\b/gi,   // mk: Cancel
+  /\bзатвори\b/gi,  // mk/sr: Close
+  /\botkaži\b/gi,   // hr/bs: Cancel
+  /\bzatvori\b/gi,  // hr/bs: Close
+  /\bcancel\b/gi,
+  /\bclose\b/gi,
+  /\bакту[а-я]+\b/gi, // e.g. "Актуелно" (sr: Current)
+  /\bcontact(ați|us)?\b/gi,
+  /\bkontakt(ujte)?\b/gi,
+  /\bконтакт\b/gi,
+];
+
+/**
+ * Strip phone numbers, email addresses, UI button text and other non-address
+ * noise from a raw address string, then collapse excess punctuation/whitespace.
+ */
+function cleanAddressString(raw: string | undefined): string | undefined {
+  if (!raw) return raw;
+  let s = raw;
+  for (const re of ADDRESS_NOISE_PATTERNS) {
+    s = s.replace(re, '');
+  }
+  // Collapse leftover separators: multiple commas, leading/trailing commas/spaces
+  s = s
+    .replace(/,\s*,+/g, ',')
+    .replace(/^[\s,]+|[\s,]+$/g, '')
+    .trim();
+  return s || undefined;
+}
+
 interface ParsedPrice {
   price: number;
   currency?: string;
@@ -746,7 +795,9 @@ export const normalize = async (
 
   // Build the address string. Clear it if it only contains city/country names so
   // we don't store "Tirana, Albania" as a street address.
-  const rawAddress = (mapped.address as string | undefined)?.toString().trim();
+  const rawAddress = cleanAddressString(
+    (mapped.address as string | undefined)?.toString().trim()
+  );
   let address: string | undefined;
   if (rawAddress) {
     const parts = rawAddress.split(',').map(p => p.trim()).filter(Boolean);
