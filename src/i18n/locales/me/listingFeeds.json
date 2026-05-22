@@ -126,7 +126,7 @@
   "recentItems": "Recent items ({{count}})",
   "waitingForFirstItem": "Waiting for the first item…",
   "noItemsProcessed": "No items have been processed yet.",
-  "crawlScanning": "Skeniranje weba…",
+  "crawlScanning": "Dohvaćanje oglasa…",
   "crawlFetchingListing": "Preuzimanje oglasa {{current}} od {{total}}",
   "crawlWaitingNext": "Čekanje sljedećeg oglasa…",
   "importComplete": "Uvoz završen",

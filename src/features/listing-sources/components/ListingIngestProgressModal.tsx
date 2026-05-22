@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, memo } from 'react';
+import React, { useEffect, useMemo, useRef, useState, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from '@/shared/components/ui/Modal';
 import { useAppContext } from '@/context/AppContext';
@@ -45,56 +45,56 @@ interface CrawlHeroProps {
 
 const CrawlHero: React.FC<CrawlHeroProps> = memo(({ phase, fetched, processed, currentTitle, currentUrl, sourceHost }) => {
   const { t } = useTranslation('listingFeeds');
-  const isActive = phase === 'discovering' || phase === 'syncing';
 
   return (
-    <div className={`relative rounded-2xl overflow-hidden ${
-      phase === 'error' ? 'bg-red-950/90' : 'bg-[#0d1117]'
-    }`} style={{ minHeight: 140 }}>
+    <div className={`relative rounded-2xl overflow-hidden border ${
+      phase === 'error'
+        ? 'bg-red-50 border-red-100'
+        : 'bg-gradient-to-br from-slate-50 via-white to-emerald-50/50 border-gray-100'
+    }`} style={{ minHeight: 128 }}>
 
-      {/* Dot-grid background */}
-      <div className="absolute inset-0 opacity-20" style={{
-        backgroundImage: 'radial-gradient(circle, #4ade80 1px, transparent 1px)',
-        backgroundSize: '28px 28px',
+      {/* Subtle dot grid */}
+      <div className="absolute inset-0 opacity-50" style={{
+        backgroundImage: 'radial-gradient(circle, #d1d5db 1px, transparent 1px)',
+        backgroundSize: '24px 24px',
       }}/>
 
-      {/* Radar sweep (discovering only) */}
+      {/* Radar rings (discovering) */}
       {phase === 'discovering' && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-32 h-32 rounded-full border border-emerald-500/20 absolute" style={{ animation: 'ring-expand 2s ease-out infinite 0s' }}/>
-          <div className="w-32 h-32 rounded-full border border-emerald-500/20 absolute" style={{ animation: 'ring-expand 2s ease-out infinite 0.66s' }}/>
-          <div className="w-32 h-32 rounded-full border border-emerald-500/20 absolute" style={{ animation: 'ring-expand 2s ease-out infinite 1.33s' }}/>
-          {/* Rotating sweep */}
-          <div className="w-48 h-48 absolute rounded-full overflow-hidden" style={{ animation: 'radar-spin 3s linear infinite' }}>
+          <div className="w-28 h-28 rounded-full border border-emerald-300/50 absolute" style={{ animation: 'ring-expand 2s ease-out infinite 0s' }}/>
+          <div className="w-28 h-28 rounded-full border border-emerald-300/50 absolute" style={{ animation: 'ring-expand 2s ease-out infinite 0.66s' }}/>
+          <div className="w-28 h-28 rounded-full border border-emerald-300/50 absolute" style={{ animation: 'ring-expand 2s ease-out infinite 1.33s' }}/>
+          <div className="w-44 h-44 absolute rounded-full overflow-hidden" style={{ animation: 'radar-spin 3s linear infinite' }}>
             <div className="absolute inset-0" style={{
-              background: 'conic-gradient(from 0deg, transparent 85%, rgba(74, 222, 128, 0.35) 100%)',
+              background: 'conic-gradient(from 0deg, transparent 82%, rgba(16,185,129,0.18) 100%)',
               borderRadius: '50%',
             }}/>
           </div>
         </div>
       )}
 
-      {/* Scan-line (syncing only) */}
+      {/* Scan line (syncing) */}
       {phase === 'syncing' && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
-          <div className="absolute inset-y-0 w-12 bg-gradient-to-r from-transparent via-emerald-400/10 to-transparent"
+          <div className="absolute inset-y-0 w-16 bg-gradient-to-r from-transparent via-emerald-300/25 to-transparent"
                style={{ animation: 'scan-sweep 2.2s ease-in-out infinite' }}/>
         </div>
       )}
 
       {/* Content */}
-      <div className="relative z-10 px-5 py-5 flex flex-col items-center justify-center gap-3 text-center" style={{ minHeight: 140 }}>
+      <div className="relative z-10 px-5 py-5 flex flex-col items-center justify-center gap-3 text-center" style={{ minHeight: 128 }}>
 
-        {/* Phase: discovering */}
+        {/* discovering */}
         {phase === 'discovering' && (
           <>
-            <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center"
+            <div className="w-10 h-10 rounded-full bg-white border border-emerald-200 text-emerald-600 flex items-center justify-center shadow-sm"
                  style={{ animation: 'pulse-glow 1.8s ease-in-out infinite' }}>
               <div className="w-5 h-5">{Ico.globe}</div>
             </div>
             <div>
-              <p className="text-emerald-300 font-semibold text-sm tracking-wide">{t('crawlScanning')}</p>
-              <p className="text-emerald-600 text-xs mt-0.5 font-mono">{sourceHost}</p>
+              <p className="text-emerald-700 font-semibold text-sm tracking-wide">{t('crawlScanning')}</p>
+              <p className="text-emerald-500 text-xs mt-0.5 font-mono">{sourceHost}</p>
             </div>
             <div className="flex items-center gap-1.5">
               {[0, 0.2, 0.4].map(d => (
@@ -105,60 +105,55 @@ const CrawlHero: React.FC<CrawlHeroProps> = memo(({ phase, fetched, processed, c
           </>
         )}
 
-        {/* Phase: syncing */}
+        {/* syncing */}
         {phase === 'syncing' && (
           <div className="w-full max-w-full">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] text-emerald-500 font-mono uppercase tracking-widest flex items-center gap-1.5">
+              <span className="text-[10px] text-emerald-600 font-mono uppercase tracking-widest flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" style={{ animation: 'pulse-dot 1s infinite' }}/>
                 {t('crawlFetchingListing', { current: processed + 1, total: fetched })}
               </span>
-              <span className="text-[10px] text-gray-600 font-mono">{Math.round((processed / Math.max(1, fetched)) * 100)}%</span>
+              <span className="text-[10px] text-gray-400 font-mono">{Math.round((processed / Math.max(1, fetched)) * 100)}%</span>
             </div>
             {currentTitle && (
-              <p className="text-white text-sm font-semibold truncate text-left mb-1">{currentTitle}</p>
+              <p className="text-gray-800 text-sm font-semibold truncate text-left mb-1">{currentTitle}</p>
             )}
             {currentUrl && (
-              <div className="bg-black/40 rounded-lg px-3 py-2 flex items-center gap-2 overflow-hidden">
-                <span className="text-emerald-400 text-xs flex-shrink-0">›</span>
-                <span className="text-emerald-300/80 text-[11px] font-mono truncate flex-1">{currentUrl}</span>
-                <span className="w-0.5 h-3.5 bg-emerald-400 flex-shrink-0" style={{ animation: 'blink-cursor 1s step-end infinite' }}/>
+              <div className="bg-gray-100 rounded-lg px-3 py-2 flex items-center gap-2 overflow-hidden border border-gray-200/80">
+                <span className="text-emerald-500 text-xs flex-shrink-0">›</span>
+                <span className="text-gray-500 text-[11px] font-mono truncate flex-1">{currentUrl}</span>
+                <span className="w-0.5 h-3.5 bg-emerald-500 flex-shrink-0" style={{ animation: 'blink-cursor 1s step-end infinite' }}/>
               </div>
             )}
             {!currentUrl && !currentTitle && (
-              <div className="bg-black/40 rounded-lg px-3 py-2">
-                <span className="text-gray-500 text-[11px] font-mono">{t('crawlWaitingNext')}</span>
+              <div className="bg-gray-100 rounded-lg px-3 py-2 border border-gray-200/80">
+                <span className="text-gray-400 text-[11px] font-mono">{t('crawlWaitingNext')}</span>
               </div>
             )}
           </div>
         )}
 
-        {/* Phase: finished */}
+        {/* finished */}
         {phase === 'finished' && (
           <>
-            <div className="w-11 h-11 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-400 flex items-center justify-center"
+            <div className="w-11 h-11 rounded-full bg-white border border-emerald-200 text-emerald-500 flex items-center justify-center shadow-sm"
                  style={{ animation: 'pop-in 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards' }}>
               <div className="w-5 h-5">{Ico.check}</div>
             </div>
-            <p className="text-emerald-300 font-semibold text-sm">{t('importComplete')}</p>
+            <p className="text-emerald-700 font-semibold text-sm">{t('importComplete')}</p>
           </>
         )}
 
-        {/* Phase: error */}
+        {/* error */}
         {phase === 'error' && (
           <>
-            <div className="w-11 h-11 rounded-full bg-red-500/20 border border-red-400/40 text-red-400 flex items-center justify-center">
+            <div className="w-11 h-11 rounded-full bg-white border border-red-200 text-red-400 flex items-center justify-center shadow-sm">
               <div className="w-5 h-5">{Ico.warn}</div>
             </div>
-            <p className="text-red-300 font-semibold text-sm">{t('importFailed')}</p>
+            <p className="text-red-600 font-semibold text-sm">{t('importFailed')}</p>
           </>
         )}
       </div>
-
-      {/* Corner glow */}
-      {isActive && (
-        <div className="absolute bottom-0 right-0 w-32 h-32 rounded-full bg-emerald-500/5 blur-2xl pointer-events-none"/>
-      )}
     </div>
   );
 });
@@ -166,20 +161,40 @@ CrawlHero.displayName = 'CrawlHero';
 
 // ─── StatRow ─────────────────────────────────────────────────────────────────
 
-interface StatItem { label: string; value: number; color: string; icon: React.ReactNode; }
+interface StatItem { label: string; value: number; color: string; bgActive: string; ringActive: string; icon: React.ReactNode; }
 
-const StatRow: React.FC<{ items: StatItem[] }> = memo(({ items }) => (
+const AnimatedStat: React.FC<StatItem> = ({ label, value, color, bgActive, ringActive, icon }) => {
+  const prevRef = useRef(value);
+  const [bumping, setBumping] = useState(false);
+
+  useEffect(() => {
+    if (value !== prevRef.current) {
+      setBumping(true);
+      const id = setTimeout(() => setBumping(false), 500);
+      prevRef.current = value;
+      return () => clearTimeout(id);
+    }
+  }, [value]);
+
+  return (
+    <div className={`flex flex-col items-center gap-1 rounded-xl py-2.5 px-1 ring-1 transition-all duration-300 ${
+      bumping ? `${bgActive} ${ringActive} shadow-sm` : 'bg-gray-50 ring-gray-100'
+    }`} style={{ transform: bumping ? 'scale(1.07)' : 'scale(1)', transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1), background 0.3s, box-shadow 0.3s' }}>
+      <div className={`w-4 h-4 ${color} opacity-70`}>{icon}</div>
+      <span className={`text-xl font-extrabold tabular-nums leading-none ${color}`}
+            style={{ transform: bumping ? 'scale(1.18)' : 'scale(1)', display: 'inline-block', transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)' }}>
+        {value}
+      </span>
+      <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 leading-none">{label}</span>
+    </div>
+  );
+};
+
+const StatRow: React.FC<{ items: StatItem[] }> = ({ items }) => (
   <div className="grid grid-cols-5 gap-2">
-    {items.map(({ label, value, color, icon }) => (
-      <div key={label} className="flex flex-col items-center gap-1 bg-gray-50 rounded-xl py-2.5 px-1 ring-1 ring-gray-100">
-        <div className={`w-4 h-4 ${color} opacity-70`}>{icon}</div>
-        <span className={`text-xl font-extrabold tabular-nums leading-none ${color}`}>{value}</span>
-        <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 leading-none">{label}</span>
-      </div>
-    ))}
+    {items.map(item => <AnimatedStat key={item.label} {...item} />)}
   </div>
-));
-StatRow.displayName = 'StatRow';
+);
 
 // ─── LiveFeedItem ─────────────────────────────────────────────────────────────
 
@@ -266,11 +281,11 @@ const ListingIngestProgressModal: React.FC<Props> = ({
   try { sourceHost = sourceUrl ? new URL(sourceUrl).hostname.replace(/^www\./, '') : ''; } catch { /* */ }
 
   const statItems: StatItem[] = [
-    { label: t('statScanned'),  value: stats.fetched,   color: 'text-gray-500',    icon: Ico.globe  },
-    { label: t('statNew'),      value: stats.imported,  color: 'text-emerald-600', icon: Ico.plus   },
-    { label: t('statUpdated'),  value: stats.updated,   color: 'text-blue-600',    icon: Ico.arrow  },
-    { label: t('statQueued'),   value: stats.deferred,  color: 'text-amber-600',   icon: Ico.clock  },
-    { label: t('statFailed'),   value: stats.failed,    color: 'text-red-500',     icon: Ico.warn   },
+    { label: t('statScanned'),  value: stats.fetched,   color: 'text-gray-600',    bgActive: 'bg-gray-100',    ringActive: 'ring-gray-300',    icon: Ico.globe  },
+    { label: t('statNew'),      value: stats.imported,  color: 'text-emerald-600', bgActive: 'bg-emerald-50',  ringActive: 'ring-emerald-300', icon: Ico.plus   },
+    { label: t('statUpdated'),  value: stats.updated,   color: 'text-blue-600',    bgActive: 'bg-blue-50',     ringActive: 'ring-blue-300',    icon: Ico.arrow  },
+    { label: t('statQueued'),   value: stats.deferred,  color: 'text-amber-600',   bgActive: 'bg-amber-50',    ringActive: 'ring-amber-300',   icon: Ico.clock  },
+    { label: t('statFailed'),   value: stats.failed,    color: 'text-red-500',     bgActive: 'bg-red-50',      ringActive: 'ring-red-300',     icon: Ico.warn   },
   ];
 
   const incompleteCount = finalStats?.incompleteCount ?? 0;
@@ -456,7 +471,7 @@ const ListingIngestProgressModal: React.FC<Props> = ({
       <style>{`
         @keyframes radar-spin    { to { transform: rotate(360deg); } }
         @keyframes ring-expand   { 0% { transform: scale(0.4); opacity: 0.7; } 100% { transform: scale(2.2); opacity: 0; } }
-        @keyframes pulse-glow    { 0%,100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.4); } 50% { box-shadow: 0 0 0 10px rgba(74,222,128,0); } }
+        @keyframes pulse-glow    { 0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.25); } 50% { box-shadow: 0 0 0 10px rgba(16,185,129,0); } }
         @keyframes pulse-dot     { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
         @keyframes scan-sweep    { 0% { left: -33%; } 100% { left: 110%; } }
         @keyframes shimmer       { 0% { transform: translateX(-100%); } 100% { transform: translateX(350%); } }

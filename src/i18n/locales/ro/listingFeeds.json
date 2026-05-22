@@ -126,7 +126,7 @@
   "recentItems": "Recent items ({{count}})",
   "waitingForFirstItem": "Waiting for the first item…",
   "noItemsProcessed": "No items have been processed yet.",
-  "crawlScanning": "Scanare web…",
+  "crawlScanning": "Preluare anunțuri…",
   "crawlFetchingListing": "Preluare anunț {{current}} din {{total}}",
   "crawlWaitingNext": "Așteptare anunț următor…",
   "importComplete": "Import finalizat",

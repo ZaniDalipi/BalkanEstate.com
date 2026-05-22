@@ -126,7 +126,7 @@
   "recentItems": "Recent items ({{count}})",
   "waitingForFirstItem": "Waiting for the first item…",
   "noItemsProcessed": "No items have been processed yet.",
-  "crawlScanning": "Сканиране на мрежата…",
+  "crawlScanning": "Извличане на обяви…",
   "crawlFetchingListing": "Извличане на обява {{current}} от {{total}}",
   "crawlWaitingNext": "Изчакване на следваща обява…",
   "importComplete": "Импортът завърши",

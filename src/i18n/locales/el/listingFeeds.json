@@ -126,7 +126,7 @@
   "recentItems": "Recent items ({{count}})",
   "waitingForFirstItem": "Waiting for the first item…",
   "noItemsProcessed": "No items have been processed yet.",
-  "crawlScanning": "Σάρωση ιστού…",
+  "crawlScanning": "Ανάκτηση αγγελιών…",
   "crawlFetchingListing": "Ανάκτηση αγγελίας {{current}} από {{total}}",
   "crawlWaitingNext": "Αναμονή επόμενης αγγελίας…",
   "importComplete": "Η εισαγωγή ολοκληρώθηκε",

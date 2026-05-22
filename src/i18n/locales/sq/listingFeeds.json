@@ -126,7 +126,7 @@
   "recentItems": "Recent items ({{count}})",
   "waitingForFirstItem": "Waiting for the first item…",
   "noItemsProcessed": "No items have been processed yet.",
-  "crawlScanning": "Duke skanuar uebin…",
+  "crawlScanning": "Duke marrë listingjet…",
   "crawlFetchingListing": "Duke marrë listimin {{current}} nga {{total}}",
   "crawlWaitingNext": "Duke pritur listimin tjetër…",
   "importComplete": "Importimi u krye",

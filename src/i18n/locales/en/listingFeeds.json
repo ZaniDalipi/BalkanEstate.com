@@ -37,7 +37,7 @@
   "recentItems": "Recent items ({{count}})",
   "waitingForFirstItem": "Waiting for the first item…",
   "noItemsProcessed": "No items have been processed yet.",
-  "crawlScanning": "Scanning the web…",
+  "crawlScanning": "Fetching listings…",
   "crawlFetchingListing": "Fetching listing {{current}} of {{total}}",
   "crawlWaitingNext": "Waiting for next listing…",
   "importComplete": "Import complete",
