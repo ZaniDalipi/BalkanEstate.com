@@ -12,6 +12,7 @@ import { BALKAN_COUNTRIES } from '@/constants/countries';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import PropertyImage from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
+import ExternalSourceBadge from '@/features/properties/components/ExternalSourceBadge';
 
 interface PropertyCardProps {
   property: Property;
