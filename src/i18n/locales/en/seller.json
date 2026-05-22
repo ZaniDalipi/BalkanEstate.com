@@ -395,7 +395,11 @@
     "rentedUntil": "Rented until {{date}}",
     "canRenewIn": "Can renew in {{hours}}h {{minutes}}m",
     "forSaleCount": "For Sale ({{count}})",
-    "forRentCount": "For Rent ({{count}})"
+    "forRentCount": "For Rent ({{count}})",
+    "renewAll": "Renew All ({{count}})",
+    "renewingAll": "Renewing...",
+    "renewAllSuccess": "{{count}} renewed",
+    "renewAllNone": "None ready to renew"
   },
   "form": {
     "basicInfo": "Basic Information",

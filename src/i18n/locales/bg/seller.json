@@ -392,7 +392,11 @@
     "rentedUntil": "Отдадено до {{date}}",
     "canRenewIn": "Може да се поднови след {{hours}}ч {{minutes}}м",
     "forSaleCount": "За Продажба ({{count}})",
-    "forRentCount": "Под Наем ({{count}})"
+    "forRentCount": "Под Наем ({{count}})",
+    "renewAll": "Поднови всички ({{count}})",
+    "renewingAll": "Подновяване...",
+    "renewAllSuccess": "{{count}} подновени",
+    "renewAllNone": "Няма готови за подновяване"
   },
   "form": {
     "basicInfo": "Basic Information",

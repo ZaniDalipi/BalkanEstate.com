@@ -388,7 +388,11 @@
     "rentedUntil": "Închiriat până la {{date}}",
     "canRenewIn": "Poate fi reînnoit în {{hours}}o {{minutes}}m",
     "forSaleCount": "De Vânzare ({{count}})",
-    "forRentCount": "De Închiriat ({{count}})"
+    "forRentCount": "De Închiriat ({{count}})",
+    "renewAll": "Reînnoiește toate ({{count}})",
+    "renewingAll": "Se reînnoiește...",
+    "renewAllSuccess": "{{count}} reînnoite",
+    "renewAllNone": "Niciunul gata de reînnoit"
   },
   "form": {
     "basicInfo": "Informații de Bază",

@@ -388,7 +388,11 @@
     "rentedUntil": "Издато до {{date}}",
     "canRenewIn": "Може се обновити за {{hours}}ч {{minutes}}м",
     "forSaleCount": "На Продају ({{count}})",
-    "forRentCount": "За Изнајмљивање ({{count}})"
+    "forRentCount": "За Изнајмљивање ({{count}})",
+    "renewAll": "Обнови све ({{count}})",
+    "renewingAll": "Обнављање...",
+    "renewAllSuccess": "{{count}} обновљено",
+    "renewAllNone": "Ништа није спремно за обнову"
   },
   "form": {
     "basicInfo": "Основне Информације",

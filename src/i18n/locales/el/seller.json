@@ -388,7 +388,11 @@
     "rentedUntil": "Ενοικιασμένο μέχρι {{date}}",
     "canRenewIn": "Ανανέωση σε {{hours}}ω {{minutes}}λ",
     "forSaleCount": "Πώληση ({{count}})",
-    "forRentCount": "Ενοικίαση ({{count}})"
+    "forRentCount": "Ενοικίαση ({{count}})",
+    "renewAll": "Ανανέωση όλων ({{count}})",
+    "renewingAll": "Ανανέωση...",
+    "renewAllSuccess": "{{count}} ανανεώθηκαν",
+    "renewAllNone": "Κανένα έτοιμο για ανανέωση"
   },
   "form": {
     "basicInfo": "Βασικές Πληροφορίες",

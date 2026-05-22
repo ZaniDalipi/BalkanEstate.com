@@ -495,7 +495,11 @@
     "rentedUntil": "E dhënë me qira deri {{date}}",
     "canRenewIn": "Mund të rinovohet për {{hours}}o {{minutes}}m",
     "forSaleCount": "Për Shitje ({{count}})",
-    "forRentCount": "Me Qira ({{count}})"
+    "forRentCount": "Me Qira ({{count}})",
+    "renewAll": "Rinovoji të gjitha ({{count}})",
+    "renewingAll": "Duke rinovuar...",
+    "renewAllSuccess": "{{count}} të rinovuara",
+    "renewAllNone": "Asnjë gati për rinovim"
   },
   "form": {
     "basicInfo": "Informacione Bazë",
