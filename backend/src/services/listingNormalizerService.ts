@@ -358,9 +358,16 @@ const categorizeAmenities = (amenities: unknown[]): string[] => {
       continue;
     }
 
-    // Try to match against known keywords
+    // Try to match against known keywords with word-boundary check to avoid
+    // false positives like "pool" matching "poolhouse".
     for (const [key, keywords] of Object.entries(AMENITY_KEYWORDS)) {
-      if (keywords.some(kw => str.includes(kw))) {
+      if (keywords.some(kw => {
+        const i = str.indexOf(kw);
+        if (i === -1) return false;
+        const before = i === 0 || !/[a-z0-9]/i.test(str[i - 1]);
+        const after = i + kw.length >= str.length || !/[a-z0-9]/i.test(str[i + kw.length]);
+        return before && after;
+      })) {
         normalized.add(key);
         break;
       }

@@ -16,6 +16,7 @@ interface Props {
   finalStats?: IngestStats;
   onClose: () => void;
   onMinimize: () => void;
+  onRetry?: () => void;
 }
 
 type StatusBadgeStyle = { label: string; cls: string };
@@ -113,6 +114,7 @@ const ListingIngestProgressModal: React.FC<Props> = ({
   finalStats,
   onClose,
   onMinimize,
+  onRetry,
 }) => {
   const { t } = useTranslation(['listingFeeds', 'common']);
   const { dispatch } = useAppContext();
@@ -413,23 +415,32 @@ const ListingIngestProgressModal: React.FC<Props> = ({
         {/* Footer */}
         <div className="flex items-center justify-end gap-2 pt-1">
           {isRunning ? (
-            <>
-              <button
-                type="button"
-                onClick={onMinimize}
-                className="px-4 py-2 text-sm font-semibold rounded-xl bg-primary text-white hover:bg-primary-dark transition-colors"
-              >
-                {t('listingFeeds:minimizeAndUseApp')}
-              </button>
-            </>
-          ) : (
             <button
               type="button"
-              onClick={onClose}
+              onClick={onMinimize}
               className="px-4 py-2 text-sm font-semibold rounded-xl bg-primary text-white hover:bg-primary-dark transition-colors"
             >
-              {t('common:close')}
+              {t('listingFeeds:minimizeAndUseApp')}
             </button>
+          ) : (
+            <>
+              {phase === 'error' && onRetry && (
+                <button
+                  type="button"
+                  onClick={() => { onClose(); onRetry(); }}
+                  className="px-4 py-2 text-sm font-semibold rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  {t('common:tryAgain', 'Try again')}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-sm font-semibold rounded-xl bg-primary text-white hover:bg-primary-dark transition-colors"
+              >
+                {t('common:close')}
+              </button>
+            </>
           )}
         </div>
       </div>

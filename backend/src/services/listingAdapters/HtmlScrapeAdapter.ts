@@ -48,6 +48,8 @@ interface HtmlScrapeAdapterConfig {
   pageParam?: string;
   pageStart?: number;
   maxPages?: number;
+  /** Hard cap on total wall-clock time for a single fetchListings call (ms). Default: 10 min. */
+  maxDurationMs?: number;
   userAgent?: string;
   requestDelayMs?: number;
   respectRobotsTxt?: boolean;
@@ -303,14 +305,26 @@ export class HtmlScrapeAdapter implements SourceAdapter {
       ? 1  // Playwright tabs are expensive — serialise detail fetches
       : Math.max(1, cfg.detailConcurrency ?? DEFAULT_DETAIL_CONCURRENCY);
 
-    /** Fetch a page HTML — via Playwright when needed, plain HTTP otherwise. */
+    /** Fetch a page HTML with up to 3 attempts and a per-request timeout. */
     const fetchHtml = async (url: string): Promise<string> => {
-      if (usePlaywright) {
-        const r = await fetchWithBrowser(url, { waitUntil: 'networkidle', settleMs: 800 });
-        return r.html;
+      let lastErr: unknown;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          if (usePlaywright) {
+            const r = await fetchWithBrowser(url, { waitUntil: 'networkidle', settleMs: 800 });
+            return r.html;
+          }
+          const r = await httpGet<string>(url, { ...requestOpts, responseType: 'text', timeout: 30_000 });
+          return String(r.data);
+        } catch (err) {
+          lastErr = err;
+          // Don't retry 4xx — the server definitively rejected the request.
+          const status = (err as { response?: { status?: number } })?.response?.status;
+          if (status && status >= 400 && status < 500) throw err;
+          if (attempt < 2) await new Promise(res => setTimeout(res, 1_000 * (attempt + 1)));
+        }
       }
-      const r = await httpGet<string>(url, { ...requestOpts, responseType: 'text' });
-      return String(r.data);
+      throw lastErr;
     };
 
     /**
@@ -322,6 +336,8 @@ export class HtmlScrapeAdapter implements SourceAdapter {
     const stubs: RawListing[] = [];
     // Guard against sites whose "next" link loops back to a visited page.
     const visitedPageUrls = new Set<string>();
+    // Hard wall-clock deadline — prevents infinite crawls on misbehaving sites.
+    const deadline = Date.now() + (cfg.maxDurationMs ?? 10 * 60_000);
 
     let pageUrl: string | undefined = cfg.indexUrl;
     let pageNum = cfg.pageStart ?? 1;
@@ -329,6 +345,7 @@ export class HtmlScrapeAdapter implements SourceAdapter {
     for (let i = 0; i < maxPages && pageUrl; i++) {
       const url: string = cfg.pageParam ? this.withPageParam(cfg.indexUrl, cfg.pageParam, pageNum) : pageUrl;
       if (visitedPageUrls.has(url)) break; // stop on cycle
+      if (Date.now() > deadline) break;     // stop if wall-clock limit exceeded
       visitedPageUrls.add(url);
       const stubsBeforePage = stubs.length;
       const pageHtml = await fetchHtml(url);
@@ -389,6 +406,10 @@ export class HtmlScrapeAdapter implements SourceAdapter {
         for (const a of $('a[href]').toArray()) {
           const href = $(a).attr('href');
           if (!href || !isUsableHref(href)) continue;
+          // Skip obvious pagination anchors before resolving to avoid adding
+          // paginated index URLs as if they were individual listing detail pages.
+          if (/[?&](page|p|pg|offset|start|from)=\d+/i.test(href)) continue;
+          if (/\/(?:page|p|str|stranica|seite|pagina)\/\d+/i.test(href)) continue;
           const detailUrl = resolveUrl(url, href);
           let pathname = '';
           try { pathname = new URL(detailUrl).pathname; } catch { continue; }
@@ -396,6 +417,9 @@ export class HtmlScrapeAdapter implements SourceAdapter {
 
           const pathParts = pathname.split('/').filter(Boolean);
           if (pathParts.length < 2 && !/\d{3,}/.test(pathname)) continue;
+          // Skip if anchor text is a bare page number (e.g. "2", "Next", etc.)
+          const anchorText = $(a).text().trim();
+          if (/^\d{1,4}$/.test(anchorText)) continue;
           if (seenUrls.has(detailUrl)) continue;
           seenUrls.add(detailUrl);
 

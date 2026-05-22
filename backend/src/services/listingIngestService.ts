@@ -301,13 +301,33 @@ export const runSource = async (
     source.listingsImported += stats.imported;
     source.listingsUpdated += stats.updated;
     source.listingsFailed += stats.failed;
-    source.lastSuccessAt = new Date();
-    source.lastErrorMessage = undefined;
+    // Only mark a clean success when something was actually imported/updated.
+    // A run that fetched 0 items (e.g. blocked by the site) should not reset lastSuccessAt.
+    if (stats.imported > 0 || stats.updated > 0) {
+      source.lastSuccessAt = new Date();
+    }
     if (stats.deferred > 0) {
       source.lastErrorMessage =
         `Reached monthly limit — ${stats.deferred} listing(s) deferred to ${deferUntil.toISOString().slice(0, 10)}.`;
+    } else if (stats.imported > 0 || stats.updated > 0) {
+      source.lastErrorMessage = undefined;
     }
     await source.save();
+
+    // Calculate how many of this source's properties are still missing key fields.
+    // Drives the "some listings need attention" UI in the progress modal.
+    if (stats.imported > 0) {
+      try {
+        stats.incompleteCount = await Property.countDocuments({
+          source: source.slug,
+          $or: [
+            { address: { $in: [null, undefined, ''] } },
+            { city: { $in: [null, undefined, ''] } },
+            { price: { $in: [null, undefined, 0] } },
+          ],
+        });
+      } catch { /* non-critical — UI gracefully handles missing value */ }
+    }
   } catch (err) {
     const msg = (err as Error).message;
     stats.errors.push(`source: ${msg}`);

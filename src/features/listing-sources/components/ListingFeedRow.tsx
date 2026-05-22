@@ -248,6 +248,7 @@ const ListingFeedRow: React.FC<Props> = ({
         finalStats={lastRun}
         onClose={() => setModalOpen(false)}
         onMinimize={() => setModalOpen(false)}
+        onRetry={onRun}
       />
     </div>
   );
