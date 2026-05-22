@@ -30,7 +30,7 @@ export interface UseListingFeedsReturn {
   lastRun: Record<string, IngestStats>;
   // Preview state
   pendingPreview: PendingPreview | null;
-  confirmingPreview: boolean;
+  confirmingPreview: false;
   // Selection state (for bulk ops)
   selectedIds: Set<string>;
   isAllSelected: boolean;
@@ -73,7 +73,6 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
     failSession,
     pendingPreview,
     fetchingPreviews,
-    confirmingPreview,
     startPreview,
     confirmPreview,
     cancelPreview,
@@ -208,15 +207,8 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
    * the import completes via `onImportConfirmed`.
    */
   const confirmFeed = useCallback((approvedIds: string[]): void => {
-    const capturedSourceId = pendingPreview?.sourceId;
-    void confirmPreview(approvedIds).then((stats) => {
-      if (stats && capturedSourceId) {
-        setLastRun((prev) => ({ ...prev, [capturedSourceId]: stats }));
-      }
-    }).catch((e) => {
-      setError((e as Error).message || 'Import failed');
-    });
-  }, [confirmPreview, pendingPreview]);
+    confirmPreview(approvedIds);
+  }, [confirmPreview]);
 
   // Refresh the local source list (lastRun stats, counters) whenever an
   // import confirmed elsewhere in the app — so this page stays in sync even
@@ -320,7 +312,7 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
     clearingIds,
     lastRun,
     pendingPreview,
-    confirmingPreview,
+    confirmingPreview: false as const,
     selectedIds,
     isAllSelected,
     isSomeSelected,

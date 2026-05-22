@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useRef, useState, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from '@/shared/components/ui/Modal';
 import { useAppContext } from '@/context/AppContext';
-import type { ProcessedItem, SyncSession } from '../context/ListingIngestProgressContext';
+import { useSocket } from '@/shared/hooks/useSocket';
+import type { ListingIngestProgressEvent, ProcessedItem, SyncSession } from '../context/ListingIngestProgressContext';
 import type { IngestStats, ListingSource } from '../api/listingSourceApi';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -243,9 +244,50 @@ const ListingIngestProgressModal: React.FC<Props> = ({
   const { t } = useTranslation(['listingFeeds', 'common']);
   const { dispatch } = useAppContext();
   const feedRef = useRef<HTMLDivElement>(null);
+  const socket = useSocket();
 
-  const current = session?.current ?? null;
-  const recentItems = session?.recentItems ?? [];
+  // Direct socket listener — catches events even if the context session lookup
+  // misses (e.g. ID mismatch or events arriving before first render).
+  const [directEvent, setDirectEvent] = useState<ListingIngestProgressEvent | null>(null);
+  const [directItems, setDirectItems] = useState<ProcessedItem[]>([]);
+  const prevDirectRef = useRef<ListingIngestProgressEvent | null>(null);
+
+  useEffect(() => {
+    if (!socket || !isOpen) return;
+    const handle = (event: ListingIngestProgressEvent) => {
+      if (event.sourceId !== source.id) return;
+      setDirectEvent(event);
+      const prev = prevDirectRef.current;
+      let status: ProcessedItem['status'] | null = null;
+      if (event.imported > (prev?.imported ?? 0)) status = 'imported';
+      else if (event.updated > (prev?.updated ?? 0)) status = 'updated';
+      else if ((event.deferred ?? 0) > (prev?.deferred ?? 0)) status = 'deferred';
+      else if (event.failed > (prev?.failed ?? 0)) status = 'failed';
+      if (status && event.currentItem) {
+        setDirectItems(prev2 => {
+          const next = [...prev2, { id: event.currentItem!.id, title: event.currentItem!.title, url: event.currentItem!.url, status } as ProcessedItem];
+          return next.length > 100 ? next.slice(-100) : next;
+        });
+      }
+      prevDirectRef.current = event;
+    };
+    socket.on('listing:ingestProgress', handle);
+    return () => { socket.off('listing:ingestProgress', handle); };
+  }, [socket, isOpen, source.id]);
+
+  // Reset direct state when modal closes or source changes
+  useEffect(() => {
+    if (!isOpen) {
+      setDirectEvent(null);
+      setDirectItems([]);
+      prevDirectRef.current = null;
+    }
+  }, [isOpen]);
+
+  // Prefer direct socket data over session data (more reliable)
+  const current = directEvent ?? session?.current ?? null;
+  const recentItems = directItems.length > 0 ? directItems : (session?.recentItems ?? []);
+  const resolvedFinalStats = finalStats ?? session?.finalStats;
 
   useEffect(() => {
     if (feedRef.current) feedRef.current.scrollTop = feedRef.current.scrollHeight;
@@ -257,18 +299,18 @@ const ListingIngestProgressModal: React.FC<Props> = ({
       imported: current.imported, updated: current.updated,
       failed: current.failed, deferred: current.deferred ?? 0,
     };
-    if (finalStats) return {
-      fetched: finalStats.fetched, processed: finalStats.fetched,
-      imported: finalStats.imported, updated: finalStats.updated,
-      failed: finalStats.failed, deferred: finalStats.deferred ?? 0,
+    if (resolvedFinalStats) return {
+      fetched: resolvedFinalStats.fetched, processed: resolvedFinalStats.fetched,
+      imported: resolvedFinalStats.imported, updated: resolvedFinalStats.updated,
+      failed: resolvedFinalStats.failed, deferred: resolvedFinalStats.deferred ?? 0,
     };
     return { fetched: 0, processed: 0, imported: 0, updated: 0, failed: 0, deferred: 0 };
-  }, [current, finalStats]);
+  }, [current, resolvedFinalStats]);
 
-  const monthlyUsage = current?.monthlyUsage ?? finalStats?.monthlyUsage;
+  const monthlyUsage = current?.monthlyUsage ?? resolvedFinalStats?.monthlyUsage;
   const pct = stats.fetched > 0 ? Math.min(100, Math.round((stats.processed / stats.fetched) * 100)) : 0;
-  const errorMessage = current?.message ?? finalStats?.errors?.[0];
-  const isDone = session?.isDone ?? !isRunning;
+  const errorMessage = current?.message ?? resolvedFinalStats?.errors?.[0];
+  const isDone = Boolean(directEvent?.done) || session?.isDone || !isRunning;
 
   const phase: Phase = isDone && errorMessage && stats.imported === 0 && stats.updated === 0
     ? 'error'
@@ -288,7 +330,7 @@ const ListingIngestProgressModal: React.FC<Props> = ({
     { label: t('statFailed'),   value: stats.failed,    color: 'text-red-500',     bgActive: 'bg-red-50',      ringActive: 'ring-red-300',     icon: Ico.warn   },
   ];
 
-  const incompleteCount = finalStats?.incompleteCount ?? 0;
+  const incompleteCount = resolvedFinalStats?.incompleteCount ?? 0;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="2xl">
