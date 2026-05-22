@@ -67,12 +67,11 @@ if (!self.define) {
     });
   };
 }
-define(['./workbox-fa6cb374'], (function (workbox) { 'use strict';
+define(['./workbox-b1bafff1'], (function (workbox) { 'use strict';
 
   importScripts("/sw-safari-fix.js", "/sw-push.js");
   self.skipWaiting();
   workbox.clientsClaim();
-
   /**
    * The precacheAndRoute() method efficiently caches and responds to
    * requests for URLs in the manifest.
@@ -80,11 +79,7 @@ define(['./workbox-fa6cb374'], (function (workbox) { 'use strict';
    */
   workbox.precacheAndRoute([{
     "url": "index.html",
-<<<<<<< HEAD
-    "revision": "0.1qnhqlskjbo"
-=======
-    "revision": "0.hnqqvekj9b4"
->>>>>>> claude/search-suggestions-map-view-qJI0h
+    "revision": "0.gl0jep230qk"
   }], {});
   workbox.cleanupOutdatedCaches();
   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("index.html"), {
@@ -129,4 +124,5 @@ define(['./workbox-fa6cb374'], (function (workbox) { 'use strict';
   }), 'GET');
 
 }));
+//# sourceMappingURL=sw.js.map
 //# sourceMappingURL=sw.js.map
