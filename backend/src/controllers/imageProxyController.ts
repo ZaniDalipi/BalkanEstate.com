@@ -56,7 +56,7 @@ export const proxyExternalImage = async (req: Request, res: Response): Promise<v
       validateStatus: (s) => s >= 200 && s < 400,
     });
 
-    const contentType = (upstream.headers['content-type'] ?? '').split(';')[0].trim().toLowerCase();
+    const contentType = String(upstream.headers['content-type'] ?? '').split(';')[0].trim().toLowerCase();
     if (!IMAGE_MIME_TYPES.has(contentType) && !contentType.startsWith('image/')) {
       res.status(400).json({ error: 'URL does not point to an image' });
       return;
