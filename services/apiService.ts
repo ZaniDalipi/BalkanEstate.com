@@ -2072,6 +2072,22 @@ export const renewProperty = async (propertyId: string): Promise<{
 };
 
 /**
+ * Renew all eligible property listings at once (skips those still in 24hr cooldown)
+ */
+export const renewAllProperties = async (): Promise<{
+  success: boolean;
+  renewed: number;
+  skipped: number;
+  renewedIds: string[];
+  lastRenewed?: string;
+}> => {
+  return await apiRequest('/properties/renew-all', {
+    method: 'PATCH',
+    requiresAuth: true,
+  });
+};
+
+/**
  * Get featured/promoted properties (public)
  */
 export const getFeaturedProperties = async (filters?: {

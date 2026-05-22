@@ -311,6 +311,8 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const [myProperties, setMyProperties] = useState<Property[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [renewalStatuses, setRenewalStatuses] = useState<Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }>>({});
+    const [isRenewingAll, setIsRenewingAll] = useState(false);
+    const [renewAllResult, setRenewAllResult] = useState<{ renewed: number; skipped: number } | null>(null);
     const skipNextRefetchRef = useRef(false);
 
     // Calculate renewal status based on lastRenewed
@@ -424,6 +426,13 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
 
     const showListingTypeFilter = listingTypeCounts.sale > 0 && listingTypeCounts.rent > 0;
 
+    const renewableCount = useMemo(() =>
+        myProperties.filter(p =>
+            (p.status === 'active' || p.status === 'pending') &&
+            (renewalStatuses[p.id]?.canRenew ?? calculateRenewalStatus(p.lastRenewed).canRenew)
+        ).length
+    , [myProperties, renewalStatuses]);
+
     const filteredAndSortedProperties = useMemo(() => {
         let filtered = myProperties;
 
@@ -529,6 +538,54 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             }
             // Re-fetch to restore accurate state
             fetchMyListings();
+        }
+    };
+
+    const handleRenewAll = async () => {
+        setIsRenewingAll(true);
+        setRenewAllResult(null);
+        const now = Date.now();
+
+        // Optimistic update: mark all eligible properties as renewed
+        setMyProperties(prev => prev.map(p => {
+            if (p.status !== 'active' && p.status !== 'pending') return p;
+            const status = calculateRenewalStatus(p.lastRenewed);
+            if (!status.canRenew) return p;
+            return { ...p, lastRenewed: now };
+        }));
+        setRenewalStatuses(prev => {
+            const updated = { ...prev };
+            myProperties.forEach(p => {
+                if (p.status !== 'active' && p.status !== 'pending') return;
+                if (prev[p.id]?.canRenew === false) return;
+                updated[p.id] = calculateRenewalStatus(new Date(now));
+            });
+            return updated;
+        });
+
+        try {
+            const result = await api.renewAllProperties();
+            setRenewAllResult({ renewed: result.renewed, skipped: result.skipped });
+
+            // Sync server timestamps for renewed listings
+            if (result.renewedIds.length > 0 && result.lastRenewed) {
+                const serverTimestamp = new Date(result.lastRenewed).getTime();
+                setMyProperties(prev => prev.map(p =>
+                    result.renewedIds.includes(p.id) ? { ...p, lastRenewed: serverTimestamp } : p
+                ));
+                setRenewalStatuses(prev => {
+                    const updated = { ...prev };
+                    result.renewedIds.forEach(id => {
+                        updated[id] = calculateRenewalStatus(new Date(serverTimestamp));
+                    });
+                    return updated;
+                });
+            }
+        } catch {
+            fetchMyListings();
+        } finally {
+            setIsRenewingAll(false);
+            setTimeout(() => setRenewAllResult(null), 5000);
         }
     };
 
@@ -841,6 +898,29 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">{t('seller:myListings.titleWithCount', 'My Listings ({{count}})', { count: myProperties.length })}</h3>
                 <div className="flex flex-wrap gap-2">
+                    {renewableCount > 0 && (
+                        <button
+                            onClick={handleRenewAll}
+                            disabled={isRenewingAll}
+                            title={`Renew all ${renewableCount} eligible listing${renewableCount !== 1 ? 's' : ''} to appear at top of search`}
+                            className="flex-1 sm:flex-initial px-4 py-2.5 bg-emerald-600 text-white font-semibold rounded-lg shadow-sm hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                            <ArrowPathIcon className={`w-4 h-4 ${isRenewingAll ? 'animate-spin' : ''}`} />
+                            <span>
+                                {isRenewingAll
+                                    ? t('seller:myListings.renewingAll', 'Renewing...')
+                                    : t('seller:myListings.renewAll', 'Renew All ({{count}})', { count: renewableCount })}
+                            </span>
+                        </button>
+                    )}
+                    {renewAllResult && (
+                        <div className="flex items-center gap-1.5 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-700 font-medium">
+                            <CheckCircleIcon className="w-4 h-4" />
+                            {renewAllResult.renewed > 0
+                                ? t('seller:myListings.renewAllSuccess', '{{count}} renewed', { count: renewAllResult.renewed })
+                                : t('seller:myListings.renewAllNone', 'None ready to renew')}
+                        </div>
+                    )}
                     <button
                       onClick={() => {
                           dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });

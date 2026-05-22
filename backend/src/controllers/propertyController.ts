@@ -1989,3 +1989,62 @@ export const renewProperty = async (
     res.status(500).json({ message: 'Error renewing property' });
   }
 };
+
+// @desc    Renew all eligible property listings for the current user (once per 24 hours per listing)
+// @route   PATCH /api/properties/renew-all
+// @access  Private
+export const renewAllProperties = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const userId = String((req.user as IUser)._id);
+    const COOLDOWN_HOURS = 24;
+    const cooldownMs = COOLDOWN_HOURS * 60 * 60 * 1000;
+    const now = new Date();
+
+    // Find all active/pending properties owned by this user
+    const properties = await Property.find({
+      sellerId: userId,
+      status: { $in: ['active', 'pending'] },
+    });
+
+    const renewed: string[] = [];
+    const skipped: string[] = [];
+
+    for (const property of properties) {
+      if (property.lastRenewed) {
+        const timeSinceRenewal = now.getTime() - new Date(property.lastRenewed).getTime();
+        if (timeSinceRenewal < cooldownMs) {
+          skipped.push(String(property._id));
+          continue;
+        }
+      }
+      property.lastRenewed = now;
+      await property.save();
+      renewed.push(String(property._id));
+    }
+
+    if (renewed.length > 0) {
+      invalidateCache('/api/properties');
+    }
+
+    propertyLogger.info(`✅ Renew all: ${renewed.length} renewed, ${skipped.length} skipped for user ${userId}`);
+
+    res.json({
+      success: true,
+      renewed: renewed.length,
+      skipped: skipped.length,
+      renewedIds: renewed,
+      lastRenewed: now.toISOString(),
+    });
+  } catch (error: any) {
+    propertyLogger.error('Renew all properties error:', error);
+    res.status(500).json({ message: 'Error renewing properties' });
+  }
+};
