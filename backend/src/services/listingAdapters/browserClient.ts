@@ -10,39 +10,66 @@ try {
 }
 
 const DEFAULT_TIMEOUT_MS = 30_000;
-const DEFAULT_SELECTOR = 'body';
+
+export interface BrowserFetchOptions {
+  /** Puppeteer waitUntil strategy (e.g. 'networkidle2', 'domcontentloaded'). */
+  waitUntil?: string;
+  /** Extra ms to wait after page load before capturing HTML. */
+  settleMs?: number;
+  timeout?: number;
+  waitForSelector?: string;
+}
+
+export interface BrowserFetchResult {
+  html: string;
+  status?: number;
+}
 
 /**
- * Launch a headless browser, navigate to the URL, wait for a CSS selector,
- * and return the full page HTML. Throws a descriptive error if Puppeteer is not installed.
+ * Launch a headless browser, navigate to the URL, optionally wait for a CSS selector,
+ * and return { html }. Throws a descriptive error if Puppeteer is not installed.
  */
-export const fetchRenderedHtml = async (
+export const fetchWithBrowser = async (
   url: string,
-  waitForSelector: string = DEFAULT_SELECTOR,
-  timeoutMs: number = DEFAULT_TIMEOUT_MS
-): Promise<string> => {
+  options: BrowserFetchOptions = {}
+): Promise<BrowserFetchResult> => {
   if (!puppeteer) {
     throw new Error(
       'Puppeteer is not installed. Run: npm install puppeteer --save-dev'
     );
   }
 
+  const {
+    waitUntil = 'networkidle2',
+    settleMs = 0,
+    timeout = DEFAULT_TIMEOUT_MS,
+    waitForSelector,
+  } = options;
+
   const browser = await puppeteer.launch({ headless: true });
   try {
     const page = await browser.newPage();
     await page.setUserAgent('BalkanEstateBot/1.0');
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: timeoutMs });
-    await page.waitForSelector(waitForSelector, { timeout: timeoutMs });
-    const html = await page.content();
-    return html;
+    await page.goto(url, { waitUntil, timeout });
+    if (waitForSelector) {
+      await page.waitForSelector(waitForSelector, { timeout });
+    }
+    if (settleMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, settleMs));
+    }
+    const html: string = await page.content();
+    return { html };
   } finally {
     await browser.close();
   }
 };
 
-/** Alias for fetchRenderedHtml — preferred name used by HtmlScrapeAdapter. */
-export const fetchWithBrowser = (
+/** @deprecated Use fetchWithBrowser */
+export const fetchRenderedHtml = async (
   url: string,
   waitForSelector?: string,
   timeoutMs?: number
-): Promise<string> => fetchRenderedHtml(url, waitForSelector, timeoutMs);
+): Promise<string> => {
+  const result = await fetchWithBrowser(url, { waitForSelector, timeout: timeoutMs });
+  return result.html;
+};

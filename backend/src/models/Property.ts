@@ -135,6 +135,7 @@ export interface IProperty extends Document {
   // Visit/viewing availability
   visitAvailability?: IVisitAvailability;
   // Scraper / external import fields
+  sourceUrl?: string; // Full URL of the listing on the source site
   sourceListingId?: string; // The listing's original ID on the source site
   createdAt: Date;
   updatedAt: Date;
@@ -184,6 +185,10 @@ const PropertySchema: Schema = new Schema(
       type: String,
       required: false,
       index: true,
+    },
+    sourceUrl: {
+      type: String,
+      required: false,
     },
     sourceListingId: {
       type: String,
