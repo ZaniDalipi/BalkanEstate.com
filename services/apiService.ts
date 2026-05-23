@@ -2080,6 +2080,9 @@ export const renewAllProperties = async (): Promise<{
   skipped: number;
   renewedIds: string[];
   lastRenewed?: string;
+  dailyUsed?: number;
+  dailyLimit?: number;
+  dailyRemaining?: number;
 }> => {
   return await apiRequest('/properties/renew-all', {
     method: 'PATCH',

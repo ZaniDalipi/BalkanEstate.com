@@ -499,7 +499,11 @@
     "renewAll": "Rinovoji të gjitha ({{count}})",
     "renewingAll": "Duke rinovuar...",
     "renewAllSuccess": "{{count}} të rinovuara",
-    "renewAllNone": "Asnjë gati për rinovim"
+    "renewAllNone": "Asnjë gati për rinovim",
+    "renewAllTitle": "Rinovo {{count}} listim(e) të pranueshme për t'u shfaqur në krye të rezultateve",
+    "renewAllLimitReached": "Kufiri ditor u arrit ({{used}}/{{limit}})",
+    "renewAllLimitInfo": "Vendi tjetër i disponueshëm në {{hours}}h {{minutes}}m",
+    "renewAllError": "Rinovimi dështoi. Ju lutem provoni sërish."
   },
   "form": {
     "basicInfo": "Informacione Bazë",

@@ -313,6 +313,12 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const [renewalStatuses, setRenewalStatuses] = useState<Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }>>({});
     const [isRenewingAll, setIsRenewingAll] = useState(false);
     const [renewAllResult, setRenewAllResult] = useState<{ renewed: number; skipped: number } | null>(null);
+    const [renewAllError, setRenewAllError] = useState<string | null>(null);
+    const [dailyLimitInfo, setDailyLimitInfo] = useState<{
+        used: number;
+        limit: number;
+        canRenewAt: Date;
+    } | null>(null);
     const skipNextRefetchRef = useRef(false);
 
     // Calculate renewal status based on lastRenewed
@@ -438,6 +444,16 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         )
     , [myProperties, renewalStatuses]);
 
+    const dailyLimitCountdown = useMemo(() => {
+        if (!dailyLimitInfo) return null;
+        const now = Date.now();
+        const timeRemaining = dailyLimitInfo.canRenewAt.getTime() - now;
+        if (timeRemaining <= 0) return null;
+        const hours = Math.floor(timeRemaining / (60 * 60 * 1000));
+        const minutes = Math.ceil((timeRemaining % (60 * 60 * 1000)) / (60 * 1000));
+        return { hours, minutes, used: dailyLimitInfo.used, limit: dailyLimitInfo.limit };
+    }, [dailyLimitInfo]);
+
     const filteredAndSortedProperties = useMemo(() => {
         let filtered = myProperties;
 
@@ -549,21 +565,26 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const handleRenewAll = async () => {
         setIsRenewingAll(true);
         setRenewAllResult(null);
+        setRenewAllError(null);
         const now = Date.now();
 
-        // Optimistic update: mark all eligible properties as renewed
+        // Capture the snapshot of eligible IDs before optimistic update
+        const eligibleIds = myProperties
+            .filter(p =>
+                (p.status === 'active' || p.status === 'pending') &&
+                (renewalStatuses[p.id]?.canRenew ?? calculateRenewalStatus(p.lastRenewed).canRenew)
+            )
+            .map(p => p.id);
+
+        // Optimistic update: mark eligible properties as renewed
         setMyProperties(prev => prev.map(p => {
-            if (p.status !== 'active' && p.status !== 'pending') return p;
-            const status = calculateRenewalStatus(p.lastRenewed);
-            if (!status.canRenew) return p;
+            if (!eligibleIds.includes(p.id)) return p;
             return { ...p, lastRenewed: now };
         }));
         setRenewalStatuses(prev => {
             const updated = { ...prev };
-            myProperties.forEach(p => {
-                if (p.status !== 'active' && p.status !== 'pending') return;
-                if (prev[p.id]?.canRenew === false) return;
-                updated[p.id] = calculateRenewalStatus(new Date(now));
+            eligibleIds.forEach(id => {
+                updated[id] = calculateRenewalStatus(new Date(now));
             });
             return updated;
         });
@@ -571,6 +592,16 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         try {
             const result = await api.renewAllProperties();
             setRenewAllResult({ renewed: result.renewed, skipped: result.skipped });
+
+            // Update daily limit info from response
+            if (result.dailyUsed !== undefined && result.dailyLimit !== undefined) {
+                if (result.dailyRemaining === 0 && result.lastRenewed) {
+                    const canRenewAt = new Date(new Date(result.lastRenewed).getTime() + 24 * 60 * 60 * 1000);
+                    setDailyLimitInfo({ used: result.dailyUsed, limit: result.dailyLimit, canRenewAt });
+                } else {
+                    setDailyLimitInfo(null);
+                }
+            }
 
             // Sync server timestamps for renewed listings
             if (result.renewedIds.length > 0 && result.lastRenewed) {
@@ -586,8 +617,21 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                     return updated;
                 });
             }
-        } catch {
+        } catch (err: unknown) {
+            // Roll back optimistic updates on failure
             fetchMyListings();
+
+            const errorData = (err as { response?: { data?: { code?: string; canRenewAt?: string; dailyUsed?: number; dailyLimit?: number } } })?.response?.data;
+            if (errorData?.code === 'BULK_RENEWAL_DAILY_LIMIT' && errorData.canRenewAt) {
+                setDailyLimitInfo({
+                    used: errorData.dailyUsed ?? RENEW_ALL_LIMIT,
+                    limit: errorData.dailyLimit ?? RENEW_ALL_LIMIT,
+                    canRenewAt: new Date(errorData.canRenewAt),
+                });
+            } else {
+                setRenewAllError(t('seller:myListings.renewAllError', 'Failed to renew listings. Please try again.'));
+                setTimeout(() => setRenewAllError(null), 6000);
+            }
         } finally {
             setIsRenewingAll(false);
             setTimeout(() => setRenewAllResult(null), 5000);
@@ -903,12 +947,37 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">{t('seller:myListings.titleWithCount', 'My Listings ({{count}})', { count: myProperties.length })}</h3>
                 <div className="flex flex-wrap gap-2">
-                    {renewableCount > 0 && (
+                    {/* Daily bulk-renewal limit exhausted — show disabled button with countdown */}
+                    {dailyLimitCountdown ? (
+                        <div className="flex flex-col gap-1">
+                            <button
+                                type="button"
+                                disabled
+                                aria-disabled="true"
+                                aria-label={t('seller:myListings.renewAllLimitReached', 'Daily limit reached ({{used}}/{{limit}})', { used: dailyLimitCountdown.used, limit: dailyLimitCountdown.limit })}
+                                title={t('seller:myListings.renewAllLimitReached', 'Daily limit reached ({{used}}/{{limit}})', { used: dailyLimitCountdown.used, limit: dailyLimitCountdown.limit })}
+                                className="flex-1 sm:flex-initial px-4 py-2.5 bg-neutral-300 text-neutral-500 font-semibold rounded-lg shadow-sm flex items-center justify-center gap-2 text-sm cursor-not-allowed opacity-70"
+                            >
+                                <ArrowPathIcon className="w-4 h-4" />
+                                <span>{t('seller:myListings.renewAllLimitReached', 'Daily limit reached ({{used}}/{{limit}})', { used: dailyLimitCountdown.used, limit: dailyLimitCountdown.limit })}</span>
+                            </button>
+                            <p className="text-xs text-neutral-500 text-center">
+                                {t('seller:myListings.renewAllLimitInfo', 'Next slot available in {{hours}}h {{minutes}}m', { hours: dailyLimitCountdown.hours, minutes: dailyLimitCountdown.minutes })}
+                            </p>
+                        </div>
+                    ) : renewableCount > 0 ? (
                         <button
+                            type="button"
                             onClick={handleRenewAll}
                             disabled={isRenewingAll}
-                            title={`Renew all ${renewableCount} eligible listing${renewableCount !== 1 ? 's' : ''} to appear at top of search`}
-                            className="flex-1 sm:flex-initial px-4 py-2.5 bg-emerald-600 text-white font-semibold rounded-lg shadow-sm hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                            aria-disabled={isRenewingAll}
+                            aria-label={isRenewingAll
+                                ? t('seller:myListings.renewingAll', 'Renewing...')
+                                : t('seller:myListings.renewAllTitle', 'Renew {{count}} eligible listing(s) to appear at top of search results', { count: renewableCount })}
+                            title={isRenewingAll
+                                ? t('seller:myListings.renewingAll', 'Renewing...')
+                                : t('seller:myListings.renewAllTitle', 'Renew {{count}} eligible listing(s) to appear at top of search results', { count: renewableCount })}
+                            className="flex-1 sm:flex-initial px-4 py-2.5 bg-emerald-600 text-white font-semibold rounded-lg shadow-sm hover:bg-emerald-700 active:bg-emerald-800 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                             <ArrowPathIcon className={`w-4 h-4 ${isRenewingAll ? 'animate-spin' : ''}`} />
                             <span>
@@ -917,13 +986,27 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                                     : t('seller:myListings.renewAll', 'Renew All ({{count}})', { count: renewableCount })}
                             </span>
                         </button>
-                    )}
+                    ) : null}
                     {renewAllResult && (
-                        <div className="flex items-center gap-1.5 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-700 font-medium">
+                        <div
+                            role="status"
+                            aria-live="polite"
+                            className="flex items-center gap-1.5 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-700 font-medium"
+                        >
                             <CheckCircleIcon className="w-4 h-4" />
                             {renewAllResult.renewed > 0
                                 ? t('seller:myListings.renewAllSuccess', '{{count}} renewed', { count: renewAllResult.renewed })
                                 : t('seller:myListings.renewAllNone', 'None ready to renew')}
+                        </div>
+                    )}
+                    {renewAllError && (
+                        <div
+                            role="alert"
+                            aria-live="assertive"
+                            className="flex items-center gap-1.5 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 font-medium"
+                        >
+                            <span className="sr-only">{t('common:error', 'Error')}:</span>
+                            {renewAllError}
                         </div>
                     )}
                     <button

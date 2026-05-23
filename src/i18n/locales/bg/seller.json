@@ -396,7 +396,11 @@
     "renewAll": "Поднови всички ({{count}})",
     "renewingAll": "Подновяване...",
     "renewAllSuccess": "{{count}} подновени",
-    "renewAllNone": "Няма готови за подновяване"
+    "renewAllNone": "Няма готови за подновяване",
+    "renewAllTitle": "Поднови {{count}} допустими обяви за показване в горната част на резултатите",
+    "renewAllLimitReached": "Достигнат дневен лимит ({{used}}/{{limit}})",
+    "renewAllLimitInfo": "Следващият слот е достъпен след {{hours}}ч {{minutes}}м",
+    "renewAllError": "Подновяването неуспешно. Моля, опитайте отново."
   },
   "form": {
     "basicInfo": "Basic Information",

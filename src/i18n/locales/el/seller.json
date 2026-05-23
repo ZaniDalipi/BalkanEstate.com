@@ -392,7 +392,11 @@
     "renewAll": "Ανανέωση όλων ({{count}})",
     "renewingAll": "Ανανέωση...",
     "renewAllSuccess": "{{count}} ανανεώθηκαν",
-    "renewAllNone": "Κανένα έτοιμο για ανανέωση"
+    "renewAllNone": "Κανένα έτοιμο για ανανέωση",
+    "renewAllTitle": "Ανανέωση {{count}} κατάλληλης/ων αγγελίας/ών για εμφάνιση στην κορυφή των αποτελεσμάτων",
+    "renewAllLimitReached": "Επιτεύχθηκε το ημερήσιο όριο ({{used}}/{{limit}})",
+    "renewAllLimitInfo": "Επόμενη διαθέσιμη θέση σε {{hours}}ω {{minutes}}λ",
+    "renewAllError": "Η ανανέωση απέτυχε. Παρακαλώ δοκιμάστε ξανά."
   },
   "form": {
     "basicInfo": "Βασικές Πληροφορίες",

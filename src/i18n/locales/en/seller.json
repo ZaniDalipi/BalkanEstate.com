@@ -399,7 +399,11 @@
     "renewAll": "Renew All ({{count}})",
     "renewingAll": "Renewing...",
     "renewAllSuccess": "{{count}} renewed",
-    "renewAllNone": "None ready to renew"
+    "renewAllNone": "None ready to renew",
+    "renewAllTitle": "Renew {{count}} eligible listing(s) to appear at top of search results",
+    "renewAllLimitReached": "Daily limit reached ({{used}}/{{limit}})",
+    "renewAllLimitInfo": "Next slot available in {{hours}}h {{minutes}}m",
+    "renewAllError": "Failed to renew listings. Please try again."
   },
   "form": {
     "basicInfo": "Basic Information",

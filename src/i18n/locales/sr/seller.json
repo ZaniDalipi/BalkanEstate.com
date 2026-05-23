@@ -392,7 +392,11 @@
     "renewAll": "Обнови све ({{count}})",
     "renewingAll": "Обнављање...",
     "renewAllSuccess": "{{count}} обновљено",
-    "renewAllNone": "Ништа није спремно за обнову"
+    "renewAllNone": "Ништа није спремно за обнову",
+    "renewAllTitle": "Обнови {{count}} прихватљив(е) оглас(е) за приказ на врху резултата претраге",
+    "renewAllLimitReached": "Достигнут дневни лимит ({{used}}/{{limit}})",
+    "renewAllLimitInfo": "Следећи слот доступан за {{hours}}ч {{minutes}}м",
+    "renewAllError": "Обнова није успела. Молимо покушајте поново."
   },
   "form": {
     "basicInfo": "Основне Информације",

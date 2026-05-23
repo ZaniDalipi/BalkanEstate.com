@@ -392,7 +392,11 @@
     "renewAll": "Reînnoiește toate ({{count}})",
     "renewingAll": "Se reînnoiește...",
     "renewAllSuccess": "{{count}} reînnoite",
-    "renewAllNone": "Niciunul gata de reînnoit"
+    "renewAllNone": "Niciunul gata de reînnoit",
+    "renewAllTitle": "Reînnoiește {{count}} anunț(uri) eligibil(e) pentru a apărea în fruntea rezultatelor",
+    "renewAllLimitReached": "Limita zilnică atinsă ({{used}}/{{limit}})",
+    "renewAllLimitInfo": "Următorul slot disponibil în {{hours}}h {{minutes}}m",
+    "renewAllError": "Reînnoirea a eșuat. Vă rugăm să încercați din nou."
   },
   "form": {
     "basicInfo": "Informații de Bază",

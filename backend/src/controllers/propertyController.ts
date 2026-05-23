@@ -2006,8 +2006,9 @@ export const renewAllProperties = async (
     const userId = String((req.user as IUser)._id);
     const COOLDOWN_HOURS = 24;
     const cooldownMs = COOLDOWN_HOURS * 60 * 60 * 1000;
-    const RENEW_ALL_LIMIT = 10;
+    const DAILY_BULK_LIMIT = 10;
     const now = new Date();
+    const windowStart = new Date(now.getTime() - cooldownMs);
 
     // Find all active/pending properties owned by this user
     const properties = await Property.find({
@@ -2015,12 +2016,41 @@ export const renewAllProperties = async (
       status: { $in: ['active', 'pending'] },
     });
 
+    // Count how many were already bulk-renewed in the last 24 hours
+    const alreadyRenewedInWindow = properties.filter(
+      p => p.lastRenewed && new Date(p.lastRenewed) >= windowStart
+    );
+    const dailyUsed = alreadyRenewedInWindow.length;
+    const dailyRemaining = Math.max(0, DAILY_BULK_LIMIT - dailyUsed);
+
+    if (dailyRemaining === 0) {
+      // Find the earliest renewal in the window to tell user when the slot frees up
+      const earliestRenewal = alreadyRenewedInWindow.reduce(
+        (earliest, p) => {
+          const t = new Date(p.lastRenewed!).getTime();
+          return t < earliest ? t : earliest;
+        },
+        Infinity
+      );
+      const canRenewAt = new Date(earliestRenewal + cooldownMs);
+      propertyLogger.info(`⚠️ Renew all daily limit reached for user ${userId}: ${dailyUsed}/${DAILY_BULK_LIMIT} in last 24h`);
+      res.status(429).json({
+        success: false,
+        code: 'BULK_RENEWAL_DAILY_LIMIT',
+        message: `You have reached the daily bulk renewal limit of ${DAILY_BULK_LIMIT} listings.`,
+        dailyUsed,
+        dailyLimit: DAILY_BULK_LIMIT,
+        canRenewAt: canRenewAt.toISOString(),
+      });
+      return;
+    }
+
     const renewed: string[] = [];
     const skipped: string[] = [];
 
     for (const property of properties) {
-      // Cap at 10 per request — remaining eligible ones can be renewed on the next click
-      if (renewed.length >= RENEW_ALL_LIMIT) {
+      // Respect cumulative daily cap
+      if (renewed.length >= dailyRemaining) {
         skipped.push(String(property._id));
         continue;
       }
@@ -2040,7 +2070,10 @@ export const renewAllProperties = async (
       invalidateCache('/api/properties');
     }
 
-    propertyLogger.info(`✅ Renew all: ${renewed.length} renewed, ${skipped.length} skipped for user ${userId}`);
+    const newDailyUsed = dailyUsed + renewed.length;
+    const newDailyRemaining = Math.max(0, DAILY_BULK_LIMIT - newDailyUsed);
+
+    propertyLogger.info(`✅ Renew all: ${renewed.length} renewed, ${skipped.length} skipped for user ${userId} (${newDailyUsed}/${DAILY_BULK_LIMIT} used today)`);
 
     res.json({
       success: true,
@@ -2048,6 +2081,9 @@ export const renewAllProperties = async (
       skipped: skipped.length,
       renewedIds: renewed,
       lastRenewed: now.toISOString(),
+      dailyUsed: newDailyUsed,
+      dailyLimit: DAILY_BULK_LIMIT,
+      dailyRemaining: newDailyRemaining,
     });
   } catch (error: any) {
     propertyLogger.error('Renew all properties error:', error);

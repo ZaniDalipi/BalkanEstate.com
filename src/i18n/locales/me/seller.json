@@ -392,7 +392,11 @@
     "renewAll": "Obnovi sve ({{count}})",
     "renewingAll": "Obnavljanje...",
     "renewAllSuccess": "{{count}} obnovljeno",
-    "renewAllNone": "Ništa nije spremno za obnovu"
+    "renewAllNone": "Ništa nije spremno za obnovu",
+    "renewAllTitle": "Obnovi {{count}} prihvatljiv(e) oglas(e) za prikaz na vrhu rezultata pretrage",
+    "renewAllLimitReached": "Dostignut dnevni limit ({{used}}/{{limit}})",
+    "renewAllLimitInfo": "Sljedeći slot dostupan za {{hours}}h {{minutes}}m",
+    "renewAllError": "Obnova nije uspjela. Molimo pokušajte ponovo."
   },
   "form": {
     "basicInfo": "Basic Information",
