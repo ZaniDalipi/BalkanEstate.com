@@ -20,6 +20,14 @@ export interface IListingSource extends Document {
   scrapeIntervalHours: number;
   totalImported: number;
   selectors: IListingSourceSelectors;
+  /** CSS-selector map passed directly to the HTML enricher (field name → selector). */
+  fieldMap: Record<string, string>;
+  /** Adapter-specific configuration (e.g. pagination params, API keys, rate limits). */
+  adapterConfig: Record<string, unknown>;
+  /** The user account that manages/owns this source. */
+  userId?: mongoose.Types.ObjectId;
+  /** When the source operator accepted the scraping terms of service. */
+  acceptedTermsAt?: Date;
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -71,6 +79,26 @@ const ListingSourceSchema: Schema = new Schema(
       images: { type: String },
       rooms: { type: String },
       area: { type: String },
+    },
+    fieldMap: {
+      type: Map,
+      of: String,
+      default: {},
+    },
+    adapterConfig: {
+      type: Map,
+      of: Schema.Types.Mixed,
+      default: {},
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: false,
+      index: true,
+    },
+    acceptedTermsAt: {
+      type: Date,
+      required: false,
     },
     notes: {
       type: String,

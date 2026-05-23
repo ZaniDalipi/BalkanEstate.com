@@ -299,12 +299,18 @@ export const uploadImage = async (
   }
 };
 
+const SCRAPER_DEFAULT_OPTIONS: UploadOptions = {
+  userId: 'scraper',
+  type: 'property',
+};
+
 /**
  * Upload an image to Cloudinary directly from a remote URL (used by scraper).
+ * options defaults to a scraper system account when omitted.
  */
 export const uploadFromUrl = async (
   imageUrl: string,
-  options: UploadOptions
+  options: UploadOptions = SCRAPER_DEFAULT_OPTIONS
 ): Promise<CloudinaryUploadResult> => {
   const folder = buildFolderPath(options);
   try {

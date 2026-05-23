@@ -134,6 +134,8 @@ export interface IProperty extends Document {
   rentalHistory?: IRentalHistoryEntry[]; // Past rental periods for income tracking
   // Visit/viewing availability
   visitAvailability?: IVisitAvailability;
+  // Scraper / external import fields
+  sourceListingId?: string; // The listing's original ID on the source site
   createdAt: Date;
   updatedAt: Date;
 }
@@ -179,6 +181,11 @@ const PropertySchema: Schema = new Schema(
       required: false,
     },
     source: {
+      type: String,
+      required: false,
+      index: true,
+    },
+    sourceListingId: {
       type: String,
       required: false,
       index: true,

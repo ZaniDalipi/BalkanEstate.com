@@ -27,6 +27,9 @@ export const fetchHtml = async (url: string, timeoutMs: number = DEFAULT_TIMEOUT
   }
 };
 
+/** Alias for fetchHtml — preferred name used by HtmlScrapeAdapter. */
+export const httpGet = fetchHtml;
+
 /**
  * Fetch a remote URL and return the response body parsed as JSON of type T.
  * Throws if the response status is not 2xx or JSON parsing fails.

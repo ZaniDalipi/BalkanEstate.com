@@ -39,3 +39,10 @@ export const fetchRenderedHtml = async (
     await browser.close();
   }
 };
+
+/** Alias for fetchRenderedHtml — preferred name used by HtmlScrapeAdapter. */
+export const fetchWithBrowser = (
+  url: string,
+  waitForSelector?: string,
+  timeoutMs?: number
+): Promise<string> => fetchRenderedHtml(url, waitForSelector, timeoutMs);

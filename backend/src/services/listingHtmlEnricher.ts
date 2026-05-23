@@ -112,3 +112,13 @@ export const enrichHtml = (
 
   return result;
 };
+
+/**
+ * Extract structured listing data from a property detail-page HTML.
+ * Accepts a fieldMap (CSS selector per field key) produced by the source's adapter config.
+ * Falls back to enrichHtml when fieldMap is empty.
+ */
+export const enrichFromDetailHtml = (
+  html: string,
+  fieldMap?: Record<string, string>
+): EnrichedListing => enrichHtml(html, fieldMap as Partial<Record<keyof EnrichedListing, string>>);
