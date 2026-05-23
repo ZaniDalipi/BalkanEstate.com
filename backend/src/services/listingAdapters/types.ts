@@ -8,8 +8,8 @@ export interface FetchOptions {
   headers?: Record<string, string>;
   /** Maximum number of listings to fetch in one run. */
   limit?: number;
-  /** Called after each listing is successfully fetched, with the running total. */
-  onProgress?: (count: number) => void;
+  /** Called after each listing is fetched, with the running total and the listing itself. */
+  onProgress?: (count: number, listing?: RawListing) => void;
 }
 
 /** Raw data captured from a single scraped property listing. */
@@ -31,8 +31,11 @@ export interface RawListing {
   sqft?: number;
   lat?: number;
   lng?: number;
-  /** Raw HTML or JSON string from the detail page, used for re-parsing. */
-  raw?: string;
+  /**
+   * Raw payload from the detail page — may be an HTML string or a parsed JSON object
+   * depending on the adapter. Use `unknown` so adapters can store either form.
+   */
+  raw?: unknown;
   /** @deprecated Use raw */
   rawHtml?: string;
   scrapedAt: Date;
@@ -51,7 +54,8 @@ export interface AdapterResult {
 
 /** Contract that every listing source adapter must implement. */
 export interface SourceAdapter {
-  readonly name: string;
+  /** Adapter identifier — does not have to be readonly. */
+  name: string;
   /** Fetch listings for the given source configuration. Returns the raw listing array. */
   fetchListings(source: IListingSource, options?: FetchOptions): Promise<RawListing[]>;
 }

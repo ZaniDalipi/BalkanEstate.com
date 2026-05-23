@@ -137,6 +137,7 @@ export interface IProperty extends Document {
   // Scraper / external import fields
   sourceUrl?: string; // Full URL of the listing on the source site
   sourceListingId?: string; // The listing's original ID on the source site
+  sourceFetchedAt?: Date; // When the listing was last fetched from the source
   createdAt: Date;
   updatedAt: Date;
 }
@@ -194,6 +195,10 @@ const PropertySchema: Schema = new Schema(
       type: String,
       required: false,
       index: true,
+    },
+    sourceFetchedAt: {
+      type: Date,
+      required: false,
     },
     propertyId: {
       type: String,

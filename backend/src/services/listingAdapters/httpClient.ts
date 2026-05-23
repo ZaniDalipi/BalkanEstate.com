@@ -6,6 +6,7 @@ const DEFAULT_TIMEOUT_MS = 10_000;
 export interface HttpGetOptions {
   timeoutMs?: number;
   headers?: Record<string, string>;
+  responseType?: 'text' | 'json' | 'blob' | 'arraybuffer' | 'stream';
 }
 
 export interface HttpGetResult<T> {

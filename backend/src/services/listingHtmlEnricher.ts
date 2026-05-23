@@ -115,11 +115,18 @@ export const enrichHtml = (
 
 /**
  * Extract structured listing data from a property detail-page HTML.
- * Accepts a fieldMap (CSS selector per field key) and an optional base URL for resolving
- * relative image/link paths. Falls back to enrichHtml when fieldMap is empty.
+ * fieldMap may be a CSS-selector Record or a JSON string that will be parsed.
+ * The optional baseUrl is reserved for future relative-URL resolution.
  */
 export const enrichFromDetailHtml = (
-  html: string,
-  fieldMap?: Record<string, string>,
+  html: unknown,
+  fieldMap?: Record<string, string> | string,
   _baseUrl?: string
-): EnrichedListing => enrichHtml(html, fieldMap as Partial<Record<keyof EnrichedListing, string>>);
+): EnrichedListing => {
+  const htmlStr = typeof html === 'string' ? html : JSON.stringify(html);
+  const resolvedMap: Partial<Record<keyof EnrichedListing, string>> =
+    typeof fieldMap === 'string'
+      ? (JSON.parse(fieldMap) as Partial<Record<keyof EnrichedListing, string>>)
+      : (fieldMap as Partial<Record<keyof EnrichedListing, string>>);
+  return enrichHtml(htmlStr, resolvedMap);
+};
