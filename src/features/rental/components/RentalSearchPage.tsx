@@ -236,45 +236,69 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                     {isMobile && <div className="h-14 flex-shrink-0" />}
 
                     {/* Header with city search — desktop only (mobile uses floating pill bar) */}
-                    <div className="hidden lg:block sticky top-0 z-20" style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                        <div className="px-4 py-3 flex items-center justify-between gap-3">
+                    <div className="hidden lg:block sticky top-0 z-20" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', borderBottom: '1px solid rgba(217,119,6,0.3)' }}>
+                        {/* Gold shimmer top bar */}
+                        <div className="h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
+                        <div className="px-4 pt-3 pb-2 flex items-center justify-between gap-3">
                             <div>
-                                <h1 className="text-lg font-bold text-gray-900 text-glow">{t('rental:title')}</h1>
-                                <p className="text-xs text-gray-400">
-                                    {listProperties.length} {t('rental:propertiesFound')}
+                                <div className="flex items-center gap-2">
+                                    <svg className="w-5 h-5 text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205 3 1m1.5.5-1.5-.5M6.75 7.364V3h-3v18m3-13.636 10.5-3.819" />
+                                    </svg>
+                                    <h1 className="text-lg font-bold text-white tracking-wide">{t('rental:luxuryVillas', 'Luxury Villas')}</h1>
+                                </div>
+                                <p className="text-xs mt-0.5" style={{ color: 'rgba(251,191,36,0.8)' }}>
+                                    {listProperties.length > 0 ? (
+                                        <>
+                                            <span className="font-semibold text-amber-300">{listProperties.length}</span>
+                                            {' '}{t('rental:exclusiveVillas', 'exclusive villas')}
+                                            {listProperties.some(p => p.price) && (
+                                                <> · {t('rental:from', 'from')} <span className="font-semibold text-amber-300">€{Math.min(...listProperties.filter(p => p.price).map(p => p.price!)).toLocaleString()}</span>/{t('rental:perDayShort', 'night')}</>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <span className="text-amber-300/60">{t('rental:premiumVillaCollection', 'Premium villa collection')}</span>
+                                    )}
                                 </p>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Button
-                                    variant="accent"
-                                    size="sm"
+                                <button
                                     onClick={handleCreateRental}
-                                    className="font-semibold rounded-xl"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white transition-all active:scale-95 whitespace-nowrap"
+                                    style={{
+                                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%)',
+                                        boxShadow: '0 2px 12px rgba(217,119,6,0.5), inset 0 1px 0 rgba(255,255,255,0.2)',
+                                    }}
                                 >
-                                    + {t('rental:createListing')}
-                                </Button>
+                                    + {t('rental:listYourVilla', 'List Your Villa')}
+                                </button>
                             </div>
                         </div>
 
                         {/* City Search Bar */}
-                        <div className="px-4 pb-3">
+                        <div className="px-4 pb-2">
                             <div ref={searchWrapperRef} className="relative">
                                 <div className="relative">
-                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400/70" />
                                     <input
                                         type="text"
                                         value={filters.query}
                                         onChange={(e) => handleFilterChange('query', e.target.value)}
                                         onFocus={() => setIsQueryInputFocused(true)}
                                         onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
-                                        placeholder={t('rental:filters.searchCity', 'Search by city or location...')}
-                                        className="glass-input w-full pl-9 pr-9 py-2 text-sm"
+                                        placeholder={t('rental:filters.searchCity', 'Search by location...')}
+                                        className="w-full pl-9 pr-9 py-2 text-sm rounded-xl border outline-none transition-all"
+                                        style={{
+                                            background: 'rgba(255,255,255,0.08)',
+                                            border: '1px solid rgba(217,119,6,0.3)',
+                                            color: 'rgba(255,255,255,0.9)',
+                                        }}
                                         aria-label={t('rental:filters.searchCity', 'Search by city or location...')}
                                     />
                                     {filters.query && (
                                         <button
                                             onClick={() => handleFilterChange('query', '')}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-600 transition-colors"
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-400/60 hover:text-amber-300 transition-colors"
                                             aria-label={t('common:aria.clearSearch')}
                                         >
                                             <XMarkIcon className="w-4 h-4" />
@@ -299,10 +323,80 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                 )}
                                 {isSearchingLocation && (
                                     <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 p-3 text-center">
-                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-400 mx-auto" />
+                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-amber-400 mx-auto" />
                                     </div>
                                 )}
                             </div>
+                        </div>
+
+                        {/* Luxury Quick-Filter Chips */}
+                        <div className="px-4 pb-3 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+                            {[
+                                { label: '⛰ Mountain', field: 'viewType' as const, value: 'mountain' },
+                                { label: '🌊 Sea View', field: 'viewType' as const, value: 'sea' },
+                                { label: '🌲 Lake / Forest', field: 'viewType' as const, value: 'park' },
+                                { label: '🏙 City View', field: 'viewType' as const, value: 'city' },
+                                { label: '🏊 Pool', field: 'hasPool' as const, value: true },
+                                { label: '🌿 Garden', field: 'hasGarden' as const, value: true },
+                                { label: '🛁 Sauna', field: 'amenities' as const, value: 'sauna' },
+                                { label: '🍷 Wine Cellar', field: 'amenities' as const, value: 'wine cellar' },
+                                { label: '🌅 Panoramic', field: 'amenities' as const, value: 'panoramic view' },
+                            ].map((chip) => {
+                                const isActive = chip.field === 'amenities'
+                                    ? (filters.amenities || []).includes(chip.value as string)
+                                    : (filters as any)[chip.field] === chip.value;
+                                return (
+                                    <button
+                                        key={chip.label}
+                                        onClick={() => {
+                                            if (chip.field === 'amenities') {
+                                                const current = filters.amenities || [];
+                                                handleFilterChange('amenities', isActive
+                                                    ? current.filter((a: string) => a !== chip.value)
+                                                    : [...current, chip.value as string]
+                                                );
+                                            } else {
+                                                handleFilterChange(chip.field, isActive ? (chip.field === 'viewType' ? 'any' : null) : chip.value);
+                                            }
+                                        }}
+                                        className="flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-all whitespace-nowrap"
+                                        style={isActive ? {
+                                            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                                            color: '#fff',
+                                            boxShadow: '0 2px 8px rgba(217,119,6,0.45)',
+                                        } : {
+                                            background: 'rgba(255,255,255,0.1)',
+                                            color: 'rgba(255,255,255,0.75)',
+                                            border: '1px solid rgba(217,119,6,0.25)',
+                                        }}
+                                    >
+                                        {chip.label}
+                                    </button>
+                                );
+                            })}
+                            {/* Beds quick filter */}
+                            {[null, 3, 5].map((beds, idx) => {
+                                const label = beds === null ? 'Any' : `${beds}+`;
+                                const isActive = (filters.beds ?? null) === beds;
+                                return (
+                                    <button
+                                        key={`beds-${idx}`}
+                                        onClick={() => handleFilterChange('beds', beds)}
+                                        className="flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-all whitespace-nowrap"
+                                        style={isActive ? {
+                                            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                                            color: '#fff',
+                                            boxShadow: '0 2px 8px rgba(217,119,6,0.45)',
+                                        } : {
+                                            background: 'rgba(255,255,255,0.1)',
+                                            color: 'rgba(255,255,255,0.75)',
+                                            border: '1px solid rgba(217,119,6,0.25)',
+                                        }}
+                                    >
+                                        {label === 'Any' ? label : `🛏 ${label}`}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 

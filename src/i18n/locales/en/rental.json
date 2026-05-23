@@ -1,5 +1,11 @@
 {
   "title": "Properties for Rent",
+  "luxuryVillas": "Luxury Villas",
+  "exclusiveVillas": "exclusive villas",
+  "premiumVillaCollection": "Premium villa collection",
+  "listYourVilla": "List Your Villa",
+  "from": "from",
+  "perDayShort": "night",
   "propertiesFound": "properties available",
   "createListing": "List for Rent",
   "loading": "Loading rental properties...",
