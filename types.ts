@@ -404,6 +404,10 @@ export interface Property {
     // Price discount
     hasDiscount?: boolean;
     isNegotiable?: boolean;
+    // External source (imported listings)
+    source?: string;
+    sourceUrl?: string;
+    sourceFetchedAt?: number;
 }
 
 export interface RentalHistoryEntry {

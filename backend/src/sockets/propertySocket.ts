@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
 import mongoose from 'mongoose';
 import { socketLogger } from '../utils/logger';
+import { encodeId } from '../utils/idObfuscation';
 
 // Store the io instance for emitting from controllers
 let ioInstance: Server | null = null;
@@ -293,6 +294,37 @@ export const emitPropertiesBulkUpdate = (action: 'created' | 'updated' | 'delete
     timestamp: new Date().toISOString(),
   });
   socketLogger.info(`📤 [Controller] property:bulkUpdate - ${action} ${count} properties`);
+};
+
+/**
+ * Emit listing ingest progress event
+ * Call this during listing source sync to show real-time progress
+ */
+export const emitListingIngestProgress = (sourceId: string, progress: {
+  fetched: number;
+  processed: number;
+  imported: number;
+  updated: number;
+  failed: number;
+  deferred?: number;
+  done?: boolean;
+  message?: string;
+  currentItem?: { id: string; title?: string; url?: string };
+  monthlyUsage?: { monthlyAllowance: number; remaining: number };
+}) => {
+  if (!ioInstance) return;
+
+  // The frontend stores sessions under the obfuscated (encoded) ID, which is
+  // what the global Mongoose toJSON transform produces. Encode here so the
+  // socket event's sourceId matches what the client registered.
+  const encodedSourceId = encodeId(sourceId);
+
+  ioInstance.emit('listing:ingestProgress', {
+    sourceId: encodedSourceId,
+    ...progress,
+    timestamp: new Date().toISOString(),
+  });
+  socketLogger.info(`📤 [Ingest] progress for source ${sourceId}: processed=${progress.processed}/${progress.fetched}`);
 };
 
 /**

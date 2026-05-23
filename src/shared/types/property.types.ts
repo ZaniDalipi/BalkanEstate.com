@@ -158,6 +158,10 @@ export interface Property {
   size?: number;
   // Agent reference
   agentId?: string;
+  // Universal-listings ingestion: present when this listing was imported from a third-party site.
+  source?: string;
+  sourceUrl?: string;
+  sourceFetchedAt?: number;
 }
 
 export interface VisitAvailability {

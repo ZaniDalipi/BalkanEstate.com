@@ -37,7 +37,7 @@ export interface IProperty extends Document {
   sellerId: mongoose.Types.ObjectId;
   createdByName: string; // Name of the user who created this listing
   createdByEmail: string; // Email of the user who created this listing
-  createdAsRole: 'private_seller' | 'agent'; // Which role context was used to create this listing
+  createdAsRole: 'private_seller' | 'agent' | 'external'; // Which role context was used to create this listing
   createdByAgencyName?: string; // If created as agent, store agency name
   createdByAgencyId?: mongoose.Types.ObjectId; // If created as agent, direct reference to Agency document
   createdByLicenseNumber?: string; // If created as agent, store license number
@@ -141,6 +141,12 @@ export interface IProperty extends Document {
   parkingIncluded?: boolean;
   // Visit/viewing availability
   visitAvailability?: IVisitAvailability;
+  // External-source ingestion fields (set when listing was imported from a third-party site)
+  source?: string;
+  sourceListingId?: string;
+  sourceUrl?: string;
+  sourceFetchedAt?: Date;
+  sourceMetadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -165,7 +171,7 @@ const PropertySchema: Schema = new Schema(
     },
     createdAsRole: {
       type: String,
-      enum: ['private_seller', 'agent'],
+      enum: ['private_seller', 'agent', 'external'],
       required: true,
       default: 'private_seller',
       index: true, // Index for filtering by role
@@ -570,6 +576,23 @@ const PropertySchema: Schema = new Schema(
       slotDurationMinutes: { type: Number, default: 30 },
       notes: { type: String },
     },
+    // External ingestion fields
+    source: {
+      type: String,
+      index: true,
+    },
+    sourceListingId: {
+      type: String,
+    },
+    sourceUrl: {
+      type: String,
+    },
+    sourceFetchedAt: {
+      type: Date,
+    },
+    sourceMetadata: {
+      type: Schema.Types.Mixed,
+    },
   },
   {
     timestamps: true,
@@ -616,5 +639,16 @@ PropertySchema.index({ listingType: 1, price: 1, status: 1 });
 PropertySchema.index({ sellerId: 1, status: 1, createdAt: -1 });
 // Default sort order (lastRenewed) with status filter — covers the most common query
 PropertySchema.index({ status: 1, lastRenewed: -1 });
+
+// Idempotent upsert key for externally ingested listings.
+// Partial filter ensures the unique constraint only applies to imported docs (those with `source` set).
+PropertySchema.index(
+  { source: 1, sourceListingId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { source: { $exists: true, $type: 'string' } },
+    name: 'source_listing_unique',
+  }
+);
 
 export default mongoose.model<IProperty>('Property', PropertySchema);

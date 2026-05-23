@@ -347,6 +347,37 @@ export const uploadPropertyImages = async (
 };
 
 /**
+ * Upload an image directly from a remote URL.
+ * Used by the universal-listings ingest pipeline to re-host external images
+ * onto Cloudinary so frontend image optimization (srcset / WebP) keeps working
+ * and source sites can't break our listings by deleting images later.
+ *
+ * Cloudinary's `uploader.upload(remoteUrl)` accepts http(s) URLs natively.
+ */
+export const uploadFromUrl = async (
+  remoteUrl: string,
+  folder = 'balkan-estate/external-listings'
+): Promise<CloudinaryUploadResult> => {
+  const result = await cloudinary.uploader.upload(remoteUrl, {
+    folder,
+    resource_type: 'image',
+    transformation: [
+      { quality: 'auto:good' },
+      { fetch_format: 'auto' },
+    ],
+  });
+  mediaLogger.info(`✅ Re-hosted external image to Cloudinary: ${result.public_id}`);
+  return {
+    url: result.secure_url,
+    publicId: result.public_id,
+    width: result.width,
+    height: result.height,
+    format: result.format,
+    bytes: result.bytes,
+  };
+};
+
+/**
  * Delete image from Cloudinary and remove its file record.
  * Tries authenticated first, then falls back to upload type,
  * since the file may be either delivery type.

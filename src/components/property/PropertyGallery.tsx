@@ -11,6 +11,22 @@ import {
   BuildingOfficeIcon,
 } from '../../../constants';
 import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
+
+const isCloudinaryUrl = (url: string): boolean =>
+  typeof url === 'string' && url.includes('res.cloudinary.com');
+
+/** Returns an optimized src — Cloudinary transform for uploads, backend proxy for external URLs. */
+const getImageSrc = (url: string, width: number): string => {
+  if (!url) return '';
+  if (isCloudinaryUrl(url)) return optimizeCloudinaryUrl(url, { width, quality: 'auto' });
+  return `/api/image-proxy?url=${encodeURIComponent(url)}`;
+};
+
+/** srcSet is only meaningful for Cloudinary images; proxied external images don't support it. */
+const getImageSrcSet = (url: string, widths: number[]): string => {
+  if (!url || !isCloudinaryUrl(url)) return '';
+  return cloudinarySrcSet(url, widths);
+};
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 
 interface PropertyGalleryProps {
@@ -462,7 +478,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               <>
                 {/* LQIP blurred background — fills letterbox bars on desktop object-contain */}
                 <img
-                  src={getPropertyImagePlaceholder(currentImageUrl) || optimizeCloudinaryUrl(currentImageUrl, { width: 40, quality: 'auto:eco' })}
+                  src={getPropertyImagePlaceholder(currentImageUrl) || getImageSrc(currentImageUrl, 40)}
                   alt=""
                   aria-hidden="true"
                   className="absolute inset-0 w-full h-full object-cover blur-3xl scale-110 pointer-events-none select-none"
@@ -508,13 +524,13 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                           style={{ willChange: 'transform' }}
                         >
                           <img
-                            src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
-                            srcSet={cloudinarySrcSet(currentImageUrl, [640, 960, 1200, 1920])}
+                            src={getImageSrc(currentImageUrl, 1200)}
+                            srcSet={getImageSrcSet(currentImageUrl, [640, 960, 1200, 1920])}
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
                             alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
                             width={1200}
                             height={800}
-                            crossOrigin="anonymous"
+                            {...(isCloudinaryUrl(currentImageUrl) ? { crossOrigin: 'anonymous' as const } : {})}
                             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                             // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
                             fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}

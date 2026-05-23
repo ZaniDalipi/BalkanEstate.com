@@ -9,6 +9,8 @@ import { AlertProvider } from './context/AlertContext';
 import { ConfirmationProvider } from './src/shared/hooks/useConfirmation';
 import { NotificationProvider } from './src/shared/hooks/useNotification';
 import { QueryProvider } from './src/app/providers/QueryProvider';
+import { ListingIngestProgressProvider } from './src/features/listing-sources/context/ListingIngestProgressContext';
+import ListingIngestDock from './src/features/listing-sources/components/ListingIngestDock';
 import { ErrorBoundary } from './src/app/components/ErrorBoundary';
 import { QueryErrorBoundary } from './src/app/components/QueryErrorBoundary';
 import { AnimationProvider } from './src/components/ui/Animations';
@@ -1260,6 +1262,7 @@ const App: React.FC = () => {
                 <ConfirmationProvider>
                   <AnimationProvider>
                     <NavigationProvider>
+                      <ListingIngestProgressProvider>
                       {/* Global SVG filter for liquid glass effects */}
                       <LiquidGlassFilter />
                       {/* Lazy loaded SEO & Analytics components (don't block initial render) */}
@@ -1279,6 +1282,8 @@ const App: React.FC = () => {
                       </Suspense>
 
                       <AppWrapper />
+                      <ListingIngestDock />
+                      </ListingIngestProgressProvider>
                     </NavigationProvider>
                   </AnimationProvider>
                 </ConfirmationProvider>
