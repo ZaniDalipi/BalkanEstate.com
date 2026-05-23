@@ -121,7 +121,7 @@ const AgencyPaymentPage = lazy(() => import('./src/features/agencies/components/
 // Google Maps API is deferred - only loads when map pages are visited (see MapComponent.tsx)
 
 // Cookie Consent Banner (lazy loaded - shown after initial render)
-const CookieConsent = lazy(() => import('./src/shared/components/CookieConsent'));
+const ConsentBanner = lazy(() => import('./src/shared/components/ConsentBanner'));
 const PushNotificationPrompt = lazy(() => import('./src/features/notifications/components/PushNotificationPrompt'));
 
 // Splash screen (lazy loaded - shown on initial app load to hide loading)
@@ -1209,7 +1209,7 @@ const AppWrapper: React.FC = () => {
                 <MainLayout />
                 <Suspense fallback={null}>
                     {state.isAuthModalOpen && <AuthPage />}
-                    <CookieConsent />
+                    <ConsentBanner />
                     <PWAInstallPrompt />
                     <PushNotificationPrompt />
                 </Suspense>

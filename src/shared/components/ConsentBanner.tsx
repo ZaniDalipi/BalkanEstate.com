@@ -32,7 +32,7 @@ export const hasConsentedToCookies = (): boolean => {
   return localStorage.getItem(COOKIE_CONSENT_KEY) === 'true';
 };
 
-const CookieConsent: React.FC = () => {
+const ConsentBanner: React.FC = () => {
   const { t } = useTranslation(['common']);
   const [isVisible, setIsVisible] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -276,4 +276,4 @@ const CookieConsent: React.FC = () => {
   return createPortal(banner, document.body);
 };
 
-export default CookieConsent;
+export default ConsentBanner;
