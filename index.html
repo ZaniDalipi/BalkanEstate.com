@@ -3,6 +3,28 @@
   <head>
     <meta charset="UTF-8" />
 
+    <!-- Chunk-load guard: auto-reload when a Vite bundle file returns HTML
+         (MIME type error) after a deployment — this happens when the browser
+         has cached an old index.html pointing to old fingerprinted chunks that
+         no longer exist on the server. The guard runs before React mounts so
+         it covers BOTH static and lazy-loaded chunk failures.
+         We cap retries via sessionStorage to avoid infinite reload loops.  -->
+    <script>
+      (function() {
+        var KEY = 'chunk-reload-' + location.pathname;
+        window.addEventListener('error', function(e) {
+          var t = e.target;
+          if (!t || t.tagName !== 'SCRIPT') return;
+          var last = sessionStorage.getItem(KEY);
+          var now = Date.now();
+          if (!last || now - Number(last) > 30000) {
+            sessionStorage.setItem(KEY, String(now));
+            location.reload();
+          }
+        }, true);
+      })();
+    </script>
+
     <!-- Ziggy Polyfill: Prevents errors from external scripts expecting Laravel Ziggy -->
     <script>
       (function() {

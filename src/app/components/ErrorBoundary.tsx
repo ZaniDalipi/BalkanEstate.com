@@ -101,7 +101,9 @@ export class ErrorBoundary extends Component<Props, State> {
       message.includes('Loading chunk') ||
       message.includes('Loading CSS chunk') ||
       message.includes('Failed to fetch dynamically imported module') ||
-      message.includes('Importing a module script failed')
+      message.includes('Importing a module script failed') ||
+      message.includes('Expected a JavaScript') ||
+      message.includes('MIME type')
     );
   }
 
