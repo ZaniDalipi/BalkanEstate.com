@@ -12,7 +12,7 @@ self.addEventListener('push', (event) => {
   let payload;
   try {
     payload = event.data.json();
-  } catch {
+  } catch (_e) {
     // Fallback for plain text payloads
     payload = {
       title: 'BalkanEstateAI',
@@ -32,7 +32,7 @@ self.addEventListener('push', (event) => {
     data: data || {},
     requireInteraction: requireInteraction || false,
     vibrate: [100, 50, 100],
-    actions: getActionsForType(data?.type),
+    actions: getActionsForType(data && data.type),
   };
 
   event.waitUntil(
@@ -73,7 +73,7 @@ self.addEventListener('notificationclick', (event) => {
       // Try to find any existing window and navigate it
       for (const client of clientList) {
         if ('focus' in client && 'navigate' in client) {
-          return client.navigate(targetUrl).then((c) => c?.focus());
+          return client.navigate(targetUrl).then((c) => c && c.focus());
         }
       }
       // Open a new window as last resort
