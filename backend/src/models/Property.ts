@@ -37,10 +37,11 @@ export interface IProperty extends Document {
   sellerId: mongoose.Types.ObjectId;
   createdByName: string; // Name of the user who created this listing
   createdByEmail: string; // Email of the user who created this listing
-  createdAsRole: 'private_seller' | 'agent'; // Which role context was used to create this listing
+  createdAsRole: 'private_seller' | 'agent' | 'external'; // Which role context was used to create this listing
   createdByAgencyName?: string; // If created as agent, store agency name
   createdByAgencyId?: mongoose.Types.ObjectId; // If created as agent, direct reference to Agency document
   createdByLicenseNumber?: string; // If created as agent, store license number
+  source?: string; // External source identifier (e.g. 'nekretnine.ba') for scraped listings
   propertyId?: string; // Custom property ID assigned by the agency/agent for internal tracking
   listingType: 'sale' | 'rent'; // Whether this property is for sale or rent
   title?: string; // Optional title/headline for the property listing
@@ -157,7 +158,7 @@ const PropertySchema: Schema = new Schema(
     },
     createdAsRole: {
       type: String,
-      enum: ['private_seller', 'agent'],
+      enum: ['private_seller', 'agent', 'external'],
       required: true,
       default: 'private_seller',
       index: true, // Index for filtering by role
@@ -176,6 +177,11 @@ const PropertySchema: Schema = new Schema(
     createdByLicenseNumber: {
       type: String,
       required: false,
+    },
+    source: {
+      type: String,
+      required: false,
+      index: true,
     },
     propertyId: {
       type: String,

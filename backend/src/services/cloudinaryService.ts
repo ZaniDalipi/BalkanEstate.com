@@ -300,6 +300,44 @@ export const uploadImage = async (
 };
 
 /**
+ * Upload an image to Cloudinary directly from a remote URL (used by scraper).
+ */
+export const uploadFromUrl = async (
+  imageUrl: string,
+  options: UploadOptions
+): Promise<CloudinaryUploadResult> => {
+  const folder = buildFolderPath(options);
+  try {
+    const result = await cloudinary.uploader.upload(imageUrl, {
+      folder,
+      resource_type: 'image',
+      fetch_format: 'auto',
+      quality: 'auto',
+    });
+    const fileSize = result.bytes;
+    await registerFileUpload({
+      publicId: result.public_id,
+      url: result.secure_url,
+      userId: options.userId,
+      fileType: options.type,
+      bytes: fileSize,
+    });
+    return {
+      url: result.secure_url,
+      publicId: result.public_id,
+      width: result.width,
+      height: result.height,
+      format: result.format,
+      bytes: result.bytes,
+    };
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? (error as Error).message : String(error);
+    mediaLogger.error('❌ Cloudinary uploadFromUrl error:', error);
+    throw new Error(`Failed to upload image from URL: ${msg}`);
+  }
+};
+
+/**
  * Upload multiple images for a property listing.
  * If watermarkOptions is provided, applies agency logo + BalkanEstate branding.
  */
