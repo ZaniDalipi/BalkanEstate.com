@@ -2006,6 +2006,7 @@ export const renewAllProperties = async (
     const userId = String((req.user as IUser)._id);
     const COOLDOWN_HOURS = 24;
     const cooldownMs = COOLDOWN_HOURS * 60 * 60 * 1000;
+    const RENEW_ALL_LIMIT = 10;
     const now = new Date();
 
     // Find all active/pending properties owned by this user
@@ -2018,6 +2019,11 @@ export const renewAllProperties = async (
     const skipped: string[] = [];
 
     for (const property of properties) {
+      // Cap at 10 per request — remaining eligible ones can be renewed on the next click
+      if (renewed.length >= RENEW_ALL_LIMIT) {
+        skipped.push(String(property._id));
+        continue;
+      }
       if (property.lastRenewed) {
         const timeSinceRenewal = now.getTime() - new Date(property.lastRenewed).getTime();
         if (timeSinceRenewal < cooldownMs) {

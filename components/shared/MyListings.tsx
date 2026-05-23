@@ -426,11 +426,16 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
 
     const showListingTypeFilter = listingTypeCounts.sale > 0 && listingTypeCounts.rent > 0;
 
+    const RENEW_ALL_LIMIT = 10;
+
     const renewableCount = useMemo(() =>
-        myProperties.filter(p =>
-            (p.status === 'active' || p.status === 'pending') &&
-            (renewalStatuses[p.id]?.canRenew ?? calculateRenewalStatus(p.lastRenewed).canRenew)
-        ).length
+        Math.min(
+            myProperties.filter(p =>
+                (p.status === 'active' || p.status === 'pending') &&
+                (renewalStatuses[p.id]?.canRenew ?? calculateRenewalStatus(p.lastRenewed).canRenew)
+            ).length,
+            RENEW_ALL_LIMIT
+        )
     , [myProperties, renewalStatuses]);
 
     const filteredAndSortedProperties = useMemo(() => {
