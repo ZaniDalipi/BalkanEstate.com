@@ -373,13 +373,37 @@ if (frontendDistExists) {
   app.get('/:lang/property/:slug', propertyPageOgMiddleware);
 
   // Serve built frontend static assets (JS, CSS, images, icons, etc.)
-  app.use(express.static(frontendDist, { index: false }));
+  // Hashed assets (/assets/*) get a 1-year immutable cache; everything else
+  // (including index.html) gets no-cache so browsers always re-validate.
+  app.use(express.static(frontendDist, {
+    index: false,
+    setHeaders: (res, filePath) => {
+      if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      } else {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+    },
+  }));
+
+  // If a request looks like a static asset but wasn't served above, the file
+  // doesn't exist (e.g. a stale browser cache referencing old hashed filenames
+  // after a new deploy). Return 404 so the browser doesn't receive index.html
+  // with Content-Type: text/html and produce a MIME-type module-script error.
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (/\.(js|mjs|css|woff2?|ttf|eot|ico|png|jpe?g|gif|svg|webp|avif|map)$/i.test(req.path)) {
+      res.status(404).end();
+      return;
+    }
+    next();
+  });
 
   // SPA catch-all: serve index.html for any non-API route so that client-side
   // routing (React Router / custom routing in App.tsx) works on direct URL access.
   // Note: path-to-regexp v8+ (used by Express 5) does not accept bare '*' —
   // use '/{*path}' (Express 5) or a regex fallback instead.
   app.use((_req: Request, res: Response) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(frontendDist, 'index.html'));
   });
 } else {
