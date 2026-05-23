@@ -7,7 +7,7 @@ let socketClients = 0;
 
 const getSocket = (): Socket => {
   if (!globalSocket) {
-    const socketUrl = API_URL.replace('/api', '');
+    const socketUrl = API_URL.replace(/\/api$/, '');
     globalSocket = io(socketUrl, {
       reconnection: true,
       reconnectionDelay: 1000,
