@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 interface FloorInputCombinedProps {
     label: string;
-    floorNumber: number;
-    totalFloors: number;
+    floorNumber: number | null | undefined;
+    totalFloors: number | null | undefined;
     onFloorNumberChange: (value: number) => void;
     onTotalFloorsChange: (value: number) => void;
 }
@@ -15,11 +15,13 @@ interface FloorInputCombinedProps {
  */
 const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
     label,
-    floorNumber,
-    totalFloors,
+    floorNumber: rawFloorNumber,
+    totalFloors: rawTotalFloors,
     onFloorNumberChange,
     onTotalFloorsChange,
 }) => {
+    const floorNumber = rawFloorNumber ?? 0;
+    const totalFloors = rawTotalFloors ?? 0;
     const { t } = useTranslation(['common']);
     const id = useMemo(() => `floor-input-combined`, []);
 

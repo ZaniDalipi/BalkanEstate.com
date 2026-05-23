@@ -10,8 +10,9 @@ import UserListingsSuggestions from './UserListingsSuggestions';
 
 const ViewingRequestsTab = lazy(() => import('./ViewingRequestsTab'));
 const MyBusinessListings = lazy(() => import('./MyBusinessListings'));
+const MyListingFeeds = lazy(() => import('../../src/features/listing-sources/components/MyListingFeeds'));
 import { User, UserRole, Agency } from '../../types';
-import { BuildingOfficeIcon, BuildingStorefrontIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon, CalendarIcon, HomeIcon, ClockIcon, ExclamationTriangleIcon, CheckCircleIcon } from '../../constants';
+import { BuildingOfficeIcon, BuildingStorefrontIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon, CalendarIcon, HomeIcon, ClockIcon, ExclamationTriangleIcon, CheckCircleIcon, GlobeAltIcon } from '../../constants';
 import DefaultAvatar from './DefaultAvatar';
 import AvatarCustomizer, { type AvatarOptions, parseAvatarOptions, getDefaultAvatarOptions } from './AvatarCustomizer';
 import AgentLicenseModal from './AgentLicenseModal';
@@ -54,7 +55,7 @@ const BALKAN_COUNTRIES = [
   { code: 'SI', name: 'Slovenia' },
 ];
 
-type AccountTab = 'listings' | 'performance' | 'profile' | 'subscription' | 'security' | 'promotions' | 'measurements' | 'viewings' | 'businesses';
+type AccountTab = 'listings' | 'performance' | 'profile' | 'subscription' | 'security' | 'promotions' | 'measurements' | 'viewings' | 'businesses' | 'feeds';
 
 // Map URL slugs to account tabs
 const tabRouteMap: Record<string, AccountTab> = {
@@ -76,6 +77,9 @@ const tabRouteMap: Record<string, AccountTab> = {
     'viewing-requests': 'viewings',
     'businesses': 'businesses',
     'my-businesses': 'businesses',
+    'feeds': 'feeds',
+    'listing-feeds': 'feeds',
+    'external-feeds': 'feeds',
 };
 
 // Map account tabs to URL slugs
@@ -89,6 +93,7 @@ const tabToRouteMap: Record<AccountTab, string> = {
     'measurements': 'measurements',
     'viewings': 'viewings',
     'businesses': 'businesses',
+    'feeds': 'feeds',
 };
 
 const TabButton: React.FC<{
@@ -2180,7 +2185,7 @@ const MyAccountPage: React.FC = () => {
     // Redirect users without seller tabs to profile if they land on a seller-only tab
     useEffect(() => {
         if (!state.currentUser) return;
-        if (!hasSellerTabs && (activeTab === 'listings' || activeTab === 'performance' || activeTab === 'subscription' || activeTab === 'promotions' || activeTab === 'viewings')) {
+        if (!hasSellerTabs && (activeTab === 'listings' || activeTab === 'performance' || activeTab === 'subscription' || activeTab === 'promotions' || activeTab === 'viewings' || activeTab === 'feeds')) {
             setActiveTab('profile');
         }
     }, [hasSellerTabs, activeTab, setActiveTab, state.currentUser]);
@@ -2248,6 +2253,8 @@ const MyAccountPage: React.FC = () => {
                  return <SecuritySettings logoutAllDevices={logoutAllDevices} />;
             case 'businesses':
                  return <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}><MyBusinessListings /></Suspense>;
+            case 'feeds':
+                 return hasSellerTabs ? <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}><MyListingFeeds /></Suspense> : null;
             default:
                 return null;
         }
@@ -2322,6 +2329,7 @@ const MyAccountPage: React.FC = () => {
                                         <TabButton label={t('account:tabs.promotions', 'My Promotions')} icon={<SparklesIcon className="w-6 h-6"/>} isActive={activeTab === 'promotions'} onClick={() => setActiveTab('promotions')} tabKey="promotions" />
                                         <TabButton label={t('account:tabs.performance')} icon={<ChartBarIcon className="w-6 h-6"/>} isActive={activeTab === 'performance'} onClick={() => setActiveTab('performance')} tabKey="performance" />
                                         <TabButton label={t('account:tabs.viewings', 'Viewing Requests')} icon={<CalendarIcon className="w-6 h-6"/>} isActive={activeTab === 'viewings'} onClick={() => setActiveTab('viewings')} tabKey="viewings" hasUnread={unreadViewingCount > 0} />
+                                        <TabButton label={t('account:tabs.feeds', 'External Feeds')} icon={<GlobeAltIcon className="w-6 h-6"/>} isActive={activeTab === 'feeds'} onClick={() => setActiveTab('feeds')} tabKey="feeds" />
                                     </>
                                 )}
                                 <TabButton label={t('account:tabs.myBusinesses', 'My Businesses')} icon={<BuildingStorefrontIcon className="w-6 h-6"/>} isActive={activeTab === 'businesses'} onClick={() => setActiveTab('businesses')} tabKey="businesses" />

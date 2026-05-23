@@ -12,6 +12,7 @@ import { BALKAN_COUNTRIES } from '@/constants/countries';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import PropertyImage from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
+import ExternalSourceBadge from '@/features/properties/components/ExternalSourceBadge';
 
 interface PropertyCardProps {
   property: Property;
@@ -374,6 +375,11 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               <div className="bg-purple-500/85 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
                 <span>360°</span>
               </div>
+            )}
+
+            {/* External-source badge for ingested listings */}
+            {property.source && (
+              <ExternalSourceBadge source={property.source} sourceUrl={property.sourceUrl} />
             )}
           </div>
 

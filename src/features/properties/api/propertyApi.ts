@@ -58,7 +58,7 @@ export function transformBackendProperty(backendProp: any): Property {
     views: backendProp.views || 0,
     saves: backendProp.saves || 0,
     inquiries: backendProp.inquiries || 0,
-    createdAsRole: backendProp.createdAsRole,
+    createdAsRole: backendProp.createdAsRole as Property['createdAsRole'],
     listingType: backendProp.listingType || 'sale',
     rentPeriod: backendProp.rentPeriod,
     securityDeposit: backendProp.securityDeposit,
@@ -98,6 +98,9 @@ export function transformBackendProperty(backendProp: any): Property {
     hasUrgentBadge: backendProp.hasUrgentBadge || false,
     orientation: backendProp.orientation,
     visitAvailability: backendProp.visitAvailability,
+    source: backendProp.source,
+    sourceUrl: backendProp.sourceUrl,
+    sourceFetchedAt: backendProp.sourceFetchedAt ? new Date(backendProp.sourceFetchedAt).getTime() : undefined,
   };
 }
 
