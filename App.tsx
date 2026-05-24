@@ -167,6 +167,28 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     };
   }, [dispatch]);
 
+  // Warm the highest-traffic lazy views during browser idle time so the first
+  // navigation to them is instant instead of flashing the full-screen loader.
+  // Specifiers must match the lazy() imports above so Vite reuses the chunk.
+  // Skipped on data-saver / slow connections to respect the user's bandwidth.
+  useEffect(() => {
+    const conn = (navigator as { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+    if (conn && (conn.saveData || /2g/.test(conn.effectiveType || ''))) return;
+
+    const prefetchTopViews = () => {
+      import('./src/features/search/components');
+      import('./src/features/property-details/components/PropertyDetailsPage');
+      import('./src/features/auth/components/AuthModal');
+    };
+
+    if ('requestIdleCallback' in window) {
+      const id = requestIdleCallback(prefetchTopViews, { timeout: 3000 });
+      return () => cancelIdleCallback(id);
+    }
+    const id = window.setTimeout(prefetchTopViews, 2000);
+    return () => clearTimeout(id);
+  }, []);
+
   // Check URL for routing on mount and when URL changes (handles browser/mobile back button)
   useEffect(() => {
     const checkUrlForRouting = () => {
