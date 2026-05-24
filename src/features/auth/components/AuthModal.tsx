@@ -6,6 +6,7 @@ import SocialLoginPopup from './SocialLoginPopup';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { ALL_PHONE_COUNTRY_CODES, PHONE_FORMAT_PATTERNS, formatPhoneNumber, getPhonePlaceholder, BALKAN_PHONE_CODES, getDefaultPhoneCountryCode } from '@/constants/phoneCountryCodes';
 import ConfirmationModal from '@/shared/components/ui/ConfirmationModal';
+import { getAvailableOAuthProviders } from '@/services/apiService';
 
 type SocialProvider = 'google' | 'apple';
 
@@ -264,7 +265,6 @@ const AuthPage: React.FC = () => {
         // Fetch available OAuth providers
         const fetchProviders = async () => {
             try {
-                const { getAvailableOAuthProviders } = await import('@/services/apiService');
                 const providers = await getAvailableOAuthProviders();
                 setAvailableProviders(providers);
             } catch (error) {
