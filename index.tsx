@@ -63,6 +63,12 @@ root.render(
 // Register the service worker AFTER the page has loaded so it doesn't
 // block the critical rendering path (LCP/FCP). VitePWA's injectRegister
 // is set to null so we handle it manually here.
+// Reload when a lazy-loaded chunk fails (e.g. stale page referencing old
+// hashed filenames after a new deploy). Vite 5+ fires this before throwing.
+window.addEventListener('vite:preloadError', () => {
+  window.location.reload();
+});
+
 if ('serviceWorker' in navigator) {
   // When a new SW takes control (skipWaiting + clientsClaim), any lazy-loaded
   // chunks cached under old content-hash URLs become unreachable. Reload
