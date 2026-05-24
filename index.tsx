@@ -63,10 +63,32 @@ root.render(
 // Register the service worker AFTER the page has loaded so it doesn't
 // block the critical rendering path (LCP/FCP). VitePWA's injectRegister
 // is set to null so we handle it manually here.
+
+// Reload at most once within a short window to recover from stale chunks
+// after a deploy. Without this guard a persistently-stale page (e.g. a
+// service worker serving a precached index.html that references old hashed
+// filenames) would reload, hit the same failure, and reload again forever —
+// the cause of the visible "page keeps refreshing" loop. Mirrors the guard
+// in src/app/components/ErrorBoundary.tsx.
+const recoverViaReload = () => {
+  try {
+    const key = 'be:auto-reload';
+    const last = Number(sessionStorage.getItem(key) || '0');
+    // Already reloaded recently → reloading won't help (HTML still stale).
+    // Bail and let the in-app ErrorBoundary render a fallback instead.
+    if (last && Date.now() - last < 30000) return;
+    sessionStorage.setItem(key, String(Date.now()));
+  } catch {
+    // sessionStorage unavailable (private mode / blocked storage): fall
+    // through and reload once, accepting we can't track loops here.
+  }
+  window.location.reload();
+};
+
 // Reload when a lazy-loaded chunk fails (e.g. stale page referencing old
 // hashed filenames after a new deploy). Vite 5+ fires this before throwing.
 window.addEventListener('vite:preloadError', () => {
-  window.location.reload();
+  recoverViaReload();
 });
 
 if ('serviceWorker' in navigator) {
@@ -78,7 +100,7 @@ if ('serviceWorker' in navigator) {
   const prevController = navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (prevController) {
-      window.location.reload();
+      recoverViaReload();
     }
   });
 
