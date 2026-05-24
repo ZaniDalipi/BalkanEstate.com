@@ -17,7 +17,7 @@ import DefaultAvatar from './DefaultAvatar';
 import AvatarCustomizer, { type AvatarOptions, parseAvatarOptions, getDefaultAvatarOptions } from './AvatarCustomizer';
 import AgentLicenseModal from './AgentLicenseModal';
 import AgencyManagementSection from './AgencyManagementSection';
-import { switchRole, joinAgencyByInvitationCode, getAgencies, updateAgentProfile, changeEmail } from '../../services/apiService';
+import { switchRole, joinAgencyByInvitationCode, getAgencies, updateAgentProfile, changeEmail, getLoginHistory, changePassword, setPasswordForSocialUser } from '../../services/apiService';
 import { submitLicense, getLicenseFormatHint } from '../../src/features/credentials/api/licenseApi';
 import Footer from './Footer';
 import PhoneInput from '../../src/shared/components/ui/PhoneInput';
@@ -372,7 +372,6 @@ const LoginHistorySection: React.FC = () => {
     useEffect(() => {
         const fetchLoginHistory = async () => {
             try {
-                const { getLoginHistory } = await import('../../services/apiService');
                 const history = await getLoginHistory();
                 setLoginHistory(history);
             } catch (error) {
@@ -531,7 +530,6 @@ const ChangePasswordSection: React.FC = () => {
 
         setIsLoading(true);
         try {
-            const { changePassword } = await import('../../services/apiService');
             await changePassword(currentPassword, newPassword);
             setSuccess(t('security.passwordChangedSuccess'));
             setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
@@ -556,7 +554,6 @@ const ChangePasswordSection: React.FC = () => {
 
         setIsLoading(true);
         try {
-            const { setPasswordForSocialUser } = await import('../../services/apiService');
             await setPasswordForSocialUser(newPassword);
             setSuccess(t('security.passwordSetSuccess', 'Password set successfully! You can now also log in with your email and password.'));
             setNewPassword(''); setConfirmPassword('');
