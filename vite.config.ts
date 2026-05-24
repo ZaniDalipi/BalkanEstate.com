@@ -252,8 +252,7 @@ export default defineConfig(({ mode }) => {
             clientsClaim: true
           },
           devOptions: {
-            enabled: true,
-            type: 'module',
+            enabled: false,
           }
         })
       ],
