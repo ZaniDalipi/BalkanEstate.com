@@ -2803,7 +2803,7 @@ export const unsubscribeFromEmails = async (req: Request, res: Response): Promis
         <div class="card">
           <h1>✓ Successfully Unsubscribed</h1>
           <p>You've been unsubscribed from ${unsubscribeType === 'all' ? 'all promotional emails' : unsubscribeType + ' emails'}. You can update your email preferences anytime in your account settings.</p>
-          <a href="${frontendUrl}/settings/notifications">Manage Preferences</a>
+          <a href="${frontendUrl}/account/notifications">Manage Preferences</a>
         </div>
       </body>
       </html>

@@ -488,11 +488,11 @@ class EmailService {
 
     const unsubscribeUrl = unsubscribeToken
       ? `${backendUrl}/api/auth/unsubscribe?token=${unsubscribeToken}&type=${emailType}`
-      : `${frontendUrl}/settings/notifications`;
+      : `${frontendUrl}/account/notifications`;
 
     const unsubscribeAllUrl = unsubscribeToken
       ? `${backendUrl}/api/auth/unsubscribe?token=${unsubscribeToken}&type=all`
-      : `${frontendUrl}/settings/notifications`;
+      : `${frontendUrl}/account/notifications`;
 
     return `
     <!-- Footer -->
@@ -501,7 +501,7 @@ class EmailService {
       <p style="color: #9ca3af; font-size: 11px; margin: 0 0 8px 0;" class="ec-text-muted">
         <a href="${unsubscribeUrl}" style="color: #9ca3af; text-decoration: underline;" class="ec-text-muted">Unsubscribe from these emails</a>
         ${emailType !== 'all' ? ` · <a href="${unsubscribeAllUrl}" style="color: #9ca3af; text-decoration: underline;" class="ec-text-muted">Unsubscribe from all</a>` : ''}
-        · <a href="${frontendUrl}/settings/notifications" style="color: #9ca3af; text-decoration: underline;" class="ec-text-muted">Manage preferences</a>
+        · <a href="${frontendUrl}/account/notifications" style="color: #9ca3af; text-decoration: underline;" class="ec-text-muted">Manage preferences</a>
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 8px 0 0 0;" class="ec-text-muted">
         © ${year} ${companyNameFormatted}. All rights reserved.
