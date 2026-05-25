@@ -6,6 +6,10 @@ import type { Agency, AgencyFilters, Agent } from '@/src/shared/types';
 
 // --- Agency API ---
 
+export const getTopAgencies = async (limit = 10): Promise<any> => {
+  return apiRequest(`/agencies/leaderboard?limit=${limit}`);
+};
+
 export const getAgencies = async (filters?: AgencyFilters): Promise<any> => {
   const params = new URLSearchParams();
   if (filters?.city) params.append('city', filters.city);

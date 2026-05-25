@@ -106,6 +106,7 @@ export function calcScoreBreakdown(agent: Agent): ScoreBreakdown {
 }
 
 export function calcScore(agent: Agent): number {
+  if (typeof agent.score === 'number') return agent.score;
   return calcScoreBreakdown(agent).total;
 }
 

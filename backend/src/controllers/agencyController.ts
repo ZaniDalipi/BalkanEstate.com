@@ -19,6 +19,7 @@ import { getSocketInstance } from '../utils/socketInstance';
 import { agencyLogger } from '../utils/logger';
 import { createNotificationWithPush } from '../services/engagementService';
 import { syncAgentAttributesToAgency, recalculateAgencyAttributes } from '../services/agencyAttributeSyncService';
+import { calcAgencyScoreBreakdown } from '../utils/scoringUtils';
 
 // Helper function to generate unique Agent ID using secure random
 function generateAgentId(): string {
@@ -504,7 +505,7 @@ export const getAgencies = async (
       .populate('ownerId', 'name email phone avatarUrl')
       .populate('agents', 'name email phone avatarUrl avatarOptions gender role agencyName licenseNumber agentId city country stats.activeListings stats.totalSalesValue stats.propertiesSold stats.rating')
       .populate('admins', 'name email phone avatarUrl')
-      .sort({ isFeatured: -1, adRotationOrder: 1, createdAt: -1 })
+      .sort({ score: -1, isFeatured: -1 })
       .skip(skip)
       .limit(limitNum)
       .lean(); // Use lean() for better performance when we don't need document methods
@@ -3483,5 +3484,53 @@ export const migrateAgentSubscriptions = async (
     res.status(500).json({
       message: 'Migration failed',
     });
+  }
+};
+
+// @desc    Get top N agencies by score (leaderboard)
+// @route   GET /api/agencies/leaderboard
+// @access  Public
+export const getTopAgencies = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const limitNum = Math.min(Math.max(Number(req.query.limit) || 10, 1), 50);
+    const agencies = await Agency.find({})
+      .populate('ownerId', 'name email')
+      .populate('agents', 'name email avatarUrl')
+      .sort({ score: -1, isFeatured: -1 })
+      .limit(limitNum)
+      .lean();
+    res.json({ agencies });
+  } catch (error: any) {
+    agencyLogger.error('Get top agencies error:', error);
+    res.status(500).json({ message: 'Error fetching leaderboard' });
+  }
+};
+
+// @desc    Recompute and persist scores for all agencies (admin backfill)
+// @route   POST /api/agencies/admin/recompute-scores
+// @access  Private (admin only — validate req.user.role)
+export const recomputeAgencyScores = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user || !['admin', 'super_admin'].includes((req.user as IUser).role)) {
+      res.status(403).json({ message: 'Admin access required' });
+      return;
+    }
+    const agencies = await Agency.find({});
+    let updated = 0;
+    const bulkOps = agencies.map((agency) => {
+      const b = calcAgencyScoreBreakdown(agency);
+      updated++;
+      return {
+        updateOne: {
+          filter: { _id: agency._id },
+          update: { $set: { score: b.total, scoreBreakdown: { listings: b.listings, team: b.team, experience: b.experience, featured: b.featured } } },
+        },
+      };
+    });
+    if (bulkOps.length > 0) await Agency.bulkWrite(bulkOps);
+    res.json({ message: `Recomputed scores for ${updated} agencies` });
+  } catch (error: any) {
+    agencyLogger.error('Recompute agency scores error:', error);
+    res.status(500).json({ message: 'Error recomputing scores' });
   }
 };

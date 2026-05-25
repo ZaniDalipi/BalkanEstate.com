@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { escapeRegex } from '../utils/escapeRegex';
 import Agent from '../models/Agent';
 import User, { IUser } from '../models/User';
+import { calcAgentScoreBreakdown } from '../utils/scoringUtils';
 import Agency from '../models/Agency';
 import Conversation from '../models/Conversation';
 import Property from '../models/Property';
@@ -53,7 +54,7 @@ export const getAgents = async (req: Request, res: Response): Promise<void> => {
       .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
       .populate('agencyId', 'name logo coverGradient coverImage slug type')
       .populate('testimonials.userId', 'name avatarUrl')
-      .sort({ rating: -1, totalSales: -1 })
+      .sort({ score: -1, rating: -1 })
       .skip(skip)
       .limit(limitNum);
 
@@ -807,5 +808,53 @@ export const getAgentMarketInsights = async (req: Request, res: Response): Promi
   } catch (error: any) {
     apiLogger.error('Get agent market insights error:', error);
     res.status(500).json({ message: 'Error fetching market insights' });
+  }
+};
+
+// @desc    Get top N agents by score (leaderboard)
+// @route   GET /api/agents/leaderboard
+// @access  Public
+export const getTopAgents = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const limitNum = Math.min(Math.max(Number(req.query.limit) || 10, 1), 50);
+    const agents = await Agent.find({ isActive: true })
+      .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
+      .populate('agencyId', 'name logo coverGradient coverImage slug type')
+      .sort({ score: -1, rating: -1 })
+      .limit(limitNum)
+      .lean();
+    res.json({ agents });
+  } catch (error: any) {
+    apiLogger.error('Get top agents error:', error);
+    res.status(500).json({ message: 'Error fetching leaderboard' });
+  }
+};
+
+// @desc    Recompute and persist scores for all agents (admin backfill)
+// @route   POST /api/agents/admin/recompute-scores
+// @access  Private (admin only — validate req.user.role)
+export const recomputeAgentScores = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user || !['admin', 'super_admin'].includes((req.user as IUser).role)) {
+      res.status(403).json({ message: 'Admin access required' });
+      return;
+    }
+    const agents = await Agent.find({});
+    let updated = 0;
+    const bulkOps = agents.map((agent) => {
+      const b = calcAgentScoreBreakdown(agent);
+      updated++;
+      return {
+        updateOne: {
+          filter: { _id: agent._id },
+          update: { $set: { score: b.total, scoreBreakdown: { rating: b.rating, sales: b.sales, active: b.active, reviews: b.reviews } } },
+        },
+      };
+    });
+    if (bulkOps.length > 0) await Agent.bulkWrite(bulkOps);
+    res.json({ message: `Recomputed scores for ${updated} agents` });
+  } catch (error: any) {
+    apiLogger.error('Recompute agent scores error:', error);
+    res.status(500).json({ message: 'Error recomputing scores' });
   }
 };

@@ -22,6 +22,13 @@ export interface AgencySalesStats {
   averagePrice: number;
 }
 
+export interface AgencyScoreBreakdown {
+  listings: number;
+  team: number;
+  experience: number;
+  featured: number;
+}
+
 export interface Agency {
   _id: string;
   slug?: string;
@@ -79,6 +86,15 @@ export interface Agency {
   updatedAt?: string;
   totalListings?: number;
   salesStats?: AgencySalesStats;
+  score?: number;
+  scoreBreakdown?: AgencyScoreBreakdown;
+}
+
+export interface AgentScoreBreakdown {
+  rating: number;
+  sales: number;
+  active: number;
+  reviews: number;
 }
 
 export interface Agent extends User {
@@ -118,6 +134,8 @@ export interface Agent extends User {
   agencyGradient?: string;
   agencyCoverImage?: string;
   agencyType?: AgencyType;
+  score?: number;
+  scoreBreakdown?: AgentScoreBreakdown;
 }
 
 export interface AgencyFilters {

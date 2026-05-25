@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { getAllAgents } from '@/src/features/agents/api/agentApi';
+import { getTopAgents } from '@/src/features/agents/api/agentApi';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import { useAppContext } from '@/context/AppContext';
@@ -184,7 +184,7 @@ const AgentPodiumCard: React.FC<{
             boxShadow: '0 2px 8px rgba(232,50,10,0.45)',
             whiteSpace: 'nowrap',
           }}>
-            {gap} pts to #1
+            {t('topAgents.ptsToTop', '{{gap}} pts to #1').replace('{{gap}}', String(gap))}
           </div>
         )}
 
@@ -228,7 +228,7 @@ const AgentPodiumCard: React.FC<{
             fontWeight: 800,
             color: isChamp ? '#92710A' : '#475569',
           }}>
-            {score} pts
+            {score} {t('topAgents.pts', 'pts')}
           </span>
         </div>
 
@@ -347,11 +347,8 @@ const TopAgentsSection: React.FC = () => {
   const { data: agents = [], isLoading } = useQuery<Agent[]>({
     queryKey: ['topAgentsWeek'],
     queryFn: async () => {
-      const { agents } = await getAllAgents();
-      return agents
-        .filter(a => a.name)
-        .sort((a, b) => calcScore(b) - calcScore(a))
-        .slice(0, 3);
+      const { agents } = await getTopAgents(3);
+      return agents.filter(a => a.name);
     },
     staleTime: 10 * 60 * 1000,
     gcTime:    30 * 60 * 1000,
