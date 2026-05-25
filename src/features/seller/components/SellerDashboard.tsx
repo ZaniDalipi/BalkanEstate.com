@@ -10,7 +10,7 @@ const CreateListingPage: React.FC = () => {
   const { state } = useAppContext();
 
   return (
-    <div className="liquid-glass-bg min-h-full">
+    <div className="liquid-glass-bg min-h-full listing-form-page">
       <div className="glass-orb w-72 h-72 bg-blue-100/60 top-20 -left-20" />
       <div className="glass-orb w-96 h-96 bg-purple-50 top-1/3 right-0" style={{ animationDelay: '-5s' }} />
       <div className="glass-orb w-64 h-64 bg-cyan-50 bottom-40 left-1/4" style={{ animationDelay: '-10s' }} />

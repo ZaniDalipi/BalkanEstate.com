@@ -305,6 +305,19 @@ fieldset {
   -webkit-backdrop-filter: none !important;
 }
 
+/*
+ * The create-listing page wraps the entire tall form in an outer .glass-panel
+ * that sits OUTSIDE .listing-form, so the rule above doesn't reach it. That one
+ * large backdrop-filter layer re-rasterizes over the animated .glass-orb
+ * backgrounds on every scroll frame — the cost grows with scroll depth, which is
+ * why scrolling lags around the lower sections (Property Features onward). The
+ * blur is invisible over the solid white page, so disable it for smooth scroll.
+ */
+.listing-form-page .glass-panel {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
 /* Also speed up transitions inside the form — 'transition: all' is expensive */
 .listing-form .glass-input,
 .listing-form .glass-select {
