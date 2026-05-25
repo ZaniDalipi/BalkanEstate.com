@@ -64,33 +64,107 @@ const MEDAL = {
 const PODIUM_HEIGHTS = [280, 340, 240]; // visual positions: 2nd, 1st, 3rd
 const PODIUM_ORDER   = [1, 0, 2];       // data indices in visual left→right order
 
-const ScoreLegend: React.FC = () => (
-  <div style={{
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '0.9rem',
-    marginTop: '0.85rem',
-    padding: '8px 18px',
-    background: 'rgba(255,255,255,0.75)',
-    borderRadius: '14px',
-    border: '1px solid rgba(226,232,240,0.9)',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-  }}>
-    <span style={{ fontSize: '0.62rem', color: '#94a3b8', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
-      How to rank up →
-    </span>
-    {[
-      { icon: '★', label: 'Rating ×20', color: '#f59e0b' },
-      { icon: '🏠', label: 'Sales ×5',  color: '#10b981' },
-      { icon: '📋', label: 'Active ×2', color: '#3b82f6' },
-      { icon: '💬', label: 'Reviews ×1', color: '#8b5cf6' },
-    ].map(item => (
-      <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-        <span style={{ fontSize: '0.72rem' }}>{item.icon}</span>
-        <span style={{ fontSize: '0.65rem', color: item.color, fontWeight: 700 }}>{item.label}</span>
-      </div>
-    ))}
+const SCORING_METRICS = [
+  {
+    icon: '★',
+    label: 'Client Rating',
+    formula: '20 pts per ★',
+    desc: 'Each star your clients give you is worth 20 points. A perfect 5-star rating earns you 100 pts alone — the single biggest factor.',
+    cap: 'Max 100 pts',
+    color: '#f59e0b',
+    bg: 'rgba(245,158,11,0.07)',
+    border: 'rgba(245,158,11,0.22)',
+  },
+  {
+    icon: '🏠',
+    label: 'Properties Sold',
+    formula: '5 pts per sale',
+    desc: 'Every closed transaction adds 5 points. Close 10 sales and you max out this category — hustle pays off.',
+    cap: 'Max 50 pts',
+    color: '#10b981',
+    bg: 'rgba(16,185,129,0.07)',
+    border: 'rgba(16,185,129,0.22)',
+  },
+  {
+    icon: '📋',
+    label: 'Active Listings',
+    formula: '2 pts per listing',
+    desc: 'An active portfolio signals you\'re in the market. Each live listing earns 2 points — keep adding properties.',
+    cap: 'Max 20 pts',
+    color: '#3b82f6',
+    bg: 'rgba(59,130,246,0.07)',
+    border: 'rgba(59,130,246,0.22)',
+  },
+  {
+    icon: '💬',
+    label: 'Client Reviews',
+    formula: '1 pt per review',
+    desc: 'Volume of reviews shows trust. Every review you collect adds 1 point regardless of score.',
+    cap: 'Max 10 pts',
+    color: '#8b5cf6',
+    bg: 'rgba(139,92,246,0.07)',
+    border: 'rgba(139,92,246,0.22)',
+  },
+] as const;
+
+const ScoringPanel: React.FC = () => (
+  <div style={{ maxWidth: '820px', margin: '2rem auto 0', padding: '0 1rem' }}>
+    {/* Panel header */}
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.4rem',
+    }}>
+      <span style={{
+        fontSize: '0.72rem', fontWeight: 800, color: '#0f172a',
+        letterSpacing: '0.06em', textTransform: 'uppercase',
+      }}>
+        📊 How points are calculated
+      </span>
+      <span style={{
+        fontSize: '0.65rem', fontWeight: 600, color: '#94a3b8',
+        background: 'rgba(148,163,184,0.1)', borderRadius: '999px',
+        padding: '2px 10px', border: '1px solid rgba(148,163,184,0.2)',
+      }}>
+        Max possible: 180 pts
+      </span>
+    </div>
+
+    {/* 4-metric grid */}
+    <div className="tas-scoring-grid" style={{ display: 'grid', gap: '0.65rem' }}>
+      {SCORING_METRICS.map(m => (
+        <div key={m.label} style={{
+          background: m.bg,
+          border: `1px solid ${m.border}`,
+          borderRadius: '16px',
+          padding: '1rem 1rem 0.85rem',
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          textAlign: 'center', gap: '0.3rem',
+        }}>
+          <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>{m.icon}</span>
+          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f172a' }}>{m.label}</span>
+          <span style={{
+            fontSize: '0.78rem', fontWeight: 800, color: m.color,
+            background: `${m.color}14`, borderRadius: '8px',
+            padding: '2px 8px', letterSpacing: '0.01em',
+          }}>
+            {m.formula}
+          </span>
+          <p style={{
+            fontSize: '0.63rem', color: '#64748b', lineHeight: 1.5,
+            margin: '0.1rem 0 0.3rem',
+          }}>
+            {m.desc}
+          </p>
+          <span style={{
+            fontSize: '0.6rem', fontWeight: 700, color: m.color,
+            background: `${m.color}12`, border: `1px solid ${m.color}25`,
+            borderRadius: '999px', padding: '1px 9px',
+          }}>
+            {m.cap}
+          </span>
+        </div>
+      ))}
+    </div>
   </div>
 );
 
@@ -387,6 +461,14 @@ const TopAgentsSection: React.FC = () => {
           0%, 100% { transform: translateX(-50%) translateY(0px); }
           50%       { transform: translateX(-50%) translateY(-5px); }
         }
+        .tas-scoring-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+        @media (max-width: 640px) {
+          .tas-scoring-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
       `}</style>
 
       {/* Header */}
@@ -414,9 +496,10 @@ const TopAgentsSection: React.FC = () => {
         <p style={{ fontSize: 'clamp(0.8rem, 2vw, 0.95rem)', color: '#64748b', maxWidth: '500px', margin: '0 auto' }}>
           {t('topAgents.subtitle', 'Ranked by sales, ratings, and client satisfaction this week')}
         </p>
-
-        <ScoreLegend />
       </div>
+
+      {/* Scoring explanation panel */}
+      <ScoringPanel />
 
       {/* Loading skeleton */}
       {isLoading && (
@@ -438,7 +521,7 @@ const TopAgentsSection: React.FC = () => {
       {!isLoading && hasPodium && (
         <>
           <div className="hidden sm:flex" style={{
-            maxWidth: '800px', margin: '0 auto',
+            maxWidth: '800px', margin: '2rem auto 0',
             alignItems: 'flex-end', justifyContent: 'center',
             gap: '2rem', padding: '0 1rem',
           }}>
