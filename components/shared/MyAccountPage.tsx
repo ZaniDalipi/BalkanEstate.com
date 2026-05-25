@@ -2190,15 +2190,38 @@ const MyAccountPage: React.FC = () => {
         }
     }, [activeTab]);
 
+    // Open login modal automatically when user arrives unauthenticated (e.g. from email link)
+    useEffect(() => {
+        if (!state.isAuthenticating && !state.currentUser) {
+            dispatch({ type: 'SET_PENDING_REDIRECT', payload: 'account' });
+            dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
+        }
+    }, [state.isAuthenticating, state.currentUser, dispatch]);
+
     if (!state.currentUser) {
         return (
-            <div className="p-8 text-center">
-                <p>{t('account:mustBeLoggedIn')}</p>
+            <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50/60 to-indigo-50/40 flex items-center justify-center px-4">
+                <div className="bg-white/60 backdrop-blur-xl border border-white/50 rounded-3xl shadow-xl p-10 max-w-sm w-full text-center space-y-4">
+                    <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+                        <BellIcon className="w-7 h-7 text-primary" />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-bold text-neutral-800">{t('account:mustBeLoggedIn', 'Sign in to continue')}</h2>
+                        <p className="text-sm text-neutral-500 mt-1">{t('account:loginToManagePrefs', 'Log in to manage your email and notification preferences.')}</p>
+                    </div>
+                    <button
+                        onClick={() => {
+                            dispatch({ type: 'SET_PENDING_REDIRECT', payload: 'account' });
+                            dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
+                        }}
+                        className="w-full py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-primary/90 transition-colors"
+                    >
+                        {t('account:signIn', 'Sign in')}
+                    </button>
+                </div>
             </div>
         );
     }
-
-    const handleLogout = () => {
         logout();
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
     };
