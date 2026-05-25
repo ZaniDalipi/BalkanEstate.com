@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCityMarketData, useCitiesByCountry } from '../hooks/useCityQueries';
+import { useSuburbData } from '../hooks/useSuburbQueries';
 import { formatPrice } from '@/utils/currency';
 import { parseLanguageFromPath, buildLocalizedPath } from '@/src/utils/languageRouting';
 import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
@@ -8,6 +9,11 @@ import { useAppContext } from '@/context/AppContext';
 import { searchLocation } from '@/services/osmService';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
+import SuburbDetailPanel from './SuburbDetailPanel';
+import type { SuburbEntry } from '@/src/shared/types/suburb.types';
+
+// Lazy-load the map to avoid SSR issues with Leaflet
+const CitySuburbMap = lazy(() => import('./CitySuburbMap'));
 import {
   MapPinIcon,
   ArrowTrendingUpIcon,
@@ -69,6 +75,8 @@ const CityDashboard: React.FC = () => {
 
   const [params, setParams] = useState(parseCityFromUrl);
   const [showListingPrice, setShowListingPrice] = useState(false);
+  const [suburbView, setSuburbView] = useState<'map' | 'list'>('map');
+  const [selectedSuburb, setSelectedSuburb] = useState<SuburbEntry | null>(null);
 
   // Re-parse URL when navigating between cities (popstate or pushState)
   useEffect(() => {
@@ -81,6 +89,7 @@ const CityDashboard: React.FC = () => {
 
   const { data: city, isLoading, error } = useCityMarketData(params?.city, params?.country);
   const { data: countryCities } = useCitiesByCountry(params?.country);
+  const { data: suburbData, isLoading: suburbLoading, error: suburbError } = useSuburbData(params?.city, params?.country);
 
   // Scroll to top when city changes
   useEffect(() => {
@@ -621,6 +630,144 @@ const CityDashboard: React.FC = () => {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── Explore Neighborhoods ───────────────────────────────────────── */}
+        <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6 mb-8">
+          {/* Section header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+            <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
+              <MapPinIcon className="w-5 h-5 text-primary" />
+              Explore Neighborhoods
+            </h3>
+            {/* Tab switcher */}
+            <div className="flex gap-1 bg-neutral-100 rounded-xl p-1 w-fit">
+              {(['map', 'list'] as const).map((view) => (
+                <button
+                  key={view}
+                  onClick={() => setSuburbView(view)}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                    suburbView === view
+                      ? 'bg-white text-primary shadow-sm'
+                      : 'text-neutral-500 hover:text-neutral-700'
+                  }`}
+                >
+                  {view === 'map' ? 'Interactive Map' : 'List View'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Loading skeleton */}
+          {suburbLoading && (
+            <div className="animate-pulse space-y-3">
+              <div className="h-[450px] bg-neutral-100 rounded-xl" />
+              <div className="grid grid-cols-3 gap-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-20 bg-neutral-100 rounded-lg" />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Error state */}
+          {!suburbLoading && suburbError && (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <GlobeAltIcon className="w-12 h-12 text-neutral-300 mb-3" />
+              <p className="text-neutral-500 text-sm">
+                Neighborhood data is being prepared. Check back soon.
+              </p>
+            </div>
+          )}
+
+          {/* Content */}
+          {!suburbLoading && !suburbError && suburbData && suburbData.suburbs.length > 0 && (
+            <>
+              {suburbView === 'map' ? (
+                <div className="flex flex-col lg:flex-row gap-4">
+                  {/* Map */}
+                  <div className="flex-1 min-w-0">
+                    <Suspense
+                      fallback={
+                        <div className="h-[450px] bg-neutral-100 rounded-xl animate-pulse" />
+                      }
+                    >
+                      <CitySuburbMap
+                        suburbs={suburbData.suburbs}
+                        cityAvgPricePerSqm={suburbData.cityAvgPricePerSqm}
+                        selectedSuburb={selectedSuburb}
+                        onSuburbSelect={setSelectedSuburb}
+                      />
+                    </Suspense>
+                  </div>
+
+                  {/* Detail panel */}
+                  <div className="w-full lg:w-72 flex-shrink-0">
+                    {selectedSuburb ? (
+                      <SuburbDetailPanel
+                        suburb={selectedSuburb}
+                        cityAvgPricePerSqm={suburbData.cityAvgPricePerSqm}
+                        onClose={() => setSelectedSuburb(null)}
+                      />
+                    ) : (
+                      <div className="h-full flex flex-col items-center justify-center py-10 text-center border-2 border-dashed border-neutral-200 rounded-xl">
+                        <MapPinIcon className="w-10 h-10 text-neutral-300 mb-2" />
+                        <p className="text-sm font-medium text-neutral-500">Click a neighborhood</p>
+                        <p className="text-xs text-neutral-400 mt-1">to see detailed stats</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                /* List view grid */
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {suburbData.suburbs.map((suburb) => {
+                    const vsAvg = suburb.stats.priceVsCityAvg;
+                    const isSelected = selectedSuburb?.name === suburb.name;
+                    return (
+                      <button
+                        key={suburb.name}
+                        onClick={() => {
+                          setSelectedSuburb(isSelected ? null : suburb);
+                          setSuburbView('map');
+                        }}
+                        className={`text-left p-4 rounded-xl border transition-all ${
+                          isSelected
+                            ? 'border-primary/40 bg-primary/5 shadow-sm'
+                            : 'border-neutral-100 bg-neutral-50 hover:border-primary/20 hover:bg-primary/5'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-bold text-neutral-900 truncate">{suburb.name}</span>
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-neutral-200 text-neutral-600 flex-shrink-0">
+                            #{suburb.rank}
+                          </span>
+                        </div>
+                        <div className="text-base font-black text-neutral-900 mb-1">
+                          €{suburb.stats.avgPricePerSqm.toLocaleString()}/m²
+                        </div>
+                        <div className={`text-[11px] font-semibold mb-2 ${vsAvg > 0 ? 'text-red-500' : vsAvg < 0 ? 'text-green-600' : 'text-neutral-500'}`}>
+                          {vsAvg > 0 ? `+${vsAvg}%` : `${vsAvg}%`} vs city avg
+                        </div>
+                        <div className="flex items-center justify-between text-[11px] text-neutral-500">
+                          <span>+{suburb.stats.priceGrowthYoY}% YoY</span>
+                          <span>{suburb.stats.demandScore}/100 demand</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Empty state (no suburbs for this city) */}
+          {!suburbLoading && !suburbError && (!suburbData || suburbData.suburbs.length === 0) && (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <MapPinIcon className="w-12 h-12 text-neutral-300 mb-3" />
+              <p className="text-neutral-500 text-sm">No neighborhood data available for {city.city} yet.</p>
             </div>
           )}
         </div>
