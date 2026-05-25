@@ -831,5 +831,38 @@
     "french": "French",
     "russian": "Russian",
     "spanish": "Spanish"
+  },
+  "scoring": {
+    "panelTitle": "How the ranking score works",
+    "maxPossible": "Max possible: {{max}} pts",
+    "toggleShow": "Show details",
+    "toggleHide": "Hide details",
+    "footerNote": "Scores update weekly. Earn reviews, close sales, and keep listings active to climb the ranks.",
+    "metrics": {
+      "rating": {
+        "label": "Client Rating",
+        "formula": "20 pts per ★",
+        "desc": "Each star your clients give you is worth 20 points. A perfect 5-star rating earns you 100 pts alone.",
+        "cap": "Max 100 pts"
+      },
+      "sales": {
+        "label": "Properties Sold",
+        "formula": "5 pts per sale",
+        "desc": "Every closed transaction adds 5 points. Close 10 sales and you max out this category.",
+        "cap": "Max 50 pts"
+      },
+      "active": {
+        "label": "Active Listings",
+        "formula": "2 pts per listing",
+        "desc": "An active portfolio signals you are in the market. Each live listing earns 2 points.",
+        "cap": "Max 20 pts"
+      },
+      "reviews": {
+        "label": "Client Reviews",
+        "formula": "1 pt per review",
+        "desc": "Volume of reviews shows trust. Every review you collect adds 1 point regardless of score.",
+        "cap": "Max 10 pts"
+      }
+    }
   }
 }

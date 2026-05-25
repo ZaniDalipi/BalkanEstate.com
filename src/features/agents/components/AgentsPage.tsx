@@ -6,6 +6,7 @@ import { Agent, Agency } from '@/types';
 import { getAllAgents, getAgencies } from '@/services/apiService';
 import { getAgent } from '../api/agentApi';
 import AgentCard from './AgentCard';
+import AgentScoringPanel from './AgentScoringPanel';
 import AgentProfilePage from './AgentProfilePage';
 import AgencyBadge from '@/components/shared/AgencyBadge';
 import { MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon, PhoneIcon, BuildingOfficeIcon, HomeIcon, UsersIcon, UserCircleIcon } from '@/constants';
@@ -775,6 +776,11 @@ const AgentsPage: React.FC = () => {
               )}
             </p>
           </div>
+
+          {/* Scoring panel — only when agents are loaded */}
+          {!loading && agents.length > 0 && (
+            <AgentScoringPanel className="mb-8" defaultCollapsed={false} />
+          )}
 
           {/* Agent Cards Grid */}
           {loading ? (
