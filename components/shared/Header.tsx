@@ -58,7 +58,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
       return (
         <button
           onClick={handleAccountClick}
-          className="relative flex items-center space-x-2 font-semibold transition-all duration-700 py-1.5 px-2.5 rounded-full whitespace-nowrap overflow-hidden backdrop-blur-md text-neutral-700 border border-white/40 hover:-translate-y-px hover:brightness-105"
+          className="relative flex items-center space-x-2 font-semibold transition-all duration-700 py-1.5 px-2.5 rounded-full whitespace-nowrap overflow-hidden text-neutral-700 border border-white/40 hover:-translate-y-px hover:brightness-105"
           style={{
             background: 'linear-gradient(135deg, rgba(255,255,255,0.85), rgba(245,245,247,0.85))',
             boxShadow: '0 4px 6px rgba(0,0,0,0.08), 0 0 15px rgba(0,0,0,0.04), inset 2px 2px 1px 0 rgba(255,255,255,0.6), inset -1px -1px 1px 1px rgba(255,255,255,0.4)',
@@ -75,7 +75,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
     return (
       <button
         onClick={handleAccountClick}
-        className="relative flex items-center space-x-2 font-semibold transition-all duration-700 py-1.5 px-2.5 rounded-full whitespace-nowrap overflow-hidden backdrop-blur-md text-neutral-700 border border-white/40 hover:-translate-y-px hover:brightness-105"
+        className="relative flex items-center space-x-2 font-semibold transition-all duration-700 py-1.5 px-2.5 rounded-full whitespace-nowrap overflow-hidden text-neutral-700 border border-white/40 hover:-translate-y-px hover:brightness-105"
         style={{
           background: 'linear-gradient(135deg, rgba(255,255,255,0.85), rgba(245,245,247,0.85))',
           boxShadow: '0 4px 6px rgba(0,0,0,0.08), 0 0 15px rgba(0,0,0,0.04), inset 2px 2px 1px 0 rgba(255,255,255,0.6), inset -1px -1px 1px 1px rgba(255,255,255,0.4)',
@@ -100,7 +100,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
     boxShadow: '0 6px 6px rgba(255,149,0,0.25), 0 0 20px rgba(255,149,0,0.1), inset 2px 2px 1px 0 rgba(255,255,255,0.35), inset -1px -1px 1px 1px rgba(255,255,255,0.2)',
     transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 2.2)',
   };
-  const glassButtonClasses = "relative overflow-hidden backdrop-blur-md text-white px-3 py-1.5 sm:px-3.5 sm:py-2 md:px-4 lg:px-5 lg:py-2.5 rounded-full text-[11px] sm:text-xs md:text-sm font-semibold transition-all duration-700 hover:-translate-y-px hover:brightness-110 active:brightness-95 whitespace-nowrap border border-white/25";
+  const glassButtonClasses = "relative overflow-hidden text-white px-3 py-1.5 sm:px-3.5 sm:py-2 md:px-4 lg:px-5 lg:py-2.5 rounded-full text-[11px] sm:text-xs md:text-sm font-semibold transition-all duration-700 hover:-translate-y-px hover:brightness-110 active:brightness-95 whitespace-nowrap border border-white/25";
 
   if (isFloating) {
     // Note: Header is hidden entirely on property details via App.tsx showHeader logic
@@ -114,7 +114,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
         }}
       >
         <nav
-          className="flex items-center gap-1 sm:gap-1.5 md:gap-2 lg:gap-3 bg-white/70 backdrop-blur-xl p-1 sm:p-1.5 rounded-full border border-white/40"
+          className="flex items-center gap-1 sm:gap-1.5 md:gap-2 lg:gap-3 bg-white/90 p-1 sm:p-1.5 rounded-full border border-white/40"
           style={{ boxShadow: '0 6px 6px rgba(0,0,0,0.12), 0 0 20px rgba(0,0,0,0.06), inset 2px 2px 1px 0 rgba(255,255,255,0.6), inset -1px -1px 1px 1px rgba(255,255,255,0.5)' }}
         >
           <button

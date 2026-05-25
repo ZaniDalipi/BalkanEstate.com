@@ -1,11 +1,14 @@
-import React, { memo } from 'react';
+import React, { memo, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BALKAN_LOCATIONS, CityData } from '@/utils/balkanLocations';
 import { getCurrencySymbol } from '@/utils/currency';
-import MapLocationPicker from './MapLocationPicker';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
 import type { ListingData, ImageData } from './ListingFormHelpers';
 import { floatingInputClasses, floatingSelectLabelClasses, inputBaseClasses, labelClasses, selectClasses } from './ListingFormHelpers';
+
+// Leaflet is heavy and the map only renders once a city + coordinates are set,
+// so load it in its own chunk on demand instead of in the create-listing bundle.
+const MapLocationPicker = lazy(() => import('./MapLocationPicker'));
 
 const chevronIcon = (
     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
@@ -99,18 +102,20 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                 {/* Show interactive map when city is selected */}
                 {selectedCity && listingData.lat !== 0 && listingData.lng !== 0 && (
                     <div className="md:col-span-2">
-                        <MapLocationPicker
-                            lat={listingData.lat}
-                            lng={listingData.lng}
-                            address={listingData.streetAddress || `${selectedCity}, ${selectedCountry}`}
-                            zoom={getZoomLevel}
-                            country={selectedCountry}
-                            city={selectedCity}
-                            cityLat={cityData?.lat}
-                            cityLng={cityData?.lng}
-                            onLocationChange={handleMapLocationChange}
-                            onAddressChange={handleMapAddressChange}
-                        />
+                        <Suspense fallback={<div className="w-full h-64 rounded-xl bg-gray-100 animate-pulse" />}>
+                            <MapLocationPicker
+                                lat={listingData.lat}
+                                lng={listingData.lng}
+                                address={listingData.streetAddress || `${selectedCity}, ${selectedCountry}`}
+                                zoom={getZoomLevel}
+                                country={selectedCountry}
+                                city={selectedCity}
+                                cityLat={cityData?.lat}
+                                cityLng={cityData?.lng}
+                                onLocationChange={handleMapLocationChange}
+                                onAddressChange={handleMapAddressChange}
+                            />
+                        </Suspense>
                     </div>
                 )}
 

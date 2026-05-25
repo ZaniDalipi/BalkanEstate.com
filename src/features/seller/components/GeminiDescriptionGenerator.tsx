@@ -1,10 +1,9 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { SparklesIcon, MapPinIcon } from '@/constants';
 import MarketInsightsAnimation from './MarketInsightsAnimation';
-import MapLocationPicker from './MapLocationPicker';
 import PromotionSelector from '@/src/features/promotions/components/PromotionSelector';
 import Modal from '@/src/shared/components/ui/Modal';
 import RoleSelector from './RoleSelector';
@@ -22,6 +21,10 @@ import {
     LANGUAGES, CheckCircleIcon, UploadIcon, TagListInput,
     inputBaseClasses, labelClasses, selectClasses,
 } from './ListingFormHelpers';
+
+// Leaflet is heavy and the map only renders once a city + coordinates are set,
+// so load it in its own chunk on demand instead of in the create-listing bundle.
+const MapLocationPicker = lazy(() => import('./MapLocationPicker'));
 
 // --- Main Component ---
 const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> = ({ propertyToEdit }) => {
@@ -314,18 +317,20 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         <MapPinIcon className="w-3 h-3 inline-block mr-1" />
                                         {t('seller:createListing.ai.locationHint', 'Adding location helps AI generate more accurate, location-specific descriptions')}
                                     </p>
-                                    <MapLocationPicker
-                                        lat={listingData.lat}
-                                        lng={listingData.lng}
-                                        address={listingData.streetAddress || `${selectedCity}, ${selectedCountry}`}
-                                        zoom={getZoomLevel}
-                                        country={selectedCountry}
-                                        city={selectedCity}
-                                        cityLat={cityData?.lat}
-                                        cityLng={cityData?.lng}
-                                        onLocationChange={handleMapLocationChange}
-                                        onAddressChange={handleMapAddressChange}
-                                    />
+                                    <Suspense fallback={<div className="w-full h-64 rounded-xl bg-gray-100 animate-pulse" />}>
+                                        <MapLocationPicker
+                                            lat={listingData.lat}
+                                            lng={listingData.lng}
+                                            address={listingData.streetAddress || `${selectedCity}, ${selectedCountry}`}
+                                            zoom={getZoomLevel}
+                                            country={selectedCountry}
+                                            city={selectedCity}
+                                            cityLat={cityData?.lat}
+                                            cityLng={cityData?.lng}
+                                            onLocationChange={handleMapLocationChange}
+                                            onAddressChange={handleMapAddressChange}
+                                        />
+                                    </Suspense>
                                 </div>
                             )}
                         </div>
