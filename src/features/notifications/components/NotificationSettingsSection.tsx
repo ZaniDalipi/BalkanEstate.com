@@ -230,10 +230,15 @@ const EMAIL_ROWS: EmailPrefRow[] = [
   },
 ];
 
+const OPTIONAL_KEYS: Array<keyof Omit<EmailPreferences, 'transactional'>> = [
+  'messages', 'propertyAlerts', 'priceDrops', 'weeklyStats', 'marketing',
+];
+
 const EmailSection: React.FC = () => {
   const { t } = useTranslation(['account']);
   const [prefs, setPrefs] = useState<EmailPreferences | null>(null);
   const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [savingAll, setSavingAll] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [saved, setSaved] = useState<string | null>(null);
 
@@ -245,35 +250,93 @@ const EmailSection: React.FC = () => {
     return () => { cancelled = true; };
   }, []);
 
-  const handleToggle = useCallback(async (key: keyof EmailPreferences, value: boolean) => {
-    if (!prefs) return;
-    const updated = { ...prefs, [key]: value };
-    setPrefs(updated);
-    setSavingKey(key);
+  const savePrefs = useCallback(async (updated: EmailPreferences, savedKey: string) => {
     try {
       await apiRequest('/auth/email-preferences', {
         method: 'PUT',
         body: updated,
         requiresAuth: true,
       });
-      setSaved(key);
-      setTimeout(() => setSaved(prev => prev === key ? null : prev), 2000);
+      setSaved(savedKey);
+      setTimeout(() => setSaved(prev => prev === savedKey ? null : prev), 2000);
     } catch {
-      setPrefs(prefs); // revert
+      setPrefs(prefs => prefs); // revert handled by caller
+    }
+  }, []);
+
+  const handleToggle = useCallback(async (key: keyof EmailPreferences, value: boolean) => {
+    if (!prefs) return;
+    const updated = { ...prefs, [key]: value };
+    setPrefs(updated);
+    setSavingKey(key);
+    try {
+      await savePrefs(updated, key);
+    } catch {
+      setPrefs(prefs);
     } finally {
       setSavingKey(null);
     }
-  }, [prefs]);
+  }, [prefs, savePrefs]);
+
+  const handleToggleAll = useCallback(async (enable: boolean) => {
+    if (!prefs) return;
+    const updated = { ...prefs };
+    OPTIONAL_KEYS.forEach(k => { updated[k] = enable; });
+    setPrefs(updated);
+    setSavingAll(true);
+    try {
+      await savePrefs(updated, 'all');
+    } catch {
+      setPrefs(prefs);
+    } finally {
+      setSavingAll(false);
+    }
+  }, [prefs, savePrefs]);
+
+  const allOff = prefs ? OPTIONAL_KEYS.every(k => !prefs[k]) : false;
+  const allOn = prefs ? OPTIONAL_KEYS.every(k => prefs[k]) : false;
 
   return (
     <div className="bg-white/30 backdrop-blur-sm border border-white/40 rounded-2xl p-5">
-      <div className="flex items-center gap-2 mb-1">
-        <Mail className="w-4 h-4 text-primary" />
-        <h4 className="font-semibold text-neutral-800 text-sm">{t('account:notifications.emailTitle', 'Email Notifications')}</h4>
+      <div className="flex items-start justify-between gap-3 mb-1">
+        <div className="flex items-center gap-2">
+          <Mail className="w-4 h-4 text-primary" />
+          <h4 className="font-semibold text-neutral-800 text-sm">{t('account:notifications.emailTitle', 'Email Notifications')}</h4>
+        </div>
+        {prefs && (
+          <button
+            type="button"
+            onClick={() => handleToggleAll(allOff)}
+            disabled={savingAll}
+            className={`flex-shrink-0 flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl border transition-colors disabled:opacity-50 ${
+              allOff
+                ? 'border-primary/30 bg-primary/5 text-primary hover:bg-primary/10'
+                : 'border-red-200 bg-red-50/60 text-red-600 hover:bg-red-100/60'
+            }`}
+          >
+            {savingAll ? (
+              <Loader2 className="w-3 h-3 animate-spin" />
+            ) : allOff ? (
+              <Bell className="w-3 h-3" />
+            ) : (
+              <BellOff className="w-3 h-3" />
+            )}
+            {allOff
+              ? t('account:notifications.enableAll', 'Enable all')
+              : t('account:notifications.unsubscribeAll', 'Turn off all')}
+          </button>
+        )}
       </div>
       <p className="text-xs text-neutral-500 mb-4 ml-6">
         {t('account:notifications.emailSubtitle', 'Control which emails we send to your inbox.')}
       </p>
+
+      {allOff && prefs && (
+        <div className="mb-3 flex items-start gap-2 rounded-xl bg-amber-50/60 border border-amber-200/50 px-3 py-2.5 text-xs text-amber-800">
+          <BellOff className="w-4 h-4 flex-shrink-0 mt-0.5" />
+          <span>{t('account:notifications.allOffNotice', 'You\'ve turned off all optional emails. You\'ll still receive transaction and security emails.')}</span>
+        </div>
+      )}
 
       {loadError ? (
         <p className="text-sm text-neutral-500 px-4">{t('account:notifications.emailLoadError', 'Could not load preferences.')}</p>
@@ -321,9 +384,46 @@ const EmailSection: React.FC = () => {
       {saved && (
         <div className="mt-3 flex items-center gap-2 rounded-xl bg-green-50/60 border border-green-200/50 px-3 py-2 text-xs text-green-800">
           <CheckCircle className="w-4 h-4 flex-shrink-0" />
-          {t('account:notifications.saved', 'Preferences saved')}
+          {saved === 'all'
+            ? (allOff
+                ? t('account:notifications.allDisabled', 'All emails turned off')
+                : t('account:notifications.allEnabled', 'All emails turned on'))
+            : t('account:notifications.saved', 'Preferences saved')}
         </div>
       )}
+    </div>
+  );
+};
+
+// ─── Unsubscribe confirmation banner (shown after clicking email unsubscribe link) ─
+
+const UnsubscribeBanner: React.FC = () => {
+  const [type, setType] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const val = params.get('unsubscribed');
+    if (val) {
+      setType(val);
+      // Clean the query param from the URL without a page reload
+      const clean = window.location.pathname;
+      window.history.replaceState(null, '', clean);
+    }
+  }, []);
+
+  if (!type) return null;
+
+  const label = type === 'all' ? 'all promotional emails' : `${type} emails`;
+
+  return (
+    <div className="flex items-start gap-3 rounded-2xl bg-green-50/80 border border-green-200/60 px-4 py-3.5 text-sm text-green-800">
+      <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-green-600" />
+      <div>
+        <p className="font-semibold">You've been unsubscribed</p>
+        <p className="text-xs text-green-700 mt-0.5">
+          You'll no longer receive <strong>{label}</strong>. Use the toggles below to adjust anytime.
+        </p>
+      </div>
     </div>
   );
 };
@@ -340,6 +440,7 @@ const NotificationSettingsSection: React.FC = () => {
         <p className="text-sm text-neutral-500 mt-0.5">{t('account:notifications.subtitle', 'Choose how and when we reach out to you.')}</p>
       </div>
 
+      <UnsubscribeBanner />
       <PushSection />
       <EmailSection />
     </div>
