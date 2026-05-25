@@ -34,18 +34,30 @@ export const Analytics: React.FC<AnalyticsProps> = ({
   facebookPixelId,
   hotjarId,
 }) => {
-  // Track page views on route change
+    // Patch pushState/replaceState to emit a custom event so SPA navigations
+  // are captured in addition to browser back/forward (popstate).
   useEffect(() => {
+    const NAVIGATION_EVENT = 'spa-navigation';
+
+    function patchHistoryMethod(method: 'pushState' | 'replaceState') {
+      const original = window.history[method].bind(window.history);
+      window.history[method] = function (...args: Parameters<History[typeof method]>) {
+        original(...args);
+        window.dispatchEvent(new Event(NAVIGATION_EVENT));
+      };
+      return original;
+    }
+
+    const origPush = patchHistoryMethod('pushState');
+    const origReplace = patchHistoryMethod('replaceState');
+
     const handleRouteChange = () => {
-      // Google Analytics page view
       if (googleAnalyticsId && window.gtag) {
         window.gtag('config', googleAnalyticsId, {
           page_path: window.location.pathname,
           page_title: document.title,
         });
       }
-
-      // Facebook Pixel page view
       if (facebookPixelId && window.fbq) {
         window.fbq('track', 'PageView');
       }
@@ -54,11 +66,15 @@ export const Analytics: React.FC<AnalyticsProps> = ({
     // Initial page view
     handleRouteChange();
 
-    // Listen for popstate (browser navigation)
+    window.addEventListener(NAVIGATION_EVENT, handleRouteChange);
     window.addEventListener('popstate', handleRouteChange);
 
     return () => {
+      window.removeEventListener(NAVIGATION_EVENT, handleRouteChange);
       window.removeEventListener('popstate', handleRouteChange);
+      // Restore originals
+      window.history.pushState = origPush;
+      window.history.replaceState = origReplace;
     };
   }, [googleAnalyticsId, facebookPixelId]);
 
