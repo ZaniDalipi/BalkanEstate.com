@@ -4,6 +4,7 @@
  * Runs every Monday at 9:00 AM UTC
  */
 
+import mongoose from 'mongoose';
 import User from '../models/User';
 import Agency from '../models/Agency';
 import { cronLogger } from '../utils/logger';
@@ -41,11 +42,12 @@ const getViewsInPeriod = async (
 ): Promise<{ total: number; unique: number }> => {
   if (entityIds.length === 0) return { total: 0, unique: 0 };
 
+  const objectIds = entityIds.map(id => new mongoose.Types.ObjectId(id));
   const result = await PageView.aggregate([
     {
       $match: {
         entityType,
-        entityId: { $in: entityIds.map(id => id.toString()) },
+        entityId: { $in: objectIds },
         createdAt: { $gte: startDate, $lte: endDate },
       },
     },
@@ -120,11 +122,12 @@ export const sendProMemberWeeklyStats = async (): Promise<void> => {
         // Find top performing property this week
         let topProperty: WeeklyStatsData['topPerformingProperty'] | undefined;
         if (propertyIds.length > 0) {
+          const propertyObjectIds = propertyIds.map(id => new mongoose.Types.ObjectId(id));
           const propertyViewsThisWeek = await PageView.aggregate([
             {
               $match: {
                 entityType: 'property',
-                entityId: { $in: propertyIds },
+                entityId: { $in: propertyObjectIds },
                 createdAt: { $gte: oneWeekAgo, $lte: now },
               },
             },
@@ -139,7 +142,7 @@ export const sendProMemberWeeklyStats = async (): Promise<void> => {
           ]);
 
           if (propertyViewsThisWeek.length > 0) {
-            const topProp = properties.find(p => String(p._id) === propertyViewsThisWeek[0]._id);
+            const topProp = properties.find(p => String(p._id) === String(propertyViewsThisWeek[0]._id));
             if (topProp) {
               topProperty = {
                 title: topProp.title || 'Property',
@@ -262,11 +265,12 @@ export const sendAgencyWeeklyStats = async (): Promise<void> => {
         // Find top property
         let topProperty: AgencyWeeklyStatsData['topProperty'] | undefined;
         if (propertyIds.length > 0) {
+          const agencyPropertyObjectIds = propertyIds.map(id => new mongoose.Types.ObjectId(id));
           const propertyViewsThisWeek = await PageView.aggregate([
             {
               $match: {
                 entityType: 'property',
-                entityId: { $in: propertyIds },
+                entityId: { $in: agencyPropertyObjectIds },
                 createdAt: { $gte: oneWeekAgo, $lte: now },
               },
             },
@@ -281,7 +285,7 @@ export const sendAgencyWeeklyStats = async (): Promise<void> => {
           ]);
 
           if (propertyViewsThisWeek.length > 0) {
-            const topProp = agencyProperties.find(p => String(p._id) === propertyViewsThisWeek[0]._id);
+            const topProp = agencyProperties.find(p => String(p._id) === String(propertyViewsThisWeek[0]._id));
             if (topProp) {
               topProperty = {
                 title: topProp.title || `${topProp.address}, ${topProp.city}`,
