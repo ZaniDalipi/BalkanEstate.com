@@ -318,6 +318,31 @@ fieldset {
   -webkit-backdrop-filter: none !important;
 }
 
+/*
+ * Continuous decorative animations repaint/recomposite every frame and compete
+ * with scrolling on this long form. The blurred orbs are three large blur(80px)
+ * GPU layers; the shimmer border repaints a full-panel-height pseudo-element on
+ * every frame. Drop them on this page — over the solid white background the
+ * difference is barely visible, and scroll stays smooth.
+ */
+.listing-form-page .glass-orb {
+  display: none;
+}
+.listing-form-page .glass-shimmer-border::before {
+  animation: none;
+}
+
+/*
+ * Skip layout/paint for off-screen sections while scrolling the long form. Only
+ * applied to sections that contain native <select>s and buttons (no overflowing
+ * popovers), so the paint containment that content-visibility implies is safe.
+ * contain-intrinsic-size keeps the scrollbar stable before a section renders.
+ */
+.listing-form-page .cv-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
+}
+
 /* Also speed up transitions inside the form — 'transition: all' is expensive */
 .listing-form .glass-input,
 .listing-form .glass-select {

@@ -36,7 +36,7 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
             </fieldset>
 
             {/* Mandatory Amenities Section - show different options for land */}
-            <fieldset className="space-y-4 glass-fieldset">
+            <fieldset className="space-y-4 glass-fieldset cv-section">
                 <h3 className="text-base font-semibold text-gray-700 mb-3">
                     {listingData.propertyType === 'land' ? t('seller:createListing.propertyFeatures.landFeatures', 'Land Features') : t('seller:createListing.propertyFeatures.title')}
                 </h3>
@@ -90,7 +90,7 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
 
             {/* Advanced Property Details Section - hide for land */}
             {listingData.propertyType !== 'land' ? (
-                <fieldset className="space-y-4 glass-fieldset">
+                <fieldset className="space-y-4 glass-fieldset cv-section">
                     <h3 className="text-base font-semibold text-gray-700 mb-3">{t('seller:createListing.advancedDetails.title')}</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {/* Furnishing Status */}
@@ -200,7 +200,7 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
                     <p className="text-xs text-gray-400 mt-2">{t('seller:createListing.advancedDetails.hint')}</p>
                 </fieldset>
             ) : (
-                <fieldset className="space-y-4 glass-fieldset">
+                <fieldset className="space-y-4 glass-fieldset cv-section">
                     <h3 className="text-base font-semibold text-gray-700 mb-3">{t('seller:createListing.landDetails.title')}</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {/* Land Condition */}
