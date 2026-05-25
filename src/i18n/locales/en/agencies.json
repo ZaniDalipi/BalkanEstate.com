@@ -416,5 +416,38 @@
     "ourAgents": "Our Agents",
     "ourProperties": "Our Properties",
     "noPropertiesListed": "No properties currently listed"
+  },
+  "scoring": {
+    "panelTitle": "How the agency score works",
+    "maxPossible": "Max possible: {{max}} pts",
+    "toggleShow": "Show details",
+    "toggleHide": "Hide details",
+    "footerNote": "Scores update weekly. Add more listings, grow your team, and get featured to climb the rankings.",
+    "metrics": {
+      "listings": {
+        "label": "Property Listings",
+        "formula": "3 pts per listing",
+        "desc": "Every active listing adds 3 points to your score. List more properties to dominate the rankings.",
+        "cap": "Max 60 pts"
+      },
+      "team": {
+        "label": "Agent Team Size",
+        "formula": "5 pts per agent",
+        "desc": "Each agent on your team earns 5 points. Build a stronger team to rise faster.",
+        "cap": "Max 50 pts"
+      },
+      "experience": {
+        "label": "Years in Business",
+        "formula": "2 pts per year",
+        "desc": "Every year your agency has been operating adds 2 points. Seniority builds trust.",
+        "cap": "Max 30 pts"
+      },
+      "featured": {
+        "label": "Featured Status",
+        "formula": "+20 pts bonus",
+        "desc": "Featured agencies receive a 20-point bonus and appear at the top of all searches.",
+        "cap": "Max 20 pts"
+      }
+    }
   }
 }

@@ -5,6 +5,8 @@ import { Agent } from '../types';
 import { Property } from '../types';
 import { UserRole } from '../types';
 import { getAgencies } from '../src/features/agencies/api';
+import AgencyScoringPanel from '../src/features/agencies/components/AgencyScoringPanel';
+import { calcAgencyScore } from '../src/features/agencies/utils/agencyScoring';
 import {
   BuildingOfficeIcon,
   PhoneIcon,
@@ -693,6 +695,9 @@ const AgenciesListPage: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-6 sm:space-y-8">
+                {/* Scoring explanation panel */}
+                <AgencyScoringPanel defaultCollapsed={false} />
+
                 {/* Featured Top 3 Agencies - Showcase Section */}
                 {agencies.length >= 3 && (
                   <div className="mb-6 sm:mb-10">

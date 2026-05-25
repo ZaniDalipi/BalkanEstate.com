@@ -131,15 +131,31 @@
       "message": "Reveniți în curând pentru partenerii noștri promovați!"
     },
     "subscription": {
-      "currentlyFeatured": "Agenție Momentan Evidențiată ✨", "receivingVisibility": "Agenția dvs. este momentan evidențiată și primește vizibilitate îmbunătățită.",
-      "timeRemaining": "Timp Rămas", "expires": "Expiră:", "featureYourAgency": "Evidențiază Agenția Ta",
-      "getVisibility": "Obțineți mai multă vizibilitate cu un anunț evidențiat.", "getFeaturedFrom": "Evidențiază-te de la €{{price}}/săptămână", "getFeaturedNow": "Evidențiază-te Acum",
-      "featuredAgency": "Agenție Evidențiată", "boostVisibility": "Crește Vizibilitatea", "freeTrialProgress": "🎉 Progresul Perioadei de Probă Gratuite",
-      "subscriptionPeriod": "📅 Perioada Abonamentului", "daysLeft": "{{count}} zile rămase", "freeTrialActive": "🎉 Perioada de Probă Gratuită Activă",
-      "trialEndsOn": "Perioada dvs. de probă gratuită expiră pe {{date}}", "interval": "Interval", "price": "Preț", "startDate": "Data de Început",
-      "renewsOn": "Se reînnoiește pe", "endedOn": "S-a încheiat pe", "couponApplied": "✓ Cupon {{code}} aplicat",
-      "cancelAtPeriodEnd": "⚠️ Abonamentul va fi anulat la sfârșitul perioadei curente", "renewStatus": "🔄 Reînnoiește Statutul Evidențiat",
-      "continueVisibility": "Continuați să vă bucurați de vizibilitate îmbunătățită.", "renewNow": "Reînnoiește Acum",
+      "currentlyFeatured": "Agenție Momentan Evidențiată ✨",
+      "receivingVisibility": "Agenția dvs. este momentan evidențiată și primește vizibilitate îmbunătățită.",
+      "timeRemaining": "Timp Rămas",
+      "expires": "Expiră:",
+      "featureYourAgency": "Evidențiază Agenția Ta",
+      "getVisibility": "Obțineți mai multă vizibilitate cu un anunț evidențiat.",
+      "getFeaturedFrom": "Evidențiază-te de la €{{price}}/săptămână",
+      "getFeaturedNow": "Evidențiază-te Acum",
+      "featuredAgency": "Agenție Evidențiată",
+      "boostVisibility": "Crește Vizibilitatea",
+      "freeTrialProgress": "🎉 Progresul Perioadei de Probă Gratuite",
+      "subscriptionPeriod": "📅 Perioada Abonamentului",
+      "daysLeft": "{{count}} zile rămase",
+      "freeTrialActive": "🎉 Perioada de Probă Gratuită Activă",
+      "trialEndsOn": "Perioada dvs. de probă gratuită expiră pe {{date}}",
+      "interval": "Interval",
+      "price": "Preț",
+      "startDate": "Data de Început",
+      "renewsOn": "Se reînnoiește pe",
+      "endedOn": "S-a încheiat pe",
+      "couponApplied": "✓ Cupon {{code}} aplicat",
+      "cancelAtPeriodEnd": "⚠️ Abonamentul va fi anulat la sfârșitul perioadei curente",
+      "renewStatus": "🔄 Reînnoiește Statutul Evidențiat",
+      "continueVisibility": "Continuați să vă bucurați de vizibilitate îmbunătățită.",
+      "renewNow": "Reînnoiește Acum",
       "proTip": "💡 Sfat Pro: Agențiile evidențiate primesc de până la 5x mai multă vizibilitate!"
     }
   },
@@ -257,16 +273,59 @@
   "coupon": {
     "title": "Utilizează Cuponul Agenției",
     "description": "Introduceți codul cuponului primit pentru a vă alătura unei agenții și a primi un abonament Pro.",
-    "codeLabel": "Cod Cupon", "codePlaceholder": "Introduceți codul cuponului (ex., AGENCY-XXXXXXXX)", "codeFormat": "Codul trebuie să fie în formatul: AGENCY-XXXXXXXX",
-    "redeeming": "Se utilizează...", "redeemButton": "Utilizează Cuponul", "note": "Notă:",
-    "alreadyInAgency": "Sunteți deja membru al {{name}}. Utilizarea unui cupon nou vă va transfera în noua agenție.", "anAgency": "o agenție",
+    "codeLabel": "Cod Cupon",
+    "codePlaceholder": "Introduceți codul cuponului (ex., AGENCY-XXXXXXXX)",
+    "codeFormat": "Codul trebuie să fie în formatul: AGENCY-XXXXXXXX",
+    "redeeming": "Se utilizează...",
+    "redeemButton": "Utilizează Cuponul",
+    "note": "Notă:",
+    "alreadyInAgency": "Sunteți deja membru al {{name}}. Utilizarea unui cupon nou vă va transfera în noua agenție.",
+    "anAgency": "o agenție",
     "confirmMove": "Sunteți deja membru al unei agenții. Utilizarea acestui cupon vă va transfera în noua agenție. Continuați?",
-    "agentRequired": { "title": "Înregistrare Agent Necesară", "description": "Pentru a utiliza un cupon de agenție, trebuie mai întâi să vă înregistrați ca agent.", "goToProfile": "Mergi la Setările Profilului" },
-    "errors": { "enterCode": "Vă rugăm introduceți un cod de cupon", "loginRequired": "Trebuie să fiți autentificat pentru a utiliza un cupon", "agentRequired": "Doar agenții înregistrați pot utiliza cupoanele agenției.", "invalidCoupon": "Cod de cupon invalid.", "alreadyUsed": "Acest cupon a fost deja utilizat.", "expired": "Acest cupon a expirat.", "notFound": "Cuponul nu a fost găsit.", "subscriptionInactive": "Abonamentul agenției nu mai este activ.", "missingCode": "Vă rugăm introduceți un cod de cupon.", "redeemFailed": "Utilizarea cuponului a eșuat.", "redemptionFailed": "Utilizare Eșuată" },
-    "success": { "title": "Cupon Utilizat!", "message": "V-ați alăturat cu succes la {{name}} cu un abonament Pro!", "welcome": "Bine ați venit la {{name}}!", "joined": "V-ați alăturat cu succes agenției cu un abonament Pro.", "benefits": "Beneficiile Dvs.:", "listingsLimit": "Până la {{limit}} anunțuri active", "branding": "Brandingul agenției pe anunțurile dvs.", "promotionAccess": "Acces la cupoanele promoționale ale agenției", "validUntil": "Abonament valabil până la {{date}}", "viewAgency": "Vezi Agenția" },
-    "whatHappens": { "title": "Ce se întâmplă când utilizați?", "addedToTeam": "Veți fi adăugat în agenție ca membru al echipei", "proSubscription": "Veți primi un abonament Pro (valabil 1 an)", "agencyBranding": "Anunțurile dvs. vor afișa brandul agenției", "promotionCoupons": "Acces la cupoane promoționale pentru anunțurile dvs." }
+    "agentRequired": {
+      "title": "Înregistrare Agent Necesară",
+      "description": "Pentru a utiliza un cupon de agenție, trebuie mai întâi să vă înregistrați ca agent.",
+      "goToProfile": "Mergi la Setările Profilului"
+    },
+    "errors": {
+      "enterCode": "Vă rugăm introduceți un cod de cupon",
+      "loginRequired": "Trebuie să fiți autentificat pentru a utiliza un cupon",
+      "agentRequired": "Doar agenții înregistrați pot utiliza cupoanele agenției.",
+      "invalidCoupon": "Cod de cupon invalid.",
+      "alreadyUsed": "Acest cupon a fost deja utilizat.",
+      "expired": "Acest cupon a expirat.",
+      "notFound": "Cuponul nu a fost găsit.",
+      "subscriptionInactive": "Abonamentul agenției nu mai este activ.",
+      "missingCode": "Vă rugăm introduceți un cod de cupon.",
+      "redeemFailed": "Utilizarea cuponului a eșuat.",
+      "redemptionFailed": "Utilizare Eșuată"
+    },
+    "success": {
+      "title": "Cupon Utilizat!",
+      "message": "V-ați alăturat cu succes la {{name}} cu un abonament Pro!",
+      "welcome": "Bine ați venit la {{name}}!",
+      "joined": "V-ați alăturat cu succes agenției cu un abonament Pro.",
+      "benefits": "Beneficiile Dvs.:",
+      "listingsLimit": "Până la {{limit}} anunțuri active",
+      "branding": "Brandingul agenției pe anunțurile dvs.",
+      "promotionAccess": "Acces la cupoanele promoționale ale agenției",
+      "validUntil": "Abonament valabil până la {{date}}",
+      "viewAgency": "Vezi Agenția"
+    },
+    "whatHappens": {
+      "title": "Ce se întâmplă când utilizați?",
+      "addedToTeam": "Veți fi adăugat în agenție ca membru al echipei",
+      "proSubscription": "Veți primi un abonament Pro (valabil 1 an)",
+      "agencyBranding": "Anunțurile dvs. vor afișa brandul agenției",
+      "promotionCoupons": "Acces la cupoane promoționale pentru anunțurile dvs."
+    }
   },
-  "badge": { "independent": "Independent", "independentShort": "Ind", "agency": "Agenție", "independentAgent": "Agent Independent" },
+  "badge": {
+    "independent": "Independent",
+    "independentShort": "Ind",
+    "agency": "Agenție",
+    "independentAgent": "Agent Independent"
+  },
   "featuredDialog": {
     "title": "Abonament Agenție Evidențiată",
     "loadingPricing": "Se încarcă prețurile...",
@@ -368,5 +427,38 @@
     "ourAgents": "Agenții Noștri",
     "ourProperties": "Proprietățile Noastre",
     "noPropertiesListed": "Nu există proprietăți listate în prezent"
+  },
+  "scoring": {
+    "panelTitle": "Cum funcționează sistemul de puncte al agenției",
+    "maxPossible": "Maxim posibil: {{max}} puncte",
+    "toggleShow": "Afișează detalii",
+    "toggleHide": "Ascunde detalii",
+    "footerNote": "Punctele se actualizează săptămânal. Adăugați anunțuri, extindeți echipa și obțineți statut Featured.",
+    "metrics": {
+      "listings": {
+        "label": "Anunțuri de Proprietăți",
+        "formula": "3 puncte pe anunț",
+        "desc": "Fiecare anunț activ adaugă 3 puncte. Adăugați mai multe proprietăți pentru a domina clasamentul.",
+        "cap": "Max 60 puncte"
+      },
+      "team": {
+        "label": "Mărimea Echipei de Agenți",
+        "formula": "5 puncte pe agent",
+        "desc": "Fiecare agent din echipă aduce 5 puncte. Construiți o echipă mai puternică.",
+        "cap": "Max 50 puncte"
+      },
+      "experience": {
+        "label": "Ani în Activitate",
+        "formula": "2 puncte pe an",
+        "desc": "Fiecare an de activitate al agenției adaugă 2 puncte. Experiența construiește încredere.",
+        "cap": "Max 30 puncte"
+      },
+      "featured": {
+        "label": "Statut Featured",
+        "formula": "+20 puncte bonus",
+        "desc": "Agențiile Featured primesc 20 puncte bonus și apar în fruntea tuturor căutărilor.",
+        "cap": "Max 20 puncte"
+      }
+    }
   }
 }
