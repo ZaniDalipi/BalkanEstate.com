@@ -2,6 +2,9 @@ import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCityMarketData, useCitiesByCountry } from '../hooks/useCityQueries';
 import { useSuburbData, useCityImages } from '../hooks/useSuburbQueries';
+import { useCityPriceHistory, useEconomicIndicators } from '../hooks/useCityInsights';
+import PriceHistoryChart from './PriceHistoryChart';
+import EconomicIndicatorsPanel from './EconomicIndicatorsPanel';
 import { formatPrice } from '@/utils/currency';
 import { parseLanguageFromPath, buildLocalizedPath } from '@/src/utils/languageRouting';
 import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
@@ -91,6 +94,8 @@ const CityDashboard: React.FC = () => {
   const { data: countryCities } = useCitiesByCountry(params?.country);
   const { data: suburbData, isLoading: suburbLoading, error: suburbError } = useSuburbData(params?.city, params?.country);
   const { data: cityImagesData } = useCityImages(params?.city, params?.country);
+  const { data: priceHistory, isLoading: historyLoading } = useCityPriceHistory(params?.city, params?.country);
+  const { data: economicData } = useEconomicIndicators(params?.country);
 
   // Scroll to top when city changes
   useEffect(() => {
@@ -690,6 +695,36 @@ const CityDashboard: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* ── 8-Year Price History Chart ──────────────────────────────────── */}
+        <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6 mb-6">
+          {historyLoading ? (
+            <div className="animate-pulse">
+              <div className="h-6 w-48 bg-neutral-100 rounded mb-2" />
+              <div className="h-3 w-72 bg-neutral-100 rounded mb-5" />
+              <div className="h-64 bg-neutral-50 rounded-xl" />
+            </div>
+          ) : priceHistory && priceHistory.history.length > 0 ? (
+            <PriceHistoryChart
+              history={priceHistory.history}
+              dataSource={priceHistory.dataSource}
+              fredUrl={priceHistory.fredUrl}
+              city={city.city}
+            />
+          ) : (
+            <div className="text-center py-10 text-neutral-400 text-sm">
+              <ChartBarIcon className="w-10 h-10 text-neutral-300 mx-auto mb-2" />
+              Price history is being prepared for {city.city}.
+            </div>
+          )}
+        </div>
+
+        {/* ── Macroeconomic Indicators (World Bank) ───────────────────────── */}
+        {economicData && (
+          <div className="mb-8">
+            <EconomicIndicatorsPanel data={economicData} />
+          </div>
+        )}
 
         {/* ── Explore Neighborhoods ───────────────────────────────────────── */}
         <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6 mb-8">

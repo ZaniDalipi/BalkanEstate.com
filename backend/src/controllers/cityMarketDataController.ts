@@ -3,6 +3,8 @@ import { getFeaturedCities, getCitiesByCountry, getCityMarketData } from '../ser
 import { triggerMarketDataUpdate } from '../jobs/updateCityMarketData';
 import { refreshAllCityImages } from '../services/cityImageService';
 import { fetchCityImages, getCityFallbackImageUrl } from '../services/wikiImageService';
+import { getCityPriceHistory } from '../services/cityHistoryService';
+import { getEconomicIndicators } from '../services/economicIndicatorsService';
 import { apiLogger } from '../utils/logger';
 import { getParam } from '../utils/validateParams';
 
@@ -171,5 +173,46 @@ export const getCityImagesController = async (req: Request, res: Response): Prom
   } catch (error: unknown) {
     apiLogger.error('Error fetching city images:', error);
     res.status(500).json({ success: false, message: 'Error fetching city images' });
+  }
+};
+
+/**
+ * @desc    Get historical quarterly price data (8 years)
+ * @route   GET /api/cities/history/:city/:country
+ * @access  Public
+ */
+export const getCityHistoryController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const city = getParam(req, 'city');
+    const country = getParam(req, 'country');
+    if (!city || !country) {
+      res.status(400).json({ success: false, message: 'City and country are required' });
+      return;
+    }
+    const history = await getCityPriceHistory(city, country);
+    res.json(history);
+  } catch (error: unknown) {
+    apiLogger.error('Error fetching city price history:', error);
+    res.status(500).json({ success: false, message: 'Error fetching price history' });
+  }
+};
+
+/**
+ * @desc    Get macroeconomic indicators (GDP, inflation, etc.) from World Bank
+ * @route   GET /api/cities/economic/:country
+ * @access  Public
+ */
+export const getEconomicIndicatorsController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const country = getParam(req, 'country');
+    if (!country) {
+      res.status(400).json({ success: false, message: 'Country is required' });
+      return;
+    }
+    const indicators = await getEconomicIndicators(country);
+    res.json(indicators);
+  } catch (error: unknown) {
+    apiLogger.error('Error fetching economic indicators:', error);
+    res.status(500).json({ success: false, message: 'Error fetching economic indicators' });
   }
 };
