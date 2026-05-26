@@ -5,6 +5,7 @@ import {
   getCityMarketDataController,
   triggerMarketDataUpdateController,
   refreshCityImagesController,
+  getCityImagesController,
 } from '../controllers/cityMarketDataController';
 import {
   getSuburbDataController,
@@ -19,6 +20,7 @@ router.get('/featured', getFeaturedCitiesController);
 router.get('/country/:country', getCitiesByCountryController);
 router.get('/market-data/:city/:country', getCityMarketDataController);
 router.get('/suburbs/:city/:country', getSuburbDataController);
+router.get('/images/:city/:country', getCityImagesController);
 
 // Admin routes
 router.post('/update-market-data', protect, triggerMarketDataUpdateController);

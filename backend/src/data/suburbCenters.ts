@@ -15,6 +15,28 @@ export interface SuburbCenterEntry {
 
 export const SUBURB_CENTERS: Record<string, SuburbCenterEntry[]> = {
   // ── Kosovo ───────────────────────────────────────────────────────────────
+  Gjakova: [
+    { name: 'Center', center: [42.382, 20.430], radiusKm: 1.0 },
+    { name: 'Çarshia e Madhe', center: [42.380, 20.425], radiusKm: 0.7 },
+    { name: 'Hadum', center: [42.384, 20.434], radiusKm: 0.8 },
+    { name: 'Çabrat', center: [42.390, 20.441], radiusKm: 1.0 },
+  ],
+  Ferizaj: [
+    { name: 'Center', center: [42.370, 21.148], radiusKm: 1.0 },
+    { name: 'Municipalities', center: [42.375, 21.155], radiusKm: 0.9 },
+    { name: 'Kaçanik Road', center: [42.362, 21.141], radiusKm: 1.0 },
+  ],
+  Mitrovica: [
+    { name: 'South Mitrovica', center: [42.883, 20.866], radiusKm: 1.0 },
+    { name: 'North Mitrovica', center: [42.893, 20.866], radiusKm: 0.9 },
+    { name: 'Bosniak Quarter', center: [42.888, 20.861], radiusKm: 0.7 },
+    { name: 'Suhodol', center: [42.878, 20.876], radiusKm: 1.0 },
+  ],
+  Gjilan: [
+    { name: 'Center', center: [42.461, 21.469], radiusKm: 1.0 },
+    { name: 'Gjilani i Ri', center: [42.467, 21.476], radiusKm: 0.9 },
+    { name: 'Shurdhan', center: [42.455, 21.462], radiusKm: 0.8 },
+  ],
   Prishtina: [
     { name: 'Sunny Hill', center: [42.667, 21.158], radiusKm: 1.2 },
     { name: 'Dragodan', center: [42.657, 21.148], radiusKm: 1.0 },
@@ -38,6 +60,33 @@ export const SUBURB_CENTERS: Record<string, SuburbCenterEntry[]> = {
   ],
 
   // ── Albania ──────────────────────────────────────────────────────────────
+  Shkoder: [
+    { name: 'Center', center: [42.068, 19.513], radiusKm: 1.1 },
+    { name: 'Rus', center: [42.075, 19.520], radiusKm: 1.0 },
+    { name: 'Bahçallek', center: [42.061, 19.507], radiusKm: 0.9 },
+    { name: 'Perash', center: [42.079, 19.515], radiusKm: 1.0 },
+  ],
+  Fier: [
+    { name: 'Center', center: [40.724, 19.556], radiusKm: 1.0 },
+    { name: 'Apollonia', center: [40.716, 19.549], radiusKm: 0.9 },
+    { name: 'Seman', center: [40.732, 19.563], radiusKm: 1.0 },
+  ],
+  Berat: [
+    { name: 'Mangalem', center: [40.704, 19.950], radiusKm: 0.7 },
+    { name: 'Gorica', center: [40.705, 19.954], radiusKm: 0.7 },
+    { name: 'Kala', center: [40.708, 19.952], radiusKm: 0.6 },
+    { name: 'Center', center: [40.700, 19.947], radiusKm: 0.8 },
+  ],
+  Elbasan: [
+    { name: 'Center', center: [41.112, 20.082], radiusKm: 1.0 },
+    { name: 'Qyteti Studenti', center: [41.118, 20.090], radiusKm: 0.9 },
+    { name: 'Labinot', center: [41.105, 20.076], radiusKm: 1.1 },
+  ],
+  Korce: [
+    { name: 'Center', center: [40.618, 20.779], radiusKm: 1.0 },
+    { name: 'Varoshi', center: [40.622, 20.785], radiusKm: 0.8 },
+    { name: 'Drililas', center: [40.613, 20.773], radiusKm: 0.9 },
+  ],
   Tirana: [
     { name: 'Blloku', center: [41.325, 19.818], radiusKm: 0.8 },
     { name: 'New Bazaar', center: [41.336, 19.815], radiusKm: 0.9 },
@@ -67,6 +116,32 @@ export const SUBURB_CENTERS: Record<string, SuburbCenterEntry[]> = {
   ],
 
   // ── North Macedonia ──────────────────────────────────────────────────────
+  Tetovo: [
+    { name: 'Center', center: [42.010, 20.971], radiusKm: 1.0 },
+    { name: 'Kamenjane', center: [42.018, 20.963], radiusKm: 1.0 },
+    { name: 'Zelino', center: [42.002, 20.979], radiusKm: 0.9 },
+    { name: 'Gostivar Road', center: [42.015, 20.985], radiusKm: 1.0 },
+  ],
+  Kumanovo: [
+    { name: 'Center', center: [42.132, 21.714], radiusKm: 1.1 },
+    { name: 'Prolece', center: [42.138, 21.721], radiusKm: 1.0 },
+    { name: 'Stari Grad', center: [42.126, 21.707], radiusKm: 0.9 },
+  ],
+  Veles: [
+    { name: 'Center', center: [41.716, 21.775], radiusKm: 0.9 },
+    { name: 'Isar', center: [41.721, 21.781], radiusKm: 0.8 },
+    { name: 'Malo Konjari', center: [41.709, 21.768], radiusKm: 0.9 },
+  ],
+  Strumica: [
+    { name: 'Center', center: [41.438, 22.644], radiusKm: 1.0 },
+    { name: 'Banica', center: [41.444, 22.651], radiusKm: 0.9 },
+    { name: 'Kuklis', center: [41.432, 22.637], radiusKm: 0.9 },
+  ],
+  Kavadarci: [
+    { name: 'Center', center: [41.432, 22.012], radiusKm: 0.9 },
+    { name: 'Kavadarci North', center: [41.438, 22.018], radiusKm: 0.8 },
+    { name: 'Vatasha', center: [41.426, 22.007], radiusKm: 0.8 },
+  ],
   Skopje: [
     { name: 'Centar', center: [41.996, 21.433], radiusKm: 1.2 },
     { name: 'Aerodrom', center: [41.972, 21.447], radiusKm: 1.5 },
@@ -87,6 +162,37 @@ export const SUBURB_CENTERS: Record<string, SuburbCenterEntry[]> = {
   ],
 
   // ── Serbia ───────────────────────────────────────────────────────────────
+  Subotica: [
+    { name: 'Center', center: [46.100, 19.667], radiusKm: 1.2 },
+    { name: 'Palic', center: [46.098, 19.740], radiusKm: 1.0 },
+    { name: 'Aleksandrovo', center: [46.091, 19.659], radiusKm: 1.0 },
+    { name: 'Kelebija', center: [46.117, 19.683], radiusKm: 1.0 },
+  ],
+  Zrenjanin: [
+    { name: 'Center', center: [45.383, 20.383], radiusKm: 1.1 },
+    { name: 'Bagljas', center: [45.390, 20.390], radiusKm: 1.0 },
+    { name: 'Mikicevic', center: [45.376, 20.376], radiusKm: 1.0 },
+  ],
+  Pancevo: [
+    { name: 'Center', center: [44.872, 20.641], radiusKm: 1.0 },
+    { name: 'Vojlovica', center: [44.879, 20.648], radiusKm: 1.0 },
+    { name: 'Omoljica', center: [44.863, 20.634], radiusKm: 1.0 },
+  ],
+  Cacak: [
+    { name: 'Center', center: [43.891, 20.349], radiusKm: 1.0 },
+    { name: 'Ljubic', center: [43.897, 20.356], radiusKm: 0.9 },
+    { name: 'Konjevici', center: [43.884, 20.342], radiusKm: 0.9 },
+  ],
+  Valjevo: [
+    { name: 'Center', center: [44.270, 19.886], radiusKm: 1.0 },
+    { name: 'Petnica', center: [44.263, 19.879], radiusKm: 0.9 },
+    { name: 'Beloševac', center: [44.277, 19.893], radiusKm: 0.9 },
+  ],
+  Smederevo: [
+    { name: 'Center', center: [44.664, 20.928], radiusKm: 1.0 },
+    { name: 'Radinac', center: [44.672, 20.935], radiusKm: 0.9 },
+    { name: 'Kolari', center: [44.656, 20.921], radiusKm: 0.9 },
+  ],
   Belgrade: [
     { name: 'Stari Grad', center: [44.818, 20.461], radiusKm: 1.0 },
     { name: 'Savski Venac', center: [44.800, 20.454], radiusKm: 1.5 },
@@ -114,6 +220,32 @@ export const SUBURB_CENTERS: Record<string, SuburbCenterEntry[]> = {
   ],
 
   // ── Bosnia and Herzegovina ────────────────────────────────────────────────
+  Tuzla: [
+    { name: 'Center', center: [44.538, 18.676], radiusKm: 1.1 },
+    { name: 'Stupine', center: [44.544, 18.683], radiusKm: 1.0 },
+    { name: 'Lamela', center: [44.531, 18.669], radiusKm: 0.9 },
+    { name: 'Slatina', center: [44.548, 18.691], radiusKm: 1.0 },
+  ],
+  Zenica: [
+    { name: 'Center', center: [44.202, 17.908], radiusKm: 1.1 },
+    { name: 'Radakovo', center: [44.209, 17.915], radiusKm: 1.0 },
+    { name: 'Crkvice', center: [44.195, 17.901], radiusKm: 0.9 },
+  ],
+  Trebinje: [
+    { name: 'Center', center: [42.711, 18.344], radiusKm: 0.9 },
+    { name: 'Luka', center: [42.717, 18.351], radiusKm: 0.8 },
+    { name: 'Zasad', center: [42.705, 18.337], radiusKm: 0.8 },
+  ],
+  Bijeljina: [
+    { name: 'Center', center: [44.756, 19.214], radiusKm: 1.0 },
+    { name: 'Amajlije', center: [44.762, 19.221], radiusKm: 0.9 },
+    { name: 'Patkovaca', center: [44.749, 19.207], radiusKm: 0.9 },
+  ],
+  Brcko: [
+    { name: 'Center', center: [44.872, 18.810], radiusKm: 0.9 },
+    { name: 'Brcko District', center: [44.878, 18.817], radiusKm: 0.9 },
+    { name: 'Arizona', center: [44.865, 18.803], radiusKm: 0.8 },
+  ],
   Sarajevo: [
     { name: 'Bascarsija', center: [43.860, 18.434], radiusKm: 0.8 },
     { name: 'Marijin Dvor', center: [43.851, 18.408], radiusKm: 1.0 },
@@ -135,6 +267,39 @@ export const SUBURB_CENTERS: Record<string, SuburbCenterEntry[]> = {
   ],
 
   // ── Croatia ───────────────────────────────────────────────────────────────
+  Osijek: [
+    { name: 'Center', center: [45.555, 18.695], radiusKm: 1.2 },
+    { name: 'Gornji Grad', center: [45.561, 18.702], radiusKm: 1.0 },
+    { name: 'Retfala', center: [45.548, 18.688], radiusKm: 1.0 },
+    { name: 'Donji Grad', center: [45.564, 18.710], radiusKm: 1.0 },
+  ],
+  Zadar: [
+    { name: 'Old Town', center: [44.115, 15.224], radiusKm: 0.6 },
+    { name: 'Borik', center: [44.124, 15.216], radiusKm: 1.2 },
+    { name: 'Bili Brig', center: [44.108, 15.232], radiusKm: 0.9 },
+    { name: 'Puntamika', center: [44.131, 15.209], radiusKm: 1.0 },
+  ],
+  Pula: [
+    { name: 'Old Town', center: [44.868, 13.847], radiusKm: 0.7 },
+    { name: 'Veruda', center: [44.857, 13.854], radiusKm: 0.9 },
+    { name: 'Vidikovac', center: [44.876, 13.854], radiusKm: 0.9 },
+    { name: 'Veli Vrh', center: [44.880, 13.840], radiusKm: 0.9 },
+  ],
+  Sibenik: [
+    { name: 'Old Town', center: [43.735, 15.893], radiusKm: 0.7 },
+    { name: 'Crnica', center: [43.728, 15.900], radiusKm: 0.9 },
+    { name: 'Vidici', center: [43.741, 15.906], radiusKm: 0.8 },
+  ],
+  Varazdin: [
+    { name: 'Center', center: [46.305, 16.337], radiusKm: 1.0 },
+    { name: 'Biškupec', center: [46.311, 16.344], radiusKm: 0.9 },
+    { name: 'Jalkovec', center: [46.298, 16.330], radiusKm: 0.9 },
+  ],
+  'Slavonski Brod': [
+    { name: 'Center', center: [45.160, 18.015], radiusKm: 1.0 },
+    { name: 'Brodsko Brdo', center: [45.167, 18.022], radiusKm: 0.9 },
+    { name: 'Korija', center: [45.153, 18.008], radiusKm: 0.9 },
+  ],
   Zagreb: [
     { name: 'Centar', center: [45.815, 15.982], radiusKm: 1.2 },
     { name: 'Novi Zagreb', center: [45.783, 16.008], radiusKm: 2.0 },
@@ -164,6 +329,35 @@ export const SUBURB_CENTERS: Record<string, SuburbCenterEntry[]> = {
   ],
 
   // ── Montenegro ────────────────────────────────────────────────────────────
+  Niksic: [
+    { name: 'Center', center: [42.774, 18.944], radiusKm: 1.2 },
+    { name: 'Gornja Varos', center: [42.780, 18.951], radiusKm: 1.0 },
+    { name: 'Mioce', center: [42.767, 18.937], radiusKm: 1.0 },
+    { name: 'Spuz', center: [42.782, 19.094], radiusKm: 1.0 },
+  ],
+  'Herceg Novi': [
+    { name: 'Old Town', center: [42.452, 18.537], radiusKm: 0.6 },
+    { name: 'Igalo', center: [42.453, 18.521], radiusKm: 0.9 },
+    { name: 'Njivice', center: [42.460, 18.544], radiusKm: 0.8 },
+    { name: 'Topla', center: [42.447, 18.549], radiusKm: 0.8 },
+  ],
+  Bar: [
+    { name: 'Old Town', center: [42.096, 19.101], radiusKm: 0.7 },
+    { name: 'Port Area', center: [42.098, 19.092], radiusKm: 0.8 },
+    { name: 'Sutomore', center: [42.050, 19.028], radiusKm: 0.9 },
+    { name: 'Susanj', center: [42.085, 19.100], radiusKm: 0.8 },
+  ],
+  Ulcinj: [
+    { name: 'Old Town', center: [41.922, 19.217], radiusKm: 0.6 },
+    { name: 'Velika Plaza', center: [41.896, 19.238], radiusKm: 1.2 },
+    { name: 'Ada', center: [41.877, 19.349], radiusKm: 0.9 },
+    { name: 'New Town', center: [41.926, 19.224], radiusKm: 0.8 },
+  ],
+  Tivat: [
+    { name: 'Center', center: [42.434, 18.697], radiusKm: 0.9 },
+    { name: 'Porto Montenegro', center: [42.430, 18.693], radiusKm: 0.7 },
+    { name: 'Donja Lastva', center: [42.440, 18.703], radiusKm: 0.8 },
+  ],
   Podgorica: [
     { name: 'Center', center: [42.441, 19.263], radiusKm: 1.0 },
     { name: 'Nova Varos', center: [42.445, 19.271], radiusKm: 1.1 },

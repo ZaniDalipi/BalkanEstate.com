@@ -48,7 +48,7 @@ const CityRecommendations: React.FC = () => {
   const loadCities = async () => {
     try {
       setLoading(true);
-      const data = await getFeaturedCities(36); // Load 36 cities (3-4 per country)
+      const data = await getFeaturedCities(100); // Load all cities across all countries
       setCities(data);
     } catch (error) {
       // Error removed

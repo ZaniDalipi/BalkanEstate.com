@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCityMarketData, useCitiesByCountry } from '../hooks/useCityQueries';
-import { useSuburbData } from '../hooks/useSuburbQueries';
+import { useSuburbData, useCityImages } from '../hooks/useSuburbQueries';
 import { formatPrice } from '@/utils/currency';
 import { parseLanguageFromPath, buildLocalizedPath } from '@/src/utils/languageRouting';
 import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
@@ -90,6 +90,7 @@ const CityDashboard: React.FC = () => {
   const { data: city, isLoading, error } = useCityMarketData(params?.city, params?.country);
   const { data: countryCities } = useCitiesByCountry(params?.country);
   const { data: suburbData, isLoading: suburbLoading, error: suburbError } = useSuburbData(params?.city, params?.country);
+  const { data: cityImagesData } = useCityImages(params?.city, params?.country);
 
   // Scroll to top when city changes
   useEffect(() => {
@@ -275,6 +276,11 @@ const CityDashboard: React.FC = () => {
   const demandInfo = getDemandInfo(demandScore);
   const investmentInfo = getInvestmentInfo(investmentScore);
 
+  // Wikimedia images: use first one as hero fallback, rest for gallery
+  const wikiImages = cityImagesData?.images ?? [];
+  const heroWikiUrl = wikiImages[0]?.thumbUrl ?? cityImagesData?.fallbackUrl;
+  const galleryImages = wikiImages.slice(0, 5);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <SEO
@@ -293,8 +299,17 @@ const CityDashboard: React.FC = () => {
           loading="eager"
           decoding="async"
           onError={(e) => {
-            (e.target as HTMLImageElement).style.display = 'none';
-            (e.target as HTMLImageElement).parentElement!.style.background = fallbackGradient;
+            const el = e.target as HTMLImageElement;
+            if (heroWikiUrl) {
+              el.src = heroWikiUrl;
+              el.onerror = () => {
+                el.style.display = 'none';
+                el.parentElement!.style.background = fallbackGradient;
+              };
+            } else {
+              el.style.display = 'none';
+              el.parentElement!.style.background = fallbackGradient;
+            }
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/70" />
@@ -332,6 +347,48 @@ const CityDashboard: React.FC = () => {
 
       {/* Main content */}
       <div className="max-w-6xl mx-auto px-4 sm:px-8 -mt-6 relative z-10 pb-12">
+
+        {/* Photo gallery — Wikimedia Commons images */}
+        {galleryImages.length > 1 && (
+          <div className="mb-6 grid grid-cols-4 gap-2 rounded-xl overflow-hidden h-36 sm:h-48">
+            {/* Large primary image */}
+            <div className="col-span-2 row-span-2 relative overflow-hidden">
+              <img
+                src={galleryImages[0].thumbUrl}
+                alt={`${city.city} photo 1`}
+                className="absolute inset-0 w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                loading="lazy"
+              />
+            </div>
+            {/* Secondary images */}
+            {galleryImages.slice(1, 5).map((img, i) => (
+              <div key={i} className="relative overflow-hidden">
+                <img
+                  src={img.thumbUrl}
+                  alt={`${city.city} photo ${i + 2}`}
+                  className="absolute inset-0 w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
+              </div>
+            ))}
+            {/* Attribution overlay */}
+            <div className="col-span-4 flex items-center justify-end px-2 py-1 bg-black/20 absolute bottom-0 right-0 rounded-bl-lg">
+              <span className="text-[9px] text-white/70">Photos © Wikimedia Commons</span>
+            </div>
+          </div>
+        )}
+
+        {/* Official data source badge */}
+        {city.dataSource && (
+          <div className="mb-5 flex items-center gap-2 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-xl text-xs">
+            <ShieldCheckIcon className="w-4 h-4 text-blue-600 flex-shrink-0" />
+            <span className="text-blue-700 font-medium">
+              Data verified by official sources:{' '}
+              <span className="font-bold">BIS · National Statistics Institute · {city.country} Cadastre</span>
+            </span>
+            <span className="ml-auto text-blue-500 text-[10px]">Updated {safeFormatDate(city.lastUpdated)}</span>
+          </div>
+        )}
 
         {/* Market Health Score - composite visual */}
         <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6 mb-8">

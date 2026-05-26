@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { getFeaturedCities, getCitiesByCountry, getCityMarketData } from '../services/cityMarketDataService';
 import { triggerMarketDataUpdate } from '../jobs/updateCityMarketData';
 import { refreshAllCityImages } from '../services/cityImageService';
+import { fetchCityImages, getCityFallbackImageUrl } from '../services/wikiImageService';
 import { apiLogger } from '../utils/logger';
 import { getParam } from '../utils/validateParams';
 
@@ -145,5 +146,30 @@ export const refreshCityImagesController = async (req: Request, res: Response): 
   } catch (error: any) {
     apiLogger.error('Error triggering city image refresh:', error);
     res.status(500).json({ success: false, message: 'Error triggering image refresh' });
+  }
+};
+
+/**
+ * @desc    Get city photos from Wikimedia Commons
+ * @route   GET /api/cities/images/:city/:country
+ * @access  Public
+ */
+export const getCityImagesController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const city = getParam(req, 'city');
+    const country = getParam(req, 'country');
+
+    if (!city || !country) {
+      res.status(400).json({ success: false, message: 'City and country are required' });
+      return;
+    }
+
+    const images = await fetchCityImages(city, country, 5);
+    const fallbackUrl = getCityFallbackImageUrl(city, country);
+
+    res.json({ images, fallbackUrl });
+  } catch (error: unknown) {
+    apiLogger.error('Error fetching city images:', error);
+    res.status(500).json({ success: false, message: 'Error fetching city images' });
   }
 };

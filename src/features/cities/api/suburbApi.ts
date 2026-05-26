@@ -1,13 +1,20 @@
-// Suburb data API module
-// Fetches per-suburb real estate data for the interactive choropleth map
+// Suburb & image API module
 
 import { apiRequest } from '@/src/shared/api';
 import type { SuburbData } from '@/src/shared/types/suburb.types';
 
-/**
- * Fetch suburb data for a given city and country.
- * Results are cached server-side for 7 days.
- */
+export interface WikiCityImage {
+  title: string;
+  url: string;
+  thumbUrl: string;
+  credit: string;
+}
+
+export interface CityImagesResponse {
+  images: WikiCityImage[];
+  fallbackUrl: string;
+}
+
 export const getSuburbData = async (
   city: string,
   country: string
@@ -17,4 +24,15 @@ export const getSuburbData = async (
     { requiresAuth: false }
   );
   return response.suburbs;
+};
+
+export const getCityImages = async (
+  city: string,
+  country: string
+): Promise<CityImagesResponse> => {
+  const response = await apiRequest<CityImagesResponse>(
+    `/cities/images/${encodeURIComponent(city)}/${encodeURIComponent(country)}`,
+    { requiresAuth: false }
+  );
+  return response;
 };
