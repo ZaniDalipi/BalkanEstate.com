@@ -209,7 +209,8 @@ export interface Agent extends User {
     agencyType?: 'standard' | 'luxury' | 'commercial' | 'boutique' | 'team';
     lat?: number;
     lng?: number;
-
+    score?: number;
+    scoreBreakdown?: { rating: number; sales: number; active: number; reviews: number };
 }
 
 export interface Agency {
@@ -279,6 +280,8 @@ export interface Agency {
         autoRenew?: boolean;
         listingsLimit?: number;
     };
+    score?: number;
+    scoreBreakdown?: { listings: number; team: number; experience: number; featured: number };
 }
 
 export interface PropertyImage {

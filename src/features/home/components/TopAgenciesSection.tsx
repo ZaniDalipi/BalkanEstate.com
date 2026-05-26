@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { getAgencies } from '@/src/features/agencies/api/agencyApi';
+import { getTopAgencies } from '@/src/features/agencies/api/agencyApi';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { useAppContext } from '@/context/AppContext';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
@@ -136,7 +136,7 @@ const AgencyPodiumCard: React.FC<{
               boxShadow: '0 2px 6px rgba(232,50,10,0.4)',
               whiteSpace: 'nowrap',
             }}>
-              {gap} pts to #1
+              {t('topAgencies.ptsToTop', '{{gap}} pts to #1').replace('{{gap}}', String(gap))}
             </div>
           )}
         </div>
@@ -182,7 +182,7 @@ const AgencyPodiumCard: React.FC<{
             borderRadius: '999px', padding: '2px 10px', marginBottom: '0.4rem',
           }}>
             <span style={{ fontSize: '0.72rem', fontWeight: 800, color: isChamp ? '#92710A' : '#475569' }}>
-              {score} pts
+              {score} {t('topAgencies.pts', 'pts')}
             </span>
           </div>
 
@@ -336,12 +336,9 @@ const TopAgenciesSection: React.FC = () => {
   const { data: agencies = [], isLoading } = useQuery<Agency[]>({
     queryKey: ['topAgenciesMonth'],
     queryFn: async () => {
-      const data = await getAgencies({ limit: 10 });
-      const list = data.agencies || [];
-      return list
-        .filter((a: Agency) => a.name)
-        .sort((a: Agency, b: Agency) => calcAgencyScore(b) - calcAgencyScore(a))
-        .slice(0, 3);
+      const data = await getTopAgencies(3);
+      const list: Agency[] = data.agencies || [];
+      return list.filter((a) => a.name);
     },
     staleTime: 10 * 60 * 1000,
     gcTime: 30 * 60 * 1000,

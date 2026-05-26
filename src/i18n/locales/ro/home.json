@@ -156,7 +156,9 @@
     "title": "Cunoaște Cei Mai Performanți Agenți",
     "subtitle": "Clasați după vânzări, evaluări și satisfacția clienților în această săptămână",
     "sold": "vândut",
-    "active": "activ"
+    "active": "activ",
+    "pts": "pct.",
+    "ptsToTop": "{{gap}} pct. până la #1"
   },
   "topAgencies": {
     "badge": "Agențiile Lunii",
@@ -164,7 +166,9 @@
     "subtitle": "Agenții cu cele mai bune performanțe cu cele mai multe anunțuri, agenți și încrederea clienților",
     "listings": "anunțuri",
     "agents": "agenți",
-    "years": "ani"
+    "years": "ani",
+    "pts": "pct.",
+    "ptsToTop": "{{gap}} pct. până la #1"
   },
   "testimonials": {
     "title": "Ce Spun Utilizatorii Noștri",
