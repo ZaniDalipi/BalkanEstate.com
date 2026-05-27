@@ -296,35 +296,71 @@ const CityDashboard: React.FC = () => {
         type="website"
       />
 
-      {/* Hero header with city image */}
-      <div className="relative h-64 sm:h-80 overflow-hidden">
-        <img
-          src={imageUrl}
-          alt={city.city}
-          className="absolute inset-0 w-full h-full object-cover"
-          loading="eager"
-          decoding="async"
-          onError={(e) => {
-            const el = e.target as HTMLImageElement;
-            if (heroWikiUrl) {
-              el.src = heroWikiUrl;
-              el.onerror = () => {
-                el.style.display = 'none';
-                el.parentElement!.style.background = fallbackGradient;
-              };
-            } else {
-              el.style.display = 'none';
-              el.parentElement!.style.background = fallbackGradient;
-            }
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/70" />
+      {/* ─── Immersive mosaic cover ──────────────────────────────────────── */}
+      <div className="relative overflow-hidden bg-neutral-950" style={{ height: 440 }}>
+
+        {/* Mosaic photo grid */}
+        <div
+          className="absolute inset-0"
+          style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gridTemplateRows: '1fr 1fr', gap: 2 }}
+        >
+          {/* Hero image — spans both rows on the left */}
+          <div className="row-span-2 relative overflow-hidden bg-neutral-900">
+            <img
+              src={imageUrl}
+              alt={city.city}
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="eager"
+              decoding="async"
+              onError={(e) => {
+                const el = e.target as HTMLImageElement;
+                const first = galleryImages[0]?.thumbUrl ?? heroWikiUrl ?? '';
+                if (first) {
+                  el.src = first;
+                  el.onerror = () => {
+                    el.style.display = 'none';
+                    (el.parentElement as HTMLElement).style.background = fallbackGradient;
+                  };
+                } else {
+                  el.style.display = 'none';
+                  (el.parentElement as HTMLElement).style.background = fallbackGradient;
+                }
+              }}
+            />
+          </div>
+
+          {/* 4 secondary photo slots */}
+          {Array.from({ length: 4 }, (_, i) => {
+            const img = galleryImages[i];
+            return (
+              <div key={i} className="relative overflow-hidden bg-neutral-800">
+                {img ? (
+                  <img
+                    src={img.thumbUrl}
+                    alt={`${city.city} ${i + 1}`}
+                    className="absolute inset-0 w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                    loading="lazy"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 opacity-60" style={{ background: fallbackGradient }} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Gradient overlays for legibility */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-black/35 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent pointer-events-none" />
 
         {/* Back button */}
-        <div className="absolute top-4 left-4 z-10">
+        <div className="absolute top-5 left-5 z-10">
           <button
             onClick={navigateBack}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-black/30 backdrop-blur-md text-white rounded-xl border border-white/20 hover:bg-black/50 active:bg-black/60 transition-colors text-xs sm:text-sm font-medium"
+            className="flex items-center gap-2 px-4 py-2 bg-black/40 backdrop-blur-md text-white rounded-xl border border-white/20 hover:bg-black/60 active:bg-black/70 transition-colors text-sm font-medium"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -333,17 +369,30 @@ const CityDashboard: React.FC = () => {
           </button>
         </div>
 
-        {/* City name and trend */}
-        <div className="absolute bottom-6 left-4 sm:left-8 right-4 sm:right-8 z-10">
+        {/* Photo attribution */}
+        {galleryImages.length > 0 && (
+          <div className="absolute top-5 right-5 z-10">
+            <span className="text-[10px] text-white/50 bg-black/30 backdrop-blur-sm px-2 py-1 rounded-md">
+              © Wikimedia Commons
+            </span>
+          </div>
+        )}
+
+        {/* City info — bottom overlay */}
+        <div className="absolute bottom-0 left-0 right-0 z-10 px-6 sm:px-10 pb-7 pt-20">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <MapPinIcon className="w-6 h-6 text-white/90" />
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white">{city.city}</h1>
+              <div className="flex items-center gap-3 mb-1">
+                <MapPinIcon className="w-7 h-7 text-white/90 drop-shadow-lg flex-shrink-0" />
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow-lg leading-none">
+                  {city.city}
+                </h1>
               </div>
-              <p className="text-white/70 text-base sm:text-lg ml-8">{city.country}</p>
+              <p className="text-white/65 text-lg sm:text-xl font-medium tracking-wide pl-10">
+                {city.country}
+              </p>
             </div>
-            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold shadow-lg ${getTrendColor(city.marketTrend)}`}>
+            <div className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold shadow-xl backdrop-blur-sm border border-white/10 ${getTrendColor(city.marketTrend)}`}>
               {getTrendIcon(city.marketTrend)}
               {t('dashboard.marketIs', 'Market is')} {getTrendLabel(city.marketTrend)}
             </div>
@@ -352,37 +401,7 @@ const CityDashboard: React.FC = () => {
       </div>
 
       {/* Main content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-8 -mt-6 relative z-10 pb-12">
-
-        {/* Photo gallery — Wikimedia Commons images */}
-        {galleryImages.length > 1 && (
-          <div className="mb-6 grid grid-cols-4 gap-2 rounded-xl overflow-hidden h-36 sm:h-48">
-            {/* Large primary image */}
-            <div className="col-span-2 row-span-2 relative overflow-hidden">
-              <img
-                src={galleryImages[0].thumbUrl}
-                alt={`${city.city} photo 1`}
-                className="absolute inset-0 w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                loading="lazy"
-              />
-            </div>
-            {/* Secondary images */}
-            {galleryImages.slice(1, 5).map((img, i) => (
-              <div key={i} className="relative overflow-hidden">
-                <img
-                  src={img.thumbUrl}
-                  alt={`${city.city} photo ${i + 2}`}
-                  className="absolute inset-0 w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
-                />
-              </div>
-            ))}
-            {/* Attribution overlay */}
-            <div className="col-span-4 flex items-center justify-end px-2 py-1 bg-black/20 absolute bottom-0 right-0 rounded-bl-lg">
-              <span className="text-[9px] text-white/70">Photos © Wikimedia Commons</span>
-            </div>
-          </div>
-        )}
+      <div className="max-w-6xl mx-auto px-4 sm:px-8 mt-6 relative z-10 pb-12">
 
         {/* Data sources explainer banner */}
         <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
