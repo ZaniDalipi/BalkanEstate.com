@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -114,6 +114,41 @@ const PopularCitiesSection: React.FC<PopularCitiesSectionProps> = ({ onNavigate 
     [allCities, mountId.current]
   );
 
+  // Wikipedia fallback images for cities without imageUrl
+  const [wikiImages, setWikiImages] = useState<Record<string, string | null>>({});
+
+  useEffect(() => {
+    const fetchMissing = async () => {
+      for (const city of cities) {
+        if (city.imageUrl) continue;
+        const key = city.city;
+        if (wikiImages[key] !== undefined) continue;
+
+        setWikiImages(prev => ({ ...prev, [key]: null }));
+        const candidates = [city.city, `${city.city}, ${city.country}`, `${city.city} (city)`];
+        for (const term of candidates) {
+          try {
+            const res = await fetch(
+              `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(term)}`,
+              { headers: { Accept: 'application/json' } }
+            );
+            if (!res.ok) continue;
+            const data = await res.json();
+            const src: string | undefined = data.originalimage?.source || data.thumbnail?.source;
+            if (src) {
+              setWikiImages(prev => ({ ...prev, [key]: src }));
+              break;
+            }
+          } catch {
+            // try next candidate
+          }
+        }
+      }
+    };
+    if (cities.length > 0) fetchMissing();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cities]);
+
   if (isError && cities.length === 0) return null;
 
   return (
@@ -169,9 +204,9 @@ const PopularCitiesSection: React.FC<PopularCitiesSectionProps> = ({ onNavigate 
                 onClick={() => onNavigate('explore-cities', `/explore-cities/${encodeURIComponent(city.city)}/${encodeURIComponent(city.country)}`)}
                 className={`group relative overflow-hidden rounded-xl ${i < 2 ? 'sm:col-span-2 lg:col-span-2 aspect-[16/9]' : 'aspect-[4/3]'}`}
               >
-                {city.imageUrl ? (
+                {(city.imageUrl || typeof wikiImages[city.city] === 'string') ? (
                   <img
-                    src={city.imageUrl}
+                    src={(city.imageUrl || wikiImages[city.city])!}
                     alt={city.city}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="eager"
