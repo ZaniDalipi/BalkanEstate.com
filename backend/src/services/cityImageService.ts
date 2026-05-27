@@ -4,7 +4,6 @@ import cloudinary from '../config/cloudinary';
 import CityMarketData from '../models/CityMarketData';
 import { apiLogger } from '../utils/logger';
 
-const CITY_IMAGE_FOLDER = 'balkan-estate/cities';
 const IMAGE_MAX_AGE_DAYS = 30; // Re-fetch images older than 30 days
 const MAX_IMAGE_WIDTH = 1200;
 const MAX_IMAGE_HEIGHT = 800;
