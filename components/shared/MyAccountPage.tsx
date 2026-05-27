@@ -12,7 +12,7 @@ const ViewingRequestsTab = lazy(() => import('./ViewingRequestsTab'));
 const MyBusinessListings = lazy(() => import('./MyBusinessListings'));
 const MyListingFeeds = lazy(() => import('../../src/features/listing-sources/components/MyListingFeeds'));
 import { User, UserRole, Agency } from '../../types';
-import { BuildingOfficeIcon, BuildingStorefrontIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon, CalendarIcon, HomeIcon, ClockIcon, ExclamationTriangleIcon, CheckCircleIcon, GlobeAltIcon } from '../../constants';
+import { BuildingOfficeIcon, BuildingStorefrontIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon, CalendarIcon, HomeIcon, ClockIcon, ExclamationTriangleIcon, CheckCircleIcon, GlobeAltIcon, BellIcon } from '../../constants';
 import DefaultAvatar from './DefaultAvatar';
 import AvatarCustomizer, { type AvatarOptions, parseAvatarOptions, getDefaultAvatarOptions } from './AvatarCustomizer';
 import AgentLicenseModal from './AgentLicenseModal';
@@ -55,7 +55,7 @@ const BALKAN_COUNTRIES = [
   { code: 'SI', name: 'Slovenia' },
 ];
 
-type AccountTab = 'listings' | 'performance' | 'profile' | 'subscription' | 'security' | 'promotions' | 'measurements' | 'viewings' | 'businesses' | 'feeds';
+type AccountTab = 'listings' | 'performance' | 'profile' | 'subscription' | 'security' | 'promotions' | 'measurements' | 'viewings' | 'businesses' | 'feeds' | 'notifications';
 
 // Map URL slugs to account tabs
 const tabRouteMap: Record<string, AccountTab> = {
@@ -80,6 +80,10 @@ const tabRouteMap: Record<string, AccountTab> = {
     'feeds': 'feeds',
     'listing-feeds': 'feeds',
     'external-feeds': 'feeds',
+    'notifications': 'notifications',
+    'notification-settings': 'notifications',
+    'email-preferences': 'notifications',
+    'email-prefs': 'notifications',
 };
 
 // Map account tabs to URL slugs
@@ -94,6 +98,7 @@ const tabToRouteMap: Record<AccountTab, string> = {
     'viewings': 'viewings',
     'businesses': 'businesses',
     'feeds': 'feeds',
+    'notifications': 'notifications',
 };
 
 const TabButton: React.FC<{
@@ -2193,10 +2198,35 @@ const MyAccountPage: React.FC = () => {
         }
     }, [activeTab]);
 
+    // Open login modal automatically when user arrives unauthenticated (e.g. from email link)
+    useEffect(() => {
+        if (!state.isAuthenticating && !state.currentUser) {
+            dispatch({ type: 'SET_PENDING_REDIRECT', payload: 'account' });
+            dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
+        }
+    }, [state.isAuthenticating, state.currentUser, dispatch]);
+
     if (!state.currentUser) {
         return (
-            <div className="p-8 text-center">
-                <p>{t('account:mustBeLoggedIn')}</p>
+            <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50/60 to-indigo-50/40 flex items-center justify-center px-4">
+                <div className="bg-white/60 backdrop-blur-xl border border-white/50 rounded-3xl shadow-xl p-10 max-w-sm w-full text-center space-y-4">
+                    <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+                        <BellIcon className="w-7 h-7 text-primary" />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-bold text-neutral-800">{t('account:mustBeLoggedIn', 'Sign in to continue')}</h2>
+                        <p className="text-sm text-neutral-500 mt-1">{t('account:loginToManagePrefs', 'Log in to manage your email and notification preferences.')}</p>
+                    </div>
+                    <button
+                        onClick={() => {
+                            dispatch({ type: 'SET_PENDING_REDIRECT', payload: 'account' });
+                            dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
+                        }}
+                        className="w-full py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-primary/90 transition-colors"
+                    >
+                        {t('account:signIn', 'Sign in')}
+                    </button>
+                </div>
             </div>
         );
     }
@@ -2248,6 +2278,8 @@ const MyAccountPage: React.FC = () => {
                  return hasSellerTabs ? <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}><ViewingRequestsTab /></Suspense> : null;
             case 'security':
                  return <SecuritySettings logoutAllDevices={logoutAllDevices} />;
+            case 'notifications':
+                 return <NotificationSettingsSection />;
             case 'businesses':
                  return <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}><MyBusinessListings /></Suspense>;
             case 'feeds':
@@ -2334,6 +2366,7 @@ const MyAccountPage: React.FC = () => {
                                 <TabButton label={t('account:tabs.subscription', 'Subscription')} icon={<CreditCardIcon className="w-6 h-6"/>} isActive={activeTab === 'subscription'} onClick={() => setActiveTab('subscription')} tabKey="subscription" />
                                 <TabButton label={t('account:tabs.measurements', 'Measurements')} icon={<MapPinIcon className="w-6 h-6"/>} isActive={activeTab === 'measurements'} onClick={() => setActiveTab('measurements')} tabKey="measurements" />
                                 <TabButton label={t('account:tabs.security')} icon={<ShieldCheckIcon className="w-6 h-6"/>} isActive={activeTab === 'security'} onClick={() => setActiveTab('security')} tabKey="security" />
+                                <TabButton label={t('account:tabs.notifications', 'Notifications')} icon={<BellIcon className="w-6 h-6"/>} isActive={activeTab === 'notifications'} onClick={() => setActiveTab('notifications')} tabKey="notifications" />
                                 <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all w-full text-left text-red-500 hover:bg-red-50/40 hover:border-red-200/40 border border-transparent backdrop-blur-sm mt-4">
                                     <ArrowLeftOnRectangleIcon className="w-6 h-6" />
                                     <span>{t('account:logout')}</span>
