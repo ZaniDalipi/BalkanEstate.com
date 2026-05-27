@@ -1273,7 +1273,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                 title: t('profile.emailChangeTitle', 'Change Email Address?'),
                 message: t('profile.emailChangeConfirm', 'Changing your email to "{{email}}" will require you to verify the new address. You will be logged out and need to verify before logging back in.').replace('{{email}}', formData.email),
                 confirmLabel: t('profile.emailChangeButton', 'Change Email & Logout'),
-                variant: 'warning',
+                type: 'warning',
             });
 
             if (!confirmed) return;
