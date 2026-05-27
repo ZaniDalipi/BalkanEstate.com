@@ -383,17 +383,41 @@ const CityDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Official data source badge */}
-        {city.dataSource && (
-          <div className="mb-5 flex items-center gap-2 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-xl text-xs">
-            <ShieldCheckIcon className="w-4 h-4 text-blue-600 flex-shrink-0" />
-            <span className="text-blue-700 font-medium">
-              Data verified by official sources:{' '}
-              <span className="font-bold">BIS · National Statistics Institute · {city.country} Cadastre</span>
-            </span>
-            <span className="ml-auto text-blue-500 text-[10px]">Updated {safeFormatDate(city.lastUpdated)}</span>
+        {/* Data sources explainer banner */}
+        <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="flex items-start gap-3 p-4 bg-violet-50 border border-violet-200 rounded-xl">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+              <LightBulbIcon className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-violet-800 uppercase tracking-wide mb-0.5">BalkanEstate AI</p>
+              <p className="text-[11px] text-violet-600 leading-relaxed">
+                Market scores, demand index, rental estimates, neighborhood insights, and suburb stats are AI-generated using our regional data model.
+              </p>
+            </div>
           </div>
-        )}
+          <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+              <ShieldCheckIcon className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-blue-800 uppercase tracking-wide mb-0.5">Official Sources</p>
+              <p className="text-[11px] text-blue-600 leading-relaxed">
+                Price history from <span className="font-semibold">BIS</span> · Macroeconomic data from <span className="font-semibold">World Bank</span> · Photos from <span className="font-semibold">Wikimedia Commons</span>.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* AI section divider */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="h-px flex-1 bg-violet-100" />
+          <span className="text-[10px] font-bold text-violet-600 uppercase tracking-widest px-3 py-1 bg-violet-50 border border-violet-200 rounded-full flex items-center gap-1.5">
+            <LightBulbIcon className="w-3 h-3" />
+            BalkanEstate AI Analysis
+          </span>
+          <div className="h-px flex-1 bg-violet-100" />
+        </div>
 
         {/* Market Health Score - composite visual */}
         <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6 mb-8">
@@ -531,6 +555,11 @@ const CityDashboard: React.FC = () => {
             <span className="text-2xl sm:text-3xl font-black text-blue-600">{rentalYield}%</span>
           </div>
         </div>
+
+        <p className="text-[10px] text-violet-500 mb-6 flex items-center gap-1">
+          <LightBulbIcon className="w-3 h-3" />
+          Figures above are BalkanEstate AI estimates based on regional market data.
+        </p>
 
         {/* Secondary stats + scores */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -696,8 +725,18 @@ const CityDashboard: React.FC = () => {
           )}
         </div>
 
+        {/* Official data section divider */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="h-px flex-1 bg-blue-100" />
+          <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest px-3 py-1 bg-blue-50 border border-blue-200 rounded-full flex items-center gap-1.5">
+            <ShieldCheckIcon className="w-3 h-3" />
+            Official Market Data
+          </span>
+          <div className="h-px flex-1 bg-blue-100" />
+        </div>
+
         {/* ── 8-Year Price History Chart ──────────────────────────────────── */}
-        <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6 mb-6">
+        <div className="bg-white rounded-xl shadow-md border border-blue-100 p-5 sm:p-6 mb-6">
           {historyLoading ? (
             <div className="animate-pulse">
               <div className="h-6 w-48 bg-neutral-100 rounded mb-2" />
@@ -721,10 +760,20 @@ const CityDashboard: React.FC = () => {
 
         {/* ── Macroeconomic Indicators (World Bank) ───────────────────────── */}
         {economicData && (
-          <div className="mb-8">
+          <div className="mb-8 ring-1 ring-blue-100 rounded-xl">
             <EconomicIndicatorsPanel data={economicData} />
           </div>
         )}
+
+        {/* AI section divider (return to AI-generated content) */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="h-px flex-1 bg-violet-100" />
+          <span className="text-[10px] font-bold text-violet-600 uppercase tracking-widest px-3 py-1 bg-violet-50 border border-violet-200 rounded-full flex items-center gap-1.5">
+            <LightBulbIcon className="w-3 h-3" />
+            BalkanEstate AI Analysis
+          </span>
+          <div className="h-px flex-1 bg-violet-100" />
+        </div>
 
         {/* ── Explore Neighborhoods ───────────────────────────────────────── */}
         <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6 mb-8">
@@ -1076,16 +1125,30 @@ const CityDashboard: React.FC = () => {
         )}
 
         {/* Data freshness info */}
-        <div className="mb-8 p-4 bg-gradient-to-r from-violet-50 to-fuchsia-50 rounded-xl border border-violet-200">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/25 flex-shrink-0">
-              <GlobeAltIcon className="w-5 h-5 text-white" />
+        <div className="mb-8 p-4 rounded-xl border border-neutral-200 bg-neutral-50">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex items-start gap-3 flex-1">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-sm flex-shrink-0">
+                <LightBulbIcon className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-violet-700 uppercase tracking-wide">BalkanEstate AI</p>
+                <p className="text-[11px] text-neutral-500 mt-0.5">
+                  {t('aiInsights.lastUpdated', { date: safeFormatDate(city.lastUpdated) })} &bull; {t('aiInsights.dataSource')}
+                </p>
+              </div>
             </div>
-            <div>
-              <h4 className="font-bold text-slate-900 text-sm">{t('aiInsights.title')}</h4>
-              <p className="text-xs text-slate-500 mt-1">
-                {t('aiInsights.lastUpdated', { date: safeFormatDate(city.lastUpdated) })} &bull; {t('aiInsights.dataSource')}
-              </p>
+            <div className="hidden sm:block w-px bg-neutral-200 self-stretch" />
+            <div className="flex items-start gap-3 flex-1">
+              <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm flex-shrink-0">
+                <ShieldCheckIcon className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-blue-700 uppercase tracking-wide">Official Sources</p>
+                <p className="text-[11px] text-neutral-500 mt-0.5">
+                  BIS Residential Property Price Index &bull; World Bank Open Data &bull; Photos via Wikimedia Commons
+                </p>
+              </div>
             </div>
           </div>
         </div>
