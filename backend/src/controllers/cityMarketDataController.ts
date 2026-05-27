@@ -5,6 +5,8 @@ import { refreshAllCityImages } from '../services/cityImageService';
 import { fetchCityImages, getCityFallbackImageUrl } from '../services/wikiImageService';
 import { getCityPriceHistory } from '../services/cityHistoryService';
 import { getEconomicIndicators } from '../services/economicIndicatorsService';
+import { getCityGeoData } from '../services/geoDataService';
+import { seedCityImages } from '../scripts/seedCityImages';
 import { apiLogger } from '../utils/logger';
 import { getParam } from '../utils/validateParams';
 
@@ -214,5 +216,59 @@ export const getEconomicIndicatorsController = async (req: Request, res: Respons
   } catch (error: unknown) {
     apiLogger.error('Error fetching economic indicators:', error);
     res.status(500).json({ success: false, message: 'Error fetching economic indicators' });
+  }
+};
+
+/**
+ * @desc    Get real GeoJSON municipality boundaries from OpenStreetMap
+ * @route   GET /api/cities/geodata/:city/:country
+ * @access  Public
+ */
+export const getCityGeoDataController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const city = getParam(req, 'city');
+    const country = getParam(req, 'country');
+    if (!city || !country) {
+      res.status(400).json({ success: false, message: 'City and country are required' });
+      return;
+    }
+    const forceRefresh = req.query.refresh === 'true';
+    const geoData = await getCityGeoData(city, country, forceRefresh);
+    if (!geoData) {
+      res.status(404).json({ success: false, message: 'No boundary data available for this city' });
+      return;
+    }
+    res.json({ success: true, data: geoData, featureCount: geoData.features.length });
+  } catch (error: unknown) {
+    apiLogger.error('Error fetching city geo data:', error);
+    res.status(500).json({ success: false, message: 'Error fetching boundary data' });
+  }
+};
+
+/**
+ * @desc    Seed missing city images to Cloudinary (admin only)
+ * @route   POST /api/cities/seed-images
+ * @access  Private/Admin
+ */
+export const seedCityImagesController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user || (req.user as { role?: string }).role !== 'admin') {
+      res.status(403).json({ success: false, message: 'Admin access required' });
+      return;
+    }
+    const force = req.query.force === 'true';
+    const only = typeof req.query.only === 'string' ? req.query.only : undefined;
+
+    // Run in background — don't block the response
+    seedCityImages(force, only).then(({ ok, skipped, failed }) => {
+      apiLogger.info(`City image seed complete: ${ok} uploaded, ${skipped} skipped, ${failed} failed`);
+    }).catch(err => {
+      apiLogger.error('City image seed failed:', err);
+    });
+
+    res.json({ success: true, message: 'City image seeding started in background' });
+  } catch (error: unknown) {
+    apiLogger.error('Error starting city image seed:', error);
+    res.status(500).json({ success: false, message: 'Error starting image seed' });
   }
 };

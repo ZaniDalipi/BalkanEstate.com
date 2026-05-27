@@ -56,12 +56,22 @@ async function downloadAndResizeImage(imageUrl: string): Promise<Buffer | null> 
 /**
  * Upload a resized image buffer to Cloudinary
  */
+/** Normalises a name to match the frontend's getCityImageUrl format */
+function normalizeName(name: string): string {
+  return name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
+
+/**
+ * Upload an image buffer to Cloudinary.
+ * Public ID format: city-{country}-{city}  — must match getCityImageUrl() in cloudinaryConfig.ts
+ */
 async function uploadBufferToCloudinary(
   imageBuffer: Buffer,
-  cityName: string
+  cityName: string,
+  country = 'unknown'
 ): Promise<string | null> {
   try {
-    const publicId = `${CITY_IMAGE_FOLDER}/${cityName.toLowerCase().replace(/\s+/g, '-')}`;
+    const publicId = `city-${normalizeName(country)}-${normalizeName(cityName)}`;
     const result = await new Promise<any>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
@@ -116,7 +126,7 @@ export async function refreshCityImage(cityId: string, force = false): Promise<s
   const resizedBuffer = await downloadAndResizeImage(wikiUrl);
   if (!resizedBuffer) return city.imageUrl || null;
 
-  const cloudinaryUrl = await uploadBufferToCloudinary(resizedBuffer, city.city);
+  const cloudinaryUrl = await uploadBufferToCloudinary(resizedBuffer, city.city, city.country);
   if (!cloudinaryUrl) return city.imageUrl || null;
 
   await CityMarketData.findByIdAndUpdate(cityId, {

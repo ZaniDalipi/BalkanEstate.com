@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCityMarketData, useCitiesByCountry } from '../hooks/useCityQueries';
-import { useSuburbData, useCityImages } from '../hooks/useSuburbQueries';
+import { useSuburbData, useCityImages, useCityGeoData } from '../hooks/useSuburbQueries';
 import { useCityPriceHistory, useEconomicIndicators } from '../hooks/useCityInsights';
 import PriceHistoryChart from './PriceHistoryChart';
 import EconomicIndicatorsPanel from './EconomicIndicatorsPanel';
@@ -96,6 +96,7 @@ const CityDashboard: React.FC = () => {
   const { data: cityImagesData } = useCityImages(params?.city, params?.country);
   const { data: priceHistory, isLoading: historyLoading } = useCityPriceHistory(params?.city, params?.country);
   const { data: economicData } = useEconomicIndicators(params?.country);
+  const { data: cityGeoData } = useCityGeoData(params?.city, params?.country);
 
   // Scroll to top when city changes
   useEffect(() => {
@@ -840,6 +841,9 @@ const CityDashboard: React.FC = () => {
                         cityAvgPricePerSqm={suburbData.cityAvgPricePerSqm}
                         selectedSuburb={selectedSuburb}
                         onSuburbSelect={setSelectedSuburb}
+                        geoData={cityGeoData}
+                        officialAvgPrice={priceHistory?.history?.[priceHistory.history.length - 1]?.pricePerSqm}
+                        officialSource={priceHistory?.dataSource === 'bis' ? 'BIS Official' : undefined}
                       />
                     </Suspense>
                   </div>
