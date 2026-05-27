@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getFeaturedCities, CityMarketData } from '@/services/apiService';
 import { formatPrice } from '@/utils/currency';
@@ -24,6 +24,8 @@ const CityRecommendations: React.FC = () => {
     return params.get('country') || 'all';
   });
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  // wikiImages: undefined = not fetched, null = fetch failed/no image, string = URL
+  const [wikiImages, setWikiImages] = useState<Record<string, string | null>>({});
   const { dispatch, updateSearchPageState } = useAppContext();
 
   // Listen for country filter changes from footer (when component is already mounted)
@@ -36,9 +38,43 @@ const CityRecommendations: React.FC = () => {
     return () => window.removeEventListener('country-filter-change', handleCountryFilter);
   }, []);
 
-  // Handle image load error - fallback to gradient
-  const handleImageError = (cityName: string) => {
+  const fetchWikipediaImage = async (cityName: string, country: string) => {
+    // Don't re-fetch if we already have a result (null or URL)
+    if (wikiImages[cityName] !== undefined) return;
+    // Mark as in-progress with null so we don't double-fetch
+    setWikiImages(prev => ({ ...prev, [cityName]: null }));
+
+    const candidates = [
+      cityName,
+      `${cityName}, ${country}`,
+      `${cityName} (city)`,
+    ];
+
+    for (const term of candidates) {
+      try {
+        const res = await fetch(
+          `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(term)}`,
+          { headers: { Accept: 'application/json' } }
+        );
+        if (!res.ok) continue;
+        const data = await res.json();
+        // Prefer originalimage (higher res), fall back to thumbnail
+        const src: string | undefined = data.originalimage?.source || data.thumbnail?.source;
+        if (src) {
+          setWikiImages(prev => ({ ...prev, [cityName]: src }));
+          return;
+        }
+      } catch {
+        // try next candidate
+      }
+    }
+    // All candidates failed — leave null so we show gradient
+  };
+
+  // Handle image load error — try Wikipedia next, then gradient
+  const handleImageError = (cityName: string, country: string) => {
     setFailedImages(prev => new Set(prev).add(cityName));
+    fetchWikipediaImage(cityName, country);
   };
 
   useEffect(() => {
@@ -48,7 +84,7 @@ const CityRecommendations: React.FC = () => {
   const loadCities = async () => {
     try {
       setLoading(true);
-      const data = await getFeaturedCities(36); // Load 36 cities (3-4 per country)
+      const data = await getFeaturedCities(100); // Load all cities across all countries
       setCities(data);
     } catch (error) {
       // Error removed
@@ -320,9 +356,15 @@ const CityRecommendations: React.FC = () => {
         {/* City Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCities.map((city) => {
-            const hasImage = !failedImages.has(city.city);
+            const cloudinaryFailed = failedImages.has(city.city);
+            const wikiSrc = wikiImages[city.city]; // undefined | null | string
             const imageUrl = getCityImageUrl(city.city, { country: city.country, width: 800, height: 400, quality: 'auto:good' });
             const fallbackGradient = getCityFallbackGradient(city.city);
+
+            // Display priority: Cloudinary → Wikipedia → gradient
+            const showCloudinary = !cloudinaryFailed;
+            const showWiki = cloudinaryFailed && typeof wikiSrc === 'string';
+            const showGradient = cloudinaryFailed && !showWiki;
 
             return (
               <div
@@ -333,16 +375,26 @@ const CityRecommendations: React.FC = () => {
                 {/* City Image Header */}
                 <div className="relative h-36 overflow-hidden">
                   {/* Background Image or Gradient Fallback */}
-                  {hasImage ? (
+                  {showCloudinary && (
                     <img
                       src={imageUrl}
                       alt={city.city}
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      onError={() => handleImageError(city.city)}
+                      onError={() => handleImageError(city.city, city.country)}
                       loading="lazy"
                       decoding="async"
                     />
-                  ) : (
+                  )}
+                  {showWiki && (
+                    <img
+                      src={wikiSrc!}
+                      alt={city.city}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  )}
+                  {showGradient && (
                     <div
                       className="absolute inset-0"
                       style={{ background: fallbackGradient }}
