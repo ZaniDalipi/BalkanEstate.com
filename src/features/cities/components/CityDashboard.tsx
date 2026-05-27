@@ -78,6 +78,7 @@ const CityDashboard: React.FC = () => {
 
   const [params, setParams] = useState(parseCityFromUrl);
   const [showListingPrice, setShowListingPrice] = useState(false);
+  const [showOfficialPrice, setShowOfficialPrice] = useState(false);
   const [suburbView, setSuburbView] = useState<'map' | 'list'>('map');
   const [selectedSuburb, setSelectedSuburb] = useState<SuburbEntry | null>(null);
 
@@ -281,6 +282,21 @@ const CityDashboard: React.FC = () => {
   const fallbackGradient = getCityFallbackGradient(city.city);
   const demandInfo = getDemandInfo(demandScore);
   const investmentInfo = getInvestmentInfo(investmentScore);
+
+  // Official (BIS) price data — derived from the price history endpoint
+  const bisHistory = priceHistory?.dataSource === 'bis' ? priceHistory.history : null;
+  const bisLatestPrice = bisHistory ? bisHistory[bisHistory.length - 1]?.pricePerSqm ?? null : null;
+  const bisYoY = bisHistory && bisHistory.length >= 5
+    ? parseFloat(
+        (
+          ((bisHistory[bisHistory.length - 1].pricePerSqm - bisHistory[bisHistory.length - 5].pricePerSqm) /
+            bisHistory[bisHistory.length - 5].pricePerSqm) *
+          100
+        ).toFixed(1)
+      )
+    : null;
+  const bisSourceUrl = priceHistory?.fredUrl ?? null;
+  const hasBIS = bisLatestPrice !== null;
 
   // Wikimedia images: use first one as hero fallback, rest for gallery
   const wikiImages = cityImagesData?.images ?? [];
@@ -497,40 +513,55 @@ const CityDashboard: React.FC = () => {
 
         {/* Primary metrics row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-8">
-          {/* Avg Price/m² */}
-          <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-4 sm:p-5">
+          {/* Avg Price/m² — AI | Listings | Official toggle */}
+          <div className={`bg-white rounded-xl shadow-md p-4 sm:p-5 border transition-colors ${showOfficialPrice ? 'border-blue-200' : 'border-neutral-100'}`}>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <HomeIcon className="w-4 h-4 text-primary" />
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${showOfficialPrice ? 'bg-blue-100' : 'bg-primary/10'}`}>
+                  <HomeIcon className={`w-4 h-4 ${showOfficialPrice ? 'text-blue-600' : 'text-primary'}`} />
                 </div>
                 <span className="text-xs font-medium text-neutral-500">Avg. Price /m²</span>
               </div>
-              {city.listingAvgPricePerSqm && (
-                <div className="flex gap-0.5 bg-neutral-100 rounded-full p-0.5">
+              <div className="flex gap-0.5 bg-neutral-100 rounded-full p-0.5">
+                <button
+                  onClick={() => { setShowOfficialPrice(false); setShowListingPrice(false); }}
+                  className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${!showListingPrice && !showOfficialPrice ? 'bg-white text-violet-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
+                >AI</button>
+                {city.listingAvgPricePerSqm && (
                   <button
-                    onClick={() => setShowListingPrice(false)}
-                    className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${!showListingPrice ? 'bg-white text-primary shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
-                  >
-                    Market
-                  </button>
+                    onClick={() => { setShowListingPrice(true); setShowOfficialPrice(false); }}
+                    className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${showListingPrice ? 'bg-white text-primary shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
+                  >Listings</button>
+                )}
+                {hasBIS && (
                   <button
-                    onClick={() => setShowListingPrice(true)}
-                    className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${showListingPrice ? 'bg-white text-blue-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
-                  >
-                    Listings
-                  </button>
-                </div>
-              )}
+                    onClick={() => { setShowOfficialPrice(true); setShowListingPrice(false); }}
+                    className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${showOfficialPrice ? 'bg-white text-blue-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
+                  >Official</button>
+                )}
+              </div>
             </div>
             <div className="flex items-baseline gap-1">
               <span className="text-2xl sm:text-3xl font-black text-neutral-900">
-                €{(showListingPrice && city.listingAvgPricePerSqm ? city.listingAvgPricePerSqm : avgPrice).toLocaleString()}
+                €{(showOfficialPrice && bisLatestPrice
+                    ? bisLatestPrice
+                    : showListingPrice && city.listingAvgPricePerSqm
+                    ? city.listingAvgPricePerSqm
+                    : avgPrice
+                  ).toLocaleString()}
               </span>
               <span className="text-sm text-neutral-400">/m²</span>
             </div>
-            <p className="text-[10px] text-neutral-400 mt-1">
-              {showListingPrice ? `${city.listingsCount} active listings` : 'Market research'}
+            <p className="text-[10px] mt-1">
+              {showOfficialPrice
+                ? <span className="text-blue-500 font-semibold flex items-center gap-1">
+                    <ShieldCheckIcon className="w-3 h-3" />
+                    BIS Residential Property Price Index
+                  </span>
+                : showListingPrice
+                ? <span className="text-neutral-400">{city.listingsCount} active listings</span>
+                : <span className="text-violet-400">BalkanEstate AI estimate</span>
+              }
             </p>
           </div>
 
@@ -545,7 +576,7 @@ const CityDashboard: React.FC = () => {
             <span className="text-2xl sm:text-3xl font-black text-primary">{formatPrice(medianPrice, city.countryCode)}</span>
           </div>
 
-          {/* YoY Growth */}
+          {/* YoY Growth — AI estimate + optional BIS official */}
           <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${yoyGrowth > 0 ? 'bg-green-100' : yoyGrowth < 0 ? 'bg-red-100' : 'bg-neutral-100'}`}>
@@ -562,6 +593,12 @@ const CityDashboard: React.FC = () => {
             <span className={`text-2xl sm:text-3xl font-black ${yoyGrowth > 0 ? 'text-green-600' : yoyGrowth < 0 ? 'text-red-600' : 'text-neutral-700'}`}>
               {yoyGrowth > 0 ? '+' : ''}{yoyGrowth}%
             </span>
+            {bisYoY !== null && (
+              <div className="mt-1.5 flex items-center gap-1 text-[10px]">
+                <ShieldCheckIcon className="w-3 h-3 text-blue-500 flex-shrink-0" />
+                <span className="text-blue-600 font-semibold">BIS: {bisYoY > 0 ? '+' : ''}{bisYoY}%</span>
+              </div>
+            )}
           </div>
 
           {/* Rental Yield */}
@@ -576,10 +613,39 @@ const CityDashboard: React.FC = () => {
           </div>
         </div>
 
-        <p className="text-[10px] text-violet-500 mb-6 flex items-center gap-1">
+        <p className="text-[10px] text-violet-500 mb-3 flex items-center gap-1">
           <LightBulbIcon className="w-3 h-3" />
-          Figures above are BalkanEstate AI estimates based on regional market data.
+          AI estimates shown by default — tap <span className="font-bold">Official</span> on any card to see government data.
         </p>
+
+        {/* Official price reference strip — visible only when BIS data is available */}
+        {hasBIS && (
+          <div className="mb-6 flex flex-wrap items-center gap-3 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl">
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <ShieldCheckIcon className="w-4 h-4 text-blue-600" />
+              <span className="text-xs font-bold text-blue-800 uppercase tracking-wide">Official Reference</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="font-black text-blue-900">€{bisLatestPrice!.toLocaleString()}/m²</span>
+              {bisYoY !== null && (
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${bisYoY >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  {bisYoY >= 0 ? '+' : ''}{bisYoY}% YoY
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] text-blue-600 flex-shrink-0">BIS Residential Property Price Index · {city.country}</span>
+            {bisSourceUrl && (
+              <a
+                href={bisSourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-auto text-[10px] text-blue-600 hover:underline font-semibold flex-shrink-0"
+              >
+                View source ↗
+              </a>
+            )}
+          </div>
+        )}
 
         {/* Secondary stats + scores */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -861,8 +927,8 @@ const CityDashboard: React.FC = () => {
                         selectedSuburb={selectedSuburb}
                         onSuburbSelect={setSelectedSuburb}
                         geoData={cityGeoData}
-                        officialAvgPrice={priceHistory?.history?.[priceHistory.history.length - 1]?.pricePerSqm}
-                        officialSource={priceHistory?.dataSource === 'bis' ? 'BIS Official' : undefined}
+                        officialAvgPrice={bisLatestPrice ?? undefined}
+                        officialSource={hasBIS ? 'BIS' : undefined}
                       />
                     </Suspense>
                   </div>
@@ -1168,9 +1234,21 @@ const CityDashboard: React.FC = () => {
               </div>
               <div>
                 <p className="text-xs font-bold text-blue-700 uppercase tracking-wide">Official Sources</p>
-                <p className="text-[11px] text-neutral-500 mt-0.5">
-                  BIS Residential Property Price Index &bull; World Bank Open Data &bull; Photos via Wikimedia Commons
+                <p className="text-[11px] text-neutral-500 mt-0.5 space-x-1">
+                  {bisSourceUrl
+                    ? <a href={bisSourceUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">BIS Residential Property Price Index ↗</a>
+                    : <span>BIS Residential Property Price Index</span>
+                  }
+                  <span>&bull;</span>
+                  <a href="https://data.worldbank.org/" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">World Bank ↗</a>
+                  <span>&bull;</span>
+                  <span>Wikimedia Commons</span>
                 </p>
+                {priceHistory?.lastUpdated && (
+                  <p className="text-[10px] text-neutral-400 mt-0.5">
+                    Price index refreshed {safeFormatDate(priceHistory.lastUpdated)}
+                  </p>
+                )}
               </div>
             </div>
           </div>
