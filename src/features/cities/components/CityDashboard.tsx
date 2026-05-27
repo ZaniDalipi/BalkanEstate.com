@@ -181,6 +181,39 @@ const CityDashboard: React.FC = () => {
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
   };
 
+  // Navigate to search filtered to a specific neighbourhood
+  const handleViewNeighborhoodListings = async (neighborhoodName: string) => {
+    if (!city) return;
+    const searchQuery = `${neighborhoodName}, ${city.city}, ${city.country}`;
+    const results = await searchLocation(searchQuery);
+    const bestResult = results[0];
+    const lat = bestResult ? Number(bestResult.lat) : 0;
+    const lng = bestResult ? Number(bestResult.lon) : 0;
+    const emptyFilters = {
+      country: 'any' as const, query: '', listingType: 'sale' as const,
+      minPrice: null, maxPrice: null, beds: null, baths: null,
+      livingRooms: null, minSqft: null, maxSqft: null, sortBy: 'newest' as const,
+      sellerType: 'any' as const, propertyType: 'any' as const, minYearBuilt: null,
+      maxYearBuilt: null, minParking: null, furnishing: 'any' as const,
+      heatingType: 'any' as const, condition: 'any' as const, viewType: 'any' as const,
+      energyRating: 'any' as const, hasBalcony: null, hasGarden: null,
+      hasElevator: null, hasSecurity: null, hasAirConditioning: null, hasPool: null,
+      petsAllowed: null, minFloorNumber: null, maxFloorNumber: null,
+      maxDistanceToCenter: null, maxDistanceToSea: null, maxDistanceToSchool: null,
+      maxDistanceToHospital: null, amenities: [] as string[],
+      has360Tour: null, hasDiscount: null, hasPriceIncrease: null,
+      minPricePerSqm: null, maxPricePerSqm: null, maxDaysListed: null,
+    };
+    updateSearchPageState({
+      filters: { ...emptyFilters, query: searchQuery },
+      activeFilters: { ...emptyFilters },
+      drawnBoundsJSON: null,
+      focusMapOnProperty: { lat, lng, address: searchQuery, zoom: 14 },
+      mobileView: 'map',
+    });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+  };
+
   // Trend helpers
   const getTrendColor = (trend: string) => {
     if (trend === 'rising') return 'text-green-600 bg-green-50';
@@ -890,7 +923,7 @@ const CityDashboard: React.FC = () => {
           {/* Loading skeleton */}
           {suburbLoading && (
             <div className="animate-pulse space-y-3">
-              <div className="h-[450px] bg-neutral-100 rounded-xl" />
+              <div className="h-64 sm:h-80 md:h-[420px] lg:h-[520px] bg-neutral-100 rounded-xl" />
               <div className="grid grid-cols-3 gap-3">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="h-20 bg-neutral-100 rounded-lg" />
@@ -918,7 +951,7 @@ const CityDashboard: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <Suspense
                       fallback={
-                        <div className="h-[450px] bg-neutral-100 rounded-xl animate-pulse" />
+                        <div className="h-64 sm:h-80 md:h-[420px] lg:h-[520px] bg-neutral-100 rounded-xl animate-pulse" />
                       }
                     >
                       <CitySuburbMap
@@ -933,6 +966,14 @@ const CityDashboard: React.FC = () => {
                     </Suspense>
                   </div>
 
+                  {/* Mobile hint (shown only when nothing selected) */}
+                  {!selectedSuburb && (
+                    <p className="lg:hidden text-xs text-neutral-400 text-center -mt-1 mb-1 flex items-center justify-center gap-1">
+                      <MapPinIcon className="w-3 h-3" />
+                      Tap a neighbourhood on the map for details
+                    </p>
+                  )}
+
                   {/* Detail panel */}
                   <div className="w-full lg:w-72 flex-shrink-0">
                     {selectedSuburb ? (
@@ -940,9 +981,10 @@ const CityDashboard: React.FC = () => {
                         suburb={selectedSuburb}
                         cityAvgPricePerSqm={suburbData.cityAvgPricePerSqm}
                         onClose={() => setSelectedSuburb(null)}
+                        onViewListings={handleViewNeighborhoodListings}
                       />
                     ) : (
-                      <div className="h-full flex flex-col items-center justify-center py-10 text-center border-2 border-dashed border-neutral-200 rounded-xl">
+                      <div className="hidden lg:flex h-full flex-col items-center justify-center py-10 text-center border-2 border-dashed border-neutral-200 rounded-xl">
                         <MapPinIcon className="w-10 h-10 text-neutral-300 mb-2" />
                         <p className="text-sm font-medium text-neutral-500">Click a neighborhood</p>
                         <p className="text-xs text-neutral-400 mt-1">to see detailed stats</p>
