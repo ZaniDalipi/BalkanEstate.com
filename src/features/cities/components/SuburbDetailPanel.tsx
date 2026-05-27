@@ -25,7 +25,7 @@ export interface SuburbDetailPanelProps {
   suburb: SuburbEntry | null;
   cityAvgPricePerSqm: number;
   onClose: () => void;
-  onViewListings?: (neighborhoodName: string) => void;
+  onViewListings?: (suburb: SuburbEntry) => void;
 }
 
 function clamp(v: number, min: number, max: number): number {
@@ -274,7 +274,7 @@ const SuburbDetailPanel: React.FC<SuburbDetailPanelProps> = ({
 
         {/* ── CTA ─────────────────────────────────────────── */}
         <button
-          onClick={() => onViewListings?.(name)}
+          onClick={() => onViewListings?.(suburb)}
           className="w-full py-3 px-4 bg-primary text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2 hover:bg-primary-dark active:scale-[0.98] transition-all shadow-sm shadow-primary/20 mt-1"
         >
           <MapPinIcon className="w-4 h-4 flex-shrink-0" />

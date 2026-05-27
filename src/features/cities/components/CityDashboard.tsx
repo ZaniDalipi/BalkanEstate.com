@@ -181,14 +181,24 @@ const CityDashboard: React.FC = () => {
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
   };
 
-  // Navigate to search filtered to a specific neighbourhood
-  const handleViewNeighborhoodListings = async (neighborhoodName: string) => {
+  // Navigate to search focused on a specific neighbourhood —
+  // uses the suburb's own center + polygon bounds so no geocode call is needed.
+  const handleViewNeighborhoodListings = (suburb: SuburbEntry) => {
     if (!city) return;
-    const searchQuery = `${neighborhoodName}, ${city.city}, ${city.country}`;
-    const results = await searchLocation(searchQuery);
-    const bestResult = results[0];
-    const lat = bestResult ? Number(bestResult.lat) : 0;
-    const lng = bestResult ? Number(bestResult.lon) : 0;
+
+    // Derive bounding box from the suburb polygon (GeoJSON: [lon, lat] pairs)
+    const ring = suburb.polygon.coordinates[0] ?? [];
+    const lats = ring.map((c) => c[1]);
+    const lngs = ring.map((c) => c[0]);
+    const drawnBoundsJSON =
+      ring.length > 0
+        ? JSON.stringify({
+            _southWest: { lat: Math.min(...lats), lng: Math.min(...lngs) },
+            _northEast: { lat: Math.max(...lats), lng: Math.max(...lngs) },
+          })
+        : null;
+
+    const searchQuery = `${suburb.name}, ${city.city}, ${city.country}`;
     const emptyFilters = {
       country: 'any' as const, query: '', listingType: 'sale' as const,
       minPrice: null, maxPrice: null, beds: null, baths: null,
@@ -204,11 +214,17 @@ const CityDashboard: React.FC = () => {
       has360Tour: null, hasDiscount: null, hasPriceIncrease: null,
       minPricePerSqm: null, maxPricePerSqm: null, maxDaysListed: null,
     };
+
     updateSearchPageState({
       filters: { ...emptyFilters, query: searchQuery },
       activeFilters: { ...emptyFilters },
-      drawnBoundsJSON: null,
-      focusMapOnProperty: { lat, lng, address: searchQuery, zoom: 14 },
+      drawnBoundsJSON,
+      focusMapOnProperty: {
+        lat: suburb.center.lat,
+        lng: suburb.center.lng,
+        address: searchQuery,
+        zoom: 15,
+      },
       mobileView: 'map',
     });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
@@ -981,7 +997,7 @@ const CityDashboard: React.FC = () => {
                         suburb={selectedSuburb}
                         cityAvgPricePerSqm={suburbData.cityAvgPricePerSqm}
                         onClose={() => setSelectedSuburb(null)}
-                        onViewListings={handleViewNeighborhoodListings}
+                        onViewListings={(s) => handleViewNeighborhoodListings(s)}
                       />
                     ) : (
                       <div className="hidden lg:flex h-full flex-col items-center justify-center py-10 text-center border-2 border-dashed border-neutral-200 rounded-xl">
