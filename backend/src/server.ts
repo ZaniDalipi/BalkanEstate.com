@@ -129,6 +129,7 @@ import { startPromotionRefreshWorker } from './workers/promotionRefreshWorker';
 import { startMonthlyResetWorker } from './workers/monthlyResetWorker';
 import { startTrialManagementJob } from './jobs/trialManagementJob';
 import { startCityMarketDataUpdateJob } from './jobs/updateCityMarketData';
+import { ensureAllFeaturedCitiesExist } from './services/cityMarketDataService';
 import { startMonthlyCouponJob } from './jobs/monthlyCouponJob';
 import { initializePushService } from './services/pushNotificationService';
 
@@ -163,7 +164,13 @@ setupChatSocket(io);
 setupPropertySocket(io);
 
 // Connect to database
-connectDB();
+connectDB().then(() => {
+  // Seed any cities added to FEATURED_CITIES that aren't yet in the DB.
+  // Safe to call every startup — skips cities that already exist.
+  ensureAllFeaturedCitiesExist().catch(err =>
+    serverLogger.error('Failed to seed featured cities:', err)
+  );
+});
 
 // Initialize store services (if credentials are provided)
 if (process.env.GOOGLE_PLAY_CLIENT_EMAIL && process.env.GOOGLE_PLAY_PRIVATE_KEY) {
