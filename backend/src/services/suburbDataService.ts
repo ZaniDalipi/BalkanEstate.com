@@ -214,7 +214,17 @@ function buildSuburbEntries(
 export async function getSuburbData(city: string, country: string): Promise<ISuburbData> {
   const centers = SUBURB_CENTERS[city];
   if (!centers || centers.length === 0) {
-    throw new Error(`City not found: ${city}`);
+    // Return an empty stub so the frontend receives 200 with empty suburbs
+    // instead of a 404 that causes console errors and retries.
+    return {
+      city,
+      country,
+      countryCode: CITY_COUNTRY_MAP[city] ?? '',
+      suburbs: [],
+      cityAvgPricePerSqm: COUNTRY_FALLBACK_PRICES[country] ?? 1200,
+      lastUpdated: new Date(),
+      dataSource: 'fallback',
+    } as unknown as ISuburbData;
   }
 
   // Check cache
@@ -235,7 +245,7 @@ export async function getSuburbData(city: string, country: string): Promise<ISub
 export async function refreshSuburbData(city: string, country: string): Promise<ISuburbData> {
   const centers = SUBURB_CENTERS[city];
   if (!centers || centers.length === 0) {
-    throw new Error(`City not found: ${city}`);
+    throw new Error(`City not supported for suburb data: ${city}`);
   }
 
   // Resolve city average price from DB first, then fallback map
