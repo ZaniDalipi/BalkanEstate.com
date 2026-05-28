@@ -22,7 +22,6 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 import Agency from '../models/Agency';
 import PageView from '../models/PageView';
-import User from '../models/User';
 import { sendAgencyWeeklyStats } from '../jobs/weeklyStatsJob';
 
 const TEST_EMAIL = process.env.TEST_EMAIL || null;
