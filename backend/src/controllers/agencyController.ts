@@ -3514,7 +3514,6 @@ export const getTopAgencies = async (req: Request, res: Response): Promise<void>
         $match: {
           sellerId: { $in: allSellerIds },
           status: { $in: ['active', 'pending'] },
-          createdAsRole: 'agent',
         },
       },
       { $group: { _id: '$sellerId', count: { $sum: 1 } } },
