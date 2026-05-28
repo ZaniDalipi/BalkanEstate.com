@@ -130,6 +130,7 @@ import { startMonthlyResetWorker } from './workers/monthlyResetWorker';
 import { startTrialManagementJob } from './jobs/trialManagementJob';
 import { startCityMarketDataUpdateJob } from './jobs/updateCityMarketData';
 import { startMonthlyCouponJob } from './jobs/monthlyCouponJob';
+import { runScoreBackfill } from './jobs/scoreBackfillJob';
 import { initializePushService } from './services/pushNotificationService';
 
 // Create Express app
@@ -164,6 +165,21 @@ setupPropertySocket(io);
 
 // Connect to database
 connectDB();
+
+// Non-blocking score backfill: updates any agent/agency records with score=0 after DB is ready.
+// Runs in the background so it never delays server startup.
+setTimeout(() => {
+  runScoreBackfill()
+    .then(r => {
+      if (r.agentsUpdated > 0 || r.agenciesUpdated > 0) {
+        serverLogger.info(`📊 Score backfill complete — agents: ${r.agentsUpdated}, agencies: ${r.agenciesUpdated}`);
+      }
+      if (r.errors.length > 0) {
+        serverLogger.warn(`⚠️ Score backfill errors: ${r.errors.join('; ')}`);
+      }
+    })
+    .catch(err => serverLogger.error('Score backfill failed:', err));
+}, 5000); // 5-second delay ensures DB connection is established
 
 // Initialize store services (if credentials are provided)
 if (process.env.GOOGLE_PLAY_CLIENT_EMAIL && process.env.GOOGLE_PLAY_PRIVATE_KEY) {
