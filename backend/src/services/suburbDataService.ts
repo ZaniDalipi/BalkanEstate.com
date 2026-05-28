@@ -11,10 +11,9 @@ const genAI = new GoogleGenerativeAI(
 /** Cache lifetime: 7 days in ms */
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
-/**
- * Fallback average price per sqm (EUR) by country name.
- * Used when neither Gemini nor the CityMarketData collection has a value.
- */
+/** How long to wait for Gemini before giving up (ms) */
+const GEMINI_TIMEOUT_MS = 10_000;
+
 const COUNTRY_FALLBACK_PRICES: Record<string, number> = {
   Kosovo: 900,
   Albania: 1200,
@@ -28,12 +27,8 @@ const COUNTRY_FALLBACK_PRICES: Record<string, number> = {
   Romania: 1300,
 };
 
-/**
- * Generate a circular GeoJSON Polygon from a centre point and radius.
- * Coordinates are [lng, lat] per the GeoJSON spec.
- */
 function createCirclePolygon(
-  center: [number, number], // [lat, lng]
+  center: [number, number],
   radiusKm: number,
   numPoints = 20
 ): { type: 'Polygon'; coordinates: number[][][] } {
@@ -44,7 +39,7 @@ function createCirclePolygon(
     const lngOffset =
       (radiusKm / (111 * Math.cos((center[0] * Math.PI) / 180))) *
       Math.sin(angle);
-    coords.push([center[1] + lngOffset, center[0] + latOffset]); // GeoJSON: [lng, lat]
+    coords.push([center[1] + lngOffset, center[0] + latOffset]);
   }
   return { type: 'Polygon' as const, coordinates: [coords] };
 }
@@ -61,9 +56,7 @@ interface GeminiSuburbData {
   highlights: string[];
 }
 
-/**
- * Call Gemini to generate suburb stats.
- */
+/** Race Gemini against a hard timeout so the request never hangs. */
 async function generateSuburbStats(
   city: string,
   country: string,
@@ -100,28 +93,27 @@ Guidelines:
 - priceVsCityAvg will be computed from avgPricePerSqm`;
 
   const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  const text = response.text();
 
-  const jsonMatch = text.match(/\[[\s\S]*\]/);
-  if (!jsonMatch) {
-    throw new Error('No JSON array found in Gemini response');
-  }
+  const timeoutPromise = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error(`Gemini timeout after ${GEMINI_TIMEOUT_MS}ms`)), GEMINI_TIMEOUT_MS)
+  );
 
-  return JSON.parse(jsonMatch[0]) as GeminiSuburbData[];
+  const geminiPromise = model.generateContent(prompt).then((result) => {
+    const text = result.response.text();
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) throw new Error('No JSON array found in Gemini response');
+    return JSON.parse(jsonMatch[0]) as GeminiSuburbData[];
+  });
+
+  return Promise.race([geminiPromise, timeoutPromise]);
 }
 
-/**
- * Build deterministic fallback suburb stats when Gemini is unavailable.
- */
 function buildFallbackStats(
   suburbName: string,
   index: number,
   totalSuburbs: number,
   cityAvgPricePerSqm: number
 ): GeminiSuburbData {
-  // Spread prices from +30% (most expensive) to -20% (cheapest)
   const priceFactor = 1.3 - (index / Math.max(totalSuburbs - 1, 1)) * 0.5;
   const avgPricePerSqm = Math.round(cityAvgPricePerSqm * priceFactor);
   const isPremium = index < totalSuburbs / 3;
@@ -144,9 +136,6 @@ function buildFallbackStats(
   };
 }
 
-/**
- * Assemble ISuburbEntry objects from Gemini data + center metadata.
- */
 function buildSuburbEntries(
   geminiData: GeminiSuburbData[],
   city: string,
@@ -154,7 +143,6 @@ function buildSuburbEntries(
 ): ISuburbEntry[] {
   const centerEntries = SUBURB_CENTERS[city] ?? [];
 
-  // Map by suburb name for O(1) lookup
   const geminiMap = new Map<string, GeminiSuburbData>();
   for (const d of geminiData) {
     geminiMap.set(d.name.toLowerCase(), d);
@@ -182,7 +170,7 @@ function buildSuburbEntries(
       avgPricePerSqm: gData.avgPricePerSqm,
       priceVsCityAvg,
       priceGrowthYoY: gData.priceGrowthYoY,
-      medianPrice: Math.round(gData.avgPricePerSqm * 70), // 70 m² as reference
+      medianPrice: Math.round(gData.avgPricePerSqm * 70),
       rentalYield: Math.round(gData.rentalYield * 10) / 10,
       demandScore: Math.min(100, Math.max(0, Math.round(gData.demandScore))),
       listingsCount: gData.listingsCount,
@@ -197,11 +185,10 @@ function buildSuburbEntries(
       center: { lat: ce.center[0], lng: ce.center[1] },
       polygon: createCirclePolygon(ce.center, ce.radiusKm),
       stats,
-      rank: 0, // assigned after sorting
+      rank: 0,
     };
   });
 
-  // Sort by price descending; rank 1 = most expensive
   entries.sort((a, b) => b.stats.avgPricePerSqm - a.stats.avgPricePerSqm);
   entries.forEach((e, i) => { e.rank = i + 1; });
 
@@ -209,17 +196,97 @@ function buildSuburbEntries(
 }
 
 /**
- * Get suburb data for a city, using MongoDB cache when fresh.
- * Never throws — always returns data (from cache, Gemini, or deterministic fallback).
+ * Build a valid ISuburbData object purely from static data — no DB or API calls.
+ * Instant response, always succeeds.
  */
-export async function getSuburbData(city: string, country: string): Promise<ISuburbData> {
+function buildInMemoryFallback(city: string, country: string, cityAvgPricePerSqm?: number): ISuburbData {
+  const price = cityAvgPricePerSqm ?? COUNTRY_FALLBACK_PRICES[country] ?? 1200;
+  const countryCode = CITY_COUNTRY_MAP[city] ?? 'XX';
+
   const centers = SUBURB_CENTERS[city];
-  if (!centers || centers.length === 0) {
-    // Return in-memory fallback so missing cities still show a neighbourhood section
-    return buildInMemoryFallback(city, country);
+  let geminiData: GeminiSuburbData[];
+  if (centers && centers.length > 0) {
+    geminiData = centers.map((c, i) => buildFallbackStats(c.name, i, centers.length, price));
+  } else {
+    const names = ['City Center', 'North District', 'South District'];
+    geminiData = names.map((name, i) => buildFallbackStats(name, i, names.length, price));
   }
 
-  // Check cache
+  const suburbs = buildSuburbEntries(geminiData, city, price);
+
+  return {
+    city,
+    country,
+    countryCode,
+    suburbs,
+    cityAvgPricePerSqm: price,
+    lastUpdated: new Date(),
+    dataSource: 'fallback',
+  } as unknown as ISuburbData;
+}
+
+/**
+ * Persist suburb data to MongoDB in the background.
+ * Never awaited by the request handler — failure is logged only.
+ */
+async function persistInBackground(
+  city: string,
+  country: string,
+  cityAvgPricePerSqm: number
+): Promise<void> {
+  try {
+    const centers = SUBURB_CENTERS[city];
+    if (!centers || centers.length === 0) return;
+
+    const countryCode = CITY_COUNTRY_MAP[city] ?? 'XX';
+    const suburbNames = centers.map((c) => c.name);
+
+    let geminiData: GeminiSuburbData[];
+    let dataSource: 'gemini' | 'fallback' = 'fallback';
+
+    try {
+      geminiData = await generateSuburbStats(city, country, cityAvgPricePerSqm, suburbNames);
+      dataSource = 'gemini';
+      apiLogger.info(`Background: Gemini suburb data generated for ${city}`);
+    } catch (err) {
+      apiLogger.warn(`Background: Gemini failed for ${city}, persisting fallback data`, err);
+      geminiData = suburbNames.map((name, i) =>
+        buildFallbackStats(name, i, suburbNames.length, cityAvgPricePerSqm)
+      );
+    }
+
+    const suburbs = buildSuburbEntries(geminiData, city, cityAvgPricePerSqm);
+
+    await SuburbData.findOneAndUpdate(
+      { city, country },
+      { city, country, countryCode, suburbs, cityAvgPricePerSqm, lastUpdated: new Date(), dataSource },
+      { upsert: true, new: true }
+    );
+    apiLogger.info(`Background: suburb data persisted for ${city} (${dataSource})`);
+  } catch (err) {
+    apiLogger.warn(`Background: suburb persist failed for ${city}`, err);
+  }
+}
+
+/**
+ * Get suburb data for a city.
+ *
+ * Strategy:
+ *  1. Fresh MongoDB cache → return immediately (fast path)
+ *  2. No fresh cache → return deterministic fallback data IMMEDIATELY,
+ *     then fire Gemini generation in the background so the next request
+ *     gets richer data. This prevents any external API from blocking the
+ *     HTTP response and causing gateway timeouts.
+ */
+export async function getSuburbData(city: string, country: string): Promise<ISuburbData> {
+  // Resolve city avg price (best-effort, non-blocking)
+  let cityAvgPricePerSqm = COUNTRY_FALLBACK_PRICES[country] ?? 1200;
+  try {
+    const dbCity = await CityMarketData.findOne({ city, country }).lean();
+    if (dbCity && (dbCity.avgPricePerSqm ?? 0) > 0) cityAvgPricePerSqm = dbCity.avgPricePerSqm!;
+  } catch { /* use fallback price */ }
+
+  // 1. Check MongoDB cache
   try {
     const cached = await SuburbData.findOne({ city, country });
     if (cached) {
@@ -227,53 +294,22 @@ export async function getSuburbData(city: string, country: string): Promise<ISub
       if (ageMs < CACHE_TTL_MS) {
         return cached;
       }
+      // Stale — refresh in background, return stale data now
+      persistInBackground(city, country, cityAvgPricePerSqm).catch(() => {});
+      return cached;
     }
   } catch (err) {
-    apiLogger.warn(`getSuburbData: cache lookup failed for ${city}, regenerating`, err);
+    apiLogger.warn(`getSuburbData: cache lookup failed for ${city}`, err);
   }
 
-  try {
-    return await refreshSuburbData(city, country);
-  } catch (err) {
-    apiLogger.warn(`getSuburbData: refresh failed for ${city}, returning in-memory fallback`, err);
-    return buildInMemoryFallback(city, country);
-  }
-}
-
-/**
- * Build a valid ISuburbData object purely from static data — no DB or API calls.
- * Used as ultimate safety net so the suburb section always renders.
- */
-function buildInMemoryFallback(city: string, country: string): ISuburbData {
-  const cityAvgPricePerSqm = COUNTRY_FALLBACK_PRICES[country] ?? 1200;
-  const countryCode = CITY_COUNTRY_MAP[city] ?? 'XX';
-
-  const centers = SUBURB_CENTERS[city];
-  let geminiData: GeminiSuburbData[];
-  if (centers && centers.length > 0) {
-    geminiData = centers.map((c, i) => buildFallbackStats(c.name, i, centers.length, cityAvgPricePerSqm));
-  } else {
-    // Generic 3-suburb fallback when city has no center data at all
-    const names = ['City Center', 'North District', 'South District'];
-    geminiData = names.map((name, i) => buildFallbackStats(name, i, names.length, cityAvgPricePerSqm));
-  }
-
-  const suburbs = buildSuburbEntries(geminiData, city, cityAvgPricePerSqm);
-
-  return {
-    _id: undefined as any,
-    city,
-    country,
-    countryCode,
-    suburbs,
-    cityAvgPricePerSqm,
-    lastUpdated: new Date(),
-    dataSource: 'fallback',
-  } as unknown as ISuburbData;
+  // 2. No cache — return fallback immediately, persist in background
+  persistInBackground(city, country, cityAvgPricePerSqm).catch(() => {});
+  return buildInMemoryFallback(city, country, cityAvgPricePerSqm);
 }
 
 /**
  * Force-regenerate suburb data from Gemini (or fallback) and persist.
+ * Used by the admin refresh endpoint only.
  */
 export async function refreshSuburbData(city: string, country: string): Promise<ISuburbData> {
   const centers = SUBURB_CENTERS[city];
@@ -281,14 +317,11 @@ export async function refreshSuburbData(city: string, country: string): Promise<
     throw new Error(`City not found: ${city}`);
   }
 
-  // Resolve city average price from DB first, then fallback map
-  let cityAvgPricePerSqm: number;
+  let cityAvgPricePerSqm = COUNTRY_FALLBACK_PRICES[country] ?? 1200;
   try {
     const dbCity = await CityMarketData.findOne({ city, country }).lean();
-    cityAvgPricePerSqm = dbCity?.avgPricePerSqm ?? COUNTRY_FALLBACK_PRICES[country] ?? 1200;
-  } catch {
-    cityAvgPricePerSqm = COUNTRY_FALLBACK_PRICES[country] ?? 1200;
-  }
+    if (dbCity && (dbCity.avgPricePerSqm ?? 0) > 0) cityAvgPricePerSqm = dbCity.avgPricePerSqm!;
+  } catch { /* use fallback price */ }
 
   const countryCode = CITY_COUNTRY_MAP[city] ?? 'XX';
   const suburbNames = centers.map((c) => c.name);
@@ -312,29 +345,15 @@ export async function refreshSuburbData(city: string, country: string): Promise<
   try {
     const doc = await SuburbData.findOneAndUpdate(
       { city, country },
-      {
-        city,
-        country,
-        countryCode,
-        suburbs,
-        cityAvgPricePerSqm,
-        lastUpdated: new Date(),
-        dataSource,
-      },
+      { city, country, countryCode, suburbs, cityAvgPricePerSqm, lastUpdated: new Date(), dataSource },
       { upsert: true, new: true }
     );
     return doc;
   } catch (err) {
-    // DB write failed — return the generated data without persistence
     apiLogger.warn(`refreshSuburbData: DB save failed for ${city}, returning in-memory data`, err);
     return {
-      city,
-      country,
-      countryCode,
-      suburbs,
-      cityAvgPricePerSqm,
-      lastUpdated: new Date(),
-      dataSource,
+      city, country, countryCode, suburbs, cityAvgPricePerSqm,
+      lastUpdated: new Date(), dataSource,
     } as unknown as ISuburbData;
   }
 }

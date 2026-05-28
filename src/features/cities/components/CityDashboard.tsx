@@ -914,10 +914,21 @@ const CityDashboard: React.FC = () => {
         <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6 mb-8">
           {/* Section header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
-            <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
-              <MapPinIcon className="w-5 h-5 text-primary" />
-              Explore Neighborhoods
-            </h3>
+            <div className="flex flex-col gap-1">
+              <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
+                <MapPinIcon className="w-5 h-5 text-primary" />
+                Explore Neighborhoods
+              </h3>
+              {suburbData && (
+                <span className={`text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full w-fit ${
+                  suburbData.dataSource === 'gemini'
+                    ? 'bg-violet-50 text-violet-600 border border-violet-200'
+                    : 'bg-amber-50 text-amber-600 border border-amber-200'
+                }`}>
+                  {suburbData.dataSource === 'gemini' ? '✦ BalkanEstate AI Analysis' : 'Estimated data · updating…'}
+                </span>
+              )}
+            </div>
             {/* Tab switcher */}
             <div className="flex gap-1 bg-neutral-100 rounded-xl p-1 w-fit">
               {(['map', 'list'] as const).map((view) => (
