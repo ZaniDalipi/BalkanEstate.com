@@ -394,5 +394,38 @@
     "ourAgents": "Agjentët Tanë",
     "ourProperties": "Pronat Tona",
     "noPropertiesListed": "Nuk ka prona të listuara aktualisht"
+  },
+  "scoring": {
+    "panelTitle": "Si funksionon sistemi i pikëve të agjencisë",
+    "maxPossible": "Maksimumi i mundshëm: {{max}} pikë",
+    "toggleShow": "Shfaq detajet",
+    "toggleHide": "Fshih detajet",
+    "footerNote": "Pikët përditësohen çdo javë. Shtoni listime, rritni ekipin dhe merrni statusin e veçuar për të ngjitut.",
+    "metrics": {
+      "listings": {
+        "label": "Listime Pronash",
+        "formula": "3 pikë për listim",
+        "desc": "Çdo listim aktiv shton 3 pikë. Shtoni prona për të dominuar renditjet.",
+        "cap": "Maks 60 pikë"
+      },
+      "team": {
+        "label": "Madhësia e Ekipit",
+        "formula": "5 pikë për agjent",
+        "desc": "Çdo agjent në ekipin tuaj fiton 5 pikë. Ndërtoni një ekip më të fortë për të ngjitut.",
+        "cap": "Maks 50 pikë"
+      },
+      "experience": {
+        "label": "Vite në Biznes",
+        "formula": "2 pikë për vit",
+        "desc": "Çdo vit që agjencia juaj ka operuar shton 2 pikë. Senioriteti krijon besim.",
+        "cap": "Maks 30 pikë"
+      },
+      "featured": {
+        "label": "Status i Veçuar",
+        "formula": "+20 pikë bonus",
+        "desc": "Agjencitë e veçuara marrin 20 pikë bonus dhe shfaqen në krye të të gjitha kërkimeve.",
+        "cap": "Maks 20 pikë"
+      }
+    }
   }
 }

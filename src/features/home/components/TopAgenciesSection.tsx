@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { getAgencies } from '@/src/features/agencies/api/agencyApi';
+import { getTopAgencies } from '@/src/features/agencies/api/agencyApi';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { useAppContext } from '@/context/AppContext';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import type { Agency } from '@/src/shared/types';
+import { calcAgencyScore, getAgencyAchievementBadge, AGENCY_SCORING_METRIC_DEFS, AGENCY_MAX_SCORE } from '@/src/features/agencies/utils/agencyScoring';
 
 const MEDAL_COLORS = {
   0: { bg: '#FFD700', text: '#92710A', glow: 'rgba(255, 215, 0, 0.4)', gradient: 'linear-gradient(135deg, #FFD700, #FFC107)' },
@@ -22,12 +23,17 @@ const AgencyPodiumCard: React.FC<{
   agency: Agency;
   rank: number;
   podiumHeight: number;
+  score: number;
+  topScore: number;
   onAgencyClick?: (agency: Agency) => void;
   t: (key: string, fallback?: string) => string;
-}> = ({ agency, rank, podiumHeight, onAgencyClick, t }) => {
+}> = ({ agency, rank, podiumHeight, score, topScore, onAgencyClick, t }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const medal = MEDAL_COLORS[rank as keyof typeof MEDAL_COLORS];
+  const isChamp = rank === 0;
+  const gap = rank > 0 ? topScore - score : 0;
+  const badge = getAgencyAchievementBadge(agency);
 
   useEffect(() => {
     const card = cardRef.current;
@@ -86,35 +92,53 @@ const AgencyPodiumCard: React.FC<{
         {/* Cover / gradient header */}
         <div
           style={{
-            height: rank === 0 ? '80px' : '64px',
+            height: isChamp ? '80px' : '64px',
             background: agency.coverImage
               ? `url(${optimizeCloudinaryUrl(agency.coverImage, { width: 560, quality: 'auto', crop: 'fill' })}) center/cover`
               : 'linear-gradient(135deg, #0f172a, #1e293b)',
             position: 'relative',
           }}
         >
-          {/* Medal badge */}
-          <div
-            style={{
-              position: 'absolute',
-              top: '10px',
-              right: '10px',
-              width: '28px',
-              height: '28px',
-              borderRadius: '50%',
+          {/* Crown for #1 */}
+          {isChamp && (
+            <div style={{
+              position: 'absolute', top: '-14px', left: '50%',
+              transform: 'translateX(-50%)',
+              fontSize: '22px', lineHeight: 1,
+              filter: 'drop-shadow(0 4px 8px rgba(255,180,0,0.65))',
+              animation: isVisible ? 'tas-agency-bounce 2.4s ease-in-out infinite' : 'none',
+            }}>👑</div>
+          )}
+
+          {/* Medal badge for 2nd/3rd */}
+          {!isChamp && (
+            <div style={{
+              position: 'absolute', top: '8px', right: '8px',
+              width: '26px', height: '26px', borderRadius: '50%',
               background: medal.gradient,
               boxShadow: `0 4px 12px ${medal.glow}`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '11px',
-              fontWeight: 800,
-              color: medal.text,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '10px', fontWeight: 800, color: medal.text,
               border: '2px solid rgba(255,255,255,0.9)',
-            }}
-          >
-            {rank + 1}
-          </div>
+            }}>
+              {rank + 1}
+            </div>
+          )}
+
+          {/* "X pts to #1" gap pill */}
+          {rank > 0 && gap > 0 && (
+            <div style={{
+              position: 'absolute', bottom: '6px', right: '8px',
+              background: 'linear-gradient(135deg, #ff6b35, #e8320a)',
+              color: '#fff', fontSize: '0.55rem', fontWeight: 700,
+              padding: '2px 6px', borderRadius: '999px',
+              letterSpacing: '0.02em',
+              boxShadow: '0 2px 6px rgba(232,50,10,0.4)',
+              whiteSpace: 'nowrap',
+            }}>
+              {t('topAgencies.ptsToTop', '{{gap}} pts to #1').replace('{{gap}}', String(gap))}
+            </div>
+          )}
         </div>
 
         {/* Logo overlapping cover */}
@@ -151,9 +175,20 @@ const AgencyPodiumCard: React.FC<{
 
         {/* Content */}
         <div style={{ padding: '0 1rem 1.25rem', textAlign: 'center' }}>
+          {/* Score pill */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '3px',
+            background: isChamp ? 'linear-gradient(135deg, #FFD700, #FFA500)' : '#f1f5f9',
+            borderRadius: '999px', padding: '2px 10px', marginBottom: '0.4rem',
+          }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: isChamp ? '#92710A' : '#475569' }}>
+              {score} {t('topAgencies.pts', 'pts')}
+            </span>
+          </div>
+
           <h3
             style={{
-              fontSize: rank === 0 ? '1rem' : '0.9rem',
+              fontSize: isChamp ? '1rem' : '0.9rem',
               fontWeight: 700,
               color: '#0f172a',
               marginBottom: '2px',
@@ -222,6 +257,20 @@ const AgencyPodiumCard: React.FC<{
               {agency.type}
             </div>
           )}
+
+          {/* Achievement badge */}
+          {badge && (
+            <div style={{
+              display: 'inline-block', marginTop: '0.4rem', marginLeft: '4px',
+              fontSize: '0.6rem', fontWeight: 700,
+              color: badge.color,
+              background: `${badge.color}15`,
+              border: `1px solid ${badge.color}28`,
+              borderRadius: '999px', padding: '2px 8px',
+            }}>
+              {badge.label}
+            </div>
+          )}
         </div>
       </div>
 
@@ -272,7 +321,9 @@ const AgencyPodiumCard: React.FC<{
 
 /* ─── Section ─── */
 const TopAgenciesSection: React.FC = () => {
-  const { t } = useTranslation('home');
+  const { t: rawT } = useTranslation('home');
+  const t = useCallback((key: string, fallback?: string): string =>
+    rawT(key, { defaultValue: fallback }) as string, [rawT]);
   const { dispatch } = useAppContext();
   const { navigate } = useLocalizedNavigation();
 
@@ -285,22 +336,23 @@ const TopAgenciesSection: React.FC = () => {
   const { data: agencies = [], isLoading } = useQuery<Agency[]>({
     queryKey: ['topAgenciesMonth'],
     queryFn: async () => {
-      const data = await getAgencies({ limit: 3 });
-      const list = data.agencies || [];
-      return list.filter((a: Agency) => a.name).slice(0, 3);
+      const data = await getTopAgencies(10);
+      const list: Agency[] = data.agencies || [];
+      return list
+        .filter((a) => a.name)
+        .sort((a, b) => calcAgencyScore(b) - calcAgencyScore(a))
+        .slice(0, 3);
     },
     staleTime: 10 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     retry: 1,
   });
 
-  const displayAgencies = agencies;
+  if (!isLoading && agencies.length === 0) return null;
 
-  // Don't render section at all if no agencies and not loading
-  if (!isLoading && displayAgencies.length === 0) return null;
-
-  const podiumAgencies = displayAgencies.slice(0, 3);
+  const podiumAgencies = agencies.slice(0, 3);
   const hasPodium = podiumAgencies.length === 3;
+  const topScore = podiumAgencies.length > 0 ? calcAgencyScore(podiumAgencies[0]) : 0;
 
   return (
     <section
@@ -309,6 +361,12 @@ const TopAgenciesSection: React.FC = () => {
         padding: '4rem 1rem 0',
       }}
     >
+      <style>{`
+        @keyframes tas-agency-bounce {
+          0%, 100% { transform: translateX(-50%) translateY(0px); }
+          50%       { transform: translateX(-50%) translateY(-5px); }
+        }
+      `}</style>
       {/* Header */}
       <div style={{ maxWidth: '72rem', margin: '0 auto', textAlign: 'center', marginBottom: '2rem', padding: '0 1rem' }}>
         <div
@@ -383,6 +441,8 @@ const TopAgenciesSection: React.FC = () => {
                 agency={podiumAgencies[dataIndex]}
                 rank={dataIndex}
                 podiumHeight={PODIUM_HEIGHTS[visualIndex]}
+                score={calcAgencyScore(podiumAgencies[dataIndex])}
+                topScore={topScore}
                 onAgencyClick={handleAgencyClick}
                 t={t}
               />
@@ -397,6 +457,8 @@ const TopAgenciesSection: React.FC = () => {
                 agency={podiumAgencies[dataIndex]}
                 rank={dataIndex}
                 podiumHeight={50}
+                score={calcAgencyScore(podiumAgencies[dataIndex])}
+                topScore={topScore}
                 onAgencyClick={handleAgencyClick}
                 t={t}
               />
@@ -422,6 +484,8 @@ const TopAgenciesSection: React.FC = () => {
               agency={agency}
               rank={i}
               podiumHeight={180}
+              score={calcAgencyScore(agency)}
+              topScore={topScore}
               onAgencyClick={handleAgencyClick}
               t={t}
             />

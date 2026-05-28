@@ -57,6 +57,8 @@ export function transformBackendAgent(backendAgent: any): Agent {
     officePhone: backendAgent.officePhone,
     lat: backendAgent.lat,
     lng: backendAgent.lng,
+    score: typeof backendAgent.score === 'number' && backendAgent.score > 0 ? backendAgent.score : undefined,
+    scoreBreakdown: backendAgent.scoreBreakdown ?? undefined,
   };
 }
 
@@ -64,6 +66,14 @@ export function transformBackendAgent(backendAgent: any): Agent {
 
 export const getAllAgents = async (): Promise<{ agents: Agent[] }> => {
   const response = await apiRequest<{ agents?: any[] }>('/agents');
+  if (response.agents) {
+    return { agents: response.agents.map(transformBackendAgent) };
+  }
+  return { agents: [] };
+};
+
+export const getTopAgents = async (limit = 10): Promise<{ agents: Agent[] }> => {
+  const response = await apiRequest<{ agents?: any[] }>(`/agents/leaderboard?limit=${limit}`);
   if (response.agents) {
     return { agents: response.agents.map(transformBackendAgent) };
   }

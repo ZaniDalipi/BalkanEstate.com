@@ -156,7 +156,9 @@
     "title": "Meet Our Best Performing Agents",
     "subtitle": "Ranked by sales, ratings, and client satisfaction this week",
     "sold": "sold",
-    "active": "active"
+    "active": "active",
+    "pts": "pts",
+    "ptsToTop": "{{gap}} pts to #1"
   },
   "topAgencies": {
     "badge": "Agencies of the Month",
@@ -164,7 +166,9 @@
     "subtitle": "Top-performing agencies with the most listings, agents, and client trust",
     "listings": "listings",
     "agents": "agents",
-    "years": "yrs"
+    "years": "yrs",
+    "pts": "pts",
+    "ptsToTop": "{{gap}} pts to #1"
   },
   "testimonials": {
     "title": "What Our Users Say",

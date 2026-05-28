@@ -156,7 +156,9 @@
     "title": "Upoznajte Naše Najbolje Agente",
     "subtitle": "Rangirani po prodaji, ocjenama i zadovoljstvu klijenata ove nedjelje",
     "sold": "prodato",
-    "active": "aktivno"
+    "active": "aktivno",
+    "pts": "bod.",
+    "ptsToTop": "{{gap}} bod. do #1"
   },
   "topAgencies": {
     "badge": "Agencije Mjeseca",
@@ -164,7 +166,9 @@
     "subtitle": "Agencije sa najboljim performansama sa najviše oglasa, agenata i povjerenja klijenata",
     "listings": "oglasa",
     "agents": "agenata",
-    "years": "god."
+    "years": "god.",
+    "pts": "bod.",
+    "ptsToTop": "{{gap}} bod. do #1"
   },
   "testimonials": {
     "title": "Što Kažu Naši Korisnici",
