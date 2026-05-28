@@ -3499,7 +3499,41 @@ export const getTopAgencies = async (req: Request, res: Response): Promise<void>
       .sort({ score: -1, isFeatured: -1 })
       .limit(limitNum)
       .lean();
-    res.json({ agencies });
+
+    const Property = (await import('../models/Property')).default;
+
+    // Include owner + all agents as seller IDs (mirrors agency detail logic)
+    const allSellerIds = agencies.flatMap((agency: any) => {
+      const ownerIds = agency.ownerId?._id ? [agency.ownerId._id] : [];
+      const agentIds = agency.agents?.map((agent: any) => agent._id) || [];
+      return [...ownerIds, ...agentIds];
+    });
+
+    const propertyCounts = await Property.aggregate([
+      {
+        $match: {
+          sellerId: { $in: allSellerIds },
+          status: { $in: ['active', 'pending'] },
+          createdAsRole: 'agent',
+        },
+      },
+      { $group: { _id: '$sellerId', count: { $sum: 1 } } },
+    ]);
+    const countBySeller = new Map(
+      propertyCounts.map((pc: { _id: unknown; count: number }) => [String(pc._id), pc.count])
+    );
+    const agenciesWithCounts = agencies.map((agency: any) => {
+      const sellerIds = [
+        ...(agency.ownerId?._id ? [agency.ownerId._id] : []),
+        ...(agency.agents?.map((agent: any) => agent._id) || []),
+      ];
+      const totalProperties = sellerIds.reduce(
+        (sum: number, id: unknown) => sum + (countBySeller.get(String(id)) || 0), 0
+      );
+      return { ...agency, totalProperties, totalAgents: agency.agents?.length || 0 };
+    });
+
+    res.json({ agencies: agenciesWithCounts });
   } catch (error: any) {
     agencyLogger.error('Get top agencies error:', error);
     res.status(500).json({ message: 'Error fetching leaderboard' });
