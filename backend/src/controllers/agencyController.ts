@@ -3516,10 +3516,8 @@ export const recomputeAgencyScores = async (req: Request, res: Response): Promis
       return;
     }
     const agencies = await Agency.find({});
-    let updated = 0;
     const bulkOps = agencies.map((agency) => {
       const b = calcAgencyScoreBreakdown(agency);
-      updated++;
       return {
         updateOne: {
           filter: { _id: agency._id },
@@ -3527,7 +3525,11 @@ export const recomputeAgencyScores = async (req: Request, res: Response): Promis
         },
       };
     });
-    if (bulkOps.length > 0) await Agency.bulkWrite(bulkOps);
+    let updated = 0;
+    if (bulkOps.length > 0) {
+      const result = await Agency.bulkWrite(bulkOps);
+      updated = result.modifiedCount;
+    }
     res.json({ message: `Recomputed scores for ${updated} agencies` });
   } catch (error: any) {
     agencyLogger.error('Recompute agency scores error:', error);

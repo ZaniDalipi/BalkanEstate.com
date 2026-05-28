@@ -18,7 +18,7 @@ function isValidNumber(value: unknown): boolean {
 async function backfillAgents(forceAll: boolean): Promise<{ updated: number; errors: string[] }> {
   const filter = forceAll
     ? {}
-    : { $or: [{ score: { $lte: 0 } }, { score: { $exists: false } }], isActive: true };
+    : { $or: [{ score: { $lte: 0 } }, { score: { $exists: false } }] };
 
   const total = await Agent.countDocuments(filter);
   if (total === 0) return { updated: 0, errors: [] };
@@ -33,6 +33,7 @@ async function backfillAgents(forceAll: boolean): Promise<{ updated: number; err
     try {
       const batch = await Agent.find(filter)
         .select('_id rating totalSales activeListings totalReviews')
+        .sort({ _id: 1 })
         .skip(skip)
         .limit(BATCH_SIZE)
         .lean();
@@ -93,6 +94,7 @@ async function backfillAgencies(forceAll: boolean): Promise<{ updated: number; e
     try {
       const batch = await Agency.find(filter)
         .select('_id totalProperties totalAgents yearsInBusiness isFeatured')
+        .sort({ _id: 1 })
         .skip(skip)
         .limit(BATCH_SIZE)
         .lean();

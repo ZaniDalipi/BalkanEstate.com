@@ -840,10 +840,8 @@ export const recomputeAgentScores = async (req: Request, res: Response): Promise
       return;
     }
     const agents = await Agent.find({});
-    let updated = 0;
     const bulkOps = agents.map((agent) => {
       const b = calcAgentScoreBreakdown(agent);
-      updated++;
       return {
         updateOne: {
           filter: { _id: agent._id },
@@ -851,7 +849,11 @@ export const recomputeAgentScores = async (req: Request, res: Response): Promise
         },
       };
     });
-    if (bulkOps.length > 0) await Agent.bulkWrite(bulkOps);
+    let updated = 0;
+    if (bulkOps.length > 0) {
+      const result = await Agent.bulkWrite(bulkOps);
+      updated = result.modifiedCount;
+    }
     res.json({ message: `Recomputed scores for ${updated} agents` });
   } catch (error: any) {
     apiLogger.error('Recompute agent scores error:', error);
