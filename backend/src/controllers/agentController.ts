@@ -823,7 +823,25 @@ export const getTopAgents = async (req: Request, res: Response): Promise<void> =
       .sort({ score: -1, rating: -1 })
       .limit(limitNum)
       .lean();
-    res.json({ agents });
+
+    const Property = (await import('../models/Property')).default;
+    const userIds = agents
+      .map((a: any) => a.userId?._id)
+      .filter(Boolean);
+
+    const propertyCounts = await Property.aggregate([
+      { $match: { sellerId: { $in: userIds }, status: { $in: ['active', 'pending'] } } },
+      { $group: { _id: '$sellerId', count: { $sum: 1 } } },
+    ]);
+    const countByUser = new Map(
+      propertyCounts.map((pc: { _id: unknown; count: number }) => [String(pc._id), pc.count])
+    );
+    const agentsWithCounts = agents.map((agent: any) => ({
+      ...agent,
+      activeListings: countByUser.get(String(agent.userId?._id)) ?? agent.activeListings ?? 0,
+    }));
+
+    res.json({ agents: agentsWithCounts });
   } catch (error: any) {
     apiLogger.error('Get top agents error:', error);
     res.status(500).json({ message: 'Error fetching leaderboard' });
