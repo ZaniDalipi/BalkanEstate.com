@@ -921,11 +921,17 @@ const CityDashboard: React.FC = () => {
               </h3>
               {suburbData && (
                 <span className={`text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full w-fit ${
-                  suburbData.dataSource === 'gemini'
-                    ? 'bg-violet-50 text-violet-600 border border-violet-200'
-                    : 'bg-amber-50 text-amber-600 border border-amber-200'
+                  suburbData.dataSource === 'research'
+                    ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                    : suburbData.dataSource === 'gemini'
+                      ? 'bg-violet-50 text-violet-600 border border-violet-200'
+                      : 'bg-amber-50 text-amber-600 border border-amber-200'
                 }`}>
-                  {suburbData.dataSource === 'gemini' ? '✦ BalkanEstate AI Analysis' : 'Estimated data · updating…'}
+                  {suburbData.dataSource === 'research'
+                    ? '◈ Market Research Data'
+                    : suburbData.dataSource === 'gemini'
+                      ? '✦ BalkanEstate AI Analysis'
+                      : 'Estimated data · updating…'}
                 </span>
               )}
             </div>

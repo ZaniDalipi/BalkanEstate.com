@@ -260,25 +260,54 @@ const CITY_METADATA: Record<string, {
 };
 
 /**
+ * Research-based city prices (EUR/m²) from BIS, national stats offices, market reports.
+ * These override the tier/type calculation to ensure realistic values.
+ */
+const CITY_RESEARCH_PRICES: Record<string, number> = {
+  Prishtina: 980, Prizren: 670, Peja: 610, Gjakova: 580,
+  Ferizaj: 555, Mitrovica: 540, Gjilan: 560,
+  Tirana: 1200, Durres: 950, Vlore: 980, Sarande: 1100,
+  Shkoder: 700, Fier: 670, Berat: 640, Elbasan: 645, Korce: 660,
+  Skopje: 1100, Ohrid: 900, Bitola: 700, Tetovo: 680,
+  Kumanovo: 670, Veles: 620, Strumica: 635, Kavadarci: 605,
+  Belgrade: 2200, 'Novi Sad': 1650, Nis: 850, Kragujevac: 780,
+  Subotica: 750, Zrenjanin: 700, Pancevo: 750, Cacak: 680,
+  Valjevo: 660, Smederevo: 700,
+  Sarajevo: 1700, 'Banja Luka': 1100, Mostar: 1000, Tuzla: 850,
+  Zenica: 800, Trebinje: 850, Bijeljina: 750, Brcko: 760,
+  Zagreb: 2900, Split: 3800, Dubrovnik: 5500, Rijeka: 2100,
+  Osijek: 1300, Zadar: 2800, Pula: 2600, Sibenik: 2400,
+  Varazdin: 1500, 'Slavonski Brod': 1100,
+  Podgorica: 1450, Budva: 3200, Kotor: 3000, Niksic: 850,
+  'Herceg Novi': 2200, Bar: 1800, Ulcinj: 1600, Tivat: 2800,
+  Athens: 2400, Thessaloniki: 1600, Patras: 1100, Heraklion: 1700,
+  Volos: 1000, Larissa: 900, Ioannina: 950, Kavala: 1000,
+  Chania: 2000, Rhodes: 2200,
+  Sofia: 1700, Plovdiv: 1100, Varna: 1200, Burgas: 1000,
+  'Stara Zagora': 750, Pleven: 700, Ruse: 750, Sliven: 645, Dobrich: 675,
+  Bucharest: 1900, 'Cluj-Napoca': 2200, Timisoara: 1400, Brasov: 1500,
+  Iasi: 1100, Constanta: 1100, Galati: 850, Craiova: 900,
+  Ploiesti: 950, Oradea: 1050,
+};
+
+const COUNTRY_FALLBACK_RESEARCH: Record<string, number> = {
+  Kosovo: 650, Albania: 850, 'North Macedonia': 750, Serbia: 900,
+  'Bosnia and Herzegovina': 850, Croatia: 2000, Montenegro: 1400,
+  Greece: 1400, Bulgaria: 900, Romania: 1100,
+};
+
+/**
  * Generate realistic fallback data when Gemini API is unavailable
  */
 function generateFallbackCityData(cityInfo: { city: string; country: string; countryCode: string }): CityDataFromGemini {
   const metadata = CITY_METADATA[cityInfo.city] || { type: 'regional', tier: 3, neighborhoods: ['Center', 'Downtown', 'Suburb'] };
 
-  // Base prices by tier and type
-  let basePrice = 1200; // Default mid-range
-  if (metadata.tier === 1) basePrice = 2000;
-  else if (metadata.tier === 2) basePrice = 1400;
-  else basePrice = 1000;
+  // Use research-based price as the primary source
+  const basePrice = CITY_RESEARCH_PRICES[cityInfo.city]
+    ?? COUNTRY_FALLBACK_RESEARCH[cityInfo.country]
+    ?? 900;
 
-  // Adjust by city type
-  if (metadata.type === 'capital') basePrice *= 1.3;
-  else if (metadata.type === 'coastal' || metadata.type === 'tourist') basePrice *= 1.2;
-  else if (metadata.type === 'industrial') basePrice *= 0.9;
-
-  // Add some variance
-  const variance = 0.85 + Math.random() * 0.3; // 85% to 115%
-  const avgPricePerSqm = Math.round(basePrice * variance);
+  const avgPricePerSqm = basePrice;
   const medianPrice = avgPricePerSqm * 70; // 70sqm apartment
 
   // Growth rates based on type
