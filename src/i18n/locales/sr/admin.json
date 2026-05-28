@@ -942,5 +942,19 @@
     "testEmailDesc": "Тест е-пошта ће бити послата са узорком података на горњу адресу.",
     "sending": "Слање...",
     "sendTest": "Пошаљи тест"
+  },
+  "scoring": {
+    "title": "Upravljanje Bodovima",
+    "description": "Preračunajte složene bodove za agente i agencije. Bodovi se automatski ažuriraju pri čuvanju, ali koristite ovo za popunjavanje postojećih zapisa.",
+    "recomputeAgents": "Preračunaj Bodove Agenata",
+    "recomputeAgencies": "Preračunaj Bodove Agencija",
+    "recomputeAll": "Preračunaj Sve Bodove",
+    "running": "U toku...",
+    "success": "Ažurirano {{count}} zapisa",
+    "error": "Preračunavanje bodova nije uspjelo",
+    "lastRun": "Poslednje pokretanje",
+    "howItWorks": "Kako funkcioniše bodovanje",
+    "agentFormula": "Agenti: ocena×20 + prodaje×5 + oglasi×2 + recenzije×1 (maks 180 bod.)",
+    "agencyFormula": "Agencije: oglasi×3 + tim×5 + iskustvo×2 + istaknuti×20 (maks 160 bod.)"
   }
 }

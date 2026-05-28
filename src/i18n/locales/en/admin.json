@@ -1144,5 +1144,19 @@
       "seasonal": "Seasonal Promotion",
       "test100": "Test 100% Discount"
     }
+  },
+  "scoring": {
+    "title": "Score Management",
+    "description": "Recompute composite scores for agents and agencies. Scores update automatically on save, but use this to backfill existing records.",
+    "recomputeAgents": "Recompute Agent Scores",
+    "recomputeAgencies": "Recompute Agency Scores",
+    "recomputeAll": "Recompute All Scores",
+    "running": "Running...",
+    "success": "Updated {{count}} records",
+    "error": "Failed to recompute scores",
+    "lastRun": "Last run",
+    "howItWorks": "How scoring works",
+    "agentFormula": "Agents: rating×20 + sales×5 + listings×2 + reviews×1 (max 180 pts)",
+    "agencyFormula": "Agencies: listings×3 + team×5 + experience×2 + featured×20 (max 160 pts)"
   }
 }
