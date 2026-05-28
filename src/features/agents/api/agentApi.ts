@@ -57,7 +57,7 @@ export function transformBackendAgent(backendAgent: any): Agent {
     officePhone: backendAgent.officePhone,
     lat: backendAgent.lat,
     lng: backendAgent.lng,
-    score: typeof backendAgent.score === 'number' ? backendAgent.score : undefined,
+    score: typeof backendAgent.score === 'number' && backendAgent.score > 0 ? backendAgent.score : undefined,
     scoreBreakdown: backendAgent.scoreBreakdown ?? undefined,
   };
 }

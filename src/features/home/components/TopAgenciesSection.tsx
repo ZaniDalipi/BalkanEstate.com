@@ -336,9 +336,12 @@ const TopAgenciesSection: React.FC = () => {
   const { data: agencies = [], isLoading } = useQuery<Agency[]>({
     queryKey: ['topAgenciesMonth'],
     queryFn: async () => {
-      const data = await getTopAgencies(3);
+      const data = await getTopAgencies(10);
       const list: Agency[] = data.agencies || [];
-      return list.filter((a) => a.name);
+      return list
+        .filter((a) => a.name)
+        .sort((a, b) => calcAgencyScore(b) - calcAgencyScore(a))
+        .slice(0, 3);
     },
     staleTime: 10 * 60 * 1000,
     gcTime: 30 * 60 * 1000,

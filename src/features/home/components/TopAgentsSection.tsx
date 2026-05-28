@@ -347,8 +347,11 @@ const TopAgentsSection: React.FC = () => {
   const { data: agents = [], isLoading } = useQuery<Agent[]>({
     queryKey: ['topAgentsWeek'],
     queryFn: async () => {
-      const { agents } = await getTopAgents(3);
-      return agents.filter(a => a.name);
+      const { agents } = await getTopAgents(10);
+      return agents
+        .filter(a => a.name)
+        .sort((a, b) => calcScore(b) - calcScore(a))
+        .slice(0, 3);
     },
     staleTime: 10 * 60 * 1000,
     gcTime:    30 * 60 * 1000,
