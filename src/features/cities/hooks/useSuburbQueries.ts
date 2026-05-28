@@ -28,7 +28,7 @@ export function useSuburbData(city: string | undefined, country: string | undefi
     staleTime: 30 * 60 * 1000,
     gcTime: 2 * 60 * 60 * 1000,
     refetchOnWindowFocus: false,
-    retry: no404Retry,
+    retry: 1,
   });
 }
 

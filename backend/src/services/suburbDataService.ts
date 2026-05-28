@@ -210,33 +210,66 @@ function buildSuburbEntries(
 
 /**
  * Get suburb data for a city, using MongoDB cache when fresh.
+ * Never throws — always returns data (from cache, Gemini, or deterministic fallback).
  */
 export async function getSuburbData(city: string, country: string): Promise<ISuburbData> {
   const centers = SUBURB_CENTERS[city];
   if (!centers || centers.length === 0) {
-    // Return an empty stub so the frontend receives 200 with empty suburbs
-    // instead of a 404 that causes console errors and retries.
-    return {
-      city,
-      country,
-      countryCode: CITY_COUNTRY_MAP[city] ?? '',
-      suburbs: [],
-      cityAvgPricePerSqm: COUNTRY_FALLBACK_PRICES[country] ?? 1200,
-      lastUpdated: new Date(),
-      dataSource: 'fallback',
-    } as unknown as ISuburbData;
+    // Return in-memory fallback so missing cities still show a neighbourhood section
+    return buildInMemoryFallback(city, country);
   }
 
   // Check cache
-  const cached = await SuburbData.findOne({ city, country });
-  if (cached) {
-    const ageMs = Date.now() - cached.lastUpdated.getTime();
-    if (ageMs < CACHE_TTL_MS) {
-      return cached;
+  try {
+    const cached = await SuburbData.findOne({ city, country });
+    if (cached) {
+      const ageMs = Date.now() - cached.lastUpdated.getTime();
+      if (ageMs < CACHE_TTL_MS) {
+        return cached;
+      }
     }
+  } catch (err) {
+    apiLogger.warn(`getSuburbData: cache lookup failed for ${city}, regenerating`, err);
   }
 
-  return refreshSuburbData(city, country);
+  try {
+    return await refreshSuburbData(city, country);
+  } catch (err) {
+    apiLogger.warn(`getSuburbData: refresh failed for ${city}, returning in-memory fallback`, err);
+    return buildInMemoryFallback(city, country);
+  }
+}
+
+/**
+ * Build a valid ISuburbData object purely from static data — no DB or API calls.
+ * Used as ultimate safety net so the suburb section always renders.
+ */
+function buildInMemoryFallback(city: string, country: string): ISuburbData {
+  const cityAvgPricePerSqm = COUNTRY_FALLBACK_PRICES[country] ?? 1200;
+  const countryCode = CITY_COUNTRY_MAP[city] ?? 'XX';
+
+  const centers = SUBURB_CENTERS[city];
+  let geminiData: GeminiSuburbData[];
+  if (centers && centers.length > 0) {
+    geminiData = centers.map((c, i) => buildFallbackStats(c.name, i, centers.length, cityAvgPricePerSqm));
+  } else {
+    // Generic 3-suburb fallback when city has no center data at all
+    const names = ['City Center', 'North District', 'South District'];
+    geminiData = names.map((name, i) => buildFallbackStats(name, i, names.length, cityAvgPricePerSqm));
+  }
+
+  const suburbs = buildSuburbEntries(geminiData, city, cityAvgPricePerSqm);
+
+  return {
+    _id: undefined as any,
+    city,
+    country,
+    countryCode,
+    suburbs,
+    cityAvgPricePerSqm,
+    lastUpdated: new Date(),
+    dataSource: 'fallback',
+  } as unknown as ISuburbData;
 }
 
 /**
@@ -276,9 +309,25 @@ export async function refreshSuburbData(city: string, country: string): Promise<
 
   const suburbs = buildSuburbEntries(geminiData, city, cityAvgPricePerSqm);
 
-  const doc = await SuburbData.findOneAndUpdate(
-    { city, country },
-    {
+  try {
+    const doc = await SuburbData.findOneAndUpdate(
+      { city, country },
+      {
+        city,
+        country,
+        countryCode,
+        suburbs,
+        cityAvgPricePerSqm,
+        lastUpdated: new Date(),
+        dataSource,
+      },
+      { upsert: true, new: true }
+    );
+    return doc;
+  } catch (err) {
+    // DB write failed — return the generated data without persistence
+    apiLogger.warn(`refreshSuburbData: DB save failed for ${city}, returning in-memory data`, err);
+    return {
       city,
       country,
       countryCode,
@@ -286,9 +335,6 @@ export async function refreshSuburbData(city: string, country: string): Promise<
       cityAvgPricePerSqm,
       lastUpdated: new Date(),
       dataSource,
-    },
-    { upsert: true, new: true }
-  );
-
-  return doc;
+    } as unknown as ISuburbData;
+  }
 }
