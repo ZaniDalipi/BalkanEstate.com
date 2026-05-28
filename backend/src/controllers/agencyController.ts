@@ -3501,20 +3501,34 @@ export const getTopAgencies = async (req: Request, res: Response): Promise<void>
       .lean();
 
     const Property = (await import('../models/Property')).default;
-    const allAgentIds = agencies.flatMap((agency: any) =>
-      agency.agents?.map((agent: any) => agent._id) || []
-    );
+
+    // Include owner + all agents as seller IDs (mirrors agency detail logic)
+    const allSellerIds = agencies.flatMap((agency: any) => {
+      const ownerIds = agency.ownerId?._id ? [agency.ownerId._id] : [];
+      const agentIds = agency.agents?.map((agent: any) => agent._id) || [];
+      return [...ownerIds, ...agentIds];
+    });
+
     const propertyCounts = await Property.aggregate([
-      { $match: { sellerId: { $in: allAgentIds }, status: { $in: ['active', 'pending'] } } },
+      {
+        $match: {
+          sellerId: { $in: allSellerIds },
+          status: { $in: ['active', 'pending'] },
+          createdAsRole: 'agent',
+        },
+      },
       { $group: { _id: '$sellerId', count: { $sum: 1 } } },
     ]);
-    const countByAgent = new Map(
+    const countBySeller = new Map(
       propertyCounts.map((pc: { _id: unknown; count: number }) => [String(pc._id), pc.count])
     );
     const agenciesWithCounts = agencies.map((agency: any) => {
-      const agentIds = agency.agents?.map((agent: any) => agent._id) || [];
-      const totalProperties = agentIds.reduce(
-        (sum: number, id: unknown) => sum + (countByAgent.get(String(id)) || 0), 0
+      const sellerIds = [
+        ...(agency.ownerId?._id ? [agency.ownerId._id] : []),
+        ...(agency.agents?.map((agent: any) => agent._id) || []),
+      ];
+      const totalProperties = sellerIds.reduce(
+        (sum: number, id: unknown) => sum + (countBySeller.get(String(id)) || 0), 0
       );
       return { ...agency, totalProperties, totalAgents: agency.agents?.length || 0 };
     });
