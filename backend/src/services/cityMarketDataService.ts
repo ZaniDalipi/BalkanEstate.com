@@ -670,6 +670,14 @@ export async function getFeaturedCities(limit: number = 12): Promise<CityMarketD
       .limit(limit)
       .lean<CityMarketDataLean[]>();
 
+    // If the DB has fewer cities than the canonical list, seed missing ones in the
+    // background so the next request gets the full set (self-healing, fire-and-forget).
+    if (cities.length < FEATURED_CITIES.length) {
+      ensureAllFeaturedCitiesExist().catch(err =>
+        apiLogger.error('Background city seed failed:', err)
+      );
+    }
+
     // Enrich each city with live stats from the Property collection
     const enrichedCities = await Promise.all(
       cities.map(async (city) => {
