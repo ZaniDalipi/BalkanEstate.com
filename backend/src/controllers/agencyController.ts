@@ -3499,7 +3499,27 @@ export const getTopAgencies = async (req: Request, res: Response): Promise<void>
       .sort({ score: -1, isFeatured: -1 })
       .limit(limitNum)
       .lean();
-    res.json({ agencies });
+
+    const Property = (await import('../models/Property')).default;
+    const allAgentIds = agencies.flatMap((agency: any) =>
+      agency.agents?.map((agent: any) => agent._id) || []
+    );
+    const propertyCounts = await Property.aggregate([
+      { $match: { sellerId: { $in: allAgentIds }, status: { $in: ['active', 'pending'] } } },
+      { $group: { _id: '$sellerId', count: { $sum: 1 } } },
+    ]);
+    const countByAgent = new Map(
+      propertyCounts.map((pc: { _id: unknown; count: number }) => [String(pc._id), pc.count])
+    );
+    const agenciesWithCounts = agencies.map((agency: any) => {
+      const agentIds = agency.agents?.map((agent: any) => agent._id) || [];
+      const totalProperties = agentIds.reduce(
+        (sum: number, id: unknown) => sum + (countByAgent.get(String(id)) || 0), 0
+      );
+      return { ...agency, totalProperties, totalAgents: agency.agents?.length || 0 };
+    });
+
+    res.json({ agencies: agenciesWithCounts });
   } catch (error: any) {
     agencyLogger.error('Get top agencies error:', error);
     res.status(500).json({ message: 'Error fetching leaderboard' });
