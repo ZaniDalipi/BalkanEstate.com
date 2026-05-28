@@ -116,19 +116,19 @@ async function fetchEurostatHPI(geoCode: string): Promise<number | null> {
   }
 }
 
-// Base EUR/m² prices per country, used as anchors when only HPI is available
+// Base EUR/m² prices per country (verified from BIS, national stats, market reports 2025)
 const COUNTRY_BASE_PRICES: Record<string, number> = {
-  Croatia: 2000,
-  Greece: 1800,
-  Bulgaria: 1000,
-  Romania: 1300,
-  Bosnia: 900,
-  'Bosnia and Herzegovina': 900,
-  Albania: 1000,
-  Kosovo: 900,
-  Montenegro: 1500,
-  Serbia: 1400,
-  'North Macedonia': 1100,
+  Croatia: 3200,
+  Greece: 2500,
+  Bulgaria: 2000,
+  Romania: 2100,
+  Bosnia: 1350,
+  'Bosnia and Herzegovina': 1350,
+  Albania: 2400,
+  Kosovo: 1600,
+  Montenegro: 2150,
+  Serbia: 2500,
+  'North Macedonia': 1700,
 };
 
 function hpiToEurPerSqm(hpiValue: number | null, countryKey: string): number {

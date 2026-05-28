@@ -263,37 +263,41 @@ const CITY_METADATA: Record<string, {
  * Research-based city prices (EUR/m²) from BIS, national stats offices, market reports.
  * These override the tier/type calculation to ensure realistic values.
  */
+/**
+ * Research-based prices (EUR/m²) verified against BIS, national stats offices,
+ * Global Property Guide, Investropa, Numbeo — 2025 data.
+ */
 const CITY_RESEARCH_PRICES: Record<string, number> = {
-  Prishtina: 980, Prizren: 670, Peja: 610, Gjakova: 580,
-  Ferizaj: 555, Mitrovica: 540, Gjilan: 560,
-  Tirana: 1200, Durres: 950, Vlore: 980, Sarande: 1100,
-  Shkoder: 700, Fier: 670, Berat: 640, Elbasan: 645, Korce: 660,
-  Skopje: 1100, Ohrid: 900, Bitola: 700, Tetovo: 680,
-  Kumanovo: 670, Veles: 620, Strumica: 635, Kavadarci: 605,
-  Belgrade: 2200, 'Novi Sad': 1650, Nis: 850, Kragujevac: 780,
-  Subotica: 750, Zrenjanin: 700, Pancevo: 750, Cacak: 680,
-  Valjevo: 660, Smederevo: 700,
-  Sarajevo: 1700, 'Banja Luka': 1100, Mostar: 1000, Tuzla: 850,
-  Zenica: 800, Trebinje: 850, Bijeljina: 750, Brcko: 760,
-  Zagreb: 2900, Split: 3800, Dubrovnik: 5500, Rijeka: 2100,
-  Osijek: 1300, Zadar: 2800, Pula: 2600, Sibenik: 2400,
-  Varazdin: 1500, 'Slavonski Brod': 1100,
-  Podgorica: 1450, Budva: 3200, Kotor: 3000, Niksic: 850,
-  'Herceg Novi': 2200, Bar: 1800, Ulcinj: 1600, Tivat: 2800,
-  Athens: 2400, Thessaloniki: 1600, Patras: 1100, Heraklion: 1700,
-  Volos: 1000, Larissa: 900, Ioannina: 950, Kavala: 1000,
-  Chania: 2000, Rhodes: 2200,
-  Sofia: 1700, Plovdiv: 1100, Varna: 1200, Burgas: 1000,
-  'Stara Zagora': 750, Pleven: 700, Ruse: 750, Sliven: 645, Dobrich: 675,
-  Bucharest: 1900, 'Cluj-Napoca': 2200, Timisoara: 1400, Brasov: 1500,
-  Iasi: 1100, Constanta: 1100, Galati: 850, Craiova: 900,
-  Ploiesti: 950, Oradea: 1050,
+  Prishtina: 1600, Prizren: 850, Peja: 750, Gjakova: 700,
+  Ferizaj: 660, Mitrovica: 640, Gjilan: 680,
+  Tirana: 2400, Durres: 1400, Vlore: 1500, Sarande: 1700,
+  Shkoder: 950, Fier: 800, Berat: 750, Elbasan: 780, Korce: 800,
+  Skopje: 1700, Ohrid: 1100, Bitola: 850, Tetovo: 800,
+  Kumanovo: 780, Veles: 730, Strumica: 750, Kavadarci: 720,
+  Belgrade: 2500, 'Novi Sad': 1750, Nis: 1000, Kragujevac: 900,
+  Subotica: 880, Zrenjanin: 820, Pancevo: 880, Cacak: 790,
+  Valjevo: 770, Smederevo: 820,
+  Sarajevo: 1350, 'Banja Luka': 1150, Mostar: 1100, Tuzla: 950,
+  Zenica: 900, Trebinje: 980, Bijeljina: 870, Brcko: 880,
+  Zagreb: 3200, Split: 5200, Dubrovnik: 4200, Rijeka: 2500,
+  Osijek: 1500, Zadar: 3200, Pula: 3000, Sibenik: 2800,
+  Varazdin: 1700, 'Slavonski Brod': 1200,
+  Podgorica: 2150, Budva: 3500, Kotor: 3300, Niksic: 1000,
+  'Herceg Novi': 2500, Bar: 2100, Ulcinj: 1900, Tivat: 3200,
+  Athens: 2500, Thessaloniki: 2200, Patras: 1400, Heraklion: 2000,
+  Volos: 1200, Larissa: 1100, Ioannina: 1150, Kavala: 1200,
+  Chania: 2400, Rhodes: 2600,
+  Sofia: 2000, Plovdiv: 1400, Varna: 1500, Burgas: 1200,
+  'Stara Zagora': 850, Pleven: 800, Ruse: 900, Sliven: 750, Dobrich: 780,
+  Bucharest: 2100, 'Cluj-Napoca': 3200, Timisoara: 1700, Brasov: 1800,
+  Iasi: 1400, Constanta: 1300, Galati: 1000, Craiova: 1050,
+  Ploiesti: 1100, Oradea: 1250,
 };
 
 const COUNTRY_FALLBACK_RESEARCH: Record<string, number> = {
-  Kosovo: 650, Albania: 850, 'North Macedonia': 750, Serbia: 900,
-  'Bosnia and Herzegovina': 850, Croatia: 2000, Montenegro: 1400,
-  Greece: 1400, Bulgaria: 900, Romania: 1100,
+  Kosovo: 750, Albania: 1100, 'North Macedonia': 950, Serbia: 1100,
+  'Bosnia and Herzegovina': 1000, Croatia: 2400, Montenegro: 1800,
+  Greece: 1700, Bulgaria: 1100, Romania: 1300,
 };
 
 /**

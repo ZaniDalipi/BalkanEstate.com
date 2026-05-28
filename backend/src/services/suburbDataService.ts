@@ -6,121 +6,121 @@ import { apiLogger } from '../utils/logger';
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 /**
- * Research-based city average prices (EUR/m²) derived from:
+ * Research-based city average prices (EUR/m²) verified against:
  * - BIS Residential Property Price Index (stats.bis.org)
- * - National statistics offices (SSO, RGZ, NSI, ELSTAT, etc.)
+ * - National statistics offices (SSO MKD, RGZ SRB, NSI BGR, ELSTAT GRC, etc.)
  * - Eurostat House Price Index
- * - Established real estate market reports (2024–2025)
+ * - Global Property Guide, Investropa, Numbeo — 2025 data
  */
 const CITY_RESEARCH_PRICES: Record<string, number> = {
-  // Kosovo — KAS / market reports
-  Prishtina: 980,
-  Prizren: 670,
-  Peja: 610,
-  Gjakova: 580,
-  Ferizaj: 555,
-  Mitrovica: 540,
-  Gjilan: 560,
+  // Kosovo — KAS + market reports 2025; Prishtina center reaches €2,380/m²
+  Prishtina: 1600,
+  Prizren: 850,
+  Peja: 750,
+  Gjakova: 700,
+  Ferizaj: 660,
+  Mitrovica: 640,
+  Gjilan: 680,
 
-  // Albania — INSTAT / BIS ALB index
-  Tirana: 1200,
-  Durres: 950,
-  Vlore: 980,
-  Sarande: 1100,
-  Shkoder: 700,
-  Fier: 670,
-  Berat: 640,
-  Elbasan: 645,
-  Korce: 660,
+  // Albania — prices tripled since 2015; Tirana now avg €2,300–2,700/m²
+  Tirana: 2400,
+  Durres: 1400,
+  Vlore: 1500,
+  Sarande: 1700,
+  Shkoder: 950,
+  Fier: 800,
+  Berat: 750,
+  Elbasan: 780,
+  Korce: 800,
 
-  // North Macedonia — SSO / BIS MKD index (base ≈ €1,100)
-  Skopje: 1100,
-  Ohrid: 900,
-  Bitola: 700,
-  Tetovo: 680,
-  Kumanovo: 670,
-  Veles: 620,
-  Strumica: 635,
-  Kavadarci: 605,
+  // North Macedonia — SSO + BIS MKD; Skopje avg €1,670 in 2025
+  Skopje: 1700,
+  Ohrid: 1100,
+  Bitola: 850,
+  Tetovo: 800,
+  Kumanovo: 780,
+  Veles: 730,
+  Strumica: 750,
+  Kavadarci: 720,
 
-  // Serbia — RZS / BIS SRB index (base ≈ €1,400)
-  Belgrade: 2200,
-  'Novi Sad': 1650,
-  Nis: 850,
-  Kragujevac: 780,
-  Subotica: 750,
-  Zrenjanin: 700,
-  Pancevo: 750,
-  Cacak: 680,
-  Valjevo: 660,
-  Smederevo: 700,
+  // Serbia — RZS + BIS SRB; Belgrade median €2,517–2,560 in Q3 2025
+  Belgrade: 2500,
+  'Novi Sad': 1750,
+  Nis: 1000,
+  Kragujevac: 900,
+  Subotica: 880,
+  Zrenjanin: 820,
+  Pancevo: 880,
+  Cacak: 790,
+  Valjevo: 770,
+  Smederevo: 820,
 
-  // Bosnia and Herzegovina — BHAS / BIS BIH index
-  Sarajevo: 1700,
-  'Banja Luka': 1100,
-  Mostar: 1000,
-  Tuzla: 850,
-  Zenica: 800,
-  Trebinje: 850,
-  Bijeljina: 750,
-  Brcko: 760,
+  // Bosnia and Herzegovina — BHAS + BIS BIH; new builds €1,280–1,550; secondary €900–1,200
+  Sarajevo: 1350,
+  'Banja Luka': 1150,
+  Mostar: 1100,
+  Tuzla: 950,
+  Zenica: 900,
+  Trebinje: 980,
+  Bijeljina: 870,
+  Brcko: 880,
 
-  // Croatia — DZS / BIS HRV index (EU member, higher prices)
-  Zagreb: 2900,
-  Split: 3800,
-  Dubrovnik: 5500,
-  Rijeka: 2100,
-  Osijek: 1300,
-  Zadar: 2800,
-  Pula: 2600,
-  Sibenik: 2400,
-  Varazdin: 1500,
-  'Slavonski Brod': 1100,
+  // Croatia — DZS + market data 2025 (EU member); Zagreb €2,958–3,605; Split €5,183
+  Zagreb: 3200,
+  Split: 5200,
+  Dubrovnik: 4200,
+  Rijeka: 2500,
+  Osijek: 1500,
+  Zadar: 3200,
+  Pula: 3000,
+  Sibenik: 2800,
+  Varazdin: 1700,
+  'Slavonski Brod': 1200,
 
-  // Montenegro — Monstat / BIS MNE index
-  Podgorica: 1450,
-  Budva: 3200,
-  Kotor: 3000,
-  Niksic: 850,
-  'Herceg Novi': 2200,
-  Bar: 1800,
-  Ulcinj: 1600,
-  Tivat: 2800,
+  // Montenegro — Monstat + market data; Podgorica avg €2,153; Budva €2,500–4,000
+  Podgorica: 2150,
+  Budva: 3500,
+  Kotor: 3300,
+  Niksic: 1000,
+  'Herceg Novi': 2500,
+  Bar: 2100,
+  Ulcinj: 1900,
+  Tivat: 3200,
 
-  // Greece — ELSTAT / BIS GRC index (recovering market)
-  Athens: 2400,
-  Thessaloniki: 1600,
-  Patras: 1100,
-  Heraklion: 1700,
-  Volos: 1000,
-  Larissa: 900,
-  Ioannina: 950,
-  Kavala: 1000,
-  Chania: 2000,
-  Rhodes: 2200,
+  // Greece — ELSTAT + BIS GRC; Athens avg €2,450–2,580; Thessaloniki €2,200
+  Athens: 2500,
+  Thessaloniki: 2200,
+  Patras: 1400,
+  Heraklion: 2000,
+  Volos: 1200,
+  Larissa: 1100,
+  Ioannina: 1150,
+  Kavala: 1200,
+  Chania: 2400,
+  Rhodes: 2600,
 
-  // Bulgaria — NSI / BIS BGR index
-  Sofia: 1700,
-  Plovdiv: 1100,
-  Varna: 1200,
-  Burgas: 1000,
-  'Stara Zagora': 750,
-  Pleven: 700,
-  Ruse: 750,
-  Sliven: 645,
-  Dobrich: 675,
+  // Bulgaria — NSI + BIS BGR; Sofia avg €1,840–2,310 in 2025
+  Sofia: 2000,
+  Plovdiv: 1400,
+  Varna: 1500,
+  Burgas: 1200,
+  'Stara Zagora': 850,
+  Pleven: 800,
+  Ruse: 900,
+  Sliven: 750,
+  Dobrich: 780,
 
-  // Romania — INS / BIS ROU index
-  Bucharest: 1900,
-  'Cluj-Napoca': 2200,
-  Timisoara: 1400,
-  Brasov: 1500,
-  Iasi: 1100,
-  Constanta: 1100,
-  Galati: 850,
-  Craiova: 900,
-  Ploiesti: 950,
-  Oradea: 1050,
+  // Romania — INS + BIS ROU; Bucharest avg €2,100; Cluj-Napoca €3,200
+  Bucharest: 2100,
+  'Cluj-Napoca': 3200,
+  Timisoara: 1700,
+  Brasov: 1800,
+  Iasi: 1400,
+  Constanta: 1300,
+  Galati: 1000,
+  Craiova: 1050,
+  Ploiesti: 1100,
+  Oradea: 1250,
 };
 
 /**
@@ -142,16 +142,16 @@ const COUNTRY_VALID_RANGES: Record<string, [number, number]> = {
 
 /** Per-country fallback when a city isn't in CITY_RESEARCH_PRICES */
 const COUNTRY_FALLBACK_PRICES: Record<string, number> = {
-  Kosovo: 650,
-  Albania: 850,
-  'North Macedonia': 750,
-  Serbia: 900,
-  'Bosnia and Herzegovina': 850,
-  Croatia: 2000,
-  Montenegro: 1400,
-  Greece: 1400,
-  Bulgaria: 900,
-  Romania: 1100,
+  Kosovo: 750,
+  Albania: 1100,
+  'North Macedonia': 950,
+  Serbia: 1100,
+  'Bosnia and Herzegovina': 1000,
+  Croatia: 2400,
+  Montenegro: 1800,
+  Greece: 1700,
+  Bulgaria: 1100,
+  Romania: 1300,
 };
 
 function createCirclePolygon(
@@ -382,7 +382,7 @@ export async function getSuburbData(city: string, country: string): Promise<ISub
       const priceValid = isCachePriceValid(cached.cityAvgPricePerSqm, country);
       const isWrongPrice = Math.abs(cached.cityAvgPricePerSqm - expectedPrice) / expectedPrice > 0.5;
 
-      if (ageMs < CACHE_TTL_MS && priceValid && !isWrongPrice) {
+      if (ageMs < CACHE_TTL_MS && priceValid && !isWrongPrice && cached.dataSource === 'research') {
         return cached;
       }
       // Stale or wrong prices — return fresh research data, refresh cache
