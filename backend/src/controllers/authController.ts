@@ -2757,57 +2757,10 @@ export const unsubscribeFromEmails = async (req: Request, res: Response): Promis
 
     await user.save();
 
-    // Return a nice HTML page for browser access
+    // Redirect to the app's notifications settings page with a success indicator
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Unsubscribed - BalkanEstate</title>
-        <style>
-          body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            padding: 20px;
-          }
-          .card {
-            background: white;
-            border-radius: 16px;
-            padding: 40px;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-          }
-          h1 { color: #22c55e; font-size: 24px; margin: 0 0 16px 0; }
-          p { color: #6b7280; line-height: 1.6; margin: 0 0 24px 0; }
-          a {
-            display: inline-block;
-            background: #0252CD;
-            color: white;
-            text-decoration: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-          }
-          a:hover { background: #0369a1; }
-        </style>
-      </head>
-      <body>
-        <div class="card">
-          <h1>✓ Successfully Unsubscribed</h1>
-          <p>You've been unsubscribed from ${unsubscribeType === 'all' ? 'all promotional emails' : unsubscribeType + ' emails'}. You can update your email preferences anytime in your account settings.</p>
-          <a href="${frontendUrl}/settings/notifications">Manage Preferences</a>
-        </div>
-      </body>
-      </html>
-    `);
+    const label = unsubscribeType === 'all' ? 'all' : unsubscribeType;
+    res.redirect(`${frontendUrl}/account/notifications?unsubscribed=${encodeURIComponent(label)}`);
   } catch (error: any) {
     authLogger.error('Unsubscribe error:', error);
     res.status(500).json({ message: 'Error processing unsubscribe request' });

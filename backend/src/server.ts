@@ -129,6 +129,7 @@ import { startPromotionRefreshWorker } from './workers/promotionRefreshWorker';
 import { startMonthlyResetWorker } from './workers/monthlyResetWorker';
 import { startTrialManagementJob } from './jobs/trialManagementJob';
 import { startCityMarketDataUpdateJob } from './jobs/updateCityMarketData';
+import { ensureAllFeaturedCitiesExist } from './services/cityMarketDataService';
 import { startMonthlyCouponJob } from './jobs/monthlyCouponJob';
 import { runScoreBackfill } from './jobs/scoreBackfillJob';
 import { initializePushService } from './services/pushNotificationService';
@@ -164,7 +165,13 @@ setupChatSocket(io);
 setupPropertySocket(io);
 
 // Connect to database
-connectDB();
+connectDB().then(() => {
+  // Seed any cities added to FEATURED_CITIES that aren't yet in the DB.
+  // Safe to call every startup — skips cities that already exist.
+  ensureAllFeaturedCitiesExist().catch(err =>
+    serverLogger.error('Failed to seed featured cities:', err)
+  );
+});
 
 // Non-blocking score backfill: updates any agent/agency records with score=0 after DB is ready.
 // Runs in the background so it never delays server startup.

@@ -343,6 +343,16 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return;
       }
 
+      // Redirect legacy /settings/notifications to /account/notifications
+      if (path === '/settings/notifications' || path === '/settings/notifications/') {
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'notifications' });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+        window.history.replaceState(null, '', '/account/notifications');
+        return;
+      }
+
       // Account sub-routes: /account/:tab
       const accountMatch = path.match(/^\/account(?:\/(.+))?$/);
       if (accountMatch) {
