@@ -209,7 +209,8 @@ export interface Agent extends User {
     agencyType?: 'standard' | 'luxury' | 'commercial' | 'boutique' | 'team';
     lat?: number;
     lng?: number;
-
+    score?: number;
+    scoreBreakdown?: { rating: number; sales: number; active: number; reviews: number };
 }
 
 export interface Agency {
@@ -279,6 +280,8 @@ export interface Agency {
         autoRenew?: boolean;
         listingsLimit?: number;
     };
+    score?: number;
+    scoreBreakdown?: { listings: number; team: number; experience: number; featured: number };
 }
 
 export interface PropertyImage {
@@ -774,7 +777,7 @@ export interface AppState {
     isSessionExpiredModalOpen: boolean;
 }
 
-export type AdminSection = 'dashboard' | 'heatmap' | 'users' | 'inquiries' | 'agent-requests' | 'discounts' | 'promotions' | 'promotion-plans' | 'properties' | 'agencies' | 'pricing' | 'activity' | 'settings' | 'site-settings' | 'how-it-works' | 'email-templates' | 'business-listings';
+export type AdminSection = 'dashboard' | 'heatmap' | 'users' | 'inquiries' | 'agent-requests' | 'discounts' | 'promotions' | 'promotion-plans' | 'properties' | 'agencies' | 'pricing' | 'activity' | 'settings' | 'site-settings' | 'how-it-works' | 'email-templates' | 'business-listings' | 'articles';
 
 export type AgencyDashboardSection = 'overview' | 'agents' | 'properties' | 'leads' | 'analytics' | 'financial' | 'profile' | 'team';
 

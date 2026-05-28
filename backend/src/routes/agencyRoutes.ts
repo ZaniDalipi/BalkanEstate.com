@@ -23,6 +23,8 @@ import {
   getAgencyAgents,
   migrateAgentSubscriptions,
   sendPromotionCouponsEmailEndpoint,
+  getTopAgencies,
+  recomputeAgencyScores,
 } from '../controllers/agencyController';
 import { protect, optionalAuth } from '../middleware/auth';
 
@@ -76,6 +78,10 @@ router.get('/:id/agents', protect, getAgencyAgents); // Get agent list with deta
 
 // Migration route (run once to fix existing agents)
 router.post('/migrate-agent-subscriptions', protect, migrateAgentSubscriptions);
+
+// Leaderboard and admin routes (must be before catch-all /:country/:name)
+router.get('/leaderboard', getTopAgencies);
+router.post('/admin/recompute-scores', protect, recomputeAgencyScores);
 
 // Catch-all public lookup routes (must be LAST — /:country/:name matches any two-segment path)
 router.get('/:country/:name', optionalAuth, getAgency); // Format: /agencies/:country/:name (e.g., /agencies/albania/zano-real-estate)

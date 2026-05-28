@@ -394,5 +394,38 @@
     "ourAgents": "Наши Агенти",
     "ourProperties": "Наше Некретнине",
     "noPropertiesListed": "Тренутно нема објављених некретнина"
+  },
+  "scoring": {
+    "panelTitle": "Kako funkcioniše sistem bodova agencije",
+    "maxPossible": "Maksimum moguće: {{max}} bodova",
+    "toggleShow": "Prikaži detalje",
+    "toggleHide": "Sakrij detalje",
+    "footerNote": "Bodovi se ažuriraju nedeljno. Dodajte oglase, povećajte tim i dobijte istaknuti status.",
+    "metrics": {
+      "listings": {
+        "label": "Oglasi Nekretnina",
+        "formula": "3 boda po oglasu",
+        "desc": "Svaki aktivni oglas dodaje 3 boda. Dodajte više nekretnina za dominaciju u rang-listi.",
+        "cap": "Maks 60 bodova"
+      },
+      "team": {
+        "label": "Veličina Tima Agenata",
+        "formula": "5 bodova po agentu",
+        "desc": "Svaki agent u timu donosi 5 bodova. Izgradite jači tim za brži napredak.",
+        "cap": "Maks 50 bodova"
+      },
+      "experience": {
+        "label": "Godine u Poslovanju",
+        "formula": "2 boda po godini",
+        "desc": "Svaka godina rada agencije dodaje 2 boda. Iskustvo gradi poverenje.",
+        "cap": "Maks 30 bodova"
+      },
+      "featured": {
+        "label": "Istaknuti Status",
+        "formula": "+20 bodova bonus",
+        "desc": "Istaknute agencije dobijaju 20 bodova bonusa i prikazuju se na vrhu svih pretraga.",
+        "cap": "Maks 20 bodova"
+      }
+    }
   }
 }

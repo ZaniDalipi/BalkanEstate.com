@@ -17,6 +17,7 @@ import { fetchAndStoreNews, cleanupOldNews } from '../services/newsService';
 import { startPropertyStatsJob, stopPropertyStatsJob } from '../jobs/computePropertyStatsJob';
 import { processExpiredRentals } from '../jobs/rentalExpiryJob';
 import { processListingIngest, processDeferredListingReplay } from '../jobs/listingIngestJob';
+import { runScoreFullRefresh } from '../jobs/scoreBackfillJob';
 
 // Helper to check if MongoDB is connected before running a job
 const isMongoConnected = (): boolean => {
@@ -50,6 +51,7 @@ let newsCleanupTask: cron.ScheduledTask | null = null;
 let rentalExpiryTask: cron.ScheduledTask | null = null;
 let listingIngestTask: cron.ScheduledTask | null = null;
 let deferredReplayTask: cron.ScheduledTask | null = null;
+let scoreRefreshTask: cron.ScheduledTask | null = null;
 
 export const startCronJobs = () => {
   // Check for subscriptions expiring in 1 day - runs daily at 10 AM
@@ -455,7 +457,28 @@ export const startCronJobs = () => {
     });
   });
 
-  cronLogger.info('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails, monthly coupons, news fetch, property stats, rental expiry, listing ingest, deferred replay)');
+  // ===============================
+  // SCORE REFRESH
+  // ===============================
+
+  // Refresh all agent and agency composite scores every Monday at 03:00 UTC.
+  // Catches drift for records updated outside the pre-save hook (e.g. admin bulk ops).
+  scoreRefreshTask = cron.schedule('0 3 * * 1', async () => {
+    await withDbConnection('score refresh', async () => {
+      try {
+        cronLogger.info('📊 Weekly score refresh starting...');
+        const result = await runScoreFullRefresh();
+        cronLogger.info(`📊 Weekly score refresh done — agents: ${result.agentsUpdated}, agencies: ${result.agenciesUpdated}, errors: ${result.errors.length}`);
+        if (result.errors.length > 0) {
+          cronLogger.warn(`⚠️ Score refresh errors: ${result.errors.join('; ')}`);
+        }
+      } catch (error) {
+        cronLogger.error('Score refresh cron error:', error);
+      }
+    });
+  });
+
+  cronLogger.info('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails, monthly coupons, news fetch, property stats, rental expiry, listing ingest, deferred replay, score refresh)');
 };
 
 export const stopCronJobs = () => {
@@ -477,6 +500,7 @@ export const stopCronJobs = () => {
   if (rentalExpiryTask) rentalExpiryTask.stop();
   if (listingIngestTask) listingIngestTask.stop();
   if (deferredReplayTask) deferredReplayTask.stop();
+  if (scoreRefreshTask) scoreRefreshTask.stop();
   stopPropertyStatsJob();
   cronLogger.info('🛑 All cron jobs stopped');
 };

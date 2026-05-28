@@ -831,5 +831,38 @@
     "french": "French",
     "russian": "Russian",
     "spanish": "Spanish"
+  },
+  "scoring": {
+    "panelTitle": "Cum funcționează sistemul de puncte",
+    "maxPossible": "Maxim posibil: {{max}} puncte",
+    "toggleShow": "Afișează detalii",
+    "toggleHide": "Ascunde detalii",
+    "footerNote": "Punctele se actualizează săptămânal. Obțineți recenzii, încheiați vânzări și mențineți anunțuri active pentru a urca în clasament.",
+    "metrics": {
+      "rating": {
+        "label": "Evaluarea Clientului",
+        "formula": "20 puncte pe ★",
+        "desc": "Fiecare stea primită de la clienți valorează 20 de puncte. O evaluare perfectă de 5 stele îți aduce 100 de puncte — factorul cel mai important.",
+        "cap": "Max 100 puncte"
+      },
+      "sales": {
+        "label": "Proprietăți Vândute",
+        "formula": "5 puncte pe vânzare",
+        "desc": "Fiecare tranzacție încheiată adaugă 5 puncte. Închide 10 vânzări și maximizează această categorie.",
+        "cap": "Max 50 puncte"
+      },
+      "active": {
+        "label": "Anunțuri Active",
+        "formula": "2 puncte pe anunț",
+        "desc": "Un portofoliu activ arată că ești pe piață. Fiecare anunț activ câștigă 2 puncte — adaugă proprietăți.",
+        "cap": "Max 20 puncte"
+      },
+      "reviews": {
+        "label": "Recenzii Clienți",
+        "formula": "1 punct pe recenzie",
+        "desc": "Numărul de recenzii arată încredere. Fiecare recenzie colectată adaugă 1 punct indiferent de notă.",
+        "cap": "Max 10 puncte"
+      }
+    }
   }
 }

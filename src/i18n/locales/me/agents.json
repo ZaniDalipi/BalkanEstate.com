@@ -831,5 +831,38 @@
     "french": "French",
     "russian": "Russian",
     "spanish": "Spanish"
+  },
+  "scoring": {
+    "panelTitle": "Kako funkcioniše sistem bodova",
+    "maxPossible": "Maksimum moguće: {{max}} bodova",
+    "toggleShow": "Prikaži detalje",
+    "toggleHide": "Sakrij detalje",
+    "footerNote": "Bodovi se ažuriraju sedmično. Zaradite recenzije, zatvorite prodaje i zadržite aktivne oglase da biste napredovali.",
+    "metrics": {
+      "rating": {
+        "label": "Ocjena Klijenta",
+        "formula": "20 bodova po ★",
+        "desc": "Svaka zvjezdica koju vam klijenti daju vrijedi 20 bodova. Savršena ocjena od 5 zvjezdica donosi 100 bodova — najvažniji faktor.",
+        "cap": "Maks 100 bodova"
+      },
+      "sales": {
+        "label": "Prodate Nekretnine",
+        "formula": "5 bodova po prodaji",
+        "desc": "Svaka zatvorena transakcija dodaje 5 bodova. Zatvorite 10 prodaja i maksimizujte ovu kategoriju.",
+        "cap": "Maks 50 bodova"
+      },
+      "active": {
+        "label": "Aktivni Oglasi",
+        "formula": "2 boda po oglasu",
+        "desc": "Aktivni portfolio pokazuje da ste na tržištu. Svaki aktivni oglas donosi 2 boda — dodajte nekretnine.",
+        "cap": "Maks 20 bodova"
+      },
+      "reviews": {
+        "label": "Recenzije Klijenata",
+        "formula": "1 bod po recenziji",
+        "desc": "Broj recenzija pokazuje povjerenje. Svaka recenzija dodaje 1 bod bez obzira na ocjenu.",
+        "cap": "Maks 10 bodova"
+      }
+    }
   }
 }

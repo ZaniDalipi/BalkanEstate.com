@@ -156,7 +156,9 @@
     "title": "Njihuni me Agjentët Tanë Më të Mirë",
     "subtitle": "Renditur sipas shitjeve, vlerësimeve dhe kënaqësisë së klientëve këtë javë",
     "sold": "shitur",
-    "active": "aktive"
+    "active": "aktive",
+    "pts": "pikë",
+    "ptsToTop": "{{gap}} pikë deri te #1"
   },
   "topAgencies": {
     "badge": "Agjencitë e Muajit",
@@ -164,7 +166,9 @@
     "subtitle": "Agjencitë me performancën më të lartë me më shumë lista, agjentë dhe besim të klientëve",
     "listings": "lista",
     "agents": "agjentë",
-    "years": "vite"
+    "years": "vite",
+    "pts": "pikë",
+    "ptsToTop": "{{gap}} pikë deri te #1"
   },
   "testimonials": {
     "title": "Çfarë Thonë Përdoruesit Tanë",

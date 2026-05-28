@@ -262,7 +262,7 @@ export function renderEmailConfig(
       ${footerReason ? `<p style="color:#000000;font-size:12px;margin:0 0 8px 0;" class="ec-text-muted">${footerReason}</p>` : ''}
       ${config.showUnsubscribe ? `
       <p style="color:#000000;font-size:11px;margin:0 0 6px 0;" class="ec-text-muted">
-        <a href="${frontendUrl}/settings/notifications" style="color:#000000;text-decoration:underline;" class="ec-text-muted">Manage email preferences</a>
+        <a href="${frontendUrl}/account/notifications" style="color:#000000;text-decoration:underline;" class="ec-text-muted">Manage email preferences</a>
       </p>` : ''}
       <p style="color:#000000;font-size:12px;margin:4px 0 4px 0;" class="ec-text-muted">
         Need help? <a href="mailto:${supportEmail}" style="color:${brandPrimary};text-decoration:none;" class="ec-link">${supportEmail}</a>

@@ -314,7 +314,7 @@ export async function getSuburbData(city: string, country: string): Promise<ISub
 export async function refreshSuburbData(city: string, country: string): Promise<ISuburbData> {
   const centers = SUBURB_CENTERS[city];
   if (!centers || centers.length === 0) {
-    throw new Error(`City not found: ${city}`);
+    throw new Error(`City not supported for suburb data: ${city}`);
   }
 
   let cityAvgPricePerSqm = COUNTRY_FALLBACK_PRICES[country] ?? 1200;

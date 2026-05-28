@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { calcAgentScoreBreakdown } from '../utils/scoringUtils';
 
 export interface ICredential {
   type: 'license' | 'certification' | 'award' | 'membership';
@@ -72,6 +73,8 @@ export interface IAgent extends Document {
   views: number;
   viewStats: IAgentStats;
   isActive: boolean;
+  score: number;
+  scoreBreakdown: { rating: number; sales: number; active: number; reviews: number };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -322,6 +325,17 @@ const AgentSchema: Schema = new Schema(
       type: Boolean,
       default: true,
     },
+    score: {
+      type: Number,
+      default: 0,
+      index: true,
+    },
+    scoreBreakdown: {
+      rating:  { type: Number, default: 0 },
+      sales:   { type: Number, default: 0 },
+      active:  { type: Number, default: 0 },
+      reviews: { type: Number, default: 0 },
+    },
   },
   {
     timestamps: true,
@@ -352,5 +366,23 @@ AgentSchema.pre<IAgent>('save', function (next) {
   }
   next();
 });
+
+// Auto-calculate composite score before saving
+AgentSchema.pre<IAgent>('save', function (next) {
+  if (
+    this.isModified('rating') ||
+    this.isModified('totalSales') ||
+    this.isModified('activeListings') ||
+    this.isModified('totalReviews') ||
+    this.isNew
+  ) {
+    const b = calcAgentScoreBreakdown(this);
+    this.score = b.total;
+    this.scoreBreakdown = { rating: b.rating, sales: b.sales, active: b.active, reviews: b.reviews };
+  }
+  next();
+});
+
+AgentSchema.index({ score: -1, rating: -1 });
 
 export default mongoose.model<IAgent>('Agent', AgentSchema);

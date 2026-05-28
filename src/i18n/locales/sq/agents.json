@@ -831,5 +831,38 @@
     "french": "French",
     "russian": "Russian",
     "spanish": "Spanish"
+  },
+  "scoring": {
+    "panelTitle": "Si funksionon sistemi i pikëve",
+    "maxPossible": "Maksimumi i mundshëm: {{max}} pikë",
+    "toggleShow": "Shfaq detajet",
+    "toggleHide": "Fshih detajet",
+    "footerNote": "Pikët përditësohen çdo javë. Merrni komente, mbyllni shitje dhe mbani listime aktive për të ngjitut në renditje.",
+    "metrics": {
+      "rating": {
+        "label": "Vlerësimi i Klientit",
+        "formula": "20 pikë për ★",
+        "desc": "Çdo yll që klientët tuaj ju japin vlen 20 pikë. Një vlerësim i përsosur me 5 yje ju sjell 100 pikë vetëm — faktori më i rëndësishëm.",
+        "cap": "Maks 100 pikë"
+      },
+      "sales": {
+        "label": "Prona të Shitura",
+        "formula": "5 pikë për shitje",
+        "desc": "Çdo transaksion i mbyllur shton 5 pikë. Mbyllni 10 shitje dhe maksimizoni këtë kategori.",
+        "cap": "Maks 50 pikë"
+      },
+      "active": {
+        "label": "Listime Aktive",
+        "formula": "2 pikë për listim",
+        "desc": "Një portofol aktiv tregon se jeni në treg. Çdo listim aktiv sjell 2 pikë — shtoni prona.",
+        "cap": "Maks 20 pikë"
+      },
+      "reviews": {
+        "label": "Komentet e Klientëve",
+        "formula": "1 pikë për koment",
+        "desc": "Vëllimi i komenteve tregon besim. Çdo koment që mbledhni shton 1 pikë, pavarësisht nga nota.",
+        "cap": "Maks 10 pikë"
+      }
+    }
   }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getFeaturedCities, CityMarketData } from '@/services/apiService';
+import { mergeWithStaticFallback } from '../data/staticCities';
 import { formatPrice } from '@/utils/currency';
 import { MapPinIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, ChartBarIcon, CalendarIcon, HomeIcon, FireIcon, StarIcon, BuildingOfficeIcon, GlobeAltIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
@@ -84,8 +85,8 @@ const CityRecommendations: React.FC = () => {
   const loadCities = async () => {
     try {
       setLoading(true);
-      const data = await getFeaturedCities(100); // Load all cities across all countries
-      setCities(data);
+      const data = await getFeaturedCities(100);
+      setCities(mergeWithStaticFallback(data));
     } catch (error) {
       // Error removed
     } finally {

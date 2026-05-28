@@ -234,11 +234,8 @@ export const getCityGeoDataController = async (req: Request, res: Response): Pro
     }
     const forceRefresh = req.query.refresh === 'true';
     const geoData = await getCityGeoData(city, country, forceRefresh);
-    if (!geoData) {
-      res.status(404).json({ success: false, message: 'No boundary data available for this city' });
-      return;
-    }
-    res.json({ success: true, data: geoData, featureCount: geoData.features.length });
+    const result = geoData ?? { type: 'FeatureCollection' as const, features: [] };
+    res.json({ success: true, data: result, featureCount: result.features.length });
   } catch (error: unknown) {
     apiLogger.error('Error fetching city geo data:', error);
     res.status(500).json({ success: false, message: 'Error fetching boundary data' });
