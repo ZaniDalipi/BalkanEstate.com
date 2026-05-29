@@ -3532,6 +3532,13 @@ export const getTopAgencies = async (req: Request, res: Response): Promise<void>
       return { ...agency, totalProperties, totalAgents: agency.agents?.length || 0 };
     });
 
+    // Re-sort after computing live totalProperties so tiebreaks favour agencies with more listings
+    agenciesWithCounts.sort((a: any, b: any) => {
+      const scoreDiff = (b.score || 0) - (a.score || 0);
+      if (scoreDiff !== 0) return scoreDiff;
+      return (b.totalProperties || 0) - (a.totalProperties || 0);
+    });
+
     res.json({ agencies: agenciesWithCounts });
   } catch (error: any) {
     agencyLogger.error('Get top agencies error:', error);

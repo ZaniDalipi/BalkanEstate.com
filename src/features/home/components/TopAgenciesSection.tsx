@@ -63,8 +63,22 @@ const AgencyPodiumCard: React.FC<{
         alignItems: 'center',
         flex: rank === 0 ? '1.2' : '1',
         minWidth: 0,
+        position: 'relative',
       }}
     >
+      {/* Crown sits OUTSIDE the card so it isn't clipped by overflow:hidden */}
+      {isChamp && (
+        <div style={{
+          position: 'absolute', top: '-18px', left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 20,
+          fontSize: '26px', lineHeight: 1,
+          filter: 'drop-shadow(0 4px 10px rgba(255,180,0,0.7))',
+          animation: isVisible ? 'tas-agency-bounce 2.4s ease-in-out infinite' : 'none',
+          pointerEvents: 'none',
+        }}>👑</div>
+      )}
+
       {/* Agency Card */}
       <div
         ref={cardRef}
@@ -99,17 +113,6 @@ const AgencyPodiumCard: React.FC<{
             position: 'relative',
           }}
         >
-          {/* Crown for #1 */}
-          {isChamp && (
-            <div style={{
-              position: 'absolute', top: '-14px', left: '50%',
-              transform: 'translateX(-50%)',
-              fontSize: '22px', lineHeight: 1,
-              filter: 'drop-shadow(0 4px 8px rgba(255,180,0,0.65))',
-              animation: isVisible ? 'tas-agency-bounce 2.4s ease-in-out infinite' : 'none',
-            }}>👑</div>
-          )}
-
           {/* Medal badge for 2nd/3rd */}
           {!isChamp && (
             <div style={{
@@ -340,7 +343,11 @@ const TopAgenciesSection: React.FC = () => {
       const list: Agency[] = data.agencies || [];
       return list
         .filter((a) => a.name)
-        .sort((a, b) => calcAgencyScore(b) - calcAgencyScore(a))
+        .sort((a, b) => {
+          const scoreDiff = calcAgencyScore(b) - calcAgencyScore(a);
+          if (scoreDiff !== 0) return scoreDiff;
+          return (b.totalProperties || 0) - (a.totalProperties || 0);
+        })
         .slice(0, 3);
     },
     staleTime: 10 * 60 * 1000,
