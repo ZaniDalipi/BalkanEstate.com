@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { GoogleMap, Marker, Autocomplete } from '@react-google-maps/api';
+import { GoogleMap, Marker } from '@react-google-maps/api';
 import { useGoogleMapLoader } from '@/src/features/map/hooks/useGoogleMapLoader';
-import { reverseGeocode } from '@/services/osmService';
+import { searchLocation, reverseGeocode } from '@/services/osmService';
+import { NominatimResult } from '@/types';
 import { useAppContext } from '@/context/AppContext';
 
 interface GoogleMapLocationPickerProps {
@@ -21,6 +22,20 @@ interface GoogleMapLocationPickerProps {
 
 const MAP_CONTAINER_STYLE = { width: '100%', height: '100%' };
 
+const COUNTRY_CODE_MAP: Record<string, string> = {
+  Serbia: 'RS',
+  Kosovo: 'XK',
+  Albania: 'AL',
+  'North Macedonia': 'MK',
+  'Bosnia and Herzegovina': 'BA',
+  Montenegro: 'ME',
+  Croatia: 'HR',
+  Slovenia: 'SI',
+  Bulgaria: 'BG',
+  Romania: 'RO',
+  Greece: 'GR',
+};
+
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -30,20 +45,6 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
     Math.sin(dLon / 2) * Math.sin(dLon / 2);
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-};
-
-const COUNTRY_CODE_MAP: Record<string, string> = {
-  Serbia: 'rs',
-  Kosovo: 'xk',
-  Albania: 'al',
-  'North Macedonia': 'mk',
-  'Bosnia and Herzegovina': 'ba',
-  Montenegro: 'me',
-  Croatia: 'hr',
-  Slovenia: 'si',
-  Bulgaria: 'bg',
-  Romania: 'ro',
-  Greece: 'gr',
 };
 
 const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
@@ -64,27 +65,49 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
   const { isLoaded, loadError } = useGoogleMapLoader();
 
   const mapRef = useRef<google.maps.Map | null>(null);
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const [mapType, setMapType] = useState<'roadmap' | 'satellite'>('roadmap');
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [markerPos, setMarkerPos] = useState<{ lat: number; lng: number }>({ lat, lng });
 
-  // Keep refs for validation inside callbacks
+  // Search state
+  const [searchQuery, setSearchQuery] = useState(address);
+  const [searchResults, setSearchResults] = useState<NominatimResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+
+  // Track whether user is actively typing (don't override while typing)
+  const isUserTypingRef = useRef(false);
+
+  // Keep refs for validation callbacks
   const cityRef = useRef(city);
   const cityLatRef = useRef(cityLat);
   const cityLngRef = useRef(cityLng);
   const markerPosRef = useRef(markerPos);
+  const latRef = useRef(lat);
+  const lngRef = useRef(lng);
 
   useEffect(() => { cityRef.current = city; }, [city]);
   useEffect(() => { cityLatRef.current = cityLat; }, [cityLat]);
   useEffect(() => { cityLngRef.current = cityLng; }, [cityLng]);
   useEffect(() => { markerPosRef.current = markerPos; }, [markerPos]);
+  useEffect(() => { latRef.current = lat; }, [lat]);
+  useEffect(() => { lngRef.current = lng; }, [lng]);
 
   // Sync marker when parent updates lat/lng externally
   useEffect(() => {
     setMarkerPos({ lat, lng });
   }, [lat, lng]);
+
+  // Keep search box in sync with the address shown on the map
+  // (updated after drag → reverse geocode, or after selecting a result)
+  useEffect(() => {
+    if (!isUserTypingRef.current && address) {
+      setSearchQuery(address);
+    }
+  }, [address]);
 
   // Auto-detect location on mount
   useEffect(() => {
@@ -98,7 +121,10 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
           if (onAddressChange) {
             try {
               const result = await reverseGeocode(latitude, longitude);
-              if (result) onAddressChange(result.display_name);
+              if (result) {
+                onAddressChange(result.display_name);
+                setSearchQuery(result.display_name);
+              }
             } catch { /* silent */ }
           }
           setIsGettingLocation(false);
@@ -111,7 +137,7 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
   }, [autoDetectLocation]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const validateAndMove = useCallback(
-    async (newLat: number, newLng: number) => {
+    async (newLat: number, newLng: number): Promise<boolean> => {
       const currentCity = cityRef.current;
       const cLat = cityLatRef.current;
       const cLng = cityLngRef.current;
@@ -119,8 +145,7 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
       if (currentCity && cLat && cLng) {
         const dist = calculateDistance(cLat, cLng, newLat, newLng);
         if (dist > 30) {
-          // Snap back
-          setMarkerPos({ ...markerPosRef.current });
+          setMarkerPos({ lat: latRef.current, lng: lngRef.current });
           dispatch({
             type: 'SHOW_ALERT',
             payload: {
@@ -129,7 +154,7 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
               message: t('search:map.locationTooFar', { distance: dist.toFixed(1), city: currentCity }),
             },
           });
-          return;
+          return false;
         }
       }
 
@@ -139,9 +164,13 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
       if (onAddressChange) {
         try {
           const result = await reverseGeocode(newLat, newLng);
-          if (result) onAddressChange(result.display_name);
+          if (result) {
+            onAddressChange(result.display_name);
+            setSearchQuery(result.display_name);
+          }
         } catch { /* silent */ }
       }
+      return true;
     },
     [dispatch, onLocationChange, onAddressChange, t],
   );
@@ -154,13 +183,79 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
     [validateAndMove],
   );
 
-  const handleMapTypeToggle = useCallback(
-    (type: 'roadmap' | 'satellite') => {
-      setMapType(type);
-      mapRef.current?.setMapTypeId(type);
-    },
-    [],
-  );
+  // Search input handler with debounce
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    setShowResults(true);
+    isUserTypingRef.current = true;
+
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+
+    if (query.trim().length < 3) {
+      setSearchResults([]);
+      return;
+    }
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const countryCode = country ? COUNTRY_CODE_MAP[country] : undefined;
+        let results = await searchLocation(query, countryCode);
+
+        // Filter to within 30 km of city if one is selected
+        const cLat = cityLatRef.current;
+        const cLng = cityLngRef.current;
+        if (cityRef.current && cLat && cLng) {
+          results = results.filter((r) => {
+            const dist = calculateDistance(cLat, cLng, parseFloat(r.lat), parseFloat(r.lon));
+            return dist <= 30;
+          });
+        }
+
+        setSearchResults(results.slice(0, 8));
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 250);
+  };
+
+  const handleResultSelect = (result: NominatimResult) => {
+    const newLat = parseFloat(result.lat);
+    const newLng = parseFloat(result.lon);
+
+    const currentCity = cityRef.current;
+    const cLat = cityLatRef.current;
+    const cLng = cityLngRef.current;
+    if (currentCity && cLat && cLng) {
+      const dist = calculateDistance(cLat, cLng, newLat, newLng);
+      if (dist > 30) {
+        dispatch({
+          type: 'SHOW_ALERT',
+          payload: {
+            type: 'warning',
+            title: t('search:map.locationTooFarTitle', 'Location Too Far'),
+            message: t('search:map.locationTooFar', { distance: dist.toFixed(1), city: currentCity }),
+          },
+        });
+        return;
+      }
+    }
+
+    setMarkerPos({ lat: newLat, lng: newLng });
+    onLocationChange(newLat, newLng);
+    if (onAddressChange) onAddressChange(result.display_name);
+
+    setSearchQuery(result.display_name);
+    setShowResults(false);
+    setSearchResults([]);
+    isUserTypingRef.current = false;
+
+    mapRef.current?.panTo({ lat: newLat, lng: newLng });
+    mapRef.current?.setZoom(16);
+  };
 
   const handleGetCurrentLocation = useCallback(async () => {
     if (!navigator.geolocation) {
@@ -173,9 +268,11 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords;
-        await validateAndMove(latitude, longitude);
-        mapRef.current?.panTo({ lat: latitude, lng: longitude });
-        mapRef.current?.setZoom(16);
+        const ok = await validateAndMove(latitude, longitude);
+        if (ok) {
+          mapRef.current?.panTo({ lat: latitude, lng: longitude });
+          mapRef.current?.setZoom(16);
+        }
         setIsGettingLocation(false);
       },
       (error) => {
@@ -198,23 +295,13 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
     );
   }, [t, validateAndMove]);
 
-  const handlePlaceChanged = useCallback(() => {
-    const place = autocompleteRef.current?.getPlace();
-    if (!place?.geometry?.location) return;
-
-    const newLat = place.geometry.location.lat();
-    const newLng = place.geometry.location.lng();
-    validateAndMove(newLat, newLng);
-    mapRef.current?.panTo({ lat: newLat, lng: newLng });
-    mapRef.current?.setZoom(16);
-  }, [validateAndMove]);
+  const handleMapTypeToggle = useCallback((type: 'roadmap' | 'satellite') => {
+    setMapType(type);
+    mapRef.current?.setMapTypeId(type);
+  }, []);
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
-  }, []);
-
-  const onAutocompleteLoad = useCallback((ac: google.maps.places.Autocomplete) => {
-    autocompleteRef.current = ac;
   }, []);
 
   if (loadError) {
@@ -236,13 +323,6 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
     );
   }
 
-  const autocompleteOptions: google.maps.places.AutocompleteOptions = {
-    types: ['geocode', 'establishment'],
-    ...(country && COUNTRY_CODE_MAP[country]
-      ? { componentRestrictions: { country: COUNTRY_CODE_MAP[country] } }
-      : {}),
-  };
-
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -253,19 +333,58 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
       {/* Search box + geolocation button */}
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <Autocomplete
-            onLoad={onAutocompleteLoad}
-            onPlaceChanged={handlePlaceChanged}
-            options={autocompleteOptions}
-          >
-            <input
-              type="text"
-              defaultValue={address}
-              placeholder={t('search:map.searchPlaceholder')}
-              className="w-full px-4 py-2.5 pr-10 text-sm border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-              autoComplete="off"
-            />
-          </Autocomplete>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onFocus={() => searchResults.length > 0 && setShowResults(true)}
+            onBlur={() => setTimeout(() => setShowResults(false), 150)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                if (searchResults.length > 0) handleResultSelect(searchResults[0]);
+              }
+              if (e.key === 'Escape') {
+                setShowResults(false);
+                isUserTypingRef.current = false;
+              }
+            }}
+            placeholder={t('search:map.searchPlaceholder')}
+            className="w-full px-4 py-2.5 pr-10 text-sm border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+            autoComplete="off"
+          />
+
+          {isSearching && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+
+          {/* Search results dropdown */}
+          {showResults && searchResults.length > 0 && (
+            <div className="absolute z-50 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+              {searchResults.map((result) => (
+                <button
+                  key={result.place_id}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()} // prevent blur before click
+                  onClick={() => handleResultSelect(result)}
+                  className="w-full text-left px-4 py-3 hover:bg-neutral-100 border-b border-neutral-100 last:border-b-0 transition-colors"
+                >
+                  <div className="flex items-start gap-2">
+                    <svg className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-neutral-900 truncate">{result.display_name}</p>
+                      <p className="text-xs text-neutral-500 mt-0.5">{result.type || t('search:map.location')}</p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <button
