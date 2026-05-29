@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { GoogleMap, Marker } from '@react-google-maps/api';
+import { GoogleMap } from '@react-google-maps/api';
 import { useGoogleMapLoader } from '@/src/features/map/hooks/useGoogleMapLoader';
 import { searchLocation, reverseGeocode } from '@/services/osmService';
 import { NominatimResult } from '@/types';
@@ -65,6 +65,7 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
   const { isLoaded, loadError } = useGoogleMapLoader();
 
   const mapRef = useRef<google.maps.Map | null>(null);
+  const advancedMarkerRef = useRef<google.maps.marker.AdvancedMarkerElement | null>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [mapType, setMapType] = useState<'roadmap' | 'satellite'>('roadmap');
@@ -145,7 +146,9 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
       if (currentCity && cLat && cLng) {
         const dist = calculateDistance(cLat, cLng, newLat, newLng);
         if (dist > 30) {
-          setMarkerPos({ lat: latRef.current, lng: lngRef.current });
+          const snapPos = { lat: latRef.current, lng: lngRef.current };
+          setMarkerPos(snapPos);
+          if (advancedMarkerRef.current) advancedMarkerRef.current.position = snapPos;
           dispatch({
             type: 'SHOW_ALERT',
             payload: {
@@ -159,6 +162,9 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
       }
 
       setMarkerPos({ lat: newLat, lng: newLng });
+      if (advancedMarkerRef.current) {
+        advancedMarkerRef.current.position = { lat: newLat, lng: newLng };
+      }
       onLocationChange(newLat, newLng);
 
       if (onAddressChange) {
@@ -173,14 +179,6 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
       return true;
     },
     [dispatch, onLocationChange, onAddressChange, t],
-  );
-
-  const handleMarkerDragEnd = useCallback(
-    (e: google.maps.MapMouseEvent) => {
-      if (!e.latLng) return;
-      validateAndMove(e.latLng.lat(), e.latLng.lng());
-    },
-    [validateAndMove],
   );
 
   // Search input handler with debounce
@@ -245,6 +243,9 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
     }
 
     setMarkerPos({ lat: newLat, lng: newLng });
+    if (advancedMarkerRef.current) {
+      advancedMarkerRef.current.position = { lat: newLat, lng: newLng };
+    }
     onLocationChange(newLat, newLng);
     if (onAddressChange) onAddressChange(result.display_name);
 
@@ -302,7 +303,32 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
-  }, []);
+
+    // AdvancedMarkerElement requires the marker library (already loaded via useGoogleMapLoader)
+    const marker = new google.maps.marker.AdvancedMarkerElement({
+      map,
+      position: { lat: latRef.current, lng: lngRef.current },
+      gmpDraggable: true,
+      title: 'Drag to adjust location',
+    });
+
+    marker.addListener('dragend', async () => {
+      const pos = marker.position as google.maps.LatLngLiteral | null;
+      if (!pos) return;
+      const newLat = typeof pos.lat === 'function' ? (pos as any).lat() : pos.lat;
+      const newLng = typeof pos.lng === 'function' ? (pos as any).lng() : pos.lng;
+      await validateAndMove(newLat, newLng);
+    });
+
+    advancedMarkerRef.current = marker;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Keep AdvancedMarkerElement position in sync when markerPos state changes
+  useEffect(() => {
+    if (advancedMarkerRef.current) {
+      advancedMarkerRef.current.position = { lat, lng };
+    }
+  }, [lat, lng]);
 
   if (loadError) {
     return (
@@ -430,12 +456,6 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
               gestureHandling: 'greedy',
             }}
           >
-            <Marker
-              position={markerPos}
-              draggable
-              onDragEnd={handleMarkerDragEnd}
-              title={t('search:map.dragToAdjust', 'Drag me to adjust location')}
-            />
           </GoogleMap>
         </div>
 
