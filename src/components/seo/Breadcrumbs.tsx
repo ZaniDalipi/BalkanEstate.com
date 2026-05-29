@@ -25,7 +25,7 @@ interface BreadcrumbsProps {
  * ]} />
  */
 export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className = '' }) => {
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://balkanestate.com';
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://balkanestateai.com';
 
   // Generate JSON-LD structured data for breadcrumbs
   const breadcrumbSchema = {

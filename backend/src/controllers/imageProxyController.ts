@@ -50,7 +50,7 @@ export const proxyExternalImage = async (req: Request, res: Response): Promise<v
       maxContentLength: 20 * 1024 * 1024, // 20 MB max
       maxRedirects: 3,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; BalkanEstate/1.0; +https://balkanestate.com)',
+        'User-Agent': 'Mozilla/5.0 (compatible; BalkanEstate/1.0; +https://balkanestateai.com)',
         'Accept': 'image/webp,image/avif,image/*,*/*;q=0.8',
       },
       validateStatus: (s) => s >= 200 && s < 400,

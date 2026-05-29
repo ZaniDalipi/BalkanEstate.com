@@ -82,7 +82,7 @@ function generateICSFile(property: Property, date: string, timeSlot: string, dur
         `DESCRIPTION:${descriptionLabel} ${title} at ${location}`,
         `LOCATION:${location}`,
         'STATUS:CONFIRMED',
-        `UID:${Date.now()}@balkanestate.com`,
+        `UID:${Date.now()}@balkanestateai.com`,
         'END:VEVENT',
         'END:VCALENDAR',
     ].join('\r\n');

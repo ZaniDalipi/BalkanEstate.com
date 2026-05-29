@@ -78,7 +78,7 @@
 ## Project Structure
 
 ```
-BalkanEstate.com/
+BalkanEstateAI.com/
 ├── components/                    # React Components
 │   ├── AgentsPage/               # Agent-related pages
 │   │   ├── AgentCard.tsx
@@ -393,8 +393,8 @@ Located in `src/i18n/index.ts`:
 <meta name="twitter:card" content="summary_large_image" />
 
 <!-- Hreflang (multi-language) -->
-<link rel="alternate" hreflang="en" href="https://balkanestate.com" />
-<link rel="alternate" hreflang="sq" href="https://balkanestate.com/sq" />
+<link rel="alternate" hreflang="en" href="https://balkanestateai.com" />
+<link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq" />
 <!-- ... all 10 languages -->
 ```
 
@@ -437,7 +437,7 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /seller/
-Sitemap: https://balkanestate.com/sitemap.xml
+Sitemap: https://balkanestateai.com/sitemap.xml
 ```
 
 ---
@@ -636,7 +636,7 @@ router.get('/profile', authMiddleware, getProfile);
 
 ### Frontend (.env)
 ```env
-VITE_API_URL=https://api.balkanestate.com
+VITE_API_URL=https://api.balkanestateai.com
 VITE_GOOGLE_MAPS_KEY=your-google-maps-key
 VITE_CLOUDINARY_CLOUD_NAME=your-cloud-name
 ```

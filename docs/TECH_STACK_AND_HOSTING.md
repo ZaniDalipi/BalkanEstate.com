@@ -1,4 +1,4 @@
-# BalkanEstate.com - Tech Stack & Hosting Guide
+# BalkanEstateAI.com - Tech Stack & Hosting Guide
 
 ## Tech Stack Overview
 
@@ -230,4 +230,4 @@ npx ts-node scripts/test-email.ts your@email.com
 
 ---
 
-*Generated for BalkanEstate.com - January 2026*
+*Generated for BalkanEstateAI.com - January 2026*

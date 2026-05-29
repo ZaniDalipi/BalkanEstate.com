@@ -1063,7 +1063,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                         {
                             label: t('seller:actions.requestMoreListings', 'Request More Listings'),
                             onClick: () => {
-                                const email = 'support@balkanestate.com';
+                                const email = 'support@balkanestateai.com';
                                 const subject = encodeURIComponent('Request for Additional Monthly Listings');
                                 const body = encodeURIComponent(`Hello,\n\nI have reached my monthly listing limit and would like to request additional listings.\n\nPlease let me know about the cost and process.\n\nThank you.`);
                                 window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;

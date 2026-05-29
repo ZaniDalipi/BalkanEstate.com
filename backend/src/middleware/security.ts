@@ -167,9 +167,7 @@ export const helmetConfig = helmet({
       ],
       connectSrc: [
         "'self'",
-        'https://api.balkanestate.com',
-        'https://www.balkanestate.com',
-        'wss://api.balkanestate.com',
+        'https://www.balkanestateai.com',
         'https://api.balkanestateai.com',
         'wss://api.balkanestateai.com',
         'https://nominatim.openstreetmap.org',
