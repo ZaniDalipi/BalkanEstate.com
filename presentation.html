@@ -343,9 +343,142 @@ kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:1px 6px;font-size
 #scr-btn:hover{background:rgba(255,255,255,.15);color:#fff}
 #scr-btn.scr-on{background:rgba(2,82,205,.3);border-color:rgba(59,130,246,.5);color:#93C5FD}
 #scr-tip{font-size:.68rem;color:rgba(255,255,255,.35);pointer-events:none}
+/* ══════════════════════════════════════
+   COOL ANIMATIONS
+══════════════════════════════════════ */
+
+/* Animated .hl text — flowing gradient */
+.hl{
+  background:linear-gradient(90deg,#FF9500,#FCD34D,#FF5E3A,#FF9500);
+  background-size:300% auto;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:grad-flow 3s linear infinite;
+}
+.hlb{
+  background:linear-gradient(90deg,#60A5FA,#93C5FD,#3B82F6,#60A5FA);
+  background-size:300% auto;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:grad-flow 3s linear infinite;
+}
+@keyframes grad-flow{to{background-position:300% center}}
+
+/* Click ripple */
+.ripple{position:fixed;border-radius:50%;background:rgba(255,255,255,.13);pointer-events:none;z-index:9999;
+  animation:ripple-out .65s ease-out forwards}
+@keyframes ripple-out{from{transform:scale(0);opacity:1}to{transform:scale(5);opacity:0}}
+
+/* Confetti */
+.ck-piece{position:fixed;width:8px;height:8px;border-radius:2px;pointer-events:none;z-index:9998;
+  animation:ck-fall var(--dur,1.5s) ease-in var(--delay,0s) forwards}
+@keyframes ck-fall{
+  0%{transform:translateY(-20px) rotate(0deg) scale(1);opacity:1}
+  80%{opacity:1}
+  100%{transform:translateY(105vh) rotate(var(--spin,720deg)) scale(.5);opacity:0}
+}
+
+/* Particle canvas */
+#pc{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.45}
+
+/* Stagger reveals — list items */
+.slide.on .ilist li{animation:stag-in .45s cubic-bezier(.4,0,.2,1) both}
+.slide.on .ilist li:nth-child(1){animation-delay:.08s}
+.slide.on .ilist li:nth-child(2){animation-delay:.16s}
+.slide.on .ilist li:nth-child(3){animation-delay:.24s}
+.slide.on .ilist li:nth-child(4){animation-delay:.32s}
+.slide.on .ilist li:nth-child(5){animation-delay:.40s}
+.slide.on .cklist li{animation:stag-in .45s cubic-bezier(.4,0,.2,1) both}
+.slide.on .cklist li:nth-child(1){animation-delay:.06s}
+.slide.on .cklist li:nth-child(2){animation-delay:.12s}
+.slide.on .cklist li:nth-child(3){animation-delay:.18s}
+.slide.on .cklist li:nth-child(4){animation-delay:.24s}
+.slide.on .cklist li:nth-child(5){animation-delay:.30s}
+.slide.on .cklist li:nth-child(6){animation-delay:.36s}
+.slide.on .cklist li:nth-child(7){animation-delay:.42s}
+.slide.on .cklist li:nth-child(8){animation-delay:.48s}
+@keyframes stag-in{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
+
+/* Feature card stagger on active slide */
+.slide.on .fc:nth-child(1){animation-delay:.05s}
+.slide.on .fc:nth-child(2){animation-delay:.12s}
+.slide.on .fc:nth-child(3){animation-delay:.18s}
+.slide.on .fc:nth-child(4){animation-delay:.24s}
+
+/* Shimmer sweep on glass panels */
+.g{overflow:hidden;position:relative}
+.g::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.055) 50%,transparent 60%);
+  background-size:200% 100%;
+  animation:shimmer 4s ease-in-out infinite;
+  pointer-events:none;border-radius:inherit}
+@keyframes shimmer{0%,100%{background-position:200% 0}50%{background-position:-200% 0}}
+
+/* Floating stat pills on title slide */
+#statRow .sp{animation:float-pill 4s ease-in-out infinite}
+#statRow .sp:nth-child(1){animation-delay:0s}
+#statRow .sp:nth-child(2){animation-delay:.6s}
+#statRow .sp:nth-child(3){animation-delay:1.2s}
+#statRow .sp:nth-child(4){animation-delay:1.8s}
+@keyframes float-pill{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+/* Flag chips stagger on title slide */
+.slide.on .fc2{animation:flag-in .4s cubic-bezier(.34,1.56,.64,1) both}
+.slide.on .flags .fc2:nth-child(1){animation-delay:.3s}
+.slide.on .flags .fc2:nth-child(2){animation-delay:.36s}
+.slide.on .flags .fc2:nth-child(3){animation-delay:.42s}
+.slide.on .flags .fc2:nth-child(4){animation-delay:.48s}
+.slide.on .flags .fc2:nth-child(5){animation-delay:.54s}
+.slide.on .flags .fc2:nth-child(6){animation-delay:.60s}
+.slide.on .flags .fc2:nth-child(7){animation-delay:.66s}
+.slide.on .flags .fc2:nth-child(8){animation-delay:.72s}
+.slide.on .flags .fc2:nth-child(9){animation-delay:.78s}
+.slide.on .flags .fc2:nth-child(10){animation-delay:.84s}
+@keyframes flag-in{from{opacity:0;transform:scale(.7) translateY(10px)}to{opacity:1;transform:none}}
+
+/* Typewriter cursor blink */
+#twCursor{animation:blink-cur .9s step-end infinite;color:var(--orange)}
+@keyframes blink-cur{50%{opacity:0}}
+
+/* Glow on feature cards hover */
+.fc:hover{box-shadow:0 0 0 1px rgba(255,255,255,.18),0 12px 32px rgba(0,0,0,.35),0 0 30px rgba(2,82,205,.12)}
+
+/* Scan line on phone screens */
+.phone-screen{position:relative;overflow:hidden}
+.phone-screen::after{content:'';position:absolute;left:0;right:0;height:60px;
+  background:linear-gradient(180deg,transparent,rgba(255,255,255,.04),transparent);
+  animation:scan 3.5s linear infinite;pointer-events:none;z-index:2}
+@keyframes scan{from{top:-60px}to{top:100%}}
+
+/* Tier card hover glow */
+.tier-card:hover{box-shadow:0 0 0 1px rgba(255,255,255,.2),0 16px 40px rgba(0,0,0,.4)}
+
+/* Progress bar sparkle particle */
+#progbar::after{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);
+  width:8px;height:8px;border-radius:50%;background:#fff;
+  box-shadow:0 0 8px 3px var(--orange),0 0 16px 6px rgba(255,149,0,.4);
+  animation:sparkle-bob .8s ease-in-out infinite alternate}
+#progbar{position:relative;overflow:visible}
+@keyframes sparkle-bob{from{transform:translateY(-50%) scale(.9)}to{transform:translateY(-50%) scale(1.2)}}
+
+/* Magnetic buttons — handled in JS, just base transition */
+.cb{transition:transform .15s cubic-bezier(.34,1.56,.64,1),background .2s}
+
+/* Agent card glow on select */
+.acard.selected{box-shadow:0 0 0 2px var(--blue2),0 0 30px rgba(2,82,205,.3)}
+
+/* Draw zone button pulse when active */
+#drawBtn.draw-active{animation:btn-pulse 1.5s ease-in-out infinite}
+@keyframes btn-pulse{0%,100%{box-shadow:0 0 0 0 rgba(59,130,246,.5)}50%{box-shadow:0 0 0 6px rgba(59,130,246,0)}}
+
+/* Smooth orb transitions for parallax */
+.o1,.o2,.o3{transition:transform .12s linear}
 </style>
 </head>
 <body>
+<canvas id="pc"></canvas>
 <div class="bg"></div>
 <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
 <div id="prog"><div id="progbar" style="width:6.25%"></div></div>
@@ -375,8 +508,8 @@ kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:1px 6px;font-size
     <img src="./public/icons/logo-3d.svg" alt="BalkanEstate Logo" style="height:120px;width:auto;filter:drop-shadow(0 8px 32px rgba(2,82,205,.6));animation:rup .8s cubic-bezier(.4,0,.2,1)" onerror="this.style.display='none'"/>
   </div>
   <h1 style="font-size:clamp(2.8rem,6vw,5rem)">The Real Estate Platform<br/>Built for the <span class="hl">Balkans</span></h1>
-  <p class="tag" style="max-width:560px;margin:0 auto;font-size:1.15rem">One platform. Ten countries. Your home awaits.</p>
-  <div class="srow" style="justify-content:center;margin-top:6px">
+  <p class="tag" style="max-width:580px;margin:0 auto;font-size:1.15rem">Find your <span style="font-weight:700;color:#fff" id="twTarget">Dream Home</span><span id="twCursor">|</span> — across 10 countries.</p>
+  <div id="statRow" class="srow" style="justify-content:center;margin-top:6px">
     <div class="sp sblue"><span class="n" id="c1">0</span><span class="l">Countries</span></div>
     <div class="sp sorange"><span class="n" id="c2">0</span><span class="l">Languages</span></div>
     <div class="sp sgreen"><span class="n" id="c3">0</span><span class="l">User Roles</span></div>
@@ -1326,17 +1459,12 @@ let tx=0;
 document.addEventListener('touchstart',e=>tx=e.touches[0].clientX);
 document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>55)dx<0?go(cur+1):go(cur-1)});
 
-// Counter animation slide 1
+// Counter animation slide 1 — uses eased animateCounter
 function runCounters(){
-  const targets=[{id:'c1',end:10},{id:'c2',end:10},{id:'c3',end:4},{id:'c4',end:38}];
-  targets.forEach(({id,end})=>{
-    let v=0;const el=document.getElementById(id);
-    const iv=setInterval(()=>{
-      v=Math.min(v+1,end);
-      el.textContent=v+(id==='c4'?'+':'');
-      if(v>=end)clearInterval(iv);
-    },60);
-  });
+  animateCounter(document.getElementById('c1'),10);
+  animateCounter(document.getElementById('c2'),10);
+  animateCounter(document.getElementById('c3'),4);
+  animateCounter(document.getElementById('c4'),38,'+');
 }
 setTimeout(runCounters,600);
 
@@ -1363,8 +1491,8 @@ function showRole(idx){
 
 // Agent select
 function selectAgent(el){
-  document.querySelectorAll('.acard').forEach(c=>c.style.borderColor='');
-  el.style.borderColor='rgba(59,130,246,.6)';
+  document.querySelectorAll('.acard').forEach(c=>{c.style.borderColor='';c.classList.remove('selected');});
+  el.classList.add('selected');
 }
 
 // Chat
@@ -1547,6 +1675,137 @@ if(mapSlide){
 
 go(0);
 document.getElementById('pbtn').disabled=true;
+
+// ══════════════════════════════════════
+// COOL ANIMATIONS
+// ══════════════════════════════════════
+
+// 1. Floating particle network
+(function initParticles(){
+  const cv=document.getElementById('pc');
+  const ctx=cv.getContext('2d');
+  let W,H,pts=[];
+  function resize(){
+    W=cv.width=innerWidth;H=cv.height=innerHeight;
+  }
+  resize();addEventListener('resize',resize);
+  for(let i=0;i<70;i++)pts.push({
+    x:Math.random()*W,y:Math.random()*H,
+    vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.28,
+    r:Math.random()*1.4+.4,o:Math.random()*.45+.08
+  });
+  (function draw(){
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(100,160,255,${p.o})`;ctx.fill();
+    });
+    // draw connections
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+      const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<130){
+        ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);
+        ctx.strokeStyle=`rgba(80,140,255,${.07*(1-d/130)})`;ctx.lineWidth=.6;ctx.stroke();
+      }
+    }
+    requestAnimationFrame(draw);
+  })();
+})();
+
+// 2. Mouse parallax on background orbs
+(function initParallax(){
+  const o1=document.querySelector('.o1'),o2=document.querySelector('.o2'),o3=document.querySelector('.o3');
+  document.addEventListener('mousemove',e=>{
+    const x=(e.clientX/innerWidth-.5)*22,y=(e.clientY/innerHeight-.5)*22;
+    o1.style.transform=`translate(${x*.9}px,${y*.9}px)`;
+    o2.style.transform=`translate(${-x*.55}px,${-y*.55}px)`;
+    o3.style.transform=`translate(calc(-50% + ${x*.3}px),calc(-50% + ${y*.3}px))`;
+  });
+})();
+
+// 3. Click ripple anywhere on stage
+document.addEventListener('click',e=>{
+  if(e.target.closest('#ctrl')||e.target.closest('input')||e.target.closest('button.map-layer-btn')||e.target.closest('#drawBtn'))return;
+  const r=document.createElement('div');
+  r.className='ripple';
+  const s=70;
+  r.style.cssText=`width:${s}px;height:${s}px;left:${e.clientX-s/2}px;top:${e.clientY-s/2}px`;
+  document.body.appendChild(r);
+  setTimeout(()=>r.remove(),700);
+});
+
+// 4. Magnetic control buttons
+document.querySelectorAll('.cb').forEach(btn=>{
+  btn.addEventListener('mousemove',e=>{
+    const r=btn.getBoundingClientRect();
+    const dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);
+    btn.style.transform=`translate(${dx*.35}px,${dy*.35}px) scale(1.07)`;
+  });
+  btn.addEventListener('mouseleave',()=>btn.style.transform='');
+});
+
+// 5. Typewriter on slide 1
+(function initTypewriter(){
+  const el=document.getElementById('twTarget');
+  if(!el)return;
+  const words=['Dream Home','Perfect Villa','Ideal Apartment','Best Investment','New Beginning'];
+  let wi=0,ci=words[0].length,del=false;
+  function tick(){
+    const w=words[wi];
+    if(!del){
+      el.textContent=w.slice(0,++ci);
+      if(ci===w.length){del=true;setTimeout(tick,2000);return;}
+    }else{
+      el.textContent=w.slice(0,--ci);
+      if(ci===0){del=false;wi=(wi+1)%words.length;}
+    }
+    setTimeout(tick,del?55:85);
+  }
+  setTimeout(tick,2200);
+})();
+
+// 6. Confetti burst on closing slide
+(function initConfetti(){
+  const lastSlide=slides[slides.length-1];
+  const colors=['#0252CD','#FF9500','#7C3AED','#10B981','#FCD34D','#60A5FA','#F472B6'];
+  let fired=false;
+  new MutationObserver(()=>{
+    if(lastSlide.classList.contains('on')&&!fired){
+      fired=true;
+      for(let i=0;i<100;i++){
+        const c=document.createElement('div');
+        c.className='ck-piece';
+        const spin=(Math.random()>.5?1:-1)*(360+Math.floor(Math.random()*540));
+        c.style.cssText=`left:${Math.random()*100}vw;top:-12px;background:${colors[i%colors.length]};`
+          +`--dur:${1.1+Math.random()*.9}s;--delay:${Math.random()*.8}s;--spin:${spin}deg;`
+          +`width:${6+Math.floor(Math.random()*6)}px;height:${6+Math.floor(Math.random()*6)}px;`
+          +`border-radius:${Math.random()>.5?'50%':'3px'}`;
+        document.body.appendChild(c);
+        setTimeout(()=>c.remove(),2800);
+      }
+    }
+    if(!lastSlide.classList.contains('on'))fired=false;
+  }).observe(lastSlide,{attributes:true,attributeFilter:['class']});
+})();
+
+// 7. Counter animation — smoother eased version
+function animateCounter(el,end,suffix=''){
+  const dur=1400,start=Date.now();
+  (function step(){
+    const p=Math.min((Date.now()-start)/dur,1);
+    const ease=1-Math.pow(1-p,4);
+    el.textContent=Math.round(ease*end)+(suffix&&p===1?suffix:'');
+    if(p<1)requestAnimationFrame(step);
+    else el.textContent=end+suffix;
+  })();
+}
+
+// 8. Slide entrance — unique per-slide motion (extend go())
+const _go=go;
+// override handled inline after redefinition below
 
 // ── SCREENSHOT UPLOAD SYSTEM ──
 let scrMode=false;
