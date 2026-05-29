@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BalkanEstate.com — Presentation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #0252CD;
+    --blue-light: #3B82F6;
+    --blue-glow: rgba(2, 82, 205, 0.4);
+    --orange: #FF9500;
+    --orange-dark: #FF5E3A;
+    --white: #ffffff;
+    --glass-bg: rgba(255,255,255,0.08);
+    --glass-border: rgba(255,255,255,0.15);
+    --glass-strong: rgba(255,255,255,0.14);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255,255,255,0.72);
+    --text-muted: rgba(255,255,255,0.45);
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #020818;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── BACKGROUND ── */
+  .bg {
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse 80% 60% at 20% 10%, rgba(2,82,205,0.35) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 90%, rgba(255,149,0,0.18) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 40% at 70% 20%, rgba(88,86,214,0.2) 0%, transparent 50%),
+                linear-gradient(160deg, #020818 0%, #050d2a 50%, #020818 100%);
+  }
+  .bg-orb {
+    position: fixed; border-radius: 50%; filter: blur(80px); z-index: 0; pointer-events: none;
+    animation: orb-drift 12s ease-in-out infinite alternate;
+  }
+  .bg-orb-1 { width: 600px; height: 600px; background: rgba(2,82,205,0.2); top: -200px; left: -100px; animation-delay: 0s; }
+  .bg-orb-2 { width: 400px; height: 400px; background: rgba(255,149,0,0.12); bottom: -100px; right: -80px; animation-delay: -4s; }
+  .bg-orb-3 { width: 350px; height: 350px; background: rgba(88,86,214,0.18); top: 40%; left: 50%; transform: translate(-50%,-50%); animation-delay: -8s; }
+  @keyframes orb-drift { from { transform: translate(0,0) scale(1); } to { transform: translate(30px,20px) scale(1.08); } }
+
+  /* ── SLIDE CONTAINER ── */
+  #slides {
+    position: relative; z-index: 1;
+    width: 100%; height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: 40px 60px;
+    opacity: 0; pointer-events: none;
+    transform: translateX(60px) scale(0.97);
+    transition: opacity 0.55s cubic-bezier(0.4,0,0.2,1), transform 0.55s cubic-bezier(0.4,0,0.2,1);
+  }
+  .slide.active {
+    opacity: 1; pointer-events: all;
+    transform: translateX(0) scale(1);
+  }
+  .slide.prev {
+    opacity: 0;
+    transform: translateX(-60px) scale(0.97);
+  }
+
+  .slide-inner {
+    width: 100%; max-width: 1100px;
+    display: flex; flex-direction: column; gap: 28px;
+  }
+
+  /* ── GLASS CARD ── */
+  .glass {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    backdrop-filter: blur(24px) saturate(1.6);
+    -webkit-backdrop-filter: blur(24px) saturate(1.6);
+    box-shadow: 0 4px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12);
+  }
+  .glass-strong {
+    background: rgba(255,255,255,0.11);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 16px;
+    backdrop-filter: blur(20px) saturate(1.8);
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+    box-shadow: 0 2px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+
+  /* ── TYPOGRAPHY ── */
+  .slide-num {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--orange); opacity: 0.9;
+  }
+  h1 {
+    font-size: clamp(2rem, 4vw, 3.4rem);
+    font-weight: 800; line-height: 1.1;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+  }
+  h1 span.hl { color: var(--orange); }
+  h1 span.hlb { color: var(--blue-light); }
+  h2 {
+    font-size: clamp(1.4rem, 2.8vw, 2.2rem);
+    font-weight: 700; line-height: 1.2;
+    color: var(--text-primary); letter-spacing: -0.025em;
+  }
+  h3 {
+    font-size: clamp(0.95rem, 1.6vw, 1.2rem);
+    font-weight: 600; color: var(--text-primary);
+  }
+  p, li {
+    font-size: clamp(0.82rem, 1.3vw, 1rem);
+    line-height: 1.65; color: var(--text-secondary); font-weight: 400;
+  }
+  .tagline {
+    font-size: clamp(1rem, 1.8vw, 1.35rem);
+    font-weight: 300; color: var(--text-secondary);
+    letter-spacing: 0.01em;
+  }
+  .caption {
+    font-size: 0.8rem; color: var(--text-muted);
+  }
+
+  /* ── BADGE ── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 6px 14px; border-radius: 100px;
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    border: 1px solid;
+  }
+  .badge-blue { background: rgba(2,82,205,0.25); border-color: rgba(59,130,246,0.5); color: #93C5FD; }
+  .badge-orange { background: rgba(255,149,0,0.2); border-color: rgba(255,149,0,0.5); color: #FCD34D; }
+  .badge-green { background: rgba(16,185,129,0.2); border-color: rgba(16,185,129,0.5); color: #6EE7B7; }
+  .badge-purple { background: rgba(139,92,246,0.2); border-color: rgba(139,92,246,0.5); color: #C4B5FD; }
+  .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* ── BULLET LIST ── */
+  .bullet-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .bullet-list li { display: flex; align-items: flex-start; gap: 10px; }
+  .bullet-list li::before {
+    content: '';
+    flex-shrink: 0; margin-top: 8px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue-light), var(--orange));
+  }
+
+  /* ── ICON BULLET ── */
+  .icon-list { list-style: none; display: flex; flex-direction: column; gap: 11px; }
+  .icon-list li { display: flex; align-items: flex-start; gap: 12px; font-size: clamp(0.82rem, 1.3vw, 0.97rem); color: var(--text-secondary); }
+  .icon-list .ico {
+    flex-shrink: 0; width: 30px; height: 30px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+  }
+  .icon-list li strong { color: var(--white); font-weight: 600; }
+
+  /* ── TWO COLUMNS ── */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .cols-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .cols-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+
+  /* ── CARD ── */
+  .feature-card {
+    padding: 22px 20px; border-radius: 16px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex; flex-direction: column; gap: 10px;
+    transition: background 0.2s;
+  }
+  .feature-card .card-icon { font-size: 1.6rem; }
+  .feature-card h4 { font-size: 0.95rem; font-weight: 700; color: var(--white); }
+  .feature-card p { font-size: 0.82rem; line-height: 1.5; color: var(--text-secondary); }
+
+  /* ── STAT PILLS ── */
+  .stat-row { display: flex; gap: 14px; flex-wrap: wrap; }
+  .stat-pill {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 14px 24px; border-radius: 14px; flex: 1; min-width: 120px;
+    text-align: center;
+  }
+  .stat-pill .num {
+    font-size: clamp(1.4rem, 2.5vw, 2rem);
+    font-weight: 800; color: var(--white); letter-spacing: -0.04em;
+  }
+  .stat-pill .lbl {
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-muted); margin-top: 2px;
+  }
+  .stat-blue { background: rgba(2,82,205,0.25); border: 1px solid rgba(59,130,246,0.3); }
+  .stat-orange { background: rgba(255,149,0,0.2); border: 1px solid rgba(255,149,0,0.3); }
+  .stat-green { background: rgba(16,185,129,0.18); border: 1px solid rgba(16,185,129,0.3); }
+  .stat-purple { background: rgba(139,92,246,0.18); border: 1px solid rgba(139,92,246,0.3); }
+
+  /* ── TABLE ── */
+  .compare-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .compare-table th {
+    padding: 10px 14px; text-align: left;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .compare-table th:first-child { border-radius: 10px 0 0 0; }
+  .compare-table th:last-child { border-radius: 0 10px 0 0; }
+  .compare-table td {
+    padding: 10px 14px;
+    font-size: 0.88rem; color: var(--text-secondary);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .compare-table td:first-child { color: var(--white); font-weight: 500; }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:hover td { background: rgba(255,255,255,0.04); }
+  .check { color: #34D399; font-size: 1rem; }
+  .cross { color: rgba(255,255,255,0.25); font-size: 1rem; }
+  .col-h { color: #93C5FD !important; font-weight: 700 !important; }
+
+  /* ── ROLE ROW ── */
+  .role-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .role-card {
+    padding: 16px; border-radius: 14px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .role-card .role-icon { font-size: 1.8rem; }
+  .role-card .role-title { font-size: 0.85rem; font-weight: 700; color: var(--white); }
+  .role-card .role-desc { font-size: 0.76rem; color: var(--text-secondary); line-height: 1.4; }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    margin: 4px 0;
+  }
+
+  /* ── GRADIENT TEXT ── */
+  .grad-blue { background: linear-gradient(135deg, #60A5FA, #3B82F6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .grad-orange { background: linear-gradient(135deg, #FCD34D, #F97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+  /* ── TRANSCRIPT BOX ── */
+  .transcript-wrap {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+  .transcript-wrap.open { transform: translateY(0); }
+  .transcript-box {
+    margin: 0 auto; max-width: 900px;
+    background: rgba(5,13,42,0.97);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-bottom: none;
+    border-radius: 20px 20px 0 0;
+    backdrop-filter: blur(30px);
+    padding: 20px 28px 28px;
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.5);
+  }
+  .transcript-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+  }
+  .transcript-label {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--orange);
+  }
+  .transcript-close {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px; padding: 4px 12px; color: var(--text-secondary);
+    font-size: 0.78rem; cursor: pointer; transition: background 0.2s;
+  }
+  .transcript-close:hover { background: rgba(255,255,255,0.14); }
+  .transcript-text {
+    font-size: 0.92rem; line-height: 1.75; color: rgba(255,255,255,0.82);
+    font-style: italic;
+  }
+
+  /* ── CONTROLS ── */
+  #controls {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    z-index: 200; display: flex; align-items: center; gap: 10px;
+  }
+  .ctrl-btn {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    color: var(--white); font-size: 1rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, transform 0.15s;
+    backdrop-filter: blur(12px);
+  }
+  .ctrl-btn:hover { background: rgba(255,255,255,0.15); transform: scale(1.05); }
+  .ctrl-btn:active { transform: scale(0.95); }
+  .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+  .slide-counter {
+    font-size: 0.8rem; font-weight: 600; color: var(--text-muted);
+    min-width: 50px; text-align: center;
+  }
+  .notes-btn {
+    padding: 0 16px; width: auto; font-size: 0.75rem; font-weight: 600;
+    letter-spacing: 0.06em; gap: 5px;
+  }
+  .notes-btn span { font-size: 0.9rem; }
+
+  /* ── PROGRESS BAR ── */
+  #progress {
+    position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 300;
+    background: rgba(255,255,255,0.08);
+  }
+  #progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue), var(--orange));
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    border-radius: 0 2px 2px 0;
+    box-shadow: 0 0 12px rgba(2,82,205,0.6);
+  }
+
+  /* ── SLIDE NUM INDICATOR ── */
+  #slide-dots {
+    position: fixed; top: 20px; right: 24px; z-index: 200;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,0.2); cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+  }
+  .dot.active { background: var(--orange); transform: scale(1.4); }
+  .dot:hover { background: rgba(255,255,255,0.5); }
+
+  /* ── LOGO TOP LEFT ── */
+  #logo {
+    position: fixed; top: 20px; left: 24px; z-index: 200;
+    display: flex; align-items: center; gap: 8px;
+  }
+  #logo .logo-mark {
+    width: 32px; height: 32px; border-radius: 9px;
+    background: linear-gradient(135deg, var(--blue) 0%, #7C3AED 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; font-weight: 800; color: white;
+    box-shadow: 0 2px 12px rgba(2,82,205,0.5);
+  }
+  #logo .logo-text { font-size: 0.82rem; font-weight: 700; color: rgba(255,255,255,0.7); }
+
+  /* ── COUNTRY FLAGS ROW ── */
+  .flags { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .flag-chip {
+    display: flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 100px;
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+    font-size: 0.75rem; color: var(--text-secondary);
+  }
+
+  /* ── CHECKMARK LIST ── */
+  .check-list { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+  .check-list li { display: flex; align-items: flex-start; gap: 10px; font-size: clamp(0.8rem, 1.2vw, 0.95rem); color: var(--text-secondary); }
+  .check-list li .ck { flex-shrink: 0; margin-top: 2px; width: 18px; height: 18px; border-radius: 50%; background: rgba(52,211,153,0.15); border: 1px solid rgba(52,211,153,0.4); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #34D399; }
+
+  /* ── REVEAL ANIMATION ── */
+  .slide.active .glass,
+  .slide.active .feature-card,
+  .slide.active .role-card,
+  .slide.active .stat-pill,
+  .slide.active .flag-chip {
+    animation: reveal-up 0.5s cubic-bezier(0.4,0,0.2,1) both;
+  }
+  .slide.active .glass:nth-child(2) { animation-delay: 0.06s; }
+  .slide.active .glass:nth-child(3) { animation-delay: 0.12s; }
+  .slide.active .feature-card:nth-child(1) { animation-delay: 0.05s; }
+  .slide.active .feature-card:nth-child(2) { animation-delay: 0.1s; }
+  .slide.active .feature-card:nth-child(3) { animation-delay: 0.15s; }
+  .slide.active .feature-card:nth-child(4) { animation-delay: 0.2s; }
+  .slide.active .role-card:nth-child(2) { animation-delay: 0.08s; }
+  .slide.active .role-card:nth-child(3) { animation-delay: 0.14s; }
+  .slide.active .role-card:nth-child(4) { animation-delay: 0.2s; }
+  .slide.active .stat-pill:nth-child(2) { animation-delay: 0.07s; }
+  .slide.active .stat-pill:nth-child(3) { animation-delay: 0.14s; }
+  .slide.active .stat-pill:nth-child(4) { animation-delay: 0.21s; }
+  @keyframes reveal-up {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── TIER BADGES ── */
+  .tier { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 700; }
+  .tier-gold { background: rgba(251,191,36,0.2); border: 1px solid rgba(251,191,36,0.5); color: #FDE68A; }
+  .tier-blue { background: rgba(56,189,248,0.2); border: 1px solid rgba(56,189,248,0.5); color: #BAE6FD; }
+  .tier-purple { background: rgba(167,139,250,0.2); border: 1px solid rgba(167,139,250,0.5); color: #DDD6FE; }
+
+  /* ── KEYBOARD HINT ── */
+  #keyhint {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    z-index: 200; display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px; padding: 5px 14px;
+    font-size: 0.72rem; color: var(--text-muted);
+    animation: fade-away 4s ease forwards;
+  }
+  @keyframes fade-away { 0%,60%{opacity:1} 100%{opacity:0;pointer-events:none} }
+  kbd { background: rgba(255,255,255,0.12); border-radius: 4px; padding: 1px 6px; font-size: 0.68rem; color: var(--text-secondary); font-family: inherit; }
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+<div class="bg-orb bg-orb-3"></div>
+
+<div id="progress"><div id="progress-bar"></div></div>
+
+<div id="logo">
+  <div class="logo-mark">B</div>
+  <span class="logo-text">BalkanEstate.com</span>
+</div>
+
+<div id="keyhint">
+  Navigate: <kbd>←</kbd><kbd>→</kbd> or <kbd>Space</kbd> &nbsp;·&nbsp; Notes: <kbd>N</kbd>
+</div>
+
+<div id="slide-dots"></div>
+
+<!-- ═══════════════════════════ SLIDES ═══════════════════════════ -->
+<div id="slides">
+
+  <!-- SLIDE 1 ── TITLE -->
+  <div class="slide active" data-slide="1" data-notes="The Balkan region is home to millions of property transactions every year — but there has never been a single, modern, trusted platform built specifically for this market. Until now. BalkanEstate.com brings together buyers, sellers, and real estate professionals across ten countries into one seamless experience. Whether you're in Belgrade, Tirana, Athens, or Bucharest — this platform speaks your language, literally.">
+    <div class="slide-inner" style="align-items:center; text-align:center;">
+      <div class="slide-num">01 — Introduction</div>
+      <h1 style="font-size: clamp(2.4rem, 5.5vw, 4.2rem);">The Real Estate Platform<br/>Built for the <span class="hl">Balkans</span></h1>
+      <p class="tagline" style="max-width:580px; margin:0 auto;">One platform. Ten countries. Your home awaits.</p>
+      <div class="stat-row" style="justify-content:center; margin-top: 8px;">
+        <div class="stat-pill stat-blue"><span class="num">10</span><span class="lbl">Countries</span></div>
+        <div class="stat-pill stat-orange"><span class="num">10</span><span class="lbl">Languages</span></div>
+        <div class="stat-pill stat-green"><span class="num">4</span><span class="lbl">User Roles</span></div>
+        <div class="stat-pill stat-purple"><span class="num">∞</span><span class="lbl">Listings</span></div>
+      </div>
+      <div class="flags" style="justify-content:center; margin-top:4px;">
+        <div class="flag-chip">🇷🇸 Serbia</div>
+        <div class="flag-chip">🇲🇪 Montenegro</div>
+        <div class="flag-chip">🇭🇷 Croatia</div>
+        <div class="flag-chip">🇧🇦 Bosnia</div>
+        <div class="flag-chip">🇲🇰 N. Macedonia</div>
+        <div class="flag-chip">🇦🇱 Albania</div>
+        <div class="flag-chip">🇽🇰 Kosovo</div>
+        <div class="flag-chip">🇧🇬 Bulgaria</div>
+        <div class="flag-chip">🇷🇴 Romania</div>
+        <div class="flag-chip">🇬🇷 Greece</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2 ── THE PROBLEM -->
+  <div class="slide" data-slide="2" data-notes="Right now, if you want to buy a property in Montenegro but you live in Germany, you're stuck searching through fragmented local websites in languages you don't speak, with no way to verify the agents you're contacting. The market is huge, but the tools are failing the people who need them most. BalkanEstate.com solves exactly this problem.">
+    <div class="slide-inner">
+      <div class="slide-num">02 — The Problem</div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <h2>The Balkan Real Estate Market <span class="hl">Is Broken</span></h2>
+        <p class="tagline">A massive market with no modern, unified platform to serve it.</p>
+      </div>
+      <div class="cols">
+        <div class="feature-card">
+          <div class="card-icon">🌐</div>
+          <h4>Fragmented Market</h4>
+          <p>Buyers must jump between dozens of local portals across different countries — each with different languages, formats, and standards.</p>
+        </div>
+        <div class="feature-card">
+          <div class="card-icon">🚧</div>
+          <h4>Language Barriers</h4>
+          <p>Cross-border property search is nearly impossible. International buyers can't navigate local portals in unfamiliar languages.</p>
+        </div>
+        <div class="feature-card">
+          <div class="card-icon">🔍</div>
+          <h4>No Trust or Verification</h4>
+          <p>Buyers have no way to verify agent credentials or reliability. Fraud and misrepresentation are common pain points.</p>
+        </div>
+        <div class="feature-card">
+          <div class="card-icon">📱</div>
+          <h4>Outdated Platforms</h4>
+          <p>Existing portals are built on old technology — poor mobile experience, slow, no smart tools, no real-time communication.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3 ── WHAT IS BALKANESTATE -->
+  <div class="slide" data-slide="3" data-notes="BalkanEstate is built for everyone in the transaction — not just buyers. Sellers get powerful listing tools, agents build their reputation and receive direct leads, and agencies manage their entire team and portfolio in one place. And because we built it specifically for this region, every corner of the platform is available in ten languages from day one.">
+    <div class="slide-inner">
+      <div class="slide-num">03 — The Solution</div>
+      <h2>One Platform for <span class="hlb">Everyone</span> in the Journey</h2>
+      <div class="role-row">
+        <div class="role-card">
+          <div class="role-icon">🏠</div>
+          <div class="role-title">Buyers</div>
+          <div class="role-desc">Search, discover, and connect with verified sellers across the whole region</div>
+        </div>
+        <div class="role-card">
+          <div class="role-icon">🏷️</div>
+          <div class="role-title">Sellers</div>
+          <div class="role-desc">List properties and reach buyers across 10 countries with one listing</div>
+        </div>
+        <div class="role-card">
+          <div class="role-icon">🤝</div>
+          <div class="role-title">Agents</div>
+          <div class="role-desc">Professional profiles, direct leads, real-time messaging, and analytics</div>
+        </div>
+        <div class="role-card">
+          <div class="role-icon">🏢</div>
+          <div class="role-title">Agencies</div>
+          <div class="role-desc">Full agency management — team tools, premium visibility, and subscription plans</div>
+        </div>
+      </div>
+      <div class="glass" style="padding: 20px 24px; display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+        <div style="display:flex; flex-direction:column; gap:4px; flex:1; min-width:200px;">
+          <div class="badge badge-blue" style="width:fit-content;"><span class="dot"></span>10 Countries Covered</div>
+          <p style="font-size:0.82rem; margin-top:4px;">Serbia · Montenegro · Croatia · Bosnia · N. Macedonia · Albania · Kosovo · Bulgaria · Romania · Greece</p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:4px; flex:1; min-width:200px;">
+          <div class="badge badge-orange" style="width:fit-content;"><span class="dot"></span>10 Native Languages</div>
+          <p style="font-size:0.82rem; margin-top:4px;">Every page, every button, every label — translated natively in all 10 languages</p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:4px; flex:1; min-width:200px;">
+          <div class="badge badge-green" style="width:fit-content;"><span class="dot"></span>Mobile-First PWA</div>
+          <p style="font-size:0.82rem; margin-top:4px;">Feels like a native app on any phone — no app store download required</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4 ── FIND YOUR PROPERTY -->
+  <div class="slide" data-slide="4" data-notes="Searching for a property on BalkanEstate feels completely different from any other portal in the region. You can draw a boundary directly on the map and see only the properties inside it. You can save your search and forget about it — we'll notify you the moment something new matches. It's a buying experience designed around how people actually think about property.">
+    <div class="slide-inner">
+      <div class="slide-num">04 — Property Discovery</div>
+      <h2>Find Your <span class="hl">Perfect Property</span></h2>
+      <div class="cols">
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <ul class="icon-list">
+            <li><div class="ico">🔍</div><div><strong>Smart Search</strong> — filter by city, country, price, size, bedrooms, bathrooms, and amenities simultaneously</div></li>
+            <li><div class="ico">🗺️</div><div><strong>Draw-on-Map Search</strong> — draw any zone on the interactive map and see every listing inside it, live</div></li>
+            <li><div class="ico">👁️</div><div><strong>Three View Modes</strong> — switch between list, grid, or full-screen map — whatever works for you</div></li>
+            <li><div class="ico">🔔</div><div><strong>Saved Searches & Alerts</strong> — save your criteria and get notified the moment a matching property is listed</div></li>
+            <li><div class="ico">⚡</div><div><strong>Instant Results</strong> — no page reloads; results update live as you adjust any filter</div></li>
+          </ul>
+        </div>
+        <div class="glass" style="padding: 22px; display:flex; flex-direction:column; gap:14px;">
+          <h3 style="font-size:0.9rem; color: var(--text-muted); text-transform:uppercase; letter-spacing:0.1em;">Search Filters Include</h3>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <div class="badge badge-blue">Country</div>
+            <div class="badge badge-blue">City / Neighborhood</div>
+            <div class="badge badge-blue">Price Range</div>
+            <div class="badge badge-blue">Property Type</div>
+            <div class="badge badge-orange">Bedrooms</div>
+            <div class="badge badge-orange">Bathrooms</div>
+            <div class="badge badge-orange">Floor Area (m²)</div>
+            <div class="badge badge-green">Amenities</div>
+            <div class="badge badge-green">For Sale / Rent</div>
+            <div class="badge badge-purple">Promotion Tier</div>
+            <div class="badge badge-purple">New Listings</div>
+          </div>
+          <div class="divider"></div>
+          <p style="font-size:0.82rem;">Properties display real-time badges for <strong style="color:white;">Price Reduced</strong>, <strong style="color:white;">New</strong>, and promotion tiers.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5 ── RICH LISTINGS -->
+  <div class="slide" data-slide="5" data-notes="When a buyer lands on a property page, they get everything they need to make a confident decision — without ever picking up the phone first. Photos, videos, a 360° tour, the floor plan, what's around the property, how the price compares to the local market. And if they're ready to visit, they can schedule it right there on the page.">
+    <div class="slide-inner">
+      <div class="slide-num">05 — Property Listings</div>
+      <h2>Rich, Detailed <span class="hl">Listings</span> That Tell the Full Story</h2>
+      <div class="cols-3">
+        <div class="feature-card">
+          <div class="card-icon">📸</div>
+          <h4>Professional Galleries</h4>
+          <p>Smooth photo browsing with full-screen zoom and swipe gestures on mobile.</p>
+        </div>
+        <div class="feature-card">
+          <div class="card-icon">🎥</div>
+          <h4>Video & 360° Tours</h4>
+          <p>Video walkthroughs and full 360° tours — explore before you visit in person.</p>
+        </div>
+        <div class="feature-card">
+          <div class="card-icon">📐</div>
+          <h4>Floor Plans</h4>
+          <p>Understand the layout and room flow at a glance — before ever stepping inside.</p>
+        </div>
+        <div class="feature-card">
+          <div class="card-icon">📍</div>
+          <h4>Neighborhood Insights</h4>
+          <p>Nearby schools, hospitals, transit links, restaurants, and parks — all on the listing.</p>
+        </div>
+        <div class="feature-card">
+          <div class="card-icon">📊</div>
+          <h4>Market Context</h4>
+          <p>Price per m², local market trends, and how the listing compares to similar properties.</p>
+        </div>
+        <div class="feature-card">
+          <div class="card-icon">📅</div>
+          <h4>Schedule a Viewing</h4>
+          <p>Book a viewing directly from the listing — pick a time, confirm instantly. Calendar export included.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6 ── AGENTS & AGENCIES -->
+  <div class="slide" data-slide="6" data-notes="One of the biggest fears in real estate is working with someone you can't trust. BalkanEstate solves this with verified profiles and full transparency — you can see an agent's entire history, their client reviews, how fast they respond, and where they rank regionally. It removes the guesswork entirely.">
+    <div class="slide-inner">
+      <div class="slide-num">06 — Agents & Agencies</div>
+      <h2>Verified <span class="hlb">Agents & Agencies</span> You Can Trust</h2>
+      <div class="cols">
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <h3 style="color: var(--text-secondary);">Agent Profiles Include:</h3>
+          <ul class="icon-list">
+            <li><div class="ico">✅</div><div><strong>Verified Badges</strong> — only legitimate professionals are listed on the platform</div></li>
+            <li><div class="ico">📊</div><div><strong>Full Track Record</strong> — sales history, transaction stats, and years of experience</div></li>
+            <li><div class="ico">🌐</div><div><strong>Languages & Service Areas</strong> — find the right agent for your specific situation</div></li>
+            <li><div class="ico">⭐</div><div><strong>Client Reviews & Ratings</strong> — real feedback from real buyers and sellers</div></li>
+            <li><div class="ico">⚡</div><div><strong>Response Time Indicators</strong> — know how quickly each agent typically replies</div></li>
+          </ul>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <h3 style="color: var(--text-secondary);">Agency Profiles Include:</h3>
+          <ul class="icon-list">
+            <li><div class="ico">👥</div><div><strong>Full Team Roster</strong> — browse agents within an agency and pick your preferred one</div></li>
+            <li><div class="ico">📋</div><div><strong>Active Listings</strong> — see the agency's full portfolio in one place</div></li>
+            <li><div class="ico">🕐</div><div><strong>Business Hours & Certifications</strong> — know when they're available and their credentials</div></li>
+            <li><div class="ico">🏆</div><div><strong>Regional Leaderboards</strong> — top agents and top agencies ranked transparently</div></li>
+          </ul>
+          <div class="glass" style="padding: 14px 18px; display:flex; gap:10px; flex-wrap:wrap;">
+            <span class="tier tier-gold">🏆 #1 Agent — Belgrade</span>
+            <span class="tier tier-blue">⚡ Fast Responder</span>
+            <span class="tier tier-purple">✅ Verified Pro</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7 ── MESSAGING -->
+  <div class="slide" data-slide="7" data-notes="The moment a buyer is interested, they can start a conversation instantly — no emails, no external apps, no waiting. Agents get notified immediately, reply from any device, and the entire conversation history is saved. This is what fast, modern real estate communication looks like.">
+    <div class="slide-inner">
+      <div class="slide-num">07 — Communication</div>
+      <h2>Direct Messaging, <span class="hl">Instant Connection</span></h2>
+      <div class="cols">
+        <div class="glass" style="padding: 28px; display:flex; flex-direction:column; gap:18px; justify-content:center;">
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div style="background:rgba(2,82,205,0.25); border:1px solid rgba(59,130,246,0.3); border-radius:14px 14px 14px 4px; padding:12px 16px; max-width:80%;">
+              <p style="font-size:0.85rem; color:#93C5FD;">Hi! I saw the apartment in Podgorica. Is it still available?</p>
+              <p style="font-size:0.68rem; color:var(--text-muted); margin-top:4px;">Buyer · Just now</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.09); border:1px solid rgba(255,255,255,0.12); border-radius:14px 14px 4px 14px; padding:12px 16px; max-width:80%; align-self:flex-end;">
+              <p style="font-size:0.85rem; color:var(--text-secondary);">Yes! Would you like to schedule a viewing this weekend?</p>
+              <p style="font-size:0.68rem; color:var(--text-muted); margin-top:4px;">Agent Marko · 2 min ago · ✓✓</p>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <ul class="icon-list">
+            <li><div class="ico">💬</div><div><strong>Real-Time Chat</strong> — instant messaging between buyers, sellers, and agents. No external apps needed.</div></li>
+            <li><div class="ico">🔔</div><div><strong>Instant Notifications</strong> — agents and sellers are alerted immediately on any device</div></li>
+            <li><div class="ico">📱</div><div><strong>Works Everywhere</strong> — seamless experience on mobile and desktop simultaneously</div></li>
+            <li><div class="ico">📂</div><div><strong>Full History</strong> — all conversations saved, searchable, and accessible anytime</div></li>
+            <li><div class="ico">🔒</div><div><strong>Secure & Private</strong> — all conversations stay safely within the platform</div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8 ── SMART TOOLS -->
+  <div class="slide" data-slide="8" data-notes="BalkanEstate gives buyers tools that used to only exist in expensive consultant reports. You can get an AI-powered valuation of any property in seconds, understand what you can actually afford, and get a full analysis of any neighborhood — all for free, all in one place. Buyers come to BalkanEstate informed, and that makes every transaction smoother.">
+    <div class="slide-inner">
+      <div class="slide-num">08 — Smart Tools</div>
+      <h2>Intelligence Built In, <span class="hlb">Not Bolted On</span></h2>
+      <div class="cols-auto">
+        <div class="feature-card" style="border-color: rgba(167,139,250,0.3);">
+          <div class="card-icon">🤖</div>
+          <h4>AI Property Valuation</h4>
+          <p>Instantly estimate if a listed price is fair — powered by real market data and AI analysis. Know before you negotiate.</p>
+          <div class="badge badge-purple" style="width:fit-content; margin-top:4px;">AI Powered</div>
+        </div>
+        <div class="feature-card" style="border-color: rgba(59,130,246,0.3);">
+          <div class="card-icon">🏦</div>
+          <h4>Mortgage Calculator</h4>
+          <p>Calculate monthly payments in your local currency with regional interest rates. Fully adjustable for any country.</p>
+        </div>
+        <div class="feature-card" style="border-color: rgba(52,211,153,0.3);">
+          <div class="card-icon">💰</div>
+          <h4>Affordability Calculator</h4>
+          <p>Understand your true budget — based on income, savings, and loan eligibility — before you start searching.</p>
+        </div>
+        <div class="feature-card" style="border-color: rgba(167,139,250,0.3);">
+          <div class="card-icon">🏘️</div>
+          <h4>Neighborhood Insights</h4>
+          <p>AI-generated analysis of any area: schools, safety ratings, growth trends, walkability score, and nearby amenities.</p>
+          <div class="badge badge-purple" style="width:fit-content; margin-top:4px;">AI Powered</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9 ── SELLER & AGENCY TOOLS -->
+  <div class="slide" data-slide="9" data-notes="The platform is equally powerful for the supply side. A private seller can go from zero to a live listing in minutes. An agency can manage their entire portfolio, track which agents are performing, and invest in promoting their best listings to reach buyers faster. The promotion system means there's always a way to stand out — and a clear revenue path for the platform.">
+    <div class="slide-inner">
+      <div class="slide-num">09 — Seller & Agency Tools</div>
+      <h2>Powerful Tools for <span class="hl">Sellers & Agencies</span></h2>
+      <div class="cols">
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div class="badge badge-blue" style="width:fit-content;">For Sellers</div>
+          <ul class="icon-list">
+            <li><div class="ico">📝</div><div><strong>Create a Listing in Minutes</strong> — guided steps, image upload, and AI-powered pricing suggestions</div></li>
+            <li><div class="ico">📊</div><div><strong>Real-Time Dashboard</strong> — track views, inquiries, and interest per listing as it happens</div></li>
+            <li><div class="ico">🔄</div><div><strong>Full Listing Control</strong> — update, renew, or pause listings anytime with zero friction</div></li>
+            <li><div class="ico">📣</div><div><strong>Promote Your Listing</strong> — boost visibility with Featured, Highlighted, or Premium placement</div></li>
+          </ul>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div class="badge badge-orange" style="width:fit-content;">For Agencies</div>
+          <ul class="icon-list">
+            <li><div class="ico">👥</div><div><strong>Team Management</strong> — manage your entire agent roster from a single dashboard</div></li>
+            <li><div class="ico">📈</div><div><strong>Performance Analytics</strong> — track each agent's leads, views, and closing rates</div></li>
+            <li><div class="ico">💳</div><div><strong>Subscription Plans</strong> — transparent monthly or annual billing with clear tiers</div></li>
+          </ul>
+          <div class="glass" style="padding: 16px 18px; margin-top:4px;">
+            <p style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.08em; font-weight:700;">Promotion Tiers</p>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <span class="tier tier-gold">⭐ Premium</span>
+              <span class="tier tier-blue">🔷 Highlighted</span>
+              <span class="tier tier-purple">🔮 Featured</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 10 ── DIFFERENTIATION TABLE -->
+  <div class="slide" data-slide="10" data-notes="Every feature on this slide was a deliberate decision. This platform was designed from the ground up for the Balkan market — not adapted from something generic. The multilingual experience is native, not translated. The AI tools are integrated, not third-party widgets. The mobile experience feels like an app because it is one. That's the difference.">
+    <div class="slide-inner">
+      <div class="slide-num">10 — Differentiation</div>
+      <h2>Why <span class="hl">BalkanEstate</span> Is Different</h2>
+      <div class="glass" style="padding: 8px 0; overflow:hidden;">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Generic Portals</th>
+              <th class="col-h">BalkanEstate.com</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Languages</td><td>1–2</td><td class="col-h">10 native languages ✨</td></tr>
+            <tr><td>Countries</td><td>1</td><td class="col-h">10 countries covered</td></tr>
+            <tr><td>AI Property Valuation</td><td class="cross">✕ Not available</td><td class="check">✓ Built in</td></tr>
+            <tr><td>Real-Time Messaging</td><td class="cross">✕ Not available</td><td class="check">✓ Built in</td></tr>
+            <tr><td>Draw-on-Map Search</td><td class="cross">✕ Not available</td><td class="check">✓ Built in</td></tr>
+            <tr><td>360° Property Tours</td><td class="cross">✕ Not available</td><td class="check">✓ Built in</td></tr>
+            <tr><td>Agent Leaderboards</td><td class="cross">✕ Not available</td><td class="check">✓ Built in</td></tr>
+            <tr><td>Works Offline (PWA)</td><td class="cross">✕ No</td><td class="check">✓ Yes — installs like a native app</td></tr>
+            <tr><td>Mobile Experience</td><td>Outdated, slow</td><td class="col-h">Native app quality</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 11 ── OPPORTUNITY -->
+  <div class="slide" data-slide="11" data-notes="The Balkan real estate market moves billions of euros every year, and it is dramatically underserved by technology. Foreign buyers — from Western Europe, the Gulf, diaspora communities — are increasingly looking at the Balkans as a destination. BalkanEstate positions itself as the one platform that serves all of them, in all of their languages, across all of these countries. The timing is right.">
+    <div class="slide-inner">
+      <div class="slide-num">11 — The Opportunity</div>
+      <h2>A Massive Market, <span class="hlb">Dramatically Underserved</span></h2>
+      <div class="cols">
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div class="stat-row" style="flex-direction:column; gap:12px;">
+            <div class="stat-pill stat-blue" style="flex-direction:row; justify-content:flex-start; gap:16px; text-align:left; padding:16px 20px;">
+              <span class="num" style="font-size:1.6rem;">50M+</span>
+              <span class="lbl" style="text-align:left; text-transform:none; font-size:0.85rem; letter-spacing:0; font-weight:400; color:var(--text-secondary);">People across 10 Southeast European countries</span>
+            </div>
+            <div class="stat-pill stat-orange" style="flex-direction:row; justify-content:flex-start; gap:16px; text-align:left; padding:16px 20px;">
+              <span class="num" style="font-size:1.6rem;">€B+</span>
+              <span class="lbl" style="text-align:left; text-transform:none; font-size:0.85rem; letter-spacing:0; font-weight:400; color:var(--text-secondary);">Billions in annual real estate transactions across the region</span>
+            </div>
+            <div class="stat-pill stat-green" style="flex-direction:row; justify-content:flex-start; gap:16px; text-align:left; padding:16px 20px;">
+              <span class="num" style="font-size:1.6rem;">↑</span>
+              <span class="lbl" style="text-align:left; text-transform:none; font-size:0.85rem; letter-spacing:0; font-weight:400; color:var(--text-secondary);">Foreign investment into the Balkans growing year-over-year</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <h3>Revenue Streams</h3>
+          <ul class="icon-list">
+            <li><div class="ico">💳</div><div><strong>Subscriptions</strong> — monthly and annual plans for agents and agencies</div></li>
+            <li><div class="ico">📣</div><div><strong>Promoted Listings</strong> — Featured, Highlighted, Premium placement tiers</div></li>
+            <li><div class="ico">💸</div><div><strong>Transaction Fees</strong> — facilitation commissions on closed deals</div></li>
+            <li><div class="ico">🤖</div><div><strong>Premium Tools</strong> — advanced AI valuation reports and market analytics</div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 12 ── CLOSING -->
+  <div class="slide" data-slide="12" data-notes="This is not a prototype or a concept. BalkanEstate.com is a fully functional platform with every major feature already built and working. What you've seen today is live, real, and ready for market. The next phase is growth — expanding the content, scaling the user base, and building on the strong foundation already in place. We're looking for partners who see what we see: a massive, underserved market and the right product to capture it.">
+    <div class="slide-inner">
+      <div class="slide-num">12 — Ready for Market</div>
+      <div class="cols">
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <h2>Already <span class="hl">Built</span> & Ready</h2>
+          <ul class="check-list">
+            <li><div class="ck">✓</div><div>Full property search, map search, saved searches & alerts</div></li>
+            <li><div class="ck">✓</div><div>Rich listing pages: gallery, video, 360°, floor plans, viewing scheduler</div></li>
+            <li><div class="ck">✓</div><div>Verified agent & agency profiles with leaderboards and reviews</div></li>
+            <li><div class="ck">✓</div><div>Real-time messaging between buyers, sellers, and agents</div></li>
+            <li><div class="ck">✓</div><div>AI valuation, mortgage and affordability calculators</div></li>
+            <li><div class="ck">✓</div><div>Seller and agency dashboards with full analytics</div></li>
+            <li><div class="ck">✓</div><div>Promotion and subscription system with regional payments</div></li>
+            <li><div class="ck">✓</div><div>10 languages, 10 countries — mobile-first, works offline</div></li>
+          </ul>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <h2>Coming <span class="hlb">Next</span></h2>
+          <ul class="icon-list">
+            <li><div class="ico">🔜</div><div>Rental market vertical with dedicated search and management tools</div></li>
+            <li><div class="ico">🔜</div><div>Commercial property listings and business real estate</div></li>
+            <li><div class="ico">🔜</div><div>Expanded city guides and regional market reports</div></li>
+            <li><div class="ico">🔜</div><div>AI personalized property recommendations</div></li>
+          </ul>
+          <div class="glass" style="padding:20px 22px; margin-top:auto; text-align:center; display:flex; flex-direction:column; gap:8px;">
+            <p style="font-size:0.78rem; color:var(--text-muted); letter-spacing:0.06em; text-transform:uppercase; font-weight:700;">The platform is live. The market is ready.</p>
+            <h3 style="font-size:1.2rem; font-weight:800;">Let's build the future of <span class="grad-orange">Balkan real estate</span> together.</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /slides -->
+
+<!-- TRANSCRIPT PANEL -->
+<div class="transcript-wrap" id="transcriptWrap">
+  <div class="transcript-box">
+    <div class="transcript-header">
+      <span class="transcript-label">🎙 Speaker Notes</span>
+      <button class="transcript-close" id="transcriptClose">Close</button>
+    </div>
+    <div class="transcript-text" id="transcriptText"></div>
+  </div>
+</div>
+
+<!-- CONTROLS -->
+<div id="controls">
+  <button class="ctrl-btn" id="prevBtn" title="Previous">←</button>
+  <span class="slide-counter" id="counter">1 / 12</span>
+  <button class="ctrl-btn" id="nextBtn" title="Next">→</button>
+  <button class="ctrl-btn notes-btn" id="notesBtn" title="Toggle Notes (N)"><span>🎙</span> Notes</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const totalSlides = slides.length;
+  let current = 0;
+  let notesOpen = false;
+
+  const counter = document.getElementById('counter');
+  const progressBar = document.getElementById('progress-bar');
+  const transcriptWrap = document.getElementById('transcriptWrap');
+  const transcriptText = document.getElementById('transcriptText');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const notesBtn = document.getElementById('notesBtn');
+  const dotsContainer = document.getElementById('slide-dots');
+
+  // Build dots
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(d);
+  });
+
+  function goTo(index) {
+    if (index < 0 || index >= totalSlides) return;
+    slides[current].classList.remove('active');
+    slides[current].classList.add('prev');
+    setTimeout(() => slides[current < index ? current : index + (index === current ? 0 : 0)].classList.remove('prev'), 600);
+
+    const oldPrev = document.querySelector('.slide.prev');
+    if (oldPrev) oldPrev.classList.remove('prev');
+
+    slides[current].classList.add('prev');
+    current = index;
+    slides[current].classList.remove('prev');
+    slides[current].classList.add('active');
+
+    counter.textContent = `${current + 1} / ${totalSlides}`;
+    progressBar.style.width = `${((current + 1) / totalSlides) * 100}%`;
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === totalSlides - 1;
+
+    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+
+    if (notesOpen) updateNotes();
+
+    setTimeout(() => document.querySelectorAll('.slide.prev').forEach(s => s.classList.remove('prev')), 700);
+  }
+
+  function updateNotes() {
+    transcriptText.textContent = slides[current].dataset.notes || '';
+  }
+
+  function toggleNotes() {
+    notesOpen = !notesOpen;
+    transcriptWrap.classList.toggle('open', notesOpen);
+    if (notesOpen) updateNotes();
+  }
+
+  prevBtn.addEventListener('click', () => goTo(current - 1));
+  nextBtn.addEventListener('click', () => goTo(current + 1));
+  notesBtn.addEventListener('click', toggleNotes);
+  document.getElementById('transcriptClose').addEventListener('click', toggleNotes);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goTo(current + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(current - 1); }
+    if (e.key === 'n' || e.key === 'N') toggleNotes();
+    if (e.key === 'Escape' && notesOpen) toggleNotes();
+  });
+
+  // Touch swipe
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) { dx < 0 ? goTo(current + 1) : goTo(current - 1); }
+  });
+
+  // Init
+  goTo(0);
+</script>
+</body>
+</html>
