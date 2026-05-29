@@ -134,30 +134,34 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                         </div>
 
                         {/* Slider track container with proper touch target */}
-                        <div className="relative h-12 flex items-center">
-                            {/* Smooth glow effect behind track - only when active */}
+                        <div className="relative h-12 flex items-center" style={{ touchAction: 'none' }}>
+                            {/* Glow effect behind track */}
                             <div
-                                className={`absolute top-1/2 -translate-y-1/2 h-6 rounded-full transition-all duration-500 pointer-events-none ${
+                                className={`absolute top-1/2 -translate-y-1/2 h-6 rounded-full pointer-events-none ${
                                     isSliderActive ? 'opacity-100' : 'opacity-40'
                                 }`}
                                 style={{
                                     left: '6px',
                                     width: `calc(${sliderPercent}% - 6px)`,
                                     background: 'linear-gradient(90deg, rgba(59,130,246,0.3), rgba(139,92,246,0.25), rgba(236,72,153,0.2))',
-                                    filter: 'blur(8px)'
+                                    filter: 'blur(8px)',
+                                    willChange: 'width',
+                                    transition: isSliderActive ? 'none' : 'opacity 300ms ease-out'
                                 }}
                             />
 
                             {/* Track background - smooth glass effect */}
                             <div className="relative w-full h-3 rounded-full bg-gradient-to-r from-neutral-200 via-neutral-100 to-neutral-200 shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] overflow-hidden">
-                                {/* Smooth gradient fill with conditional animation */}
+                                {/* Gradient fill */}
                                 <div
-                                    className="absolute inset-y-0 left-0 rounded-full transition-all duration-150 ease-out"
+                                    className="absolute inset-y-0 left-0 rounded-full"
                                     style={{
                                         width: `${sliderPercent}%`,
                                         background: 'linear-gradient(90deg, #3b82f6 0%, #6366f1 25%, #8b5cf6 50%, #a855f7 75%, #ec4899 100%)',
                                         backgroundSize: isSliderActive ? '200% 100%' : '100% 100%',
-                                        animation: isSliderActive ? 'shimmer 2s ease-in-out infinite' : 'none'
+                                        animation: isSliderActive ? 'shimmer 2s ease-in-out infinite' : 'none',
+                                        willChange: 'width',
+                                        transition: isSliderActive ? 'none' : 'width 80ms ease-out'
                                     }}
                                 />
 
@@ -179,13 +183,15 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                                 <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/40 to-transparent rounded-t-full pointer-events-none" />
                             </div>
 
-                            {/* Premium custom thumb - positioned relative to track */}
+                            {/* Custom thumb */}
                             <div
-                                className={`absolute top-1/2 -translate-y-1/2 pointer-events-none transition-all duration-150 ease-out z-10 ${
+                                className={`absolute top-1/2 -translate-y-1/2 pointer-events-none z-10 ${
                                     isSliderActive ? 'scale-110' : 'scale-100'
                                 }`}
                                 style={{
                                     left: `calc(${sliderPercent}% - ${sliderPercent * 0.28}px)`,
+                                    willChange: 'left',
+                                    transition: isSliderActive ? 'transform 150ms ease-out' : 'transform 150ms ease-out, left 80ms ease-out',
                                 }}
                             >
                                 {/* Outer glow ring - only animates when active */}
