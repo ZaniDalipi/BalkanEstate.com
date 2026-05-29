@@ -197,20 +197,31 @@ p{font-size:clamp(.9rem,1.3vw,1.05rem);line-height:1.65;color:var(--text2)}
 .fpill{padding:7px 14px;border-radius:100px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);font-size:.8rem;color:var(--text2);cursor:pointer;transition:background .2s,border-color .2s,color .2s;user-select:none}
 .fpill:hover,.fpill.fon{background:rgba(2,82,205,.25);border-color:rgba(59,130,246,.5);color:#93C5FD}
 
-/* Map mockup */
-.map-area{background:linear-gradient(135deg,#0d1f3c,#0a1829);border-radius:16px;position:relative;overflow:hidden;flex:1;min-height:260px}
-.map-grid{position:absolute;inset:0;opacity:.15;background-image:linear-gradient(rgba(255,255,255,.3) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.3) 1px,transparent 1px);background-size:40px 40px}
-.map-road{position:absolute;background:rgba(255,255,255,.12);border-radius:2px}
-.mpin{position:absolute;cursor:pointer;transition:transform .2s}
-.mpin:hover{transform:scale(1.2)}
-.mpin .mp-bubble{background:var(--blue);color:#fff;font-size:.65rem;font-weight:800;padding:4px 8px;border-radius:10px;white-space:nowrap;box-shadow:0 3px 12px rgba(2,82,205,.5);border:1px solid rgba(255,255,255,.3)}
-.mpin.featured .mp-bubble{background:linear-gradient(135deg,#f59e0b,#d97706);box-shadow:0 3px 12px rgba(245,158,11,.5)}
-.mpin .mp-tri{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid var(--blue);margin:0 auto}
-.mpin.featured .mp-tri{border-top-color:#d97706}
-.map-popup{position:absolute;background:rgba(10,18,40,.95);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:10px 14px;min-width:150px;box-shadow:0 8px 24px rgba(0,0,0,.5);pointer-events:none;opacity:0;transition:opacity .25s}
-.map-popup.show{opacity:1}
-.map-popup .mp-title{font-size:.8rem;font-weight:700;color:#fff;margin-bottom:2px}
-.map-popup .mp-info{font-size:.68rem;color:var(--text2)}
+/* Map — new 3D interactive */
+.mpin3{position:absolute;cursor:pointer;transform:translate(-50%,-100%);transition:transform .2s,filter .2s;z-index:10}
+.mpin3:hover{transform:translate(-50%,-100%) scale(1.18);filter:brightness(1.2)}
+.mp3-bubble{background:var(--blue);color:#fff;font-size:.68rem;font-weight:800;padding:5px 9px;border-radius:11px;white-space:nowrap;border:1.5px solid rgba(255,255,255,.35);box-shadow:0 4px 14px rgba(2,82,205,.55)}
+.mp3-feat .mp3-bubble{background:linear-gradient(135deg,#f59e0b,#b45309);box-shadow:0 4px 14px rgba(245,158,11,.55)}
+.mp3-tri{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:8px solid var(--blue);margin:0 auto}
+.mp3-feat .mp3-tri{border-top-color:#b45309}
+/* Pulse animations for pins */
+@keyframes pulse{0%,100%{box-shadow:0 4px 14px rgba(2,82,205,.55),0 0 0 0 rgba(2,82,205,.4)}60%{box-shadow:0 4px 14px rgba(2,82,205,.55),0 0 0 9px rgba(2,82,205,0)}}
+@keyframes pulse2{0%,100%{box-shadow:0 4px 14px rgba(245,158,11,.55),0 0 0 0 rgba(245,158,11,.4)}60%{box-shadow:0 4px 14px rgba(245,158,11,.55),0 0 0 9px rgba(245,158,11,0)}}
+.mp3-bubble{animation:pulse 2.8s ease-in-out infinite}
+.mp3-feat .mp3-bubble{animation:pulse2 2.8s ease-in-out infinite}
+/* Cluster */
+.mcluster{position:absolute;transform:translate(-50%,-50%);cursor:pointer;z-index:8}
+.mc-circle{width:38px;height:38px;border-radius:50%;background:rgba(2,82,205,.85);border:2px solid rgba(255,255,255,.4);color:#fff;font-size:.8rem;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(2,82,205,.5);transition:transform .2s}
+.mcluster:hover .mc-circle{transform:scale(1.15)}
+.mc-ring{position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(2,82,205,.3);animation:ring-pulse 2s ease-in-out infinite}
+@keyframes ring-pulse{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.2);opacity:0}}
+/* Layer buttons */
+.map-layer-btn{padding:6px 13px;border-radius:9px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:rgba(255,255,255,.65);font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+.map-layer-btn:hover{background:rgba(255,255,255,.13);color:#fff}
+.mlb-on{background:rgba(2,82,205,.3)!important;border-color:rgba(59,130,246,.55)!important;color:#93C5FD!important}
+/* Draw zone animation */
+@keyframes draw-in{to{stroke-dashoffset:0}}
+@keyframes fade-label{to{opacity:1}}
 
 /* Chat mockup */
 .chat-wrap{display:flex;gap:0;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.12);height:280px}
@@ -310,11 +321,8 @@ input[type=range]{width:100%;accent-color:var(--blue);cursor:pointer;height:4px;
 @keyframes fadeaway{0%,55%{opacity:1}100%{opacity:0;pointer-events:none}}
 kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:1px 6px;font-size:.66rem;color:var(--text2);font-family:inherit}
 
-/* Scroll pulse on map pins */
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(2,82,205,.5)}50%{box-shadow:0 0 0 8px rgba(2,82,205,0)}}
-.mpin .mp-bubble{animation:pulse 2.5s ease-in-out infinite}
-.mpin.featured .mp-bubble{animation:pulse2 2.5s ease-in-out infinite}
-@keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.5)}50%{box-shadow:0 0 0 8px rgba(245,158,11,0)}}
+/* Draw zone button active state */
+#drawBtn.draw-active{background:rgba(59,130,246,.5)!important;border-color:rgba(59,130,246,.8)!important;color:#fff!important}
 
 /* Typing indicator */
 @keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
@@ -494,53 +502,168 @@ kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:1px 6px;font-size
 </div>
 </div>
 
-<!-- ═══ SLIDE 5 — MAP SEARCH ═══ -->
-<div class="slide" data-notes="The map search is one of the most powerful features. You can draw a custom boundary directly on the map — a neighborhood, a block, a zone — and see only listings inside that area. Every price bubble is clickable, showing a preview card. Featured listings glow in gold. Try clicking the pins on this demo.">
-<div class="inner">
-  <div class="snum">05 — Map Search</div>
-  <h2>Search by <span class="hl">Drawing on the Map</span></h2>
-  <div class="cols c2" style="gap:22px;align-items:stretch">
-    <div style="display:flex;flex-direction:column;gap:14px;flex:1">
-      <ul class="ilist">
-        <li><div class="ico">✏️</div><div><strong>Draw Any Zone</strong> — draw a freehand boundary and instantly see all properties inside</div></li>
-        <li><div class="ico">📌</div><div><strong>Price Bubbles</strong> — every listing shows its price on the map, click for a quick preview</div></li>
-        <li><div class="ico">⭐</div><div><strong>Featured Pins Glow</strong> — promoted listings stand out visually with gold highlight</div></li>
-        <li><div class="ico">🔄</div><div><strong>Synced with List</strong> — map and list view always stay in sync as you pan or filter</div></li>
-        <li><div class="ico">🌍</div><div><strong>10 Countries</strong> — zoom anywhere from Serbia to Greece on one unified map</div></li>
-      </ul>
+<!-- ═══ SLIDE 5 — 3D MAP SEARCH ═══ -->
+<div class="slide" data-notes="The map is one of the most powerful and unique features of BalkanEstate. Users can tilt the map to 3D, draw any freehand boundary to search inside it, switch to a heatmap showing price density across the city, and click any price bubble for a full property preview. Promoted listings pulse in gold. Clusters automatically group nearby properties. This is the kind of map experience buyers expect from modern real estate — and it's built in.">
+<div class="inner" style="gap:16px">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div>
+      <div class="snum">05 — 3D Interactive Map</div>
+      <h2 style="margin-top:2px">Search by <span class="hl">Drawing on the Map</span></h2>
     </div>
-    <div style="flex:1;position:relative">
-      <div class="map-area" id="mapArea">
-        <div class="map-grid"></div>
-        <div class="map-road" style="top:35%;left:0;right:0;height:6px;transform:rotate(-3deg)"></div>
-        <div class="map-road" style="top:60%;left:0;right:0;height:4px"></div>
-        <div class="map-road" style="left:30%;top:0;bottom:0;width:5px;transform:rotate(2deg)"></div>
-        <div class="map-road" style="left:65%;top:0;bottom:0;width:4px"></div>
-        <div class="mpin" style="left:20%;top:25%" onclick="showMapPopup(this,'€185k — 3bd Budva','Sea view apt · Agent Marko')">
-          <div class="mp-bubble">€185k</div><div class="mp-tri"></div>
-        </div>
-        <div class="mpin featured" style="left:55%;top:18%" onclick="showMapPopup(this,'€320k — Villa','5bd · Pool · Private garden')">
-          <div class="mp-bubble">€320k ⭐</div><div class="mp-tri" style="border-top-color:#d97706"></div>
-        </div>
-        <div class="mpin" style="left:38%;top:55%" onclick="showMapPopup(this,'€92k — 2bd Ohrid','Lake view · Renovated')">
-          <div class="mp-bubble">€92k</div><div class="mp-tri"></div>
-        </div>
-        <div class="mpin" style="left:72%;top:42%" onclick="showMapPopup(this,'€145k — 3bd Sofia','City centre · Modern')">
-          <div class="mp-bubble">€145k</div><div class="mp-tri"></div>
-        </div>
-        <div class="mpin featured" style="left:15%;top:65%" onclick="showMapPopup(this,'€210k — Penthouse','4bd · Rooftop terrace')">
-          <div class="mp-bubble">€210k ⭐</div><div class="mp-tri" style="border-top-color:#d97706"></div>
-        </div>
-        <div class="mpin" style="left:80%;top:70%" onclick="showMapPopup(this,'€68k — 1bd Tirana','Central · Investment')">
-          <div class="mp-bubble">€68k</div><div class="mp-tri"></div>
-        </div>
-        <div class="map-popup" id="mapPopup" style="top:10px;right:10px">
-          <div class="mp-title" id="mpTitle">—</div>
-          <div class="mp-info" id="mpInfo">—</div>
-        </div>
-      </div>
-      <p style="font-size:.75rem;color:var(--text3);text-align:center;margin-top:8px">👆 Click any price bubble to preview</p>
+    <!-- Layer toggle buttons -->
+    <div style="display:flex;gap:8px;flex-shrink:0" id="layerBtns">
+      <button class="map-layer-btn mlb-on" onclick="setLayer('standard',this)">🗺 Standard</button>
+      <button class="map-layer-btn" onclick="setLayer('satellite',this)">🛰 Satellite</button>
+      <button class="map-layer-btn" onclick="setLayer('heat',this)">🌡 Heatmap</button>
+      <button class="map-layer-btn" onclick="setLayer('tilt3d',this)">🏙 3D Tilt</button>
     </div>
+  </div>
+
+  <!-- Map wrapper with 3D perspective -->
+  <div id="map3dOuter" style="perspective:1100px;flex:1">
+    <div id="map3dInner" style="transition:transform .7s cubic-bezier(.4,0,.2,1);transform-origin:bottom center">
+      <div id="mapArea" style="position:relative;border-radius:18px;overflow:hidden;height:360px;background:linear-gradient(160deg,#0b1e3d,#0d2a4a,#0a1a35);border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 60px rgba(0,0,0,.6)">
+
+        <!-- Map grid / tile texture -->
+        <div style="position:absolute;inset:0;opacity:.18;background-image:linear-gradient(rgba(100,160,255,.4) 1px,transparent 1px),linear-gradient(90deg,rgba(100,160,255,.4) 1px,transparent 1px);background-size:44px 44px"></div>
+
+        <!-- Water body -->
+        <div style="position:absolute;right:0;top:0;bottom:0;width:28%;background:linear-gradient(180deg,rgba(14,60,120,.6),rgba(8,40,90,.8));border-left:1px solid rgba(100,180,255,.12)"></div>
+        <div style="position:absolute;right:28%;top:52%;width:12%;height:22%;background:rgba(14,60,120,.45);border-radius:50% 30% 50% 30%"></div>
+
+        <!-- Roads -->
+        <div style="position:absolute;top:38%;left:0;right:28%;height:7px;background:rgba(255,255,255,.1);transform:rotate(-2deg)"></div>
+        <div style="position:absolute;top:58%;left:0;right:28%;height:5px;background:rgba(255,255,255,.08)"></div>
+        <div style="position:absolute;top:72%;left:0;right:28%;height:4px;background:rgba(255,255,255,.06);transform:rotate(1deg)"></div>
+        <div style="position:absolute;left:22%;top:0;bottom:0;width:6px;background:rgba(255,255,255,.09);transform:rotate(1.5deg)"></div>
+        <div style="position:absolute;left:48%;top:0;bottom:55%;width:5px;background:rgba(255,255,255,.08)"></div>
+        <div style="position:absolute;left:68%;top:0;bottom:0;width:5px;background:rgba(255,255,255,.07)"></div>
+
+        <!-- Building blocks (city silhouette) -->
+        <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.22" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5%" y="18%" width="7%" height="18%" rx="3" fill="#4a90d9"/>
+          <rect x="7%" y="12%" width="4%" height="12%" rx="2" fill="#5aa0e9"/>
+          <rect x="14%" y="20%" width="6%" height="14%" rx="3" fill="#4a90d9"/>
+          <rect x="26%" y="15%" width="8%" height="20%" rx="3" fill="#5aa0e9"/>
+          <rect x="28%" y="8%" width="4%" height="10%" rx="2" fill="#6ab0f9"/>
+          <rect x="38%" y="18%" width="7%" height="16%" rx="3" fill="#4a90d9"/>
+          <rect x="36%" y="12%" width="4%" height="9%" rx="2" fill="#5aa0e9"/>
+          <rect x="50%" y="16%" width="8%" height="18%" rx="3" fill="#4a90d9"/>
+          <rect x="52%" y="9%" width="3%" height="10%" rx="2" fill="#6ab0f9"/>
+          <rect x="10%" y="62%" width="9%" height="12%" rx="3" fill="#3a80c9"/>
+          <rect x="24%" y="65%" width="7%" height="10%" rx="3" fill="#3a80c9"/>
+          <rect x="42%" y="63%" width="8%" height="11%" rx="3" fill="#3a80c9"/>
+        </svg>
+
+        <!-- Heatmap overlay (hidden by default) -->
+        <div id="heatOverlay" style="position:absolute;inset:0;opacity:0;transition:opacity .6s;pointer-events:none;mix-blend-mode:screen">
+          <div style="position:absolute;left:30%;top:25%;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,60,0,.7) 0%,rgba(255,120,0,.4) 40%,transparent 70%)"></div>
+          <div style="position:absolute;left:10%;top:50%;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(255,200,0,.6) 0%,rgba(255,140,0,.3) 45%,transparent 70%)"></div>
+          <div style="position:absolute;left:50%;top:15%;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,60,0,.65) 0%,rgba(255,100,0,.35) 45%,transparent 70%)"></div>
+          <div style="position:absolute;left:5%;top:20%;width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,rgba(100,200,255,.5) 0%,rgba(60,120,255,.25) 50%,transparent 70%)"></div>
+          <div style="position:absolute;left:60%;top:55%;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle,rgba(120,255,120,.45) 0%,rgba(60,200,60,.2) 50%,transparent 70%)"></div>
+        </div>
+
+        <!-- Satellite overlay (hidden by default) -->
+        <div id="satOverlay" style="position:absolute;inset:0;opacity:0;transition:opacity .6s;pointer-events:none;background:linear-gradient(160deg,#0a1a08,#0f2510,#0a1508)">
+          <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 18px,rgba(40,100,40,.15) 19px),repeating-linear-gradient(90deg,transparent,transparent 22px,rgba(40,100,40,.1) 23px)"></div>
+          <div style="position:absolute;top:35%;left:8%;width:18%;height:12%;background:rgba(80,160,80,.2);border-radius:4px"></div>
+          <div style="position:absolute;top:55%;left:30%;width:14%;height:10%;background:rgba(80,160,80,.18);border-radius:4px"></div>
+          <div style="position:absolute;top:20%;left:40%;width:10%;height:8%;background:rgba(80,160,80,.15);border-radius:50%"></div>
+        </div>
+
+        <!-- Animated draw zone SVG -->
+        <svg id="drawZoneSvg" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" xmlns="http://www.w3.org/2000/svg">
+          <polygon id="drawPoly" points="18,145 95,90 210,80 260,150 240,230 150,255 60,230"
+            fill="rgba(59,130,246,.12)" stroke="rgba(59,130,246,.8)" stroke-width="2.5"
+            stroke-dasharray="800" stroke-dashoffset="800" style="transition:none"/>
+          <text x="135" y="170" text-anchor="middle" fill="rgba(255,255,255,.55)" font-size="11" font-family="Inter,sans-serif" font-weight="700" opacity="0" id="drawLabel">24 properties</text>
+        </svg>
+
+        <!-- Property clusters -->
+        <div class="mcluster" style="left:8%;top:44%" onclick="expandCluster(this)">
+          <div class="mc-circle">14</div>
+          <div class="mc-ring"></div>
+        </div>
+
+        <!-- Individual price pins -->
+        <div class="mpin3" style="left:19%;top:22%" onclick="openMapCard('budva','€185,000','Sea View Apartment','3 bed · 2 bath · 95 m²','Budva, Montenegro','Agent Marko','4.9','🛏 3  🚿 2  📐 95m²')">
+          <div class="mp3-bubble">€185k</div><div class="mp3-tri"></div>
+        </div>
+        <div class="mpin3 mp3-feat" style="left:50%;top:12%" onclick="openMapCard('villa','€320,000','Luxury Sea Villa','5 bed · 4 bath · 280 m²','Budva Riviera','Agent Sofia','5.0','🛏 5  🚿 4  📐 280m²')">
+          <div class="mp3-bubble">€320k ⭐</div><div class="mp3-tri" style="border-top-color:#b45309"></div>
+        </div>
+        <div class="mpin3" style="left:35%;top:48%" onclick="openMapCard('ohrid','€92,000','Lake View Studio','2 bed · 1 bath · 68 m²','Ohrid, N. Macedonia','Agent Ana','4.8','🛏 2  🚿 1  📐 68m²')">
+          <div class="mp3-bubble">€92k</div><div class="mp3-tri"></div>
+        </div>
+        <div class="mpin3" style="left:58%;top:36%" onclick="openMapCard('sofia','€145,000','Modern City Apt','3 bed · 2 bath · 88 m²','Sofia, Bulgaria','Agent Ivan','4.7','🛏 3  🚿 2  📐 88m²')">
+          <div class="mp3-bubble">€145k</div><div class="mp3-tri"></div>
+        </div>
+        <div class="mpin3 mp3-feat" style="left:25%;top:68%" onclick="openMapCard('penthouse','€210,000','Rooftop Penthouse','4 bed · 3 bath · 140 m²','Belgrade, Serbia','Agency Prime','4.9','🛏 4  🚿 3  📐 140m²')">
+          <div class="mp3-bubble">€210k ⭐</div><div class="mp3-tri" style="border-top-color:#b45309"></div>
+        </div>
+        <div class="mpin3" style="left:44%;top:65%" onclick="openMapCard('tirana','€68,000','City Centre Studio','1 bed · 1 bath · 42 m²','Tirana, Albania','Agent Besa','4.8','🛏 1  🚿 1  📐 42m²')">
+          <div class="mp3-bubble">€68k</div><div class="mp3-tri"></div>
+        </div>
+        <div class="mpin3" style="left:62%;top:58%" onclick="openMapCard('zagreb','€230,000','Family Home','4 bed · 2 bath · 165 m²','Zagreb, Croatia','Agent Luca','4.6','🛏 4  🚿 2  📐 165m²')">
+          <div class="mp3-bubble">€230k</div><div class="mp3-tri"></div>
+        </div>
+        <div class="mpin3" style="left:10%;top:72%" onclick="openMapCard('nis','€55,000','Starter Apartment','2 bed · 1 bath · 52 m²','Niš, Serbia','Agent Petar','4.5','🛏 2  🚿 1  📐 52m²')">
+          <div class="mp3-bubble">€55k</div><div class="mp3-tri"></div>
+        </div>
+
+        <!-- Rich popup card -->
+        <div id="richPopup" style="position:absolute;bottom:14px;left:14px;width:220px;background:rgba(8,18,45,.97);border:1px solid rgba(255,255,255,.2);border-radius:16px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.6);transform:translateY(20px) scale(.95);opacity:0;transition:all .35s cubic-bezier(.4,0,.2,1);pointer-events:none;z-index:30">
+          <div id="rpImg" style="height:80px;background:linear-gradient(135deg,#0d2550,#1a3a6e);display:flex;align-items:center;justify-content:center;font-size:2rem;opacity:.4;position:relative">🏢
+            <div id="rpBadge" style="position:absolute;top:6px;left:6px;font-size:.58rem;font-weight:700;padding:2px 7px;border-radius:5px;background:rgba(2,82,205,.8);color:#fff"></div>
+          </div>
+          <div style="padding:10px 12px;display:flex;flex-direction:column;gap:4px">
+            <div id="rpPrice" style="font-size:1.1rem;font-weight:900;color:#fff;letter-spacing:-.03em"></div>
+            <div id="rpTitle" style="font-size:.75rem;font-weight:600;color:#fff"></div>
+            <div id="rpMeta" style="font-size:.67rem;color:rgba(255,255,255,.5)"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:5px">
+              <div style="display:flex;align-items:center;gap:5px">
+                <div id="rpAvatar" style="width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#0252CD,#7C3AED);display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:700;color:#fff">M</div>
+                <span id="rpAgent" style="font-size:.62rem;color:rgba(255,255,255,.5)"></span>
+              </div>
+              <div style="background:rgba(2,82,205,.3);border:1px solid rgba(59,130,246,.4);border-radius:7px;padding:4px 10px;font-size:.65rem;font-weight:700;color:#93C5FD;cursor:pointer">View →</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search bar overlay at top -->
+        <div style="position:absolute;top:12px;left:12px;right:12px;display:flex;gap:8px;z-index:20">
+          <div style="flex:1;background:rgba(8,18,45,.85);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:7px 12px;display:flex;align-items:center;gap:8px;backdrop-filter:blur(12px)">
+            <span style="font-size:.85rem">🔍</span>
+            <span style="font-size:.75rem;color:rgba(255,255,255,.45)">Budva, Montenegro — 24 results</span>
+          </div>
+          <div id="drawBtn" style="background:rgba(2,82,205,.4);border:1px solid rgba(59,130,246,.5);border-radius:10px;padding:7px 12px;font-size:.75rem;font-weight:700;color:#93C5FD;cursor:pointer;white-space:nowrap;backdrop-filter:blur(12px);transition:background .2s" onclick="toggleDraw()">✏️ Draw Zone</div>
+        </div>
+
+        <!-- Results strip at bottom -->
+        <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(5,12,35,.95),transparent);padding:10px 14px 10px;display:flex;align-items:center;gap:10px;pointer-events:none">
+          <span style="font-size:.72rem;font-weight:700;color:#fff">📍 <span id="resultCount">31</span> properties found</span>
+          <span style="font-size:.68rem;color:rgba(255,255,255,.4)">·</span>
+          <span style="font-size:.68rem;color:rgba(255,255,255,.4)">Avg. €162k</span>
+          <span style="font-size:.68rem;color:rgba(255,255,255,.4)">·</span>
+          <span style="font-size:.68rem;color:rgba(255,255,255,.4)">€68k – €320k</span>
+        </div>
+
+      </div><!-- /mapArea -->
+    </div><!-- /map3dInner -->
+  </div><!-- /map3dOuter -->
+
+  <!-- Feature chips row -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+    <div style="font-size:.72rem;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase">Features:</div>
+    <div class="fc2">✏️ Draw any zone</div>
+    <div class="fc2">📌 Price bubbles</div>
+    <div class="fc2">🌡 Price heatmap</div>
+    <div class="fc2">🏙 3D city tilt</div>
+    <div class="fc2">🛰 Satellite view</div>
+    <div class="fc2">🔵 Auto-clustering</div>
+    <div class="fc2">🔄 Synced with list</div>
+    <div class="fc2">🌍 10 countries</div>
   </div>
 </div>
 </div>
@@ -1222,17 +1345,6 @@ document.getElementById('filterPills').addEventListener('click',e=>{
   if(e.target.classList.contains('fpill'))e.target.classList.toggle('fon');
 });
 
-// Map popup
-let popupTimer;
-function showMapPopup(pin,title,info){
-  clearTimeout(popupTimer);
-  const p=document.getElementById('mapPopup');
-  document.getElementById('mpTitle').textContent=title;
-  document.getElementById('mpInfo').textContent=info;
-  p.classList.add('show');
-  popupTimer=setTimeout(()=>p.classList.remove('show'),3500);
-}
-
 // Role cards
 const roleData=[
   {icon:'🏠',text:'Buyers get advanced search with map-draw, saved alerts, AI valuation, mortgage calculator, 360° property tours, instant messaging with agents, and neighborhood insights — all in one platform, in their language.'},
@@ -1321,6 +1433,116 @@ function switchLang(code,h,sub){
     document.getElementById('langCode').textContent=code.toUpperCase();
     hEl.style.opacity='1';sEl.style.opacity='1';
   },250);
+}
+
+// ── 3D MAP FUNCTIONS ──
+
+let drawActive=false;
+let is3D=false;
+
+function setLayer(type,btn){
+  // Update button states
+  document.querySelectorAll('.map-layer-btn').forEach(b=>b.classList.remove('mlb-on'));
+  btn.classList.add('mlb-on');
+
+  const heat=document.getElementById('heatOverlay');
+  const sat=document.getElementById('satOverlay');
+  const inner=document.getElementById('map3dInner');
+
+  // Reset overlays
+  heat.style.opacity='0';
+  sat.style.opacity='0';
+
+  if(type==='heat'){
+    heat.style.opacity='1';
+    if(is3D){inner.style.transform='rotateX(22deg) scale(1.06)';} else {inner.style.transform='';}
+  } else if(type==='satellite'){
+    sat.style.opacity='0.92';
+    if(is3D){inner.style.transform='rotateX(22deg) scale(1.06)';} else {inner.style.transform='';}
+  } else if(type==='tilt3d'){
+    is3D=true;
+    inner.style.transform='rotateX(22deg) scale(1.06)';
+  } else {
+    // standard
+    is3D=false;
+    inner.style.transform='';
+  }
+}
+
+function openMapCard(id,price,title,subtitle,loc,agent,rating,meta){
+  const pop=document.getElementById('richPopup');
+  document.getElementById('rpPrice').textContent=price;
+  document.getElementById('rpTitle').textContent=title;
+  document.getElementById('rpMeta').textContent=meta+'  ·  📍 '+loc;
+  document.getElementById('rpAgent').textContent=agent+' · ⭐ '+rating;
+  document.getElementById('rpAvatar').textContent=agent[agent.indexOf(' ')+1]||agent[0];
+  const badge=document.getElementById('rpBadge');
+  if(id==='villa'||id==='penthouse'){badge.textContent='⭐ Featured';badge.style.background='rgba(180,83,9,.8)';}
+  else{badge.textContent='For Sale';badge.style.background='rgba(2,82,205,.8)';}
+  // Show popup
+  pop.style.pointerEvents='all';
+  pop.style.opacity='1';
+  pop.style.transform='translateY(0) scale(1)';
+  // Auto-hide after 4s
+  clearTimeout(pop._t);
+  pop._t=setTimeout(()=>{
+    pop.style.opacity='0';
+    pop.style.transform='translateY(20px) scale(.95)';
+    setTimeout(()=>pop.style.pointerEvents='none',350);
+  },4000);
+}
+
+function toggleDraw(){
+  drawActive=!drawActive;
+  const btn=document.getElementById('drawBtn');
+  const poly=document.getElementById('drawPoly');
+  const label=document.getElementById('drawLabel');
+  const counter=document.getElementById('resultCount');
+  btn.classList.toggle('draw-active',drawActive);
+  btn.textContent=drawActive?'✏️ Clear Zone':'✏️ Draw Zone';
+  if(drawActive){
+    poly.style.transition='none';
+    poly.setAttribute('stroke-dashoffset','800');
+    void poly.getBoundingClientRect();// force reflow
+    poly.style.transition='stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)';
+    poly.setAttribute('stroke-dashoffset','0');
+    label.style.animation='fade-label .4s ease 1.3s both';
+    counter.textContent='24';
+  } else {
+    poly.setAttribute('stroke-dashoffset','800');
+    label.style.animation='none';label.style.opacity='0';
+    counter.textContent='31';
+  }
+}
+
+function expandCluster(el){
+  const circle=el.querySelector('.mc-circle');
+  circle.style.transform='scale(1.3)';
+  circle.style.background='rgba(2,82,205,1)';
+  setTimeout(()=>{
+    circle.style.transform='';
+    circle.style.background='';
+  },600);
+  // Nudge nearby pins
+  document.querySelectorAll('.mpin3').forEach(p=>{
+    p.style.transition='transform .5s cubic-bezier(.34,1.56,.64,1)';
+    const r=(Math.random()-.5)*18;
+    p.style.transform=`translate(-50%,-100%) translate(${r}px,${r*.5}px)`;
+    setTimeout(()=>p.style.transform='translate(-50%,-100%)',700);
+  });
+}
+
+// Auto-run draw zone animation when map slide becomes active
+const mapSlide=document.querySelector('[data-notes*="3D interactive"]')?.closest?.('.slide');
+if(mapSlide){
+  const slideObs=new MutationObserver(muts=>{
+    muts.forEach(m=>{
+      if(m.target.classList.contains('on')&&!drawActive){
+        setTimeout(()=>{if(!drawActive)toggleDraw();},900);
+      }
+    });
+  });
+  if(mapSlide)slideObs.observe(mapSlide,{attributes:true,attributeFilter:['class']});
 }
 
 go(0);
