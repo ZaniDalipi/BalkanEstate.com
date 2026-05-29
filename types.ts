@@ -585,6 +585,28 @@ export interface AiSearchQuery {
     maxSqft?: number;
     propertyType?: 'house' | 'apartment' | 'villa' | 'land' | 'commercial';
     sellerType?: 'agent' | 'private';
+    // Rich filters extracted by the AI (mapped client-side in handleApplyAiFilters)
+    listingType?: 'sale' | 'rent';
+    viewType?: 'sea' | 'mountain' | 'city' | 'park' | 'garden' | 'street';
+    condition?: 'new' | 'excellent' | 'good' | 'fair' | 'needs-renovation';
+    furnishing?: 'furnished' | 'semi-furnished' | 'unfurnished';
+    energyRating?: 'A+' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+    minFloorNumber?: number;
+    maxFloorNumber?: number;
+    minParking?: number;
+    minPricePerSqm?: number;
+    maxPricePerSqm?: number;
+    maxDaysListed?: number;
+    hasDiscount?: boolean;
+    hasElevator?: boolean;
+    hasPool?: boolean;
+    hasGarden?: boolean;
+    hasBalcony?: boolean;
+    hasAirConditioning?: boolean;
+    hasSecurity?: boolean;
+    petsAllowed?: boolean;
+    maxDistanceToSea?: number;
+    maxDistanceToCenter?: number;
     features?: string[];
 }
 

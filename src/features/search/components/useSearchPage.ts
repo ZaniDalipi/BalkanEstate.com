@@ -863,6 +863,32 @@ export function useSearchPage() {
         if (aiQuery.sellerType) {
             newFilters.sellerType = aiQuery.sellerType;
         }
+
+        // Rich filters — only applied when the AI extracted them. These are matched
+        // client-side by filterProperties(), so no backend changes are required.
+        // Note: listingType is intentionally NOT applied here — this is the "buy"
+        // (sale) search page; rentals are handled by the dedicated rental search.
+        if (aiQuery.viewType) newFilters.viewType = aiQuery.viewType;
+        if (aiQuery.condition) newFilters.condition = aiQuery.condition;
+        if (aiQuery.furnishing) newFilters.furnishing = aiQuery.furnishing;
+        if (aiQuery.energyRating) newFilters.energyRating = aiQuery.energyRating;
+        if (aiQuery.minFloorNumber != null) newFilters.minFloorNumber = aiQuery.minFloorNumber;
+        if (aiQuery.maxFloorNumber != null) newFilters.maxFloorNumber = aiQuery.maxFloorNumber;
+        if (aiQuery.minParking != null) newFilters.minParking = aiQuery.minParking;
+        if (aiQuery.minPricePerSqm != null) newFilters.minPricePerSqm = aiQuery.minPricePerSqm;
+        if (aiQuery.maxPricePerSqm != null) newFilters.maxPricePerSqm = aiQuery.maxPricePerSqm;
+        if (aiQuery.maxDaysListed != null) newFilters.maxDaysListed = aiQuery.maxDaysListed;
+        if (aiQuery.hasDiscount === true) newFilters.hasDiscount = true;
+        if (aiQuery.hasElevator === true) newFilters.hasElevator = true;
+        if (aiQuery.hasPool === true) newFilters.hasPool = true;
+        if (aiQuery.hasGarden === true) newFilters.hasGarden = true;
+        if (aiQuery.hasBalcony === true) newFilters.hasBalcony = true;
+        if (aiQuery.hasAirConditioning === true) newFilters.hasAirConditioning = true;
+        if (aiQuery.hasSecurity === true) newFilters.hasSecurity = true;
+        if (aiQuery.petsAllowed === true) newFilters.petsAllowed = true;
+        if (aiQuery.maxDistanceToSea != null) newFilters.maxDistanceToSea = aiQuery.maxDistanceToSea;
+        if (aiQuery.maxDistanceToCenter != null) newFilters.maxDistanceToCenter = aiQuery.maxDistanceToCenter;
+
         const updatedFilters = { ...initialFilters, ...newFilters };
 
         updateSearchPageState({ filters: updatedFilters, activeFilters: updatedFilters, searchMode: 'manual', isAiChatModalOpen: false });

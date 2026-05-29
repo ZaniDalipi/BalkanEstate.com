@@ -478,9 +478,23 @@ export const getAiChatResponse = async (
             - ALWAYS keep the conversation going. Never end with a dead-end response.
         8.  **Respond in JSON.**
 
+        9.  **CRITICAL - Extract RICH filters when mentioned (this is what makes us better than other sites):**
+            - **Rent vs buy:** "for rent / to let / me qira / za iznajmljivanje" → listingType "rent". "for sale / to buy / në shitje / na prodaju" → listingType "sale".
+            - **View:** "sea view / pamje nga deti / pogled na more" → viewType "sea". Also mountain/city/park/garden/street.
+            - **Sea/center proximity:** "near the beach / close to the sea / blizu mora" → maxDistanceToSea (km, ~1). "near the center / u centru" → maxDistanceToCenter (km, ~2).
+            - **Condition:** "new build / novogradnja / i ri" → condition "new". "needs renovation / fixer-upper" → "needs-renovation".
+            - **Floor:** "top / high floor" → minFloorNumber. "ground floor / prizemlje" → minFloorNumber 0 and maxFloorNumber 0.
+            - **Amenities:** elevator/lift/ashensor → hasElevator. pool/bazen → hasPool. balcony/balkon → hasBalcony. AC/klima → hasAirConditioning. garden/kopsht → hasGarden. parking/garage → minParking 1. pets → petsAllowed.
+            - **Furnishing:** "furnished / i mobiluar / namešten" → furnishing "furnished". "unfurnished" → "unfurnished".
+            - **Price per m²:** "under 1500 per sqm / do 1500 po kvadratu" → maxPricePerSqm 1500.
+            - **Recency:** "new listings / just posted" → maxDaysListed 7. "today" → 1. "this month" → 30.
+            - **Deals:** "discounted / price reduced / price drop" → hasDiscount true.
+            - **Energy:** "energy class B / klasa A" → energyRating.
+            - Only set a field when the user actually mentions it. Never invent constraints.
+
         **JSON Output:**
         - \`responseMessage\`: Your friendly message in the user's language. Always end with an invitation to continue.
-        - \`searchQuery\`: Object with: location, country, minPrice, maxPrice, beds, baths, livingRooms, minSqft, maxSqft, propertyType, sellerType, features. Set to null if no useful info yet.
+        - \`searchQuery\`: Object with any of: location, country, minPrice, maxPrice, beds, baths, livingRooms, minSqft, maxSqft, propertyType, sellerType, listingType, viewType, condition, furnishing, energyRating, minFloorNumber, maxFloorNumber, minParking, minPricePerSqm, maxPricePerSqm, maxDaysListed, hasDiscount, hasElevator, hasPool, hasGarden, hasBalcony, hasAirConditioning, hasSecurity, petsAllowed, maxDistanceToSea, maxDistanceToCenter, features. Only include keys the user actually mentioned. Set to null if no useful info yet.
         - \`isFinalQuery\`: true = search ready (have at least location or country), false = still need basic info.
 
         **Example Interactions:**
@@ -533,6 +547,27 @@ export const getAiChatResponse = async (
           "searchQuery": { "location": "Durrës", "country": "Albania" },
           "isFinalQuery": true
         }
+
+        User: "sea view apartment in Budva under 150k with an elevator and parking, top floor"
+        {
+          "responseMessage": "Great taste! Here are top-floor, sea-view apartments in Budva under €150,000 with an elevator and parking. Want me to tighten the budget or add a balcony?",
+          "searchQuery": { "location": "Budva", "country": "Montenegro", "propertyType": "apartment", "maxPrice": 150000, "viewType": "sea", "hasElevator": true, "minParking": 1, "minFloorNumber": 4 },
+          "isFinalQuery": true
+        }
+
+        User: "newly built 2 bedroom flat to rent in Belgrade, furnished, near the center"
+        {
+          "responseMessage": "Here are newly built, furnished 2-bedroom rentals near the centre of Belgrade. Want me to add a budget or a balcony?",
+          "searchQuery": { "location": "Belgrade", "country": "Serbia", "propertyType": "apartment", "listingType": "rent", "beds": 2, "condition": "new", "furnishing": "furnished", "maxDistanceToCenter": 2 },
+          "isFinalQuery": true
+        }
+
+        User: "discounted houses with a pool and garden in Split, listed this week"
+        {
+          "responseMessage": "Here are recently listed, price-reduced houses in Split with a pool and garden. Want me to set a maximum price?",
+          "searchQuery": { "location": "Split", "country": "Croatia", "propertyType": "house", "hasPool": true, "hasGarden": true, "hasDiscount": true, "maxDaysListed": 7 },
+          "isFinalQuery": true
+        }
         ---
         **Available Properties Context (sample of ${simplifiedProperties.length}):**
         ${JSON.stringify(simplifiedProperties.slice(0, 15), null, 2)}
@@ -570,6 +605,52 @@ export const getAiChatResponse = async (
             enum: ['agent', 'private'],
             description: 'ONLY set if user explicitly says "private seller", "from owner", "agent", etc. Must be null if not mentioned.'
           },
+          listingType: {
+            type: Type.STRING,
+            nullable: true,
+            enum: ['sale', 'rent'],
+            description: 'Set "rent" if user wants to rent/lease (for rent, to let, me qira, za iznajmljivanje, под кирија). Set "sale" if buying (for sale, to buy, na prodaju, në shitje). Null if not mentioned.'
+          },
+          viewType: {
+            type: Type.STRING,
+            nullable: true,
+            enum: ['sea', 'mountain', 'city', 'park', 'garden', 'street'],
+            description: 'The view the user wants. "sea view / pamje nga deti / pogled na more" → sea. Null if not mentioned.'
+          },
+          condition: {
+            type: Type.STRING,
+            nullable: true,
+            enum: ['new', 'excellent', 'good', 'fair', 'needs-renovation'],
+            description: '"new build / newly built / novogradnja / i ri" → new. "needs renovation / fixer-upper / za renoviranje" → needs-renovation. Null if not mentioned.'
+          },
+          furnishing: {
+            type: Type.STRING,
+            nullable: true,
+            enum: ['furnished', 'semi-furnished', 'unfurnished'],
+            description: '"furnished / namešten / i mobiluar" → furnished. "unfurnished / prazan" → unfurnished. Null if not mentioned.'
+          },
+          energyRating: {
+            type: Type.STRING,
+            nullable: true,
+            enum: ['A+', 'A', 'B', 'C', 'D', 'E', 'F', 'G'],
+            description: 'Energy efficiency class if the user mentions one (e.g. "energy class B", "klasa A"). Null otherwise.'
+          },
+          minFloorNumber: { type: Type.INTEGER, nullable: true, description: 'Minimum floor. "high floor / at least 3rd floor" → set this. "ground floor / prizemlje" → set minFloorNumber AND maxFloorNumber to 0.' },
+          maxFloorNumber: { type: Type.INTEGER, nullable: true, description: 'Maximum floor. "low floor / ground floor" → small number. Null if not mentioned.' },
+          minParking: { type: Type.INTEGER, nullable: true, description: 'Minimum number of parking spots if the user wants parking/garage (e.g. "with parking" → 1).' },
+          minPricePerSqm: { type: Type.NUMBER, nullable: true, description: 'Minimum price per square meter, if mentioned.' },
+          maxPricePerSqm: { type: Type.NUMBER, nullable: true, description: 'Maximum price per square meter. "under 1500 per sqm / do 1500 po kvadratu" → 1500.' },
+          maxDaysListed: { type: Type.NUMBER, nullable: true, description: 'Recency in days. "new listings / just listed / posted this week" → 7. "today / last 24h" → 1. "this month" → 30. Null if not mentioned.' },
+          hasDiscount: { type: Type.BOOLEAN, nullable: true, description: 'True if user wants price-reduced / discounted / "price drop" properties. Null otherwise.' },
+          hasElevator: { type: Type.BOOLEAN, nullable: true, description: 'True if user wants an elevator/lift (lift, ashensor). Null otherwise.' },
+          hasPool: { type: Type.BOOLEAN, nullable: true, description: 'True if user wants a pool (bazen, pishinë). Null otherwise.' },
+          hasGarden: { type: Type.BOOLEAN, nullable: true, description: 'True if user wants a garden (vrt, kopsht, bašta). Null otherwise.' },
+          hasBalcony: { type: Type.BOOLEAN, nullable: true, description: 'True if user wants a balcony/terrace (balkon). Null otherwise.' },
+          hasAirConditioning: { type: Type.BOOLEAN, nullable: true, description: 'True if user wants air conditioning (AC, klima). Null otherwise.' },
+          hasSecurity: { type: Type.BOOLEAN, nullable: true, description: 'True if user wants security (guard, alarm, obezbeđenje). Null otherwise.' },
+          petsAllowed: { type: Type.BOOLEAN, nullable: true, description: 'True if user needs pets allowed (pet friendly, dozvoljeni ljubimci). Null otherwise.' },
+          maxDistanceToSea: { type: Type.NUMBER, nullable: true, description: 'Max distance to the sea in km. "near the beach / close to the sea / blizu mora" → 1. "walking distance to sea" → 0.5. Null if not mentioned.' },
+          maxDistanceToCenter: { type: Type.NUMBER, nullable: true, description: 'Max distance to the city center in km. "near the center / close to downtown / u centru" → 2. Null if not mentioned.' },
           features: { type: Type.ARRAY, items: { type: Type.STRING } },
         },
       },
