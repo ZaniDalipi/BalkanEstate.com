@@ -35,6 +35,7 @@ import Footer from './shared/Footer';
 import { SEO } from '../src/components/seo';
 import AgenciesHeroBanner from './shared/AgenciesHeroBanner';
 import { FloatingSphere, GlossyPill, AbstractBlob, RealEstateOrb, Decorative3DStyles } from './shared/Decorative3D';
+import MagneticTiltCard from '../src/features/business-directory/components/MagneticTiltCard';
 import { API_URL } from '../src/shared/api/config';
 import { tokenService } from '../src/shared/api/tokenService';
 
@@ -221,150 +222,148 @@ const AgenciesListPage: React.FC = () => {
   const renderAgencyCard = (agency: Agency, index: number, isCompact: boolean = false) => {
     const rankStyle = getRankStyle(index);
     const logoSize = isCompact ? 56 : 80;
+    const score = calcAgencyScore(agency);
 
     return (
-      <div
-        key={agency._id}
-        onClick={() => handleViewAgency(agency)}
-        className="group relative bg-white rounded-2xl sm:rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer overflow-hidden border border-gray-100/80 hover:border-primary/30"
-      >
-        {/* Top banner - use agency cover image, agency gradient, or rank-based fallback */}
+      <MagneticTiltCard key={agency._id} tiltMax={6} glareOpacity={0.12} className="group">
         <div
-          className="h-24 sm:h-28 relative overflow-hidden"
-          style={!agency.coverImage ? { backgroundImage: resolveGradientCss((agency as any).coverGradient) || rankStyle.css } : undefined}
+          onClick={() => handleViewAgency(agency)}
+          className="relative bg-white rounded-2xl sm:rounded-3xl shadow-lg hover:shadow-2xl transition-shadow duration-500 cursor-pointer overflow-hidden border border-gray-100/80 hover:border-primary/30"
         >
-          {/* Agency cover image */}
-          {agency.coverImage && (
-            <img
-              src={agency.coverImage}
-              alt={`${agency.name} banner`}
-              className="absolute inset-0 w-full h-full object-cover"
-              loading="lazy"
-              draggable={false}
-            />
-          )}
+          {/* Shine sweep on hover */}
+          <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden rounded-2xl sm:rounded-3xl">
+            <div className="absolute inset-y-0 -left-full w-1/2 bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-[500%] transition-transform duration-700 ease-in-out" />
+          </div>
 
-          {/* Overlay for better text visibility on images */}
-          {agency.coverImage && (
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
-          )}
-
-          {/* Decorative pattern - only show on gradient backgrounds */}
-          {!agency.coverImage && (
-            <div className="absolute inset-0 opacity-10">
-              <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                <pattern id={`grid-${agency._id}`} width="10" height="10" patternUnits="userSpaceOnUse">
-                  <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" strokeWidth="0.5"/>
-                </pattern>
-                <rect width="100%" height="100%" fill={`url(#grid-${agency._id})`}/>
-              </svg>
-            </div>
-          )}
-
-          {/* Rank badge */}
-          {index < 10 && (
-            <div className={`absolute top-3 right-3 px-2.5 py-1 bg-white/20 backdrop-blur-sm rounded-lg text-white text-xs font-bold flex items-center gap-1 border border-white/30`}>
-              {rankStyle.emoji && <span>{rankStyle.emoji}</span>}
-              <span>#{index + 1}</span>
-            </div>
-          )}
-
-          {/* Featured badge */}
-          {agency.isFeatured && (
-            <div className="absolute top-3 left-3 px-2.5 py-1 bg-gradient-to-r from-amber-400 to-orange-500 rounded-lg text-white text-xs font-bold flex items-center gap-1 shadow-lg">
-              <SparklesIcon className="w-3 h-3" />
-              <span>{t('agencies.featured')}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Logo - overlapping banner */}
-        <div className="relative px-4 sm:px-5 -mt-10 sm:-mt-12 mb-3">
+          {/* Top banner */}
           <div
-            className="relative rounded-xl sm:rounded-2xl bg-white overflow-hidden border-4 border-white shadow-xl group-hover:shadow-2xl transition-all duration-300 mx-auto sm:mx-0"
-            style={{
-              width: `${logoSize}px`,
-              height: `${logoSize}px`,
-              minWidth: `${logoSize}px`,
-              minHeight: `${logoSize}px`,
-            }}
+            className="h-24 sm:h-28 relative overflow-hidden"
+            style={!agency.coverImage ? { backgroundImage: resolveGradientCss((agency as any).coverGradient) || rankStyle.css } : undefined}
           >
-            {agency.logo ? (
+            {agency.coverImage && (
               <img
-                src={agency.logo}
-                alt={agency.name}
-                className="absolute inset-0 w-full h-full object-cover"
+                src={agency.coverImage}
+                alt={`${agency.name} banner`}
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 loading="lazy"
                 draggable={false}
               />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-                <BuildingOfficeIcon className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+            )}
+            {agency.coverImage && (
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+            )}
+            {!agency.coverImage && (
+              <div className="absolute inset-0 opacity-10">
+                <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <pattern id={`grid-${agency._id}`} width="10" height="10" patternUnits="userSpaceOnUse">
+                    <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" strokeWidth="0.5"/>
+                  </pattern>
+                  <rect width="100%" height="100%" fill={`url(#grid-${agency._id})`}/>
+                </svg>
               </div>
             )}
-          </div>
-        </div>
 
-        {/* Content */}
-        <div className="px-4 sm:px-5 pb-4 sm:pb-5">
-          {/* Name and Location */}
-          <div className="mb-4">
-            <h3 className={`${isCompact ? 'text-base' : 'text-lg sm:text-xl'} font-bold text-gray-900 group-hover:text-primary transition-colors mb-1 line-clamp-1`}>
-              {agency.name}
-            </h3>
-            <div className="flex items-center gap-1.5 text-gray-500">
-              <MapPinIcon className="w-3.5 h-3.5 text-primary/60 flex-shrink-0" />
-              <span className="text-sm truncate">{agency.city}, {agency.country}</span>
+            {/* Score badge — top left */}
+            <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 bg-black/40 backdrop-blur-sm rounded-lg border border-white/20">
+              <TrophyIcon className="w-3 h-3 text-amber-400" />
+              <span className="text-white text-xs font-bold">{score} pts</span>
             </div>
-          </div>
 
-          {/* Stats Row - Horizontal compact */}
-          <div className="flex items-center justify-between bg-gray-50 rounded-xl p-3 mb-4">
-            <div className="text-center flex-1">
-              <div className="text-lg sm:text-xl font-bold text-primary">{agency.totalProperties || 0}</div>
-              <div className="text-[10px] text-gray-500 font-medium uppercase">{t('agencies.properties')}</div>
-            </div>
-            <div className="w-px h-8 bg-gray-200" />
-            <div className="text-center flex-1">
-              <div className="text-lg sm:text-xl font-bold text-emerald-600">{agency.totalAgents || 0}</div>
-              <div className="text-[10px] text-gray-500 font-medium uppercase">{t('agencies.agents')}</div>
-            </div>
-            <div className="w-px h-8 bg-gray-200" />
-            <div className="text-center flex-1">
-              <div className="text-lg sm:text-xl font-bold text-violet-600">{agency.yearsInBusiness || 0}+</div>
-              <div className="text-[10px] text-gray-500 font-medium uppercase">{t('agencies.years')}</div>
-            </div>
-          </div>
-
-          {/* Action Row */}
-          <div className="flex items-center gap-2">
-            {agency.phone && (
-              <a
-                href={`tel:${agency.phone}`}
-                onClick={(e) => e.stopPropagation()}
-                className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-100 text-gray-600 hover:bg-primary hover:text-white transition-all"
-                aria-label={t('agencies.call')}
-              >
-                <PhoneIcon className="w-4 h-4" />
-              </a>
+            {/* Rank badge — top right */}
+            {index < 10 && (
+              <div className="absolute top-3 right-3 px-2.5 py-1 bg-white/20 backdrop-blur-sm rounded-lg text-white text-xs font-bold flex items-center gap-1 border border-white/30">
+                {rankStyle.emoji && <span>{rankStyle.emoji}</span>}
+                <span>#{index + 1}</span>
+              </div>
             )}
-            {agency.email && (
-              <a
-                href={`mailto:${agency.email}`}
-                onClick={(e) => e.stopPropagation()}
-                className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-100 text-gray-600 hover:bg-primary hover:text-white transition-all"
-                aria-label={t('agencies.email')}
-              >
-                <EnvelopeIcon className="w-4 h-4" />
-              </a>
+
+            {/* Featured badge replaces score if featured */}
+            {agency.isFeatured && (
+              <div className="absolute top-3 left-3 px-2.5 py-1 bg-gradient-to-r from-amber-400 to-orange-500 rounded-lg text-white text-xs font-bold flex items-center gap-1 shadow-lg">
+                <SparklesIcon className="w-3 h-3" />
+                <span>{t('agencies.featured')}</span>
+              </div>
             )}
-            <button className="flex-1 py-2.5 bg-gradient-to-r from-primary to-blue-600 hover:from-primary-dark hover:to-blue-700 text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.98]">
+
+            {/* Hover quick-contact overlay */}
+            <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 p-2 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+              {agency.phone && (
+                <a
+                  href={`tel:${agency.phone}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-primary hover:text-white transition-all shadow-md hover:scale-110"
+                  aria-label={t('agencies.call')}
+                >
+                  <PhoneIcon className="w-3.5 h-3.5" />
+                </a>
+              )}
+              {agency.email && (
+                <a
+                  href={`mailto:${agency.email}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-primary hover:text-white transition-all shadow-md hover:scale-110"
+                  aria-label={t('agencies.email')}
+                >
+                  <EnvelopeIcon className="w-3.5 h-3.5" />
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* Logo — overlapping banner */}
+          <div className="relative px-4 sm:px-5 -mt-10 sm:-mt-12 mb-3">
+            <div
+              className="relative rounded-xl sm:rounded-2xl bg-white overflow-hidden border-4 border-white shadow-xl group-hover:shadow-2xl group-hover:scale-105 transition-all duration-300 mx-auto sm:mx-0"
+              style={{ width: `${logoSize}px`, height: `${logoSize}px`, minWidth: `${logoSize}px`, minHeight: `${logoSize}px` }}
+            >
+              {agency.logo ? (
+                <img src={agency.logo} alt={agency.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" draggable={false} />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                  <BuildingOfficeIcon className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="px-4 sm:px-5 pb-4 sm:pb-5">
+            <div className="mb-4">
+              <h3 className={`${isCompact ? 'text-base' : 'text-lg sm:text-xl'} font-bold text-gray-900 group-hover:text-primary transition-colors mb-1 line-clamp-1`}>
+                {agency.name}
+              </h3>
+              <div className="flex items-center gap-1.5 text-gray-500">
+                <MapPinIcon className="w-3.5 h-3.5 text-primary/60 flex-shrink-0" />
+                <span className="text-sm truncate">{agency.city}, {agency.country}</span>
+              </div>
+            </div>
+
+            {/* Stats row */}
+            <div className="flex items-center justify-between bg-gray-50 group-hover:bg-primary/5 rounded-xl p-3 mb-4 transition-colors duration-300">
+              <div className="text-center flex-1">
+                <div className="text-lg sm:text-xl font-bold text-primary">{agency.totalProperties || 0}</div>
+                <div className="text-[10px] text-gray-500 font-medium uppercase">{t('agencies.properties')}</div>
+              </div>
+              <div className="w-px h-8 bg-gray-200" />
+              <div className="text-center flex-1">
+                <div className="text-lg sm:text-xl font-bold text-emerald-600">{agency.totalAgents || 0}</div>
+                <div className="text-[10px] text-gray-500 font-medium uppercase">{t('agencies.agents')}</div>
+              </div>
+              <div className="w-px h-8 bg-gray-200" />
+              <div className="text-center flex-1">
+                <div className="text-lg sm:text-xl font-bold text-violet-600">{agency.yearsInBusiness || 0}+</div>
+                <div className="text-[10px] text-gray-500 font-medium uppercase">{t('agencies.years')}</div>
+              </div>
+            </div>
+
+            {/* View button */}
+            <button className="w-full py-2.5 bg-gradient-to-r from-primary to-blue-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.98] group-hover:shadow-primary/30">
               {t('agencies.view')}
-              <ChevronRightIcon className="w-4 h-4" />
+              <ChevronRightIcon className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>
         </div>
-      </div>
+      </MagneticTiltCard>
     );
   };
 
