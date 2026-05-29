@@ -920,19 +920,32 @@ const CityDashboard: React.FC = () => {
                 Explore Neighborhoods
               </h3>
               {suburbData && (
-                <span className={`text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full w-fit ${
-                  suburbData.dataSource === 'research'
-                    ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                    : suburbData.dataSource === 'gemini'
-                      ? 'bg-violet-50 text-violet-600 border border-violet-200'
-                      : 'bg-amber-50 text-amber-600 border border-amber-200'
-                }`}>
-                  {suburbData.dataSource === 'research'
-                    ? '◈ Market Research Data'
-                    : suburbData.dataSource === 'gemini'
-                      ? '✦ BalkanEstate AI Analysis'
-                      : 'Estimated data · updating…'}
-                </span>
+                <div className="flex flex-col gap-1 items-start">
+                  <span className={`text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full w-fit ${
+                    suburbData.dataSource === 'research'
+                      ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                      : suburbData.dataSource === 'gemini'
+                        ? 'bg-violet-50 text-violet-600 border border-violet-200'
+                        : 'bg-amber-50 text-amber-600 border border-amber-200'
+                  }`}>
+                    {suburbData.dataSource === 'research'
+                      ? '◈ Market Research Data'
+                      : suburbData.dataSource === 'gemini'
+                        ? '✦ BalkanEstate AI Analysis'
+                        : 'Estimated data · updating…'}
+                  </span>
+                  {suburbData.officialSourceName && suburbData.officialSourceUrl && (
+                    <a
+                      href={suburbData.officialSourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] text-blue-500 hover:text-blue-700 hover:underline transition-colors"
+                      title="View official data source"
+                    >
+                      Data anchored to {suburbData.officialSourceName} ↗
+                    </a>
+                  )}
+                </div>
               )}
             </div>
             {/* Tab switcher */}

@@ -1,6 +1,7 @@
 import SuburbData, { ISuburbData, ISuburbEntry, ISuburbStats } from '../models/SuburbData';
 import { SUBURB_CENTERS, CITY_COUNTRY_MAP } from '../data/suburbCenters';
 import { apiLogger } from '../utils/logger';
+import { fetchLiveCityPrice, getOfficialSourceInfo } from './officialPriceDataService';
 
 /** Cache lifetime: 30 days — research data doesn't change often */
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
@@ -287,14 +288,45 @@ function buildSuburbEntries(
   return entries;
 }
 
-/**
- * Get the research-validated city average price.
- * Priority: CITY_RESEARCH_PRICES (static, verified) → country fallback.
- * The DB CityMarketData value is intentionally ignored to avoid compounding
- * errors from stale Gemini-generated city averages.
- */
 function getResearchPrice(city: string, country: string): number {
   return CITY_RESEARCH_PRICES[city] ?? COUNTRY_FALLBACK_PRICES[country] ?? 1000;
+}
+
+interface CityPriceResult {
+  pricePerSqm: number;
+  officialSourceName: string;
+  officialSourceUrl: string;
+}
+
+/**
+ * Derive city average price.
+ * Priority: BIS live API (3s timeout) → CITY_RESEARCH_PRICES static fallback.
+ * Attaches the official source name and URL for UI attribution.
+ */
+async function getOfficialCityPrice(city: string, country: string): Promise<CityPriceResult> {
+  const fallbackPrice = getResearchPrice(city, country);
+  const sourceInfo = getOfficialSourceInfo(country);
+
+  try {
+    const live = await fetchLiveCityPrice(city, country);
+    if (live && live.pricePerSqm > 0) {
+      return {
+        pricePerSqm: live.pricePerSqm,
+        officialSourceName: live.sourceName,
+        officialSourceUrl: live.sourceUrl,
+      };
+    }
+  } catch {
+    // fall through to static prices
+  }
+
+  return {
+    pricePerSqm: fallbackPrice,
+    officialSourceName: sourceInfo.name,
+    officialSourceUrl: sourceInfo.bisSeriesId
+      ? `https://fred.stlouisfed.org/series/${sourceInfo.bisSeriesId}`
+      : sourceInfo.url,
+  };
 }
 
 /**
@@ -308,11 +340,11 @@ function isCachePriceValid(cityAvgPricePerSqm: number, country: string): boolean
 }
 
 /**
- * Build a valid ISuburbData object purely from static research data.
- * Instant response, always succeeds, no external dependencies.
+ * Build suburb data using BIS live price when available, static research as fallback.
  */
-function buildResearchData(city: string, country: string): ISuburbData {
-  const cityAvgPricePerSqm = getResearchPrice(city, country);
+async function buildResearchData(city: string, country: string): Promise<ISuburbData> {
+  const { pricePerSqm: cityAvgPricePerSqm, officialSourceName, officialSourceUrl } =
+    await getOfficialCityPrice(city, country);
   const countryCode = CITY_COUNTRY_MAP[city] ?? 'XX';
 
   const centers = SUBURB_CENTERS[city];
@@ -334,18 +366,21 @@ function buildResearchData(city: string, country: string): ISuburbData {
     cityAvgPricePerSqm,
     lastUpdated: new Date(),
     dataSource: 'research',
+    officialSourceName,
+    officialSourceUrl,
   } as unknown as ISuburbData;
 }
 
 /**
- * Persist research-based suburb data to MongoDB in the background.
+ * Persist research/BIS-derived suburb data to MongoDB in the background.
  */
 async function persistInBackground(city: string, country: string): Promise<void> {
   try {
     const centers = SUBURB_CENTERS[city];
     if (!centers || centers.length === 0) return;
 
-    const cityAvgPricePerSqm = getResearchPrice(city, country);
+    const { pricePerSqm: cityAvgPricePerSqm, officialSourceName, officialSourceUrl } =
+      await getOfficialCityPrice(city, country);
     const countryCode = CITY_COUNTRY_MAP[city] ?? 'XX';
     const researchData = centers.map((c, i) =>
       buildResearchStats(c.name, i, centers.length, cityAvgPricePerSqm)
@@ -354,7 +389,11 @@ async function persistInBackground(city: string, country: string): Promise<void>
 
     await SuburbData.findOneAndUpdate(
       { city, country },
-      { city, country, countryCode, suburbs, cityAvgPricePerSqm, lastUpdated: new Date(), dataSource: 'research' },
+      {
+        city, country, countryCode, suburbs, cityAvgPricePerSqm,
+        lastUpdated: new Date(), dataSource: 'research',
+        officialSourceName, officialSourceUrl,
+      },
       { upsert: true, new: true }
     );
     apiLogger.info(`Background: research suburb data persisted for ${city}`);
@@ -387,7 +426,7 @@ export async function getSuburbData(city: string, country: string): Promise<ISub
       }
       // Stale or wrong prices — return fresh research data, refresh cache
       persistInBackground(city, country).catch(() => {});
-      return buildResearchData(city, country);
+      return await buildResearchData(city, country);
     }
   } catch (err) {
     apiLogger.warn(`getSuburbData: cache lookup failed for ${city}`, err);
@@ -395,7 +434,7 @@ export async function getSuburbData(city: string, country: string): Promise<ISub
 
   // No cache — return research data immediately, persist in background
   persistInBackground(city, country).catch(() => {});
-  return buildResearchData(city, country);
+  return await buildResearchData(city, country);
 }
 
 /**
@@ -408,7 +447,8 @@ export async function refreshSuburbData(city: string, country: string): Promise<
     throw new Error(`City not supported for suburb data: ${city}`);
   }
 
-  const cityAvgPricePerSqm = getResearchPrice(city, country);
+  const { pricePerSqm: cityAvgPricePerSqm, officialSourceName, officialSourceUrl } =
+    await getOfficialCityPrice(city, country);
   const countryCode = CITY_COUNTRY_MAP[city] ?? 'XX';
   const researchData = centers.map((c, i) =>
     buildResearchStats(c.name, i, centers.length, cityAvgPricePerSqm)
@@ -418,7 +458,11 @@ export async function refreshSuburbData(city: string, country: string): Promise<
   try {
     const doc = await SuburbData.findOneAndUpdate(
       { city, country },
-      { city, country, countryCode, suburbs, cityAvgPricePerSqm, lastUpdated: new Date(), dataSource: 'research' },
+      {
+        city, country, countryCode, suburbs, cityAvgPricePerSqm,
+        lastUpdated: new Date(), dataSource: 'research',
+        officialSourceName, officialSourceUrl,
+      },
       { upsert: true, new: true }
     );
     apiLogger.info(`refreshSuburbData: research data persisted for ${city}`);
@@ -428,6 +472,7 @@ export async function refreshSuburbData(city: string, country: string): Promise<
     return {
       city, country, countryCode, suburbs, cityAvgPricePerSqm,
       lastUpdated: new Date(), dataSource: 'research',
+      officialSourceName, officialSourceUrl,
     } as unknown as ISuburbData;
   }
 }
