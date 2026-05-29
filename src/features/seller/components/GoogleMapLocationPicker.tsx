@@ -2,8 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GoogleMap } from '@react-google-maps/api';
 import { useGoogleMapLoader } from '@/src/features/map/hooks/useGoogleMapLoader';
-import { searchLocation, reverseGeocode } from '@/services/osmService';
-import { NominatimResult } from '@/types';
 import { useAppContext } from '@/context/AppContext';
 
 interface GoogleMapLocationPickerProps {
@@ -23,17 +21,17 @@ interface GoogleMapLocationPickerProps {
 const MAP_CONTAINER_STYLE = { width: '100%', height: '100%' };
 
 const COUNTRY_CODE_MAP: Record<string, string> = {
-  Serbia: 'RS',
-  Kosovo: 'XK',
-  Albania: 'AL',
-  'North Macedonia': 'MK',
-  'Bosnia and Herzegovina': 'BA',
-  Montenegro: 'ME',
-  Croatia: 'HR',
-  Slovenia: 'SI',
-  Bulgaria: 'BG',
-  Romania: 'RO',
-  Greece: 'GR',
+  Serbia: 'rs',
+  Kosovo: 'xk',
+  Albania: 'al',
+  'North Macedonia': 'mk',
+  'Bosnia and Herzegovina': 'ba',
+  Montenegro: 'me',
+  Croatia: 'hr',
+  Slovenia: 'si',
+  Bulgaria: 'bg',
+  Romania: 'ro',
+  Greece: 'gr',
 };
 
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -64,79 +62,64 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
   const { dispatch } = useAppContext();
   const { isLoaded, loadError } = useGoogleMapLoader();
 
+  // Map + marker
   const mapRef = useRef<google.maps.Map | null>(null);
   const advancedMarkerRef = useRef<google.maps.marker.AdvancedMarkerElement | null>(null);
+  const geocoderRef = useRef<google.maps.Geocoder | null>(null);
+  const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [mapType, setMapType] = useState<'roadmap' | 'satellite'>('roadmap');
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [markerPos, setMarkerPos] = useState<{ lat: number; lng: number }>({ lat, lng });
+  const [markerPos, setMarkerPos] = useState({ lat, lng });
 
-  // Search state
+  // Search
   const [searchQuery, setSearchQuery] = useState(address);
-  const [searchResults, setSearchResults] = useState<NominatimResult[]>([]);
+  const [predictions, setPredictions] = useState<google.maps.places.AutocompletePrediction[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
-
-  // Track whether user is actively typing (don't override while typing)
   const isUserTypingRef = useRef(false);
 
-  // Keep refs for validation callbacks
+  // Stable refs so async callbacks always see fresh values
   const cityRef = useRef(city);
   const cityLatRef = useRef(cityLat);
   const cityLngRef = useRef(cityLng);
-  const markerPosRef = useRef(markerPos);
   const latRef = useRef(lat);
   const lngRef = useRef(lng);
 
   useEffect(() => { cityRef.current = city; }, [city]);
   useEffect(() => { cityLatRef.current = cityLat; }, [cityLat]);
   useEffect(() => { cityLngRef.current = cityLng; }, [cityLng]);
-  useEffect(() => { markerPosRef.current = markerPos; }, [markerPos]);
   useEffect(() => { latRef.current = lat; }, [lat]);
   useEffect(() => { lngRef.current = lng; }, [lng]);
 
-  // Sync marker when parent updates lat/lng externally
+  // Sync marker element when coords change from parent
   useEffect(() => {
     setMarkerPos({ lat, lng });
+    if (advancedMarkerRef.current) advancedMarkerRef.current.position = { lat, lng };
   }, [lat, lng]);
 
-  // Keep search box in sync with the address shown on the map
-  // (updated after drag → reverse geocode, or after selecting a result)
+  // Keep search box text in sync with map address (but not while user is typing)
   useEffect(() => {
-    if (!isUserTypingRef.current && address) {
-      setSearchQuery(address);
-    }
+    if (!isUserTypingRef.current && address) setSearchQuery(address);
   }, [address]);
 
-  // Auto-detect location on mount
-  useEffect(() => {
-    if (!autoDetectLocation || !navigator.geolocation) return;
-    const timer = setTimeout(() => {
-      setIsGettingLocation(true);
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          const { latitude, longitude } = pos.coords;
-          onLocationChange(latitude, longitude);
-          if (onAddressChange) {
-            try {
-              const result = await reverseGeocode(latitude, longitude);
-              if (result) {
-                onAddressChange(result.display_name);
-                setSearchQuery(result.display_name);
-              }
-            } catch { /* silent */ }
-          }
-          setIsGettingLocation(false);
-        },
-        () => setIsGettingLocation(false),
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 },
-      );
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [autoDetectLocation]); // eslint-disable-line react-hooks/exhaustive-deps
+  // --- Google reverse-geocode helper ---
+  const reverseGeocodeGoogle = useCallback(async (newLat: number, newLng: number): Promise<string | null> => {
+    if (!geocoderRef.current) return null;
+    return new Promise((resolve) => {
+      geocoderRef.current!.geocode({ location: { lat: newLat, lng: newLng } }, (results, status) => {
+        if (status === 'OK' && results?.[0]) {
+          resolve(results[0].formatted_address);
+        } else {
+          resolve(null);
+        }
+      });
+    });
+  }, []);
 
+  // --- Move marker + notify parent ---
   const validateAndMove = useCallback(
     async (newLat: number, newLng: number): Promise<boolean> => {
       const currentCity = cityRef.current;
@@ -162,26 +145,67 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
       }
 
       setMarkerPos({ lat: newLat, lng: newLng });
-      if (advancedMarkerRef.current) {
-        advancedMarkerRef.current.position = { lat: newLat, lng: newLng };
-      }
+      if (advancedMarkerRef.current) advancedMarkerRef.current.position = { lat: newLat, lng: newLng };
       onLocationChange(newLat, newLng);
 
       if (onAddressChange) {
-        try {
-          const result = await reverseGeocode(newLat, newLng);
-          if (result) {
-            onAddressChange(result.display_name);
-            setSearchQuery(result.display_name);
-          }
-        } catch { /* silent */ }
+        const formattedAddress = await reverseGeocodeGoogle(newLat, newLng);
+        if (formattedAddress) {
+          onAddressChange(formattedAddress);
+          setSearchQuery(formattedAddress);
+        }
       }
       return true;
     },
-    [dispatch, onLocationChange, onAddressChange, t],
+    [dispatch, onLocationChange, onAddressChange, t, reverseGeocodeGoogle],
   );
 
-  // Search input handler with debounce
+  // --- Auto-detect on mount ---
+  useEffect(() => {
+    if (!autoDetectLocation || !navigator.geolocation) return;
+    const timer = setTimeout(() => {
+      setIsGettingLocation(true);
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const { latitude, longitude } = pos.coords;
+          await validateAndMove(latitude, longitude);
+          mapRef.current?.panTo({ lat: latitude, lng: longitude });
+          mapRef.current?.setZoom(16);
+          setIsGettingLocation(false);
+        },
+        () => setIsGettingLocation(false),
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 },
+      );
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [autoDetectLocation]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // --- Map load: create marker + services ---
+  const onMapLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
+    geocoderRef.current = new google.maps.Geocoder();
+    autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
+
+    const marker = new google.maps.marker.AdvancedMarkerElement({
+      map,
+      position: { lat: latRef.current, lng: lngRef.current },
+      gmpDraggable: true,
+      title: 'Drag to adjust location',
+    });
+
+    marker.addListener('dragend', async () => {
+      const pos = marker.position as google.maps.LatLngLiteral | null;
+      if (!pos) return;
+      // position may be a LatLng object or a plain literal
+      const newLat = typeof (pos as any).lat === 'function' ? (pos as any).lat() : (pos as any).lat;
+      const newLng = typeof (pos as any).lng === 'function' ? (pos as any).lng() : (pos as any).lng;
+      await validateAndMove(newLat, newLng);
+    });
+
+    advancedMarkerRef.current = marker;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // --- Search input ---
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
@@ -190,74 +214,72 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
 
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
 
-    if (query.trim().length < 3) {
-      setSearchResults([]);
+    if (query.trim().length < 2) {
+      setPredictions([]);
       return;
     }
 
-    searchTimeoutRef.current = setTimeout(async () => {
+    searchTimeoutRef.current = setTimeout(() => {
+      if (!autocompleteServiceRef.current) return;
       setIsSearching(true);
-      try {
-        const countryCode = country ? COUNTRY_CODE_MAP[country] : undefined;
-        let results = await searchLocation(query, countryCode);
 
-        // Filter to within 30 km of city if one is selected
-        const cLat = cityLatRef.current;
-        const cLng = cityLngRef.current;
-        if (cityRef.current && cLat && cLng) {
-          results = results.filter((r) => {
-            const dist = calculateDistance(cLat, cLng, parseFloat(r.lat), parseFloat(r.lon));
-            return dist <= 30;
-          });
-        }
+      const request: google.maps.places.AutocompletionRequest = {
+        input: query,
+        ...(country && COUNTRY_CODE_MAP[country]
+          ? { componentRestrictions: { country: COUNTRY_CODE_MAP[country] } }
+          : {}),
+      };
 
-        setSearchResults(results.slice(0, 8));
-      } catch {
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
+      // Bias predictions toward the current city if available
+      if (cityLatRef.current && cityLngRef.current && mapRef.current) {
+        request.locationBias = new google.maps.Circle({
+          center: { lat: cityLatRef.current, lng: cityLngRef.current },
+          radius: 30000, // 30 km
+        });
       }
-    }, 250);
+
+      autocompleteServiceRef.current.getPlacePredictions(request, (preds, status) => {
+        setIsSearching(false);
+        if (status === google.maps.places.PlacesServiceStatus.OK && preds) {
+          setPredictions(preds.slice(0, 6));
+        } else {
+          setPredictions([]);
+        }
+      });
+    }, 200);
   };
 
-  const handleResultSelect = (result: NominatimResult) => {
-    const newLat = parseFloat(result.lat);
-    const newLng = parseFloat(result.lon);
+  // --- Select a prediction ---
+  const handlePredictionSelect = (prediction: google.maps.places.AutocompletePrediction) => {
+    if (!geocoderRef.current) return;
 
-    const currentCity = cityRef.current;
-    const cLat = cityLatRef.current;
-    const cLng = cityLngRef.current;
-    if (currentCity && cLat && cLng) {
-      const dist = calculateDistance(cLat, cLng, newLat, newLng);
-      if (dist > 30) {
-        dispatch({
-          type: 'SHOW_ALERT',
-          payload: {
-            type: 'warning',
-            title: t('search:map.locationTooFarTitle', 'Location Too Far'),
-            message: t('search:map.locationTooFar', { distance: dist.toFixed(1), city: currentCity }),
-          },
-        });
-        return;
-      }
-    }
-
-    setMarkerPos({ lat: newLat, lng: newLng });
-    if (advancedMarkerRef.current) {
-      advancedMarkerRef.current.position = { lat: newLat, lng: newLng };
-    }
-    onLocationChange(newLat, newLng);
-    if (onAddressChange) onAddressChange(result.display_name);
-
-    setSearchQuery(result.display_name);
+    setSearchQuery(prediction.description);
     setShowResults(false);
-    setSearchResults([]);
+    setPredictions([]);
     isUserTypingRef.current = false;
 
-    mapRef.current?.panTo({ lat: newLat, lng: newLng });
-    mapRef.current?.setZoom(16);
+    geocoderRef.current.geocode({ placeId: prediction.place_id }, async (results, status) => {
+      if (status !== 'OK' || !results?.[0]?.geometry?.location) return;
+
+      const loc = results[0].geometry.location;
+      const newLat = loc.lat();
+      const newLng = loc.lng();
+
+      const ok = await validateAndMove(newLat, newLng);
+      if (ok) {
+        // Use the Google-formatted address directly (already have it from geocode)
+        const formattedAddress = results[0].formatted_address;
+        if (onAddressChange && formattedAddress) {
+          onAddressChange(formattedAddress);
+          setSearchQuery(formattedAddress);
+        }
+        mapRef.current?.panTo({ lat: newLat, lng: newLng });
+        mapRef.current?.setZoom(16);
+      }
+    });
   };
 
+  // --- Use My Location ---
   const handleGetCurrentLocation = useCallback(async () => {
     if (!navigator.geolocation) {
       setLocationError(t('search:map.geolocationNotSupported'));
@@ -279,56 +301,21 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
       (error) => {
         setIsGettingLocation(false);
         switch (error.code) {
-          case error.PERMISSION_DENIED:
-            setLocationError(t('search:map.locationPermissionDenied'));
-            break;
-          case error.POSITION_UNAVAILABLE:
-            setLocationError(t('search:map.locationUnavailable'));
-            break;
-          case error.TIMEOUT:
-            setLocationError(t('search:map.locationTimeout'));
-            break;
-          default:
-            setLocationError(t('search:map.locationError'));
+          case error.PERMISSION_DENIED: setLocationError(t('search:map.locationPermissionDenied')); break;
+          case error.POSITION_UNAVAILABLE: setLocationError(t('search:map.locationUnavailable')); break;
+          case error.TIMEOUT: setLocationError(t('search:map.locationTimeout')); break;
+          default: setLocationError(t('search:map.locationError'));
         }
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
   }, [t, validateAndMove]);
 
+  // --- Street / Satellite ---
   const handleMapTypeToggle = useCallback((type: 'roadmap' | 'satellite') => {
     setMapType(type);
     mapRef.current?.setMapTypeId(type);
   }, []);
-
-  const onMapLoad = useCallback((map: google.maps.Map) => {
-    mapRef.current = map;
-
-    // AdvancedMarkerElement requires the marker library (already loaded via useGoogleMapLoader)
-    const marker = new google.maps.marker.AdvancedMarkerElement({
-      map,
-      position: { lat: latRef.current, lng: lngRef.current },
-      gmpDraggable: true,
-      title: 'Drag to adjust location',
-    });
-
-    marker.addListener('dragend', async () => {
-      const pos = marker.position as google.maps.LatLngLiteral | null;
-      if (!pos) return;
-      const newLat = typeof pos.lat === 'function' ? (pos as any).lat() : pos.lat;
-      const newLng = typeof pos.lng === 'function' ? (pos as any).lng() : pos.lng;
-      await validateAndMove(newLat, newLng);
-    });
-
-    advancedMarkerRef.current = marker;
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Keep AdvancedMarkerElement position in sync when markerPos state changes
-  useEffect(() => {
-    if (advancedMarkerRef.current) {
-      advancedMarkerRef.current.position = { lat, lng };
-    }
-  }, [lat, lng]);
 
   if (loadError) {
     return (
@@ -356,19 +343,19 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
         <p className="text-xs text-neutral-500">{t('search:map.searchNavigatePin')}</p>
       </div>
 
-      {/* Search box + geolocation button */}
+      {/* Search + geolocation */}
       <div className="flex gap-2">
         <div className="relative flex-1">
           <input
             type="text"
             value={searchQuery}
             onChange={handleSearchChange}
-            onFocus={() => searchResults.length > 0 && setShowResults(true)}
+            onFocus={() => predictions.length > 0 && setShowResults(true)}
             onBlur={() => setTimeout(() => setShowResults(false), 150)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault();
-                if (searchResults.length > 0) handleResultSelect(searchResults[0]);
+                if (predictions.length > 0) handlePredictionSelect(predictions[0]);
               }
               if (e.key === 'Escape') {
                 setShowResults(false);
@@ -386,29 +373,37 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
             </div>
           )}
 
-          {/* Search results dropdown */}
-          {showResults && searchResults.length > 0 && (
-            <div className="absolute z-50 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
-              {searchResults.map((result) => (
+          {/* Predictions dropdown */}
+          {showResults && predictions.length > 0 && (
+            <div className="absolute z-50 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-72 overflow-y-auto">
+              {predictions.map((pred) => (
                 <button
-                  key={result.place_id}
+                  key={pred.place_id}
                   type="button"
-                  onMouseDown={(e) => e.preventDefault()} // prevent blur before click
-                  onClick={() => handleResultSelect(result)}
-                  className="w-full text-left px-4 py-3 hover:bg-neutral-100 border-b border-neutral-100 last:border-b-0 transition-colors"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => handlePredictionSelect(pred)}
+                  className="w-full text-left px-4 py-3 hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 transition-colors"
                 >
-                  <div className="flex items-start gap-2">
-                    <svg className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-start gap-3">
+                    <svg className="w-4 h-4 text-neutral-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-neutral-900 truncate">{result.display_name}</p>
-                      <p className="text-xs text-neutral-500 mt-0.5">{result.type || t('search:map.location')}</p>
+                      <p className="text-sm font-medium text-neutral-900">
+                        {pred.structured_formatting.main_text}
+                      </p>
+                      <p className="text-xs text-neutral-500 truncate mt-0.5">
+                        {pred.structured_formatting.secondary_text}
+                      </p>
                     </div>
                   </div>
                 </button>
               ))}
+              {/* Google attribution required */}
+              <div className="px-4 py-2 flex justify-end">
+                <img src="https://maps.gstatic.com/mapfiles/api-3/images/powered-by-google-on-white3.png" alt="Powered by Google" className="h-4" />
+              </div>
             </div>
           )}
         </div>
@@ -455,8 +450,7 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
               maxZoom: 20,
               gestureHandling: 'greedy',
             }}
-          >
-          </GoogleMap>
+          />
         </div>
 
         {/* Street / Satellite toggle */}
@@ -464,22 +458,14 @@ const GoogleMapLocationPicker: React.FC<GoogleMapLocationPickerProps> = ({
           <button
             type="button"
             onClick={() => handleMapTypeToggle('roadmap')}
-            className={`px-3 py-1.5 rounded text-xs font-semibold transition-all ${
-              mapType === 'roadmap'
-                ? 'bg-primary text-white shadow'
-                : 'text-neutral-600 hover:bg-neutral-100'
-            }`}
+            className={`px-3 py-1.5 rounded text-xs font-semibold transition-all ${mapType === 'roadmap' ? 'bg-primary text-white shadow' : 'text-neutral-600 hover:bg-neutral-100'}`}
           >
             {t('search:map.street')}
           </button>
           <button
             type="button"
             onClick={() => handleMapTypeToggle('satellite')}
-            className={`px-3 py-1.5 rounded text-xs font-semibold transition-all ${
-              mapType === 'satellite'
-                ? 'bg-primary text-white shadow'
-                : 'text-neutral-600 hover:bg-neutral-100'
-            }`}
+            className={`px-3 py-1.5 rounded text-xs font-semibold transition-all ${mapType === 'satellite' ? 'bg-primary text-white shadow' : 'text-neutral-600 hover:bg-neutral-100'}`}
           >
             {t('search:map.satellite')}
           </button>
