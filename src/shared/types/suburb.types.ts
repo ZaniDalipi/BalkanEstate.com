@@ -31,4 +31,6 @@ export interface SuburbData {
   cityAvgPricePerSqm: number;
   lastUpdated: string;
   dataSource: 'gemini' | 'fallback' | 'research';
+  officialSourceName?: string;
+  officialSourceUrl?: string;
 }

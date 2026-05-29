@@ -30,6 +30,8 @@ export interface ISuburbData extends Document {
   cityAvgPricePerSqm: number;
   lastUpdated: Date;
   dataSource: 'gemini' | 'fallback' | 'research';
+  officialSourceName?: string;
+  officialSourceUrl?: string;
 }
 
 const SuburbStatsSchema = new Schema<ISuburbStats>(
@@ -83,6 +85,8 @@ const SuburbDataSchema = new Schema<ISuburbData>(
       enum: ['gemini', 'fallback', 'research'],
       default: 'research',
     },
+    officialSourceName: { type: String },
+    officialSourceUrl: { type: String },
   },
   { timestamps: true }
 );

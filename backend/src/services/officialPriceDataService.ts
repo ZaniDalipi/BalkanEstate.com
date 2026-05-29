@@ -753,6 +753,97 @@ export function getBISCountryConfig(
   return BIS_COUNTRY_CONFIG[country] ?? null;
 }
 
+export interface LiveCityPrice {
+  pricePerSqm: number;
+  sourceName: string;
+  sourceUrl: string;
+  bisIndexUsed: boolean;
+}
+
+/**
+ * Per-city multiplier relative to the national average (COUNTRY_BASE_PRICES).
+ * Derived from CITY_RESEARCH_PRICES[city] / COUNTRY_BASE_PRICES[country].
+ * Used to convert BIS country-level index to a per-city EUR/m² estimate.
+ */
+const CITY_MULTIPLIERS: Record<string, number> = {
+  // Kosovo (base 1600)
+  Prishtina: 1.00, Prizren: 0.53, Peja: 0.47, Gjakova: 0.44,
+  Ferizaj: 0.41, Mitrovica: 0.40, Gjilan: 0.43,
+  // Albania (base 2400)
+  Tirana: 1.00, Durres: 0.58, Vlore: 0.63, Sarande: 0.71,
+  Shkoder: 0.40, Fier: 0.33, Berat: 0.31, Elbasan: 0.33, Korce: 0.33,
+  // North Macedonia (base 1700)
+  Skopje: 1.00, Ohrid: 0.65, Bitola: 0.50, Tetovo: 0.47,
+  Kumanovo: 0.46, Veles: 0.43, Strumica: 0.44, Kavadarci: 0.42,
+  // Serbia (base 2500)
+  Belgrade: 1.00, 'Novi Sad': 0.70, Nis: 0.40, Kragujevac: 0.36,
+  Subotica: 0.35, Zrenjanin: 0.33, Pancevo: 0.35, Cacak: 0.32,
+  Valjevo: 0.31, Smederevo: 0.33,
+  // Bosnia (base 1350)
+  Sarajevo: 1.00, 'Banja Luka': 0.85, Mostar: 0.81, Tuzla: 0.70,
+  Zenica: 0.67, Trebinje: 0.73, Bijeljina: 0.64, Brcko: 0.65,
+  // Croatia (base 3200)
+  Zagreb: 1.00, Split: 1.63, Dubrovnik: 1.31, Rijeka: 0.78,
+  Osijek: 0.47, Zadar: 1.00, Pula: 0.94, Sibenik: 0.88,
+  Varazdin: 0.53, 'Slavonski Brod': 0.38,
+  // Montenegro (base 2150)
+  Podgorica: 1.00, Budva: 1.63, Kotor: 1.53, Niksic: 0.47,
+  'Herceg Novi': 1.16, Bar: 0.98, Ulcinj: 0.88, Tivat: 1.49,
+  // Greece (base 2500)
+  Athens: 1.00, Thessaloniki: 0.88, Patras: 0.56, Heraklion: 0.80,
+  Volos: 0.48, Larissa: 0.44, Ioannina: 0.46, Kavala: 0.48,
+  Chania: 0.96, Rhodes: 1.04,
+  // Bulgaria (base 2000)
+  Sofia: 1.00, Plovdiv: 0.70, Varna: 0.75, Burgas: 0.60,
+  'Stara Zagora': 0.43, Pleven: 0.40, Ruse: 0.45, Sliven: 0.38, Dobrich: 0.39,
+  // Romania (base 2100)
+  Bucharest: 1.00, 'Cluj-Napoca': 1.52, Timisoara: 0.81, Brasov: 0.86,
+  Iasi: 0.67, Constanta: 0.62, Galati: 0.48, Craiova: 0.50,
+  Ploiesti: 0.52, Oradea: 0.60,
+};
+
+/**
+ * Fetch the latest BIS country index and derive a per-city EUR/m² estimate.
+ * Times out after 3 seconds so it never blocks the request pipeline.
+ * Returns null if BIS is unreachable or the country has no BIS series.
+ */
+export async function fetchLiveCityPrice(
+  city: string,
+  country: string,
+): Promise<LiveCityPrice | null> {
+  const config = BIS_COUNTRY_CONFIG[country];
+  if (!config || !config.bisSeriesId) return null;
+
+  const source = OFFICIAL_SOURCES[country] ?? {
+    name: 'Official Government Data',
+    url: '#',
+    bisSeriesId: null,
+  };
+
+  try {
+    const bisResult = await Promise.race([
+      fetchBISPropertyPriceIndex(config.iso3),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000)),
+    ]);
+
+    if (!bisResult) return null;
+
+    const countryBase = COUNTRY_BASE_PRICES[country] ?? 1000;
+    const bisScaledCountry = Math.round(countryBase * (bisResult.latestIndex / 100));
+    const multiplier = CITY_MULTIPLIERS[city] ?? 1.0;
+    const pricePerSqm = Math.round(bisScaledCountry * multiplier);
+
+    return {
+      pricePerSqm,
+      sourceName: source.name,
+      sourceUrl: `https://fred.stlouisfed.org/series/${config.bisSeriesId}`,
+      bisIndexUsed: true,
+    };
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Fetch official real estate price data for a city/country pair.
  * Priority order: BIS API → Country-specific registry → Eurostat HPI → base-price fallback.
