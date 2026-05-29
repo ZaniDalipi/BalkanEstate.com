@@ -321,6 +321,20 @@ kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:1px 6px;font-size
 .typing-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);animation:typing 1.2s ease-in-out infinite}
 .typing-dot:nth-child(2){animation-delay:.2s}
 .typing-dot:nth-child(3){animation-delay:.4s}
+
+/* Screenshot upload zones */
+.upzone{position:relative;cursor:pointer}
+.upzone .upover{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;opacity:0;transition:opacity .2s;z-index:20;border-radius:inherit}
+.upzone:hover .upover{opacity:1}
+.upover .up-icon{font-size:1.4rem}
+.upover .up-lbl{font-size:.68rem;font-weight:700;color:#fff;letter-spacing:.04em;background:rgba(2,82,205,.8);padding:3px 10px;border-radius:100px;border:1px solid rgba(255,255,255,.3)}
+.upzone.has-img .upover .up-lbl{background:rgba(255,255,255,.15)}
+/* Slide-level screenshot toggle */
+#scr-bar{position:fixed;top:68px;right:24px;z-index:250;display:flex;align-items:center;gap:8px}
+#scr-btn{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:100px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);font-size:.72rem;font-weight:700;cursor:pointer;backdrop-filter:blur(12px);transition:background .2s,color .2s;font-family:inherit}
+#scr-btn:hover{background:rgba(255,255,255,.15);color:#fff}
+#scr-btn.scr-on{background:rgba(2,82,205,.3);border-color:rgba(59,130,246,.5);color:#93C5FD}
+#scr-tip{font-size:.68rem;color:rgba(255,255,255,.35);pointer-events:none}
 </style>
 </head>
 <body>
@@ -337,7 +351,11 @@ kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:1px 6px;font-size
   <div id="dots-wrap"></div>
 </div>
 
-<div id="hint">Navigate: <kbd>←</kbd><kbd>→</kbd> or <kbd>Space</kbd> &nbsp;·&nbsp; Notes: <kbd>N</kbd></div>
+<div id="hint">Navigate: <kbd>←</kbd><kbd>→</kbd> or <kbd>Space</kbd> &nbsp;·&nbsp; Notes: <kbd>N</kbd> &nbsp;·&nbsp; Screenshots: <kbd>S</kbd></div>
+<div id="scr-bar">
+  <button id="scr-btn" onclick="toggleScreenshots()">📸 Add Screenshots</button>
+  <span id="scr-tip">hover image areas to replace</span>
+</div>
 
 <div id="stage">
 
@@ -535,7 +553,7 @@ kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:1px 6px;font-size
   <div class="cols c2" style="gap:22px">
     <div style="display:flex;flex-direction:column;gap:12px">
       <div class="g" style="padding:18px;overflow:hidden">
-        <div style="height:130px;background:linear-gradient(135deg,#0d2550,#1a3a6e);border-radius:10px;display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:10px">
+        <div id="detailHero" style="height:130px;background:linear-gradient(135deg,#0d2550,#1a3a6e);border-radius:10px;display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:10px;overflow:hidden">
           <span style="font-size:3.5rem;opacity:.3">🏢</span>
           <div style="position:absolute;bottom:8px;left:8px;display:flex;gap:4px">
             <span style="background:rgba(0,0,0,.6);border-radius:6px;padding:3px 8px;font-size:.6rem;color:white">📸 Gallery</span>
@@ -729,6 +747,7 @@ kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:1px 6px;font-size
 <div class="inner">
   <div class="snum">10 — Seller & Agency Tools</div>
   <h2>Powerful <span class="hl">Dashboard</span> for Sellers & Agencies</h2>
+  <div id="dashArea" style="background:rgba(255,255,255,.04);border:1px dashed rgba(255,255,255,.1);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden">
   <div class="cols c4" style="gap:12px">
     <div class="dash-stat">
       <div class="dash-lbl">Total Views</div>
@@ -773,6 +792,7 @@ kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:1px 6px;font-size
       </ul>
     </div>
   </div>
+  </div><!-- /dashArea -->
 </div>
 </div>
 
@@ -890,57 +910,110 @@ kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:1px 6px;font-size
 </div>
 
 <!-- ═══ SLIDE 13 — PROMOTIONS ═══ -->
-<div class="slide" data-notes="BalkanEstate has a clear, tiered monetization model. Agents and agencies subscribe for access. Sellers can promote individual listings to different visibility tiers — Featured gets a gold ring and priority placement, Premium gets maximum exposure. Each tier is clearly priced and can be upgraded anytime.">
+<div class="slide" data-notes="BalkanEstate has a clear, tiered monetization model. Sellers subscribe for access and can promote individual listings for extra visibility. The Free plan gives 3 active listings. Pro Monthly at €25/month gives 20 listings and 3 promotion coupons. Pro Yearly at €200/year saves 33%. Enterprise at €1,000 per year covers a full team of 5 agents with 750+ listings. Buyers also have a Pro plan at just €3 per month for unlimited alerts and market insights.">
 <div class="inner">
   <div class="snum">13 — Promotions & Subscriptions</div>
-  <h2>Clear <span class="hl">Pricing</span> That Drives Revenue</h2>
-  <div class="cols c4" style="gap:14px">
-    <div class="tier-card tier-basic">
-      <div class="tier-name" style="color:var(--text2)">Basic</div>
-      <div><div class="tier-price">Free</div><div class="tier-period">to get started</div></div>
-      <ul class="tier-feat">
-        <li>1 active listing</li>
-        <li>Standard placement</li>
-        <li>Basic analytics</li>
-        <li>Email support</li>
-      </ul>
+  <h2>Real Pricing, <span class="hl">Real Revenue</span></h2>
+
+  <!-- Subscription Plans -->
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)">Seller / Agent Subscription Plans</div>
+    <div class="cols c4" style="gap:12px">
+      <div class="tier-card tier-basic">
+        <div class="tier-name" style="color:var(--text2)">Free</div>
+        <div><div class="tier-price">€0</div><div class="tier-period">forever</div></div>
+        <ul class="tier-feat">
+          <li>3 active listings</li>
+          <li>3 saved searches</li>
+          <li>3 AI messages</li>
+          <li>3 AI insights</li>
+        </ul>
+      </div>
+      <div class="tier-card tier-featured">
+        <div class="tier-badge" style="background:rgba(16,185,129,.2);border:1px solid rgba(16,185,129,.5);color:#6EE7B7">✓ Best Value</div>
+        <div class="tier-name" style="color:#93C5FD">Pro Monthly</div>
+        <div><div class="tier-price">€25<span style="font-size:1rem">/mo</span></div><div class="tier-period">billed monthly</div></div>
+        <ul class="tier-feat">
+          <li>20 listings / month</li>
+          <li>Unlimited searches</li>
+          <li>3 promo coupons/mo</li>
+          <li>Lead dashboard</li>
+          <li>Priority support</li>
+        </ul>
+      </div>
+      <div class="tier-card tier-premium">
+        <div class="tier-badge" style="background:rgba(251,191,36,.25);border:1px solid rgba(251,191,36,.5);color:#FDE68A">⭐ Most Popular</div>
+        <div class="tier-name" style="color:#FDE68A">Pro Yearly</div>
+        <div><div class="tier-price">€200<span style="font-size:1rem">/yr</span></div><div class="tier-period">save 33% vs monthly</div></div>
+        <ul class="tier-feat">
+          <li>250 listings / year</li>
+          <li>Unlimited searches</li>
+          <li>3 promo coupons/mo</li>
+          <li>All Pro features</li>
+          <li>Priority support</li>
+        </ul>
+      </div>
+      <div class="tier-card tier-enterprise">
+        <div class="tier-badge" style="background:rgba(139,92,246,.25);border:1px solid rgba(139,92,246,.5);color:#DDD6FE">🏢 For Teams</div>
+        <div class="tier-name" style="color:#DDD6FE">Enterprise</div>
+        <div><div class="tier-price">€1,000<span style="font-size:1rem">/yr</span></div><div class="tier-period">full agency team</div></div>
+        <ul class="tier-feat">
+          <li>750–1,000 listings</li>
+          <li>5 team agents included</li>
+          <li>5 promo coupons/mo</li>
+          <li>Agency branding page</li>
+          <li>Dedicated manager</li>
+        </ul>
+      </div>
     </div>
-    <div class="tier-card tier-featured">
-      <div class="tier-name" style="color:#93C5FD">Highlighted</div>
-      <div><div class="tier-price">€29<span style="font-size:1rem">/mo</span></div><div class="tier-period">per listing</div></div>
-      <ul class="tier-feat">
-        <li>Blue ring highlight</li>
-        <li>Priority in search</li>
-        <li>Full analytics</li>
-        <li>Priority support</li>
-      </ul>
+  </div>
+
+  <!-- Promotion add-ons + buyer -->
+  <div class="cols" style="grid-template-columns:1fr 1fr;gap:14px">
+    <div class="g" style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+      <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)">Listing Promotion Add-Ons (one-time)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 6px">
+          <div style="font-size:.7rem;font-weight:700;color:var(--blue3);margin-bottom:5px">🔷 Featured</div>
+          <div style="font-size:.68rem;color:var(--text3)">7 days</div><div style="font-size:.85rem;font-weight:800;color:#fff">€9.99</div>
+          <div style="font-size:.68rem;color:var(--text3);margin-top:3px">30 days</div><div style="font-size:.85rem;font-weight:800;color:#fff">€29.99</div>
+          <div style="font-size:.68rem;color:var(--text3);margin-top:3px">90 days</div><div style="font-size:.85rem;font-weight:800;color:#fff">€69.99</div>
+        </div>
+        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,149,0,.3);border-radius:10px;padding:10px 6px">
+          <div style="font-size:.7rem;font-weight:700;color:#FCD34D;margin-bottom:5px">⭐ Highlighted</div>
+          <div style="font-size:.68rem;color:var(--text3)">7 days</div><div style="font-size:.85rem;font-weight:800;color:#fff">€19.99</div>
+          <div style="font-size:.68rem;color:var(--text3);margin-top:3px">30 days</div><div style="font-size:.85rem;font-weight:800;color:#fff">€49.99</div>
+          <div style="font-size:.68rem;color:var(--text3);margin-top:3px">90 days</div><div style="font-size:.85rem;font-weight:800;color:#fff">€119.99</div>
+        </div>
+        <div style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.4);border-radius:10px;padding:10px 6px">
+          <div style="font-size:.7rem;font-weight:700;color:#DDD6FE;margin-bottom:5px">💎 Premium</div>
+          <div style="font-size:.68rem;color:var(--text3)">7 days</div><div style="font-size:.85rem;font-weight:800;color:#fff">€39.99</div>
+          <div style="font-size:.68rem;color:var(--text3);margin-top:3px">30 days</div><div style="font-size:.85rem;font-weight:800;color:#fff">€99.99</div>
+          <div style="font-size:.68rem;color:var(--text3);margin-top:3px">90 days</div><div style="font-size:.85rem;font-weight:800;color:#fff">€229.99</div>
+        </div>
+      </div>
     </div>
-    <div class="tier-card tier-premium">
-      <div class="tier-badge" style="background:rgba(251,191,36,.25);border:1px solid rgba(251,191,36,.5);color:#FDE68A">⭐ Popular</div>
-      <div class="tier-name" style="color:#FDE68A">Featured</div>
-      <div><div class="tier-price">€59<span style="font-size:1rem">/mo</span></div><div class="tier-period">per listing</div></div>
-      <ul class="tier-feat">
-        <li>Gold ring + badge</li>
-        <li>Top of results</li>
-        <li>Homepage visibility</li>
-        <li>Advanced analytics</li>
-      </ul>
-    </div>
-    <div class="tier-card tier-enterprise">
-      <div class="tier-name" style="color:#DDD6FE">Premium Agency</div>
-      <div><div class="tier-price">€199<span style="font-size:1rem">/mo</span></div><div class="tier-period">full team</div></div>
-      <ul class="tier-feat">
-        <li>Unlimited listings</li>
-        <li>All promotion tiers</li>
-        <li>Agency leaderboard</li>
-        <li>Dedicated support</li>
+    <div class="g" style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+      <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)">Buyer Pro Plan</div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="font-size:2.2rem;font-weight:900;color:#fff;letter-spacing:-.04em">€3<span style="font-size:1rem;font-weight:400;color:var(--text3)">/mo</span></div>
+        <div class="badge bb">7-day free trial</div>
+      </div>
+      <ul class="tier-feat" style="font-size:.82rem">
+        <li>Unlimited saved searches</li>
+        <li>Instant email &amp; SMS alerts</li>
+        <li>Early access to new listings</li>
+        <li>Price drop notifications</li>
+        <li>Advanced market insights</li>
+        <li>Ad-free browsing</li>
       </ul>
     </div>
   </div>
-  <div class="g" style="padding:16px 22px;display:flex;gap:20px;align-items:center;flex-wrap:wrap">
-    <span style="font-size:.88rem;color:var(--text2)">💳 Paysera · Stripe · Regional payment methods supported</span>
-    <span style="font-size:.88rem;color:var(--text2)">🔄 Monthly or annual billing · Cancel anytime</span>
-    <span style="font-size:.88rem;color:var(--text2)">🎟️ Promo codes &amp; trial periods</span>
+
+  <div class="g" style="padding:13px 20px;display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+    <span style="font-size:.85rem;color:var(--text2)">💳 Paysera · Stripe · Regional payment methods</span>
+    <span style="font-size:.85rem;color:var(--text2)">🔄 Monthly or annual billing · Cancel anytime</span>
+    <span style="font-size:.85rem;color:var(--text2)">🎟️ Promo codes &amp; agent registration codes</span>
   </div>
 </div>
 </div>
@@ -1239,6 +1312,100 @@ function switchLang(code,h,sub){
 
 go(0);
 document.getElementById('pbtn').disabled=true;
+
+// ── SCREENSHOT UPLOAD SYSTEM ──
+let scrMode=false;
+const uploadZones=[];
+
+function makeUploadable(el,label='Add screenshot'){
+  el.classList.add('upzone');
+  const ov=document.createElement('div');
+  ov.className='upover';
+  ov.innerHTML=`<span class="up-icon">📸</span><span class="up-lbl">${label}</span>`;
+  el.appendChild(ov);
+
+  const inp=document.createElement('input');
+  inp.type='file';inp.accept='image/*';inp.style.display='none';
+  document.body.appendChild(inp);
+
+  el.addEventListener('click',e=>{
+    if(!scrMode)return;
+    e.stopPropagation();
+    inp.click();
+  });
+  inp.addEventListener('change',e=>{
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      el.style.backgroundImage=`url(${ev.target.result})`;
+      el.style.backgroundSize='cover';
+      el.style.backgroundPosition='center';
+      el.style.backgroundRepeat='no-repeat';
+      el.classList.add('has-img');
+      ov.querySelector('.up-lbl').textContent='Change screenshot';
+      // Fade out placeholder children (not the overlay)
+      Array.from(el.children).forEach(c=>{
+        if(!c.classList.contains('upover'))c.style.opacity='0';
+      });
+    };
+    r.readAsDataURL(f);
+    inp.value='';
+  });
+  uploadZones.push(el);
+}
+
+function toggleScreenshots(){
+  scrMode=!scrMode;
+  const btn=document.getElementById('scr-btn');
+  const tip=document.getElementById('scr-tip');
+  btn.classList.toggle('scr-on',scrMode);
+  btn.textContent=scrMode?'✅ Screenshot Mode ON':'📸 Add Screenshots';
+  tip.style.opacity=scrMode?'1':'0';
+  document.body.style.cursor=scrMode?'crosshair':'';
+}
+
+// Register all image placeholders — runs immediately (script is at end of body)
+// Property card images — only hide the placeholder emoji, keep badges/hearts
+document.querySelectorAll('.pcard-img').forEach((el,i)=>{
+  el.classList.add('upzone');
+  const ov=document.createElement('div');
+  ov.className='upover';
+  ov.innerHTML=`<span class="up-icon">📸</span><span class="up-lbl">Property ${i+1} photo</span>`;
+  el.appendChild(ov);
+  const inp=document.createElement('input');
+  inp.type='file';inp.accept='image/*';inp.style.display='none';
+  document.body.appendChild(inp);
+  el.addEventListener('click',e=>{if(!scrMode)return;e.stopPropagation();inp.click();});
+  inp.addEventListener('change',e=>{
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      el.style.backgroundImage=`url(${ev.target.result})`;
+      el.style.backgroundSize='cover';el.style.backgroundPosition='center';
+      el.classList.add('has-img');
+      ov.querySelector('.up-lbl').textContent='Change photo';
+      el.querySelectorAll('.bldg').forEach(c=>c.style.display='none');
+    };
+    r.readAsDataURL(f);inp.value='';
+  });
+  uploadZones.push(el);
+});
+
+// Full-replacement zones: detail hero, map, phones, dashboard
+[
+  {sel:'#detailHero',lbl:'Property detail screenshot'},
+  {sel:'#mapArea',lbl:'Map view screenshot'},
+  {sel:'#dashArea',lbl:'Dashboard screenshot'},
+].forEach(({sel,lbl})=>{
+  const el=document.querySelector(sel);
+  if(el)makeUploadable(el,lbl);
+});
+document.querySelectorAll('.phone-screen').forEach((el,i)=>makeUploadable(el,`App screen ${i+1}`));
+
+// Keyboard shortcut
+document.addEventListener('keydown',e=>{
+  if((e.key==='s'||e.key==='S')&&!e.target.matches('input'))toggleScreenshots();
+});
 </script>
 </body>
 </html>
