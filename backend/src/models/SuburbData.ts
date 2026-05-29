@@ -29,7 +29,7 @@ export interface ISuburbData extends Document {
   suburbs: ISuburbEntry[];
   cityAvgPricePerSqm: number;
   lastUpdated: Date;
-  dataSource: 'gemini' | 'fallback';
+  dataSource: 'gemini' | 'fallback' | 'research';
 }
 
 const SuburbStatsSchema = new Schema<ISuburbStats>(
@@ -80,8 +80,8 @@ const SuburbDataSchema = new Schema<ISuburbData>(
     lastUpdated: { type: Date, default: Date.now, index: true },
     dataSource: {
       type: String,
-      enum: ['gemini', 'fallback'],
-      default: 'gemini',
+      enum: ['gemini', 'fallback', 'research'],
+      default: 'research',
     },
   },
   { timestamps: true }
