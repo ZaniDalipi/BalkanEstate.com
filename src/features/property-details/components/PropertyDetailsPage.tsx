@@ -433,11 +433,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   }, [property.status]);
 
   const handleShare = async () => {
-    // Use the /api/og/property/ URL so social media bots (WhatsApp, Facebook,
-    // Telegram, etc.) receive property-specific OG meta tags (photo, price,
-    // title) instead of the generic homepage preview.  Regular browsers that
-    // open this URL are immediately redirected to the real property page.
-    const shareUrl = `${window.location.origin}/api/og/property/${propertySlug}`;
+    const shareUrl = `${window.location.origin}/property/${propertySlug}`;
     try {
       if (navigator.share) {
         await navigator.share({
