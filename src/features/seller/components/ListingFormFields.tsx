@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BALKAN_LOCATIONS, CityData } from '@/utils/balkanLocations';
 import { getCurrencySymbol } from '@/utils/currency';
-import MapLocationPicker from './MapLocationPicker';
+import GoogleMapLocationPicker from './GoogleMapLocationPicker';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
 import type { ListingData, ImageData } from './ListingFormHelpers';
 import { floatingInputClasses, floatingSelectLabelClasses, inputBaseClasses, labelClasses, selectClasses } from './ListingFormHelpers';
@@ -99,7 +99,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                 {/* Show interactive map when city is selected */}
                 {selectedCity && listingData.lat !== 0 && listingData.lng !== 0 && (
                     <div className="md:col-span-2">
-                        <MapLocationPicker
+                        <GoogleMapLocationPicker
                             lat={listingData.lat}
                             lng={listingData.lng}
                             address={listingData.streetAddress || `${selectedCity}, ${selectedCountry}`}
