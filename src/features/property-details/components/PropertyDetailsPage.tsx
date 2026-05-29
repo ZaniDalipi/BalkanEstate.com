@@ -442,7 +442,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           ? ', 1 living room'
           : `, ${property.livingRooms} living rooms`
         : '';
-      const mapText = ` Check out the 3D map: ${shareUrl}`;
+      const mapText = ` Check out the 3D map: ${shareUrl}#property-map-section`;
       const shareText = `Check out this property: ${bedroomText}, ${bathroomText}${livingRoomText}, ${property.sqft}m².${mapText}`;
       if (navigator.share) {
         await navigator.share({
