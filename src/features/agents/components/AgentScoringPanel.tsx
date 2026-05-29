@@ -146,7 +146,7 @@ const AgentScoringPanel: React.FC<AgentScoringPanelProps> = ({
         id="agent-scoring-body"
         className={cn(
           'transition-all duration-300 ease-in-out overflow-hidden',
-          open ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
+          open ? 'max-h-[2400px] opacity-100' : 'max-h-0 opacity-0'
         )}
         aria-hidden={!open}
       >
@@ -158,7 +158,7 @@ const AgentScoringPanel: React.FC<AgentScoringPanelProps> = ({
 
           <div
             role="list"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"
+            className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3"
           >
             {metricsContent}
           </div>
