@@ -244,13 +244,19 @@ const PromotionOfferModal: React.FC<PromotionOfferModalProps> = ({
                                     </div>
                                 </div>
 
-                                <button
-                                    onClick={() => handlePromote('Listing Promotion 15 Days', promotionPrice, promotionProduct?.productId || 'listing_promotion_15days')}
-                                    className="w-full py-3 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-600 transition-colors flex items-center justify-center gap-2"
-                                >
-                                    <SparklesIcon className="w-5 h-5" />
-                                    {t('common:promotions.promoteNowForPrice', { price: promotionPrice })}
-                                </button>
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 px-3 py-2 bg-amber-100 border border-amber-300 rounded-lg">
+                                        <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse flex-shrink-0"></span>
+                                        <p className="text-xs text-amber-800 font-medium">Direct payments are not yet available. Use a coupon to activate for free.</p>
+                                    </div>
+                                    <button
+                                        onClick={() => handlePromote('Listing Promotion 15 Days', promotionPrice, promotionProduct?.productId || 'listing_promotion_15days')}
+                                        className="w-full py-3 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-600 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <SparklesIcon className="w-5 h-5" />
+                                        Activate with Coupon
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Stats */}

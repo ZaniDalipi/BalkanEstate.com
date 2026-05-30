@@ -76,7 +76,7 @@ const PaymentComingSoon: React.FC<PaymentComingSoonProps> = ({
 
       {/* Message */}
       <p className="text-gray-600 mb-5 max-w-md mx-auto">
-        {message || t('common:comingSoon.message', 'We are setting up our payment system. In the meantime, contact us to process your order manually.')}
+        {message || t('common:comingSoon.message', 'We are currently looking for a payment provider to partner with us. Direct payments are not accepted at this time. You can activate your subscription instantly using a coupon code, or contact us to arrange it manually.')}
       </p>
 
       {/* Coupon activation section */}
@@ -124,7 +124,7 @@ const PaymentComingSoon: React.FC<PaymentComingSoonProps> = ({
       {/* Badge */}
       <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 bg-amber-100 text-amber-700 text-sm font-medium rounded-full">
         <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
-        {t('common:comingSoon.badge', 'Payment integration in progress')}
+        {t('common:comingSoon.badge', 'Seeking payment provider partner')}
       </div>
     </div>
   );
