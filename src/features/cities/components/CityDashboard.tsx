@@ -609,7 +609,18 @@ const CityDashboard: React.FC = () => {
                   </span>
                 : showListingPrice
                 ? <span className="text-neutral-400">{city.listingsCount} active listings</span>
-                : <span className="text-violet-400">BalkanEstate AI estimate</span>
+                : city.officialSourceUrl
+                  ? <a
+                      href={city.officialSourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:text-blue-700 hover:underline flex items-center gap-1"
+                      title={city.officialSourceName}
+                    >
+                      <ShieldCheckIcon className="w-3 h-3" />
+                      Official data ↗
+                    </a>
+                  : <span className="text-violet-400">BalkanEstate AI estimate</span>
               }
             </p>
           </div>
@@ -662,9 +673,9 @@ const CityDashboard: React.FC = () => {
           </div>
         </div>
 
-        <p className="text-[10px] text-violet-500 mb-3 flex items-center gap-1">
-          <LightBulbIcon className="w-3 h-3" />
-          AI estimates shown by default — tap <span className="font-bold">Official</span> on any card to see government data.
+        <p className="text-[10px] text-blue-500 mb-3 flex items-center gap-1">
+          <ShieldCheckIcon className="w-3 h-3" />
+          Prices anchored to official government data — tap <span className="font-bold">Official</span> on the price card to see the BIS index.
         </p>
 
         {/* Official price reference strip — visible only when BIS data is available */}

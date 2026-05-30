@@ -31,6 +31,10 @@ export interface ICityMarketData extends Document {
   lastUpdated: Date;
   dataSource: 'gemini' | 'manual' | 'calculated';
 
+  // Official data source attribution
+  officialSourceName?: string;
+  officialSourceUrl?: string;
+
   // City image (stored in Cloudinary, fetched from Wikipedia once)
   imageUrl?: string; // Cloudinary URL for city thumbnail
   imageUpdatedAt?: Date; // When the image was last fetched/updated
@@ -123,6 +127,8 @@ const CityMarketDataSchema = new Schema<ICityMarketData>({
     enum: ['gemini', 'manual', 'calculated'],
     default: 'gemini',
   },
+  officialSourceName: { type: String },
+  officialSourceUrl: { type: String },
   imageUrl: {
     type: String,
   },
