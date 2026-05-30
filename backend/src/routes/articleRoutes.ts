@@ -86,6 +86,22 @@ router.get('/countries', async (_req: Request, res: Response) => {
   }
 });
 
+// GET /api/articles/tags - Public: list popular tags across published articles
+router.get('/tags', async (_req: Request, res: Response) => {
+  try {
+    const result = await Article.aggregate([
+      { $match: { status: 'published' } },
+      { $unwind: '$tags' },
+      { $group: { _id: '$tags', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 50 },
+    ]);
+    res.json({ tags: result.map(r => r._id) });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch tags' });
+  }
+});
+
 // GET /api/articles/:slug - Public: get single article by slug
 router.get('/:slug', async (req: Request, res: Response): Promise<void> => {
   try {

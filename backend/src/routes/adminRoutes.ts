@@ -727,4 +727,55 @@ router.delete('/articles/:id', logAdminAction('DELETE_ARTICLE'), async (req: Req
   }
 });
 
+// GET /api/admin/articles/:id - Get single article by ID for editing
+router.get('/articles/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const article = await Article.findById(req.params.id)
+      .populate('author', 'name email')
+      .lean();
+    if (!article) {
+      res.status(404).json({ message: 'Article not found' });
+      return;
+    }
+    res.json({ article });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch article', error: String(err) });
+  }
+});
+
+// Article image upload multer config
+const articleImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  },
+});
+
+// POST /api/admin/articles/upload-image - Upload image for article content or cover
+router.post('/articles/upload-image', logAdminAction('UPLOAD_ARTICLE_IMAGE'), articleImageUpload.single('image'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ message: 'No image file provided' });
+      return;
+    }
+
+    const { uploadImage } = await import('../services/cloudinaryService');
+    const result = await uploadImage(req.file.buffer, {
+      userId: (req as any).user._id.toString(),
+      type: 'listing' as any,
+      maxWidth: 1920,
+      maxHeight: 1080,
+    });
+
+    res.json({ url: result.url, publicId: result.publicId });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to upload image', error: String(err) });
+  }
+});
+
 export default router;

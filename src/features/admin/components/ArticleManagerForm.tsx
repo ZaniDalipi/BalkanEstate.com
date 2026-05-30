@@ -1,226 +1,701 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { tokenService } from '@/src/shared/api/tokenService';
+import { API_CONFIG } from '@/src/shared/constants/app.constants';
 
 interface ArticleManagerFormProps {
   articleId: string | null;
   onClose: () => void;
 }
 
+const CATEGORIES = [
+  { value: 'guide', label: 'Guide', color: 'bg-blue-100 text-blue-700' },
+  { value: 'market', label: 'Market Analysis', color: 'bg-slate-100 text-slate-700' },
+  { value: 'investment', label: 'Investment', color: 'bg-emerald-100 text-emerald-700' },
+  { value: 'regulation', label: 'Regulation', color: 'bg-amber-100 text-amber-700' },
+  { value: 'development', label: 'Development', color: 'bg-violet-100 text-violet-700' },
+  { value: 'tourism', label: 'Tourism', color: 'bg-rose-100 text-rose-700' },
+  { value: 'lifestyle', label: 'Lifestyle', color: 'bg-pink-100 text-pink-700' },
+];
+
+const BALKAN_COUNTRIES = [
+  { name: 'Albania', code: 'AL', flag: '🇦🇱' },
+  { name: 'Bosnia & Herzegovina', code: 'BA', flag: '🇧🇦' },
+  { name: 'Bulgaria', code: 'BG', flag: '🇧🇬' },
+  { name: 'Croatia', code: 'HR', flag: '🇭🇷' },
+  { name: 'Greece', code: 'GR', flag: '🇬🇷' },
+  { name: 'Kosovo', code: 'XK', flag: '🇽🇰' },
+  { name: 'Montenegro', code: 'ME', flag: '🇲🇪' },
+  { name: 'North Macedonia', code: 'MK', flag: '🇲🇰' },
+  { name: 'Romania', code: 'RO', flag: '🇷🇴' },
+  { name: 'Serbia', code: 'RS', flag: '🇷🇸' },
+  { name: 'Slovenia', code: 'SI', flag: '🇸🇮' },
+];
+
+type ActiveSection = 'write' | 'preview';
+
 const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onClose }) => {
-  const [formData, setFormData] = useState({
-    title: '',
-    excerpt: '',
-    content: '',
-    category: 'guide',
-    country: '',
-    countryCode: '',
-    tags: '',
-    coverImageUrl: '',
-    status: 'draft',
-    isFeatured: false,
-  });
+  const [title, setTitle] = useState('');
+  const [excerpt, setExcerpt] = useState('');
+  const [category, setCategory] = useState('guide');
+  const [country, setCountry] = useState('');
+  const [countryCode, setCountryCode] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
+  const [coverImageUrl, setCoverImageUrl] = useState('');
+  const [coverImagePublicId, setCoverImagePublicId] = useState('');
+  const [status, setStatus] = useState<'draft' | 'published'>('draft');
+  const [isFeatured, setIsFeatured] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [fetchingArticle, setFetchingArticle] = useState(false);
+  const [activeSection, setActiveSection] = useState<ActiveSection>('write');
+  const [coverUploading, setCoverUploading] = useState(false);
+  const [inlineUploading, setInlineUploading] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [error, setError] = useState('');
+  const [previewContent, setPreviewContent] = useState('');
+
+  const editorRef = useRef<HTMLDivElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const inlineImageInputRef = useRef<HTMLInputElement>(null);
+  const savedRangeRef = useRef<Range | null>(null);
 
   useEffect(() => {
-    if (articleId) {
-      fetchArticle();
-    }
+    if (articleId) loadArticle(articleId);
   }, [articleId]);
 
-  const fetchArticle = async () => {
+  const loadArticle = async (id: string) => {
     try {
+      setFetchingArticle(true);
       const token = tokenService.getAccessToken();
-      const res = await fetch(`http://localhost:5001/api/admin/articles?page=1&limit=1`, {
+      const res = await fetch(`${API_CONFIG.BASE_URL}/admin/articles/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // This is simplified - in production you'd fetch by ID
-      console.log('Fetch article implementation needed');
-    } catch (err) {
-      console.error(err);
+      if (!res.ok) throw new Error('Failed to load article');
+      const data = await res.json();
+      const a = data.article;
+      setTitle(a.title || '');
+      setExcerpt(a.excerpt || '');
+      setCategory(a.category || 'guide');
+      setCountry(a.country || '');
+      setCountryCode(a.countryCode || '');
+      setTags(a.tags || []);
+      setCoverImageUrl(a.coverImageUrl || '');
+      setCoverImagePublicId(a.coverImagePublicId || '');
+      setStatus(a.status || 'draft');
+      setIsFeatured(a.isFeatured || false);
+      if (editorRef.current) {
+        editorRef.current.innerHTML = a.content || '';
+        setPreviewContent(a.content || '');
+      }
+    } catch {
+      setError('Failed to load article for editing.');
+    } finally {
+      setFetchingArticle(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // ── Rich Text Editor Commands ──────────────────────────────────────────────
+
+  const saveSelection = () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) {
+      savedRangeRef.current = sel.getRangeAt(0).cloneRange();
+    }
+  };
+
+  const restoreSelection = () => {
+    const sel = window.getSelection();
+    if (sel && savedRangeRef.current) {
+      sel.removeAllRanges();
+      sel.addRange(savedRangeRef.current);
+    }
+  };
+
+  const execCmd = useCallback((cmd: string, value?: string) => {
+    editorRef.current?.focus();
+    document.execCommand(cmd, false, value);
+  }, []);
+
+  const execBlock = useCallback((tag: string) => {
+    editorRef.current?.focus();
+    document.execCommand('formatBlock', false, tag);
+  }, []);
+
+  const insertHTML = useCallback((html: string) => {
+    editorRef.current?.focus();
+    restoreSelection();
+    document.execCommand('insertHTML', false, html);
+  }, []);
+
+  const handleEditorInput = () => {
+    if (editorRef.current) {
+      setPreviewContent(editorRef.current.innerHTML);
+    }
+  };
+
+  // ── Cover Image Upload ─────────────────────────────────────────────────────
+
+  const handleCoverUpload = async (file: File) => {
+    try {
+      setCoverUploading(true);
+      const token = tokenService.getAccessToken();
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch(`${API_CONFIG.BASE_URL}/admin/articles/upload-image`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      if (!res.ok) throw new Error('Upload failed');
+      const data = await res.json();
+      setCoverImageUrl(data.url);
+      setCoverImagePublicId(data.publicId || '');
+    } catch {
+      setError('Cover image upload failed.');
+    } finally {
+      setCoverUploading(false);
+    }
+  };
+
+  // ── Inline Image Upload ────────────────────────────────────────────────────
+
+  const handleInlineImageUpload = async (file: File) => {
+    try {
+      setInlineUploading(true);
+      saveSelection();
+      const token = tokenService.getAccessToken();
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch(`${API_CONFIG.BASE_URL}/admin/articles/upload-image`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      if (!res.ok) throw new Error('Upload failed');
+      const data = await res.json();
+      insertHTML(`<img src="${data.url}" alt="" style="max-width:100%;border-radius:8px;margin:12px 0;" />`);
+    } catch {
+      setError('Inline image upload failed.');
+    } finally {
+      setInlineUploading(false);
+    }
+  };
+
+  // ── Tags ───────────────────────────────────────────────────────────────────
+
+  const addTag = (raw: string) => {
+    const val = raw.trim().toLowerCase().replace(/\s+/g, '-');
+    if (val && !tags.includes(val) && tags.length < 20) {
+      setTags(prev => [...prev, val]);
+    }
+    setTagInput('');
+  };
+
+  const removeTag = (tag: string) => setTags(tags.filter(t => t !== tag));
+
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addTag(tagInput);
+    } else if (e.key === 'Backspace' && !tagInput && tags.length > 0) {
+      removeTag(tags[tags.length - 1]);
+    }
+  };
+
+  // ── Country selector ───────────────────────────────────────────────────────
+
+  const handleCountryChange = (name: string) => {
+    const found = BALKAN_COUNTRIES.find(c => c.name === name);
+    setCountry(name);
+    setCountryCode(found?.code || '');
+  };
+
+  // ── Submit ─────────────────────────────────────────────────────────────────
+
+  const handleSubmit = async (submitStatus?: 'draft' | 'published') => {
+    const content = editorRef.current?.innerHTML || '';
+    if (!title.trim() || !excerpt.trim() || !content.trim()) {
+      setError('Title, excerpt, and content are required.');
+      return;
+    }
+
+    const finalStatus = submitStatus || status;
+
     try {
       setLoading(true);
+      setError('');
       const token = tokenService.getAccessToken();
       const payload = {
-        ...formData,
-        tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
+        title: title.trim(),
+        excerpt: excerpt.trim(),
+        content,
+        category,
+        tags,
+        country: country || undefined,
+        countryCode: countryCode || undefined,
+        coverImageUrl: coverImageUrl || undefined,
+        coverImagePublicId: coverImagePublicId || undefined,
+        status: finalStatus,
+        isFeatured,
       };
 
       const method = articleId ? 'PATCH' : 'POST';
       const url = articleId
-        ? `http://localhost:5001/api/admin/articles/${articleId}`
-        : `http://localhost:5001/api/admin/articles`;
+        ? `${API_CONFIG.BASE_URL}/admin/articles/${articleId}`
+        : `${API_CONFIG.BASE_URL}/admin/articles`;
 
       const res = await fetch(url, {
         method,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error('Failed to save article');
-      onClose();
-    } catch (err) {
-      console.error(err);
-      alert('Error saving article');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error((errData as any).message || 'Failed to save article');
+      }
+
+      setSaveSuccess(true);
+      setTimeout(() => {
+        setSaveSuccess(false);
+        onClose();
+      }, 800);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error saving article');
     } finally {
       setLoading(false);
     }
   };
 
+  const selectedCategory = CATEGORIES.find(c => c.value === category);
+  const selectedCountryObj = BALKAN_COUNTRIES.find(c => c.name === country);
+
+  if (fetchingArticle) {
+    return (
+      <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-10 flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
+          <p className="text-slate-600 font-medium">Loading article…</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg max-w-2xl w-full p-6 my-8">
-        <h2 className="text-2xl font-bold mb-6">{articleId ? 'Edit' : 'Create'} Article</h2>
-
-        <div className="space-y-4 max-h-[70vh] overflow-y-auto">
-          <div>
-            <label className="block text-sm font-medium mb-1">Title *</label>
-            <input
-              type="text"
-              required
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full border rounded px-3 py-2"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Excerpt *</label>
-            <textarea
-              required
-              value={formData.excerpt}
-              onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-              className="w-full border rounded px-3 py-2"
-              rows={2}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Content *</label>
-            <textarea
-              required
-              value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              className="w-full border rounded px-3 py-2 font-mono text-sm"
-              rows={8}
-              placeholder="Enter HTML or markdown content"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Category</label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full border rounded px-3 py-2"
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col">
+      {/* ── Top Bar ─────────────────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between bg-white border-b border-neutral-200 px-4 sm:px-6 py-3 flex-shrink-0">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onClose}
+            className="text-slate-500 hover:text-slate-900 transition-colors p-1"
+            aria-label="Close"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <span className="text-sm font-semibold text-slate-900">
+            {articleId ? 'Edit Article' : 'New Article'}
+          </span>
+          <div className="hidden sm:flex items-center bg-neutral-100 rounded-lg p-0.5">
+            {(['write', 'preview'] as const).map(s => (
+              <button
+                key={s}
+                onClick={() => setActiveSection(s)}
+                className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${activeSection === s ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
               >
-                <option value="guide">Guide</option>
-                <option value="market">Market</option>
-                <option value="investment">Investment</option>
-                <option value="regulation">Regulation</option>
-                <option value="development">Development</option>
-                <option value="tourism">Tourism</option>
-                <option value="lifestyle">Lifestyle</option>
-              </select>
-            </div>
+                {s.charAt(0).toUpperCase() + s.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Country</label>
-              <input
-                type="text"
-                value={formData.country}
-                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                className="w-full border rounded px-3 py-2"
+        <div className="flex items-center gap-2">
+          {error && (
+            <span className="text-xs text-red-600 bg-red-50 px-3 py-1 rounded-full max-w-xs truncate">
+              {error}
+            </span>
+          )}
+          {saveSuccess && (
+            <span className="text-xs text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">✓ Saved</span>
+          )}
+          <button
+            onClick={() => handleSubmit('draft')}
+            disabled={loading}
+            className="px-3 py-1.5 text-xs font-medium border border-neutral-300 rounded-lg hover:bg-neutral-50 disabled:opacity-50 transition-colors"
+          >
+            Save Draft
+          </button>
+          <button
+            onClick={() => handleSubmit('published')}
+            disabled={loading}
+            className="px-4 py-1.5 text-xs font-semibold bg-slate-900 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50 transition-colors"
+          >
+            {loading ? 'Saving…' : status === 'published' ? 'Update' : 'Publish'}
+          </button>
+        </div>
+      </div>
+
+      {/* ── Main Layout ─────────────────────────────────────────────────────── */}
+      <div className="flex flex-1 overflow-hidden">
+
+        {/* ── Editor / Preview ──────────────────────────────────────────────── */}
+        <div className="flex-1 overflow-y-auto bg-white">
+          {activeSection === 'write' ? (
+            <div className="max-w-3xl mx-auto px-4 sm:px-8 py-8">
+
+              {/* Cover Image */}
+              <div
+                className={`relative w-full rounded-2xl overflow-hidden mb-8 cursor-pointer group ${coverImageUrl ? 'h-64' : 'h-40 border-2 border-dashed border-neutral-300 bg-neutral-50 hover:bg-neutral-100 hover:border-neutral-400'} transition-all`}
+                onClick={() => coverInputRef.current?.click()}
+              >
+                {coverImageUrl ? (
+                  <>
+                    <img src={coverImageUrl} alt="Cover" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="text-white text-sm font-medium">Change cover photo</span>
+                    </div>
+                    <button
+                      onClick={e => { e.stopPropagation(); setCoverImageUrl(''); setCoverImagePublicId(''); }}
+                      className="absolute top-3 right-3 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center text-slate-700 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ×
+                    </button>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full gap-2 text-slate-400">
+                    {coverUploading ? (
+                      <div className="w-8 h-8 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span className="text-sm font-medium">Add a cover photo</span>
+                        <span className="text-xs">Click to upload · JPG, PNG, WebP · max 10MB</span>
+                      </>
+                    )}
+                  </div>
+                )}
+                <input
+                  ref={coverInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={e => e.target.files?.[0] && handleCoverUpload(e.target.files[0])}
+                />
+              </div>
+
+              {/* Title */}
+              <textarea
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="Article title…"
+                rows={2}
+                className="w-full text-3xl sm:text-4xl font-bold text-slate-900 placeholder:text-neutral-300 border-none outline-none resize-none mb-4 leading-tight"
+              />
+
+              {/* Excerpt */}
+              <textarea
+                value={excerpt}
+                onChange={e => setExcerpt(e.target.value)}
+                placeholder="Write a short excerpt (shown in listing cards)…"
+                rows={2}
+                maxLength={500}
+                className="w-full text-base text-slate-500 placeholder:text-neutral-300 border-none outline-none resize-none mb-6 leading-relaxed"
+              />
+
+              <div className="border-t border-neutral-100 mb-6" />
+
+              {/* ── Toolbar ─────────────────────────────────────────────── */}
+              <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border border-neutral-200 rounded-xl flex flex-wrap items-center gap-0.5 px-2 py-1.5 mb-4 shadow-sm">
+                <ToolbarBtn title="Bold (Ctrl+B)" onClick={() => execCmd('bold')}>
+                  <strong>B</strong>
+                </ToolbarBtn>
+                <ToolbarBtn title="Italic (Ctrl+I)" onClick={() => execCmd('italic')}>
+                  <em>I</em>
+                </ToolbarBtn>
+                <ToolbarBtn title="Underline (Ctrl+U)" onClick={() => execCmd('underline')}>
+                  <span className="underline">U</span>
+                </ToolbarBtn>
+                <ToolbarBtn title="Strikethrough" onClick={() => execCmd('strikeThrough')}>
+                  <span className="line-through">S</span>
+                </ToolbarBtn>
+
+                <div className="w-px h-5 bg-neutral-200 mx-1" />
+
+                <ToolbarBtn title="Heading 1" onClick={() => execBlock('h1')}>H1</ToolbarBtn>
+                <ToolbarBtn title="Heading 2" onClick={() => execBlock('h2')}>H2</ToolbarBtn>
+                <ToolbarBtn title="Heading 3" onClick={() => execBlock('h3')}>H3</ToolbarBtn>
+                <ToolbarBtn title="Paragraph" onClick={() => execBlock('p')}>P</ToolbarBtn>
+
+                <div className="w-px h-5 bg-neutral-200 mx-1" />
+
+                <ToolbarBtn title="Bullet list" onClick={() => execCmd('insertUnorderedList')}>
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3 5a1 1 0 100-2 1 1 0 000 2zm3-1a1 1 0 011-1h10a1 1 0 110 2H7a1 1 0 01-1-1zm-3 6a1 1 0 100-2 1 1 0 000 2zm3-1a1 1 0 011-1h10a1 1 0 110 2H7a1 1 0 01-1-1zm-3 6a1 1 0 100-2 1 1 0 000 2zm3-1a1 1 0 011-1h10a1 1 0 110 2H7a1 1 0 01-1-1z" clipRule="evenodd" />
+                  </svg>
+                </ToolbarBtn>
+                <ToolbarBtn title="Numbered list" onClick={() => execCmd('insertOrderedList')}>
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M4 4h2v2H4V4zm0 4h2v2H4V8zm0 4h2v2H4v-2zm4-8h8v2H8V4zm0 4h8v2H8V8zm0 4h8v2H8v-2z" />
+                  </svg>
+                </ToolbarBtn>
+                <ToolbarBtn title="Blockquote" onClick={() => execBlock('blockquote')}>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </ToolbarBtn>
+
+                <div className="w-px h-5 bg-neutral-200 mx-1" />
+
+                <ToolbarBtn
+                  title="Insert link"
+                  onClick={() => {
+                    const url = prompt('Enter URL:');
+                    if (url) execCmd('createLink', url);
+                  }}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                </ToolbarBtn>
+
+                <ToolbarBtn
+                  title="Insert image from file"
+                  onClick={() => { saveSelection(); inlineImageInputRef.current?.click(); }}
+                  disabled={inlineUploading}
+                >
+                  {inlineUploading ? (
+                    <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  )}
+                </ToolbarBtn>
+
+                <ToolbarBtn title="Horizontal rule" onClick={() => execCmd('insertHorizontalRule')}>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 12h16" />
+                  </svg>
+                </ToolbarBtn>
+
+                <div className="w-px h-5 bg-neutral-200 mx-1" />
+
+                <ToolbarBtn title="Clear formatting" onClick={() => execCmd('removeFormat')}>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </ToolbarBtn>
+
+                <input
+                  ref={inlineImageInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={e => e.target.files?.[0] && handleInlineImageUpload(e.target.files[0])}
+                />
+              </div>
+
+              {/* ── Content Editor ───────────────────────────────────────── */}
+              <div
+                ref={editorRef}
+                contentEditable
+                suppressContentEditableWarning
+                onInput={handleEditorInput}
+                onMouseUp={saveSelection}
+                onKeyUp={saveSelection}
+                data-placeholder="Start writing your article…"
+                className="min-h-[400px] text-slate-800 text-base leading-7 outline-none
+                  [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mb-3 [&_h1]:mt-6 [&_h1]:text-slate-900
+                  [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mb-2 [&_h2]:mt-5 [&_h2]:text-slate-900
+                  [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mb-2 [&_h3]:mt-4 [&_h3]:text-slate-900
+                  [&_p]:mb-3
+                  [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-3
+                  [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-3
+                  [&_li]:mb-1
+                  [&_blockquote]:border-l-4 [&_blockquote]:border-blue-400 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-slate-600 [&_blockquote]:my-4
+                  [&_a]:text-blue-600 [&_a]:underline
+                  [&_hr]:border-neutral-200 [&_hr]:my-6
+                  [&_img]:max-w-full [&_img]:rounded-xl [&_img]:my-4
+                  [&_code]:bg-slate-100 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
+                  [&_pre]:bg-slate-900 [&_pre]:text-green-300 [&_pre]:p-4 [&_pre]:rounded-xl [&_pre]:overflow-x-auto [&_pre]:my-4
+                  empty:before:content-[attr(data-placeholder)] empty:before:text-slate-300 empty:before:pointer-events-none"
               />
             </div>
-          </div>
+          ) : (
+            /* ── Preview ─────────────────────────────────────────────────── */
+            <div className="max-w-3xl mx-auto px-4 sm:px-8 py-8">
+              {coverImageUrl && (
+                <img src={coverImageUrl} alt="Cover" className="w-full h-64 object-cover rounded-2xl mb-8" />
+              )}
+              <div className="flex flex-wrap items-center gap-2 mb-4 text-sm text-slate-500">
+                {selectedCountryObj && (
+                  <span className="flex items-center gap-1">{selectedCountryObj.flag} {selectedCountryObj.name}</span>
+                )}
+                {selectedCountryObj && selectedCategory && <span>·</span>}
+                {selectedCategory && (
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${selectedCategory.color}`}>
+                    {selectedCategory.label}
+                  </span>
+                )}
+              </div>
+              <h1 className="text-4xl font-bold text-slate-900 mb-4 leading-tight">
+                {title || <span className="text-neutral-300">Article title…</span>}
+              </h1>
+              <p className="text-lg text-slate-500 mb-6 leading-relaxed">
+                {excerpt || <span className="text-neutral-300">Excerpt…</span>}
+              </p>
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-8">
+                  {tags.map(t => (
+                    <span key={t} className="px-3 py-1 bg-neutral-100 text-slate-600 text-sm rounded-full">#{t}</span>
+                  ))}
+                </div>
+              )}
+              <div className="border-t border-neutral-100 mb-8" />
+              <div
+                className="prose prose-slate max-w-none [&_h1]:text-3xl [&_h2]:text-2xl [&_h3]:text-xl [&_blockquote]:border-l-4 [&_blockquote]:border-blue-400 [&_blockquote]:pl-4 [&_blockquote]:italic [&_img]:rounded-xl"
+                dangerouslySetInnerHTML={{ __html: previewContent || '<p class="text-neutral-300">Start writing to see the preview…</p>' }}
+              />
+            </div>
+          )}
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Country Code</label>
-            <input
-              type="text"
-              maxLength={2}
-              value={formData.countryCode}
-              onChange={(e) => setFormData({ ...formData, countryCode: e.target.value.toUpperCase() })}
-              className="w-full border rounded px-3 py-2"
-              placeholder="e.g., AL, RS, HR"
-            />
-          </div>
+        {/* ── Right Sidebar ────────────────────────────────────────────────── */}
+        <aside className="hidden lg:flex flex-col w-72 bg-slate-50 border-l border-neutral-200 overflow-y-auto flex-shrink-0">
+          <div className="p-5 space-y-6">
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Tags (comma-separated)</label>
-            <input
-              type="text"
-              value={formData.tags}
-              onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-              className="w-full border rounded px-3 py-2"
-              placeholder="e.g., investment, realestate, tips"
-            />
-          </div>
+            {/* Status & Featured */}
+            <div>
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Publishing</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-700">Status</span>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${status === 'published' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                    {status === 'published' ? 'Published' : 'Draft'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-700">Featured article</span>
+                  <button
+                    onClick={() => setIsFeatured(!isFeatured)}
+                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${isFeatured ? 'bg-slate-900' : 'bg-neutral-300'}`}
+                  >
+                    <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform shadow ${isFeatured ? 'translate-x-5' : 'translate-x-1'}`} />
+                  </button>
+                </div>
+              </div>
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Cover Image URL</label>
-            <input
-              type="url"
-              value={formData.coverImageUrl}
-              onChange={(e) => setFormData({ ...formData, coverImageUrl: e.target.value })}
-              className="w-full border rounded px-3 py-2"
-            />
-          </div>
+            {/* Category */}
+            <div>
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Category</h3>
+              <div className="flex flex-wrap gap-1.5">
+                {CATEGORIES.map(cat => (
+                  <button
+                    key={cat.value}
+                    onClick={() => setCategory(cat.value)}
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
+                      category === cat.value
+                        ? cat.color + ' ring-2 ring-offset-1 ring-slate-400'
+                        : 'bg-white border border-neutral-200 text-slate-600 hover:border-neutral-300'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <label className="block text-sm font-medium mb-1">Status</label>
+            {/* Country */}
+            <div>
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Country</h3>
               <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full border rounded px-3 py-2"
+                value={country}
+                onChange={e => handleCountryChange(e.target.value)}
+                className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
               >
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
+                <option value="">— No specific country —</option>
+                {BALKAN_COUNTRIES.map(c => (
+                  <option key={c.code} value={c.name}>{c.flag} {c.name}</option>
+                ))}
               </select>
+              {countryCode && (
+                <p className="text-[11px] text-slate-400 mt-1">Code: <strong>{countryCode}</strong></p>
+              )}
             </div>
 
-            <div className="flex items-end">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={formData.isFeatured}
-                  onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-                />
-                <span className="text-sm font-medium">Featured</span>
-              </label>
+            {/* Tags */}
+            <div>
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Tags</h3>
+              <div className="flex flex-wrap gap-1.5 mb-2 min-h-[24px]">
+                {tags.map(tag => (
+                  <span key={tag} className="flex items-center gap-1 px-2 py-0.5 bg-slate-900 text-white text-xs rounded-full">
+                    #{tag}
+                    <button onClick={() => removeTag(tag)} className="hover:text-red-300 transition-colors leading-none">×</button>
+                  </span>
+                ))}
+              </div>
+              <input
+                type="text"
+                value={tagInput}
+                onChange={e => setTagInput(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+                onBlur={() => tagInput.trim() && addTag(tagInput)}
+                placeholder="Type tag, press Enter"
+                className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 bg-white text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+              />
+              <p className="text-[11px] text-slate-400 mt-1">Enter or comma to add · {20 - tags.length} remaining</p>
             </div>
+
+            {/* Cover image URL fallback */}
+            <div>
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Cover Image URL</h3>
+              <input
+                type="url"
+                value={coverImageUrl}
+                onChange={e => setCoverImageUrl(e.target.value)}
+                placeholder="https://…"
+                className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 bg-white text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+              />
+              <p className="text-[11px] text-slate-400 mt-1">Or paste URL instead of uploading above</p>
+            </div>
+
+            {/* SEO Preview */}
+            <div>
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">SEO Preview</h3>
+              <div className="bg-white border border-neutral-200 rounded-xl p-3 space-y-1">
+                <p className="text-xs text-blue-700 font-medium truncate">{title || 'Article Title'}</p>
+                <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">{excerpt || 'Article excerpt will appear here in search results…'}</p>
+              </div>
+            </div>
+
           </div>
-        </div>
-
-        <div className="flex gap-3 mt-6 pt-4 border-t">
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex-1 bg-blue-600 text-white py-2 rounded font-medium disabled:opacity-50"
-          >
-            {loading ? 'Saving...' : 'Save'}
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-6 py-2 border rounded font-medium"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+        </aside>
+      </div>
     </div>
   );
 };
+
+// ── Toolbar Button ─────────────────────────────────────────────────────────────
+const ToolbarBtn: React.FC<{
+  title: string;
+  onClick: () => void;
+  disabled?: boolean;
+  children: React.ReactNode;
+}> = ({ title, onClick, disabled, children }) => (
+  <button
+    type="button"
+    title={title}
+    disabled={disabled}
+    onMouseDown={e => { e.preventDefault(); onClick(); }}
+    className="w-7 h-7 flex items-center justify-center text-xs font-medium text-slate-600 rounded hover:bg-neutral-100 hover:text-slate-900 disabled:opacity-40 transition-colors"
+  >
+    {children}
+  </button>
+);
 
 export default ArticleManagerForm;
