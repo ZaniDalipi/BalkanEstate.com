@@ -1,13 +1,13 @@
 // PropertyInfo Component
 // Displays property details, description, and amenities
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
+import { validateCoordinates } from '../../shared/utils/validation';
 import { formatPrice } from '../../../utils/currency';
 import { getPriceReductionInfo } from '../../../utils/priceUtils';
 import {
-  MapPinIcon,
   BedIcon,
   BathIcon,
   SqftIcon,
@@ -92,6 +92,35 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
       window.history.pushState({}, '', `/search?country=${encodeURIComponent(countryKey)}`);
     }
   }, [property.city, property.country, state.searchPageState.filters, updateSearchPageState, dispatch]);
+
+  const [directionsLoading, setDirectionsLoading] = useState(false);
+
+  const handleGetDirections = useCallback(() => {
+    const coordsValid = validateCoordinates(property.lat ?? 0, property.lng ?? 0).isValid;
+    const destinationParam = coordsValid
+      ? `${property.lat},${property.lng}`
+      : encodeURIComponent(`${property.address}, ${property.city}, ${property.country}`);
+
+    const openMaps = (origin?: string) => {
+      const url = origin
+        ? `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destinationParam}`
+        : `https://www.google.com/maps/dir/?api=1&destination=${destinationParam}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+      setDirectionsLoading(false);
+    };
+
+    if (!navigator.geolocation) {
+      openMaps();
+      return;
+    }
+
+    setDirectionsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => openMaps(`${pos.coords.latitude},${pos.coords.longitude}`),
+      () => openMaps(),
+      { timeout: 5000, maximumAge: 60000 }
+    );
+  }, [property.lat, property.lng, property.address, property.city, property.country]);
 
   return (
     <div className="space-y-6">
@@ -182,35 +211,68 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             );
           })()}
 
-          <div className="inline-flex items-center text-neutral-600 mt-2 flex-wrap">
-            <MapPinIcon className="w-5 h-5 mr-2 text-neutral-400 flex-shrink-0" />
-            <span className="text-sm sm:text-base lg:text-lg">
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${property.lat},${property.lng}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline hover:text-primary transition-colors"
-                title="Open in Google Maps"
-              >
-                {property.address}
-              </a>
-              <span>, </span>
+          {/* Address Card */}
+          <div className="mt-4 p-4 rounded-2xl bg-gradient-to-br from-primary/[0.08] via-primary/[0.04] to-transparent border border-primary/20 hover:border-primary/30 transition-colors">
+            <div className="flex items-start gap-3">
+              {/* Filled location pin */}
+              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+                <svg className="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="currentColor">
+                  <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-2.083 3.218-4.374 3.218-6.991a6.5 6.5 0 10-13 0c0 2.617 1.274 4.908 3.218 6.99a19.58 19.58 0 002.682 2.283 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                </svg>
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <a
+                  href={
+                    validateCoordinates(property.lat ?? 0, property.lng ?? 0).isValid
+                      ? `https://www.google.com/maps/search/?api=1&query=${property.lat},${property.lng}`
+                      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(property.address)}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block font-semibold text-neutral-900 hover:text-primary transition-colors text-sm sm:text-base leading-snug"
+                  title={t('details.openInMaps', 'Open in Google Maps')}
+                >
+                  {property.address}
+                </a>
+                <div className="flex flex-wrap items-center gap-x-1.5 mt-1 text-xs sm:text-sm text-neutral-500">
+                  <button
+                    onClick={(e) => handleLocationClick(e, 'city')}
+                    className="hover:text-primary transition-colors"
+                    title={`View all properties in ${property.city}`}
+                  >
+                    {property.city}
+                  </button>
+                  <span aria-hidden>·</span>
+                  <button
+                    onClick={(e) => handleLocationClick(e, 'country')}
+                    className="hover:text-primary transition-colors"
+                    title={`View all properties in ${property.country}`}
+                  >
+                    {property.country}
+                  </button>
+                </div>
+              </div>
+
+              {/* Directions button */}
               <button
-                onClick={(e) => handleLocationClick(e, 'city')}
-                className="hover:underline hover:text-primary transition-colors cursor-pointer"
-                title={`View all properties in ${property.city}`}
+                onClick={handleGetDirections}
+                disabled={directionsLoading}
+                className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-white text-xs sm:text-sm font-medium hover:bg-primary/90 disabled:opacity-60 active:scale-95 transition-all shadow-sm shadow-primary/20"
+                aria-label={t('details.getDirections', 'Get Directions')}
               >
-                {property.city}
+                {directionsLoading ? (
+                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v3m0 12v3M3 12h3m12 0h3" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                  </svg>
+                )}
+                <span className="hidden sm:inline">{t('details.getDirections', 'Directions')}</span>
               </button>
-              <span>, </span>
-              <button
-                onClick={(e) => handleLocationClick(e, 'country')}
-                className="hover:underline hover:text-primary transition-colors cursor-pointer"
-                title={`View all properties in ${property.country}`}
-              >
-                {property.country}
-              </button>
-            </span>
+            </div>
           </div>
 
           {/* Property Type & Listing Badge */}
