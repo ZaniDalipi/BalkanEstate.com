@@ -148,9 +148,32 @@ async function captureSlide(page, idx, shots) {
     }
 
     // ── Slide 6: Property Detail ─────────────────────────────────────────────
-    case 5:
+    case 5: {
       shots.push({ buf: await snap(page, `${label} Property`), note: 'Property detail' });
+      // Open each feature overlay
+      const overlays = [
+        ['neighborhood', 'Neighborhood Insights overlay'],
+        ['market',       'Market Context overlay'],
+        ['viewing',      'Schedule a Viewing overlay'],
+      ];
+      for (const [type, note] of overlays) {
+        await highlight(page, `.fc[onclick*="${type}"]`);
+        shots.push({ buf: await snap(page, `${label} fc-hl-${type}`), note: `Highlight: ${note.replace(' overlay','')}` });
+        await clearHighlight(page);
+        await page.evaluate(t => { if (typeof openOverlay === 'function') openOverlay(t); }, type);
+        await sleep(700);
+        shots.push({ buf: await snap(page, `${label} ov-${type}`), note });
+        // For viewing overlay: also show booking confirmation
+        if (type === 'viewing') {
+          await page.evaluate(() => { if (typeof confirmBooking === 'function') confirmBooking(); });
+          await sleep(1400);
+          shots.push({ buf: await snap(page, `${label} ov-booking-confirmed`), note: 'Viewing booking confirmed' });
+        }
+        await page.evaluate(() => { if (typeof closeOverlay === 'function') closeOverlay(); });
+        await sleep(350);
+      }
       break;
+    }
 
     // ── Slide 7: Agents ──────────────────────────────────────────────────────
     case 6: {
@@ -212,6 +235,15 @@ async function captureSlide(page, idx, shots) {
       });
       await sleep(400);
       shots.push({ buf: await snap(page, `${label} mortgage-30yr`), note: 'Mortgage calc — 30 years' });
+      // AI Neighborhood overlay
+      await highlight(page, '.fc[onclick*="ai-neighborhood"]');
+      shots.push({ buf: await snap(page, `${label} ai-nb-hl`), note: 'Highlight: AI Neighborhood Insights' });
+      await clearHighlight(page);
+      await page.evaluate(() => { if (typeof openOverlay === 'function') openOverlay('ai-neighborhood'); });
+      await sleep(700);
+      shots.push({ buf: await snap(page, `${label} ai-nb-overlay`), note: 'AI Neighborhood Analysis overlay' });
+      await page.evaluate(() => { if (typeof closeOverlay === 'function') closeOverlay(); });
+      await sleep(350);
       break;
     }
 
