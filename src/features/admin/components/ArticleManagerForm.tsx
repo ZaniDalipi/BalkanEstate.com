@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { tokenService } from '@/src/shared/api/tokenService';
+import { csrfHeaders } from '@/src/shared/api/httpClient';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 
 interface ArticleManagerFormProps {
@@ -143,7 +144,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
       formData.append('image', file);
       const res = await fetch(`${API_CONFIG.BASE_URL}/admin/articles/upload-image`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}`, ...csrfHeaders() },
         body: formData,
       });
       if (!res.ok) throw new Error('Upload failed');
@@ -168,7 +169,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
       formData.append('image', file);
       const res = await fetch(`${API_CONFIG.BASE_URL}/admin/articles/upload-image`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}`, ...csrfHeaders() },
         body: formData,
       });
       if (!res.ok) throw new Error('Upload failed');
@@ -246,7 +247,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
 
       const res = await fetch(url, {
         method,
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', ...csrfHeaders() },
         body: JSON.stringify(payload),
       });
 
