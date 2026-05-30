@@ -191,6 +191,8 @@
     "view360": "360° View",
     "floorPlan": "Floor Plan",
     "viewOnMap": "View on Map",
+    "getDirections": "Directions",
+    "openInMaps": "Open in Google Maps",
     "callSeller": "Call Seller",
     "messageSeller": "Message Seller",
     "startingChat": "Starting Chat...",
