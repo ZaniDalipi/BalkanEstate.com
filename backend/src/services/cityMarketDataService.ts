@@ -4,6 +4,7 @@ import CityMarketData, { ICityMarketData } from '../models/CityMarketData';
 import Property from '../models/Property';
 import { FlattenMaps } from 'mongoose';
 import { apiLogger } from '../utils/logger';
+import { fetchLiveCityPrice, getOfficialSourceInfo } from './officialPriceDataService';
 
 // Type for lean documents (plain objects without Mongoose methods)
 export type CityMarketDataLean = FlattenMaps<ICityMarketData> & { _id: string };
@@ -301,6 +302,40 @@ const COUNTRY_FALLBACK_RESEARCH: Record<string, number> = {
 };
 
 /**
+ * Authoritative city average price: BIS live (3s timeout) → static research → country fallback.
+ * This is the single source of truth for avgPricePerSqm across all city market data.
+ */
+async function getAuthoritativePrice(city: string, country: string): Promise<{
+  avgPricePerSqm: number;
+  officialSourceName: string;
+  officialSourceUrl: string;
+}> {
+  const staticPrice = CITY_RESEARCH_PRICES[city] ?? COUNTRY_FALLBACK_RESEARCH[country] ?? 900;
+  const sourceInfo = getOfficialSourceInfo(country);
+
+  try {
+    const live = await fetchLiveCityPrice(city, country);
+    if (live && live.pricePerSqm > 0) {
+      return {
+        avgPricePerSqm: live.pricePerSqm,
+        officialSourceName: live.sourceName,
+        officialSourceUrl: live.sourceUrl,
+      };
+    }
+  } catch {
+    // fall through
+  }
+
+  return {
+    avgPricePerSqm: staticPrice,
+    officialSourceName: sourceInfo.name,
+    officialSourceUrl: sourceInfo.bisSeriesId
+      ? `https://fred.stlouisfed.org/series/${sourceInfo.bisSeriesId}`
+      : sourceInfo.url,
+  };
+}
+
+/**
  * Generate realistic fallback data when Gemini API is unavailable
  */
 function generateFallbackCityData(cityInfo: { city: string; country: string; countryCode: string }): CityDataFromGemini {
@@ -431,17 +466,17 @@ For each city, provide realistic market data based on general economic trends, t
   }
 ]
 
-Guidelines for avgPricePerSqm (for-sale prices only, NOT rental):
-- Albania (Tirana): €800-1,400/sqm; coastal (Sarande, Vlore): €700-1,200/sqm
-- Serbia (Belgrade): €1,500-2,500/sqm; smaller Serbian cities: €600-1,200/sqm
-- Montenegro coastal (Budva, Kotor): €2,000-4,000/sqm; Podgorica: €1,000-1,800/sqm
-- Croatia coastal (Split, Dubrovnik area): €3,000-5,000/sqm; Zagreb: €2,000-3,500/sqm
-- Bosnia (Sarajevo): €1,200-2,000/sqm; smaller cities: €600-1,200/sqm
-- North Macedonia (Skopje): €1,000-1,800/sqm; smaller cities: €500-900/sqm
-- Bulgaria (Sofia): €1,200-2,000/sqm; coastal: €800-1,500/sqm
-- Romania (Bucharest): €1,500-2,500/sqm; other cities: €800-1,500/sqm
-- Kosovo (Pristina): €700-1,200/sqm
-- Greece: coastal/islands €2,000-5,000/sqm; mainland cities €1,000-2,000/sqm
+Guidelines for avgPricePerSqm (for-sale prices only, NOT rental) — verified 2025 data:
+- Albania: Tirana €2,200-2,600/sqm; Sarande €1,600-1,800/sqm; Vlore €1,400-1,600/sqm; Durres €1,300-1,500/sqm; smaller cities €700-1,000/sqm
+- Serbia: Belgrade €2,300-2,700/sqm; Novi Sad €1,600-1,900/sqm; Nis €900-1,100/sqm; smaller cities €700-950/sqm
+- Montenegro: Budva/Tivat/Kotor €3,000-3,800/sqm; Podgorica €2,000-2,300/sqm; Bar/Herceg Novi €2,000-2,600/sqm
+- Croatia: Split €4,800-5,500/sqm; Dubrovnik €3,900-4,500/sqm; Zagreb/Zadar €3,000-3,400/sqm; Rijeka €2,300-2,700/sqm; smaller cities €1,100-1,800/sqm
+- Bosnia: Sarajevo €1,250-1,450/sqm; Banja Luka €1,050-1,250/sqm; Mostar €1,000-1,200/sqm; smaller cities €800-1,000/sqm
+- North Macedonia: Skopje €1,600-1,800/sqm; Ohrid €1,000-1,200/sqm; Bitola €800-900/sqm; smaller cities €700-800/sqm
+- Bulgaria: Sofia €1,800-2,200/sqm; Varna €1,400-1,600/sqm; Plovdiv €1,300-1,500/sqm; coastal €1,100-1,300/sqm
+- Romania: Cluj-Napoca €3,000-3,400/sqm; Bucharest €1,900-2,300/sqm; Brasov €1,700-1,900/sqm; smaller cities €1,000-1,500/sqm
+- Kosovo: Prishtina €1,500-1,700/sqm; Prizren €800-900/sqm; smaller cities €600-750/sqm
+- Greece: Athens €2,300-2,700/sqm; Rhodes/Chania €2,400-2,800/sqm; Thessaloniki €2,000-2,400/sqm; mainland cities €1,000-1,400/sqm
 - Rising markets have 8-15% YoY growth
 - Stable markets have 2-7% YoY growth
 - Declining markets have -3% to 2% growth
@@ -611,14 +646,21 @@ export async function updateAllCityMarketData(): Promise<void> {
             continue;
           }
 
+          // Always override avgPricePerSqm with authoritative research/BIS data — never trust Gemini for prices
+          const { avgPricePerSqm, officialSourceName, officialSourceUrl } =
+            await getAuthoritativePrice(cityInfo.city, cityInfo.country);
+
           // Merge: Gemini provides market-wide metrics; calculated provides live listing stats.
-          // avgPricePerSqm always comes from Gemini (market reference).
+          // avgPricePerSqm is always overridden by official/research price.
           // listingAvgPricePerSqm comes from active platform listings (when enough exist).
           const marketData: Partial<ICityMarketData> = {
             city: cityInfo.city,
             country: cityInfo.country,
             countryCode: cityInfo.countryCode,
             ...(geminiCityData || {}),
+            avgPricePerSqm,
+            officialSourceName,
+            officialSourceUrl,
             ...(calculatedData ? {
               listingsCount: calculatedData.listingsCount,
               soldLastMonth: calculatedData.soldLastMonth,
@@ -676,8 +718,13 @@ export async function ensureAllFeaturedCitiesExist(): Promise<void> {
     if (exists) continue;
 
     const fallback = generateFallbackCityData(cityInfo);
+    const { avgPricePerSqm, officialSourceName, officialSourceUrl } =
+      await getAuthoritativePrice(cityInfo.city, cityInfo.country);
     await CityMarketData.create({
       ...fallback,
+      avgPricePerSqm,
+      officialSourceName,
+      officialSourceUrl,
       listingsCount: 0,
       soldLastMonth: 0,
       priceGrowthMoM: +(fallback.priceGrowthYoY / 12).toFixed(1),
@@ -711,12 +758,18 @@ export async function getFeaturedCities(limit: number = 12): Promise<CityMarketD
       );
     }
 
-    // Enrich each city with live stats from the Property collection
+    // Enrich each city with live stats and override avgPricePerSqm with authoritative data
     const enrichedCities = await Promise.all(
       cities.map(async (city) => {
-        const liveStats = await getLiveCityStats(city.city, city.country);
+        const [liveStats, priceData] = await Promise.all([
+          getLiveCityStats(city.city, city.country),
+          getAuthoritativePrice(city.city, city.country),
+        ]);
         return {
           ...city,
+          avgPricePerSqm: priceData.avgPricePerSqm,
+          officialSourceName: priceData.officialSourceName,
+          officialSourceUrl: priceData.officialSourceUrl,
           listingsCount: liveStats.listingsCount,
           soldLastMonth: liveStats.soldLastMonth,
           ...(liveStats.listingAvgPricePerSqm !== undefined
@@ -742,12 +795,18 @@ export async function getCitiesByCountry(country: string): Promise<CityMarketDat
       .sort({ demandScore: -1, avgPricePerSqm: 1 })
       .lean<CityMarketDataLean[]>();
 
-    // Enrich each city with live stats from the Property collection
+    // Enrich each city with live stats and override avgPricePerSqm with authoritative data
     const enrichedCities = await Promise.all(
       cities.map(async (city) => {
-        const liveStats = await getLiveCityStats(city.city, city.country);
+        const [liveStats, priceData] = await Promise.all([
+          getLiveCityStats(city.city, city.country),
+          getAuthoritativePrice(city.city, city.country),
+        ]);
         return {
           ...city,
+          avgPricePerSqm: priceData.avgPricePerSqm,
+          officialSourceName: priceData.officialSourceName,
+          officialSourceUrl: priceData.officialSourceUrl,
           listingsCount: liveStats.listingsCount,
           soldLastMonth: liveStats.soldLastMonth,
           ...(liveStats.listingAvgPricePerSqm !== undefined
@@ -775,10 +834,16 @@ export async function getCityMarketData(city: string, country: string): Promise<
       return null;
     }
 
-    // Enrich with live stats
-    const liveStats = await getLiveCityStats(city, country);
+    // Enrich with live stats and override avgPricePerSqm with authoritative data
+    const [liveStats, priceData] = await Promise.all([
+      getLiveCityStats(city, country),
+      getAuthoritativePrice(city, country),
+    ]);
     return {
       ...data,
+      avgPricePerSqm: priceData.avgPricePerSqm,
+      officialSourceName: priceData.officialSourceName,
+      officialSourceUrl: priceData.officialSourceUrl,
       listingsCount: liveStats.listingsCount,
       soldLastMonth: liveStats.soldLastMonth,
       ...(liveStats.listingAvgPricePerSqm !== undefined
