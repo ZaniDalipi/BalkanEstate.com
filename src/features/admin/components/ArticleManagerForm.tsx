@@ -69,6 +69,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
       setFetchingArticle(true);
       const token = tokenService.getAccessToken();
       const res = await fetch(`${API_CONFIG.BASE_URL}/admin/articles/${id}`, {
+        credentials: 'include',
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('Failed to load article');
@@ -144,6 +145,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
       formData.append('image', file);
       const res = await fetch(`${API_CONFIG.BASE_URL}/admin/articles/upload-image`, {
         method: 'POST',
+        credentials: 'include',
         headers: { Authorization: `Bearer ${token}`, ...csrfHeaders() },
         body: formData,
       });
@@ -169,6 +171,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
       formData.append('image', file);
       const res = await fetch(`${API_CONFIG.BASE_URL}/admin/articles/upload-image`, {
         method: 'POST',
+        credentials: 'include',
         headers: { Authorization: `Bearer ${token}`, ...csrfHeaders() },
         body: formData,
       });
@@ -247,6 +250,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
 
       const res = await fetch(url, {
         method,
+        credentials: 'include',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', ...csrfHeaders() },
         body: JSON.stringify(payload),
       });
