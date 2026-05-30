@@ -182,6 +182,44 @@ Raw URL → optimizeCloudinaryUrl(url, { width, quality }) → <img src>
 
 ---
 
+## Google AdSense Integration
+
+```
+src/features/ads/
+├── types/index.ts          # AdSlot interface + AD_SLOTS registry
+├── hooks/useAdSense.ts     # Script loader (singleton) + shouldShowAds gate
+├── components/
+│   ├── AdUnit.tsx          # Core <ins> renderer — calls adsbygoogle.push once per mount
+│   ├── AdBanner.tsx        # Horizontal leaderboard / footer strip
+│   ├── AdInFeed.tsx        # Native in-feed unit between property cards
+│   ├── AdSidebar.tsx       # 300×250 rectangle for detail page sidebar
+│   └── AdInArticle.tsx     # In-article unit between content sections
+└── __tests__/
+    ├── useAdSense.test.ts
+    └── AdUnit.test.tsx
+```
+
+### Ad visibility gate
+
+| User state | Sees ads? |
+|------------|-----------|
+| Unauthenticated | Yes |
+| `subscription.tier === 'free'` | Yes |
+| `tier === 'buyer'` (€3/month — ad-free is a feature) | No |
+| `tier === 'pro'` | No |
+| `tier === 'agency_owner'` / `agency_agent` | No |
+| Auth loading | No (avoids flash) |
+
+### Script loading strategy
+
+`useAdSense` uses a **module-level singleton** (`scriptState` + `listeners` Set) so the AdSense `<script>` tag is injected into `<head>` exactly once regardless of how many ad components are mounted simultaneously. The script is loaded **lazily** — only when a component eligible to show ads first mounts — so paid users never trigger the network request.
+
+### Environment
+
+`VITE_ADSENSE_PUBLISHER_ID` — if absent, all components return `null` silently (local dev / tests pass without any AdSense account).
+
+---
+
 ## Security Notes
 - All API mutations use CSRF cookie (`credentials: 'include'`)
 - JWT stored in httpOnly cookies (not localStorage)

@@ -112,3 +112,44 @@ Every new translation key must be added to all 10 locale files simultaneously.
 
 Always use `optimizeCloudinaryUrl(url, { width, quality })` and `cloudinarySrcSet()` — never raw Cloudinary URLs.
 LQIP uses `width: 40, quality: 'auto:eco'`.
+
+---
+
+## Google AdSense
+
+Feature slice: `src/features/ads/`
+
+### Environment variable
+```
+VITE_ADSENSE_PUBLISHER_ID=ca-pub-XXXXXXXXXXXXXXXXX
+```
+Without this variable, **all ad components render nothing** — safe for local dev and test.
+
+### Ad gating rule
+Ads are shown **only** to unauthenticated visitors and users whose `subscription.tier === 'free'`.
+Paid tiers (`buyer`, `pro`, `agency_agent`, `agency_owner`) never see ads.
+
+### Usage
+```tsx
+import { AdBanner, AdInFeed, AdSidebar, AdInArticle } from '@/features/ads';
+
+// Between hero and property grid
+<AdBanner placement="home-leaderboard" />
+
+// Between property cards (every Nth card in the grid)
+<AdInFeed />
+
+// Property detail sidebar
+<AdSidebar />
+
+// Between description sections
+<AdInArticle />
+```
+
+### Adding a new slot
+1. Add an entry to `AD_SLOTS` in `src/features/ads/types/index.ts` — slotId comes from AdSense dashboard.
+2. Export a named component from `src/features/ads/index.ts` if it needs a custom wrapper.
+3. Never inline slot IDs in page components — always reference `AD_SLOTS`.
+
+### Script loading
+`useAdSense` loads the AdSense `<script>` lazily and exactly once (module singleton). It only triggers the load when a component eligible to show ads mounts, so paid users never incur the network request.

@@ -8,6 +8,8 @@ interface ImportMetaEnv {
   readonly VITE_GOOGLE_MAPS_MAP_ID?: string;
   readonly VITE_FACEBOOK_APP_ID?: string;
   readonly VITE_APPLE_CLIENT_ID?: string;
+  /** Google AdSense publisher ID — format: ca-pub-XXXXXXXXXXXXXXXXX */
+  readonly VITE_ADSENSE_PUBLISHER_ID?: string;
 }
 
 interface ImportMeta {
