@@ -131,10 +131,10 @@
     "helpText": "If the payment window didn't open, please check your popup blocker"
   },
   "comingSoon": {
-    "selfServicePayment": "Self-service payment",
-    "launchingSoon": "Online payment gateway launching soon",
-    "integrationInProgress": "Payment integration in progress",
-    "contactSalesDescription": "Need help or want to subscribe manually? Contact our sales team:",
+    "selfServicePayment": "Direct payments not yet available",
+    "launchingSoon": "We are currently working to find a payment provider to partner with us. Direct payments are not accepted at this time.",
+    "integrationInProgress": "Searching for payment provider partner",
+    "contactSalesDescription": "Want to subscribe? Contact us and we will arrange it manually for you:",
     "responseTime": "We typically respond within 24 hours"
   },
   "taxNotice": {

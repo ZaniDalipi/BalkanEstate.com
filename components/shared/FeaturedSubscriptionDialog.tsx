@@ -278,6 +278,23 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
               </>
             )}
 
+            {/* Payment Coming Soon Notice */}
+            <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4">
+              <div className="flex gap-3 items-start">
+                <div className="flex-shrink-0 mt-0.5">
+                  <span className="w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse inline-block"></span>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-amber-900 mb-1">
+                    Direct payments are not yet available
+                  </p>
+                  <p className="text-xs text-amber-800 leading-relaxed">
+                    We are currently looking for a payment provider to partner with us. You can activate your featured agency subscription for free using a coupon code, or contact us at <a href="mailto:sales@balkanestateai.com" className="underline font-medium">sales@balkanestateai.com</a> to arrange it manually.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Coupon Code */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-neutral-700 mb-2">
@@ -344,27 +361,21 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
               </button>
               <button
                 onClick={handleSubscribe}
-                disabled={loading || loadingProducts}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-primary text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 disabled:opacity-50"
+                disabled={loading || loadingProducts || !(couponApplied && finalPrice === 0)}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-primary text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? t('agencies:featuredDialog.processing', 'Processing...') : couponApplied && finalPrice !== null
-                  ? finalPrice === 0
-                    ? t('agencies:featuredDialog.activateForFree', 'Activate for FREE')
-                    : t('agencies:featuredDialog.subscribePrice', 'Subscribe - €{{price}}', { price: finalPrice })
-                  : t('agencies:featuredDialog.subscribePrice', 'Subscribe - €{{price}}', { price: durationOptions[selectedDuration].price })}
+                {loading ? t('agencies:featuredDialog.processing', 'Processing...') : couponApplied && finalPrice === 0
+                  ? t('agencies:featuredDialog.activateForFree', 'Activate for FREE')
+                  : 'Payment Not Available Yet'}
               </button>
             </div>
 
             <p className="text-xs text-neutral-500 text-center mt-4">
               {t('agencies:featuredDialog.bySubscribing', 'By subscribing, you agree to our terms and conditions.')}
-              {couponApplied && finalPrice !== null ? (
-                finalPrice === 0 ? (
-                  <span className="font-semibold text-green-600"> {t('agencies:featuredDialog.noPaymentRequired', 'No payment required - 100% discount applied!')}</span>
-                ) : (
-                  <span> {t('agencies:featuredDialog.chargedPerPeriod', 'You will be charged €{{price}} per {{period}}.', { price: finalPrice, period: durationOptions[selectedDuration].label })}</span>
-                )
+              {couponApplied && finalPrice === 0 ? (
+                <span className="font-semibold text-green-600"> {t('agencies:featuredDialog.noPaymentRequired', 'No payment required - 100% discount applied!')}</span>
               ) : (
-                <span> {t('agencies:featuredDialog.chargedPerPeriod', 'You will be charged €{{price}} per {{period}}.', { price: durationOptions[selectedDuration].price, period: durationOptions[selectedDuration].label })}</span>
+                <span className="text-amber-700"> Apply a 100% off coupon code to activate your featured subscription at no cost.</span>
               )}
             </p>
           </>
