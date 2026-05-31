@@ -207,7 +207,7 @@ const BlogPage: React.FC = () => {
                           key={article._id}
                           article={article}
                           index={i}
-                          t={t}
+                          t={t as (key: string, fallback?: string) => string}
                           onTagClick={tag => handleTagChange(tag)}
                         />
                       ))}
