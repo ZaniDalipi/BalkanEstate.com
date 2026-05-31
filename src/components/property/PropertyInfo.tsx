@@ -238,7 +238,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block font-semibold text-neutral-900 hover:text-primary transition-colors text-sm sm:text-base leading-snug"
-                  title={t('details.openInMaps', 'Open in Google Maps')}
+                  title={t('actions.openInMaps', 'Open in Google Maps')}
                 >
                   {property.address}
                 </a>
@@ -266,7 +266,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                 onClick={handleGetDirections}
                 disabled={directionsLoading}
                 className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-white text-xs sm:text-sm font-medium hover:bg-primary/90 disabled:opacity-60 active:scale-95 transition-all shadow-sm shadow-primary/20"
-                aria-label={t('details.getDirections', 'Get Directions')}
+                aria-label={t('actions.getDirections', 'Get Directions')}
               >
                 {directionsLoading ? (
                   <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -277,7 +277,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
                   </svg>
                 )}
-                <span className="hidden sm:inline">{t('details.getDirections', 'Directions')}</span>
+                <span className="hidden sm:inline">{t('actions.getDirections', 'Directions')}</span>
               </button>
             </div>
           </div>
