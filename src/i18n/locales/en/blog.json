@@ -1,14 +1,17 @@
 {
   "title": "Balkan Real Estate Blog",
   "subtitle": "Expert insights, market analysis, and guides for property buyers, investors, and sellers across the Balkans",
+  "searchPlaceholder": "Search articles…",
   "readMore": "Read More",
   "backToBlog": "Back to Blog",
   "minuteRead": "{{count}} min read",
   "noArticles": "No articles found",
   "error": "Failed to load articles",
   "articleNotFound": "Article not found",
+  "articleNotFoundDesc": "This article may have been moved or deleted.",
   "moreArticles": "More Articles",
   "moreArticlesDesc": "Check back soon for more articles on real estate investment and market insights",
+  "relatedArticles": "Related Articles",
   "category_market": "Market",
   "category_investment": "Investment",
   "category_regulation": "Regulation",
@@ -19,7 +22,8 @@
   "filters": {
     "category": "Category",
     "country": "Country",
-    "all": "All"
+    "all": "All",
+    "popularTags": "Popular Tags"
   },
   "pagination": {
     "prev": "Previous",

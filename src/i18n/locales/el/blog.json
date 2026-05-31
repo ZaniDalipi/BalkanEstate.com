@@ -1,0 +1,33 @@
+{
+  "title": "Blog Ακινήτων στα Βαλκάνια",
+  "subtitle": "Εξειδικευμένες γνώσεις, αναλύσεις αγοράς και οδηγοί για αγοραστές, επενδυτές και πωλητές ακινήτων στα Βαλκάνια",
+  "searchPlaceholder": "Αναζήτηση άρθρων…",
+  "readMore": "Διαβάστε Περισσότερα",
+  "backToBlog": "Επιστροφή στο Blog",
+  "minuteRead": "{{count}} λεπτά ανάγνωση",
+  "noArticles": "Δεν βρέθηκαν άρθρα",
+  "error": "Αποτυχία φόρτωσης άρθρων",
+  "articleNotFound": "Το άρθρο δεν βρέθηκε",
+  "articleNotFoundDesc": "Αυτό το άρθρο μπορεί να έχει μετακινηθεί ή διαγραφεί.",
+  "moreArticles": "Περισσότερα Άρθρα",
+  "moreArticlesDesc": "Επισκεφθείτε μας σύντομα για περισσότερα άρθρα σχετικά με επενδύσεις και τάσεις της αγοράς ακινήτων",
+  "relatedArticles": "Σχετικά Άρθρα",
+  "category_market": "Αγορά",
+  "category_investment": "Επενδύσεις",
+  "category_regulation": "Κανονισμοί",
+  "category_development": "Ανάπτυξη",
+  "category_tourism": "Τουρισμός",
+  "category_guide": "Οδηγός",
+  "category_lifestyle": "Τρόπος Ζωής",
+  "filters": {
+    "category": "Κατηγορία",
+    "country": "Χώρα",
+    "all": "Όλα",
+    "popularTags": "Δημοφιλείς Ετικέτες"
+  },
+  "pagination": {
+    "prev": "Προηγούμενη",
+    "next": "Επόμενη",
+    "page": "Σελίδα {{page}} από {{total}}"
+  }
+}

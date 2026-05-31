@@ -1,0 +1,33 @@
+{
+  "title": "Blog Imobiliar din Balcani",
+  "subtitle": "Perspective de experți, analize de piață și ghiduri pentru cumpărători, investitori și vânzători de proprietăți din Balcani",
+  "searchPlaceholder": "Căutați articole…",
+  "readMore": "Citește Mai Mult",
+  "backToBlog": "Înapoi la Blog",
+  "minuteRead": "{{count}} min citire",
+  "noArticles": "Nu s-au găsit articole",
+  "error": "Eroare la încărcarea articolelor",
+  "articleNotFound": "Articolul nu a fost găsit",
+  "articleNotFoundDesc": "Acest articol poate fi mutat sau șters.",
+  "moreArticles": "Mai Multe Articole",
+  "moreArticlesDesc": "Reveniți curând pentru mai multe articole despre investiții și tendințele pieței imobiliare",
+  "relatedArticles": "Articole Conexe",
+  "category_market": "Piață",
+  "category_investment": "Investiții",
+  "category_regulation": "Reglementări",
+  "category_development": "Dezvoltare",
+  "category_tourism": "Turism",
+  "category_guide": "Ghid",
+  "category_lifestyle": "Stil de Viață",
+  "filters": {
+    "category": "Categorie",
+    "country": "Țară",
+    "all": "Toate",
+    "popularTags": "Etichete Populare"
+  },
+  "pagination": {
+    "prev": "Anterioară",
+    "next": "Următoare",
+    "page": "Pagina {{page}} din {{total}}"
+  }
+}
