@@ -466,9 +466,9 @@ export const getProperty = async (
         return;
       }
 
+      await Property.updateOne({ _id: refreshed._id }, { $inc: { views: 1 } });
       refreshed.views += 1;
-      await refreshed.save();
-      await incrementViewCount(String(refreshed.sellerId._id || refreshed.sellerId));
+      await incrementViewCount(String((refreshed.sellerId as any)._id || refreshed.sellerId));
 
       let enrichedProperty = refreshed.toObject();
       const seller = enrichedProperty.sellerId as any;
@@ -481,12 +481,14 @@ export const getProperty = async (
       return;
     }
 
-    // Increment views on property
-    property.views += 1;
-    await property.save();
+    // Increment views atomically — avoids running Mongoose validators which would
+    // fail for scraped listings that may be missing schema-required fields like
+    // address/city/country that are filled in later by the owner.
+    await Property.updateOne({ _id: property._id }, { $inc: { views: 1 } });
+    property.views += 1; // keep local copy in sync for the response
 
     // Update seller's stats in real-time
-    await incrementViewCount(String(property.sellerId._id || property.sellerId));
+    await incrementViewCount(String((property.sellerId as any)._id || property.sellerId));
 
     // Enrich property with agency logo if seller is an agent
     let enrichedProperty = property.toObject();

@@ -959,7 +959,9 @@ export const normalize = async (
     status: 'active',
     price: finalPrice,
     isNegotiable: finalPrice === 0 ? true : Boolean(mapped.isNegotiable),
-    address: address || undefined,
+    // Fallback chain: address → city → country → 'Unknown'
+    // Required by schema; owner can correct via the edit listing form later.
+    address: address || city || country || 'Unknown',
     city: city || undefined,
     country: country || undefined,
     beds: beds ?? 0,
