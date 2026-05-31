@@ -612,8 +612,11 @@ router.post('/articles', logAdminAction('CREATE_ARTICLE'), async (req: Request, 
   try {
     const { title, content, excerpt, category, tags, country, countryCode, coverImageUrl, status, isFeatured } = req.body;
 
+    console.log('[Article create] body keys:', Object.keys(req.body || {}));
+    console.log('[Article create] title:', !!title, '| content:', !!content, `(len=${String(content).length})`, '| excerpt:', !!excerpt);
     if (!title || !content || !excerpt) {
-      res.status(400).json({ message: 'Title, content, and excerpt are required' });
+      console.log('[Article create] 400 - missing required fields');
+      res.status(400).json({ message: `Missing required fields: ${[!title && 'title', !content && 'content', !excerpt && 'excerpt'].filter(Boolean).join(', ')}` });
       return;
     }
 
