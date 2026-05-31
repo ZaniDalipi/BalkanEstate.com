@@ -90,15 +90,15 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
       <article className="min-h-screen bg-white">
         {/* Hero / Cover Image */}
         {article.coverImageUrl ? (
-          <div className="w-full h-64 sm:h-96 md:h-[500px] overflow-hidden">
+          <div className="w-full aspect-[21/9] overflow-hidden bg-slate-100">
             <img
               src={article.coverImageUrl}
               alt={article.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-center"
             />
           </div>
         ) : (
-          <div className="w-full h-32 sm:h-48 bg-gradient-to-br from-slate-800 to-slate-900" />
+          <div className="w-full h-24 sm:h-32 bg-gradient-to-br from-slate-800 to-slate-900" />
         )}
 
         {/* Article Header */}
@@ -194,7 +194,7 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
               [&_blockquote]:border-l-4 [&_blockquote]:border-blue-400 [&_blockquote]:pl-5 [&_blockquote]:italic [&_blockquote]:text-slate-600 [&_blockquote]:my-6 [&_blockquote]:bg-blue-50/50 [&_blockquote]:py-3 [&_blockquote]:rounded-r-lg
               [&_a]:text-blue-600 [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-blue-800
               [&_hr]:border-neutral-200 [&_hr]:my-8
-              [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:my-6 [&_img]:shadow-sm
+              [&_img]:w-full [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-2xl [&_img]:my-8 [&_img]:shadow-md [&_img]:object-cover
               [&_code]:bg-slate-100 [&_code]:text-slate-800 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
               [&_pre]:bg-slate-900 [&_pre]:text-green-300 [&_pre]:p-5 [&_pre]:rounded-2xl [&_pre]:overflow-x-auto [&_pre]:my-6 [&_pre]:text-sm
               [&_strong]:font-semibold [&_strong]:text-slate-900

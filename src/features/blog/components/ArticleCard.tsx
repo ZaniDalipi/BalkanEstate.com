@@ -63,17 +63,15 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, index, t, onTagClick
     >
       {/* Clickable area for article */}
       <button onClick={handleClick} className="block w-full text-left">
-        {/* Cover image or gradient fallback */}
-        <div className={`h-44 relative overflow-hidden ${article.coverImageUrl ? '' : 'bg-gradient-to-br from-blue-200 to-indigo-300'}`}>
+        {/* Cover image or gradient fallback — 16:9 aspect ratio */}
+        <div className={`aspect-[16/9] relative overflow-hidden ${article.coverImageUrl ? '' : 'bg-gradient-to-br from-blue-200 to-indigo-300'}`}>
           {article.coverImageUrl ? (
             <img
               src={article.coverImageUrl}
               alt={article.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               loading="lazy"
               decoding="async"
-              width={400}
-              height={176}
             />
           ) : (
             <div className="absolute inset-0 bg-black/10">

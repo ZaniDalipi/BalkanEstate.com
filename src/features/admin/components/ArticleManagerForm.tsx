@@ -329,12 +329,12 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
 
               {/* Cover Image */}
               <div
-                className={`relative w-full rounded-2xl overflow-hidden mb-8 cursor-pointer group ${coverImageUrl ? 'h-64' : 'h-40 border-2 border-dashed border-neutral-300 bg-neutral-50 hover:bg-neutral-100 hover:border-neutral-400'} transition-all`}
+                className={`relative w-full rounded-2xl overflow-hidden mb-8 cursor-pointer group ${coverImageUrl ? 'aspect-[21/9]' : 'h-40 border-2 border-dashed border-neutral-300 bg-neutral-50 hover:bg-neutral-100 hover:border-neutral-400'} transition-all`}
                 onClick={() => coverInputRef.current?.click()}
               >
                 {coverImageUrl ? (
                   <>
-                    <img src={coverImageUrl} alt="Cover" className="w-full h-full object-cover" />
+                    <img src={coverImageUrl} alt="Cover" className="absolute inset-0 w-full h-full object-cover object-center" />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <span className="text-white text-sm font-medium">Change cover photo</span>
                     </div>
