@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BalkanEstateAI — Investor Pitch Deck</title>
+<style>
+:root {
+  --blue:    #1A56DB;
+  --teal:    #0891B2;
+  --teal-lt: #06B6D4;
+  --sky:     #38BDF8;
+  --navy:    #0B1E3D;
+  --slate:   #1E3A5F;
+  --slateXl: #0F2540;
+  --dark:    #070E1C;
+  --dark2:   #0C1B2E;
+  --mist:    #E8F0FE;
+  --mistDk:  #C7D9F8;
+  --offW:    #F7F9FC;
+  --gray:    #64748B;
+  --grayLt:  #CBD5E1;
+  --white:   #FFFFFF;
+  --orange:  #F59E0B;
+  --green:   #10B981;
+  --purple:  #7C3AED;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  font-family: -apple-system, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+  background: #000;
+}
+
+/* ─── Stage ──────────────────────────────────────────────────────────────── */
+#stage {
+  position: relative;
+  width: 100vw; height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── Slides ─────────────────────────────────────────────────────────────── */
+.slide {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  overflow: hidden;
+  transform: translateX(100%);
+  transition: transform .65s cubic-bezier(.77,0,.18,1), opacity .65s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+.slide.active {
+  transform: translateX(0); opacity: 1; pointer-events: all;
+  animation: slideIn .65s cubic-bezier(.77,0,.18,1) forwards;
+}
+.slide.prev {
+  transform: translateX(-100%); opacity: 0;
+}
+@keyframes slideIn { from { transform: translateX(100%); opacity:0; } to { transform: translateX(0); opacity:1; } }
+@keyframes fadeUp  { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeIn  { from { opacity:0; } to { opacity:1; } }
+@keyframes popIn   { from { opacity:0; transform:scale(.92); } to { opacity:1; transform:scale(1); } }
+@keyframes spinRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+.slide.active .s-tag     { animation: fadeUp  .5s .1s both; }
+.slide.active .s-num     { animation: fadeIn  .4s .05s both; }
+.slide.active .s-headline{ animation: fadeUp  .55s .15s both; }
+.slide.active .s-divider { animation: fadeIn  .5s .25s both; }
+.slide.active .s-body    { animation: fadeUp  .5s .3s both; }
+.slide.active .s-grid    { animation: fadeUp  .55s .35s both; }
+.slide.active .s-cards   { animation: fadeUp  .55s .4s both; }
+.slide.active .s-footer  { animation: fadeUp  .45s .5s both; }
+.slide.active .s-deco    { animation: popIn   .8s .1s both; }
+
+/* ─── Common layout helpers ──────────────────────────────────────────────── */
+.abs { position: absolute; }
+.full { inset: 0; }
+.col { display: flex; flex-direction: column; }
+.row { display: flex; align-items: center; }
+.center { display: flex; align-items: center; justify-content: center; }
+.flex1 { flex: 1; }
+
+/* ─── Typography ─────────────────────────────────────────────────────────── */
+.hero    { font-size: clamp(2.8rem, 5.5vw, 5.2rem); font-weight: 800; letter-spacing: -.03em; line-height: 1.08; }
+.h2      { font-size: clamp(2rem, 3.8vw, 3.6rem); font-weight: 800; letter-spacing: -.025em; line-height: 1.1; }
+.h3      { font-size: clamp(1.3rem, 2.2vw, 2rem); font-weight: 700; letter-spacing: -.015em; }
+.sub     { font-size: clamp(.85rem, 1.2vw, 1.05rem); line-height: 1.6; }
+.label   { font-size: clamp(.7rem, .9vw, .82rem); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.mono    { font-family: 'SF Mono', 'Fira Code', monospace; }
+.grad-text {
+  background: linear-gradient(120deg, var(--sky), var(--teal-lt));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+/* ─── Tag chip ───────────────────────────────────────────────────────────── */
+.tag {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .28rem .9rem; border-radius: 99px;
+  font-size: .72rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+  border: 1.5px solid currentColor;
+}
+.tag-teal  { color: var(--sky);  background: rgba(8,145,178,.12); border-color: rgba(56,189,248,.3); }
+.tag-blue  { color: var(--sky);  background: rgba(26,86,219,.15); border-color: rgba(38,99,235,.35); }
+.tag-white { color: var(--white);background: rgba(255,255,255,.08);border-color: rgba(255,255,255,.2); }
+
+/* ─── Divider line ───────────────────────────────────────────────────────── */
+.div-line {
+  width: 3.5rem; height: 3px; border-radius: 9px;
+  background: linear-gradient(90deg, var(--teal-lt), var(--blue)); margin: 1rem 0;
+}
+
+/* ─── Cards ──────────────────────────────────────────────────────────────── */
+.card {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px; padding: 1.2rem 1.4rem;
+  backdrop-filter: blur(12px);
+}
+.card-light {
+  background: var(--white);
+  border: 1.5px solid var(--mistDk);
+  border-radius: 16px; padding: 1.2rem 1.4rem;
+}
+.card-mist {
+  background: var(--mist);
+  border: 1.5px solid var(--mistDk);
+  border-radius: 14px; padding: 1rem 1.3rem;
+}
+
+/* ─── Top progress bar ───────────────────────────────────────────────────── */
+#progress-bar {
+  position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 100;
+  background: rgba(255,255,255,.06);
+}
+#progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), var(--sky));
+  transition: width .4s ease;
+}
+
+/* ─── Nav controls ───────────────────────────────────────────────────────── */
+#nav {
+  position: fixed; bottom: 1.6rem; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 1rem; z-index: 100;
+}
+.nav-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(255,255,255,.25); cursor: pointer;
+  transition: all .25s; border: none; padding: 0;
+}
+.nav-dot.on {
+  background: var(--sky); width: 22px; border-radius: 4px;
+}
+#nav-prev, #nav-next {
+  width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.07); color: #fff; font-size: .9rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(10px); transition: all .2s;
+}
+#nav-prev:hover, #nav-next:hover { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.4); }
+#slide-counter {
+  font-size: .72rem; color: rgba(255,255,255,.4); font-weight: 600;
+  letter-spacing: .05em; min-width: 3rem; text-align: center;
+}
+
+/* ─── Decorative circles ─────────────────────────────────────────────────── */
+.deco-circle {
+  position: absolute; border-radius: 50%; pointer-events: none;
+}
+.deco-ring {
+  position: absolute; border-radius: 50%; border: 1.5px solid; pointer-events: none;
+}
+
+/* ─── Notes overlay ──────────────────────────────────────────────────────── */
+#notes-panel {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+  background: rgba(7,14,28,.96); backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255,255,255,.1);
+  padding: 1rem 2.5rem; transform: translateY(100%);
+  transition: transform .3s ease;
+  font-size: .85rem; color: rgba(255,255,255,.7); line-height: 1.65;
+  max-height: 30vh; overflow-y: auto;
+}
+#notes-panel.open { transform: translateY(0); }
+#notes-panel strong { color: var(--sky); font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: .4rem; }
+
+/* ─── Hotkeys hint ───────────────────────────────────────────────────────── */
+#hints {
+  position: fixed; top: 1.1rem; right: 1.4rem; z-index: 100;
+  display: flex; gap: .5rem;
+}
+.hint-btn {
+  font-size: .65rem; padding: .25rem .55rem; border-radius: 6px;
+  background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.4); cursor: pointer; font-weight: 600; letter-spacing: .04em;
+  transition: all .2s;
+}
+.hint-btn:hover { background: rgba(255,255,255,.12); color: rgba(255,255,255,.7); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SLIDE SPECIFIC STYLES
+══════════════════════════════════════════════════════════════════════════ */
+
+/* ── S1 Cover ── */
+#s1 { background: linear-gradient(135deg, #060D1A 0%, #0D1F3A 100%); }
+#s1 .content {
+  position: absolute; inset: 0;
+  display: grid; grid-template-columns: 1fr 1fr;
+  padding: 0 6% 0 7%; align-items: center; gap: 4%;
+}
+#s1 .logo-row { display: flex; align-items: center; gap: .8rem; margin-bottom: 1.6rem; }
+#s1 .logo-mark {
+  width: 46px; height: 46px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--blue), var(--teal));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem; font-weight: 800; color: #fff;
+}
+#s1 .logo-name { font-size: 1.1rem; font-weight: 700; color: #fff; }
+#s1 .headline { color: #fff; margin: .5rem 0 1.2rem; }
+#s1 .tagline { color: rgba(142,184,216,.85); font-size: 1.05rem; line-height: 1.65; max-width: 460px; }
+#s1 .stats-row {
+  display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;
+}
+#s1 .stat-pill {
+  padding: .55rem 1.1rem; border-radius: 12px;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(56,189,248,.2);
+  display: flex; align-items: center; gap: .6rem;
+}
+#s1 .stat-pill .sv { font-size: 1.05rem; font-weight: 800; color: var(--sky); }
+#s1 .stat-pill .sl { font-size: .75rem; color: rgba(142,184,216,.75); font-weight: 500; }
+#s1 .right-deco { position: relative; height: 100%; }
+#s1 .url-tag {
+  margin-top: 1.8rem; font-size: .78rem; color: rgba(56,189,248,.5);
+  font-style: italic; letter-spacing: .02em;
+}
+
+/* ── S2 Problem ── */
+#s2 { background: var(--offW); }
+#s2 .left-panel {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 30%;
+  background: linear-gradient(160deg, var(--navy) 0%, var(--slateXl) 100%);
+  display: flex; flex-direction: column; justify-content: center; padding: 0 0 0 5%;
+}
+#s2 .right-panel {
+  position: absolute; left: 30%; right: 0; top: 0; bottom: 0;
+  display: flex; flex-direction: column; justify-content: center; padding: 0 5% 0 4%;
+  gap: .75rem;
+}
+#s2 .prob-card {
+  display: flex; align-items: center; gap: 1rem;
+  background: var(--white); border: 1.5px solid var(--mistDk); border-radius: 14px;
+  padding: .9rem 1.2rem; position: relative; overflow: hidden;
+  box-shadow: 0 2px 12px rgba(26,86,219,.06);
+}
+#s2 .prob-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+}
+#s2 .prob-card:nth-child(1)::before,#s2 .prob-card:nth-child(2)::before { background: var(--blue); }
+#s2 .prob-card:nth-child(3)::before { background: var(--teal); }
+#s2 .prob-card:nth-child(4)::before,#s2 .prob-card:nth-child(5)::before { background: var(--slate); }
+#s2 .pnum {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .85rem; font-weight: 800; color: #fff;
+}
+#s2 .prob-card:nth-child(1) .pnum,#s2 .prob-card:nth-child(2) .pnum { background: var(--blue); }
+#s2 .prob-card:nth-child(3) .pnum { background: var(--teal); }
+#s2 .prob-card:nth-child(4) .pnum,#s2 .prob-card:nth-child(5) .pnum { background: var(--slate); }
+#s2 .prob-text { font-size: .95rem; color: var(--navy); font-weight: 500; line-height: 1.4; }
+
+/* ── S3 Solution ── */
+#s3 { background: linear-gradient(135deg, #080F1C 0%, #0C1E3A 100%); }
+#s3 .content {
+  position: absolute; inset: 0;
+  display: grid; grid-template-columns: 1fr 1fr;
+  padding: 0 5% 0 7%; align-items: center; gap: 5%;
+}
+#s3 .feat-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: .9rem;
+}
+#s3 .feat-card {
+  border-radius: 16px; padding: 1.1rem 1rem;
+  display: flex; flex-direction: column; align-items: center; gap: .5rem; text-align: center;
+  transition: transform .2s;
+}
+#s3 .feat-card:hover { transform: translateY(-3px); }
+#s3 .feat-icon { font-size: 1.9rem; }
+#s3 .feat-label { font-size: .85rem; font-weight: 700; line-height: 1.25; }
+
+/* ── S4 Product ── */
+#s4 { background: var(--offW); }
+#s4 .header {
+  position: absolute; left: 0; right: 0; top: 0; height: 22%;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--slateXl) 100%);
+  display: flex; flex-direction: column; justify-content: center; padding: 0 6%;
+}
+#s4 .cols {
+  position: absolute; left: 0; right: 0; top: 22%; bottom: 10%;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5%; padding: 2.5% 4% 0;
+}
+#s4 .col-card {
+  background: var(--white); border: 1.5px solid var(--mistDk); border-radius: 18px;
+  overflow: hidden;
+}
+#s4 .col-head {
+  padding: .9rem 1.3rem;
+  font-size: 1rem; font-weight: 700; color: #fff;
+}
+#s4 .col-head.buyers { background: var(--blue); }
+#s4 .col-head.agents { background: linear-gradient(90deg, var(--teal), var(--teal-lt)); }
+#s4 .col-body { padding: .8rem 1.3rem; display: flex; flex-direction: column; gap: .55rem; }
+#s4 .col-item { display: flex; gap: .7rem; align-items: flex-start; }
+#s4 .col-item .ci { font-size: 1.05rem; line-height: 1; margin-top: .1rem; }
+#s4 .col-item .ct { font-size: .88rem; color: var(--navy); }
+#s4 .col-item .ct strong { display: block; font-size: .9rem; font-weight: 700; margin-bottom: .1rem; }
+#s4 .countries {
+  position: absolute; left: 4%; right: 4%; bottom: 1.5%;
+  background: var(--navy); border-radius: 12px; padding: .55rem 1.2rem;
+  text-align: center; font-size: .8rem; font-weight: 600; color: var(--sky);
+  letter-spacing: .03em;
+}
+
+/* ── S5 Market ── */
+#s5 { background: linear-gradient(135deg, #080F1C 0%, #0C1E3A 100%); }
+#s5 .content {
+  position: absolute; inset: 0;
+  display: grid; grid-template-columns: 1fr 1fr;
+  padding: 0 5% 0 7%; align-items: center; gap: 4%;
+}
+#s5 .driver { display: flex; gap: .9rem; align-items: flex-start; margin-bottom: .8rem; }
+#s5 .driver .di {
+  width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+}
+#s5 .driver:nth-child(1) .di, #s5 .driver:nth-child(2) .di { background: rgba(26,86,219,.2); }
+#s5 .driver:nth-child(3) .di, #s5 .driver:nth-child(4) .di { background: rgba(8,145,178,.2); }
+#s5 .driver .dt { font-size: .92rem; font-weight: 700; color: #fff; margin-bottom: .2rem; }
+#s5 .driver .ds { font-size: .82rem; color: rgba(142,184,216,.75); line-height: 1.45; }
+#s5 .why-box {
+  background: rgba(255,255,255,.04); border: 1px solid rgba(56,189,248,.15);
+  border-radius: 20px; padding: 2rem 1.8rem; height: 100%; display: flex; flex-direction: column;
+}
+#s5 .why-item {
+  display: flex; gap: .7rem; align-items: flex-start;
+  padding: .6rem 0; border-bottom: 1px solid rgba(255,255,255,.06);
+}
+#s5 .why-item:last-child { border-bottom: none; }
+#s5 .why-item span { font-size: .9rem; color: rgba(142,184,216,.8); line-height: 1.5; }
+
+/* ── S6 Business Model ── */
+#s6 { background: var(--offW); }
+#s6 .header {
+  position: absolute; left:0;right:0;top:0; height: 22%;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--slateXl) 100%);
+  display: flex; flex-direction: column; justify-content: center; padding: 0 6%;
+}
+#s6 .cards {
+  position: absolute; left: 0; right: 0; top: 22%; bottom: 0;
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 1.2%; padding: 2.5% 3.5%;
+}
+#s6 .bm-card {
+  background: var(--white); border-radius: 20px; overflow: hidden;
+  display: flex; flex-direction: column;
+  border: 1.5px solid var(--mistDk);
+  box-shadow: 0 4px 24px rgba(26,86,219,.06);
+}
+#s6 .bm-top {
+  height: 6px;
+}
+#s6 .bm-icon { font-size: 2.2rem; text-align: center; padding: 1.4rem 1rem .5rem; }
+#s6 .bm-title { font-size: 1rem; font-weight: 800; text-align: center; padding: 0 1rem .5rem; color: var(--navy); }
+#s6 .bm-div { width: 2rem; height: 3px; border-radius: 4px; margin: .3rem auto .8rem; }
+#s6 .bm-body { font-size: .82rem; color: var(--gray); text-align: center; padding: 0 1.1rem 1rem; line-height: 1.55; flex: 1; }
+#s6 .bm-badge {
+  margin: 0 1rem 1rem; padding: .3rem .6rem; border-radius: 8px; text-align: center;
+  font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+}
+
+/* ── S7 Traction ── */
+#s7 { background: linear-gradient(135deg, #060D1A 0%, #0C1E3A 100%); }
+#s7 .content {
+  position: absolute; inset: 0;
+  display: grid; grid-template-rows: auto 1fr; padding: 4% 6% 3%;
+}
+#s7 .m-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: 1fr 1fr;
+  gap: 1.2%; margin-top: 1.5%;
+}
+#s7 .m-card {
+  background: rgba(14,28,55,.7); border: 1px solid rgba(56,189,248,.12);
+  border-radius: 18px; padding: 1.2rem 1.3rem; display: flex; gap: .9rem;
+  align-items: flex-start; position: relative; overflow: hidden;
+}
+#s7 .m-card::after {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+}
+#s7 .m-card:nth-child(1)::after,#s7 .m-card:nth-child(6)::after { background: var(--blue); }
+#s7 .m-card:nth-child(2)::after,#s7 .m-card:nth-child(5)::after { background: var(--teal); }
+#s7 .m-card:nth-child(3)::after { background: var(--purple); }
+#s7 .m-card:nth-child(4)::after { background: var(--orange); }
+#s7 .m-icon {
+  width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+}
+#s7 .m-card:nth-child(1) .m-icon,#s7 .m-card:nth-child(6) .m-icon { background: rgba(26,86,219,.2); }
+#s7 .m-card:nth-child(2) .m-icon,#s7 .m-card:nth-child(5) .m-icon { background: rgba(8,145,178,.2); }
+#s7 .m-card:nth-child(3) .m-icon { background: rgba(124,58,237,.2); }
+#s7 .m-card:nth-child(4) .m-icon { background: rgba(245,158,11,.2); }
+#s7 .m-title { font-size: .95rem; font-weight: 700; color: #fff; margin-bottom: .25rem; }
+#s7 .m-body  { font-size: .8rem; color: rgba(142,184,216,.75); line-height: 1.5; }
+
+/* ── S8 Competitive Advantage ── */
+#s8 { background: var(--offW); }
+#s8 .header {
+  position: absolute; left:0;right:0;top:0; height: 22%;
+  background: linear-gradient(135deg, var(--navy), var(--slateXl));
+  display: flex; flex-direction: column; justify-content: center; padding: 0 6%;
+}
+#s8 .adv-grid {
+  position: absolute; left: 0; right: 0; top: 22%; bottom: 0;
+  display: grid; grid-template-columns: repeat(4,1fr); grid-template-rows: 1fr 1fr;
+  gap: 1%; padding: 2% 3%;
+}
+#s8 .adv-card {
+  background: var(--white); border: 1.5px solid var(--mistDk); border-radius: 16px;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  padding: 1.1rem .9rem; overflow: hidden; position: relative;
+  box-shadow: 0 2px 12px rgba(26,86,219,.05);
+  transition: transform .2s, box-shadow .2s;
+}
+#s8 .adv-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(26,86,219,.1); }
+#s8 .adv-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height: 4px;
+}
+#s8 .adv-card:nth-child(odd)::before  { background: var(--blue); }
+#s8 .adv-card:nth-child(even)::before { background: var(--teal); }
+#s8 .adv-icon { font-size: 1.9rem; margin-bottom: .5rem; }
+#s8 .adv-title { font-size: .88rem; font-weight: 800; color: var(--navy); margin-bottom: .35rem; }
+#s8 .adv-body  { font-size: .75rem; color: var(--gray); line-height: 1.5; }
+/* Last item spans */
+#s8 .adv-card:last-child { grid-column: 2 / 4; }
+
+/* ── S9 Team ── */
+#s9 { background: linear-gradient(135deg, #070E1C 0%, #0C1E3A 100%); }
+#s9 .content {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  justify-content: center; padding: 4% 8%;
+}
+#s9 .founder-card {
+  background: rgba(15,37,64,.7); border: 1px solid rgba(56,189,248,.15);
+  border-radius: 24px; padding: 2.5rem 3rem; display: flex; gap: 3rem; align-items: flex-start;
+  position: relative; overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,.4);
+}
+#s9 .founder-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, var(--blue), var(--teal-lt));
+}
+#s9 .avatar {
+  width: 110px; height: 110px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--blue), var(--teal));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; font-weight: 800; color: #fff;
+  box-shadow: 0 0 0 4px rgba(56,189,248,.25), 0 0 0 8px rgba(56,189,248,.08);
+}
+#s9 .name { font-size: 2.8rem; font-weight: 800; color: #fff; letter-spacing: -.025em; }
+#s9 .role { font-size: 1.05rem; font-weight: 700; color: var(--sky); margin: .3rem 0 .8rem; }
+#s9 .bio  { font-size: .95rem; color: rgba(142,184,216,.8); line-height: 1.65; max-width: 520px; }
+#s9 .skills { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.3rem; }
+#s9 .skill-tag {
+  background: rgba(26,86,219,.15); border: 1px solid rgba(56,189,248,.25);
+  border-radius: 8px; padding: .35rem .8rem;
+  font-size: .8rem; font-weight: 700; color: var(--sky);
+}
+#s9 .looking {
+  margin-top: 2rem; background: rgba(8,145,178,.08); border: 1px solid rgba(56,189,248,.15);
+  border-radius: 14px; padding: 1rem 1.4rem;
+  font-size: .92rem; color: rgba(142,184,216,.8); line-height: 1.6;
+}
+
+/* ── S10 Vision & Ask ── */
+#s10 { background: linear-gradient(135deg, #060D1A 0%, #0C1E3A 100%); }
+#s10 .content {
+  position: absolute; inset: 0;
+  display: grid; grid-template-columns: 1fr 1fr;
+  padding: 0 5% 0 7%; align-items: center; gap: 4%;
+}
+#s10 .vision-title {
+  font-size: clamp(1.8rem, 3vw, 2.9rem); font-weight: 800; color: #fff;
+  letter-spacing: -.025em; line-height: 1.12; margin-bottom: 1.2rem;
+}
+#s10 .need-list { display: flex; flex-direction: column; gap: .55rem; margin-top: 1.2rem; }
+#s10 .need-item {
+  display: flex; align-items: center; gap: .8rem;
+  background: rgba(255,255,255,.04); border: 1px solid rgba(56,189,248,.15);
+  border-radius: 12px; padding: .65rem 1rem;
+}
+#s10 .need-item .ni { font-size: 1.1rem; }
+#s10 .need-item .nt { font-size: .88rem; font-weight: 700; color: var(--sky); }
+#s10 .right-panel {
+  background: rgba(15,37,64,.6); border: 1px solid rgba(56,189,248,.12);
+  border-radius: 22px; padding: 2rem 1.8rem; height: 85%;
+  display: flex; flex-direction: column; position: relative; overflow: hidden;
+}
+#s10 .right-panel::before {
+  content:''; position:absolute; top:0;left:0;right:0; height:4px;
+  background: linear-gradient(90deg, var(--blue), var(--teal));
+}
+#s10 .wp-title { font-size: 1.05rem; font-weight: 800; color: #fff; margin-bottom: .5rem; }
+#s10 .wp-sub   { font-size: .8rem; color: rgba(142,184,216,.5); margin-bottom: 1.2rem; }
+#s10 .wp-item  { display: flex; gap: .8rem; align-items: flex-start; padding: .75rem 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+#s10 .wp-item:last-child { border-bottom: none; }
+#s10 .wp-item .wi { font-size: 1.3rem; }
+#s10 .wp-item .wt { font-size: .92rem; font-weight: 700; color: #fff; margin-bottom: .15rem; }
+#s10 .wp-item .ws { font-size: .8rem; color: rgba(107,170,208,.75); line-height: 1.4; }
+#s10 .cta-bar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 52px;
+  background: linear-gradient(90deg, var(--blue), var(--teal));
+  display: flex; align-items: center; justify-content: center;
+  font-size: .95rem; font-weight: 700; color: #fff; letter-spacing: .03em;
+}
+
+</style>
+</head>
+<body>
+
+<div id="progress-bar"><div id="progress-fill"></div></div>
+
+<div id="hints">
+  <button class="hint-btn" onclick="toggleNotes()">N  notes</button>
+  <button class="hint-btn" onclick="toggleFS()">F  fullscreen</button>
+</div>
+
+<div id="stage">
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SLIDE 1 — COVER
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="slide active" id="s1" data-notes="BalkanEstateAI is an AI-powered real estate platform purpose-built for the Western Balkans — a region of 40+ million people with no unified property portal. We are live, we are operational, and we are here to talk about why this opportunity is massive and why now is the time to move.">
+
+  <!-- Decorative geometry -->
+  <div class="s-deco">
+    <div class="deco-circle abs" style="width:560px;height:560px;right:-120px;top:-140px;background:radial-gradient(circle,rgba(26,86,219,.18) 0%,transparent 70%)"></div>
+    <div class="deco-circle abs" style="width:380px;height:380px;right:-60px;top:60px;background:radial-gradient(circle,rgba(6,182,212,.14) 0%,transparent 70%)"></div>
+    <div class="deco-ring abs" style="width:480px;height:480px;right:-80px;top:-60px;border-color:rgba(56,189,248,.08)"></div>
+    <div class="deco-ring abs" style="width:280px;height:280px;right:120px;top:180px;border-color:rgba(56,189,248,.06)"></div>
+    <div class="deco-circle abs" style="width:180px;height:180px;right:200px;top:80px;background:radial-gradient(circle,rgba(56,189,248,.1) 0%,transparent 70%)"></div>
+    <!-- Grid dots top right -->
+    <svg class="abs" style="right:5%;top:5%;opacity:.08" width="180" height="180"><defs><pattern id="dots" x="0" y="0" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.5" fill="#38BDF8"/></pattern></defs><rect width="180" height="180" fill="url(#dots)"/></svg>
+  </div>
+
+  <div class="content">
+    <div class="s-left col">
+      <div class="s-num">
+        <div class="logo-row">
+          <div class="logo-mark">BE</div>
+          <span class="logo-name">BalkanEstateAI</span>
+        </div>
+      </div>
+      <div class="s-tag">
+        <span class="tag tag-teal">Investor Pitch Deck · 2026</span>
+      </div>
+      <h1 class="hero s-headline" style="color:#fff;margin-top:.7rem">
+        AI-Powered<br>Real Estate<br><span class="grad-text">for the Balkans</span>
+      </h1>
+      <div class="div-line s-divider"></div>
+      <p class="s-body" style="color:rgba(142,184,216,.8);font-size:1.05rem;line-height:1.7;max-width:460px">
+        Helping buyers, sellers, agents, and agencies discover properties through intelligent search, interactive maps, and modern management tools.
+      </p>
+      <div class="stats-row s-grid">
+        <div class="stat-pill"><span class="sv">AI-First</span><span class="sl">Search</span></div>
+        <div class="stat-pill"><span class="sv">11</span><span class="sl">Countries</span></div>
+        <div class="stat-pill"><span class="sv">Multi-Lang</span><span class="sl">Platform</span></div>
+      </div>
+      <div class="url-tag s-footer">BalkanEstateAI.com</div>
+    </div>
+    <div class="s-right" style="display:flex;align-items:center;justify-content:center;height:100%;position:relative">
+      <!-- Animated ring graphic -->
+      <div style="position:relative;width:340px;height:340px">
+        <div style="position:absolute;inset:0;border-radius:50%;border:2px solid rgba(56,189,248,.15);animation:spinRing 20s linear infinite"></div>
+        <div style="position:absolute;inset:30px;border-radius:50%;border:1.5px solid rgba(56,189,248,.1);animation:spinRing 14s linear infinite reverse"></div>
+        <div style="position:absolute;inset:60px;border-radius:50%;border:1px solid rgba(56,189,248,.08)"></div>
+        <div style="position:absolute;inset:100px;border-radius:50%;background:linear-gradient(135deg,rgba(26,86,219,.2),rgba(8,145,178,.2));display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+          <div style="text-align:center">
+            <div style="font-size:3.5rem">🏠</div>
+            <div style="font-size:.8rem;font-weight:700;color:var(--sky);margin-top:.4rem;letter-spacing:.05em">LIVE NOW</div>
+          </div>
+        </div>
+        <!-- Orbit dots -->
+        <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%) translateX(160px);width:12px;height:12px;border-radius:50%;background:var(--sky);box-shadow:0 0 10px var(--sky)"></div>
+        <div style="position:absolute;bottom:25px;left:15px;width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal)"></div>
+        <div style="position:absolute;top:50%;right:12px;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 8px var(--blue)"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SLIDE 2 — THE PROBLEM
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s2" data-notes="The Balkan real estate market is broken. Listings are scattered across dozens of sites and social media groups. Buyers spend hours sifting through outdated data. Agencies have no professional tools. And there is zero pricing transparency — buyers have no way to know if a price is fair. This is the gap BalkanEstateAI was built to close.">
+
+  <div class="left-panel s-deco">
+    <div class="deco-circle abs" style="width:300px;height:300px;left:-100px;bottom:-80px;background:radial-gradient(circle,rgba(6,182,212,.12) 0%,transparent 70%)"></div>
+    <div class="deco-circle abs" style="width:180px;height:180px;right:-40px;top:20px;background:radial-gradient(circle,rgba(26,86,219,.15) 0%,transparent 70%)"></div>
+    <div class="s-num label" style="color:var(--sky);margin-bottom:.6rem">02</div>
+    <div class="div-line" style="margin:.4rem 0 1rem"></div>
+    <h2 class="h2 s-headline" style="color:#fff">The<br>Problem</h2>
+    <p class="s-body" style="color:rgba(142,184,216,.65);font-size:.88rem;margin-top:1.2rem;line-height:1.7;max-width:200px">
+      The real estate market in the Western Balkans is fragmented and broken.
+    </p>
+  </div>
+
+  <div class="right-panel s-cards">
+    <div class="prob-card">
+      <div class="pnum">01</div>
+      <div class="prob-text">Listings spread across dozens of websites and social media — no single source of truth</div>
+    </div>
+    <div class="prob-card">
+      <div class="pnum">02</div>
+      <div class="prob-text">Buyers spend hours searching through incomplete or outdated property listings</div>
+    </div>
+    <div class="prob-card">
+      <div class="pnum">03</div>
+      <div class="prob-text">Agencies struggle to gain digital visibility and manage listings efficiently online</div>
+    </div>
+    <div class="prob-card">
+      <div class="pnum">04</div>
+      <div class="prob-text">No access to market insights or pricing transparency — buyers can't tell if a price is fair</div>
+    </div>
+    <div class="prob-card">
+      <div class="pnum">05</div>
+      <div class="prob-text">Existing platforms lack AI search, interactive maps, and modern filtering tools</div>
+    </div>
+  </div>
+
+  <div class="abs" style="left:30%;right:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--teal))"></div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SLIDE 3 — OUR SOLUTION
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s3" data-notes="BalkanEstateAI is the answer to every one of those problems. One platform, AI at the core, built specifically for this region. You get smart search that understands natural language, interactive maps where you can literally draw the zone you want to search in, agency tools, pricing analytics, saved alerts — and it all works natively in every Balkan language.">
+
+  <div class="abs full s-deco">
+    <div class="deco-circle abs" style="width:500px;height:500px;right:-120px;bottom:-120px;background:radial-gradient(circle,rgba(26,86,219,.12) 0%,transparent 70%)"></div>
+    <div class="deco-ring abs" style="width:600px;height:600px;right:-150px;bottom:-150px;border-color:rgba(56,189,248,.06)"></div>
+    <div class="deco-circle abs" style="width:220px;height:220px;right:200px;top:80px;background:radial-gradient(circle,rgba(6,182,212,.1) 0%,transparent 70%)"></div>
+    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--blue))"></div>
+  </div>
+
+  <div class="content">
+    <div class="col s-left">
+      <div class="s-num label" style="color:var(--sky);margin-bottom:.6rem">03</div>
+      <div class="s-tag" style="margin-bottom:.8rem"><span class="tag tag-teal">Our Solution</span></div>
+      <h2 class="h2 s-headline" style="color:#fff">One Platform.<br>Every Market.<br><span class="grad-text">Every Language.</span></h2>
+      <div class="div-line s-divider"></div>
+      <p class="sub s-body" style="color:rgba(142,184,216,.8);max-width:380px">
+        BalkanEstateAI is an AI-powered platform making property search faster, smarter, and more transparent — built specifically for the Western Balkans.
+      </p>
+    </div>
+
+    <div class="feat-grid s-grid">
+      <div class="feat-card" style="background:rgba(26,86,219,.15);border:1px solid rgba(26,86,219,.25)">
+        <div class="feat-icon">🤖</div>
+        <div class="feat-label" style="color:#fff">AI Property Search</div>
+      </div>
+      <div class="feat-card" style="background:rgba(8,145,178,.15);border:1px solid rgba(8,145,178,.25)">
+        <div class="feat-icon">🗺️</div>
+        <div class="feat-label" style="color:#fff">Interactive Maps</div>
+      </div>
+      <div class="feat-card" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.25)">
+        <div class="feat-icon">🏢</div>
+        <div class="feat-label" style="color:#fff">Agency Profiles</div>
+      </div>
+      <div class="feat-card" style="background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.25)">
+        <div class="feat-icon">📊</div>
+        <div class="feat-label" style="color:#fff">Pricing Analytics</div>
+      </div>
+      <div class="feat-card" style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.25)">
+        <div class="feat-icon">🔔</div>
+        <div class="feat-label" style="color:#fff">Saved Searches</div>
+      </div>
+      <div class="feat-card" style="background:rgba(26,86,219,.15);border:1px solid rgba(26,86,219,.25)">
+        <div class="feat-icon">🚀</div>
+        <div class="feat-label" style="color:#fff">Listing Promotions</div>
+      </div>
+      <div class="feat-card" style="background:rgba(8,145,178,.15);border:1px solid rgba(8,145,178,.25)">
+        <div class="feat-icon">🌍</div>
+        <div class="feat-label" style="color:#fff">Multi-Language</div>
+      </div>
+      <div class="feat-card" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.25)">
+        <div class="feat-icon">📱</div>
+        <div class="feat-label" style="color:#fff">Mobile-First PWA</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SLIDE 4 — PRODUCT
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s4" data-notes="Let me walk you through what users actually do on the platform. For buyers it's about discovery — AI-powered search, drawing zones on a map, setting alerts. For agents and agencies it's about visibility and operations — publish listings, build a branded page, run promotions, and track performance. And we support 11 countries across the region.">
+
+  <div class="abs full s-deco">
+    <div class="deco-circle abs" style="width:400px;height:400px;right:-100px;top:-100px;background:radial-gradient(circle,rgba(26,86,219,.1) 0%,transparent 70%)"></div>
+    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--teal))"></div>
+  </div>
+
+  <div class="header s-num">
+    <div class="label" style="color:var(--sky);margin-bottom:.3rem">04 / The Product</div>
+    <h2 class="h3 s-headline" style="color:#fff">What Users Can Do</h2>
+    <p class="s-body" style="color:rgba(142,184,216,.7);font-size:.85rem;margin-top:.2rem">Everything in one place — for buyers and for agents</p>
+  </div>
+
+  <div class="cols s-cards">
+    <div class="col-card">
+      <div class="col-head buyers">🏠  For Buyers</div>
+      <div class="col-body">
+        <div class="col-item">
+          <span class="ci">🔍</span>
+          <div class="ct"><strong>AI-Powered Search</strong>Natural language and filter-based property discovery</div>
+        </div>
+        <div class="col-item">
+          <span class="ci">🗺️</span>
+          <div class="ct"><strong>Interactive Map</strong>Draw zones on a live map to search inside any area</div>
+        </div>
+        <div class="col-item">
+          <span class="ci">🔔</span>
+          <div class="ct"><strong>Save &amp; Alert</strong>Save searches and get notified when matches appear</div>
+        </div>
+        <div class="col-item">
+          <span class="ci">📈</span>
+          <div class="ct"><strong>Price Compare</strong>Compare listings and access market pricing insights</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-head agents">🏢  For Agents &amp; Agencies</div>
+      <div class="col-body">
+        <div class="col-item">
+          <span class="ci">📋</span>
+          <div class="ct"><strong>Listing Manager</strong>Create, edit, and publish listings in one dashboard</div>
+        </div>
+        <div class="col-item">
+          <span class="ci">🌟</span>
+          <div class="ct"><strong>Agency Pages</strong>Build a professional branded agency profile</div>
+        </div>
+        <div class="col-item">
+          <span class="ci">🚀</span>
+          <div class="ct"><strong>Promotions</strong>Boost visibility with featured and premium placements</div>
+        </div>
+        <div class="col-item">
+          <span class="ci">📊</span>
+          <div class="ct"><strong>Analytics</strong>Track views, leads, and performance per listing</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="countries s-footer">
+    🌍&nbsp;&nbsp;N. Macedonia · Albania · Kosovo · Montenegro · Serbia · Bosnia &amp; Herzegovina · Croatia · Slovenia · Bulgaria · Greece · Romania
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SLIDE 5 — MARKET OPPORTUNITY
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s5" data-notes="The timing is exceptional. Urban development, foreign investment, tourism expansion, and digital adoption are all accelerating across the region. But the most important point is the Why Now: post-COVID digital adoption, EU accession tailwinds, mobile penetration above 80%, and — critically — there is no dominant pan-Balkan portal. That category is wide open.">
+
+  <div class="abs full s-deco">
+    <div class="deco-circle abs" style="width:500px;height:500px;left:-150px;bottom:-150px;background:radial-gradient(circle,rgba(8,145,178,.12) 0%,transparent 70%)"></div>
+    <div class="deco-circle abs" style="width:300px;height:300px;left:-80px;bottom:-60px;background:radial-gradient(circle,rgba(26,86,219,.1) 0%,transparent 70%)"></div>
+    <div class="deco-ring abs" style="width:700px;height:700px;right:8%;top:50%;transform:translateY(-50%);border-color:rgba(56,189,248,.05)"></div>
+    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--teal))"></div>
+  </div>
+
+  <div class="content">
+    <div class="col s-left" style="padding:5% 0">
+      <div class="s-num label" style="color:var(--sky);margin-bottom:.6rem">05</div>
+      <div class="s-tag" style="margin-bottom:.8rem"><span class="tag tag-teal">Market Opportunity</span></div>
+      <h2 class="h2 s-headline" style="color:#fff">A Growing Region<br><span class="grad-text">Underserved</span><br>by PropTech</h2>
+      <div class="div-line s-divider"></div>
+      <div class="s-body">
+        <div class="driver">
+          <div class="di">🏗️</div>
+          <div><div class="dt">Urban Development</div><div class="ds">Rapid construction across all Balkan capitals</div></div>
+        </div>
+        <div class="driver">
+          <div class="di">💰</div>
+          <div><div class="dt">Foreign Investment</div><div class="ds">Growing expat &amp; diaspora demand for property</div></div>
+        </div>
+        <div class="driver">
+          <div class="di">✈️</div>
+          <div><div class="dt">Tourism Expansion</div><div class="ds">Record tourism driving holiday rental demand</div></div>
+        </div>
+        <div class="driver">
+          <div class="di">📲</div>
+          <div><div class="dt">Digital Adoption</div><div class="ds">Rising demand for modern digital services across SEE</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col s-grid" style="height:80%;justify-content:center">
+      <div class="why-box">
+        <div class="label" style="color:var(--sky);margin-bottom:1rem">💡  Why Now?</div>
+        <div class="why-item">
+          <span>→</span><span>Post-COVID digital adoption surge across Southeast Europe</span>
+        </div>
+        <div class="why-item">
+          <span>→</span><span>EU accession tailwinds for Albania, Serbia &amp; North Macedonia</span>
+        </div>
+        <div class="why-item">
+          <span>→</span><span><strong style="color:#fff">No dominant pan-Balkan portal exists today</strong> — the category is wide open</span>
+        </div>
+        <div class="why-item">
+          <span>→</span><span>Mobile penetration above 80% across the entire region</span>
+        </div>
+        <div class="why-item">
+          <span>→</span><span>PropTech investment in Western Europe is 10× higher — the gap is our opportunity</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SLIDE 6 — BUSINESS MODEL
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s6" data-notes="Four revenue streams. Agent subscriptions for independents, agency subscriptions for teams, premium listing promotions for visibility, and advertising and future AI analytics products. The model is designed to grow with the platform — as more agents join, more listings compete for premium placement, and our data becomes increasingly valuable.">
+
+  <div class="abs full s-deco">
+    <div class="deco-circle abs" style="width:400px;height:400px;right:-100px;top:-100px;background:radial-gradient(circle,rgba(26,86,219,.08) 0%,transparent 70%)"></div>
+    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--teal))"></div>
+  </div>
+
+  <div class="header s-num">
+    <div class="label" style="color:var(--sky);margin-bottom:.3rem">06 / Business Model</div>
+    <h2 class="h3 s-headline" style="color:#fff">Multiple Revenue Streams. Designed to Scale.</h2>
+    <p class="s-body" style="color:rgba(142,184,216,.7);font-size:.85rem;margin-top:.2rem">Subscription-based core with layered premium revenue on top</p>
+  </div>
+
+  <div class="cards s-cards">
+    <div class="bm-card">
+      <div class="bm-top" style="background:var(--blue)"></div>
+      <div class="bm-icon">👤</div>
+      <div class="bm-title">Agent<br>Subscriptions</div>
+      <div class="bm-div" style="background:var(--blue)"></div>
+      <div class="bm-body">Monthly &amp; annual plans for independent agents — listing quotas, analytics, and priority support.</div>
+      <div class="bm-badge" style="background:rgba(26,86,219,.1);color:var(--blue)">Core Revenue</div>
+    </div>
+    <div class="bm-card">
+      <div class="bm-top" style="background:var(--teal)"></div>
+      <div class="bm-icon">🏢</div>
+      <div class="bm-title">Agency<br>Subscriptions</div>
+      <div class="bm-div" style="background:var(--teal)"></div>
+      <div class="bm-body">Team management, multi-agent dashboards, and enterprise-level listing volumes for agencies.</div>
+      <div class="bm-badge" style="background:rgba(8,145,178,.1);color:var(--teal)">High LTV</div>
+    </div>
+    <div class="bm-card">
+      <div class="bm-top" style="background:var(--orange)"></div>
+      <div class="bm-icon">⭐</div>
+      <div class="bm-title">Premium<br>Promotions</div>
+      <div class="bm-div" style="background:var(--orange)"></div>
+      <div class="bm-body">Featured &amp; highlighted listing placements and priority positioning in search results.</div>
+      <div class="bm-badge" style="background:rgba(245,158,11,.1);color:var(--orange)">Transactional</div>
+    </div>
+    <div class="bm-card">
+      <div class="bm-top" style="background:var(--purple)"></div>
+      <div class="bm-icon">📣</div>
+      <div class="bm-title">Advertising<br>&amp; AI Tools</div>
+      <div class="bm-div" style="background:var(--purple)"></div>
+      <div class="bm-body">Display advertising for partners and future premium AI analytics products for agencies.</div>
+      <div class="bm-badge" style="background:rgba(124,58,237,.1);color:var(--purple)">Future Layer</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SLIDE 7 — TRACTION
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s7" data-notes="The platform launched in February 2026. We are early-stage and pre-revenue, but the hard technical work is done. The platform is live. Multi-country and multi-language support is operational. The agency system is complete. Interactive map search is live. And we are actively onboarding our first agencies through direct outreach and social media. The foundation is solid — now we need to accelerate.">
+
+  <div class="abs full s-deco">
+    <div class="deco-circle abs" style="width:600px;height:600px;right:-150px;top:-150px;background:radial-gradient(circle,rgba(6,182,212,.08) 0%,transparent 70%)"></div>
+    <div class="deco-ring abs" style="width:800px;height:800px;right:-200px;top:-200px;border-color:rgba(56,189,248,.04)"></div>
+    <div class="deco-circle abs" style="width:350px;height:350px;left:-80px;bottom:-80px;background:radial-gradient(circle,rgba(26,86,219,.08) 0%,transparent 70%)"></div>
+    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--blue))"></div>
+  </div>
+
+  <div class="content" style="padding:4% 6% 3%">
+    <div class="row s-num" style="align-items:flex-end;gap:1.5rem;margin-bottom:.8rem">
+      <div>
+        <div class="label" style="color:var(--sky);margin-bottom:.3rem">07 / Traction</div>
+        <h2 class="h2 s-headline" style="color:#fff">Current Progress</h2>
+      </div>
+      <div class="s-tag" style="margin-bottom:.45rem"><span class="tag tag-teal">Platform live Feb 2026</span></div>
+    </div>
+    <p class="s-body" style="color:rgba(142,184,216,.65);font-size:.88rem;margin-bottom:1.2rem">
+      Early-stage · focused on user acquisition and market validation
+    </p>
+
+    <div class="m-grid s-cards">
+      <div class="m-card">
+        <div class="m-icon">🚀</div>
+        <div><div class="m-title">Platform Live</div><div class="m-body">Fully functional web platform publicly accessible</div></div>
+      </div>
+      <div class="m-card">
+        <div class="m-icon">🌍</div>
+        <div><div class="m-title">Multi-Country Support</div><div class="m-body">Property listings and search active across multiple Balkan countries</div></div>
+      </div>
+      <div class="m-card">
+        <div class="m-icon">🏢</div>
+        <div><div class="m-title">Agency System</div><div class="m-body">Agency and agent profile system fully built and operational</div></div>
+      </div>
+      <div class="m-card">
+        <div class="m-icon">🗺️</div>
+        <div><div class="m-title">Interactive Maps</div><div class="m-body">Map-based search live with draw-zone capability</div></div>
+      </div>
+      <div class="m-card">
+        <div class="m-icon">📣</div>
+        <div><div class="m-title">Active Outreach</div><div class="m-body">Onboarding agencies via direct outreach and social media</div></div>
+      </div>
+      <div class="m-card">
+        <div class="m-icon">🤝</div>
+        <div><div class="m-title">Growing Network</div><div class="m-body">Building a network of partners across the Balkans</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SLIDE 8 — COMPETITIVE ADVANTAGE
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s8" data-notes="Why us? We are not a global portal that bolted on a Balkans filter. We built this from scratch for this region. AI is not a feature we added — it's the core of how search works. We have native multi-language support. Our map search lets buyers draw zones, not just type a city name. And we have real agency tools, not just a listing form. Against the aging portals in this market, we are years ahead on UX.">
+
+  <div class="abs full s-deco">
+    <div class="deco-circle abs" style="width:400px;height:400px;left:-100px;top:-100px;background:radial-gradient(circle,rgba(26,86,219,.07) 0%,transparent 70%)"></div>
+    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--teal))"></div>
+  </div>
+
+  <div class="header s-num">
+    <div class="label" style="color:var(--sky);margin-bottom:.3rem">08 / Competitive Advantage</div>
+    <h2 class="h3 s-headline" style="color:#fff">Why BalkanEstateAI?</h2>
+    <p class="s-body" style="color:rgba(142,184,216,.7);font-size:.85rem;margin-top:.2rem">We are not another generic listing portal — we are AI-first and region-native</p>
+  </div>
+
+  <div class="adv-grid s-cards">
+    <div class="adv-card">
+      <div class="adv-icon">🎯</div>
+      <div class="adv-title">Built for This Region</div>
+      <div class="adv-body">Designed exclusively for Western Balkans — not adapted from a global template</div>
+    </div>
+    <div class="adv-card">
+      <div class="adv-icon">🤖</div>
+      <div class="adv-title">AI-First Experience</div>
+      <div class="adv-body">Natural language search and intelligent recommendations at the core</div>
+    </div>
+    <div class="adv-card">
+      <div class="adv-icon">🌐</div>
+      <div class="adv-title">Native Multi-Language</div>
+      <div class="adv-body">Full localisation across all target countries from day one</div>
+    </div>
+    <div class="adv-card">
+      <div class="adv-icon">🗺️</div>
+      <div class="adv-title">Draw-Zone Map Search</div>
+      <div class="adv-body">Users draw areas on a map — not just filter by city name</div>
+    </div>
+    <div class="adv-card">
+      <div class="adv-icon">🏢</div>
+      <div class="adv-title">Agency-Focused Tools</div>
+      <div class="adv-body">Dedicated agency dashboard built in — not an afterthought add-on</div>
+    </div>
+    <div class="adv-card">
+      <div class="adv-icon">🌱</div>
+      <div class="adv-title">Regional Scale Path</div>
+      <div class="adv-body">Architecture built to expand country by country across Southeast Europe</div>
+    </div>
+    <div class="adv-card">
+      <div class="adv-icon">✨</div>
+      <div class="adv-title">Modern UX Design</div>
+      <div class="adv-body">Consumer-grade UI against outdated traditional portals in the region</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SLIDE 9 — TEAM
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s9" data-notes="I'm Valdet — an Android developer and software engineer who built BalkanEstateAI from the ground up. My background spans mobile architecture, AI integrations, product design, and I have deep knowledge of the Balkan real estate market. I'm not a first-time builder — I understand both the technology and the domain. I built this because I saw the gap personally, and I believe this is a category-defining opportunity.">
+
+  <div class="abs full s-deco">
+    <div class="deco-circle abs" style="width:600px;height:600px;right:-150px;bottom:-150px;background:radial-gradient(circle,rgba(26,86,219,.1) 0%,transparent 70%)"></div>
+    <div class="deco-circle abs" style="width:350px;height:350px;left:-80px;top:-80px;background:radial-gradient(circle,rgba(6,182,212,.09) 0%,transparent 70%)"></div>
+    <div class="deco-ring abs" style="width:900px;height:900px;right:-200px;bottom:-200px;border-color:rgba(56,189,248,.04)"></div>
+    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--teal))"></div>
+  </div>
+
+  <div class="content" style="padding:4% 8%">
+    <div class="col" style="gap:0">
+      <div class="row s-num" style="gap:1rem;margin-bottom:1.2rem">
+        <div class="label" style="color:var(--sky)">09 / The Team</div>
+        <div class="div-line" style="margin:0;flex:1;max-width:120px"></div>
+      </div>
+      <h2 class="h2 s-headline" style="color:#fff;margin-bottom:1.5rem">Built by a Founder<br><span class="grad-text">Who Ships</span></h2>
+
+      <div class="founder-card s-cards">
+        <div class="avatar">V</div>
+        <div class="col flex1">
+          <div class="name">Valdet</div>
+          <div class="role">Founder &amp; CEO · BalkanEstateAI</div>
+          <p class="bio">
+            Android Developer and Software Engineer building BalkanEstateAI from the ground up. Focused on solving real estate discovery challenges across the Balkan region with modern technology and a deep understanding of the local market.
+          </p>
+          <div class="skills">
+            <span class="skill-tag">🛠️ Android Development</span>
+            <span class="skill-tag">🏗️ Software Architecture</span>
+            <span class="skill-tag">🤖 AI Integrations</span>
+            <span class="skill-tag">🎨 Product Design</span>
+            <span class="skill-tag">🌍 Balkans Domain Expert</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="looking s-body">
+        ⭐  Currently seeking <strong style="color:var(--sky)">strategic partners, mentors, and investors</strong> to accelerate growth and expand BalkanEstateAI across the region.
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SLIDE 10 — VISION & ASK
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s10" data-notes="Our vision is simple: become the leading AI-powered real estate platform in the Western Balkans. To get there we need strategic mentorship, industry partnerships, marketing support, early-stage investment, and access to regional networks. We are building the infrastructure for the next generation of real estate discovery in the Balkans — and we would love to have you with us.">
+
+  <div class="abs full s-deco">
+    <div class="deco-ring abs" style="width:700px;height:700px;left:50%;top:50%;transform:translate(-50%,-50%);border-color:rgba(26,86,219,.08)"></div>
+    <div class="deco-ring abs" style="width:480px;height:480px;left:50%;top:50%;transform:translate(-50%,-50%);border-color:rgba(56,189,248,.06)"></div>
+    <div class="deco-ring abs" style="width:280px;height:280px;left:50%;top:50%;transform:translate(-50%,-50%);border-color:rgba(8,145,178,.08)"></div>
+    <div class="deco-circle abs" style="width:400px;height:400px;left:-100px;bottom:-100px;background:radial-gradient(circle,rgba(8,145,178,.1) 0%,transparent 70%)"></div>
+    <div class="deco-circle abs" style="width:350px;height:350px;right:-80px;top:-80px;background:radial-gradient(circle,rgba(26,86,219,.1) 0%,transparent 70%)"></div>
+    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--blue))"></div>
+  </div>
+
+  <div class="content" style="padding-bottom:52px">
+    <div class="col s-left" style="padding:4% 0">
+      <div class="s-num label" style="color:var(--sky);margin-bottom:.6rem">10 / Vision &amp; Ask</div>
+      <div class="vision-title s-headline">
+        Become the Leading<br>AI Real Estate Platform<br><span class="grad-text">in the Western Balkans.</span>
+      </div>
+      <div class="div-line s-divider"></div>
+      <div class="label s-body" style="color:var(--sky);margin-bottom:.8rem">What We Are Looking For</div>
+      <div class="need-list s-cards">
+        <div class="need-item"><span class="ni">🧭</span><span class="nt">Strategic Mentorship</span></div>
+        <div class="need-item"><span class="ni">🤝</span><span class="nt">Industry Partnerships</span></div>
+        <div class="need-item"><span class="ni">📣</span><span class="nt">Marketing Support</span></div>
+        <div class="need-item"><span class="ni">💰</span><span class="nt">Early-Stage Investment</span></div>
+        <div class="need-item"><span class="ni">🌐</span><span class="nt">Access to Regional Networks</span></div>
+      </div>
+    </div>
+
+    <div class="s-grid" style="height:80%;display:flex;align-items:center">
+      <div class="right-panel">
+        <div class="wp-title">Why BalkanEstateAI Wins</div>
+        <div class="wp-sub">The five reasons this becomes the category leader</div>
+        <div class="flex1 col" style="justify-content:space-between">
+          <div class="wp-item">
+            <span class="wi">🌍</span>
+            <div><div class="wt">Regional First-Mover</div><div class="ws">11 countries, one platform — no one else has unified this market</div></div>
+          </div>
+          <div class="wp-item">
+            <span class="wi">🤖</span>
+            <div><div class="wt">AI at the Core</div><div class="ws">Smarter search and recommendations from the first day</div></div>
+          </div>
+          <div class="wp-item">
+            <span class="wi">📈</span>
+            <div><div class="wt">Multiple Revenue Streams</div><div class="ws">Subscriptions, promotions, advertising, and future AI tools</div></div>
+          </div>
+          <div class="wp-item">
+            <span class="wi">🏗️</span>
+            <div><div class="wt">Infrastructure Ready</div><div class="ws">Platform built to expand country by country across SEE</div></div>
+          </div>
+          <div class="wp-item">
+            <span class="wi">✨</span>
+            <div><div class="wt">Modern vs Incumbents</div><div class="ws">Consumer-grade UX against outdated traditional portals</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-bar s-footer">
+    🌐 &nbsp; BalkanEstateAI.com &nbsp;·&nbsp; Building the future of real estate discovery in the Balkans
+  </div>
+</div>
+
+</div><!-- /stage -->
+
+<!-- Nav -->
+<div id="nav">
+  <button id="nav-prev" onclick="go(-1)">‹</button>
+  <div id="dots"></div>
+  <span id="slide-counter">1 / 10</span>
+  <button id="nav-next" onclick="go(1)">›</button>
+</div>
+
+<!-- Notes -->
+<div id="notes-panel"><strong>Speaker Notes</strong><span id="notes-text"></span></div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const N = slides.length;
+let cur = 0;
+
+// Build dots
+const dotsEl = document.getElementById('dots');
+dotsEl.style.cssText = 'display:flex;gap:.45rem;align-items:center';
+slides.forEach((_, i) => {
+  const b = document.createElement('button');
+  b.className = 'nav-dot' + (i===0?' on':'');
+  b.onclick = () => goTo(i);
+  dotsEl.appendChild(b);
+});
+
+function goTo(n) {
+  slides[cur].classList.remove('active');
+  slides[cur].classList.add('prev');
+  setTimeout(() => slides[n < cur ? cur : cur].classList.remove('prev'), 680);
+  // Handle direction
+  if (n > cur) {
+    slides[n].style.transform = 'translateX(100%)';
+  } else {
+    slides[n].style.transform = 'translateX(-100%)';
+  }
+  cur = n;
+  slides[cur].classList.add('active');
+
+  // update dots
+  document.querySelectorAll('.nav-dot').forEach((d,i) => d.classList.toggle('on', i===cur));
+  // update counter
+  document.getElementById('slide-counter').textContent = (cur+1) + ' / ' + N;
+  // update progress
+  document.getElementById('progress-fill').style.width = ((cur+1)/N*100) + '%';
+  // update notes
+  const notesText = slides[cur].dataset.notes || '';
+  document.getElementById('notes-text').textContent = notesText;
+}
+
+function go(d) {
+  const next = Math.max(0, Math.min(N-1, cur+d));
+  if (next !== cur) goTo(next);
+}
+
+// keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') { e.preventDefault(); go(1); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')  { e.preventDefault(); go(-1); }
+  if (e.key === 'n' || e.key === 'N') toggleNotes();
+  if (e.key === 'f' || e.key === 'F') toggleFS();
+  if (e.key === 'Escape') { document.getElementById('notes-panel').classList.remove('open'); }
+});
+
+// Touch swipe
+let tx = 0;
+document.getElementById('stage').addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive:true});
+document.getElementById('stage').addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
+}, {passive:true});
+
+// Click stage to advance
+document.getElementById('stage').addEventListener('click', e => {
+  if (e.target.closest('#nav') || e.target.closest('#notes-panel') || e.target.closest('#hints')) return;
+  go(1);
+});
+
+function toggleNotes() {
+  document.getElementById('notes-panel').classList.toggle('open');
+}
+function toggleFS() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+  else document.exitFullscreen().catch(()=>{});
+}
+
+// Init progress + notes
+document.getElementById('progress-fill').style.width = (1/N*100) + '%';
+document.getElementById('notes-text').textContent = slides[0].dataset.notes || '';
+</script>
+</body>
+</html>
