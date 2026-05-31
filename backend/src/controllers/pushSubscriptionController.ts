@@ -40,11 +40,28 @@ export const subscribe = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Validate endpoint is a valid URL
+    // Validate endpoint is a valid HTTPS URL (push endpoints are always HTTPS)
     try {
-      new URL(subscription.endpoint);
+      const url = new URL(subscription.endpoint);
+      if (url.protocol !== 'https:') {
+        res.status(400).json({ message: 'Invalid push subscription: endpoint must use HTTPS' });
+        return;
+      }
     } catch {
       res.status(400).json({ message: 'Invalid push subscription endpoint URL' });
+      return;
+    }
+
+    // Validate p256dh and auth are non-empty base64url strings within expected length bounds
+    const isValidBase64url = (s: string, minLen: number, maxLen: number): boolean =>
+      typeof s === 'string' && s.length >= minLen && s.length <= maxLen && /^[A-Za-z0-9_-]+=*$/.test(s);
+
+    if (!isValidBase64url(subscription.keys.p256dh, 86, 88)) {
+      res.status(400).json({ message: 'Invalid push subscription: p256dh key format is invalid' });
+      return;
+    }
+    if (!isValidBase64url(subscription.keys.auth, 22, 24)) {
+      res.status(400).json({ message: 'Invalid push subscription: auth key format is invalid' });
       return;
     }
 
@@ -85,8 +102,20 @@ export const unsubscribe = async (req: Request, res: Response): Promise<void> =>
     const userId = String((req.user as IUser)._id);
     const { endpoint } = req.body;
 
-    if (!endpoint) {
+    if (!endpoint || typeof endpoint !== 'string') {
       res.status(400).json({ message: 'Endpoint is required' });
+      return;
+    }
+
+    // Validate endpoint format to prevent NoSQL injection via crafted strings
+    try {
+      const url = new URL(endpoint);
+      if (url.protocol !== 'https:') {
+        res.status(400).json({ message: 'Invalid endpoint' });
+        return;
+      }
+    } catch {
+      res.status(400).json({ message: 'Invalid endpoint' });
       return;
     }
 
