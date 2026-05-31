@@ -53,6 +53,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
   const [inlineUploading, setInlineUploading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{ title?: string; excerpt?: string; content?: string; coverImageUrl?: string }>({});
   const [previewContent, setPreviewContent] = useState('');
 
   const editorRef = useRef<HTMLDivElement>(null);
@@ -188,8 +189,8 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
   // ── Tags ───────────────────────────────────────────────────────────────────
 
   const addTag = (raw: string) => {
-    const val = raw.trim().toLowerCase().replace(/\s+/g, '-');
-    if (val && !tags.includes(val) && tags.length < 20) {
+    const val = raw.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    if (val && val.length >= 2 && val.length <= 30 && !tags.includes(val) && tags.length < 20) {
       setTags(prev => [...prev, val]);
     }
     setTagInput('');
@@ -216,13 +217,34 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
 
   // ── Submit ─────────────────────────────────────────────────────────────────
 
+  // Strip HTML tags to get plain text length for content validation
+  const getContentText = (html: string) => html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+
+  const validateCoverUrl = (url: string) => {
+    if (!url) return '';
+    try { new URL(url); return ''; } catch { return 'Cover image URL is not valid.'; }
+  };
+
   const handleSubmit = async (submitStatus?: 'draft' | 'published') => {
     const content = editorRef.current?.innerHTML || '';
-    if (!title.trim() || !excerpt.trim() || !content.trim()) {
-      setError('Title, excerpt, and content are required.');
+    const contentText = getContentText(content);
+    const errs: typeof fieldErrors = {};
+    if (!title.trim()) errs.title = 'Title is required.';
+    else if (title.trim().length < 5) errs.title = 'Title must be at least 5 characters.';
+    if (!excerpt.trim()) errs.excerpt = 'Excerpt is required.';
+    else if (excerpt.trim().length < 10) errs.excerpt = 'Excerpt must be at least 10 characters.';
+    if (!contentText) errs.content = 'Article body cannot be empty.';
+    else if (contentText.length < 50) errs.content = 'Article body must be at least 50 characters.';
+    const urlErr = validateCoverUrl(coverImageUrl);
+    if (urlErr) errs.coverImageUrl = urlErr;
+
+    if (Object.keys(errs).length > 0) {
+      setFieldErrors(errs);
+      setError('Please fix the highlighted fields before saving.');
       return;
     }
 
+    setFieldErrors({});
     const finalStatus = submitStatus || status;
 
     try {
@@ -372,21 +394,34 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
               {/* Title */}
               <textarea
                 value={title}
-                onChange={e => setTitle(e.target.value)}
+                onChange={e => { setTitle(e.target.value); if (fieldErrors.title) setFieldErrors(p => ({ ...p, title: undefined })); }}
                 placeholder="Article title…"
                 rows={2}
-                className="w-full text-3xl sm:text-4xl font-bold text-slate-900 placeholder:text-neutral-300 border-none outline-none resize-none mb-4 leading-tight"
+                maxLength={120}
+                className={`w-full text-3xl sm:text-4xl font-bold text-slate-900 placeholder:text-neutral-300 border-none outline-none resize-none leading-tight ${fieldErrors.title ? 'border-b-2 border-red-400 pb-1' : 'mb-1'}`}
               />
+              <div className="flex items-center justify-between mb-3">
+                {fieldErrors.title
+                  ? <p className="text-xs text-red-500">{fieldErrors.title}</p>
+                  : <span />}
+                <span className={`text-[11px] ${title.length > 100 ? 'text-amber-500' : 'text-slate-300'}`}>{title.length}/120</span>
+              </div>
 
               {/* Excerpt */}
               <textarea
                 value={excerpt}
-                onChange={e => setExcerpt(e.target.value)}
+                onChange={e => { setExcerpt(e.target.value); if (fieldErrors.excerpt) setFieldErrors(p => ({ ...p, excerpt: undefined })); }}
                 placeholder="Write a short excerpt (shown in listing cards)…"
                 rows={2}
                 maxLength={500}
-                className="w-full text-base text-slate-500 placeholder:text-neutral-300 border-none outline-none resize-none mb-6 leading-relaxed"
+                className={`w-full text-base text-slate-500 placeholder:text-neutral-300 border-none outline-none resize-none leading-relaxed ${fieldErrors.excerpt ? 'border-b-2 border-red-400 pb-1' : 'mb-1'}`}
               />
+              <div className="flex items-center justify-between mb-5">
+                {fieldErrors.excerpt
+                  ? <p className="text-xs text-red-500">{fieldErrors.excerpt}</p>
+                  : <span />}
+                <span className={`text-[11px] ${excerpt.length > 450 ? 'text-amber-500' : 'text-slate-300'}`}>{excerpt.length}/500</span>
+              </div>
 
               <div className="border-t border-neutral-100 mb-6" />
 
@@ -486,7 +521,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
                 ref={editorRef}
                 contentEditable
                 suppressContentEditableWarning
-                onInput={handleEditorInput}
+                onInput={e => { handleEditorInput(e); if (fieldErrors.content) setFieldErrors(p => ({ ...p, content: undefined })); }}
                 onMouseUp={saveSelection}
                 onKeyUp={saveSelection}
                 data-placeholder="Start writing your article…"
@@ -506,6 +541,12 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
                   [&_pre]:bg-slate-900 [&_pre]:text-green-300 [&_pre]:p-4 [&_pre]:rounded-xl [&_pre]:overflow-x-auto [&_pre]:my-4
                   empty:before:content-[attr(data-placeholder)] empty:before:text-slate-300 empty:before:pointer-events-none"
               />
+              {fieldErrors.content && (
+                <p className="text-xs text-red-500 mt-2 flex items-center gap-1">
+                  <svg className="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                  {fieldErrors.content}
+                </p>
+              )}
             </div>
           ) : (
             /* ── Preview ─────────────────────────────────────────────────── */
@@ -679,11 +720,14 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
               <input
                 type="url"
                 value={coverImageUrl}
-                onChange={e => setCoverImageUrl(e.target.value)}
+                onChange={e => { setCoverImageUrl(e.target.value); if (fieldErrors.coverImageUrl) setFieldErrors(p => ({ ...p, coverImageUrl: undefined })); }}
                 placeholder="https://…"
-                className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 bg-white text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+                className={`w-full text-sm border rounded-lg px-3 py-2 bg-white text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 ${fieldErrors.coverImageUrl ? 'border-red-400 focus:ring-red-300' : 'border-neutral-200 focus:ring-slate-900/20'}`}
               />
-              <p className="text-[11px] text-slate-400 mt-1">Or paste URL instead of uploading above</p>
+              {fieldErrors.coverImageUrl
+                ? <p className="text-[11px] text-red-500 mt-1">{fieldErrors.coverImageUrl}</p>
+                : <p className="text-[11px] text-slate-400 mt-1">Or paste URL instead of uploading above</p>
+              }
             </div>
 
             {/* SEO Preview */}
