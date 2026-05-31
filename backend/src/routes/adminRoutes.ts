@@ -623,9 +623,9 @@ router.post('/articles', logAdminAction('CREATE_ARTICLE'), async (req: Request, 
       excerpt,
       category: category || 'guide',
       tags: tags || [],
-      country,
-      countryCode,
-      coverImageUrl,
+      country: country || undefined,
+      countryCode: countryCode || undefined,
+      coverImageUrl: coverImageUrl || undefined,
       status: status || 'draft',
       author: (req as any).user._id,
       isFeatured: isFeatured || false,
@@ -633,8 +633,19 @@ router.post('/articles', logAdminAction('CREATE_ARTICLE'), async (req: Request, 
 
     await article.save();
     res.status(201).json({ article });
-  } catch (err) {
-    res.status(500).json({ message: 'Failed to create article', error: String(err) });
+  } catch (err: any) {
+    // Return validation errors as 400 so the frontend can display them
+    if (err?.name === 'ValidationError') {
+      const fields = Object.values(err.errors || {}).map((e: any) => e.message).join(', ');
+      res.status(400).json({ message: fields || 'Validation failed', code: 'VALIDATION_ERROR' });
+      return;
+    }
+    if (err?.code === 11000) {
+      res.status(409).json({ message: 'An article with this slug already exists', code: 'DUPLICATE_SLUG' });
+      return;
+    }
+    console.error('[Article create]', err);
+    res.status(500).json({ message: err?.message || 'Failed to create article' });
   }
 });
 
@@ -655,10 +666,11 @@ router.patch('/articles/:id', logAdminAction('UPDATE_ARTICLE'), async (req: Requ
     if (excerpt) article.excerpt = excerpt;
     if (category) article.category = category;
     if (tags) article.tags = tags;
-    if (country) article.country = country;
-    if (countryCode) article.countryCode = countryCode;
-    if (coverImageUrl) article.coverImageUrl = coverImageUrl;
-    if (coverImagePublicId) article.coverImagePublicId = coverImagePublicId;
+    // Allow clearing country/countryCode by passing empty string
+    article.country = country || undefined;
+    article.countryCode = countryCode || undefined;
+    if (coverImageUrl !== undefined) article.coverImageUrl = coverImageUrl || undefined;
+    if (coverImagePublicId !== undefined) article.coverImagePublicId = coverImagePublicId || undefined;
     if (isFeatured !== undefined) article.isFeatured = isFeatured;
 
     // Handle status change to published
@@ -671,8 +683,14 @@ router.patch('/articles/:id', logAdminAction('UPDATE_ARTICLE'), async (req: Requ
 
     await article.save();
     res.json({ article });
-  } catch (err) {
-    res.status(500).json({ message: 'Failed to update article', error: String(err) });
+  } catch (err: any) {
+    if (err?.name === 'ValidationError') {
+      const fields = Object.values(err.errors || {}).map((e: any) => e.message).join(', ');
+      res.status(400).json({ message: fields || 'Validation failed', code: 'VALIDATION_ERROR' });
+      return;
+    }
+    console.error('[Article update]', err);
+    res.status(500).json({ message: err?.message || 'Failed to update article' });
   }
 });
 
