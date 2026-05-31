@@ -46,33 +46,45 @@ html, body {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   overflow: hidden;
-  transform: translateX(100%);
-  transition: transform .65s cubic-bezier(.77,0,.18,1), opacity .65s ease;
   opacity: 0;
   pointer-events: none;
+  /* resting — off-screen right, slightly scaled down */
+  transform: translateX(6%) scale(.97);
+  transition:
+    transform .72s cubic-bezier(.22,1,.36,1),
+    opacity   .55s cubic-bezier(.22,1,.36,1);
+  will-change: transform, opacity;
 }
 .slide.active {
-  transform: translateX(0); opacity: 1; pointer-events: all;
-  animation: slideIn .65s cubic-bezier(.77,0,.18,1) forwards;
+  transform: translateX(0) scale(1);
+  opacity: 1;
+  pointer-events: all;
 }
 .slide.prev {
-  transform: translateX(-100%); opacity: 0;
+  transform: translateX(-6%) scale(.97);
+  opacity: 0;
 }
-@keyframes slideIn { from { transform: translateX(100%); opacity:0; } to { transform: translateX(0); opacity:1; } }
-@keyframes fadeUp  { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
-@keyframes fadeIn  { from { opacity:0; } to { opacity:1; } }
-@keyframes popIn   { from { opacity:0; transform:scale(.92); } to { opacity:1; transform:scale(1); } }
-@keyframes spinRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-.slide.active .s-tag     { animation: fadeUp  .5s .1s both; }
-.slide.active .s-num     { animation: fadeIn  .4s .05s both; }
-.slide.active .s-headline{ animation: fadeUp  .55s .15s both; }
-.slide.active .s-divider { animation: fadeIn  .5s .25s both; }
-.slide.active .s-body    { animation: fadeUp  .5s .3s both; }
-.slide.active .s-grid    { animation: fadeUp  .55s .35s both; }
-.slide.active .s-cards   { animation: fadeUp  .55s .4s both; }
-.slide.active .s-footer  { animation: fadeUp  .45s .5s both; }
-.slide.active .s-deco    { animation: popIn   .8s .1s both; }
+/* ── Per-element entrance keyframes ── */
+@keyframes fadeUp   { from { opacity:0; transform:translateY(28px); }        to { opacity:1; transform:translateY(0); } }
+@keyframes fadeDown { from { opacity:0; transform:translateY(-20px); }        to { opacity:1; transform:translateY(0); } }
+@keyframes fadeIn   { from { opacity:0; }                                     to { opacity:1; } }
+@keyframes popIn    { from { opacity:0; transform:scale(.88); }               to { opacity:1; transform:scale(1); } }
+@keyframes slideRight{ from { opacity:0; transform:translateX(-28px); }       to { opacity:1; transform:translateX(0); } }
+@keyframes spinRing { from { transform:rotate(0deg); }                        to { transform:rotate(360deg); } }
+@keyframes blurIn   { from { opacity:0; filter:blur(8px); transform:scale(.96); } to { opacity:1; filter:blur(0); transform:scale(1); } }
+@keyframes growBar  { from { transform:scaleX(0); transform-origin:left; }    to { transform:scaleX(1); transform-origin:left; } }
+
+/* Smooth easing for content blocks — only fires on .active */
+.slide.active .s-deco    { animation: blurIn    .9s cubic-bezier(.22,1,.36,1)  .05s both; }
+.slide.active .s-num     { animation: fadeDown  .55s cubic-bezier(.22,1,.36,1) .08s both; }
+.slide.active .s-tag     { animation: fadeDown  .55s cubic-bezier(.22,1,.36,1) .14s both; }
+.slide.active .s-headline{ animation: fadeUp    .65s cubic-bezier(.22,1,.36,1) .18s both; }
+.slide.active .s-divider { animation: growBar   .55s cubic-bezier(.22,1,.36,1) .3s  both; }
+.slide.active .s-body    { animation: fadeUp    .6s  cubic-bezier(.22,1,.36,1) .32s both; }
+.slide.active .s-grid    { animation: fadeUp    .65s cubic-bezier(.22,1,.36,1) .38s both; }
+.slide.active .s-cards   { animation: fadeUp    .65s cubic-bezier(.22,1,.36,1) .42s both; }
+.slide.active .s-footer  { animation: fadeUp    .5s  cubic-bezier(.22,1,.36,1) .54s both; }
 
 /* ─── Common layout helpers ──────────────────────────────────────────────── */
 .abs { position: absolute; }
@@ -462,7 +474,7 @@ html, body {
   width: 110px; height: 110px; border-radius: 50%; flex-shrink: 0;
   background: linear-gradient(135deg, var(--blue), var(--teal));
   display: flex; align-items: center; justify-content: center;
-  font-size: 3rem; font-weight: 800; color: #fff;
+  font-size: 2.2rem; font-weight: 800; color: #fff; letter-spacing:-.02em;
   box-shadow: 0 0 0 4px rgba(56,189,248,.25), 0 0 0 8px rgba(56,189,248,.08);
 }
 #s9 .name { font-size: 2.8rem; font-weight: 800; color: #fff; letter-spacing: -.025em; }
@@ -997,7 +1009,7 @@ html, body {
 <!-- ══════════════════════════════════════════════════════════════════════════
      SLIDE 9 — TEAM
 ══════════════════════════════════════════════════════════════════════════ -->
-<div class="slide" id="s9" data-notes="I'm Valdet — an Android developer and software engineer who built BalkanEstateAI from the ground up. My background spans mobile architecture, AI integrations, product design, and I have deep knowledge of the Balkan real estate market. I'm not a first-time builder — I understand both the technology and the domain. I built this because I saw the gap personally, and I believe this is a category-defining opportunity.">
+<div class="slide" id="s9" data-notes="I'm Zani Dalipi — an Android developer and software engineer who built BalkanEstateAI from the ground up. My background spans mobile architecture, AI integrations, product design, and I have deep knowledge of the Balkan real estate market. I'm not a first-time builder — I understand both the technology and the domain. I built this because I saw the gap personally, and I believe this is a category-defining opportunity.">
 
   <div class="abs full s-deco">
     <div class="deco-circle abs" style="width:600px;height:600px;right:-150px;bottom:-150px;background:radial-gradient(circle,rgba(26,86,219,.1) 0%,transparent 70%)"></div>
@@ -1015,9 +1027,9 @@ html, body {
       <h2 class="h2 s-headline" style="color:#fff;margin-bottom:1.5rem">Built by a Founder<br><span class="grad-text">Who Ships</span></h2>
 
       <div class="founder-card s-cards">
-        <div class="avatar">V</div>
+        <div class="avatar">ZD</div>
         <div class="col flex1">
-          <div class="name">Valdet</div>
+          <div class="name">Zani Dalipi</div>
           <div class="role">Founder &amp; CEO · BalkanEstateAI</div>
           <p class="bio">
             Android Developer and Software Engineer building BalkanEstateAI from the ground up. Focused on solving real estate discovery challenges across the Balkan region with modern technology and a deep understanding of the local market.
@@ -1135,27 +1147,45 @@ slides.forEach((_, i) => {
 });
 
 function goTo(n) {
-  slides[cur].classList.remove('active');
-  slides[cur].classList.add('prev');
-  setTimeout(() => slides[n < cur ? cur : cur].classList.remove('prev'), 680);
-  // Handle direction
-  if (n > cur) {
-    slides[n].style.transform = 'translateX(100%)';
-  } else {
-    slides[n].style.transform = 'translateX(-100%)';
-  }
-  cur = n;
-  slides[cur].classList.add('active');
+  if (n === cur) return;
+  const dir = n > cur ? 1 : -1;
+  const leaving = slides[cur];
+  const entering = slides[n];
 
-  // update dots
+  // Reset entering slide: position off-screen in the incoming direction, no transition
+  entering.style.transition = 'none';
+  entering.style.transform = `translateX(${dir * 6}%) scale(0.97)`;
+  entering.style.opacity = '0';
+  entering.classList.remove('prev');
+
+  // Force reflow so the reset is applied before we add transitions
+  entering.getBoundingClientRect();
+
+  // Now animate both slides simultaneously
+  leaving.style.transition = '';
+  entering.style.transition = '';
+
+  leaving.classList.remove('active');
+  leaving.classList.add('prev');
+  // Override prev direction so it exits the correct way
+  leaving.style.transform = `translateX(${-dir * 6}%) scale(0.97)`;
+
+  cur = n;
+  entering.classList.add('active');
+
+  // Clean up leaving slide after animation
+  const cleanup = () => {
+    leaving.classList.remove('prev');
+    leaving.style.transform = '';
+    leaving.style.opacity = '';
+  };
+  entering.addEventListener('transitionend', cleanup, { once: true });
+
+  // Update UI
   document.querySelectorAll('.nav-dot').forEach((d,i) => d.classList.toggle('on', i===cur));
-  // update counter
   document.getElementById('slide-counter').textContent = (cur+1) + ' / ' + N;
-  // update progress
   document.getElementById('progress-fill').style.width = ((cur+1)/N*100) + '%';
-  // update notes
-  const notesText = slides[cur].dataset.notes || '';
-  document.getElementById('notes-text').textContent = notesText;
+  document.getElementById('notes-text').textContent = slides[cur].dataset.notes || '';
 }
 
 function go(d) {
