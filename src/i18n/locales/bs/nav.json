@@ -106,7 +106,9 @@
     "valuation": "Procjena",
     "mortgageCalculator": "Kalkulator",
     "cityDashboard": "Gradska Tabla",
-    "default": "BalkanEstate"
+    "default": "BalkanEstate",
+    "blog": "Blog i Članci",
+    "guides": "Vodiči"
   },
   "blog": "Blog i Članci"
 }

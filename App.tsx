@@ -823,7 +823,7 @@ const MainLayout: React.FC = () => {
   const isMainTabView = !state.selectedAgentId && !state.selectedAgencyId && !state.selectedBusinessListingId && [
     'agents', 'agencies', 'saved-properties', 'saved-searches', 'explore-cities', 'city-dashboard',
     'inbox', 'pricing', 'how-it-works', 'valuation', 'mortgage-calculator', 'analytics', 'admin', 'agency-dashboard', 'business-directory',
-    'account',
+    'account', 'blog', 'guides',
   ].includes(state.activeView);
 
 
@@ -853,6 +853,8 @@ const MainLayout: React.FC = () => {
       'agency-dashboard': 'nav:pageTitles.agencyDashboard',
       valuation: 'nav:pageTitles.valuation',
       'mortgage-calculator': 'nav:pageTitles.mortgageCalculator',
+      blog: 'nav:pageTitles.blog',
+      guides: 'nav:pageTitles.guides',
     };
     const key = titleKeys[state.activeView];
     return key ? t(key) : t('nav:pageTitles.default');
