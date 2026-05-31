@@ -310,7 +310,7 @@ const NewsSection: React.FC = () => {
                   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
                 >
                   {news.slice(0, 6).map((item, i) => (
-                    <NewsCard key={item.id} item={item} index={i} t={t} />
+                    <NewsCard key={item.id} item={item} index={i} t={t as (key: string, fallback?: string) => string} />
                   ))}
                 </motion.div>
               </AnimatePresence>

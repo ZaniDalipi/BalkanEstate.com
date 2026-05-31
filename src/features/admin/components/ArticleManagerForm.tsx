@@ -521,7 +521,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
                 ref={editorRef}
                 contentEditable
                 suppressContentEditableWarning
-                onInput={e => { handleEditorInput(e); if (fieldErrors.content) setFieldErrors(p => ({ ...p, content: undefined })); }}
+                onInput={() => { handleEditorInput(); if (fieldErrors.content) setFieldErrors(p => ({ ...p, content: undefined })); }}
                 onMouseUp={saveSelection}
                 onKeyUp={saveSelection}
                 data-placeholder="Start writing your article…"

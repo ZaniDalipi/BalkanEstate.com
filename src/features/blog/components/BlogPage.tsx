@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -18,7 +18,9 @@ const BlogPage: React.FC = () => {
   const [selectedCountry, setSelectedCountry] = useState<string | undefined>();
   const [selectedTag, setSelectedTag] = useState<string | undefined>();
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   // Read URL on every render — when SET_ACTIVE_VIEW re-renders this component
   // window.location.pathname reflects the latest pushState call, so navigation
@@ -26,12 +28,22 @@ const BlogPage: React.FC = () => {
   const slugMatch = window.location.pathname.match(/^(?:\/[a-z]{2})?\/blog\/(.+)$/);
   const slug = slugMatch ? slugMatch[1] : null;
 
+  // Debounce search input — avoids firing an API call on every keystroke
+  useEffect(() => {
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 350);
+    return () => clearTimeout(debounceRef.current);
+  }, [searchQuery]);
+
   // All hooks must be called unconditionally before any early return
   const { articles, pagination, isLoading, error } = useArticles({
     category: selectedCategory,
     country: selectedCountry,
     tag: selectedTag,
-    search: searchQuery || undefined,
+    search: debouncedSearch || undefined,
     page,
     limit: 12,
   });
@@ -76,7 +88,7 @@ const BlogPage: React.FC = () => {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setPage(1);
+    // page reset is handled inside the debounce effect
   };
 
   const handleCategoryChange = (cat: ArticleCategory | undefined) => {

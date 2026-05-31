@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import DOMPurify from 'dompurify';
 import { useArticle } from '../hooks/useArticle';
 import { useArticles } from '../hooks/useArticles';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
@@ -109,6 +110,22 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
     page: 1,
   });
   const related = relatedArticles.filter(a => a.slug !== slug).slice(0, 2);
+
+  // Sanitise article HTML once — prevents XSS while preserving safe formatting
+  const sanitisedContent = useMemo(() => {
+    if (!article?.content) return '';
+    return DOMPurify.sanitize(article.content, {
+      ALLOWED_TAGS: [
+        'p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+        'strong', 'em', 'u', 's', 'blockquote', 'code', 'pre',
+        'ul', 'ol', 'li', 'a', 'img', 'hr', 'table', 'thead',
+        'tbody', 'tr', 'th', 'td', 'figure', 'figcaption', 'span', 'div',
+      ],
+      ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'target', 'rel', 'class', 'width', 'height'],
+      ALLOW_DATA_ATTR: false,
+      FORCE_BODY: true,
+    });
+  }, [article?.content]);
 
   const goBack = useCallback(() => {
     window.history.pushState({}, '', buildLocalizedPath('/blog'));
@@ -380,7 +397,7 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
               [&_td]:px-4 [&_td]:py-2.5 [&_td]:border [&_td]:border-neutral-200
               [&_tr:nth-child(even)_td]:bg-slate-50
             "
-            dangerouslySetInnerHTML={{ __html: article.content }}
+            dangerouslySetInnerHTML={{ __html: sanitisedContent }}
           />
         </motion.div>
 

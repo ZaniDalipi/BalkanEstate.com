@@ -612,32 +612,35 @@ router.post('/articles', logAdminAction('CREATE_ARTICLE'), async (req: Request, 
   try {
     const { title, content, excerpt, category, tags, country, countryCode, coverImageUrl, status, isFeatured } = req.body;
 
-    console.log('[Article create] body keys:', Object.keys(req.body || {}));
-    console.log('[Article create] title:', !!title, '| content:', !!content, `(len=${String(content).length})`, '| excerpt:', !!excerpt);
     if (!title || !content || !excerpt) {
-      console.log('[Article create] 400 - missing required fields');
       res.status(400).json({ message: `Missing required fields: ${[!title && 'title', !content && 'content', !excerpt && 'excerpt'].filter(Boolean).join(', ')}` });
       return;
     }
 
+    const VALID_CATS = new Set(['market', 'investment', 'regulation', 'development', 'tourism', 'guide', 'lifestyle']);
+    const VALID_STATUS = new Set(['draft', 'published']);
+
     const article = new Article({
-      title,
+      title: String(title).trim(),
       content,
-      excerpt,
-      category: category || 'guide',
-      tags: tags || [],
-      country: country || undefined,
-      countryCode: countryCode || undefined,
-      coverImageUrl: coverImageUrl || undefined,
-      status: status || 'draft',
+      excerpt: String(excerpt).trim(),
+      category: VALID_CATS.has(category) ? category : 'guide',
+      tags: Array.isArray(tags) ? tags.filter((t: unknown) => typeof t === 'string').slice(0, 20) : [],
+      country: country ? String(country).trim().substring(0, 100) : undefined,
+      countryCode: countryCode ? String(countryCode).trim().toUpperCase().substring(0, 2) : undefined,
+      coverImageUrl: coverImageUrl ? String(coverImageUrl).trim() : undefined,
+      status: VALID_STATUS.has(status) ? status : 'draft',
       author: (req as any).user._id,
-      isFeatured: isFeatured || false,
+      isFeatured: isFeatured === true,
     });
+
+    if (article.status === 'published' && !article.publishedAt) {
+      article.publishedAt = new Date();
+    }
 
     await article.save();
     res.status(201).json({ article });
   } catch (err: any) {
-    // Return validation errors as 400 so the frontend can display them
     if (err?.name === 'ValidationError') {
       const fields = Object.values(err.errors || {}).map((e: any) => e.message).join(', ');
       res.status(400).json({ message: fields || 'Validation failed', code: 'VALIDATION_ERROR' });
@@ -647,9 +650,7 @@ router.post('/articles', logAdminAction('CREATE_ARTICLE'), async (req: Request, 
       res.status(409).json({ message: 'An article with this slug already exists', code: 'DUPLICATE_SLUG' });
       return;
     }
-    console.error('[Article create] error:', err?.name, err?.message, err?.stack?.split('\n')[0]);
-    console.error('[Article create] body:', JSON.stringify(req.body).substring(0, 500));
-    res.status(500).json({ message: err?.message || 'Failed to create article', errorType: err?.name });
+    res.status(500).json({ message: 'Failed to create article' });
   }
 });
 
@@ -664,21 +665,21 @@ router.patch('/articles/:id', logAdminAction('UPDATE_ARTICLE'), async (req: Requ
       return;
     }
 
-    // Update fields
-    if (title) article.title = title;
-    if (content) article.content = content;
-    if (excerpt) article.excerpt = excerpt;
-    if (category) article.category = category;
-    if (tags) article.tags = tags;
-    // Allow clearing country/countryCode by passing empty string
-    article.country = country || undefined;
-    article.countryCode = countryCode || undefined;
-    if (coverImageUrl !== undefined) article.coverImageUrl = coverImageUrl || undefined;
-    if (coverImagePublicId !== undefined) article.coverImagePublicId = coverImagePublicId || undefined;
-    if (isFeatured !== undefined) article.isFeatured = isFeatured;
+    const VALID_CATS = new Set(['market', 'investment', 'regulation', 'development', 'tourism', 'guide', 'lifestyle']);
+    const VALID_STATUS = new Set(['draft', 'published']);
 
-    // Handle status change to published
-    if (status && status !== article.status) {
+    if (title && typeof title === 'string') article.title = title.trim();
+    if (content) article.content = content;
+    if (excerpt && typeof excerpt === 'string') article.excerpt = excerpt.trim();
+    if (category && VALID_CATS.has(category)) article.category = category;
+    if (Array.isArray(tags)) article.tags = tags.filter((t: unknown) => typeof t === 'string').slice(0, 20);
+    article.country = country ? String(country).trim().substring(0, 100) : undefined;
+    article.countryCode = countryCode ? String(countryCode).trim().toUpperCase().substring(0, 2) : undefined;
+    if (coverImageUrl !== undefined) article.coverImageUrl = coverImageUrl ? String(coverImageUrl).trim() : undefined;
+    if (coverImagePublicId !== undefined) article.coverImagePublicId = coverImagePublicId || undefined;
+    if (isFeatured !== undefined) article.isFeatured = isFeatured === true;
+
+    if (status && VALID_STATUS.has(status) && status !== article.status) {
       article.status = status;
       if (status === 'published' && !article.publishedAt) {
         article.publishedAt = new Date();
@@ -693,8 +694,7 @@ router.patch('/articles/:id', logAdminAction('UPDATE_ARTICLE'), async (req: Requ
       res.status(400).json({ message: fields || 'Validation failed', code: 'VALIDATION_ERROR' });
       return;
     }
-    console.error('[Article update]', err);
-    res.status(500).json({ message: err?.message || 'Failed to update article' });
+    res.status(500).json({ message: 'Failed to update article' });
   }
 });
 
