@@ -398,6 +398,105 @@ html, body {
   display:flex; align-items:center; justify-content:center;
   font-size:.92rem; font-weight:700; color:#fff; letter-spacing:.03em;
 }
+
+/* ══════════════ DEMO OVERLAY ══════════════ */
+#demo-overlay {
+  position:fixed; inset:0; z-index:500;
+  background:rgba(4,8,18,.88); backdrop-filter:blur(14px);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity .3s ease;
+}
+#demo-overlay.open { opacity:1; pointer-events:all; }
+#demo-win {
+  width:86vw; height:87vh; max-width:1200px;
+  border-radius:16px; overflow:hidden;
+  background:#1a1a1e;
+  box-shadow:0 48px 120px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.07);
+  display:flex; flex-direction:column;
+  transform:translateY(20px) scale(.97);
+  transition:transform .38s cubic-bezier(.22,1,.36,1);
+}
+#demo-overlay.open #demo-win { transform:translateY(0) scale(1); }
+
+#demo-chrome {
+  background:#2a2a2e; padding:10px 14px;
+  display:flex; align-items:center; gap:10px; flex-shrink:0;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.traff { display:flex; gap:6px; }
+.traff span { width:12px;height:12px;border-radius:50%;display:block;cursor:pointer; }
+.t-red{background:#FF5F57}.t-yel{background:#FEBC2E}.t-grn{background:#28C840}
+#demo-bar {
+  flex:1; background:#3a3a3e; border-radius:7px; padding:5px 12px;
+  font-size:.7rem; color:#666; font-family:monospace;
+  display:flex; align-items:center; gap:6px; overflow:hidden;
+}
+#demo-bar .lock { color:#888; }
+#demo-bar .url  { color:#bbb; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#demo-reload {
+  font-size:1rem; color:#666; cursor:pointer; background:none; border:none;
+  padding:2px 6px; border-radius:5px; transition:color .15s; line-height:1;
+}
+#demo-reload:hover { color:#aaa; }
+#demo-close-btn {
+  padding:4px 10px; border-radius:6px; border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.06); color:rgba(255,255,255,.55);
+  font-size:.72rem; font-weight:700; letter-spacing:.04em; cursor:pointer; transition:all .15s;
+}
+#demo-close-btn:hover { background:rgba(255,255,255,.12); color:#fff; }
+#demo-body { position:relative; flex:1; overflow:hidden; }
+#demo-iframe { width:100%; height:100%; border:none; display:block; background:#fff; }
+#demo-loading {
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:1rem;
+  background:#0B1421; color:rgba(142,184,216,.65); font-size:.9rem;
+  transition:opacity .3s;
+}
+#demo-loading .spin {
+  width:36px; height:36px; border-radius:50%;
+  border:3px solid rgba(56,189,248,.15); border-top-color:var(--sky);
+  animation:kSpin .8s linear infinite;
+}
+#demo-blocked {
+  position:absolute; inset:0; display:none; flex-direction:column;
+  align-items:center; justify-content:center; gap:1.2rem;
+  background:#0B1421; text-align:center; padding:2.5rem;
+}
+#demo-blocked .bi { font-size:3rem; }
+#demo-blocked p { color:rgba(142,184,216,.7); font-size:.95rem; line-height:1.65; max-width:380px; }
+#demo-blocked a {
+  padding:.65rem 1.5rem; border-radius:10px; background:var(--blue);
+  color:#fff; text-decoration:none; font-weight:700; font-size:.9rem; transition:opacity .2s;
+}
+#demo-blocked a:hover { opacity:.85; }
+
+/* Clickable feature cards */
+.demo-card {
+  cursor:pointer !important;
+  position:relative;
+  transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease !important;
+}
+.demo-card:hover { transform:translateY(-5px) scale(1.04) !important; box-shadow:0 14px 40px rgba(0,0,0,.45) !important; }
+.demo-card .demo-hint {
+  position:absolute; bottom:6px; left:0; right:0; text-align:center;
+  font-size:.6rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+  color:rgba(255,255,255,.35); opacity:0; transition:opacity .2s;
+}
+.demo-card:hover .demo-hint { opacity:1; }
+
+/* Clickable list items */
+.demo-item {
+  cursor:pointer; border-radius:10px; padding:.6rem .5rem !important;
+  transition:background .18s, transform .18s !important;
+  display:flex; align-items:flex-start; gap:.65rem;
+}
+.demo-item:hover { background:rgba(26,86,219,.09) !important; transform:translateX(5px) !important; }
+.demo-item:hover .tx strong { color:var(--blue) !important; }
+.demo-item-arr {
+  margin-left:auto; flex-shrink:0; font-size:.8rem;
+  color:rgba(56,189,248,.45); opacity:0; transition:opacity .18s; align-self:center;
+}
+.demo-item:hover .demo-item-arr { opacity:1; }
 </style>
 </head>
 <body>
@@ -500,14 +599,14 @@ html, body {
     </div>
 
     <div class="fgrid sa-grid">
-      <div class="fc" style="background:rgba(26,86,219,.15);border:1px solid rgba(26,86,219,.28)"><div class="fi">🤖</div><div class="fl">AI Property Search</div></div>
-      <div class="fc" style="background:rgba(8,145,178,.15);border:1px solid rgba(8,145,178,.28)"><div class="fi">🗺️</div><div class="fl">Interactive Maps</div></div>
-      <div class="fc" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.28)"><div class="fi">🏢</div><div class="fl">Agency Profiles</div></div>
-      <div class="fc" style="background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.28)"><div class="fi">📊</div><div class="fl">Pricing Analytics</div></div>
-      <div class="fc" style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.28)"><div class="fi">🔔</div><div class="fl">Saved Searches</div></div>
-      <div class="fc" style="background:rgba(26,86,219,.15);border:1px solid rgba(26,86,219,.28)"><div class="fi">🚀</div><div class="fl">Listing Promotions</div></div>
-      <div class="fc" style="background:rgba(8,145,178,.15);border:1px solid rgba(8,145,178,.28)"><div class="fi">🌍</div><div class="fl">Multi-Language</div></div>
-      <div class="fc" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.28)"><div class="fi">📱</div><div class="fl">Mobile-First PWA</div></div>
+      <div class="fc demo-card" data-demo="https://balkanestate.com/search" data-label="balkanestate.com/search" style="background:rgba(26,86,219,.15);border:1px solid rgba(26,86,219,.28)"><div class="fi">🤖</div><div class="fl">AI Property Search</div><div class="demo-hint">Click to demo ↗</div></div>
+      <div class="fc demo-card" data-demo="https://balkanestate.com/search" data-label="balkanestate.com/search — Map View" style="background:rgba(8,145,178,.15);border:1px solid rgba(8,145,178,.28)"><div class="fi">🗺️</div><div class="fl">Interactive Maps</div><div class="demo-hint">Click to demo ↗</div></div>
+      <div class="fc demo-card" data-demo="https://balkanestate.com/agents" data-label="balkanestate.com/agents" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.28)"><div class="fi">🏢</div><div class="fl">Agency Profiles</div><div class="demo-hint">Click to demo ↗</div></div>
+      <div class="fc demo-card" data-demo="https://balkanestate.com/valuation" data-label="balkanestate.com/valuation" style="background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.28)"><div class="fi">📊</div><div class="fl">Pricing Analytics</div><div class="demo-hint">Click to demo ↗</div></div>
+      <div class="fc demo-card" data-demo="https://balkanestate.com/search" data-label="balkanestate.com/search" style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.28)"><div class="fi">🔔</div><div class="fl">Saved Searches</div><div class="demo-hint">Click to demo ↗</div></div>
+      <div class="fc demo-card" data-demo="https://balkanestate.com/pricing" data-label="balkanestate.com/pricing" style="background:rgba(26,86,219,.15);border:1px solid rgba(26,86,219,.28)"><div class="fi">🚀</div><div class="fl">Listing Promotions</div><div class="demo-hint">Click to demo ↗</div></div>
+      <div class="fc demo-card" data-demo="https://balkanestate.com" data-label="balkanestate.com" style="background:rgba(8,145,178,.15);border:1px solid rgba(8,145,178,.28)"><div class="fi">🌍</div><div class="fl">Multi-Language</div><div class="demo-hint">Click to demo ↗</div></div>
+      <div class="fc demo-card" data-demo="https://balkanestate.com/mortgage-calculator" data-label="balkanestate.com/mortgage-calculator" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.28)"><div class="fi">📱</div><div class="fl">Mobile-First PWA</div><div class="demo-hint">Click to demo ↗</div></div>
     </div>
   </div>
 </div>
@@ -532,19 +631,19 @@ html, body {
     <div class="cc">
       <div class="ch b">🏠&nbsp; For Buyers</div>
       <div class="cb">
-        <div class="ci"><span class="ico">🔍</span><div class="tx"><strong>AI-Powered Search</strong>Natural language and filter-based property discovery</div></div>
-        <div class="ci"><span class="ico">🗺️</span><div class="tx"><strong>Interactive Map</strong>Draw zones on a live map to search any area</div></div>
-        <div class="ci"><span class="ico">🔔</span><div class="tx"><strong>Save &amp; Alert</strong>Save searches and get notified on new matches</div></div>
-        <div class="ci"><span class="ico">📈</span><div class="tx"><strong>Price Compare</strong>Compare listings and access pricing insights</div></div>
+        <div class="ci demo-item" data-demo="https://balkanestate.com/search" data-label="balkanestate.com/search"><span class="ico">🔍</span><div class="tx"><strong>AI-Powered Search</strong>Natural language and filter-based property discovery</div><span class="demo-item-arr">↗</span></div>
+        <div class="ci demo-item" data-demo="https://balkanestate.com/search" data-label="balkanestate.com/search — Map View"><span class="ico">🗺️</span><div class="tx"><strong>Interactive Map</strong>Draw zones on a live map to search any area</div><span class="demo-item-arr">↗</span></div>
+        <div class="ci demo-item" data-demo="https://balkanestate.com/search" data-label="balkanestate.com/search"><span class="ico">🔔</span><div class="tx"><strong>Save &amp; Alert</strong>Save searches and get notified on new matches</div><span class="demo-item-arr">↗</span></div>
+        <div class="ci demo-item" data-demo="https://balkanestate.com/valuation" data-label="balkanestate.com/valuation"><span class="ico">📈</span><div class="tx"><strong>Price Compare</strong>Compare listings and access pricing insights</div><span class="demo-item-arr">↗</span></div>
       </div>
     </div>
     <div class="cc">
       <div class="ch t">🏢&nbsp; For Agents &amp; Agencies</div>
       <div class="cb">
-        <div class="ci"><span class="ico">📋</span><div class="tx"><strong>Listing Manager</strong>Create, edit, and publish listings in one dashboard</div></div>
-        <div class="ci"><span class="ico">🌟</span><div class="tx"><strong>Agency Pages</strong>Build a professional branded agency profile</div></div>
-        <div class="ci"><span class="ico">🚀</span><div class="tx"><strong>Promotions</strong>Boost visibility with featured and premium placements</div></div>
-        <div class="ci"><span class="ico">📊</span><div class="tx"><strong>Analytics</strong>Track views, leads, and performance per listing</div></div>
+        <div class="ci demo-item" data-demo="https://balkanestate.com/agents" data-label="balkanestate.com/agents"><span class="ico">📋</span><div class="tx"><strong>Listing Manager</strong>Create, edit, and publish listings in one dashboard</div><span class="demo-item-arr">↗</span></div>
+        <div class="ci demo-item" data-demo="https://balkanestate.com/agents" data-label="balkanestate.com/agents"><span class="ico">🌟</span><div class="tx"><strong>Agency Pages</strong>Build a professional branded agency profile</div><span class="demo-item-arr">↗</span></div>
+        <div class="ci demo-item" data-demo="https://balkanestate.com/pricing" data-label="balkanestate.com/pricing"><span class="ico">🚀</span><div class="tx"><strong>Promotions</strong>Boost visibility with featured and premium placements</div><span class="demo-item-arr">↗</span></div>
+        <div class="ci demo-item" data-demo="https://balkanestate.com/agents" data-label="balkanestate.com/agents"><span class="ico">📊</span><div class="tx"><strong>Analytics</strong>Track views, leads, and performance per listing</div><span class="demo-item-arr">↗</span></div>
       </div>
     </div>
   </div>
@@ -801,6 +900,37 @@ html, body {
 
 <div id="notes"><b>Speaker Notes</b><span id="ntext"></span></div>
 
+<!-- ══ DEMO OVERLAY ══ -->
+<div id="demo-overlay">
+  <div id="demo-win">
+    <div id="demo-chrome">
+      <div class="traff">
+        <span class="t-red"  title="Close" onclick="closeDemo()"></span>
+        <span class="t-yel"  title="Minimize"></span>
+        <span class="t-grn"  title="Fullscreen"></span>
+      </div>
+      <div id="demo-bar">
+        <span class="lock">🔒</span>
+        <span class="url" id="demo-url">balkanestate.com</span>
+      </div>
+      <button id="demo-reload" title="Reload" onclick="reloadDemo()">↺</button>
+      <button id="demo-close-btn" onclick="closeDemo()">✕ Close</button>
+    </div>
+    <div id="demo-body">
+      <div id="demo-loading">
+        <div class="spin"></div>
+        <span>Loading live demo…</span>
+      </div>
+      <div id="demo-blocked">
+        <div class="bi">🔗</div>
+        <p>This page can't be shown inside the presentation because the site prevents embedding.<br><br>Click the button below to open it directly in a new tab.</p>
+        <a id="demo-ext-link" href="#" target="_blank">Open balkanestate.com ↗</a>
+      </div>
+      <iframe id="demo-iframe" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"></iframe>
+    </div>
+  </div>
+</div>
+
 <script>
 const slides = Array.from(document.querySelectorAll('.slide'));
 const N = slides.length;
@@ -863,16 +993,22 @@ function go(d) { goTo(cur + d); }
 
 /* Keyboard */
 document.addEventListener('keydown', e => {
+  const demoOpen = document.getElementById('demo-overlay')?.classList.contains('open');
+  if (e.key === 'Escape') {
+    if (demoOpen) { closeDemo(); return; }
+    document.getElementById('notes').classList.remove('open'); return;
+  }
+  if (demoOpen) return; /* don't advance slides while demo is open */
   if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') { e.preventDefault(); go(1); }
   if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')  { e.preventDefault(); go(-1); }
   if (e.key === 'n' || e.key === 'N') toggleNotes();
   if (e.key === 'f' || e.key === 'F') document.documentElement.requestFullscreen?.();
-  if (e.key === 'Escape') document.getElementById('notes').classList.remove('open');
 });
 
-/* Click to advance */
+/* Click to advance (skip if clicking a demo card/item) */
 document.getElementById('stage').addEventListener('click', e => {
   if (e.target.closest('#nav,#notes,#hints')) return;
+  if (e.target.closest('.demo-card,.demo-item')) return; /* handled separately */
   go(1);
 });
 
@@ -885,6 +1021,103 @@ document.getElementById('stage').addEventListener('touchend', e => {
 }, { passive: true });
 
 function toggleNotes() { document.getElementById('notes').classList.toggle('open'); }
+
+/* ══ DEMO OVERLAY ══ */
+let currentDemoUrl = '';
+
+document.querySelectorAll('.demo-card, .demo-item').forEach(el => {
+  el.addEventListener('click', e => {
+    e.stopPropagation();
+    const url   = el.dataset.demo;
+    const label = el.dataset.label || url.replace('https://','');
+    if (url) openDemo(url, label);
+  });
+});
+
+function openDemo(url, label) {
+  currentDemoUrl = url;
+  const overlay  = document.getElementById('demo-overlay');
+  const iframe   = document.getElementById('demo-iframe');
+  const loading  = document.getElementById('demo-loading');
+  const blocked  = document.getElementById('demo-blocked');
+  const urlEl    = document.getElementById('demo-url');
+  const extLink  = document.getElementById('demo-ext-link');
+
+  /* Reset state */
+  iframe.src            = '';
+  loading.style.display = 'flex';
+  blocked.style.display = 'none';
+  urlEl.textContent     = label || url.replace('https://','');
+  extLink.href          = url;
+
+  overlay.classList.add('open');
+
+  /* Small delay so the window animation plays before the iframe starts loading */
+  setTimeout(() => {
+    iframe.src = url;
+  }, 250);
+
+  /* Detect if iframe loaded successfully */
+  let loadTimer = setTimeout(() => {
+    /* If still showing loading after 12s, site may be blocking */
+  }, 12000);
+
+  iframe.onload = () => {
+    clearTimeout(loadTimer);
+    loading.style.opacity = '0';
+    setTimeout(() => { loading.style.display = 'none'; loading.style.opacity = '1'; }, 300);
+
+    /* Try to detect X-Frame-Options block — iframe will have empty contentDocument */
+    try {
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      if (!doc || doc.body === null || doc.body.innerHTML === '') {
+        showBlocked(url);
+      }
+    } catch(err) {
+      /* Cross-origin — this is expected and means it loaded fine */
+      loading.style.display = 'none';
+    }
+  };
+
+  iframe.onerror = () => {
+    clearTimeout(loadTimer);
+    showBlocked(url);
+  };
+}
+
+function showBlocked(url) {
+  document.getElementById('demo-loading').style.display = 'none';
+  const b = document.getElementById('demo-blocked');
+  b.style.display = 'flex';
+  document.getElementById('demo-ext-link').href = url;
+  document.getElementById('demo-ext-link').textContent = 'Open ' + url.replace('https://','') + ' ↗';
+}
+
+function closeDemo() {
+  const overlay = document.getElementById('demo-overlay');
+  overlay.classList.remove('open');
+  setTimeout(() => {
+    document.getElementById('demo-iframe').src = '';
+    document.getElementById('demo-loading').style.display = 'flex';
+    document.getElementById('demo-blocked').style.display = 'none';
+  }, 350);
+}
+
+function reloadDemo() {
+  if (currentDemoUrl) {
+    document.getElementById('demo-iframe').src = '';
+    document.getElementById('demo-loading').style.display = 'flex';
+    document.getElementById('demo-blocked').style.display = 'none';
+    setTimeout(() => { document.getElementById('demo-iframe').src = currentDemoUrl; }, 100);
+  }
+}
+
+/* ESC: close demo first, then notes — handled in the main keydown listener above */
+
+/* Click backdrop to close */
+document.getElementById('demo-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('demo-overlay')) closeDemo();
+});
 </script>
 </body>
 </html>
