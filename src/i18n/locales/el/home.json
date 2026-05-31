@@ -121,7 +121,9 @@
     "category_investment": "Επένδυση",
     "category_regulation": "Κανονισμοί",
     "category_development": "Ανάπτυξη",
-    "category_tourism": "Τουρισμός"
+    "category_tourism": "Τουρισμός",
+    "tabNews": "Νέα Αγοράς",
+    "tabArticles": "Τα Άρθρα Μας"
   },
   "showcase": {
     "badge": "Πώς Λειτουργεί",

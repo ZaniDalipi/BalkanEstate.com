@@ -121,7 +121,9 @@
     "category_investment": "Investment",
     "category_regulation": "Regulation",
     "category_development": "Development",
-    "category_tourism": "Tourism"
+    "category_tourism": "Tourism",
+    "tabNews": "Market News",
+    "tabArticles": "Our Articles"
   },
   "showcase": {
     "badge": "How It Works",

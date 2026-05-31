@@ -121,7 +121,9 @@
     "category_investment": "Investiții",
     "category_regulation": "Reglementări",
     "category_development": "Dezvoltare",
-    "category_tourism": "Turism"
+    "category_tourism": "Turism",
+    "tabNews": "Știri de Piață",
+    "tabArticles": "Articolele Noastre"
   },
   "showcase": {
     "badge": "Cum Funcționează",

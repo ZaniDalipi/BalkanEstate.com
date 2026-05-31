@@ -121,7 +121,9 @@
     "category_investment": "Investim",
     "category_regulation": "Rregullim",
     "category_development": "Zhvillim",
-    "category_tourism": "Turizëm"
+    "category_tourism": "Turizëm",
+    "tabNews": "Lajme Tregu",
+    "tabArticles": "Artikujt Tanë"
   },
   "showcase": {
     "badge": "Si Funksionon",

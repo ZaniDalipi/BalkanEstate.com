@@ -121,7 +121,9 @@
     "category_investment": "Инвестиции",
     "category_regulation": "Регулатива",
     "category_development": "Развој",
-    "category_tourism": "Туризам"
+    "category_tourism": "Туризам",
+    "tabNews": "Пазарни Вести",
+    "tabArticles": "Наши Написи"
   },
   "showcase": {
     "badge": "Како Функционира",
