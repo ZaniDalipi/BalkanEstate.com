@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useArticle } from '../hooks/useArticle';
 import { useArticles } from '../hooks/useArticles';
+import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { useAppContext } from '@/context/AppContext';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import ArticleCard from './ArticleCard';
@@ -130,7 +131,7 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
     const key = `viewed_${slug}`;
     if (sessionStorage.getItem(key)) return;
     sessionStorage.setItem(key, '1');
-    fetch(`${window.location.origin.replace(':3000', ':5001')}/api/articles/${slug}/view`, {
+    fetch(`${API_CONFIG.BASE_URL}/articles/${slug}/view`, {
       method: 'POST',
     }).catch(() => {});
   }, [slug]);

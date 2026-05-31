@@ -1,28 +1,30 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { useArticles } from '../hooks/useArticles';
 import { ArticleCategory } from '../types/article.types';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
+import { useAppContext } from '@/context/AppContext';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import ArticleCard from './ArticleCard';
 import BlogFilters from './BlogFilters';
 import ArticlePage from './ArticlePage';
 
 const BlogPage: React.FC = () => {
   const { t } = useTranslation('blog');
+  const { dispatch } = useAppContext();
   const [selectedCategory, setSelectedCategory] = useState<ArticleCategory | undefined>();
   const [selectedCountry, setSelectedCountry] = useState<string | undefined>();
   const [selectedTag, setSelectedTag] = useState<string | undefined>();
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
 
-  // Extract slug from URL if present — computed once, no hooks after
-  const slug = useMemo(() => {
-    const path = window.location.pathname;
-    const match = path.match(/^(?:\/[a-z]{2})?\/blog\/(.+)$/);
-    return match ? match[1] : null;
-  }, []);
+  // Read URL on every render — when SET_ACTIVE_VIEW re-renders this component
+  // window.location.pathname reflects the latest pushState call, so navigation
+  // between articles and back to the list always picks up the correct path.
+  const slugMatch = window.location.pathname.match(/^(?:\/[a-z]{2})?\/blog\/(.+)$/);
+  const slug = slugMatch ? slugMatch[1] : null;
 
   // All hooks must be called unconditionally before any early return
   const { articles, pagination, isLoading, error } = useArticles({
@@ -56,7 +58,17 @@ const BlogPage: React.FC = () => {
 
   // After all hooks, handle the article detail view
   if (slug) {
-    return <ArticlePage slug={slug} />;
+    return (
+      <ArticlePage
+        slug={slug}
+        onTagClick={tag => {
+          window.history.pushState({}, '', buildLocalizedPath('/blog'));
+          setSelectedTag(tag);
+          setPage(1);
+          dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'blog' });
+        }}
+      />
+    );
   }
 
   const categories = categoriesData?.categories || [];
