@@ -644,8 +644,9 @@ router.post('/articles', logAdminAction('CREATE_ARTICLE'), async (req: Request, 
       res.status(409).json({ message: 'An article with this slug already exists', code: 'DUPLICATE_SLUG' });
       return;
     }
-    console.error('[Article create]', err);
-    res.status(500).json({ message: err?.message || 'Failed to create article' });
+    console.error('[Article create] error:', err?.name, err?.message, err?.stack?.split('\n')[0]);
+    console.error('[Article create] body:', JSON.stringify(req.body).substring(0, 500));
+    res.status(500).json({ message: err?.message || 'Failed to create article', errorType: err?.name });
   }
 });
 
