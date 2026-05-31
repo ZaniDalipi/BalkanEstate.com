@@ -1019,10 +1019,3 @@ export const BoltIconSolid: React.FC<{ className?: string }> = ({ className }) =
         React.createElement('path', { fillRule: "evenodd", clipRule: "evenodd", d: "M14.615 1.595a.75.75 0 01.359.852L12.982 9.75h7.268a.75.75 0 01.548 1.262l-10.5 11.25a.75.75 0 01-1.272-.71l1.992-7.302H3.75a.75.75 0 01-.548-1.262l10.5-11.25a.75.75 0 01.913-.143z" })
     )
 );
-
-export const BookOpenIcon: React.FC<{ className?: string }> = ({ className }) => (
-    React.createElement(Icon, { className: className },
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" })
-    )
-);
-
