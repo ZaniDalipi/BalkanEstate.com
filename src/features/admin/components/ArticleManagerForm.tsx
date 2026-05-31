@@ -316,36 +316,13 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {error && (
-            <span className="text-xs text-red-600 bg-red-50 px-3 py-1 rounded-full max-w-xs truncate">
-              {error}
-            </span>
-          )}
-          {saveSuccess && (
-            <span className="text-xs text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">✓ Saved</span>
-          )}
-          <button
-            onClick={() => handleSubmit('draft')}
-            disabled={loading}
-            className="px-3 py-1.5 text-xs font-medium border border-neutral-300 rounded-lg hover:bg-neutral-50 disabled:opacity-50 transition-colors"
-          >
-            Save Draft
-          </button>
-          <button
-            onClick={() => handleSubmit('published')}
-            disabled={loading}
-            className="px-4 py-1.5 text-xs font-semibold bg-slate-900 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50 transition-colors"
-          >
-            {loading ? 'Saving…' : status === 'published' ? 'Update' : 'Publish'}
-          </button>
-        </div>
       </div>
 
       {/* ── Main Layout ─────────────────────────────────────────────────────── */}
       <div className="flex flex-1 overflow-hidden">
 
-        {/* ── Editor / Preview ──────────────────────────────────────────────── */}
+        {/* ── Editor / Preview + Bottom Bar ────────────────────────────────── */}
+        <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto bg-white">
           {activeSection === 'write' ? (
             <div className="max-w-3xl mx-auto px-4 sm:px-8 py-8">
@@ -567,6 +544,46 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
               />
             </div>
           )}
+        </div>
+        {/* ── Bottom Action Bar ────────────────────────────────────────────── */}
+        <div className="flex-shrink-0 bg-white border-t border-neutral-200 px-6 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            {error && (
+              <span className="text-xs text-red-600 bg-red-50 px-3 py-1.5 rounded-full truncate max-w-sm">
+                {error}
+              </span>
+            )}
+            {saveSuccess && (
+              <span className="text-xs text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full flex items-center gap-1">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+                Saved
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => handleSubmit('draft')}
+              disabled={loading}
+              className="px-4 py-2 text-sm font-medium border border-neutral-300 rounded-lg hover:bg-neutral-50 disabled:opacity-50 transition-colors"
+            >
+              Save Draft
+            </button>
+            <button
+              onClick={() => handleSubmit('published')}
+              disabled={loading}
+              className="px-5 py-2 text-sm font-semibold bg-slate-900 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Saving…
+                </>
+              ) : status === 'published' ? 'Update' : 'Publish'}
+            </button>
+          </div>
+        </div>
         </div>
 
         {/* ── Right Sidebar ────────────────────────────────────────────────── */}
