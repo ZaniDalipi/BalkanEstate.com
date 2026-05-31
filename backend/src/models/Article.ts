@@ -61,19 +61,18 @@ ArticleSchema.index({ tags: 1 });
 
 // Pre-save hook: auto-generate slug and readTime
 ArticleSchema.pre<IArticle>('save', async function (next) {
-  if (this.isModified('title') && !this.slug) {
-    // Generate slug from title: lowercase, replace spaces with hyphens, remove special chars
-    const baseSlug = this.title
+  if (!this.slug) {
+    const baseSlug = (this.title || 'article')
       .toLowerCase()
       .replace(/[^\w\s-]/g, '')
       .replace(/\s+/g, '-')
-      .replace(/-+/g, '-');
-    // Append short random id for uniqueness
+      .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'article';
     const shortId = Math.random().toString(36).substring(2, 8);
     this.slug = `${baseSlug}-${shortId}`;
   }
 
-  if (this.isModified('content') && !this.readTime) {
+  if (!this.readTime && this.content) {
     // Calculate read time: ~200 words per minute
     const wordCount = this.content.split(/\s+/).length;
     this.readTime = Math.ceil(wordCount / 200);
