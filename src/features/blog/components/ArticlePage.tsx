@@ -259,6 +259,9 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
   const publishedDate = article.publishedAt
     ? new Date(article.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     : '';
+  const publishedTime = article.publishedAt
+    ? new Date(article.publishedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    : '';
   const countryFlag = article.country ? COUNTRY_FLAGS[article.country] : '';
   const pageTitle = `${article.title} | BalkanEstate Blog`;
 
@@ -369,7 +372,9 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
               <div>
                 <p className="font-semibold text-slate-900 text-sm">{article.author?.name || 'BalkanEstate'}</p>
                 <div className="flex items-center gap-2 text-xs text-slate-400">
-                  {publishedDate && <span>{publishedDate}</span>}
+                  {publishedDate && (
+                    <span>{publishedDate}{publishedTime && <span className="text-slate-300 ml-1">· {publishedTime}</span>}</span>
+                  )}
                   {publishedDate && article.readTime && <span>·</span>}
                   {article.readTime && (
                     <span className="flex items-center gap-1">
