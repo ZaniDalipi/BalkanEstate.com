@@ -118,7 +118,8 @@ const seedArticles = async () => {
     // or generate slugs manually for insertMany (faster)
     const articles = ARTICLE_IDEAS.map((idea) => {
       const content = `<p>This is a placeholder article for: ${idea.title}</p><p>Full content to be added later.</p>`;
-      const wordCount = content.split(/\s+/).length;
+      const plainText = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+      const wordCount = plainText ? plainText.split(' ').length : 0;
       return {
         ...idea,
         slug: generateSlug(idea.title),
