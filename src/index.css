@@ -292,6 +292,13 @@ fieldset {
  * Removing backdrop-filter collapses all elements into one GPU layer so
  * scroll is handled entirely in hardware.
  */
+/* NOTE: Lightning CSS aggressively dedupes identical -webkit/standard
+   declarations and (incorrectly) keeps only the prefixed one — leaving the
+   standard `backdrop-filter` from the base rule in force on Chromium. Use two
+   rules with structurally different selectors (`:where()` adds zero
+   specificity but is a different selector string) so the minifier can't
+   merge them. Both `backdrop-filter` and `-webkit-backdrop-filter` then
+   survive into production. */
 .listing-form .glass-input,
 .listing-form .glass-select,
 .listing-form .glass-btn,
@@ -302,6 +309,8 @@ fieldset {
 .listing-form .glass-panel,
 .listing-form .glass-panel-light {
   backdrop-filter: none !important;
+}
+.listing-form :where(.glass-input, .glass-select, .glass-btn, .glass-btn-primary, .glass-btn-accent, .glass-fieldset, .glass-badge, .glass-panel, .glass-panel-light) {
   -webkit-backdrop-filter: none !important;
 }
 
@@ -315,6 +324,8 @@ fieldset {
  */
 .listing-form-page .glass-panel {
   backdrop-filter: none !important;
+}
+.listing-form-page :where(.glass-panel) {
   -webkit-backdrop-filter: none !important;
 }
 
@@ -329,7 +340,10 @@ fieldset {
   display: none;
 }
 .listing-form-page .glass-shimmer-border::before {
-  animation: none;
+  /* Display:none avoids the cost of the masked pseudo entirely — `mask` forces
+     an extra compositor layer covering the whole (tall) panel, which competes
+     with scroll. The plain border on .glass-panel still frames it. */
+  display: none;
 }
 
 /*
@@ -341,6 +355,25 @@ fieldset {
 .listing-form-page .cv-section {
   content-visibility: auto;
   contain-intrinsic-size: auto 320px;
+}
+
+/*
+ * The global LiquidGlassControl (Sale/Rent + AI/Manual toggles) and Button
+ * components apply backdrop-filter and an SVG distortion filter via INLINE
+ * styles, so the class-based override above doesn't reach them. They live near
+ * the top of this form, which is exactly where scroll jank was concentrated.
+ * Strip both effects on this page only; the toggle/button still looks fine
+ * without the inner blur/distortion over the solid white background.
+ */
+.listing-form-page [style*="backdrop-filter"],
+.listing-form-page [style*="-webkit-backdrop-filter"] {
+  backdrop-filter: none !important;
+}
+.listing-form-page :where([style*="backdrop-filter"], [style*="-webkit-backdrop-filter"]) {
+  -webkit-backdrop-filter: none !important;
+}
+.listing-form-page [style*="liquid-glass-distortion"] {
+  filter: none !important;
 }
 
 /* Also speed up transitions inside the form — 'transition: all' is expensive */
