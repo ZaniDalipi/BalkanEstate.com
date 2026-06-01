@@ -166,9 +166,10 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
   // ── Inline Image Upload ────────────────────────────────────────────────────
 
   const handleInlineImageUpload = async (file: File) => {
+    // Capture the saved range immediately — it was saved when the toolbar button was clicked
+    const savedRange = savedRangeRef.current ? savedRangeRef.current.cloneRange() : null;
     try {
       setInlineUploading(true);
-      saveSelection();
       const token = tokenService.getAccessToken();
       const formData = new FormData();
       formData.append('image', file);
@@ -180,11 +181,22 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
       });
       if (!res.ok) throw new Error('Upload failed');
       const data = await res.json();
-      insertHTML(`<img src="${data.url}" alt="" style="max-width:100%;border-radius:8px;margin:12px 0;" />`);
+
+      // Restore focus + selection before inserting so execCommand works
+      editorRef.current?.focus();
+      const sel = window.getSelection();
+      if (sel && savedRange) {
+        sel.removeAllRanges();
+        sel.addRange(savedRange);
+      }
+      document.execCommand('insertHTML', false, `<img src="${data.url}" alt="" style="max-width:100%;border-radius:8px;margin:12px 0;" />`);
+      handleEditorInput();
     } catch {
       setError('Inline image upload failed.');
     } finally {
       setInlineUploading(false);
+      // Reset the file input so the same file can be re-selected
+      if (inlineImageInputRef.current) inlineImageInputRef.current.value = '';
     }
   };
 
