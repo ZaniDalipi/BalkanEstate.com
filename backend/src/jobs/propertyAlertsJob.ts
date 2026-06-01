@@ -15,6 +15,10 @@ import Favorite from '../models/Favorite';
 import PropertyAlert from '../models/PropertyAlert';
 import PriceHistory from '../models/PriceHistory';
 import Notification from '../models/Notification';
+import SavedAgent from '../models/SavedAgent';
+import AgencyFavorite from '../models/AgencyFavorite';
+import Agent from '../models/Agent';
+import User from '../models/User';
 import { sendPropertyAlert, sendPriceDropAlert, sendSavedSearchPriceDropAlert, sendNewListingsDigest } from '../services/emailService';
 import { sendPushToUser } from '../services/pushNotificationService';
 
@@ -354,6 +358,16 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
             { userId: user._id, savedSearchId: search._id, emailSent: false },
             { emailSent: true, emailSentAt: new Date() }
           );
+
+          // Push for digest: use the first property as the deep-link target
+          const firstProperty = matchingProperties[0];
+          await sendNewListingPush(
+            String(user._id),
+            search.name,
+            String(firstProperty._id),
+            firstProperty.title || `${firstProperty.address}, ${firstProperty.city}`,
+            matchingProperties.length
+          );
         }
       } catch (emailError) {
         cronLogger.error('   Failed to send property alert email:', emailError);
@@ -676,6 +690,93 @@ export async function recordPriceChange(
 }
 
 /**
+ * Notify users who saved the agent or agency that posted a new listing.
+ * Called from processInstantAlertsForProperty.
+ */
+async function processAgentAgencyFollowerAlerts(property: IProperty): Promise<void> {
+  const propertyTitle = property.title || `${property.address}, ${property.city}`;
+  const propertyUrl = `/properties/${property._id}`;
+  const notified = new Set<string>(); // prevent double-notify if user follows both agent and agency
+
+  // ── Agent followers ──────────────────────────────────────────────────────────
+  try {
+    // Find the Agent document via the User who created this listing (matched by email)
+    const creatorUser = await User.findOne({ email: property.createdByEmail }).select('_id').lean();
+    if (creatorUser) {
+      const agent = await Agent.findOne({ userId: creatorUser._id }).select('_id').lean();
+      if (agent) {
+        const agentFollowers = await SavedAgent.find({ agentId: agent._id })
+          .populate('userId', 'email name subscription')
+          .lean();
+
+        for (const follow of agentFollowers) {
+          const follower = follow.userId as any;
+          if (!follower || notified.has(String(follower._id))) continue;
+
+          try {
+            const notification = await Notification.create({
+              userId: follower._id,
+              type: 'new_listing',
+              title: 'New listing from a saved agent',
+              message: `${property.createdByName || 'An agent you follow'} posted: ${propertyTitle}`,
+              priority: 'normal',
+              data: { actionUrl: propertyUrl, propertyId: String(property._id) },
+            });
+            sendPushToUser(String(follower._id), notification).catch(() => {});
+            notified.add(String(follower._id));
+          } catch (err) {
+            cronLogger.error(`Failed to notify agent follower ${follower._id}:`, err);
+          }
+        }
+
+        cronLogger.info(`   👤 Agent follower alerts sent: ${notified.size}`);
+      }
+    }
+  } catch (err) {
+    cronLogger.error('Error processing agent follower alerts:', err);
+  }
+
+  // ── Agency followers ─────────────────────────────────────────────────────────
+  if (!property.createdByAgencyId) return;
+
+  try {
+    const agencyFollowers = await AgencyFavorite.find({ agencyId: property.createdByAgencyId })
+      .populate('userId', 'email name subscription')
+      .lean();
+
+    let agencyCount = 0;
+    for (const follow of agencyFollowers) {
+      const follower = follow.userId as any;
+      if (!follower || notified.has(String(follower._id))) continue;
+
+      try {
+        const notification = await Notification.create({
+          userId: follower._id,
+          type: 'new_listing',
+          title: 'New listing from a saved agency',
+          message: `${property.createdByAgencyName || 'An agency you follow'} posted: ${propertyTitle}`,
+          priority: 'normal',
+          data: {
+            actionUrl: propertyUrl,
+            propertyId: String(property._id),
+            agencyId: String(property.createdByAgencyId),
+          },
+        });
+        sendPushToUser(String(follower._id), notification).catch(() => {});
+        notified.add(String(follower._id));
+        agencyCount++;
+      } catch (err) {
+        cronLogger.error(`Failed to notify agency follower ${follower._id}:`, err);
+      }
+    }
+
+    cronLogger.info(`   🏢 Agency follower alerts sent: ${agencyCount}`);
+  } catch (err) {
+    cronLogger.error('Error processing agency follower alerts:', err);
+  }
+}
+
+/**
  * Process instant alerts for a single newly created/activated property
  * Called immediately when a property is created or activated
  * This provides truly instant notifications instead of waiting for the 15-minute cron
@@ -841,6 +942,9 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
     }
 
     cronLogger.info(`✅ Instant alerts processed for property ${propertyId}: ${alertsSent} alerts sent`);
+
+    // Notify followers of the agent and agency who posted this listing
+    await processAgentAgencyFollowerAlerts(property);
   } catch (error) {
     cronLogger.error(`❌ Error processing instant alerts for property ${propertyId}:`, error);
     // Don't throw - we don't want to break the property creation flow
