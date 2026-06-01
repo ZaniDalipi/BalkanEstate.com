@@ -681,7 +681,7 @@ router.patch('/articles/:id', logAdminAction('UPDATE_ARTICLE'), async (req: Requ
     if (coverImageUrl !== undefined) article.coverImageUrl = coverImageUrl ? String(coverImageUrl).trim() : undefined;
     if (coverImagePublicId !== undefined) article.coverImagePublicId = coverImagePublicId || undefined;
     if (coverImageFit && typeof coverImageFit === 'string' && VALID_FIT.has(coverImageFit)) {
-      article.coverImageFit = coverImageFit;
+      article.coverImageFit = coverImageFit as 'cover' | 'contain' | 'fill';
     }
     if (isFeatured !== undefined) article.isFeatured = isFeatured === true;
 
