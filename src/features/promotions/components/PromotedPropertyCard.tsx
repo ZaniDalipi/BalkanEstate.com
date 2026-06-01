@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
-import { ClockIcon, BuildingOfficeIcon, MapPinIcon, ChartBarIcon, StarIconSolid, FireIcon } from '@/constants';
+import { ClockIcon, MapPinIcon, ChartBarIcon, StarIconSolid, FireIcon } from '@/constants';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 
 // Tier configuration
@@ -210,8 +210,8 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
             {property.imageUrl ? (
               <img src={optimizeCloudinaryUrl(property.imageUrl, { width: 192, quality: 'auto', crop: 'fill' })} alt={property.title || 'Property'} className="w-full h-full object-cover" loading="lazy" decoding="async" width={96} height={96} />
             ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <BuildingOfficeIcon className="w-10 h-10 text-neutral-300" />
+              <div className="w-full h-full flex items-center justify-center p-2">
+                <img src="/icons/BalkanEstateAILogo.svg" alt="BalkanEstate AI" className="max-w-[80%] max-h-[80%] object-contain opacity-70" loading="lazy" decoding="async" />
               </div>
             )}
           </div>

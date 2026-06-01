@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { optimizeCloudinaryUrl, getPropertyImagePlaceholder } from '@/config/cloudinaryConfig';
-import { BuildingOfficeIcon } from '@/constants';
 
 interface PropertyImageProps {
   src: string | undefined;
@@ -44,8 +43,14 @@ const PropertyImage: React.FC<PropertyImageProps> = ({
 
   if (error || !src) {
     return (
-      <div className="absolute inset-0 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
-        <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
+      <div className="absolute inset-0 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center p-4">
+        <img
+          src="/icons/BalkanEstateAILogo.svg"
+          alt="BalkanEstate AI"
+          loading="lazy"
+          decoding="async"
+          className="max-w-[70%] max-h-[70%] object-contain opacity-70 select-none pointer-events-none"
+        />
       </div>
     );
   }
