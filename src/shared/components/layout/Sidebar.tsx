@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 import { AppView, UserRole, Conversation } from '@/types';
-import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, ShieldCheckIcon, GlobeAltIcon, ChartBarIcon } from '@/constants';
+import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, ShieldCheckIcon, GlobeAltIcon, ChartBarIcon, BookOpenIcon } from '@/constants';
 import LanguageSwitcher from '@/src/components/LanguageSwitcher';
 import UserAvatar from '@/components/shared/UserAvatar';
 
@@ -113,6 +113,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       { view: 'saved-properties' as AppView, label: t('nav:savedProperties'), icon: <HeartIcon /> },
       { view: 'agents' as AppView, label: t('nav:topAgents'), icon: <AgentsIcon /> },
       { view: 'agencies' as AppView, label: t('nav:agencies'), icon: <BuildingOfficeIcon /> },
+      { view: 'blog' as AppView, label: t('nav:blog', 'Blog'), icon: <BookOpenIcon /> },
     ];
 
     // Add agency dashboard for users who belong to an agency

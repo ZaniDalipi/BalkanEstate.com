@@ -60,21 +60,21 @@ ArticleSchema.index({ country: 1, publishedAt: -1 });
 ArticleSchema.index({ tags: 1 });
 
 // Pre-save hook: auto-generate slug and readTime
-ArticleSchema.pre<IArticle>('save', async function (next) {
-  if (this.isModified('title') && !this.slug) {
-    // Generate slug from title: lowercase, replace spaces with hyphens, remove special chars
-    const baseSlug = this.title
+// pre('validate') runs before Mongoose validation — must generate slug here
+// so the required:true check on slug doesn't fail for new documents.
+ArticleSchema.pre<IArticle>('validate', function (next) {
+  if (!this.slug) {
+    const baseSlug = (this.title || 'article')
       .toLowerCase()
       .replace(/[^\w\s-]/g, '')
       .replace(/\s+/g, '-')
-      .replace(/-+/g, '-');
-    // Append short random id for uniqueness
+      .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'article';
     const shortId = Math.random().toString(36).substring(2, 8);
     this.slug = `${baseSlug}-${shortId}`;
   }
 
-  if (this.isModified('content') && !this.readTime) {
-    // Calculate read time: ~200 words per minute
+  if (!this.readTime && this.content) {
     const wordCount = this.content.split(/\s+/).length;
     this.readTime = Math.ceil(wordCount / 200);
   }

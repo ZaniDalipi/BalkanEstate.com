@@ -1,0 +1,33 @@
+{
+  "title": "Blog o Nekretninama na Balkanu",
+  "subtitle": "Stručni uvidi, analize tržišta i vodiči za kupce, investitore i prodavce nekretnina na Balkanu",
+  "searchPlaceholder": "Pretražite članke…",
+  "readMore": "Pročitaj Više",
+  "backToBlog": "Natrag na Blog",
+  "minuteRead": "{{count}} min čitanja",
+  "noArticles": "Nisu pronađeni članci",
+  "error": "Učitavanje članaka nije uspjelo",
+  "articleNotFound": "Članak nije pronađen",
+  "articleNotFoundDesc": "Ovaj članak je možda premješten ili izbrisan.",
+  "moreArticles": "Više Članaka",
+  "moreArticlesDesc": "Svratite uskoro po više članaka o investicijama i trendovima tržišta nekretnina",
+  "relatedArticles": "Srodni Članci",
+  "category_market": "Tržište",
+  "category_investment": "Investicije",
+  "category_regulation": "Regulativa",
+  "category_development": "Razvoj",
+  "category_tourism": "Turizam",
+  "category_guide": "Vodič",
+  "category_lifestyle": "Stil Života",
+  "filters": {
+    "category": "Kategorija",
+    "country": "Zemlja",
+    "all": "Sve",
+    "popularTags": "Popularne Oznake"
+  },
+  "pagination": {
+    "prev": "Prethodna",
+    "next": "Sljedeća",
+    "page": "Stranica {{page}} od {{total}}"
+  }
+}

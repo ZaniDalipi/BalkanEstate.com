@@ -108,6 +108,9 @@
     "valuation": "Valuation",
     "mortgageCalculator": "Calculator",
     "cityDashboard": "City Dashboard",
-    "default": "BalkanEstate"
-  }
+    "default": "BalkanEstate",
+    "blog": "Blog & Articles",
+    "guides": "Guides"
+  },
+  "blog": "Blog & Articles"
 }

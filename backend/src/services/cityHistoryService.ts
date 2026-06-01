@@ -85,7 +85,10 @@ async function fetchBISHistory(
   const fetchPromise = axios
     .get(url, {
       timeout: BIS_TIMEOUT_MS,
-      headers: { 'User-Agent': 'BalkanEstate Research Bot/1.0', Accept: 'application/json' },
+      // BIS SDMX REST API: format is already declared via ?format=jsondata in the URL.
+      // Sending Accept: application/json causes 406 because the endpoint expects the
+      // SDMX-specific content type. Using */* lets the server honour its own format param.
+      headers: { 'User-Agent': 'BalkanEstate Research Bot/1.0', Accept: '*/*' },
     })
     .then((response) => {
       const dataSet = response.data?.dataSets?.[0];

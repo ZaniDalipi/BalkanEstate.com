@@ -58,6 +58,7 @@ import enAgencyDashboard from './locales/en/agencyDashboard.json';
 import enHome from './locales/en/home.json';
 import enBusinessDirectory from './locales/en/businessDirectory.json';
 import enListingFeeds from './locales/en/listingFeeds.json';
+import enBlog from './locales/en/blog.json';
 
 // Language configuration
 export const languages = [
@@ -119,6 +120,7 @@ const enResources = {
   home: enHome,
   businessDirectory: enBusinessDirectory,
   listingFeeds: enListingFeeds,
+  blog: enBlog,
 };
 
 // Track which language bundles have been loaded

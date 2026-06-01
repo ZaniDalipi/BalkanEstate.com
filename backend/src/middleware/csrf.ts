@@ -62,6 +62,11 @@ const EXEMPT_PATHS = [
   '/webhooks/',
   '/health',
   '/view-stats/',
+  // Admin routes are protected by JWT Bearer token auth, which is inherently
+  // CSRF-safe — cross-origin requests cannot automatically include the
+  // Authorization header. Requiring double-submit cookies on top breaks
+  // multipart uploads and other admin operations that use raw fetch.
+  '/admin/',
 ];
 
 /** HTTP methods that are safe (read-only) and don't need CSRF protection */
