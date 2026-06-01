@@ -211,6 +211,36 @@ const NotificationCenter: React.FC = () => {
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
       return;
     }
+
+    // Universal fallback: parse actionUrl and dispatch the right view
+    if (data.actionUrl) {
+      setIsOpen(false);
+      const url: string = data.actionUrl;
+
+      if (url.startsWith('/property/')) {
+        const id = url.replace('/property/', '');
+        setDirection('up');
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: id });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
+      } else if (url.startsWith('/agencies/')) {
+        const slug = url.replace('/agencies/', '');
+        setDirection('up');
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: slug });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
+      } else if (url.startsWith('/account')) {
+        const tabMatch = url.match(/^\/account\/(.+)$/);
+        if (tabMatch) dispatch({ type: 'SET_ACCOUNT_TAB', payload: tabMatch[1] });
+        setDirection('morph');
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+      } else if (url === '/inbox') {
+        setDirection('morph');
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
+      } else if (url.includes('/subscribe') || url === '/pricing') {
+        setDirection('forward');
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+      }
+      window.history.pushState({}, '', url);
+    }
   };
 
   // Fetch on mount and poll every 5 minutes

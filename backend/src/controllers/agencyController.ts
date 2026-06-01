@@ -1733,7 +1733,7 @@ export const joinAgencyByInvitationCode = async (
           agentName: user.name || 'Agent',
           agentEmail: user.email,
           totalAgents: agency.agents.length,
-          actionUrl: `/agency/${agency.slug || agency._id}`,
+          actionUrl: `/agencies/${agency.slug || agency._id}`,
           actionLabel: 'View Agency',
         },
       });
@@ -1752,7 +1752,7 @@ export const joinAgencyByInvitationCode = async (
           agencyName: agency.name,
           subscriptionTier: user.subscription.tier,
           listingsLimit: user.subscription.listingsLimit,
-          actionUrl: `/agency/${agency.slug || agency._id}`,
+          actionUrl: `/agencies/${agency.slug || agency._id}`,
           actionLabel: 'View Agency',
         },
       });
@@ -2683,7 +2683,7 @@ export const redeemAgentCoupon = async (
           agentEmail: user.email,
           couponCode,
           totalAgents: agency.agents.length,
-          actionUrl: `/agency/${agency.slug || agency._id}`,
+          actionUrl: `/agencies/${agency.slug || agency._id}`,
           actionLabel: 'View Agency',
         },
       });
@@ -2702,7 +2702,7 @@ export const redeemAgentCoupon = async (
           agencyName: agency.name,
           subscriptionTier: user.subscription.tier,
           listingsLimit: user.subscription.listingsLimit,
-          actionUrl: `/agency/${agency.slug || agency._id}`,
+          actionUrl: `/agencies/${agency.slug || agency._id}`,
           actionLabel: 'View Agency',
         },
       });
