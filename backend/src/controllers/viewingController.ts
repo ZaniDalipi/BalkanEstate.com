@@ -258,7 +258,7 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
         propertyTitle,
         viewingId: String(viewing._id),
         visitorName: trimmedName,
-        actionUrl: '/seller?tab=viewings',
+        actionUrl: '/account/viewings',
         actionLabel: 'View Requests',
       },
     }).catch(err => apiLogger.error('Failed to create new viewing notification:', err));
@@ -481,6 +481,7 @@ export const updateViewingStatus = async (req: Request, res: Response): Promise<
           visitorName: viewing.visitorName,
           date: formattedDate,
           timeSlot: viewing.timeSlot,
+          actionUrl: '/account/viewings',
         },
       }).catch(err => apiLogger.error('Failed to create viewing notification:', err));
     }
