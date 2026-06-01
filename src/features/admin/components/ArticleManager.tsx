@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ArticleManagerForm from './ArticleManagerForm';
 import { tokenService } from '@/src/shared/api/tokenService';
+import { API_CONFIG } from '@/src/shared/constants/app.constants';
 
 interface Article {
   _id: string;
@@ -33,7 +34,7 @@ const ArticleManager: React.FC = () => {
       setLoading(true);
       const token = tokenService.getAccessToken();
       const res = await fetch(
-        `http://localhost:5001/api/admin/articles?page=${page}&limit=20${statusFilter !== 'all' ? `&status=${statusFilter}` : ''}`,
+        `${API_CONFIG.BASE_URL}/admin/articles?page=${page}&limit=20${statusFilter !== 'all' ? `&status=${statusFilter}` : ''}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -50,7 +51,7 @@ const ArticleManager: React.FC = () => {
     if (!confirm('Are you sure?')) return;
     try {
       const token = tokenService.getAccessToken();
-      await fetch(`http://localhost:5001/api/admin/articles/${id}`, {
+      await fetch(`${API_CONFIG.BASE_URL}/admin/articles/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -63,7 +64,7 @@ const ArticleManager: React.FC = () => {
   const handlePublish = async (id: string) => {
     try {
       const token = tokenService.getAccessToken();
-      await fetch(`http://localhost:5001/api/admin/articles/${id}/publish`, {
+      await fetch(`${API_CONFIG.BASE_URL}/admin/articles/${id}/publish`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` },
       });
