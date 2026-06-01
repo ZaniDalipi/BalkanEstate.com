@@ -32,6 +32,19 @@ export function initializePushService(): void {
     return;
   }
 
+  // Sanity-check key format: VAPID keys are base64url-encoded EC keys
+  // Public key (uncompressed P-256): 65 bytes → ~87 base64url chars
+  // Private key (P-256 scalar): 32 bytes → ~43 base64url chars
+  const isValidBase64url = (s: string) => /^[A-Za-z0-9_-]+=*$/.test(s);
+  if (!isValidBase64url(vapidPublicKey) || vapidPublicKey.length < 80) {
+    apiLogger.error('❌ VAPID_PUBLIC_KEY format looks invalid — expected a base64url-encoded P-256 public key (~87 chars)');
+    return;
+  }
+  if (!isValidBase64url(vapidPrivateKey) || vapidPrivateKey.length < 40) {
+    apiLogger.error('❌ VAPID_PRIVATE_KEY format looks invalid — expected a base64url-encoded 32-byte scalar (~43 chars)');
+    return;
+  }
+
   try {
     webpush.setVapidDetails(VAPID_SUBJECT, vapidPublicKey, vapidPrivateKey);
     isConfigured = true;
