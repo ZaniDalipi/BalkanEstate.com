@@ -39,7 +39,7 @@ async function sendNewListingPush(userId: string, searchName: string, propertyId
       title,
       message,
       priority: 'high',
-      data: { actionUrl: `/properties/${propertyId}`, propertyId },
+      data: { actionUrl: `/property/${propertyId}`, propertyId },
     });
     sendPushToUser(userId, notification).catch(() => {});
   } catch (err) {
@@ -60,7 +60,7 @@ async function sendPriceChangePush(userId: string, propertyId: string, propertyT
       title,
       message,
       priority: isPriceDrop ? 'high' : 'normal',
-      data: { actionUrl: `/properties/${propertyId}`, propertyId, previousPrice, newPrice },
+      data: { actionUrl: `/property/${propertyId}`, propertyId, previousPrice, newPrice },
     });
     sendPushToUser(userId, notification).catch(() => {});
   } catch (err) {
@@ -697,7 +697,7 @@ export async function recordPriceChange(
  */
 async function processAgentAgencyFollowerAlerts(property: IProperty): Promise<void> {
   const propertyTitle = property.title || `${property.address}, ${property.city}`;
-  const propertyUrl = `/properties/${property._id}`;
+  const propertyUrl = `/property/${property._id}`;
   const notified = new Set<string>(); // prevent double-notify if user follows both agent and agency
 
   // ── Agent followers ──────────────────────────────────────────────────────────
