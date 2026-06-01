@@ -29,17 +29,18 @@ const ALERT_ELIGIBLE_STATUSES = ['active', 'trial', 'grace', 'pending_cancellati
 
 async function sendNewListingPush(userId: string, searchName: string, propertyId: string, propertyTitle: string, count: number): Promise<void> {
   try {
-    const title = count === 1 ? 'New property found!' : `${count} new properties found!`;
+    // Title = saved search name so users know which alert fired
+    const title = searchName;
     const message = count === 1
-      ? `"${propertyTitle}" matches your search "${searchName}"`
-      : `${count} new properties match your search "${searchName}"`;
+      ? `1 new listing: "${propertyTitle}"`
+      : `${count} new listings match your search`;
     const notification = await Notification.create({
       userId,
       type: 'new_listing',
       title,
       message,
       priority: 'high',
-      data: { actionUrl: `/property/${propertyId}`, propertyId },
+      data: { actionUrl: `/property/${propertyId}`, propertyId, searchName, count },
     });
     sendPushToUser(userId, notification).catch(() => {});
   } catch (err) {
@@ -198,10 +199,15 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
   cronLogger.info(`🔔 Processing ${frequency} new listing alerts...`);
 
   try {
-    // Get all saved searches with alerts enabled for this frequency
+    // alertsEnabled: treat missing/undefined as true (legacy records pre-date the field)
+    // alertFrequency: for 'instant' also match records where the field is absent (schema default)
+    const frequencyQuery = frequency === 'instant'
+      ? { $or: [{ alertFrequency: 'instant' }, { alertFrequency: { $exists: false } }] }
+      : { alertFrequency: frequency };
+
     const savedSearches = await SavedSearch.find({
-      alertsEnabled: true,
-      alertFrequency: frequency,
+      alertsEnabled: { $ne: false },
+      ...frequencyQuery,
     }).populate('userId', 'email name subscription');
 
     if (savedSearches.length === 0) {
@@ -226,17 +232,19 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
 
     cronLogger.info(`   ${savedSearches.length} saved searches, ${eligibleSearches.length} eligible`);
 
-    // Determine time window based on frequency
+    // Time window: add 5-min overlap so clock skew between cron ticks
+    // never silently drops a property that was created just before the previous run.
+    // seenPropertyIds deduplication prevents double-notifications.
     let since: Date;
     switch (frequency) {
       case 'instant':
-        since = new Date(Date.now() - 15 * 60 * 1000); // Last 15 minutes
+        since = new Date(Date.now() - 20 * 60 * 1000); // 15-min cron + 5-min overlap
         break;
       case 'daily':
-        since = new Date(Date.now() - 24 * 60 * 60 * 1000); // Last 24 hours
+        since = new Date(Date.now() - 25 * 60 * 60 * 1000); // 24 h + 1 h overlap
         break;
       case 'weekly':
-        since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // Last 7 days
+        since = new Date(Date.now() - (7 * 24 + 1) * 60 * 60 * 1000); // 7 d + 1 h overlap
         break;
     }
 
