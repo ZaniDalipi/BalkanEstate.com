@@ -22,8 +22,9 @@ import User from '../models/User';
 import { sendPropertyAlert, sendPriceDropAlert, sendSavedSearchPriceDropAlert, sendNewListingsDigest } from '../services/emailService';
 import { sendPushToUser } from '../services/pushNotificationService';
 
-// Subscription tiers that have access to property alerts
-const ALERT_ELIGIBLE_TIERS = ['buyer', 'pro', 'agency_owner', 'agency_agent'];
+// All tiers can receive saved-search and price alerts — free users included.
+// Subscription gate only controls how many searches a user can save, not whether they get notified.
+const ALERT_ELIGIBLE_TIERS = ['free', 'buyer', 'pro', 'agency_owner', 'agency_agent'];
 const ALERT_ELIGIBLE_STATUSES = ['active', 'trial', 'grace', 'pending_cancellation'];
 
 async function sendNewListingPush(userId: string, searchName: string, propertyId: string, propertyTitle: string, count: number): Promise<void> {
@@ -208,10 +209,13 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
       return;
     }
 
-    // Filter to only users with active subscriptions (buyer or pro tier)
+    // Filter: allow all registered users (no subscription = free tier, still eligible)
     const eligibleSearches = savedSearches.filter(search => {
       const user = search.userId as any;
-      if (!user || !user.subscription) return false;
+      if (!user) return false;
+
+      // Users with no subscription object are treated as free tier — still eligible
+      if (!user.subscription) return true;
 
       const { tier, status } = user.subscription;
       const isEligibleTier = ALERT_ELIGIBLE_TIERS.includes(tier);
@@ -220,7 +224,7 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
       return isEligibleTier && isActiveStatus;
     });
 
-    cronLogger.info(`   ${savedSearches.length} saved searches, ${eligibleSearches.length} with eligible subscriptions`);
+    cronLogger.info(`   ${savedSearches.length} saved searches, ${eligibleSearches.length} eligible`);
 
     // Determine time window based on frequency
     let since: Date;
@@ -398,19 +402,17 @@ export async function processPriceDropAlerts(): Promise<void> {
       return;
     }
 
-    // Filter to only users with active subscriptions
+    // Allow all registered users — no subscription = free tier, still eligible
     const eligibleFavorites = favorites.filter(fav => {
       const user = fav.userId as any;
-      if (!user || !user.subscription) return false;
+      if (!user) return false;
+      if (!user.subscription) return true;
 
       const { tier, status } = user.subscription;
-      const isEligibleTier = ALERT_ELIGIBLE_TIERS.includes(tier);
-      const isActiveStatus = ALERT_ELIGIBLE_STATUSES.includes(status);
-
-      return isEligibleTier && isActiveStatus;
+      return ALERT_ELIGIBLE_TIERS.includes(tier) && ALERT_ELIGIBLE_STATUSES.includes(status);
     });
 
-    cronLogger.info(`   ${favorites.length} favorites with alerts, ${eligibleFavorites.length} with eligible subscriptions`);
+    cronLogger.info(`   ${favorites.length} favorites with alerts, ${eligibleFavorites.length} eligible`);
 
     if (eligibleFavorites.length === 0) {
       cronLogger.info('   No users with eligible subscriptions');
@@ -824,12 +826,18 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
       cronLogger.info(`   [${i + 1}] Search "${search.name}" by ${user?.email || 'unknown'} - subscription: ${user?.subscription?.tier || 'none'} (${user?.subscription?.status || 'none'})`);
     });
 
-    // Filter to only users with active subscriptions
+    // Filter: allow all registered users (no subscription = free tier, still eligible)
     const eligibleSearches = savedSearches.filter(search => {
       const user = search.userId as any;
-      if (!user || !user.subscription) {
-        cronLogger.info(`   ❌ Search "${search.name}" - no user or subscription`);
+      if (!user) {
+        cronLogger.info(`   ❌ Search "${search.name}" - no user`);
         return false;
+      }
+
+      // No subscription object = free tier, still eligible
+      if (!user.subscription) {
+        cronLogger.info(`   ✓ Search "${search.name}" - user ${user.email} (no subscription, treated as free)`);
+        return true;
       }
 
       const { tier, status } = user.subscription;
@@ -841,11 +849,11 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
         return false;
       }
 
-      cronLogger.info(`   ✓ Search "${search.name}" - user ${user.email} is eligible`);
+      cronLogger.info(`   ✓ Search "${search.name}" - user ${user.email} eligible (tier: ${tier})`);
       return true;
     });
 
-    cronLogger.info(`   👥 ${eligibleSearches.length} eligible saved searches (users with Pro subscription)`);
+    cronLogger.info(`   👥 ${eligibleSearches.length} eligible saved searches`);
 
     if (eligibleSearches.length === 0) {
       cronLogger.info('   ℹ️ No users with eligible subscriptions');
