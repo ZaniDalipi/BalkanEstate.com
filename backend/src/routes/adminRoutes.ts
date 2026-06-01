@@ -610,7 +610,7 @@ router.get('/articles', logAdminAction('VIEW_ARTICLES'), async (req: Request, re
 // POST /api/admin/articles - Create article
 router.post('/articles', logAdminAction('CREATE_ARTICLE'), async (req: Request, res: Response): Promise<void> => {
   try {
-    const { title, content, excerpt, category, tags, country, countryCode, coverImageUrl, status, isFeatured } = req.body;
+    const { title, content, excerpt, category, tags, country, countryCode, coverImageUrl, coverImageFit, status, isFeatured } = req.body;
 
     if (!title || !content || !excerpt) {
       res.status(400).json({ message: `Missing required fields: ${[!title && 'title', !content && 'content', !excerpt && 'excerpt'].filter(Boolean).join(', ')}` });
@@ -619,6 +619,7 @@ router.post('/articles', logAdminAction('CREATE_ARTICLE'), async (req: Request, 
 
     const VALID_CATS = new Set(['market', 'investment', 'regulation', 'development', 'tourism', 'guide', 'lifestyle']);
     const VALID_STATUS = new Set(['draft', 'published']);
+    const VALID_FIT = new Set(['cover', 'contain', 'fill']);
 
     const article = new Article({
       title: String(title).trim(),
@@ -629,6 +630,7 @@ router.post('/articles', logAdminAction('CREATE_ARTICLE'), async (req: Request, 
       country: country ? String(country).trim().substring(0, 100) : undefined,
       countryCode: countryCode ? String(countryCode).trim().toUpperCase().substring(0, 2) : undefined,
       coverImageUrl: coverImageUrl ? String(coverImageUrl).trim() : undefined,
+      coverImageFit: coverImageFit && typeof coverImageFit === 'string' && VALID_FIT.has(coverImageFit) ? coverImageFit : 'cover',
       status: VALID_STATUS.has(status) ? status : 'draft',
       author: (req as any).user._id,
       isFeatured: isFeatured === true,
@@ -657,7 +659,7 @@ router.post('/articles', logAdminAction('CREATE_ARTICLE'), async (req: Request, 
 // PATCH /api/admin/articles/:id - Update article
 router.patch('/articles/:id', logAdminAction('UPDATE_ARTICLE'), async (req: Request, res: Response): Promise<void> => {
   try {
-    const { title, content, excerpt, category, tags, country, countryCode, coverImageUrl, coverImagePublicId, status, isFeatured } = req.body;
+    const { title, content, excerpt, category, tags, country, countryCode, coverImageUrl, coverImagePublicId, coverImageFit, status, isFeatured } = req.body;
     const article = await Article.findById(req.params.id);
 
     if (!article) {
@@ -667,6 +669,7 @@ router.patch('/articles/:id', logAdminAction('UPDATE_ARTICLE'), async (req: Requ
 
     const VALID_CATS = new Set(['market', 'investment', 'regulation', 'development', 'tourism', 'guide', 'lifestyle']);
     const VALID_STATUS = new Set(['draft', 'published']);
+    const VALID_FIT = new Set(['cover', 'contain', 'fill']);
 
     if (title && typeof title === 'string') article.title = title.trim();
     if (content) article.content = content;
@@ -677,6 +680,9 @@ router.patch('/articles/:id', logAdminAction('UPDATE_ARTICLE'), async (req: Requ
     article.countryCode = countryCode ? String(countryCode).trim().toUpperCase().substring(0, 2) : undefined;
     if (coverImageUrl !== undefined) article.coverImageUrl = coverImageUrl ? String(coverImageUrl).trim() : undefined;
     if (coverImagePublicId !== undefined) article.coverImagePublicId = coverImagePublicId || undefined;
+    if (coverImageFit && typeof coverImageFit === 'string' && VALID_FIT.has(coverImageFit)) {
+      article.coverImageFit = coverImageFit;
+    }
     if (isFeatured !== undefined) article.isFeatured = isFeatured === true;
 
     if (status && VALID_STATUS.has(status) && status !== article.status) {

@@ -17,6 +17,7 @@ export interface ArticleListItem {
   country?: string;
   countryCode?: string;
   coverImageUrl?: string;
+  coverImageFit?: 'cover' | 'contain' | 'fill';
   author: ArticleAuthor;
   publishedAt?: string;
   readTime?: number;

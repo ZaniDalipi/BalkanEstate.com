@@ -12,6 +12,7 @@ export interface IArticle extends Document {
   countryCode?: string;
   coverImageUrl?: string;
   coverImagePublicId?: string;
+  coverImageFit?: 'cover' | 'contain' | 'fill';
   status: 'draft' | 'published';
   publishedAt?: Date;
   readTime?: number;
@@ -38,6 +39,7 @@ const ArticleSchema = new Schema(
     countryCode: { type: String, trim: true, uppercase: true, maxlength: 2 },
     coverImageUrl: { type: String, trim: true },
     coverImagePublicId: { type: String, trim: true },
+    coverImageFit: { type: String, enum: ['cover', 'contain', 'fill'], default: 'cover' },
     status: {
       type: String,
       enum: ['draft', 'published'],
