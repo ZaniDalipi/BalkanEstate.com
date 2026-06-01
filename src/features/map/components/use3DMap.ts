@@ -1175,49 +1175,57 @@ export function use3DMap(props: Map3DBuildingsProps) {
       // Add custom 3D building with floor slices for properties with floor data
       // Wait for tiles to fully load before querying building geometry
       if (floorNumber != null && totalFloors != null && totalFloors > 0) {
-        // Retry mechanism to ensure building tiles are loaded
+        // Retry mechanism to ensure building tiles are loaded.
+        //
+        // IMPORTANT (production fix): retries must NOT depend on a fresh `idle`
+        // event. The previous implementation re-ran the whole step by calling
+        // `flyTo` again to the SAME center/zoom on every retry. Once the camera
+        // has settled, that second `flyTo` moves nothing, so MapLibre emits no
+        // new `idle` event and the retry handler never fired — the loop stalled.
+        //
+        // On localhost the OpenFreeMap tiles are warm/cached so the very first
+        // attempt succeeds and retries are never needed; in production (cold
+        // cache, slower network) the first attempt runs before the building
+        // vector tiles are queryable, the retry stalled, and the floor box
+        // never appeared. We now drive retries on a self-scheduling timer that
+        // re-invokes the placement directly, independent of any `idle` event.
         let retryCount = 0;
-        const maxRetries = 8;
+        const maxRetries = 12;
 
-        const tryAddCustomBuilding = () => {
-          // Zoom to the building location to ensure tiles load
+        const attemptAddCustomBuilding = () => {
+          addCustomBuilding3D(
+            mapInstance,
+            lat,
+            lng,
+            floorNumber,
+            totalFloors,
+            virtualTour360Url,
+            virtualTour360Url ? handleEnterBuilding : undefined
+          );
+
+          // If the building geometry wasn't queryable yet (no source created),
+          // schedule another attempt on a plain timer. Tiles keep streaming in
+          // while we wait, so a later attempt will find the footprint.
+          if (!mapInstance.getSource('custom-building') && retryCount < maxRetries) {
+            retryCount++;
+            setTimeout(attemptAddCustomBuilding, 1200);
+          }
+        };
+
+        // Zoom close enough for the building tiles to load, then begin attempts
+        // once the fly animation settles. Subsequent retries are driven by the
+        // self-scheduling timer above, not by additional `idle`/`moveend` events.
+        const startBuildingPlacement = () => {
+          mapInstance.off('idle', startBuildingPlacement);
           mapInstance.flyTo({
             center: [lng, lat],
             zoom: Math.max(mapInstance.getZoom(), 17),
             padding: { top: 0, bottom: 120, left: 0, right: 0 },
             duration: 1500,
           });
-
-          // Wait for map to become idle (all tiles loaded and rendered) after flyTo
-          // This is more reliable than a fixed timeout, especially on slow connections
-          const onIdleAfterFly = () => {
-            mapInstance.off('idle', onIdleAfterFly);
-
-            addCustomBuilding3D(
-              mapInstance,
-              lat,
-              lng,
-              floorNumber,
-              totalFloors,
-              virtualTour360Url,
-              virtualTour360Url ? handleEnterBuilding : undefined
-            );
-
-            // Check if source was added successfully - if not, retry
-            if (!mapInstance.getSource('custom-building') && retryCount < maxRetries) {
-              retryCount++;
-              setTimeout(tryAddCustomBuilding, 1500);
-            }
-          };
-          mapInstance.on('idle', onIdleAfterFly);
+          mapInstance.once('moveend', attemptAddCustomBuilding);
         };
-
-        // Start the process after initial load
-        const addBuildingOnIdle = () => {
-          tryAddCustomBuilding();
-          mapInstance.off('idle', addBuildingOnIdle);
-        };
-        mapInstance.on('idle', addBuildingOnIdle);
+        mapInstance.on('idle', startBuildingPlacement);
       }
 
       // Add attribution
