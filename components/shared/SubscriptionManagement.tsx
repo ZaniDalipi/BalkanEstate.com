@@ -149,7 +149,7 @@ const LISTING_LIMITS: Record<string, number> = {
   free_tier: 3,
   pro_monthly: 20,  // 20 listings per month
   pro_yearly: 250,  // 250 listings per year
-  agency_yearly: 750,  // 750 listings for enterprise
+  agency_yearly: 1000,  // 1000 listings per year for enterprise
   buyer_monthly: 0,  // Buyers don't create listings
   // Agency agent tier (joined via coupon)
   agency_agent_yearly: 30,  // 30 listings per month for agency agents (fallback; real value comes from DB)
@@ -1445,7 +1445,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                   : isYearlyPlan ? t('management.perYearLabel', 'Per year') : t('management.perMonthLabel', 'Per month')}
               </p>
               {(user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner') && (
-                <p className="text-xs text-neutral-400 mt-0.5">{t('management.agencyPoolDesc', '{{count}} listing pool / year across the agency', { count: agencyOwnerProductFromDB?.listingsLimit ?? 750 })}</p>
+                <p className="text-xs text-neutral-400 mt-0.5">{t('management.agencyPoolDesc', '{{count}} listing pool / year across the agency', { count: agencyOwnerProductFromDB?.listingsLimit ?? 1000 })}</p>
               )}
             </div>
           </div>
