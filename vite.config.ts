@@ -331,6 +331,23 @@ export default defineConfig(({ mode }) => {
                 if (id.includes('framer-motion')) {
                   return 'animation';
                 }
+                // motion (framer-motion v11 successor) — only used by lazy
+                // components (SplashScreen, apple-hello-effect). Without an
+                // explicit rule it falls through to the eager `vendor` chunk.
+                if (id.includes('node_modules/motion/')) {
+                  return 'motion';
+                }
+                // GSAP — only used by lazy-imported glass-cards (HomePage).
+                // Without an explicit rule it ends up in eager vendor.
+                if (id.includes('node_modules/gsap/') || id.includes('node_modules/gsap-trial')) {
+                  return 'gsap';
+                }
+                // Lenis smooth-scroll — used only by AnimationProvider (which
+                // wraps the whole app, so this is eager) but isolating it makes
+                // the dependency graph clearer.
+                if (id.includes('node_modules/lenis/') || id.includes('node_modules/@studio-freight/lenis')) {
+                  return 'lenis';
+                }
                 // NOTE: socket.io removed from manual chunks due to circular dep with vendor
                 // AI/Gemini - only for AI features
                 if (id.includes('@google/genai') || id.includes('@google/generative-ai')) {
@@ -365,9 +382,16 @@ export default defineConfig(({ mode }) => {
               // Let Rollup handle features with cross-dependencies
               // ============================================================
 
-              // Auth features (standalone, no deps on other features)
-              if (id.includes('/features/auth/')) {
-                return 'auth';
+              // Auth: only group the eagerly-imported core (AuthContext, api,
+              // shared hooks). The UI components in /features/auth/components/
+              // are already lazy()-imported in App.tsx; leaving them out of
+              // this rule lets Rollup auto-chunk them so they load on demand
+              // instead of being pulled into the initial paint via the auth
+              // chunk (which used to ship 478 KB up-front).
+              if (id.includes('/features/auth/state/') ||
+                  id.includes('/features/auth/api/') ||
+                  id.includes('/features/auth/hooks/')) {
+                return 'auth-core';
               }
               // Legal pages - each page separate for better code splitting
               if (id.includes('/features/legal/components/PrivacyPolicyPage')) {
