@@ -194,6 +194,7 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
   }, [article?.content]);
 
   const goBack = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     window.history.pushState({}, '', buildLocalizedPath('/blog'));
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'blog' });
   }, [dispatch]);

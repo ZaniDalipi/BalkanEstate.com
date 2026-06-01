@@ -74,6 +74,7 @@ const BlogPage: React.FC = () => {
       <ArticlePage
         slug={slug}
         onTagClick={tag => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
           window.history.pushState({}, '', buildLocalizedPath('/blog'));
           setSelectedTag(tag);
           setPage(1);

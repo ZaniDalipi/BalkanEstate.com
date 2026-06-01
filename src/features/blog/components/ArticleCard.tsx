@@ -102,6 +102,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, index, t, onTagClick
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     window.history.pushState({}, '', buildLocalizedPath(`/blog/${article.slug}`));
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'blog' });
   };

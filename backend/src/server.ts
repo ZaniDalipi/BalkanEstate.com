@@ -9,7 +9,7 @@ import path from 'path';
 import { existsSync } from 'fs';
 import connectDB from './config/database';
 import ogRoutes from './routes/ogRoutes';
-import { propertyPageOgMiddleware } from './controllers/ogController';
+import { propertyPageOgMiddleware, blogArticleOgMiddleware } from './controllers/ogController';
 import { setupChatSocket } from './sockets/chatSocket';
 import { setupPropertySocket } from './sockets/propertySocket';
 import { setSocketInstance } from './utils/socketInstance';
@@ -394,6 +394,8 @@ if (frontendDistExists) {
   // Detects bot user-agents; regular browsers pass through to the SPA catch-all.
   app.get('/property/:slug', propertyPageOgMiddleware);
   app.get('/:lang/property/:slug', propertyPageOgMiddleware);
+  app.get('/blog/:slug', blogArticleOgMiddleware);
+  app.get('/:lang/blog/:slug', blogArticleOgMiddleware);
 
   // Serve built frontend static assets (JS, CSS, images, icons, etc.)
   // Hashed assets (/assets/*) get a 1-year immutable cache; everything else

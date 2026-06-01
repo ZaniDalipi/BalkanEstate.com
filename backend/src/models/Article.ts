@@ -76,9 +76,11 @@ ArticleSchema.pre<IArticle>('validate', function (next) {
     this.slug = `${baseSlug}-${shortId}`;
   }
 
-  if (!this.readTime && this.content) {
-    const wordCount = this.content.split(/\s+/).length;
-    this.readTime = Math.ceil(wordCount / 200);
+  if (this.content && (this.isModified('content') || !this.readTime)) {
+    // Strip all HTML tags before counting so images/attributes don't inflate the word count
+    const plainText = this.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    const wordCount = plainText ? plainText.split(' ').length : 0;
+    this.readTime = Math.max(1, Math.ceil(wordCount / 200));
   }
 
   next();
