@@ -15,6 +15,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
 import Property, { IProperty } from '../models/Property';
+import Article from '../models/Article';
 import { resolveId, encodeId } from '../utils/idObfuscation';
 import { isValidObjectId } from '../utils/validateParams';
 import { apiLogger } from '../utils/logger';
@@ -271,6 +272,100 @@ export const propertyPageOgMiddleware = async (
       .send(html);
   } catch (error) {
     apiLogger.error('OG middleware error for slug:', slug, error);
+    next();
+  }
+};
+
+// ─── Blog article OG middleware ───────────────────────────────────────────────
+
+function buildArticleOgHtml(
+  title: string,
+  description: string,
+  imageUrl: string,
+  canonicalUrl: string,
+): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="refresh" content="0;url=${escapeHtml(canonicalUrl)}" />
+  <title>${escapeHtml(title)}</title>
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="BalkanEstateAI" />
+  <meta property="og:url" content="${escapeHtml(canonicalUrl)}" />
+  <meta property="og:title" content="${escapeHtml(title)}" />
+  <meta property="og:description" content="${escapeHtml(description)}" />
+  <meta property="og:image" content="${escapeHtml(imageUrl)}" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="628" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${escapeHtml(title)}" />
+  <meta name="twitter:description" content="${escapeHtml(description)}" />
+  <meta name="twitter:image" content="${escapeHtml(imageUrl)}" />
+
+  <link rel="canonical" href="${escapeHtml(canonicalUrl)}" />
+</head>
+<body>
+  <script>window.location.replace(${JSON.stringify(canonicalUrl)});</script>
+  <noscript>
+    <p>Redirecting to <a href="${escapeHtml(canonicalUrl)}">${escapeHtml(title)}</a></p>
+  </noscript>
+</body>
+</html>`;
+}
+
+/**
+ * Middleware: GET /blog/:slug  and  GET /:lang/blog/:slug
+ *
+ * Social media bots receive a minimal HTML page with correct og:image for the
+ * article's cover photo.  Regular browsers pass through to the SPA catch-all.
+ */
+export const blogArticleOgMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const userAgent = req.get('user-agent') ?? '';
+
+  if (!isSocialMediaBot(userAgent)) {
+    next();
+    return;
+  }
+
+  const slug = (req.params.slug as string ?? '').trim();
+  if (!slug) {
+    next();
+    return;
+  }
+
+  try {
+    const article = await Article.findOne({ slug, status: 'published' })
+      .select('title excerpt coverImageUrl slug')
+      .lean<{ title: string; excerpt: string; coverImageUrl?: string; slug: string }>();
+
+    if (!article) {
+      next();
+      return;
+    }
+
+    const canonicalUrl = `${OG_BASE_URL}/en/blog/${article.slug}`;
+    const imageUrl = article.coverImageUrl ?? `${OG_BASE_URL}/og-image.png`;
+    const description = (article.excerpt ?? '').slice(0, 300);
+    const title = `${article.title} | BalkanEstateAI`;
+    const html = buildArticleOgHtml(title, description, imageUrl, canonicalUrl);
+
+    res
+      .setHeader('Content-Type', 'text/html; charset=utf-8')
+      .setHeader('Cache-Control', `public, max-age=${OG_CACHE_MAX_AGE_SECONDS}`)
+      .status(200)
+      .send(html);
+  } catch (error) {
+    apiLogger.error('Blog OG middleware error for slug:', slug, error);
     next();
   }
 };
