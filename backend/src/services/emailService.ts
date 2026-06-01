@@ -1793,8 +1793,8 @@ class EmailService {
         </div>
       </div>`;
 
-    // Try DB-driven template first
-    const config = await getActiveEmailConfig('price-drop-alert');
+    // Try DB-driven template first (only for actual price drops — the template is hardcoded for drops)
+    const config = isIncrease ? null : await getActiveEmailConfig('price-drop-alert');
     if (config) {
       const variables: Record<string, string> = {
         recipientName: escapeHtml(params.recipientName),
