@@ -3,7 +3,6 @@ import { ArticleListItem } from '../types/article.types';
 import { useAppContext } from '@/context/AppContext';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { cn } from '@/lib/utils';
-
 const COUNTRY_FLAGS: Record<string, string> = {
   Albania: '🇦🇱', Serbia: '🇷🇸', Croatia: '🇭🇷', Greece: '🇬🇷',
   Montenegro: '🇲🇪', 'North Macedonia': '🇲🇰', Bulgaria: '🇧🇬',
@@ -29,8 +28,10 @@ interface ArticleCardProps {
 
 const ArticleCard: React.FC<ArticleCardProps> = ({ article, index, t, onTagClick }) => {
   const { dispatch } = useAppContext();
-  const cardRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);   // outer — only used for IntersectionObserver
+  const tiltRef = useRef<HTMLDivElement>(null);   // inner — JS tilt applied here, away from image
   const glareRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);  // image zoom controlled directly
   const [isVisible, setIsVisible] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -52,37 +53,50 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, index, t, onTagClick
     return () => observer.disconnect();
   }, []);
 
-  // Magnetic tilt effect
+  // Tilt applied only to inner wrapper — never touches the image's transform
+  const handleMouseEnter = useCallback(() => {
+    const img = imgRef.current;
+    if (img) {
+      img.style.transition = 'transform 1400ms cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      img.style.transform = 'scale(1.10)';
+    }
+  }, []);
+
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const card = cardRef.current;
+    const tilt = tiltRef.current;
     const glare = glareRef.current;
-    if (!card) return;
-    const rect = card.getBoundingClientRect();
+    if (!tilt) return;
+    const rect = tilt.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const cx = rect.width / 2;
     const cy = rect.height / 2;
-    const rotX = ((y - cy) / cy) * -6;
-    const rotY = ((x - cx) / cx) * 6;
-    card.style.transform = `perspective(900px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.015,1.015,1.015)`;
-    card.style.transition = 'transform 0.1s ease-out';
+    const rotX = ((y - cy) / cy) * -5;
+    const rotY = ((x - cx) / cx) * 5;
+    tilt.style.transform = `perspective(900px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    tilt.style.transition = 'transform 0.15s ease-out';
     if (glare) {
       const angle = Math.atan2(y - cy, x - cx) * (180 / Math.PI) + 180;
       glare.style.opacity = '1';
-      glare.style.background = `linear-gradient(${angle}deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 60%)`;
+      glare.style.background = `linear-gradient(${angle}deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 60%)`;
     }
   }, []);
 
   const handleMouseLeave = useCallback(() => {
-    const card = cardRef.current;
+    const tilt = tiltRef.current;
     const glare = glareRef.current;
-    if (card) {
-      card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
-      card.style.transition = 'transform 0.45s ease-out';
+    const img = imgRef.current;
+    if (tilt) {
+      tilt.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg)';
+      tilt.style.transition = 'transform 0.5s ease-out';
     }
     if (glare) {
       glare.style.opacity = '0';
       glare.style.transition = 'opacity 0.4s ease-out';
+    }
+    if (img) {
+      img.style.transition = 'transform 900ms cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      img.style.transform = 'scale(1)';
     }
   }, []);
 
@@ -100,21 +114,27 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, index, t, onTagClick
   const flag = article.country ? COUNTRY_FLAGS[article.country] : '';
 
   return (
+    // Outer: visibility animation only — no transform that would conflict with image
     <div
       ref={cardRef}
       className={cn(
-        'group relative rounded-3xl bg-white w-full overflow-hidden cursor-pointer',
+        'group relative rounded-3xl bg-white w-full cursor-pointer',
         'shadow-[8px_8px_20px_rgba(0,0,0,0.08),-8px_-8px_20px_rgba(255,255,255,0.9)]',
-        'transition-shadow duration-500',
+        'transition-[opacity,transform,box-shadow] duration-700',
         'hover:shadow-[14px_14px_28px_rgba(0,0,0,0.12),-14px_-14px_28px_rgba(255,255,255,1)]',
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8',
-        'transition-[opacity,transform] duration-700',
       )}
-      style={{ transitionDelay: `${index * 80}ms`, transformStyle: 'preserve-3d', willChange: 'transform' }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
+      style={{ transitionDelay: `${index * 80}ms` }}
       onClick={handleClick}
     >
+      {/* Inner tilt wrapper — JS transform lives here, isolated from image */}
+      <div
+        ref={tiltRef}
+        className="rounded-3xl overflow-hidden"
+        onMouseEnter={handleMouseEnter}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
       {/* Cover image — LinkedIn 1200x628 (1.91:1) */}
       <div className={cn(
         'aspect-[1200/628] relative overflow-hidden',
@@ -126,19 +146,19 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, index, t, onTagClick
               <div className={`absolute inset-0 bg-gradient-to-br ${cat.accent} opacity-40 animate-pulse`} />
             )}
             <img
+              ref={imgRef}
               src={article.coverImageUrl}
               alt={article.title}
               className={cn(
-                'absolute inset-0 w-full h-full object-center',
+                'absolute inset-0 w-full h-full object-center will-change-transform',
                 article.coverImageFit === 'contain'
                   ? 'object-contain bg-slate-100'
                   : article.coverImageFit === 'fill'
                   ? 'object-fill'
                   : 'object-cover',
-                'transition-[opacity,transform] duration-[1400ms] ease-out',
                 imgLoaded ? 'opacity-100' : 'opacity-0',
-                'group-hover:scale-110',
               )}
+              style={{ transition: 'opacity 500ms ease, transform 1400ms cubic-bezier(0.25,0.46,0.45,0.94)', transform: 'scale(1)' }}
               loading="lazy"
               decoding="async"
               onLoad={() => setImgLoaded(true)}
@@ -278,6 +298,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, index, t, onTagClick
 
       {/* Hover border */}
       <div className="absolute inset-0 rounded-3xl border border-blue-200/0 group-hover:border-blue-200/80 transition-colors duration-500 pointer-events-none" />
+      </div>{/* end tilt wrapper */}
     </div>
   );
 };
