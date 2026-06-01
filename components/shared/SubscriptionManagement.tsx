@@ -621,9 +621,12 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
   // Detect if subscription plan is yearly (not monthly) — derived from productId alone
   const isYearlyPlan = useMemo(() => {
+    // Enterprise/agency_owner tier is always yearly
+    if (user?.subscription?.tier === 'agency_owner') return true;
+
     const productId = subscription?.productId || '';
     return productId.includes('yearly');
-  }, [subscription?.productId]);
+  }, [subscription?.productId, user?.subscription?.tier]);
 
   // Calculate subscription details with calendar-based days
   const subscriptionDetails = useMemo(() => {
