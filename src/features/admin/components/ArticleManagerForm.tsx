@@ -61,10 +61,21 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
   const coverInputRef = useRef<HTMLInputElement>(null);
   const inlineImageInputRef = useRef<HTMLInputElement>(null);
   const savedRangeRef = useRef<Range | null>(null);
+  // Holds HTML content fetched before the editor DOM is ready
+  const pendingContentRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (articleId) loadArticle(articleId);
   }, [articleId]);
+
+  // Once fetchingArticle resolves and the editor mounts, inject any pending content
+  useEffect(() => {
+    if (!fetchingArticle && pendingContentRef.current !== null && editorRef.current) {
+      editorRef.current.innerHTML = pendingContentRef.current;
+      setPreviewContent(pendingContentRef.current);
+      pendingContentRef.current = null;
+    }
+  }, [fetchingArticle]);
 
   const loadArticle = async (id: string) => {
     try {
@@ -88,10 +99,8 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
       setCoverImageFit(a.coverImageFit || 'cover');
       setStatus(a.status || 'draft');
       setIsFeatured(a.isFeatured || false);
-      if (editorRef.current) {
-        editorRef.current.innerHTML = a.content || '';
-        setPreviewContent(a.content || '');
-      }
+      // Store content — applied to editor once fetchingArticle=false and editor is mounted
+      pendingContentRef.current = a.content || '';
     } catch {
       setError('Failed to load article for editing.');
     } finally {

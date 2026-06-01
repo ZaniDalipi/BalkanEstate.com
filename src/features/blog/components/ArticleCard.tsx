@@ -65,7 +65,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, index, t, onTagClick
     const rotX = ((y - cy) / cy) * -6;
     const rotY = ((x - cx) / cx) * 6;
     card.style.transform = `perspective(900px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.015,1.015,1.015)`;
-    card.style.transition = 'transform 0.1s ease-out';
+    card.style.transition = 'transform 0.3s ease-out';
     if (glare) {
       const angle = Math.atan2(y - cy, x - cx) * (180 / Math.PI) + 180;
       glare.style.opacity = '1';
@@ -110,7 +110,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, index, t, onTagClick
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8',
         'transition-[opacity,transform] duration-700',
       )}
-      style={{ transitionDelay: `${index * 80}ms`, transformStyle: 'preserve-3d', willChange: 'transform' }}
+      style={{ transitionDelay: `${index * 80}ms` }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
