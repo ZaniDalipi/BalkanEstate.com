@@ -44,6 +44,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
   const [tagInput, setTagInput] = useState('');
   const [coverImageUrl, setCoverImageUrl] = useState('');
   const [coverImagePublicId, setCoverImagePublicId] = useState('');
+  const [coverImageFit, setCoverImageFit] = useState<'cover' | 'contain' | 'fill'>('cover');
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
   const [isFeatured, setIsFeatured] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -84,6 +85,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
       setTags(a.tags || []);
       setCoverImageUrl(a.coverImageUrl || '');
       setCoverImagePublicId(a.coverImagePublicId || '');
+      setCoverImageFit(a.coverImageFit || 'cover');
       setStatus(a.status || 'draft');
       setIsFeatured(a.isFeatured || false);
       if (editorRef.current) {
@@ -261,6 +263,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
         countryCode: countryCode || undefined,
         coverImageUrl: coverImageUrl || undefined,
         coverImagePublicId: coverImagePublicId || undefined,
+        coverImageFit,
         status: finalStatus,
         isFeatured,
       };
@@ -351,12 +354,16 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
 
               {/* Cover Image */}
               <div
-                className={`relative w-full rounded-2xl overflow-hidden mb-8 cursor-pointer group ${coverImageUrl ? 'aspect-[21/9]' : 'h-40 border-2 border-dashed border-neutral-300 bg-neutral-50 hover:bg-neutral-100 hover:border-neutral-400'} transition-all`}
+                className={`relative w-full rounded-2xl overflow-hidden mb-8 cursor-pointer group ${coverImageUrl ? 'aspect-[1200/628]' : 'h-40 border-2 border-dashed border-neutral-300 bg-neutral-50 hover:bg-neutral-100 hover:border-neutral-400'} transition-all`}
                 onClick={() => coverInputRef.current?.click()}
               >
                 {coverImageUrl ? (
                   <>
-                    <img src={coverImageUrl} alt="Cover" className="absolute inset-0 w-full h-full object-cover object-center" />
+                    <img
+                      src={coverImageUrl}
+                      alt="Cover"
+                      className={`absolute inset-0 w-full h-full object-center ${coverImageFit === 'contain' ? 'object-contain bg-slate-100' : coverImageFit === 'fill' ? 'object-fill' : 'object-cover'}`}
+                    />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <span className="text-white text-sm font-medium">Change cover photo</span>
                     </div>
@@ -728,6 +735,32 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
                 ? <p className="text-[11px] text-red-500 mt-1">{fieldErrors.coverImageUrl}</p>
                 : <p className="text-[11px] text-slate-400 mt-1">Or paste URL instead of uploading above</p>
               }
+            </div>
+
+            {/* Cover Image Fit */}
+            <div>
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Cover Image Fit</h3>
+              <div className="flex rounded-lg overflow-hidden border border-neutral-200">
+                {([
+                  { value: 'cover', label: 'Cover (crop to fill)' },
+                  { value: 'contain', label: 'Contain (show full image)' },
+                  { value: 'fill', label: 'Fill (stretch)' },
+                ] as const).map((opt, i) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setCoverImageFit(opt.value)}
+                    className={`flex-1 px-2 py-2 text-[11px] font-medium transition-colors leading-tight text-center ${i > 0 ? 'border-l border-neutral-200' : ''} ${
+                      coverImageFit === opt.value
+                        ? 'bg-slate-900 text-white'
+                        : 'bg-white text-slate-600 hover:bg-neutral-50'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1">How the cover image fills the 1200×628 frame</p>
             </div>
 
             {/* SEO Preview */}

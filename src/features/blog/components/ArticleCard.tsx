@@ -115,9 +115,9 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, index, t, onTagClick
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
     >
-      {/* Cover image — 16:9 */}
+      {/* Cover image — LinkedIn 1200x628 (1.91:1) */}
       <div className={cn(
-        'aspect-[16/9] relative overflow-hidden',
+        'aspect-[1200/628] relative overflow-hidden',
         !article.coverImageUrl || imgError ? `bg-gradient-to-br ${cat.accent}` : '',
       )}>
         {article.coverImageUrl && !imgError ? (
@@ -129,7 +129,12 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, index, t, onTagClick
               src={article.coverImageUrl}
               alt={article.title}
               className={cn(
-                'absolute inset-0 w-full h-full object-cover object-center',
+                'absolute inset-0 w-full h-full object-center',
+                article.coverImageFit === 'contain'
+                  ? 'object-contain bg-slate-100'
+                  : article.coverImageFit === 'fill'
+                  ? 'object-fill'
+                  : 'object-cover',
                 'transition-[opacity,transform] duration-700',
                 imgLoaded ? 'opacity-100' : 'opacity-0',
                 'group-hover:scale-105',

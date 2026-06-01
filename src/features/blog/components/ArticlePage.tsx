@@ -9,6 +9,7 @@ import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { useAppContext } from '@/context/AppContext';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import ArticleCard from './ArticleCard';
+import { cn } from '@/lib/utils';
 
 interface ArticlePageProps {
   slug: string;
@@ -144,7 +145,7 @@ const ShareButtons: React.FC<{
 // ── Article skeleton ─────────────────────────────────────────────────────────
 const ArticleSkeleton: React.FC = () => (
   <div className="min-h-screen bg-white animate-pulse">
-    <div className="w-full aspect-[21/9] bg-neutral-200" />
+    <div className="w-full aspect-[1200/628] bg-neutral-200" />
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12 space-y-4">
       <div className="h-4 w-24 bg-neutral-200 rounded-full" />
       <div className="h-10 w-3/4 bg-neutral-200 rounded-xl" />
@@ -300,11 +301,18 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
       <article className="min-h-screen bg-white" ref={contentRef}>
         {/* ── Hero Image ─────────────────────────────────────────────────────── */}
         {article.coverImageUrl ? (
-          <div className="w-full aspect-[21/9] overflow-hidden bg-slate-100">
+          <div className="w-full aspect-[1200/628] overflow-hidden bg-slate-100">
             <motion.img
               src={article.coverImageUrl}
               alt={article.title}
-              className="w-full h-full object-cover object-center"
+              className={cn(
+                'w-full h-full object-center',
+                article.coverImageFit === 'contain'
+                  ? 'object-contain bg-slate-100'
+                  : article.coverImageFit === 'fill'
+                  ? 'object-fill'
+                  : 'object-cover',
+              )}
               initial={{ scale: 1.05, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.7, ease: 'easeOut' }}
