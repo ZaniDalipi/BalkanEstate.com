@@ -135,9 +135,9 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, index, t, onTagClick
                   : article.coverImageFit === 'fill'
                   ? 'object-fill'
                   : 'object-cover',
-                'transition-[opacity,transform] duration-700',
+                'transition-[opacity,transform] duration-[1400ms] ease-out',
                 imgLoaded ? 'opacity-100' : 'opacity-0',
-                'group-hover:scale-105',
+                'group-hover:scale-110',
               )}
               loading="lazy"
               decoding="async"
