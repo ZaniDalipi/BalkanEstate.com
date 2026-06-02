@@ -115,6 +115,9 @@ import {
 } from '../controllers/systemSettingsController';
 import multer from 'multer';
 import Article from '../models/Article';
+import SavedSearch from '../models/SavedSearch';
+import Property from '../models/Property';
+import { processNewListingAlerts, processInstantAlertsForProperty } from '../jobs/propertyAlertsJob';
 
 const router = express.Router();
 
@@ -724,6 +727,87 @@ router.delete('/articles/:id', logAdminAction('DELETE_ARTICLE'), async (req: Req
     res.json({ message: 'Article deleted' });
   } catch (err) {
     res.status(500).json({ message: 'Failed to delete article', error: String(err) });
+  }
+});
+
+// ===== Alert Diagnostics =====
+
+/**
+ * GET /api/admin/debug/alerts
+ * Returns full state of every saved search + recent properties + filter match result.
+ * Use this to understand why alerts are or are not firing.
+ */
+router.get('/debug/alerts', async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const searches = await SavedSearch.find({})
+      .populate('userId', 'email name subscription')
+      .lean();
+
+    const recentProperties = await Property.find({
+      status: 'active',
+      createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+    })
+      .select('_id title address city country price listingType propertyType beds baths sqft createdAt')
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .lean();
+
+    const summary = searches.map((s: any) => {
+      const user = s.userId as any;
+      return {
+        searchId: s._id,
+        searchName: s.name,
+        user: user ? { email: user.email, tier: user.subscription?.tier, status: user.subscription?.status } : null,
+        alertsEnabled: s.alertsEnabled,
+        alertFrequency: s.alertFrequency,
+        seenPropertyIds: s.seenPropertyIds?.length ?? 0,
+        lastAlertSentAt: s.lastAlertSentAt,
+        filters: s.filters,
+        hasBounds: !!s.drawnBoundsJSON,
+      };
+    });
+
+    res.json({
+      savedSearchCount: searches.length,
+      recentPropertyCount: recentProperties.length,
+      savedSearches: summary,
+      recentProperties: recentProperties.map((p: any) => ({
+        id: p._id,
+        title: p.title || `${p.address}, ${p.city}`,
+        city: p.city,
+        country: p.country,
+        price: p.price,
+        listingType: p.listingType,
+        propertyType: p.propertyType,
+        beds: p.beds,
+        createdAt: p.createdAt,
+      })),
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/admin/debug/alerts/run
+ * Body: { propertyId?: string, frequency?: 'instant'|'daily'|'weekly' }
+ * Forces the alert job to run immediately and returns what happened.
+ * If propertyId provided → runs processInstantAlertsForProperty.
+ * Otherwise → runs processNewListingAlerts with given frequency.
+ */
+router.post('/debug/alerts/run', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { propertyId, frequency = 'instant' } = req.body;
+
+    if (propertyId) {
+      await processInstantAlertsForProperty(String(propertyId));
+      res.json({ ran: 'processInstantAlertsForProperty', propertyId });
+    } else {
+      await processNewListingAlerts(frequency as 'instant' | 'daily' | 'weekly');
+      res.json({ ran: 'processNewListingAlerts', frequency });
+    }
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
   }
 });
 
