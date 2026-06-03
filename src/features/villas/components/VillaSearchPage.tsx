@@ -456,27 +456,77 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     </button>
                                 </div>
                             ) : listProperties.length === 0 ? (
-                                /* Premium empty state */
-                                <div className="flex justify-center py-12">
-                                    <div className="bg-white rounded-2xl shadow-sm p-10 text-center max-w-sm w-full">
-                                        <div className="text-5xl mb-4">🏛️</div>
-                                        <h3 className="text-gray-800 font-bold text-xl mb-2">
+                                /* Premium empty state with destination quick-select */
+                                <div className="flex justify-center py-10 px-3">
+                                    <div className="bg-white rounded-2xl shadow-sm p-8 text-center max-w-md w-full">
+                                        <div className="text-5xl mb-3">🏛️</div>
+                                        <h3 className="text-gray-800 font-bold text-lg mb-1">
                                             {t('villas:noProperties', 'No luxury villas found')}
                                         </h3>
-                                        <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-                                            {t('villas:noPropertiesHint', 'Try a different location or adjust your filters to discover our curated collection')}
+                                        <p className="text-gray-400 text-sm mb-5 leading-relaxed">
+                                            {t('villas:noPropertiesHint', 'Try one of our sought-after destinations below, or adjust your filters')}
                                         </p>
+                                        {/* Destination quick-select */}
+                                        <div className="flex flex-wrap justify-center gap-2 mb-5">
+                                            {[
+                                                { label: 'Bay of Kotor', query: 'Kotor' },
+                                                { label: 'Lake Ohrid', query: 'Ohrid' },
+                                                { label: 'Budva Riviera', query: 'Budva' },
+                                                { label: 'Julian Alps', query: 'Bled' },
+                                                { label: 'Dubrovnik', query: 'Dubrovnik' },
+                                            ].map(dest => (
+                                                <button
+                                                    key={dest.query}
+                                                    onClick={() => { handleFilterChange('query', dest.query); handleSearch(); }}
+                                                    className="px-3 py-1.5 rounded-full text-xs font-semibold border border-[#FFA500]/40 text-[#0252CD] bg-[#FFA500]/8 hover:bg-[#FFA500]/15 hover:border-[#FFA500] transition-all"
+                                                >
+                                                    {dest.label}
+                                                </button>
+                                            ))}
+                                        </div>
                                         <button
                                             onClick={handleResetFilters}
                                             className="bg-primary text-white rounded-xl px-5 py-2.5 font-semibold text-sm hover:opacity-90 transition-opacity"
                                         >
-                                            {t('villas:clearFilters', 'Clear Filters')}
+                                            {t('villas:clearFilters', 'Clear All Filters')}
                                         </button>
                                     </div>
                                 </div>
                             ) : (
                                 <>
                                     <VillaCardAnimationStyles />
+                                    {/* Curated destinations strip — horizontal scroll */}
+                                    <div className="px-3 pt-3 pb-1">
+                                        <div className="flex items-center gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' } as React.CSSProperties}>
+                                            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex-shrink-0">Destinations</span>
+                                            {[
+                                                { label: '🏔️ Julian Alps', query: 'Bled' },
+                                                { label: '🌊 Bay of Kotor', query: 'Kotor' },
+                                                { label: '🌅 Budva Riviera', query: 'Budva' },
+                                                { label: '🏞️ Lake Ohrid', query: 'Ohrid' },
+                                                { label: '🏛️ Dubrovnik', query: 'Dubrovnik' },
+                                                { label: '⛰️ Pirin Mountains', query: 'Bansko' },
+                                            ].map(dest => {
+                                                const isActive = filters.query === dest.query;
+                                                return (
+                                                    <button
+                                                        key={dest.query}
+                                                        onClick={() => {
+                                                            handleFilterChange('query', isActive ? '' : dest.query);
+                                                            if (!isActive) handleSearch();
+                                                        }}
+                                                        className={`flex-shrink-0 px-3 py-1 rounded-full text-[11px] font-semibold border transition-all ${
+                                                            isActive
+                                                                ? 'bg-[#FFA500]/15 text-[#0252CD] border-[#FFA500]'
+                                                                : 'bg-white text-gray-500 border-gray-200 hover:border-[#FFA500]/50 hover:text-[#0252CD]'
+                                                        }`}
+                                                    >
+                                                        {dest.label}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
                                     <HighlightedPropertiesSection properties={listProperties} />
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {listProperties.slice(0, visibleCount).map((property, index) => (

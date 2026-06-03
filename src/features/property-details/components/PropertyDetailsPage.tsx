@@ -933,6 +933,58 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
             </div>
 
+            {/* Luxury Villa Highlights Banner */}
+            {property.propertyType === 'luxury-villa' && (
+              <div className="animate-slide-up" style={{ animationDelay: '140ms' }}>
+                <div className="rounded-2xl overflow-hidden border border-[#FFA500]/25 bg-gradient-to-r from-[#FFA500]/8 via-white to-[#0252CD]/5">
+                  <div className="px-5 py-4 flex items-center gap-3 border-b border-[#FFA500]/15">
+                    <span className="text-2xl">✦</span>
+                    <div>
+                      <p className="text-xs font-bold text-[#FFA500] uppercase tracking-wider">Exclusive Collection</p>
+                      <h4 className="text-sm font-bold text-gray-900">Luxury Villa · Daily Rentals</h4>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-[#FFA500]/10">
+                    {[
+                      { label: 'Bedrooms', value: property.beds > 0 ? `${property.beds} beds` : '—', emoji: '🛏️' },
+                      { label: 'Bathrooms', value: property.baths > 0 ? `${property.baths} baths` : '—', emoji: '🛁' },
+                      { label: 'Area', value: property.sqft > 0 ? `${property.sqft} m²` : '—', emoji: '📐' },
+                      { label: 'Setting', value: property.viewType && property.viewType !== 'any'
+                          ? ({ sea: '🌊 Sea View', mountain: '⛰️ Mountain', city: '🏙️ City View', park: '🌲 Forest/Lake', garden: '🌷 Garden', street: '🏘️ Street' }[property.viewType] ?? property.viewType)
+                          : '—', emoji: '' },
+                    ].map(item => (
+                      <div key={item.label} className="px-4 py-3 text-center">
+                        <p className="text-[11px] text-gray-400 mb-0.5">{item.label}</p>
+                        <p className="text-sm font-bold text-gray-800">{item.emoji && !item.value.includes(item.emoji) ? `${item.emoji} ` : ''}{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Premium amenity chips */}
+                  {(() => {
+                    const amenities: string[] = (property.amenities as string[]) || [];
+                    const chips: string[] = [];
+                    if (property.hasPool)                                          chips.push('🏊 Pool');
+                    if (property.hasGarden)                                        chips.push('🌿 Garden');
+                    if (amenities.some(a => a.toLowerCase().includes('sauna')))    chips.push('🧖 Sauna');
+                    if (amenities.some(a => a.toLowerCase().includes('wine')))     chips.push('🍷 Wine Cellar');
+                    if (amenities.some(a => a.toLowerCase().includes('panoramic')))chips.push('🏔️ Panoramic');
+                    if (property.breakfastIncluded)                       chips.push('🍳 Breakfast Incl.');
+                    if (property.towelsIncluded)                          chips.push('🛁 Towels Incl.');
+                    if (property.parkingIncluded)                         chips.push('🚗 Parking Incl.');
+                    return chips.length > 0 ? (
+                      <div className="px-4 py-3 border-t border-[#FFA500]/10 flex flex-wrap gap-1.5">
+                        {chips.map(chip => (
+                          <span key={chip} className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#FFA500]/10 text-[#0252CD] border border-[#FFA500]/20">
+                            {chip}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null;
+                  })()}
+                </div>
+              </div>
+            )}
+
             {/* Rental Terms (only for rental properties) */}
             {property.listingType === 'rent' && (
               <div className="animate-slide-up space-y-6" style={{ animationDelay: '150ms' }}>
