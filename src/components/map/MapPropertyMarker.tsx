@@ -409,34 +409,68 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
   const borderRadius = scaledHeight / 2; // Pill shape
   const hoverScale = isHovered ? 1.15 : 1;
 
-  // Build SVG — luxury villa gets a metallic gold gradient with dark border + text
-  const luxuryGradientDef = isLuxuryVilla ? `
-    <defs>
-      <linearGradient id="lvGold_s" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#F5DC6E"/>
-        <stop offset="45%" stop-color="#E8B820"/>
-        <stop offset="100%" stop-color="#B8860B"/>
-      </linearGradient>
-    </defs>` : '';
-  const pillFill    = isLuxuryVilla ? 'url(#lvGold_s)' : markerColor;
-  const pillText    = isLuxuryVilla ? '#2C1A00' : 'white';
-  const pillStroke  = isLuxuryVilla ? '#7A5000' : strokeColorFinal;
-  const pillStrokeW = isLuxuryVilla ? 1.5 : ringWidth;
+  const hoverClass = isHovered ? 'drop-shadow-lg' : '';
+
+  // Luxury villa: house-silhouette marker instead of a price pill
+  if (isLuxuryVilla) {
+    const houseBaseWidth = Math.max(62, getMarkerWidthForPrice(price) + 18);
+    const houseBaseH = 52; // roof(20) + body(18) + pin(14)
+    const houseScaledW = Math.round(houseBaseWidth * zoomScale);
+    const houseScaledH = Math.round(houseBaseH * zoomScale);
+    const cx = houseBaseWidth / 2;
+    // unique gradient id per marker to avoid SVG gradient collisions in DOM
+    const gid = `lvGs_${String(property._id).slice(-6)}`;
+    const svgHouseHtml = `
+      <div class="promoted-marker-wrapper ${nightModeClass}" style="width:${houseScaledW}px;height:${houseScaledH}px;">
+        <div class="${promotedInnerClass}" style="width:${houseScaledW}px;height:${houseScaledH}px;transform:scale(${hoverScale});transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);">
+          <svg width="${houseScaledW}" height="${houseScaledH}" viewBox="0 0 ${houseBaseWidth} ${houseBaseH}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:${pillFilter};">
+            <defs>
+              <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#F5DC6E"/>
+                <stop offset="50%" stop-color="#E8B820"/>
+                <stop offset="100%" stop-color="#B8860B"/>
+              </linearGradient>
+            </defs>
+            <!-- Pin pointer -->
+            <path d="M${cx} ${houseBaseH} L${cx - 9} 38 H${cx + 9} Z" fill="#5C3A00"/>
+            <!-- House body -->
+            <rect x="3" y="20" width="${houseBaseWidth - 6}" height="18" rx="2" fill="url(#${gid})" stroke="#7A5000" stroke-width="1.5"/>
+            <!-- Roof gable -->
+            <path d="M3 20 L${cx} 3 L${houseBaseWidth - 3} 20 Z" fill="url(#${gid})" stroke="#7A5000" stroke-width="1.5"/>
+            <!-- ✦ at roof peak -->
+            <text x="${cx}" y="13" font-family="Inter,sans-serif" font-size="8" font-weight="900" fill="#2C1A00" text-anchor="middle" dominant-baseline="middle">✦</text>
+            <!-- Price in body -->
+            <text x="${cx}" y="31" font-family="Inter,sans-serif" font-size="10" font-weight="800" fill="#2C1A00" text-anchor="middle" dominant-baseline="middle">${price}</text>
+          </svg>
+        </div>
+      </div>
+    `;
+    return L.divIcon({
+      html: svgHouseHtml,
+      className: hoverClass,
+      iconSize: [houseScaledW, houseScaledH],
+      iconAnchor: [houseScaledW / 2, houseScaledH], // anchor at pointer tip
+      popupAnchor: [0, -houseScaledH],
+    });
+  }
+
+  // Build SVG pill for all other property types
+  const pillFill    = markerColor;
+  const pillText    = 'white';
+  const pillStroke  = strokeColorFinal;
+  const pillStrokeW = ringWidth;
 
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
     <div class="promoted-marker-wrapper ${nightModeClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px;">
       <div class="${promotedInnerClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px; transform: scale(${hoverScale}); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
         <svg width="${scaledWidth}" height="${scaledHeight}" viewBox="0 0 ${baseWidth} ${baseHeight}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${pillFilter};">
-            ${luxuryGradientDef}
             <rect x="${pillStrokeW / 2}" y="${pillStrokeW / 2}" width="${baseWidth - pillStrokeW}" height="${baseHeight - pillStrokeW}" rx="${(baseHeight - pillStrokeW) / 2}" fill="${pillFill}" stroke="${pillStroke}" stroke-width="${pillStrokeW}"/>
-            <text x="${baseWidth / 2}" y="${baseHeight / 2 + 1}" font-family="Inter, sans-serif" font-size="${11}" font-weight="800" fill="${pillText}" text-anchor="middle" dominant-baseline="middle">${displayPrice}</text>
+            <text x="${baseWidth / 2}" y="${baseHeight / 2 + 1}" font-family="Inter, sans-serif" font-size="${11}" font-weight="800" fill="${pillText}" text-anchor="middle" dominant-baseline="middle">${price}</text>
         </svg>
       </div>
     </div>
   `;
-
-  const hoverClass = isHovered ? 'drop-shadow-lg' : '';
 
   return L.divIcon({
     html: svgHtml,
@@ -525,23 +559,61 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
   const finalFilter = isLuxuryVilla
     ? `drop-shadow(0 0 10px rgba(212,168,0,0.9)) drop-shadow(0 0 20px rgba(200,140,0,0.5)) drop-shadow(0 4px 10px rgba(0,0,0,0.4))`
     : baseFilter;
-  const priceY = isLuxuryVilla ? '33' : '30';
-  // Gold gradient for the house fill + ✦ crown at roof peak
-  const luxuryDefs = isLuxuryVilla ? `
-    <defs>
-      <linearGradient id="lvGold_d" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#F5DC6E"/>
-        <stop offset="45%" stop-color="#E8B820"/>
-        <stop offset="100%" stop-color="#B8860B"/>
-      </linearGradient>
-    </defs>` : '';
-  const finalMarkerColor = isLuxuryVilla ? 'url(#lvGold_d)' : markerColor;
-  const luxuryCrown = isLuxuryVilla
-    ? `<text x="35" y="10" font-family="Inter,sans-serif" font-size="11" font-weight="900" fill="#2C1A00" text-anchor="middle" dominant-baseline="middle">✦</text>`
-    : '';
   const nightModeClass = shouldGlow ? 'night-mode-marker-pulse' : '';
+  const hoverClass = isHovered ? 'drop-shadow-xl' : '';
 
-  // Calculate scaled dimensions based on zoom
+  // Luxury villa: Mediterranean villa silhouette — gabled roof + flat parapet wings + columns
+  if (isLuxuryVilla) {
+    // viewBox 80×72: pin(14) + body(20) + parapet(6) + gable(22) + crown area(10)
+    const vbW = 80; const vbH = 72;
+    const scaledW = Math.round(vbW * zoomScale);
+    const scaledH = Math.round(vbH * zoomScale);
+    const gid = `lvGd_${String(property._id).slice(-6)}`;
+    const fSize = Math.max(10, Math.round(12 * zoomScale));
+    const svgVillaHtml = `
+      <div class="promoted-marker-wrapper ${nightModeClass}" style="width:${scaledW}px;height:${scaledH}px;">
+        <div class="${promotedInnerClass}" style="width:${scaledW}px;height:${scaledH}px;">
+          <svg width="${scaledW}" height="${scaledH}" viewBox="0 0 ${vbW} ${vbH}" fill="none" xmlns="http://www.w3.org/2000/svg"
+               style="filter:${finalFilter};transform-origin:bottom center;transform:scale(${scale});transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);">
+            <defs>
+              <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#F5DC6E"/>
+                <stop offset="50%" stop-color="#E8B820"/>
+                <stop offset="100%" stop-color="#B8860B"/>
+              </linearGradient>
+            </defs>
+            <!-- Pin pointer -->
+            <path d="M40 72L30 58H50L40 72Z" fill="#5C3A00"/>
+            <!-- Villa main body -->
+            <rect x="4" y="38" width="72" height="20" rx="1" fill="url(#${gid})" stroke="#7A5000" stroke-width="1.5"/>
+            <!-- Left flat parapet wing -->
+            <rect x="4" y="32" width="14" height="6" rx="1" fill="url(#${gid})" stroke="#7A5000" stroke-width="1.5"/>
+            <!-- Right flat parapet wing -->
+            <rect x="62" y="32" width="14" height="6" rx="1" fill="url(#${gid})" stroke="#7A5000" stroke-width="1.5"/>
+            <!-- Central gabled roof -->
+            <path d="M14 38L40 14L66 38Z" fill="url(#${gid})" stroke="#7A5000" stroke-width="1.5"/>
+            <!-- Left column pillar -->
+            <rect x="13" y="38" width="3.5" height="20" fill="#B8860B" opacity="0.5"/>
+            <!-- Right column pillar -->
+            <rect x="63.5" y="38" width="3.5" height="20" fill="#B8860B" opacity="0.5"/>
+            <!-- ✦ crown at roof peak -->
+            <text x="40" y="22" font-family="Inter,sans-serif" font-size="11" font-weight="900" fill="#2C1A00" text-anchor="middle" dominant-baseline="middle">✦</text>
+            <!-- Price in body -->
+            <text x="40" y="50" font-family="Inter,sans-serif" font-size="${fSize}" font-weight="bold" fill="#2C1A00" text-anchor="middle" dominant-baseline="middle">${price}</text>
+          </svg>
+        </div>
+      </div>
+    `;
+    return L.divIcon({
+      html: svgVillaHtml,
+      className: hoverClass,
+      iconSize: [scaledW, scaledH],
+      iconAnchor: [scaledW / 2, scaledH], // anchor at pointer tip
+      popupAnchor: [0, -scaledH],
+    });
+  }
+
+  // Standard house-pin marker for all other property types
   const baseWidth = 52;
   const baseHeight = 42;
   const scaledWidth = Math.round(baseWidth * zoomScale);
@@ -553,17 +625,13 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
     <div class="promoted-marker-wrapper ${nightModeClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px;">
       <div class="${promotedInnerClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px;">
         <svg width="${scaledWidth}" height="${scaledHeight}" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${finalFilter}; transform-origin: bottom center; transform: scale(${scale}); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
-            ${luxuryDefs}
             <path d="M35 56L25 44H45L35 56Z" fill="${finalPointerColor}" />
-            <path d="M65 24.5V44H5V24.5L35 5L65 24.5Z" fill="${finalMarkerColor}" stroke="${finalStrokeColor}" stroke-width="${finalStrokeWidth}" />
-            ${luxuryCrown}
-            <text x="35" y="${priceY}" font-family="Inter, sans-serif" font-size="${fontSize}" font-weight="bold" fill="${finalTextColor}" text-anchor="middle" dominant-baseline="middle">${price}</text>
+            <path d="M65 24.5V44H5V24.5L35 5L65 24.5Z" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${strokeWidth}" />
+            <text x="35" y="30" font-family="Inter, sans-serif" font-size="${fontSize}" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
         </svg>
       </div>
     </div>
   `;
-
-  const hoverClass = isHovered ? 'drop-shadow-xl' : '';
 
   return L.divIcon({
     html: svgHtml,
