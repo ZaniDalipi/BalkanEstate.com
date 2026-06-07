@@ -415,5 +415,6 @@ export function useVillaSearch() {
         isSaving,
         handleSaveSearchArea,
         showToast,
+        flyTo: (center: [number, number], zoom: number) => setFlyToTarget({ center, zoom }),
     };
 }

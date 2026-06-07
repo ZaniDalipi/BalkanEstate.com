@@ -102,19 +102,19 @@ const SPARKLES = [
 
 /* ── Luxury Hero Banner ── */
 const DESTINATIONS = [
-    { label: '⛰️ Julian Alps',    query: 'Bled'       },
-    { label: '🌊 Bay of Kotor',   query: 'Kotor'      },
-    { label: '🌅 Budva Riviera',  query: 'Budva'      },
-    { label: '🏞️ Lake Ohrid',     query: 'Ohrid'      },
-    { label: '🏛️ Dubrovnik',     query: 'Dubrovnik'  },
-    { label: '🌲 Pirin Mountains',query: 'Bansko'     },
+    { label: '⛰️ Julian Alps',    query: 'Bled',       center: [46.3683, 14.1146] as [number,number], zoom: 11 },
+    { label: '🌊 Bay of Kotor',   query: 'Kotor',      center: [42.4247, 18.7712] as [number,number], zoom: 12 },
+    { label: '🌅 Budva Riviera',  query: 'Budva',      center: [42.2864, 18.8400] as [number,number], zoom: 12 },
+    { label: '🏞️ Lake Ohrid',     query: 'Ohrid',      center: [41.1172, 20.8016] as [number,number], zoom: 11 },
+    { label: '🏛️ Dubrovnik',     query: 'Dubrovnik',  center: [42.6507, 18.0944] as [number,number], zoom: 13 },
+    { label: '🌲 Pirin Mountains',query: 'Bansko',     center: [41.8374, 23.4882] as [number,number], zoom: 12 },
 ];
 
 interface LuxuryHeroProps {
     count: number;
     minPrice: number | null;
     activeQuery: string;
-    onDestinationClick: (query: string) => void;
+    onDestinationClick: (dest: typeof DESTINATIONS[number]) => void;
 }
 const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, minPrice, activeQuery, onDestinationClick }) => (
     <div className="relative overflow-hidden -mx-3 -mt-2 mb-3"
@@ -157,7 +157,7 @@ const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, minPrice, activeQuery, o
                     return (
                         <button
                             key={dest.query}
-                            onClick={() => onDestinationClick(dest.query)}
+                            onClick={() => onDestinationClick(dest)}
                             className="px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all duration-200"
                             style={isActive ? {
                                 background: 'rgba(255,165,0,0.18)',
@@ -253,6 +253,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
         handleSaveSearchArea,
         toast,
         setToast,
+        flyTo,
     } = useVillaSearch();
 
     const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
@@ -637,7 +638,11 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                         count={0}
                                         minPrice={null}
                                         activeQuery={filters.query ?? ''}
-                                        onDestinationClick={(q) => { handleFilterChange('query', q); handleSearch(); }}
+                                        onDestinationClick={(dest) => {
+                                            handleFilterChange('query', dest.query);
+                                            handleSearch();
+                                            flyTo(dest.center, dest.zoom);
+                                        }}
                                     />
                                     <div className="flex justify-center py-8 px-3">
                                         <div className="bg-white rounded-2xl shadow-sm p-8 text-center max-w-md w-full border border-[#FFA500]/10">
@@ -665,10 +670,13 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                         count={listProperties.length}
                                         minPrice={minResultPrice}
                                         activeQuery={filters.query ?? ''}
-                                        onDestinationClick={(q) => {
-                                            const isActive = (filters.query ?? '') === q;
-                                            handleFilterChange('query', isActive ? '' : q);
-                                            if (!isActive) handleSearch();
+                                        onDestinationClick={(dest) => {
+                                            const isActive = (filters.query ?? '') === dest.query;
+                                            handleFilterChange('query', isActive ? '' : dest.query);
+                                            if (!isActive) {
+                                                handleSearch();
+                                                flyTo(dest.center, dest.zoom);
+                                            }
                                         }}
                                     />
                                     <HighlightedPropertiesSection properties={listProperties} />
