@@ -1,17 +1,15 @@
 import React, { useState, useEffect, useRef, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import MapComponent from '@/src/features/map/components/MapComponent';
-import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
 import VillaFilters from './VillaFilters';
+import LuxuryVillaCard from './LuxuryVillaCard';
 import Toast from '@/components/shared/Toast';
 import { useVillaSearch } from '../hooks/useVillaSearch';
-import { Squares2x2Icon, MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, MagnifyingGlassIcon, Bars3Icon } from '@/constants';
+import { MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, MagnifyingGlassIcon, Bars3Icon } from '@/constants';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
-import { Button } from '@/components/ui/liquid-glass-button';
-import { Helmet } from 'react-helmet-async';
 import { SEO } from '@/src/components/seo';
 import Footer from '@/components/shared/Footer';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
@@ -19,37 +17,190 @@ import { NominatimResult, Property } from '@/types';
 
 const ITEMS_PER_PAGE = 20;
 
-/* CSS animation keyframes for villa card entrance */
-const VillaCardAnimationStyles = () => (
+/* ── Global animation keyframes injected once ── */
+const VillaAnimationStyles = () => (
     <style>{`
-    @keyframes villaCardSlideUp {
-      0% { opacity: 0; transform: translateY(30px) scale(0.97); }
-      100% { opacity: 1; transform: translateY(0) scale(1); }
+    @keyframes villaSlideUp {
+      0%   { opacity: 0; transform: translateY(28px) scale(0.97); }
+      100% { opacity: 1; transform: translateY(0)    scale(1);    }
     }
-    .villa-card-entrance-fly {
+    @keyframes sparklePulse {
+      0%, 100% { opacity: 0; transform: scale(0.6) rotate(0deg);  }
+      50%       { opacity: 1; transform: scale(1.2) rotate(45deg); }
+    }
+    @keyframes goldShimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position:  200% center; }
+    }
+    @keyframes floatUp {
+      0%   { opacity: 0; transform: translateY(0); }
+      20%  { opacity: 1; }
+      80%  { opacity: 0.6; }
+      100% { opacity: 0; transform: translateY(-40px); }
+    }
+    .villa-card-fly {
       opacity: 0;
-      animation: villaCardSlideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation: villaSlideUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
       animation-delay: var(--card-delay, 0ms);
+    }
+    .luxury-chip {
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    .luxury-villa-card:hover .luxury-chip {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+    }
+    .luxury-villa-card .luxury-chip {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    .gold-shimmer {
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255,165,0,0.25) 40%,
+        rgba(255,200,50,0.45) 50%,
+        rgba(255,165,0,0.25) 60%,
+        transparent 100%
+      );
+      background-size: 200% auto;
+      animation: goldShimmer 2.5s linear infinite;
+    }
+    .sparkle {
+      position: absolute;
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: #FFA500;
+      animation: sparklePulse var(--dur, 2.4s) ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+    }
+    .float-particle {
+      position: absolute;
+      width: 2px; height: 2px;
+      border-radius: 50%;
+      background: rgba(255,165,0,0.6);
+      animation: floatUp var(--dur, 3s) ease-out infinite;
+      animation-delay: var(--delay, 0s);
     }
   `}</style>
 );
 
-/* Animated property card — staggered fly-in entrance */
-const AnimatedPropertyCard = memo<{
+/* ── Cinematic sparkle particles (CSS-only, no library) ── */
+const SPARKLES = [
+    { x: '8%',  y: '22%', dur: '2.1s', delay: '0s'    },
+    { x: '18%', y: '55%', dur: '2.7s', delay: '0.4s'  },
+    { x: '28%', y: '80%', dur: '2.3s', delay: '0.8s'  },
+    { x: '45%', y: '35%', dur: '3.1s', delay: '0.2s'  },
+    { x: '60%', y: '65%', dur: '2.5s', delay: '1.1s'  },
+    { x: '72%', y: '18%', dur: '2.8s', delay: '0.6s'  },
+    { x: '82%', y: '48%', dur: '2.2s', delay: '1.5s'  },
+    { x: '92%', y: '72%', dur: '3.0s', delay: '0.3s'  },
+    { x: '35%', y: '88%', dur: '2.6s', delay: '0.9s'  },
+    { x: '55%', y: '12%', dur: '2.4s', delay: '1.8s'  },
+    { x: '12%', y: '40%', dur: '3.2s', delay: '0.7s'  },
+    { x: '88%', y: '30%', dur: '2.0s', delay: '1.3s'  },
+];
+
+/* ── Luxury Hero Banner ── */
+const DESTINATIONS = [
+    { label: '⛰️ Julian Alps',    query: 'Bled'       },
+    { label: '🌊 Bay of Kotor',   query: 'Kotor'      },
+    { label: '🌅 Budva Riviera',  query: 'Budva'      },
+    { label: '🏞️ Lake Ohrid',     query: 'Ohrid'      },
+    { label: '🏛️ Dubrovnik',     query: 'Dubrovnik'  },
+    { label: '🌲 Pirin Mountains',query: 'Bansko'     },
+];
+
+interface LuxuryHeroProps {
+    count: number;
+    minPrice: number | null;
+    activeQuery: string;
+    onDestinationClick: (query: string) => void;
+}
+const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, minPrice, activeQuery, onDestinationClick }) => (
+    <div className="relative overflow-hidden -mx-3 -mt-2 mb-3"
+        style={{ background: 'linear-gradient(135deg, #050d1f 0%, #0a1a3a 35%, #0f2650 65%, #080f1f 100%)' }}
+    >
+        {/* Sparkle particles */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            {SPARKLES.map((s, i) => (
+                <div key={i} className="sparkle"
+                    style={{ left: s.x, top: s.y, '--dur': s.dur, '--delay': s.delay } as React.CSSProperties}
+                />
+            ))}
+        </div>
+        {/* Gold shimmer line at top */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] gold-shimmer" />
+
+        <div className="relative px-5 pt-7 pb-6 text-center">
+            <p className="text-[10px] font-bold tracking-[0.35em] uppercase mb-2"
+                style={{ color: '#FFA500', letterSpacing: '0.3em' }}>
+                ✦ &nbsp;Exclusive Collection&nbsp; ✦
+            </p>
+            <h2 className="text-white font-extrabold text-2xl sm:text-3xl leading-tight mb-1">
+                Luxury Villas
+            </h2>
+            <p className="text-white/40 text-xs mb-1">
+                Private estates · Extraordinary settings · The Balkans
+            </p>
+            {count > 0 && (
+                <p className="text-[11px] font-semibold mb-4"
+                    style={{ color: 'rgba(255,165,0,0.75)' }}>
+                    {count} {count === 1 ? 'villa' : 'villas'} available
+                    {minPrice != null ? ` · from €${minPrice.toLocaleString()}/night` : ''}
+                </p>
+            )}
+
+            {/* Destination pills */}
+            <div className="flex flex-wrap justify-center gap-1.5">
+                {DESTINATIONS.map(dest => {
+                    const isActive = activeQuery === dest.query;
+                    return (
+                        <button
+                            key={dest.query}
+                            onClick={() => onDestinationClick(dest.query)}
+                            className="px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all duration-200"
+                            style={isActive ? {
+                                background: 'rgba(255,165,0,0.18)',
+                                borderColor: '#FFA500',
+                                color: '#FFA500',
+                            } : {
+                                background: 'rgba(255,255,255,0.05)',
+                                borderColor: 'rgba(255,255,255,0.15)',
+                                color: 'rgba(255,255,255,0.65)',
+                            }}
+                        >
+                            {dest.label}
+                        </button>
+                    );
+                })}
+            </div>
+        </div>
+
+        {/* Fade to page bg */}
+        <div className="absolute bottom-0 inset-x-0 h-6"
+            style={{ background: 'linear-gradient(to bottom, transparent, #F8F9FC)' }}
+        />
+        {/* Gold shimmer line at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-[1px] gold-shimmer" />
+    </div>
+);
+
+/* ── Animated luxury card with staggered entrance ── */
+const AnimatedVillaCard = memo<{
     property: Property;
     index: number;
     onHover?: (id: string | null) => void;
     animateEntrance?: boolean;
 }>(({ property, index, onHover, animateEntrance }) => {
-    const entranceDelay = animateEntrance ? Math.min(index * 60, 1200) : 0;
+    const delay = animateEntrance ? Math.min(index * 70, 1400) : 0;
     return (
         <div
-            className={animateEntrance ? 'villa-card-entrance-fly' : undefined}
-            style={animateEntrance ? { '--card-delay': `${entranceDelay}ms` } as React.CSSProperties : undefined}
+            className={animateEntrance ? 'villa-card-fly' : undefined}
+            style={animateEntrance ? { '--card-delay': `${delay}ms` } as React.CSSProperties : undefined}
             onMouseEnter={() => onHover?.(property.id)}
             onMouseLeave={() => onHover?.(null)}
         >
-            <PropertyCard property={property} />
+            <LuxuryVillaCard property={property} priority={index < 4} />
         </div>
     );
 });
@@ -248,11 +399,15 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                     {/* Desktop header — sticky, new 3-tier design */}
                     <div className="hidden lg:block sticky top-0 z-20">
 
-                        {/* Tier 1: Blue brand bar — 56px, amber bottom border */}
+                        {/* Tier 1: Blue brand bar — 56px, animated gold bottom border */}
                         <div
-                            className="flex items-center justify-between px-4"
-                            style={{ height: '56px', background: '#0252CD', borderBottom: '3px solid #FFA500' }}
+                            className="relative flex items-center justify-between px-4 overflow-hidden"
+                            style={{ height: '56px', background: 'linear-gradient(135deg, #0252CD 0%, #0640a8 100%)' }}
                         >
+                            {/* Subtle shimmer overlay */}
+                            <div className="absolute inset-0 opacity-10 gold-shimmer pointer-events-none" />
+                            {/* Gold animated border at bottom */}
+                            <div className="absolute bottom-0 left-0 right-0 h-[2px] gold-shimmer" />
                             {/* Left: brand + stats */}
                             <div className="flex items-center gap-3 min-w-0">
                                 <span className="text-xl flex-shrink-0">🏛️</span>
@@ -433,16 +588,36 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                         {/* Card grid / loading / empty states */}
                         <div className="p-3 pt-2 bg-gray-50">
                             {(isLoading || isSearchFiltering) ? (
-                                /* Premium loading state */
+                                /* Cinematic loading state */
                                 <>
-                                    <div className="flex flex-col items-center justify-center gap-3 py-8 mb-2">
-                                        <div className="relative">
-                                            <div className="w-10 h-10 rounded-full border-2 border-gray-100" />
-                                            <div className="absolute inset-0 w-10 h-10 rounded-full border-2 border-t-[#0252CD] border-r-[#FFA500] animate-spin" />
+                                    <VillaAnimationStyles />
+                                    <div className="relative overflow-hidden -mx-3 -mt-2 mb-4"
+                                        style={{ background: 'linear-gradient(135deg, #050d1f 0%, #0a1a3a 50%, #080f1f 100%)' }}
+                                    >
+                                        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                                            {SPARKLES.slice(0, 6).map((s, i) => (
+                                                <div key={i} className="sparkle"
+                                                    style={{ left: s.x, top: s.y, '--dur': s.dur, '--delay': s.delay } as React.CSSProperties}
+                                                />
+                                            ))}
                                         </div>
-                                        <span className="text-xs text-gray-400 font-medium">
-                                            {t('villas:discoveringVillas', 'Discovering exclusive villas...')}
-                                        </span>
+                                        <div className="absolute top-0 left-0 right-0 h-[2px] gold-shimmer" />
+                                        <div className="relative px-5 py-10 text-center">
+                                            <p className="text-[10px] font-bold tracking-[0.3em] mb-3" style={{ color: '#FFA500' }}>
+                                                ✦ &nbsp;Exclusive Collection&nbsp; ✦
+                                            </p>
+                                            <div className="relative mx-auto w-12 h-12 mb-3">
+                                                <div className="absolute inset-0 rounded-full border-2 border-white/10" />
+                                                <div className="absolute inset-0 rounded-full border-2 border-t-[#FFA500] border-r-[#0252CD] animate-spin" />
+                                                <span className="absolute inset-0 flex items-center justify-center text-xl">✦</span>
+                                            </div>
+                                            <p className="text-white/60 text-xs font-medium">
+                                                {t('villas:discoveringVillas', 'Curating your exclusive collection...')}
+                                            </p>
+                                        </div>
+                                        <div className="absolute bottom-0 inset-x-0 h-6"
+                                            style={{ background: 'linear-gradient(to bottom, transparent, #F8F9FC)' }}
+                                        />
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {[...Array(6)].map((_, i) => <PropertyCardSkeleton key={i} index={i} />)}
@@ -456,81 +631,50 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     </button>
                                 </div>
                             ) : listProperties.length === 0 ? (
-                                /* Premium empty state with destination quick-select */
-                                <div className="flex justify-center py-10 px-3">
-                                    <div className="bg-white rounded-2xl shadow-sm p-8 text-center max-w-md w-full">
-                                        <div className="text-5xl mb-3">🏛️</div>
-                                        <h3 className="text-gray-800 font-bold text-lg mb-1">
-                                            {t('villas:noProperties', 'No luxury villas found')}
-                                        </h3>
-                                        <p className="text-gray-400 text-sm mb-5 leading-relaxed">
-                                            {t('villas:noPropertiesHint', 'Try one of our sought-after destinations below, or adjust your filters')}
-                                        </p>
-                                        {/* Destination quick-select */}
-                                        <div className="flex flex-wrap justify-center gap-2 mb-5">
-                                            {[
-                                                { label: 'Bay of Kotor', query: 'Kotor' },
-                                                { label: 'Lake Ohrid', query: 'Ohrid' },
-                                                { label: 'Budva Riviera', query: 'Budva' },
-                                                { label: 'Julian Alps', query: 'Bled' },
-                                                { label: 'Dubrovnik', query: 'Dubrovnik' },
-                                            ].map(dest => (
-                                                <button
-                                                    key={dest.query}
-                                                    onClick={() => { handleFilterChange('query', dest.query); handleSearch(); }}
-                                                    className="px-3 py-1.5 rounded-full text-xs font-semibold border border-[#FFA500]/40 text-[#0252CD] bg-[#FFA500]/8 hover:bg-[#FFA500]/15 hover:border-[#FFA500] transition-all"
-                                                >
-                                                    {dest.label}
-                                                </button>
-                                            ))}
+                                /* Cinematic empty state */
+                                <>
+                                    <LuxuryHero
+                                        count={0}
+                                        minPrice={null}
+                                        activeQuery={filters.query ?? ''}
+                                        onDestinationClick={(q) => { handleFilterChange('query', q); handleSearch(); }}
+                                    />
+                                    <div className="flex justify-center py-8 px-3">
+                                        <div className="bg-white rounded-2xl shadow-sm p-8 text-center max-w-md w-full border border-[#FFA500]/10">
+                                            <div className="text-5xl mb-3">🏛️</div>
+                                            <h3 className="text-gray-800 font-bold text-lg mb-1">
+                                                {t('villas:noProperties', 'No luxury villas found')}
+                                            </h3>
+                                            <p className="text-gray-400 text-sm mb-5 leading-relaxed">
+                                                {t('villas:noPropertiesHint', 'Try a destination above or adjust your filters')}
+                                            </p>
+                                            <button
+                                                onClick={handleResetFilters}
+                                                className="bg-primary text-white rounded-xl px-5 py-2.5 font-semibold text-sm hover:opacity-90 transition-opacity"
+                                            >
+                                                {t('villas:clearFilters', 'Clear All Filters')}
+                                            </button>
                                         </div>
-                                        <button
-                                            onClick={handleResetFilters}
-                                            className="bg-primary text-white rounded-xl px-5 py-2.5 font-semibold text-sm hover:opacity-90 transition-opacity"
-                                        >
-                                            {t('villas:clearFilters', 'Clear All Filters')}
-                                        </button>
                                     </div>
-                                </div>
+                                </>
                             ) : (
                                 <>
-                                    <VillaCardAnimationStyles />
-                                    {/* Curated destinations strip — horizontal scroll */}
-                                    <div className="px-3 pt-3 pb-1">
-                                        <div className="flex items-center gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' } as React.CSSProperties}>
-                                            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex-shrink-0">Destinations</span>
-                                            {[
-                                                { label: '🏔️ Julian Alps', query: 'Bled' },
-                                                { label: '🌊 Bay of Kotor', query: 'Kotor' },
-                                                { label: '🌅 Budva Riviera', query: 'Budva' },
-                                                { label: '🏞️ Lake Ohrid', query: 'Ohrid' },
-                                                { label: '🏛️ Dubrovnik', query: 'Dubrovnik' },
-                                                { label: '⛰️ Pirin Mountains', query: 'Bansko' },
-                                            ].map(dest => {
-                                                const isActive = filters.query === dest.query;
-                                                return (
-                                                    <button
-                                                        key={dest.query}
-                                                        onClick={() => {
-                                                            handleFilterChange('query', isActive ? '' : dest.query);
-                                                            if (!isActive) handleSearch();
-                                                        }}
-                                                        className={`flex-shrink-0 px-3 py-1 rounded-full text-[11px] font-semibold border transition-all ${
-                                                            isActive
-                                                                ? 'bg-[#FFA500]/15 text-[#0252CD] border-[#FFA500]'
-                                                                : 'bg-white text-gray-500 border-gray-200 hover:border-[#FFA500]/50 hover:text-[#0252CD]'
-                                                        }`}
-                                                    >
-                                                        {dest.label}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
+                                    <VillaAnimationStyles />
+                                    {/* Cinematic hero banner — scrolls away */}
+                                    <LuxuryHero
+                                        count={listProperties.length}
+                                        minPrice={minResultPrice}
+                                        activeQuery={filters.query ?? ''}
+                                        onDestinationClick={(q) => {
+                                            const isActive = (filters.query ?? '') === q;
+                                            handleFilterChange('query', isActive ? '' : q);
+                                            if (!isActive) handleSearch();
+                                        }}
+                                    />
                                     <HighlightedPropertiesSection properties={listProperties} />
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {listProperties.slice(0, visibleCount).map((property, index) => (
-                                            <AnimatedPropertyCard
+                                            <AnimatedVillaCard
                                                 key={property.id}
                                                 property={property}
                                                 index={index}
