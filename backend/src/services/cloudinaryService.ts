@@ -358,10 +358,10 @@ export const uploadFromUrl = async (
   remoteUrl: string,
   folder = 'balkan-estate/external-listings'
 ): Promise<CloudinaryUploadResult> => {
-  // In local/development we don't want to consume Cloudinary storage or quota
-  // for scraped external images. Reference the source URL directly instead of
-  // re-hosting it. Set CLOUDINARY_REHOST_IN_DEV=true to force real uploads.
-  if (process.env.NODE_ENV !== 'production' && process.env.CLOUDINARY_REHOST_IN_DEV !== 'true') {
+  // In local/development we NEVER upload external images to Cloudinary — that
+  // would consume storage/quota for throwaway dev data. Always reference the
+  // source URL directly instead of re-hosting it.
+  if (process.env.NODE_ENV !== 'production') {
     mediaLogger.info(`⏭️  [dev] Skipping Cloudinary re-host, referencing source: ${remoteUrl}`);
     return {
       url: remoteUrl,
