@@ -68,6 +68,8 @@ interface UploadOptions {
   userId: string;
   userEmail?: string;
   propertyId?: string;
+  /** Human-readable listing title, appended as a slug to the listing folder for readability. */
+  propertyTitle?: string;
   agencyId?: string;
   businessListingId?: string;
   credentialId?: string;
@@ -76,6 +78,31 @@ interface UploadOptions {
   maxHeight?: number;
   quality?: number;
 }
+
+/**
+ * Turn a human title into a short, filesystem/URL-safe folder slug.
+ * e.g. "Cozy 2BR in Tëtovo!" → "cozy-2br-in-tetovo"
+ * Returns '' when there's nothing usable, so callers can fall back to ID-only.
+ */
+const slugify = (text: string | undefined, maxLen = 40): string => {
+  if (!text) return '';
+  return text
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '') // strip accents
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-') // non-alphanumerics → dashes
+    .replace(/^-+|-+$/g, '') // trim leading/trailing dashes
+    .slice(0, maxLen)
+    .replace(/-+$/g, ''); // re-trim after slice
+};
+
+/**
+ * Append a readable slug to an ID segment, keeping the ID first so that
+ * prefix-based lookups/deletes (which match on the ID) keep working.
+ * e.g. ("69a7…d65", "cozy-2br") → "69a7…d65-cozy-2br"
+ */
+const idSlugSegment = (id: string, slug: string): string =>
+  slug ? `${id}-${slug}` : id;
 
 /**
  * Sanitize email for use as a Cloudinary folder name.
@@ -97,21 +124,24 @@ const sanitizeEmailForFolder = (email: string): string => {
  * - Agencies: balkan-estate/agencies/{agencyId}/{subfolder}
  */
 const buildFolderPath = (options: UploadOptions): string => {
-  const { userId, userEmail, propertyId, agencyId, businessListingId, credentialId, type } = options;
+  const { userId, userEmail, propertyId, propertyTitle, agencyId, businessListingId, credentialId, type } = options;
   const ROOT = 'balkan-estate';
+  // ID first, readable slug appended — keeps prefix-based deletes
+  // (e.g. .../listings/{propertyId}) matching the slugged folder.
+  const listingSegment = propertyId ? idSlugSegment(propertyId, slugify(propertyTitle)) : '';
 
   switch (type) {
     case 'property':
-      // balkan-estate/users/{userId}/listings/{propertyId}/photos or /temp
+      // balkan-estate/users/{userId}/listings/{propertyId}-{slug}/photos or /temp
       if (propertyId) {
-        return `${ROOT}/users/${userId}/listings/${propertyId}/photos`;
+        return `${ROOT}/users/${userId}/listings/${listingSegment}/photos`;
       }
       return `${ROOT}/users/${userId}/listings/temp`;
 
     case 'floorplan':
-      // balkan-estate/users/{userId}/listings/{propertyId}/floorplans
+      // balkan-estate/users/{userId}/listings/{propertyId}-{slug}/floorplans
       if (propertyId) {
-        return `${ROOT}/users/${userId}/listings/${propertyId}/floorplans`;
+        return `${ROOT}/users/${userId}/listings/${listingSegment}/floorplans`;
       }
       return `${ROOT}/users/${userId}/listings/temp/floorplans`;
 
@@ -307,7 +337,8 @@ export const uploadPropertyImages = async (
   files: Express.Multer.File[],
   userId: string,
   propertyId?: string,
-  watermarkOptions?: WatermarkOptions
+  watermarkOptions?: WatermarkOptions,
+  propertyTitle?: string
 ): Promise<Array<{ url: string; publicId: string; tag: string }>> => {
   const uploadedImages: Array<{ url: string; publicId: string; tag: string }> = [];
 
@@ -324,6 +355,7 @@ export const uploadPropertyImages = async (
       const result = await uploadImage(buffer, {
         userId,
         propertyId,
+        propertyTitle,
         type: 'property',
         maxWidth: 1920,
         maxHeight: 1080,
@@ -347,6 +379,32 @@ export const uploadPropertyImages = async (
 };
 
 /**
+ * Context for re-hosting an external (scraped) image, used to organize it under
+ * the user the listing is attributed to — mirroring the user-uploaded layout:
+ *   balkan-estate/users/{userId}/external-listings/{listingId}-{slug}
+ * When no attribution is available it falls back to a flat shared folder.
+ */
+export interface ExternalImageContext {
+  /** The user the imported listing is attributed to (source owner or external seller). */
+  userId?: string;
+  /** Stable per-source listing id (e.g. sourceListingId) for the listing folder. */
+  listingId?: string;
+  /** Human-readable listing title, appended as a slug for browsability. */
+  listingTitle?: string;
+}
+
+const buildExternalFolder = (ctx: ExternalImageContext): string => {
+  const ROOT = 'balkan-estate';
+  if (ctx.userId) {
+    const listing = ctx.listingId
+      ? `/${idSlugSegment(ctx.listingId, slugify(ctx.listingTitle))}`
+      : '';
+    return `${ROOT}/users/${ctx.userId}/external-listings${listing}`;
+  }
+  return `${ROOT}/external-listings`;
+};
+
+/**
  * Upload an image directly from a remote URL.
  * Used by the universal-listings ingest pipeline to re-host external images
  * onto Cloudinary so frontend image optimization (srcset / WebP) keeps working
@@ -356,7 +414,7 @@ export const uploadPropertyImages = async (
  */
 export const uploadFromUrl = async (
   remoteUrl: string,
-  folder = 'balkan-estate/external-listings'
+  context: ExternalImageContext = {}
 ): Promise<CloudinaryUploadResult> => {
   // In local/development we NEVER upload external images to Cloudinary — that
   // would consume storage/quota for throwaway dev data. Always reference the
@@ -374,7 +432,7 @@ export const uploadFromUrl = async (
   }
 
   const result = await cloudinary.uploader.upload(remoteUrl, {
-    folder,
+    folder: buildExternalFolder(context),
     resource_type: 'image',
     transformation: [
       { quality: 'auto:good' },

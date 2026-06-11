@@ -1411,6 +1411,7 @@ export const uploadImages = async (
     }
 
     // If propertyId is provided, verify ownership
+    let propertyTitle: string | undefined;
     if (propertyId) {
       const property = await Property.findById(propertyId);
       if (!property) {
@@ -1422,6 +1423,7 @@ export const uploadImages = async (
         res.status(403).json({ message: 'Not authorized to upload images for this property' });
         return;
       }
+      propertyTitle = property.title;
     }
 
     // Look up user's agency for watermarking
@@ -1442,7 +1444,7 @@ export const uploadImages = async (
 
     // Upload images using the centralized service (with watermarking)
     // Images will be organized in: balkan-estate/properties/user-{userId}/listing-{propertyId}/
-    const uploadedImages = await uploadPropertyImages(files, userId, propertyId, watermarkOptions);
+    const uploadedImages = await uploadPropertyImages(files, userId, propertyId, watermarkOptions, propertyTitle);
 
     res.json({
       images: uploadedImages,
