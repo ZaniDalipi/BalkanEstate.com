@@ -592,6 +592,78 @@ export const moveImagesToProperty = async (
   return newPublicIds;
 };
 
+/** A listing image as stored on the Property document. */
+export interface ListingImageRef {
+  url: string;
+  publicId?: string;
+  tag?: 'main' | 'floorplan' | 'other' | string;
+}
+
+/**
+ * Relocate a listing's freshly-uploaded temp images into the listing's own
+ * folder, so Cloudinary is organized as:
+ *   balkan-estate/users/{userId}/listings/{propertyId}-{slug}/photos|floorplans
+ *
+ * The frontend uploads images before the property exists (to a temp folder),
+ * so this runs right after the property is created and has an id + title.
+ * Only Cloudinary-hosted temp images are moved; external URLs (no publicId, or
+ * not under .../listings/temp) are left untouched. Each rename is best-effort —
+ * on failure the original ref is kept so a listing never loses its image.
+ */
+export const organizeListingMedia = async (
+  images: ListingImageRef[],
+  userId: string,
+  propertyId: string,
+  propertyTitle?: string
+): Promise<ListingImageRef[]> => {
+  const segment = idSlugSegment(propertyId, slugify(propertyTitle));
+  // Dedupe renames — the main image often shares a publicId with images[0].
+  const movedByPublicId = new Map<string, { url: string; publicId: string }>();
+
+  const out: ListingImageRef[] = [];
+  for (const img of images) {
+    const publicId = img.publicId;
+    if (!publicId || !publicId.includes('/listings/temp')) {
+      out.push(img); // external URL or already organized — leave as-is
+      continue;
+    }
+
+    const cached = movedByPublicId.get(publicId);
+    if (cached) {
+      out.push({ ...img, url: cached.url, publicId: cached.publicId });
+      continue;
+    }
+
+    const isFloorplan = img.tag === 'floorplan';
+    const subfolder = isFloorplan ? 'floorplans' : 'photos';
+    const filename = publicId.split('/').pop();
+    const newPublicId = `balkan-estate/users/${userId}/listings/${segment}/${subfolder}/${filename}`;
+
+    try {
+      const result = await cloudinary.uploader.rename(publicId, newPublicId, {
+        overwrite: false,
+        invalidate: true,
+      });
+      await removeFileRecord(publicId);
+      await registerFileUpload({
+        publicId: result.public_id,
+        url: result.secure_url,
+        userId,
+        fileType: isFloorplan ? 'floorplan' : 'property',
+        resourceId: propertyId,
+      });
+      movedByPublicId.set(publicId, { url: result.secure_url, publicId: result.public_id });
+      out.push({ ...img, url: result.secure_url, publicId: result.public_id });
+      mediaLogger.info(`📁 Organized listing image: ${publicId} → ${result.public_id}`);
+    } catch (error: any) {
+      mediaLogger.error(`⚠️  Failed to organize image ${publicId}:`, error.message);
+      out.push(img); // keep original on failure
+    }
+  }
+
+  return out;
+};
+
 /**
  * Get optimized image URL with transformations.
  * Uses signed URL for sensitive file types, standard URL for public assets.

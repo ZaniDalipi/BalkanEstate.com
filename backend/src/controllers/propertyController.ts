@@ -12,6 +12,7 @@ import {
   uploadPropertyImages,
   deleteImages,
   deleteFolder,
+  organizeListingMedia,
 } from '../services/cloudinaryService';
 import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/highlightingUtils';
 import { recordPriceChange, processInstantAlertsForProperty, processInstantPriceDropForProperty } from '../jobs/propertyAlertsJob';
@@ -906,6 +907,51 @@ export const createProperty = async (
         },
       });
       throw createError;
+    }
+
+    // The frontend uploads images to a temp folder before the property exists,
+    // so relocate them now into the listing's own folder
+    // (balkan-estate/users/{userId}/listings/{propertyId}-{slug}/photos) so
+    // Cloudinary stays organized by user + listing. Best-effort: a failure here
+    // must not fail listing creation.
+    try {
+      if (Array.isArray(property.images) && property.images.length > 0) {
+        const organized = await organizeListingMedia(
+          property.images.map((i) => ({ url: i.url, publicId: i.publicId, tag: i.tag })),
+          String(property.sellerId),
+          String(property._id),
+          property.title
+        );
+        property.images = organized.map((i) => ({
+          url: i.url,
+          publicId: i.publicId,
+          tag: (i.tag as 'main' | 'floorplan' | 'other') ?? 'other',
+        })) as typeof property.images;
+
+        const main = organized.find((i) => i.tag === 'main') ?? organized[0];
+        if (main) {
+          property.imageUrl = main.url;
+          property.imagePublicId = main.publicId;
+        }
+      }
+
+      // Standalone floorplan (stored separately from images[]) — relocate too.
+      if (property.floorplanPublicId) {
+        const [organizedFloorplan] = await organizeListingMedia(
+          [{ url: property.floorplanUrl ?? '', publicId: property.floorplanPublicId, tag: 'floorplan' }],
+          String(property.sellerId),
+          String(property._id),
+          property.title
+        );
+        if (organizedFloorplan) {
+          property.floorplanUrl = organizedFloorplan.url;
+          property.floorplanPublicId = organizedFloorplan.publicId;
+        }
+      }
+
+      await property.save();
+    } catch (organizeError) {
+      propertyLogger.error('Failed to organize listing media (non-fatal):', organizeError);
     }
 
     // Counters were already incremented atomically above (the findOneAndUpdate).
