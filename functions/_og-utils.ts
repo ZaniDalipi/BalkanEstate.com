@@ -151,6 +151,119 @@ export function buildOgHtml(property: PropertyData, slug: string, lang = 'en'): 
 </html>`;
 }
 
+// ─── Blog article OG ──────────────────────────────────────────────────────────
+
+export interface ArticleData {
+  title?: string;
+  excerpt?: string;
+  coverImageUrl?: string;
+  slug?: string;
+  publishedAt?: string;
+  tags?: string[];
+}
+
+/**
+ * Get the best available article image.
+ * Priority: article cover image > default OG image.
+ */
+export function getArticleImage(article: ArticleData): string {
+  return article.coverImageUrl || DEFAULT_IMAGE;
+}
+
+export function buildArticleOgHtml(article: ArticleData, slug: string, lang = 'en'): string {
+  const title = article.title ? `${article.title} | ${SITE_NAME}` : SITE_NAME;
+  const description = (article.excerpt || '')
+    .replace(/\n/g, ' ')
+    .trim()
+    .slice(0, 300)
+    || 'Read the latest property insights from the Balkans on BalkanEstateAI.';
+  const image = getArticleImage(article);
+  const canonicalUrl = `${SITE_URL}/${lang}/blog/${slug}`;
+
+  return `<!DOCTYPE html>
+<html lang="${lang}">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="refresh" content="0;url=${escapeHtml(canonicalUrl)}" />
+  <title>${escapeHtml(title)}</title>
+  <meta name="description" content="${escapeHtml(description)}" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="${SITE_NAME}" />
+  <meta property="og:url" content="${escapeHtml(canonicalUrl)}" />
+  <meta property="og:title" content="${escapeHtml(title)}" />
+  <meta property="og:description" content="${escapeHtml(description)}" />
+  <meta property="og:image" content="${escapeHtml(image)}" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="628" />
+  <meta property="og:image:alt" content="${escapeHtml(article.title || SITE_NAME)}" />
+  <meta property="og:locale" content="en_US" />
+  ${article.publishedAt ? `<meta property="article:published_time" content="${escapeHtml(article.publishedAt)}" />` : ''}
+  ${(article.tags || []).map(tag => `<meta property="article:tag" content="${escapeHtml(tag)}" />`).join('\n  ')}
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${escapeHtml(title)}" />
+  <meta name="twitter:description" content="${escapeHtml(description)}" />
+  <meta name="twitter:image" content="${escapeHtml(image)}" />
+  <meta name="twitter:image:alt" content="${escapeHtml(article.title || SITE_NAME)}" />
+
+  <link rel="canonical" href="${escapeHtml(canonicalUrl)}" />
+</head>
+<body>
+  <script>window.location.replace(${JSON.stringify(canonicalUrl)});</script>
+  <noscript>
+    <p>Redirecting to <a href="${escapeHtml(canonicalUrl)}">${escapeHtml(title)}</a></p>
+  </noscript>
+</body>
+</html>`;
+}
+
+/**
+ * Fetch article data from the backend API and return OG HTML response.
+ * Shared handler used by both blog route functions.
+ */
+export async function handleArticleOgRequest(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  context: any,
+  slug: string,
+  lang = 'en',
+): Promise<Response> {
+  const userAgent = context.request.headers.get('user-agent') || '';
+
+  // Only intercept for social media crawlers
+  if (!isCrawler(userAgent)) {
+    return context.env.ASSETS.fetch(context.request);
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/articles/${slug}`);
+
+    if (!response.ok) {
+      return context.env.ASSETS.fetch(context.request);
+    }
+
+    const data = await response.json() as { article?: ArticleData; data?: ArticleData };
+    const article = data.article || data.data || (data as unknown as ArticleData);
+
+    if (!article || !article.title) {
+      return context.env.ASSETS.fetch(context.request);
+    }
+
+    const html = buildArticleOgHtml(article, slug, lang);
+
+    return new Response(html, {
+      headers: {
+        'Content-Type': 'text/html;charset=UTF-8',
+        'Cache-Control': 'public, max-age=3600',
+      },
+    });
+  } catch {
+    return context.env.ASSETS.fetch(context.request);
+  }
+}
+
 /**
  * Fetch property data from the backend API and return OG HTML response.
  * Shared handler used by both route functions.
