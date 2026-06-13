@@ -947,11 +947,6 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               </div>
             )}
 
-            {/* Map Link */}
-            <div id="property-map-section" className="animate-slide-up" style={{ animationDelay: '300ms' }}>
-              <PropertyMapLink property={property} onNavigateToMap={handleNavigateToMap} />
-            </div>
-
             {/* Neighborhood Insights */}
             <div className="animate-slide-up" style={{ animationDelay: '400ms' }}>
               <NeighborhoodInsights
@@ -986,6 +981,15 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           </div>
         </div>
       </main>
+
+      {/* Map Link — full-bleed, outside main container so it spans 100% page width */}
+      <div
+        id="property-map-section"
+        className="animate-slide-up w-full px-3 sm:px-4 md:px-6 lg:px-8 mb-6 sm:mb-8 lg:mb-10"
+        style={{ animationDelay: '300ms' }}
+      >
+        <PropertyMapLink property={property} onNavigateToMap={handleNavigateToMap} />
+      </div>
 
       {/* Sticky Bottom Action Bar - Mobile Only (Zillow-style) */}
       {!isOwner && property.status !== 'sold' && (
