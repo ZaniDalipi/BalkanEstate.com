@@ -11,6 +11,7 @@ import { ArrowLeftIcon, SparklesIcon, UserIcon } from '@/constants';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import ImageViewerModal from './ImageViewerModal';
 import FloorPlanViewerModal from './FloorPlanViewerModal';
+import PropertySectionNav from './PropertySectionNav';
 import FeaturedAgencies from '@/components/FeaturedAgencies';
 import RentalTermsSection from '@/src/features/rental/components/RentalTermsSection';
 import RentalHistorySection from '@/src/features/rental/components/RentalHistorySection';
@@ -873,6 +874,9 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             </button>
           </div>
         </div>
+
+        {/* Bookmark-style quick navigation to key sections */}
+        <PropertySectionNav />
       </div>
 
       {/* Gallery — full-bleed, outside main container so it spans 100% page width */}
@@ -940,7 +944,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
             {/* Rental Terms (only for rental properties) */}
             {property.listingType === 'rent' && (
-              <div className="animate-slide-up space-y-6" style={{ animationDelay: '150ms' }}>
+              <div data-section="availability" className="scroll-mt-24 animate-slide-up space-y-6" style={{ animationDelay: '150ms' }}>
                 <RentalTermsSection property={property} />
                 <RentalHistorySection property={property} isOwner={isOwner} />
                 <RentalRulesByCountry country={property.country} />
@@ -948,7 +952,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             )}
 
             {/* Map Link */}
-            <div id="property-map-section" className="animate-slide-up" style={{ animationDelay: '300ms' }}>
+            <div id="property-map-section" data-section="map" className="scroll-mt-24 animate-slide-up" style={{ animationDelay: '300ms' }}>
               <PropertyMapLink property={property} onNavigateToMap={handleNavigateToMap} />
             </div>
 

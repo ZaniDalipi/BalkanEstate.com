@@ -640,5 +640,12 @@
       "hint": "Draw on the image to annotate",
       "sendToChat": "Send"
     }
+  },
+  "sectionNav": {
+    "ariaLabel": "Property sections",
+    "overview": "Overview",
+    "map": "3D Map",
+    "availability": "Availability",
+    "calculators": "Calculators"
   }
 }
