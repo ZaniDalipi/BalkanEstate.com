@@ -34,6 +34,7 @@ interface PropertyGalleryProps {
   onOpenEditor: (imageUrl: string) => void;
   onOpenViewer: () => void;
   onNavigateTo3DTour?: () => void;
+  onView3DMap?: () => void;
   // Controlled mode props
   activeCategory?: PropertyImageTag | 'all';
   currentImageIndex?: number;
@@ -78,6 +79,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   onOpenEditor,
   onOpenViewer,
   onNavigateTo3DTour,
+  onView3DMap,
   activeCategory: controlledCategory,
   currentImageIndex: controlledIndex,
   onCategoryChange,
@@ -764,19 +766,36 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
         {/* ── OVERLAYS (photos mode only) ── */}
         {viewMode === 'photos' && (
           <>
-            {/* 3D Tour badge – top-left */}
-            {videoEnded && property.virtualTour360Url && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onNavigateTo3DTour?.(); }}
-                className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs font-semibold rounded-full px-3 py-1.5 shadow-lg hover:scale-105 active:scale-95 transition-all animate-pulse hover:animate-none"
-              >
-                <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                  <path d="M2 12h20" />
-                </svg>
-                <span>{t('property:gallery.enter3DTour', 'Enter 3D Tour')}</span>
-              </button>
+            {/* Top-left badge stack: 3D Tour + 3D Map */}
+            {((videoEnded && property.virtualTour360Url) || onView3DMap) && (
+              <div className="absolute top-3 left-3 z-10 flex flex-col items-start gap-2">
+                {videoEnded && property.virtualTour360Url && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onNavigateTo3DTour?.(); }}
+                    className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs font-semibold rounded-full px-3 py-1.5 shadow-lg hover:scale-105 active:scale-95 transition-all animate-pulse hover:animate-none"
+                  >
+                    <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                      <path d="M2 12h20" />
+                    </svg>
+                    <span>{t('property:gallery.enter3DTour', 'Enter 3D Tour')}</span>
+                  </button>
+                )}
+                {onView3DMap && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onView3DMap(); }}
+                    className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-semibold rounded-full px-3 py-1.5 shadow-lg hover:scale-105 active:scale-95 transition-all"
+                  >
+                    <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+                      <line x1="8" y1="2" x2="8" y2="18" />
+                      <line x1="16" y1="6" x2="16" y2="22" />
+                    </svg>
+                    <span>{t('property:gallery.view3DMap', '3D Location Map')}</span>
+                  </button>
+                )}
+              </div>
             )}
 
             {/* Favorite button */}
