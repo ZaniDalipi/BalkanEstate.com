@@ -950,11 +950,29 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
             </div>
 
-            {/* 3D Map — placed right after the description to keep readers engaged.
-                Full width on mobile/tablet (single-column); fills the content column on desktop. */}
-            <div id="property-map-section" className="animate-slide-up" style={{ animationDelay: '130ms' }}>
-              <PropertyMapLink property={property} onNavigateToMap={handleNavigateToMap} />
-            </div>
+          </div>
+
+          {/* Right Column - Contact Sidebar (Desktop only - mobile version shown above) */}
+          <div className="hidden lg:block lg:col-span-1 min-w-0 animate-slide-up" style={{ animationDelay: '150ms' }}>
+            <PropertyContact
+              property={property}
+              isCreatingConversation={isCreatingConversation}
+              onContactSeller={handleContactSeller}
+            />
+          </div>
+        </div>
+      </main>
+
+      {/* 3D Map — full-bleed, rendered outside the main container so it spans the
+          full screen width. Positioned right after the description to keep readers engaged. */}
+      <div id="property-map-section" className="animate-slide-up w-full mt-4 sm:mt-6" style={{ animationDelay: '130ms' }}>
+        <PropertyMapLink property={property} onNavigateToMap={handleNavigateToMap} />
+      </div>
+
+      {/* Main Content (continued) — remaining details below the full-width map */}
+      <main className="max-w-screen-xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 overflow-x-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8 lg:space-y-10 min-w-0">
 
             {/* Rental Terms (only for rental properties) */}
             {property.listingType === 'rent' && (
@@ -987,15 +1005,6 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <FeaturedAgencies />
             </div>
 
-          </div>
-
-          {/* Right Column - Contact Sidebar (Desktop only - mobile version shown above) */}
-          <div className="hidden lg:block lg:col-span-1 min-w-0 animate-slide-up" style={{ animationDelay: '150ms' }}>
-            <PropertyContact
-              property={property}
-              isCreatingConversation={isCreatingConversation}
-              onContactSeller={handleContactSeller}
-            />
           </div>
         </div>
       </main>
