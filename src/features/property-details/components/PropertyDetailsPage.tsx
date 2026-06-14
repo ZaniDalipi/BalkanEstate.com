@@ -1110,3 +1110,4 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 };
 
 export default PropertyDetailsPage;
+
