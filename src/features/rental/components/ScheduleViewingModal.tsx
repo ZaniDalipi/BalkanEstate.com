@@ -177,7 +177,18 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
             setIsSubmitting(false);
             setError('');
             setFieldErrors({});
+            setShowCloseConfirmation(false);
         }
+    }, [isOpen]);
+
+    // Lock body scroll while the modal is open (prevents background scroll on mobile/tablet)
+    useEffect(() => {
+        if (!isOpen) return;
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = previousOverflow;
+        };
     }, [isOpen]);
 
     // Generate available dates (next 21 days, filtered by allowed days)
@@ -304,14 +315,26 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
 
     const hasUnsavedChanges = !isSubmitted && (selectedDate || selectedTime || name || email || phone || message);
 
-    const requestClose = () => {
+    const requestClose = useCallback(() => {
         if (isSubmitting) return;
         if (hasUnsavedChanges) {
             setShowCloseConfirmation(true);
         } else {
             onClose();
         }
-    };
+    }, [isSubmitting, hasUnsavedChanges, onClose]);
+
+    // Close on Escape. When the discard-confirmation is open, let it handle Escape itself.
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleEscape = (e: KeyboardEvent) => {
+            if (e.key !== 'Escape') return;
+            if (showCloseConfirmation || isSubmitting) return;
+            requestClose();
+        };
+        document.addEventListener('keydown', handleEscape);
+        return () => document.removeEventListener('keydown', handleEscape);
+    }, [isOpen, showCloseConfirmation, isSubmitting, requestClose]);
 
     const location = [property.address, property.city, property.country].filter(Boolean).join(', ');
     const formattedDate = selectedDate
@@ -322,25 +345,17 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
 
     return createPortal(
         <>
-            {/* Confirmation modal for unsaved changes */}
-            <ConfirmationModal
-                isOpen={showCloseConfirmation}
-                onClose={() => setShowCloseConfirmation(false)}
-                onConfirm={() => { setShowCloseConfirmation(false); onClose(); }}
-                title="Discard Changes?"
-                message="You have unsaved changes to your viewing request. Are you sure you want to close?"
-                confirmLabel="Discard"
-                cancelLabel="Keep Editing"
-                type="danger"
-                cancelPrimary
-            />
-
-            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+            <div
+                className="fixed inset-0 z-[9990] flex items-end sm:items-center justify-center p-0 sm:p-4"
+                role="dialog"
+                aria-modal="true"
+                aria-label={t('rental:viewing.title', 'Schedule a Viewing')}
+            >
                 {/* Backdrop */}
                 <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={requestClose} />
 
             {/* Modal */}
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden animate-in zoom-in-95 fade-in duration-200">
+            <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom sm:zoom-in-95 fade-in duration-200">
                 {/* Header */}
                 <div className="px-5 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
                     <div className="flex items-center justify-between">
@@ -397,7 +412,7 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                 )}
 
                 {/* Content */}
-                <div className="overflow-y-auto max-h-[60vh] p-5">
+                <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-5">
                     {loadingAvailability ? (
                         <div className="py-12 flex flex-col items-center gap-3">
                             <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
@@ -723,6 +738,20 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                 )}
             </div>
             </div>
+
+            {/* Discard-changes confirmation. Rendered last so it paints above the
+                viewing modal (both use a 9999-tier z-index). */}
+            <ConfirmationModal
+                isOpen={showCloseConfirmation}
+                onClose={() => setShowCloseConfirmation(false)}
+                onConfirm={() => { setShowCloseConfirmation(false); onClose(); }}
+                title={t('rental:viewing.discardTitle', 'Discard Changes?')}
+                message={t('rental:viewing.discardMessage', 'You have unsaved changes to your viewing request. Are you sure you want to close?')}
+                confirmLabel={t('rental:viewing.discardConfirm', 'Discard')}
+                cancelLabel={t('rental:viewing.discardCancel', 'Keep Editing')}
+                type="danger"
+                cancelPrimary
+            />
         </>,
         document.body
     );
