@@ -70,10 +70,9 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
     !isNaN(property.lat) &&
     !isNaN(property.lng);
 
-  // Responsive map heights — full-bleed (full-screen) placement stays a bit
-  // shorter so the page scrolls past it easily on touch devices.
+  // Responsive map heights — taller in full-bleed (full-screen) placement.
   const heightClassName = fullBleed
-    ? 'h-[340px] sm:h-[440px] lg:h-[560px]'
+    ? 'h-[460px] sm:h-[600px] lg:h-[78vh]'
     : 'h-[420px] sm:h-[520px] lg:h-[650px]';
 
   return (
