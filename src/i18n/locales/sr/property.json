@@ -375,7 +375,10 @@
     "remainingInfo": "{{remaining}} од {{limit}} увида преостало овог месеца",
     "unlimitedInsights": "Неограничени увиди доступни са вашим планом",
     "upgradePrompt": "Надоградите на premium за више увида!",
-    "tryAgain": "Покушај поново"
+    "tryAgain": "Покушај поново",
+    "aiTeaserTitle": "Želite da saznate više o ovoj nekretnini?",
+    "aiTeaserSubtitle": "Neka naša veštačka inteligencija napravi detaljan izveštaj o susedstvu — škole, prevoz, parkovi, prodavnice i lokalni sadržaji — za samo nekoliko sekundi.",
+    "coordinatesUnavailable": "Podaci o lokaciji za ovu nekretninu još nisu dostupni, pa ne možemo da generišemo uvide."
   },
   "photos": {
     "title": "Фотографије",
@@ -633,5 +636,16 @@
       "hint": "Цртајте по слици за белешке",
       "sendToChat": "Pošalji"
     }
+  },
+  "sectionNav": {
+    "ariaLabel": "Sekcije nekretnine",
+    "overview": "Pregled",
+    "map": "3D mapa",
+    "availability": "Dostupnost",
+    "calculators": "Kalkulatori",
+    "details": "Detalji",
+    "neighborhood": "Susedstvo",
+    "similar": "Slične nekretnine",
+    "onThisPage": "Na ovoj stranici"
   }
 }
