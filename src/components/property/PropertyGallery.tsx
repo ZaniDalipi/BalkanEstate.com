@@ -785,7 +785,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 {onView3DMap && (
                   <button
                     onClick={(e) => { e.stopPropagation(); onView3DMap(); }}
-                    className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-semibold rounded-full px-3 py-1.5 shadow-lg hover:scale-105 active:scale-95 transition-all"
+                    aria-label={t('property:gallery.view3DMap', '3D Location Map')}
+                    className="flex items-center gap-1.5 whitespace-nowrap bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-semibold rounded-full px-3 py-1.5 shadow-lg hover:scale-105 active:scale-95 transition-all"
                   >
                     <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />

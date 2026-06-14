@@ -19,7 +19,7 @@ interface PropertyMapLinkProps {
  * Map loading fallback component
  */
 const MapLoadingFallback: React.FC = () => (
-  <div className="bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-xl animate-pulse flex items-center justify-center h-[650px]">
+  <div className="bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-xl animate-pulse flex items-center justify-center h-[420px] sm:h-[520px] lg:h-[650px]">
     <div className="text-center">
       <div className="relative w-12 h-12 mx-auto mb-3">
         <div className="absolute inset-0 border-4 border-neutral-300 rounded-full" />
@@ -113,7 +113,7 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
             address={property.address || `${property.city}, ${property.country}`}
             title={property.title}
             onNavigateToMap={onNavigateToMap}
-            height="650px"
+            heightClassName="h-[420px] sm:h-[520px] lg:h-[650px]"
             pitch={60}
             bearing={-20}
             zoom={16}
@@ -126,7 +126,7 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
           />
         </Suspense>
       ) : (
-        <div className="h-[650px] bg-neutral-100 flex items-center justify-center">
+        <div className="h-[420px] sm:h-[520px] lg:h-[650px] bg-neutral-100 flex items-center justify-center">
           <div className="text-center text-neutral-500">
             <svg
               className="w-12 h-12 mx-auto mb-2 opacity-50"

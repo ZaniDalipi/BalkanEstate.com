@@ -532,7 +532,8 @@
     "propertyShowcase": "Property Showcase",
     "skipVideo": "Skip Video",
     "videoTour": "Video Tour",
-    "enter3DTour": "Enter 3D Tour"
+    "enter3DTour": "Enter 3D Tour",
+    "view3DMap": "Hartă 3D a locației"
   },
   "viewings": {
     "title": "Cereri de Vizionare",

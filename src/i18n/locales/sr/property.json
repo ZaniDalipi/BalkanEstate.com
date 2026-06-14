@@ -532,7 +532,8 @@
     "propertyShowcase": "Property Showcase",
     "skipVideo": "Skip Video",
     "videoTour": "Video Tour",
-    "enter3DTour": "Enter 3D Tour"
+    "enter3DTour": "Enter 3D Tour",
+    "view3DMap": "3D mapa lokacije"
   },
   "viewings": {
     "title": "Захтеви за Разгледање",

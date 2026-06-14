@@ -356,11 +356,11 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   };
 
   // Scroll to the 3D representational map section (button shown in the gallery)
-  const handleView3DMap = () => {
+  const handleView3DMap = useCallback(() => {
     document
       .getElementById('property-map-section')
-      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, []);
 
   const handleProfileClick = useCallback(() => {
     if (state.isAuthenticated) {
