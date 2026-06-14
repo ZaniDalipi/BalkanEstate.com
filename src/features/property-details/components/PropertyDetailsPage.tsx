@@ -966,7 +966,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       {/* 3D Map — near full-width, rendered outside the main container. Small side
           gutters leave a strip to scroll past the map on touch devices. Positioned
           right after the description to keep readers engaged. */}
-      <div id="property-map-section" className="animate-slide-up w-full px-6 sm:px-12 lg:px-24 my-6 sm:my-8" style={{ animationDelay: '130ms' }}>
+      <div id="property-map-section" className="animate-slide-up w-full px-3 sm:px-4 lg:px-6 my-6 sm:my-8" style={{ animationDelay: '130ms' }}>
         <PropertyMapLink property={property} onNavigateToMap={handleNavigateToMap} fullBleed />
       </div>
 
