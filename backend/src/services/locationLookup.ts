@@ -713,3 +713,363 @@ export const COUNTRY_SLUG_MAP: Record<string, string> = {
   'australia': 'Australia', 'au': 'Australia',
   'newzealand': 'New Zealand', 'nz': 'New Zealand',
 };
+
+/**
+ * Maps every city slug (same keys as CITY_SLUG_MAP) to its canonical country name.
+ * Used by the normalizer to infer country from city when source data omits it.
+ */
+export const CITY_TO_COUNTRY_MAP: Record<string, string> = {
+  // ── Albania ───────────────────────────────────────────────────────────────
+  'tirana': 'Albania', 'tirane': 'Albania', 'tiranes': 'Albania', 'tiranaa': 'Albania',
+  'durres': 'Albania', 'durresi': 'Albania', 'durresso': 'Albania', 'durresdurres': 'Albania',
+  'vlore': 'Albania', 'vlora': 'Albania', 'vloravlore': 'Albania',
+  'shkoder': 'Albania', 'shkodra': 'Albania',
+  'elbasan': 'Albania', 'elbasani': 'Albania',
+  'korce': 'Albania', 'korca': 'Albania',
+  'fier': 'Albania', 'fieri': 'Albania',
+  'berat': 'Albania', 'berati': 'Albania',
+  'lushnje': 'Albania', 'lushnja': 'Albania',
+  'pogradec': 'Albania',
+  'gjirokaster': 'Albania', 'gjirokastra': 'Albania',
+  'sarand': 'Albania', 'saranda': 'Albania',
+  'kavaje': 'Albania', 'kavaja': 'Albania',
+  'kamez': 'Albania', 'kamza': 'Albania',
+  'lezhë': 'Albania', 'lezhe': 'Albania',
+  'peshkopi': 'Albania',
+  'kukes': 'Albania', 'kukesi': 'Albania',
+  'permet': 'Albania', 'tepelena': 'Albania', 'himara': 'Albania', 'shijak': 'Albania',
+
+  // ── Kosovo ────────────────────────────────────────────────────────────────
+  'pristina': 'Kosovo', 'prishtina': 'Kosovo', 'prishtine': 'Kosovo',
+  'prizren': 'Kosovo',
+  'peja': 'Kosovo', 'pec': 'Kosovo',
+  'gjakova': 'Kosovo', 'dakovica': 'Kosovo',
+  'mitrovica': 'Kosovo', 'mitrovice': 'Kosovo',
+  'ferizaj': 'Kosovo', 'urosevac': 'Kosovo',
+  'gjilan': 'Kosovo', 'gnjilane': 'Kosovo',
+  'podujevo': 'Kosovo', 'vucitrn': 'Kosovo', 'rahovec': 'Kosovo',
+  'decan': 'Kosovo', 'istog': 'Kosovo', 'kamenica': 'Kosovo',
+  'lipjan': 'Kosovo', 'malisheve': 'Kosovo', 'obilic': 'Kosovo',
+  'suva reka': 'Kosovo', 'vitia': 'Kosovo',
+
+  // ── North Macedonia ───────────────────────────────────────────────────────
+  'skopje': 'North Macedonia', 'skoplje': 'North Macedonia',
+  'bitola': 'North Macedonia', 'bitolj': 'North Macedonia',
+  'ohrid': 'North Macedonia',
+  'tetovo': 'North Macedonia', 'tetove': 'North Macedonia',
+  'kumanovo': 'North Macedonia', 'gostivar': 'North Macedonia',
+  'strumica': 'North Macedonia', 'veles': 'North Macedonia',
+  'stip': 'North Macedonia', 'kicevo': 'North Macedonia',
+  'struga': 'North Macedonia', 'radovis': 'North Macedonia',
+  'gevgelija': 'North Macedonia', 'debar': 'North Macedonia',
+  'negotino': 'North Macedonia', 'kavadarci': 'North Macedonia',
+  'kocani': 'North Macedonia', 'sveti nikole': 'North Macedonia',
+
+  // ── Montenegro ────────────────────────────────────────────────────────────
+  'podgorica': 'Montenegro',
+  'niksic': 'Montenegro', 'niksici': 'Montenegro',
+  'budva': 'Montenegro', 'budvanrivijera': 'Montenegro',
+  'kotor': 'Montenegro',
+  'hercegnovi': 'Montenegro', 'herceg novi': 'Montenegro',
+  'bar': 'Montenegro', 'tivat': 'Montenegro', 'ulcinj': 'Montenegro', 'ulqin': 'Montenegro',
+  'bijelo polje': 'Montenegro', 'bijelo': 'Montenegro',
+  'pljevlja': 'Montenegro', 'berane': 'Montenegro', 'rozaje': 'Montenegro',
+  'cetinje': 'Montenegro', 'plav': 'Montenegro', 'zabljak': 'Montenegro',
+  'kolasin': 'Montenegro', 'petrovac': 'Montenegro',
+  'sveti stefan': 'Montenegro', 'perast': 'Montenegro',
+
+  // ── Bosnia and Herzegovina ────────────────────────────────────────────────
+  'sarajevo': 'Bosnia and Herzegovina', 'mostar': 'Bosnia and Herzegovina',
+  'banjaluka': 'Bosnia and Herzegovina', 'banja luka': 'Bosnia and Herzegovina', 'banjaluke': 'Bosnia and Herzegovina',
+  'tuzla': 'Bosnia and Herzegovina', 'zenica': 'Bosnia and Herzegovina',
+  'bihac': 'Bosnia and Herzegovina', 'bijeljina': 'Bosnia and Herzegovina',
+  'doboj': 'Bosnia and Herzegovina', 'trebinje': 'Bosnia and Herzegovina',
+  'zvornik': 'Bosnia and Herzegovina', 'travnik': 'Bosnia and Herzegovina',
+  'gorazde': 'Bosnia and Herzegovina', 'cazin': 'Bosnia and Herzegovina',
+  'lukavac': 'Bosnia and Herzegovina', 'gradacac': 'Bosnia and Herzegovina',
+  'visoko': 'Bosnia and Herzegovina', 'jajce': 'Bosnia and Herzegovina',
+  'neum': 'Bosnia and Herzegovina', 'medjugorje': 'Bosnia and Herzegovina',
+  'srebrenica': 'Bosnia and Herzegovina', 'pale': 'Bosnia and Herzegovina',
+  'ilidza': 'Bosnia and Herzegovina',
+
+  // ── Serbia ────────────────────────────────────────────────────────────────
+  'beograd': 'Serbia', 'belgrade': 'Serbia',
+  'novisad': 'Serbia', 'novi sad': 'Serbia',
+  'nis': 'Serbia', 'nish': 'Serbia',
+  'kragujevac': 'Serbia', 'subotica': 'Serbia', 'cacak': 'Serbia',
+  'krusevac': 'Serbia', 'pancevo': 'Serbia', 'smederevo': 'Serbia',
+  'novi pazar': 'Serbia', 'novipazar': 'Serbia',
+  'sabac': 'Serbia', 'uzice': 'Serbia', 'valjevo': 'Serbia',
+  'leskovac': 'Serbia', 'pirot': 'Serbia', 'zrenjanin': 'Serbia',
+  'sombor': 'Serbia', 'prokuplje': 'Serbia', 'vranje': 'Serbia',
+  'pozarevac': 'Serbia', 'sremska mitrovica': 'Serbia',
+  'kikinda': 'Serbia', 'bor': 'Serbia', 'zajecar': 'Serbia',
+  'zlatibor': 'Serbia', 'kopaonik': 'Serbia',
+  'vrnjacka banja': 'Serbia', 'arandjelovac': 'Serbia', 'loznica': 'Serbia',
+
+  // ── Croatia ───────────────────────────────────────────────────────────────
+  'zagreb': 'Croatia', 'split': 'Croatia', 'rijeka': 'Croatia',
+  'osijek': 'Croatia', 'dubrovnik': 'Croatia', 'zadar': 'Croatia',
+  'pula': 'Croatia', 'varazdin': 'Croatia', 'sibenik': 'Croatia',
+  'slavonski brod': 'Croatia', 'slavonskibrod': 'Croatia',
+  'karlovac': 'Croatia', 'sisak': 'Croatia', 'bjelovar': 'Croatia',
+  'petrinja': 'Croatia', 'koprivnica': 'Croatia', 'vukovar': 'Croatia',
+  'gospic': 'Croatia', 'pazin': 'Croatia', 'rovinj': 'Croatia',
+  'porec': 'Croatia', 'umag': 'Croatia', 'crikvenica': 'Croatia',
+  'makarska': 'Croatia', 'omis': 'Croatia', 'hvar': 'Croatia',
+  'brac': 'Croatia', 'korcula': 'Croatia', 'lošinj': 'Croatia', 'losinj': 'Croatia',
+  'krk': 'Croatia', 'cavtat': 'Croatia', 'mali losinj': 'Croatia',
+  'biograd': 'Croatia',
+
+  // ── Slovenia ──────────────────────────────────────────────────────────────
+  'ljubljana': 'Slovenia', 'maribor': 'Slovenia', 'celje': 'Slovenia',
+  'kranj': 'Slovenia', 'koper': 'Slovenia', 'velenje': 'Slovenia',
+  'novo mesto': 'Slovenia', 'novomesto': 'Slovenia',
+  'murska sobota': 'Slovenia', 'nova gorica': 'Slovenia', 'novagorica': 'Slovenia',
+  'ptuj': 'Slovenia', 'trbovlje': 'Slovenia', 'bled': 'Slovenia',
+  'portoroz': 'Slovenia', 'portorož': 'Slovenia', 'kranjska gora': 'Slovenia',
+
+  // ── Bulgaria ──────────────────────────────────────────────────────────────
+  'sofia': 'Bulgaria', 'sofiya': 'Bulgaria',
+  'plovdiv': 'Bulgaria', 'varna': 'Bulgaria', 'burgas': 'Bulgaria',
+  'stara zagora': 'Bulgaria', 'starazagora': 'Bulgaria',
+  'ruse': 'Bulgaria', 'pleven': 'Bulgaria', 'sliven': 'Bulgaria',
+  'dobrich': 'Bulgaria', 'shumen': 'Bulgaria', 'pernik': 'Bulgaria',
+  'haskovo': 'Bulgaria', 'yambol': 'Bulgaria', 'pazardzhik': 'Bulgaria',
+  'blagoevgrad': 'Bulgaria', 'vidin': 'Bulgaria', 'montana': 'Bulgaria',
+  'lovech': 'Bulgaria', 'kyustendil': 'Bulgaria', 'targovishte': 'Bulgaria',
+  'razgrad': 'Bulgaria', 'silistra': 'Bulgaria', 'nessebar': 'Bulgaria',
+  'sozopol': 'Bulgaria', 'sunny beach': 'Bulgaria', 'sunnybeach': 'Bulgaria',
+  'golden sands': 'Bulgaria', 'goldensands': 'Bulgaria',
+  'bansko': 'Bulgaria', 'borovets': 'Bulgaria', 'pamporovo': 'Bulgaria',
+
+  // ── Romania ───────────────────────────────────────────────────────────────
+  'bucharest': 'Romania', 'bucuresti': 'Romania', 'bucureşti': 'Romania',
+  'cluj': 'Romania', 'clujnapoca': 'Romania',
+  'timisoara': 'Romania', 'timişoara': 'Romania',
+  'iasi': 'Romania', 'iaşi': 'Romania',
+  'constanta': 'Romania', 'constanţa': 'Romania',
+  'craiova': 'Romania', 'brasov': 'Romania', 'braşov': 'Romania',
+  'galati': 'Romania', 'galaţi': 'Romania',
+  'ploiesti': 'Romania', 'ploieşti': 'Romania',
+  'oradea': 'Romania', 'braila': 'Romania', 'pitesti': 'Romania',
+  'arad': 'Romania', 'sibiu': 'Romania', 'bacau': 'Romania',
+  'targu mures': 'Romania', 'targumures': 'Romania',
+  'baia mare': 'Romania', 'baiamare': 'Romania',
+  'buzau': 'Romania', 'satu mare': 'Romania', 'satumare': 'Romania',
+  'botosani': 'Romania', 'piatra neamt': 'Romania', 'piatraneamt': 'Romania',
+  'suceava': 'Romania', 'ramnicu valcea': 'Romania',
+  'drobeta turnu severin': 'Romania', 'targu jiu': 'Romania',
+  'deva': 'Romania', 'sinaia': 'Romania', 'mamaia': 'Romania',
+  'eforie': 'Romania', 'neptun': 'Romania',
+
+  // ── Greece ────────────────────────────────────────────────────────────────
+  'athens': 'Greece', 'athina': 'Greece', 'athen': 'Greece', 'athènes': 'Greece',
+  'thessaloniki': 'Greece', 'salonika': 'Greece',
+  'patras': 'Greece', 'heraklion': 'Greece', 'iraklion': 'Greece',
+  'piraeus': 'Greece', 'pireaus': 'Greece',
+  'larissa': 'Greece', 'volos': 'Greece', 'ioannina': 'Greece',
+  'chalkida': 'Greece', 'serres': 'Greece', 'alexandroupoli': 'Greece',
+  'xanthi': 'Greece', 'kavala': 'Greece', 'drama': 'Greece', 'katerini': 'Greece',
+  'corfu': 'Greece', 'kerkyra': 'Greece',
+  'rhodes': 'Greece', 'rodos': 'Greece',
+  'mykonos': 'Greece', 'santorini': 'Greece', 'thira': 'Greece',
+  'crete': 'Greece', 'kriti': 'Greece', 'kos': 'Greece',
+  'zakynthos': 'Greece', 'kefalonia': 'Greece', 'lefkada': 'Greece',
+  'chania': 'Greece', 'rethymno': 'Greece', 'agios nikolaos': 'Greece',
+  'glyfada': 'Greece', 'maroussi': 'Greece', 'kifisia': 'Greece',
+  'paros': 'Greece', 'naxos': 'Greece', 'samos': 'Greece', 'halkidiki': 'Greece',
+
+  // ── Turkey ────────────────────────────────────────────────────────────────
+  'istanbul': 'Turkey', 'İstanbul': 'Turkey',
+  'ankara': 'Turkey', 'izmir': 'Turkey', 'İzmir': 'Turkey',
+  'bursa': 'Turkey', 'adana': 'Turkey', 'antalya': 'Turkey',
+  'konya': 'Turkey', 'gaziantep': 'Turkey', 'mersin': 'Turkey',
+  'diyarbakir': 'Turkey', 'kayseri': 'Turkey', 'eskisehir': 'Turkey',
+  'denizli': 'Turkey', 'samsun': 'Turkey', 'trabzon': 'Turkey',
+  'malatya': 'Turkey', 'alanya': 'Turkey', 'side': 'Turkey',
+  'bodrum': 'Turkey', 'marmaris': 'Turkey', 'fethiye': 'Turkey',
+  'dalaman': 'Turkey', 'kusadasi': 'Turkey', 'cesme': 'Turkey',
+  'cappadocia': 'Turkey', 'kapadokya': 'Turkey',
+
+  // ── Germany ───────────────────────────────────────────────────────────────
+  'berlin': 'Germany', 'hamburg': 'Germany',
+  'munich': 'Germany', 'münchen': 'Germany', 'muenchen': 'Germany',
+  'cologne': 'Germany', 'koeln': 'Germany', 'köln': 'Germany',
+  'frankfurt': 'Germany', 'stuttgart': 'Germany',
+  'dusseldorf': 'Germany', 'düsseldorf': 'Germany',
+  'dortmund': 'Germany', 'essen': 'Germany', 'leipzig': 'Germany',
+  'Bremen': 'Germany', 'dresden': 'Germany', 'hannover': 'Germany',
+  'nuremberg': 'Germany', 'nürnberg': 'Germany',
+  'duisburg': 'Germany', 'bochum': 'Germany', 'wuppertal': 'Germany',
+  'bielefeld': 'Germany', 'mannheim': 'Germany', 'bonn': 'Germany',
+
+  // ── Austria ───────────────────────────────────────────────────────────────
+  'vienna': 'Austria', 'wien': 'Austria',
+  'graz': 'Austria', 'linz': 'Austria', 'salzburg': 'Austria',
+  'innsbruck': 'Austria', 'klagenfurt': 'Austria', 'wels': 'Austria',
+
+  // ── Switzerland ───────────────────────────────────────────────────────────
+  'zurich': 'Switzerland', 'zürich': 'Switzerland',
+  'geneva': 'Switzerland', 'genève': 'Switzerland', 'genf': 'Switzerland',
+  'basel': 'Switzerland', 'bern': 'Switzerland', 'lausanne': 'Switzerland',
+  'lucerne': 'Switzerland', 'luzern': 'Switzerland',
+  'winterthur': 'Switzerland', 'st gallen': 'Switzerland', 'stgallen': 'Switzerland',
+
+  // ── Italy ─────────────────────────────────────────────────────────────────
+  'rome': 'Italy', 'roma': 'Italy',
+  'milan': 'Italy', 'milano': 'Italy',
+  'naples': 'Italy', 'napoli': 'Italy',
+  'turin': 'Italy', 'torino': 'Italy',
+  'palermo': 'Italy', 'genoa': 'Italy', 'genova': 'Italy',
+  'bologna': 'Italy', 'florence': 'Italy', 'firenze': 'Italy',
+  'bari': 'Italy', 'catania': 'Italy',
+  'venice': 'Italy', 'venezia': 'Italy',
+  'verona': 'Italy', 'trieste': 'Italy', 'messina': 'Italy',
+  'padua': 'Italy', 'padova': 'Italy', 'brescia': 'Italy',
+  'prato': 'Italy', 'reggio calabria': 'Italy', 'modena': 'Italy',
+  'reggio emilia': 'Italy', 'perugia': 'Italy', 'ravenna': 'Italy',
+  'livorno': 'Italy', 'cagliari': 'Italy', 'rimini': 'Italy',
+  'siena': 'Italy', 'pisa': 'Italy', 'amalfi': 'Italy', 'positano': 'Italy',
+  'sardinia': 'Italy', 'sardegna': 'Italy', 'sicily': 'Italy', 'sicilia': 'Italy',
+
+  // ── France ────────────────────────────────────────────────────────────────
+  'paris': 'France', 'marseille': 'France', 'lyon': 'France',
+  'toulouse': 'France', 'nice': 'France', 'nantes': 'France',
+  'montpellier': 'France', 'strasbourg': 'France', 'bordeaux': 'France',
+  'lille': 'France', 'rennes': 'France', 'reims': 'France',
+  'saint etienne': 'France', 'toulon': 'France', 'grenoble': 'France',
+  'dijon': 'France', 'cannes': 'France',
+  'antibes': 'France', 'saint tropez': 'France', 'biarritz': 'France',
+
+  // ── Monaco ────────────────────────────────────────────────────────────────
+  'monaco': 'Monaco',
+
+  // ── Spain ─────────────────────────────────────────────────────────────────
+  'madrid': 'Spain', 'barcelona': 'Spain', 'valencia': 'Spain',
+  'seville': 'Spain', 'sevilla': 'Spain', 'zaragoza': 'Spain',
+  'malaga': 'Spain', 'málaga': 'Spain', 'murcia': 'Spain',
+  'palma': 'Spain', 'palma de mallorca': 'Spain', 'bilbao': 'Spain',
+  'alicante': 'Spain', 'valladolid': 'Spain',
+  'cordoba': 'Spain', 'córdoba': 'Spain', 'vigo': 'Spain',
+  'granada': 'Spain', 'elche': 'Spain', 'oviedo': 'Spain',
+  'santander': 'Spain', 'marbella': 'Spain', 'ibiza': 'Spain',
+  'tenerife': 'Spain', 'gran canaria': 'Spain',
+  'benidorm': 'Spain', 'torrevieja': 'Spain',
+
+  // ── Portugal ──────────────────────────────────────────────────────────────
+  'lisbon': 'Portugal', 'lisboa': 'Portugal',
+  'porto': 'Portugal', 'braga': 'Portugal', 'setubal': 'Portugal',
+  'coimbra': 'Portugal', 'funchal': 'Portugal', 'faro': 'Portugal',
+  'albufeira': 'Portugal', 'lagos': 'Portugal', 'cascais': 'Portugal',
+  'sintra': 'Portugal', 'amadora': 'Portugal', 'loule': 'Portugal',
+  'portimao': 'Portugal',
+
+  // ── Netherlands ───────────────────────────────────────────────────────────
+  'amsterdam': 'Netherlands', 'rotterdam': 'Netherlands',
+  'the hague': 'Netherlands', 'thehague': 'Netherlands', 'denhaag': 'Netherlands',
+  'utrecht': 'Netherlands', 'eindhoven': 'Netherlands', 'groningen': 'Netherlands',
+  'tilburg': 'Netherlands', 'almere': 'Netherlands', 'breda': 'Netherlands',
+  'nijmegen': 'Netherlands', 'apeldoorn': 'Netherlands', 'haarlem': 'Netherlands',
+  'arnhem': 'Netherlands', 'zaanstad': 'Netherlands',
+
+  // ── Belgium ───────────────────────────────────────────────────────────────
+  'brussels': 'Belgium', 'bruxelles': 'Belgium', 'brussel': 'Belgium',
+  'antwerp': 'Belgium', 'antwerpen': 'Belgium', 'anvers': 'Belgium',
+  'ghent': 'Belgium', 'gent': 'Belgium',
+  'bruges': 'Belgium', 'brugge': 'Belgium',
+  'liège': 'Belgium', 'liege': 'Belgium', 'namur': 'Belgium', 'leuven': 'Belgium',
+
+  // ── Poland ────────────────────────────────────────────────────────────────
+  'warsaw': 'Poland', 'warszawa': 'Poland',
+  'krakow': 'Poland', 'kraków': 'Poland', 'cracow': 'Poland',
+  'lodz': 'Poland', 'łódź': 'Poland',
+  'wroclaw': 'Poland', 'wrocław': 'Poland',
+  'poznan': 'Poland', 'poznań': 'Poland',
+  'gdansk': 'Poland', 'gdańsk': 'Poland',
+  'szczecin': 'Poland', 'bydgoszcz': 'Poland', 'lublin': 'Poland',
+  'katowice': 'Poland', 'bialystok': 'Poland',
+
+  // ── Czech Republic ────────────────────────────────────────────────────────
+  'prague': 'Czech Republic', 'praha': 'Czech Republic',
+  'brno': 'Czech Republic', 'ostrava': 'Czech Republic',
+  'pilsen': 'Czech Republic', 'plzen': 'Czech Republic', 'plzeň': 'Czech Republic',
+  'liberec': 'Czech Republic', 'olomouc': 'Czech Republic',
+
+  // ── Hungary ───────────────────────────────────────────────────────────────
+  'budapest': 'Hungary', 'debrecen': 'Hungary', 'szeged': 'Hungary',
+  'miskolc': 'Hungary', 'pecs': 'Hungary', 'pécs': 'Hungary',
+  'gyor': 'Hungary', 'győr': 'Hungary',
+  'nyiregyhaza': 'Hungary', 'kecskemet': 'Hungary', 'balaton': 'Hungary',
+
+  // ── Slovakia ──────────────────────────────────────────────────────────────
+  'bratislava': 'Slovakia', 'kosice': 'Slovakia', 'košice': 'Slovakia',
+  'presov': 'Slovakia', 'zilina': 'Slovakia', 'nitra': 'Slovakia',
+  'banska bystrica': 'Slovakia',
+
+  // ── United Kingdom ────────────────────────────────────────────────────────
+  'london': 'United Kingdom', 'birmingham': 'United Kingdom',
+  'manchester': 'United Kingdom', 'glasgow': 'United Kingdom',
+  'liverpool': 'United Kingdom', 'leeds': 'United Kingdom',
+  'sheffield': 'United Kingdom', 'edinburgh': 'United Kingdom',
+  'bristol': 'United Kingdom', 'cardiff': 'United Kingdom',
+  'leicester': 'United Kingdom', 'coventry': 'United Kingdom',
+  'bradford': 'United Kingdom', 'belfast': 'United Kingdom',
+  'nottingham': 'United Kingdom', 'kingston': 'United Kingdom',
+  'southampton': 'United Kingdom', 'cambridge': 'United Kingdom',
+  'oxford': 'United Kingdom',
+
+  // ── Ireland ───────────────────────────────────────────────────────────────
+  'dublin': 'Ireland', 'cork': 'Ireland', 'limerick': 'Ireland',
+  'galway': 'Ireland', 'waterford': 'Ireland',
+
+  // ── Nordic ────────────────────────────────────────────────────────────────
+  'stockholm': 'Sweden', 'gothenburg': 'Sweden', 'göteborg': 'Sweden',
+  'malmo': 'Sweden', 'malmö': 'Sweden',
+  'oslo': 'Norway', 'bergen': 'Norway', 'trondheim': 'Norway', 'stavanger': 'Norway',
+  'copenhagen': 'Denmark', 'københavn': 'Denmark', 'aarhus': 'Denmark', 'odense': 'Denmark',
+  'helsinki': 'Finland', 'tampere': 'Finland', 'turku': 'Finland',
+  'reykjavik': 'Iceland',
+
+  // ── Eastern Europe ────────────────────────────────────────────────────────
+  'kyiv': 'Ukraine', 'kiev': 'Ukraine', 'kharkiv': 'Ukraine',
+  'odessa': 'Ukraine', 'lviv': 'Ukraine', 'dnipro': 'Ukraine',
+  'minsk': 'Belarus',
+  'chisinau': 'Moldova', 'chișinău': 'Moldova',
+  'vilnius': 'Lithuania', 'riga': 'Latvia', 'tallinn': 'Estonia',
+  'moscow': 'Russia', 'moskva': 'Russia',
+  'saint petersburg': 'Russia', 'saintpetersburg': 'Russia',
+
+  // ── Cyprus ────────────────────────────────────────────────────────────────
+  'nicosia': 'Cyprus', 'lefkosia': 'Cyprus',
+  'limassol': 'Cyprus', 'lemesos': 'Cyprus',
+  'larnaca': 'Cyprus', 'paphos': 'Cyprus', 'famagusta': 'Cyprus',
+  'protaras': 'Cyprus', 'ayia napa': 'Cyprus', 'ayianapa': 'Cyprus',
+
+  // ── Malta ─────────────────────────────────────────────────────────────────
+  'valletta': 'Malta', 'sliema': 'Malta',
+  'st julians': 'Malta', 'stjulians': 'Malta',
+
+  // ── UAE / Middle East ─────────────────────────────────────────────────────
+  'dubai': 'UAE', 'abu dhabi': 'UAE', 'abudhabi': 'UAE', 'sharjah': 'UAE',
+  'riyadh': 'Saudi Arabia', 'doha': 'Qatar',
+  'beirut': 'Lebanon', 'amman': 'Jordan',
+
+  // ── Americas ──────────────────────────────────────────────────────────────
+  'new york': 'United States', 'newyork': 'United States', 'nyc': 'United States',
+  'los angeles': 'United States', 'losangeles': 'United States',
+  'chicago': 'United States', 'houston': 'United States', 'phoenix': 'United States',
+  'philadelphia': 'United States', 'san antonio': 'United States',
+  'san diego': 'United States', 'dallas': 'United States', 'san jose': 'United States',
+  'miami': 'United States', 'atlanta': 'United States', 'boston': 'United States',
+  'seattle': 'United States', 'denver': 'United States', 'las vegas': 'United States',
+  'washington': 'United States', 'nashville': 'United States', 'orlando': 'United States',
+  'toronto': 'Canada', 'montreal': 'Canada', 'montréal': 'Canada',
+  'vancouver': 'Canada', 'calgary': 'Canada', 'edmonton': 'Canada',
+  'ottawa': 'Canada', 'winnipeg': 'Canada', 'quebec city': 'Canada',
+
+  // ── Australia ─────────────────────────────────────────────────────────────
+  'sydney': 'Australia', 'melbourne': 'Australia', 'brisbane': 'Australia',
+  'perth': 'Australia', 'adelaide': 'Australia', 'canberra': 'Australia',
+  'gold coast': 'Australia',
+};

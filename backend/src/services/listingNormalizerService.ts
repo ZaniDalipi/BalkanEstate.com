@@ -6,7 +6,7 @@ import type { RawListing } from './listingAdapters';
 import { geocodeAddress } from './geocodingService';
 import { uploadFromUrl } from './cloudinaryService';
 import { enrichFromDetailHtml } from './listingHtmlEnricher';
-import { CITY_SLUG_MAP, COUNTRY_SLUG_MAP } from './locationLookup';
+import { CITY_SLUG_MAP, COUNTRY_SLUG_MAP, CITY_TO_COUNTRY_MAP } from './locationLookup';
 import User from '../models/User';
 import { cronLogger } from '../utils/logger';
 
@@ -791,6 +791,12 @@ export const normalize = async (
         if (city && country) break;
       }
     } catch { /* ignore */ }
+  }
+
+  // Infer country from city name if still unknown
+  if (!country && city) {
+    const citySlug = city.toLowerCase().replace(/[-\s]/g, '');
+    country = CITY_TO_COUNTRY_MAP[citySlug] ?? CITY_TO_COUNTRY_MAP[city.toLowerCase()];
   }
 
   // Build the address string. Clear it if it only contains city/country names so
