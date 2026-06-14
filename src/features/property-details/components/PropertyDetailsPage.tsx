@@ -969,8 +969,42 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
             </div>
 
-            {/* Neighborhood Insights (Desktop only — mobile version shown above) */}
-            <div data-section="neighborhood" className="scroll-mt-24 hidden lg:block animate-slide-up" style={{ animationDelay: '130ms' }}>
+          </div>
+
+          {/* Right Column - Contact Sidebar (Desktop only - mobile version shown above) */}
+          <div className="hidden lg:block lg:col-span-1 min-w-0 animate-slide-up" style={{ animationDelay: '150ms' }}>
+            <PropertyContact
+              property={property}
+              isCreatingConversation={isCreatingConversation}
+              onContactSeller={handleContactSeller}
+            />
+          </div>
+        </div>
+      </main>
+
+      {/* 3D Map — near full-width, rendered outside the main container. Small side
+          gutters leave a strip to scroll past the map on touch devices. Positioned
+          right after the description to keep readers engaged. */}
+      <div id="property-map-section" className="animate-slide-up w-full px-3 sm:px-4 lg:px-6 my-6 sm:my-8" style={{ animationDelay: '130ms' }}>
+        <PropertyMapLink property={property} onNavigateToMap={handleNavigateToMap} fullBleed />
+      </div>
+
+      {/* Main Content (continued) — remaining details below the full-width map */}
+      <main className="max-w-screen-xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 overflow-x-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8 lg:space-y-10 min-w-0">
+
+            {/* Rental Terms (only for rental properties) */}
+            {property.listingType === 'rent' && (
+              <div className="animate-slide-up space-y-6" style={{ animationDelay: '150ms' }}>
+                <RentalTermsSection property={property} />
+                <RentalHistorySection property={property} isOwner={isOwner} />
+                <RentalRulesByCountry country={property.country} />
+              </div>
+            )}
+
+            {/* Neighborhood Insights */}
+            <div className="animate-slide-up" style={{ animationDelay: '400ms' }}>
               <NeighborhoodInsights
                 lat={property.lat}
                 lng={property.lng}
