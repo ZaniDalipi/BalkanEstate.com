@@ -13,6 +13,8 @@ const Map3DBuildings = lazy(
 interface PropertyMapLinkProps {
   property: Property;
   onNavigateToMap: () => void;
+  /** Render edge-to-edge (no rounded card chrome) for full-screen-width placement. */
+  fullBleed?: boolean;
 }
 
 /**
@@ -57,6 +59,7 @@ const MapLoadingFallback: React.FC = () => (
 export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
   property,
   onNavigateToMap,
+  fullBleed = false,
 }) => {
   const { t } = useTranslation(['property']);
 
@@ -67,8 +70,19 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
     !isNaN(property.lat) &&
     !isNaN(property.lng);
 
+  // Responsive map heights — taller in full-bleed (full-screen) placement.
+  const heightClassName = fullBleed
+    ? 'h-[460px] sm:h-[600px] lg:h-[78vh]'
+    : 'h-[420px] sm:h-[520px] lg:h-[650px]';
+
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
+    <div
+      className={
+        fullBleed
+          ? 'bg-white border-y border-neutral-200 overflow-hidden'
+          : 'bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden'
+      }
+    >
       {/* Header */}
       <div className="p-4 border-b border-neutral-100 bg-gradient-to-r from-blue-50 to-purple-50">
         <div className="flex items-center gap-3">
@@ -113,7 +127,7 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
             address={property.address || `${property.city}, ${property.country}`}
             title={property.title}
             onNavigateToMap={onNavigateToMap}
-            heightClassName="h-[420px] sm:h-[520px] lg:h-[650px]"
+            heightClassName={`${heightClassName}${fullBleed ? ' !rounded-none' : ''}`}
             pitch={60}
             bearing={-20}
             zoom={16}
@@ -126,7 +140,7 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
           />
         </Suspense>
       ) : (
-        <div className="h-[420px] sm:h-[520px] lg:h-[650px] bg-neutral-100 flex items-center justify-center">
+        <div className={`${heightClassName} bg-neutral-100 flex items-center justify-center`}>
           <div className="text-center text-neutral-500">
             <svg
               className="w-12 h-12 mx-auto mb-2 opacity-50"

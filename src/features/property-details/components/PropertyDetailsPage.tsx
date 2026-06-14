@@ -964,9 +964,10 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       </main>
 
       {/* 3D Map — full-bleed, rendered outside the main container so it spans the
-          full screen width. Positioned right after the description to keep readers engaged. */}
-      <div id="property-map-section" className="animate-slide-up w-full mt-4 sm:mt-6" style={{ animationDelay: '130ms' }}>
-        <PropertyMapLink property={property} onNavigateToMap={handleNavigateToMap} />
+          full screen width edge-to-edge. Positioned right after the description to
+          keep readers engaged. */}
+      <div id="property-map-section" className="animate-slide-up w-full my-6 sm:my-8" style={{ animationDelay: '130ms' }}>
+        <PropertyMapLink property={property} onNavigateToMap={handleNavigateToMap} fullBleed />
       </div>
 
       {/* Main Content (continued) — remaining details below the full-width map */}
