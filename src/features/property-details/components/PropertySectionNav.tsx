@@ -264,7 +264,7 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
       // Sit in the far-right gutter, close to the viewport edge (the left side
       // is occupied by the global app sidebar). Hugs further right as the
       // viewport widens, clamped to a small margin on narrower screens.
-      style={{ right: 'max(0.75rem, calc(50vw - 47rem))', top: '50%', transform: 'translateY(-50%)' }}
+      style={{ right: 'max(0.5rem, calc(50vw - 50rem))', top: '50%', transform: 'translateY(-50%)' }}
     >
       <div className="glass-rail rounded-2xl p-1.5 transition-all duration-300 ease-out motion-reduce:transition-none">
         {/* "On this page" heading — revealed with the panel */}
