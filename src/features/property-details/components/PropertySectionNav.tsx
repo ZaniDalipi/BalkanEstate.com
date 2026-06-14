@@ -238,10 +238,10 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
                     type="button"
                     onClick={() => scrollToSection(s.key)}
                     aria-current={isActive ? 'true' : undefined}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap border min-h-[38px] backdrop-blur-sm transition-all duration-200 active:scale-95 motion-reduce:transition-none motion-reduce:active:scale-100 ${
+                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-bold whitespace-nowrap border-2 min-h-[40px] transition-all duration-200 active:scale-95 motion-reduce:transition-none motion-reduce:active:scale-100 ${
                       isActive
-                        ? 'bg-primary text-white border-primary/60 shadow-md shadow-primary/25'
-                        : 'bg-white/55 text-neutral-600 border-white/60 shadow-sm hover:bg-primary-light/70 hover:text-primary hover:border-primary/30'
+                        ? 'bg-primary text-white border-primary shadow-md shadow-primary/30'
+                        : 'bg-white text-neutral-700 border-neutral-200 shadow-sm hover:bg-primary-light hover:text-primary-dark hover:border-primary/40'
                     }`}
                   >
                     {s.icon}
@@ -261,16 +261,15 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
     <nav
       aria-label={ariaLabel}
       className="hidden lg:block fixed z-40 group print:hidden"
-      // Hug the content's right edge on wide screens; keep a small margin from
-      // the viewport edge on narrower screens. (Content is centred inside the
-      // 80px-offset region, so its right edge sits ~`50vw - 42.5rem` from the
-      // viewport's right edge.)
-      style={{ right: 'max(0.75rem, calc(50vw - 42.5rem))', top: '50%', transform: 'translateY(-50%)' }}
+      // Sit in the far-right gutter, close to the viewport edge (the left side
+      // is occupied by the global app sidebar). Hugs further right as the
+      // viewport widens, clamped to a small margin on narrower screens.
+      style={{ right: 'max(0.75rem, calc(50vw - 47rem))', top: '50%', transform: 'translateY(-50%)' }}
     >
       <div className="glass-rail rounded-2xl p-1.5 transition-all duration-300 ease-out motion-reduce:transition-none">
         {/* "On this page" heading — revealed with the panel */}
         <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-10 group-hover:opacity-100 group-focus-within:max-h-10 group-focus-within:opacity-100 transition-all duration-300 motion-reduce:transition-none">
-          <p className="px-2.5 pt-1.5 pb-1 text-[11px] font-bold uppercase tracking-wider text-neutral-400 whitespace-nowrap text-right">
+          <p className="px-2.5 pt-1.5 pb-1 text-[11px] font-bold uppercase tracking-wider text-neutral-500 whitespace-nowrap text-right">
             {t('property:sectionNav.onThisPage', 'On this page')}
           </p>
         </div>
@@ -288,24 +287,26 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
                   title={s.label}
                   // flex-row-reverse keeps the dash flush to the right (gutter
                   // side) while the label expands leftward into the page.
-                  className="group/item flex flex-row-reverse items-center gap-2.5 w-full rounded-lg px-1.5 py-1.5 group-hover:px-2.5 hover:bg-primary-light/60 transition-colors motion-reduce:transition-none"
+                  className={`group/item flex flex-row-reverse items-center gap-2.5 w-full rounded-lg px-1.5 py-1.5 group-hover:px-2.5 transition-colors motion-reduce:transition-none ${
+                    isActive ? 'bg-primary-light/70' : 'hover:bg-primary-light/50'
+                  }`}
                 >
                   {/* Dash indicator (collapsed view) */}
                   <span
                     aria-hidden="true"
-                    className={`h-[3px] rounded-full transition-all duration-300 flex-shrink-0 motion-reduce:transition-none ${
+                    className={`rounded-full transition-all duration-300 flex-shrink-0 motion-reduce:transition-none ${
                       isActive
-                        ? 'w-6 bg-primary'
-                        : 'w-4 bg-neutral-300 group-hover:bg-neutral-400 group-hover/item:bg-primary/60'
+                        ? 'h-[4px] w-7 bg-primary shadow-sm shadow-primary/40'
+                        : 'h-[3px] w-4 bg-neutral-400 group-hover:bg-neutral-500 group-hover/item:bg-primary'
                     }`}
                   />
                   {/* Label (revealed on hover / keyboard focus) */}
                   <span
-                    className={`flex items-center gap-2 overflow-hidden whitespace-nowrap text-sm font-semibold max-w-0 opacity-0 group-hover:max-w-[200px] group-hover:opacity-100 group-focus-within:max-w-[200px] group-focus-within:opacity-100 transition-all duration-300 motion-reduce:transition-none ${
-                      isActive ? 'text-primary' : 'text-neutral-600 group-hover/item:text-primary'
+                    className={`flex items-center gap-2 overflow-hidden whitespace-nowrap text-sm font-bold max-w-0 opacity-0 group-hover:max-w-[200px] group-hover:opacity-100 group-focus-within:max-w-[200px] group-focus-within:opacity-100 transition-all duration-300 motion-reduce:transition-none ${
+                      isActive ? 'text-primary-dark' : 'text-neutral-800 group-hover/item:text-primary'
                     }`}
                   >
-                    <span className={isActive ? 'text-primary' : 'text-neutral-400'}>{s.icon}</span>
+                    <span className={isActive ? 'text-primary' : 'text-neutral-500'}>{s.icon}</span>
                     {s.label}
                   </span>
                 </button>
