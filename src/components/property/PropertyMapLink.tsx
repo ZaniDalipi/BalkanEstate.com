@@ -79,7 +79,7 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
     <div
       className={
         fullBleed
-          ? 'bg-white border-y border-neutral-200 overflow-hidden'
+          ? 'bg-white rounded-2xl shadow-lg border border-neutral-200 overflow-hidden'
           : 'bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden'
       }
     >
@@ -127,7 +127,7 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
             address={property.address || `${property.city}, ${property.country}`}
             title={property.title}
             onNavigateToMap={onNavigateToMap}
-            heightClassName={`${heightClassName}${fullBleed ? ' !rounded-none' : ''}`}
+            heightClassName={heightClassName}
             pitch={60}
             bearing={-20}
             zoom={16}
