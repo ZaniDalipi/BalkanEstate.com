@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ShieldCheck, Building2, KeyRound, Globe, ChevronDown, BadgeCheck, AlertCircle, Phone, MapPin, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getAgencies } from '../../services/apiService';
@@ -133,6 +134,17 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
     }
   }, [isOpen]);
 
+  // Close on Escape key (matches shared Modal behaviour)
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isSubmitting) handleClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, isSubmitting]);
+
   const fetchAgencies = async () => {
     try {
       setLoadingAgencies(true);
@@ -258,14 +270,19 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
     'focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 ' +
     'transition-all placeholder:text-gray-300 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed';
 
-  return (
+  const titleId = 'agent-license-modal-title';
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-6"
+      className="fixed inset-0 z-[5000] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-6"
       onClick={handleClose}
     >
       <div
         className="bg-white w-full flex flex-col rounded-t-[2rem] sm:rounded-2xl max-h-[96dvh] sm:max-h-[85vh] sm:max-w-lg shadow-2xl"
         onClick={e => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
       >
         {/* Mobile drag handle */}
         <div className="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
@@ -282,7 +299,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                 : <ShieldCheck className="w-5 h-5 text-white" />}
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-base font-bold text-gray-900 leading-snug">
+            <h2 id={titleId} className="text-base font-bold text-gray-900 leading-snug">
               {phoneOnly
                 ? t('modals:agentLicense.phoneOnlyTitle', 'Add Your Phone Number')
                 : isJoiningAgency
@@ -711,7 +728,8 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
