@@ -322,19 +322,6 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
 
     return createPortal(
         <>
-            {/* Confirmation modal for unsaved changes */}
-            <ConfirmationModal
-                isOpen={showCloseConfirmation}
-                onClose={() => setShowCloseConfirmation(false)}
-                onConfirm={() => { setShowCloseConfirmation(false); onClose(); }}
-                title="Discard Changes?"
-                message="You have unsaved changes to your viewing request. Are you sure you want to close?"
-                confirmLabel="Discard"
-                cancelLabel="Keep Editing"
-                type="danger"
-                cancelPrimary
-            />
-
             <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
                 {/* Backdrop */}
                 <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={requestClose} />
@@ -723,6 +710,24 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                 )}
             </div>
             </div>
+
+            {/*
+              Confirmation modal for unsaved changes.
+              Rendered LAST so it stacks above the viewing modal — both use
+              z-[9999], so DOM order determines which paints on top. If it were
+              rendered first it would be hidden behind the viewing modal.
+            */}
+            <ConfirmationModal
+                isOpen={showCloseConfirmation}
+                onClose={() => setShowCloseConfirmation(false)}
+                onConfirm={() => { setShowCloseConfirmation(false); onClose(); }}
+                title={t('rental:viewing.discardTitle', 'Discard Changes?')}
+                message={t('rental:viewing.discardMessage', 'You have unsaved changes to your viewing request. Are you sure you want to close?')}
+                confirmLabel={t('rental:viewing.discardConfirm', 'Discard')}
+                cancelLabel={t('rental:viewing.discardCancel', 'Keep Editing')}
+                type="danger"
+                cancelPrimary
+            />
         </>,
         document.body
     );

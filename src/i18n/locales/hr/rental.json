@@ -157,7 +157,11 @@
     "ics": {
       "summary": "Property Viewing",
       "description": "Scheduled viewing for"
-    }
+    },
+    "discardTitle": "Odbaciti promjene?",
+    "discardMessage": "Imate nespremljene promjene u zahtjevu za razgledavanje. Jeste li sigurni da želite zatvoriti?",
+    "discardConfirm": "Odbaci",
+    "discardCancel": "Nastavi uređivati"
   },
   "status": {
     "markAsRented": "Oznaci kao iznajmljeno",

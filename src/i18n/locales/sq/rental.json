@@ -157,7 +157,11 @@
     "ics": {
       "summary": "Property Viewing",
       "description": "Scheduled viewing for"
-    }
+    },
+    "discardTitle": "Të hidhen ndryshimet?",
+    "discardMessage": "Keni ndryshime të paruajtura në kërkesën tuaj për shikim. Jeni i sigurt që dëshironi ta mbyllni?",
+    "discardConfirm": "Hidh",
+    "discardCancel": "Vazhdo redaktimin"
   },
   "status": {
     "markAsRented": "Sheno si te dhene me Qira",
