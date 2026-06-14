@@ -632,5 +632,12 @@
       "hint": "Vizato mbi imazh për të shtuar shënime",
       "sendToChat": "Dërgo"
     }
+  },
+  "sectionNav": {
+    "ariaLabel": "Seksionet e pronës",
+    "overview": "Përmbledhje",
+    "map": "Harta 3D",
+    "availability": "Disponueshmëria",
+    "calculators": "Llogaritësit"
   }
 }

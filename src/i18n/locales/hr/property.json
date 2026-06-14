@@ -632,5 +632,12 @@
       "hint": "Crtajte po slici za bilješke",
       "sendToChat": "Pošalji"
     }
+  },
+  "sectionNav": {
+    "ariaLabel": "Odjeljci nekretnine",
+    "overview": "Pregled",
+    "map": "3D karta",
+    "availability": "Dostupnost",
+    "calculators": "Kalkulatori"
   }
 }

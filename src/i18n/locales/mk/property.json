@@ -573,5 +573,12 @@
       "hint": "Цртајте на сликата за белешки",
       "sendToChat": "Испрати"
     }
+  },
+  "sectionNav": {
+    "ariaLabel": "Делови на имотот",
+    "overview": "Преглед",
+    "map": "3Д мапа",
+    "availability": "Достапност",
+    "calculators": "Калкулатори"
   }
 }

@@ -632,5 +632,12 @@
       "hint": "Desenați pe imagine pentru adnotare",
       "sendToChat": "Trimite"
     }
+  },
+  "sectionNav": {
+    "ariaLabel": "Secțiuni proprietate",
+    "overview": "Prezentare",
+    "map": "Hartă 3D",
+    "availability": "Disponibilitate",
+    "calculators": "Calculatoare"
   }
 }
