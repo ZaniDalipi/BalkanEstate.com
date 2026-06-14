@@ -256,19 +256,21 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
     );
   }
 
-  // ── Desktop: Notion-style vertical dash rail (fixed in the left gutter) ──
+  // ── Desktop: Notion-style vertical dash rail (fixed in the right gutter) ──
   return (
     <nav
       aria-label={ariaLabel}
       className="hidden lg:block fixed z-40 group print:hidden"
-      // Hug the content's left edge on wide screens; stay clear of the 80px
-      // (5rem) global app sidebar on narrower screens.
-      style={{ left: 'max(5.5rem, calc(50vw - 40rem))', top: '50%', transform: 'translateY(-50%)' }}
+      // Hug the content's right edge on wide screens; keep a small margin from
+      // the viewport edge on narrower screens. (Content is centred inside the
+      // 80px-offset region, so its right edge sits ~`50vw - 42.5rem` from the
+      // viewport's right edge.)
+      style={{ right: 'max(0.75rem, calc(50vw - 42.5rem))', top: '50%', transform: 'translateY(-50%)' }}
     >
       <div className="rounded-2xl p-1.5 transition-all duration-300 ease-out bg-transparent border border-transparent group-hover:bg-white/95 group-hover:backdrop-blur-md group-hover:shadow-[0_12px_40px_rgba(0,0,0,0.14)] group-hover:border-neutral-200/80 focus-within:bg-white/95 focus-within:backdrop-blur-md focus-within:shadow-[0_12px_40px_rgba(0,0,0,0.14)] focus-within:border-neutral-200/80">
         {/* "On this page" heading — revealed with the panel */}
         <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-10 group-hover:opacity-100 group-focus-within:max-h-10 group-focus-within:opacity-100 transition-all duration-300 motion-reduce:transition-none">
-          <p className="px-2.5 pt-1.5 pb-1 text-[11px] font-bold uppercase tracking-wider text-neutral-400 whitespace-nowrap">
+          <p className="px-2.5 pt-1.5 pb-1 text-[11px] font-bold uppercase tracking-wider text-neutral-400 whitespace-nowrap text-right">
             {t('property:sectionNav.onThisPage', 'On this page')}
           </p>
         </div>
@@ -284,7 +286,9 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
                   aria-current={isActive ? 'true' : undefined}
                   aria-label={s.label}
                   title={s.label}
-                  className="group/item flex items-center gap-2.5 w-full rounded-lg px-1.5 py-1.5 group-hover:px-2.5 hover:bg-primary-light/60 transition-colors motion-reduce:transition-none"
+                  // flex-row-reverse keeps the dash flush to the right (gutter
+                  // side) while the label expands leftward into the page.
+                  className="group/item flex flex-row-reverse items-center gap-2.5 w-full rounded-lg px-1.5 py-1.5 group-hover:px-2.5 hover:bg-primary-light/60 transition-colors motion-reduce:transition-none"
                 >
                   {/* Dash indicator (collapsed view) */}
                   <span
