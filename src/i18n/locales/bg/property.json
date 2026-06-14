@@ -638,6 +638,10 @@
     "overview": "Преглед",
     "map": "3D карта",
     "availability": "Наличност",
-    "calculators": "Калкулатори"
+    "calculators": "Калкулатори",
+    "details": "Детайли",
+    "neighborhood": "Квартал",
+    "similar": "Подобни имоти",
+    "onThisPage": "На тази страница"
   }
 }

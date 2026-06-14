@@ -584,6 +584,10 @@
     "overview": "Pregled",
     "map": "3D mapa",
     "availability": "Dostupnost",
-    "calculators": "Kalkulatori"
+    "calculators": "Kalkulatori",
+    "details": "Detalji",
+    "neighborhood": "Susjedstvo",
+    "similar": "Slične nekretnine",
+    "onThisPage": "Na ovoj stranici"
   }
 }

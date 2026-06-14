@@ -579,6 +579,10 @@
     "overview": "Επισκόπηση",
     "map": "Χάρτης 3D",
     "availability": "Διαθεσιμότητα",
-    "calculators": "Υπολογιστές"
+    "calculators": "Υπολογιστές",
+    "details": "Λεπτομέρειες",
+    "neighborhood": "Γειτονιά",
+    "similar": "Παρόμοια ακίνητα",
+    "onThisPage": "Σε αυτή τη σελίδα"
   }
 }

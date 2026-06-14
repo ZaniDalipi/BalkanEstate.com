@@ -638,6 +638,10 @@
     "overview": "Përmbledhje",
     "map": "Harta 3D",
     "availability": "Disponueshmëria",
-    "calculators": "Llogaritësit"
+    "calculators": "Llogaritësit",
+    "details": "Detajet",
+    "neighborhood": "Lagjja",
+    "similar": "Prona të ngjashme",
+    "onThisPage": "Në këtë faqe"
   }
 }

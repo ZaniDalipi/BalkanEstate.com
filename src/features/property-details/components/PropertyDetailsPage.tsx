@@ -875,9 +875,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           </div>
         </div>
 
-        {/* Bookmark-style quick navigation to key sections */}
-        <PropertySectionNav />
+        {/* Bookmark-style quick navigation — horizontal chip bar (mobile/tablet) */}
+        <PropertySectionNav variant="bar" />
       </div>
+
+      {/* Bookmark-style quick navigation — Notion-style vertical rail (desktop).
+          Mounted at the page root, outside the backdrop-blurred header. */}
+      <PropertySectionNav variant="rail" />
 
       {/* Gallery — full-bleed, outside main container so it spans 100% page width */}
       <div className="animate-slide-up w-full" style={{ animationDelay: '0ms' }}>
@@ -909,7 +913,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             )}
 
             {/* Mobile Only: Property Info (description) shown early */}
-            <div className="lg:hidden animate-slide-up" style={{ animationDelay: '50ms' }}>
+            <div data-section="details" className="scroll-mt-24 lg:hidden animate-slide-up" style={{ animationDelay: '50ms' }}>
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
             </div>
 
@@ -938,7 +942,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             })()}
 
             {/* Property Info (Desktop only - mobile version shown above) */}
-            <div className="hidden lg:block animate-slide-up" style={{ animationDelay: '100ms' }}>
+            <div data-section="details" className="scroll-mt-24 hidden lg:block animate-slide-up" style={{ animationDelay: '100ms' }}>
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
             </div>
 
@@ -957,7 +961,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             </div>
 
             {/* Neighborhood Insights */}
-            <div className="animate-slide-up" style={{ animationDelay: '400ms' }}>
+            <div data-section="neighborhood" className="scroll-mt-24 animate-slide-up" style={{ animationDelay: '400ms' }}>
               <NeighborhoodInsights
                 lat={property.lat}
                 lng={property.lng}
@@ -968,7 +972,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             </div>
 
             {/* Similar Properties - Internal linking for SEO */}
-            <div className="mt-4 sm:mt-6 lg:mt-8 animate-slide-up" style={{ animationDelay: '450ms' }}>
+            <div data-section="similar" className="scroll-mt-24 mt-4 sm:mt-6 lg:mt-8 animate-slide-up" style={{ animationDelay: '450ms' }}>
               <SimilarProperties property={property} maxItems={4} />
             </div>
 

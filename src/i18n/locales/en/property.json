@@ -646,6 +646,10 @@
     "overview": "Overview",
     "map": "3D Map",
     "availability": "Availability",
-    "calculators": "Calculators"
+    "calculators": "Calculators",
+    "details": "Details",
+    "neighborhood": "Neighborhood",
+    "similar": "Similar Homes",
+    "onThisPage": "On this page"
   }
 }

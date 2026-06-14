@@ -638,6 +638,10 @@
     "overview": "Prezentare",
     "map": "Hartă 3D",
     "availability": "Disponibilitate",
-    "calculators": "Calculatoare"
+    "calculators": "Calculatoare",
+    "details": "Detalii",
+    "neighborhood": "Vecinătate",
+    "similar": "Proprietăți similare",
+    "onThisPage": "Pe această pagină"
   }
 }
