@@ -917,6 +917,17 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
             </div>
 
+            {/* Mobile Only: Neighborhood Insights — directly under the description */}
+            <div data-section="neighborhood" className="scroll-mt-24 lg:hidden animate-slide-up" style={{ animationDelay: '62ms' }}>
+              <NeighborhoodInsights
+                lat={property.lat}
+                lng={property.lng}
+                address={property.address}
+                city={property.city}
+                country={property.country}
+              />
+            </div>
+
             {/* Mobile Only: Quick Actions & Contact (shown after description on mobile) */}
             <div className="lg:hidden animate-slide-up" style={{ animationDelay: '75ms' }}>
               <PropertyContact
@@ -946,8 +957,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
             </div>
 
-            {/* Neighborhood Insights — AI report, surfaced right after the description */}
-            <div data-section="neighborhood" className="scroll-mt-24 animate-slide-up" style={{ animationDelay: '130ms' }}>
+            {/* Neighborhood Insights (Desktop only — mobile version shown above) */}
+            <div data-section="neighborhood" className="scroll-mt-24 hidden lg:block animate-slide-up" style={{ animationDelay: '130ms' }}>
               <NeighborhoodInsights
                 lat={property.lat}
                 lng={property.lng}
