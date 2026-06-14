@@ -30,8 +30,16 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 // ── Share utilities ──────────────────────────────────────────────────────────
-const getShareUrl = () => window.location.href;
+// Return the clean, canonical article URL (origin + path) so the link pasted
+// into each social post is stable and matches the OG-preview crawler route —
+// dropping any transient hash/query that may sit in the address bar.
+const getShareUrl = () => {
+  if (typeof window === 'undefined') return '';
+  return `${window.location.origin}${window.location.pathname}`;
+};
 
+// Every entry embeds the article `url` so the link is always part of the
+// resulting post/composer on the target platform.
 const shareLinks = (title: string, url: string) => ({
   twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}&via=balkanestate`,
   linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
