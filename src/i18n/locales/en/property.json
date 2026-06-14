@@ -395,7 +395,10 @@
     "remainingInfo": "{{remaining}} of {{limit}} insights remaining this month",
     "unlimitedInsights": "Unlimited insights available with your plan",
     "upgradePrompt": "Upgrade to premium for more insights!",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "aiTeaserTitle": "Want to know more about this property?",
+    "aiTeaserSubtitle": "Let our AI generate a detailed neighborhood report — nearby schools, transport, parks, shops and local amenities — in just seconds.",
+    "coordinatesUnavailable": "Location data isn't available for this property yet, so we can't generate insights."
   },
   "photos": {
     "title": "Photos",
@@ -641,5 +644,16 @@
       "hint": "Draw on the image to annotate",
       "sendToChat": "Send"
     }
+  },
+  "sectionNav": {
+    "ariaLabel": "Property sections",
+    "overview": "Overview",
+    "map": "3D Map",
+    "availability": "Availability",
+    "calculators": "Calculators",
+    "details": "Details",
+    "neighborhood": "Neighborhood",
+    "similar": "Similar Homes",
+    "onThisPage": "On this page"
   }
 }

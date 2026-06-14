@@ -136,7 +136,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
   return (
     <div className="lg:sticky lg:top-20 space-y-3 lg:space-y-4">
       {/* Quick Actions Card */}
-      <div className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200">
+      <div data-section="availability" className="scroll-mt-24 bg-white p-4 rounded-xl shadow-lg border border-neutral-200">
         <h3 className="text-sm font-semibold text-neutral-600 mb-3 uppercase tracking-wide">{t('property:actions.quickActions')}</h3>
         <div className="grid grid-cols-3 gap-2">
           {/* Call Button */}
@@ -522,23 +522,25 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
       )}
 
       {/* Rental-specific widgets OR sale-specific widgets */}
-      {isRental ? (
-        <>
-          {/* Rent Affordability Calculator */}
-          <RentAffordabilityCalculator property={property} />
+      <div data-section="calculators" className="scroll-mt-24 space-y-3 lg:space-y-4">
+        {isRental ? (
+          <>
+            {/* Rent Affordability Calculator */}
+            <RentAffordabilityCalculator property={property} />
 
-          {/* Move-in Cost Breakdown */}
-          <MoveInCostBreakdown property={property} />
-        </>
-      ) : (
-        <>
-          {/* Mortgage Calculator */}
-          <MortgageCalculator propertyPrice={property.price} country={property.country} />
+            {/* Move-in Cost Breakdown */}
+            <MoveInCostBreakdown property={property} />
+          </>
+        ) : (
+          <>
+            {/* Mortgage Calculator */}
+            <MortgageCalculator propertyPrice={property.price} country={property.country} />
 
-          {/* Rent vs Buy Calculator */}
-          <RentVsBuyCalculator propertyPrice={property.price} country={property.country} />
-        </>
-      )}
+            {/* Rent vs Buy Calculator */}
+            <RentVsBuyCalculator propertyPrice={property.price} country={property.country} />
+          </>
+        )}
+      </div>
 
       {/* Animation styles */}
       <style>{`
