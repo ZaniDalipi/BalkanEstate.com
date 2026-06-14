@@ -375,7 +375,10 @@
     "remainingInfo": "{{remaining}} od {{limit}} uvida preostalo ovaj mjesec",
     "unlimitedInsights": "Neograničeni uvidi dostupni s vašim planom",
     "upgradePrompt": "Nadogradite na premium za više uvida!",
-    "tryAgain": "Pokušaj ponovo"
+    "tryAgain": "Pokušaj ponovo",
+    "aiTeaserTitle": "Želite li znati više o ovoj nekretnini?",
+    "aiTeaserSubtitle": "Neka naša vještačka inteligencija napravi detaljan izvještaj o susjedstvu — škole, prevoz, parkovi, trgovine i lokalni sadržaji — za samo nekoliko sekundi.",
+    "coordinatesUnavailable": "Podaci o lokaciji za ovu nekretninu još nisu dostupni pa ne možemo generisati uvide."
   },
   "photos": {
     "title": "Fotografije",

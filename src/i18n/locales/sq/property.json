@@ -375,7 +375,10 @@
     "remainingInfo": "{{remaining}} nga {{limit}} analiza të mbetura këtë muaj",
     "unlimitedInsights": "Analiza pa limit me planin tuaj",
     "upgradePrompt": "Kaloni në premium për më shumë analiza!",
-    "tryAgain": "Provo përsëri"
+    "tryAgain": "Provo përsëri",
+    "aiTeaserTitle": "Doni të dini më shumë për këtë pronë?",
+    "aiTeaserSubtitle": "Lëreni IA-në tonë të gjenerojë një raport të detajuar të lagjes — shkolla, transport, parqe, dyqane dhe shërbime lokale — për pak sekonda.",
+    "coordinatesUnavailable": "Të dhënat e vendndodhjes nuk janë ende të disponueshme për këtë pronë, prandaj nuk mund të gjenerojmë njohuri."
   },
   "photos": {
     "title": "Foto",

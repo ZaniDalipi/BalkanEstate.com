@@ -946,6 +946,17 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
             </div>
 
+            {/* Neighborhood Insights — AI report, surfaced right after the description */}
+            <div data-section="neighborhood" className="scroll-mt-24 animate-slide-up" style={{ animationDelay: '130ms' }}>
+              <NeighborhoodInsights
+                lat={property.lat}
+                lng={property.lng}
+                address={property.address}
+                city={property.city}
+                country={property.country}
+              />
+            </div>
+
             {/* Rental Terms (only for rental properties) */}
             {property.listingType === 'rent' && (
               <div data-section="availability" className="scroll-mt-24 animate-slide-up space-y-6" style={{ animationDelay: '150ms' }}>
@@ -958,17 +969,6 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             {/* Map Link */}
             <div id="property-map-section" data-section="map" className="scroll-mt-24 animate-slide-up" style={{ animationDelay: '300ms' }}>
               <PropertyMapLink property={property} onNavigateToMap={handleNavigateToMap} />
-            </div>
-
-            {/* Neighborhood Insights */}
-            <div data-section="neighborhood" className="scroll-mt-24 animate-slide-up" style={{ animationDelay: '400ms' }}>
-              <NeighborhoodInsights
-                lat={property.lat}
-                lng={property.lng}
-                address={property.address}
-                city={property.city}
-                country={property.country}
-              />
             </div>
 
             {/* Similar Properties - Internal linking for SEO */}
