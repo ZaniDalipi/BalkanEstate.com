@@ -274,23 +274,18 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[5000] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-6"
+      className="fixed inset-0 z-[5000] flex items-start sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-6"
       onClick={handleClose}
     >
       <div
-        className="bg-white w-full flex flex-col rounded-t-[2rem] sm:rounded-2xl max-h-[96dvh] sm:max-h-[85vh] sm:max-w-lg shadow-2xl"
+        className="bg-white w-full flex flex-col rounded-b-[2rem] sm:rounded-2xl max-h-[96dvh] sm:max-h-[85vh] sm:max-w-lg shadow-2xl"
         onClick={e => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
       >
-        {/* Mobile drag handle */}
-        <div className="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
-          <div className="w-8 h-1 rounded-full bg-gray-200" />
-        </div>
-
         {/* Header */}
-        <div className="relative flex items-center gap-4 px-6 pt-5 pb-5 sm:pt-6 flex-shrink-0 border-b border-gray-100">
+        <div className="relative flex items-center gap-4 px-6 pt-5 pb-5 sm:pt-6 flex-shrink-0 border-b border-gray-100" style={{ paddingTop: 'max(1.25rem, env(safe-area-inset-top))' }}>
           <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${phoneOnly ? 'bg-emerald-600' : 'bg-blue-600'}`}>
             {phoneOnly
               ? <Phone className="w-5 h-5 text-white" />
@@ -691,41 +686,46 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
 
         {/* Footer */}
         <div
-          className="flex items-center gap-3 px-6 pt-3 pb-5 border-t border-gray-100 bg-white rounded-b-2xl flex-shrink-0"
-          style={{ paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}
+          className="flex flex-col border-t border-gray-100 bg-white rounded-b-[2rem] sm:rounded-b-2xl flex-shrink-0"
         >
-          <button
-            type="button"
-            onClick={handleClose}
-            disabled={isSubmitting}
-            className="px-4 py-2.5 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-40"
-          >
-            {t('common:cancel')}
-          </button>
-          <button
-            type="button"
-            onClick={runSubmit}
-            disabled={isSubmitting}
-            className="ml-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
-          >
-            {isSubmitting ? (
-              <>
-                <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                {phoneOnly
-                  ? t('modals:agentLicense.saving', 'Saving...')
-                  : isJoiningAgency
-                    ? t('modals:agentLicense.joining')
-                    : t('modals:agentLicense.verifying')}
-              </>
-            ) : phoneOnly
-              ? t('modals:agentLicense.saveAndContinue', 'Save & Continue')
-              : isJoiningAgency
-                ? t('modals:agentLicense.joinAgency')
-                : noLicense
-                  ? t('modals:agentLicense.becomeAgentWithoutLicense', 'Become Agent')
-                  : t('modals:agentLicense.verifyAndBecomeAgent')
-            }
-          </button>
+          <div className="flex items-center gap-3 px-6 pt-3 pb-3">
+            <button
+              type="button"
+              onClick={handleClose}
+              disabled={isSubmitting}
+              className="px-4 py-2.5 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-40"
+            >
+              {t('common:cancel')}
+            </button>
+            <button
+              type="button"
+              onClick={runSubmit}
+              disabled={isSubmitting}
+              className="ml-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  {phoneOnly
+                    ? t('modals:agentLicense.saving', 'Saving...')
+                    : isJoiningAgency
+                      ? t('modals:agentLicense.joining')
+                      : t('modals:agentLicense.verifying')}
+                </>
+              ) : phoneOnly
+                ? t('modals:agentLicense.saveAndContinue', 'Save & Continue')
+                : isJoiningAgency
+                  ? t('modals:agentLicense.joinAgency')
+                  : noLicense
+                    ? t('modals:agentLicense.becomeAgentWithoutLicense', 'Become Agent')
+                    : t('modals:agentLicense.verifyAndBecomeAgent')
+              }
+            </button>
+          </div>
+          {/* Mobile drag handle at bottom for top-sheet pull-down */}
+          <div className="sm:hidden flex justify-center pb-3 flex-shrink-0">
+            <div className="w-8 h-1 rounded-full bg-gray-200" />
+          </div>
         </div>
       </div>
     </div>,
