@@ -355,6 +355,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     }
   };
 
+  // Scroll to the 3D representational map section (button shown in the gallery)
+  const handleView3DMap = useCallback(() => {
+    document
+      .getElementById('property-map-section')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, []);
+
   const handleProfileClick = useCallback(() => {
     if (state.isAuthenticated) {
       dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
@@ -882,6 +889,11 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           onOpenEditor={(url) => setIsEditorOpen(true)}
           onOpenViewer={() => setIsViewerOpen(true)}
           onNavigateTo3DTour={handleNavigateTo3DTour}
+          onView3DMap={
+            property.lat != null && property.lng != null && !isNaN(property.lat) && !isNaN(property.lng)
+              ? handleView3DMap
+              : undefined
+          }
           activeCategory={activeCategory}
           currentImageIndex={currentImageIndex}
           onCategoryChange={handleCategorySelect}
@@ -938,6 +950,31 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
             </div>
 
+          </div>
+
+          {/* Right Column - Contact Sidebar (Desktop only - mobile version shown above) */}
+          <div className="hidden lg:block lg:col-span-1 min-w-0 animate-slide-up" style={{ animationDelay: '150ms' }}>
+            <PropertyContact
+              property={property}
+              isCreatingConversation={isCreatingConversation}
+              onContactSeller={handleContactSeller}
+            />
+          </div>
+        </div>
+      </main>
+
+      {/* 3D Map — near full-width, rendered outside the main container. Small side
+          gutters leave a strip to scroll past the map on touch devices. Positioned
+          right after the description to keep readers engaged. */}
+      <div id="property-map-section" className="animate-slide-up w-full px-4 sm:px-8 lg:px-16 my-6 sm:my-8" style={{ animationDelay: '130ms' }}>
+        <PropertyMapLink property={property} onNavigateToMap={handleNavigateToMap} fullBleed />
+      </div>
+
+      {/* Main Content (continued) — remaining details below the full-width map */}
+      <main className="max-w-screen-xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 overflow-x-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8 lg:space-y-10 min-w-0">
+
             {/* Rental Terms (only for rental properties) */}
             {property.listingType === 'rent' && (
               <div className="animate-slide-up space-y-6" style={{ animationDelay: '150ms' }}>
@@ -946,11 +983,6 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                 <RentalRulesByCountry country={property.country} />
               </div>
             )}
-
-            {/* Map Link */}
-            <div id="property-map-section" className="animate-slide-up" style={{ animationDelay: '300ms' }}>
-              <PropertyMapLink property={property} onNavigateToMap={handleNavigateToMap} />
-            </div>
 
             {/* Neighborhood Insights */}
             <div className="animate-slide-up" style={{ animationDelay: '400ms' }}>
@@ -974,15 +1006,6 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <FeaturedAgencies />
             </div>
 
-          </div>
-
-          {/* Right Column - Contact Sidebar (Desktop only - mobile version shown above) */}
-          <div className="hidden lg:block lg:col-span-1 min-w-0 animate-slide-up" style={{ animationDelay: '150ms' }}>
-            <PropertyContact
-              property={property}
-              isCreatingConversation={isCreatingConversation}
-              onContactSeller={handleContactSeller}
-            />
           </div>
         </div>
       </main>

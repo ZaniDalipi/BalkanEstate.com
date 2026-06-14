@@ -28,6 +28,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
     address,
     title,
     height = '500px',
+    heightClassName,
     enableShadowTimelapse = true,
     onNavigateToMap,
     floorNumber,
@@ -94,7 +95,10 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
   } = use3DMap(props);
 
   return (
-    <div className="relative isolate rounded-xl overflow-hidden shadow-xl" style={{ height }}>
+    <div
+      className={`relative isolate rounded-xl overflow-hidden shadow-xl ${heightClassName ?? ''}`}
+      style={heightClassName ? undefined : { height }}
+    >
       {/* Map container - z-0 ensures WebGL canvas stays below overlay controls on mobile */}
       <div ref={mapContainer} className="relative z-0 w-full h-full" />
 

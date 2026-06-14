@@ -965,6 +965,17 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
     map.current = mapInstance;
 
+    // Keep the WebGL canvas sized to its container. Because this component is
+    // lazy-loaded inside a <Suspense> boundary, the container's final width may
+    // not be settled when the map initializes — without this the canvas keeps
+    // its initial (often too-narrow) pixel size and only fills part of the box.
+    const resizeObserver = new ResizeObserver(() => {
+      mapInstance.resize();
+    });
+    if (mapContainer.current) {
+      resizeObserver.observe(mapContainer.current);
+    }
+
     // Provide a transparent fallback for any sprite icons missing from the
     // OpenFreeMap style so MapLibre stops logging "Image X could not be loaded".
     mapInstance.on('styleimagemissing', (e) => {
@@ -1234,6 +1245,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
     );
 
     return () => {
+      // Stop observing container resize
+      resizeObserver.disconnect();
       // Clean up floor labels
       floorLabelsRef.current.forEach(marker => marker.remove());
       floorLabelsRef.current = [];
