@@ -238,10 +238,10 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
                     type="button"
                     onClick={() => scrollToSection(s.key)}
                     aria-current={isActive ? 'true' : undefined}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap border min-h-[38px] transition-all duration-200 active:scale-95 motion-reduce:transition-none motion-reduce:active:scale-100 ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap border min-h-[38px] backdrop-blur-sm transition-all duration-200 active:scale-95 motion-reduce:transition-none motion-reduce:active:scale-100 ${
                       isActive
-                        ? 'bg-primary text-white border-primary shadow-md shadow-primary/20'
-                        : 'bg-neutral-50 text-neutral-600 border-neutral-200 hover:bg-primary-light hover:text-primary hover:border-primary/30'
+                        ? 'bg-primary text-white border-primary/60 shadow-md shadow-primary/25'
+                        : 'bg-white/55 text-neutral-600 border-white/60 shadow-sm hover:bg-primary-light/70 hover:text-primary hover:border-primary/30'
                     }`}
                   >
                     {s.icon}
@@ -267,7 +267,7 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
       // viewport's right edge.)
       style={{ right: 'max(0.75rem, calc(50vw - 42.5rem))', top: '50%', transform: 'translateY(-50%)' }}
     >
-      <div className="rounded-2xl p-1.5 transition-all duration-300 ease-out bg-transparent border border-transparent group-hover:bg-white/95 group-hover:backdrop-blur-md group-hover:shadow-[0_12px_40px_rgba(0,0,0,0.14)] group-hover:border-neutral-200/80 focus-within:bg-white/95 focus-within:backdrop-blur-md focus-within:shadow-[0_12px_40px_rgba(0,0,0,0.14)] focus-within:border-neutral-200/80">
+      <div className="glass-rail rounded-2xl p-1.5 transition-all duration-300 ease-out motion-reduce:transition-none">
         {/* "On this page" heading — revealed with the panel */}
         <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-10 group-hover:opacity-100 group-focus-within:max-h-10 group-focus-within:opacity-100 transition-all duration-300 motion-reduce:transition-none">
           <p className="px-2.5 pt-1.5 pb-1 text-[11px] font-bold uppercase tracking-wider text-neutral-400 whitespace-nowrap text-right">
