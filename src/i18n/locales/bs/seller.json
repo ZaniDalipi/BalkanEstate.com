@@ -388,7 +388,14 @@
     "rentedUntil": "Izdato do {{date}}",
     "canRenewIn": "Može se obnoviti za {{hours}}č {{minutes}}m",
     "forSaleCount": "Na Prodaju ({{count}})",
-    "forRentCount": "Za Iznajmljivanje ({{count}})"
+    "forRentCount": "Za Iznajmljivanje ({{count}})",
+    "moveToAgency": "Premjesti u agenciju",
+    "moveToPrivate": "Premjesti u privatno",
+    "moveToAgencyHint": "Premjestite ovaj oglas u svoju agenciju",
+    "moveToPrivateHint": "Premjestite ovaj oglas na svoj privatni prodajni profil",
+    "moveToAgencyConfirm": "Premjestiti ovaj oglas u vašu agenciju? Bit će prikazan s vašim agentskim podacima.",
+    "moveToAgencyConfirmNamed": "Premjestiti ovaj oglas u \"{{agency}}\"? Bit će prikazan pod vašom agencijom s vašim agentskim podacima.",
+    "moveToPrivateConfirm": "Vratiti ovaj oglas na vaš privatni prodajni profil? Podaci o agenciji bit će uklonjeni."
   },
   "actions": {
     "subscribeToPro": "Pretplatite se na Pro",

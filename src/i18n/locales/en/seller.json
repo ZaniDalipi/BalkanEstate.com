@@ -395,7 +395,14 @@
     "rentedUntil": "Rented until {{date}}",
     "canRenewIn": "Can renew in {{hours}}h {{minutes}}m",
     "forSaleCount": "For Sale ({{count}})",
-    "forRentCount": "For Rent ({{count}})"
+    "forRentCount": "For Rent ({{count}})",
+    "moveToAgency": "Move to Agency",
+    "moveToPrivate": "Move to Private",
+    "moveToAgencyHint": "Move this listing to your agency",
+    "moveToPrivateHint": "Move this listing to your private seller profile",
+    "moveToAgencyConfirm": "Move this listing to your agency? It will be shown with your agent details.",
+    "moveToAgencyConfirmNamed": "Move this listing to \"{{agency}}\"? It will be shown under your agency with your agent details.",
+    "moveToPrivateConfirm": "Move this listing back to your private seller profile? Agency details will be removed from it."
   },
   "form": {
     "basicInfo": "Basic Information",

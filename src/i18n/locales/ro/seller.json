@@ -388,7 +388,14 @@
     "rentedUntil": "Închiriat până la {{date}}",
     "canRenewIn": "Poate fi reînnoit în {{hours}}o {{minutes}}m",
     "forSaleCount": "De Vânzare ({{count}})",
-    "forRentCount": "De Închiriat ({{count}})"
+    "forRentCount": "De Închiriat ({{count}})",
+    "moveToAgency": "Mută la agenție",
+    "moveToPrivate": "Mută la privat",
+    "moveToAgencyHint": "Mutați acest anunț la agenția dvs.",
+    "moveToPrivateHint": "Mutați acest anunț în profilul dvs. de vânzător privat",
+    "moveToAgencyConfirm": "Mutați acest anunț la agenția dvs.? Va fi afișat cu datele dvs. de agent.",
+    "moveToAgencyConfirmNamed": "Mutați acest anunț la „{{agency}}”? Va fi afișat sub agenția dvs. cu datele dvs. de agent.",
+    "moveToPrivateConfirm": "Mutați acest anunț înapoi în profilul dvs. de vânzător privat? Datele agenției vor fi eliminate."
   },
   "form": {
     "basicInfo": "Informații de Bază",

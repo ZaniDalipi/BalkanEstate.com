@@ -770,6 +770,22 @@ export const markPropertyAsAvailable = async (propertyId: string): Promise<Prope
   return transformBackendProperty(response.property);
 };
 
+export const reassignPropertyRole = async (
+  propertyId: string,
+  role: 'agent' | 'private_seller'
+): Promise<{ property: Property; updatedSubscription?: any }> => {
+  const response = await apiRequest<{ property: any; updatedSubscription?: any }>(`/properties/${propertyId}/reassign-role`, {
+    method: 'PATCH',
+    requiresAuth: true,
+    body: { role },
+  });
+
+  return {
+    property: transformBackendProperty(response.property),
+    updatedSubscription: response.updatedSubscription,
+  };
+};
+
 export const addRentalHistoryEntry = async (
   propertyId: string,
   entry: { startDate: string; endDate: string; monthlyRent: number; tenantName?: string; notes?: string }
