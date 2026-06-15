@@ -80,21 +80,48 @@ const SimilarProperties: React.FC<SimilarPropertiesProps> = ({ property, maxItem
 
   const isRental = property.listingType === 'rent';
   const agencyName = property.seller?.agencyName;
+  const isAgency = hasAgency && agencyProperties.length > 0;
 
-  const heading = hasAgency && agencyProperties.length > 0
-    ? t('property:similarProperties.agencyTitle', 'More from {{agency}}', { agency: agencyName || 'this agency' })
-    : isRental
+  // Only claim a location in the heading if every displayed property actually
+  // matches it — otherwise we'd say e.g. "Similar Properties in Gjilan" while
+  // showing listings from Tirana.
+  const allSameCity =
+    !!property.city && displayProperties.every(p => p.city === property.city);
+  const allSameCountry =
+    !!property.country && displayProperties.every(p => p.country === property.country);
+
+  let heading: string;
+  if (isAgency) {
+    heading = t('property:similarProperties.agencyTitle', 'More from {{agency}}', { agency: agencyName || 'this agency' });
+  } else if (allSameCity) {
+    heading = isRental
       ? t('property:similarProperties.titleRent', 'Similar Rentals in {{city}}', { city: property.city })
       : t('property:similarProperties.title', 'Similar Properties in {{city}}', { city: property.city });
+  } else {
+    heading = isRental
+      ? t('property:similarProperties.titleRentGeneric', 'Similar Rentals')
+      : t('property:similarProperties.titleGeneric', 'Similar Properties');
+  }
 
-  const subtitle = hasAgency && agencyProperties.length > 0
-    ? t('property:similarProperties.agencySubtitle', 'Other listings from {{agency}}', { agency: agencyName || 'this agency' })
-    : t('property:similarProperties.subtitle', 'Browse more {{type}} for {{action}} in {{city}}, {{country}}', {
-        type: property.propertyType || 'properties',
-        action: isRental ? 'rent' : 'sale',
-        city: property.city,
-        country: property.country,
-      });
+  const action = isRental ? 'rent' : 'sale';
+  const type = property.propertyType || 'properties';
+
+  let subtitle: string;
+  if (isAgency) {
+    subtitle = t('property:similarProperties.agencySubtitle', 'Other listings from {{agency}}', { agency: agencyName || 'this agency' });
+  } else if (allSameCity) {
+    subtitle = t('property:similarProperties.subtitle', 'Browse more {{type}} for {{action}} in {{city}}, {{country}}', {
+      type, action, city: property.city, country: property.country,
+    });
+  } else if (allSameCountry) {
+    subtitle = t('property:similarProperties.subtitleCountry', 'Browse more {{type}} for {{action}} in {{country}}', {
+      type, action, country: property.country,
+    });
+  } else {
+    subtitle = t('property:similarProperties.subtitleGeneric', 'Browse more {{type}} for {{action}}', {
+      type, action,
+    });
+  }
 
   return (
     <section aria-label={hasAgency && agencyProperties.length > 0 ? 'Agency listings' : 'Similar properties'}>
