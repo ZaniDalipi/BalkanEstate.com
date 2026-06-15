@@ -14,7 +14,7 @@ import { getParam, getObjectIdParam, isValidObjectId } from '../utils/validatePa
 
 import PromotionCoupon from '../models/PromotionCoupon';
 import { ENTERPRISE_TIER_LIMITS, FREE_TIER_LIMITS } from '../config/subscriptionConstants';
-import { revokeAgencyCouponSubscription } from '../services/subscriptionPaymentService';
+import { revokeAgencyCouponSubscription, generateProSubscriptionCoupons } from '../services/subscriptionPaymentService';
 import { getSocketInstance } from '../utils/socketInstance';
 import { agencyLogger } from '../utils/logger';
 import { createNotificationWithPush } from '../services/engagementService';
@@ -2859,6 +2859,49 @@ export const getAgencyCoupons = async (
     }> = [];
 
     try {
+      // Self-heal: if the monthly pool reports available coupons but the
+      // matching code documents are missing (older ones expired and were
+      // filtered out), generate fresh codes so the displayed list always
+      // reflects the current available allocation — the newest codes.
+      const ownerObjId = new mongoose.Types.ObjectId(ownerId);
+      const poolAvailable = agency.promotionCoupons?.available ?? 0;
+      if (agency.isSubscriptionActive() && poolAvailable > 0) {
+        const availableDocs = await PromotionCoupon.countDocuments({
+          generatedForUserId: ownerObjId,
+          status: { $ne: 'expired' },
+          validUntil: { $gte: new Date() },
+          currentTotalUses: { $lt: 1 },
+        });
+
+        const gap = poolAvailable - availableDocs;
+        if (gap > 0) {
+          const agencyProduct =
+            (await Product.findOne({ productId: 'agency_yearly' }).lean()) ??
+            (await Product.findOne({ productId: 'seller_enterprise_yearly' }).lean());
+
+          // Distribute the gap across tiers (highlight → premium → featured),
+          // using the agency product breakdown as the per-tier cap.
+          let remaining = gap;
+          const takeHighlight = Math.min(agencyProduct?.highlightedCoupons ?? ENTERPRISE_TIER_LIMITS.HIGHLIGHTED_COUPONS, remaining);
+          remaining -= takeHighlight;
+          const takePremium = Math.min(agencyProduct?.premiumCoupons ?? ENTERPRISE_TIER_LIMITS.PREMIUM_COUPONS, remaining);
+          remaining -= takePremium;
+          // Any leftover (breakdown smaller than the gap) goes to featured.
+          const takeFeatured = remaining;
+
+          const now = new Date();
+          const monthEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999));
+          await generateProSubscriptionCoupons(
+            ownerId,
+            takeHighlight,
+            takePremium,
+            takeFeatured,
+            monthEnd,
+            14, // Agency coupons expire in 2 weeks
+          );
+        }
+      }
+
       const coupons = await PromotionCoupon.find({
         $or: [
           { generatedForUserId: new mongoose.Types.ObjectId(ownerId) },
@@ -2879,22 +2922,26 @@ export const getAgencyCoupons = async (
         couponUsers.forEach(u => couponUsersMap.set(String(u._id), { name: u.name, email: u.email }));
       }
 
-      promotionCouponCodes = coupons.map(c => {
-        const isUsed = c.currentTotalUses > 0 || (c.maxTotalUses && c.currentTotalUses >= c.maxTotalUses);
-        const isExpired = c.status === 'expired' || new Date(c.validUntil) < new Date();
-        const lastUsage = c.usageHistory?.[c.usageHistory.length - 1];
+      promotionCouponCodes = coupons
+        .map(c => {
+          const isUsed = c.currentTotalUses > 0 || (c.maxTotalUses && c.currentTotalUses >= c.maxTotalUses);
+          const isExpired = c.status === 'expired' || new Date(c.validUntil) < new Date();
+          const lastUsage = c.usageHistory?.[c.usageHistory.length - 1];
 
-        return {
-          code: c.code,
-          tier: c.applicableTiers?.[0] || 'featured',
-          status: isUsed ? 'used' : isExpired ? 'expired' : 'available',
-          validFrom: c.validFrom,
-          validUntil: c.validUntil,
-          used: !!isUsed,
-          usedAt: lastUsage?.usedAt,
-          usedBy: lastUsage?.userId ? couponUsersMap.get(String(lastUsage.userId)) || null : null,
-        };
-      });
+          return {
+            code: c.code,
+            tier: c.applicableTiers?.[0] || 'featured',
+            status: (isUsed ? 'used' : isExpired ? 'expired' : 'available') as string,
+            validFrom: c.validFrom,
+            validUntil: c.validUntil,
+            used: !!isUsed,
+            usedAt: lastUsage?.usedAt,
+            usedBy: lastUsage?.userId ? couponUsersMap.get(String(lastUsage.userId)) || null : null,
+          };
+        })
+        // Once coupons expire, replace them with the newest ones: hide expired codes
+        // so only the latest active (available/used) codes are shown.
+        .filter(c => c.status !== 'expired');
     } catch (err) {
       agencyLogger.error('Error fetching promotion coupon codes:', err);
     }
