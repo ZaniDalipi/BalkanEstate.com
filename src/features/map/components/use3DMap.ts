@@ -624,27 +624,28 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // Prevent the original `3d-buildings` extrusion from occluding our custom
-    // floor-sliced building. Both occupy the same footprint (the custom one is
-    // only 5% larger), so which one "wins" each pixel comes down to depth-buffer
-    // precision — that varies by GPU/driver/browser, which is exactly why the
-    // green floor showed locally but got hidden in production.
-    //
-    // We hide ONLY the matched building by its feature id. This is reliable
-    // because it doesn't depend on `render_height` (absent on many features,
-    // which is why an earlier `['<', ['get', 'render_height'], 5]` filter was
-    // reverted — it made MapLibre log "Expected value to be of type number,
-    // but found null instead.").
+    // Keep the original `3d-buildings` extrusion in place. It sits just inside
+    // our scaled custom building and shows through the gaps between floor slabs,
+    // giving the dark "separator line" look between floors (see the reference
+    // design). We deliberately do NOT hide it: hiding it leaves the gaps cutting
+    // straight through to the background, which makes the whole tower read as a
+    // hollow, translucent box. We clear any stale filter to be safe.
     if (mapInstance.getLayer('3d-buildings')) {
-      const matchedFeatureId = buildingFeature?.id;
-      if (matchedFeatureId != null) {
-        mapInstance.setFilter('3d-buildings', ['!=', ['id'], matchedFeatureId]);
-      } else {
-        // No stable id available — clear any prior filter and rely on the
-        // custom building (scaled larger and drawn last) covering the original.
-        mapInstance.setFilter('3d-buildings', null);
-      }
+      mapInstance.setFilter('3d-buildings', null);
     }
+
+    // The highlighted floor is extruded from a slightly larger footprint than
+    // the other floors so it always protrudes in front of both the grey slabs
+    // and the original building — making the green floor impossible to occlude
+    // regardless of depth-buffer precision (the prior 5% scale was borderline
+    // and could lose the depth test in production).
+    const highlightScaleFactor = 1.12;
+    const highlightScaledCoords = buildingCoords.map(ring =>
+      ring.map(coord => [
+        centroidLng + (coord[0] - centroidLng) * highlightScaleFactor,
+        centroidLat + (coord[1] - centroidLat) * highlightScaleFactor,
+      ])
+    );
 
     // Add source for the custom building using actual geometry
     if (!mapInstance.getSource('custom-building')) {
@@ -671,6 +672,24 @@ export function use3DMap(props: Map3DBuildingsProps) {
       });
     }
 
+    // Separate, slightly larger source used only for the highlighted floor.
+    const highlightSourceData: GeoJSON.Feature = {
+      type: 'Feature',
+      properties: { height: totalHeightM, totalFloors: totalFlrs },
+      geometry: {
+        type: 'Polygon',
+        coordinates: highlightScaledCoords,
+      },
+    };
+    if (!mapInstance.getSource('custom-building-highlight')) {
+      mapInstance.addSource('custom-building-highlight', {
+        type: 'geojson',
+        data: highlightSourceData,
+      });
+    } else {
+      (mapInstance.getSource('custom-building-highlight') as maplibregl.GeoJSONSource).setData(highlightSourceData);
+    }
+
     // Remove existing floor layers if any
     for (let floor = 1; floor <= 100; floor++) {
       const layerId = `building-floor-${floor}`;
@@ -683,8 +702,11 @@ export function use3DMap(props: Map3DBuildingsProps) {
     }
 
     // Add floor slice layers - each floor is a separate "box" stacked on top of each other
-    // The gap between floors makes each box clearly distinct
-    const gapSize = Math.max(0.3, adjustedFloorHeight * 0.12); // 12% of floor height as gap, minimum 0.3m
+    // The gap between floors makes each box clearly distinct. Slabs are fully
+    // opaque so the tower reads as solid stacked boxes (a semi-transparent slab
+    // looks like a hollow ghost). The dark original building shows through the
+    // gaps, producing the separator line between floors.
+    const gapSize = Math.max(0.5, adjustedFloorHeight * 0.15); // 15% of floor height as gap, minimum 0.5m
     for (let floor = 1; floor <= totalFlrs; floor++) {
       const floorBase = (floor - 1) * adjustedFloorHeight;
       const floorTop = floor * adjustedFloorHeight;
@@ -694,14 +716,16 @@ export function use3DMap(props: Map3DBuildingsProps) {
       mapInstance.addLayer({
         id: layerId,
         type: 'fill-extrusion',
-        source: 'custom-building',
+        // Highlighted floor uses the larger footprint so it protrudes in front
+        // and can never be hidden behind the grey slabs or original building.
+        source: isHighlightedFloor ? 'custom-building-highlight' : 'custom-building',
         paint: {
           'fill-extrusion-color': isHighlightedFloor
             ? '#13e861' // Bright green for the property's floor
             : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
           'fill-extrusion-height': floorTop - gapSize, // Gap at top of each floor slab
           'fill-extrusion-base': floorBase + (gapSize * 0.25), // Small gap at bottom too
-          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.75,
+          'fill-extrusion-opacity': 1,
         },
       });
     }
@@ -716,7 +740,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     mapInstance.addLayer({
       id: glowLayerId,
       type: 'fill-extrusion',
-      source: 'custom-building',
+      source: 'custom-building-highlight',
       paint: {
         'fill-extrusion-color': '#4ade80', // Lighter green glow
         'fill-extrusion-height': highlightTop - (gapSize * 0.5),
