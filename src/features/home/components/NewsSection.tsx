@@ -208,7 +208,7 @@ const NewsSection: React.FC = () => {
   const { t } = useTranslation('home');
   const { dispatch } = useAppContext();
   const { news, countries, selectedCountry, setSelectedCountry, isLoading } = useRealEstateNews();
-  const [activeTab, setActiveTab] = useState<'news' | 'articles'>('news');
+  const [activeTab, setActiveTab] = useState<'news' | 'articles'>('articles');
 
   const { articles, isLoading: articlesLoading } = useArticles({ limit: 6 });
 
@@ -250,16 +250,6 @@ const NewsSection: React.FC = () => {
         <div className="flex justify-center mb-6 sm:mb-8">
           <div className="inline-flex rounded-xl border border-neutral-200 p-1 bg-neutral-50 gap-1">
             <button
-              onClick={() => setActiveTab('news')}
-              className={`px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
-                activeTab === 'news'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              {t('news.tabNews', 'Market News')}
-            </button>
-            <button
               onClick={() => setActiveTab('articles')}
               className={`px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 ${
                 activeTab === 'articles'
@@ -273,6 +263,16 @@ const NewsSection: React.FC = () => {
                   {articles.length}
                 </span>
               )}
+            </button>
+            <button
+              onClick={() => setActiveTab('news')}
+              className={`px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                activeTab === 'news'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              {t('news.tabNews', 'Market News')}
             </button>
           </div>
         </div>
