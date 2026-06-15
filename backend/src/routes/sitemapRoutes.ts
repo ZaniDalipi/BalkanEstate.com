@@ -5,7 +5,7 @@ import { apiLogger } from '../utils/logger';
 
 const router = express.Router();
 
-const BASE_URL = process.env.FRONTEND_URL || 'https://balkanestate.com';
+const BASE_URL = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
 /**
  * Generate XML Sitemap for SEO

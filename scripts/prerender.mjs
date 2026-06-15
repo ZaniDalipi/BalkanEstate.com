@@ -443,6 +443,70 @@ function buildHreflangTags(pagePath) {
   return tags.join('\n');
 }
 
+// ─── Sitemap generation ──────────────────────────────────────────────────────
+// Build sitemap.xml from the same route data that drives prerendering, so every
+// prerendered page (incl. country/city/type and native landing pages) is
+// discoverable, with hreflang alternates for all languages. Info pages that
+// aren't prerendered routes are folded in so coverage never regresses.
+const EXTRA_STATIC_PAGES = [
+  { path: '/how-it-works', priority: '0.6', changefreq: 'monthly' },
+  { path: '/pricing', priority: '0.6', changefreq: 'monthly' },
+  { path: '/contact', priority: '0.5', changefreq: 'monthly' },
+  { path: '/privacy-policy', priority: '0.3', changefreq: 'yearly' },
+  { path: '/terms-of-service', priority: '0.3', changefreq: 'yearly' },
+  { path: '/cookie-policy', priority: '0.3', changefreq: 'yearly' },
+];
+
+function sitemapMeta(path) {
+  if (path === '/') return { priority: '1.0', changefreq: 'daily' };
+  if (path === '/search' || path === '/rentals') return { priority: '0.9', changefreq: 'daily' };
+  if (/[?&]city=/.test(path)) return { priority: '0.8', changefreq: 'weekly' };
+  if (/[?&]country=/.test(path)) return { priority: '0.8', changefreq: 'weekly' };
+  if (/[?&]propertyType=/.test(path)) return { priority: '0.7', changefreq: 'weekly' };
+  return { priority: '0.6', changefreq: 'weekly' };
+}
+
+function xmlEscapeUrl(url) {
+  return url
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function langHref(lang, path) {
+  if (path === '/') return lang === 'en' ? BASE_URL : `${BASE_URL}/${lang}`;
+  return lang === 'en' ? `${BASE_URL}${path}` : `${BASE_URL}/${lang}${path}`;
+}
+
+function buildSitemap(allRoutes) {
+  const today = new Date().toISOString().split('T')[0];
+  const seen = new Set();
+  const entries = [];
+  const collect = (path, meta) => {
+    if (seen.has(path)) return;
+    seen.add(path);
+    entries.push({ path, ...meta });
+  };
+  for (const r of allRoutes) collect(r.path, sitemapMeta(r.path));
+  for (const e of EXTRA_STATIC_PAGES) collect(e.path, { priority: e.priority, changefreq: e.changefreq });
+
+  let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+  xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n`;
+  for (const e of entries) {
+    const loc = xmlEscapeUrl(langHref('en', e.path));
+    xml += `  <url>\n    <loc>${loc}</loc>\n`;
+    for (const lang of LANGUAGES) {
+      xml += `    <xhtml:link rel="alternate" hreflang="${lang}" href="${xmlEscapeUrl(langHref(lang, e.path))}" />\n`;
+    }
+    xml += `    <xhtml:link rel="alternate" hreflang="x-default" href="${loc}" />\n`;
+    xml += `    <lastmod>${today}</lastmod>\n    <changefreq>${e.changefreq}</changefreq>\n    <priority>${e.priority}</priority>\n  </url>\n`;
+  }
+  xml += `</urlset>\n`;
+  return xml;
+}
+
 /**
  * Generate a prerendered HTML file for a given route and language.
  */
@@ -667,6 +731,18 @@ for (const route of routes) {
 }
 
 console.log(`✅ Prerendered ${generated} pages (${routes.length} routes × ${LANGUAGES.length} languages) to ${DIST_DIR}/`);
+
+// Generate sitemap.xml covering every prerendered + landing page (overwrites the
+// static placeholder copied from public/), keeping it in sync with the routes.
+try {
+  const sitemap = buildSitemap(routes);
+  writeFileSync(join(DIST_DIR, 'sitemap.xml'), sitemap, 'utf-8');
+  const urlCount = (sitemap.match(/<url>/g) || []).length;
+  console.log(`✅ Generated sitemap.xml with ${urlCount} page URLs`);
+} catch (err) {
+  console.error(`❌ Failed to generate sitemap.xml: ${err.message}`);
+  process.exit(1);
+}
 
 function escapeHtml(str) {
   return str
