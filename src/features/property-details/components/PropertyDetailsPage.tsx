@@ -970,6 +970,15 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             </div>
 
           </div>
+
+          {/* Right Column - Contact Sidebar (Desktop only - mobile version shown above) */}
+          <div className="hidden lg:block lg:col-span-1 min-w-0 animate-slide-up" style={{ animationDelay: '150ms' }}>
+            <PropertyContact
+              property={property}
+              isCreatingConversation={isCreatingConversation}
+              onContactSeller={handleContactSeller}
+            />
+          </div>
         </div>
       </main>
 

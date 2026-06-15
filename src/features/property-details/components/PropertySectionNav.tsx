@@ -224,10 +224,12 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
 
   const ariaLabel = t('property:sectionNav.ariaLabel', 'Property sections');
 
-  // ── Mobile + Tablet: horizontal chip bar (lives in the sticky header) ──
+  // ── Mobile / Tablet / standard laptops: horizontal chip bar (in the header) ──
+  // Shown below 1500px, where the left app sidebar + right contact sidebar leave
+  // no free gutter for a vertical rail (it would overlap the calculators).
   if (variant === 'bar') {
     return (
-      <nav aria-label={ariaLabel} className="lg:hidden border-t border-neutral-100">
+      <nav aria-label={ariaLabel} className="min-[1500px]:hidden border-t border-neutral-100">
         <div className="max-w-screen-xl mx-auto px-2 sm:px-4 md:px-6">
           <ul className="flex items-center gap-2 overflow-x-auto scrollbar-hide py-2">
             {sections.map((s) => {
@@ -256,11 +258,13 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
     );
   }
 
-  // ── Desktop: Notion-style vertical dash rail (fixed in the right gutter) ──
+  // ── Wide desktop (≥1500px): Notion-style vertical dash rail in the right
+  // gutter. Only shown when the viewport is wide enough that the content +
+  // sidebars leave a free right margin, so it never covers the calculators. ──
   return (
     <nav
       aria-label={ariaLabel}
-      className="hidden lg:block fixed z-40 group print:hidden"
+      className="hidden min-[1500px]:block fixed z-40 group print:hidden"
       // Sit in the far-right gutter, close to the viewport edge (the left side
       // is occupied by the global app sidebar). Hugs further right as the
       // viewport widens, clamped to a small margin on narrower screens.
