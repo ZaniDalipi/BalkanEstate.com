@@ -1168,6 +1168,202 @@ export const updateProperty = async (
   }
 };
 
+// @desc    Reassign a property's posting role (private seller <-> agent/agency)
+// @route   PATCH /api/properties/:id/reassign-role
+// @access  Private (owner only)
+//
+// NOTE: This is the ONE sanctioned way to mutate `createdAsRole` after creation.
+// `updateProperty` still treats the role + agency credentials as immutable; moving
+// a listing between the "private" and "agency" contexts must go through here so that
+// agency credentials and the per-role subscription counters stay consistent.
+export const reassignPropertyRole = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    // Validate the requested target role at the system boundary
+    const targetRole = req.body?.role;
+    const VALID_TARGET_ROLES = ['private_seller', 'agent'] as const;
+    if (!targetRole || !VALID_TARGET_ROLES.includes(targetRole)) {
+      res.status(400).json({
+        message: "Invalid role. Must be 'private_seller' or 'agent'.",
+        code: 'INVALID_TARGET_ROLE',
+      });
+      return;
+    }
+
+    const property = await Property.findById(id);
+    if (!property) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    // Check ownership
+    const currentUser = req.user as IUser;
+    if (property.sellerId.toString() !== String(currentUser._id).toString()) {
+      res.status(403).json({ message: 'Not authorized to update this property' });
+      return;
+    }
+
+    // Externally ingested listings are not owned content and must not be reclassified
+    if (property.createdAsRole === 'external') {
+      res.status(400).json({
+        message: 'Imported listings cannot be reassigned.',
+        code: 'EXTERNAL_LISTING_NOT_REASSIGNABLE',
+      });
+      return;
+    }
+
+    // No-op guard: already in the requested role
+    if (property.createdAsRole === targetRole) {
+      res.status(400).json({
+        message: targetRole === 'agent'
+          ? 'This listing is already posted under your agency.'
+          : 'This listing is already posted as a private seller.',
+        code: 'ROLE_UNCHANGED',
+      });
+      return;
+    }
+
+    const user = await User.findById(String(currentUser._id));
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // To move a listing into the agency/agent context the user must actually be able
+    // to act as an agent. Mirrors the frontend RoleSelector eligibility check.
+    if (targetRole === 'agent') {
+      const canActAsAgent =
+        user.role === 'agent' ||
+        (Array.isArray(user.availableRoles) && user.availableRoles.includes('agent')) ||
+        !!user.agentId ||
+        !!user.licenseNumber ||
+        !!user.agencyId ||
+        user.agency?.role === 'agent' ||
+        user.agency?.role === 'owner';
+
+      if (!canActAsAgent) {
+        res.status(403).json({
+          message: 'You must be a registered agent to move a listing to an agency.',
+          code: 'AGENT_ROLE_REQUIRED',
+        });
+        return;
+      }
+    }
+
+    const previousRole = property.createdAsRole;
+
+    if (targetRole === 'agent') {
+      // Snapshot the agent/agency credentials at reassignment time, mirroring createProperty
+      property.createdAsRole = 'agent';
+      property.createdByAgencyName = user.agencyName || undefined;
+      property.createdByAgencyId = user.agencyId || user.agency?.agencyId || undefined;
+      property.createdByLicenseNumber = user.licenseNumber || undefined;
+    } else {
+      // Moving back to private seller — strip agency attribution
+      property.createdAsRole = 'private_seller';
+      property.createdByAgencyName = undefined;
+      property.createdByAgencyId = undefined;
+      property.createdByLicenseNumber = undefined;
+    }
+
+    await property.save();
+
+    // Propagate the change to every denormalized snapshot of THIS listing so the
+    // whole database stays consistent — not just the live Property document.
+    // (Agency `stats.totalListings` and agency listing pages read from live
+    // Property queries, so they reflect the change automatically.)
+    try {
+      // Historical sale records keep the seller's role captured at sale time
+      await SalesHistory.updateMany(
+        { propertyId: property._id },
+        { $set: { sellerRole: targetRole } }
+      );
+
+      // Archived (sold/rented/deleted) snapshots keep role + agency attribution
+      if (targetRole === 'agent') {
+        const set: Record<string, unknown> = { createdAsRole: 'agent' };
+        const unset: Record<string, 1> = {};
+        if (property.createdByAgencyName) set.createdByAgencyName = property.createdByAgencyName;
+        else unset.createdByAgencyName = 1;
+        if (property.createdByAgencyId) set.createdByAgencyId = property.createdByAgencyId;
+        else unset.createdByAgencyId = 1;
+
+        const archiveUpdate: Record<string, unknown> = { $set: set };
+        if (Object.keys(unset).length > 0) archiveUpdate.$unset = unset;
+        await ArchivedListing.updateMany({ originalPropertyId: property._id }, archiveUpdate);
+      } else {
+        await ArchivedListing.updateMany(
+          { originalPropertyId: property._id },
+          {
+            $set: { createdAsRole: 'private_seller' },
+            $unset: { createdByAgencyName: 1, createdByAgencyId: 1 },
+          }
+        );
+      }
+    } catch (propagateError) {
+      // Non-fatal: the live listing is already updated; historical snapshots are
+      // best-effort and also self-heal via the periodic stats/recompute jobs.
+      propertyLogger.error('Failed to propagate role reassignment to denormalized records (non-fatal):', propagateError);
+    }
+
+    // Shift the per-role subscription counters. These are incremented by role at
+    // creation time (regardless of later status), so we shift them unconditionally
+    // here and floor at 0 to stay resilient to any pre-existing drift.
+    let updatedSubscription: Record<string, unknown> | null = null;
+    if (user.subscription) {
+      if (previousRole === 'agent' && (user.subscription.agentCount || 0) > 0) {
+        user.subscription.agentCount = (user.subscription.agentCount || 0) - 1;
+      } else if (previousRole === 'private_seller' && (user.subscription.privateSellerCount || 0) > 0) {
+        user.subscription.privateSellerCount = (user.subscription.privateSellerCount || 0) - 1;
+      }
+
+      if (targetRole === 'agent') {
+        user.subscription.agentCount = (user.subscription.agentCount || 0) + 1;
+      } else {
+        user.subscription.privateSellerCount = (user.subscription.privateSellerCount || 0) + 1;
+      }
+
+      await user.save();
+
+      updatedSubscription = {
+        activeListingsCount: user.subscription.activeListingsCount,
+        privateSellerCount: user.subscription.privateSellerCount,
+        agentCount: user.subscription.agentCount,
+        listingsLimit: user.subscription.listingsLimit,
+        tier: user.subscription.tier,
+      };
+    }
+
+    propertyLogger.info(
+      `🔁 Property ${property._id} reassigned: ${previousRole} → ${targetRole} by user ${user._id}`
+    );
+
+    // Populate seller info for the response, then broadcast + invalidate caches
+    await property.populate('sellerId', 'name email phone avatarUrl role agencyName agencyId licenseNumber');
+
+    emitPropertyUpdated(String(property._id), property.toObject());
+    invalidateCache('/api/properties');
+
+    res.json({
+      property: sanitizeProperty(property.toObject(), 'detail'),
+      updatedSubscription,
+    });
+  } catch (error: any) {
+    propertyLogger.error('Reassign property role error:', error);
+    res.status(500).json({ message: 'Error reassigning property role' });
+  }
+};
+
 // @desc    Delete property
 // @route   DELETE /api/properties/:id
 // @access  Private

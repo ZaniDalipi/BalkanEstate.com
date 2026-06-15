@@ -495,7 +495,14 @@
     "rentedUntil": "E dhënë me qira deri {{date}}",
     "canRenewIn": "Mund të rinovohet për {{hours}}o {{minutes}}m",
     "forSaleCount": "Për Shitje ({{count}})",
-    "forRentCount": "Me Qira ({{count}})"
+    "forRentCount": "Me Qira ({{count}})",
+    "moveToAgency": "Kalo te Agjencia",
+    "moveToPrivate": "Kalo te Privat",
+    "moveToAgencyHint": "Kaloje këtë listim te agjencia juaj",
+    "moveToPrivateHint": "Kaloje këtë listim te profili juaj si shitës privat",
+    "moveToAgencyConfirm": "Ta kaloni këtë listim te agjencia juaj? Do të shfaqet me të dhënat tuaja si agjent.",
+    "moveToAgencyConfirmNamed": "Ta kaloni këtë listim te \"{{agency}}\"? Do të shfaqet nën agjencinë tuaj me të dhënat tuaja si agjent.",
+    "moveToPrivateConfirm": "Ta ktheni këtë listim te profili juaj si shitës privat? Të dhënat e agjencisë do të hiqen prej tij."
   },
   "form": {
     "basicInfo": "Informacione Bazë",

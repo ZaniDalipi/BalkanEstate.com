@@ -323,6 +323,30 @@ export const markPropertyAsSold = async (propertyId: string): Promise<Property> 
   return transformBackendProperty(response.property);
 };
 
+/**
+ * Reassign a listing's posting role between private seller and agent/agency.
+ * Moving to 'agent' snapshots the user's current agency credentials onto the
+ * listing; moving to 'private_seller' strips them.
+ */
+export const reassignPropertyRole = async (
+  propertyId: string,
+  role: 'agent' | 'private_seller'
+): Promise<{ property: Property; updatedSubscription?: any }> => {
+  const response = await apiRequest<{ property: any; updatedSubscription?: any }>(
+    `/properties/${propertyId}/reassign-role`,
+    {
+      method: 'PATCH',
+      body: { role },
+      requiresAuth: true,
+    }
+  );
+
+  return {
+    property: transformBackendProperty(response.property),
+    updatedSubscription: response.updatedSubscription,
+  };
+};
+
 export const getMyListings = async (role?: 'agent' | 'private_seller'): Promise<Property[]> => {
   const url = role ? `/properties/my/listings?role=${role}` : '/properties/my/listings';
   const response = await apiRequest<{ properties: any[] }>(url, { requiresAuth: true });

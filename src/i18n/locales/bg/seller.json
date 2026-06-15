@@ -392,7 +392,14 @@
     "rentedUntil": "Отдадено до {{date}}",
     "canRenewIn": "Може да се поднови след {{hours}}ч {{minutes}}м",
     "forSaleCount": "За Продажба ({{count}})",
-    "forRentCount": "Под Наем ({{count}})"
+    "forRentCount": "Под Наем ({{count}})",
+    "moveToAgency": "Премести към агенция",
+    "moveToPrivate": "Премести към частен",
+    "moveToAgencyHint": "Преместете тази обява към вашата агенция",
+    "moveToPrivateHint": "Преместете тази обява към профила ви като частен продавач",
+    "moveToAgencyConfirm": "Да преместите ли тази обява към вашата агенция? Тя ще се показва с вашите данни като агент.",
+    "moveToAgencyConfirmNamed": "Да преместите ли тази обява към „{{agency}}“? Тя ще се показва под вашата агенция с вашите данни като агент.",
+    "moveToPrivateConfirm": "Да върнете ли тази обява към профила ви като частен продавач? Данните за агенцията ще бъдат премахнати."
   },
   "form": {
     "basicInfo": "Basic Information",
