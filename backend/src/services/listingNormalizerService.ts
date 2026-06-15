@@ -965,11 +965,14 @@ export const normalize = async (
     status: 'active',
     price: finalPrice,
     isNegotiable: finalPrice === 0 ? true : Boolean(mapped.isNegotiable),
-    // Fallback chain: address → city → country → 'Unknown'
-    // Required by schema; owner can correct via the edit listing form later.
+    // All three are schema-required. The ingest path persists via
+    // findOneAndUpdate(upsert) which skips Mongoose validators, so an undefined
+    // value here is silently stored and later breaks any document .save()
+    // (e.g. when the owner edits the listing). Guarantee non-empty strings.
+    // Owner can correct any 'Unknown' via the edit listing form later.
     address: address || city || country || 'Unknown',
-    city: city || undefined,
-    country: country || undefined,
+    city: city || 'Unknown',
+    country: country || 'Unknown',
     beds: beds ?? 0,
     baths: baths ?? 0,
     livingRooms: livingRooms ?? 0,
