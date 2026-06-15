@@ -2879,22 +2879,26 @@ export const getAgencyCoupons = async (
         couponUsers.forEach(u => couponUsersMap.set(String(u._id), { name: u.name, email: u.email }));
       }
 
-      promotionCouponCodes = coupons.map(c => {
-        const isUsed = c.currentTotalUses > 0 || (c.maxTotalUses && c.currentTotalUses >= c.maxTotalUses);
-        const isExpired = c.status === 'expired' || new Date(c.validUntil) < new Date();
-        const lastUsage = c.usageHistory?.[c.usageHistory.length - 1];
+      promotionCouponCodes = coupons
+        .map(c => {
+          const isUsed = c.currentTotalUses > 0 || (c.maxTotalUses && c.currentTotalUses >= c.maxTotalUses);
+          const isExpired = c.status === 'expired' || new Date(c.validUntil) < new Date();
+          const lastUsage = c.usageHistory?.[c.usageHistory.length - 1];
 
-        return {
-          code: c.code,
-          tier: c.applicableTiers?.[0] || 'featured',
-          status: isUsed ? 'used' : isExpired ? 'expired' : 'available',
-          validFrom: c.validFrom,
-          validUntil: c.validUntil,
-          used: !!isUsed,
-          usedAt: lastUsage?.usedAt,
-          usedBy: lastUsage?.userId ? couponUsersMap.get(String(lastUsage.userId)) || null : null,
-        };
-      });
+          return {
+            code: c.code,
+            tier: c.applicableTiers?.[0] || 'featured',
+            status: (isUsed ? 'used' : isExpired ? 'expired' : 'available') as string,
+            validFrom: c.validFrom,
+            validUntil: c.validUntil,
+            used: !!isUsed,
+            usedAt: lastUsage?.usedAt,
+            usedBy: lastUsage?.userId ? couponUsersMap.get(String(lastUsage.userId)) || null : null,
+          };
+        })
+        // Once coupons expire, replace them with the newest ones: hide expired codes
+        // so only the latest active (available/used) codes are shown.
+        .filter(c => c.status !== 'expired');
     } catch (err) {
       agencyLogger.error('Error fetching promotion coupon codes:', err);
     }
