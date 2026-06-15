@@ -577,10 +577,50 @@ export function use3DMap(props: Map3DBuildingsProps) {
       }
     }
 
-    // If no building was found at the property coordinates, skip the custom building overlay
-    // Don't create a fake building box that would mark the wrong location
+    // Build a synthetic square footprint centered on the property. Used as a
+    // deterministic fallback so the floor tower ALWAYS renders, regardless of
+    // whether the vector tiles happened to expose a building footprint at this
+    // spot (tile availability/timing differs between local and production).
+    const makeSyntheticFootprint = (halfWidthMeters: number): number[][][] => {
+      const metersPerDegLat = 110540;
+      const metersPerDegLng = 111320 * Math.cos((latitude * Math.PI) / 180);
+      const dLat = halfWidthMeters / metersPerDegLat;
+      const dLng = halfWidthMeters / metersPerDegLng;
+      return [[
+        [longitude - dLng, latitude - dLat],
+        [longitude + dLng, latitude - dLat],
+        [longitude + dLng, latitude + dLat],
+        [longitude - dLng, latitude + dLat],
+        [longitude - dLng, latitude - dLat],
+      ]];
+    };
+
+    // Reject an implausibly large matched footprint — that almost always means
+    // we latched onto the wrong building (a big block next door), which renders
+    // as a giant featureless slab. Fall back to a clean synthetic tower instead.
+    if (buildingCoords) {
+      const ring = buildingCoords[0];
+      let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
+      for (const c of ring) {
+        if (c[0] < minLng) minLng = c[0];
+        if (c[0] > maxLng) maxLng = c[0];
+        if (c[1] < minLat) minLat = c[1];
+        if (c[1] > maxLat) maxLat = c[1];
+      }
+      const metersPerDegLat = 110540;
+      const metersPerDegLng = 111320 * Math.cos((latitude * Math.PI) / 180);
+      const widthM = (maxLng - minLng) * metersPerDegLng;
+      const depthM = (maxLat - minLat) * metersPerDegLat;
+      if (widthM > 60 || depthM > 60) {
+        buildingCoords = null;
+        buildingFeature = null;
+      }
+    }
+
+    // Fallback: synthesize a footprint so the floor tower always renders. ~14m
+    // square reads as a believable tower for any floor count.
     if (!buildingCoords) {
-      return;
+      buildingCoords = makeSyntheticFootprint(7);
     }
 
     // Get actual building height from map data if available
