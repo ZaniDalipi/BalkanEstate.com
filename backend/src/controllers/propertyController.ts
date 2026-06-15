@@ -1278,6 +1278,44 @@ export const reassignPropertyRole = async (
 
     await property.save();
 
+    // Propagate the change to every denormalized snapshot of THIS listing so the
+    // whole database stays consistent — not just the live Property document.
+    // (Agency `stats.totalListings` and agency listing pages read from live
+    // Property queries, so they reflect the change automatically.)
+    try {
+      // Historical sale records keep the seller's role captured at sale time
+      await SalesHistory.updateMany(
+        { propertyId: property._id },
+        { $set: { sellerRole: targetRole } }
+      );
+
+      // Archived (sold/rented/deleted) snapshots keep role + agency attribution
+      if (targetRole === 'agent') {
+        const set: Record<string, unknown> = { createdAsRole: 'agent' };
+        const unset: Record<string, 1> = {};
+        if (property.createdByAgencyName) set.createdByAgencyName = property.createdByAgencyName;
+        else unset.createdByAgencyName = 1;
+        if (property.createdByAgencyId) set.createdByAgencyId = property.createdByAgencyId;
+        else unset.createdByAgencyId = 1;
+
+        const archiveUpdate: Record<string, unknown> = { $set: set };
+        if (Object.keys(unset).length > 0) archiveUpdate.$unset = unset;
+        await ArchivedListing.updateMany({ originalPropertyId: property._id }, archiveUpdate);
+      } else {
+        await ArchivedListing.updateMany(
+          { originalPropertyId: property._id },
+          {
+            $set: { createdAsRole: 'private_seller' },
+            $unset: { createdByAgencyName: 1, createdByAgencyId: 1 },
+          }
+        );
+      }
+    } catch (propagateError) {
+      // Non-fatal: the live listing is already updated; historical snapshots are
+      // best-effort and also self-heal via the periodic stats/recompute jobs.
+      propertyLogger.error('Failed to propagate role reassignment to denormalized records (non-fatal):', propagateError);
+    }
+
     // Shift the per-role subscription counters. These are incremented by role at
     // creation time (regardless of later status), so we shift them unconditionally
     // here and floor at 0 to stay resilient to any pre-existing drift.
