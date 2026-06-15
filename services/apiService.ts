@@ -2203,9 +2203,11 @@ export const leaveAgency = async (): Promise<{
 
 // --- AGENCY FEATURED SUBSCRIPTION API ---
 
+export type FeaturedSubscriptionInterval = '7days' | '14days' | '28days' | '90days';
+
 export const createFeaturedSubscription = async (
   agencyId: string,
-  data: { interval?: 'weekly' | 'monthly' | 'yearly'; couponCode?: string; startTrial?: boolean }
+  data: { interval?: FeaturedSubscriptionInterval; couponCode?: string; startTrial?: boolean }
 ): Promise<any> => {
   return await apiRequest(`/agencies/${agencyId}/featured-subscription`, {
     method: 'POST',
