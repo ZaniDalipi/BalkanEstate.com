@@ -1,7 +1,66 @@
 import PromotionCoupon from '../models/PromotionCoupon';
-import AgencyFeaturedSubscription from '../models/AgencyFeaturedSubscription';
+import AgencyFeaturedSubscription, {
+  FeaturedSubscriptionInterval,
+} from '../models/AgencyFeaturedSubscription';
 import Agency from '../models/Agency';
 import { subscriptionLogger } from './logger';
+
+/**
+ * Single source of truth for featured-agency subscription intervals.
+ *
+ * Duration-based intervals (`Ndays`) are the current pricing model and must
+ * stay aligned with the `featured_agency_*days` products in `seedProducts.ts`.
+ * Legacy intervals (`weekly`/`monthly`/`yearly`) are retained so existing
+ * records keep renewing correctly.
+ */
+interface IntervalConfig {
+  days?: number;
+  months?: number;
+  years?: number;
+  /** Base price in EUR before any coupon/discount is applied. */
+  price: number;
+}
+
+export const FEATURED_INTERVAL_CONFIG: Record<FeaturedSubscriptionInterval, IntervalConfig> = {
+  '7days': { days: 7, price: 6.99 },
+  '14days': { days: 14, price: 11.99 },
+  '28days': { days: 28, price: 24.99 },
+  '90days': { days: 90, price: 49.99 },
+  // Legacy intervals — kept for backward compatibility with existing records.
+  weekly: { days: 7, price: 10 },
+  monthly: { months: 1, price: 35 },
+  yearly: { years: 1, price: 400 },
+};
+
+export const FEATURED_INTERVALS = Object.keys(
+  FEATURED_INTERVAL_CONFIG
+) as FeaturedSubscriptionInterval[];
+
+/** Type guard validating that an arbitrary value is a supported interval. */
+export const isValidFeaturedInterval = (
+  value: unknown
+): value is FeaturedSubscriptionInterval =>
+  typeof value === 'string' &&
+  Object.prototype.hasOwnProperty.call(FEATURED_INTERVAL_CONFIG, value);
+
+/** Base (pre-discount) price in EUR for a given interval. */
+export const getIntervalPrice = (interval: FeaturedSubscriptionInterval): number =>
+  FEATURED_INTERVAL_CONFIG[interval].price;
+
+/** Compute the period end date by advancing `start` according to the interval. */
+export const computePeriodEnd = (
+  start: Date,
+  interval: FeaturedSubscriptionInterval
+): Date => {
+  const end = new Date(start);
+  const config = FEATURED_INTERVAL_CONFIG[interval];
+
+  if (config.days) end.setDate(end.getDate() + config.days);
+  if (config.months) end.setMonth(end.getMonth() + config.months);
+  if (config.years) end.setFullYear(end.getFullYear() + config.years);
+
+  return end;
+};
 
 /**
  * Create a 7-day free trial coupon for new agencies
@@ -157,22 +216,18 @@ export const checkAndUpdateSubscription = async (
 };
 
 /**
- * Calculate pricing for different intervals
+ * Calculate pricing for a given interval.
+ *
+ * Pricing is sourced from {@link FEATURED_INTERVAL_CONFIG} so it stays aligned
+ * with the seeded products and the create/renew flows.
  */
 export const calculatePrice = (
-  interval: 'weekly' | 'monthly' | 'yearly',
-  couponCode?: string
+  interval: FeaturedSubscriptionInterval,
+  _couponCode?: string
 ): { basePrice: number; discountedPrice: number; savings: number } => {
-  let basePrice = 10; // Weekly default
+  const basePrice = getIntervalPrice(interval);
 
-  if (interval === 'monthly') {
-    basePrice = 35; // ~30% discount (vs 4 weeks × 10)
-  } else if (interval === 'yearly') {
-    basePrice = 400; // ~23% discount (vs 52 weeks × 10)
-  }
-
-  // For now, return base price
-  // In real implementation, apply coupon discount here
+  // Coupon discounts are applied at the controller layer against live coupon data.
   return {
     basePrice,
     discountedPrice: basePrice,

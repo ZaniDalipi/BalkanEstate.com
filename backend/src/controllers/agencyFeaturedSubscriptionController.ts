@@ -4,16 +4,32 @@ import Agency from '../models/Agency';
 import PromotionCoupon from '../models/PromotionCoupon';
 import { agencyLogger } from '../utils/logger';
 import { getObjectIdParam } from '../utils/validateParams';
+import {
+  FEATURED_INTERVALS,
+  computePeriodEnd,
+  getIntervalPrice,
+  isValidFeaturedInterval,
+} from '../utils/featuredSubscriptionUtils';
 
 export const createFeaturedSubscription = async (req: Request, res: Response): Promise<void> => {
   try {
     const agencyId = getObjectIdParam(req, res, 'agencyId');
     if (!agencyId) return;
-    const { interval = 'weekly', couponCode, startTrial = false } = req.body;
+    const { interval = '28days', couponCode, startTrial = false } = req.body;
     const userId = (req as any).user?.id || (req as any).user?._id;
 
     if (!userId) {
       res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    // Validate interval against the supported set before touching the database.
+    if (!isValidFeaturedInterval(interval)) {
+      res.status(400).json({
+        error: 'Invalid subscription interval',
+        message: `Interval must be one of: ${FEATURED_INTERVALS.join(', ')}`,
+        allowedIntervals: FEATURED_INTERVALS,
+      });
       return;
     }
 
@@ -74,17 +90,9 @@ export const createFeaturedSubscription = async (req: Request, res: Response): P
       currentPeriodEnd = new Date(trialEndDate);
       price = 0; // Free during trial
     } else {
-      // Calculate period end based on interval
-      if (interval === 'weekly') {
-        currentPeriodEnd.setDate(currentPeriodEnd.getDate() + 7);
-        price = 10;
-      } else if (interval === 'monthly') {
-        currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + 1);
-        price = 35; // 30% discount for monthly
-      } else if (interval === 'yearly') {
-        currentPeriodEnd.setFullYear(currentPeriodEnd.getFullYear() + 1);
-        price = 400; // ~23% discount for yearly
-      }
+      // Calculate period end and price from the shared interval config.
+      currentPeriodEnd = computePeriodEnd(now, interval);
+      price = getIntervalPrice(interval);
     }
 
     // Apply coupon if provided (works for both trial and paid subscriptions)
@@ -458,15 +466,7 @@ export const checkExpiredSubscriptions = async (req: Request, res: Response) => 
         // In a real implementation, you would charge the payment method here
         // For now, we'll just extend the period
         const newPeriodStart = subscription.currentPeriodEnd;
-        const newPeriodEnd = new Date(newPeriodStart);
-
-        if (subscription.interval === 'weekly') {
-          newPeriodEnd.setDate(newPeriodEnd.getDate() + 7);
-        } else if (subscription.interval === 'monthly') {
-          newPeriodEnd.setMonth(newPeriodEnd.getMonth() + 1);
-        } else if (subscription.interval === 'yearly') {
-          newPeriodEnd.setFullYear(newPeriodEnd.getFullYear() + 1);
-        }
+        const newPeriodEnd = computePeriodEnd(newPeriodStart, subscription.interval);
 
         subscription.currentPeriodStart = newPeriodStart;
         subscription.currentPeriodEnd = newPeriodEnd;
