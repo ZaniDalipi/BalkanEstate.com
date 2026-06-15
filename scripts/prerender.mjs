@@ -161,6 +161,11 @@ const routes = [
     title: `Property for Sale in Greece - Islands, Athens & Coastal Homes | ${SITE_NAME}`,
     description: 'Find property for sale in Greece. Browse Athens apartments, island homes, and coastal villas. Golden visa eligible.',
   },
+  {
+    path: '/search?country=Slovenia',
+    title: `Property for Sale in Slovenia - Ljubljana & Alpine Real Estate | ${SITE_NAME}`,
+    description: 'Find property for sale in Slovenia. Browse apartments in Ljubljana, homes in Maribor, coastal property in Koper, and Alpine real estate near Bled.',
+  },
 
   // ── Other pages ──────────────────────────────────────────────────
   {
@@ -269,6 +274,7 @@ const COUNTRIES = [
   { name: 'Bulgaria', q: 'Bulgaria', cities: ['Sofia', 'Burgas', 'Varna'] },
   { name: 'Romania', q: 'Romania', cities: ['Bucharest', 'Cluj-Napoca', 'Brasov'] },
   { name: 'Greece', q: 'Greece', cities: ['Athens', 'Thessaloniki', 'Crete'] },
+  { name: 'Slovenia', q: 'Slovenia', cities: ['Ljubljana', 'Maribor', 'Koper', 'Bled'] },
 ];
 
 const PROPERTY_TYPES = [

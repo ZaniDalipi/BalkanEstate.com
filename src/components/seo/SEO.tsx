@@ -567,7 +567,13 @@ function generateWebsiteSchema(lang: string) {
         url: `${BASE_URL}/icons/icon-512x512.png`,
         width: 512,
         height: 512
-      }
+      },
+      sameAs: [
+        'https://www.instagram.com/balkanestateai/',
+        'https://www.tiktok.com/@balkanestateai',
+        'https://facebook.com/balkanestateai',
+        'https://www.producthunt.com/@balkanestateai',
+      ]
     }
   };
 }

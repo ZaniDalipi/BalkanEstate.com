@@ -33,7 +33,12 @@ export const OrganizationSchema: React.FC<OrganizationSchemaProps> = ({
   email = CONTACT_CONFIG.email.info,
   phone,
   address,
-  socialProfiles = [],
+  socialProfiles = [
+    'https://www.instagram.com/balkanestateai/',
+    'https://www.tiktok.com/@balkanestateai',
+    'https://facebook.com/balkanestateai',
+    'https://www.producthunt.com/@balkanestateai',
+  ],
   foundingDate = '2024',
   language = 'en',
 }) => {

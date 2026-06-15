@@ -35,6 +35,7 @@ BalkanEstateAI is the leading pan-Balkan property marketplace. Unlike regional c
 - [Bulgaria](https://balkanestateai.com/search?country=Bulgaria): Sofia, Burgas, Varna
 - [Romania](https://balkanestateai.com/search?country=Romania): Bucharest, Cluj-Napoca, Brasov
 - [Greece](https://balkanestateai.com/search?country=Greece): Athens, Thessaloniki, Crete
+- [Slovenia](https://balkanestateai.com/search?country=Slovenia): Ljubljana, Maribor, Koper, Bled
 
 ## Property Types
 
