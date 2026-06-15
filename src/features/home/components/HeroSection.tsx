@@ -83,7 +83,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       ]);
       return {
         properties: propsRes.pagination?.total || 0,
-        countries: 11,
+        countries: 10,
         agents: agentsRes.total || agentsRes.pagination?.total || (Array.isArray(agentsRes.agents) ? agentsRes.agents.length : 0),
         languages: 10,
       };
@@ -273,6 +273,26 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       }} />
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 pt-12 pb-16 sm:pt-24 sm:pb-28 hero-stagger">
+        {/* AI positioning badge — our key differentiator (no competitor has AI) */}
+        <div className="flex justify-center mb-4 sm:mb-6 hero-fade-up">
+          <span
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '7px',
+              padding: '6px 14px', borderRadius: '9999px',
+              fontSize: '12px', fontWeight: 600, letterSpacing: '0.01em',
+              color: '#1e40af',
+              background: 'linear-gradient(135deg, rgba(59,130,246,0.10), rgba(139,92,246,0.10))',
+              border: '1px solid rgba(59,130,246,0.25)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6)',
+            }}
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" />
+            </svg>
+            {t('home:hero.badge')}
+          </span>
+        </div>
+
         {/* Title */}
         <h1
           className="text-center text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-tight max-w-3xl mx-auto hero-fade-up"

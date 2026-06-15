@@ -56,8 +56,8 @@ const routes = [
   // Homepage
   {
     path: '/',
-    title: `${SITE_NAME} - Property for Sale in the Balkans | Houses, Apartments & Villas`,
-    description: 'Find property for sale across 10 Balkan countries. Browse apartments in Tirana, villas in Montenegro, houses in Belgrade, real estate in North Macedonia, and more. AI-powered search, 10 languages.',
+    title: `${SITE_NAME} - AI-Powered Property Search Across the Balkans`,
+    description: 'The only AI-powered real estate platform for all 10 Balkan countries. Search in plain language, get instant AI property valuations, and browse verified listings in Montenegro, Albania, Serbia, North Macedonia, and more — in 10 languages.',
   },
   // Main search
   {

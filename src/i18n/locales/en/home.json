@@ -1,17 +1,17 @@
 {
   "seo": {
-    "title": "BalkanEstate - Find Your Dream Property Across the Balkans",
-    "description": "Discover properties for sale and rent across 11 Balkan countries. AI-powered search, verified agents, and real-time listings in 10 languages."
+    "title": "BalkanEstateAI - AI-Powered Property Search Across the Balkans",
+    "description": "The only AI-powered real estate platform for all 10 Balkan countries. Search in plain language, get instant AI property valuations, and browse verified listings in 10 languages."
   },
   "hero": {
-    "badge": "The #1 Balkan Real Estate Platform",
+    "badge": "AI-Powered Search & Instant Valuations",
     "title": "Find Your",
     "titleHighlight": "Dream Home",
     "typewriterWord2": "Perfect Villa",
     "typewriterWord3": "Ideal Apartment",
     "typewriterWord4": "New Beginning",
     "titleEnd": "in the Balkans",
-    "subtitle": "Discover thousands of properties across 11 countries. AI-powered search, verified agents, and listings in 10 languages.",
+    "subtitle": "The only AI-powered property platform for all 10 Balkan countries. Describe what you want in plain language, get instant AI valuations, and connect with verified agents — in 10 languages.",
     "searchPlaceholder": "Search by city, neighborhood, or address...",
     "searchButton": "Search",
     "popularSearches": "Popular:",
