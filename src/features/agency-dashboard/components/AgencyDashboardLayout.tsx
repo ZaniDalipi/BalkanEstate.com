@@ -4,6 +4,7 @@ import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { useAppContext } from '@/context/AppContext';
 import AgencyDashboardSidebar from './AgencyDashboardSidebar';
 import AgencyDashboardHeader from './AgencyDashboardHeader';
+import { buildLocalizedPath } from '../../../utils/languageRouting';
 import { useAgencyOverview } from '../hooks/useAgencyOverview';
 import { agencyDashboardKeys } from '../api/agencyDashboardKeys';
 import { socketService } from '@/services/socketService';
@@ -70,7 +71,12 @@ const AgencyDashboardLayout: React.FC<AgencyDashboardLayoutProps> = ({
   };
 
   const handleBackToAgency = () => {
+    // Navigate to the public agency page: set the selected agency, switch the
+    // active view, and update the URL so the route is consistent (and survives
+    // reloads / back navigation). The backend resolves agencies by id or slug.
     dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencyId });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
+    window.history.pushState({}, '', buildLocalizedPath(`/agencies/${agencyId}`));
   };
 
   return (
