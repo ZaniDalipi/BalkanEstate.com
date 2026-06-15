@@ -211,5 +211,97 @@ Disallow: /login
 Disallow: /register
 Crawl-delay: 2
 
+# OpenAI ChatGPT Search crawler (powers in-chat search results & citations)
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /account
+Disallow: /inbox
+Disallow: /admin
+Disallow: /saved-properties
+Disallow: /saved-searches
+Disallow: /create-listing
+Disallow: /edit-listing
+Disallow: /create-rental
+Disallow: /create-agency
+Disallow: /agency-dashboard
+Disallow: /analytics
+Disallow: /payment/
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /login
+Disallow: /register
+Crawl-delay: 2
+
+# Anthropic Claude crawler
+User-agent: ClaudeBot
+Allow: /
+Disallow: /account
+Disallow: /inbox
+Disallow: /admin
+Disallow: /saved-properties
+Disallow: /saved-searches
+Disallow: /create-listing
+Disallow: /edit-listing
+Disallow: /create-rental
+Disallow: /create-agency
+Disallow: /agency-dashboard
+Disallow: /analytics
+Disallow: /payment/
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /login
+Disallow: /register
+Crawl-delay: 2
+
+# Anthropic Claude in-product fetch (when a user asks Claude about a page)
+User-agent: Claude-Web
+Allow: /
+Disallow: /account
+Disallow: /admin
+Disallow: /payment/
+Disallow: /login
+Disallow: /register
+Crawl-delay: 2
+
+# Apple Intelligence / Siri AI training & answers
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /account
+Disallow: /admin
+Disallow: /payment/
+Disallow: /login
+Disallow: /register
+Crawl-delay: 2
+
+# Meta AI (Llama / Meta AI assistant)
+User-agent: meta-externalagent
+Allow: /
+Disallow: /account
+Disallow: /admin
+Disallow: /payment/
+Disallow: /login
+Disallow: /register
+Crawl-delay: 2
+
+# Amazon (Alexa / Rufus AI)
+User-agent: Amazonbot
+Allow: /
+Disallow: /account
+Disallow: /admin
+Disallow: /payment/
+Disallow: /login
+Disallow: /register
+Crawl-delay: 2
+
+# Cohere AI
+User-agent: cohere-ai
+Allow: /
+Disallow: /account
+Disallow: /admin
+Disallow: /payment/
+Disallow: /login
+Disallow: /register
+Crawl-delay: 2
+
 # Sitemap location
 Sitemap: https://balkanestateai.com/sitemap.xml
