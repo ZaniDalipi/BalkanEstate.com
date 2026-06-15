@@ -13,6 +13,9 @@ export const useArticle = (slug: string | null) => {
       return response.json();
     },
     enabled: !!slug,
+    // Distinct-entity detail view — opt out of the global keepPreviousData
+    // default so switching articles shows a loading state, not the prior one.
+    placeholderData: undefined,
     staleTime: 10 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
     retry: (failureCount, err) => {

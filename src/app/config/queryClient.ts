@@ -1,7 +1,7 @@
 // Query Client Configuration for TanStack Query
 // Centralized configuration with optimal defaults
 
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, keepPreviousData } from '@tanstack/react-query';
 
 /**
  * Creates a Query Client with production-ready defaults
@@ -11,10 +11,18 @@ import { QueryClient } from '@tanstack/react-query';
  * - Cache time: 2 minutes - Keep unused data briefly
  * - Retry: Smart retry based on error type
  * - Refetch: On window focus and reconnect
+ * - Placeholder data: keep previous result while a new query key loads, so the
+ *   UI never flashes back to a skeleton on filter/pagination/search/locale
+ *   changes — content stays put and swaps in smoothly (no flicker).
  */
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      // Keep showing the last successful data for a query while the next key
+      // resolves. Only kicks in when there IS previous data (first load still
+      // shows skeletons), so transitions feel seamless instead of jumpy.
+      placeholderData: keepPreviousData,
+
       // How long data is considered fresh (no refetch)
       staleTime: 30 * 1000, // 30 seconds - fast refresh for all data
 

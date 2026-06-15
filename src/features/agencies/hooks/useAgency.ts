@@ -14,6 +14,9 @@ export function useAgency(agencyId: string | null | undefined) {
       return getAgency(agencyId);
     },
     enabled: !!agencyId,
+    // Distinct-entity detail view — opt out of the global keepPreviousData
+    // default so switching agencies shows a loading state, not the prior one.
+    placeholderData: undefined,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     retry: (failureCount, error: any) => {
