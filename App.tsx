@@ -811,7 +811,11 @@ const MainLayout: React.FC = () => {
   const isFullHeightView = isSearchPage || isRentalPage || state.activeView === 'inbox' || !!state.selectedProperty;
   // On mobile: floating header hidden, PWA top bar handles navigation
   // On desktop: floating header shown (except property details which has its own)
-  const showHeader = !isMobile && !state.selectedProperty && !state.selectedAgentId && !state.selectedAgencyId && !state.selectedBusinessListingId;
+  // Agency dashboard has its own full header bar (Browse Properties / Back to Agency /
+  // Back to Site / account), so the global floating header is suppressed there to avoid
+  // it overlapping and covering those controls.
+  const hasOwnHeader = state.activeView === 'agency-dashboard';
+  const showHeader = !isMobile && !state.selectedProperty && !state.selectedAgentId && !state.selectedAgencyId && !state.selectedBusinessListingId && !hasOwnHeader;
 
   // PWA top bar: shown on mobile for internal pages only
   // NOT shown on: search/rental (have their own search headers), property details (has its own header)
