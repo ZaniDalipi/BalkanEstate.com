@@ -17,6 +17,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { dirname, join } from 'path';
+import { LANDING_PAGES } from './seo-landing-pages.mjs';
 
 const DIST_DIR = process.argv[2] || 'dist';
 const BASE_URL = 'https://balkanestateai.com';
@@ -338,7 +339,7 @@ function faqForRoute(route) {
 }
 
 // Build crawler-visible HTML for #root.
-function buildBodyContent(route, lang, canonicalUrl) {
+function buildBodyContent(route, lang, canonicalUrl, loc) {
   const L = LABELS[lang] || LABELS.en;
   const prefix = lang === 'en' ? '' : `/${lang}`;
   const link = (path, text) => `<a href="${BASE_URL}${prefix}${path}">${escapeHtml(text)}</a>`;
@@ -355,17 +356,20 @@ function buildBodyContent(route, lang, canonicalUrl) {
     ['/guides', 'Buying guides'], ['/mortgage-calculator', 'Mortgage calculator'],
   ].map(([p, t]) => `<li>${link(p, t)}</li>`).join('');
 
-  const faqs = faqForRoute(route);
+  const faqs = (loc && loc.faqs) ? loc.faqs : faqForRoute(route);
   const faqHtml = faqs.map(f =>
     `<div itemscope itemtype="https://schema.org/Question"><h3 itemprop="name">${escapeHtml(f.q)}</h3>` +
     `<div itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer"><p itemprop="text">${escapeHtml(f.a)}</p></div></div>`
   ).join('');
 
+  const h1 = loc?.h1 || route.title.split(' | ')[0];
+  const intro = loc?.description || route.description;
+
   // Visible while JS loads; React replaces it on mount (createRoot).
   return `
       <main id="prerendered-content">
-        <h1>${escapeHtml(route.title.split(' | ')[0])}</h1>
-        <p>${escapeHtml(route.description)}</p>
+        <h1>${escapeHtml(h1)}</h1>
+        <p>${escapeHtml(intro)}</p>
         <nav aria-label="${escapeHtml(L.country)}"><h2>${escapeHtml(L.country)}</h2><ul>${countryLinks}</ul></nav>
         <nav aria-label="${escapeHtml(L.type)}"><h2>${escapeHtml(L.type)}</h2><ul>${typeLinks}</ul></nav>
         <nav aria-label="${escapeHtml(L.pages)}"><h2>${escapeHtml(L.pages)}</h2><ul>${pageLinks}</ul></nav>
@@ -374,7 +378,7 @@ function buildBodyContent(route, lang, canonicalUrl) {
 }
 
 // Build per-page JSON-LD: BreadcrumbList + CollectionPage + FAQPage.
-function buildPageJsonLd(route, lang, canonicalUrl) {
+function buildPageJsonLd(route, lang, canonicalUrl, loc) {
   const prefix = lang === 'en' ? '' : `/${lang}`;
   const crumbs = [{ name: 'Home', url: `${BASE_URL}${prefix}/` }];
   const country = COUNTRIES.find(c => route.path.includes(`country=${c.q.replace(/ /g, '+')}`) || route.path.includes(`country=${c.q}`));
@@ -398,14 +402,14 @@ function buildPageJsonLd(route, lang, canonicalUrl) {
     '@type': route.path.includes('/search') || route.path.includes('/rentals') ? 'CollectionPage' : 'WebPage',
     '@id': `${canonicalUrl}#webpage`,
     url: canonicalUrl,
-    name: route.title,
-    description: route.description,
+    name: loc?.title || route.title,
+    description: loc?.description || route.description,
     inLanguage: lang,
     isPartOf: { '@id': `${BASE_URL}/#website` },
     about: { '@id': `${BASE_URL}/#organization` },
   };
 
-  const faqs = faqForRoute(route);
+  const faqs = (loc && loc.faqs) ? loc.faqs : faqForRoute(route);
   const faqPage = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -445,6 +449,11 @@ function prerenderPage(route, lang) {
   const canonicalUrl = `${BASE_URL}${langPrefix}${route.path}`;
   const ogLocale = OG_LOCALE_MAP[lang] || 'en_US';
 
+  // Native-language override for this path+language, if one exists.
+  const loc = LOCALIZED[route.path]?.[lang];
+  const pageTitle = loc?.title ? `${loc.title} | ${SITE_NAME}` : route.title;
+  const pageDescription = loc?.description || route.description;
+
   let html = template;
 
   // Set html lang attribute
@@ -453,19 +462,19 @@ function prerenderPage(route, lang) {
   // Replace title
   html = html.replace(
     /<title>[^<]*<\/title>/,
-    `<title>${escapeHtml(route.title)}</title>`
+    `<title>${escapeHtml(pageTitle)}</title>`
   );
 
   // Replace meta description
   html = html.replace(
     /<meta name="description" content="[^"]*"/,
-    `<meta name="description" content="${escapeHtml(route.description)}"`
+    `<meta name="description" content="${escapeHtml(pageDescription)}"`
   );
 
   // Replace meta title
   html = html.replace(
     /<meta name="title" content="[^"]*"/,
-    `<meta name="title" content="${escapeHtml(route.title)}"`
+    `<meta name="title" content="${escapeHtml(pageTitle)}"`
   );
 
   // Replace meta language
@@ -483,11 +492,11 @@ function prerenderPage(route, lang) {
   // Replace OG tags
   html = html.replace(
     /<meta property="og:title" content="[^"]*"/,
-    `<meta property="og:title" content="${escapeHtml(route.title)}"`
+    `<meta property="og:title" content="${escapeHtml(pageTitle)}"`
   );
   html = html.replace(
     /<meta property="og:description" content="[^"]*"/,
-    `<meta property="og:description" content="${escapeHtml(route.description)}"`
+    `<meta property="og:description" content="${escapeHtml(pageDescription)}"`
   );
   html = html.replace(
     /<meta property="og:url" content="[^"]*"/,
@@ -501,11 +510,11 @@ function prerenderPage(route, lang) {
   // Replace Twitter tags
   html = html.replace(
     /<meta name="twitter:title" content="[^"]*"/,
-    `<meta name="twitter:title" content="${escapeHtml(route.title)}"`
+    `<meta name="twitter:title" content="${escapeHtml(pageTitle)}"`
   );
   html = html.replace(
     /<meta name="twitter:description" content="[^"]*"/,
-    `<meta name="twitter:description" content="${escapeHtml(route.description)}"`
+    `<meta name="twitter:description" content="${escapeHtml(pageDescription)}"`
   );
 
   // Replace hreflang tags with page-specific ones
@@ -517,7 +526,7 @@ function prerenderPage(route, lang) {
   // Inject per-page JSON-LD (BreadcrumbList + CollectionPage/WebPage + FAQPage),
   // a freshness signal, and prerender status indicator before </head>.
   const buildDate = new Date().toISOString();
-  const pageJsonLd = buildPageJsonLd(route, lang, canonicalUrl);
+  const pageJsonLd = buildPageJsonLd(route, lang, canonicalUrl, loc);
   html = html.replace(
     '</head>',
     `${pageJsonLd}\n  <meta property="article:modified_time" content="${buildDate}" />\n  <meta name="prerender-status" content="200" />\n  </head>`
@@ -525,8 +534,16 @@ function prerenderPage(route, lang) {
 
   // Seed #root with crawler-visible content. React (createRoot) replaces this on
   // mount, so users are unaffected while JS-less AI crawlers get real content.
-  const bodyContent = buildBodyContent(route, lang, canonicalUrl);
+  const bodyContent = buildBodyContent(route, lang, canonicalUrl, loc);
   html = html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+
+  // Remove the generic <noscript> SEO fallback: the per-page #root content above
+  // now provides superior, page-specific content for crawlers and no-JS users,
+  // and the static block would otherwise duplicate the H1 and content.
+  html = html.replace(
+    /\s*<!-- Noscript fallback for SEO crawlers and users without JavaScript -->[\s\S]*?<\/noscript>/,
+    ''
+  );
 
   // Determine output path
   let outputPath;
@@ -572,6 +589,20 @@ function prerenderPage(route, lang) {
   }
   writeFileSync(outputPath, html, 'utf-8');
   return outputPath;
+}
+
+// ─── Merge native-language landing pages ─────────────────────────────────────
+// Build a path -> { lang -> {title, description, h1, faqs} } lookup, and register
+// an English route for any landing path not already covered (so it generates in
+// all languages with hreflang). Existing routes keep their richer English copy.
+const LOCALIZED = {};
+const existingPaths = new Set(routes.map(r => r.path));
+for (const page of LANDING_PAGES) {
+  LOCALIZED[page.path] = page.loc;
+  if (!existingPaths.has(page.path)) {
+    routes.push({ path: page.path, title: `${page.en.title} | ${SITE_NAME}`, description: page.en.description });
+    existingPaths.add(page.path);
+  }
 }
 
 let generated = 0;
