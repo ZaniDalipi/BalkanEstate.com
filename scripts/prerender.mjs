@@ -39,6 +39,15 @@ if (!existsSync(templatePath)) {
 }
 const template = readFileSync(templatePath, 'utf-8');
 
+// Validate the template exposes the structural hooks this script relies on, so a
+// silent no-op replacement (e.g. empty #root) fails loudly at build time instead.
+for (const marker of ['<div id="root"></div>', '</head>', '<title>']) {
+  if (!template.includes(marker)) {
+    console.error(`❌ Template ${templatePath} is missing required marker: ${marker}`);
+    process.exit(1);
+  }
+}
+
 // ─── Routes to prerender ─────────────────────────────────────────────────────
 // Each route gets a static HTML file with SEO-optimized meta tags.
 // Prioritized by keyword opportunity score.
@@ -48,13 +57,13 @@ const routes = [
   {
     path: '/',
     title: `${SITE_NAME} - Property for Sale in the Balkans | Houses, Apartments & Villas`,
-    description: 'Find property for sale across 11 Balkan countries. Browse apartments in Tirana, villas in Montenegro, houses in Belgrade, real estate in North Macedonia, and more. AI-powered search, 10 languages.',
+    description: 'Find property for sale across 10 Balkan countries. Browse apartments in Tirana, villas in Montenegro, houses in Belgrade, real estate in North Macedonia, and more. AI-powered search, 10 languages.',
   },
   // Main search
   {
     path: '/search',
     title: `Property for Sale in the Balkans - Houses, Apartments & Villas | ${SITE_NAME}`,
-    description: 'Search property for sale across 11 Balkan countries. AI-powered search for apartments, houses, villas, and land in Montenegro, Albania, Serbia, North Macedonia, Croatia, and more.',
+    description: 'Search property for sale across 10 Balkan countries. AI-powered search for apartments, houses, villas, and land in Montenegro, Albania, Serbia, North Macedonia, Croatia, and more.',
   },
 
   // ── Tier 1: Kosovo, N. Macedonia, Albania ────────────────────────
@@ -162,17 +171,12 @@ const routes = [
     title: `Property for Sale in Greece - Islands, Athens & Coastal Homes | ${SITE_NAME}`,
     description: 'Find property for sale in Greece. Browse Athens apartments, island homes, and coastal villas. Golden visa eligible.',
   },
-  {
-    path: '/search?country=Slovenia',
-    title: `Property for Sale in Slovenia - Ljubljana & Alpine Real Estate | ${SITE_NAME}`,
-    description: 'Find property for sale in Slovenia. Browse apartments in Ljubljana, homes in Maribor, coastal property in Koper, and Alpine real estate near Bled.',
-  },
 
   // ── Other pages ──────────────────────────────────────────────────
   {
     path: '/agents',
     title: `Real Estate Agents in the Balkans - Find Verified Agents | ${SITE_NAME}`,
-    description: 'Find verified real estate agents across 11 Balkan countries. Connect with local property experts in Montenegro, Albania, Serbia, North Macedonia, and more.',
+    description: 'Find verified real estate agents across 10 Balkan countries. Connect with local property experts in Montenegro, Albania, Serbia, North Macedonia, and more.',
   },
   {
     path: '/agencies',
@@ -236,7 +240,7 @@ const routes = [
   {
     path: '/search?propertyType=apartment',
     title: `Apartments for Sale in the Balkans - Buy Flat | ${SITE_NAME}`,
-    description: 'Find apartments for sale across 11 Balkan countries. City flats, new builds, and investment apartments in Montenegro, Albania, Serbia, and more.',
+    description: 'Find apartments for sale across 10 Balkan countries. City flats, new builds, and investment apartments in Montenegro, Albania, Serbia, and more.',
   },
   {
     path: '/search?propertyType=house',
@@ -275,7 +279,6 @@ const COUNTRIES = [
   { name: 'Bulgaria', q: 'Bulgaria', cities: ['Sofia', 'Burgas', 'Varna'] },
   { name: 'Romania', q: 'Romania', cities: ['Bucharest', 'Cluj-Napoca', 'Brasov'] },
   { name: 'Greece', q: 'Greece', cities: ['Athens', 'Thessaloniki', 'Crete'] },
-  { name: 'Slovenia', q: 'Slovenia', cities: ['Ljubljana', 'Maribor', 'Koper', 'Bled'] },
 ];
 
 const PROPERTY_TYPES = [
@@ -304,11 +307,11 @@ const LABELS = {
 
 // FAQ sets (English). Keyed by page category. {country} is interpolated.
 const FAQ_GENERAL = [
-  { q: 'Which countries does BalkanEstateAI cover?', a: 'BalkanEstateAI lists property for sale and rent across all 11 Balkan countries: Albania, Bosnia and Herzegovina, Bulgaria, Croatia, Greece, Kosovo, Montenegro, North Macedonia, Romania, Serbia, and Slovenia — on a single platform.' },
+  { q: 'Which countries does BalkanEstateAI cover?', a: 'BalkanEstateAI lists property for sale and rent across all 10 Balkan countries: Albania, Bosnia and Herzegovina, Bulgaria, Croatia, Greece, Kosovo, Montenegro, North Macedonia, Romania, and Serbia — on a single platform.' },
   { q: 'Can foreigners buy property in the Balkans?', a: 'In most Balkan countries foreign nationals can buy property, though rules differ by country (some restrict agricultural land or require a local company for certain purchases). See our country-specific buying guides for the exact process.' },
   { q: 'What languages is BalkanEstateAI available in?', a: 'The platform is available in 10 languages: English, Albanian, Serbian, Bulgarian, Croatian, Bosnian, Macedonian, Montenegrin, Romanian, and Greek.' },
   { q: 'Is BalkanEstateAI free for buyers and renters?', a: 'Yes. Searching listings, using AI-powered natural-language search, and contacting agents is free for buyers and renters.' },
-  { q: 'What makes BalkanEstateAI different from other portals?', a: 'It is the only single platform covering all 11 Balkan countries with AI-powered search and AI property valuations, whereas most competitors cover a few countries or run a separate site per country.' },
+  { q: 'What makes BalkanEstateAI different from other portals?', a: 'It is the only single platform covering all 10 Balkan countries with AI-powered search and AI property valuations, whereas most competitors cover a few countries or run a separate site per country.' },
 ];
 
 const faqCountry = (country) => [
@@ -319,7 +322,7 @@ const faqCountry = (country) => [
 ];
 
 const faqType = (type) => [
-  { q: `Where can I buy ${type} in the Balkans?`, a: `BalkanEstateAI lists ${type} for sale across all 11 Balkan countries. Filter by country and city to find ${type} that match your budget and location.` },
+  { q: `Where can I buy ${type} in the Balkans?`, a: `BalkanEstateAI lists ${type} for sale across all 10 Balkan countries. Filter by country and city to find ${type} that match your budget and location.` },
   { q: `Can I get a price estimate for a ${type}?`, a: `Yes — use the free AI property valuation tool to estimate the value of any ${type} in the Balkans based on comparable listings and location data.` },
 ];
 
@@ -591,6 +594,49 @@ function prerenderPage(route, lang) {
   return outputPath;
 }
 
+// ─── Validate native-language landing-page data ──────────────────────────────
+// This is the system boundary for externally-edited content (seo-landing-pages.mjs).
+// Validate the shape up front so malformed entries fail the build with a clear
+// message instead of emitting broken pages or invalid JSON-LD.
+function validateLandingPages(pages) {
+  if (!Array.isArray(pages)) {
+    throw new Error('LANDING_PAGES must be an array');
+  }
+  const seen = new Set();
+  pages.forEach((page, i) => {
+    const at = `LANDING_PAGES[${i}]${page?.path ? ` (${page.path})` : ''}`;
+    if (!page || typeof page.path !== 'string' || !page.path.startsWith('/')) {
+      throw new Error(`${at}: 'path' must be a string starting with '/'`);
+    }
+    if (seen.has(page.path)) throw new Error(`${at}: duplicate path`);
+    seen.add(page.path);
+    if (!page.en?.title || !page.en?.description) {
+      throw new Error(`${at}: missing en.title or en.description`);
+    }
+    if (!page.loc || typeof page.loc !== 'object' || Object.keys(page.loc).length === 0) {
+      throw new Error(`${at}: 'loc' must contain at least one language`);
+    }
+    for (const [lang, c] of Object.entries(page.loc)) {
+      if (!LANGUAGES.includes(lang)) {
+        throw new Error(`${at}: loc language '${lang}' is not a supported locale`);
+      }
+      if (!c?.title || !c?.description || !c?.h1) {
+        throw new Error(`${at}.loc.${lang}: requires title, description, and h1`);
+      }
+      if (!Array.isArray(c.faqs) || c.faqs.some(f => !f?.q || !f?.a)) {
+        throw new Error(`${at}.loc.${lang}: 'faqs' must be an array of { q, a }`);
+      }
+    }
+  });
+}
+
+try {
+  validateLandingPages(LANDING_PAGES);
+} catch (err) {
+  console.error(`❌ Invalid landing-page data: ${err.message}`);
+  process.exit(1);
+}
+
 // ─── Merge native-language landing pages ─────────────────────────────────────
 // Build a path -> { lang -> {title, description, h1, faqs} } lookup, and register
 // an English route for any landing path not already covered (so it generates in
@@ -610,7 +656,12 @@ let generated = 0;
 // Generate English (default) pages first, then all other languages
 for (const route of routes) {
   for (const lang of LANGUAGES) {
-    prerenderPage(route, lang);
+    try {
+      prerenderPage(route, lang);
+    } catch (err) {
+      console.error(`❌ Failed to prerender ${route.path} [${lang}]: ${err.message}`);
+      process.exit(1);
+    }
     generated++;
   }
 }

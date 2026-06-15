@@ -18,9 +18,6 @@
  * Native strings below are written to be grammatically correct; any additions in
  * a new language/city should be reviewed by a native speaker before shipping,
  * since incorrect grammar hurts credibility with both users and AI engines.
- *
- * NOTE: Slovene (sl) is not yet a supported app locale, so Slovenia landing
- * pages remain English until `sl` is added to the i18n config.
  */
 
 export const LANDING_PAGES = [
