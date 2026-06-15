@@ -624,13 +624,26 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // Let the custom building cover the original via z-ordering. We previously
-    // attempted a `setFilter('3d-buildings', ['<', ['get', 'render_height'], 5])`
-    // here, but `render_height` is absent on many features and MapLibre then
-    // logs "Expected value to be of type number, but found null instead." We
-    // clear any prior filter to be safe.
+    // Prevent the original `3d-buildings` extrusion from occluding our custom
+    // floor-sliced building. Both occupy the same footprint (the custom one is
+    // only 5% larger), so which one "wins" each pixel comes down to depth-buffer
+    // precision — that varies by GPU/driver/browser, which is exactly why the
+    // green floor showed locally but got hidden in production.
+    //
+    // We hide ONLY the matched building by its feature id. This is reliable
+    // because it doesn't depend on `render_height` (absent on many features,
+    // which is why an earlier `['<', ['get', 'render_height'], 5]` filter was
+    // reverted — it made MapLibre log "Expected value to be of type number,
+    // but found null instead.").
     if (mapInstance.getLayer('3d-buildings')) {
-      mapInstance.setFilter('3d-buildings', null);
+      const matchedFeatureId = buildingFeature?.id;
+      if (matchedFeatureId != null) {
+        mapInstance.setFilter('3d-buildings', ['!=', ['id'], matchedFeatureId]);
+      } else {
+        // No stable id available — clear any prior filter and rely on the
+        // custom building (scaled larger and drawn last) covering the original.
+        mapInstance.setFilter('3d-buildings', null);
+      }
     }
 
     // Add source for the custom building using actual geometry
