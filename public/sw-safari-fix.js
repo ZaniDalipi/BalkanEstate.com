@@ -9,6 +9,21 @@
  * rather than a stale precached copy that may reference dead bundle files.
  * The precache is only used as an offline fallback.
  */
+
+// On activation, delete ALL old workbox-precache caches so stale index.html
+// with dead JS bundle references can never be served again.
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((names) =>
+      Promise.all(
+        names
+          .filter((n) => n.startsWith('workbox-precache'))
+          .map((n) => caches.delete(n))
+      )
+    )
+  );
+});
+
 self.addEventListener('fetch', (event) => {
   // Only handle top-level navigation (HTML page loads)
   if (event.request.mode !== 'navigate') return;
