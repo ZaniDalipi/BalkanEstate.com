@@ -701,28 +701,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // Hide ONLY the property's own building — the one our floor tower replaces —
-    // from every building extrusion layer (incl. the Liberty base style's native
-    // layer, not just our '3d-buildings'). We combine with each layer's existing
-    // filter so all the OTHER surrounding buildings keep rendering normally.
-    const matchedFeatureId = buildingFeature?.id;
-    if (matchedFeatureId != null) {
-      const excludeFilter = ['!=', ['id'], matchedFeatureId] as maplibregl.FilterSpecification;
-      for (const layerId of queryBuildingLayers) {
-        try {
-          const existing = mapInstance.getFilter(layerId) as maplibregl.FilterSpecification | undefined;
-          mapInstance.setFilter(
-            layerId,
-            existing
-              ? (['all', existing, excludeFilter] as maplibregl.FilterSpecification)
-              : excludeFilter
-          );
-        } catch {
-          // some layers may reject this filter shape; skip them
-        }
-      }
-      mapLogger.warn('[FLOORVIZ] hid property building', { matchedFeatureId, layers: queryBuildingLayers });
-    }
+    // Note: we do NOT hide any buildings. The floor tower simply renders on top
+    // of the existing buildings — its slabs are opaque and slightly larger than
+    // the footprint, and the highlighted floor protrudes further, so the green
+    // floor stays visible without removing any surrounding objects.
 
     // The highlighted floor is extruded from a slightly larger footprint than
     // the other floors so it always protrudes in front of both the grey slabs
