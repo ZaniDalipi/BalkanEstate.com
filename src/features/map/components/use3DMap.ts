@@ -434,6 +434,23 @@ export function use3DMap(props: Map3DBuildingsProps) {
     tourUrl?: string,
     onEnterTour?: () => void
   ) => {
+    mapLogger.warn('[FLOORVIZ] addCustomBuilding3D called', {
+      floorNum, floorNumType: typeof floorNum,
+      totalFlrs, totalFlrsType: typeof totalFlrs,
+      lat: latitude, lng: longitude,
+      has3dBuildingsLayer: !!mapInstance.getLayer('3d-buildings'),
+    });
+
+    // Coerce to numbers defensively — if these arrive as strings (e.g. from the
+    // API) then `floor === floorNum` strict-equality never matches and the green
+    // highlighted floor silently disappears, with no error.
+    floorNum = Number(floorNum);
+    totalFlrs = Number(totalFlrs);
+    if (!Number.isFinite(totalFlrs) || totalFlrs <= 0) {
+      mapLogger.warn('[FLOORVIZ] aborting: invalid totalFlrs', { totalFlrs });
+      return;
+    }
+
     const floorHeightM = 2; // 3m per floor
     const totalHeightM = totalFlrs * floorHeightM;
 
@@ -619,9 +636,11 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
     // Fallback: synthesize a footprint so the floor tower always renders. ~14m
     // square reads as a believable tower for any floor count.
+    const usedSynthetic = !buildingCoords;
     if (!buildingCoords) {
       buildingCoords = makeSyntheticFootprint(7);
     }
+    mapLogger.warn('[FLOORVIZ] footprint resolved', { usedSynthetic, ringPoints: buildingCoords[0]?.length });
 
     // Get actual building height from map data if available
     let actualBuildingHeight = totalHeightM;
@@ -664,14 +683,17 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // Keep the original `3d-buildings` extrusion in place. It sits just inside
-    // our scaled custom building and shows through the gaps between floor slabs,
-    // giving the dark "separator line" look between floors (see the reference
-    // design). We deliberately do NOT hide it: hiding it leaves the gaps cutting
-    // straight through to the background, which makes the whole tower read as a
-    // hollow, translucent box. We clear any stale filter to be safe.
+    // Hide the matched original building. We render our own self-contained tower
+    // (a dark full-height "core" + opaque floor slabs), so we must not let the
+    // original extrusion remain: a taller/wider real building would dominate or
+    // z-fight our tower (the cause of the inconsistent result across machines).
+    // Hiding by feature id is reliable and independent of render_height.
     if (mapInstance.getLayer('3d-buildings')) {
-      mapInstance.setFilter('3d-buildings', null);
+      const matchedFeatureId = buildingFeature?.id;
+      mapInstance.setFilter(
+        '3d-buildings',
+        matchedFeatureId != null ? ['!=', ['id'], matchedFeatureId] : null
+      );
     }
 
     // The highlighted floor is extruded from a slightly larger footprint than
@@ -712,6 +734,27 @@ export function use3DMap(props: Map3DBuildingsProps) {
       });
     }
 
+    // Dark full-height "core" sitting just inside the slabs (unscaled footprint).
+    // The gaps between the opaque floor slabs reveal this core, producing the
+    // dark separator line between floors — deterministically, without depending
+    // on the original building being present behind our tower.
+    const coreSourceData: GeoJSON.Feature = {
+      type: 'Feature',
+      properties: { height: totalHeightM, totalFloors: totalFlrs },
+      geometry: {
+        type: 'Polygon',
+        coordinates: buildingCoords,
+      },
+    };
+    if (!mapInstance.getSource('custom-building-core')) {
+      mapInstance.addSource('custom-building-core', {
+        type: 'geojson',
+        data: coreSourceData,
+      });
+    } else {
+      (mapInstance.getSource('custom-building-core') as maplibregl.GeoJSONSource).setData(coreSourceData);
+    }
+
     // Separate, slightly larger source used only for the highlighted floor.
     const highlightSourceData: GeoJSON.Feature = {
       type: 'Feature',
@@ -740,6 +783,23 @@ export function use3DMap(props: Map3DBuildingsProps) {
     if (mapInstance.getLayer('building-floor-highlight-glow')) {
       mapInstance.removeLayer('building-floor-highlight-glow');
     }
+    if (mapInstance.getLayer('building-core')) {
+      mapInstance.removeLayer('building-core');
+    }
+
+    // Dark full-height core, drawn first so the floor slabs sit on top of it and
+    // the inter-floor gaps reveal it as solid dark separator lines.
+    mapInstance.addLayer({
+      id: 'building-core',
+      type: 'fill-extrusion',
+      source: 'custom-building-core',
+      paint: {
+        'fill-extrusion-color': '#1f2937',
+        'fill-extrusion-height': finalBuildingHeight,
+        'fill-extrusion-base': 0,
+        'fill-extrusion-opacity': 1,
+      },
+    });
 
     // Add floor slice layers - each floor is a separate "box" stacked on top of each other
     // The gap between floors makes each box clearly distinct. Slabs are fully
@@ -769,6 +829,15 @@ export function use3DMap(props: Map3DBuildingsProps) {
         },
       });
     }
+
+    mapLogger.warn('[FLOORVIZ] floor layers added', {
+      totalFlrs,
+      coreLayer: !!mapInstance.getLayer('building-core'),
+      floor1Layer: !!mapInstance.getLayer('building-floor-1'),
+      highlightFloorLayer: !!mapInstance.getLayer(`building-floor-${floorNum}`),
+      adjustedFloorHeight,
+      finalBuildingHeight,
+    });
 
     // Add a brighter outline layer for the highlighted floor to make it pop
     const highlightBase = (floorNum - 1) * adjustedFloorHeight;
@@ -1262,6 +1331,11 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
       // Add custom 3D building with floor slices for properties with floor data
       // Wait for tiles to fully load before querying building geometry
+      mapLogger.warn('[FLOORVIZ] trigger check', {
+        floorNumber, floorNumberType: typeof floorNumber,
+        totalFloors, totalFloorsType: typeof totalFloors,
+        willRender: floorNumber != null && totalFloors != null && totalFloors > 0,
+      });
       if (floorNumber != null && totalFloors != null && totalFloors > 0) {
         // Retry mechanism to ensure building tiles are loaded
         let retryCount = 0;
