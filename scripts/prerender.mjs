@@ -40,12 +40,35 @@ if (!existsSync(templatePath)) {
 const template = readFileSync(templatePath, 'utf-8');
 
 // Validate the template exposes the structural hooks this script relies on, so a
-// silent no-op replacement (e.g. empty #root) fails loudly at build time instead.
-for (const marker of ['<div id="root"></div>', '</head>', '<title>']) {
+// silent no-op replacement fails loudly at build time instead. #root may be empty
+// or seeded with an app-shell loader (createRoot replaces it on mount either way),
+// so we only require the opening tag here — replaceRootContent handles both shapes.
+for (const marker of ['<div id="root">', '</head>', '<title>']) {
   if (!template.includes(marker)) {
     console.error(`❌ Template ${templatePath} is missing required marker: ${marker}`);
     process.exit(1);
   }
+}
+
+// Replace everything inside the <div id="root"> … </div> block with crawler-visible
+// content, regardless of whether the source #root is empty or seeded with the
+// app-shell loader. The scan is nesting-aware so the loader's inner <div>s don't
+// confuse the search for the matching closing tag.
+function replaceRootContent(html, innerHtml) {
+  const openTag = '<div id="root">';
+  const start = html.indexOf(openTag);
+  if (start === -1) return null;
+  const tagRe = /<\/?div\b[^>]*>/gi;
+  tagRe.lastIndex = start + openTag.length;
+  let depth = 1;
+  let m;
+  while ((m = tagRe.exec(html))) {
+    depth += m[0][1] === '/' ? -1 : 1;
+    if (depth === 0) {
+      return html.slice(0, start) + openTag + innerHtml + html.slice(m.index);
+    }
+  }
+  return null;
 }
 
 // ─── Routes to prerender ─────────────────────────────────────────────────────
@@ -538,7 +561,11 @@ function prerenderPage(route, lang) {
   // Seed #root with crawler-visible content. React (createRoot) replaces this on
   // mount, so users are unaffected while JS-less AI crawlers get real content.
   const bodyContent = buildBodyContent(route, lang, canonicalUrl, loc);
-  html = html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+  const seeded = replaceRootContent(html, bodyContent);
+  if (seeded === null) {
+    throw new Error('could not locate #root block to seed crawler content');
+  }
+  html = seeded;
 
   // Remove the generic <noscript> SEO fallback: the per-page #root content above
   // now provides superior, page-specific content for crawlers and no-JS users,
