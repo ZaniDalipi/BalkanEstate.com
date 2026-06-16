@@ -434,428 +434,152 @@ export function use3DMap(props: Map3DBuildingsProps) {
     tourUrl?: string,
     onEnterTour?: () => void
   ) => {
+    // ---- Floor visualization (deterministic, self-contained) ----
+    // Build a clean stacked-floor tower centered on the property. We deliberately
+    // do NOT depend on the map's building vector tiles for the tower's shape —
+    // that was the source of inconsistent behavior across environments. Instead
+    // we draw a synthetic tower and hide any real buildings underneath it.
     mapLogger.warn('[FLOORVIZ] addCustomBuilding3D called', {
-      floorNum, floorNumType: typeof floorNum,
-      totalFlrs, totalFlrsType: typeof totalFlrs,
-      lat: latitude, lng: longitude,
+      floorNum, totalFlrs, lat: latitude, lng: longitude,
       has3dBuildingsLayer: !!mapInstance.getLayer('3d-buildings'),
     });
 
-    // Coerce to numbers defensively — if these arrive as strings (e.g. from the
-    // API) then `floor === floorNum` strict-equality never matches and the green
-    // highlighted floor silently disappears, with no error.
-    floorNum = Number(floorNum);
-    totalFlrs = Number(totalFlrs);
+    // Coerce defensively: string values would break `floor === floorNum`.
+    floorNum = Math.round(Number(floorNum));
+    totalFlrs = Math.round(Number(totalFlrs));
     if (!Number.isFinite(totalFlrs) || totalFlrs <= 0) {
       mapLogger.warn('[FLOORVIZ] aborting: invalid totalFlrs', { totalFlrs });
       return;
     }
+    if (!Number.isFinite(floorNum)) floorNum = 0;
 
-    const floorHeightM = 2; // 3m per floor
-    const totalHeightM = totalFlrs * floorHeightM;
+    const floorHeightM = 3; // metres per floor
+    const buildingHeightM = totalFlrs * floorHeightM;
 
-    // Query the actual building at this location from the map's building layer
-    const point = mapInstance.project([longitude, latitude]);
-
-    let buildingCoords: number[][][] | null = null;
-    let buildingFeature: maplibregl.MapGeoJSONFeature | null = null;
-
-    // Check if 3d-buildings layer exists
-    if (!mapInstance.getLayer('3d-buildings')) {
-      mapLogger.warn('3D buildings layer not found in the map style. Custom building will be a simple box.');
-    }
-
-    // Helper function to calculate building centroid
-    const getBuildingCentroid = (feature: maplibregl.MapGeoJSONFeature): { lng: number; lat: number } | null => {
-      let coords: number[][] = [];
-      if (feature.geometry.type === 'Polygon') {
-        coords = (feature.geometry as GeoJSON.Polygon).coordinates[0];
-      } else if (feature.geometry.type === 'MultiPolygon') {
-        coords = (feature.geometry as GeoJSON.MultiPolygon).coordinates[0][0];
-      }
-      if (coords.length === 0) return null;
-
-      let sumLng = 0, sumLat = 0;
-      const numPoints = coords.length - 1; // Exclude closing point
-      for (let i = 0; i < numPoints; i++) {
-        sumLng += coords[i][0];
-        sumLat += coords[i][1];
-      }
-      return { lng: sumLng / numPoints, lat: sumLat / numPoints };
-    };
-
-    // Helper function to calculate distance between two points (in degrees, approximate)
-    const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
-      const dLat = lat2 - lat1;
-      const dLng = lng2 - lng1;
-      return Math.sqrt(dLat * dLat + dLng * dLng);
-    };
-
-    // Try multiple query approaches to find the building
-    // 1. First try exact point query on the 3d-buildings layer
-    const exactFeatures = mapInstance.queryRenderedFeatures(point, {
-      layers: ['3d-buildings']
-    });
-
-    if (exactFeatures.length > 0) {
-      // If we hit multiple buildings at exact point, pick the one closest to our coordinates
-      if (exactFeatures.length === 1) {
-        buildingFeature = exactFeatures[0];
-      } else {
-        let minDist = Infinity;
-        for (const feature of exactFeatures) {
-          const centroid = getBuildingCentroid(feature);
-          if (centroid) {
-            const dist = getDistance(latitude, longitude, centroid.lat, centroid.lng);
-            if (dist < minDist) {
-              minDist = dist;
-              buildingFeature = feature;
-            }
-          }
-        }
-      }
-    } else {
-      // 2. Try a small bounding box query (~30px, roughly one building width)
-      const bbox: [maplibregl.PointLike, maplibregl.PointLike] = [
-        [point.x - 30, point.y - 30],
-        [point.x + 30, point.y + 30]
-      ];
-      const nearbyFeatures = mapInstance.queryRenderedFeatures(bbox, {
-        layers: ['3d-buildings']
-      });
-
-      // Find the building CLOSEST to our coordinates that is tall enough
-      // Only accept buildings very close to the property (max ~30m)
-      if (nearbyFeatures.length > 0) {
-        let minDistance = Infinity;
-        let closestFeature: maplibregl.MapGeoJSONFeature | null = null;
-
-        // Maximum distance threshold: ~30m in degrees (~0.0003)
-        const maxDistanceThreshold = 0.0003;
-
-        for (const feature of nearbyFeatures) {
-          const centroid = getBuildingCentroid(feature);
-          if (centroid) {
-            const distance = getDistance(latitude, longitude, centroid.lat, centroid.lng);
-
-            // Only consider buildings within the distance threshold
-            if (distance < maxDistanceThreshold && distance < minDistance) {
-              minDistance = distance;
-              closestFeature = feature;
-            }
-          }
-        }
-
-        // Only accept the building if it's close enough to the property coordinates
-        // ~0.0005 degrees ≈ 55 meters - beyond this the building is likely not the right one
-        const maxAcceptableDistance = 0.0005;
-        if (closestFeature && minDistance < maxAcceptableDistance) {
-          buildingFeature = closestFeature;
-        }
-      }
-    }
-
-    // 3. Fallback: querySourceFeatures queries raw tile data, not just rendered screen features.
-    // This is more reliable in production where tiles may load after the first idle event.
-    if (!buildingFeature) {
-      const buildingLayer = mapInstance.getLayer('3d-buildings') as any;
-      const vectorSourceId: string | undefined = buildingLayer?.source;
-      if (vectorSourceId) {
-        try {
-          const sourceFeatures = mapInstance.querySourceFeatures(vectorSourceId, {
-            sourceLayer: 'building',
-          }) as maplibregl.MapGeoJSONFeature[];
-
-          const maxAcceptableDistance = 0.0005; // ~55m
-          let minDist = Infinity;
-          for (const feature of sourceFeatures) {
-            const centroid = getBuildingCentroid(feature);
-            if (centroid) {
-              const dist = getDistance(latitude, longitude, centroid.lat, centroid.lng);
-              if (dist < maxAcceptableDistance && dist < minDist) {
-                minDist = dist;
-                buildingFeature = feature;
-              }
-            }
-          }
-        } catch {
-          // querySourceFeatures not supported or source unavailable
-        }
-      }
-    }
-
-    // Extract coordinates from the building feature
-    if (buildingFeature) {
-      if (buildingFeature.geometry.type === 'Polygon') {
-        buildingCoords = (buildingFeature.geometry as GeoJSON.Polygon).coordinates;
-      } else if (buildingFeature.geometry.type === 'MultiPolygon') {
-        // For MultiPolygon, use the first polygon
-        buildingCoords = (buildingFeature.geometry as GeoJSON.MultiPolygon).coordinates[0];
-      }
-    }
-
-    // Build a synthetic square footprint centered on the property. Used as a
-    // deterministic fallback so the floor tower ALWAYS renders, regardless of
-    // whether the vector tiles happened to expose a building footprint at this
-    // spot (tile availability/timing differs between local and production).
-    const makeSyntheticFootprint = (halfWidthMeters: number): number[][][] => {
-      const metersPerDegLat = 110540;
-      const metersPerDegLng = 111320 * Math.cos((latitude * Math.PI) / 180);
-      const dLat = halfWidthMeters / metersPerDegLat;
-      const dLng = halfWidthMeters / metersPerDegLng;
-      return [[
+    // Square footprint centered on the property. Three sizes: a dark core, the
+    // floor slabs (slightly larger so they sit over the core), and the green
+    // highlighted floor (larger still, so it always protrudes in front).
+    const metersPerDegLat = 110540;
+    const metersPerDegLng = 111320 * Math.cos((latitude * Math.PI) / 180);
+    const makeRing = (halfMeters: number): number[][] => {
+      const dLat = halfMeters / metersPerDegLat;
+      const dLng = halfMeters / metersPerDegLng;
+      return [
         [longitude - dLng, latitude - dLat],
         [longitude + dLng, latitude - dLat],
         [longitude + dLng, latitude + dLat],
         [longitude - dLng, latitude + dLat],
         [longitude - dLng, latitude - dLat],
-      ]];
+      ];
     };
+    const coreCoords: number[][][] = [makeRing(8.0)];
+    const scaledCoords: number[][][] = [makeRing(8.4)];
+    const highlightCoords: number[][][] = [makeRing(9.2)];
 
-    // Reject an implausibly large matched footprint — that almost always means
-    // we latched onto the wrong building (a big block next door), which renders
-    // as a giant featureless slab. Fall back to a clean synthetic tower instead.
-    if (buildingCoords) {
-      const ring = buildingCoords[0];
-      let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
-      for (const c of ring) {
-        if (c[0] < minLng) minLng = c[0];
-        if (c[0] > maxLng) maxLng = c[0];
-        if (c[1] < minLat) minLat = c[1];
-        if (c[1] > maxLat) maxLat = c[1];
-      }
-      const metersPerDegLat = 110540;
-      const metersPerDegLng = 111320 * Math.cos((latitude * Math.PI) / 180);
-      const widthM = (maxLng - minLng) * metersPerDegLng;
-      const depthM = (maxLat - minLat) * metersPerDegLat;
-      if (widthM > 60 || depthM > 60) {
-        buildingCoords = null;
-        buildingFeature = null;
-      }
-    }
-
-    // Fallback: synthesize a footprint so the floor tower always renders. ~14m
-    // square reads as a believable tower for any floor count.
-    const usedSynthetic = !buildingCoords;
-    if (!buildingCoords) {
-      buildingCoords = makeSyntheticFootprint(7);
-    }
-    mapLogger.warn('[FLOORVIZ] footprint resolved', { usedSynthetic, ringPoints: buildingCoords[0]?.length });
-
-    // Get actual building height from map data if available
-    let actualBuildingHeight = totalHeightM;
-    if (buildingFeature && buildingFeature.properties) {
-      const props = buildingFeature.properties;
-      const renderHeight = Number(props.render_height);
-      const levels = Number(props['building:levels']);
-      if (Number.isFinite(renderHeight) && renderHeight > 0) {
-        actualBuildingHeight = renderHeight;
-      } else if (Number.isFinite(levels) && levels > 0) {
-        actualBuildingHeight = levels * 3.5;
-      }
-    }
-    // Use the larger of our calculated height or the map's height
-    const finalBuildingHeight = Math.max(totalHeightM, actualBuildingHeight);
-    // Recalculate floor height based on actual building (guard against zero floors)
-    const safeFloors = totalFlrs > 0 ? totalFlrs : 1;
-    const adjustedFloorHeight = finalBuildingHeight / safeFloors;
-
-    // Scale up the building coordinates to fully cover the original and prevent z-fighting
-    const scaleFactor = 1.05; // 5% larger to fully cover original building
-
-    // Calculate centroid for scaling and label positioning
-    const outerRing = buildingCoords[0];
-    let centroidLng = 0;
-    let centroidLat = 0;
-    const numPoints = outerRing.length - 1; // Exclude closing point
-    for (let i = 0; i < numPoints; i++) {
-      centroidLng += outerRing[i][0];
-      centroidLat += outerRing[i][1];
-    }
-    centroidLng /= numPoints;
-    centroidLat /= numPoints;
-
-    // Scale coordinates from centroid to prevent z-fighting with original building
-    const scaledCoords = buildingCoords.map(ring =>
-      ring.map(coord => [
-        centroidLng + (coord[0] - centroidLng) * scaleFactor,
-        centroidLat + (coord[1] - centroidLat) * scaleFactor
-      ])
-    );
-
-    // Hide the matched original building. We render our own self-contained tower
-    // (a dark full-height "core" + opaque floor slabs), so we must not let the
-    // original extrusion remain: a taller/wider real building would dominate or
-    // z-fight our tower (the cause of the inconsistent result across machines).
-    // Hiding by feature id is reliable and independent of render_height.
+    // Hide real buildings under/near the property so they can't clash with or
+    // occlude our synthetic tower.
     if (mapInstance.getLayer('3d-buildings')) {
-      const matchedFeatureId = buildingFeature?.id;
-      mapInstance.setFilter(
-        '3d-buildings',
-        matchedFeatureId != null ? ['!=', ['id'], matchedFeatureId] : null
-      );
-    }
-
-    // The highlighted floor is extruded from a slightly larger footprint than
-    // the other floors so it always protrudes in front of both the grey slabs
-    // and the original building — making the green floor impossible to occlude
-    // regardless of depth-buffer precision (the prior 5% scale was borderline
-    // and could lose the depth test in production).
-    const highlightScaleFactor = 1.12;
-    const highlightScaledCoords = buildingCoords.map(ring =>
-      ring.map(coord => [
-        centroidLng + (coord[0] - centroidLng) * highlightScaleFactor,
-        centroidLat + (coord[1] - centroidLat) * highlightScaleFactor,
-      ])
-    );
-
-    // Add source for the custom building using actual geometry
-    if (!mapInstance.getSource('custom-building')) {
-      mapInstance.addSource('custom-building', {
-        type: 'geojson',
-        data: {
-          type: 'Feature',
-          properties: { height: totalHeightM, totalFloors: totalFlrs },
-          geometry: {
-            type: 'Polygon',
-            coordinates: scaledCoords,
-          },
-        },
-      });
-    } else {
-      // Update existing source
-      (mapInstance.getSource('custom-building') as maplibregl.GeoJSONSource).setData({
-        type: 'Feature',
-        properties: { height: totalHeightM, totalFloors: totalFlrs },
-        geometry: {
-          type: 'Polygon',
-          coordinates: scaledCoords,
-        },
-      });
-    }
-
-    // Dark full-height "core" sitting just inside the slabs (unscaled footprint).
-    // The gaps between the opaque floor slabs reveal this core, producing the
-    // dark separator line between floors — deterministically, without depending
-    // on the original building being present behind our tower.
-    const coreSourceData: GeoJSON.Feature = {
-      type: 'Feature',
-      properties: { height: totalHeightM, totalFloors: totalFlrs },
-      geometry: {
-        type: 'Polygon',
-        coordinates: buildingCoords,
-      },
-    };
-    if (!mapInstance.getSource('custom-building-core')) {
-      mapInstance.addSource('custom-building-core', {
-        type: 'geojson',
-        data: coreSourceData,
-      });
-    } else {
-      (mapInstance.getSource('custom-building-core') as maplibregl.GeoJSONSource).setData(coreSourceData);
-    }
-
-    // Separate, slightly larger source used only for the highlighted floor.
-    const highlightSourceData: GeoJSON.Feature = {
-      type: 'Feature',
-      properties: { height: totalHeightM, totalFloors: totalFlrs },
-      geometry: {
-        type: 'Polygon',
-        coordinates: highlightScaledCoords,
-      },
-    };
-    if (!mapInstance.getSource('custom-building-highlight')) {
-      mapInstance.addSource('custom-building-highlight', {
-        type: 'geojson',
-        data: highlightSourceData,
-      });
-    } else {
-      (mapInstance.getSource('custom-building-highlight') as maplibregl.GeoJSONSource).setData(highlightSourceData);
-    }
-
-    // Remove existing floor layers if any
-    for (let floor = 1; floor <= 100; floor++) {
-      const layerId = `building-floor-${floor}`;
-      if (mapInstance.getLayer(layerId)) {
-        mapInstance.removeLayer(layerId);
+      try {
+        const p = mapInstance.project([longitude, latitude]);
+        const box: [maplibregl.PointLike, maplibregl.PointLike] = [
+          [p.x - 45, p.y - 45],
+          [p.x + 45, p.y + 45],
+        ];
+        const near = mapInstance.queryRenderedFeatures(box, { layers: ['3d-buildings'] });
+        const ids = Array.from(
+          new Set(near.map((f) => f.id).filter((id): id is number | string => id != null))
+        );
+        mapInstance.setFilter(
+          '3d-buildings',
+          ids.length > 0 ? ['!', ['in', ['id'], ['literal', ids]]] : null
+        );
+      } catch {
+        mapInstance.setFilter('3d-buildings', null);
       }
     }
-    if (mapInstance.getLayer('building-floor-highlight-glow')) {
-      mapInstance.removeLayer('building-floor-highlight-glow');
+
+    // Create/update the three GeoJSON sources.
+    const setSource = (id: string, coords: number[][][]) => {
+      const data: GeoJSON.Feature = {
+        type: 'Feature',
+        properties: {},
+        geometry: { type: 'Polygon', coordinates: coords },
+      };
+      const existing = mapInstance.getSource(id) as maplibregl.GeoJSONSource | undefined;
+      if (existing) existing.setData(data);
+      else mapInstance.addSource(id, { type: 'geojson', data });
+    };
+    setSource('custom-building-core', coreCoords);
+    setSource('custom-building', scaledCoords);
+    setSource('custom-building-highlight', highlightCoords);
+
+    // Remove any previously-added tower layers.
+    for (let f = 1; f <= 200; f++) {
+      const id = `building-floor-${f}`;
+      if (mapInstance.getLayer(id)) mapInstance.removeLayer(id);
     }
-    if (mapInstance.getLayer('building-core')) {
-      mapInstance.removeLayer('building-core');
+    for (const id of ['building-core', 'building-floor-highlight-glow']) {
+      if (mapInstance.getLayer(id)) mapInstance.removeLayer(id);
     }
 
-    // Dark full-height core, drawn first so the floor slabs sit on top of it and
-    // the inter-floor gaps reveal it as solid dark separator lines.
+    // Dark full-height core, drawn first. The gaps between the opaque floor
+    // slabs reveal it, producing the dark separator line between floors.
     mapInstance.addLayer({
       id: 'building-core',
       type: 'fill-extrusion',
       source: 'custom-building-core',
       paint: {
         'fill-extrusion-color': '#1f2937',
-        'fill-extrusion-height': finalBuildingHeight,
+        'fill-extrusion-height': buildingHeightM,
         'fill-extrusion-base': 0,
         'fill-extrusion-opacity': 1,
       },
     });
 
-    // Add floor slice layers - each floor is a separate "box" stacked on top of each other
-    // The gap between floors makes each box clearly distinct. Slabs are fully
-    // opaque so the tower reads as solid stacked boxes (a semi-transparent slab
-    // looks like a hollow ghost). The dark original building shows through the
-    // gaps, producing the separator line between floors.
-    const gapSize = Math.max(0.5, adjustedFloorHeight * 0.15); // 15% of floor height as gap, minimum 0.5m
+    // Opaque floor slabs, one per floor, with a gap between each so the tower
+    // reads as distinct stacked boxes. The property's floor is bright green.
+    const gapSize = Math.max(0.6, floorHeightM * 0.18);
     for (let floor = 1; floor <= totalFlrs; floor++) {
-      const floorBase = (floor - 1) * adjustedFloorHeight;
-      const floorTop = floor * adjustedFloorHeight;
+      const floorBase = (floor - 1) * floorHeightM;
+      const floorTop = floor * floorHeightM;
       const isHighlightedFloor = floor === floorNum;
-      const layerId = `building-floor-${floor}`;
-
       mapInstance.addLayer({
-        id: layerId,
+        id: `building-floor-${floor}`,
         type: 'fill-extrusion',
-        // Highlighted floor uses the larger footprint so it protrudes in front
-        // and can never be hidden behind the grey slabs or original building.
         source: isHighlightedFloor ? 'custom-building-highlight' : 'custom-building',
         paint: {
           'fill-extrusion-color': isHighlightedFloor
-            ? '#13e861' // Bright green for the property's floor
-            : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
-          'fill-extrusion-height': floorTop - gapSize, // Gap at top of each floor slab
-          'fill-extrusion-base': floorBase + (gapSize * 0.25), // Small gap at bottom too
+            ? '#13e861'
+            : floor % 2 === 0 ? '#4b5563' : '#6b7280',
+          'fill-extrusion-height': floorTop - gapSize,
+          'fill-extrusion-base': floorBase + gapSize * 0.25,
           'fill-extrusion-opacity': 1,
         },
       });
     }
 
-    mapLogger.warn('[FLOORVIZ] floor layers added', {
-      totalFlrs,
-      coreLayer: !!mapInstance.getLayer('building-core'),
-      floor1Layer: !!mapInstance.getLayer('building-floor-1'),
-      highlightFloorLayer: !!mapInstance.getLayer(`building-floor-${floorNum}`),
-      adjustedFloorHeight,
-      finalBuildingHeight,
-    });
-
-    // Add a brighter outline layer for the highlighted floor to make it pop
-    const highlightBase = (floorNum - 1) * adjustedFloorHeight;
-    const highlightTop = floorNum * adjustedFloorHeight;
-    const glowLayerId = 'building-floor-highlight-glow';
-    if (mapInstance.getLayer(glowLayerId)) {
-      mapInstance.removeLayer(glowLayerId);
+    // Soft green glow around the highlighted floor to make it pop.
+    if (floorNum > 0 && floorNum <= totalFlrs) {
+      const highlightBase = (floorNum - 1) * floorHeightM;
+      const highlightTop = floorNum * floorHeightM;
+      mapInstance.addLayer({
+        id: 'building-floor-highlight-glow',
+        type: 'fill-extrusion',
+        source: 'custom-building-highlight',
+        paint: {
+          'fill-extrusion-color': '#4ade80',
+          'fill-extrusion-height': highlightTop - gapSize * 0.5,
+          'fill-extrusion-base': highlightBase + gapSize * 0.5,
+          'fill-extrusion-opacity': 0.35,
+        },
+      });
     }
-    mapInstance.addLayer({
-      id: glowLayerId,
-      type: 'fill-extrusion',
-      source: 'custom-building-highlight',
-      paint: {
-        'fill-extrusion-color': '#4ade80', // Lighter green glow
-        'fill-extrusion-height': highlightTop - (gapSize * 0.5),
-        'fill-extrusion-base': highlightBase + (gapSize * 0.5),
-        'fill-extrusion-opacity': 0.35,
-      },
+
+    mapLogger.warn('[FLOORVIZ] tower rendered', {
+      totalFlrs, floorNum,
+      hasCore: !!mapInstance.getLayer('building-core'),
+      hasFloor1: !!mapInstance.getLayer('building-floor-1'),
+      hasHighlight: !!mapInstance.getLayer('building-floor-highlight-glow'),
     });
 
     // Add floating "Floor X/Y" label above the building at the highlighted floor level
