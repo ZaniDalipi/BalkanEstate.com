@@ -701,32 +701,27 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // Hide ALL real buildings immediately around the property — across every
-    // building extrusion layer, including the Liberty base style's native one
-    // (not just our '3d-buildings'). That native layer was the grey tower that
-    // kept rendering behind/over our floor tower. Hiding the cluster of nearby
-    // buildings lets our floor tower stand alone.
-    if (queryBuildingLayers.length) {
-      const hideBox: [maplibregl.PointLike, maplibregl.PointLike] = [
-        [point.x - 60, point.y - 60],
-        [point.x + 60, point.y + 60],
-      ];
-      const nearIds = Array.from(new Set(
-        mapInstance.queryRenderedFeatures(hideBox, { layers: queryBuildingLayers })
-          .map((f) => f.id)
-          .filter((id): id is number | string => id != null)
-      ));
-      if (nearIds.length) {
-        const excludeFilter = ['!', ['in', ['id'], ['literal', nearIds]]] as maplibregl.FilterSpecification;
-        for (const layerId of queryBuildingLayers) {
-          try {
-            mapInstance.setFilter(layerId, excludeFilter);
-          } catch {
-            // some layers may reject this filter shape; skip them
-          }
+    // Hide ONLY the property's own building — the one our floor tower replaces —
+    // from every building extrusion layer (incl. the Liberty base style's native
+    // layer, not just our '3d-buildings'). We combine with each layer's existing
+    // filter so all the OTHER surrounding buildings keep rendering normally.
+    const matchedFeatureId = buildingFeature?.id;
+    if (matchedFeatureId != null) {
+      const excludeFilter = ['!=', ['id'], matchedFeatureId] as maplibregl.FilterSpecification;
+      for (const layerId of queryBuildingLayers) {
+        try {
+          const existing = mapInstance.getFilter(layerId) as maplibregl.FilterSpecification | undefined;
+          mapInstance.setFilter(
+            layerId,
+            existing
+              ? (['all', existing, excludeFilter] as maplibregl.FilterSpecification)
+              : excludeFilter
+          );
+        } catch {
+          // some layers may reject this filter shape; skip them
         }
       }
-      mapLogger.warn('[FLOORVIZ] hid nearby buildings', { count: nearIds.length, layers: queryBuildingLayers });
+      mapLogger.warn('[FLOORVIZ] hid property building', { matchedFeatureId, layers: queryBuildingLayers });
     }
 
     // The highlighted floor is extruded from a slightly larger footprint than
