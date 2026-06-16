@@ -664,14 +664,17 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // Keep the original `3d-buildings` extrusion in place. It sits just inside
-    // our scaled custom building and shows through the gaps between floor slabs,
-    // giving the dark "separator line" look between floors (see the reference
-    // design). We deliberately do NOT hide it: hiding it leaves the gaps cutting
-    // straight through to the background, which makes the whole tower read as a
-    // hollow, translucent box. We clear any stale filter to be safe.
+    // Hide the matched original building. We render our own self-contained tower
+    // (a dark full-height "core" + opaque floor slabs), so we must not let the
+    // original extrusion remain: a taller/wider real building would dominate or
+    // z-fight our tower (the cause of the inconsistent result across machines).
+    // Hiding by feature id is reliable and independent of render_height.
     if (mapInstance.getLayer('3d-buildings')) {
-      mapInstance.setFilter('3d-buildings', null);
+      const matchedFeatureId = buildingFeature?.id;
+      mapInstance.setFilter(
+        '3d-buildings',
+        matchedFeatureId != null ? ['!=', ['id'], matchedFeatureId] : null
+      );
     }
 
     // The highlighted floor is extruded from a slightly larger footprint than
@@ -712,6 +715,27 @@ export function use3DMap(props: Map3DBuildingsProps) {
       });
     }
 
+    // Dark full-height "core" sitting just inside the slabs (unscaled footprint).
+    // The gaps between the opaque floor slabs reveal this core, producing the
+    // dark separator line between floors — deterministically, without depending
+    // on the original building being present behind our tower.
+    const coreSourceData: GeoJSON.Feature = {
+      type: 'Feature',
+      properties: { height: totalHeightM, totalFloors: totalFlrs },
+      geometry: {
+        type: 'Polygon',
+        coordinates: buildingCoords,
+      },
+    };
+    if (!mapInstance.getSource('custom-building-core')) {
+      mapInstance.addSource('custom-building-core', {
+        type: 'geojson',
+        data: coreSourceData,
+      });
+    } else {
+      (mapInstance.getSource('custom-building-core') as maplibregl.GeoJSONSource).setData(coreSourceData);
+    }
+
     // Separate, slightly larger source used only for the highlighted floor.
     const highlightSourceData: GeoJSON.Feature = {
       type: 'Feature',
@@ -740,6 +764,23 @@ export function use3DMap(props: Map3DBuildingsProps) {
     if (mapInstance.getLayer('building-floor-highlight-glow')) {
       mapInstance.removeLayer('building-floor-highlight-glow');
     }
+    if (mapInstance.getLayer('building-core')) {
+      mapInstance.removeLayer('building-core');
+    }
+
+    // Dark full-height core, drawn first so the floor slabs sit on top of it and
+    // the inter-floor gaps reveal it as solid dark separator lines.
+    mapInstance.addLayer({
+      id: 'building-core',
+      type: 'fill-extrusion',
+      source: 'custom-building-core',
+      paint: {
+        'fill-extrusion-color': '#1f2937',
+        'fill-extrusion-height': finalBuildingHeight,
+        'fill-extrusion-base': 0,
+        'fill-extrusion-opacity': 1,
+      },
+    });
 
     // Add floor slice layers - each floor is a separate "box" stacked on top of each other
     // The gap between floors makes each box clearly distinct. Slabs are fully
