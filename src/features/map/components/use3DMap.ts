@@ -451,7 +451,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
       return;
     }
 
-    const floorHeightM = 2; // 3m per floor
+    const floorHeightM = 3; // metres per floor (taller = clearly visible tower)
     const totalHeightM = totalFlrs * floorHeightM;
 
     // Query the actual building at this location from the map's building layer
@@ -626,9 +626,13 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ]];
     };
 
-    // Reject an implausibly large matched footprint — that almost always means
-    // we latched onto the wrong building (a big block next door), which renders
-    // as a giant featureless slab. Fall back to a clean synthetic tower instead.
+    // Choose the tower footprint. Prefer the real building's shape, but ONLY if
+    // it's a sensible size: a tiny matched feature (a kiosk/awning) makes an
+    // invisible sliver, and a huge one makes a giant slab. In those cases — and
+    // when nothing was matched — use a clean synthetic ~18m square so the tower
+    // is ALWAYS clearly visible. We keep `buildingFeature` regardless so the real
+    // building still gets hidden.
+    let usedSynthetic = false;
     if (buildingCoords) {
       const ring = buildingCoords[0];
       let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
@@ -638,23 +642,23 @@ export function use3DMap(props: Map3DBuildingsProps) {
         if (c[1] < minLat) minLat = c[1];
         if (c[1] > maxLat) maxLat = c[1];
       }
-      const metersPerDegLat = 110540;
-      const metersPerDegLng = 111320 * Math.cos((latitude * Math.PI) / 180);
-      const widthM = (maxLng - minLng) * metersPerDegLng;
-      const depthM = (maxLat - minLat) * metersPerDegLat;
-      if (widthM > 60 || depthM > 60) {
-        buildingCoords = null;
-        buildingFeature = null;
+      const mPerDegLat = 110540;
+      const mPerDegLng = 111320 * Math.cos((latitude * Math.PI) / 180);
+      const widthM = (maxLng - minLng) * mPerDegLng;
+      const depthM = (maxLat - minLat) * mPerDegLat;
+      if (widthM < 8 || depthM < 8 || widthM > 80 || depthM > 80) {
+        buildingCoords = makeSyntheticFootprint(9);
+        usedSynthetic = true;
       }
+    } else {
+      buildingCoords = makeSyntheticFootprint(9);
+      usedSynthetic = true;
     }
-
-    // Fallback: synthesize a footprint so the floor tower always renders. ~14m
-    // square reads as a believable tower for any floor count.
-    const usedSynthetic = !buildingCoords;
-    if (!buildingCoords) {
-      buildingCoords = makeSyntheticFootprint(7);
-    }
-    mapLogger.warn('[FLOORVIZ] footprint resolved', { usedSynthetic, ringPoints: buildingCoords[0]?.length });
+    mapLogger.warn('[FLOORVIZ] footprint resolved', {
+      usedSynthetic,
+      ringPoints: buildingCoords[0]?.length,
+      matchedId: buildingFeature?.id ?? null,
+    });
 
     // Get actual building height from map data if available
     let actualBuildingHeight = totalHeightM;
@@ -697,27 +701,32 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // Hide the matched original building from EVERY building extrusion layer —
-    // including the Liberty base style's native layer, not just our own
-    // '3d-buildings'. That native layer was the grey tower that kept rendering
-    // behind our floor tower. Hiding by feature id is reliable and independent
-    // of render_height.
-    const matchedFeatureId = buildingFeature?.id;
-    if (matchedFeatureId != null) {
-      const excludeFilter = ['!=', ['id'], matchedFeatureId] as maplibregl.FilterSpecification;
-      for (const layerId of queryBuildingLayers) {
-        try {
-          const existing = mapInstance.getFilter(layerId) as maplibregl.FilterSpecification | undefined;
-          mapInstance.setFilter(
-            layerId,
-            existing
-              ? (['all', existing, excludeFilter] as maplibregl.FilterSpecification)
-              : excludeFilter
-          );
-        } catch {
-          // some layers may reject this filter shape; skip them
+    // Hide ALL real buildings immediately around the property — across every
+    // building extrusion layer, including the Liberty base style's native one
+    // (not just our '3d-buildings'). That native layer was the grey tower that
+    // kept rendering behind/over our floor tower. Hiding the cluster of nearby
+    // buildings lets our floor tower stand alone.
+    if (queryBuildingLayers.length) {
+      const hideBox: [maplibregl.PointLike, maplibregl.PointLike] = [
+        [point.x - 60, point.y - 60],
+        [point.x + 60, point.y + 60],
+      ];
+      const nearIds = Array.from(new Set(
+        mapInstance.queryRenderedFeatures(hideBox, { layers: queryBuildingLayers })
+          .map((f) => f.id)
+          .filter((id): id is number | string => id != null)
+      ));
+      if (nearIds.length) {
+        const excludeFilter = ['!', ['in', ['id'], ['literal', nearIds]]] as maplibregl.FilterSpecification;
+        for (const layerId of queryBuildingLayers) {
+          try {
+            mapInstance.setFilter(layerId, excludeFilter);
+          } catch {
+            // some layers may reject this filter shape; skip them
+          }
         }
       }
+      mapLogger.warn('[FLOORVIZ] hid nearby buildings', { count: nearIds.length, layers: queryBuildingLayers });
     }
 
     // The highlighted floor is extruded from a slightly larger footprint than
