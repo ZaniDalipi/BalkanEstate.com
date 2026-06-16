@@ -85,11 +85,54 @@ const recoverViaReload = () => {
   window.location.reload();
 };
 
+// Hard recovery for the "app won't load" case: a stale service worker serving a
+// precached index.html that references hashed chunk filenames which 404 on the
+// server (the browser then gets text/html for a module script and the app can't
+// boot). A plain reload re-serves the same stale HTML, so here we first tear down
+// the service worker and all caches, then reload to fetch a clean bundle.
+const hardRecover = async () => {
+  try {
+    const key = 'be:hard-recover';
+    const last = Number(sessionStorage.getItem(key) || '0');
+    if (last && Date.now() - last < 30000) return; // already tried recently
+    sessionStorage.setItem(key, String(Date.now()));
+  } catch {
+    // ignore storage failures and attempt recovery once
+  }
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister()));
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k)));
+    }
+  } catch {
+    // best-effort cleanup; reload regardless
+  }
+  window.location.reload();
+};
+
 // Reload when a lazy-loaded chunk fails (e.g. stale page referencing old
 // hashed filenames after a new deploy). Vite 5+ fires this before throwing.
 window.addEventListener('vite:preloadError', () => {
-  recoverViaReload();
+  hardRecover();
 });
+
+// A failed ES module script load surfaces as a window "error" event whose target
+// is the <script>. This is the "Expected a JavaScript module but got text/html"
+// case — a missing chunk served as the SPA fallback. Self-heal the same way.
+window.addEventListener(
+  'error',
+  (event) => {
+    const target = event.target as HTMLElement | null;
+    if (target && target.tagName === 'SCRIPT' && (target as HTMLScriptElement).type === 'module') {
+      hardRecover();
+    }
+  },
+  true // capture phase: resource load errors don't bubble
+);
 
 if ('serviceWorker' in navigator) {
   // When a new SW takes control (skipWaiting + clientsClaim), any lazy-loaded
