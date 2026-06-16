@@ -41,7 +41,7 @@ const template = readFileSync(templatePath, 'utf-8');
 
 // Validate the template exposes the structural hooks this script relies on, so a
 // silent no-op replacement (e.g. empty #root) fails loudly at build time instead.
-for (const marker of ['<div id="root"></div>', '</head>', '<title>']) {
+for (const marker of ['<div id="root">', '</head>', '<title>']) {
   if (!template.includes(marker)) {
     console.error(`❌ Template ${templatePath} is missing required marker: ${marker}`);
     process.exit(1);
@@ -535,10 +535,12 @@ function prerenderPage(route, lang) {
     `${pageJsonLd}\n  <meta property="article:modified_time" content="${buildDate}" />\n  <meta name="prerender-status" content="200" />\n  </head>`
   );
 
-  // Seed #root with crawler-visible content. React (createRoot) replaces this on
-  // mount, so users are unaffected while JS-less AI crawlers get real content.
+  // Seed #root with crawler-visible content, injected right after the opening
+  // <div id="root"> tag (before the app-shell loader). React (createRoot) clears
+  // all of #root's children on mount, so real users still see the loader overlay
+  // while JS loads, and JS-less AI crawlers get real, page-specific content.
   const bodyContent = buildBodyContent(route, lang, canonicalUrl, loc);
-  html = html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+  html = html.replace('<div id="root">', () => `<div id="root">${bodyContent}`);
 
   // Remove the generic <noscript> SEO fallback: the per-page #root content above
   // now provides superior, page-specific content for crawlers and no-JS users,
