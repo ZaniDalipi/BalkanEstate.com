@@ -22,6 +22,9 @@ export function useAgent(agentId: string | null | undefined, options: UseAgentOp
       return await getAgentDetails(agentId);
     },
     enabled: !!agentId && enabled,
+    // Distinct-entity detail view — opt out of the global keepPreviousData
+    // default so switching agents shows a loading state, not the prior agent.
+    placeholderData: undefined,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     retry: (failureCount, error: any) => {
