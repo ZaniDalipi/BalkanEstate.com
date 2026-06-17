@@ -707,11 +707,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
     // floor stays visible without removing any surrounding objects.
 
     // The highlighted floor is extruded from a slightly larger footprint than
-    // the other floors so it always protrudes in front of both the grey slabs
-    // and the original building — making the green floor impossible to occlude
-    // regardless of depth-buffer precision (the prior 5% scale was borderline
-    // and could lose the depth test in production).
-    const highlightScaleFactor = 1.12;
+    // the original building to win the depth test in production (GPU depth-buffer
+    // precision varies). 1.06x is enough to avoid z-fighting without making the
+    // green band look detached from the building.
+    const highlightScaleFactor = 1.06;
     const highlightScaledCoords = buildingCoords.map(ring =>
       ring.map(coord => [
         centroidLng + (coord[0] - centroidLng) * highlightScaleFactor,
@@ -798,10 +797,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
     }
 
     // Draw ONLY the property's floor as a bright green band over the EXISTING
-    // building. We no longer draw a dark core or a full stack of slabs (those
-    // covered the building and made it look hidden). The band uses a slightly
-    // larger footprint so it protrudes and stays visible on the building face;
-    // the real building underneath stays fully visible.
+    // building. Semi-transparent (0.65) so the real building face is still visible
+    // through the green highlight — avoids the "building hidden" appearance while
+    // keeping the floor indicator clearly visible.
     const gapSize = Math.max(0.5, adjustedFloorHeight * 0.15);
     if (floorNum > 0 && floorNum <= totalFlrs) {
       mapInstance.addLayer({
@@ -812,7 +810,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
           'fill-extrusion-color': '#13e861', // Bright green for the property's floor
           'fill-extrusion-height': floorNum * adjustedFloorHeight - gapSize * 0.5,
           'fill-extrusion-base': (floorNum - 1) * adjustedFloorHeight + gapSize * 0.5,
-          'fill-extrusion-opacity': 1,
+          'fill-extrusion-opacity': 0.65,
         },
       });
     }
@@ -840,7 +838,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         'fill-extrusion-color': '#4ade80', // Lighter green glow
         'fill-extrusion-height': highlightTop - (gapSize * 0.5),
         'fill-extrusion-base': highlightBase + (gapSize * 0.5),
-        'fill-extrusion-opacity': 0.35,
+        'fill-extrusion-opacity': 0.2,
       },
     });
 
