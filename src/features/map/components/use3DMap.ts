@@ -797,54 +797,30 @@ export function use3DMap(props: Map3DBuildingsProps) {
       mapInstance.removeLayer('building-core');
     }
 
-    // Dark full-height core, drawn first so the floor slabs sit on top of it and
-    // the inter-floor gaps reveal it as solid dark separator lines.
-    mapInstance.addLayer({
-      id: 'building-core',
-      type: 'fill-extrusion',
-      source: 'custom-building-core',
-      paint: {
-        'fill-extrusion-color': '#1f2937',
-        'fill-extrusion-height': finalBuildingHeight,
-        'fill-extrusion-base': 0,
-        'fill-extrusion-opacity': 1,
-      },
-    });
-
-    // Add floor slice layers - each floor is a separate "box" stacked on top of each other
-    // The gap between floors makes each box clearly distinct. Slabs are fully
-    // opaque so the tower reads as solid stacked boxes (a semi-transparent slab
-    // looks like a hollow ghost). The dark original building shows through the
-    // gaps, producing the separator line between floors.
-    const gapSize = Math.max(0.5, adjustedFloorHeight * 0.15); // 15% of floor height as gap, minimum 0.5m
-    for (let floor = 1; floor <= totalFlrs; floor++) {
-      const floorBase = (floor - 1) * adjustedFloorHeight;
-      const floorTop = floor * adjustedFloorHeight;
-      const isHighlightedFloor = floor === floorNum;
-      const layerId = `building-floor-${floor}`;
-
+    // Draw ONLY the property's floor as a bright green band over the EXISTING
+    // building. We no longer draw a dark core or a full stack of slabs (those
+    // covered the building and made it look hidden). The band uses a slightly
+    // larger footprint so it protrudes and stays visible on the building face;
+    // the real building underneath stays fully visible.
+    const gapSize = Math.max(0.5, adjustedFloorHeight * 0.15);
+    if (floorNum > 0 && floorNum <= totalFlrs) {
       mapInstance.addLayer({
-        id: layerId,
+        id: `building-floor-${floorNum}`,
         type: 'fill-extrusion',
-        // Highlighted floor uses the larger footprint so it protrudes in front
-        // and can never be hidden behind the grey slabs or original building.
-        source: isHighlightedFloor ? 'custom-building-highlight' : 'custom-building',
+        source: 'custom-building-highlight',
         paint: {
-          'fill-extrusion-color': isHighlightedFloor
-            ? '#13e861' // Bright green for the property's floor
-            : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
-          'fill-extrusion-height': floorTop - gapSize, // Gap at top of each floor slab
-          'fill-extrusion-base': floorBase + (gapSize * 0.25), // Small gap at bottom too
+          'fill-extrusion-color': '#13e861', // Bright green for the property's floor
+          'fill-extrusion-height': floorNum * adjustedFloorHeight - gapSize * 0.5,
+          'fill-extrusion-base': (floorNum - 1) * adjustedFloorHeight + gapSize * 0.5,
           'fill-extrusion-opacity': 1,
         },
       });
     }
 
-    mapLogger.warn('[FLOORVIZ] floor layers added', {
+    mapLogger.warn('[FLOORVIZ] green floor band added', {
       totalFlrs,
-      coreLayer: !!mapInstance.getLayer('building-core'),
-      floor1Layer: !!mapInstance.getLayer('building-floor-1'),
-      highlightFloorLayer: !!mapInstance.getLayer(`building-floor-${floorNum}`),
+      floorNum,
+      hasBand: !!mapInstance.getLayer(`building-floor-${floorNum}`),
       adjustedFloorHeight,
       finalBuildingHeight,
     });
