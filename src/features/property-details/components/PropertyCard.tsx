@@ -568,9 +568,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
             {/* Seller Info */}
             <div className="min-w-0 flex-1">
-              {safeProperty.seller.name && (
-                <p className="text-xs font-semibold text-neutral-800 truncate">{safeProperty.seller.name}</p>
-              )}
+              <p className="text-xs font-semibold text-neutral-800 truncate">
+                {safeProperty.seller.name || (safeProperty.seller.type === 'agent' ? t('property:seller.agent') : t('property:seller.private'))}
+              </p>
               <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-[1px] rounded-full ${
                 safeProperty.seller.type === 'agent'
                   ? 'bg-blue-50 text-blue-600'
