@@ -47,6 +47,58 @@ const isOAuthCallbackInProgress =
   window.location.pathname.includes('auth/callback') &&
   !!new URLSearchParams(window.location.search).get('token');
 
+// Derive the correct initial view from the current URL synchronously so the
+// first paint already shows the right page — avoids a one-frame flash of the
+// home page before the checkUrlForRouting effect fires (FOIV).
+function getInitialView(): AppView {
+  if (typeof window === 'undefined') return 'home';
+  let path = window.location.pathname;
+  // Strip language prefix: /en/search → /search
+  const langMatch = path.match(/^\/(en|sq|sr|mk|bs|hr|bg|ro|el|me)(\/|$)/);
+  if (langMatch) {
+    path = path.slice(langMatch[1].length + 1) || '/';
+    if (!path.startsWith('/')) path = '/' + path;
+  }
+  // Remove trailing slash except for root
+  if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1);
+
+  if (path === '/' || path === '' || path === '/home') return 'home';
+  if (path === '/search') return 'search';
+  if (path === '/rentals' || path === '/rent') return 'rentals';
+  if (path === '/subscribe' || path === '/pricing') return 'pricing';
+  if (path === '/valuation') return 'valuation';
+  if (path === '/mortgage-calculator') return 'mortgage-calculator';
+  if (path === '/contact') return 'contact';
+  if (path === '/guides') return 'guides';
+  if (path === '/analytics') return 'analytics';
+  if (path === '/inbox') return 'inbox';
+  if (path === '/create-listing') return 'create-listing';
+  if (path === '/create-rental') return 'create-rental';
+  if (path === '/explore-cities') return 'explore-cities';
+  if (path === '/blog') return 'blog';
+  if (path === '/business-directory') return 'business-directory';
+  if (path === '/reset-password') return 'reset-password';
+  if (path === '/verify-email') return 'verify-email';
+  if (path.startsWith('/agents')) return 'agents';
+  if (path.startsWith('/agencies')) return 'agencies';
+  if (path.startsWith('/account')) return 'account';
+  if (path.startsWith('/admin')) return 'admin';
+  if (path.startsWith('/agency-dashboard')) return 'agency-dashboard';
+  if (path.startsWith('/business-directory')) return 'business-directory';
+  if (path.startsWith('/explore-cities')) return 'explore-cities';
+  if (path.startsWith('/how-it-works')) return 'how-it-works';
+  if (path.startsWith('/saved-properties')) return 'saved-properties';
+  if (path.startsWith('/saved-searches')) return 'saved-searches';
+  if (path.startsWith('/blog')) return 'blog';
+  if (path.startsWith('/property')) return 'search'; // async load; search is shown while property fetches
+  if (path.startsWith('/create-agency')) return 'createAgency';
+  if (path.startsWith('/privacy')) return 'privacy';
+  if (path.startsWith('/terms')) return 'terms';
+  if (path.startsWith('/cookies')) return 'cookies';
+  if (path.startsWith('/refund')) return 'refund';
+  return 'search'; // safe default — search is the primary page
+}
+
 const initialState: AppState = {
   user: null,
   onboardingComplete: true,
@@ -54,7 +106,7 @@ const initialState: AppState = {
   // 1. A likely-valid session exists (session cookie present) → restoring silently
   // 2. An OAuth callback is in progress → token must be verified before rendering
   isAuthenticating: hasLikelyValidSession() || isOAuthCallbackInProgress,
-  activeView: 'home',
+  activeView: getInitialView(),
   isPricingModalOpen: false,
   isFirstLoginOffer: false,
   isAgencyCreationMode: false,
