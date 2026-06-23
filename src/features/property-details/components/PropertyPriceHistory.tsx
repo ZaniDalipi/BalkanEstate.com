@@ -256,14 +256,14 @@ const ChangeBarChart: React.FC<ChangeBarChartProps> = ({ entries }) => {
               {/* Bar */}
               <rect x={barX} y={y} width={Math.max(barW, 2)} height={BAR_H} rx="4" fill={color} fillOpacity="0.85" />
 
-              {/* Amount label */}
+              {/* Amount label — always on the open side of the chart */}
               <text
-                x={isPos ? barX + barW + 6 : barX - 6}
+                x={isPos ? barX + barW + 6 : cx + 6}
                 y={y + BAR_H / 2 + 4}
                 fontSize="10"
                 fill={color}
                 fontWeight="700"
-                textAnchor={isPos ? 'start' : 'end'}
+                textAnchor="start"
               >
                 {isPos ? '+' : ''}{fmtEur(delta)}
               </text>
