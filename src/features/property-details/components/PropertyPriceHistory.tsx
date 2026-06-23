@@ -47,10 +47,10 @@ interface StatCardProps {
 }
 
 const StatCard: React.FC<StatCardProps> = ({ label, value, sub, color }) => (
-  <div className="flex-1 min-w-0 bg-white rounded-xl border border-neutral-100 px-3 py-3 sm:px-4">
-    <p className="text-[10px] sm:text-xs uppercase tracking-wider text-neutral-400 font-semibold mb-0.5 truncate">{label}</p>
-    <p className={`text-base sm:text-lg font-black truncate ${color ?? 'text-neutral-900'}`}>{value}</p>
-    {sub && <p className="text-[10px] sm:text-xs text-neutral-400 mt-0.5 truncate">{sub}</p>}
+  <div className="bg-white rounded-xl border border-neutral-100 px-3 py-3 sm:px-4">
+    <p className="text-[10px] sm:text-xs uppercase tracking-wider text-neutral-400 font-semibold mb-0.5">{label}</p>
+    <p className={`text-sm sm:text-base font-black ${color ?? 'text-neutral-900'}`}>{value}</p>
+    {sub && <p className="text-[10px] sm:text-xs text-neutral-400 mt-0.5">{sub}</p>}
   </div>
 );
 
@@ -497,8 +497,8 @@ const PropertyPriceHistory: React.FC<PropertyPriceHistoryProps> = ({ property })
     <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-4 sm:p-6">
       <SectionHeader count={dbHistoryCount} />
 
-      {/* Stats Row */}
-      <div className="flex flex-wrap gap-2 sm:gap-3 mb-6">
+      {/* Stats Row — 2-col grid on mobile, auto-fill on larger screens */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 mb-6">
         <StatCard label="Current Price" value={fmtEur(currentPrice)} color="text-primary" />
 
         {totalDelta != null && totalPct != null && startingPrice !== currentPrice && (
