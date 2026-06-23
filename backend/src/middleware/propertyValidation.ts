@@ -16,7 +16,7 @@ export function handleValidationErrors(req: Request, res: Response, next: NextFu
       success: false,
       message: 'Validation failed',
       errors: errors.array().map((e) => ({
-        field: (e as any).path ?? (e as any).param,
+        field: ('path' in e ? e.path : 'param' in e ? (e as { param: string }).param : undefined),
         message: e.msg,
       })),
     });

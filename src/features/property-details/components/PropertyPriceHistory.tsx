@@ -9,7 +9,7 @@
  *   5. Rental price-interval schedule (rental properties only)
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useId } from 'react';
 import type { Property, PriceHistoryEntry, PriceInterval } from '@/src/shared/types';
 import { usePriceHistory } from '../hooks/usePriceHistory';
 
@@ -68,6 +68,7 @@ interface PriceTrendChartProps {
 
 const PriceTrendChart: React.FC<PriceTrendChartProps> = ({ entries }) => {
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  const uid = useId();
 
   const { points, min, max, yTicks, xTicks, linePath, areaPath, isOverall } = useMemo(() => {
     const prices = entries.map((e) => e.price);
@@ -112,7 +113,7 @@ const PriceTrendChart: React.FC<PriceTrendChartProps> = ({ entries }) => {
 
   const hovered = hoverIdx != null ? points[hoverIdx] : null;
   const lineColor = isOverall ? '#22c55e' : '#ef4444';
-  const gradId = isOverall ? 'trendGradGreen' : 'trendGradRed';
+  const gradId = `${uid}-grad`;
   const gradStart = isOverall ? '#22c55e' : '#ef4444';
 
   return (
@@ -246,7 +247,7 @@ const ChangeBarChart: React.FC<ChangeBarChartProps> = ({ entries }) => {
           const color = isPos ? '#22c55e' : '#ef4444';
 
           return (
-            <g key={e.id}>
+            <g key={e.id ?? i}>
               {/* Date label */}
               <text x={LABEL_W - 6} y={y + BAR_H / 2 + 4} fontSize="10" fill="#94a3b8" textAnchor="end">
                 {fmtDateShort(e.changedAt)}
@@ -351,17 +352,16 @@ const ChangeTimeline: React.FC<ChangeTimelineProps> = ({ entries, sqft }) => (
       <div className="space-y-3">
         {[...entries].reverse().map((e, i) => {
           const delta = e.previousPrice != null ? e.price - e.previousPrice : null;
-          const isUp = e.changeType === 'increase';
           const isDown = e.changeType === 'decrease';
-          const dotColor = isUp ? 'bg-green-500' : isDown ? 'bg-red-500' : 'bg-indigo-500';
-          const badgeColor = isUp
+          const dotColor = e.changeType === 'increase' ? 'bg-green-500' : isDown ? 'bg-red-500' : 'bg-indigo-500';
+          const badgeColor = e.changeType === 'increase'
             ? 'bg-green-50 text-green-700 border-green-200'
             : isDown
             ? 'bg-red-50 text-red-700 border-red-200'
             : 'bg-indigo-50 text-indigo-700 border-indigo-200';
 
           return (
-            <div key={e.id} className="flex items-start gap-3 pl-2">
+            <div key={e.id ?? i} className="flex items-start gap-3 pl-2">
               {/* Dot */}
               <div className={`w-4 h-4 rounded-full flex-shrink-0 mt-1 ring-2 ring-white shadow-sm ${dotColor}`} />
 
@@ -424,9 +424,11 @@ const PropertyPriceHistory: React.FC<PropertyPriceHistoryProps> = ({ property })
     ? new Date(property.createdAt).toISOString()
     : new Date().toISOString();
 
+  // Snapshot DB count before synthesis so it always reflects real recorded changes.
+  const dbHistoryCount = data?.history?.length ?? 0;
+
   // Build working history: real DB records take priority; synthesise if none.
   let workingHistory: PriceHistoryEntry[] = data?.history?.length ? [...data.history] : [];
-  const dbHistoryCount = workingHistory.length;
 
   if (workingHistory.length === 0) {
     if (originalPrice && originalPrice > currentPrice && priceReducedAt) {
@@ -475,6 +477,21 @@ const PropertyPriceHistory: React.FC<PropertyPriceHistoryProps> = ({ property })
     (Date.now() - new Date(last.changedAt).getTime()) / 86400000
   );
   const isDown = totalDelta != null && totalDelta < 0;
+  const nonInitialCount = workingHistory.filter((e) => e.changeType !== 'initial').length;
+
+  // Memoize price/m² series so PriceTrendChart's internal useMemo isn't busted
+  // by a new array reference on every render.
+  const pricePerSqftEntries = useMemo(
+    () =>
+      effectiveSqft && effectiveSqft > 0 && workingHistory.length >= 2
+        ? workingHistory.map((e) => ({
+            ...e,
+            price: parseFloat((e.price / effectiveSqft).toFixed(0)),
+          }))
+        : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [workingHistory, effectiveSqft]
+  );
 
   return (
     <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-4 sm:p-6">
@@ -527,7 +544,7 @@ const PropertyPriceHistory: React.FC<PropertyPriceHistoryProps> = ({ property })
           )}
 
           {/* Bar chart — needs ≥ 2 non-initial change events */}
-          {workingHistory.filter((e) => e.changeType !== 'initial').length >= 2 && (
+          {nonInitialCount >= 2 && (
             <div className="mb-8">
               <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Change Magnitude</h4>
               <ChangeBarChart entries={workingHistory} />
@@ -535,15 +552,10 @@ const PropertyPriceHistory: React.FC<PropertyPriceHistoryProps> = ({ property })
           )}
 
           {/* Price/m² trend — needs ≥ 2 points and sqft */}
-          {effectiveSqft && effectiveSqft > 0 && workingHistory.length >= 2 && (
+          {pricePerSqftEntries && (
             <div className="mb-8">
               <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Price per m² Trend</h4>
-              <PriceTrendChart
-                entries={workingHistory.map((e) => ({
-                  ...e,
-                  price: parseFloat((e.price / effectiveSqft!).toFixed(0)),
-                }))}
-              />
+              <PriceTrendChart entries={pricePerSqftEntries} />
               <p className="text-[10px] text-neutral-400 text-right mt-1">Values in €/m²</p>
             </div>
           )}

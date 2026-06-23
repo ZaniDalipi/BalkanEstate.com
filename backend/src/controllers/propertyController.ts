@@ -982,10 +982,12 @@ export const createProperty = async (
     // Populate seller info
     await property.populate('sellerId', 'name email phone avatarUrl role agencyName');
 
-    // Record initial price in history so price-history charts have a starting point
-    recordPriceChange(String(property._id), property.price).catch((err) => {
-      propertyLogger.error('Error recording initial price history:', err);
-    });
+    // Record initial price in history (skip negotiable listings where price is 0)
+    if (property.price > 0) {
+      recordPriceChange(String(property._id), property.price).catch((err) => {
+        propertyLogger.error('Error recording initial price history:', err);
+      });
+    }
 
     // Emit real-time event for instant updates across all connected clients
     emitPropertyCreated(property.toObject());
@@ -2260,23 +2262,45 @@ export const getPropertyPriceHistory = async (
       return;
     }
 
-    const history = await PriceHistory.find({ propertyId: id })
+    const rawHistory = await PriceHistory.find({ propertyId: id })
       .sort({ changedAt: 1 })
       .lean();
 
+    // lean() returns _id (ObjectId); map to id string so the frontend type is satisfied
+    const history = rawHistory.map((h) => ({
+      id: String(h._id),
+      propertyId: String(h.propertyId),
+      price: h.price,
+      previousPrice: h.previousPrice,
+      changeType: h.changeType,
+      percentageChange: h.percentageChange,
+      changedAt: (h.changedAt as Date).toISOString(),
+    }));
+
+    // IProperty has all these fields; the .select() limits what lean() returns,
+    // so cast to the known subset rather than using any.
+    const p = property as typeof property & {
+      originalPrice?: number;
+      priceReducedAt?: Date;
+      priceIntervals?: Array<{ price: number; startDate: Date; endDate?: Date; label?: string }>;
+      sqft: number;
+      listingType: string;
+      rentPeriod?: string;
+    };
+
     res.json({
       history,
-      currentPrice: property.price,
-      originalPrice: (property as any).originalPrice,
-      priceReducedAt: (property as any).priceReducedAt,
-      priceIntervals: (property as any).priceIntervals || [],
-      sqft: (property as any).sqft,
-      createdAt: property.createdAt,
-      listingType: (property as any).listingType,
-      rentPeriod: (property as any).rentPeriod,
-      status: property.status,
+      currentPrice: p.price,
+      originalPrice: p.originalPrice,
+      priceReducedAt: p.priceReducedAt ? p.priceReducedAt.toISOString() : undefined,
+      priceIntervals: p.priceIntervals ?? [],
+      sqft: p.sqft,
+      createdAt: p.createdAt ? (p.createdAt as Date).toISOString() : undefined,
+      listingType: p.listingType,
+      rentPeriod: p.rentPeriod,
+      status: p.status,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     propertyLogger.error('Get price history error:', error);
     res.status(500).json({ message: 'Error fetching price history' });
   }
