@@ -400,42 +400,35 @@ interface PropertyPriceHistoryProps {
 }
 
 const PropertyPriceHistory: React.FC<PropertyPriceHistoryProps> = ({ property }) => {
-  const { data, isLoading, error } = usePriceHistory(property.id);
+  const { data, isLoading } = usePriceHistory(property.id);
 
-  if (isLoading) {
-    return (
-      <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-6">
-        <div className="h-5 w-40 bg-neutral-100 rounded animate-pulse mb-6" />
-        <div className="flex gap-3 mb-6">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex-1 h-16 bg-neutral-100 rounded-xl animate-pulse" />
-          ))}
-        </div>
-        <div className="h-60 bg-neutral-100 rounded-xl animate-pulse" />
-      </div>
-    );
-  }
+  // ── Derive all values from the property prop first so the section always
+  // renders. DB history (from the API) optionally enriches it.
+  const currentPrice = data?.currentPrice ?? property.price;
+  const originalPrice = data?.originalPrice ?? property.originalPrice;
+  const effectiveSqft = data?.sqft ?? property.sqft;
+  const isRental = (data?.listingType ?? property.listingType) === 'rent';
+  const priceIntervals: PriceInterval[] = data?.priceIntervals ?? property.priceIntervals ?? [];
 
-  if (error || !data) return null;
+  // Normalise priceReducedAt to ISO string regardless of whether it came from
+  // the API (already ISO) or the property prop (unix timestamp in ms).
+  const priceReducedAt: string | undefined = data?.priceReducedAt
+    ? data.priceReducedAt
+    : property.priceReducedAt
+    ? new Date(property.priceReducedAt).toISOString()
+    : undefined;
 
-  const { currentPrice, originalPrice, priceReducedAt, priceIntervals, sqft } = data;
-  const effectiveSqft = sqft ?? property.sqft;
-  const isRental = data.listingType === 'rent';
+  const listedAt: string = data?.createdAt
+    ? data.createdAt
+    : property.createdAt
+    ? new Date(property.createdAt).toISOString()
+    : new Date().toISOString();
 
-  // Build the working history: prefer real DB records; if none exist yet,
-  // synthesise from the property's own price/originalPrice/createdAt fields.
-  const listedAt =
-    data.createdAt ??
-    (property.createdAt
-      ? new Date(
-          typeof property.createdAt === 'number' ? property.createdAt : property.createdAt
-        ).toISOString()
-      : new Date().toISOString());
-
-  let workingHistory = [...data.history];
+  // Build working history: real DB records take priority; synthesise if none.
+  let workingHistory: PriceHistoryEntry[] = data?.history?.length ? [...data.history] : [];
+  const dbHistoryCount = workingHistory.length;
 
   if (workingHistory.length === 0) {
-    // Synthesise: if a discount exists, add original-price entry first
     if (originalPrice && originalPrice > currentPrice && priceReducedAt) {
       workingHistory = [
         {
@@ -458,7 +451,6 @@ const PropertyPriceHistory: React.FC<PropertyPriceHistoryProps> = ({ property })
         },
       ];
     } else {
-      // Single "Listed at" point — at minimum we always show this
       workingHistory = [
         {
           id: 'synth-listed',
@@ -477,17 +469,16 @@ const PropertyPriceHistory: React.FC<PropertyPriceHistoryProps> = ({ property })
   const totalDelta = last.price !== startingPrice ? last.price - startingPrice : null;
   const totalPct =
     totalDelta != null && startingPrice > 0
-      ? ((totalDelta / startingPrice) * 100)
+      ? (totalDelta / startingPrice) * 100
       : null;
   const daysSinceLast = Math.floor(
     (Date.now() - new Date(last.changedAt).getTime()) / 86400000
   );
   const isDown = totalDelta != null && totalDelta < 0;
-  const isUp = totalDelta != null && totalDelta > 0;
 
   return (
     <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-4 sm:p-6">
-      <SectionHeader count={data.history.length} />
+      <SectionHeader count={dbHistoryCount} />
 
       {/* Stats Row */}
       <div className="flex flex-wrap gap-2 sm:gap-3 mb-6">
@@ -510,47 +501,56 @@ const PropertyPriceHistory: React.FC<PropertyPriceHistoryProps> = ({ property })
         )}
 
         <StatCard
-          label={data.history.length > 0 ? 'Last Changed' : 'Listed'}
+          label={dbHistoryCount > 0 ? 'Last Changed' : 'Listed'}
           value={daysSinceLast === 0 ? 'Today' : `${daysSinceLast}d ago`}
           sub={
-            data.history.length > 0
-              ? `${data.history.length} change${data.history.length !== 1 ? 's' : ''} recorded`
+            dbHistoryCount > 0
+              ? `${dbHistoryCount} change${dbHistoryCount !== 1 ? 's' : ''} recorded`
               : fmtDate(listedAt)
           }
         />
       </div>
 
-      {/* Trend chart — needs ≥ 2 points */}
-      {workingHistory.length >= 2 && (
-        <div className="mb-8">
-          <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Price Trend</h4>
-          <PriceTrendChart entries={workingHistory} />
-        </div>
+      {/* Loading overlay — shimmer over chart area while DB history fetches */}
+      {isLoading && (
+        <div className="h-60 bg-neutral-50 rounded-xl animate-pulse mb-6" />
       )}
 
-      {/* Bar chart — needs ≥ 2 change events (non-initial) */}
-      {workingHistory.filter((e) => e.changeType !== 'initial').length >= 2 && (
-        <div className="mb-8">
-          <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Change Magnitude</h4>
-          <ChangeBarChart entries={workingHistory} />
-        </div>
+      {!isLoading && (
+        <>
+          {/* Trend chart — needs ≥ 2 points */}
+          {workingHistory.length >= 2 && (
+            <div className="mb-8">
+              <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Price Trend</h4>
+              <PriceTrendChart entries={workingHistory} />
+            </div>
+          )}
+
+          {/* Bar chart — needs ≥ 2 non-initial change events */}
+          {workingHistory.filter((e) => e.changeType !== 'initial').length >= 2 && (
+            <div className="mb-8">
+              <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Change Magnitude</h4>
+              <ChangeBarChart entries={workingHistory} />
+            </div>
+          )}
+
+          {/* Price/m² trend — needs ≥ 2 points and sqft */}
+          {effectiveSqft && effectiveSqft > 0 && workingHistory.length >= 2 && (
+            <div className="mb-8">
+              <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Price per m² Trend</h4>
+              <PriceTrendChart
+                entries={workingHistory.map((e) => ({
+                  ...e,
+                  price: parseFloat((e.price / effectiveSqft!).toFixed(0)),
+                }))}
+              />
+              <p className="text-[10px] text-neutral-400 text-right mt-1">Values in €/m²</p>
+            </div>
+          )}
+        </>
       )}
 
-      {/* Price/m² trend — needs ≥ 2 points and sqft */}
-      {effectiveSqft && effectiveSqft > 0 && workingHistory.length >= 2 && (
-        <div className="mb-8">
-          <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Price per m² Trend</h4>
-          <PriceTrendChart
-            entries={workingHistory.map((e) => ({
-              ...e,
-              price: parseFloat((e.price / effectiveSqft!).toFixed(0)),
-            }))}
-          />
-          <p className="text-[10px] text-neutral-400 text-right mt-1">Values in €/m²</p>
-        </div>
-      )}
-
-      {/* Timeline list */}
+      {/* Timeline list — always visible */}
       <ChangeTimeline entries={workingHistory} sqft={effectiveSqft} />
 
       {/* Rental pricing schedule */}
