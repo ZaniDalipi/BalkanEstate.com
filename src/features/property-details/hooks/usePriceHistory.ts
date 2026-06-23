@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { getPropertyPriceHistory, priceHistoryKeys } from '../api/priceHistoryApi';
+import { propertyKeys } from '@/src/shared/query/queryKeys';
+import { getPropertyPriceHistory } from '../api/priceHistoryApi';
 
 export function usePriceHistory(propertyId: string | null | undefined) {
   const { data, isLoading, error } = useQuery({
-    queryKey: priceHistoryKeys.detail(propertyId || ''),
+    queryKey: propertyKeys.priceHistory(propertyId ?? ''),
     queryFn: () => getPropertyPriceHistory(propertyId!),
     enabled: !!propertyId,
     staleTime: 5 * 60 * 1000,

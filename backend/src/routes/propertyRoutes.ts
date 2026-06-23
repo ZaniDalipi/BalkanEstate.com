@@ -19,6 +19,7 @@ import {
 import { protect } from '../middleware/auth';
 import { upload } from '../utils/upload';
 import { mutationRateLimiter } from '../middleware/security';
+import { validatePropertyId } from '../middleware/propertyValidation';
 
 const router = express.Router();
 
@@ -198,6 +199,6 @@ router.patch('/:id/reassign-role', protect, mutationRateLimiter, reassignPropert
 router.patch('/:id/renew', protect, mutationRateLimiter, renewProperty);
 router.post('/:id/rental-history', protect, mutationRateLimiter, addRentalHistoryEntry);
 router.delete('/:id/rental-history/:entryId', protect, mutationRateLimiter, deleteRentalHistoryEntry);
-router.get('/:id/price-history', getPropertyPriceHistory);
+router.get('/:id/price-history', validatePropertyId, getPropertyPriceHistory);
 
 export default router;

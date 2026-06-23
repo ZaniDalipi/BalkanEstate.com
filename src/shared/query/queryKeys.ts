@@ -102,6 +102,9 @@ export const propertyKeys = {
 
   // User's own properties
   myListings: () => [...propertyKeys.all, 'my'] as const,
+
+  // Price history for a single property
+  priceHistory: (propertyId: string) => [...propertyKeys.all, propertyId, 'price-history'] as const,
 };
 
 // ============================================================================

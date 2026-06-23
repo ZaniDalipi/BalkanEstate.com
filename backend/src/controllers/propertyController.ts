@@ -982,6 +982,11 @@ export const createProperty = async (
     // Populate seller info
     await property.populate('sellerId', 'name email phone avatarUrl role agencyName');
 
+    // Record initial price in history so price-history charts have a starting point
+    recordPriceChange(String(property._id), property.price).catch((err) => {
+      propertyLogger.error('Error recording initial price history:', err);
+    });
+
     // Emit real-time event for instant updates across all connected clients
     emitPropertyCreated(property.toObject());
 
