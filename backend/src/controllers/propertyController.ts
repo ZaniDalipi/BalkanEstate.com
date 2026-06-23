@@ -6,6 +6,7 @@ import User, { IUser } from '../models/User';
 import Agent from '../models/Agent';
 import Agency from '../models/Agency';
 import SalesHistory from '../models/SalesHistory';
+import PriceHistory from '../models/PriceHistory';
 import { geocodeProperty } from '../services/geocodingService';
 import { incrementViewCount, updateSoldStats, incrementActiveListings } from '../utils/statsUpdater';
 import {
@@ -2231,5 +2232,47 @@ export const renewProperty = async (
   } catch (error: any) {
     propertyLogger.error('Renew property error:', error);
     res.status(500).json({ message: 'Error renewing property' });
+  }
+};
+
+// @desc    Get price history for a property
+// @route   GET /api/properties/:id/price-history
+// @access  Public
+export const getPropertyPriceHistory = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const property = await Property.findById(id)
+      .select('price originalPrice priceReducedAt priceIntervals sqft createdAt listingType rentPeriod status soldAt')
+      .lean();
+
+    if (!property) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    const history = await PriceHistory.find({ propertyId: id })
+      .sort({ changedAt: 1 })
+      .lean();
+
+    res.json({
+      history,
+      currentPrice: property.price,
+      originalPrice: (property as any).originalPrice,
+      priceReducedAt: (property as any).priceReducedAt,
+      priceIntervals: (property as any).priceIntervals || [],
+      sqft: (property as any).sqft,
+      createdAt: property.createdAt,
+      listingType: (property as any).listingType,
+      rentPeriod: (property as any).rentPeriod,
+      status: property.status,
+    });
+  } catch (error: any) {
+    propertyLogger.error('Get price history error:', error);
+    res.status(500).json({ message: 'Error fetching price history' });
   }
 };

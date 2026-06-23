@@ -48,6 +48,29 @@ export interface RentalHistoryEntry {
   notes?: string;
 }
 
+export interface PriceHistoryEntry {
+  id: string;
+  propertyId: string;
+  price: number;
+  previousPrice?: number;
+  changeType: 'initial' | 'increase' | 'decrease';
+  percentageChange?: number;
+  changedAt: string; // ISO date string from backend
+}
+
+export interface PropertyPriceHistoryResponse {
+  history: PriceHistoryEntry[];
+  currentPrice: number;
+  originalPrice?: number;
+  priceReducedAt?: string;
+  priceIntervals: PriceInterval[];
+  sqft?: number;
+  createdAt?: string;
+  listingType?: string;
+  rentPeriod?: RentPeriod;
+  status?: string;
+}
+
 export interface Property {
   id: string;
   propertyId?: string; // Custom property ID assigned by agency/agent

@@ -16,6 +16,7 @@ import FeaturedAgencies from '@/components/FeaturedAgencies';
 import RentalTermsSection from '@/src/features/rental/components/RentalTermsSection';
 import RentalHistorySection from '@/src/features/rental/components/RentalHistorySection';
 import RentalRulesByCountry from '@/src/features/rental/components/RentalRulesByCountry';
+import PropertyPriceHistory from './PropertyPriceHistory';
 import { SEO, Breadcrumbs, generatePropertyBreadcrumbs } from '@/src/components/seo';
 import { generatePropertySlug } from '@/utils/slug';
 import { SocialShare } from '@/src/components/marketing/SocialShare';
@@ -1013,6 +1014,11 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                 <RentalRulesByCountry country={property.country} />
               </div>
             )}
+
+            {/* Price History */}
+            <div data-section="price-history" className="scroll-mt-24 animate-slide-up" style={{ animationDelay: '380ms' }}>
+              <PropertyPriceHistory property={property} />
+            </div>
 
             {/* Similar Properties - Internal linking for SEO */}
             <div data-section="similar" className="scroll-mt-24 mt-4 sm:mt-6 lg:mt-8 animate-slide-up" style={{ animationDelay: '450ms' }}>
