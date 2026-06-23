@@ -1,0 +1,87 @@
+{
+  "pipeline": {
+    "title": "Lead Pipeline",
+    "search": "Search leads...",
+    "empty": "No leads here"
+  },
+  "tab": {
+    "overview": "Overview",
+    "activity": "Activity",
+    "edit": "Edit"
+  },
+  "lead": {
+    "new": "New Lead",
+    "newLead": "New Lead",
+    "create": "Create Lead",
+    "save": "Save Lead",
+    "saveChanges": "Save Changes",
+    "name": "Full Name",
+    "namePlaceholder": "Client name",
+    "email": "Email",
+    "phone": "Phone",
+    "stage": "Stage",
+    "source": "Source",
+    "budget": "Budget",
+    "preferredLocation": "Preferred Location",
+    "preferredPropertyType": "Property Type",
+    "propertyTypePlaceholder": "Apartment, house...",
+    "notes": "Notes",
+    "notesPlaceholder": "Additional notes about this lead...",
+    "nextAction": "Next Action",
+    "nextActionPlaceholder": "Follow-up call, send proposal...",
+    "nextActionDate": "Due Date",
+    "moveStageTo": "Move to stage",
+    "stageNoteOptional": "Optional note for this stage change...",
+    "archive": "Archive",
+    "restore": "Restore",
+    "delete": "Delete Lead",
+    "confirmDelete": "Are you sure you want to permanently delete this lead?",
+    "archived": "Archived"
+  },
+  "stage": {
+    "new": "New",
+    "contacted": "Contacted",
+    "qualified": "Qualified",
+    "proposal": "Proposal",
+    "negotiation": "Negotiation",
+    "closed_won": "Won",
+    "closed_lost": "Lost"
+  },
+  "source": {
+    "inquiry": "Inquiry",
+    "referral": "Referral",
+    "website": "Website",
+    "social": "Social Media",
+    "walk_in": "Walk-in",
+    "other": "Other"
+  },
+  "field": {
+    "phone": "Phone",
+    "source": "Source",
+    "budget": "Budget",
+    "location": "Preferred Location",
+    "propertyType": "Property Type",
+    "property": "Linked Property",
+    "nextAction": "Next Action",
+    "nextActionDate": "Due Date",
+    "created": "Created",
+    "lastContacted": "Last Contacted"
+  },
+  "activity": {
+    "log": "Log Activity",
+    "actionPlaceholder": "Called, emailed, showed property...",
+    "notePlaceholder": "Additional notes (optional)",
+    "actionRequired": "Action is required",
+    "actionTooLong": "Action must be at most 200 characters",
+    "empty": "No activities logged yet"
+  },
+  "errors": {
+    "createFailed": "Failed to create lead. Please try again.",
+    "updateFailed": "Failed to update lead.",
+    "deleteFailed": "Failed to delete lead.",
+    "stageFailed": "Failed to move lead stage."
+  },
+  "common": {
+    "saving": "Saving..."
+  }
+}
