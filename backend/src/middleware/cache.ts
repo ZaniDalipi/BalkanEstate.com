@@ -204,7 +204,7 @@ const cacheConfig: Record<string, number> = {
   '/api/cities': 15 * 60 * 1000,
   '/api/agencies': 5 * 60 * 1000,
   '/api/agents': 5 * 60 * 1000,
-  '/api/properties': 10 * 1000,
+  '/api/properties': 2 * 60 * 1000,
   '/api/products': 30 * 1000,
   '/api/promotions/tiers': 30 * 1000,
   '/api/promotion-plans': 30 * 1000,

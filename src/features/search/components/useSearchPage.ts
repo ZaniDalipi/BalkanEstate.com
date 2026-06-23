@@ -49,14 +49,36 @@ export function useSearchPage() {
     const [fallbackLocation, setFallbackLocation] = useState<string | null>(null); // Location name when showing fallback properties
     const [showDrawHint, setShowDrawHint] = useState(false); // Show draw area hint when coming from explore cities
 
-    // Enable real-time property updates via WebSocket
-    // When any property is created/updated/deleted, the list refreshes instantly
-    // Use fetchProperties directly (it's already a stable useCallback) to avoid
-    // re-subscribing to websocket events on every render.
+    // Enable real-time property updates via WebSocket.
+    // Update global state surgically instead of refetching all 1000 properties on every event.
+    const handlePropertyCreated = useCallback((data: any) => {
+        if (data.property) {
+            dispatch({ type: 'ADD_PROPERTY', payload: data.property });
+        } else {
+            fetchProperties();
+        }
+    }, [dispatch, fetchProperties]);
+
+    const handlePropertyUpdated = useCallback((data: any) => {
+        if (data.property) {
+            dispatch({ type: 'UPDATE_PROPERTY', payload: data.property });
+        } else {
+            fetchProperties();
+        }
+    }, [dispatch, fetchProperties]);
+
+    const handlePropertyDeleted = useCallback((data: any) => {
+        if (data.propertyId) {
+            dispatch({ type: 'DELETE_PROPERTY', payload: data.propertyId });
+        } else {
+            fetchProperties();
+        }
+    }, [dispatch, fetchProperties]);
+
     useRealtimeProperties({
-        onPropertyCreated: (() => fetchProperties()) as any,
-        onPropertyUpdated: (() => fetchProperties()) as any,
-        onPropertyDeleted: (() => fetchProperties()) as any,
+        onPropertyCreated: handlePropertyCreated,
+        onPropertyUpdated: handlePropertyUpdated,
+        onPropertyDeleted: handlePropertyDeleted,
     });
 
     useEffect(() => {
