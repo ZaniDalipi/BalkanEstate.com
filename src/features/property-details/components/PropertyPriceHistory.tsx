@@ -9,8 +9,7 @@
  *   5. Rental price-interval schedule (rental properties only)
  */
 
-import React, { useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useState } from 'react';
 import type { Property, PriceHistoryEntry, PriceInterval } from '@/src/shared/types';
 import { usePriceHistory } from '../hooks/usePriceHistory';
 
@@ -394,45 +393,6 @@ const ChangeTimeline: React.FC<ChangeTimelineProps> = ({ entries, sqft }) => (
   </div>
 );
 
-// ── No-data states ─────────────────────────────────────────────────────────────
-
-const SyntheticTwoPoint: React.FC<{ current: number; original: number; reducedAt?: string; sqft?: number }> = ({
-  current,
-  original,
-  reducedAt,
-  sqft,
-}) => {
-  const delta = current - original;
-  const p = ((delta / original) * 100).toFixed(1);
-  const isDown = delta < 0;
-
-  const synth: PriceHistoryEntry[] = [
-    { id: 'orig', propertyId: '', price: original, changeType: 'initial', changedAt: reducedAt || new Date(Date.now() - 30 * 86400000).toISOString() },
-    { id: 'curr', propertyId: '', price: current, previousPrice: original, changeType: isDown ? 'decrease' : 'increase', percentageChange: parseFloat(p), changedAt: reducedAt || new Date().toISOString() },
-  ];
-
-  return (
-    <>
-      <div className="flex flex-wrap gap-2 sm:gap-3 mb-6">
-        <StatCard label="Current Price" value={fmtEur(current)} color="text-primary" />
-        <StatCard label="Original Price" value={fmtEur(original)} />
-        <StatCard
-          label="Total Change"
-          value={`${isDown ? '▼' : '▲'} ${fmtEur(Math.abs(delta))}`}
-          sub={`${isDown ? '' : '+'}${p}%`}
-          color={isDown ? 'text-red-600' : 'text-green-600'}
-        />
-        {sqft && sqft > 0 && (
-          <StatCard label="Price / m²" value={fmtEur(Math.round(current / sqft))} />
-        )}
-      </div>
-
-      <PriceTrendChart entries={synth} />
-      <ChangeTimeline entries={synth} sqft={sqft} />
-    </>
-  );
-};
-
 // ── Main Component ─────────────────────────────────────────────────────────────
 
 interface PropertyPriceHistoryProps {
@@ -440,35 +400,7 @@ interface PropertyPriceHistoryProps {
 }
 
 const PropertyPriceHistory: React.FC<PropertyPriceHistoryProps> = ({ property }) => {
-  const { t } = useTranslation('property');
   const { data, isLoading, error } = usePriceHistory(property.id);
-
-  // ---- stats derived from history data ----------------------------------------
-  const stats = useMemo(() => {
-    if (!data) return null;
-
-    const { history, currentPrice, originalPrice, sqft } = data;
-    const first = history[0];
-    const last = history[history.length - 1];
-
-    const startingPrice = first?.price ?? originalPrice;
-    const totalDelta = startingPrice != null ? currentPrice - startingPrice : null;
-    const totalPct = startingPrice ? ((currentPrice - startingPrice) / startingPrice) * 100 : null;
-
-    const daysSinceLast = last
-      ? Math.floor((Date.now() - new Date(last.changedAt).getTime()) / 86400000)
-      : null;
-
-    return {
-      currentPrice,
-      startingPrice,
-      totalDelta,
-      totalPct,
-      daysSinceLast,
-      sqft: sqft ?? property.sqft,
-      changeCount: history.length,
-    };
-  }, [data, property.sqft]);
 
   if (isLoading) {
     return (
@@ -486,114 +418,140 @@ const PropertyPriceHistory: React.FC<PropertyPriceHistoryProps> = ({ property })
 
   if (error || !data) return null;
 
-  const { history, currentPrice, originalPrice, priceReducedAt, priceIntervals, sqft } = data;
+  const { currentPrice, originalPrice, priceReducedAt, priceIntervals, sqft } = data;
   const effectiveSqft = sqft ?? property.sqft;
   const isRental = data.listingType === 'rent';
 
-  // No recorded history, but has discount info on the property
-  if (history.length === 0 && originalPrice && originalPrice > currentPrice) {
-    return (
-      <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-4 sm:p-6">
-        <SectionHeader />
-        <SyntheticTwoPoint
-          current={currentPrice}
-          original={originalPrice}
-          reducedAt={priceReducedAt}
-          sqft={effectiveSqft}
-        />
-        {isRental && priceIntervals.length > 0 && (
-          <PriceIntervalsSection intervals={priceIntervals} currentPrice={currentPrice} />
-        )}
-      </div>
-    );
+  // Build the working history: prefer real DB records; if none exist yet,
+  // synthesise from the property's own price/originalPrice/createdAt fields.
+  const listedAt =
+    data.createdAt ??
+    (property.createdAt
+      ? new Date(
+          typeof property.createdAt === 'number' ? property.createdAt : property.createdAt
+        ).toISOString()
+      : new Date().toISOString());
+
+  let workingHistory = [...data.history];
+
+  if (workingHistory.length === 0) {
+    // Synthesise: if a discount exists, add original-price entry first
+    if (originalPrice && originalPrice > currentPrice && priceReducedAt) {
+      workingHistory = [
+        {
+          id: 'synth-orig',
+          propertyId: property.id,
+          price: originalPrice,
+          changeType: 'initial' as const,
+          changedAt: listedAt,
+        },
+        {
+          id: 'synth-curr',
+          propertyId: property.id,
+          price: currentPrice,
+          previousPrice: originalPrice,
+          changeType: 'decrease' as const,
+          percentageChange: parseFloat(
+            (((currentPrice - originalPrice) / originalPrice) * 100).toFixed(1)
+          ),
+          changedAt: priceReducedAt,
+        },
+      ];
+    } else {
+      // Single "Listed at" point — at minimum we always show this
+      workingHistory = [
+        {
+          id: 'synth-listed',
+          propertyId: property.id,
+          price: currentPrice,
+          changeType: 'initial' as const,
+          changedAt: listedAt,
+        },
+      ];
+    }
   }
 
-  // No data at all
-  if (history.length === 0) {
-    if (!isRental || priceIntervals.length === 0) return null;
-    return (
-      <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-4 sm:p-6">
-        <SectionHeader />
-        <div className="flex flex-wrap gap-2 sm:gap-3 mb-6">
-          <StatCard label="Current Price" value={fmtEur(currentPrice)} color="text-primary" />
-          {effectiveSqft && effectiveSqft > 0 && (
-            <StatCard label="Price / m²" value={fmtEur(Math.round(currentPrice / effectiveSqft))} />
-          )}
-        </div>
-        <PriceIntervalsSection intervals={priceIntervals} currentPrice={currentPrice} />
-      </div>
-    );
-  }
-
-  // Full view with history records
-  const isDown = stats && stats.totalDelta != null && stats.totalDelta < 0;
-  const isUp = stats && stats.totalDelta != null && stats.totalDelta > 0;
+  const first = workingHistory[0];
+  const last = workingHistory[workingHistory.length - 1];
+  const startingPrice = first.price;
+  const totalDelta = last.price !== startingPrice ? last.price - startingPrice : null;
+  const totalPct =
+    totalDelta != null && startingPrice > 0
+      ? ((totalDelta / startingPrice) * 100)
+      : null;
+  const daysSinceLast = Math.floor(
+    (Date.now() - new Date(last.changedAt).getTime()) / 86400000
+  );
+  const isDown = totalDelta != null && totalDelta < 0;
+  const isUp = totalDelta != null && totalDelta > 0;
 
   return (
     <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-4 sm:p-6">
-      <SectionHeader count={history.length} />
+      <SectionHeader count={data.history.length} />
 
       {/* Stats Row */}
-      {stats && (
-        <div className="flex flex-wrap gap-2 sm:gap-3 mb-6">
-          <StatCard label="Current Price" value={fmtEur(stats.currentPrice)} color="text-primary" />
+      <div className="flex flex-wrap gap-2 sm:gap-3 mb-6">
+        <StatCard label="Current Price" value={fmtEur(currentPrice)} color="text-primary" />
 
-          {stats.startingPrice != null && stats.startingPrice !== stats.currentPrice && (
-            <StatCard label="Starting Price" value={fmtEur(stats.startingPrice)} />
-          )}
-
-          {stats.totalDelta != null && stats.totalPct != null && (
+        {totalDelta != null && totalPct != null && startingPrice !== currentPrice && (
+          <>
+            <StatCard label="Listed At" value={fmtEur(startingPrice)} />
             <StatCard
               label="Total Change"
-              value={`${isDown ? '▼' : isUp ? '▲' : '●'} ${fmtEur(Math.abs(stats.totalDelta))}`}
-              sub={pct(stats.totalPct)}
-              color={isDown ? 'text-red-600' : isUp ? 'text-green-600' : 'text-neutral-700'}
+              value={`${isDown ? '▼' : '▲'} ${fmtEur(Math.abs(totalDelta))}`}
+              sub={`${isDown ? '' : '+'}${totalPct.toFixed(1)}%`}
+              color={isDown ? 'text-red-600' : 'text-green-600'}
             />
-          )}
+          </>
+        )}
 
-          {effectiveSqft && effectiveSqft > 0 && (
-            <StatCard label="Price / m²" value={fmtEur(Math.round(stats.currentPrice / effectiveSqft))} />
-          )}
+        {effectiveSqft && effectiveSqft > 0 && (
+          <StatCard label="Price / m²" value={fmtEur(Math.round(currentPrice / effectiveSqft))} />
+        )}
 
-          {stats.daysSinceLast != null && (
-            <StatCard
-              label="Last Changed"
-              value={stats.daysSinceLast === 0 ? 'Today' : `${stats.daysSinceLast}d ago`}
-              sub={`${stats.changeCount} change${stats.changeCount !== 1 ? 's' : ''} total`}
-            />
-          )}
-        </div>
-      )}
+        <StatCard
+          label={data.history.length > 0 ? 'Last Changed' : 'Listed'}
+          value={daysSinceLast === 0 ? 'Today' : `${daysSinceLast}d ago`}
+          sub={
+            data.history.length > 0
+              ? `${data.history.length} change${data.history.length !== 1 ? 's' : ''} recorded`
+              : fmtDate(listedAt)
+          }
+        />
+      </div>
 
-      {/* Trend chart (only if ≥ 2 points) */}
-      {history.length >= 2 && (
+      {/* Trend chart — needs ≥ 2 points */}
+      {workingHistory.length >= 2 && (
         <div className="mb-8">
           <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Price Trend</h4>
-          <PriceTrendChart entries={history} />
+          <PriceTrendChart entries={workingHistory} />
         </div>
       )}
 
-      {/* Bar chart (only if ≥ 2 change events) */}
-      {history.filter((e) => e.changeType !== 'initial').length >= 2 && (
+      {/* Bar chart — needs ≥ 2 change events (non-initial) */}
+      {workingHistory.filter((e) => e.changeType !== 'initial').length >= 2 && (
         <div className="mb-8">
           <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Change Magnitude</h4>
-          <ChangeBarChart entries={history} />
+          <ChangeBarChart entries={workingHistory} />
         </div>
       )}
 
-      {/* Price/sqm trend (if sqft and ≥ 2 entries) */}
-      {effectiveSqft && effectiveSqft > 0 && history.length >= 2 && (
+      {/* Price/m² trend — needs ≥ 2 points and sqft */}
+      {effectiveSqft && effectiveSqft > 0 && workingHistory.length >= 2 && (
         <div className="mb-8">
           <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Price per m² Trend</h4>
           <PriceTrendChart
-            entries={history.map((e) => ({ ...e, price: parseFloat((e.price / effectiveSqft!).toFixed(0)) }))}
+            entries={workingHistory.map((e) => ({
+              ...e,
+              price: parseFloat((e.price / effectiveSqft!).toFixed(0)),
+            }))}
           />
           <p className="text-[10px] text-neutral-400 text-right mt-1">Values in €/m²</p>
         </div>
       )}
 
       {/* Timeline list */}
-      <ChangeTimeline entries={history} sqft={effectiveSqft} />
+      <ChangeTimeline entries={workingHistory} sqft={effectiveSqft} />
 
       {/* Rental pricing schedule */}
       {isRental && priceIntervals.length > 0 && (
