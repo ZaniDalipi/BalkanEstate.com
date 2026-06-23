@@ -9,7 +9,7 @@
  *   5. Rental price-interval schedule (rental properties only)
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { Property, PriceHistoryEntry, PriceInterval } from '@/src/shared/types';
 import { usePriceHistory } from '../hooks/usePriceHistory';
 
