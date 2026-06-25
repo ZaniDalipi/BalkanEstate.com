@@ -150,6 +150,33 @@ const ShareButtons: React.FC<{
   </div>
 );
 
+// ── HTML page renderer — sandboxed iframe with auto-height ───────────────────
+const HtmlPageRenderer: React.FC<{ content: string }> = ({ content }) => {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  const autoResize = () => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc) return;
+    iframe.style.height = '0px';
+    const h = Math.max(doc.body?.scrollHeight ?? 0, doc.documentElement?.scrollHeight ?? 0);
+    iframe.style.height = `${h + 32}px`;
+  };
+
+  return (
+    <iframe
+      ref={iframeRef}
+      srcDoc={content}
+      sandbox="allow-same-origin"
+      className="w-full border-0"
+      style={{ minHeight: '400px', display: 'block' }}
+      onLoad={autoResize}
+      title="Article content"
+    />
+  );
+};
+
 // ── Article skeleton ─────────────────────────────────────────────────────────
 const ArticleSkeleton: React.FC = () => (
   <div className="min-h-screen bg-white animate-pulse">
@@ -185,21 +212,29 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
   });
   const related = relatedArticles.filter(a => a.slug !== slug).slice(0, 2);
 
+  const isHtmlPage = !!(article?.content && (
+    article.content.includes('<style') ||
+    article.content.trimStart().startsWith('<!DOCTYPE') ||
+    article.content.trimStart().startsWith('<html')
+  ));
+
   // Sanitise article HTML once — prevents XSS while preserving safe formatting
   const sanitisedContent = useMemo(() => {
-    if (!article?.content) return '';
+    if (!article?.content || isHtmlPage) return '';
     return DOMPurify.sanitize(article.content, {
       ALLOWED_TAGS: [
         'p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
         'strong', 'em', 'u', 's', 'blockquote', 'code', 'pre',
         'ul', 'ol', 'li', 'a', 'img', 'hr', 'table', 'thead',
         'tbody', 'tr', 'th', 'td', 'figure', 'figcaption', 'span', 'div',
+        'section', 'article', 'aside', 'header', 'footer', 'main', 'nav',
+        'mark', 'small', 'sub', 'sup', 'del', 'ins',
       ],
-      ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'target', 'rel', 'class', 'width', 'height'],
+      ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'target', 'rel', 'class', 'width', 'height', 'style'],
       ALLOW_DATA_ATTR: false,
       FORCE_BODY: true,
     });
-  }, [article?.content]);
+  }, [article?.content, isHtmlPage]);
 
   const goBack = useCallback(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -296,6 +331,28 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
         <meta name="twitter:description" content={article.excerpt} />
         {article.coverImageUrl && <meta name="twitter:image" content={article.coverImageUrl} />}
         <meta name="twitter:site" content="@balkanestate" />
+        {/* Open Graph image dimensions */}
+        {article.coverImageUrl && <meta property="og:image:width" content="1200" />}
+        {article.coverImageUrl && <meta property="og:image:height" content="628" />}
+        {article.coverImageUrl && <meta property="og:image:type" content="image/jpeg" />}
+        {/* JSON-LD structured data — improves link previews and rich snippets */}
+        <script type="application/ld+json">{JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: article.title,
+          description: article.excerpt,
+          ...(article.coverImageUrl ? { image: [article.coverImageUrl] } : {}),
+          ...(article.publishedAt ? { datePublished: article.publishedAt } : {}),
+          dateModified: article.updatedAt || article.publishedAt,
+          author: { '@type': 'Person', name: article.author?.name || 'BalkanEstate' },
+          publisher: {
+            '@type': 'Organization',
+            name: 'BalkanEstate',
+            logo: { '@type': 'ImageObject', url: `${typeof window !== 'undefined' ? window.location.origin : ''}/logo.png` },
+          },
+          mainEntityOfPage: { '@type': 'WebPage', '@id': shareUrl },
+          keywords: article.tags?.join(', '),
+        })}</script>
       </Helmet>
 
       {/* Reading progress bar */}
@@ -442,33 +499,37 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.25 }}
-          className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-16"
+          className={isHtmlPage ? 'w-full pb-16 overflow-hidden' : 'max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-16'}
         >
-          <div
-            className="
-              text-slate-800 text-base sm:text-[1.0625rem] leading-[1.85]
-              [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:text-slate-900 [&_h1]:mt-12 [&_h1]:mb-4 [&_h1]:tracking-tight
-              [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mt-10 [&_h2]:mb-3 [&_h2]:tracking-tight
-              [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-slate-900 [&_h3]:mt-7 [&_h3]:mb-2
-              [&_p]:mb-5 [&_p]:leading-[1.85]
-              [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-5 [&_ul]:space-y-1.5
-              [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-5 [&_ol]:space-y-1.5
-              [&_li]:leading-relaxed
-              [&_blockquote]:border-l-4 [&_blockquote]:border-blue-400 [&_blockquote]:pl-5 [&_blockquote]:italic [&_blockquote]:text-slate-600 [&_blockquote]:my-8 [&_blockquote]:bg-blue-50/60 [&_blockquote]:py-4 [&_blockquote]:pr-4 [&_blockquote]:rounded-r-xl [&_blockquote]:text-lg
-              [&_a]:text-blue-600 [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-blue-800
-              [&_hr]:border-neutral-200 [&_hr]:my-10
-              [&_img]:w-full [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-2xl [&_img]:my-8 [&_img]:shadow-lg [&_img]:object-cover
-              [&_code]:bg-slate-100 [&_code]:text-slate-800 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
-              [&_pre]:bg-slate-900 [&_pre]:text-green-300 [&_pre]:p-5 [&_pre]:rounded-2xl [&_pre]:overflow-x-auto [&_pre]:my-8 [&_pre]:text-sm [&_pre]:leading-relaxed
-              [&_strong]:font-semibold [&_strong]:text-slate-900
-              [&_em]:text-slate-600
-              [&_table]:w-full [&_table]:border-collapse [&_table]:my-8 [&_table]:text-sm
-              [&_th]:bg-slate-100 [&_th]:px-4 [&_th]:py-2.5 [&_th]:text-left [&_th]:font-semibold [&_th]:border [&_th]:border-neutral-200
-              [&_td]:px-4 [&_td]:py-2.5 [&_td]:border [&_td]:border-neutral-200
-              [&_tr:nth-child(even)_td]:bg-slate-50
-            "
-            dangerouslySetInnerHTML={{ __html: sanitisedContent }}
-          />
+          {isHtmlPage ? (
+            <HtmlPageRenderer content={article.content} />
+          ) : (
+            <div
+              className="
+                text-slate-800 text-base sm:text-[1.0625rem] leading-[1.85]
+                [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:text-slate-900 [&_h1]:mt-12 [&_h1]:mb-4 [&_h1]:tracking-tight
+                [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mt-10 [&_h2]:mb-3 [&_h2]:tracking-tight
+                [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-slate-900 [&_h3]:mt-7 [&_h3]:mb-2
+                [&_p]:mb-5 [&_p]:leading-[1.85]
+                [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-5 [&_ul]:space-y-1.5
+                [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-5 [&_ol]:space-y-1.5
+                [&_li]:leading-relaxed
+                [&_blockquote]:border-l-4 [&_blockquote]:border-blue-400 [&_blockquote]:pl-5 [&_blockquote]:italic [&_blockquote]:text-slate-600 [&_blockquote]:my-8 [&_blockquote]:bg-blue-50/60 [&_blockquote]:py-4 [&_blockquote]:pr-4 [&_blockquote]:rounded-r-xl [&_blockquote]:text-lg
+                [&_a]:text-blue-600 [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-blue-800
+                [&_hr]:border-neutral-200 [&_hr]:my-10
+                [&_img]:w-full [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-2xl [&_img]:my-8 [&_img]:shadow-lg [&_img]:object-cover
+                [&_code]:bg-slate-100 [&_code]:text-slate-800 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
+                [&_pre]:bg-slate-900 [&_pre]:text-green-300 [&_pre]:p-5 [&_pre]:rounded-2xl [&_pre]:overflow-x-auto [&_pre]:my-8 [&_pre]:text-sm [&_pre]:leading-relaxed
+                [&_strong]:font-semibold [&_strong]:text-slate-900
+                [&_em]:text-slate-600
+                [&_table]:w-full [&_table]:border-collapse [&_table]:my-8 [&_table]:text-sm
+                [&_th]:bg-slate-100 [&_th]:px-4 [&_th]:py-2.5 [&_th]:text-left [&_th]:font-semibold [&_th]:border [&_th]:border-neutral-200
+                [&_td]:px-4 [&_td]:py-2.5 [&_td]:border [&_td]:border-neutral-200
+                [&_tr:nth-child(even)_td]:bg-slate-50
+              "
+              dangerouslySetInnerHTML={{ __html: sanitisedContent }}
+            />
+          )}
         </motion.div>
 
         {/* ── Bottom share + back ─────────────────────────────────────────────── */}
