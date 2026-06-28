@@ -64,7 +64,16 @@ export const colorMapStyles: google.maps.MapTypeStyle[] = [
 /**
  * Format price for marker display (short format)
  */
-export const formatMarkerPrice = (price: number): string => {
+export const formatMarkerPrice = (
+  priceOrProperty: number | { price?: number; isNegotiable?: boolean }
+): string => {
+  // Accept either a raw price or a property; negotiable / zero-price
+  // listings have no fixed price and must never render as €0.
+  const isNegotiable = typeof priceOrProperty === 'object' && !!priceOrProperty.isNegotiable;
+  const price = typeof priceOrProperty === 'number' ? priceOrProperty : (priceOrProperty.price ?? 0);
+  if (isNegotiable || !price || price <= 0) {
+    return 'Negotiable';
+  }
   if (price >= 1000000) {
     const millions = price / 1000000;
     if (millions >= 10) {
