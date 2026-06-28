@@ -135,19 +135,19 @@ window.addEventListener(
 );
 
 if ('serviceWorker' in navigator) {
-  // Register the SW after page load. We intentionally do NOT listen for
-  // `controllerchange` here: with skipWaiting+clientsClaim a new SW takes
-  // over automatically within seconds of the load event, and reloading at
-  // that point mid-session causes the visible "screen refresh after a few
-  // seconds" reported by users. Actual stale-chunk failures are already
-  // handled above by the `vite:preloadError` and `error` (module script)
-  // handlers, which only reload when a chunk truly fails — not preemptively.
+  // Register the SW after page load. The PWA uses registerType: 'prompt' (see
+  // vite.config.ts), so vite-plugin-pwa does NOT attach an auto-reload listener
+  // and skipWaiting/clientsClaim are off — an updated SW stays in "waiting" and
+  // takes control on the user's next page open instead of reloading mid-session
+  // (the production-only "screen refresh after a few seconds" users reported).
+  // We never call the returned updateSW(), so no programmatic reload happens.
+  // Actual stale-chunk failures are still handled above by the
+  // `vite:preloadError` and `error` (module script) handlers, which only reload
+  // when a chunk truly fails — not preemptively.
   window.addEventListener('load', async () => {
     try {
       const { registerSW } = await import('virtual:pwa-register');
-      // immediate: false — do not force-activate a waiting SW mid-session.
-      // The SW will take over on the user's next page open (or navigation),
-      // avoiding the disruptive reload that occurred with immediate: true.
+      // immediate: false — defer registration until the load event has settled.
       registerSW({ immediate: false });
     } catch {
       // SW registration is non-critical — silently ignore errors
