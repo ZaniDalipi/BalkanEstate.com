@@ -80,7 +80,7 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({ isOpen, onClose, prop
     const bestParking = findBestValue('parking', 'max');
 
     const rows: RowDef[] = [
-        { label: t('property:comparison.price'), key: 'price', bestValue: bestPrice, format: (p) => formatPrice(p.price, p.country) },
+        { label: t('property:comparison.price'), key: 'price', bestValue: bestPrice, format: (p) => p.isNegotiable ? t('property:byNegotiation', 'By Negotiation') : formatPrice(p.price, p.country) },
         { label: t('property:comparison.beds'), key: 'beds', bestValue: bestBeds, format: (p) => p.beds },
         { label: t('property:comparison.baths'), key: 'baths', bestValue: bestBaths, format: (p) => p.baths },
         { label: t('property:comparison.livingRooms'), key: 'livingRooms', bestValue: bestLivingRooms, format: (p) => p.livingRooms },
