@@ -5,6 +5,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
 import { validateCoordinates } from '../../shared/utils/validation';
+import { openExternalUrl } from '../../shared/utils/pwa';
 import { formatPrice } from '../../../utils/currency';
 import { getPriceReductionInfo } from '../../../utils/priceUtils';
 import {
@@ -53,7 +54,8 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
   const { state, dispatch, updateSearchPageState } = useAppContext();
 
   // --- state ---
-  const [directionsLoading, setDirectionsLoading] = useState(false);
+  // Controls the "open in map app" chooser shown below the Directions button.
+  const [mapMenuOpen, setMapMenuOpen] = useState(false);
 
   // --- derived values ---
   // lat/lng typed as number; guard 0,0 (null island) which passes range validation but is never a real Balkan listing
@@ -111,27 +113,40 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
     }
   }, [property.city, property.country, state.searchPageState.filters, updateSearchPageState, dispatch]);
 
-  const handleGetDirections = useCallback(() => {
-    const openMaps = (origin?: string) => {
-      const url = origin
-        ? `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${mapsDestination}`
-        : `https://www.google.com/maps/dir/?api=1&destination=${mapsDestination}`;
-      window.open(url, '_blank', 'noopener,noreferrer');
-      setDirectionsLoading(false);
-    };
+  // Each provider gets a deep link that all major map apps support. We do NOT
+  // pre-fetch geolocation for the origin: every app below falls back to the
+  // user's current location when no origin is given, and an async geolocation
+  // callback would lose the user-gesture and get the open blocked on mobile /
+  // installed PWAs (the original bug).
+  const mapProviders = useMemo(
+    () => [
+      {
+        name: 'Google Maps',
+        emoji: '🗺️',
+        url: `https://www.google.com/maps/dir/?api=1&destination=${mapsDestination}`,
+      },
+      {
+        name: 'Apple Maps',
+        emoji: '🧭',
+        url: `https://maps.apple.com/?daddr=${mapsDestination}&dirflg=d`,
+      },
+      {
+        name: 'Waze',
+        emoji: '🚗',
+        url: hasValidCoords
+          ? `https://waze.com/ul?ll=${mapsDestination}&navigate=yes`
+          : `https://waze.com/ul?q=${mapsDestination}&navigate=yes`,
+      },
+    ],
+    [mapsDestination, hasValidCoords]
+  );
 
-    if (!navigator.geolocation) {
-      openMaps();
-      return;
-    }
-
-    setDirectionsLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => openMaps(`${pos.coords.latitude},${pos.coords.longitude}`),
-      () => openMaps(),
-      { timeout: 5000, maximumAge: 60000 }
-    );
-  }, [mapsDestination]);
+  const handleSelectMapProvider = useCallback((url: string) => {
+    // openExternalUrl runs synchronously inside this click handler, so the
+    // open stays inside the user gesture and works in mobile browsers / PWAs.
+    openExternalUrl(url);
+    setMapMenuOpen(false);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -261,24 +276,49 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                 </div>
               </div>
 
-              {/* Directions button */}
-              <button
-                onClick={handleGetDirections}
-                disabled={directionsLoading}
-                className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-white text-xs sm:text-sm font-medium hover:bg-primary/90 disabled:opacity-60 active:scale-95 transition-all shadow-sm shadow-primary/20"
-                aria-label={t('actions.getDirections', 'Get Directions')}
-              >
-                {directionsLoading ? (
-                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v3m0 12v3M3 12h3m12 0h3" />
-                  </svg>
-                ) : (
+              {/* Directions button + map-app chooser */}
+              <div className="relative flex-shrink-0">
+                <button
+                  onClick={() => setMapMenuOpen((open) => !open)}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-white text-xs sm:text-sm font-medium hover:bg-primary/90 active:scale-95 transition-all shadow-sm shadow-primary/20"
+                  aria-label={t('actions.getDirections', 'Get Directions')}
+                  aria-haspopup="menu"
+                  aria-expanded={mapMenuOpen}
+                >
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
                   </svg>
+                  <span className="hidden sm:inline">{t('actions.getDirections', 'Directions')}</span>
+                </button>
+
+                {mapMenuOpen && (
+                  <>
+                    {/* Backdrop closes the menu on outside tap */}
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setMapMenuOpen(false)}
+                      aria-hidden
+                    />
+                    <div
+                      role="menu"
+                      aria-label={t('actions.getDirections', 'Get Directions')}
+                      className="absolute right-0 top-full mt-2 z-50 w-44 rounded-xl bg-white shadow-xl ring-1 ring-black/5 border border-neutral-100 overflow-hidden py-1"
+                    >
+                      {mapProviders.map((p) => (
+                        <button
+                          key={p.name}
+                          role="menuitem"
+                          onClick={() => handleSelectMapProvider(p.url)}
+                          className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 active:bg-neutral-100 transition-colors text-left"
+                        >
+                          <span className="text-base leading-none" aria-hidden>{p.emoji}</span>
+                          <span className="font-medium">{p.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </>
                 )}
-                <span className="hidden sm:inline">{t('actions.getDirections', 'Directions')}</span>
-              </button>
+              </div>
             </div>
           </div>
 
