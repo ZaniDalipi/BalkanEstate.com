@@ -262,7 +262,13 @@
       "winter": "Zima"
     },
     "promoted": "Promovirani",
-    "cadastre": "Kataststar"
+    "cadastre": "Kataststar",
+    "reset": "Resetiraj",
+    "locate": "Lokacija",
+    "layers": "Slojevi",
+    "mapView": "Karta",
+    "switchTo": "Prebaci na {{view}} prikaz",
+    "drawAreaHint": "Nacrtaj područje pretrage na karti"
   },
   "newsletter": {
     "title": "Ostanite Ažurirani s Novim Nekretninama",

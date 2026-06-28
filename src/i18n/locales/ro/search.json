@@ -262,7 +262,13 @@
       "winter": "Iarnă"
     },
     "promoted": "Promovate",
-    "cadastre": "Cadastru"
+    "cadastre": "Cadastru",
+    "reset": "Resetare",
+    "locate": "Locație",
+    "layers": "Straturi",
+    "mapView": "Hartă",
+    "switchTo": "Comută la vizualizarea {{view}}",
+    "drawAreaHint": "Desenează o zonă de căutare pe hartă"
   },
   "newsletter": {
     "title": "Fiți la Curent cu Proprietăți Noi",
