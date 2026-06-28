@@ -37,7 +37,8 @@ export function useRentalSearch() {
     // Local state
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 1024);
-    const [mobileView, setMobileView] = useState<'list' | 'map'>('list');
+    // Open on the map first on mobile/tablet (e.g. when navigating in from the sidebar).
+    const [mobileView, setMobileView] = useState<'list' | 'map'>('map');
     const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
     const [isDrawing, setIsDrawing] = useState(false);
     const [flyToTarget, setFlyToTarget] = useState<{ center: [number, number]; zoom: number } | null>(null);

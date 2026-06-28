@@ -129,6 +129,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         } else {
             // Clear selected agency/property when navigating to different views
             dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+
+            // On mobile/tablet, always open the property search on the map first so
+            // users land on the map when navigating in from the sidebar. The rentals
+            // view manages its own mobileView (defaults to map).
+            if (view === 'search') {
+                dispatch({ type: 'UPDATE_SEARCH_PAGE_STATE', payload: { mobileView: 'map' } });
+            }
+
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
 
             // Update browser URL with language prefix

@@ -31,7 +31,9 @@ const initialSearchPageState: SearchPageState = {
     activeFilters: initialFilters,
     mapBoundsJSON: null,
     drawnBoundsJSON: null,
-    mobileView: 'list',
+    // Mobile/tablet defaults to the map view so the first thing users see is the
+    // map (e.g. when navigating in from the sidebar). They can toggle to List.
+    mobileView: 'map',
     searchMode: 'manual',
     aiChatHistory: [{ sender: 'ai', text: "Hello! Welcome to Balkan Estate. How can I help you find a property today?" }],
     isAiChatModalOpen: false,
