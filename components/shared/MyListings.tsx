@@ -150,7 +150,7 @@ const ListingCard: React.FC<{
                     {property.title && (
                         <p className="font-bold text-lg sm:text-xl text-neutral-900 mt-1 line-clamp-1">{property.title}</p>
                     )}
-                    <p className={`font-bold ${property.title ? 'text-base' : 'text-lg sm:text-xl'} text-primary mt-1`}>{formatPrice(property.price, property.country)}</p>
+                    <p className={`font-bold ${property.title ? 'text-base' : 'text-lg sm:text-xl'} text-primary mt-1`}>{property.isNegotiable ? t('property:byNegotiation', 'By Negotiation') : formatPrice(property.price, property.country)}</p>
                     <p className="text-sm text-neutral-600">{property.address}, {property.city}</p>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-shrink-0">

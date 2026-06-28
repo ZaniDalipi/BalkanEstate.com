@@ -120,6 +120,7 @@ const SwipeCard: React.FC<{
     isTop: boolean;
     exitDir?: 'left' | 'right';
 }> = ({ property, onSwipe, onVisit, isTop, exitDir }) => {
+    const { t } = useTranslation(['property']);
     const [dragDir, setDragDir] = useState<'left' | 'right' | null>(null);
     const [swipeDir, setSwipeDir] = useState<'left' | 'right' | null>(null);
     const [currentImgIdx, setCurrentImgIdx] = useState(0);
@@ -241,7 +242,7 @@ const SwipeCard: React.FC<{
                     <div className="relative">
                         <div className="flex items-start justify-between gap-3 mb-2">
                             <span className="text-white font-black text-xl tracking-tight drop-shadow-sm">
-                                {formatPrice(property.price, property.country)}
+                                {property.isNegotiable ? t('property:byNegotiation', 'By Negotiation') : formatPrice(property.price, property.country)}
                             </span>
                             {property.propertyType && (
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 px-2.5 py-1 rounded-full" style={{
