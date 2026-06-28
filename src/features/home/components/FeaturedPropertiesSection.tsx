@@ -185,7 +185,7 @@ const PropertyCard: React.FC<{
         {/* Price overlay */}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent pt-8 pb-2 px-3">
           <span className="text-sm sm:text-base font-bold text-white leading-tight">
-            {(property as any).isNegotiable ? t('home:featured.byNegotiation', 'By Negotiation') : formatPrice(property.price, property.currency)}
+            {((property as any).isNegotiable || !property.price || property.price <= 0) ? t('home:featured.byNegotiation', 'By Negotiation') : formatPrice(property.price, property.currency)}
           </span>
         </div>
       </div>

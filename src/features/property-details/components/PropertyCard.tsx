@@ -196,15 +196,15 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
   return (
     <div
-      className={`group bg-white rounded-2xl overflow-hidden shadow-sm border transition-[transform,box-shadow,border-color,opacity] duration-300 text-left w-full flex flex-col cursor-pointer isolate ${getCardStyles()} ${
-        isSold || isRented ? 'hover:shadow-md' : 'hover:shadow-lg hover:-translate-y-1 hover:scale-[1.01]'
+      className={`group bg-white rounded-2xl overflow-hidden shadow-[0_2px_8px_rgba(15,23,42,0.06),0_8px_24px_-12px_rgba(15,23,42,0.12)] border transition-[transform,box-shadow,border-color,opacity] duration-300 text-left w-full flex flex-col cursor-pointer isolate ${getCardStyles()} ${
+        isSold || isRented ? 'hover:shadow-[0_4px_12px_rgba(15,23,42,0.08),0_12px_32px_-12px_rgba(15,23,42,0.16)]' : 'hover:shadow-[0_8px_24px_rgba(15,23,42,0.1),0_24px_48px_-16px_rgba(15,23,42,0.22)] hover:-translate-y-1 hover:scale-[1.01]'
       }`}
       onClick={onCardClick}
       onContextMenu={onContextMenu}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCardClick(e as any); } }}
       role="article"
       tabIndex={0}
-      aria-label={`${property.title || propertyTypeLabel}, ${property.isNegotiable ? t('property:byNegotiation', 'By Negotiation') : formatPrice(property.price, property.country) + (isRental ? '/mo' : '')}, ${safeProperty.city}, ${safeProperty.country}`}
+      aria-label={`${property.title || propertyTypeLabel}, ${(property.isNegotiable || !property.price || property.price <= 0) ? t('property:byNegotiation', 'By Negotiation') : formatPrice(property.price, property.country) + (isRental ? '/mo' : '')}, ${safeProperty.city}, ${safeProperty.country}`}
     >
       {/* Image Section */}
       <div className="relative overflow-hidden">
@@ -413,7 +413,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           </span>
           {/* Price Badge */}
           {(() => {
-            if (property.isNegotiable) {
+            // Treat a missing / zero price the same as "By Negotiation" so a
+            // listing never renders a meaningless "0 €".
+            if (property.isNegotiable || !property.price || property.price <= 0) {
               return (
                 <div className="text-right">
                   <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-xs sm:text-sm font-semibold px-2.5 py-1 rounded-full border border-amber-200">

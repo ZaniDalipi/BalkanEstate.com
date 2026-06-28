@@ -102,7 +102,7 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
             <div className="p-3 sm:p-4">
                 {/* Price */}
                 {(() => {
-                    if (property.isNegotiable) {
+                    if (property.isNegotiable || !property.price || property.price <= 0) {
                         return (
                             <div className="flex items-center gap-1.5 mb-1">
                                 <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-sm font-semibold px-2.5 py-1 rounded-full border border-amber-200">

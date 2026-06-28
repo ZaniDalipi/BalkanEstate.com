@@ -93,7 +93,7 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
       <div className="p-2.5">
         {/* Price */}
         <div className="font-bold text-base text-gray-900 mb-0.5">
-          {property.isNegotiable
+          {(property.isNegotiable || !property.price || property.price <= 0)
             ? t('property:byNegotiation', 'By Negotiation')
             : formatPrice(property.price, property.country)}
         </div>
