@@ -68,7 +68,7 @@ const AgencyDashboardHeader: React.FC<AgencyDashboardHeaderProps> = ({
             <button
               onClick={onMenuClick}
               className="lg:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
-              aria-label="Open menu"
+              aria-label={t('agencyDashboard:header.openMenu', 'Open menu')}
             >
               <Bars3Icon className="w-6 h-6" />
             </button>
@@ -93,7 +93,7 @@ const AgencyDashboardHeader: React.FC<AgencyDashboardHeaderProps> = ({
               <button
                 onClick={onBrowseProperties}
                 className="flex items-center gap-2 px-3 py-2 text-sm text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors font-medium shadow-sm"
-                aria-label="Browse Properties"
+                aria-label={t('agencyDashboard:header.browseProperties', 'Browse Properties')}
               >
                 <MagnifyingGlassIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">
@@ -105,7 +105,7 @@ const AgencyDashboardHeader: React.FC<AgencyDashboardHeaderProps> = ({
               <button
                 onClick={onBackToAgency}
                 className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                aria-label="Back to agency"
+                aria-label={t('agencyDashboard:header.backToAgency', 'Back to Agency')}
               >
                 <ArrowLeftIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">
@@ -116,7 +116,7 @@ const AgencyDashboardHeader: React.FC<AgencyDashboardHeaderProps> = ({
             <button
               onClick={onBackToSite}
               className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-              aria-label="Back to site"
+              aria-label={t('agencyDashboard:header.backToSite', 'Back to Site')}
             >
               <HomeIcon className="w-4 h-4" />
               <span className="hidden sm:inline">

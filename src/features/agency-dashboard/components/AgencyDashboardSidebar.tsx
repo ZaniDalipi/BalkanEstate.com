@@ -156,13 +156,13 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
         <button
           onClick={onMobileClose}
           className="lg:hidden p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg"
-          aria-label="Close sidebar"
+          aria-label={t('agencyDashboard:sidebar.closeSidebar', 'Close sidebar')}
         >
           <XMarkIcon className="w-5 h-5" />
         </button>
       </div>
 
-      <nav className="flex-1 overflow-y-auto p-3 space-y-1" aria-label="Agency dashboard navigation">
+      <nav className="flex-1 overflow-y-auto p-3 space-y-1" aria-label={t('agencyDashboard:sidebar.navLabel', 'Dashboard navigation')}>
         {navGroups.map((group) => (
           <div key={group.id} className="mb-2">
             {!collapsed && (
@@ -255,7 +255,7 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
           <button
             onClick={() => onCollapsedChange(!collapsed)}
             className="w-full flex items-center justify-center gap-2 px-3 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
-            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-label={collapsed ? t('agencyDashboard:sidebar.expandSidebar', 'Expand sidebar') : t('agencyDashboard:sidebar.collapseSidebar', 'Collapse sidebar')}
           >
             {collapsed ? (
               <ChevronRightIcon className="w-5 h-5" />
