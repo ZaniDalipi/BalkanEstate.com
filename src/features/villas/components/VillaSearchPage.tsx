@@ -17,98 +17,303 @@ import { NominatimResult, Property } from '@/types';
 
 const ITEMS_PER_PAGE = 20;
 
-/* ── Global animation keyframes injected once ── */
+/* ── Global animation keyframes ── */
 const VillaAnimationStyles = () => (
     <style>{`
+    /* ── Card entrance ── */
     @keyframes villaSlideUp {
-      0%   { opacity: 0; transform: translateY(28px) scale(0.97); }
+      0%   { opacity: 0; transform: translateY(30px) scale(0.96); }
       100% { opacity: 1; transform: translateY(0)    scale(1);    }
     }
-    @keyframes sparklePulse {
-      0%, 100% { opacity: 0; transform: scale(0.6) rotate(0deg);  }
-      50%       { opacity: 1; transform: scale(1.2) rotate(45deg); }
+    .villa-card-fly {
+      opacity: 0;
+      animation: villaSlideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation-delay: var(--card-delay, 0ms);
     }
+
+    /* ── Gold shimmer bar ── */
     @keyframes goldShimmer {
       0%   { background-position: -200% center; }
       100% { background-position:  200% center; }
     }
-    @keyframes floatUp {
-      0%   { opacity: 0; transform: translateY(0); }
-      20%  { opacity: 1; }
-      80%  { opacity: 0.6; }
-      100% { opacity: 0; transform: translateY(-40px); }
-    }
-    .villa-card-fly {
-      opacity: 0;
-      animation: villaSlideUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-      animation-delay: var(--card-delay, 0ms);
-    }
-    .luxury-chip {
-      transition: opacity 0.35s ease, transform 0.35s ease;
-    }
-    .luxury-villa-card:hover .luxury-chip {
-      opacity: 1 !important;
-      transform: translateY(0) !important;
-    }
-    .luxury-villa-card .luxury-chip {
-      opacity: 0;
-      transform: translateY(8px);
-    }
     .gold-shimmer {
       background: linear-gradient(90deg,
         transparent 0%,
-        rgba(255,165,0,0.25) 40%,
-        rgba(255,200,50,0.45) 50%,
-        rgba(255,165,0,0.25) 60%,
+        rgba(255,165,0,0.28) 38%,
+        rgba(255,210,60,0.50) 50%,
+        rgba(255,165,0,0.28) 62%,
         transparent 100%
       );
       background-size: 200% auto;
       animation: goldShimmer 2.5s linear infinite;
     }
-    .sparkle {
-      position: absolute;
-      width: 4px; height: 4px;
-      border-radius: 50%;
-      background: #FFA500;
-      animation: sparklePulse var(--dur, 2.4s) ease-in-out infinite;
-      animation-delay: var(--delay, 0s);
+
+    /* ── 3D magnetic tilt card ── */
+    .villa-tilt-card {
+      transform: perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+      transition: transform 0.14s ease-out, box-shadow 0.35s ease;
+      will-change: transform;
     }
-    .float-particle {
+    .luxury-villa-card:hover.villa-tilt-card,
+    .luxury-villa-card:hover .villa-tilt-card {
+      box-shadow:
+        0 32px 60px rgba(0,0,0,0.38),
+        0 0 0 1px rgba(255,165,0,0.12),
+        0 0 50px rgba(255,165,0,0.06);
+    }
+
+    /* ── Parallax image layer ── */
+    .villa-img-wrap {
+      transform: translate(var(--imgX,0px), var(--imgY,0px)) scale(1.0);
+      transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .luxury-villa-card:hover .villa-img-wrap {
+      transform: translate(var(--imgX,0px), var(--imgY,0px)) scale(1.09);
+    }
+
+    /* ── Cursor specular highlight ── */
+    .villa-specular {
+      background: radial-gradient(
+        ellipse 55% 55% at var(--mx,50%) var(--my,50%),
+        rgba(255,215,80,0.13) 0%,
+        rgba(255,165,0,0.05) 40%,
+        transparent 65%
+      );
+      transition: background 0.08s linear;
+      mix-blend-mode: screen;
+    }
+
+    /* ── SVG gold border trace ── */
+    @keyframes borderTrace {
+      0%   { stroke-dashoffset: 1; opacity: 0; }
+      8%   { opacity: 1; }
+      100% { stroke-dashoffset: 0; opacity: 1; }
+    }
+    @keyframes borderFade {
+      0%   { stroke-dashoffset: 0; opacity: 1; }
+      100% { stroke-dashoffset: 1; opacity: 0; }
+    }
+    .villa-border-trace {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .luxury-villa-card:hover .villa-border-trace {
+      animation: borderTrace 1.1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+
+    /* ── Luxury badge on card ── */
+    .villa-luxury-badge {
+      background: linear-gradient(135deg, #FFF0A0 0%, #FFA500 45%, #E8850A 100%);
+      color: #3D1F00;
+      box-shadow: 0 2px 12px rgba(255,165,0,0.35);
+    }
+
+    /* ── Price tag ── */
+    .villa-price-tag {
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,165,0,0.2);
+    }
+
+    /* ── "Reserve" CTA ── */
+    .villa-cta-btn {
+      background: rgba(255,255,255,0.10);
+      opacity: 0;
+      transform: translateY(6px) scale(0.95);
+      transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .luxury-villa-card:hover .villa-cta-btn {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    /* ── Chip reveal ── */
+    .luxury-chip {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.32s ease, transform 0.32s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .luxury-villa-card:hover .luxury-chip {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Aurora blobs in hero ── */
+    @keyframes aurora1 {
+      0%   { transform: translate(0%,0%) scale(1);    }
+      25%  { transform: translate(8%,-6%) scale(1.1); }
+      50%  { transform: translate(2%,9%) scale(0.94); }
+      75%  { transform: translate(-7%,-2%) scale(1.06);}
+      100% { transform: translate(0%,0%) scale(1);    }
+    }
+    @keyframes aurora2 {
+      0%   { transform: translate(0%,0%) scale(1.08); }
+      33%  { transform: translate(-12%,7%) scale(0.88);}
+      66%  { transform: translate(6%,-9%) scale(1.18); }
+      100% { transform: translate(0%,0%) scale(1.08); }
+    }
+    @keyframes aurora3 {
+      0%   { transform: translate(0%,0%) scale(0.92); }
+      40%  { transform: translate(11%,-11%) scale(1.12);}
+      70%  { transform: translate(-4%,6%) scale(1.0);  }
+      100% { transform: translate(0%,0%) scale(0.92); }
+    }
+    .aurora-1 { animation: aurora1 22s ease-in-out infinite; }
+    .aurora-2 { animation: aurora2 28s ease-in-out infinite 3s; }
+    .aurora-3 { animation: aurora3 18s ease-in-out infinite 6s; }
+    .aurora-4 { animation: aurora1 14s ease-in-out infinite 1s; }
+
+    /* ── Star twinkle ── */
+    @keyframes starTwinkle {
+      0%,100% { opacity: var(--so,0.25); }
+      50%      { opacity: var(--sp,0.85); }
+    }
+    .star-dot {
       position: absolute;
-      width: 2px; height: 2px;
       border-radius: 50%;
-      background: rgba(255,165,0,0.6);
-      animation: floatUp var(--dur, 3s) ease-out infinite;
-      animation-delay: var(--delay, 0s);
+      background: white;
+      animation: starTwinkle var(--dur,2.5s) ease-in-out infinite;
+      animation-delay: var(--delay,0s);
+    }
+
+    /* ── Destination pill landscape reveal ── */
+    .villa-dest-landscape {
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
+    }
+    .villa-dest-pill:hover .villa-dest-landscape,
+    .villa-dest-pill.active .villa-dest-landscape {
+      max-height: 22px;
+      opacity: 1;
+    }
+    .villa-dest-pill {
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), background 0.2s ease, border-color 0.2s ease;
+    }
+    .villa-dest-pill:hover { transform: scale(1.06) translateY(-1px); }
+    .villa-dest-pill.active { transform: scale(1.04); }
+
+    /* ── Hero title word reveal ── */
+    @keyframes wordDrop {
+      0%   { opacity: 0; transform: translateY(-20px) scale(0.9); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .hero-word {
+      display: inline-block;
+      opacity: 0;
+      animation: wordDrop 0.65s cubic-bezier(0.34,1.56,0.64,1) forwards;
+      animation-delay: var(--wd, 0ms);
+    }
+
+    /* ── Floating gold motes in hero ── */
+    @keyframes moteFloat {
+      0%   { transform: translateY(0px) translateX(0px); opacity: 0; }
+      15%  { opacity: var(--mo, 0.6); }
+      85%  { opacity: var(--mo, 0.4); }
+      100% { transform: translateY(var(--my,-60px)) translateX(var(--mx,8px)); opacity: 0; }
+    }
+    .gold-mote {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,200,50,0.9) 0%, rgba(255,140,0,0.4) 70%, transparent 100%);
+      animation: moteFloat var(--dur,4s) ease-out infinite;
+      animation-delay: var(--delay,0s);
+      pointer-events: none;
     }
   `}</style>
 );
 
-/* ── Cinematic sparkle particles (CSS-only, no library) ── */
-const SPARKLES = [
-    { x: '8%',  y: '22%', dur: '2.1s', delay: '0s'    },
-    { x: '18%', y: '55%', dur: '2.7s', delay: '0.4s'  },
-    { x: '28%', y: '80%', dur: '2.3s', delay: '0.8s'  },
-    { x: '45%', y: '35%', dur: '3.1s', delay: '0.2s'  },
-    { x: '60%', y: '65%', dur: '2.5s', delay: '1.1s'  },
-    { x: '72%', y: '18%', dur: '2.8s', delay: '0.6s'  },
-    { x: '82%', y: '48%', dur: '2.2s', delay: '1.5s'  },
-    { x: '92%', y: '72%', dur: '3.0s', delay: '0.3s'  },
-    { x: '35%', y: '88%', dur: '2.6s', delay: '0.9s'  },
-    { x: '55%', y: '12%', dur: '2.4s', delay: '1.8s'  },
-    { x: '12%', y: '40%', dur: '3.2s', delay: '0.7s'  },
-    { x: '88%', y: '30%', dur: '2.0s', delay: '1.3s'  },
+/* ── Deterministic star positions (index-based, not random) ── */
+const STARS = Array.from({ length: 48 }, (_, i) => ({
+    left:  `${((i * 73 + 17) % 100)}%`,
+    top:   `${((i * 41 + 31) % 100)}%`,
+    size:  (i % 3 === 0) ? 2 : (i % 3 === 1) ? 1.5 : 1,
+    dur:   `${2.2 + (i % 7) * 0.45}s`,
+    delay: `${(i * 0.23) % 4}s`,
+    so:    0.18 + (i % 5) * 0.1,
+    sp:    0.6  + (i % 4) * 0.1,
+}));
+
+/* ── Floating gold motes ── */
+const MOTES = Array.from({ length: 14 }, (_, i) => ({
+    left:  `${((i * 61 + 9) % 92) + 4}%`,
+    top:   `${((i * 37 + 23) % 60) + 20}%`,
+    size:  (i % 3 === 0) ? 4 : (i % 3 === 1) ? 3 : 2,
+    dur:   `${3.5 + (i % 6) * 0.7}s`,
+    delay: `${(i * 0.55) % 5}s`,
+    mx:    `${((i % 5) - 2) * 6}px`,
+    my:    `-${40 + (i % 4) * 15}px`,
+    mo:    0.4 + (i % 3) * 0.15,
+}));
+
+/* ── Destinations with landscape SVG silhouettes ── */
+const DESTINATIONS = [
+    {
+        label: '⛰️ Julian Alps',
+        query: 'Bled',
+        center: [46.3683, 14.1146] as [number, number],
+        zoom: 11,
+        landscape: 'M0 20 L6 8 L10 13 L16 3 L22 9 L27 2 L33 8 L38 5 L43 12 L48 6 L53 13 L57 7 L60 15 L60 20 Z',
+    },
+    {
+        label: '🌊 Bay of Kotor',
+        query: 'Kotor',
+        center: [42.4247, 18.7712] as [number, number],
+        zoom: 12,
+        landscape: 'M0 20 L0 11 C8 7 16 14 24 8 C32 3 40 13 48 7 C52 5 56 10 60 8 L60 20 Z',
+    },
+    {
+        label: '🌅 Budva Riviera',
+        query: 'Budva',
+        center: [42.2864, 18.8400] as [number, number],
+        zoom: 12,
+        landscape: 'M0 20 L0 13 C12 9 22 16 36 9 C46 4 53 12 60 9 L60 20 Z',
+    },
+    {
+        label: '🏞️ Lake Ohrid',
+        query: 'Ohrid',
+        center: [41.1172, 20.8016] as [number, number],
+        zoom: 11,
+        landscape: 'M0 20 L0 14 C16 11 30 16 44 12 C51 10 56 13 60 12 L60 20 Z',
+    },
+    {
+        label: '🏛️ Dubrovnik',
+        query: 'Dubrovnik',
+        center: [42.6507, 18.0944] as [number, number],
+        zoom: 13,
+        landscape: 'M0 20 L0 11 L4 11 L4 8 L7 8 L7 5 L10 5 L10 8 L14 8 L14 6 L18 6 L18 9 L22 9 L26 13 L30 13 L34 8 L38 7 L42 10 L46 13 L50 10 L54 8 L57 11 L60 12 L60 20 Z',
+    },
+    {
+        label: '🌲 Pirin Mountains',
+        query: 'Bansko',
+        center: [41.8374, 23.4882] as [number, number],
+        zoom: 12,
+        landscape: 'M0 20 L4 9 L8 14 L13 4 L19 10 L24 2 L29 8 L33 5 L38 12 L43 7 L48 11 L53 6 L57 13 L60 17 L60 20 Z',
+    },
 ];
 
-/* ── Luxury Hero Banner ── */
-const DESTINATIONS = [
-    { label: '⛰️ Julian Alps',    query: 'Bled',       center: [46.3683, 14.1146] as [number,number], zoom: 11 },
-    { label: '🌊 Bay of Kotor',   query: 'Kotor',      center: [42.4247, 18.7712] as [number,number], zoom: 12 },
-    { label: '🌅 Budva Riviera',  query: 'Budva',      center: [42.2864, 18.8400] as [number,number], zoom: 12 },
-    { label: '🏞️ Lake Ohrid',     query: 'Ohrid',      center: [41.1172, 20.8016] as [number,number], zoom: 11 },
-    { label: '🏛️ Dubrovnik',     query: 'Dubrovnik',  center: [42.6507, 18.0944] as [number,number], zoom: 13 },
-    { label: '🌲 Pirin Mountains',query: 'Bansko',     center: [41.8374, 23.4882] as [number,number], zoom: 12 },
-];
+/* ── Count-up hook for hero ── */
+const useCountUp = (target: number): number => {
+    const [val, setVal] = React.useState(0);
+    const prev = useRef(0);
+    useEffect(() => {
+        if (target === prev.current) return;
+        prev.current = target;
+        if (target === 0) { setVal(0); return; }
+        let current = 0;
+        const step = Math.max(1, Math.ceil(target / 28));
+        const id = setInterval(() => {
+            current = Math.min(current + step, target);
+            setVal(current);
+            if (current >= target) clearInterval(id);
+        }, 22);
+        return () => clearInterval(id);
+    }, [target]);
+    return val;
+};
 
 interface LuxuryHeroProps {
     count: number;
@@ -116,74 +321,151 @@ interface LuxuryHeroProps {
     activeQuery: string;
     onDestinationClick: (dest: typeof DESTINATIONS[number]) => void;
 }
-const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, minPrice, activeQuery, onDestinationClick }) => (
-    <div className="relative overflow-hidden -mx-3 -mt-2 mb-3"
-        style={{ background: 'linear-gradient(135deg, #050d1f 0%, #0a1a3a 35%, #0f2650 65%, #080f1f 100%)' }}
-    >
-        {/* Sparkle particles */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            {SPARKLES.map((s, i) => (
-                <div key={i} className="sparkle"
-                    style={{ left: s.x, top: s.y, '--dur': s.dur, '--delay': s.delay } as React.CSSProperties}
-                />
-            ))}
-        </div>
-        {/* Gold shimmer line at top */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] gold-shimmer" />
 
-        <div className="relative px-5 pt-7 pb-6 text-center">
-            <p className="text-[10px] font-bold tracking-[0.35em] uppercase mb-2"
-                style={{ color: '#FFA500', letterSpacing: '0.3em' }}>
-                ✦ &nbsp;Exclusive Collection&nbsp; ✦
-            </p>
-            <h2 className="text-white font-extrabold text-2xl sm:text-3xl leading-tight mb-1">
-                Luxury Villas
-            </h2>
-            <p className="text-white/40 text-xs mb-1">
-                Private estates · Extraordinary settings · The Balkans
-            </p>
-            {count > 0 && (
-                <p className="text-[11px] font-semibold mb-4"
-                    style={{ color: 'rgba(255,165,0,0.75)' }}>
-                    {count} {count === 1 ? 'villa' : 'villas'} available
-                    {minPrice != null ? ` · from €${minPrice.toLocaleString()}/night` : ''}
-                </p>
-            )}
-
-            {/* Destination pills */}
-            <div className="flex flex-wrap justify-center gap-1.5">
-                {DESTINATIONS.map(dest => {
-                    const isActive = activeQuery === dest.query;
-                    return (
-                        <button
-                            key={dest.query}
-                            onClick={() => onDestinationClick(dest)}
-                            className="px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all duration-200"
-                            style={isActive ? {
-                                background: 'rgba(255,165,0,0.18)',
-                                borderColor: '#FFA500',
-                                color: '#FFA500',
-                            } : {
-                                background: 'rgba(255,255,255,0.05)',
-                                borderColor: 'rgba(255,255,255,0.15)',
-                                color: 'rgba(255,255,255,0.65)',
-                            }}
-                        >
-                            {dest.label}
-                        </button>
-                    );
-                })}
+const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, minPrice, activeQuery, onDestinationClick }) => {
+    const displayCount = useCountUp(count);
+    return (
+        <div
+            className="relative overflow-hidden -mx-3 -mt-2 mb-3"
+            style={{ background: 'linear-gradient(160deg, #020818 0%, #06112e 30%, #0a1d4a 60%, #040c22 100%)', minHeight: '220px' }}
+        >
+            {/* ── Aurora nebula blobs ── */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                {/* Deep indigo */}
+                <div className="aurora-1 absolute rounded-full"
+                     style={{ width: '75%', height: '200%', left: '-18%', top: '-60%',
+                              background: 'radial-gradient(ellipse, rgba(15,50,210,0.55) 0%, rgba(8,25,120,0.18) 50%, transparent 70%)',
+                              filter: 'blur(52px)' }} />
+                {/* Rich violet */}
+                <div className="aurora-2 absolute rounded-full"
+                     style={{ width: '65%', height: '160%', right: '-12%', top: '-25%',
+                              background: 'radial-gradient(ellipse, rgba(110,20,220,0.42) 0%, rgba(60,8,130,0.12) 50%, transparent 70%)',
+                              filter: 'blur(58px)' }} />
+                {/* Deep teal */}
+                <div className="aurora-3 absolute rounded-full"
+                     style={{ width: '58%', height: '140%', left: '18%', top: '5%',
+                              background: 'radial-gradient(ellipse, rgba(0,130,200,0.32) 0%, rgba(0,70,110,0.08) 50%, transparent 70%)',
+                              filter: 'blur(48px)' }} />
+                {/* Gold accent near top-center */}
+                <div className="aurora-4 absolute rounded-full"
+                     style={{ width: '40%', height: '80%', left: '30%', top: '-20%',
+                              background: 'radial-gradient(ellipse, rgba(200,130,0,0.22) 0%, transparent 65%)',
+                              filter: 'blur(44px)' }} />
             </div>
-        </div>
 
-        {/* Fade to page bg */}
-        <div className="absolute bottom-0 inset-x-0 h-6"
-            style={{ background: 'linear-gradient(to bottom, transparent, #F8F9FC)' }}
-        />
-        {/* Gold shimmer line at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-[1px] gold-shimmer" />
-    </div>
-);
+            {/* ── Star field ── */}
+            <div className="absolute inset-0 pointer-events-none">
+                {STARS.map((s, i) => (
+                    <div
+                        key={i}
+                        className="star-dot"
+                        style={{
+                            left: s.left, top: s.top,
+                            width: `${s.size}px`, height: `${s.size}px`,
+                            '--dur': s.dur, '--delay': s.delay,
+                            '--so': s.so, '--sp': s.sp,
+                            opacity: s.so,
+                        } as React.CSSProperties}
+                    />
+                ))}
+            </div>
+
+            {/* ── Floating gold motes ── */}
+            <div className="absolute inset-0 pointer-events-none">
+                {MOTES.map((m, i) => (
+                    <div
+                        key={i}
+                        className="gold-mote"
+                        style={{
+                            left: m.left, top: m.top,
+                            width: `${m.size}px`, height: `${m.size}px`,
+                            '--dur': m.dur, '--delay': m.delay,
+                            '--mx': m.mx, '--my': m.my, '--mo': m.mo,
+                        } as React.CSSProperties}
+                    />
+                ))}
+            </div>
+
+            {/* ── Gold shimmer at top ── */}
+            <div className="absolute top-0 left-0 right-0 h-[2px] gold-shimmer" />
+
+            {/* ── Content ── */}
+            <div className="relative px-5 pt-8 pb-7 text-center">
+                {/* Eyebrow */}
+                <p className="text-[9px] font-black tracking-[0.45em] uppercase mb-3"
+                   style={{ color: '#FFA500', letterSpacing: '0.4em', textShadow: '0 0 20px rgba(255,165,0,0.6)' }}>
+                    ✦ &nbsp; Exclusive Collection &nbsp; ✦
+                </p>
+
+                {/* Animated title */}
+                <h2 className="font-black leading-none mb-2" style={{ fontSize: 'clamp(26px,5vw,38px)' }}>
+                    <span className="hero-word text-white" style={{ '--wd': '80ms' } as React.CSSProperties}>Luxury&nbsp;</span>
+                    <span className="hero-word" style={{ '--wd': '220ms', color: '#FFC740', textShadow: '0 0 30px rgba(255,180,0,0.45)' } as React.CSSProperties}>Villas</span>
+                </h2>
+
+                <p className="text-white/35 text-[11px] tracking-wide mb-1">
+                    Private estates · Extraordinary settings · The Balkans
+                </p>
+
+                {/* Live count */}
+                {count > 0 && (
+                    <p className="text-[11px] font-semibold mb-5" style={{ color: 'rgba(255,185,0,0.8)' }}>
+                        <span className="font-black text-[13px]" style={{ color: '#FFA500' }}>{displayCount}</span>
+                        {' '}{count === 1 ? 'villa' : 'villas'} available
+                        {minPrice != null ? (
+                            <span className="text-white/40"> · from <span style={{ color: 'rgba(255,185,0,0.75)' }}>€{minPrice.toLocaleString()}</span>/night</span>
+                        ) : null}
+                    </p>
+                )}
+                {count === 0 && <div className="mb-5" />}
+
+                {/* ── Destination pills with landscape SVG reveal ── */}
+                <div className="flex flex-wrap justify-center gap-2">
+                    {DESTINATIONS.map(dest => {
+                        const isActive = activeQuery === dest.query;
+                        return (
+                            <button
+                                key={dest.query}
+                                onClick={() => onDestinationClick(dest)}
+                                className={`villa-dest-pill flex flex-col items-center px-3 pt-[6px] pb-[5px] rounded-xl text-[11px] font-semibold border focus:outline-none ${isActive ? 'active' : ''}`}
+                                style={isActive ? {
+                                    background: 'rgba(255,165,0,0.20)',
+                                    borderColor: 'rgba(255,165,0,0.7)',
+                                    color: '#FFC740',
+                                    boxShadow: '0 0 16px rgba(255,165,0,0.2)',
+                                } : {
+                                    background: 'rgba(255,255,255,0.05)',
+                                    borderColor: 'rgba(255,255,255,0.12)',
+                                    color: 'rgba(255,255,255,0.62)',
+                                }}
+                            >
+                                <span>{dest.label}</span>
+                                {/* Landscape silhouette — slides down on hover/active */}
+                                <div className="villa-dest-landscape w-full mt-1">
+                                    <svg viewBox="0 0 60 20" width="60" height="16" style={{ display: 'block', margin: '0 auto' }}>
+                                        <defs>
+                                            <linearGradient id={`lg_${dest.query}`} x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stopColor={isActive ? '#FFA500' : 'rgba(255,255,255,0.5)'} />
+                                                <stop offset="100%" stopColor={isActive ? 'rgba(255,165,0,0.2)' : 'rgba(255,255,255,0.1)'} />
+                                            </linearGradient>
+                                        </defs>
+                                        <path d={dest.landscape} fill={`url(#lg_${dest.query})`} />
+                                    </svg>
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* Fade to page bg */}
+            <div className="absolute bottom-0 inset-x-0 h-8 pointer-events-none"
+                 style={{ background: 'linear-gradient(to bottom, transparent, #F8F9FC)' }} />
+            {/* Gold shimmer at bottom */}
+            <div className="absolute bottom-0 left-0 right-0 h-[1px] gold-shimmer" />
+        </div>
+    );
+};
 
 /* ── Animated luxury card with staggered entrance ── */
 const AnimatedVillaCard = memo<{
