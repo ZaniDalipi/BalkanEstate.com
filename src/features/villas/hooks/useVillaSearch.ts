@@ -46,7 +46,13 @@ export function useVillaSearch() {
     const [isSaving, setIsSaving] = useState(false);
     const debounceTimer = useRef<number | null>(null);
 
+    const abortRef = useRef<AbortController | null>(null);
+
     const fetchVillas = useCallback(async () => {
+        abortRef.current?.abort();
+        const controller = new AbortController();
+        abortRef.current = controller;
+
         setIsLoading(true);
         setError(null);
         try {
@@ -55,41 +61,53 @@ export function useVillaSearch() {
             params.set('propertyType', 'luxury-villa');
             params.set('limit', '3000');
 
-            const response = await fetch(`${API_CONFIG.BASE_URL}/properties?${params.toString()}`);
-            if (!response.ok) throw new Error(t('villas:fetchError', 'Failed to fetch villas'));
-            const data = await response.json();
+            const response = await fetch(`${API_CONFIG.BASE_URL}/properties?${params.toString()}`, {
+                signal: controller.signal,
+            });
+            if (!response.ok) {
+                const msg = t('villas:fetchError', 'Failed to fetch villas');
+                throw new Error(`${msg} (${response.status})`);
+            }
+            const data: { properties?: Record<string, unknown>[] } = await response.json();
 
-            const transformed = (data.properties || []).map((p: any) => ({
-                ...p,
-                id: p.id || p._id,
-                sellerId: p.sellerId?.id || p.sellerId?._id || p.sellerId,
-                listingType: p.listingType || 'rent',
-                rentedAt: p.rentedAt ? new Date(p.rentedAt).getTime() : undefined,
-                rentedUntil: p.rentedUntil ? new Date(p.rentedUntil).getTime() : undefined,
-                availableFrom: p.availableFrom ? new Date(p.availableFrom).getTime() : undefined,
-                promotionStartDate: p.promotionStartDate ? new Date(p.promotionStartDate).getTime() : undefined,
-                promotionEndDate: p.promotionEndDate ? new Date(p.promotionEndDate).getTime() : undefined,
-                seller: p.sellerId ? {
-                    type: p.sellerId.role === 'agent' ? 'agent' : 'private',
-                    name: p.sellerId.name || '',
-                    avatarUrl: p.sellerId.avatarUrl,
-                    phone: p.sellerId.phone || '',
-                    agencyName: p.sellerId.agencyName,
-                    agencyLogo: p.sellerId.agencyLogo,
-                    agencyId: p.sellerId.agencyId,
-                } : { type: 'private' as const, name: '', phone: '' },
-            }));
+            const transformed = (data.properties ?? []).map((p) => {
+                const seller = p.sellerId as Record<string, unknown> | null | undefined;
+                return {
+                    ...p,
+                    id: (p.id || p._id) as string,
+                    propertyType: 'luxury-villa' as const,
+                    listingType: (p.listingType as string) || 'rent',
+                    sellerId: seller?.id || seller?._id || p.sellerId,
+                    rentedAt: p.rentedAt ? new Date(p.rentedAt as string).getTime() : undefined,
+                    rentedUntil: p.rentedUntil ? new Date(p.rentedUntil as string).getTime() : undefined,
+                    availableFrom: p.availableFrom ? new Date(p.availableFrom as string).getTime() : undefined,
+                    promotionStartDate: p.promotionStartDate ? new Date(p.promotionStartDate as string).getTime() : undefined,
+                    promotionEndDate: p.promotionEndDate ? new Date(p.promotionEndDate as string).getTime() : undefined,
+                    seller: seller ? {
+                        type: seller.role === 'agent' ? 'agent' : 'private',
+                        name: (seller.name as string) || '',
+                        avatarUrl: seller.avatarUrl as string | undefined,
+                        phone: (seller.phone as string) || '',
+                        agencyName: seller.agencyName as string | undefined,
+                        agencyLogo: seller.agencyLogo as string | undefined,
+                        agencyId: seller.agencyId as string | undefined,
+                    } : { type: 'private' as const, name: '', phone: '' },
+                };
+            });
 
-            setVillaProperties(transformed);
-        } catch (err: any) {
-            setError(err.message);
+            setVillaProperties(transformed as Property[]);
+        } catch (err: unknown) {
+            if (err instanceof Error && err.name === 'AbortError') return;
+            const message = err instanceof Error ? err.message : t('common:unknownError', 'An unknown error occurred');
+            setError(message);
         } finally {
-            setIsLoading(false);
+            if (!controller.signal.aborted) setIsLoading(false);
         }
-    }, []);
+    }, [t]);
 
     useEffect(() => {
         fetchVillas();
+        return () => { abortRef.current?.abort(); };
     }, [fetchVillas]);
 
     useRealtimeProperties({
@@ -243,7 +261,7 @@ export function useVillaSearch() {
         setToast({ show: true, message, type });
     }, []);
 
-    const handleFilterChange = useCallback((key: keyof Filters, value: any) => {
+    const handleFilterChange = useCallback((key: keyof Filters, value: Filters[keyof Filters]) => {
         if (key === 'propertyType' || key === 'listingType') return; // locked to luxury-villa + rent
         setFilters(prev => ({ ...prev, [key]: value }));
     }, []);
@@ -328,8 +346,9 @@ export function useVillaSearch() {
 
             await addSavedSearch(newSearch);
             showToast(t('search:searchSaved', 'Search saved successfully!'), 'success');
-        } catch (e: any) {
-            showToast(e?.message || t('search:couldNotSaveSearch', 'Could not save search.'), 'error');
+        } catch (e: unknown) {
+            const msg = e instanceof Error ? e.message : t('search:couldNotSaveSearch', 'Could not save search.');
+            showToast(msg, 'error');
         } finally {
             setIsSaving(false);
         }
