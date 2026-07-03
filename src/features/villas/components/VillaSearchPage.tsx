@@ -878,9 +878,9 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                         style={{ background: 'linear-gradient(135deg, #050d1f 0%, #0a1a3a 50%, #080f1f 100%)' }}
                                     >
                                         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                                            {SPARKLES.slice(0, 6).map((s, i) => (
-                                                <div key={i} className="sparkle"
-                                                    style={{ left: s.x, top: s.y, '--dur': s.dur, '--delay': s.delay } as React.CSSProperties}
+                                            {STARS.slice(0, 18).map((s, i) => (
+                                                <div key={i} className="star-dot"
+                                                    style={{ left: s.left, top: s.top, width: `${s.size}px`, height: `${s.size}px`, '--dur': s.dur, '--delay': s.delay, '--so': s.so, '--sp': s.sp, opacity: s.so } as React.CSSProperties}
                                                 />
                                             ))}
                                         </div>
