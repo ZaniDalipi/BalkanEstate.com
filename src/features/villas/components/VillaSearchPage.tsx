@@ -252,42 +252,48 @@ const MOTES = Array.from({ length: 14 }, (_, i) => ({
 /* ── Destinations with landscape SVG silhouettes ── */
 const DESTINATIONS = [
     {
-        label: '⛰️ Julian Alps',
+        labelKey: 'destinations.julianAlps' as const,
+        fallback: '⛰️ Julian Alps',
         query: 'Bled',
         center: [46.3683, 14.1146] as [number, number],
         zoom: 11,
         landscape: 'M0 20 L6 8 L10 13 L16 3 L22 9 L27 2 L33 8 L38 5 L43 12 L48 6 L53 13 L57 7 L60 15 L60 20 Z',
     },
     {
-        label: '🌊 Bay of Kotor',
+        labelKey: 'destinations.kotorBay' as const,
+        fallback: '🌊 Bay of Kotor',
         query: 'Kotor',
         center: [42.4247, 18.7712] as [number, number],
         zoom: 12,
         landscape: 'M0 20 L0 11 C8 7 16 14 24 8 C32 3 40 13 48 7 C52 5 56 10 60 8 L60 20 Z',
     },
     {
-        label: '🌅 Budva Riviera',
+        labelKey: 'destinations.budvaRiviera' as const,
+        fallback: '🌅 Budva Riviera',
         query: 'Budva',
         center: [42.2864, 18.8400] as [number, number],
         zoom: 12,
         landscape: 'M0 20 L0 13 C12 9 22 16 36 9 C46 4 53 12 60 9 L60 20 Z',
     },
     {
-        label: '🏞️ Lake Ohrid',
+        labelKey: 'destinations.lakeOhrid' as const,
+        fallback: '🏞️ Lake Ohrid',
         query: 'Ohrid',
         center: [41.1172, 20.8016] as [number, number],
         zoom: 11,
         landscape: 'M0 20 L0 14 C16 11 30 16 44 12 C51 10 56 13 60 12 L60 20 Z',
     },
     {
-        label: '🏛️ Dubrovnik',
+        labelKey: 'destinations.dubrovnik' as const,
+        fallback: '🏛️ Dubrovnik',
         query: 'Dubrovnik',
         center: [42.6507, 18.0944] as [number, number],
         zoom: 13,
         landscape: 'M0 20 L0 11 L4 11 L4 8 L7 8 L7 5 L10 5 L10 8 L14 8 L14 6 L18 6 L18 9 L22 9 L26 13 L30 13 L34 8 L38 7 L42 10 L46 13 L50 10 L54 8 L57 11 L60 12 L60 20 Z',
     },
     {
-        label: '🌲 Pirin Mountains',
+        labelKey: 'destinations.pirinMountains' as const,
+        fallback: '🌲 Pirin Mountains',
         query: 'Bansko',
         center: [41.8374, 23.4882] as [number, number],
         zoom: 12,
@@ -315,6 +321,35 @@ const useCountUp = (target: number): number => {
     return val;
 };
 
+/* ── Trust strip below hero ── */
+const TrustStrip: React.FC = () => {
+    const { t } = useTranslation(['villas']);
+    const items = [
+        { icon: '🏛️', title: t('villas:trust.handpicked'), desc: t('villas:trust.handpickedDesc') },
+        { icon: '🎩', title: t('villas:trust.concierge'),  desc: t('villas:trust.conciergeDesc')  },
+        { icon: '💎', title: t('villas:trust.bestPrice'),  desc: t('villas:trust.bestPriceDesc')  },
+        { icon: '🔒', title: t('villas:trust.privacy'),    desc: t('villas:trust.privacyDesc')    },
+    ];
+    return (
+        <div
+            className="overflow-x-auto border-b border-[#FFA500]/10"
+            style={{ background: 'linear-gradient(135deg, #fffdf5 0%, #fffbee 100%)', scrollbarWidth: 'none' }}
+        >
+            <div className="flex min-w-max lg:min-w-0 lg:grid lg:grid-cols-4 divide-x divide-[#FFA500]/10">
+                {items.map((item, i) => (
+                    <div key={i} className="flex items-start gap-2.5 px-4 py-3 min-w-[170px] lg:min-w-0">
+                        <span className="text-base flex-shrink-0 mt-0.5">{item.icon}</span>
+                        <div className="min-w-0">
+                            <p className="text-[11px] font-bold text-gray-800 leading-tight truncate">{item.title}</p>
+                            <p className="text-[10px] text-gray-400 leading-snug mt-0.5">{item.desc}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
 interface LuxuryHeroProps {
     count: number;
     minPrice: number | null;
@@ -323,30 +358,27 @@ interface LuxuryHeroProps {
 }
 
 const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, minPrice, activeQuery, onDestinationClick }) => {
+    const { t } = useTranslation(['villas']);
     const displayCount = useCountUp(count);
     return (
         <div
-            className="relative overflow-hidden -mx-3 -mt-2 mb-3"
+            className="relative overflow-hidden -mx-3 -mt-2 mb-0"
             style={{ background: 'linear-gradient(160deg, #020818 0%, #06112e 30%, #0a1d4a 60%, #040c22 100%)', minHeight: '220px' }}
         >
             {/* ── Aurora nebula blobs ── */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                {/* Deep indigo */}
                 <div className="aurora-1 absolute rounded-full"
                      style={{ width: '75%', height: '200%', left: '-18%', top: '-60%',
                               background: 'radial-gradient(ellipse, rgba(15,50,210,0.55) 0%, rgba(8,25,120,0.18) 50%, transparent 70%)',
                               filter: 'blur(52px)' }} />
-                {/* Rich violet */}
                 <div className="aurora-2 absolute rounded-full"
                      style={{ width: '65%', height: '160%', right: '-12%', top: '-25%',
                               background: 'radial-gradient(ellipse, rgba(110,20,220,0.42) 0%, rgba(60,8,130,0.12) 50%, transparent 70%)',
                               filter: 'blur(58px)' }} />
-                {/* Deep teal */}
                 <div className="aurora-3 absolute rounded-full"
                      style={{ width: '58%', height: '140%', left: '18%', top: '5%',
                               background: 'radial-gradient(ellipse, rgba(0,130,200,0.32) 0%, rgba(0,70,110,0.08) 50%, transparent 70%)',
                               filter: 'blur(48px)' }} />
-                {/* Gold accent near top-center */}
                 <div className="aurora-4 absolute rounded-full"
                      style={{ width: '40%', height: '80%', left: '30%', top: '-20%',
                               background: 'radial-gradient(ellipse, rgba(200,130,0,0.22) 0%, transparent 65%)',
@@ -394,26 +426,26 @@ const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, minPrice, activeQuery, o
                 {/* Eyebrow */}
                 <p className="text-[9px] font-black tracking-[0.45em] uppercase mb-3"
                    style={{ color: '#FFA500', letterSpacing: '0.4em', textShadow: '0 0 20px rgba(255,165,0,0.6)' }}>
-                    ✦ &nbsp; Exclusive Collection &nbsp; ✦
+                    {t('villas:hero.tagline', '✦ EXCLUSIVE COLLECTION ✦')}
                 </p>
 
                 {/* Animated title */}
                 <h2 className="font-black leading-none mb-2" style={{ fontSize: 'clamp(26px,5vw,38px)' }}>
-                    <span className="hero-word text-white" style={{ '--wd': '80ms' } as React.CSSProperties}>Luxury&nbsp;</span>
-                    <span className="hero-word" style={{ '--wd': '220ms', color: '#FFC740', textShadow: '0 0 30px rgba(255,180,0,0.45)' } as React.CSSProperties}>Villas</span>
+                    <span className="hero-word text-white" style={{ '--wd': '80ms' } as React.CSSProperties}>{t('villas:hero.title1', 'Luxury')}&nbsp;</span>
+                    <span className="hero-word" style={{ '--wd': '220ms', color: '#FFC740', textShadow: '0 0 30px rgba(255,180,0,0.45)' } as React.CSSProperties}>{t('villas:hero.title2', 'Villas')}</span>
                 </h2>
 
                 <p className="text-white/35 text-[11px] tracking-wide mb-1">
-                    Private estates · Extraordinary settings · The Balkans
+                    {t('villas:hero.privateEstates', 'Private estates · Extraordinary settings · The Balkans')}
                 </p>
 
                 {/* Live count */}
                 {count > 0 && (
                     <p className="text-[11px] font-semibold mb-5" style={{ color: 'rgba(255,185,0,0.8)' }}>
                         <span className="font-black text-[13px]" style={{ color: '#FFA500' }}>{displayCount}</span>
-                        {' '}{count === 1 ? 'villa' : 'villas'} available
+                        {' '}{count === 1 ? t('villas:hero.villaAvailable', 'villa available') : t('villas:hero.villasAvailable', 'villas available')}
                         {minPrice != null ? (
-                            <span className="text-white/40"> · from <span style={{ color: 'rgba(255,185,0,0.75)' }}>€{minPrice.toLocaleString()}</span>/night</span>
+                            <span className="text-white/40"> · {t('villas:hero.from', 'from')} <span style={{ color: 'rgba(255,185,0,0.75)' }}>€{minPrice.toLocaleString()}</span>/night</span>
                         ) : null}
                     </p>
                 )}
@@ -439,7 +471,7 @@ const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, minPrice, activeQuery, o
                                     color: 'rgba(255,255,255,0.62)',
                                 }}
                             >
-                                <span>{dest.label}</span>
+                                <span>{t(`villas:${dest.labelKey}`, dest.fallback)}</span>
                                 {/* Landscape silhouette — slides down on hover/active */}
                                 <div className="villa-dest-landscape w-full mt-1">
                                     <svg viewBox="0 0 60 20" width="60" height="16" style={{ display: 'block', margin: '0 auto' }}>
@@ -458,9 +490,6 @@ const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, minPrice, activeQuery, o
                 </div>
             </div>
 
-            {/* Fade to page bg */}
-            <div className="absolute bottom-0 inset-x-0 h-8 pointer-events-none"
-                 style={{ background: 'linear-gradient(to bottom, transparent, #F8F9FC)' }} />
             {/* Gold shimmer at bottom */}
             <div className="absolute bottom-0 left-0 right-0 h-[1px] gold-shimmer" />
         </div>
@@ -869,7 +898,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                         </div>
 
                         {/* Card grid / loading / empty states */}
-                        <div className="p-3 pt-2 bg-gray-50">
+                        <div className="p-3 pt-0 bg-gray-50">
                             {(isLoading || isSearchFiltering) ? (
                                 /* Cinematic loading state */
                                 <>
@@ -887,7 +916,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                         <div className="absolute top-0 left-0 right-0 h-[2px] gold-shimmer" />
                                         <div className="relative px-5 py-10 text-center">
                                             <p className="text-[10px] font-bold tracking-[0.3em] mb-3" style={{ color: '#FFA500' }}>
-                                                ✦ &nbsp;Exclusive Collection&nbsp; ✦
+                                                {t('villas:hero.tagline', '✦ EXCLUSIVE COLLECTION ✦')}
                                             </p>
                                             <div className="relative mx-auto w-12 h-12 mb-3">
                                                 <div className="absolute inset-0 rounded-full border-2 border-white/10" />
@@ -926,6 +955,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             flyTo(dest.center, dest.zoom);
                                         }}
                                     />
+                                    <TrustStrip />
                                     <div className="flex justify-center py-8 px-3">
                                         <div className="bg-white rounded-2xl shadow-sm p-8 text-center max-w-md w-full border border-[#FFA500]/10">
                                             <div className="text-5xl mb-3">🏛️</div>
@@ -961,8 +991,9 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             }
                                         }}
                                     />
+                                    <TrustStrip />
                                     <HighlightedPropertiesSection properties={listProperties} />
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
                                         {listProperties.slice(0, visibleCount).map((property, index) => (
                                             <AnimatedVillaCard
                                                 key={property.id}
