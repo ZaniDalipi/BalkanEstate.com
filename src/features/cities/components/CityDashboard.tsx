@@ -1,6 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCityMarketData, useCitiesByCountry } from '../hooks/useCityQueries';
+import { useSuburbData, useCityImages, useCityGeoData } from '../hooks/useSuburbQueries';
+import { useCityPriceHistory, useEconomicIndicators } from '../hooks/useCityInsights';
+import PriceHistoryChart from './PriceHistoryChart';
+import EconomicIndicatorsPanel from './EconomicIndicatorsPanel';
 import { formatPrice } from '@/utils/currency';
 import { parseLanguageFromPath, buildLocalizedPath } from '@/src/utils/languageRouting';
 import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
@@ -8,6 +12,11 @@ import { useAppContext } from '@/context/AppContext';
 import { searchLocation } from '@/services/osmService';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
+import SuburbDetailPanel from './SuburbDetailPanel';
+import type { SuburbEntry } from '@/src/shared/types/suburb.types';
+
+// Lazy-load the map to avoid SSR issues with Leaflet
+const CitySuburbMap = lazy(() => import('./CitySuburbMap'));
 import {
   MapPinIcon,
   ArrowTrendingUpIcon,
@@ -69,6 +78,9 @@ const CityDashboard: React.FC = () => {
 
   const [params, setParams] = useState(parseCityFromUrl);
   const [showListingPrice, setShowListingPrice] = useState(false);
+  const [showOfficialPrice, setShowOfficialPrice] = useState(false);
+  const [suburbView, setSuburbView] = useState<'map' | 'list'>('map');
+  const [selectedSuburb, setSelectedSuburb] = useState<SuburbEntry | null>(null);
 
   // Re-parse URL when navigating between cities (popstate or pushState)
   useEffect(() => {
@@ -81,6 +93,11 @@ const CityDashboard: React.FC = () => {
 
   const { data: city, isLoading, error } = useCityMarketData(params?.city, params?.country);
   const { data: countryCities } = useCitiesByCountry(params?.country);
+  const { data: suburbData, isLoading: suburbLoading, error: suburbError } = useSuburbData(params?.city, params?.country);
+  const { data: cityImagesData } = useCityImages(params?.city, params?.country);
+  const { data: priceHistory, isLoading: historyLoading } = useCityPriceHistory(params?.city, params?.country);
+  const { data: economicData } = useEconomicIndicators(params?.country);
+  const { data: cityGeoData } = useCityGeoData(params?.city, params?.country);
 
   // Scroll to top when city changes
   useEffect(() => {
@@ -159,6 +176,55 @@ const CityDashboard: React.FC = () => {
       activeFilters: { ...emptyFilters },
       drawnBoundsJSON,
       focusMapOnProperty: { lat, lng, address: displayName, zoom: 12 },
+      mobileView: 'map',
+    });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+  };
+
+  // Navigate to search focused on a specific neighbourhood —
+  // uses the suburb's own center + polygon bounds so no geocode call is needed.
+  const handleViewNeighborhoodListings = (suburb: SuburbEntry) => {
+    if (!city) return;
+
+    // Derive bounding box from the suburb polygon (GeoJSON: [lon, lat] pairs)
+    const ring = suburb.polygon.coordinates[0] ?? [];
+    const lats = ring.map((c) => c[1]);
+    const lngs = ring.map((c) => c[0]);
+    const drawnBoundsJSON =
+      ring.length > 0
+        ? JSON.stringify({
+            _southWest: { lat: Math.min(...lats), lng: Math.min(...lngs) },
+            _northEast: { lat: Math.max(...lats), lng: Math.max(...lngs) },
+          })
+        : null;
+
+    const searchQuery = `${suburb.name}, ${city.city}, ${city.country}`;
+    const emptyFilters = {
+      country: 'any' as const, query: '', listingType: 'sale' as const,
+      minPrice: null, maxPrice: null, beds: null, baths: null,
+      livingRooms: null, minSqft: null, maxSqft: null, sortBy: 'newest' as const,
+      sellerType: 'any' as const, propertyType: 'any' as const, minYearBuilt: null,
+      maxYearBuilt: null, minParking: null, furnishing: 'any' as const,
+      heatingType: 'any' as const, condition: 'any' as const, viewType: 'any' as const,
+      energyRating: 'any' as const, hasBalcony: null, hasGarden: null,
+      hasElevator: null, hasSecurity: null, hasAirConditioning: null, hasPool: null,
+      petsAllowed: null, minFloorNumber: null, maxFloorNumber: null,
+      maxDistanceToCenter: null, maxDistanceToSea: null, maxDistanceToSchool: null,
+      maxDistanceToHospital: null, amenities: [] as string[],
+      has360Tour: null, hasDiscount: null, hasPriceIncrease: null,
+      minPricePerSqm: null, maxPricePerSqm: null, maxDaysListed: null,
+    };
+
+    updateSearchPageState({
+      filters: { ...emptyFilters, query: searchQuery },
+      activeFilters: { ...emptyFilters },
+      drawnBoundsJSON,
+      focusMapOnProperty: {
+        lat: suburb.center.lat,
+        lng: suburb.center.lng,
+        address: searchQuery,
+        zoom: 15,
+      },
       mobileView: 'map',
     });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
@@ -266,6 +332,26 @@ const CityDashboard: React.FC = () => {
   const demandInfo = getDemandInfo(demandScore);
   const investmentInfo = getInvestmentInfo(investmentScore);
 
+  // Official (BIS) price data — derived from the price history endpoint
+  const bisHistory = priceHistory?.dataSource === 'bis' ? priceHistory.history : null;
+  const bisLatestPrice = bisHistory ? bisHistory[bisHistory.length - 1]?.pricePerSqm ?? null : null;
+  const bisYoY = bisHistory && bisHistory.length >= 5
+    ? parseFloat(
+        (
+          ((bisHistory[bisHistory.length - 1].pricePerSqm - bisHistory[bisHistory.length - 5].pricePerSqm) /
+            bisHistory[bisHistory.length - 5].pricePerSqm) *
+          100
+        ).toFixed(1)
+      )
+    : null;
+  const bisSourceUrl = priceHistory?.fredUrl ?? null;
+  const hasBIS = bisLatestPrice !== null;
+
+  // Wikimedia images: use first one as hero fallback, rest for gallery
+  const wikiImages = cityImagesData?.images ?? [];
+  const heroWikiUrl = wikiImages[0]?.thumbUrl ?? cityImagesData?.fallbackUrl;
+  const galleryImages = wikiImages.slice(0, 5);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <SEO
@@ -275,26 +361,71 @@ const CityDashboard: React.FC = () => {
         type="website"
       />
 
-      {/* Hero header with city image */}
-      <div className="relative h-64 sm:h-80 overflow-hidden">
-        <img
-          src={imageUrl}
-          alt={city.city}
-          className="absolute inset-0 w-full h-full object-cover"
-          loading="eager"
-          decoding="async"
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = 'none';
-            (e.target as HTMLImageElement).parentElement!.style.background = fallbackGradient;
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/70" />
+      {/* ─── Immersive mosaic cover ──────────────────────────────────────── */}
+      <div className="relative overflow-hidden bg-neutral-950" style={{ height: 440 }}>
+
+        {/* Mosaic photo grid */}
+        <div
+          className="absolute inset-0"
+          style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gridTemplateRows: '1fr 1fr', gap: 2 }}
+        >
+          {/* Hero image — spans both rows on the left */}
+          <div className="row-span-2 relative overflow-hidden bg-neutral-900">
+            <img
+              src={imageUrl}
+              alt={city.city}
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="eager"
+              decoding="async"
+              onError={(e) => {
+                const el = e.target as HTMLImageElement;
+                const first = galleryImages[0]?.thumbUrl ?? heroWikiUrl ?? '';
+                if (first) {
+                  el.src = first;
+                  el.onerror = () => {
+                    el.style.display = 'none';
+                    (el.parentElement as HTMLElement).style.background = fallbackGradient;
+                  };
+                } else {
+                  el.style.display = 'none';
+                  (el.parentElement as HTMLElement).style.background = fallbackGradient;
+                }
+              }}
+            />
+          </div>
+
+          {/* 4 secondary photo slots */}
+          {Array.from({ length: 4 }, (_, i) => {
+            const img = galleryImages[i];
+            return (
+              <div key={i} className="relative overflow-hidden bg-neutral-800">
+                {img ? (
+                  <img
+                    src={img.thumbUrl}
+                    alt={`${city.city} ${i + 1}`}
+                    className="absolute inset-0 w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                    loading="lazy"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 opacity-60" style={{ background: fallbackGradient }} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Gradient overlays for legibility */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-black/35 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent pointer-events-none" />
 
         {/* Back button */}
-        <div className="absolute top-4 left-4 z-10">
+        <div className="absolute top-5 left-5 z-10">
           <button
             onClick={navigateBack}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-black/30 backdrop-blur-md text-white rounded-xl border border-white/20 hover:bg-black/50 active:bg-black/60 transition-colors text-xs sm:text-sm font-medium"
+            className="flex items-center gap-2 px-4 py-2 bg-black/40 backdrop-blur-md text-white rounded-xl border border-white/20 hover:bg-black/60 active:bg-black/70 transition-colors text-sm font-medium"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -303,17 +434,30 @@ const CityDashboard: React.FC = () => {
           </button>
         </div>
 
-        {/* City name and trend */}
-        <div className="absolute bottom-6 left-4 sm:left-8 right-4 sm:right-8 z-10">
+        {/* Photo attribution */}
+        {galleryImages.length > 0 && (
+          <div className="absolute top-5 right-5 z-10">
+            <span className="text-[10px] text-white/50 bg-black/30 backdrop-blur-sm px-2 py-1 rounded-md">
+              © Wikimedia Commons
+            </span>
+          </div>
+        )}
+
+        {/* City info — bottom overlay */}
+        <div className="absolute bottom-0 left-0 right-0 z-10 px-6 sm:px-10 pb-7 pt-20">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <MapPinIcon className="w-6 h-6 text-white/90" />
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white">{city.city}</h1>
+              <div className="flex items-center gap-3 mb-1">
+                <MapPinIcon className="w-7 h-7 text-white/90 drop-shadow-lg flex-shrink-0" />
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow-lg leading-none">
+                  {city.city}
+                </h1>
               </div>
-              <p className="text-white/70 text-base sm:text-lg ml-8">{city.country}</p>
+              <p className="text-white/65 text-lg sm:text-xl font-medium tracking-wide pl-10">
+                {city.country}
+              </p>
             </div>
-            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold shadow-lg ${getTrendColor(city.marketTrend)}`}>
+            <div className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold shadow-xl backdrop-blur-sm border border-white/10 ${getTrendColor(city.marketTrend)}`}>
               {getTrendIcon(city.marketTrend)}
               {t('dashboard.marketIs', 'Market is')} {getTrendLabel(city.marketTrend)}
             </div>
@@ -322,7 +466,43 @@ const CityDashboard: React.FC = () => {
       </div>
 
       {/* Main content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-8 -mt-6 relative z-10 pb-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-8 mt-6 relative z-10 pb-12">
+
+        {/* Data sources explainer banner */}
+        <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="flex items-start gap-3 p-4 bg-violet-50 border border-violet-200 rounded-xl">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+              <LightBulbIcon className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-violet-800 uppercase tracking-wide mb-0.5">BalkanEstate AI</p>
+              <p className="text-[11px] text-violet-600 leading-relaxed">
+                Market scores, demand index, rental estimates, neighborhood insights, and suburb stats are AI-generated using our regional data model.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+              <ShieldCheckIcon className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-blue-800 uppercase tracking-wide mb-0.5">Official Sources</p>
+              <p className="text-[11px] text-blue-600 leading-relaxed">
+                Price history from <span className="font-semibold">BIS</span> · Macroeconomic data from <span className="font-semibold">World Bank</span> · Photos from <span className="font-semibold">Wikimedia Commons</span>.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* AI section divider */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="h-px flex-1 bg-violet-100" />
+          <span className="text-[10px] font-bold text-violet-600 uppercase tracking-widest px-3 py-1 bg-violet-50 border border-violet-200 rounded-full flex items-center gap-1.5">
+            <LightBulbIcon className="w-3 h-3" />
+            BalkanEstate AI Analysis
+          </span>
+          <div className="h-px flex-1 bg-violet-100" />
+        </div>
 
         {/* Market Health Score - composite visual */}
         <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6 mb-8">
@@ -382,40 +562,66 @@ const CityDashboard: React.FC = () => {
 
         {/* Primary metrics row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-8">
-          {/* Avg Price/m² */}
-          <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-4 sm:p-5">
+          {/* Avg Price/m² — AI | Listings | Official toggle */}
+          <div className={`bg-white rounded-xl shadow-md p-4 sm:p-5 border transition-colors ${showOfficialPrice ? 'border-blue-200' : 'border-neutral-100'}`}>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <HomeIcon className="w-4 h-4 text-primary" />
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${showOfficialPrice ? 'bg-blue-100' : 'bg-primary/10'}`}>
+                  <HomeIcon className={`w-4 h-4 ${showOfficialPrice ? 'text-blue-600' : 'text-primary'}`} />
                 </div>
                 <span className="text-xs font-medium text-neutral-500">Avg. Price /m²</span>
               </div>
-              {city.listingAvgPricePerSqm && (
-                <div className="flex gap-0.5 bg-neutral-100 rounded-full p-0.5">
+              <div className="flex gap-0.5 bg-neutral-100 rounded-full p-0.5">
+                <button
+                  onClick={() => { setShowOfficialPrice(false); setShowListingPrice(false); }}
+                  className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${!showListingPrice && !showOfficialPrice ? 'bg-white text-violet-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
+                >AI</button>
+                {city.listingAvgPricePerSqm && (
                   <button
-                    onClick={() => setShowListingPrice(false)}
-                    className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${!showListingPrice ? 'bg-white text-primary shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
-                  >
-                    Market
-                  </button>
+                    onClick={() => { setShowListingPrice(true); setShowOfficialPrice(false); }}
+                    className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${showListingPrice ? 'bg-white text-primary shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
+                  >Listings</button>
+                )}
+                {hasBIS && (
                   <button
-                    onClick={() => setShowListingPrice(true)}
-                    className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${showListingPrice ? 'bg-white text-blue-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
-                  >
-                    Listings
-                  </button>
-                </div>
-              )}
+                    onClick={() => { setShowOfficialPrice(true); setShowListingPrice(false); }}
+                    className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${showOfficialPrice ? 'bg-white text-blue-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
+                  >Official</button>
+                )}
+              </div>
             </div>
             <div className="flex items-baseline gap-1">
               <span className="text-2xl sm:text-3xl font-black text-neutral-900">
-                €{(showListingPrice && city.listingAvgPricePerSqm ? city.listingAvgPricePerSqm : avgPrice).toLocaleString()}
+                €{(showOfficialPrice && bisLatestPrice
+                    ? bisLatestPrice
+                    : showListingPrice && city.listingAvgPricePerSqm
+                    ? city.listingAvgPricePerSqm
+                    : avgPrice
+                  ).toLocaleString()}
               </span>
               <span className="text-sm text-neutral-400">/m²</span>
             </div>
-            <p className="text-[10px] text-neutral-400 mt-1">
-              {showListingPrice ? `${city.listingsCount} active listings` : 'Market research'}
+            <p className="text-[10px] mt-1">
+              {showOfficialPrice
+                ? <span className="text-blue-500 font-semibold flex items-center gap-1">
+                    <ShieldCheckIcon className="w-3 h-3" />
+                    BIS Residential Property Price Index
+                  </span>
+                : showListingPrice
+                ? <span className="text-neutral-400">{city.listingsCount} active listings</span>
+                : city.officialSourceUrl
+                  ? <a
+                      href={city.officialSourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:text-blue-700 hover:underline flex items-center gap-1"
+                      title={city.officialSourceName}
+                    >
+                      <ShieldCheckIcon className="w-3 h-3" />
+                      Official data ↗
+                    </a>
+                  : <span className="text-violet-400">BalkanEstate AI estimate</span>
+              }
             </p>
           </div>
 
@@ -430,7 +636,7 @@ const CityDashboard: React.FC = () => {
             <span className="text-2xl sm:text-3xl font-black text-primary">{formatPrice(medianPrice, city.countryCode)}</span>
           </div>
 
-          {/* YoY Growth */}
+          {/* YoY Growth — AI estimate + optional BIS official */}
           <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${yoyGrowth > 0 ? 'bg-green-100' : yoyGrowth < 0 ? 'bg-red-100' : 'bg-neutral-100'}`}>
@@ -447,6 +653,12 @@ const CityDashboard: React.FC = () => {
             <span className={`text-2xl sm:text-3xl font-black ${yoyGrowth > 0 ? 'text-green-600' : yoyGrowth < 0 ? 'text-red-600' : 'text-neutral-700'}`}>
               {yoyGrowth > 0 ? '+' : ''}{yoyGrowth}%
             </span>
+            {bisYoY !== null && (
+              <div className="mt-1.5 flex items-center gap-1 text-[10px]">
+                <ShieldCheckIcon className="w-3 h-3 text-blue-500 flex-shrink-0" />
+                <span className="text-blue-600 font-semibold">BIS: {bisYoY > 0 ? '+' : ''}{bisYoY}%</span>
+              </div>
+            )}
           </div>
 
           {/* Rental Yield */}
@@ -460,6 +672,40 @@ const CityDashboard: React.FC = () => {
             <span className="text-2xl sm:text-3xl font-black text-blue-600">{rentalYield}%</span>
           </div>
         </div>
+
+        <p className="text-[10px] text-blue-500 mb-3 flex items-center gap-1">
+          <ShieldCheckIcon className="w-3 h-3" />
+          Prices anchored to official government data — tap <span className="font-bold">Official</span> on the price card to see the BIS index.
+        </p>
+
+        {/* Official price reference strip — visible only when BIS data is available */}
+        {hasBIS && (
+          <div className="mb-6 flex flex-wrap items-center gap-3 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl">
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <ShieldCheckIcon className="w-4 h-4 text-blue-600" />
+              <span className="text-xs font-bold text-blue-800 uppercase tracking-wide">Official Reference</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="font-black text-blue-900">€{bisLatestPrice!.toLocaleString()}/m²</span>
+              {bisYoY !== null && (
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${bisYoY >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  {bisYoY >= 0 ? '+' : ''}{bisYoY}% YoY
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] text-blue-600 flex-shrink-0">BIS Residential Property Price Index · {city.country}</span>
+            {bisSourceUrl && (
+              <a
+                href={bisSourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-auto text-[10px] text-blue-600 hover:underline font-semibold flex-shrink-0"
+              >
+                View source ↗
+              </a>
+            )}
+          </div>
+        )}
 
         {/* Secondary stats + scores */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -621,6 +867,236 @@ const CityDashboard: React.FC = () => {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* Official data section divider */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="h-px flex-1 bg-blue-100" />
+          <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest px-3 py-1 bg-blue-50 border border-blue-200 rounded-full flex items-center gap-1.5">
+            <ShieldCheckIcon className="w-3 h-3" />
+            Official Market Data
+          </span>
+          <div className="h-px flex-1 bg-blue-100" />
+        </div>
+
+        {/* ── 8-Year Price History Chart ──────────────────────────────────── */}
+        <div className="bg-white rounded-xl shadow-md border border-blue-100 p-5 sm:p-6 mb-6">
+          {historyLoading ? (
+            <div className="animate-pulse">
+              <div className="h-6 w-48 bg-neutral-100 rounded mb-2" />
+              <div className="h-3 w-72 bg-neutral-100 rounded mb-5" />
+              <div className="h-64 bg-neutral-50 rounded-xl" />
+            </div>
+          ) : priceHistory && priceHistory.history.length > 0 ? (
+            <PriceHistoryChart
+              history={priceHistory.history}
+              dataSource={priceHistory.dataSource}
+              fredUrl={priceHistory.fredUrl}
+              city={city.city}
+            />
+          ) : (
+            <div className="text-center py-10 text-neutral-400 text-sm">
+              <ChartBarIcon className="w-10 h-10 text-neutral-300 mx-auto mb-2" />
+              Price history is being prepared for {city.city}.
+            </div>
+          )}
+        </div>
+
+        {/* ── Macroeconomic Indicators (World Bank) ───────────────────────── */}
+        {economicData && (
+          <div className="mb-8 ring-1 ring-blue-100 rounded-xl">
+            <EconomicIndicatorsPanel data={economicData} />
+          </div>
+        )}
+
+        {/* AI section divider (return to AI-generated content) */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="h-px flex-1 bg-violet-100" />
+          <span className="text-[10px] font-bold text-violet-600 uppercase tracking-widest px-3 py-1 bg-violet-50 border border-violet-200 rounded-full flex items-center gap-1.5">
+            <LightBulbIcon className="w-3 h-3" />
+            BalkanEstate AI Analysis
+          </span>
+          <div className="h-px flex-1 bg-violet-100" />
+        </div>
+
+        {/* ── Explore Neighborhoods ───────────────────────────────────────── */}
+        <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6 mb-8">
+          {/* Section header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+            <div className="flex flex-col gap-1">
+              <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
+                <MapPinIcon className="w-5 h-5 text-primary" />
+                Explore Neighborhoods
+              </h3>
+              {suburbData && (
+                <div className="flex flex-col gap-1 items-start">
+                  <span className={`text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full w-fit ${
+                    suburbData.dataSource === 'research'
+                      ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                      : suburbData.dataSource === 'gemini'
+                        ? 'bg-violet-50 text-violet-600 border border-violet-200'
+                        : 'bg-amber-50 text-amber-600 border border-amber-200'
+                  }`}>
+                    {suburbData.dataSource === 'research'
+                      ? '◈ Market Research Data'
+                      : suburbData.dataSource === 'gemini'
+                        ? '✦ BalkanEstate AI Analysis'
+                        : 'Estimated data · updating…'}
+                  </span>
+                  {suburbData.officialSourceName && suburbData.officialSourceUrl && (
+                    <a
+                      href={suburbData.officialSourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] text-blue-500 hover:text-blue-700 hover:underline transition-colors"
+                      title="View official data source"
+                    >
+                      Data anchored to {suburbData.officialSourceName} ↗
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
+            {/* Tab switcher */}
+            <div className="flex gap-1 bg-neutral-100 rounded-xl p-1 w-fit">
+              {(['map', 'list'] as const).map((view) => (
+                <button
+                  key={view}
+                  onClick={() => setSuburbView(view)}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                    suburbView === view
+                      ? 'bg-white text-primary shadow-sm'
+                      : 'text-neutral-500 hover:text-neutral-700'
+                  }`}
+                >
+                  {view === 'map' ? 'Interactive Map' : 'List View'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Loading skeleton */}
+          {suburbLoading && (
+            <div className="animate-pulse space-y-3">
+              <div className="h-64 sm:h-80 md:h-[420px] lg:h-[520px] bg-neutral-100 rounded-xl" />
+              <div className="grid grid-cols-3 gap-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-20 bg-neutral-100 rounded-lg" />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Error state */}
+          {!suburbLoading && suburbError && (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <GlobeAltIcon className="w-12 h-12 text-neutral-300 mb-3" />
+              <p className="text-neutral-500 text-sm">
+                Neighborhood data is being prepared. Check back soon.
+              </p>
+            </div>
+          )}
+
+          {/* Content */}
+          {!suburbLoading && !suburbError && suburbData && suburbData.suburbs.length > 0 && (
+            <>
+              {suburbView === 'map' ? (
+                <div className="flex flex-col lg:flex-row gap-4">
+                  {/* Map */}
+                  <div className="flex-1 min-w-0">
+                    <Suspense
+                      fallback={
+                        <div className="h-64 sm:h-80 md:h-[420px] lg:h-[520px] bg-neutral-100 rounded-xl animate-pulse" />
+                      }
+                    >
+                      <CitySuburbMap
+                        suburbs={suburbData.suburbs}
+                        cityAvgPricePerSqm={suburbData.cityAvgPricePerSqm}
+                        selectedSuburb={selectedSuburb}
+                        onSuburbSelect={setSelectedSuburb}
+                        geoData={cityGeoData}
+                        officialAvgPrice={bisLatestPrice ?? undefined}
+                        officialSource={hasBIS ? 'BIS' : undefined}
+                      />
+                    </Suspense>
+                  </div>
+
+                  {/* Mobile hint (shown only when nothing selected) */}
+                  {!selectedSuburb && (
+                    <p className="lg:hidden text-xs text-neutral-400 text-center -mt-1 mb-1 flex items-center justify-center gap-1">
+                      <MapPinIcon className="w-3 h-3" />
+                      Tap a neighbourhood on the map for details
+                    </p>
+                  )}
+
+                  {/* Detail panel */}
+                  <div className="w-full lg:w-72 flex-shrink-0">
+                    {selectedSuburb ? (
+                      <SuburbDetailPanel
+                        suburb={selectedSuburb}
+                        cityAvgPricePerSqm={suburbData.cityAvgPricePerSqm}
+                        onClose={() => setSelectedSuburb(null)}
+                        onViewListings={(s) => handleViewNeighborhoodListings(s)}
+                      />
+                    ) : (
+                      <div className="hidden lg:flex h-full flex-col items-center justify-center py-10 text-center border-2 border-dashed border-neutral-200 rounded-xl">
+                        <MapPinIcon className="w-10 h-10 text-neutral-300 mb-2" />
+                        <p className="text-sm font-medium text-neutral-500">Click a neighborhood</p>
+                        <p className="text-xs text-neutral-400 mt-1">to see detailed stats</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                /* List view grid */
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {suburbData.suburbs.map((suburb) => {
+                    const vsAvg = suburb.stats.priceVsCityAvg;
+                    const isSelected = selectedSuburb?.name === suburb.name;
+                    return (
+                      <button
+                        key={suburb.name}
+                        onClick={() => {
+                          setSelectedSuburb(isSelected ? null : suburb);
+                          setSuburbView('map');
+                        }}
+                        className={`text-left p-4 rounded-xl border transition-all ${
+                          isSelected
+                            ? 'border-primary/40 bg-primary/5 shadow-sm'
+                            : 'border-neutral-100 bg-neutral-50 hover:border-primary/20 hover:bg-primary/5'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-bold text-neutral-900 truncate">{suburb.name}</span>
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-neutral-200 text-neutral-600 flex-shrink-0">
+                            #{suburb.rank}
+                          </span>
+                        </div>
+                        <div className="text-base font-black text-neutral-900 mb-1">
+                          €{suburb.stats.avgPricePerSqm.toLocaleString()}/m²
+                        </div>
+                        <div className={`text-[11px] font-semibold mb-2 ${vsAvg > 0 ? 'text-red-500' : vsAvg < 0 ? 'text-green-600' : 'text-neutral-500'}`}>
+                          {vsAvg > 0 ? `+${vsAvg}%` : `${vsAvg}%`} vs city avg
+                        </div>
+                        <div className="flex items-center justify-between text-[11px] text-neutral-500">
+                          <span>+{suburb.stats.priceGrowthYoY}% YoY</span>
+                          <span>{suburb.stats.demandScore}/100 demand</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Empty state (no suburbs for this city) */}
+          {!suburbLoading && !suburbError && (!suburbData || suburbData.suburbs.length === 0) && (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <MapPinIcon className="w-12 h-12 text-neutral-300 mb-3" />
+              <p className="text-neutral-500 text-sm">No neighborhood data available for {city.city} yet.</p>
             </div>
           )}
         </div>
@@ -837,16 +1313,42 @@ const CityDashboard: React.FC = () => {
         )}
 
         {/* Data freshness info */}
-        <div className="mb-8 p-4 bg-gradient-to-r from-violet-50 to-fuchsia-50 rounded-xl border border-violet-200">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/25 flex-shrink-0">
-              <GlobeAltIcon className="w-5 h-5 text-white" />
+        <div className="mb-8 p-4 rounded-xl border border-neutral-200 bg-neutral-50">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex items-start gap-3 flex-1">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-sm flex-shrink-0">
+                <LightBulbIcon className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-violet-700 uppercase tracking-wide">BalkanEstate AI</p>
+                <p className="text-[11px] text-neutral-500 mt-0.5">
+                  {t('aiInsights.lastUpdated', { date: safeFormatDate(city.lastUpdated) })} &bull; {t('aiInsights.dataSource')}
+                </p>
+              </div>
             </div>
-            <div>
-              <h4 className="font-bold text-slate-900 text-sm">{t('aiInsights.title')}</h4>
-              <p className="text-xs text-slate-500 mt-1">
-                {t('aiInsights.lastUpdated', { date: safeFormatDate(city.lastUpdated) })} &bull; {t('aiInsights.dataSource')}
-              </p>
+            <div className="hidden sm:block w-px bg-neutral-200 self-stretch" />
+            <div className="flex items-start gap-3 flex-1">
+              <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm flex-shrink-0">
+                <ShieldCheckIcon className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-blue-700 uppercase tracking-wide">Official Sources</p>
+                <p className="text-[11px] text-neutral-500 mt-0.5 space-x-1">
+                  {bisSourceUrl
+                    ? <a href={bisSourceUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">BIS Residential Property Price Index ↗</a>
+                    : <span>BIS Residential Property Price Index</span>
+                  }
+                  <span>&bull;</span>
+                  <a href="https://data.worldbank.org/" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">World Bank ↗</a>
+                  <span>&bull;</span>
+                  <span>Wikimedia Commons</span>
+                </p>
+                {priceHistory?.lastUpdated && (
+                  <p className="text-[10px] text-neutral-400 mt-0.5">
+                    Price index refreshed {safeFormatDate(priceHistory.lastUpdated)}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>

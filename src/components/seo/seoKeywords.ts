@@ -692,7 +692,7 @@ export function generateSearchSEODescription(filters: {
     if (minPrice && maxPrice) desc += ' – ';
     if (maxPrice) desc += `€${maxPrice.toLocaleString()}`;
   }
-  desc += `. ${translate('search:seo.tagline', 'AI-powered property search on BalkanEstateAI — 11 countries, 10 languages.')}`;
+  desc += `. ${translate('search:seo.tagline', 'AI-powered property search on BalkanEstateAI — 10 countries, 10 languages.')}`;
   return desc;
 }
 

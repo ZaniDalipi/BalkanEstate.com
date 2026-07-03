@@ -2,6 +2,11 @@ import { Request, Response } from 'express';
 import { getFeaturedCities, getCitiesByCountry, getCityMarketData } from '../services/cityMarketDataService';
 import { triggerMarketDataUpdate } from '../jobs/updateCityMarketData';
 import { refreshAllCityImages } from '../services/cityImageService';
+import { fetchCityImages, getCityFallbackImageUrl } from '../services/wikiImageService';
+import { getCityPriceHistory } from '../services/cityHistoryService';
+import { getEconomicIndicators } from '../services/economicIndicatorsService';
+import { getCityGeoData } from '../services/geoDataService';
+import { seedCityImages } from '../scripts/seedCityImages';
 import { apiLogger } from '../utils/logger';
 import { getParam } from '../utils/validateParams';
 
@@ -145,5 +150,122 @@ export const refreshCityImagesController = async (req: Request, res: Response): 
   } catch (error: any) {
     apiLogger.error('Error triggering city image refresh:', error);
     res.status(500).json({ success: false, message: 'Error triggering image refresh' });
+  }
+};
+
+/**
+ * @desc    Get city photos from Wikimedia Commons
+ * @route   GET /api/cities/images/:city/:country
+ * @access  Public
+ */
+export const getCityImagesController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const city = getParam(req, 'city');
+    const country = getParam(req, 'country');
+
+    if (!city || !country) {
+      res.status(400).json({ success: false, message: 'City and country are required' });
+      return;
+    }
+
+    const images = await fetchCityImages(city, country, 5);
+    const fallbackUrl = getCityFallbackImageUrl(city, country);
+
+    res.json({ images, fallbackUrl });
+  } catch (error: unknown) {
+    apiLogger.error('Error fetching city images:', error);
+    res.status(500).json({ success: false, message: 'Error fetching city images' });
+  }
+};
+
+/**
+ * @desc    Get historical quarterly price data (8 years)
+ * @route   GET /api/cities/history/:city/:country
+ * @access  Public
+ */
+export const getCityHistoryController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const city = getParam(req, 'city');
+    const country = getParam(req, 'country');
+    if (!city || !country) {
+      res.status(400).json({ success: false, message: 'City and country are required' });
+      return;
+    }
+    const history = await getCityPriceHistory(city, country);
+    res.json(history);
+  } catch (error: unknown) {
+    apiLogger.error('Error fetching city price history:', error);
+    res.status(500).json({ success: false, message: 'Error fetching price history' });
+  }
+};
+
+/**
+ * @desc    Get macroeconomic indicators (GDP, inflation, etc.) from World Bank
+ * @route   GET /api/cities/economic/:country
+ * @access  Public
+ */
+export const getEconomicIndicatorsController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const country = getParam(req, 'country');
+    if (!country) {
+      res.status(400).json({ success: false, message: 'Country is required' });
+      return;
+    }
+    const indicators = await getEconomicIndicators(country);
+    res.json(indicators);
+  } catch (error: unknown) {
+    apiLogger.error('Error fetching economic indicators:', error);
+    res.status(500).json({ success: false, message: 'Error fetching economic indicators' });
+  }
+};
+
+/**
+ * @desc    Get real GeoJSON municipality boundaries from OpenStreetMap
+ * @route   GET /api/cities/geodata/:city/:country
+ * @access  Public
+ */
+export const getCityGeoDataController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const city = getParam(req, 'city');
+    const country = getParam(req, 'country');
+    if (!city || !country) {
+      res.status(400).json({ success: false, message: 'City and country are required' });
+      return;
+    }
+    const forceRefresh = req.query.refresh === 'true';
+    const geoData = await getCityGeoData(city, country, forceRefresh);
+    const result = geoData ?? { type: 'FeatureCollection' as const, features: [] };
+    res.json({ success: true, data: result, featureCount: result.features.length });
+  } catch (error: unknown) {
+    apiLogger.error('Error fetching city geo data:', error);
+    res.status(500).json({ success: false, message: 'Error fetching boundary data' });
+  }
+};
+
+/**
+ * @desc    Seed missing city images to Cloudinary (admin only)
+ * @route   POST /api/cities/seed-images
+ * @access  Private/Admin
+ */
+export const seedCityImagesController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user || (req.user as { role?: string }).role !== 'admin') {
+      res.status(403).json({ success: false, message: 'Admin access required' });
+      return;
+    }
+    const force = req.query.force === 'true';
+    const only = typeof req.query.only === 'string' ? req.query.only : undefined;
+
+    // Run in background — don't block the response
+    seedCityImages(force, only).then(({ ok, skipped, failed }) => {
+      apiLogger.info(`City image seed complete: ${ok} uploaded, ${skipped} skipped, ${failed} failed`);
+    }).catch(err => {
+      apiLogger.error('City image seed failed:', err);
+    });
+
+    res.json({ success: true, message: 'City image seeding started in background' });
+  } catch (error: unknown) {
+    apiLogger.error('Error starting city image seed:', error);
+    res.status(500).json({ success: false, message: 'Error starting image seed' });
   }
 };

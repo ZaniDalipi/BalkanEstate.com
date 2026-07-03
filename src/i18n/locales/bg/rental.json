@@ -194,7 +194,11 @@
     "ics": {
       "summary": "Property Viewing",
       "description": "Scheduled viewing for"
-    }
+    },
+    "discardTitle": "Отхвърляне на промените?",
+    "discardMessage": "Имате незапазени промени в заявката за оглед. Сигурни ли сте, че искате да затворите?",
+    "discardConfirm": "Отхвърли",
+    "discardCancel": "Продължи редактирането"
   },
   "status": {
     "markAsRented": "Маркирай като отдаден",
@@ -495,3 +499,5 @@
     "inquiries": "запитвания"
   }
 }
+
+

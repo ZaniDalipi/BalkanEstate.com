@@ -1,0 +1,33 @@
+{
+  "title": "Blog i Pasurive të Paluajtshme në Ballkan",
+  "subtitle": "Njohuri eksperte, analiza tregu dhe udhëzues për blerësit, investitorët dhe shitësit në Ballkan",
+  "searchPlaceholder": "Kërko artikuj…",
+  "readMore": "Lexo Më Shumë",
+  "backToBlog": "Kthehu te Blog-u",
+  "minuteRead": "{{count}} min lexim",
+  "noArticles": "Nuk u gjetën artikuj",
+  "error": "Dështoi ngarkimi i artikujve",
+  "articleNotFound": "Artikulli nuk u gjet",
+  "articleNotFoundDesc": "Ky artikull mund të jetë zhvendosur ose fshirë.",
+  "moreArticles": "Më Shumë Artikuj",
+  "moreArticlesDesc": "Kthehuni shpejt për artikuj të tjerë mbi investimet dhe tregun e pasurive",
+  "relatedArticles": "Artikuj të Ngjashëm",
+  "category_market": "Treg",
+  "category_investment": "Investim",
+  "category_regulation": "Rregullore",
+  "category_development": "Zhvillim",
+  "category_tourism": "Turizëm",
+  "category_guide": "Udhëzues",
+  "category_lifestyle": "Stilit Jetës",
+  "filters": {
+    "category": "Kategoria",
+    "country": "Vendi",
+    "all": "Të gjitha",
+    "popularTags": "Etiketa Popullore"
+  },
+  "pagination": {
+    "prev": "Mëparshme",
+    "next": "Tjetër",
+    "page": "Faqja {{page}} nga {{total}}"
+  }
+}

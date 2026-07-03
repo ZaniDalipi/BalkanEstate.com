@@ -121,7 +121,9 @@
     "category_investment": "Investicije",
     "category_regulation": "Regulativa",
     "category_development": "Razvoj",
-    "category_tourism": "Turizam"
+    "category_tourism": "Turizam",
+    "tabNews": "Tržišne Vijesti",
+    "tabArticles": "Naši Članci"
   },
   "showcase": {
     "badge": "Kako Funkcionira",
@@ -156,7 +158,9 @@
     "title": "Upoznajte Naše Najbolje Agente",
     "subtitle": "Rangirani po prodaji, ocjenama i zadovoljstvu klijenata ovog tjedna",
     "sold": "prodano",
-    "active": "aktivno"
+    "active": "aktivno",
+    "pts": "bod.",
+    "ptsToTop": "{{gap}} bod. do #1"
   },
   "topAgencies": {
     "badge": "Agencije Mjeseca",
@@ -164,7 +168,9 @@
     "subtitle": "Agencije s najboljim performansama s najviše oglasa, agenata i povjerenja klijenata",
     "listings": "oglasa",
     "agents": "agenata",
-    "years": "god."
+    "years": "god.",
+    "pts": "bod.",
+    "ptsToTop": "{{gap}} bod. do #1"
   },
   "testimonials": {
     "title": "Što Kažu Naši Korisnici",

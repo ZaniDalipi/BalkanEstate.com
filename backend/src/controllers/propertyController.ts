@@ -6,12 +6,14 @@ import User, { IUser } from '../models/User';
 import Agent from '../models/Agent';
 import Agency from '../models/Agency';
 import SalesHistory from '../models/SalesHistory';
+import PriceHistory from '../models/PriceHistory';
 import { geocodeProperty } from '../services/geocodingService';
 import { incrementViewCount, updateSoldStats, incrementActiveListings } from '../utils/statsUpdater';
 import {
   uploadPropertyImages,
   deleteImages,
   deleteFolder,
+  organizeListingMedia,
 } from '../services/cloudinaryService';
 import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/highlightingUtils';
 import { recordPriceChange, processInstantAlertsForProperty, processInstantPriceDropForProperty } from '../jobs/propertyAlertsJob';
@@ -916,6 +918,51 @@ export const createProperty = async (
       throw createError;
     }
 
+    // The frontend uploads images to a temp folder before the property exists,
+    // so relocate them now into the listing's own folder
+    // (balkan-estate/users/{userId}/listings/{propertyId}-{slug}/photos) so
+    // Cloudinary stays organized by user + listing. Best-effort: a failure here
+    // must not fail listing creation.
+    try {
+      if (Array.isArray(property.images) && property.images.length > 0) {
+        const organized = await organizeListingMedia(
+          property.images.map((i) => ({ url: i.url, publicId: i.publicId, tag: i.tag })),
+          String(property.sellerId),
+          String(property._id),
+          property.title
+        );
+        property.images = organized.map((i) => ({
+          url: i.url,
+          publicId: i.publicId,
+          tag: (i.tag as 'main' | 'floorplan' | 'other') ?? 'other',
+        })) as typeof property.images;
+
+        const main = organized.find((i) => i.tag === 'main') ?? organized[0];
+        if (main) {
+          property.imageUrl = main.url;
+          property.imagePublicId = main.publicId;
+        }
+      }
+
+      // Standalone floorplan (stored separately from images[]) — relocate too.
+      if (property.floorplanPublicId) {
+        const [organizedFloorplan] = await organizeListingMedia(
+          [{ url: property.floorplanUrl ?? '', publicId: property.floorplanPublicId, tag: 'floorplan' }],
+          String(property.sellerId),
+          String(property._id),
+          property.title
+        );
+        if (organizedFloorplan) {
+          property.floorplanUrl = organizedFloorplan.url;
+          property.floorplanPublicId = organizedFloorplan.publicId;
+        }
+      }
+
+      await property.save();
+    } catch (organizeError) {
+      propertyLogger.error('Failed to organize listing media (non-fatal):', organizeError);
+    }
+
     // Counters were already incremented atomically above (the findOneAndUpdate).
     // Use atomicResult for accurate counts in the response.
     const updatedUser = atomicResult;
@@ -942,6 +989,13 @@ export const createProperty = async (
 
     // Populate seller info
     await property.populate('sellerId', 'name email phone avatarUrl role agencyName');
+
+    // Record initial price in history (skip negotiable listings where price is 0)
+    if (property.price > 0) {
+      recordPriceChange(String(property._id), property.price).catch((err) => {
+        propertyLogger.error('Error recording initial price history:', err);
+      });
+    }
 
     // Emit real-time event for instant updates across all connected clients
     emitPropertyCreated(property.toObject());
@@ -1130,6 +1184,202 @@ export const updateProperty = async (
   } catch (error: any) {
     propertyLogger.error('Update property error:', error);
     res.status(500).json({ message: 'Error updating property' });
+  }
+};
+
+// @desc    Reassign a property's posting role (private seller <-> agent/agency)
+// @route   PATCH /api/properties/:id/reassign-role
+// @access  Private (owner only)
+//
+// NOTE: This is the ONE sanctioned way to mutate `createdAsRole` after creation.
+// `updateProperty` still treats the role + agency credentials as immutable; moving
+// a listing between the "private" and "agency" contexts must go through here so that
+// agency credentials and the per-role subscription counters stay consistent.
+export const reassignPropertyRole = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    // Validate the requested target role at the system boundary
+    const targetRole = req.body?.role;
+    const VALID_TARGET_ROLES = ['private_seller', 'agent'] as const;
+    if (!targetRole || !VALID_TARGET_ROLES.includes(targetRole)) {
+      res.status(400).json({
+        message: "Invalid role. Must be 'private_seller' or 'agent'.",
+        code: 'INVALID_TARGET_ROLE',
+      });
+      return;
+    }
+
+    const property = await Property.findById(id);
+    if (!property) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    // Check ownership
+    const currentUser = req.user as IUser;
+    if (property.sellerId.toString() !== String(currentUser._id).toString()) {
+      res.status(403).json({ message: 'Not authorized to update this property' });
+      return;
+    }
+
+    // Externally ingested listings are not owned content and must not be reclassified
+    if (property.createdAsRole === 'external') {
+      res.status(400).json({
+        message: 'Imported listings cannot be reassigned.',
+        code: 'EXTERNAL_LISTING_NOT_REASSIGNABLE',
+      });
+      return;
+    }
+
+    // No-op guard: already in the requested role
+    if (property.createdAsRole === targetRole) {
+      res.status(400).json({
+        message: targetRole === 'agent'
+          ? 'This listing is already posted under your agency.'
+          : 'This listing is already posted as a private seller.',
+        code: 'ROLE_UNCHANGED',
+      });
+      return;
+    }
+
+    const user = await User.findById(String(currentUser._id));
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // To move a listing into the agency/agent context the user must actually be able
+    // to act as an agent. Mirrors the frontend RoleSelector eligibility check.
+    if (targetRole === 'agent') {
+      const canActAsAgent =
+        user.role === 'agent' ||
+        (Array.isArray(user.availableRoles) && user.availableRoles.includes('agent')) ||
+        !!user.agentId ||
+        !!user.licenseNumber ||
+        !!user.agencyId ||
+        user.agency?.role === 'agent' ||
+        user.agency?.role === 'owner';
+
+      if (!canActAsAgent) {
+        res.status(403).json({
+          message: 'You must be a registered agent to move a listing to an agency.',
+          code: 'AGENT_ROLE_REQUIRED',
+        });
+        return;
+      }
+    }
+
+    const previousRole = property.createdAsRole;
+
+    if (targetRole === 'agent') {
+      // Snapshot the agent/agency credentials at reassignment time, mirroring createProperty
+      property.createdAsRole = 'agent';
+      property.createdByAgencyName = user.agencyName || undefined;
+      property.createdByAgencyId = user.agencyId || user.agency?.agencyId || undefined;
+      property.createdByLicenseNumber = user.licenseNumber || undefined;
+    } else {
+      // Moving back to private seller — strip agency attribution
+      property.createdAsRole = 'private_seller';
+      property.createdByAgencyName = undefined;
+      property.createdByAgencyId = undefined;
+      property.createdByLicenseNumber = undefined;
+    }
+
+    await property.save();
+
+    // Propagate the change to every denormalized snapshot of THIS listing so the
+    // whole database stays consistent — not just the live Property document.
+    // (Agency `stats.totalListings` and agency listing pages read from live
+    // Property queries, so they reflect the change automatically.)
+    try {
+      // Historical sale records keep the seller's role captured at sale time
+      await SalesHistory.updateMany(
+        { propertyId: property._id },
+        { $set: { sellerRole: targetRole } }
+      );
+
+      // Archived (sold/rented/deleted) snapshots keep role + agency attribution
+      if (targetRole === 'agent') {
+        const set: Record<string, unknown> = { createdAsRole: 'agent' };
+        const unset: Record<string, 1> = {};
+        if (property.createdByAgencyName) set.createdByAgencyName = property.createdByAgencyName;
+        else unset.createdByAgencyName = 1;
+        if (property.createdByAgencyId) set.createdByAgencyId = property.createdByAgencyId;
+        else unset.createdByAgencyId = 1;
+
+        const archiveUpdate: Record<string, unknown> = { $set: set };
+        if (Object.keys(unset).length > 0) archiveUpdate.$unset = unset;
+        await ArchivedListing.updateMany({ originalPropertyId: property._id }, archiveUpdate);
+      } else {
+        await ArchivedListing.updateMany(
+          { originalPropertyId: property._id },
+          {
+            $set: { createdAsRole: 'private_seller' },
+            $unset: { createdByAgencyName: 1, createdByAgencyId: 1 },
+          }
+        );
+      }
+    } catch (propagateError) {
+      // Non-fatal: the live listing is already updated; historical snapshots are
+      // best-effort and also self-heal via the periodic stats/recompute jobs.
+      propertyLogger.error('Failed to propagate role reassignment to denormalized records (non-fatal):', propagateError);
+    }
+
+    // Shift the per-role subscription counters. These are incremented by role at
+    // creation time (regardless of later status), so we shift them unconditionally
+    // here and floor at 0 to stay resilient to any pre-existing drift.
+    let updatedSubscription: Record<string, unknown> | null = null;
+    if (user.subscription) {
+      if (previousRole === 'agent' && (user.subscription.agentCount || 0) > 0) {
+        user.subscription.agentCount = (user.subscription.agentCount || 0) - 1;
+      } else if (previousRole === 'private_seller' && (user.subscription.privateSellerCount || 0) > 0) {
+        user.subscription.privateSellerCount = (user.subscription.privateSellerCount || 0) - 1;
+      }
+
+      if (targetRole === 'agent') {
+        user.subscription.agentCount = (user.subscription.agentCount || 0) + 1;
+      } else {
+        user.subscription.privateSellerCount = (user.subscription.privateSellerCount || 0) + 1;
+      }
+
+      await user.save();
+
+      updatedSubscription = {
+        activeListingsCount: user.subscription.activeListingsCount,
+        privateSellerCount: user.subscription.privateSellerCount,
+        agentCount: user.subscription.agentCount,
+        listingsLimit: user.subscription.listingsLimit,
+        tier: user.subscription.tier,
+      };
+    }
+
+    propertyLogger.info(
+      `🔁 Property ${property._id} reassigned: ${previousRole} → ${targetRole} by user ${user._id}`
+    );
+
+    // Populate seller info for the response, then broadcast + invalidate caches
+    await property.populate('sellerId', 'name email phone avatarUrl role agencyName agencyId licenseNumber');
+
+    emitPropertyUpdated(String(property._id), property.toObject());
+    invalidateCache('/api/properties');
+
+    res.json({
+      property: sanitizeProperty(property.toObject(), 'detail'),
+      updatedSubscription,
+    });
+  } catch (error: any) {
+    propertyLogger.error('Reassign property role error:', error);
+    res.status(500).json({ message: 'Error reassigning property role' });
   }
 };
 
@@ -1422,6 +1672,7 @@ export const uploadImages = async (
     }
 
     // If propertyId is provided, verify ownership
+    let propertyTitle: string | undefined;
     if (propertyId) {
       const property = await Property.findById(propertyId);
       if (!property) {
@@ -1433,6 +1684,7 @@ export const uploadImages = async (
         res.status(403).json({ message: 'Not authorized to upload images for this property' });
         return;
       }
+      propertyTitle = property.title;
     }
 
     // Look up user's agency for watermarking
@@ -1453,7 +1705,7 @@ export const uploadImages = async (
 
     // Upload images using the centralized service (with watermarking)
     // Images will be organized in: balkan-estate/properties/user-{userId}/listing-{propertyId}/
-    const uploadedImages = await uploadPropertyImages(files, userId, propertyId, watermarkOptions);
+    const uploadedImages = await uploadPropertyImages(files, userId, propertyId, watermarkOptions, propertyTitle);
 
     res.json({
       images: uploadedImages,
@@ -1998,5 +2250,69 @@ export const renewProperty = async (
   } catch (error: any) {
     propertyLogger.error('Renew property error:', error);
     res.status(500).json({ message: 'Error renewing property' });
+  }
+};
+
+// @desc    Get price history for a property
+// @route   GET /api/properties/:id/price-history
+// @access  Public
+export const getPropertyPriceHistory = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const property = await Property.findById(id)
+      .select('price originalPrice priceReducedAt priceIntervals sqft createdAt listingType rentPeriod status soldAt')
+      .lean();
+
+    if (!property) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    const rawHistory = await PriceHistory.find({ propertyId: id })
+      .sort({ changedAt: 1 })
+      .lean();
+
+    // lean() returns _id (ObjectId); map to id string so the frontend type is satisfied
+    const history = rawHistory.map((h) => ({
+      id: String(h._id),
+      propertyId: String(h.propertyId),
+      price: h.price,
+      previousPrice: h.previousPrice,
+      changeType: h.changeType,
+      percentageChange: h.percentageChange,
+      changedAt: (h.changedAt as Date).toISOString(),
+    }));
+
+    // IProperty has all these fields; the .select() limits what lean() returns,
+    // so cast to the known subset rather than using any.
+    const p = property as typeof property & {
+      originalPrice?: number;
+      priceReducedAt?: Date;
+      priceIntervals?: Array<{ price: number; startDate: Date; endDate?: Date; label?: string }>;
+      sqft: number;
+      listingType: string;
+      rentPeriod?: string;
+    };
+
+    res.json({
+      history,
+      currentPrice: p.price,
+      originalPrice: p.originalPrice,
+      priceReducedAt: p.priceReducedAt ? p.priceReducedAt.toISOString() : undefined,
+      priceIntervals: p.priceIntervals ?? [],
+      sqft: p.sqft,
+      createdAt: p.createdAt ? (p.createdAt as Date).toISOString() : undefined,
+      listingType: p.listingType,
+      rentPeriod: p.rentPeriod,
+      status: p.status,
+    });
+  } catch (error: unknown) {
+    propertyLogger.error('Get price history error:', error);
+    res.status(500).json({ message: 'Error fetching price history' });
   }
 };

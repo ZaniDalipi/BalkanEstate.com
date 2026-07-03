@@ -194,7 +194,11 @@
     "ics": {
       "summary": "Property Viewing",
       "description": "Scheduled viewing for"
-    }
+    },
+    "discardTitle": "Renunțați la modificări?",
+    "discardMessage": "Aveți modificări nesalvate în cererea de vizionare. Sigur doriți să închideți?",
+    "discardConfirm": "Renunță",
+    "discardCancel": "Continuă editarea"
   },
   "status": {
     "markAsRented": "Marchează ca Închiriată",

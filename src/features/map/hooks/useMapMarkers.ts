@@ -22,7 +22,12 @@ const PROMOTION_TIER_COLORS: Record<string, string> = {
   standard: '#9ca3af',
 };
 
-const formatMarkerPrice = (price: number): string => {
+const formatMarkerPrice = (property: Property): string => {
+  // Properties listed by negotiation have no fixed price - never show €0
+  if (property.isNegotiable || !property.price || property.price <= 0) {
+    return 'Negotiable';
+  }
+  const price = property.price;
   if (price >= 1000000) {
     const millions = price / 1000000;
     if (millions >= 10) {
@@ -216,7 +221,7 @@ export const useMapMarkers = ({
         const markerDiv = document.createElement('div');
         markerDiv.className = 'property-marker';
 
-        const price = formatMarkerPrice(property.price);
+        const price = formatMarkerPrice(property);
         const color = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
         const isActivelyPromoted = property.isPromoted && property.promotionEndDate && property.promotionEndDate > Date.now();
         let borderColor = 'white';

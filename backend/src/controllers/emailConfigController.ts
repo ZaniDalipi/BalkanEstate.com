@@ -527,7 +527,7 @@ export const previewMinimalisticTemplate = async (req: Request, res: Response): 
           houseStyle: testData.houseStyle || 'modern',
           badge: testData.badge || 'Limited Offer',
           unsubscribeUrl: `${frontendUrl}/unsubscribe`,
-          preferencesUrl: `${frontendUrl}/settings/notifications`,
+          preferencesUrl: `${frontendUrl}/account/notifications`,
         });
         break;
 

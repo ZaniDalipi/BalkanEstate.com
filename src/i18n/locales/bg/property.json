@@ -182,6 +182,8 @@
     "view360": "360° изглед",
     "floorPlan": "План на етажа",
     "viewOnMap": "Виж на карта",
+    "getDirections": "Маршрут",
+    "openInMaps": "Отвори в Google Maps",
     "callSeller": "Обади се на продавача",
     "messageSeller": "Изпрати съобщение на продавача",
     "startingChat": "Стартиране на чата...",
@@ -375,7 +377,10 @@
     "remainingInfo": "{{remaining}} от {{limit}} анализа оставащи този месец",
     "unlimitedInsights": "Неограничени анализи налични с вашия план",
     "upgradePrompt": "Преминете към premium за повече анализи!",
-    "tryAgain": "Опитайте отново"
+    "tryAgain": "Опитайте отново",
+    "aiTeaserTitle": "Искате ли да научите повече за този имот?",
+    "aiTeaserSubtitle": "Нека нашият изкуствен интелект генерира подробен отчет за квартала — училища, транспорт, паркове, магазини и местни удобства — само за секунди.",
+    "coordinatesUnavailable": "Данните за местоположението все още не са налични за този имот, затова не можем да генерираме анализи."
   },
   "photos": {
     "title": "Снимки",
@@ -532,7 +537,8 @@
     "propertyShowcase": "Property Showcase",
     "skipVideo": "Skip Video",
     "videoTour": "Video Tour",
-    "enter3DTour": "Enter 3D Tour"
+    "enter3DTour": "Enter 3D Tour",
+    "view3DMap": "3D карта на местоположението"
   },
   "viewings": {
     "title": "Заявки за Оглед",
@@ -632,5 +638,17 @@
       "hint": "Рисувайте върху изображението за анотация",
       "sendToChat": "Изпрати"
     }
+  },
+  "sectionNav": {
+    "ariaLabel": "Секции на имота",
+    "overview": "Преглед",
+    "map": "3D карта",
+    "availability": "Наличност",
+    "calculators": "Калкулатори",
+    "details": "Детайли",
+    "neighborhood": "Квартал",
+    "priceHistory": "История на цените",
+    "similar": "Подобни имоти",
+    "onThisPage": "На тази страница"
   }
 }

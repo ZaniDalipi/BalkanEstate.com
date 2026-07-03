@@ -17,6 +17,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { dirname, join } from 'path';
+import { LANDING_PAGES } from './seo-landing-pages.mjs';
 
 const DIST_DIR = process.argv[2] || 'dist';
 const BASE_URL = 'https://balkanestateai.com';
@@ -38,6 +39,15 @@ if (!existsSync(templatePath)) {
 }
 const template = readFileSync(templatePath, 'utf-8');
 
+// Validate the template exposes the structural hooks this script relies on, so a
+// silent no-op replacement (e.g. empty #root) fails loudly at build time instead.
+for (const marker of ['<div id="root">', '</head>', '<title>']) {
+  if (!template.includes(marker)) {
+    console.error(`❌ Template ${templatePath} is missing required marker: ${marker}`);
+    process.exit(1);
+  }
+}
+
 // ─── Routes to prerender ─────────────────────────────────────────────────────
 // Each route gets a static HTML file with SEO-optimized meta tags.
 // Prioritized by keyword opportunity score.
@@ -47,13 +57,13 @@ const routes = [
   {
     path: '/',
     title: `${SITE_NAME} - Property for Sale in the Balkans | Houses, Apartments & Villas`,
-    description: 'Find property for sale across 11 Balkan countries. Browse apartments in Tirana, villas in Montenegro, houses in Belgrade, real estate in North Macedonia, and more. AI-powered search, 10 languages.',
+    description: 'Find property for sale across 10 Balkan countries. Browse apartments in Tirana, villas in Montenegro, houses in Belgrade, real estate in North Macedonia, and more. AI-powered search, 10 languages.',
   },
   // Main search
   {
     path: '/search',
     title: `Property for Sale in the Balkans - Houses, Apartments & Villas | ${SITE_NAME}`,
-    description: 'Search property for sale across 11 Balkan countries. AI-powered search for apartments, houses, villas, and land in Montenegro, Albania, Serbia, North Macedonia, Croatia, and more.',
+    description: 'Search property for sale across 10 Balkan countries. AI-powered search for apartments, houses, villas, and land in Montenegro, Albania, Serbia, North Macedonia, Croatia, and more.',
   },
 
   // ── Tier 1: Kosovo, N. Macedonia, Albania ────────────────────────
@@ -166,7 +176,7 @@ const routes = [
   {
     path: '/agents',
     title: `Real Estate Agents in the Balkans - Find Verified Agents | ${SITE_NAME}`,
-    description: 'Find verified real estate agents across 11 Balkan countries. Connect with local property experts in Montenegro, Albania, Serbia, North Macedonia, and more.',
+    description: 'Find verified real estate agents across 10 Balkan countries. Connect with local property experts in Montenegro, Albania, Serbia, North Macedonia, and more.',
   },
   {
     path: '/agencies',
@@ -230,7 +240,7 @@ const routes = [
   {
     path: '/search?propertyType=apartment',
     title: `Apartments for Sale in the Balkans - Buy Flat | ${SITE_NAME}`,
-    description: 'Find apartments for sale across 11 Balkan countries. City flats, new builds, and investment apartments in Montenegro, Albania, Serbia, and more.',
+    description: 'Find apartments for sale across 10 Balkan countries. City flats, new builds, and investment apartments in Montenegro, Albania, Serbia, and more.',
   },
   {
     path: '/search?propertyType=house',
@@ -250,6 +260,173 @@ const routes = [
 ];
 
 // ─── Generate prerendered HTML ───────────────────────────────────────────────
+
+// ─── GEO content injection ───────────────────────────────────────────────────
+// AI answer engines (ChatGPT/OAI-SearchBot, ClaudeBot, PerplexityBot, GPTBot,
+// Google-Extended) largely DO NOT execute JavaScript. Because the app mounts
+// with createRoot() (not hydrateRoot), React replaces #root on load — so we can
+// safely seed #root with crawler-visible content + JSON-LD. Users see the React
+// app the instant JS runs; crawlers get real, citable, per-page content.
+
+const COUNTRIES = [
+  { name: 'Montenegro', q: 'Montenegro', cities: ['Budva', 'Kotor', 'Tivat', 'Podgorica', 'Herceg Novi'] },
+  { name: 'Albania', q: 'Albania', cities: ['Tirana', 'Saranda', 'Durres', 'Vlora'] },
+  { name: 'Kosovo', q: 'Kosovo', cities: ['Pristina', 'Prizren'] },
+  { name: 'North Macedonia', q: 'North Macedonia', cities: ['Skopje', 'Ohrid', 'Bitola'] },
+  { name: 'Serbia', q: 'Serbia', cities: ['Belgrade', 'Novi Sad', 'Nis'] },
+  { name: 'Croatia', q: 'Croatia', cities: ['Split', 'Dubrovnik', 'Zagreb'] },
+  { name: 'Bosnia and Herzegovina', q: 'Bosnia', cities: ['Sarajevo', 'Mostar'] },
+  { name: 'Bulgaria', q: 'Bulgaria', cities: ['Sofia', 'Burgas', 'Varna'] },
+  { name: 'Romania', q: 'Romania', cities: ['Bucharest', 'Cluj-Napoca', 'Brasov'] },
+  { name: 'Greece', q: 'Greece', cities: ['Athens', 'Thessaloniki', 'Crete'] },
+];
+
+const PROPERTY_TYPES = [
+  { name: 'Apartments', q: 'apartment' },
+  { name: 'Houses', q: 'house' },
+  { name: 'Villas', q: 'villa' },
+  { name: 'Land', q: 'land' },
+  { name: 'Commercial', q: 'commercial' },
+];
+
+// Short UI labels translated per language (section headings only — high-confidence
+// strings). FAQ answers are kept in English in this first iteration, matching the
+// existing convention that prerendered meta copy is English across all locales.
+const LABELS = {
+  en: { country: 'Browse property by country', type: 'Property types', faq: 'Frequently asked questions', view: 'View listings', pages: 'Explore' },
+  sq: { country: 'Shfletoni prona sipas shtetit', type: 'Llojet e pronave', faq: 'Pyetjet e shpeshta', view: 'Shiko listimet', pages: 'Eksploro' },
+  sr: { country: 'Pretražite nekretnine po zemlji', type: 'Tipovi nekretnina', faq: 'Često postavljana pitanja', view: 'Pogledaj oglase', pages: 'Istražite' },
+  bg: { country: 'Имоти по държава', type: 'Видове имоти', faq: 'Често задавани въпроси', view: 'Виж обявите', pages: 'Разгледай' },
+  hr: { country: 'Pretraži nekretnine po državi', type: 'Vrste nekretnina', faq: 'Često postavljana pitanja', view: 'Pogledaj oglase', pages: 'Istraži' },
+  bs: { country: 'Pretraži nekretnine po državi', type: 'Vrste nekretnina', faq: 'Često postavljana pitanja', view: 'Pogledaj oglase', pages: 'Istraži' },
+  mk: { country: 'Имоти по земја', type: 'Типови на имоти', faq: 'Често поставувани прашања', view: 'Погледни огласи', pages: 'Истражи' },
+  me: { country: 'Pretraži nekretnine po državi', type: 'Tipovi nekretnina', faq: 'Često postavljana pitanja', view: 'Pogledaj oglase', pages: 'Istraži' },
+  ro: { country: 'Caută proprietăți după țară', type: 'Tipuri de proprietăți', faq: 'Întrebări frecvente', view: 'Vezi anunțurile', pages: 'Explorează' },
+  el: { country: 'Αναζήτηση ακινήτων ανά χώρα', type: 'Τύποι ακινήτων', faq: 'Συχνές ερωτήσεις', view: 'Δείτε τις αγγελίες', pages: 'Εξερευνήστε' },
+};
+
+// FAQ sets (English). Keyed by page category. {country} is interpolated.
+const FAQ_GENERAL = [
+  { q: 'Which countries does BalkanEstateAI cover?', a: 'BalkanEstateAI lists property for sale and rent across all 10 Balkan countries: Albania, Bosnia and Herzegovina, Bulgaria, Croatia, Greece, Kosovo, Montenegro, North Macedonia, Romania, and Serbia — on a single platform.' },
+  { q: 'Can foreigners buy property in the Balkans?', a: 'In most Balkan countries foreign nationals can buy property, though rules differ by country (some restrict agricultural land or require a local company for certain purchases). See our country-specific buying guides for the exact process.' },
+  { q: 'What languages is BalkanEstateAI available in?', a: 'The platform is available in 10 languages: English, Albanian, Serbian, Bulgarian, Croatian, Bosnian, Macedonian, Montenegrin, Romanian, and Greek.' },
+  { q: 'Is BalkanEstateAI free for buyers and renters?', a: 'Yes. Searching listings, using AI-powered natural-language search, and contacting agents is free for buyers and renters.' },
+  { q: 'What makes BalkanEstateAI different from other portals?', a: 'It is the only single platform covering all 10 Balkan countries with AI-powered search and AI property valuations, whereas most competitors cover a few countries or run a separate site per country.' },
+];
+
+const faqCountry = (country) => [
+  { q: `Can foreigners buy property in ${country}?`, a: `Foreign buyers can generally purchase property in ${country}, subject to that country's specific rules on residential vs. agricultural land. Read the ${country} buying guide on BalkanEstateAI for the legal process, taxes, and ownership requirements.` },
+  { q: `How do I find property for sale in ${country}?`, a: `Browse all verified listings for ${country} on BalkanEstateAI. Filter by city, price, property type, and bedrooms, or use AI-powered natural-language search to describe exactly what you want.` },
+  { q: `What types of property are available in ${country}?`, a: `Apartments, houses, villas, land, and commercial property are listed across ${country}. You can also estimate any property's value for free with the AI valuation tool.` },
+  { q: `How much does property cost in ${country}?`, a: `Prices vary by city, location, and property type. Use BalkanEstateAI's free AI property valuation and live listings to see current ${country} market prices rather than relying on outdated figures.` },
+];
+
+const faqType = (type) => [
+  { q: `Where can I buy ${type} in the Balkans?`, a: `BalkanEstateAI lists ${type} for sale across all 10 Balkan countries. Filter by country and city to find ${type} that match your budget and location.` },
+  { q: `Can I get a price estimate for a ${type}?`, a: `Yes — use the free AI property valuation tool to estimate the value of any ${type} in the Balkans based on comparable listings and location data.` },
+];
+
+const faqRentals = [
+  { q: 'How do I find apartments for rent in the Balkans?', a: 'Browse rental listings on BalkanEstateAI by country and city. Filter by price, bedrooms, and property type, and contact landlords or agents directly for free.' },
+  { q: 'Are long-term and monthly rentals available?', a: 'Yes. The platform lists both long-term and monthly rental apartments and houses across the Balkans.' },
+];
+
+function faqForRoute(route) {
+  const p = route.path;
+  const country = COUNTRIES.find(c => p.includes(`country=${c.q.replace(/ /g, '+')}`) || p.includes(`country=${c.q}`));
+  if (p.startsWith('/rentals')) return faqRentals;
+  if (country) return faqCountry(country.name);
+  const type = PROPERTY_TYPES.find(t => p.includes(`propertyType=${t.q}`));
+  if (type) return faqType(type.name.toLowerCase());
+  return FAQ_GENERAL;
+}
+
+// Build crawler-visible HTML for #root.
+function buildBodyContent(route, lang, canonicalUrl, loc) {
+  const L = LABELS[lang] || LABELS.en;
+  const prefix = lang === 'en' ? '' : `/${lang}`;
+  const link = (path, text) => `<a href="${BASE_URL}${prefix}${path}">${escapeHtml(text)}</a>`;
+
+  const countryLinks = COUNTRIES.map(c =>
+    `<li>${link(`/search?country=${c.q.replace(/ /g, '+')}`, `${c.name}`)}${c.cities.length ? ` — ${c.cities.slice(0, 4).map(escapeHtml).join(', ')}` : ''}</li>`
+  ).join('');
+  const typeLinks = PROPERTY_TYPES.map(t =>
+    `<li>${link(`/search?propertyType=${t.q}`, t.name)}</li>`
+  ).join('');
+  const pageLinks = [
+    ['/search', 'Property search'], ['/rentals', 'Rentals'], ['/agents', 'Real estate agents'],
+    ['/agencies', 'Agencies'], ['/explore-cities', 'City guides'], ['/valuation', 'AI property valuation'],
+    ['/guides', 'Buying guides'], ['/mortgage-calculator', 'Mortgage calculator'],
+  ].map(([p, t]) => `<li>${link(p, t)}</li>`).join('');
+
+  const faqs = (loc && loc.faqs) ? loc.faqs : faqForRoute(route);
+  const faqHtml = faqs.map(f =>
+    `<div itemscope itemtype="https://schema.org/Question"><h3 itemprop="name">${escapeHtml(f.q)}</h3>` +
+    `<div itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer"><p itemprop="text">${escapeHtml(f.a)}</p></div></div>`
+  ).join('');
+
+  const h1 = loc?.h1 || route.title.split(' | ')[0];
+  const intro = loc?.description || route.description;
+
+  // Visible while JS loads; React replaces it on mount (createRoot).
+  return `
+      <main id="prerendered-content">
+        <h1>${escapeHtml(h1)}</h1>
+        <p>${escapeHtml(intro)}</p>
+        <nav aria-label="${escapeHtml(L.country)}"><h2>${escapeHtml(L.country)}</h2><ul>${countryLinks}</ul></nav>
+        <nav aria-label="${escapeHtml(L.type)}"><h2>${escapeHtml(L.type)}</h2><ul>${typeLinks}</ul></nav>
+        <nav aria-label="${escapeHtml(L.pages)}"><h2>${escapeHtml(L.pages)}</h2><ul>${pageLinks}</ul></nav>
+        <section itemscope itemtype="https://schema.org/FAQPage"><h2>${escapeHtml(L.faq)}</h2>${faqHtml}</section>
+      </main>`;
+}
+
+// Build per-page JSON-LD: BreadcrumbList + CollectionPage + FAQPage.
+function buildPageJsonLd(route, lang, canonicalUrl, loc) {
+  const prefix = lang === 'en' ? '' : `/${lang}`;
+  const crumbs = [{ name: 'Home', url: `${BASE_URL}${prefix}/` }];
+  const country = COUNTRIES.find(c => route.path.includes(`country=${c.q.replace(/ /g, '+')}`) || route.path.includes(`country=${c.q}`));
+  if (country) crumbs.push({ name: country.name, url: canonicalUrl });
+  const type = PROPERTY_TYPES.find(t => route.path.includes(`propertyType=${t.q}`));
+  if (type && !country) crumbs.push({ name: type.name, url: canonicalUrl });
+  if (!country && !type && route.path !== '/') {
+    crumbs.push({ name: route.title.split(' | ')[0], url: canonicalUrl });
+  }
+
+  const breadcrumb = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((c, i) => ({
+      '@type': 'ListItem', position: i + 1, name: c.name, item: c.url,
+    })),
+  };
+
+  const collectionPage = {
+    '@context': 'https://schema.org',
+    '@type': route.path.includes('/search') || route.path.includes('/rentals') ? 'CollectionPage' : 'WebPage',
+    '@id': `${canonicalUrl}#webpage`,
+    url: canonicalUrl,
+    name: loc?.title || route.title,
+    description: loc?.description || route.description,
+    inLanguage: lang,
+    isPartOf: { '@id': `${BASE_URL}/#website` },
+    about: { '@id': `${BASE_URL}/#organization` },
+  };
+
+  const faqs = (loc && loc.faqs) ? loc.faqs : faqForRoute(route);
+  const faqPage = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    inLanguage: lang,
+    mainEntity: faqs.map(f => ({
+      '@type': 'Question', name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  };
+
+  return [breadcrumb, collectionPage, faqPage]
+    .map(s => `  <script type="application/ld+json">${JSON.stringify(s)}</script>`)
+    .join('\n');
+}
 
 /**
  * Build hreflang link tags for a given page path across all languages.
@@ -275,6 +452,11 @@ function prerenderPage(route, lang) {
   const canonicalUrl = `${BASE_URL}${langPrefix}${route.path}`;
   const ogLocale = OG_LOCALE_MAP[lang] || 'en_US';
 
+  // Native-language override for this path+language, if one exists.
+  const loc = LOCALIZED[route.path]?.[lang];
+  const pageTitle = loc?.title ? `${loc.title} | ${SITE_NAME}` : route.title;
+  const pageDescription = loc?.description || route.description;
+
   let html = template;
 
   // Set html lang attribute
@@ -283,19 +465,19 @@ function prerenderPage(route, lang) {
   // Replace title
   html = html.replace(
     /<title>[^<]*<\/title>/,
-    `<title>${escapeHtml(route.title)}</title>`
+    `<title>${escapeHtml(pageTitle)}</title>`
   );
 
   // Replace meta description
   html = html.replace(
     /<meta name="description" content="[^"]*"/,
-    `<meta name="description" content="${escapeHtml(route.description)}"`
+    `<meta name="description" content="${escapeHtml(pageDescription)}"`
   );
 
   // Replace meta title
   html = html.replace(
     /<meta name="title" content="[^"]*"/,
-    `<meta name="title" content="${escapeHtml(route.title)}"`
+    `<meta name="title" content="${escapeHtml(pageTitle)}"`
   );
 
   // Replace meta language
@@ -313,11 +495,11 @@ function prerenderPage(route, lang) {
   // Replace OG tags
   html = html.replace(
     /<meta property="og:title" content="[^"]*"/,
-    `<meta property="og:title" content="${escapeHtml(route.title)}"`
+    `<meta property="og:title" content="${escapeHtml(pageTitle)}"`
   );
   html = html.replace(
     /<meta property="og:description" content="[^"]*"/,
-    `<meta property="og:description" content="${escapeHtml(route.description)}"`
+    `<meta property="og:description" content="${escapeHtml(pageDescription)}"`
   );
   html = html.replace(
     /<meta property="og:url" content="[^"]*"/,
@@ -331,11 +513,11 @@ function prerenderPage(route, lang) {
   // Replace Twitter tags
   html = html.replace(
     /<meta name="twitter:title" content="[^"]*"/,
-    `<meta name="twitter:title" content="${escapeHtml(route.title)}"`
+    `<meta name="twitter:title" content="${escapeHtml(pageTitle)}"`
   );
   html = html.replace(
     /<meta name="twitter:description" content="[^"]*"/,
-    `<meta name="twitter:description" content="${escapeHtml(route.description)}"`
+    `<meta name="twitter:description" content="${escapeHtml(pageDescription)}"`
   );
 
   // Replace hreflang tags with page-specific ones
@@ -344,11 +526,28 @@ function prerenderPage(route, lang) {
     `\n    <!-- Hreflang for Multi-Region SEO -->\n${buildHreflangTags(route.path)}`
   );
 
-  // Add prerender status indicator and build date (freshness signal for AI engines) before </head>
+  // Inject per-page JSON-LD (BreadcrumbList + CollectionPage/WebPage + FAQPage),
+  // a freshness signal, and prerender status indicator before </head>.
   const buildDate = new Date().toISOString();
+  const pageJsonLd = buildPageJsonLd(route, lang, canonicalUrl, loc);
   html = html.replace(
     '</head>',
-    `  <meta property="article:modified_time" content="${buildDate}" />\n  <meta name="prerender-status" content="200" />\n  </head>`
+    `${pageJsonLd}\n  <meta property="article:modified_time" content="${buildDate}" />\n  <meta name="prerender-status" content="200" />\n  </head>`
+  );
+
+  // Seed #root with crawler-visible content, injected right after the opening
+  // <div id="root"> tag (before the app-shell loader). React (createRoot) clears
+  // all of #root's children on mount, so real users still see the loader overlay
+  // while JS loads, and JS-less AI crawlers get real, page-specific content.
+  const bodyContent = buildBodyContent(route, lang, canonicalUrl, loc);
+  html = html.replace('<div id="root">', () => `<div id="root">${bodyContent}`);
+
+  // Remove the generic <noscript> SEO fallback: the per-page #root content above
+  // now provides superior, page-specific content for crawlers and no-JS users,
+  // and the static block would otherwise duplicate the H1 and content.
+  html = html.replace(
+    /\s*<!-- Noscript fallback for SEO crawlers and users without JavaScript -->[\s\S]*?<\/noscript>/,
+    ''
   );
 
   // Determine output path
@@ -397,12 +596,74 @@ function prerenderPage(route, lang) {
   return outputPath;
 }
 
+// ─── Validate native-language landing-page data ──────────────────────────────
+// This is the system boundary for externally-edited content (seo-landing-pages.mjs).
+// Validate the shape up front so malformed entries fail the build with a clear
+// message instead of emitting broken pages or invalid JSON-LD.
+function validateLandingPages(pages) {
+  if (!Array.isArray(pages)) {
+    throw new Error('LANDING_PAGES must be an array');
+  }
+  const seen = new Set();
+  pages.forEach((page, i) => {
+    const at = `LANDING_PAGES[${i}]${page?.path ? ` (${page.path})` : ''}`;
+    if (!page || typeof page.path !== 'string' || !page.path.startsWith('/')) {
+      throw new Error(`${at}: 'path' must be a string starting with '/'`);
+    }
+    if (seen.has(page.path)) throw new Error(`${at}: duplicate path`);
+    seen.add(page.path);
+    if (!page.en?.title || !page.en?.description) {
+      throw new Error(`${at}: missing en.title or en.description`);
+    }
+    if (!page.loc || typeof page.loc !== 'object' || Object.keys(page.loc).length === 0) {
+      throw new Error(`${at}: 'loc' must contain at least one language`);
+    }
+    for (const [lang, c] of Object.entries(page.loc)) {
+      if (!LANGUAGES.includes(lang)) {
+        throw new Error(`${at}: loc language '${lang}' is not a supported locale`);
+      }
+      if (!c?.title || !c?.description || !c?.h1) {
+        throw new Error(`${at}.loc.${lang}: requires title, description, and h1`);
+      }
+      if (!Array.isArray(c.faqs) || c.faqs.some(f => !f?.q || !f?.a)) {
+        throw new Error(`${at}.loc.${lang}: 'faqs' must be an array of { q, a }`);
+      }
+    }
+  });
+}
+
+try {
+  validateLandingPages(LANDING_PAGES);
+} catch (err) {
+  console.error(`❌ Invalid landing-page data: ${err.message}`);
+  process.exit(1);
+}
+
+// ─── Merge native-language landing pages ─────────────────────────────────────
+// Build a path -> { lang -> {title, description, h1, faqs} } lookup, and register
+// an English route for any landing path not already covered (so it generates in
+// all languages with hreflang). Existing routes keep their richer English copy.
+const LOCALIZED = {};
+const existingPaths = new Set(routes.map(r => r.path));
+for (const page of LANDING_PAGES) {
+  LOCALIZED[page.path] = page.loc;
+  if (!existingPaths.has(page.path)) {
+    routes.push({ path: page.path, title: `${page.en.title} | ${SITE_NAME}`, description: page.en.description });
+    existingPaths.add(page.path);
+  }
+}
+
 let generated = 0;
 
 // Generate English (default) pages first, then all other languages
 for (const route of routes) {
   for (const lang of LANGUAGES) {
-    prerenderPage(route, lang);
+    try {
+      prerenderPage(route, lang);
+    } catch (err) {
+      console.error(`❌ Failed to prerender ${route.path} [${lang}]: ${err.message}`);
+      process.exit(1);
+    }
     generated++;
   }
 }

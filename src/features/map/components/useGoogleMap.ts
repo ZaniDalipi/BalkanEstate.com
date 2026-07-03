@@ -929,7 +929,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       markerDiv.className = 'property-marker';
       markerDiv.dataset.propertyId = property.id;
 
-      const price = formatMarkerPrice(property.price);
+      const price = formatMarkerPrice(property);
       const color = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
       const isActivelyPromoted = property.isPromoted && property.promotionEndDate && property.promotionEndDate > Date.now();
       let borderColor = 'white';

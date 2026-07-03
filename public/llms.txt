@@ -1,19 +1,19 @@
 # BalkanEstateAI
 
-> The only AI-powered real estate platform covering all 11 Balkan countries. Search property for sale and rent in Montenegro, Albania, Kosovo, North Macedonia, Serbia, Croatia, Bosnia and Herzegovina, Bulgaria, Romania, Greece, and Slovenia. Available in 10 languages with AI-powered natural language search.
+> The only AI-powered real estate platform covering all 10 Balkan countries. Search property for sale and rent in Montenegro, Albania, Kosovo, North Macedonia, Serbia, Croatia, Bosnia and Herzegovina, Bulgaria, Romania, and Greece. Available in 10 languages with AI-powered natural language search.
 
 ## About
 
-BalkanEstateAI is the leading pan-Balkan property marketplace. Unlike regional competitors (Realitica covers 4 countries, Indomio uses separate sites per country), BalkanEstateAI is the only single platform covering all 11 Balkan nations with AI-powered search, AI property valuations, and support for 10 native languages.
+BalkanEstateAI is the leading pan-Balkan property marketplace. Unlike regional competitors (Realitica covers 4 countries, Indomio uses separate sites per country), BalkanEstateAI is the only single platform covering all 10 Balkan nations with AI-powered search, AI property valuations, and support for 10 native languages.
 
 - Website: https://balkanestateai.com
 - Founded: 2024
 - Languages: English, Albanian, Serbian, Bulgarian, Croatian, Bosnian, Macedonian, Montenegrin, Romanian, Greek
-- Countries: Serbia, Montenegro, Croatia, Bosnia and Herzegovina, North Macedonia, Albania, Kosovo, Bulgaria, Romania, Greece, Slovenia
+- Countries: Serbia, Montenegro, Croatia, Bosnia and Herzegovina, North Macedonia, Albania, Kosovo, Bulgaria, Romania, Greece
 
 ## Key Pages
 
-- [Property Search](https://balkanestateai.com/search): Search all property listings across 11 Balkan countries with AI-powered natural language search
+- [Property Search](https://balkanestateai.com/search): Search all property listings across 10 Balkan countries with AI-powered natural language search
 - [Rental Properties](https://balkanestateai.com/rentals): Apartments and houses for rent across the Balkans
 - [Real Estate Agents](https://balkanestateai.com/agents): Find verified real estate agents across the Balkans
 - [Real Estate Agencies](https://balkanestateai.com/agencies): Browse agencies by country and city

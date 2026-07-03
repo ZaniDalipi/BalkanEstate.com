@@ -7,7 +7,16 @@ export type FeaturedSubscriptionStatus =
   | 'canceled'
   | 'pending_payment';
 
-export type FeaturedSubscriptionInterval = 'weekly' | 'monthly' | 'yearly';
+export type FeaturedSubscriptionInterval =
+  // Duration-based intervals (current pricing model)
+  | '7days'
+  | '14days'
+  | '28days'
+  | '90days'
+  // Legacy intervals (kept for backward compatibility with existing records)
+  | 'weekly'
+  | 'monthly'
+  | 'yearly';
 
 export interface IAgencyFeaturedSubscription extends Document {
   agencyId: mongoose.Types.ObjectId;
@@ -81,9 +90,9 @@ const AgencyFeaturedSubscriptionSchema: Schema = new Schema(
     },
     interval: {
       type: String,
-      enum: ['weekly', 'monthly', 'yearly'],
+      enum: ['7days', '14days', '28days', '90days', 'weekly', 'monthly', 'yearly'],
       required: true,
-      default: 'weekly',
+      default: '28days',
     },
     price: {
       type: Number,

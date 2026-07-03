@@ -47,6 +47,10 @@ export function useProperty(propertyId: string | null | undefined, options?: Use
       if (!propertyId) throw new Error('Property ID is required');
       return getProperty(propertyId);
     },
+    // Distinct-entity detail view: don't carry over the previous property's
+    // data when the id changes (would briefly show the wrong listing). Opts
+    // out of the global keepPreviousData default — show its own loading state.
+    placeholderData: undefined,
     staleTime: 10 * 1000, // 10 seconds - consider stale quickly for real-time feel
     gcTime: 10 * 60 * 1000, // 10 minutes cache retention
     refetchInterval: enablePolling ? 30 * 1000 : false,

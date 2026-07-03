@@ -22,6 +22,7 @@ import { formatPrice } from '@/utils/currency';
 import { slugify } from '@/utils/slug';
 import { API_URL } from '@/src/shared/api/config';
 import { cn } from '@/lib/utils';
+import { calcScore, getAchievementBadge, MAX_SCORE } from '../utils/agentScoring';
 
 interface AgentCardProps {
   agent: Agent;
@@ -120,14 +121,8 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
   const testimonialCount = agent.testimonials?.length || 0;
   const isTeam = agent.agencyName && agent.agencyName !== 'Independent Agent';
 
-  const calculatePerformanceScore = () => {
-    const ratingScore = (agent.rating / 5) * 40;
-    const salesScore = Math.min(agent.propertiesSold * 2, 30);
-    const listingsScore = Math.min((agent.activeListings || 0) * 3, 30);
-    return Math.round(ratingScore + salesScore + listingsScore);
-  };
-
-  const performanceScore = calculatePerformanceScore();
+  const performanceScore = calcScore(agent);
+  const achievementBadge = getAchievementBadge(agent);
 
   const handleSelectAgent = () => {
     const agentIdentifier = agent.agentId || agent.id;
@@ -180,11 +175,25 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
     >
       {/* Top badges row */}
       <div className="flex items-start justify-between mb-4">
-        {/* Performance score */}
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-xs font-bold text-blue-600 shadow-[3px_3px_6px_rgba(0,0,0,0.06),-3px_-3px_6px_rgba(255,255,255,0.8)] transition-all duration-300 group-hover:shadow-[1px_1px_3px_rgba(0,0,0,0.04),-1px_-1px_3px_rgba(255,255,255,0.6)] group-hover:text-blue-700">
-          <ChartBarIcon className="w-3.5 h-3.5" />
-          <span>{performanceScore}%</span>
-          <ArrowTrendingUpIcon className="w-3 h-3 text-blue-400" />
+        {/* Ranking score */}
+        <div className="flex items-center gap-1 flex-wrap">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-xs font-bold text-blue-600 shadow-[3px_3px_6px_rgba(0,0,0,0.06),-3px_-3px_6px_rgba(255,255,255,0.8)] transition-all duration-300 group-hover:text-blue-700">
+            <ChartBarIcon className="w-3.5 h-3.5" />
+            <span>{performanceScore} pts</span>
+            <ArrowTrendingUpIcon className="w-3 h-3 text-blue-400" />
+          </div>
+          {achievementBadge && (
+            <span
+              className="px-2 py-1 rounded-full text-[10px] font-bold leading-none"
+              style={{
+                color: achievementBadge.color,
+                background: `${achievementBadge.color}15`,
+                border: `1px solid ${achievementBadge.color}28`,
+              }}
+            >
+              {achievementBadge.label}
+            </span>
+          )}
         </div>
 
         {/* Status & verified */}
@@ -361,25 +370,34 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
               <BoltIcon className="w-3.5 h-3.5 text-blue-500" />
               <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">{t('agents:card.performanceScore')}</span>
             </div>
-            <p className="text-xs font-bold text-blue-700">{performanceScore}%</p>
+            <p className="text-xs font-bold text-blue-700">{performanceScore} pts</p>
           </div>
         )}
       </div>
 
-      {/* Performance progress bar */}
+      {/* Ranking score progress bar */}
       <div className="mt-4">
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
-            {t('agents:card.performanceScore')}
+            {t('agents:scoring.panelTitle', 'Ranking Score')}
           </span>
-          <span className="text-xs font-bold text-blue-600">{performanceScore}%</span>
+          <span className="text-xs font-bold text-blue-600">
+            {performanceScore} / {MAX_SCORE} pts
+          </span>
         </div>
-        <div className="h-1.5 rounded-full bg-gray-100 shadow-[inset_1px_1px_2px_rgba(0,0,0,0.06)] overflow-hidden">
+        <div
+          className="h-1.5 rounded-full bg-gray-100 shadow-[inset_1px_1px_2px_rgba(0,0,0,0.06)] overflow-hidden"
+          role="progressbar"
+          aria-valuenow={performanceScore}
+          aria-valuemin={0}
+          aria-valuemax={MAX_SCORE}
+          aria-label={`Ranking score: ${performanceScore} out of ${MAX_SCORE} points`}
+        >
           <div
             className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-1000 ease-out"
             style={{
-              width: progressAnimated ? `${performanceScore}%` : '0%',
-              boxShadow: isHovered ? '0 0 8px rgba(59, 130, 246, 0.4)' : 'none'
+              width: progressAnimated ? `${(performanceScore / MAX_SCORE) * 100}%` : '0%',
+              boxShadow: isHovered ? '0 0 8px rgba(59, 130, 246, 0.4)' : 'none',
             }}
           />
         </div>

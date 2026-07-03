@@ -194,7 +194,11 @@
     "ics": {
       "summary": "Property Viewing",
       "description": "Scheduled viewing for"
-    }
+    },
+    "discardTitle": "Отфрли промени?",
+    "discardMessage": "Имате незачувани промени во вашето барање за разгледување. Дали сте сигурни дека сакате да затворите?",
+    "discardConfirm": "Отфрли",
+    "discardCancel": "Продолжи со уредување"
   },
   "status": {
     "markAsRented": "Означи како издаден",

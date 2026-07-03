@@ -17,6 +17,7 @@ import InquiryManager from './InquiryManager';
 import AgentRequestManager from './AgentRequestManager';
 import SystemSettings from './SystemSettings';
 import ActivityLog from './ActivityLog';
+import ScoreManagementPanel from './ScoreManagementPanel';
 import HowItWorksManager from './HowItWorksManager';
 import EmailManager from './EmailManager';
 import SiteSettingsManager from './SiteSettingsManager';
@@ -189,7 +190,12 @@ const AdminDashboard: React.FC = () => {
   const renderContent = () => {
     switch (activeSection) {
       case 'dashboard':
-        return <AnalyticsDashboard />;
+        return (
+          <div className="space-y-6">
+            <AnalyticsDashboard />
+            <ScoreManagementPanel className="mt-2" />
+          </div>
+        );
       case 'heatmap':
         return <InteractionHeatmap />;
       case 'inquiries':

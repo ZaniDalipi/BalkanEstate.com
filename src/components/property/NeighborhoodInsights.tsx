@@ -5,9 +5,10 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
 import { useAppContext } from '../../../context/AppContext';
-import { MapPinIcon } from '../../../constants';
+import { MapPinIcon, SparklesIcon } from '../../../constants';
 import { parseMarkdown } from '../../utils/markdown';
 import { createSanitizedMarkup } from '../../shared/utils/sanitize';
+import { validateCoordinates } from '../../shared/utils/validation';
 import { apiRequest } from '../../shared/api';
 
 // Map language codes to full language names for AI prompt
@@ -77,6 +78,21 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
       return;
     }
 
+    // Boundary validation: don't spend a request when coordinates are missing
+    // or invalid — the AI report relies on a real location.
+    const coordCheck = validateCoordinates(lat, lng);
+    if (!coordCheck.isValid) {
+      setIsRequested(true);
+      setLoading(false);
+      setError(
+        t(
+          'neighborhood.coordinatesUnavailable',
+          "Location data isn't available for this property yet, so we can't generate insights."
+        )
+      );
+      return;
+    }
+
     setIsRequested(true);
     setLoading(true);
     setError(null);
@@ -114,20 +130,30 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
     if (!isRequested) {
       const isAuthenticated = state.isAuthenticated && state.currentUser;
       return (
-        <div className="text-center">
-          <p className="text-neutral-600 mb-4">
-            {t('neighborhood.description')}
+        <div className="text-center py-1 sm:py-2">
+          {/* AI hero badge */}
+          <div className="mx-auto mb-3 sm:mb-4 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg shadow-primary/30">
+            <SparklesIcon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+          </div>
+          <h4 className="text-base sm:text-lg font-bold text-neutral-800">
+            {t('neighborhood.aiTeaserTitle', 'Want to know more about this property?')}
+          </h4>
+          <p className="text-sm text-neutral-600 mt-1.5 mb-4 max-w-md mx-auto leading-relaxed">
+            {t(
+              'neighborhood.aiTeaserSubtitle',
+              'Let our AI generate a detailed neighborhood report — nearby schools, transport, parks, shops and local amenities — in just seconds.'
+            )}
           </p>
           {!isAuthenticated && (
-            <p className="text-sm text-amber-600 mb-4 font-semibold">
+            <p className="text-xs sm:text-sm text-amber-600 mb-4 font-semibold">
               🔒 {t('neighborhood.loginRequired')}
             </p>
           )}
           <button
             onClick={fetchInsights}
-            className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary-dark text-white font-bold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 w-full sm:w-auto motion-reduce:transform-none motion-reduce:transition-none"
           >
-            <MapPinIcon className="w-5 h-5" />
+            <SparklesIcon className="w-5 h-5" />
             {isAuthenticated ? t('neighborhood.generateInsights') : t('neighborhood.loginAndGenerate')}
           </button>
         </div>

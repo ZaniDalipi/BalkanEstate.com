@@ -81,8 +81,8 @@ interface SEOProps {
 }
 
 const SITE_NAME = 'BalkanEstateAI';
-const DEFAULT_DESCRIPTION = 'Find property for sale across 11 Balkan countries. Browse apartments in Tirana, villas in Montenegro, houses in Belgrade, real estate in North Macedonia, and more. AI-powered search, 10 languages. The only pan-Balkan property platform.';
-const DEFAULT_IMAGE = '/og-image.png';
+const DEFAULT_DESCRIPTION = 'Find property for sale across 10 Balkan countries. Browse apartments in Tirana, villas in Montenegro, houses in Belgrade, real estate in North Macedonia, and more. AI-powered search, 10 languages. The only pan-Balkan property platform.';
+const DEFAULT_IMAGE = '/og-image.jpg';
 const BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'https://balkanestateai.com';
 
 // All supported languages for hreflang tags
@@ -567,7 +567,13 @@ function generateWebsiteSchema(lang: string) {
         url: `${BASE_URL}/icons/icon-512x512.png`,
         width: 512,
         height: 512
-      }
+      },
+      sameAs: [
+        'https://www.instagram.com/balkanestateai/',
+        'https://www.tiktok.com/@balkanestateai',
+        'https://facebook.com/balkanestateai',
+        'https://www.producthunt.com/@balkanestateai',
+      ]
     }
   };
 }

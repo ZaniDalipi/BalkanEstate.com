@@ -12,6 +12,7 @@ export interface IArticle extends Document {
   countryCode?: string;
   coverImageUrl?: string;
   coverImagePublicId?: string;
+  coverImageFit?: 'cover' | 'contain' | 'fill';
   status: 'draft' | 'published';
   publishedAt?: Date;
   readTime?: number;
@@ -25,7 +26,7 @@ const ArticleSchema = new Schema(
   {
     title: { type: String, required: true, trim: true, maxlength: 300 },
     slug: { type: String, required: true, trim: true },
-    content: { type: String, required: true, maxlength: 100000 },
+    content: { type: String, required: true, maxlength: 500000 },
     excerpt: { type: String, required: true, trim: true, maxlength: 500 },
     author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     category: {
@@ -38,6 +39,7 @@ const ArticleSchema = new Schema(
     countryCode: { type: String, trim: true, uppercase: true, maxlength: 2 },
     coverImageUrl: { type: String, trim: true },
     coverImagePublicId: { type: String, trim: true },
+    coverImageFit: { type: String, enum: ['cover', 'contain', 'fill'], default: 'cover' },
     status: {
       type: String,
       enum: ['draft', 'published'],
@@ -60,23 +62,25 @@ ArticleSchema.index({ country: 1, publishedAt: -1 });
 ArticleSchema.index({ tags: 1 });
 
 // Pre-save hook: auto-generate slug and readTime
-ArticleSchema.pre<IArticle>('save', async function (next) {
-  if (this.isModified('title') && !this.slug) {
-    // Generate slug from title: lowercase, replace spaces with hyphens, remove special chars
-    const baseSlug = this.title
+// pre('validate') runs before Mongoose validation — must generate slug here
+// so the required:true check on slug doesn't fail for new documents.
+ArticleSchema.pre<IArticle>('validate', function (next) {
+  if (!this.slug) {
+    const baseSlug = (this.title || 'article')
       .toLowerCase()
       .replace(/[^\w\s-]/g, '')
       .replace(/\s+/g, '-')
-      .replace(/-+/g, '-');
-    // Append short random id for uniqueness
+      .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'article';
     const shortId = Math.random().toString(36).substring(2, 8);
     this.slug = `${baseSlug}-${shortId}`;
   }
 
-  if (this.isModified('content') && !this.readTime) {
-    // Calculate read time: ~200 words per minute
-    const wordCount = this.content.split(/\s+/).length;
-    this.readTime = Math.ceil(wordCount / 200);
+  if (this.content && (this.isModified('content') || !this.readTime)) {
+    // Strip all HTML tags before counting so images/attributes don't inflate the word count
+    const plainText = this.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    const wordCount = plainText ? plainText.split(' ').length : 0;
+    this.readTime = Math.max(1, Math.ceil(wordCount / 200));
   }
 
   next();

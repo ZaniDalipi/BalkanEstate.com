@@ -604,6 +604,7 @@ export const adjustListingLimit = async (req: Request, res: Response): Promise<v
         data: {
           newLimit,
           previousLimit: oldLimit,
+          actionUrl: '/account/listings',
         },
       }).catch((err) => {
         adminLogger.error(`[Admin] Failed to send notification for listing limit increase:`, err);

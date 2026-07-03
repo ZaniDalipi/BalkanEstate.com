@@ -19,14 +19,23 @@
     "financial": "Financial",
     "profile": "Agency Profile",
     "team": "Team",
-    "collapse": "Collapse"
+    "collapse": "Collapse",
+    "browseProperties": "Browse Properties",
+    "viewAgencyPage": "View Agency Page",
+    "closeSidebar": "Close sidebar",
+    "navLabel": "Dashboard navigation",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar"
   },
   "header": {
     "listings": "Listings",
     "agents": "Agents",
     "inquiries": "Inquiries",
     "views": "Views",
-    "backToSite": "Back to Site"
+    "backToSite": "Back to Site",
+    "backToAgency": "Back to Agency",
+    "browseProperties": "Browse Properties",
+    "openMenu": "Open menu"
   },
   "overview": {
     "title": "Overview",
@@ -37,7 +46,20 @@
     "conversionRate": "Conversion Rate",
     "viewsTrend": "Views Trend",
     "inquiriesTrend": "Inquiries Trend",
-    "noData": "No overview data available."
+    "noData": "No overview data available.",
+    "email": "Email",
+    "errorDescription": "Something went wrong while fetching your dashboard data.",
+    "errorTitle": "Failed to load overview",
+    "featured": "Featured",
+    "languages": "Languages",
+    "location": "Location",
+    "memberSince": "Member since {{date}}",
+    "phone": "Phone",
+    "retry": "Try Again",
+    "totalAgentsCount": "Agents",
+    "totalProperties": "Properties",
+    "website": "Website",
+    "yearsInBusiness": "Years"
   },
   "agents": {
     "title": "Agent Management",
@@ -52,7 +74,43 @@
     "invitationCode": "Invitation Code",
     "copyCode": "Copy Code",
     "codeCopied": "Copied!",
-    "couponUsage": "Coupon Usage"
+    "couponUsage": "Coupon Usage",
+    "couponCode": "Code Used",
+    "emptyDescription": "Invite agents using the invitation panel to grow your team.",
+    "emptyTitle": "No agents yet",
+    "errorDescription": "Could not retrieve your team data.",
+    "errorTitle": "Failed to load agents",
+    "inquiries": "Inquiries",
+    "joined": "Joined",
+    "listings": "Listings",
+    "responseTime": "Avg Response",
+    "retry": "Try Again",
+    "tableTitle": "Team Members",
+    "invite": {
+      "allCodes": "All Codes (sent via email)",
+      "available": "Available",
+      "codeLabel": "Invitation Code",
+      "copied": "Copied!",
+      "copy": "Copy code",
+      "copyCoupon": "Copy code",
+      "couponStats": "Agent Coupon Codes",
+      "instructions": "Share this code with agents so they can request to join your agency. You can approve or reject requests from the team section.",
+      "noCode": "No invitation code available",
+      "subtitle": "Share code to grow your team",
+      "title": "Invite Agents",
+      "total": "Total",
+      "used": "Used",
+      "status_available": "Available",
+      "status_used": "Used",
+      "status_expired": "Expired"
+    },
+    "perf": {
+      "activeListings": "Active Listings",
+      "activityBreakdown": "Activity Breakdown",
+      "inquiries": "Inquiries",
+      "inquiriesHandled": "Inquiries Handled",
+      "listings": "Listings"
+    }
   },
   "properties": {
     "title": "Property Management",
@@ -78,7 +136,21 @@
     "allDates": "All Time",
     "last7days": "Last 7 Days",
     "last30days": "Last 30 Days",
-    "last90days": "Last 90 Days"
+    "last90days": "Last 90 Days",
+    "agentAll": "All Agents",
+    "colAgent": "Agent",
+    "colImage": "Image",
+    "colInquiries": "Inquiries",
+    "colListed": "Listed",
+    "colPrice": "Price",
+    "colStatus": "Status",
+    "colTitle": "Title",
+    "colViews": "Views",
+    "deactivate": "Deactivate",
+    "emptyDesc": "Try adjusting your filters or add new listings.",
+    "emptyTitle": "No properties found",
+    "promote": "Promote",
+    "showing": "Showing {{from}}-{{to}} of {{total}}"
   },
   "leads": {
     "title": "Leads & Inquiries",
@@ -95,7 +167,21 @@
     "statusClosed": "Closed",
     "filterStatus": "Status",
     "filterAgent": "Agent",
-    "filterDate": "Date Range"
+    "filterDate": "Date Range",
+    "agentAll": "All Agents",
+    "assignError": "Failed to assign inquiry",
+    "assignSuccess": "Inquiry assigned to {{agent}}",
+    "colAgent": "Assigned Agent",
+    "colBuyer": "Buyer",
+    "colDate": "Date",
+    "colMessage": "Message",
+    "colProperty": "Property",
+    "colStatus": "Status",
+    "emptyDesc": "Inquiries from potential buyers will appear here.",
+    "emptyTitle": "No inquiries found",
+    "noAgents": "No agents available",
+    "showing": "Showing {{from}}-{{to}} of {{total}}",
+    "unassigned": "Unassigned"
   },
   "analytics": {
     "title": "Analytics & Reports",
@@ -107,13 +193,19 @@
     "viewsOverTime": "Views Over Time",
     "inquiriesOverTime": "Inquiries Over Time",
     "agentComparison": "Agent Comparison",
-    "noData": "No analytics data for this period."
+    "noData": "No analytics data for this period.",
+    "exporting": "Exporting...",
+    "inquiries": "Inquiries",
+    "views": "Views",
+    "listings": "Listings",
+    "inquiriesLabel": "Inquiries",
+    "viewsLabel": "Views",
+    "noAgents": "No agent data available"
   },
   "financial": {
     "title": "Financial & Billing",
     "subscription": "Subscription",
     "plan": "Plan",
-    "status": "Status",
     "startDate": "Start Date",
     "endDate": "End Date",
     "price": "Price",
@@ -123,7 +215,20 @@
     "used": "Used",
     "available": "Available",
     "refreshDate": "Next Refresh",
-    "noData": "No financial data available."
+    "noData": "No financial data available.",
+    "coupons": "Coupons",
+    "hideDetails": "Hide details",
+    "noSubscription": "No active subscription",
+    "renewal": "Renews in {{days}} days",
+    "showDetails": "Show details ({{count}})",
+    "usagePercent": "{{percent}}% used",
+    "status": {
+      "active": "Active",
+      "trial": "Trial",
+      "expired": "Expired",
+      "cancelled": "Cancelled",
+      "none": "No Plan"
+    }
   },
   "profile": {
     "title": "Agency Profile",

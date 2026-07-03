@@ -184,6 +184,8 @@
     "view360": "Pamje 360°",
     "floorPlan": "Planimetria",
     "viewOnMap": "Shiko në Hartë",
+    "getDirections": "Drejtim",
+    "openInMaps": "Hap në Google Maps",
     "callSeller": "Thirr Shitësin",
     "messageSeller": "Dërgo Mesazh",
     "startingChat": "Duke Filluar Bisedën...",
@@ -375,7 +377,10 @@
     "remainingInfo": "{{remaining}} nga {{limit}} analiza të mbetura këtë muaj",
     "unlimitedInsights": "Analiza pa limit me planin tuaj",
     "upgradePrompt": "Kaloni në premium për më shumë analiza!",
-    "tryAgain": "Provo përsëri"
+    "tryAgain": "Provo përsëri",
+    "aiTeaserTitle": "Doni të dini më shumë për këtë pronë?",
+    "aiTeaserSubtitle": "Lëreni IA-në tonë të gjenerojë një raport të detajuar të lagjes — shkolla, transport, parqe, dyqane dhe shërbime lokale — për pak sekonda.",
+    "coordinatesUnavailable": "Të dhënat e vendndodhjes nuk janë ende të disponueshme për këtë pronë, prandaj nuk mund të gjenerojmë njohuri."
   },
   "photos": {
     "title": "Foto",
@@ -532,7 +537,8 @@
     "propertyShowcase": "Property Showcase",
     "skipVideo": "Skip Video",
     "videoTour": "Video Tour",
-    "enter3DTour": "Enter 3D Tour"
+    "enter3DTour": "Enter 3D Tour",
+    "view3DMap": "Harta 3D e vendndodhjes"
   },
   "viewings": {
     "title": "Kërkesat për Vizitë",
@@ -632,5 +638,17 @@
       "hint": "Vizato mbi imazh për të shtuar shënime",
       "sendToChat": "Dërgo"
     }
+  },
+  "sectionNav": {
+    "ariaLabel": "Seksionet e pronës",
+    "overview": "Përmbledhje",
+    "map": "Harta 3D",
+    "availability": "Disponueshmëria",
+    "calculators": "Llogaritësit",
+    "details": "Detajet",
+    "neighborhood": "Lagjja",
+    "priceHistory": "Historia e Çmimeve",
+    "similar": "Prona të ngjashme",
+    "onThisPage": "Në këtë faqe"
   }
 }

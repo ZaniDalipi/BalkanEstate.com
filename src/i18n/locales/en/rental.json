@@ -204,7 +204,11 @@
     "ics": {
       "summary": "Property Viewing",
       "description": "Scheduled viewing for"
-    }
+    },
+    "discardTitle": "Discard Changes?",
+    "discardMessage": "You have unsaved changes to your viewing request. Are you sure you want to close?",
+    "discardConfirm": "Discard",
+    "discardCancel": "Keep Editing"
   },
   "status": {
     "markAsRented": "Mark as Rented",

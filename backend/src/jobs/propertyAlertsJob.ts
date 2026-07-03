@@ -15,26 +15,32 @@ import Favorite from '../models/Favorite';
 import PropertyAlert from '../models/PropertyAlert';
 import PriceHistory from '../models/PriceHistory';
 import Notification from '../models/Notification';
+import SavedAgent from '../models/SavedAgent';
+import AgencyFavorite from '../models/AgencyFavorite';
+import Agent from '../models/Agent';
+import User from '../models/User';
 import { sendPropertyAlert, sendPriceDropAlert, sendSavedSearchPriceDropAlert, sendNewListingsDigest } from '../services/emailService';
 import { sendPushToUser } from '../services/pushNotificationService';
 
-// Subscription tiers that have access to property alerts
-const ALERT_ELIGIBLE_TIERS = ['buyer', 'pro', 'agency_owner', 'agency_agent'];
+// All tiers can receive saved-search and price alerts — free users included.
+// Subscription gate only controls how many searches a user can save, not whether they get notified.
+const ALERT_ELIGIBLE_TIERS = ['free', 'buyer', 'pro', 'agency_owner', 'agency_agent'];
 const ALERT_ELIGIBLE_STATUSES = ['active', 'trial', 'grace', 'pending_cancellation'];
 
 async function sendNewListingPush(userId: string, searchName: string, propertyId: string, propertyTitle: string, count: number): Promise<void> {
   try {
-    const title = count === 1 ? 'New property found!' : `${count} new properties found!`;
+    // Title = saved search name so users know which alert fired
+    const title = searchName;
     const message = count === 1
-      ? `"${propertyTitle}" matches your search "${searchName}"`
-      : `${count} new properties match your search "${searchName}"`;
+      ? `1 new listing: "${propertyTitle}"`
+      : `${count} new listings match your search`;
     const notification = await Notification.create({
       userId,
       type: 'new_listing',
       title,
       message,
       priority: 'high',
-      data: { actionUrl: `/properties/${propertyId}`, propertyId },
+      data: { actionUrl: `/property/${propertyId}`, propertyId, searchName, count },
     });
     sendPushToUser(userId, notification).catch(() => {});
   } catch (err) {
@@ -55,7 +61,7 @@ async function sendPriceChangePush(userId: string, propertyId: string, propertyT
       title,
       message,
       priority: isPriceDrop ? 'high' : 'normal',
-      data: { actionUrl: `/properties/${propertyId}`, propertyId, previousPrice, newPrice },
+      data: { actionUrl: `/property/${propertyId}`, propertyId, previousPrice, newPrice },
     });
     sendPushToUser(userId, notification).catch(() => {});
   } catch (err) {
@@ -193,10 +199,15 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
   cronLogger.info(`🔔 Processing ${frequency} new listing alerts...`);
 
   try {
-    // Get all saved searches with alerts enabled for this frequency
+    // alertsEnabled: treat missing/undefined as true (legacy records pre-date the field)
+    // alertFrequency: for 'instant' also match records where the field is absent (schema default)
+    const frequencyQuery = frequency === 'instant'
+      ? { $or: [{ alertFrequency: 'instant' }, { alertFrequency: { $exists: false } }] }
+      : { alertFrequency: frequency };
+
     const savedSearches = await SavedSearch.find({
-      alertsEnabled: true,
-      alertFrequency: frequency,
+      alertsEnabled: { $ne: false },
+      ...frequencyQuery,
     }).populate('userId', 'email name subscription');
 
     if (savedSearches.length === 0) {
@@ -204,10 +215,13 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
       return;
     }
 
-    // Filter to only users with active subscriptions (buyer or pro tier)
+    // Filter: allow all registered users (no subscription = free tier, still eligible)
     const eligibleSearches = savedSearches.filter(search => {
       const user = search.userId as any;
-      if (!user || !user.subscription) return false;
+      if (!user) return false;
+
+      // Users with no subscription object are treated as free tier — still eligible
+      if (!user.subscription) return true;
 
       const { tier, status } = user.subscription;
       const isEligibleTier = ALERT_ELIGIBLE_TIERS.includes(tier);
@@ -216,19 +230,21 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
       return isEligibleTier && isActiveStatus;
     });
 
-    cronLogger.info(`   ${savedSearches.length} saved searches, ${eligibleSearches.length} with eligible subscriptions`);
+    cronLogger.info(`   ${savedSearches.length} saved searches, ${eligibleSearches.length} eligible`);
 
-    // Determine time window based on frequency
+    // Time window: add 5-min overlap so clock skew between cron ticks
+    // never silently drops a property that was created just before the previous run.
+    // seenPropertyIds deduplication prevents double-notifications.
     let since: Date;
     switch (frequency) {
       case 'instant':
-        since = new Date(Date.now() - 15 * 60 * 1000); // Last 15 minutes
+        since = new Date(Date.now() - 20 * 60 * 1000); // 15-min cron + 5-min overlap
         break;
       case 'daily':
-        since = new Date(Date.now() - 24 * 60 * 60 * 1000); // Last 24 hours
+        since = new Date(Date.now() - 25 * 60 * 60 * 1000); // 24 h + 1 h overlap
         break;
       case 'weekly':
-        since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // Last 7 days
+        since = new Date(Date.now() - (7 * 24 + 1) * 60 * 60 * 1000); // 7 d + 1 h overlap
         break;
     }
 
@@ -354,6 +370,16 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
             { userId: user._id, savedSearchId: search._id, emailSent: false },
             { emailSent: true, emailSentAt: new Date() }
           );
+
+          // Push for digest: use the first property as the deep-link target
+          const firstProperty = matchingProperties[0];
+          await sendNewListingPush(
+            String(user._id),
+            search.name,
+            String(firstProperty._id),
+            firstProperty.title || `${firstProperty.address}, ${firstProperty.city}`,
+            matchingProperties.length
+          );
         }
       } catch (emailError) {
         cronLogger.error('   Failed to send property alert email:', emailError);
@@ -384,19 +410,17 @@ export async function processPriceDropAlerts(): Promise<void> {
       return;
     }
 
-    // Filter to only users with active subscriptions
+    // Allow all registered users — no subscription = free tier, still eligible
     const eligibleFavorites = favorites.filter(fav => {
       const user = fav.userId as any;
-      if (!user || !user.subscription) return false;
+      if (!user) return false;
+      if (!user.subscription) return true;
 
       const { tier, status } = user.subscription;
-      const isEligibleTier = ALERT_ELIGIBLE_TIERS.includes(tier);
-      const isActiveStatus = ALERT_ELIGIBLE_STATUSES.includes(status);
-
-      return isEligibleTier && isActiveStatus;
+      return ALERT_ELIGIBLE_TIERS.includes(tier) && ALERT_ELIGIBLE_STATUSES.includes(status);
     });
 
-    cronLogger.info(`   ${favorites.length} favorites with alerts, ${eligibleFavorites.length} with eligible subscriptions`);
+    cronLogger.info(`   ${favorites.length} favorites with alerts, ${eligibleFavorites.length} eligible`);
 
     if (eligibleFavorites.length === 0) {
       cronLogger.info('   No users with eligible subscriptions');
@@ -676,6 +700,93 @@ export async function recordPriceChange(
 }
 
 /**
+ * Notify users who saved the agent or agency that posted a new listing.
+ * Called from processInstantAlertsForProperty.
+ */
+async function processAgentAgencyFollowerAlerts(property: IProperty): Promise<void> {
+  const propertyTitle = property.title || `${property.address}, ${property.city}`;
+  const propertyUrl = `/property/${property._id}`;
+  const notified = new Set<string>(); // prevent double-notify if user follows both agent and agency
+
+  // ── Agent followers ──────────────────────────────────────────────────────────
+  try {
+    // Find the Agent document via the User who created this listing (matched by email)
+    const creatorUser = await User.findOne({ email: property.createdByEmail }).select('_id').lean();
+    if (creatorUser) {
+      const agent = await Agent.findOne({ userId: creatorUser._id }).select('_id').lean();
+      if (agent) {
+        const agentFollowers = await SavedAgent.find({ agentId: agent._id })
+          .populate('userId', 'email name subscription')
+          .lean();
+
+        for (const follow of agentFollowers) {
+          const follower = follow.userId as any;
+          if (!follower || notified.has(String(follower._id))) continue;
+
+          try {
+            const notification = await Notification.create({
+              userId: follower._id,
+              type: 'new_listing',
+              title: 'New listing from a saved agent',
+              message: `${property.createdByName || 'An agent you follow'} posted: ${propertyTitle}`,
+              priority: 'normal',
+              data: { actionUrl: propertyUrl, propertyId: String(property._id) },
+            });
+            sendPushToUser(String(follower._id), notification).catch(() => {});
+            notified.add(String(follower._id));
+          } catch (err) {
+            cronLogger.error(`Failed to notify agent follower ${follower._id}:`, err);
+          }
+        }
+
+        cronLogger.info(`   👤 Agent follower alerts sent: ${notified.size}`);
+      }
+    }
+  } catch (err) {
+    cronLogger.error('Error processing agent follower alerts:', err);
+  }
+
+  // ── Agency followers ─────────────────────────────────────────────────────────
+  if (!property.createdByAgencyId) return;
+
+  try {
+    const agencyFollowers = await AgencyFavorite.find({ agencyId: property.createdByAgencyId })
+      .populate('userId', 'email name subscription')
+      .lean();
+
+    let agencyCount = 0;
+    for (const follow of agencyFollowers) {
+      const follower = follow.userId as any;
+      if (!follower || notified.has(String(follower._id))) continue;
+
+      try {
+        const notification = await Notification.create({
+          userId: follower._id,
+          type: 'new_listing',
+          title: 'New listing from a saved agency',
+          message: `${property.createdByAgencyName || 'An agency you follow'} posted: ${propertyTitle}`,
+          priority: 'normal',
+          data: {
+            actionUrl: propertyUrl,
+            propertyId: String(property._id),
+            agencyId: String(property.createdByAgencyId),
+          },
+        });
+        sendPushToUser(String(follower._id), notification).catch(() => {});
+        notified.add(String(follower._id));
+        agencyCount++;
+      } catch (err) {
+        cronLogger.error(`Failed to notify agency follower ${follower._id}:`, err);
+      }
+    }
+
+    cronLogger.info(`   🏢 Agency follower alerts sent: ${agencyCount}`);
+  } catch (err) {
+    cronLogger.error('Error processing agency follower alerts:', err);
+  }
+}
+
+/**
  * Process instant alerts for a single newly created/activated property
  * Called immediately when a property is created or activated
  * This provides truly instant notifications instead of waiting for the 15-minute cron
@@ -723,12 +834,18 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
       cronLogger.info(`   [${i + 1}] Search "${search.name}" by ${user?.email || 'unknown'} - subscription: ${user?.subscription?.tier || 'none'} (${user?.subscription?.status || 'none'})`);
     });
 
-    // Filter to only users with active subscriptions
+    // Filter: allow all registered users (no subscription = free tier, still eligible)
     const eligibleSearches = savedSearches.filter(search => {
       const user = search.userId as any;
-      if (!user || !user.subscription) {
-        cronLogger.info(`   ❌ Search "${search.name}" - no user or subscription`);
+      if (!user) {
+        cronLogger.info(`   ❌ Search "${search.name}" - no user`);
         return false;
+      }
+
+      // No subscription object = free tier, still eligible
+      if (!user.subscription) {
+        cronLogger.info(`   ✓ Search "${search.name}" - user ${user.email} (no subscription, treated as free)`);
+        return true;
       }
 
       const { tier, status } = user.subscription;
@@ -740,11 +857,11 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
         return false;
       }
 
-      cronLogger.info(`   ✓ Search "${search.name}" - user ${user.email} is eligible`);
+      cronLogger.info(`   ✓ Search "${search.name}" - user ${user.email} eligible (tier: ${tier})`);
       return true;
     });
 
-    cronLogger.info(`   👥 ${eligibleSearches.length} eligible saved searches (users with Pro subscription)`);
+    cronLogger.info(`   👥 ${eligibleSearches.length} eligible saved searches`);
 
     if (eligibleSearches.length === 0) {
       cronLogger.info('   ℹ️ No users with eligible subscriptions');
@@ -841,6 +958,9 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
     }
 
     cronLogger.info(`✅ Instant alerts processed for property ${propertyId}: ${alertsSent} alerts sent`);
+
+    // Notify followers of the agent and agency who posted this listing
+    await processAgentAgencyFollowerAlerts(property);
   } catch (error) {
     cronLogger.error(`❌ Error processing instant alerts for property ${propertyId}:`, error);
     // Don't throw - we don't want to break the property creation flow

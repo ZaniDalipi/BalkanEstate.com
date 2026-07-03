@@ -211,6 +211,36 @@ const NotificationCenter: React.FC = () => {
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
       return;
     }
+
+    // Universal fallback: parse actionUrl and dispatch the right view
+    if (data.actionUrl) {
+      setIsOpen(false);
+      const url: string = data.actionUrl;
+
+      if (url.startsWith('/property/')) {
+        const id = url.replace('/property/', '');
+        setDirection('up');
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: id });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
+      } else if (url.startsWith('/agencies/')) {
+        const slug = url.replace('/agencies/', '');
+        setDirection('up');
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: slug });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
+      } else if (url.startsWith('/account')) {
+        const tabMatch = url.match(/^\/account\/(.+)$/);
+        if (tabMatch) dispatch({ type: 'SET_ACCOUNT_TAB', payload: tabMatch[1] });
+        setDirection('morph');
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+      } else if (url === '/inbox') {
+        setDirection('morph');
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
+      } else if (url.includes('/subscribe') || url === '/pricing') {
+        setDirection('forward');
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+      }
+      window.history.pushState({}, '', url);
+    }
   };
 
   // Fetch on mount and poll every 5 minutes
@@ -367,7 +397,7 @@ const NotificationCenter: React.FC = () => {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 border border-white/30 z-[999] max-h-[70vh] flex flex-col overflow-hidden">
+        <div className="fixed sm:absolute inset-x-2 sm:inset-x-auto top-16 sm:top-auto sm:right-0 sm:mt-2 sm:w-96 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 border border-white/30 z-[999] max-h-[75vh] sm:max-h-[70vh] flex flex-col overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/20 bg-white/50">
             <h3 className="font-semibold text-gray-900">

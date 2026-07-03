@@ -941,5 +941,19 @@
     "testEmailDesc": "Një email testues do të dërgohet me të dhëna shembull në adresën e mësipërme.",
     "sending": "Duke dërguar...",
     "sendTest": "Dërgo Testin"
+  },
+  "scoring": {
+    "title": "Menaxhimi i Pikëve",
+    "description": "Rillogaritni pikët e përbëra për agjentët dhe agjencitë. Pikët përditësohen automatikisht me ruajtje, por përdoreni këtë për të mbushur të dhënat ekzistuese.",
+    "recomputeAgents": "Rillogarit Pikët e Agjentëve",
+    "recomputeAgencies": "Rillogarit Pikët e Agjencive",
+    "recomputeAll": "Rillogarit Të Gjitha Pikët",
+    "running": "Duke u ekzekutuar...",
+    "success": "U përditësuan {{count}} rekorde",
+    "error": "Dështoi rillogaritja e pikëve",
+    "lastRun": "Ekzekutimi i fundit",
+    "howItWorks": "Si funksionon vlerësimi",
+    "agentFormula": "Agjentë: vlerësim×20 + shitje×5 + listë×2 + komente×1 (maks 180 pikë)",
+    "agencyFormula": "Agjenci: listë×3 + ekip×5 + eksperiencë×2 + të veçuar×20 (maks 160 pikë)"
   }
 }

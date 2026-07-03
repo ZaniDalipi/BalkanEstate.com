@@ -277,7 +277,13 @@
       "winter": "Winter"
     },
     "promoted": "Premium",
-    "cadastre": "Cadastre"
+    "cadastre": "Cadastre",
+    "reset": "Reset",
+    "locate": "Locate",
+    "layers": "Layers",
+    "mapView": "Map",
+    "switchTo": "Switch to {{view}} view",
+    "drawAreaHint": "Draw a search area on the map"
   },
   "newsletter": {
     "title": "Stay Updated with New Properties",

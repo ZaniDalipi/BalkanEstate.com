@@ -122,7 +122,7 @@ const AgencyPaymentPage = lazy(() => import('./src/features/agencies/components/
 // Google Maps API is deferred - only loads when map pages are visited (see MapComponent.tsx)
 
 // Cookie Consent Banner (lazy loaded - shown after initial render)
-const CookieConsent = lazy(() => import('./src/shared/components/CookieConsent'));
+const ConsentBanner = lazy(() => import('./src/shared/components/ConsentBanner'));
 const PushNotificationPrompt = lazy(() => import('./src/features/notifications/components/PushNotificationPrompt'));
 
 // Splash screen (lazy loaded - shown on initial app load to hide loading)
@@ -341,6 +341,16 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-rental' });
+        return;
+      }
+
+      // Redirect legacy /settings/notifications to /account/notifications
+      if (path === '/settings/notifications' || path === '/settings/notifications/') {
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'notifications' });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+        window.history.replaceState(null, '', '/account/notifications');
         return;
       }
 
@@ -807,7 +817,11 @@ const MainLayout: React.FC = () => {
   const isFullHeightView = isSearchPage || isRentalPage || isVillaPage || state.activeView === 'inbox' || !!state.selectedProperty;
   // On mobile: floating header hidden, PWA top bar handles navigation
   // On desktop: floating header shown (except property details which has its own)
-  const showHeader = !isMobile && !state.selectedProperty && !state.selectedAgentId && !state.selectedAgencyId && !state.selectedBusinessListingId;
+  // Agency dashboard has its own full header bar (Browse Properties / Back to Agency /
+  // Back to Site / account), so the global floating header is suppressed there to avoid
+  // it overlapping and covering those controls.
+  const hasOwnHeader = state.activeView === 'agency-dashboard';
+  const showHeader = !isMobile && !state.selectedProperty && !state.selectedAgentId && !state.selectedAgencyId && !state.selectedBusinessListingId && !hasOwnHeader;
 
   // PWA top bar: shown on mobile for internal pages only
   // NOT shown on: search/rental (have their own search headers), property details (has its own header)
@@ -819,7 +833,7 @@ const MainLayout: React.FC = () => {
   const isMainTabView = !state.selectedAgentId && !state.selectedAgencyId && !state.selectedBusinessListingId && [
     'agents', 'agencies', 'saved-properties', 'saved-searches', 'explore-cities', 'city-dashboard',
     'inbox', 'pricing', 'how-it-works', 'valuation', 'mortgage-calculator', 'analytics', 'admin', 'agency-dashboard', 'business-directory',
-    'account',
+    'account', 'blog', 'guides',
   ].includes(state.activeView);
 
 
@@ -850,6 +864,8 @@ const MainLayout: React.FC = () => {
       'agency-dashboard': 'nav:pageTitles.agencyDashboard',
       valuation: 'nav:pageTitles.valuation',
       'mortgage-calculator': 'nav:pageTitles.mortgageCalculator',
+      blog: 'nav:pageTitles.blog',
+      guides: 'nav:pageTitles.guides',
     };
     const key = titleKeys[state.activeView];
     return key ? t(key) : t('nav:pageTitles.default');
@@ -1216,7 +1232,7 @@ const AppWrapper: React.FC = () => {
                 <MainLayout />
                 <Suspense fallback={null}>
                     {state.isAuthModalOpen && <AuthPage />}
-                    <CookieConsent />
+                    <ConsentBanner />
                     <PWAInstallPrompt />
                     <PushNotificationPrompt />
                 </Suspense>

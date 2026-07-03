@@ -685,9 +685,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 ) : (
                   <BuildingOfficeIcon className="w-5 h-5 text-primary" />
                 )}
-                <div className="hidden sm:block">
+                <div>
                   <p className="text-[9px] text-neutral-500 leading-none">{t('property:seller.agency')}</p>
-                  <p className="text-[10px] font-medium text-neutral-700 truncate max-w-[60px]">{safeProperty.seller.agencyName}</p>
+                  <p className="text-[10px] font-medium text-neutral-700 truncate max-w-[80px]">{safeProperty.seller.agencyName}</p>
                 </div>
               </div>
             )}

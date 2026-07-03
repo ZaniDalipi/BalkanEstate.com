@@ -481,57 +481,81 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
             )}
             <button
               onClick={() => setIsLayerMenuOpen(!isLayerMenuOpen)}
-              className={`w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all border border-white/40 ${
+              className={`w-12 h-12 rounded-full shadow-lg flex flex-col items-center justify-center gap-0.5 transition-all border border-white/40 ${
                 isLayerMenuOpen ? 'bg-primary text-white' : 'bg-white/90 text-gray-700'
               }`}
               style={{ backdropFilter: 'blur(10px)' }}
+              aria-label={t('search:map.layers')}
+              title={t('search:map.layers')}
+              aria-expanded={isLayerMenuOpen}
+              aria-haspopup="menu"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
+              <span className="text-[8px] font-semibold leading-none">{t('search:map.layers')}</span>
             </button>
           </div>
 
-          {/* Mobile controls - top right: sits below the floating search bar */}
+          {/* Mobile controls - top right: sits below the floating search bar.
+              Each button pairs its icon with a short caption + aria-label so the
+              action is self-explanatory on touch devices (no hover tooltips). */}
           <div className="absolute right-2 z-[999]" style={{ top: 'calc(var(--floating-search-top-pad, 8px) + 60px)' }}>
             <div className="flex flex-col gap-1.5 items-end">
               <div
-                className="flex items-center gap-1 p-1.5 rounded-2xl shadow-xl border border-white/30"
+                className="flex items-stretch gap-1 p-1.5 rounded-2xl shadow-xl border border-white/30"
                 style={{
                   background: 'rgba(255, 255, 255, 0.9)',
                   backdropFilter: 'blur(20px) saturate(180%)',
                 }}
               >
-                <button
-                  onClick={() => setMapStyle(mapStyle === 'street' ? 'satellite' : 'street')}
-                  className="px-2.5 py-2 text-xs font-semibold rounded-xl text-gray-700 hover:bg-white/50"
-                >
-                  {mapStyle === 'satellite' || mapStyle === 'hybrid' ? '🗺️' : '🛰️'}
-                </button>
+                {(() => {
+                  const isSatellite = mapStyle === 'satellite' || mapStyle === 'hybrid';
+                  const mapTypeLabel = isSatellite ? t('search:map.mapView') : t('search:map.satellite');
+                  return (
+                    <button
+                      onClick={() => setMapStyle(isSatellite ? 'street' : 'satellite')}
+                      className="flex flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-xl text-gray-700 hover:bg-white/50 active:scale-95 transition-all"
+                      aria-label={t('search:map.switchTo', { view: mapTypeLabel })}
+                      title={t('search:map.switchTo', { view: mapTypeLabel })}
+                    >
+                      <span className="text-base leading-none">{isSatellite ? '🗺️' : '🛰️'}</span>
+                      <span className="text-[9px] font-semibold leading-none">{mapTypeLabel}</span>
+                    </button>
+                  );
+                })()}
                 {handleResetView && (
                   <button
                     onClick={handleResetView}
-                    className="p-2 rounded-xl hover:bg-white/50 text-neutral-600 active:scale-95"
+                    className="flex flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-xl hover:bg-white/50 text-neutral-600 active:scale-95 transition-all"
                     aria-label={t('common:aria.resetView')}
+                    title={t('common:aria.resetView')}
                   >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
                     </svg>
+                    <span className="text-[9px] font-semibold leading-none">{t('search:map.reset')}</span>
                   </button>
                 )}
                 <button
                   onClick={handleRecenter}
-                  className="p-2 rounded-xl hover:bg-white/50 text-neutral-600"
+                  className="flex flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-xl hover:bg-white/50 text-neutral-600 active:scale-95 transition-all"
+                  aria-label={t('search:map.centerOnLocation')}
+                  title={t('search:map.centerOnLocation')}
                 >
                   <CrosshairsIcon className="w-5 h-5" />
+                  <span className="text-[9px] font-semibold leading-none">{t('search:map.locate')}</span>
                 </button>
                 <button
                   onClick={onDrawStart}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all ${
+                  className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-xl transition-all active:scale-95 ${
                     isDrawing ? 'bg-red-500 text-white' : 'bg-neutral-800 text-white'
                   }`}
+                  aria-label={isDrawing ? t('search:map.cancel') : t('search:map.drawAreaHint')}
+                  title={isDrawing ? t('search:map.cancel') : t('search:map.drawAreaHint')}
                 >
-                  {isDrawing ? <XCircleIcon className="w-4 h-4" /> : <PencilIcon className="w-4 h-4" />}
+                  {isDrawing ? <XCircleIcon className="w-5 h-5" /> : <PencilIcon className="w-5 h-5" />}
+                  <span className="text-[9px] font-semibold leading-none">{isDrawing ? t('search:map.cancel') : t('search:map.draw')}</span>
                 </button>
               </div>
 
@@ -547,16 +571,23 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                     <button
                       onClick={onSaveSearch}
                       disabled={isSaving}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl disabled:opacity-50"
+                      className="flex flex-col items-center justify-center gap-0.5 px-3 py-2 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl disabled:opacity-50 active:scale-95 transition-all"
+                      aria-label={isSaving ? t('search:map.saving') : t('search:map.saveArea')}
+                      title={t('search:map.saveArea')}
+                      aria-busy={isSaving}
                     >
-                      <SearchPlusIcon className="w-4 h-4" />
+                      <SearchPlusIcon className="w-5 h-5" />
+                      <span className="text-[9px] font-semibold leading-none">{isSaving ? t('search:map.saving') : t('search:map.save')}</span>
                     </button>
                   )}
                   <button
                     onClick={() => onDrawComplete(null)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl"
+                    className="flex flex-col items-center justify-center gap-0.5 px-3 py-2 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl active:scale-95 transition-all"
+                    aria-label={t('search:map.clearArea')}
+                    title={t('search:map.clearArea')}
                   >
-                    <XCircleIcon className="w-4 h-4" />
+                    <XCircleIcon className="w-5 h-5" />
+                    <span className="text-[9px] font-semibold leading-none">{t('search:map.clear')}</span>
                   </button>
                 </div>
               )}

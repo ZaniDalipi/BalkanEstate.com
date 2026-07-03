@@ -184,6 +184,8 @@
     "view360": "Vedere 360°",
     "floorPlan": "Plan de Etaj",
     "viewOnMap": "Vezi pe Hartă",
+    "getDirections": "Indicații",
+    "openInMaps": "Deschide în Google Maps",
     "callSeller": "Sună Vânzătorul",
     "messageSeller": "Trimite Mesaj Vânzătorului",
     "startingChat": "Se pornește conversația...",
@@ -375,7 +377,10 @@
     "remainingInfo": "{{remaining}} din {{limit}} analize rămase luna aceasta",
     "unlimitedInsights": "Analize nelimitate disponibile cu planul tău",
     "upgradePrompt": "Treci la premium pentru mai multe analize!",
-    "tryAgain": "Încearcă din nou"
+    "tryAgain": "Încearcă din nou",
+    "aiTeaserTitle": "Vrei să afli mai multe despre această proprietate?",
+    "aiTeaserSubtitle": "Lasă IA-ul nostru să genereze un raport detaliat despre cartier — școli, transport, parcuri, magazine și facilități locale — în doar câteva secunde.",
+    "coordinatesUnavailable": "Datele de localizare nu sunt încă disponibile pentru această proprietate, așa că nu putem genera informații."
   },
   "photos": {
     "title": "Fotografii",
@@ -532,7 +537,8 @@
     "propertyShowcase": "Property Showcase",
     "skipVideo": "Skip Video",
     "videoTour": "Video Tour",
-    "enter3DTour": "Enter 3D Tour"
+    "enter3DTour": "Enter 3D Tour",
+    "view3DMap": "Hartă 3D a locației"
   },
   "viewings": {
     "title": "Cereri de Vizionare",
@@ -632,5 +638,17 @@
       "hint": "Desenați pe imagine pentru adnotare",
       "sendToChat": "Trimite"
     }
+  },
+  "sectionNav": {
+    "ariaLabel": "Secțiuni proprietate",
+    "overview": "Prezentare",
+    "map": "Hartă 3D",
+    "availability": "Disponibilitate",
+    "calculators": "Calculatoare",
+    "details": "Detalii",
+    "neighborhood": "Vecinătate",
+    "priceHistory": "Istoricul prețurilor",
+    "similar": "Proprietăți similare",
+    "onThisPage": "Pe această pagină"
   }
 }

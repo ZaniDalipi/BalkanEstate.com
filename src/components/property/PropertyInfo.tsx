@@ -1,13 +1,14 @@
 // PropertyInfo Component
 // Displays property details, description, and amenities
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
+import { validateCoordinates } from '../../shared/utils/validation';
+import { openExternalUrl } from '../../shared/utils/pwa';
 import { formatPrice } from '../../../utils/currency';
 import { getPriceReductionInfo } from '../../../utils/priceUtils';
 import {
-  MapPinIcon,
   BedIcon,
   BathIcon,
   SqftIcon,
@@ -52,7 +53,26 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
   const { t } = useTranslation(['property', 'agents']);
   const { state, dispatch, updateSearchPageState } = useAppContext();
 
-  // Handle location click to navigate to search with city/country filter
+  // --- state ---
+  // Controls the "open in map app" chooser shown below the Directions button.
+  const [mapMenuOpen, setMapMenuOpen] = useState(false);
+
+  // --- derived values ---
+  // lat/lng typed as number; guard 0,0 (null island) which passes range validation but is never a real Balkan listing
+  const hasValidCoords = useMemo(
+    () => (property.lat !== 0 || property.lng !== 0) && validateCoordinates(property.lat, property.lng).isValid,
+    [property.lat, property.lng]
+  );
+
+  // Single destination string used by both the map link and the directions handler
+  const mapsDestination = useMemo(
+    () => hasValidCoords
+      ? `${property.lat},${property.lng}`
+      : encodeURIComponent([property.address, property.city, property.country].filter(Boolean).join(', ')),
+    [hasValidCoords, property.lat, property.lng, property.address, property.city, property.country]
+  );
+
+  // --- callbacks ---
   const handleLocationClick = useCallback((e: React.MouseEvent, type: 'city' | 'country') => {
     e.preventDefault();
     e.stopPropagation();
@@ -92,6 +112,41 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
       window.history.pushState({}, '', `/search?country=${encodeURIComponent(countryKey)}`);
     }
   }, [property.city, property.country, state.searchPageState.filters, updateSearchPageState, dispatch]);
+
+  // Each provider gets a deep link that all major map apps support. We do NOT
+  // pre-fetch geolocation for the origin: every app below falls back to the
+  // user's current location when no origin is given, and an async geolocation
+  // callback would lose the user-gesture and get the open blocked on mobile /
+  // installed PWAs (the original bug).
+  const mapProviders = useMemo(
+    () => [
+      {
+        name: 'Google Maps',
+        emoji: '🗺️',
+        url: `https://www.google.com/maps/dir/?api=1&destination=${mapsDestination}`,
+      },
+      {
+        name: 'Apple Maps',
+        emoji: '🧭',
+        url: `https://maps.apple.com/?daddr=${mapsDestination}&dirflg=d`,
+      },
+      {
+        name: 'Waze',
+        emoji: '🚗',
+        url: hasValidCoords
+          ? `https://waze.com/ul?ll=${mapsDestination}&navigate=yes`
+          : `https://waze.com/ul?q=${mapsDestination}&navigate=yes`,
+      },
+    ],
+    [mapsDestination, hasValidCoords]
+  );
+
+  const handleSelectMapProvider = useCallback((url: string) => {
+    // openExternalUrl runs synchronously inside this click handler, so the
+    // open stays inside the user gesture and works in mobile browsers / PWAs.
+    openExternalUrl(url);
+    setMapMenuOpen(false);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -182,35 +237,89 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             );
           })()}
 
-          <div className="inline-flex items-center text-neutral-600 mt-2 flex-wrap">
-            <MapPinIcon className="w-5 h-5 mr-2 text-neutral-400 flex-shrink-0" />
-            <span className="text-sm sm:text-base lg:text-lg">
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${property.lat},${property.lng}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline hover:text-primary transition-colors"
-                title="Open in Google Maps"
-              >
-                {property.address}
-              </a>
-              <span>, </span>
-              <button
-                onClick={(e) => handleLocationClick(e, 'city')}
-                className="hover:underline hover:text-primary transition-colors cursor-pointer"
-                title={`View all properties in ${property.city}`}
-              >
-                {property.city}
-              </button>
-              <span>, </span>
-              <button
-                onClick={(e) => handleLocationClick(e, 'country')}
-                className="hover:underline hover:text-primary transition-colors cursor-pointer"
-                title={`View all properties in ${property.country}`}
-              >
-                {property.country}
-              </button>
-            </span>
+          {/* Address Card */}
+          <div className="mt-4 p-4 rounded-2xl bg-gradient-to-br from-primary/[0.08] via-primary/[0.04] to-transparent border border-primary/20 hover:border-primary/30 transition-colors">
+            <div className="flex items-start gap-3">
+              {/* Filled location pin */}
+              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+                <svg className="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="currentColor">
+                  <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-2.083 3.218-4.374 3.218-6.991a6.5 6.5 0 10-13 0c0 2.617 1.274 4.908 3.218 6.99a19.58 19.58 0 002.682 2.283 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                </svg>
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${mapsDestination}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block font-semibold text-neutral-900 hover:text-primary transition-colors text-sm sm:text-base leading-snug"
+                  title={t('actions.openInMaps', 'Open in Google Maps')}
+                >
+                  {property.address}
+                </a>
+                <div className="flex flex-wrap items-center gap-x-1.5 mt-1 text-xs sm:text-sm text-neutral-500">
+                  <button
+                    onClick={(e) => handleLocationClick(e, 'city')}
+                    className="hover:text-primary transition-colors"
+                    title={`View all properties in ${property.city}`}
+                  >
+                    {property.city}
+                  </button>
+                  <span aria-hidden>·</span>
+                  <button
+                    onClick={(e) => handleLocationClick(e, 'country')}
+                    className="hover:text-primary transition-colors"
+                    title={`View all properties in ${property.country}`}
+                  >
+                    {property.country}
+                  </button>
+                </div>
+              </div>
+
+              {/* Directions button + map-app chooser */}
+              <div className="relative flex-shrink-0">
+                <button
+                  onClick={() => setMapMenuOpen((open) => !open)}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-white text-xs sm:text-sm font-medium hover:bg-primary/90 active:scale-95 transition-all shadow-sm shadow-primary/20"
+                  aria-label={t('actions.getDirections', 'Get Directions')}
+                  aria-haspopup="menu"
+                  aria-expanded={mapMenuOpen}
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                  </svg>
+                  <span className="hidden sm:inline">{t('actions.getDirections', 'Directions')}</span>
+                </button>
+
+                {mapMenuOpen && (
+                  <>
+                    {/* Backdrop closes the menu on outside tap */}
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setMapMenuOpen(false)}
+                      aria-hidden
+                    />
+                    <div
+                      role="menu"
+                      aria-label={t('actions.getDirections', 'Get Directions')}
+                      className="absolute right-0 top-full mt-2 z-50 w-44 rounded-xl bg-white shadow-xl ring-1 ring-black/5 border border-neutral-100 overflow-hidden py-1"
+                    >
+                      {mapProviders.map((p) => (
+                        <button
+                          key={p.name}
+                          role="menuitem"
+                          onClick={() => handleSelectMapProvider(p.url)}
+                          className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 active:bg-neutral-100 transition-colors text-left"
+                        >
+                          <span className="text-base leading-none" aria-hidden>{p.emoji}</span>
+                          <span className="font-medium">{p.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Property Type & Listing Badge */}

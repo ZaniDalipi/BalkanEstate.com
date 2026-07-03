@@ -109,7 +109,9 @@
     "valuation": "Valuation",
     "mortgageCalculator": "Calculator",
     "cityDashboard": "City Dashboard",
-    "villas": "Luxury Villas",
-    "default": "BalkanEstate"
-  }
+    "default": "BalkanEstate",
+    "blog": "Blog & Articles",
+    "guides": "Guides"
+  },
+  "blog": "Blog & Articles"
 }

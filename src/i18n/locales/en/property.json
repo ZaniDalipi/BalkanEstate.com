@@ -192,6 +192,8 @@
     "view360": "360° View",
     "floorPlan": "Floor Plan",
     "viewOnMap": "View on Map",
+    "getDirections": "Directions",
+    "openInMaps": "Open in Google Maps",
     "callSeller": "Call Seller",
     "messageSeller": "Message Seller",
     "startingChat": "Starting Chat...",
@@ -256,7 +258,8 @@
     "propertyShowcase": "Property Showcase",
     "skipVideo": "Skip Video",
     "videoTour": "Video Tour",
-    "enter3DTour": "Enter 3D Tour"
+    "enter3DTour": "Enter 3D Tour",
+    "view3DMap": "3D Location Map"
   },
   "featuredAgencies": "Featured Agencies",
   "status": {
@@ -394,7 +397,10 @@
     "remainingInfo": "{{remaining}} of {{limit}} insights remaining this month",
     "unlimitedInsights": "Unlimited insights available with your plan",
     "upgradePrompt": "Upgrade to premium for more insights!",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "aiTeaserTitle": "Want to know more about this property?",
+    "aiTeaserSubtitle": "Let our AI generate a detailed neighborhood report — nearby schools, transport, parks, shops and local amenities — in just seconds.",
+    "coordinatesUnavailable": "Location data isn't available for this property yet, so we can't generate insights."
   },
   "photos": {
     "title": "Photos",
@@ -640,5 +646,17 @@
       "hint": "Draw on the image to annotate",
       "sendToChat": "Send"
     }
+  },
+  "sectionNav": {
+    "ariaLabel": "Property sections",
+    "overview": "Overview",
+    "map": "3D Map",
+    "availability": "Availability",
+    "calculators": "Calculators",
+    "details": "Details",
+    "neighborhood": "Neighborhood",
+    "priceHistory": "Price History",
+    "similar": "Similar Homes",
+    "onThisPage": "On this page"
   }
 }

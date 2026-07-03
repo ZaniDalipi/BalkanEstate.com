@@ -4,16 +4,32 @@ import Agency from '../models/Agency';
 import PromotionCoupon from '../models/PromotionCoupon';
 import { agencyLogger } from '../utils/logger';
 import { getObjectIdParam } from '../utils/validateParams';
+import {
+  FEATURED_INTERVALS,
+  computePeriodEnd,
+  getIntervalPrice,
+  isValidFeaturedInterval,
+} from '../utils/featuredSubscriptionUtils';
 
 export const createFeaturedSubscription = async (req: Request, res: Response): Promise<void> => {
   try {
     const agencyId = getObjectIdParam(req, res, 'agencyId');
     if (!agencyId) return;
-    const { interval = 'weekly', couponCode, startTrial = false } = req.body;
+    const { interval = '28days', couponCode, startTrial = false } = req.body;
     const userId = (req as any).user?.id || (req as any).user?._id;
 
     if (!userId) {
       res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    // Validate interval against the supported set before touching the database.
+    if (!isValidFeaturedInterval(interval)) {
+      res.status(400).json({
+        error: 'Invalid subscription interval',
+        message: `Interval must be one of: ${FEATURED_INTERVALS.join(', ')}`,
+        allowedIntervals: FEATURED_INTERVALS,
+      });
       return;
     }
 
@@ -64,6 +80,11 @@ export const createFeaturedSubscription = async (req: Request, res: Response): P
     let appliedCouponId: any | undefined;
     let discountApplied = 0;
     let trialDays = 0;
+    // Coupon to record AFTER the subscription is persisted (avoids consuming a
+    // coupon use when the subsequent save fails). Reason is surfaced to the
+    // client when a coupon was supplied but could not be applied.
+    let couponToRecord: any | undefined;
+    let couponRejectionReason: string | undefined;
 
     // Handle trial
     if (startTrial) {
@@ -74,62 +95,68 @@ export const createFeaturedSubscription = async (req: Request, res: Response): P
       currentPeriodEnd = new Date(trialEndDate);
       price = 0; // Free during trial
     } else {
-      // Calculate period end based on interval
-      if (interval === 'weekly') {
-        currentPeriodEnd.setDate(currentPeriodEnd.getDate() + 7);
-        price = 10;
-      } else if (interval === 'monthly') {
-        currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + 1);
-        price = 35; // 30% discount for monthly
-      } else if (interval === 'yearly') {
-        currentPeriodEnd.setFullYear(currentPeriodEnd.getFullYear() + 1);
-        price = 400; // ~23% discount for yearly
-      }
+      // Calculate period end and price from the shared interval config.
+      currentPeriodEnd = computePeriodEnd(now, interval);
+      price = getIntervalPrice(interval);
     }
 
-    // Apply coupon if provided (works for both trial and paid subscriptions)
+    // Apply coupon if provided (works for both trial and paid subscriptions).
+    // Usage is NOT recorded here — it is recorded only after the subscription
+    // is successfully saved, so a failed save never burns a coupon use.
     if (couponCode) {
       const coupon = await PromotionCoupon.findOne({
         code: couponCode.toUpperCase(),
         status: 'active',
       });
 
-      if (coupon && coupon.isValid()) {
-        const canUse = await coupon.canBeUsedBy(userId as any);
-        if (canUse) {
-          // Check if coupon is applicable to featured tier
-          if (!coupon.applicableTiers || coupon.applicableTiers.length === 0 || coupon.applicableTiers.includes('featured')) {
-            // Check minimum purchase amount
-            if (!coupon.minimumPurchaseAmount || price >= coupon.minimumPurchaseAmount) {
-              // Calculate discount immediately
-              const calculatedDiscount = coupon.calculateDiscount(price);
+      if (!coupon || !coupon.isValid()) {
+        couponRejectionReason = 'Coupon not found or expired';
+      } else if (!(await coupon.canBeUsedBy(userId as any))) {
+        couponRejectionReason = 'You have already used this coupon or its usage limit has been reached';
+      } else if (
+        coupon.applicableTiers &&
+        coupon.applicableTiers.length > 0 &&
+        !coupon.applicableTiers.includes('featured')
+      ) {
+        couponRejectionReason = 'This coupon cannot be applied to a featured agency subscription';
+      } else if (coupon.minimumPurchaseAmount && price < coupon.minimumPurchaseAmount) {
+        couponRejectionReason = `This coupon requires a minimum purchase of €${coupon.minimumPurchaseAmount}`;
+      } else {
+        // Calculate discount immediately
+        const calculatedDiscount = coupon.calculateDiscount(price);
 
-              // For trial subscriptions, coupon can extend the trial period
-              if (isTrial && coupon.discountType === 'fixed' && coupon.discountValue === 0) {
-                // This is a trial extension coupon - check description for days
-                const daysMatch = coupon.description?.match(/(\d+)\s*day/i);
-                if (daysMatch) {
-                  const extensionDays = parseInt(daysMatch[1], 10);
-                  trialDays = extensionDays;
-                  trialEndDate = new Date(now);
-                  trialEndDate.setDate(trialEndDate.getDate() + extensionDays);
-                  currentPeriodEnd = new Date(trialEndDate);
-                }
-              } else {
-                // Apply price discount
-                discountApplied = calculatedDiscount;
-                price = Math.max(0, price - discountApplied);
-              }
-
-              appliedCouponCode = coupon.code;
-              appliedCouponId = coupon._id;
-
-              // Record coupon usage
-              await coupon.recordUsage(userId as any, agencyId as any, discountApplied);
-            }
+        // For trial subscriptions, coupon can extend the trial period
+        if (isTrial && coupon.discountType === 'fixed' && coupon.discountValue === 0) {
+          // This is a trial extension coupon - check description for days
+          const daysMatch = coupon.description?.match(/(\d+)\s*day/i);
+          if (daysMatch) {
+            const extensionDays = parseInt(daysMatch[1], 10);
+            trialDays = extensionDays;
+            trialEndDate = new Date(now);
+            trialEndDate.setDate(trialEndDate.getDate() + extensionDays);
+            currentPeriodEnd = new Date(trialEndDate);
           }
+        } else {
+          // Apply price discount
+          discountApplied = calculatedDiscount;
+          price = Math.max(0, price - discountApplied);
         }
+
+        appliedCouponCode = coupon.code;
+        appliedCouponId = coupon._id;
+        couponToRecord = coupon;
       }
+    }
+
+    // Direct payments are not yet available, so a paid subscription can only be
+    // activated for free via a valid coupon. If a coupon was supplied but could
+    // not be applied, fail loudly instead of creating a dead pending_payment row.
+    if (!isTrial && couponCode && price > 0) {
+      res.status(400).json({
+        error: 'Coupon could not be applied',
+        message: couponRejectionReason || 'This coupon is not valid for this subscription',
+      });
+      return;
     }
 
     // Create subscription
@@ -165,6 +192,12 @@ export const createFeaturedSubscription = async (req: Request, res: Response): P
       // Mark as active instead of pending_payment
       subscription.status = 'active';
       await subscription.save();
+    }
+
+    // Record coupon usage only now that the subscription is persisted, so a
+    // failed save never consumes a coupon use.
+    if (couponToRecord) {
+      await couponToRecord.recordUsage(userId as any, agencyId as any, discountApplied);
     }
 
     res.status(201).json({
@@ -458,15 +491,7 @@ export const checkExpiredSubscriptions = async (req: Request, res: Response) => 
         // In a real implementation, you would charge the payment method here
         // For now, we'll just extend the period
         const newPeriodStart = subscription.currentPeriodEnd;
-        const newPeriodEnd = new Date(newPeriodStart);
-
-        if (subscription.interval === 'weekly') {
-          newPeriodEnd.setDate(newPeriodEnd.getDate() + 7);
-        } else if (subscription.interval === 'monthly') {
-          newPeriodEnd.setMonth(newPeriodEnd.getMonth() + 1);
-        } else if (subscription.interval === 'yearly') {
-          newPeriodEnd.setFullYear(newPeriodEnd.getFullYear() + 1);
-        }
+        const newPeriodEnd = computePeriodEnd(newPeriodStart, subscription.interval);
 
         subscription.currentPeriodStart = newPeriodStart;
         subscription.currentPeriodEnd = newPeriodEnd;

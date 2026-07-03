@@ -194,7 +194,11 @@
     "ics": {
       "summary": "Property Viewing",
       "description": "Scheduled viewing for"
-    }
+    },
+    "discardTitle": "Απόρριψη αλλαγών;",
+    "discardMessage": "Έχετε μη αποθηκευμένες αλλαγές στο αίτημα προβολής σας. Είστε βέβαιοι ότι θέλετε να κλείσετε;",
+    "discardConfirm": "Απόρριψη",
+    "discardCancel": "Συνέχεια επεξεργασίας"
   },
   "status": {
     "markAsRented": "Σήμανση ως Ενοικιασμένο",
@@ -495,3 +499,4 @@
     "inquiries": "ερωτήματα"
   }
 }
+  

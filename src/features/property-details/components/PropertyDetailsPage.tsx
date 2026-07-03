@@ -11,10 +11,13 @@ import { ArrowLeftIcon, SparklesIcon, UserIcon } from '@/constants';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import ImageViewerModal from './ImageViewerModal';
 import FloorPlanViewerModal from './FloorPlanViewerModal';
+import PropertySectionNav from './PropertySectionNav';
 import FeaturedAgencies from '@/components/FeaturedAgencies';
 import RentalTermsSection from '@/src/features/rental/components/RentalTermsSection';
 import RentalHistorySection from '@/src/features/rental/components/RentalHistorySection';
 import RentalRulesByCountry from '@/src/features/rental/components/RentalRulesByCountry';
+import PropertyPriceHistory from './PropertyPriceHistory';
+import { QueryErrorBoundary } from '@/src/app/components';
 import { SEO, Breadcrumbs, generatePropertyBreadcrumbs } from '@/src/components/seo';
 import { generatePropertySlug } from '@/utils/slug';
 import { SocialShare } from '@/src/components/marketing/SocialShare';
@@ -355,6 +358,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     }
   };
 
+  // Scroll to the 3D representational map section (button shown in the gallery)
+  const handleView3DMap = useCallback(() => {
+    document
+      .getElementById('property-map-section')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, []);
+
   const handleProfileClick = useCallback(() => {
     if (state.isAuthenticated) {
       dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
@@ -433,20 +443,25 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   }, [property.status]);
 
   const handleShare = async () => {
-    // Use the /api/og/property/ URL so social media bots (WhatsApp, Facebook,
-    // Telegram, etc.) receive property-specific OG meta tags (photo, price,
-    // title) instead of the generic homepage preview.  Regular browsers that
-    // open this URL are immediately redirected to the real property page.
-    const shareUrl = `${window.location.origin}/api/og/property/${propertySlug}`;
+    const shareUrl = `${window.location.origin}/property/${propertySlug}`;
     try {
+      const bedroomText = property.beds === 1 ? '1 bedroom' : `${property.beds} bedrooms`;
+      const bathroomText = property.baths === 1 ? '1 bathroom' : `${property.baths} bathrooms`;
+      const livingRoomText = property.livingRooms
+        ? property.livingRooms === 1
+          ? ', 1 living room'
+          : `, ${property.livingRooms} living rooms`
+        : '';
+      const mapText = ` Check out the 3D map: ${shareUrl}`;
+      const shareText = `Check out this property: ${bedroomText}, ${bathroomText}${livingRoomText}, ${property.sqft}m².${mapText}`;
       if (navigator.share) {
         await navigator.share({
           title: `${property.address}, ${property.city}`,
-          text: `Check out this property: ${property.beds} beds, ${property.baths} baths, ${property.sqft}m²`,
+          text: shareText,
           url: shareUrl,
         });
       } else {
-        await navigator.clipboard.writeText(shareUrl);
+        await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
         setShowCopiedToast(true);
         setTimeout(() => setShowCopiedToast(false), 2000);
       }
@@ -868,7 +883,14 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             </button>
           </div>
         </div>
+
+        {/* Bookmark-style quick navigation — horizontal chip bar (mobile/tablet) */}
+        <PropertySectionNav variant="bar" />
       </div>
+
+      {/* Bookmark-style quick navigation — Notion-style vertical rail (desktop).
+          Mounted at the page root, outside the backdrop-blurred header. */}
+      <PropertySectionNav variant="rail" />
 
       {/* Gallery — full-bleed, outside main container so it spans 100% page width */}
       <div className="animate-slide-up w-full" style={{ animationDelay: '0ms' }}>
@@ -877,6 +899,11 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           onOpenEditor={(url) => setIsEditorOpen(true)}
           onOpenViewer={() => setIsViewerOpen(true)}
           onNavigateTo3DTour={handleNavigateTo3DTour}
+          onView3DMap={
+            property.lat != null && property.lng != null && !isNaN(property.lat) && !isNaN(property.lng)
+              ? handleView3DMap
+              : undefined
+          }
           activeCategory={activeCategory}
           currentImageIndex={currentImageIndex}
           onCategoryChange={handleCategorySelect}
@@ -900,8 +927,19 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             )}
 
             {/* Mobile Only: Property Info (description) shown early */}
-            <div className="lg:hidden animate-slide-up" style={{ animationDelay: '50ms' }}>
+            <div data-section="details" className="scroll-mt-24 lg:hidden animate-slide-up" style={{ animationDelay: '50ms' }}>
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
+            </div>
+
+            {/* Mobile Only: Neighborhood Insights — directly under the description */}
+            <div data-section="neighborhood" className="scroll-mt-24 lg:hidden animate-slide-up" style={{ animationDelay: '62ms' }}>
+              <NeighborhoodInsights
+                lat={property.lat}
+                lng={property.lng}
+                address={property.address}
+                city={property.city}
+                country={property.country}
+              />
             </div>
 
             {/* Mobile Only: Quick Actions & Contact (shown after description on mobile) */}
@@ -929,96 +967,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             })()}
 
             {/* Property Info (Desktop only - mobile version shown above) */}
-            <div className="hidden lg:block animate-slide-up" style={{ animationDelay: '100ms' }}>
+            <div data-section="details" className="scroll-mt-24 hidden lg:block animate-slide-up" style={{ animationDelay: '100ms' }}>
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
-            </div>
-
-            {/* Luxury Villa Highlights Banner */}
-            {property.propertyType === 'luxury-villa' && (
-              <div className="animate-slide-up" style={{ animationDelay: '140ms' }}>
-                <div className="rounded-2xl overflow-hidden border border-[#FFA500]/25 bg-gradient-to-r from-[#FFA500]/8 via-white to-[#0252CD]/5">
-                  <div className="px-5 py-4 flex items-center gap-3 border-b border-[#FFA500]/15">
-                    <span className="text-2xl">✦</span>
-                    <div>
-                      <p className="text-xs font-bold text-[#FFA500] uppercase tracking-wider">Exclusive Collection</p>
-                      <h4 className="text-sm font-bold text-gray-900">Luxury Villa · Daily Rentals</h4>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-[#FFA500]/10">
-                    {[
-                      { label: 'Bedrooms', value: property.beds > 0 ? `${property.beds} beds` : '—', emoji: '🛏️' },
-                      { label: 'Bathrooms', value: property.baths > 0 ? `${property.baths} baths` : '—', emoji: '🛁' },
-                      { label: 'Area', value: property.sqft > 0 ? `${property.sqft} m²` : '—', emoji: '📐' },
-                      { label: 'Setting', value: property.viewType && property.viewType !== 'any'
-                          ? ({ sea: '🌊 Sea View', mountain: '⛰️ Mountain', city: '🏙️ City View', park: '🌲 Forest/Lake', garden: '🌷 Garden', street: '🏘️ Street' }[property.viewType] ?? property.viewType)
-                          : '—', emoji: '' },
-                    ].map(item => (
-                      <div key={item.label} className="px-4 py-3 text-center">
-                        <p className="text-[11px] text-gray-400 mb-0.5">{item.label}</p>
-                        <p className="text-sm font-bold text-gray-800">{item.emoji && !item.value.includes(item.emoji) ? `${item.emoji} ` : ''}{item.value}</p>
-                      </div>
-                    ))}
-                  </div>
-                  {/* Premium amenity chips */}
-                  {(() => {
-                    const amenities: string[] = (property.amenities as string[]) || [];
-                    const chips: string[] = [];
-                    if (property.hasPool)                                          chips.push('🏊 Pool');
-                    if (property.hasGarden)                                        chips.push('🌿 Garden');
-                    if (amenities.some(a => a.toLowerCase().includes('sauna')))    chips.push('🧖 Sauna');
-                    if (amenities.some(a => a.toLowerCase().includes('wine')))     chips.push('🍷 Wine Cellar');
-                    if (amenities.some(a => a.toLowerCase().includes('panoramic')))chips.push('🏔️ Panoramic');
-                    if (property.breakfastIncluded)                       chips.push('🍳 Breakfast Incl.');
-                    if (property.towelsIncluded)                          chips.push('🛁 Towels Incl.');
-                    if (property.parkingIncluded)                         chips.push('🚗 Parking Incl.');
-                    return chips.length > 0 ? (
-                      <div className="px-4 py-3 border-t border-[#FFA500]/10 flex flex-wrap gap-1.5">
-                        {chips.map(chip => (
-                          <span key={chip} className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#FFA500]/10 text-[#0252CD] border border-[#FFA500]/20">
-                            {chip}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null;
-                  })()}
-                </div>
-              </div>
-            )}
-
-            {/* Rental Terms (only for rental properties) */}
-            {property.listingType === 'rent' && (
-              <div className="animate-slide-up space-y-6" style={{ animationDelay: '150ms' }}>
-                <RentalTermsSection property={property} />
-                <RentalHistorySection property={property} isOwner={isOwner} />
-                <RentalRulesByCountry country={property.country} />
-              </div>
-            )}
-
-            {/* Map Link */}
-            <div id="property-map-section" className="animate-slide-up" style={{ animationDelay: '300ms' }}>
-              <PropertyMapLink property={property} onNavigateToMap={handleNavigateToMap} />
-            </div>
-
-            {/* Neighborhood Insights */}
-            <div className="animate-slide-up" style={{ animationDelay: '400ms' }}>
-              <NeighborhoodInsights
-                lat={property.lat}
-                lng={property.lng}
-                address={property.address}
-                city={property.city}
-                country={property.country}
-              />
-            </div>
-
-            {/* Similar Properties - Internal linking for SEO */}
-            <div className="mt-4 sm:mt-6 lg:mt-8 animate-slide-up" style={{ animationDelay: '450ms' }}>
-              <SimilarProperties property={property} maxItems={4} />
-            </div>
-
-            {/* Featured Agencies */}
-            <div className="mt-4 sm:mt-6 lg:mt-8 animate-slide-up" style={{ animationDelay: '500ms' }}>
-              <h3 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-3 sm:mb-4">{t('property:featuredAgencies')}</h3>
-              <FeaturedAgencies />
             </div>
 
           </div>
@@ -1030,6 +980,60 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               isCreatingConversation={isCreatingConversation}
               onContactSeller={handleContactSeller}
             />
+          </div>
+        </div>
+      </main>
+
+      {/* 3D Map — full-bleed full-width band, rendered outside the main container so it
+          spans the full screen width, right after the description to keep readers engaged.
+          id + data-section kept so the section nav still targets it. */}
+      <div id="property-map-section" data-section="map" className="scroll-mt-24 animate-slide-up w-full px-3 sm:px-4 lg:px-6 my-6 sm:my-8" style={{ animationDelay: '130ms' }}>
+        <PropertyMapLink property={property} onNavigateToMap={handleNavigateToMap} fullBleed />
+      </div>
+
+      {/* Main Content (continued) — remaining details below the full-width map */}
+      <main className="max-w-screen-xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 overflow-x-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8 lg:space-y-10 min-w-0">
+
+            {/* Neighborhood Insights (Desktop only — mobile version shown above) */}
+            <div data-section="neighborhood" className="scroll-mt-24 hidden lg:block animate-slide-up" style={{ animationDelay: '130ms' }}>
+              <NeighborhoodInsights
+                lat={property.lat}
+                lng={property.lng}
+                address={property.address}
+                city={property.city}
+                country={property.country}
+              />
+            </div>
+
+            {/* Rental Terms (only for rental properties) */}
+            {property.listingType === 'rent' && (
+              <div data-section="availability" className="scroll-mt-24 animate-slide-up space-y-6" style={{ animationDelay: '150ms' }}>
+                <RentalTermsSection property={property} />
+                <RentalHistorySection property={property} isOwner={isOwner} />
+                <RentalRulesByCountry country={property.country} />
+              </div>
+            )}
+
+            {/* Price History */}
+            <div data-section="price-history" className="scroll-mt-24 animate-slide-up" style={{ animationDelay: '380ms' }}>
+              <QueryErrorBoundary>
+                <PropertyPriceHistory property={property} />
+              </QueryErrorBoundary>
+            </div>
+
+            {/* Similar Properties - Internal linking for SEO */}
+            <div data-section="similar" className="scroll-mt-24 mt-4 sm:mt-6 lg:mt-8 animate-slide-up" style={{ animationDelay: '450ms' }}>
+              <SimilarProperties property={property} maxItems={4} />
+            </div>
+
+            {/* Featured Agencies */}
+            <div className="mt-4 sm:mt-6 lg:mt-8 animate-slide-up" style={{ animationDelay: '500ms' }}>
+              <h3 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-3 sm:mb-4">{t('property:featuredAgencies')}</h3>
+              <FeaturedAgencies />
+            </div>
+
           </div>
         </div>
       </main>
@@ -1135,3 +1139,4 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 };
 
 export default PropertyDetailsPage;
+

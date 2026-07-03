@@ -1,0 +1,33 @@
+{
+  "title": "Блог за Недвижности на Балканот",
+  "subtitle": "Стручни сознанија, анализи на пазарот и водичи за купувачи, инвеститори и продавачи на недвижности на Балканот",
+  "searchPlaceholder": "Пребарај написи…",
+  "readMore": "Прочитај Повеќе",
+  "backToBlog": "Назад кон Блогот",
+  "minuteRead": "{{count}} мин читање",
+  "noArticles": "Не се пронајдени написи",
+  "error": "Неуспешно вчитување на написите",
+  "articleNotFound": "Написот не е пронајден",
+  "articleNotFoundDesc": "Овој напис можеби е преместен или избришан.",
+  "moreArticles": "Повеќе Написи",
+  "moreArticlesDesc": "Посетете не наскоро за повеќе написи за инвестиции и трендови на пазарот на недвижности",
+  "relatedArticles": "Поврзани Написи",
+  "category_market": "Пазар",
+  "category_investment": "Инвестиции",
+  "category_regulation": "Регулатива",
+  "category_development": "Развој",
+  "category_tourism": "Туризам",
+  "category_guide": "Водич",
+  "category_lifestyle": "Начин на Живот",
+  "filters": {
+    "category": "Категорија",
+    "country": "Земја",
+    "all": "Сите",
+    "popularTags": "Популарни Ознаки"
+  },
+  "pagination": {
+    "prev": "Претходна",
+    "next": "Следна",
+    "page": "Страница {{page}} од {{total}}"
+  }
+}

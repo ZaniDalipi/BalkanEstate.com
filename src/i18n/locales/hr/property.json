@@ -184,6 +184,8 @@
     "view360": "360° Pregled",
     "floorPlan": "Tlocrt",
     "viewOnMap": "Pogledaj na Karti",
+    "getDirections": "Upute",
+    "openInMaps": "Otvori u Google Maps",
     "callSeller": "Nazovi Prodavača",
     "messageSeller": "Pošalji Poruku Prodavaču",
     "startingChat": "Pokretanje Razgovora...",
@@ -375,7 +377,10 @@
     "remainingInfo": "{{remaining}} od {{limit}} uvida preostalo ovaj mjesec",
     "unlimitedInsights": "Neograničeni uvidi dostupni s vašim planom",
     "upgradePrompt": "Nadogradite na premium za više uvida!",
-    "tryAgain": "Pokušaj ponovno"
+    "tryAgain": "Pokušaj ponovno",
+    "aiTeaserTitle": "Želite li saznati više o ovoj nekretnini?",
+    "aiTeaserSubtitle": "Neka naša umjetna inteligencija izradi detaljan izvještaj o susjedstvu — škole, prijevoz, parkovi, trgovine i lokalni sadržaji — u samo nekoliko sekundi.",
+    "coordinatesUnavailable": "Podaci o lokaciji za ovu nekretninu još nisu dostupni pa ne možemo generirati uvide."
   },
   "photos": {
     "title": "Fotografije",
@@ -532,7 +537,8 @@
     "propertyShowcase": "Property Showcase",
     "skipVideo": "Skip Video",
     "videoTour": "Video Tour",
-    "enter3DTour": "Enter 3D Tour"
+    "enter3DTour": "Enter 3D Tour",
+    "view3DMap": "3D karta lokacije"
   },
   "viewings": {
     "title": "Zahtjevi za Razgledavanje",
@@ -632,5 +638,17 @@
       "hint": "Crtajte po slici za bilješke",
       "sendToChat": "Pošalji"
     }
+  },
+  "sectionNav": {
+    "ariaLabel": "Odjeljci nekretnine",
+    "overview": "Pregled",
+    "map": "3D karta",
+    "availability": "Dostupnost",
+    "calculators": "Kalkulatori",
+    "details": "Detalji",
+    "neighborhood": "Susjedstvo",
+    "priceHistory": "Povijest cijena",
+    "similar": "Slične nekretnine",
+    "onThisPage": "Na ovoj stranici"
   }
 }

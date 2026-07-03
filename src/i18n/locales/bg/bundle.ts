@@ -27,14 +27,16 @@ import newListing from './newListing.json';
 import valuation from './valuation.json';
 import howItWorks from './howItWorks.json';
 import rental from './rental.json';
+import agencyDashboard from './agencyDashboard.json';
 import home from './home.json';
 import businessDirectory from './businessDirectory.json';
-import villas from './villas.json';
+import listingFeeds from './listingFeeds.json';
+import blog from './blog.json';
 
 export default {
   common, nav, property, auth, search, messages, footer, newsletter,
   calculators, pricing, validation, admin, account, seller, agents, modals,
   payment, saved, exploreCities, analytics, subscription, agencies,
-  agencyDetails, agentProfile, newListing, valuation, howItWorks, rental, home,
-  businessDirectory, villas,
+  agencyDetails, agentProfile, newListing, valuation, howItWorks, rental, agencyDashboard, home,
+  businessDirectory, listingFeeds, blog,
 };

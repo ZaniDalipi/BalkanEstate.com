@@ -262,7 +262,13 @@
       "winter": "Dimër"
     },
     "promoted": "Të promovuara",
-    "cadastre": "Katastër"
+    "cadastre": "Katastër",
+    "reset": "Rivendos",
+    "locate": "Lokalizo",
+    "layers": "Shtresat",
+    "mapView": "Harta",
+    "switchTo": "Kalo te pamja {{view}}",
+    "drawAreaHint": "Vizato një zonë kërkimi në hartë"
   },
   "newsletter": {
     "title": "Qëndro i Përditësuar me Prona të Reja",

@@ -10,13 +10,16 @@ import {
   markAsSold,
   markAsRented,
   markAsAvailable,
+  reassignPropertyRole,
   renewProperty,
   addRentalHistoryEntry,
   deleteRentalHistoryEntry,
+  getPropertyPriceHistory,
 } from '../controllers/propertyController';
 import { protect } from '../middleware/auth';
 import { upload } from '../utils/upload';
 import { mutationRateLimiter } from '../middleware/security';
+import { validatePropertyId } from '../middleware/propertyValidation';
 
 const router = express.Router();
 
@@ -192,8 +195,10 @@ router.post('/:propertyId/upload-images', protect, mutationRateLimiter, upload.a
 router.patch('/:id/mark-sold', protect, mutationRateLimiter, markAsSold);
 router.patch('/:id/mark-rented', protect, mutationRateLimiter, markAsRented);
 router.patch('/:id/mark-available', protect, mutationRateLimiter, markAsAvailable);
+router.patch('/:id/reassign-role', protect, mutationRateLimiter, reassignPropertyRole);
 router.patch('/:id/renew', protect, mutationRateLimiter, renewProperty);
 router.post('/:id/rental-history', protect, mutationRateLimiter, addRentalHistoryEntry);
 router.delete('/:id/rental-history/:entryId', protect, mutationRateLimiter, deleteRentalHistoryEntry);
+router.get('/:id/price-history', validatePropertyId, getPropertyPriceHistory);
 
 export default router;

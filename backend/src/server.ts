@@ -9,7 +9,7 @@ import path from 'path';
 import { existsSync } from 'fs';
 import connectDB from './config/database';
 import ogRoutes from './routes/ogRoutes';
-import { propertyPageOgMiddleware } from './controllers/ogController';
+import { propertyPageOgMiddleware, blogArticleOgMiddleware } from './controllers/ogController';
 import { setupChatSocket } from './sockets/chatSocket';
 import { setupPropertySocket } from './sockets/propertySocket';
 import { setSocketInstance } from './utils/socketInstance';
@@ -129,7 +129,9 @@ import { startPromotionRefreshWorker } from './workers/promotionRefreshWorker';
 import { startMonthlyResetWorker } from './workers/monthlyResetWorker';
 import { startTrialManagementJob } from './jobs/trialManagementJob';
 import { startCityMarketDataUpdateJob } from './jobs/updateCityMarketData';
+import { ensureAllFeaturedCitiesExist } from './services/cityMarketDataService';
 import { startMonthlyCouponJob } from './jobs/monthlyCouponJob';
+import { runScoreBackfill } from './jobs/scoreBackfillJob';
 import { initializePushService } from './services/pushNotificationService';
 
 // Create Express app
@@ -163,7 +165,28 @@ setupChatSocket(io);
 setupPropertySocket(io);
 
 // Connect to database
-connectDB();
+connectDB().then(() => {
+  // Seed any cities added to FEATURED_CITIES that aren't yet in the DB.
+  // Safe to call every startup — skips cities that already exist.
+  ensureAllFeaturedCitiesExist().catch(err =>
+    serverLogger.error('Failed to seed featured cities:', err)
+  );
+});
+
+// Non-blocking score backfill: updates any agent/agency records with score=0 after DB is ready.
+// Runs in the background so it never delays server startup.
+setTimeout(() => {
+  runScoreBackfill()
+    .then(r => {
+      if (r.agentsUpdated > 0 || r.agenciesUpdated > 0) {
+        serverLogger.info(`📊 Score backfill complete — agents: ${r.agentsUpdated}, agencies: ${r.agenciesUpdated}`);
+      }
+      if (r.errors.length > 0) {
+        serverLogger.warn(`⚠️ Score backfill errors: ${r.errors.join('; ')}`);
+      }
+    })
+    .catch(err => serverLogger.error('Score backfill failed:', err));
+}, 5000); // 5-second delay ensures DB connection is established
 
 // Initialize store services (if credentials are provided)
 if (process.env.GOOGLE_PLAY_CLIENT_EMAIL && process.env.GOOGLE_PLAY_PRIVATE_KEY) {
@@ -371,15 +394,41 @@ if (frontendDistExists) {
   // Detects bot user-agents; regular browsers pass through to the SPA catch-all.
   app.get('/property/:slug', propertyPageOgMiddleware);
   app.get('/:lang/property/:slug', propertyPageOgMiddleware);
+  app.get('/blog/:slug', blogArticleOgMiddleware);
+  app.get('/:lang/blog/:slug', blogArticleOgMiddleware);
 
   // Serve built frontend static assets (JS, CSS, images, icons, etc.)
-  app.use(express.static(frontendDist, { index: false }));
+  // Hashed assets (/assets/*) get a 1-year immutable cache; everything else
+  // (including index.html) gets no-cache so browsers always re-validate.
+  app.use(express.static(frontendDist, {
+    index: false,
+    setHeaders: (res, filePath) => {
+      if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      } else {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+    },
+  }));
+
+  // If a request looks like a static asset but wasn't served above, the file
+  // doesn't exist (e.g. a stale browser cache referencing old hashed filenames
+  // after a new deploy). Return 404 so the browser doesn't receive index.html
+  // with Content-Type: text/html and produce a MIME-type module-script error.
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (/\.(js|mjs|css|woff2?|ttf|eot|ico|png|jpe?g|gif|svg|webp|avif|map)$/i.test(req.path)) {
+      res.status(404).end();
+      return;
+    }
+    next();
+  });
 
   // SPA catch-all: serve index.html for any non-API route so that client-side
   // routing (React Router / custom routing in App.tsx) works on direct URL access.
   // Note: path-to-regexp v8+ (used by Express 5) does not accept bare '*' —
   // use '/{*path}' (Express 5) or a regex fallback instead.
   app.use((_req: Request, res: Response) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(frontendDist, 'index.html'));
   });
 } else {

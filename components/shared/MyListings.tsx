@@ -78,8 +78,10 @@ const ListingCard: React.FC<{
     onPromote: (id: string) => void,
     onExtend: (id: string) => void,
     onVideo: (id: string) => void,
+    onReassignRole: (id: string) => void,
+    canReassignToAgency: boolean,
     renewalStatus: { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number } | null,
-}> = ({ property, onRenew, onMarkAsSold, onMarkAsAvailable, onDelete, onPromote, onExtend, onVideo, renewalStatus }) => {
+}> = ({ property, onRenew, onMarkAsSold, onMarkAsAvailable, onDelete, onPromote, onExtend, onVideo, onReassignRole, canReassignToAgency, renewalStatus }) => {
     const { t } = useTranslation(['rental', 'common', 'seller']);
     const { dispatch } = useAppContext();
     const [imageError, setImageError] = useState(false);
@@ -148,7 +150,7 @@ const ListingCard: React.FC<{
                     {property.title && (
                         <p className="font-bold text-lg sm:text-xl text-neutral-900 mt-1 line-clamp-1">{property.title}</p>
                     )}
-                    <p className={`font-bold ${property.title ? 'text-base' : 'text-lg sm:text-xl'} text-primary mt-1`}>{formatPrice(property.price, property.country)}</p>
+                    <p className={`font-bold ${property.title ? 'text-base' : 'text-lg sm:text-xl'} text-primary mt-1`}>{property.isNegotiable ? t('property:byNegotiation', 'By Negotiation') : formatPrice(property.price, property.country)}</p>
                     <p className="text-sm text-neutral-600">{property.address}, {property.city}</p>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-shrink-0">
@@ -223,6 +225,20 @@ const ListingCard: React.FC<{
                     <ArrowPathIcon className="w-4 h-4" />
                     {!canRenew && renewalStatus ? `${renewalStatus.hoursRemaining}h ${renewalStatus.minutesRemaining}m` : t('seller:myListings.renew', 'Renew')}
                 </button>
+                {property.createdAsRole !== ('external' as UserRole) && (property.createdAsRole === UserRole.AGENT || canReassignToAgency) && (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onReassignRole(property.id); }}
+                        title={property.createdAsRole === UserRole.AGENT
+                            ? t('seller:myListings.moveToPrivateHint', 'Move this listing to your private seller profile')
+                            : t('seller:myListings.moveToAgencyHint', 'Move this listing to your agency')}
+                        className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors"
+                    >
+                        <BuildingOfficeIcon className="w-4 h-4" />
+                        {property.createdAsRole === UserRole.AGENT
+                            ? t('seller:myListings.moveToPrivate', 'Move to Private')
+                            : t('seller:myListings.moveToAgency', 'Move to Agency')}
+                    </button>
+                )}
                 {property.status === 'rented' ? (
                     <button
                         onClick={(e) => { e.stopPropagation(); onMarkAsAvailable(property.id); }}
@@ -298,6 +314,8 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const [rentedUntilDate, setRentedUntilDate] = useState('');
     const [showAvailableConfirm, setShowAvailableConfirm] = useState(false);
     const [propertyToMarkAvailable, setPropertyToMarkAvailable] = useState<string | null>(null);
+    const [showReassignConfirm, setShowReassignConfirm] = useState(false);
+    const [propertyToReassign, setPropertyToReassign] = useState<{ id: string; targetRole: 'agent' | 'private_seller' } | null>(null);
     const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null);
     const [statusFilter, setStatusFilter] = useState<PropertyStatus | 'all'>('all');
     const [roleFilter, setRoleFilter] = useState<'all' | 'private_seller' | 'agent'>('all');
@@ -627,6 +645,66 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         }
     };
 
+    // Whether the current user is allowed to post/reassign listings under an agency.
+    // Mirrors the server-side eligibility check in reassignPropertyRole.
+    const currentUser = state.currentUser;
+    const canActAsAgent = !!currentUser && (
+        currentUser.role === UserRole.AGENT ||
+        (currentUser.availableRoles?.includes(UserRole.AGENT) ?? false) ||
+        !!currentUser.agentId ||
+        !!currentUser.licenseNumber ||
+        !!currentUser.agencyId
+    );
+
+    const handleReassignRoleClick = (id: string) => {
+        const prop = myProperties.find(p => p.id === id);
+        if (!prop) return;
+        const targetRole: 'agent' | 'private_seller' =
+            prop.createdAsRole === UserRole.AGENT ? 'private_seller' : 'agent';
+        setPropertyToReassign({ id, targetRole });
+        setShowReassignConfirm(true);
+    };
+
+    const confirmReassignRole = async () => {
+        if (!propertyToReassign) return;
+        const { id, targetRole } = propertyToReassign;
+        const previousRole = myProperties.find(p => p.id === id)?.createdAsRole;
+
+        // Close modal + update UI optimistically
+        setShowReassignConfirm(false);
+        setPropertyToReassign(null);
+        skipNextRefetchRef.current = true;
+        setMyProperties(prev => prev.map(p =>
+            p.id === id
+                ? { ...p, createdAsRole: targetRole as UserRole, seller: { ...p.seller, type: targetRole === 'agent' ? 'agent' : 'private' } }
+                : p
+        ));
+
+        try {
+            const result = await api.reassignPropertyRole(id, targetRole);
+            // Sync with authoritative server response
+            setMyProperties(prev => prev.map(p => p.id === id ? result.property : p));
+            if (result.updatedSubscription) {
+                dispatch({
+                    type: 'UPDATE_USER',
+                    payload: {
+                        subscription: {
+                            ...state.currentUser?.subscription,
+                            ...result.updatedSubscription,
+                        } as any,
+                    },
+                });
+            }
+            window.dispatchEvent(new CustomEvent('property-status-changed'));
+        } catch (error) {
+            // Revert optimistic update, then re-fetch to restore accurate state
+            setMyProperties(prev => prev.map(p =>
+                p.id === id ? { ...p, createdAsRole: previousRole } : p
+            ));
+            fetchMyListings();
+        }
+    };
+
     const handleDeleteClick = (id: string) => {
         setPropertyToDelete(id);
         setShowDeleteConfirm(true);
@@ -784,6 +862,27 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 <div className="flex justify-center gap-4">
                     <button onClick={() => { setShowAvailableConfirm(false); setPropertyToMarkAvailable(null); }} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">{t('common:cancel')}</button>
                     <button onClick={confirmMarkAsAvailable} className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">{t('rental:status.markAsAvailable')}</button>
+                </div>
+            </Modal>
+
+            {/* Reassign posting role (private <-> agency) confirm */}
+            <Modal
+                isOpen={showReassignConfirm}
+                onClose={() => { setShowReassignConfirm(false); setPropertyToReassign(null); }}
+                title={propertyToReassign?.targetRole === 'agent'
+                    ? t('seller:myListings.moveToAgency', 'Move to Agency')
+                    : t('seller:myListings.moveToPrivate', 'Move to Private')}
+            >
+                <p className="text-neutral-600 mb-6 text-center">
+                    {propertyToReassign?.targetRole === 'agent'
+                        ? (currentUser?.agencyName
+                            ? t('seller:myListings.moveToAgencyConfirmNamed', 'Move this listing to "{{agency}}"? It will be shown under your agency with your agent details.', { agency: currentUser.agencyName })
+                            : t('seller:myListings.moveToAgencyConfirm', 'Move this listing to your agency? It will be shown with your agent details.'))
+                        : t('seller:myListings.moveToPrivateConfirm', 'Move this listing back to your private seller profile? Agency details will be removed from it.')}
+                </p>
+                <div className="flex justify-center gap-4">
+                    <button onClick={() => { setShowReassignConfirm(false); setPropertyToReassign(null); }} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">{t('common:cancel')}</button>
+                    <button onClick={confirmReassignRole} className="px-6 py-2 bg-amber-600 text-white font-semibold rounded-lg hover:bg-amber-700">{t('common:confirm')}</button>
                 </div>
             </Modal>
 
@@ -998,6 +1097,8 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                             onPromote={handlePromote}
                             onExtend={handleExtend}
                             onVideo={handleVideo}
+                            onReassignRole={handleReassignRoleClick}
+                            canReassignToAgency={canActAsAgent}
                             renewalStatus={renewalStatuses[prop.id] || null}
                         />
                     )}

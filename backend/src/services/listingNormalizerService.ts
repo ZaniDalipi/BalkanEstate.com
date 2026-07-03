@@ -822,27 +822,10 @@ export const normalize = async (
     }
   }
 
-  const imageUrls = collectImageUrls(mapped);
-  let images: IPropertyImage[] = imageUrls.map((url) => ({ url, tag: 'other' as const }));
-  let imageUrl = imageUrls[0] ?? '';
-
-  if (opts.rehostImages && imageUrls.length) {
-    const rehosted: IPropertyImage[] = [];
-    for (const url of imageUrls) {
-      try {
-        const result = await uploadFromUrl(url);
-        rehosted.push({ url: result.url, publicId: result.publicId, tag: 'other' });
-      } catch (err) {
-        cronLogger.info(`[normalizer] rehost failed (${url}): ${(err as Error).message}`);
-        rehosted.push({ url, tag: 'other' });
-      }
-    }
-    images = rehosted;
-    imageUrl = rehosted[0]?.url ?? imageUrl;
-  }
-
   // If the source belongs to a user, attribute imported listings to them.
   // Otherwise fall back to the system "external" seller account.
+  // Computed before re-hosting so external images can be organized under the
+  // attributed user (balkan-estate/users/{userId}/external-listings/...).
   let sellerId: Types.ObjectId;
   let createdByName: string;
   let createdByEmail: string;
@@ -862,6 +845,30 @@ export const normalize = async (
     createdByName = source.name || 'External Source';
     createdByEmail = EXTERNAL_SELLER_EMAIL;
     createdAsRole = 'external';
+  }
+
+  const imageUrls = collectImageUrls(mapped);
+  let images: IPropertyImage[] = imageUrls.map((url) => ({ url, tag: 'other' as const }));
+  let imageUrl = imageUrls[0] ?? '';
+
+  if (opts.rehostImages && imageUrls.length) {
+    const externalContext = {
+      userId: sellerId.toString(),
+      listingId: raw.id,
+      listingTitle: (mapped.title as string | undefined) ?? undefined,
+    };
+    const rehosted: IPropertyImage[] = [];
+    for (const url of imageUrls) {
+      try {
+        const result = await uploadFromUrl(url, externalContext);
+        rehosted.push({ url: result.url, publicId: result.publicId, tag: 'other' });
+      } catch (err) {
+        cronLogger.info(`[normalizer] rehost failed (${url}): ${(err as Error).message}`);
+        rehosted.push({ url, tag: 'other' });
+      }
+    }
+    images = rehosted;
+    imageUrl = rehosted[0]?.url ?? imageUrl;
   }
 
   // Anything that wasn't a known IProperty key stays in sourceMetadata

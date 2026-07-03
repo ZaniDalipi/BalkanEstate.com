@@ -59,7 +59,17 @@ export default defineConfig(({ mode }) => {
         tailwindcss(),
         react(),
         VitePWA({
-          registerType: 'autoUpdate',
+          // 'prompt' (not 'autoUpdate'): in autoUpdate mode vite-plugin-pwa
+          // attaches a service-worker `activated` listener that calls
+          // window.location.reload() whenever an updated SW activates. Combined
+          // with skipWaiting/clientsClaim below that activation happened
+          // immediately after every deploy, reloading the page mid-session —
+          // the production-only "page keeps refreshing" issue. In 'prompt' mode
+          // no auto-reload listener is registered; since we never call the
+          // returned updateSW(), the new SW simply waits and takes over on the
+          // user's next visit. (Service workers don't run in dev, which is why
+          // this only ever happened in production.)
+          registerType: 'prompt',
           // Don't inject a render-blocking <script> in <head>.
           // We register the SW manually after page load in index.tsx
           // to keep it out of the critical rendering path.
@@ -248,12 +258,15 @@ export default defineConfig(({ mode }) => {
               // NOTE: API routes are NOT cached by service worker
               // Payment verification and other API calls must always be fresh
             ],
-            skipWaiting: true,
-            clientsClaim: true
+            // Do NOT skipWaiting/clientsClaim: forcing a new SW to activate
+            // mid-session is what caused the disruptive production reloads.
+            // Let the updated SW stay in "waiting" and take control on the
+            // user's next page load, following the standard SW lifecycle.
+            skipWaiting: false,
+            clientsClaim: false
           },
           devOptions: {
-            enabled: true,
-            type: 'module',
+            enabled: false,
           }
         })
       ],

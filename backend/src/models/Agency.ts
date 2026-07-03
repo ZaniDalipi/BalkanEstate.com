@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { calcAgencyScoreBreakdown } from '../utils/scoringUtils';
 import { generateSecureRandomString, generateSecureAgencyCouponCode } from '../utils/secureRandom';
 import { encryptionPlugin } from '../utils/fieldEncryption';
 
@@ -166,6 +167,8 @@ export interface IAgency extends Document {
     sunday?: string;
   };
 
+  score: number;
+  scoreBreakdown: { listings: number; team: number; experience: number; featured: number };
   createdAt: Date;
   updatedAt: Date;
 
@@ -618,6 +621,17 @@ const AgencySchema: Schema = new Schema(
       type: Number,
       default: 0,
     },
+    score: {
+      type: Number,
+      default: 0,
+      index: true,
+    },
+    scoreBreakdown: {
+      listings:   { type: Number, default: 0 },
+      team:       { type: Number, default: 0 },
+      experience: { type: Number, default: 0 },
+      featured:   { type: Number, default: 0 },
+    },
     businessHours: {
       monday: String,
       tuesday: String,
@@ -724,6 +738,24 @@ AgencySchema.methods.canGenerateMoreCoupons = function (): boolean {
   ).length;
   return availableCoupons < 5; // Max 5 coupons at a time
 };
+
+// Auto-calculate composite score before saving
+AgencySchema.pre<IAgency>('save', function (next) {
+  if (
+    this.isModified('totalProperties') ||
+    this.isModified('totalAgents') ||
+    this.isModified('yearsInBusiness') ||
+    this.isModified('isFeatured') ||
+    this.isNew
+  ) {
+    const b = calcAgencyScoreBreakdown(this);
+    this.score = b.total;
+    this.scoreBreakdown = { listings: b.listings, team: b.team, experience: b.experience, featured: b.featured };
+  }
+  next();
+});
+
+AgencySchema.index({ score: -1, isFeatured: -1 });
 
 // Field-level encryption for PII fields
 AgencySchema.plugin(encryptionPlugin, {

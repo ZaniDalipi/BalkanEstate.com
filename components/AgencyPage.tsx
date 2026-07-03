@@ -5,6 +5,7 @@ import { getAgency } from '../src/features/agencies/api';
 import PropertyCard from '@/features/property-details/components/PropertyCard';
 import { BuildingOfficeIcon, PhoneIcon, EnvelopeIcon, GlobeAltIcon } from '../constants';
 import UserAvatar from './shared/UserAvatar';
+import { useTrackView } from '../src/features/view-stats/hooks';
 
 interface AgencyPageProps {
   agencyId: string;
@@ -16,6 +17,12 @@ const AgencyPage: React.FC<AgencyPageProps> = ({ agencyId }) => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useTrackView({
+    entityType: 'agency',
+    entityId: agencyId,
+    enabled: !!agencyId,
+  });
 
   useEffect(() => {
     const fetchAgency = async () => {

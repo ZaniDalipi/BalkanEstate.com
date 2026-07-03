@@ -1044,5 +1044,19 @@
       "seasonal": "Seasonal Promotion",
       "test100": "Test 100% Discount"
     }
+  },
+  "scoring": {
+    "title": "Gestionarea Punctajului",
+    "description": "Recalculați scorurile compuse pentru agenți și agenții. Scorurile se actualizează automat la salvare, dar folosiți aceasta pentru a completa înregistrările existente.",
+    "recomputeAgents": "Recalculează Scorurile Agenților",
+    "recomputeAgencies": "Recalculează Scorurile Agențiilor",
+    "recomputeAll": "Recalculează Toate Scorurile",
+    "running": "În desfășurare...",
+    "success": "Au fost actualizate {{count}} înregistrări",
+    "error": "Recalcularea scorurilor a eșuat",
+    "lastRun": "Ultima rulare",
+    "howItWorks": "Cum funcționează punctajul",
+    "agentFormula": "Agenți: evaluare×20 + vânzări×5 + anunțuri×2 + recenzii×1 (max 180 pct.)",
+    "agencyFormula": "Agenții: anunțuri×3 + echipă×5 + experiență×2 + promovate×20 (max 160 pct.)"
   }
 }

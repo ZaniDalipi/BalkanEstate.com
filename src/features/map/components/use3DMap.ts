@@ -434,7 +434,24 @@ export function use3DMap(props: Map3DBuildingsProps) {
     tourUrl?: string,
     onEnterTour?: () => void
   ) => {
-    const floorHeightM = 2; // 3m per floor
+    mapLogger.warn('[FLOORVIZ] addCustomBuilding3D called', {
+      floorNum, floorNumType: typeof floorNum,
+      totalFlrs, totalFlrsType: typeof totalFlrs,
+      lat: latitude, lng: longitude,
+      has3dBuildingsLayer: !!mapInstance.getLayer('3d-buildings'),
+    });
+
+    // Coerce to numbers defensively — if these arrive as strings (e.g. from the
+    // API) then `floor === floorNum` strict-equality never matches and the green
+    // highlighted floor silently disappears, with no error.
+    floorNum = Number(floorNum);
+    totalFlrs = Number(totalFlrs);
+    if (!Number.isFinite(totalFlrs) || totalFlrs <= 0) {
+      mapLogger.warn('[FLOORVIZ] aborting: invalid totalFlrs', { totalFlrs });
+      return;
+    }
+
+    const floorHeightM = 3; // metres per floor (taller = clearly visible tower)
     const totalHeightM = totalFlrs * floorHeightM;
 
     // Query the actual building at this location from the map's building layer
@@ -447,6 +464,20 @@ export function use3DMap(props: Map3DBuildingsProps) {
     if (!mapInstance.getLayer('3d-buildings')) {
       mapLogger.warn('3D buildings layer not found in the map style. Custom building will be a simple box.');
     }
+
+    // The Liberty base style renders buildings through its OWN extrusion layer(s)
+    // (NOT named '3d-buildings'). Collect every building extrusion layer so we can
+    // both query and HIDE the property building across all of them — otherwise the
+    // base style's native building keeps rendering as a grey tower behind ours.
+    const buildingExtrusionLayerIds = (mapInstance.getStyle().layers || [])
+      .filter((l) =>
+        l.type === 'fill-extrusion' &&
+        (l.id === '3d-buildings' || ('source-layer' in l && (l as any)['source-layer'] === 'building'))
+      )
+      .map((l) => l.id)
+      .filter((id) => !id.startsWith('building-floor') && id !== 'building-core' && id !== 'building-floor-highlight-glow');
+    // Layers we can actually query/hide right now.
+    const queryBuildingLayers = buildingExtrusionLayerIds.filter((id) => !!mapInstance.getLayer(id));
 
     // Helper function to calculate building centroid
     const getBuildingCentroid = (feature: maplibregl.MapGeoJSONFeature): { lng: number; lat: number } | null => {
@@ -476,9 +507,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
     // Try multiple query approaches to find the building
     // 1. First try exact point query on the 3d-buildings layer
-    const exactFeatures = mapInstance.queryRenderedFeatures(point, {
-      layers: ['3d-buildings']
-    });
+    const exactFeatures = queryBuildingLayers.length
+      ? mapInstance.queryRenderedFeatures(point, { layers: queryBuildingLayers })
+      : [];
 
     if (exactFeatures.length > 0) {
       // If we hit multiple buildings at exact point, pick the one closest to our coordinates
@@ -503,9 +534,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
         [point.x - 30, point.y - 30],
         [point.x + 30, point.y + 30]
       ];
-      const nearbyFeatures = mapInstance.queryRenderedFeatures(bbox, {
-        layers: ['3d-buildings']
-      });
+      const nearbyFeatures = queryBuildingLayers.length
+        ? mapInstance.queryRenderedFeatures(bbox, { layers: queryBuildingLayers })
+        : [];
 
       // Find the building CLOSEST to our coordinates that is tall enough
       // Only accept buildings very close to the property (max ~30m)
@@ -577,11 +608,57 @@ export function use3DMap(props: Map3DBuildingsProps) {
       }
     }
 
-    // If no building was found at the property coordinates, skip the custom building overlay
-    // Don't create a fake building box that would mark the wrong location
-    if (!buildingCoords) {
-      return;
+    // Build a synthetic square footprint centered on the property. Used as a
+    // deterministic fallback so the floor tower ALWAYS renders, regardless of
+    // whether the vector tiles happened to expose a building footprint at this
+    // spot (tile availability/timing differs between local and production).
+    const makeSyntheticFootprint = (halfWidthMeters: number): number[][][] => {
+      const metersPerDegLat = 110540;
+      const metersPerDegLng = 111320 * Math.cos((latitude * Math.PI) / 180);
+      const dLat = halfWidthMeters / metersPerDegLat;
+      const dLng = halfWidthMeters / metersPerDegLng;
+      return [[
+        [longitude - dLng, latitude - dLat],
+        [longitude + dLng, latitude - dLat],
+        [longitude + dLng, latitude + dLat],
+        [longitude - dLng, latitude + dLat],
+        [longitude - dLng, latitude - dLat],
+      ]];
+    };
+
+    // Choose the tower footprint. Prefer the real building's shape, but ONLY if
+    // it's a sensible size: a tiny matched feature (a kiosk/awning) makes an
+    // invisible sliver, and a huge one makes a giant slab. In those cases — and
+    // when nothing was matched — use a clean synthetic ~18m square so the tower
+    // is ALWAYS clearly visible. We keep `buildingFeature` regardless so the real
+    // building still gets hidden.
+    let usedSynthetic = false;
+    if (buildingCoords) {
+      const ring = buildingCoords[0];
+      let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
+      for (const c of ring) {
+        if (c[0] < minLng) minLng = c[0];
+        if (c[0] > maxLng) maxLng = c[0];
+        if (c[1] < minLat) minLat = c[1];
+        if (c[1] > maxLat) maxLat = c[1];
+      }
+      const mPerDegLat = 110540;
+      const mPerDegLng = 111320 * Math.cos((latitude * Math.PI) / 180);
+      const widthM = (maxLng - minLng) * mPerDegLng;
+      const depthM = (maxLat - minLat) * mPerDegLat;
+      if (widthM < 8 || depthM < 8 || widthM > 80 || depthM > 80) {
+        buildingCoords = makeSyntheticFootprint(9);
+        usedSynthetic = true;
+      }
+    } else {
+      buildingCoords = makeSyntheticFootprint(9);
+      usedSynthetic = true;
     }
+    mapLogger.warn('[FLOORVIZ] footprint resolved', {
+      usedSynthetic,
+      ringPoints: buildingCoords[0]?.length,
+      matchedId: buildingFeature?.id ?? null,
+    });
 
     // Get actual building height from map data if available
     let actualBuildingHeight = totalHeightM;
@@ -624,14 +701,23 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // Let the custom building cover the original via z-ordering. We previously
-    // attempted a `setFilter('3d-buildings', ['<', ['get', 'render_height'], 5])`
-    // here, but `render_height` is absent on many features and MapLibre then
-    // logs "Expected value to be of type number, but found null instead." We
-    // clear any prior filter to be safe.
-    if (mapInstance.getLayer('3d-buildings')) {
-      mapInstance.setFilter('3d-buildings', null);
-    }
+    // Note: we do NOT hide any buildings. The floor tower simply renders on top
+    // of the existing buildings — its slabs are opaque and slightly larger than
+    // the footprint, and the highlighted floor protrudes further, so the green
+    // floor stays visible without removing any surrounding objects.
+
+    // The highlighted floor is extruded from a slightly larger footprint than
+    // the other floors so it always protrudes in front of both the grey slabs
+    // and the original building — making the green floor impossible to occlude
+    // regardless of depth-buffer precision (the prior 5% scale was borderline
+    // and could lose the depth test in production).
+    const highlightScaleFactor = 1.12;
+    const highlightScaledCoords = buildingCoords.map(ring =>
+      ring.map(coord => [
+        centroidLng + (coord[0] - centroidLng) * highlightScaleFactor,
+        centroidLat + (coord[1] - centroidLat) * highlightScaleFactor,
+      ])
+    );
 
     // Add source for the custom building using actual geometry
     if (!mapInstance.getSource('custom-building')) {
@@ -658,6 +744,45 @@ export function use3DMap(props: Map3DBuildingsProps) {
       });
     }
 
+    // Dark full-height "core" sitting just inside the slabs (unscaled footprint).
+    // The gaps between the opaque floor slabs reveal this core, producing the
+    // dark separator line between floors — deterministically, without depending
+    // on the original building being present behind our tower.
+    const coreSourceData: GeoJSON.Feature = {
+      type: 'Feature',
+      properties: { height: totalHeightM, totalFloors: totalFlrs },
+      geometry: {
+        type: 'Polygon',
+        coordinates: buildingCoords,
+      },
+    };
+    if (!mapInstance.getSource('custom-building-core')) {
+      mapInstance.addSource('custom-building-core', {
+        type: 'geojson',
+        data: coreSourceData,
+      });
+    } else {
+      (mapInstance.getSource('custom-building-core') as maplibregl.GeoJSONSource).setData(coreSourceData);
+    }
+
+    // Separate, slightly larger source used only for the highlighted floor.
+    const highlightSourceData: GeoJSON.Feature = {
+      type: 'Feature',
+      properties: { height: totalHeightM, totalFloors: totalFlrs },
+      geometry: {
+        type: 'Polygon',
+        coordinates: highlightScaledCoords,
+      },
+    };
+    if (!mapInstance.getSource('custom-building-highlight')) {
+      mapInstance.addSource('custom-building-highlight', {
+        type: 'geojson',
+        data: highlightSourceData,
+      });
+    } else {
+      (mapInstance.getSource('custom-building-highlight') as maplibregl.GeoJSONSource).setData(highlightSourceData);
+    }
+
     // Remove existing floor layers if any
     for (let floor = 1; floor <= 100; floor++) {
       const layerId = `building-floor-${floor}`;
@@ -668,30 +793,37 @@ export function use3DMap(props: Map3DBuildingsProps) {
     if (mapInstance.getLayer('building-floor-highlight-glow')) {
       mapInstance.removeLayer('building-floor-highlight-glow');
     }
+    if (mapInstance.getLayer('building-core')) {
+      mapInstance.removeLayer('building-core');
+    }
 
-    // Add floor slice layers - each floor is a separate "box" stacked on top of each other
-    // The gap between floors makes each box clearly distinct
-    const gapSize = Math.max(0.3, adjustedFloorHeight * 0.12); // 12% of floor height as gap, minimum 0.3m
-    for (let floor = 1; floor <= totalFlrs; floor++) {
-      const floorBase = (floor - 1) * adjustedFloorHeight;
-      const floorTop = floor * adjustedFloorHeight;
-      const isHighlightedFloor = floor === floorNum;
-      const layerId = `building-floor-${floor}`;
-
+    // Draw ONLY the property's floor as a bright green band over the EXISTING
+    // building. We no longer draw a dark core or a full stack of slabs (those
+    // covered the building and made it look hidden). The band uses a slightly
+    // larger footprint so it protrudes and stays visible on the building face;
+    // the real building underneath stays fully visible.
+    const gapSize = Math.max(0.5, adjustedFloorHeight * 0.15);
+    if (floorNum > 0 && floorNum <= totalFlrs) {
       mapInstance.addLayer({
-        id: layerId,
+        id: `building-floor-${floorNum}`,
         type: 'fill-extrusion',
-        source: 'custom-building',
+        source: 'custom-building-highlight',
         paint: {
-          'fill-extrusion-color': isHighlightedFloor
-            ? '#13e861' // Bright green for the property's floor
-            : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
-          'fill-extrusion-height': floorTop - gapSize, // Gap at top of each floor slab
-          'fill-extrusion-base': floorBase + (gapSize * 0.25), // Small gap at bottom too
-          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.75,
+          'fill-extrusion-color': '#13e861', // Bright green for the property's floor
+          'fill-extrusion-height': floorNum * adjustedFloorHeight - gapSize * 0.5,
+          'fill-extrusion-base': (floorNum - 1) * adjustedFloorHeight + gapSize * 0.5,
+          'fill-extrusion-opacity': 1,
         },
       });
     }
+
+    mapLogger.warn('[FLOORVIZ] green floor band added', {
+      totalFlrs,
+      floorNum,
+      hasBand: !!mapInstance.getLayer(`building-floor-${floorNum}`),
+      adjustedFloorHeight,
+      finalBuildingHeight,
+    });
 
     // Add a brighter outline layer for the highlighted floor to make it pop
     const highlightBase = (floorNum - 1) * adjustedFloorHeight;
@@ -703,7 +835,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     mapInstance.addLayer({
       id: glowLayerId,
       type: 'fill-extrusion',
-      source: 'custom-building',
+      source: 'custom-building-highlight',
       paint: {
         'fill-extrusion-color': '#4ade80', // Lighter green glow
         'fill-extrusion-height': highlightTop - (gapSize * 0.5),
@@ -965,6 +1097,17 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
     map.current = mapInstance;
 
+    // Keep the WebGL canvas sized to its container. Because this component is
+    // lazy-loaded inside a <Suspense> boundary, the container's final width may
+    // not be settled when the map initializes — without this the canvas keeps
+    // its initial (often too-narrow) pixel size and only fills part of the box.
+    const resizeObserver = new ResizeObserver(() => {
+      mapInstance.resize();
+    });
+    if (mapContainer.current) {
+      resizeObserver.observe(mapContainer.current);
+    }
+
     // Provide a transparent fallback for any sprite icons missing from the
     // OpenFreeMap style so MapLibre stops logging "Image X could not be loaded".
     mapInstance.on('styleimagemissing', (e) => {
@@ -1174,6 +1317,11 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
       // Add custom 3D building with floor slices for properties with floor data
       // Wait for tiles to fully load before querying building geometry
+      mapLogger.warn('[FLOORVIZ] trigger check', {
+        floorNumber, floorNumberType: typeof floorNumber,
+        totalFloors, totalFloorsType: typeof totalFloors,
+        willRender: floorNumber != null && totalFloors != null && totalFloors > 0,
+      });
       if (floorNumber != null && totalFloors != null && totalFloors > 0) {
         // Retry mechanism to ensure building tiles are loaded
         let retryCount = 0;
@@ -1234,6 +1382,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
     );
 
     return () => {
+      // Stop observing container resize
+      resizeObserver.disconnect();
       // Clean up floor labels
       floorLabelsRef.current.forEach(marker => marker.remove());
       floorLabelsRef.current = [];

@@ -6,6 +6,7 @@ import SocialLoginPopup from './SocialLoginPopup';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { ALL_PHONE_COUNTRY_CODES, PHONE_FORMAT_PATTERNS, formatPhoneNumber, getPhonePlaceholder, BALKAN_PHONE_CODES, getDefaultPhoneCountryCode } from '@/constants/phoneCountryCodes';
 import ConfirmationModal from '@/shared/components/ui/ConfirmationModal';
+import { getAvailableOAuthProviders } from '@/services/apiService';
 
 type SocialProvider = 'google' | 'apple';
 
@@ -264,7 +265,6 @@ const AuthPage: React.FC = () => {
         // Fetch available OAuth providers
         const fetchProviders = async () => {
             try {
-                const { getAvailableOAuthProviders } = await import('@/services/apiService');
                 const providers = await getAvailableOAuthProviders();
                 setAvailableProviders(providers);
             } catch (error) {
@@ -942,18 +942,25 @@ const AuthPage: React.FC = () => {
                                 handleClose();
                             }
                         }}
-                        className="absolute top-4 right-4 z-10 p-2 rounded-full
+                        className="absolute z-10 p-2 rounded-full
                                    bg-white/60 backdrop-blur-sm border border-white/50
                                    text-neutral-500 hover:text-neutral-800 hover:bg-white/80
                                    transition-all duration-300 hover:scale-110 active:scale-95
                                    shadow-lg shadow-black/5"
+                        style={{
+                            top: 'calc(1rem + env(safe-area-inset-top, 0px))',
+                            right: 'calc(1rem + env(safe-area-inset-right, 0px))',
+                        }}
                         aria-label={t('auth:validation.closeAuthModal', 'Close authentication modal')}
                     >
                         <XMarkIcon className="w-5 h-5" />
                     </button>
 
                     {/* Content */}
-                    <div className="relative p-6 sm:p-8 w-full max-w-md mx-auto pb-16 md:pb-8">
+                    <div
+                        className="relative p-6 sm:p-8 w-full max-w-md mx-auto pb-16 md:pb-8"
+                        style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
+                    >
                         {/* Magical Logo Container */}
                         <div className="flex justify-center items-center mb-6 pt-4 md:pt-0">
                             <div className="relative group">

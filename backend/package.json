@@ -28,6 +28,7 @@
     "seed:cities:production": "NODE_ENV=production ts-node scripts/seedCityData.ts",
     "test:agencies": "ts-node src/scripts/testAgencyAccess.ts",
     "test:find-agency": "ts-node src/scripts/testFindAgencyByCode.ts",
+    "test:analytics": "ts-node src/scripts/testAnalyticsAndEmails.ts",
     "sync:agents": "ts-node src/scripts/syncAgents.ts",
     "cleanup:sold": "ts-node src/scripts/archiveSoldProperties.ts",
     "cleanup:conversations": "ts-node src/scripts/cleanupConversations.ts",

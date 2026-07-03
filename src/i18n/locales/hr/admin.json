@@ -1044,5 +1044,19 @@
       "seasonal": "Seasonal Promotion",
       "test100": "Test 100% Discount"
     }
+  },
+  "scoring": {
+    "title": "Upravljanje Bodovima",
+    "description": "Preračunajte složene bodove za agente i agencije. Bodovi se automatski ažuriraju pri spremanju, ali koristite ovo za popunjavanje postojećih zapisa.",
+    "recomputeAgents": "Preračunaj Bodove Agenata",
+    "recomputeAgencies": "Preračunaj Bodove Agencija",
+    "recomputeAll": "Preračunaj Sve Bodove",
+    "running": "U tijeku...",
+    "success": "Ažurirano {{count}} zapisa",
+    "error": "Preračunavanje bodova nije uspjelo",
+    "lastRun": "Posljednje pokretanje",
+    "howItWorks": "Kako funkcionira bodovanje",
+    "agentFormula": "Agenti: ocjena×20 + prodaje×5 + oglasi×2 + recenzije×1 (maks 180 bod.)",
+    "agencyFormula": "Agencije: oglasi×3 + tim×5 + iskustvo×2 + istaknuti×20 (maks 160 bod.)"
   }
 }

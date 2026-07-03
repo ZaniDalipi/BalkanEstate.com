@@ -90,7 +90,7 @@ export const FAQSchema: React.FC<FAQSchemaProps> = ({
 export const realEstateFAQs: FAQItem[] = [
   {
     question: 'Which countries does BalkanEstateAI cover for property search?',
-    answer: 'BalkanEstateAI is the only platform covering all 11 Balkan countries: Kosovo, Albania, North Macedonia, Montenegro, Serbia, Bosnia and Herzegovina, Croatia, Bulgaria, Romania, Greece, and Slovenia. We support property searches in 10 languages including Albanian, Serbian, Macedonian, Croatian, Bosnian, Bulgarian, Romanian, and Greek.',
+    answer: 'BalkanEstateAI is the only platform covering all 10 Balkan countries: Kosovo, Albania, North Macedonia, Montenegro, Serbia, Bosnia and Herzegovina, Croatia, Bulgaria, Romania, and Greece. We support property searches in 10 languages including Albanian, Serbian, Macedonian, Croatian, Bosnian, Bulgarian, Romanian, and Greek.',
   },
   {
     question: 'Can foreigners buy property in the Balkans?',
@@ -98,11 +98,11 @@ export const realEstateFAQs: FAQItem[] = [
   },
   {
     question: 'What is the cheapest Balkan country to buy property?',
-    answer: 'North Macedonia and Albania generally offer the lowest property prices in the Balkans. In Skopje, apartments start from €600-800/sqm, while Tirana averages €800-1,200/sqm. Kosovo (Pristina) offers apartments from €700-1,000/sqm. For comparison, Montenegro coastal cities like Budva average €2,000-3,500/sqm, and Croatian cities like Dubrovnik can exceed €4,000/sqm. Use BalkanEstateAI to compare prices across all 11 countries.',
+    answer: 'North Macedonia and Albania generally offer the lowest property prices in the Balkans. In Skopje, apartments start from €600-800/sqm, while Tirana averages €800-1,200/sqm. Kosovo (Pristina) offers apartments from €700-1,000/sqm. For comparison, Montenegro coastal cities like Budva average €2,000-3,500/sqm, and Croatian cities like Dubrovnik can exceed €4,000/sqm. Use BalkanEstateAI to compare prices across all 10 countries.',
   },
   {
     question: 'How does the AI-powered property search work?',
-    answer: 'BalkanEstateAI uses artificial intelligence to match you with properties based on your preferences, budget, and lifestyle needs. Simply describe what you\'re looking for in natural language — for example, "seaside apartment in Montenegro under €100,000" or "family house near schools in Skopje" — and our AI finds the best matches across all 11 Balkan countries. No other Balkan property platform offers AI-powered search.',
+    answer: 'BalkanEstateAI uses artificial intelligence to match you with properties based on your preferences, budget, and lifestyle needs. Simply describe what you\'re looking for in natural language — for example, "seaside apartment in Montenegro under €100,000" or "family house near schools in Skopje" — and our AI finds the best matches across all 10 Balkan countries. No other Balkan property platform offers AI-powered search.',
   },
   {
     question: 'What is the best area to invest in Balkan real estate?',
@@ -118,7 +118,7 @@ export const realEstateFAQs: FAQItem[] = [
   },
   {
     question: 'What makes BalkanEstateAI different from Realitica or Indomio?',
-    answer: 'BalkanEstateAI is the only platform that covers all 11 Balkan countries on a single platform with AI-powered search. Unlike Realitica (4 countries, outdated mobile experience) or Indomio (separate sites per country, no AI), BalkanEstateAI offers: AI property matching, AI-powered valuations, 10 native languages, a modern mobile-first PWA, virtual property tours, and comprehensive agent/agency directories — all in one place.',
+    answer: 'BalkanEstateAI is the only platform that covers all 10 Balkan countries on a single platform with AI-powered search. Unlike Realitica (4 countries, outdated mobile experience) or Indomio (separate sites per country, no AI), BalkanEstateAI offers: AI property matching, AI-powered valuations, 10 native languages, a modern mobile-first PWA, virtual property tours, and comprehensive agent/agency directories — all in one place.',
   },
   {
     question: 'What are property taxes like in the Balkans?',

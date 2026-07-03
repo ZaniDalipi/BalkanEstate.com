@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { AppView, UserRole } from '../../types';
-import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, BuildingStorefrontIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, RentIcon, HomeIcon, HomeModernIcon } from '../../constants';
+import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, BuildingStorefrontIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, RentIcon, HomeIcon, BookOpenIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import UserAvatar from './UserAvatar';
@@ -129,6 +129,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         } else {
             // Clear selected agency/property when navigating to different views
             dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+
+            // On mobile/tablet, always open the property search on the map first so
+            // users land on the map when navigating in from the sidebar. The rentals
+            // view manages its own mobileView (defaults to map).
+            if (view === 'search') {
+                dispatch({ type: 'UPDATE_SEARCH_PAGE_STATE', payload: { mobileView: 'map' } });
+            }
+
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
 
             // Update browser URL with language prefix
@@ -177,6 +185,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       { view: 'agencies' as AppView, label: t('nav:agencies'), icon: <BuildingOfficeIcon /> },
       { view: 'business-directory' as AppView, label: t('nav:businessDirectory'), icon: <BuildingStorefrontIcon /> },
       { view: 'how-it-works' as AppView, label: t('nav:howItWorks'), icon: <InformationCircleIcon /> },
+      { view: 'blog' as AppView, label: t('nav:blog', 'Blog & Articles'), icon: <BookOpenIcon /> },
     ];
 
     // Add admin panel for admin users
@@ -205,12 +214,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
             {/* Sidebar */}
             <aside
-                className={`fixed top-0 left-0 h-full bg-white border-r border-neutral-200 z-50 flex flex-col transition-transform duration-300 ease-in-out group overflow-hidden ${isOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'} md:w-20 md:translate-x-0 hover:md:w-64`}
+                className={`fixed top-0 left-0 h-full bg-white border-r border-neutral-200 z-50 flex flex-col transition-transform duration-300 ease-in-out group overflow-hidden ${isOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64 invisible md:visible'} md:w-20 md:translate-x-0 hover:md:w-64`}
                 aria-label={t('nav:mainNavigation', 'Main navigation')}
                 style={{
                   paddingTop: 'env(safe-area-inset-top, 0px)',
                   paddingBottom: 'env(safe-area-inset-bottom, 0px)',
                   paddingLeft: 'env(safe-area-inset-left, 0px)',
+                  WebkitBackfaceVisibility: 'hidden',
                 }}
             >
                 <div className="flex items-center justify-between p-3 h-[56px] border-b border-neutral-200 flex-shrink-0 md:justify-center group-hover:md:justify-start">

@@ -223,8 +223,11 @@ export const runSource = async (
       deferred: 0,
     });
 
+    // Scraped/external listing images are referenced directly from the source
+    // site and are NOT re-hosted on Cloudinary by default (that would flood our
+    // media storage). Opt in per-source by setting adapterConfig.rehostImages = true.
     const rehostImages =
-      (source.adapterConfig as Record<string, unknown> | undefined)?.rehostImages !== false;
+      (source.adapterConfig as Record<string, unknown> | undefined)?.rehostImages === true;
     const emitNew =
       (source.adapterConfig as Record<string, unknown> | undefined)?.emitNewListingEvents === true;
     const deferUntil = firstOfNextMonth();

@@ -14,7 +14,10 @@ export interface Map3DBuildingsProps {
   zoom?: number;
   pitch?: number;
   bearing?: number;
+  /** Fixed pixel/CSS height applied via inline style. Ignored when `heightClassName` is set. */
   height?: string;
+  /** Responsive Tailwind height classes (e.g. "h-[420px] sm:h-[520px] lg:h-[650px]"). Takes precedence over `height`. */
+  heightClassName?: string;
   enableShadowTimelapse?: boolean;
   onNavigateToMap?: () => void;
   // Floor highlighting for apartments

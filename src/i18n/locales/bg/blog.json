@@ -1,0 +1,33 @@
+{
+  "title": "Блог за Недвижими Имоти на Балканите",
+  "subtitle": "Експертни прозрения, пазарни анализи и ръководства за купувачи, инвеститори и продавачи на недвижими имоти на Балканите",
+  "searchPlaceholder": "Търсете статии…",
+  "readMore": "Прочети Повече",
+  "backToBlog": "Назад към Блога",
+  "minuteRead": "{{count}} мин четене",
+  "noArticles": "Не са намерени статии",
+  "error": "Неуспешно зареждане на статиите",
+  "articleNotFound": "Статията не е намерена",
+  "articleNotFoundDesc": "Тази статия може да е преместена или изтрита.",
+  "moreArticles": "Още Статии",
+  "moreArticlesDesc": "Посетете ни скоро за още статии за инвестиции и тенденции на пазара на недвижими имоти",
+  "relatedArticles": "Свързани Статии",
+  "category_market": "Пазар",
+  "category_investment": "Инвестиции",
+  "category_regulation": "Регулация",
+  "category_development": "Развитие",
+  "category_tourism": "Туризъм",
+  "category_guide": "Ръководство",
+  "category_lifestyle": "Начин на Живот",
+  "filters": {
+    "category": "Категория",
+    "country": "Държава",
+    "all": "Всички",
+    "popularTags": "Популярни Тагове"
+  },
+  "pagination": {
+    "prev": "Предишна",
+    "next": "Следваща",
+    "page": "Страница {{page}} от {{total}}"
+  }
+}
