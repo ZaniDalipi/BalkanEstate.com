@@ -20,7 +20,8 @@
     "analytics": "Аналитика",
     "messages": "Пораки",
     "myAccount": "Мојот Профил",
-    "howItWorks": "Како функционира"
+    "howItWorks": "Како функционира",
+    "blog": "Блог"
   },
   "countries": {
     "AL": "Албанија",
@@ -43,7 +44,7 @@
     "privacyPolicy": "Политика за приватност",
     "termsOfService": "Услови за користење",
     "cookiePolicy": "Политика за колачиња",
-    "disclaimer": "Одрекување",
+    "disclaimer": "Одрекување од одговорност",
     "accessibility": "Пристапност"
   },
   "social": {
@@ -56,12 +57,12 @@
   },
   "app": {
     "downloadApp": "Преземете ја нашата апликација",
-    "availableOn": "Достапна на",
+    "availableOn": "Достапно на",
     "appStore": "App Store",
     "playStore": "Google Play"
   },
   "newsletter": {
-    "title": "Претплатете се на билтен",
+    "title": "Претплати се на билтен",
     "placeholder": "Внесете ја вашата е-пошта",
     "subscribe": "Претплати се",
     "subscribed": "Ви благодариме за претплатата!"
@@ -70,7 +71,7 @@
     "title": "Поддршка",
     "helpCenter": "Центар за помош",
     "contactUs": "Контактирајте нè",
-    "faq": "Често поставувани прашања",
+    "faq": "Чести прашања",
     "feedback": "Дајте повратна информација"
   },
   "company": {
@@ -84,6 +85,6 @@
     "title": "Партнери",
     "becomePartner": "Станете партнер",
     "affiliates": "Соработници",
-    "developers": "За Развивачи"
+    "developers": "За програмери"
   }
 }

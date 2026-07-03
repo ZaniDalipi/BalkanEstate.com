@@ -1,25 +1,25 @@
 {
-  "title": "Never Miss a Property",
-  "subtitle": "Stay Updated",
-  "description": "Get instant alerts for new listings matching your criteria",
+  "title": "Μη χάσετε κανένα ακίνητο",
+  "subtitle": "Μείνετε ενημερωμένοι",
+  "description": "Λάβετε άμεσες ειδοποιήσεις για νέες καταχωρίσεις που ταιριάζουν στα κριτήριά σας",
   "features": {
-    "newListings": "New listings matching your criteria",
-    "priceDrops": "Price drop alerts on saved properties",
-    "marketInsights": "Weekly market insights & trends"
+    "newListings": "Νέες καταχωρίσεις που ταιριάζουν στα κριτήριά σας",
+    "priceDrops": "Ειδοποιήσεις μείωσης τιμής για αποθηκευμένα ακίνητα",
+    "marketInsights": "Εβδομαδιαίες αναλύσεις και τάσεις αγοράς"
   },
   "form": {
-    "placeholder": "Enter your email",
-    "submit": "Subscribe",
-    "subscribing": "Subscribing..."
+    "placeholder": "Εισαγάγετε το email σας",
+    "submit": "Εγγραφή",
+    "subscribing": "Εγγραφή..."
   },
   "cta": {
-    "title": "Subscribe to Newsletter",
-    "button": "Subscribe for Free"
+    "title": "Εγγραφή στο ενημερωτικό δελτίο",
+    "button": "Εγγραφείτε δωρεάν"
   },
   "messages": {
-    "success": "Thank you for subscribing! Check your inbox for confirmation.",
-    "error": "Something went wrong. Please try again.",
-    "invalidEmail": "Please enter a valid email address"
+    "success": "Ευχαριστούμε για την εγγραφή! Ελέγξτε τα εισερχόμενά σας για επιβεβαίωση.",
+    "error": "Κάτι πήγε στραβά. Δοκιμάστε ξανά.",
+    "invalidEmail": "Εισαγάγετε μια έγκυρη διεύθυνση email"
   },
-  "privacy": "By subscribing, you agree to our Privacy Policy. Unsubscribe anytime."
+  "privacy": "Με την εγγραφή, συμφωνείτε με την Πολιτική Απορρήτου μας. Καταργήστε την εγγραφή οποτεδήποτε."
 }

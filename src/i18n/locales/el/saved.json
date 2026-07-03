@@ -10,9 +10,9 @@
       "singular": "Αποθηκευμένη Αναζήτηση",
       "plural": "Αποθηκευμένες Αναζητήσεις"
     },
-    "badge": "Smart Property Alerts",
-    "titleHighlight": "Property Searches",
-    "description": "Track your favorite search criteria and get notified when new properties match"
+    "badge": "Έξυπνες ειδοποιήσεις ακινήτων",
+    "titleHighlight": "αναζητήσεις ακινήτων",
+    "description": "Παρακολουθήστε τα αγαπημένα σας κριτήρια αναζήτησης και ειδοποιηθείτε όταν ταιριάζουν νέα ακίνητα"
   },
   "loginRequired": {
     "title": "Συνδεθείτε για να δείτε τις αποθηκευμένες αναζητήσεις σας",
@@ -48,52 +48,52 @@
     "renameFailed": "Αποτυχία μετονομασίας αποθηκευμένης αναζήτησης. Παρακαλώ δοκιμάστε ξανά."
   },
   "stats": {
-    "savedSearches": "Saved Searches",
-    "alerts": "Email Alerts",
-    "countries": "Countries",
-    "toggleAlerts": "Toggle email alerts",
-    "upgradeForAlerts": "Upgrade to Pro for email alerts",
-    "proOnly": "Pro Feature"
+    "savedSearches": "Αποθηκευμένες αναζητήσεις",
+    "alerts": "Ειδοποιήσεις email",
+    "countries": "Χώρες",
+    "toggleAlerts": "Εναλλαγή ειδοποιήσεων email",
+    "upgradeForAlerts": "Αναβαθμίστε σε Pro για ειδοποιήσεις email",
+    "proOnly": "Λειτουργία Pro"
   },
   "badges": {
-    "instantAlerts": "Instant Alerts",
-    "customAreas": "Custom Areas",
-    "smartMatching": "Smart Matching"
+    "instantAlerts": "Άμεσες ειδοποιήσεις",
+    "customAreas": "Προσαρμοσμένες περιοχές",
+    "smartMatching": "Έξυπνη αντιστοίχιση"
   },
   "alerts": {
-    "enabledTitle": "Alerts Enabled",
-    "enabledMessage": "You will receive email notifications for all saved searches",
-    "disabledTitle": "Alerts Disabled",
-    "disabledMessage": "Email notifications have been turned off",
-    "toggleFailed": "Failed to update alert settings"
+    "enabledTitle": "Ειδοποιήσεις ενεργοποιημένες",
+    "enabledMessage": "Θα λαμβάνετε ειδοποιήσεις email για όλες τις αποθηκευμένες αναζητήσεις",
+    "disabledTitle": "Ειδοποιήσεις απενεργοποιημένες",
+    "disabledMessage": "Οι ειδοποιήσεις email απενεργοποιήθηκαν",
+    "toggleFailed": "Η ενημέρωση των ρυθμίσεων ειδοποιήσεων απέτυχε"
   },
   "clearAll": {
-    "button": "Clear All",
-    "clearing": "Clearing...",
-    "confirmTitle": "Delete All Saved Searches",
-    "confirmMessage": "Are you sure you want to delete all saved searches? This cannot be undone.",
-    "confirmButton": "Delete All",
-    "cancelButton": "Cancel"
+    "button": "Εκκαθάριση όλων",
+    "clearing": "Εκκαθάριση...",
+    "confirmTitle": "Διαγραφή όλων των αποθηκευμένων αναζητήσεων",
+    "confirmMessage": "Είστε σίγουροι ότι θέλετε να διαγράψετε όλες τις αποθηκευμένες αναζητήσεις; Αυτό δεν μπορεί να αναιρεθεί.",
+    "confirmButton": "Διαγραφή όλων",
+    "cancelButton": "Ακύρωση"
   },
-  "sortBy": "Sort by",
+  "sortBy": "Ταξινόμηση κατά",
   "favorites": {
-    "badge": "Your Favorites Collection",
-    "heroTitle": "Your Curated",
-    "heroTitleHighlight": "Favorites Collection",
-    "heroDescription": "All your saved properties and trusted agents in one place, organized and ready to explore",
+    "badge": "Η συλλογή αγαπημένων σας",
+    "heroTitle": "Η επιλεγμένη σας",
+    "heroTitleHighlight": "συλλογή αγαπημένων",
+    "heroDescription": "Όλα τα αποθηκευμένα ακίνητα και οι έμπιστοι πράκτορες σε ένα μέρος, οργανωμένα και έτοιμα για εξερεύνηση",
     "stats": {
-      "properties": "Properties",
-      "agents": "Agents",
-      "countries": "Countries"
+      "properties": "Ακίνητα",
+      "agents": "Πράκτορες",
+      "countries": "Χώρες"
     },
     "tabs": {
-      "properties": "Properties",
-      "agents": "Agents"
+      "properties": "Ακίνητα",
+      "agents": "Πράκτορες"
     },
     "badges": {
-      "quickAccess": "Quick Access",
-      "organized": "Organized by Location",
-      "compare": "Easy Comparison"
+      "quickAccess": "Γρήγορη πρόσβαση",
+      "organized": "Οργανωμένα ανά τοποθεσία",
+      "compare": "Εύκολη σύγκριση"
     }
   }
 }

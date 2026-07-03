@@ -23,7 +23,7 @@
   "myListings": "Мои Огласи",
   "dashboard": "Контролна табла",
   "admin": "Админ",
-  "adminPanel": "Админ Панел",
+  "adminPanel": "Админ панел",
   "login": "Најави се",
   "signup": "Регистрирај се",
   "logout": "Одјави се",
@@ -108,7 +108,9 @@
     "cityDashboard": "Градска Табла",
     "default": "BalkanEstate",
     "blog": "Блог и Написи",
-    "guides": "Водичи"
+    "guides": "Водичи",
+    "home": "Почетна"
   },
-  "blog": "Блог и Написи"
+  "blog": "Блог и Написи",
+  "agencyDashboard": "Контролна табла на агенцијата"
 }

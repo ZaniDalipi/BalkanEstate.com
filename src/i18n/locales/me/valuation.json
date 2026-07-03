@@ -1,144 +1,148 @@
 {
   "page": {
-    "title": "What's My Property Worth?",
-    "subtitle": "Get an instant AI-powered estimate based on real market data and comparable sales in your area.",
-    "badge": "AI-Powered",
-    "trust1": "Free & Instant",
-    "trust2": "No Login Required",
-    "trust3": "Based on Real Data"
+    "title": "Koliko Vrijedi Moja Nekretnina?",
+    "subtitle": "Dobijte trenutnu AI procjenu zasnovanu na stvarnim tržišnim podacima i uporedivim prodajama u Vašem području.",
+    "badge": "AI Tehnologija",
+    "trust1": "Besplatno i Trenutno",
+    "trust2": "Prijava Nije Potrebna",
+    "trust3": "Zasnovano na Stvarnim Podacima"
   },
   "stats": {
-    "valuations": "Valuations",
-    "accuracy": "Accuracy",
-    "countries": "Balkan Countries"
+    "valuations": "Procjena",
+    "accuracy": "Tačnost",
+    "countries": "Balkanske Zemlje"
   },
   "form": {
-    "locationSection": "Location",
-    "detailsSection": "Property Details",
-    "location": "Property Location",
-    "locationPlaceholder": "Search for an address...",
-    "propertyType": "Property Type",
-    "size": "Size",
-    "bedrooms": "Bedrooms",
-    "bathrooms": "Bathrooms",
-    "condition": "Condition",
-    "yearBuilt": "Year Built",
-    "yearBuiltPlaceholder": "e.g. 2010",
-    "floorNumber": "Floor Number",
-    "totalFloors": "Total Floors",
-    "viewType": "View Type",
-    "furnishing": "Furnishing",
-    "amenities": "Amenities",
-    "showAdvanced": "Show More Options",
-    "hideAdvanced": "Hide Options",
-    "getValuation": "Get My Valuation",
-    "calculating": "Analyzing...",
-    "disclaimer": "This is an automated estimate for informational purposes only. Actual market value may vary."
+    "locationSection": "Lokacija",
+    "detailsSection": "Detalji Nekretnine",
+    "location": "Lokacija Nekretnine",
+    "locationPlaceholder": "Pretražite adresu...",
+    "propertyType": "Tip Nekretnine",
+    "size": "Veličina",
+    "bedrooms": "Spavaće Sobe",
+    "bathrooms": "Kupatila",
+    "condition": "Stanje",
+    "yearBuilt": "Godina Izgradnje",
+    "yearBuiltPlaceholder": "npr. 2010",
+    "floorNumber": "Sprat",
+    "totalFloors": "Ukupno Spratova",
+    "viewType": "Pogled",
+    "furnishing": "Namještenost",
+    "amenities": "Sadržaji",
+    "showAdvanced": "Prikaži Više Opcija",
+    "hideAdvanced": "Sakrij Opcije",
+    "getValuation": "Dobijte Moju Procjenu",
+    "calculating": "Analiza...",
+    "disclaimer": "Ovo je automatizovana procjena samo u informativne svrhe. Stvarna tržišna vrijednost može varirati."
   },
   "propertyTypes": {
-    "apartment": "Apartment",
-    "house": "House",
-    "villa": "Villa",
-    "land": "Land",
-    "other": "Other"
+    "apartment": "Stan",
+    "house": "Kuća",
+    "villa": "Vila",
+    "land": "Zemljište",
+    "other": "Ostalo"
   },
   "conditions": {
-    "new": "New",
-    "excellent": "Excellent",
-    "good": "Good",
-    "fair": "Fair",
-    "needsRenovation": "Needs Renovation"
+    "new": "Novo",
+    "excellent": "Izvrsno",
+    "good": "Dobro",
+    "fair": "Pristojno",
+    "needsRenovation": "Potrebna Renovacija"
   },
   "views": {
-    "sea": "Sea",
-    "mountain": "Mountain",
-    "city": "City",
+    "sea": "More",
+    "mountain": "Planina",
+    "city": "Grad",
     "park": "Park",
-    "garden": "Garden",
-    "street": "Street"
+    "garden": "Vrt",
+    "street": "Ulica"
   },
   "furnishing": {
-    "furnished": "Furnished",
-    "semiFurnished": "Semi-Furnished",
-    "unfurnished": "Unfurnished"
+    "furnished": "Namješteno",
+    "semiFurnished": "Polunамješteno",
+    "unfurnished": "Nenamješteno"
   },
   "amenities": {
-    "balcony": "Balcony",
-    "garden": "Garden",
-    "elevator": "Elevator",
+    "balcony": "Balkon",
+    "garden": "Vrt",
+    "elevator": "Lift",
     "parking": "Parking",
-    "pool": "Pool"
+    "pool": "Bazen"
   },
   "result": {
-    "estimatedValue": "Estimated Value",
-    "confidence": "Confidence",
-    "pricePerSqm": "Price per m²",
-    "marketTrend": "Market Trend",
-    "demandScore": "Demand Score",
-    "avgDaysOnMarket": "Avg. Days on Market",
-    "days": "days",
-    "aiInsights": "AI Market Insights",
-    "valueBreakdown": "Value Breakdown",
-    "comparableProperties": "Similar Properties",
-    "propertySummary": "Property Summary",
-    "location": "Location",
-    "type": "Type",
-    "size": "Size",
-    "bedrooms": "Bedrooms",
-    "bathrooms": "Bathrooms",
-    "condition": "Condition",
-    "beds": "beds",
-    "baths": "baths",
-    "newValuation": "New Valuation",
-    "readyToSell": "Ready to Sell?",
-    "listPropertyCTA": "List your property on BalkanEstate and reach thousands of buyers across the Balkans.",
-    "listPropertyButton": "List My Property"
+    "estimatedValue": "Procijenjena Vrijednost",
+    "confidence": "Pouzdanost",
+    "pricePerSqm": "Cijena po m²",
+    "marketTrend": "Tržišni Trend",
+    "demandScore": "Ocjena Potražnje",
+    "avgDaysOnMarket": "Prosječno Dana na Tržištu",
+    "days": "dana",
+    "aiInsights": "AI Tržišni Uvidi",
+    "valueBreakdown": "Raspored Vrijednosti",
+    "comparableProperties": "Slične Nekretnine",
+    "propertySummary": "Sažetak Nekretnine",
+    "location": "Lokacija",
+    "type": "Tip",
+    "size": "Veličina",
+    "bedrooms": "Spavaće Sobe",
+    "bathrooms": "Kupatila",
+    "condition": "Stanje",
+    "beds": "sobe",
+    "baths": "kupat.",
+    "newValuation": "Nova Procjena",
+    "readyToSell": "Spremni za Prodaju?",
+    "listPropertyCTA": "Objavite svoju nekretninu na BalkanEstate i dosegnite hiljade kupaca širom Balkana.",
+    "listPropertyButton": "Objavite Moju Nekretninu"
   },
   "breakdown": {
-    "baseValue": "Base Value (from comparables)",
-    "location": "Location Adjustment",
-    "condition": "Condition Adjustment",
-    "amenities": "Amenities Adjustment",
-    "age": "Age Adjustment",
-    "total": "Total Estimated Value"
+    "baseValue": "Osnovna Vrijednost (iz uporedivih)",
+    "location": "Prilagođavanje Lokacije",
+    "condition": "Prilagođavanje Stanja",
+    "amenities": "Prilagođavanje Sadržaja",
+    "age": "Prilagođavanje Starosti",
+    "total": "Ukupna Procijenjena Vrijednost"
   },
   "confidence": {
-    "high": "High",
-    "medium": "Medium",
-    "low": "Low"
+    "high": "Visoka",
+    "medium": "Srednja",
+    "low": "Niska"
   },
   "marketTrend": {
-    "rising": "Rising",
-    "stable": "Stable",
-    "declining": "Declining"
+    "rising": "Raste",
+    "stable": "Stabilno",
+    "declining": "Opada"
   },
   "features": {
     "instant": {
-      "title": "Instant Results",
-      "description": "Get your property valuation in seconds, not days"
+      "title": "Trenutni Rezultati",
+      "description": "Dobijte procjenu Vaše nekretnine za sekunde, ne dane"
     },
     "ai": {
-      "title": "AI-Powered",
-      "description": "Advanced algorithms analyze market data and comparable sales"
+      "title": "AI Tehnologija",
+      "description": "Napredni algoritmi analiziraju tržišne podatke i uporedive prodaje"
     },
     "market": {
-      "title": "Market Insights",
-      "description": "Understand local trends and demand in your area"
+      "title": "Tržišni Uvidi",
+      "description": "Razumijte lokalne trendove i potražnju u Vašem području"
     }
   },
   "howItWorks": {
-    "title": "How It Works",
+    "title": "Kako Funkcionira",
     "step1": {
-      "title": "Enter Details",
-      "description": "Provide your property location and basic features"
+      "title": "Unesite Detalje",
+      "description": "Navedite lokaciju Vaše nekretnine i osnovne karakteristike"
     },
     "step2": {
-      "title": "AI Analysis",
-      "description": "Our AI compares with similar properties and market data"
+      "title": "AI Analiza",
+      "description": "Naš AI upoređuje sa sličnim nekretninama i tržišnim podacima"
     },
     "step3": {
-      "title": "Get Results",
-      "description": "Receive your valuation with detailed breakdown and insights"
+      "title": "Dobijte Rezultate",
+      "description": "Primite procjenu sa detaljnim rasporedoм i uvidima"
     }
+  },
+  "seo": {
+    "title": "Free AI Property Valuation - Instant Balkan Property Estimate",
+    "description": "Get a free AI-powered property valuation for any Balkan property. Instant price estimates for apartments, houses, and villas in Montenegro, Albania, Serbia, and 8 more countries."
   }
 }

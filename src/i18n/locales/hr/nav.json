@@ -12,7 +12,7 @@
   "savedSearches": "Spremljena pretraživanja",
   "savedProperties": "Spremljene nekretnine",
   "favorites": "Favoriti",
-  "inbox": "Pristigle poruke",
+  "inbox": "Pristigla pošta",
   "messages": "Poruke",
   "account": "Moj račun",
   "myAccount": "Moj račun",
@@ -23,7 +23,7 @@
   "myListings": "Moji oglasi",
   "dashboard": "Kontrolna ploča",
   "admin": "Admin",
-  "adminPanel": "Admin ploča",
+  "adminPanel": "Administratorska ploča",
   "login": "Prijava",
   "signup": "Registracija",
   "logout": "Odjava",
@@ -88,7 +88,7 @@
     "agent": "Agent",
     "search": "Pretraživanje",
     "rentals": "Najmovi",
-    "inbox": "Pristigle poruke",
+    "inbox": "Pristigla pošta",
     "account": "Moj račun",
     "savedProperties": "Spremljeno",
     "savedSearches": "Spremljena pretraživanja",
@@ -108,7 +108,9 @@
     "cityDashboard": "Gradska ploča",
     "default": "BalkanEstate",
     "blog": "Blog i Članci",
-    "guides": "Vodiči"
+    "guides": "Vodiči",
+    "home": "Početna"
   },
-  "blog": "Blog i Članci"
+  "blog": "Blog i Članci",
+  "agencyDashboard": "Nadzorna ploča agencije"
 }

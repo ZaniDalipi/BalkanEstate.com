@@ -462,5 +462,20 @@
     "loadingMore": "Učitavanje više nekretnina...",
     "updating": "Ažuriranje rezultata...",
     "applyingFilters": "Primjena filtera..."
+  },
+  "seo": {
+    "property": "Property",
+    "cityTitle": "{{type}} for Sale in {{city}} - Real Estate Listings",
+    "countryTypeTitle": "{{type}} for Sale in {{country}} - Browse {{type}} Listings",
+    "countryTitle": "Property for Sale in {{country}} - Real Estate Listings",
+    "queryTitle": "Property for Sale in {{query}} - Real Estate Listings",
+    "defaultTitle": "Property for Sale in the Balkans - Houses, Apartments & Villas",
+    "browse": "Browse ",
+    "bedroom": "bedroom ",
+    "typesForSale": "houses, apartments, and villas for sale",
+    "in": "in",
+    "acrossBalkans": "across the Balkans",
+    "priceRange": "Price range",
+    "tagline": "AI-powered property search on BalkanEstateAI — 11 countries, 10 languages."
   }
 }

@@ -10,9 +10,9 @@
       "singular": "Зачувано пребарување",
       "plural": "Зачувани пребарувања"
     },
-    "badge": "Smart Property Alerts",
-    "titleHighlight": "Property Searches",
-    "description": "Track your favorite search criteria and get notified when new properties match"
+    "badge": "Паметни известувања за имоти",
+    "titleHighlight": "пребарувања на имоти",
+    "description": "Следете ги вашите омилени критериуми за пребарување и добивајте известувања кога ќе се појават нови соодветни имоти"
   },
   "loginRequired": {
     "title": "Најавете се за да ги видите Вашите зачувани пребарувања",
@@ -48,52 +48,52 @@
     "renameFailed": "Неуспешно преименување на зачуваното пребарување. Обидете се повторно."
   },
   "stats": {
-    "savedSearches": "Saved Searches",
-    "alerts": "Email Alerts",
-    "countries": "Countries",
-    "toggleAlerts": "Toggle email alerts",
-    "upgradeForAlerts": "Upgrade to Pro for email alerts",
-    "proOnly": "Pro Feature"
+    "savedSearches": "Зачувани пребарувања",
+    "alerts": "Известувања преку е-пошта",
+    "countries": "Земји",
+    "toggleAlerts": "Вклучи/исклучи известувања преку е-пошта",
+    "upgradeForAlerts": "Надградете на Про за известувања преку е-пошта",
+    "proOnly": "Про функција"
   },
   "badges": {
-    "instantAlerts": "Instant Alerts",
-    "customAreas": "Custom Areas",
-    "smartMatching": "Smart Matching"
+    "instantAlerts": "Моментални известувања",
+    "customAreas": "Прилагодени области",
+    "smartMatching": "Паметно совпаѓање"
   },
   "alerts": {
-    "enabledTitle": "Alerts Enabled",
-    "enabledMessage": "You will receive email notifications for all saved searches",
-    "disabledTitle": "Alerts Disabled",
-    "disabledMessage": "Email notifications have been turned off",
-    "toggleFailed": "Failed to update alert settings"
+    "enabledTitle": "Известувања овозможени",
+    "enabledMessage": "Ќе добивате известувања преку е-пошта за сите зачувани пребарувања",
+    "disabledTitle": "Известувања оневозможени",
+    "disabledMessage": "Известувањата преку е-пошта се исклучени",
+    "toggleFailed": "Ажурирањето на поставките за известувања не успеа"
   },
   "clearAll": {
-    "button": "Clear All",
-    "clearing": "Clearing...",
-    "confirmTitle": "Delete All Saved Searches",
-    "confirmMessage": "Are you sure you want to delete all saved searches? This cannot be undone.",
-    "confirmButton": "Delete All",
-    "cancelButton": "Cancel"
+    "button": "Избриши сè",
+    "clearing": "Бришење...",
+    "confirmTitle": "Избриши ги сите зачувани пребарувања",
+    "confirmMessage": "Дали сте сигурни дека сакате да ги избришете сите зачувани пребарувања? Ова не може да се врати.",
+    "confirmButton": "Избриши сè",
+    "cancelButton": "Откажи"
   },
-  "sortBy": "Sort by",
+  "sortBy": "Подреди по",
   "favorites": {
-    "badge": "Your Favorites Collection",
-    "heroTitle": "Your Curated",
-    "heroTitleHighlight": "Favorites Collection",
-    "heroDescription": "All your saved properties and trusted agents in one place, organized and ready to explore",
+    "badge": "Вашата колекција омилени",
+    "heroTitle": "Вашата одбрана",
+    "heroTitleHighlight": "колекција омилени",
+    "heroDescription": "Сите зачувани имоти и доверливи агенти на едно место, организирани и подготвени за истражување",
     "stats": {
-      "properties": "Properties",
-      "agents": "Agents",
-      "countries": "Countries"
+      "properties": "Имоти",
+      "agents": "Агенти",
+      "countries": "Земји"
     },
     "tabs": {
-      "properties": "Properties",
-      "agents": "Agents"
+      "properties": "Имоти",
+      "agents": "Агенти"
     },
     "badges": {
-      "quickAccess": "Quick Access",
-      "organized": "Organized by Location",
-      "compare": "Easy Comparison"
+      "quickAccess": "Брз пристап",
+      "organized": "Организирано по локација",
+      "compare": "Лесна споредба"
     }
   }
 }

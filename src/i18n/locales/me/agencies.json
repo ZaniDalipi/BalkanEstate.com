@@ -1,106 +1,134 @@
 {
   "hero": {
-    "badge": "Premier Real Estate Networks",
-    "title": "Top Real Estate",
-    "titleHighlight": "Agencies in Balkans",
-    "subtitle": "Connect with professional agencies that bring expertise, trust, and results to your property journey."
+    "badge": "Vrhunske Mreže za Nekretnine",
+    "title": "Najbolje Agencije za",
+    "titleHighlight": "Nekretnine na Balkanu",
+    "subtitle": "Povežite se sa profesionalnim agencijama koje donose stručnost, povjerenje i rezultate u Vaše putovanje s nekretninama."
   },
   "search": {
-    "title": "Find Your Ideal Agency",
-    "subtitle": "Search {{count}}+ professional agencies across the Balkans",
+    "title": "Pronađite Vašu Idealnu Agenciju",
+    "subtitle": "Pretražite {{count}}+ profesionalnih agencija širom Balkana",
     "tabs": {
-      "city": "City",
-      "agencyName": "Agency Name"
+      "city": "Grad",
+      "agencyName": "Naziv Agencije"
     },
     "placeholder": {
-      "city": "Search by city or location...",
-      "name": "Search by agency name..."
+      "city": "Pretražite po gradu ili lokaciji...",
+      "name": "Pretražite po nazivu agencije..."
     },
-    "clearSearch": "Clear search",
-    "popularSearches": "Popular searches:"
+    "clearSearch": "Očistite pretragu",
+    "popularSearches": "Popularne pretrage:"
   },
   "stats": {
-    "professionalAgencies": "Professional Agencies",
-    "expertAgents": "Expert Agents",
-    "listedProperties": "Listed Properties"
+    "professionalAgencies": "Profesionalne Agencije",
+    "expertAgents": "Stručni Agenti",
+    "listedProperties": "Oglašene Nekretnine"
   },
   "filters": {
-    "allAgencies": "All Agencies",
-    "featured": "Featured",
-    "myAgency": "My Agency"
+    "allAgencies": "Sve Agencije",
+    "featured": "Istaknute",
+    "myAgency": "Moja Agencija"
   },
   "sort": {
-    "mostProperties": "Most Properties",
-    "mostAgents": "Most Agents",
-    "mostExperienced": "Most Experienced",
-    "alphabetical": "Alphabetical"
+    "mostProperties": "Najviše Nekretnina",
+    "mostAgents": "Najviše Agenata",
+    "mostExperienced": "Najiskusnije",
+    "alphabetical": "Abecedno"
   },
   "results": {
-    "title": "Top Real Estate Agencies",
-    "featuredTitle": "Featured Agencies",
-    "yourAgencyTitle": "Your Agency",
-    "showingMatching": "Showing {{count}} agencies matching \"{{query}}\"",
-    "browseAgencies": "Browse professional agencies with experienced teams",
-    "agenciesFound": "agencies found",
-    "moreAgencies": "More Agencies"
+    "title": "Najbolje Agencije za Nekretnine",
+    "featuredTitle": "Istaknute Agencije",
+    "yourAgencyTitle": "Vaša Agencija",
+    "showingMatching": "Prikazuje se {{count}} agencija koje odgovaraju \"{{query}}\"",
+    "browseAgencies": "Pregledajte profesionalne agencije sa iskusnim timovima",
+    "agenciesFound": "agencija pronađeno",
+    "moreAgencies": "Više Agencija"
   },
   "card": {
-    "featured": "Featured",
-    "certified": "Certified",
-    "properties": "Properties",
-    "agents": "Agents",
-    "years": "Years",
-    "certs": "Certs",
-    "viewProfile": "View Profile",
-    "view": "View",
-    "more": "+{{count}} more"
+    "featured": "Istaknuto",
+    "certified": "Certificirano",
+    "properties": "Nekretnine",
+    "agents": "Agenti",
+    "years": "Godine",
+    "certs": "Certifikati",
+    "viewProfile": "Pogledaj Profil",
+    "view": "Pogledaj",
+    "more": "+{{count}} više"
   },
   "statsCards": {
-    "mostProperties": "Most Properties",
-    "mostAgents": "Most Agents",
-    "mostExperience": "Most Experience"
+    "mostProperties": "Najviše Nekretnina",
+    "mostAgents": "Najviše Agenata",
+    "mostExperience": "Najviše Iskustva"
   },
   "empty": {
-    "noAgenciesTitle": "No Agencies Found",
-    "noAgenciesYet": "No Agencies Yet",
-    "noMyAgency": "No Agency Found",
-    "adjustSearch": "Try adjusting your search criteria or browse all agencies.",
-    "noMyAgencyMessage": "You haven't created an agency yet. Start your journey today!",
-    "beFirst": "Be the first to create an agency and showcase your properties!"
+    "noAgenciesTitle": "Nije Pronađena Nijedna Agencija",
+    "noAgenciesYet": "Još Nema Agencija",
+    "noMyAgency": "Nije Pronađena Agencija",
+    "adjustSearch": "Pokušajte prilagoditi kriterije pretrage ili pregledajte sve agencije.",
+    "noMyAgencyMessage": "Još niste kreirali agenciju. Započnite svoje putovanje danas!",
+    "beFirst": "Budite prvi koji će kreirati agenciju i prikazati svoje nekretnine!"
   },
   "cta": {
-    "createAgency": "Create Agency",
-    "readyToGrow": "Ready to Grow Your Agency?",
-    "ctaDescription": "Join our network of premier real estate agencies and get featured to thousands of potential clients. Showcase your properties, connect with buyers, and expand your reach.",
-    "createToday": "Create Your Agency Today"
+    "createAgency": "Kreirajte Agenciju",
+    "readyToGrow": "Spremni da Razvijete Vašu Agenciju?",
+    "ctaDescription": "Pridružite se našoj mreži vrhunskih agencija za nekretnine i budite prikazani tisućama potencijalnih klijenata. Prikažite svoje nekretnine, povežite se sa kupcima i proširite svoj domet.",
+    "createToday": "Kreirajte Vašu Agenciju Danas"
   },
   "loading": {
-    "title": "Finding Agencies...",
-    "message": "Searching through our network of professional real estate agencies"
+    "title": "Pronalaženje Agencija...",
+    "message": "Pretražujemo našu mrežu profesionalnih agencija za nekretnine"
   },
   "error": {
-    "unableToLoad": "Unable to Load Agencies"
+    "unableToLoad": "Nije Moguće Učitati Agencije"
   },
   "featured": {
-    "title": "Featured Agencies",
-    "subtitle": "Discover properties through our trusted network of professional real estate partners",
-    "badge": "Featured",
-    "viewAgency": "View Agency",
-    "exploreAll": "Explore All Agencies",
-    "selectedByAlgorithm": "Each agency is carefully selected for quality and trust",
-    "selectedByAlgorithmMobile": "Carefully selected agencies",
-    "properties": "Properties",
-    "agents": "Agents",
+    "title": "Istaknute Agencije",
+    "subtitle": "Otkrijte nekretnine putem naše pouzdane mreže profesionalnih partnera za nekretnine",
+    "badge": "Istaknuto",
+    "viewAgency": "Pogledajte Agenciju",
+    "exploreAll": "Istražite Sve Agencije",
+    "selectedByAlgorithm": "Svaka agencija je pažljivo odabrana za kvalitet i povjerenje",
+    "selectedByAlgorithmMobile": "Pažljivo odabrane agencije",
+    "properties": "Nekretnine",
+    "agents": "Agenti",
     "agencyTypes": {
-      "luxury": "Luxury Properties",
-      "commercial": "Commercial Properties",
-      "boutique": "Boutique Agency",
-      "team": "Team Agency",
-      "default": "Real Estate"
+      "luxury": "Luksuzne Nekretnine",
+      "commercial": "Komercijalne Nekretnine",
+      "boutique": "Butik Agencija",
+      "team": "Timska Agencija",
+      "default": "Nekretnine"
     },
     "empty": {
-      "title": "No featured agencies available at the moment",
-      "message": "Check back soon for our featured partners!"
+      "title": "Trenutno nema dostupnih istaknutih agencija",
+      "message": "Provjerite uskoro za naše istaknute partnere!"
+    },
+    "subscription": {
+      "currentlyFeatured": "Agencija Trenutno Istaknuta ✨",
+      "receivingVisibility": "Vaša agencija je trenutno istaknuta i dobija poboljšanu vidljivost.",
+      "timeRemaining": "Preostalo Vrijeme",
+      "expires": "Ističe:",
+      "featureYourAgency": "Istakni Svoju Agenciju",
+      "getVisibility": "Dobijte više vidljivosti sa istaknutim oglasom.",
+      "getFeaturedFrom": "Istakni se od €{{price}}/sedmično",
+      "getFeaturedNow": "Istakni se Sada",
+      "featuredAgency": "Istaknuta Agencija",
+      "boostVisibility": "Povećaj Vidljivost",
+      "freeTrialProgress": "🎉 Napredak Besplatnog Probnog Perioda",
+      "subscriptionPeriod": "📅 Period Pretplate",
+      "daysLeft": "{{count}} dana preostalo",
+      "freeTrialActive": "🎉 Besplatni Probni Period Aktivan",
+      "trialEndsOn": "Vaš besplatni probni period ističe {{date}}",
+      "interval": "Interval",
+      "price": "Cijena",
+      "startDate": "Datum Početka",
+      "renewsOn": "Obnavlja se",
+      "endedOn": "Završeno",
+      "couponApplied": "✓ Kupon {{code}} primijenjen",
+      "cancelAtPeriodEnd": "⚠️ Pretplata će biti otkazana na kraju trenutnog perioda",
+      "renewStatus": "🔄 Obnovi Istaknuti Status",
+      "continueVisibility": "Nastavite uživati u poboljšanoj vidljivosti.",
+      "renewNow": "Obnovi Sada",
+      "proTip": "💡 Pro Savjet: Istaknute agencije dobijaju do 5x više vidljivosti!"
     }
   },
   "create": {
@@ -132,7 +160,14 @@
       "website": "Website URL",
       "license": "Agent License Number",
       "yearsInBusiness": "Years in Business",
-      "languages": "Languages Spoken"
+      "languages": "Languages Spoken",
+      "logo": "Agency Logo",
+      "logoPreview": "Logo preview",
+      "registrationNumber": "Business Registration / Tax ID",
+      "agencyType": "Agency Type",
+      "specializations": "Specializations",
+      "serviceAreas": "Service Areas / Regions",
+      "zipCode": "Zip / Postal Code"
     },
     "placeholders": {
       "agencyName": "e.g., Premier Real Estate Agency",
@@ -144,12 +179,20 @@
       "email": "contact@agency.com",
       "phone": "+381 11 123 4567",
       "website": "https://yourwebsite.com",
-      "license": "e.g., RE-123456"
+      "license": "e.g., RE-123456",
+      "registrationNumber": "e.g., PIB 123456789, OIB 12345678901",
+      "zipCode": "e.g., 11000",
+      "serviceAreas": "e.g., Belgrade, Novi Sad, Nis (comma-separated)"
     },
     "hints": {
       "agencyName": "Choose a professional name that represents your brand",
       "description": "A compelling description helps clients understand your value",
-      "address": "Optional: Full street address for office location"
+      "address": "Optional: Full street address for office location",
+      "logo": "JPEG, PNG, WebP or SVG. Max 5MB.",
+      "registrationNumber": "Your official business registration or tax identification number",
+      "specializations": "Select all areas your agency specializes in",
+      "serviceAreas": "List the cities or regions where your agency operates",
+      "agencyType": "Select the type that best describes your agency"
     },
     "days": {
       "monday": "Monday",
@@ -176,12 +219,19 @@
     "errors": {
       "nameRequired": "Agency name is required",
       "locationRequired": "City and country are required",
-      "emailRequired": "Email is required"
+      "emailRequired": "Email is required",
+      "logoInvalidType": "Please upload a JPEG, PNG, WebP, or SVG image",
+      "logoTooLarge": "Logo must be under 5MB"
     },
     "becomeAgent": "Become an Agent First",
     "upgradeToPro": "Upgrade to Pro",
     "createAgency": "Create Agency",
-    "continueToPayment": "Continue to Payment"
+    "continueToPayment": "Continue to Payment",
+    "buttons": {
+      "uploadLogo": "Upload Logo",
+      "changeLogo": "Change Logo",
+      "removeLogo": "Remove logo"
+    }
   },
   "payment": {
     "title": "Complete Your Purchase",
@@ -343,5 +393,61 @@
         "cap": "Maks 20 bodova"
       }
     }
+  },
+  "coupon": {
+    "title": "Iskoristi Kupon Agencije",
+    "description": "Unesite kod kupona koji ste dobili da biste se pridružili agenciji i dobili Pro pretplatu.",
+    "codeLabel": "Kod Kupona",
+    "codePlaceholder": "Unesite kod kupona (npr., AGENCY-XXXXXXXX)",
+    "codeFormat": "Kod treba biti u formatu: AGENCY-XXXXXXXX",
+    "redeeming": "Iskorištavanje...",
+    "redeemButton": "Iskoristi Kupon",
+    "note": "Napomena:",
+    "alreadyInAgency": "Već ste član {{name}}. Iskorištavanje novog kupona prebacit će vas u novu agenciju.",
+    "anAgency": "agencija",
+    "confirmMove": "Već ste član agencije. Iskorištavanje ovog kupona prebacit će vas u novu agenciju. Nastaviti?",
+    "agentRequired": {
+      "title": "Potrebna Registracija Agenta",
+      "description": "Za iskorištavanje kupona agencije morate se prvo registrovati kao agent.",
+      "goToProfile": "Idi na Postavke Profila"
+    },
+    "errors": {
+      "enterCode": "Molimo unesite kod kupona",
+      "loginRequired": "Morate biti prijavljeni za iskorištavanje kupona",
+      "agentRequired": "Samo registrovani agenti mogu iskoristiti kupone agencije.",
+      "invalidCoupon": "Nevažeći kod kupona.",
+      "alreadyUsed": "Ovaj kupon je već iskorišten.",
+      "expired": "Ovaj kupon je istekao.",
+      "notFound": "Kupon nije pronađen.",
+      "subscriptionInactive": "Pretplata agencije više nije aktivna.",
+      "missingCode": "Molimo unesite kod kupona.",
+      "redeemFailed": "Iskorištavanje kupona nije uspjelo.",
+      "redemptionFailed": "Iskorištavanje Neuspjelo"
+    },
+    "success": {
+      "title": "Kupon Iskorišten!",
+      "message": "Uspješno ste se pridružili {{name}} sa Pro pretplatom!",
+      "welcome": "Dobrodošli u {{name}}!",
+      "joined": "Uspješno ste se pridružili agenciji sa Pro pretplatom.",
+      "benefits": "Vaše Pogodnosti:",
+      "listingsLimit": "Do {{limit}} aktivnih oglasa",
+      "branding": "Brendiranje agencije na vašim oglasima",
+      "promotionAccess": "Pristup promotivnim kuponima agencije",
+      "validUntil": "Pretplata vrijedi do {{date}}",
+      "viewAgency": "Pregledaj Agenciju"
+    },
+    "whatHappens": {
+      "title": "Šta se dešava kada iskoristite?",
+      "addedToTeam": "Bit ćete dodani u agenciju kao član tima",
+      "proSubscription": "Dobit ćete Pro pretplatu (vrijedi 1 godinu)",
+      "agencyBranding": "Vaši oglasi će prikazivati brend agencije",
+      "promotionCoupons": "Pristup promotivnim kuponima za vaše oglase"
+    }
+  },
+  "badge": {
+    "independent": "Nezavisan",
+    "independentShort": "Nez",
+    "agency": "Agencija",
+    "independentAgent": "Nezavisni Agent"
   }
 }

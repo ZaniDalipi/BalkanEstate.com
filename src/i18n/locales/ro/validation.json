@@ -1,45 +1,45 @@
 {
-  "imagesRequired": "Imagini Necesare",
-  "locationRequired": "Locație Necesară",
-  "invalidFloorNumber": "Număr de Etaj Invalid",
-  "invalidFloorCount": "Număr de Etaje Invalid",
-  "elevatorRequired": "Informații despre Lift Necesare",
+  "imagesRequired": "Sunt necesare imagini",
+  "locationRequired": "Este necesară locația",
+  "invalidFloorNumber": "Număr de etaj nevalid",
+  "invalidFloorCount": "Număr de etaje nevalid",
+  "elevatorRequired": "Sunt necesare informații despre lift",
   "password": {
-    "minLength": "At least 8 characters",
-    "uppercase": "One uppercase letter",
-    "lowercase": "One lowercase letter",
-    "number": "One number",
-    "specialChar": "One special character (!@#$%...)",
-    "noSequential": "No sequential characters (123, abc, qwe)",
-    "notCommon": "Not a common password",
-    "mismatch": "Passwords do not match"
+    "minLength": "Cel puțin 8 caractere",
+    "uppercase": "O literă mare",
+    "lowercase": "O literă mică",
+    "number": "O cifră",
+    "specialChar": "Un caracter special (!@#$%...)",
+    "noSequential": "Fără caractere consecutive (123, abc, qwe)",
+    "notCommon": "Nu o parolă comună",
+    "mismatch": "Parolele nu se potrivesc"
   },
   "email": {
-    "required": "Email is required",
-    "invalid": "Please enter a valid email address"
+    "required": "E-mailul este obligatoriu",
+    "invalid": "Introduceți o adresă de e-mail validă"
   },
   "phone": {
-    "required": "Phone number is required",
-    "invalid": "Please enter a valid phone number"
+    "required": "Numărul de telefon este obligatoriu",
+    "invalid": "Introduceți un număr de telefon valid"
   },
-  "required": "This field is required",
-  "minLength": "Must be at least {{count}} characters",
-  "maxLength": "Must be no more than {{count}} characters",
-  "numeric": "Must be a number",
-  "positive": "Must be a positive number",
-  "url": "Please enter a valid URL",
+  "required": "Acest câmp este obligatoriu",
+  "minLength": "Trebuie să aibă cel puțin {{count}} caractere",
+  "maxLength": "Nu trebuie să depășească {{count}} caractere",
+  "numeric": "Trebuie să fie un număr",
+  "positive": "Trebuie să fie un număr pozitiv",
+  "url": "Introduceți un URL valid",
   "date": {
-    "invalid": "Please enter a valid date",
-    "future": "Date must be in the future",
-    "past": "Date must be in the past"
+    "invalid": "Introduceți o dată validă",
+    "future": "Data trebuie să fie în viitor",
+    "past": "Data trebuie să fie în trecut"
   },
   "file": {
-    "required": "Please select a file",
-    "size": "File size must be less than {{size}}MB",
-    "type": "Invalid file type. Allowed: {{types}}"
+    "required": "Selectați un fișier",
+    "size": "Dimensiunea fișierului trebuie să fie sub {{size}}MB",
+    "type": "Tip de fișier nevalid. Permise: {{types}}"
   },
   "form": {
-    "hasErrors": "Please fix the errors before submitting",
-    "submitError": "An error occurred. Please try again."
+    "hasErrors": "Corectați erorile înainte de trimitere",
+    "submitError": "A apărut o eroare. Încercați din nou."
   }
 }

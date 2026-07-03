@@ -22,8 +22,8 @@
   "newListing": "Νέα Αγγελία",
   "myListings": "Οι Αγγελίες μου",
   "dashboard": "Πίνακας Ελέγχου",
-  "admin": "Διαχείριση",
-  "adminPanel": "Πίνακας Διαχείρισης",
+  "admin": "Διαχειριστής",
+  "adminPanel": "Πίνακας διαχείρισης",
   "login": "Σύνδεση",
   "signup": "Εγγραφή",
   "logout": "Αποσύνδεση",
@@ -85,7 +85,7 @@
   "businessDirectory": "Επιχειρηματικός Κατάλογος",
   "pageTitles": {
     "agency": "Μεσιτικό Γραφείο",
-    "agent": "Μεσίτης",
+    "agent": "Πράκτορας",
     "search": "Αναζήτηση",
     "rentals": "Ενοικιάσεις",
     "inbox": "Εισερχόμενα",
@@ -101,14 +101,16 @@
     "exploreCities": "Εξερεύνηση",
     "howItWorks": "Πώς Λειτουργεί",
     "analytics": "Αναλυτικά",
-    "admin": "Διαχείριση",
+    "admin": "Διαχειριστής",
     "agencyDashboard": "Πίνακας Γραφείου",
     "valuation": "Αποτίμηση",
     "mortgageCalculator": "Υπολογιστής",
     "cityDashboard": "Πίνακας Πόλης",
     "default": "BalkanEstate",
     "blog": "Blog & Άρθρα",
-    "guides": "Οδηγοί"
+    "guides": "Οδηγοί",
+    "home": "Αρχική"
   },
-  "blog": "Blog & Άρθρα"
+  "blog": "Blog & Άρθρα",
+  "agencyDashboard": "Πίνακας ελέγχου γραφείου"
 }

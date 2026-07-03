@@ -12,7 +12,7 @@
   "savedSearches": "Căutări Salvate",
   "savedProperties": "Proprietăți Salvate",
   "favorites": "Favorite",
-  "inbox": "Inbox",
+  "inbox": "Mesaje primite",
   "messages": "Mesaje",
   "account": "Contul Meu",
   "myAccount": "Contul Meu",
@@ -23,7 +23,7 @@
   "myListings": "Anunțurile Mele",
   "dashboard": "Panou de Control",
   "admin": "Admin",
-  "adminPanel": "Panou Admin",
+  "adminPanel": "Panou de administrare",
   "login": "Conectare",
   "signup": "Înregistrare",
   "logout": "Deconectare",
@@ -88,7 +88,7 @@
     "agent": "Agent",
     "search": "Căutare",
     "rentals": "Închirieri",
-    "inbox": "Inbox",
+    "inbox": "Mesaje primite",
     "account": "Contul Meu",
     "savedProperties": "Salvate",
     "savedSearches": "Căutări Salvate",
@@ -108,7 +108,9 @@
     "cityDashboard": "Panou Oraș",
     "default": "BalkanEstate",
     "blog": "Blog & Articole",
-    "guides": "Ghiduri"
+    "guides": "Ghiduri",
+    "home": "Acasă"
   },
-  "blog": "Blog & Articole"
+  "blog": "Blog & Articole",
+  "agencyDashboard": "Panoul agenției"
 }

@@ -1,16 +1,16 @@
 {
-  "imagesRequired": "Kërkohen Imazhe",
-  "locationRequired": "Kërkohet Vendndodhja",
-  "invalidFloorNumber": "Numër Kati i Pavlefshëm",
-  "invalidFloorCount": "Numri i Kateve i Pavlefshëm",
-  "elevatorRequired": "Informacion për Ashensorin i Nevojshëm",
+  "imagesRequired": "Kërkohen imazhe",
+  "locationRequired": "Kërkohet vendndodhja",
+  "invalidFloorNumber": "Numër i pavlefshëm kati",
+  "invalidFloorCount": "Numër i pavlefshëm katesh",
+  "elevatorRequired": "Kërkohet informacion për ashensorin",
   "password": {
     "minLength": "Të paktën 8 karaktere",
-    "uppercase": "Një shkronjë të madhe",
-    "lowercase": "Një shkronjë të vogël",
+    "uppercase": "Një shkronjë e madhe",
+    "lowercase": "Një shkronjë e vogël",
     "number": "Një numër",
     "specialChar": "Një karakter special (!@#$%...)",
-    "noSequential": "Pa karaktere sekuenciale (123, abc, qwe)",
+    "noSequential": "Pa karaktere të njëpasnjëshme (123, abc, qwe)",
     "notCommon": "Jo një fjalëkalim i zakonshëm",
     "mismatch": "Fjalëkalimet nuk përputhen"
   },
@@ -25,8 +25,8 @@
   "required": "Kjo fushë është e detyrueshme",
   "minLength": "Duhet të jetë të paktën {{count}} karaktere",
   "maxLength": "Duhet të jetë jo më shumë se {{count}} karaktere",
-  "numeric": "Duhet të jetë një numër",
-  "positive": "Duhet të jetë një numër pozitiv",
+  "numeric": "Duhet të jetë numër",
+  "positive": "Duhet të jetë numër pozitiv",
   "url": "Ju lutemi shkruani një URL të vlefshme",
   "date": {
     "invalid": "Ju lutemi shkruani një datë të vlefshme",
@@ -36,10 +36,10 @@
   "file": {
     "required": "Ju lutemi zgjidhni një skedar",
     "size": "Madhësia e skedarit duhet të jetë më pak se {{size}}MB",
-    "type": "Lloji i skedarit i pavlefshëm. Të lejuara: {{types}}"
+    "type": "Lloj skedari i pavlefshëm. Të lejuara: {{types}}"
   },
   "form": {
-    "hasErrors": "Ju lutemi korrigjoni gabimet para se të dërgoni",
+    "hasErrors": "Ju lutemi korrigjoni gabimet para dorëzimit",
     "submitError": "Ndodhi një gabim. Ju lutemi provoni përsëri."
   }
 }
