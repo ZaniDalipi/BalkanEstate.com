@@ -959,6 +959,32 @@ const findItemsArray = (
 };
 
 /**
+ * Like `findItemsArray`, but only follows conventionally-named wrapper keys
+ * (`data`, `listings`, `items`, …) instead of falling back to ANY nested
+ * array. Used as a first pass so a single pasted listing document — which
+ * often has its own array fields like `images`, `amenities`, or `materials`
+ * — isn't mistaken for a collection of listings.
+ */
+const findItemsArrayByPreferredKeys = (
+  obj: unknown,
+  path = '$',
+  depth = 0
+): { items: Record<string, unknown>[]; path: string } | null => {
+  if (obj == null || depth > 6 || typeof obj !== 'object' || Array.isArray(obj)) return null;
+  const preferredKeys = ['listings', 'items', 'results', 'data', 'records', 'rows', 'properties', 'nekretnine', 'oglasi', 'anunturi', 'ofertas'];
+  for (const k of preferredKeys) {
+    if (!(k in (obj as Record<string, unknown>))) continue;
+    const val = (obj as Record<string, unknown>)[k];
+    if (Array.isArray(val) && val.length > 0 && val.every((v) => v && typeof v === 'object' && !Array.isArray(v))) {
+      return { items: val as Record<string, unknown>[], path: `${path}.${k}` };
+    }
+    const nested = findItemsArrayByPreferredKeys(val, `${path}.${k}`, depth + 1);
+    if (nested) return nested;
+  }
+  return null;
+};
+
+/**
  * Analyze a pasted JSON string (single object or array) and build a fieldMap
  * from it. Tolerant of:
  *   - Top-level arrays:                 [{...}, {...}]
@@ -1034,15 +1060,27 @@ export const detectFromJsonSample = (jsonString: string): DetectResult => {
   if (Array.isArray(parsed)) {
     items = (parsed as unknown[]).filter((v): v is Record<string, unknown> => v !== null && typeof v === 'object' && !Array.isArray(v));
   } else if (parsed && typeof parsed === 'object') {
-    // First try a recursive search for the deepest object-array.
-    const found = findItemsArray(parsed);
-    if (found) {
-      items = found.items;
-      itemsPath = found.path === '$' ? '$[*]' : `${found.path}[*]`;
-    } else {
-      // No array found — treat the whole object as a single listing.
+    // 1. Look for a conventionally-named wrapper array (data/listings/items/…).
+    const byPreferredKey = findItemsArrayByPreferredKeys(parsed);
+    if (byPreferredKey) {
+      items = byPreferredKey.items;
+      itemsPath = `${byPreferredKey.path}[*]`;
+    } else if (isValidListingItem(parsed as Record<string, unknown>)) {
+      // 2. The pasted object already looks like a single listing on its own
+      // (e.g. a raw MongoDB document) — treat it as one item rather than
+      // descending into unrelated nested arrays like `images` or `amenities`.
       items = [parsed as Record<string, unknown>];
       itemsPath = '$';
+    } else {
+      // 3. Last resort: recursive search for the deepest object-array anywhere.
+      const found = findItemsArray(parsed);
+      if (found) {
+        items = found.items;
+        itemsPath = found.path === '$' ? '$[*]' : `${found.path}[*]`;
+      } else {
+        items = [parsed as Record<string, unknown>];
+        itemsPath = '$';
+      }
     }
   } else {
     throw new Error('JSON must be an object or array of listings, not a primitive value.');
