@@ -16,8 +16,8 @@
     "newMessage": "Nova Poruka",
     "typeMessage": "Napišite svoju poruku...",
     "send": "Pošalji",
-    "online": "Online",
-    "offline": "Offline",
+    "online": "Na mreži",
+    "offline": "Izvan mreže",
     "lastSeen": "Zadnji put viđen {{time}}",
     "typing": "Piše...",
     "delivered": "Dostavljeno",
@@ -35,7 +35,7 @@
     "failedToUploadImage": "Neuspješno učitavanje slike. Pokušajte ponovo.",
     "failedToSendMessage": "Neuspješno slanje poruke. Pokušajte ponovo.",
     "failedToDeleteConversation": "Neuspješno brisanje razgovora. Pokušajte ponovo.",
-    "allConversations": "All Conversations"
+    "allConversations": "Svi razgovori"
   },
   "quickReplies": {
     "scheduleTour": "Zakaži Obilazak",
@@ -154,7 +154,7 @@
   "report": {
     "title": "Prijavi Poruku",
     "reason": "Razlog prijave",
-    "spam": "Spam",
+    "spam": "Neželjena pošta",
     "harassment": "Uznemiravanje",
     "inappropriate": "Neprimjeren Sadržaj",
     "scam": "Prijevara ili Obmana",

@@ -16,8 +16,8 @@
     "newMessage": "Mesaj Nou",
     "typeMessage": "Scrieți mesajul dvs...",
     "send": "Trimite",
-    "online": "Online",
-    "offline": "Offline",
+    "online": "Conectat",
+    "offline": "Deconectat",
     "lastSeen": "Ultima oară văzut {{time}}",
     "typing": "Scrie...",
     "delivered": "Livrat",
@@ -35,7 +35,7 @@
     "failedToUploadImage": "Încărcarea imaginii a eșuat. Vă rugăm încercați din nou.",
     "failedToSendMessage": "Trimiterea mesajului a eșuat. Vă rugăm încercați din nou.",
     "failedToDeleteConversation": "Ștergerea conversației a eșuat. Vă rugăm încercați din nou.",
-    "allConversations": "All Conversations"
+    "allConversations": "Toate conversațiile"
   },
   "quickReplies": {
     "scheduleTour": "Programează o Vizită",

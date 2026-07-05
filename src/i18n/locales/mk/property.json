@@ -145,7 +145,8 @@
         "sat": "Саб"
       },
       "slotDuration": "{{minutes}} мин термини"
-    }
+    },
+    "floorPlanInteractiveHint": "Интерактивен прегледувач со зумирање, поместување и ознаки"
   },
   "distances": {
     "title": "Растојанија",
@@ -193,7 +194,7 @@
     "tour3d": "3D Тура",
     "tour360": "360° Тура",
     "photos": "Фотографии",
-    "streetView": "Улична преглед",
+    "streetView": "Приказ на улица",
     "video": "Видео",
     "all": "Сите",
     "sendInquiry": "Испрати барање по е-пошта",
@@ -232,8 +233,8 @@
     "title": "360° Виртуелна тура",
     "description": "Истражете ја оваа недвижност во импресивен 360°",
     "openInNewTab": "Отворете во нов прозорец за целосно искуство",
-    "failedToLoad": "Failed to load virtual tour",
-    "loading": "Loading virtual tour...",
+    "failedToLoad": "Вчитувањето на виртуелната тура не успеа",
+    "loading": "Вчитување на виртуелната тура...",
     "exit": "Излези од турата",
     "floor": "Кат {{floor}}",
     "hint": "Повлечете за гледање • Скролајте за зум",
@@ -275,15 +276,15 @@
     "popularProperties": "Еве неколку популарни недвижности",
     "featuredAgencies": "Истакнати агенции",
     "tabs": {
-      "properties": "Недвижности",
+      "properties": "Имоти",
       "agents": "Агенти"
     },
     "agents": {
       "title": "Зачувани агенти",
-      "noSaved": "Сè уште немате зачувано агенти.",
-      "clickHeart": "Кликнете на иконата срце на кој било профил на агент за да го зачувате овде.",
-      "browseAgents": "Разгледајте агенти",
-      "agentSaved": "Зачуван агент",
+      "noSaved": "Сè уште немате зачувано ниту еден агент.",
+      "clickHeart": "Кликнете на иконата на срце на кој било профил на агент за да го зачувате тука.",
+      "browseAgents": "Прелистај агенти",
+      "agentSaved": "Агентот е зачуван",
       "agentsSaved": "Зачувани агенти"
     }
   },
@@ -358,8 +359,8 @@
         "featured": "ПРЕПОРАЧАНО",
         "standard": "ПРОМОВИРАНО"
       },
-      "promotedCount_one": "{{count}} promoted listing",
-      "promotedCount_other": "{{count}} promoted listings"
+      "promotedCount_one": "{{count}} промовиран оглас",
+      "promotedCount_other": "{{count}} промовирани огласи"
     },
     "heatMapLegend": "Густина на недвижности",
     "low": "Ниска",
@@ -384,8 +385,8 @@
     "title": "Фотографии",
     "all": "Сите",
     "categories": {
-      "exterior": "Надворешност",
-      "interior": "Внатрешност",
+      "exterior": "Екстериер",
+      "interior": "Ентериер",
       "kitchen": "Кујна",
       "bathroom": "Бања",
       "bedroom": "Спална соба",
@@ -395,9 +396,9 @@
       "view": "Поглед",
       "other": "Друго"
     },
-    "images": "photos",
-    "view": "View",
-    "tapToView": "Tap to view in gallery"
+    "images": "фотографии",
+    "view": "Прикажи",
+    "tapToView": "Допрете за приказ во галеријата"
   },
   "mapLink": {
     "title": "Видете на мапа",
@@ -527,15 +528,15 @@
     "moreListings": "Повеќе огласи"
   },
   "gallery": {
-    "mute": "Mute",
-    "unmute": "Unmute",
-    "fullscreen": "Fullscreen",
-    "exitFullscreen": "Exit fullscreen",
-    "enterFullscreen": "Enter fullscreen",
-    "propertyShowcase": "Property Showcase",
-    "skipVideo": "Skip Video",
-    "videoTour": "Video Tour",
-    "enter3DTour": "Enter 3D Tour",
+    "mute": "Исклучи звук",
+    "unmute": "Вклучи звук",
+    "fullscreen": "Цел екран",
+    "exitFullscreen": "Излези од цел екран",
+    "enterFullscreen": "Влези во цел екран",
+    "propertyShowcase": "Претставување на имотот",
+    "skipVideo": "Прескокни видео",
+    "videoTour": "Видео тура",
+    "enter3DTour": "Влези во 3D турата",
     "view3DMap": "3D мапа на локацијата"
   },
   "viewings": {
@@ -576,7 +577,14 @@
       "save": "Зачувај",
       "hint": "Цртајте на сликата за белешки",
       "sendToChat": "Испрати"
-    }
+    },
+    "ariaLabel": "Прегледувач на слики: {{current}} од {{total}}",
+    "close": "Затвори го прегледувачот на слики",
+    "imageAlt": "Слика на имотот {{current}} од {{total}}",
+    "loadError": "Сликата не можеше да се вчита",
+    "next": "Следна слика ({{current}} од {{total}})",
+    "previous": "Претходна слика ({{current}} од {{total}})",
+    "resetZoom": "Ресетирај зумирање"
   },
   "sectionNav": {
     "ariaLabel": "Делови на имотот",
@@ -589,5 +597,61 @@
     "priceHistory": "Историја на цени",
     "similar": "Слични имоти",
     "onThisPage": "На оваа страница"
+  },
+  "floorPlan": {
+    "viewer": {
+      "annotateMode": "Режим на означување",
+      "annotateTitle": "Кликнете на основата за да додадете ознаки на соби",
+      "area": "Површина (m²)",
+      "ariaLabel": "Прегледувач на основа",
+      "clearLabels": "Избриши ги сите ознаки",
+      "clickToAddLabel": "Кликнете каде било на основата за да додадете ознака на соба",
+      "close": "Затвори го прегледувачот на основа",
+      "closeDetails": "Затвори ги деталите",
+      "closeShortcut": "Затвори (Esc)",
+      "fitToScreen": "Прилагоди на екран",
+      "fitToScreenShortcut": "Прилагоди на екран (0)",
+      "floorPlanAlt": "Основа",
+      "label": "Ознака",
+      "loadFailed": "Вчитувањето на основата не успеа",
+      "loadFailedDesc": "Сликата на основата не можеше да се вчита. Можеби е преместена или избришана.",
+      "loading": "Вчитување на основата...",
+      "notes": "Белешки",
+      "notesPlaceholder": "Прозорец свртен кон југ, вграден плакар...",
+      "pan": "Поместување",
+      "panMode": "Режим на поместување",
+      "panTitle": "Поместување и зумирање (влечете за поместување, скролувајте за зумирање)",
+      "removeLabel": "Отстрани ознака",
+      "rename": "Преименувај",
+      "roomLabels": "Ознаки на соби",
+      "roomNamePlaceholder": "Име на соба...",
+      "roomType": "Тип на соба",
+      "rooms": {
+        "balcony": "Балкон",
+        "bathroom": "Бања",
+        "bedroom": "Спална соба",
+        "dining": "Трпезарија",
+        "garage": "Гаража",
+        "hallway": "Ходник",
+        "kitchen": "Кујна",
+        "living": "Дневна соба",
+        "office": "Канцеларија",
+        "other": "Друго",
+        "storage": "Остава"
+      },
+      "shortcuts": {
+        "annotate": "Клик: Додај ознака | Esc: Излез од режимот на означување",
+        "keys": "+/-: Зумирање | 0: Ресетирај | Esc: Затвори",
+        "scroll": "Скролување: Зумирање | Влечење: Поместување | Двоклик: Брзо зумирање"
+      },
+      "zoomIn": "Зголеми",
+      "zoomLevel": "Ниво на зумирање",
+      "zoomOut": "Намали"
+    }
+  },
+  "seo": {
+    "description": "{{type}} со {{beds}} спални, {{baths}} бањи за {{listingAction}} во {{city}}, {{country}}. {{sqft}}m² за €{{price}}.",
+    "forRent": "Изнајмување",
+    "forSale": "Продажба"
   }
 }

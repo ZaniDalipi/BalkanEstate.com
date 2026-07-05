@@ -35,7 +35,7 @@
     "failedToUploadImage": "Dështoi ngarkimi i imazhit. Ju lutem provoni përsëri.",
     "failedToSendMessage": "Dështoi dërgimi i mesazhit. Ju lutem provoni përsëri.",
     "failedToDeleteConversation": "Dështoi fshirja e bisedës. Ju lutem provoni përsëri.",
-    "allConversations": "All Conversations"
+    "allConversations": "Të gjitha bisedat"
   },
   "quickReplies": {
     "scheduleTour": "Cakto një Vizitë",
@@ -72,7 +72,7 @@
     "success": "Sukses!",
     "error": "Gabim",
     "warning": "Paralajmërim",
-    "info": "Info",
+    "info": "Informacion",
     "saved": "U ruajt me sukses",
     "deleted": "U fshi me sukses",
     "updated": "U përditësua me sukses",
