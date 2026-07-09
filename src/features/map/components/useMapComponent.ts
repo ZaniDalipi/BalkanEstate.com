@@ -364,6 +364,9 @@ export function useMapComponent(props: MapComponentProps) {
   return {
     t,
 
+    // Location
+    userLocation,
+
     // Google Maps fallback
     forceLeaflet,
     loadingTimedOut,

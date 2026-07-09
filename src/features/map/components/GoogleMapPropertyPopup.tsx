@@ -13,9 +13,11 @@ interface GoogleMapPropertyPopupProps {
   property: Property;
   onClose: () => void;
   onViewDetails: () => void;
+  /** Distance from the user's current location, pre-formatted (e.g. "3.2 km"). */
+  distanceLabel?: string | null;
 }
 
-const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ property, onClose, onViewDetails }) => {
+const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ property, onClose, onViewDetails, distanceLabel }) => {
   const { t } = useTranslation(['property']);
   const imageUrl = property.images?.[0]
     ? (typeof property.images[0] === 'string' ? property.images[0] : property.images[0].url)
@@ -101,6 +103,9 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
         {/* Location */}
         <p className="text-[10px] text-gray-500 mb-2 truncate">
           📍 {property.city}, {property.country}
+          {distanceLabel && (
+            <span className="text-primary font-semibold"> · {t('map.popup.distanceFromYou', '{{distance}} away', { distance: distanceLabel })}</span>
+          )}
         </p>
 
         {/* Property details - inline */}

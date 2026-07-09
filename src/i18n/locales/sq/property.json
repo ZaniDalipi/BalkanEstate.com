@@ -339,7 +339,8 @@
         "standard": "PROMOVUAR"
       },
       "promotedCount_one": "{{count}} promoted listing",
-      "promotedCount_other": "{{count}} promoted listings"
+      "promotedCount_other": "{{count}} promoted listings",
+      "distanceFromYou": "{{distance}} larg"
     },
     "agentRecommendations": {
       "premium": {

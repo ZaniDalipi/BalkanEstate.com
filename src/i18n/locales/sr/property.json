@@ -359,7 +359,8 @@
         "standard": "ПРОМОВИСАНО"
       },
       "promotedCount_one": "{{count}} promoted listing",
-      "promotedCount_other": "{{count}} promoted listings"
+      "promotedCount_other": "{{count}} promoted listings",
+      "distanceFromYou": "на {{distance}} од вас"
     },
     "heatMapLegend": "Густина Некретнина",
     "low": "Ниска",

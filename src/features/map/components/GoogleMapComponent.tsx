@@ -100,6 +100,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
                   property={hook.selectedProperty}
                   onClose={() => hook.setSelectedProperty(null)}
                   onViewDetails={() => hook.handleViewDetails(hook.selectedProperty!.id)}
+                  distanceLabel={hook.selectedPropertyDistanceLabel}
                 />
               </div>
             </OverlayViewF>
