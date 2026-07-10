@@ -38,6 +38,7 @@ import {
 import {
   injectUserLocationMarkerStyles,
   createUserLocationMarkerElement,
+  userLocationScaleForZoom,
 } from '../utils/userLocationMarker';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { useRainViewer } from '../hooks/useRainViewer';
@@ -1180,6 +1181,8 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     }
 
     const content = createUserLocationMarkerElement(label);
+    // Seed the initial zoom-proportional scale before it's on screen.
+    content.style.setProperty('--ulm-zoom-scale', String(userLocationScaleForZoom(mapToUse.getZoom() ?? DEFAULT_ZOOM)));
     content.addEventListener('click', () => {
       mapToUse.panTo(position);
     });
@@ -1193,6 +1196,24 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     });
     userLocationMarkerRef.current = marker;
   }, [map, isLoaded, validUserLocation, t]);
+
+  // Keep the location marker proportionate to the zoom level: shrink it as the
+  // user zooms out so it never blankets the map at country/continent scale.
+  useEffect(() => {
+    const mapToUse = map || mapInstanceRef.current;
+    if (!mapToUse) return;
+
+    const applyScale = () => {
+      const el = userLocationMarkerRef.current?.content as HTMLElement | null;
+      if (!el) return;
+      const z = mapToUse.getZoom() ?? DEFAULT_ZOOM;
+      el.style.setProperty('--ulm-zoom-scale', String(userLocationScaleForZoom(z)));
+    };
+
+    applyScale();
+    const listener = mapToUse.addListener('zoom_changed', applyScale);
+    return () => listener.remove();
+  }, [map, validUserLocation]);
 
   // Distance from the user's location to the currently opened property popup —
   // gives a quick "how far is this" sense without leaving the map.
