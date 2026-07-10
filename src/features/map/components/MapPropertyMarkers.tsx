@@ -11,6 +11,7 @@ import { ClimateRiskType } from './MapOptionsPanel';
 import { Markers, HighlightedPropertyMarkers } from '@/src/components/map/MapPropertyMarker';
 import { MapAgentAvatarInner } from '@/src/components/map/MapAgentAvatar';
 import { TileLayerType } from './useMapComponent';
+import UserLocationMarker from './UserLocationMarker';
 
 interface MapPropertyMarkersProps {
   propertiesInView: Property[];
@@ -25,6 +26,7 @@ interface MapPropertyMarkersProps {
   selectedClimateRisk: ClimateRiskType;
   showMeasurement: boolean;
   onMeasurementClose: () => void;
+  userLocation?: [number, number] | null;
 }
 
 const MapPropertyMarkers: React.FC<MapPropertyMarkersProps> = ({
@@ -40,9 +42,12 @@ const MapPropertyMarkers: React.FC<MapPropertyMarkersProps> = ({
   selectedClimateRisk,
   showMeasurement,
   onMeasurementClose,
+  userLocation,
 }) => {
   return (
     <>
+      {/* Animated "you are here" marker */}
+      <UserLocationMarker location={userLocation ?? null} />
       {/* Climate Risk Overlay Layer (Zillow-style) */}
       <ClimateRiskLayer key={selectedClimateRisk} riskType={selectedClimateRisk} opacity={0.6} />
       {/* 3D Buildings with time-based shadows */}

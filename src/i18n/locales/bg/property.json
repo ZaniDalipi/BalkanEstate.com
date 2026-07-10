@@ -339,8 +339,9 @@
         "featured": "ИЗБРАНО",
         "standard": "ПРОМОТИРАНО"
       },
-      "promotedCount_one": "{{count}} промотирана обява",
-      "promotedCount_other": "{{count}} промотирани обяви"
+      "promotedCount_one": "{{count}} promoted listing",
+      "promotedCount_other": "{{count}} promoted listings",
+      "distanceFromYou": "на {{distance}} от вас"
     },
     "agentRecommendations": {
       "premium": {

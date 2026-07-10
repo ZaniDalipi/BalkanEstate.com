@@ -339,8 +339,9 @@
         "featured": "RECOMANDAT",
         "standard": "PROMOVAT"
       },
-      "promotedCount_one": "{{count}} anunț promovat",
-      "promotedCount_other": "{{count}} anunțuri promovate"
+      "promotedCount_one": "{{count}} promoted listing",
+      "promotedCount_other": "{{count}} promoted listings",
+      "distanceFromYou": "{{distance}} distanță"
     },
     "agentRecommendations": {
       "premium": {

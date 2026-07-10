@@ -787,12 +787,40 @@ export function useSearchPage() {
 
 
     const handleRecenterOnUser = useCallback(() => {
+        // Already have a fix — just fly there.
         if (userLocation) {
             setFlyToTarget({ center: userLocation, zoom: 14 });
-        } else {
-            showToast("Your location is not available.", "error");
+            return;
         }
-    }, [userLocation, showToast]);
+
+        // No fix yet: actively (re)request permission on this user gesture so
+        // there's a reliable way to drop the location pin even when the initial
+        // auto-request on page load was dismissed or never resolved.
+        if (!navigator.geolocation) {
+            showToast(t('search:map.geolocationNotSupported', 'Geolocation is not supported by your browser.'), 'error');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                setUserLocation([latitude, longitude]);
+                setFlyToTarget({ center: [latitude, longitude], zoom: 14 });
+            },
+            (error) => {
+                let message = t('search:map.locationError', 'An error occurred while getting your location. Please try again.');
+                if (error.code === error.PERMISSION_DENIED) {
+                    message = t('search:map.locationPermissionDenied', 'Location permission denied. Please enable location access in your browser settings.');
+                } else if (error.code === error.POSITION_UNAVAILABLE) {
+                    message = t('search:map.locationUnavailable', 'Location information is unavailable. Please try again.');
+                } else if (error.code === error.TIMEOUT) {
+                    message = t('search:map.locationTimeout', 'Location request timed out. Please try again.');
+                }
+                showToast(message, 'error');
+            },
+            { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+        );
+    }, [userLocation, showToast, t]);
 
     // Reset map view to show the full Balkans region
     const handleResetView = useCallback(() => {

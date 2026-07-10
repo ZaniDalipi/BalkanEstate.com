@@ -14,6 +14,7 @@
  */
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { Property } from '@/types';
 import L from 'leaflet';
@@ -23,15 +24,21 @@ import { SaveMeasurementUseCase, GetMeasurementsUseCase } from '@/src/domain/use
 import { measurementRepository } from '@/src/data/repositories/MeasurementRepository';
 import { MeasurementLimitExceededError, InvalidMeasurementError } from '@/src/domain/repositories/IMeasurementRepository';
 import { MEASUREMENT_LIMITS } from '@/src/domain/entities/Measurement';
+import { validateCoordinates } from '@/shared/utils/validation';
 import {
   useGoogleMapLoader,
   GOOGLE_MAPS_MAP_ID,
   calculateDistance,
   calculateTotalDistance,
   calculatePolygonArea,
+  formatMeasureDistance,
   type MeasurementPoint,
   type LocalMeasurement,
 } from '../hooks';
+import {
+  injectUserLocationMarkerStyles,
+  createUserLocationMarkerElement,
+} from '../utils/userLocationMarker';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { useRainViewer } from '../hooks/useRainViewer';
 import { useOpenMeteoGrid, type MapBounds } from '../hooks/useOpenMeteoGrid';
@@ -120,6 +127,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   } = props;
 
   const { dispatch } = useAppContext();
+  const { t } = useTranslation(['search', 'property']);
 
   // Map state
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -175,6 +183,8 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   const climateLayerRef = useRef<google.maps.ImageMapType | null>(null);
   // Ref to track map instance synchronously (avoids race condition with async setState)
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  // The animated "you are here" dot — recreated only when the map (re)loads
+  const userLocationMarkerRef = useRef<google.maps.marker.AdvancedMarkerElement | null>(null);
 
   // Drawing refs - for rectangle drawing on map
   const drawingStartRef = useRef<{ lat: number; lng: number } | null>(null);
@@ -248,16 +258,24 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     ).length;
   }, [properties]);
 
-  // Initial center from user location
-  const initialCenter = useMemo(() => {
-    if (userLocation) {
-      return { lat: userLocation[0], lng: userLocation[1] };
-    }
-    return DEFAULT_CENTER;
+  // Validate the browser-supplied geolocation fix before trusting it anywhere
+  // (system boundary: coordinates originate from navigator.geolocation, not our own code).
+  const validUserLocation = useMemo(() => {
+    if (!userLocation) return null;
+    const [lat, lng] = userLocation;
+    return validateCoordinates(lat, lng).isValid ? userLocation : null;
   }, [userLocation]);
 
+  // Initial center from user location
+  const initialCenter = useMemo(() => {
+    if (validUserLocation) {
+      return { lat: validUserLocation[0], lng: validUserLocation[1] };
+    }
+    return DEFAULT_CENTER;
+  }, [validUserLocation]);
+
   // Initial zoom
-  const initialZoom = userLocation ? 13 : DEFAULT_ZOOM;
+  const initialZoom = validUserLocation ? 13 : DEFAULT_ZOOM;
 
   // Fetch measurement count on mount and when authentication changes
   useEffect(() => {
@@ -674,6 +692,10 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     }
     markersRef.current.clear();
     markerDivsRef.current.clear();
+    if (userLocationMarkerRef.current) {
+      userLocationMarkerRef.current.map = null;
+      userLocationMarkerRef.current = null;
+    }
     mapInstanceRef.current = null;
     setMap(null);
   }, []);
@@ -1133,6 +1155,58 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     };
   }, [validProperties, map, isLoaded, markersReady, createAllMarkers]);
 
+  // Animated "you are here" marker — created once permission is granted and a
+  // valid fix is available, removed the moment location becomes unavailable
+  // again (e.g. permission revoked mid-session).
+  useEffect(() => {
+    const mapToUse = map || mapInstanceRef.current;
+    if (!mapToUse || !isLoaded) return;
+
+    if (!validUserLocation) {
+      if (userLocationMarkerRef.current) {
+        userLocationMarkerRef.current.map = null;
+        userLocationMarkerRef.current = null;
+      }
+      return;
+    }
+
+    injectUserLocationMarkerStyles();
+    const position = { lat: validUserLocation[0], lng: validUserLocation[1] };
+    const label = t('search:map.myLocation', 'My Location');
+
+    if (userLocationMarkerRef.current) {
+      userLocationMarkerRef.current.position = position;
+      return;
+    }
+
+    const content = createUserLocationMarkerElement(label);
+    content.addEventListener('click', () => {
+      mapToUse.panTo(position);
+    });
+
+    const marker = new google.maps.marker.AdvancedMarkerElement({
+      map: mapToUse,
+      position,
+      content,
+      zIndex: 500,
+      title: label,
+    });
+    userLocationMarkerRef.current = marker;
+  }, [map, isLoaded, validUserLocation, t]);
+
+  // Distance from the user's location to the currently opened property popup —
+  // gives a quick "how far is this" sense without leaving the map.
+  const selectedPropertyDistanceLabel = useMemo(() => {
+    if (!validUserLocation || !selectedProperty) return null;
+    if (selectedProperty.lat == null || selectedProperty.lng == null) return null;
+
+    const meters = calculateDistance(
+      { lat: validUserLocation[0], lng: validUserLocation[1] },
+      { lat: selectedProperty.lat, lng: selectedProperty.lng }
+    );
+    return formatMeasureDistance(meters);
+  }, [validUserLocation, selectedProperty]);
+
   // Handle hover state changes from property list - use CSS classes for better performance
   useEffect(() => {
     markerDivsRef.current.forEach((div, id) => {
@@ -1258,15 +1332,15 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   const handleRecenter = useCallback(() => {
     if (!map) return;
 
-    if (userLocation) {
-      map.panTo({ lat: userLocation[0], lng: userLocation[1] });
+    if (validUserLocation) {
+      map.panTo({ lat: validUserLocation[0], lng: validUserLocation[1] });
       map.setZoom(13);
     } else {
       map.panTo(DEFAULT_CENTER);
       map.setZoom(DEFAULT_ZOOM);
     }
     onRecenter();
-  }, [map, userLocation, onRecenter]);
+  }, [map, validUserLocation, onRecenter]);
 
   // Cadastre layer overlay effect
   useEffect(() => {
@@ -1868,6 +1942,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     selectedProperty,
     setSelectedProperty,
     handleViewDetails,
+    selectedPropertyDistanceLabel,
 
     // Drawing
     drawingRect,

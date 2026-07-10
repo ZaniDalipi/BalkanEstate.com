@@ -359,8 +359,9 @@
         "featured": "IZDVOJENO",
         "standard": "PROMOVIRANO"
       },
-      "promotedCount_one": "{{count}} promovirani oglas",
-      "promotedCount_other": "{{count}} promoviranih oglasa"
+      "promotedCount_one": "{{count}} promoted listing",
+      "promotedCount_other": "{{count}} promoted listings",
+      "distanceFromYou": "{{distance}} daleko"
     },
     "heatMapLegend": "Gustoća Nekretnina",
     "low": "Niska",

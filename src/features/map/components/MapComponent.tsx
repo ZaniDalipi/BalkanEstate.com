@@ -370,6 +370,7 @@ const MapComponent: React.FC<MapComponentProps> = (props) => {
             selectedClimateRisk={hook.selectedClimateRisk}
             showMeasurement={hook.showMeasurement}
             onMeasurementClose={() => hook.setShowMeasurement(false)}
+            userLocation={hook.userLocation}
           />
         </MapContainer>
 

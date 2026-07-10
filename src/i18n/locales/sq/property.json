@@ -339,8 +339,9 @@
         "featured": "TË VEÇUAR",
         "standard": "PROMOVUAR"
       },
-      "promotedCount_one": "{{count}} listim i promovuar",
-      "promotedCount_other": "{{count}} listime të promovuara"
+      "promotedCount_one": "{{count}} promoted listing",
+      "promotedCount_other": "{{count}} promoted listings",
+      "distanceFromYou": "{{distance}} larg"
     },
     "agentRecommendations": {
       "premium": {

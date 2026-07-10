@@ -359,8 +359,9 @@
         "featured": "IZDVOJENO",
         "standard": "PROMOVISANO"
       },
-      "promotedCount_one": "{{count}} promovisani oglas",
-      "promotedCount_other": "{{count}} promovisanih oglasa"
+      "promotedCount_one": "{{count}} promoted listing",
+      "promotedCount_other": "{{count}} promoted listings",
+      "distanceFromYou": "{{distance}} daleko"
     },
     "heatMapLegend": "Gustina nekretnina",
     "low": "Niska",

@@ -339,8 +339,9 @@
         "featured": "ΠΡΟΤΕΙΝΟΜΕΝΟ",
         "standard": "ΠΡΟΩΘΗΜΕΝΟ"
       },
-      "promotedCount_one": "{{count}} προωθημένη καταχώριση",
-      "promotedCount_other": "{{count}} προωθημένες καταχωρίσεις"
+      "promotedCount_one": "{{count}} promoted listing",
+      "promotedCount_other": "{{count}} promoted listings",
+      "distanceFromYou": "{{distance}} μακριά"
     },
     "agentRecommendations": {
       "premium": {
