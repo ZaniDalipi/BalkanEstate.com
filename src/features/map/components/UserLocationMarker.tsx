@@ -1,7 +1,7 @@
 /**
- * UserLocationMarker - Animated "you are here" dot for the Leaflet fallback map.
- * Mirrors the Google Maps AdvancedMarkerElement rendered in useGoogleMap.ts so
- * both map engines show the same pulsing indicator.
+ * UserLocationMarker - Animated "you are here" person avatar for the Leaflet
+ * fallback map. Mirrors the Google Maps AdvancedMarkerElement rendered in
+ * useGoogleMap.ts so both map engines show the same pulsing indicator.
  */
 
 import React, { useEffect, useMemo } from 'react';
@@ -9,7 +9,11 @@ import { useTranslation } from 'react-i18next';
 import { Marker } from 'react-leaflet';
 import L from 'leaflet';
 import { validateCoordinates } from '@/shared/utils/validation';
-import { injectUserLocationMarkerStyles, userLocationMarkerHtml } from '../utils/userLocationMarker';
+import {
+  injectUserLocationMarkerStyles,
+  userLocationMarkerHtml,
+  USER_LOCATION_MARKER_SIZE,
+} from '../utils/userLocationMarker';
 
 interface UserLocationMarkerProps {
   location: [number, number] | null;
@@ -24,11 +28,12 @@ const UserLocationMarker: React.FC<UserLocationMarkerProps> = ({ location }) => 
 
   const icon = useMemo(() => {
     const label = t('search:map.myLocation', 'My Location');
+    const size = USER_LOCATION_MARKER_SIZE;
     return L.divIcon({
       html: userLocationMarkerHtml(label),
       className: 'user-location-marker-icon',
-      iconSize: [22, 22],
-      iconAnchor: [11, 11],
+      iconSize: [size, size],
+      iconAnchor: [size / 2, size / 2],
     });
   }, [t]);
 
