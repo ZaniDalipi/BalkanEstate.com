@@ -12,6 +12,24 @@ const STYLE_ID = 'user-location-marker-styles';
 // Marker footprint in px — exported so the Leaflet DivIcon can size/anchor to match.
 export const USER_LOCATION_MARKER_SIZE = 40;
 
+/**
+ * Zoom-proportional scale factor for the marker. Full size at street-level
+ * zoom; shrinks toward a floor as the user zooms out, so the marker stays
+ * proportionate and doesn't blanket the map at country/continent scale.
+ * Applied as a CSS `transform: scale(...)` on the inner `.ulm-scale` layer.
+ */
+export function userLocationScaleForZoom(zoom: number): number {
+  const MIN_SCALE = 0.4; // ~16px at continent zoom
+  const MAX_SCALE = 1; // full 40px at street zoom
+  const SMALL_AT = 6; // zoom <= 6 → smallest
+  const FULL_AT = 13; // zoom >= 13 → full size
+
+  if (!Number.isFinite(zoom) || zoom >= FULL_AT) return MAX_SCALE;
+  if (zoom <= SMALL_AT) return MIN_SCALE;
+  const ratio = (zoom - SMALL_AT) / (FULL_AT - SMALL_AT);
+  return MIN_SCALE + ratio * (MAX_SCALE - MIN_SCALE);
+}
+
 /** Injects the pulse/entrance keyframes once per document. */
 export function injectUserLocationMarkerStyles(): void {
   if (typeof document === 'undefined' || document.getElementById(STYLE_ID)) return;
@@ -43,6 +61,16 @@ export function injectUserLocationMarkerStyles(): void {
       height: ${USER_LOCATION_MARKER_SIZE}px;
       cursor: pointer;
       transform: none;
+    }
+    /* Zoom-proportional scale layer — driven by the --ulm-zoom-scale custom
+       property set on the marker element as the map zoom changes. Kept separate
+       from the entrance/bob animations so they never fight over transform. */
+    .user-location-marker .ulm-scale {
+      position: absolute;
+      inset: 0;
+      transform: scale(var(--ulm-zoom-scale, 1));
+      transform-origin: center;
+      transition: transform 0.2s ease-out;
     }
     .user-location-marker .ulm-inner {
       position: absolute;
@@ -100,10 +128,12 @@ const PERSON_SVG =
 export function userLocationMarkerHtml(label: string): string {
   return `
     <div class="user-location-marker" role="img" aria-label="${label}" title="${label}">
-      <div class="ulm-inner">
-        <div class="ulm-ping"></div>
-        <div class="ulm-ping ulm-ping-delay"></div>
-        <div class="ulm-avatar">${PERSON_SVG}</div>
+      <div class="ulm-scale">
+        <div class="ulm-inner">
+          <div class="ulm-ping"></div>
+          <div class="ulm-ping ulm-ping-delay"></div>
+          <div class="ulm-avatar">${PERSON_SVG}</div>
+        </div>
       </div>
     </div>
   `;

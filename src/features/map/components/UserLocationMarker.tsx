@@ -1,17 +1,19 @@
 /**
  * UserLocationMarker - Animated "you are here" person avatar for the Leaflet
  * fallback map. Mirrors the Google Maps AdvancedMarkerElement rendered in
- * useGoogleMap.ts so both map engines show the same pulsing indicator.
+ * useGoogleMap.ts so both map engines show the same pulsing indicator, scaled
+ * proportionally to the current zoom level.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Marker } from 'react-leaflet';
+import { Marker, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { validateCoordinates } from '@/shared/utils/validation';
 import {
   injectUserLocationMarkerStyles,
   userLocationMarkerHtml,
+  userLocationScaleForZoom,
   USER_LOCATION_MARKER_SIZE,
 } from '../utils/userLocationMarker';
 
@@ -21,6 +23,7 @@ interface UserLocationMarkerProps {
 
 const UserLocationMarker: React.FC<UserLocationMarkerProps> = ({ location }) => {
   const { t } = useTranslation(['search']);
+  const map = useMap();
 
   useEffect(() => {
     injectUserLocationMarkerStyles();
@@ -36,6 +39,21 @@ const UserLocationMarker: React.FC<UserLocationMarkerProps> = ({ location }) => 
       iconAnchor: [size / 2, size / 2],
     });
   }, [t]);
+
+  // Drive the zoom-proportional scale via a CSS custom property. It's set on the
+  // stable map container (not the marker element, which Leaflet re-creates on
+  // setIcon) so the marker — a descendant — always inherits the current value.
+  const applyScale = useCallback(() => {
+    const container = map.getContainer();
+    if (!container) return;
+    container.style.setProperty('--ulm-zoom-scale', String(userLocationScaleForZoom(map.getZoom())));
+  }, [map]);
+
+  useMapEvents({ zoom: applyScale, zoomend: applyScale });
+
+  useEffect(() => {
+    applyScale();
+  }, [applyScale, location]);
 
   // Validate at the boundary — coordinates originate from navigator.geolocation
   if (!location || !validateCoordinates(location[0], location[1]).isValid) return null;
