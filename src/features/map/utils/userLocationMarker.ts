@@ -32,11 +32,21 @@ export function injectUserLocationMarkerStyles(): void {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-3px); }
     }
+    /* Outer element handed to the map marker — MUST stay a static, fixed-size,
+       transform-free box so map engines (esp. Google AdvancedMarkerElement on a
+       vector map) don't composite our animation transforms with their own zoom
+       transforms, which made the marker visually scale on zoom. All animations
+       live on the inner children below. */
     .user-location-marker {
       position: relative;
       width: ${USER_LOCATION_MARKER_SIZE}px;
       height: ${USER_LOCATION_MARKER_SIZE}px;
       cursor: pointer;
+      transform: none;
+    }
+    .user-location-marker .ulm-inner {
+      position: absolute;
+      inset: 0;
       animation: ulmEnter 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
     }
     .user-location-marker .ulm-ping {
@@ -90,9 +100,11 @@ const PERSON_SVG =
 export function userLocationMarkerHtml(label: string): string {
   return `
     <div class="user-location-marker" role="img" aria-label="${label}" title="${label}">
-      <div class="ulm-ping"></div>
-      <div class="ulm-ping ulm-ping-delay"></div>
-      <div class="ulm-avatar">${PERSON_SVG}</div>
+      <div class="ulm-inner">
+        <div class="ulm-ping"></div>
+        <div class="ulm-ping ulm-ping-delay"></div>
+        <div class="ulm-avatar">${PERSON_SVG}</div>
+      </div>
     </div>
   `;
 }
