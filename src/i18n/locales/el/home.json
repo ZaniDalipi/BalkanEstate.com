@@ -56,7 +56,8 @@
     "perMonth": "/μήνα",
     "promoted": "Προωθημένο",
     "new": "Νέο",
-    "priceReduced": "Μειωμένη Τιμή"
+    "priceReduced": "Μειωμένη Τιμή",
+    "byNegotiation": "Κατόπιν Διαπραγμάτευσης"
   },
   "categories": {
     "title": "Αναζήτηση ανά Κατηγορία",

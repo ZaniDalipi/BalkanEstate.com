@@ -56,7 +56,8 @@
     "perMonth": "/mo",
     "promoted": "Promoted",
     "new": "New",
-    "priceReduced": "Price Reduced"
+    "priceReduced": "Price Reduced",
+    "byNegotiation": "By Negotiation"
   },
   "categories": {
     "title": "Browse by Category",
