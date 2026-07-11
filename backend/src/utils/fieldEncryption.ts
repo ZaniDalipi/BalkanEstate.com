@@ -168,6 +168,16 @@ export function encryptionPlugin(schema: any, options: { fields: string[] }) {
     for (const field of fields) {
       if (doc[field] && typeof doc[field] === 'string' && isEncrypted(doc[field])) {
         doc[field] = decryptField(doc[field]);
+        // Decrypting a field for reading must NOT mark it as modified.
+        // Assigning to a hydrated Mongoose document dirties the path, which
+        // would make the next save() re-encrypt the field — even when the
+        // caller only meant to update something unrelated (e.g. appending a
+        // login-history entry or a refresh token). A single encryption error
+        // would then turn an ordinary request into a 500. unmarkModified only
+        // exists on hydrated documents, not on lean/plain objects.
+        if (typeof doc.unmarkModified === 'function') {
+          doc.unmarkModified(field);
+        }
       }
     }
   };
