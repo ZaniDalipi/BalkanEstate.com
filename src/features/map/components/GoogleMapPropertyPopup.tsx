@@ -37,7 +37,7 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
   return (
     <div
       className="animate-map-popup-in bg-white rounded-2xl shadow-xl ring-1 ring-black/5 border border-gray-100/50 relative"
-      style={{ width: 200, maxWidth: '85vw' }}
+      style={{ width: 248, maxWidth: '88vw' }}
       onClick={(e) => e.stopPropagation()}
     >
       {/* Pointer tail toward the marker */}
@@ -59,7 +59,7 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
       </button>
 
       {/* Image container */}
-      <div className="relative h-24 rounded-t-2xl overflow-hidden bg-gray-100">
+      <div className="relative h-32 rounded-t-2xl overflow-hidden bg-gray-100">
         {imageUrl ? (
           <>
             {/* Shimmer skeleton while the image loads */}
@@ -104,16 +104,16 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
       </div>
 
       {/* Content */}
-      <div className="p-2.5">
+      <div className="p-3">
         {/* Price */}
-        <div className="map-popup-reveal map-popup-reveal-1 font-bold text-base text-gray-900 mb-0.5 tracking-tight">
+        <div className="map-popup-reveal map-popup-reveal-1 font-bold text-lg text-gray-900 mb-1 tracking-tight">
           {property.isNegotiable
             ? t('property:byNegotiation', 'By Negotiation')
             : formatPrice(property.price, property.country)}
         </div>
 
         {/* Location */}
-        <p className="map-popup-reveal map-popup-reveal-2 text-[10px] text-gray-500 mb-2 truncate">
+        <p className="map-popup-reveal map-popup-reveal-2 text-[11px] text-gray-500 mb-2.5 truncate">
           📍 {property.city}, {property.country}
           {distanceLabel && (
             <span className="text-primary font-semibold"> · {t('map.popup.distanceFromYou', '{{distance}} away', { distance: distanceLabel })}</span>
@@ -121,16 +121,16 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
         </p>
 
         {/* Property details - inline */}
-        <div className="map-popup-reveal map-popup-reveal-3 flex items-center gap-2 mb-2 text-[10px] text-gray-600">
+        <div className="map-popup-reveal map-popup-reveal-3 flex items-center gap-2 mb-2.5 text-[11px] text-gray-600">
           {property.propertyType === 'land' ? (
-            <span className="flex items-center gap-1 bg-gray-100 px-1.5 py-1 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5">
+            <span className="flex items-center gap-1 bg-gray-100 px-2 py-1.5 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5">
               📐 <b>{property.sqft?.toLocaleString()}</b> m²
             </span>
           ) : (
             <>
-              <span className="bg-gray-100 px-1.5 py-1 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5">🛏 {property.beds || 0}</span>
-              <span className="bg-gray-100 px-1.5 py-1 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5">🚿 {property.baths || 0}</span>
-              <span className="bg-gray-100 px-1.5 py-1 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5">📐 {property.sqft || 0}</span>
+              <span className="bg-gray-100 px-2 py-1.5 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5">🛏 {property.beds || 0}</span>
+              <span className="bg-gray-100 px-2 py-1.5 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5">🚿 {property.baths || 0}</span>
+              <span className="bg-gray-100 px-2 py-1.5 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5">📐 {property.sqft || 0}</span>
             </>
           )}
         </div>
@@ -138,7 +138,7 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
         {/* View details button */}
         <button
           onClick={onViewDetails}
-          className="map-popup-cta map-popup-reveal map-popup-reveal-4 w-full py-1.5 bg-gradient-to-r from-primary to-blue-600 hover:shadow-lg hover:shadow-primary/30 text-white text-xs font-semibold rounded-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
+          className="map-popup-cta map-popup-reveal map-popup-reveal-4 w-full py-2 bg-gradient-to-r from-primary to-blue-600 hover:shadow-lg hover:shadow-primary/30 text-white text-[13px] font-semibold rounded-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
         >
           {t('map.popup.viewDetails', 'View')} <span className="map-popup-cta-arrow">→</span>
         </button>
