@@ -20,19 +20,20 @@
     "analytics": "Analitika",
     "messages": "Mesazhet",
     "myAccount": "Llogaria Ime",
-    "howItWorks": "Si Funksionon"
+    "howItWorks": "Si Funksionon",
+    "blog": "Blog"
   },
   "countries": {
-    "AL": "Shqipëria",
-    "BA": "Bosnja",
-    "BG": "Bullgaria",
+    "AL": "Shqipëri",
+    "BA": "Bosnjë",
+    "BG": "Bullgari",
     "HR": "Kroacia",
     "GR": "Greqia",
-    "XK": "Kosova",
+    "XK": "Kosovë",
     "ME": "Mali i Zi",
     "MK": "Maqedonia e V.",
     "RO": "Rumania",
-    "RS": "Serbia"
+    "RS": "Serbi"
   },
   "contact": {
     "phone": "+383 XX XXX XXX",
@@ -43,11 +44,11 @@
     "privacyPolicy": "Politika e Privatësisë",
     "termsOfService": "Kushtet e Shërbimit",
     "cookiePolicy": "Politika e Cookies",
-    "disclaimer": "Disclaimer",
-    "accessibility": "Accessibility"
+    "disclaimer": "Mohim përgjegjësie",
+    "accessibility": "Aksesueshmëria"
   },
   "social": {
-    "followUs": "Follow Us",
+    "followUs": "Na Ndiqni",
     "facebook": "Facebook",
     "twitter": "Twitter",
     "instagram": "Instagram",
@@ -55,35 +56,35 @@
     "youtube": "YouTube"
   },
   "app": {
-    "downloadApp": "Download Our App",
-    "availableOn": "Available on",
+    "downloadApp": "Shkarkoni Aplikacionin Tonë",
+    "availableOn": "E disponueshme në",
     "appStore": "App Store",
     "playStore": "Google Play"
   },
   "newsletter": {
-    "title": "Subscribe to Newsletter",
-    "placeholder": "Enter your email",
-    "subscribe": "Subscribe",
-    "subscribed": "Thank you for subscribing!"
+    "title": "Abonohu në Buletin",
+    "placeholder": "Shkruani email-in tuaj",
+    "subscribe": "Abonohu",
+    "subscribed": "Faleminderit që u abonuat!"
   },
   "support": {
-    "title": "Support",
-    "helpCenter": "Help Center",
-    "contactUs": "Contact Us",
-    "faq": "FAQ",
-    "feedback": "Give Feedback"
+    "title": "Mbështetje",
+    "helpCenter": "Qendra e Ndihmës",
+    "contactUs": "Na Kontaktoni",
+    "faq": "Pyetjet e shpeshta",
+    "feedback": "Jepni Koment"
   },
   "company": {
-    "title": "Company",
-    "aboutUs": "About Us",
-    "careers": "Careers",
-    "press": "Press",
+    "title": "Kompania",
+    "aboutUs": "Rreth Nesh",
+    "careers": "Karriera",
+    "press": "Shtypi",
     "blog": "Blog"
   },
   "partners": {
-    "title": "Partners",
-    "becomePartner": "Become a Partner",
-    "affiliates": "Affiliates",
-    "developers": "For Developers"
+    "title": "Partnerët",
+    "becomePartner": "Bëhu Partner",
+    "affiliates": "Bashkëpunëtorë",
+    "developers": "Për Zhvilluesit"
   }
 }

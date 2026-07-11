@@ -1,45 +1,45 @@
 {
-  "imagesRequired": "Απαιτούνται Εικόνες",
-  "locationRequired": "Απαιτείται Τοποθεσία",
-  "invalidFloorNumber": "Μη Έγκυρος Αριθμός Ορόφου",
-  "invalidFloorCount": "Μη Έγκυρος Αριθμός Ορόφων",
-  "elevatorRequired": "Απαιτούνται Πληροφορίες Ανελκυστήρα",
+  "imagesRequired": "Απαιτούνται εικόνες",
+  "locationRequired": "Απαιτείται τοποθεσία",
+  "invalidFloorNumber": "Μη έγκυρος αριθμός ορόφου",
+  "invalidFloorCount": "Μη έγκυρος αριθμός ορόφων",
+  "elevatorRequired": "Απαιτούνται πληροφορίες ασανσέρ",
   "password": {
-    "minLength": "At least 8 characters",
-    "uppercase": "One uppercase letter",
-    "lowercase": "One lowercase letter",
-    "number": "One number",
-    "specialChar": "One special character (!@#$%...)",
-    "noSequential": "No sequential characters (123, abc, qwe)",
-    "notCommon": "Not a common password",
-    "mismatch": "Passwords do not match"
+    "minLength": "Τουλάχιστον 8 χαρακτήρες",
+    "uppercase": "Ένα κεφαλαίο γράμμα",
+    "lowercase": "Ένα πεζό γράμμα",
+    "number": "Ένας αριθμός",
+    "specialChar": "Ένας ειδικός χαρακτήρας (!@#$%...)",
+    "noSequential": "Χωρίς διαδοχικούς χαρακτήρες (123, abc, qwe)",
+    "notCommon": "Όχι κοινός κωδικός",
+    "mismatch": "Οι κωδικοί δεν ταιριάζουν"
   },
   "email": {
-    "required": "Email is required",
-    "invalid": "Please enter a valid email address"
+    "required": "Το email είναι υποχρεωτικό",
+    "invalid": "Εισαγάγετε μια έγκυρη διεύθυνση email"
   },
   "phone": {
-    "required": "Phone number is required",
-    "invalid": "Please enter a valid phone number"
+    "required": "Ο αριθμός τηλεφώνου είναι υποχρεωτικός",
+    "invalid": "Εισαγάγετε έναν έγκυρο αριθμό τηλεφώνου"
   },
-  "required": "This field is required",
-  "minLength": "Must be at least {{count}} characters",
-  "maxLength": "Must be no more than {{count}} characters",
-  "numeric": "Must be a number",
-  "positive": "Must be a positive number",
-  "url": "Please enter a valid URL",
+  "required": "Αυτό το πεδίο είναι υποχρεωτικό",
+  "minLength": "Πρέπει να έχει τουλάχιστον {{count}} χαρακτήρες",
+  "maxLength": "Δεν πρέπει να υπερβαίνει τους {{count}} χαρακτήρες",
+  "numeric": "Πρέπει να είναι αριθμός",
+  "positive": "Πρέπει να είναι θετικός αριθμός",
+  "url": "Εισαγάγετε μια έγκυρη διεύθυνση URL",
   "date": {
-    "invalid": "Please enter a valid date",
-    "future": "Date must be in the future",
-    "past": "Date must be in the past"
+    "invalid": "Εισαγάγετε μια έγκυρη ημερομηνία",
+    "future": "Η ημερομηνία πρέπει να είναι στο μέλλον",
+    "past": "Η ημερομηνία πρέπει να είναι στο παρελθόν"
   },
   "file": {
-    "required": "Please select a file",
-    "size": "File size must be less than {{size}}MB",
-    "type": "Invalid file type. Allowed: {{types}}"
+    "required": "Επιλέξτε ένα αρχείο",
+    "size": "Το μέγεθος του αρχείου πρέπει να είναι μικρότερο από {{size}}MB",
+    "type": "Μη έγκυρος τύπος αρχείου. Επιτρέπονται: {{types}}"
   },
   "form": {
-    "hasErrors": "Please fix the errors before submitting",
-    "submitError": "An error occurred. Please try again."
+    "hasErrors": "Διορθώστε τα σφάλματα πριν την υποβολή",
+    "submitError": "Παρουσιάστηκε σφάλμα. Δοκιμάστε ξανά."
   }
 }

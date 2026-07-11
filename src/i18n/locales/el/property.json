@@ -146,7 +146,8 @@
         "sat": "Σάβ"
       },
       "slotDuration": "{{minutes}} λεπτά slots"
-    }
+    },
+    "floorPlanInteractiveHint": "Διαδραστικό πρόγραμμα προβολής με ζουμ, μετακίνηση και ετικέτες"
   },
   "distances": {
     "title": "Αποστάσεις",
@@ -194,7 +195,7 @@
     "tour3d": "3D Ξενάγηση",
     "tour360": "Ξενάγηση 360°",
     "photos": "Φωτογραφίες",
-    "streetView": "Προβολή Δρόμου",
+    "streetView": "Προβολή δρόμου",
     "video": "Βίντεο",
     "all": "Όλα",
     "sendInquiry": "Αποστολή ερώτησης μέσω email",
@@ -212,14 +213,14 @@
   },
   "seller": {
     "seller": "Πωλητής",
-    "agent": "Μεσίτης",
+    "agent": "Πράκτορας",
     "agency": "Μεσιτικό Γραφείο",
     "private": "Ιδιώτης Πωλητής",
     "verified": "Επαληθευμένος Πωλητής",
     "contactInfo": "Στοιχεία Επικοινωνίας",
     "phone": "Τηλέφωνο",
     "email": "Email",
-    "website": "Ιστοσελίδα",
+    "website": "Ιστότοπος",
     "viewProfile": "Προβολή προφίλ"
   },
   "navigation": {
@@ -233,8 +234,8 @@
     "title": "Εικονική Ξενάγηση 360°",
     "description": "Εξερευνήστε αυτό το ακίνητο σε immersive 360°",
     "openInNewTab": "Ανοίξτε σε νέα καρτέλα για πλήρη εμπειρία",
-    "failedToLoad": "Failed to load virtual tour",
-    "loading": "Loading virtual tour...",
+    "failedToLoad": "Η φόρτωση της εικονικής περιήγησης απέτυχε",
+    "loading": "Φόρτωση εικονικής περιήγησης...",
     "exit": "Έξοδος από την περιήγηση",
     "floor": "Όροφος {{floor}}",
     "hint": "Σύρετε για να κοιτάξετε • Κυλήστε για ζουμ",
@@ -277,15 +278,15 @@
     "featuredAgencies": "Προτεινόμενα Μεσιτικά Γραφεία",
     "tabs": {
       "properties": "Ακίνητα",
-      "agents": "Μεσίτες"
+      "agents": "Πράκτορες"
     },
     "agents": {
-      "title": "Αποθηκευμένοι Μεσίτες",
-      "noSaved": "Δεν έχετε αποθηκεύσει ακόμα κανέναν μεσίτη.",
-      "clickHeart": "Κάντε κλικ στο εικονίδιο καρδιάς σε οποιοδήποτε προφίλ μεσίτη για να τον αποθηκεύσετε εδώ.",
-      "browseAgents": "Περιήγηση Μεσιτών",
-      "agentSaved": "Μεσίτης Αποθηκεύτηκε",
-      "agentsSaved": "Μεσίτες Αποθηκεύτηκαν"
+      "title": "Αποθηκευμένοι πράκτορες",
+      "noSaved": "Δεν έχετε αποθηκεύσει ακόμη κανέναν πράκτορα.",
+      "clickHeart": "Κάντε κλικ στο εικονίδιο καρδιάς σε οποιοδήποτε προφίλ πράκτορα για να τον αποθηκεύσετε εδώ.",
+      "browseAgents": "Περιήγηση σε πράκτορες",
+      "agentSaved": "Ο πράκτορας αποθηκεύτηκε",
+      "agentsSaved": "Αποθηκευμένοι πράκτορες"
     }
   },
   "comparison": {
@@ -341,7 +342,8 @@
         "standard": "ΠΡΟΩΘΗΜΕΝΟ"
       },
       "promotedCount_one": "{{count}} promoted listing",
-      "promotedCount_other": "{{count}} promoted listings"
+      "promotedCount_other": "{{count}} promoted listings",
+      "distanceFromYou": "{{distance}} μακριά"
     },
     "agentRecommendations": {
       "premium": {
@@ -386,8 +388,8 @@
     "title": "Φωτογραφίες",
     "all": "Όλες",
     "categories": {
-      "exterior": "Εξωτερικά",
-      "interior": "Εσωτερικά",
+      "exterior": "Εξωτερικό",
+      "interior": "Εσωτερικό",
       "kitchen": "Κουζίνα",
       "bathroom": "Μπάνιο",
       "bedroom": "Υπνοδωμάτιο",
@@ -397,9 +399,9 @@
       "view": "Θέα",
       "other": "Άλλο"
     },
-    "images": "photos",
-    "view": "View",
-    "tapToView": "Tap to view in gallery"
+    "images": "φωτογραφίες",
+    "view": "Προβολή",
+    "tapToView": "Πατήστε για προβολή στη συλλογή"
   },
   "mapLink": {
     "title": "Δείτε στον Χάρτη",
@@ -529,15 +531,15 @@
     "moreListings": "Περισσότερες Αγγελίες"
   },
   "gallery": {
-    "mute": "Mute",
-    "unmute": "Unmute",
-    "fullscreen": "Fullscreen",
-    "exitFullscreen": "Exit fullscreen",
-    "enterFullscreen": "Enter fullscreen",
-    "propertyShowcase": "Property Showcase",
-    "skipVideo": "Skip Video",
-    "videoTour": "Video Tour",
-    "enter3DTour": "Enter 3D Tour",
+    "mute": "Σίγαση",
+    "unmute": "Κατάργηση σίγασης",
+    "fullscreen": "Πλήρης οθόνη",
+    "exitFullscreen": "Έξοδος από πλήρη οθόνη",
+    "enterFullscreen": "Είσοδος σε πλήρη οθόνη",
+    "propertyShowcase": "Παρουσίαση ακινήτου",
+    "skipVideo": "Παράλειψη βίντεο",
+    "videoTour": "Περιήγηση με βίντεο",
+    "enter3DTour": "Είσοδος σε περιήγηση 3D",
     "view3DMap": "3D χάρτης τοποθεσίας"
   },
   "viewings": {
@@ -578,7 +580,14 @@
       "save": "Αποθήκευση",
       "hint": "Σχεδιάστε στην εικόνα για να προσθέσετε σχόλια",
       "sendToChat": "Αποστολή"
-    }
+    },
+    "ariaLabel": "Πρόγραμμα προβολής εικόνων: {{current}} από {{total}}",
+    "close": "Κλείσιμο προγράμματος προβολής εικόνων",
+    "imageAlt": "Εικόνα ακινήτου {{current}} από {{total}}",
+    "loadError": "Η εικόνα δεν ήταν δυνατό να φορτωθεί",
+    "next": "Επόμενη εικόνα ({{current}} από {{total}})",
+    "previous": "Προηγούμενη εικόνα ({{current}} από {{total}})",
+    "resetZoom": "Επαναφορά ζουμ"
   },
   "sectionNav": {
     "ariaLabel": "Ενότητες ακινήτου",
@@ -591,5 +600,61 @@
     "priceHistory": "Ιστορικό Τιμών",
     "similar": "Παρόμοια ακίνητα",
     "onThisPage": "Σε αυτή τη σελίδα"
+  },
+  "floorPlan": {
+    "viewer": {
+      "annotateMode": "Λειτουργία σχολιασμού",
+      "annotateTitle": "Κάντε κλικ στην κάτοψη για να προσθέσετε ετικέτες δωματίων",
+      "area": "Εμβαδόν (m²)",
+      "ariaLabel": "Πρόγραμμα προβολής κάτοψης",
+      "clearLabels": "Διαγραφή όλων των ετικετών",
+      "clickToAddLabel": "Κάντε κλικ οπουδήποτε στην κάτοψη για να προσθέσετε ετικέτα δωματίου",
+      "close": "Κλείσιμο προγράμματος προβολής κάτοψης",
+      "closeDetails": "Κλείσιμο λεπτομερειών",
+      "closeShortcut": "Κλείσιμο (Esc)",
+      "fitToScreen": "Προσαρμογή στην οθόνη",
+      "fitToScreenShortcut": "Προσαρμογή στην οθόνη (0)",
+      "floorPlanAlt": "Κάτοψη",
+      "label": "Ετικέτα",
+      "loadFailed": "Η φόρτωση της κάτοψης απέτυχε",
+      "loadFailedDesc": "Η εικόνα της κάτοψης δεν ήταν δυνατό να φορτωθεί. Ίσως έχει μετακινηθεί ή διαγραφεί.",
+      "loading": "Φόρτωση κάτοψης...",
+      "notes": "Σημειώσεις",
+      "notesPlaceholder": "Παράθυρο με νότιο προσανατολισμό, εντοιχισμένη ντουλάπα...",
+      "pan": "Μετακίνηση",
+      "panMode": "Λειτουργία μετακίνησης",
+      "panTitle": "Μετακίνηση και ζουμ (σύρετε για μετακίνηση, κυλήστε για ζουμ)",
+      "removeLabel": "Αφαίρεση ετικέτας",
+      "rename": "Μετονομασία",
+      "roomLabels": "Ετικέτες δωματίων",
+      "roomNamePlaceholder": "Όνομα δωματίου...",
+      "roomType": "Τύπος δωματίου",
+      "rooms": {
+        "balcony": "Μπαλκόνι",
+        "bathroom": "Μπάνιο",
+        "bedroom": "Υπνοδωμάτιο",
+        "dining": "Τραπεζαρία",
+        "garage": "Γκαράζ",
+        "hallway": "Διάδρομος",
+        "kitchen": "Κουζίνα",
+        "living": "Σαλόνι",
+        "office": "Γραφείο",
+        "other": "Άλλο",
+        "storage": "Αποθήκη"
+      },
+      "shortcuts": {
+        "annotate": "Κλικ: Προσθήκη ετικέτας | Esc: Έξοδος από λειτουργία ετικέτας",
+        "keys": "+/-: Ζουμ | 0: Επαναφορά | Esc: Κλείσιμο",
+        "scroll": "Κύλιση: Ζουμ | Σύρσιμο: Μετακίνηση | Διπλό κλικ: Γρήγορο ζουμ"
+      },
+      "zoomIn": "Μεγέθυνση",
+      "zoomLevel": "Επίπεδο ζουμ",
+      "zoomOut": "Σμίκρυνση"
+    }
+  },
+  "seo": {
+    "description": "{{type}} με {{beds}} υπνοδωμάτια, {{baths}} μπάνια για {{listingAction}} στην {{city}}, {{country}}. {{sqft}}m² για €{{price}}.",
+    "forRent": "Ενοικίαση",
+    "forSale": "Πώληση"
   }
 }

@@ -3,7 +3,7 @@
  *
  * This file orchestrates:
  * - useGoogleMap hook (all state, refs, effects, handlers)
- * - GoogleMapPropertyPopup (marker click popup)
+ * - MapPopupOverlay (smart-positioned marker click popup)
  * - GoogleMapControls (desktop + mobile map controls, legend, layer toggles)
  * - GoogleMapMeasurement (measurement tool panel + save modal)
  * - googleMapConstants (types, colors, styles)
@@ -16,8 +16,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   GoogleMap,
-  OverlayView,
-  OverlayViewF,
   Rectangle,
   Polyline,
   Polygon,
@@ -26,7 +24,7 @@ import { HighlightedPropertiesProvider } from '@/src/context/HighlightedProperti
 
 // Extracted hook, sub-components, and constants
 import { useGoogleMap, type GoogleMapComponentProps } from './useGoogleMap';
-import GoogleMapPropertyPopup from './GoogleMapPropertyPopup';
+import MapPopupOverlay from './MapPopupOverlay';
 import GoogleMapControls from './GoogleMapControls';
 import GoogleMapMeasurement from './GoogleMapMeasurement';
 import { mapContainerStyle } from './googleMapConstants';
@@ -89,20 +87,15 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
           onIdle={hook.onIdle}
           options={hook.mapOptions}
         >
-          {/* Property popup overlay */}
+          {/* Property popup overlay — smart-positioned (flips + clamps to edges) */}
           {hook.selectedProperty && (
-            <OverlayViewF
-              position={{ lat: hook.selectedProperty.lat, lng: hook.selectedProperty.lng }}
-              mapPaneName={OverlayView.FLOAT_PANE}
-            >
-              <div style={{ transform: 'translate(-50%, -110%)' }}>
-                <GoogleMapPropertyPopup
-                  property={hook.selectedProperty}
-                  onClose={() => hook.setSelectedProperty(null)}
-                  onViewDetails={() => hook.handleViewDetails(hook.selectedProperty!.id)}
-                />
-              </div>
-            </OverlayViewF>
+            <MapPopupOverlay
+              property={hook.selectedProperty}
+              map={hook.map}
+              onClose={() => hook.setSelectedProperty(null)}
+              onViewDetails={() => hook.handleViewDetails(hook.selectedProperty!.id)}
+              distanceLabel={hook.selectedPropertyDistanceLabel}
+            />
           )}
 
           {/* Drawn bounds rectangle (saved area) */}

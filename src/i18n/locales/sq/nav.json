@@ -12,7 +12,7 @@
   "savedSearches": "Kërkime të Ruajtura",
   "savedProperties": "Prona të Ruajtura",
   "favorites": "Të Preferuarat",
-  "inbox": "Inbox",
+  "inbox": "Kutia hyrëse",
   "messages": "Mesazhet",
   "account": "Llogaria",
   "myAccount": "Llogaria Ime",
@@ -85,10 +85,10 @@
   "businessDirectory": "Drejtoria e Bizneseve",
   "pageTitles": {
     "agency": "Agjencia",
-    "agent": "Agjenti",
+    "agent": "Agjent",
     "search": "Kërko",
     "rentals": "Me Qira",
-    "inbox": "Inbox",
+    "inbox": "Kutia hyrëse",
     "account": "Llogaria Ime",
     "savedProperties": "Të Ruajtura",
     "savedSearches": "Kërkime të Ruajtura",
@@ -104,11 +104,13 @@
     "admin": "Admin",
     "agencyDashboard": "Paneli i Agjencisë",
     "valuation": "Vlerësimi",
-    "mortgageCalculator": "Kalkulatori",
+    "mortgageCalculator": "Kalkulator",
     "cityDashboard": "Paneli i Qytetit",
     "default": "BalkanEstate",
     "blog": "Blog & Artikuj",
-    "guides": "Udhëzues"
+    "guides": "Udhëzues",
+    "home": "Kreu"
   },
-  "blog": "Blog & Artikuj"
+  "blog": "Blog & Artikuj",
+  "agencyDashboard": "Paneli i Agjencisë"
 }

@@ -146,7 +146,8 @@
         "sat": "Sht"
       },
       "slotDuration": "{{minutes}} min slot"
-    }
+    },
+    "floorPlanInteractiveHint": "Shikues interaktiv me zmadhim, lëvizje dhe etiketa"
   },
   "distances": {
     "title": "Distancat",
@@ -194,7 +195,7 @@
     "tour3d": "Tur 3D",
     "tour360": "Tur 360°",
     "photos": "Foto",
-    "streetView": "Pamje Rruge",
+    "streetView": "Pamje nga rruga",
     "video": "Video",
     "all": "Të Gjitha",
     "sendInquiry": "Dërgo Pyetje me Email",
@@ -212,14 +213,14 @@
   },
   "seller": {
     "seller": "Shitësi",
-    "agent": "Agjenti",
+    "agent": "Agjent",
     "agency": "Agjencia",
     "private": "Shitës Privat",
     "verified": "Shitës i Verifikuar",
     "contactInfo": "Informacioni i Kontaktit",
     "phone": "Telefoni",
     "email": "Email",
-    "website": "Faqja Web",
+    "website": "Uebsajti",
     "viewProfile": "Shiko Profilin"
   },
   "navigation": {
@@ -233,8 +234,8 @@
     "title": "Tur Virtual 360°",
     "description": "Eksploroni këtë pronë në 360° imersive",
     "openInNewTab": "Hap në skedë të re për përvojë të plotë",
-    "failedToLoad": "Failed to load virtual tour",
-    "loading": "Loading virtual tour...",
+    "failedToLoad": "Ngarkimi i turit virtual dështoi",
+    "loading": "Duke ngarkuar turin virtual...",
     "exit": "Dil nga Turi",
     "floor": "Kati {{floor}}",
     "hint": "Tërhiq për të parë përreth • Rrotulloj për zmadhim",
@@ -246,7 +247,7 @@
     "new": "E re",
     "reduced": "Çmim i Ulur",
     "priceReduced": "Çmim i Ulur",
-    "urgent": "Urgjente",
+    "urgent": "Urgjent",
     "exclusive": "Ekskluzive",
     "underOffer": "Në Negociata",
     "soldBanner": "Kjo pronë është shitur",
@@ -276,16 +277,16 @@
     "popularProperties": "Ja disa prona të njohura",
     "featuredAgencies": "Agjenci të Zgjedhura",
     "tabs": {
-      "properties": "Pronat",
-      "agents": "Agjentët"
+      "properties": "Prona",
+      "agents": "Agjentë"
     },
     "agents": {
-      "title": "Agjentë të Ruajtur",
-      "noSaved": "Nuk keni ruajtur asnjë agjent ende.",
-      "clickHeart": "Klikoni ikonën e zemrës në çdo profil agjenti për ta ruajtur këtu.",
-      "browseAgents": "Shfletoni Agjentët",
-      "agentSaved": "Agjent i Ruajtur",
-      "agentsSaved": "Agjentë të Ruajtur"
+      "title": "Agjentët e ruajtur",
+      "noSaved": "Nuk keni ruajtur ende asnjë agjent.",
+      "clickHeart": "Klikoni ikonën e zemrës në çdo profil agjenti për t'i ruajtur këtu.",
+      "browseAgents": "Shfleto agjentët",
+      "agentSaved": "Agjenti u ruajt",
+      "agentsSaved": "Agjentët e ruajtur"
     }
   },
   "comparison": {
@@ -297,7 +298,7 @@
     "livingRooms": "Dhoma Ndenjeje",
     "area": "Sipërfaqja (m²)",
     "yearBuilt": "Viti i Ndërtimit",
-    "parking": "Parkim",
+    "parking": "Parking",
     "specialFeatures": "Veçori të Veçanta",
     "materials": "Materialet",
     "best": "Më i miri",
@@ -341,7 +342,8 @@
         "standard": "PROMOVUAR"
       },
       "promotedCount_one": "{{count}} promoted listing",
-      "promotedCount_other": "{{count}} promoted listings"
+      "promotedCount_other": "{{count}} promoted listings",
+      "distanceFromYou": "{{distance}} larg"
     },
     "agentRecommendations": {
       "premium": {
@@ -387,10 +389,10 @@
     "all": "Të Gjitha",
     "images": "foto",
     "view": "Shiko",
-    "tapToView": "Prekni për të parë në galeri",
+    "tapToView": "Prekni për ta parë në galeri",
     "categories": {
-      "exterior": "Jashtë",
-      "interior": "Brenda",
+      "exterior": "Eksterieri",
+      "interior": "Interieri",
       "kitchen": "Kuzhina",
       "bathroom": "Banjo",
       "bedroom": "Dhomë Gjumi",
@@ -529,15 +531,15 @@
     "moreListings": "Më Shumë Listime"
   },
   "gallery": {
-    "mute": "Mute",
-    "unmute": "Unmute",
-    "fullscreen": "Fullscreen",
-    "exitFullscreen": "Exit fullscreen",
-    "enterFullscreen": "Enter fullscreen",
-    "propertyShowcase": "Property Showcase",
-    "skipVideo": "Skip Video",
-    "videoTour": "Video Tour",
-    "enter3DTour": "Enter 3D Tour",
+    "mute": "Pa zë",
+    "unmute": "Me zë",
+    "fullscreen": "Ekran i plotë",
+    "exitFullscreen": "Dil nga ekrani i plotë",
+    "enterFullscreen": "Hyni në ekran të plotë",
+    "propertyShowcase": "Prezantimi i pronës",
+    "skipVideo": "Kalo videon",
+    "videoTour": "Tur me video",
+    "enter3DTour": "Hyni në turin 3D",
     "view3DMap": "Harta 3D e vendndodhjes"
   },
   "viewings": {
@@ -574,12 +576,12 @@
   "floorPlan": {
     "viewer": {
       "ariaLabel": "Shikuesi i planimetrisë",
-      "panMode": "Modaliteti lëvizje",
-      "panTitle": "Lëviz & Zmadho (tërhiq për të lëvizur, rrotulloj për të zmadhuar)",
+      "panMode": "Modaliteti i lëvizjes",
+      "panTitle": "Lëviz & Zmadho (tërhiq për të lëvizur, rrëshqit për të zmadhuar)",
       "pan": "Lëviz",
-      "annotateMode": "Modaliteti shënim",
-      "annotateTitle": "Kliko mbi planimetri për të shtuar etiketa dhomash",
-      "label": "Etiketë",
+      "annotateMode": "Modaliteti i shënimeve",
+      "annotateTitle": "Klikoni në planimetri për të shtuar etiketa dhomash",
+      "label": "Etiketa",
       "clearLabels": "Pastro të gjitha etiketat",
       "zoomOut": "Zvogëlo",
       "zoomIn": "Zmadho",
@@ -587,20 +589,20 @@
       "fitToScreenShortcut": "Përshtat në ekran (0)",
       "close": "Mbyll shikuesin e planimetrisë",
       "closeShortcut": "Mbyll (Esc)",
-      "clickToAddLabel": "Kliko kudo në planimetri për të shtuar një etiketë dhome",
+      "clickToAddLabel": "Klikoni kudo në planimetri për të shtuar një etiketë dhome",
       "loading": "Duke ngarkuar planimetrinë...",
-      "loadFailed": "Dështoi Ngarkimi i Planimetrisë",
-      "loadFailedDesc": "Imazhi i planimetrisë nuk mund të ngarkohej. Mund të jetë lëvizur ose fshirë.",
-      "floorPlanAlt": "Planimetri",
+      "loadFailed": "Ngarkimi i planimetrisë dështoi",
+      "loadFailedDesc": "Imazhi i planimetrisë nuk mund të ngarkohej. Mund të jetë zhvendosur ose fshirë.",
+      "floorPlanAlt": "Planimetria",
       "roomNamePlaceholder": "Emri i dhomës...",
       "closeDetails": "Mbyll detajet",
-      "roomType": "Lloji i Dhomës",
+      "roomType": "Lloji i dhomës",
       "rooms": {
-        "bedroom": "Dhomë Gjumi",
-        "bathroom": "Banjo",
+        "bedroom": "Dhomë gjumi",
+        "bathroom": "Banjë",
         "kitchen": "Kuzhinë",
-        "living": "Dhomë Ndenjeje",
-        "dining": "Dhomë Ngrënieje",
+        "living": "Dhomë ndenjeje",
+        "dining": "Dhomë ngrënieje",
         "office": "Zyrë",
         "garage": "Garazh",
         "storage": "Depo",
@@ -615,11 +617,11 @@
       "rename": "Riemërto",
       "removeLabel": "Hiq etiketën",
       "zoomLevel": "Niveli i zmadhimit",
-      "roomLabels": "Etiketat e Dhomave",
+      "roomLabels": "Etiketat e dhomave",
       "shortcuts": {
-        "scroll": "Rrotulloj: Zmadho | Tërhiq: Lëviz | Dopjo-klikim: Zmadhim i shpejtë",
+        "scroll": "Rrëshqit: Zmadho | Tërhiq: Lëviz | Klik dyfish: Zmadhim i shpejtë",
         "keys": "+/-: Zmadho | 0: Rivendos | Esc: Mbyll",
-        "annotate": "Kliko: Shto etiketë | Esc: Dil nga modaliteti i etiketave"
+        "annotate": "Klik: Shto etiketë | Esc: Dil nga modaliteti i etiketave"
       }
     }
   },
@@ -630,7 +632,7 @@
     "next": "Imazhi tjetër ({{current}} nga {{total}})",
     "loadError": "Imazhi nuk mund të ngarkohej",
     "imageAlt": "Imazhi i pronës {{current}} nga {{total}}",
-    "resetZoom": "Reset zoom",
+    "resetZoom": "Rivendos zmadhimin",
     "annotate": {
       "label": "Shënim",
       "done": "Gatë",
@@ -650,5 +652,10 @@
     "priceHistory": "Historia e Çmimeve",
     "similar": "Prona të ngjashme",
     "onThisPage": "Në këtë faqe"
+  },
+  "seo": {
+    "description": "{{type}} me {{beds}} dhoma gjumi, {{baths}} banjo për {{listingAction}} në {{city}}, {{country}}. {{sqft}}m² për €{{price}}.",
+    "forRent": "Qira",
+    "forSale": "Shitje"
   }
 }

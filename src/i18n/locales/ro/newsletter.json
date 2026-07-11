@@ -1,25 +1,25 @@
 {
-  "title": "Never Miss a Property",
-  "subtitle": "Stay Updated",
-  "description": "Get instant alerts for new listings matching your criteria",
+  "title": "Nu ratați nicio proprietate",
+  "subtitle": "Rămâneți la curent",
+  "description": "Primiți alerte instant pentru anunțuri noi care corespund criteriilor dvs.",
   "features": {
-    "newListings": "New listings matching your criteria",
-    "priceDrops": "Price drop alerts on saved properties",
-    "marketInsights": "Weekly market insights & trends"
+    "newListings": "Anunțuri noi care corespund criteriilor dvs.",
+    "priceDrops": "Alerte de scădere a prețului pentru proprietățile salvate",
+    "marketInsights": "Perspective și tendințe de piață săptămânale"
   },
   "form": {
-    "placeholder": "Enter your email",
-    "submit": "Subscribe",
-    "subscribing": "Subscribing..."
+    "placeholder": "Introduceți e-mailul",
+    "submit": "Abonează-te",
+    "subscribing": "Se abonează..."
   },
   "cta": {
-    "title": "Subscribe to Newsletter",
-    "button": "Subscribe for Free"
+    "title": "Abonează-te la newsletter",
+    "button": "Abonează-te gratuit"
   },
   "messages": {
-    "success": "Thank you for subscribing! Check your inbox for confirmation.",
-    "error": "Something went wrong. Please try again.",
-    "invalidEmail": "Please enter a valid email address"
+    "success": "Vă mulțumim pentru abonare! Verificați mesajele primite pentru confirmare.",
+    "error": "Ceva nu a funcționat. Încercați din nou.",
+    "invalidEmail": "Introduceți o adresă de e-mail validă"
   },
-  "privacy": "By subscribing, you agree to our Privacy Policy. Unsubscribe anytime."
+  "privacy": "Prin abonare, sunteți de acord cu Politica noastră de confidențialitate. Vă puteți dezabona oricând."
 }

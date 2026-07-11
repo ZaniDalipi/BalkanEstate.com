@@ -1,45 +1,45 @@
 {
-  "imagesRequired": "Slike su Obavezne",
-  "locationRequired": "Lokacija je Obavezna",
-  "invalidFloorNumber": "Nevažeći Broj Kata",
-  "invalidFloorCount": "Nevažeći Broj Katova",
-  "elevatorRequired": "Potrebna Informacija o Dizalu",
+  "imagesRequired": "Potrebne su slike",
+  "locationRequired": "Potrebna je lokacija",
+  "invalidFloorNumber": "Nevažeći broj kata",
+  "invalidFloorCount": "Nevažeći broj katova",
+  "elevatorRequired": "Potrebni su podaci o dizalu",
   "password": {
     "minLength": "Najmanje 8 znakova",
     "uppercase": "Jedno veliko slovo",
     "lowercase": "Jedno malo slovo",
     "number": "Jedan broj",
-    "specialChar": "Jedan posebni znak (!@#$%...)",
+    "specialChar": "Jedan poseban znak (!@#$%...)",
     "noSequential": "Bez uzastopnih znakova (123, abc, qwe)",
-    "notCommon": "Ne smije biti uobičajena lozinka",
+    "notCommon": "Nije uobičajena lozinka",
     "mismatch": "Lozinke se ne podudaraju"
   },
   "email": {
-    "required": "Email je obavezan",
-    "invalid": "Molimo unesite valjanu email adresu"
+    "required": "E-pošta je obavezna",
+    "invalid": "Unesite valjanu adresu e-pošte"
   },
   "phone": {
-    "required": "Telefonski broj je obavezan",
-    "invalid": "Molimo unesite valjan telefonski broj"
+    "required": "Broj telefona je obavezan",
+    "invalid": "Unesite valjani broj telefona"
   },
   "required": "Ovo polje je obavezno",
   "minLength": "Mora imati najmanje {{count}} znakova",
-  "maxLength": "Mora imati najviše {{count}} znakova",
+  "maxLength": "Ne smije imati više od {{count}} znakova",
   "numeric": "Mora biti broj",
   "positive": "Mora biti pozitivan broj",
-  "url": "Molimo unesite valjan URL",
+  "url": "Unesite valjani URL",
   "date": {
-    "invalid": "Molimo unesite valjan datum",
+    "invalid": "Unesite valjani datum",
     "future": "Datum mora biti u budućnosti",
     "past": "Datum mora biti u prošlosti"
   },
   "file": {
-    "required": "Molimo odaberite datoteku",
+    "required": "Odaberite datoteku",
     "size": "Veličina datoteke mora biti manja od {{size}}MB",
-    "type": "Nevažeći tip datoteke. Dozvoljeno: {{types}}"
+    "type": "Nevažeća vrsta datoteke. Dopušteno: {{types}}"
   },
   "form": {
-    "hasErrors": "Molimo ispravite greške prije slanja",
-    "submitError": "Došlo je do greške. Molimo pokušajte ponovno."
+    "hasErrors": "Ispravite pogreške prije slanja",
+    "submitError": "Došlo je do pogreške. Pokušajte ponovno."
   }
 }

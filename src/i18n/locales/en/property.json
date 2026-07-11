@@ -361,7 +361,8 @@
         "highlight": "HIGHLIGHT",
         "featured": "FEATURED",
         "standard": "PROMOTED"
-      }
+      },
+      "distanceFromYou": "{{distance}} away"
     },
     "agentRecommendations": {
       "premium": {

@@ -33,6 +33,7 @@ interface PropertyCardData {
     yearBuilt?: number;
     description?: string;
     listingType?: 'sale' | 'rent';
+    isNegotiable?: boolean;
     imageUrl: string;
     isPromoted?: boolean;
     promotionTier?: string;
@@ -311,28 +312,42 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                             left: '16px',
                             zIndex: 3
                         }}>
-                            {property.hasDiscount && property.originalPrice && (
+                            {property.isNegotiable || !property.price ? (
                                 <span style={{
-                                    fontSize: '0.8rem',
-                                    color: 'rgba(255,255,255,0.7)',
-                                    textDecoration: 'line-through',
-                                    display: 'block',
-                                    marginBottom: '2px'
+                                    fontSize: '1.6rem',
+                                    fontWeight: 800,
+                                    color: '#fff',
+                                    textShadow: '0 2px 12px rgba(0,0,0,0.4)',
+                                    letterSpacing: '-0.02em'
                                 }}>
-                                    {formatPrice(property.originalPrice, property.currency)}
+                                    {t('featured.byNegotiation', 'By Negotiation')}
                                 </span>
-                            )}
-                            <span style={{
-                                fontSize: '1.6rem',
-                                fontWeight: 800,
-                                color: '#fff',
-                                textShadow: '0 2px 12px rgba(0,0,0,0.4)',
-                                letterSpacing: '-0.02em'
-                            }}>
-                                {formatPrice(property.price, property.currency)}
-                            </span>
-                            {property.listingType === 'rent' && (
-                                <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>{t('featured.perMonth')}</span>
+                            ) : (
+                                <>
+                                    {property.hasDiscount && property.originalPrice && (
+                                        <span style={{
+                                            fontSize: '0.8rem',
+                                            color: 'rgba(255,255,255,0.7)',
+                                            textDecoration: 'line-through',
+                                            display: 'block',
+                                            marginBottom: '2px'
+                                        }}>
+                                            {formatPrice(property.originalPrice, property.currency)}
+                                        </span>
+                                    )}
+                                    <span style={{
+                                        fontSize: '1.6rem',
+                                        fontWeight: 800,
+                                        color: '#fff',
+                                        textShadow: '0 2px 12px rgba(0,0,0,0.4)',
+                                        letterSpacing: '-0.02em'
+                                    }}>
+                                        {formatPrice(property.price, property.currency)}
+                                    </span>
+                                    {property.listingType === 'rent' && (
+                                        <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>{t('featured.perMonth')}</span>
+                                    )}
+                                </>
                             )}
                         </div>
                     </div>
@@ -542,9 +557,11 @@ const MobilePropertyCard: React.FC<{ property: PropertyCardData; color: string; 
                 {/* Price */}
                 <div style={{ position: 'absolute', bottom: 10, left: 12 }}>
                     <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#fff', textShadow: '0 2px 8px rgba(0,0,0,0.4)' }}>
-                        {formatPrice(property.price, property.currency)}
+                        {property.isNegotiable || !property.price
+                            ? t('featured.byNegotiation', 'By Negotiation')
+                            : formatPrice(property.price, property.currency)}
                     </span>
-                    {property.listingType === 'rent' && (
+                    {property.listingType === 'rent' && !property.isNegotiable && !!property.price && (
                         <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>{t('featured.perMonth')}</span>
                     )}
                 </div>

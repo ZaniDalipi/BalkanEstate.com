@@ -20,7 +20,8 @@
     "analytics": "Analitika",
     "messages": "Poruke",
     "myAccount": "Moj Račun",
-    "howItWorks": "Kako Funkcionira"
+    "howItWorks": "Kako Funkcionira",
+    "blog": "Blog"
   },
   "countries": {
     "AL": "Albanija",
@@ -43,11 +44,11 @@
     "privacyPolicy": "Politika Privatnosti",
     "termsOfService": "Uvjeti Korištenja",
     "cookiePolicy": "Politika Kolačića",
-    "disclaimer": "Odricanje od Odgovornosti",
+    "disclaimer": "Odricanje odgovornosti",
     "accessibility": "Pristupačnost"
   },
   "social": {
-    "followUs": "Pratite Nas",
+    "followUs": "Pratite nas",
     "facebook": "Facebook",
     "twitter": "Twitter",
     "instagram": "Instagram",
@@ -55,35 +56,35 @@
     "youtube": "YouTube"
   },
   "app": {
-    "downloadApp": "Preuzmite Našu Aplikaciju",
+    "downloadApp": "Preuzmite našu aplikaciju",
     "availableOn": "Dostupno na",
     "appStore": "App Store",
     "playStore": "Google Play"
   },
   "newsletter": {
-    "title": "Pretplatite se na Newsletter",
-    "placeholder": "Unesite vaš email",
+    "title": "Pretplati se na newsletter",
+    "placeholder": "Unesite svoju e-poštu",
     "subscribe": "Pretplati se",
-    "subscribed": "Hvala vam na pretplati!"
+    "subscribed": "Hvala na pretplati!"
   },
   "support": {
     "title": "Podrška",
-    "helpCenter": "Centar za Pomoć",
-    "contactUs": "Kontaktirajte Nas",
-    "faq": "Često Postavljena Pitanja",
-    "feedback": "Dajte Povratnu Informaciju"
+    "helpCenter": "Centar za pomoć",
+    "contactUs": "Kontaktirajte nas",
+    "faq": "Česta pitanja",
+    "feedback": "Dajte povratnu informaciju"
   },
   "company": {
     "title": "Tvrtka",
-    "aboutUs": "O Nama",
+    "aboutUs": "O nama",
     "careers": "Karijere",
     "press": "Mediji",
     "blog": "Blog"
   },
   "partners": {
     "title": "Partneri",
-    "becomePartner": "Postanite Partner",
-    "affiliates": "Afilirani Partneri",
-    "developers": "Za Programere"
+    "becomePartner": "Postanite partner",
+    "affiliates": "Partneri",
+    "developers": "Za razvojne programere"
   }
 }

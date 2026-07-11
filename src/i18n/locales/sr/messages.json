@@ -16,8 +16,8 @@
     "newMessage": "Nova Poruka",
     "typeMessage": "Ukucajte vašu poruku...",
     "send": "Pošalji",
-    "online": "Online",
-    "offline": "Offline",
+    "online": "На мрежи",
+    "offline": "Ван мреже",
     "lastSeen": "Poslednji put viđen {{time}}",
     "typing": "Kuca...",
     "delivered": "Dostavljeno",
@@ -35,7 +35,7 @@
     "failedToUploadImage": "Slanje slike nije uspelo. Pokušajte ponovo.",
     "failedToSendMessage": "Slanje poruke nije uspelo. Pokušajte ponovo.",
     "failedToDeleteConversation": "Brisanje razgovora nije uspelo. Pokušajte ponovo.",
-    "allConversations": "All Conversations"
+    "allConversations": "Сви разговори"
   },
   "quickReplies": {
     "scheduleTour": "Zakaži Obilazak",
@@ -139,7 +139,7 @@
     "success": "Uspeh!",
     "error": "Greška",
     "warning": "Upozorenje",
-    "info": "Info",
+    "info": "Информација",
     "saved": "Uspešno sačuvano",
     "deleted": "Uspešno obrisano",
     "updated": "Uspešno ažurirano",
@@ -167,7 +167,7 @@
   },
   "attachment": {
     "image": "Slika",
-    "document": "Dokument",
+    "document": "Документ",
     "downloading": "Preuzimanje...",
     "download": "Preuzmi",
     "preview": "Pregled",
@@ -208,7 +208,7 @@
   "report": {
     "title": "Prijavi Poruku",
     "reason": "Razlog prijave",
-    "spam": "Spam",
+    "spam": "Нежељена пошта",
     "harassment": "Uznemiravanje",
     "inappropriate": "Neprikladni Sadržaj",
     "scam": "Prevara",

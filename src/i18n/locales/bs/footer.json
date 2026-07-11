@@ -20,7 +20,8 @@
     "analytics": "Analitika",
     "messages": "Poruke",
     "myAccount": "Moj Račun",
-    "howItWorks": "Kako Funkcionira"
+    "howItWorks": "Kako Funkcionira",
+    "blog": "Blog"
   },
   "countries": {
     "AL": "Albanija",
@@ -61,8 +62,8 @@
     "playStore": "Google Play"
   },
   "newsletter": {
-    "title": "Pretplatite se na bilten",
-    "placeholder": "Unesite Vaš e-mail",
+    "title": "Pretplati se na bilten",
+    "placeholder": "Unesite svoj e-mail",
     "subscribe": "Pretplati se",
     "subscribed": "Hvala na pretplati!"
   },
@@ -70,20 +71,20 @@
     "title": "Podrška",
     "helpCenter": "Centar za pomoć",
     "contactUs": "Kontaktirajte nas",
-    "faq": "Često postavljana pitanja",
+    "faq": "Česta pitanja",
     "feedback": "Dajte povratnu informaciju"
   },
   "company": {
     "title": "Kompanija",
     "aboutUs": "O nama",
     "careers": "Karijere",
-    "press": "Štampa",
+    "press": "Mediji",
     "blog": "Blog"
   },
   "partners": {
     "title": "Partneri",
     "becomePartner": "Postanite partner",
-    "affiliates": "Affiliate",
+    "affiliates": "Saradnici",
     "developers": "Za programere"
   }
 }

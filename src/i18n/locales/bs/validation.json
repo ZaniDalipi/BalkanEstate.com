@@ -1,45 +1,45 @@
 {
-  "imagesRequired": "Potrebne Slike",
-  "locationRequired": "Potrebna Lokacija",
-  "invalidFloorNumber": "Nevažeći Broj Sprata",
-  "invalidFloorCount": "Nevažeći Broj Spratova",
-  "elevatorRequired": "Potrebna Informacija o Liftu",
+  "imagesRequired": "Potrebne su slike",
+  "locationRequired": "Potrebna je lokacija",
+  "invalidFloorNumber": "Nevažeći broj sprata",
+  "invalidFloorCount": "Nevažeći broj spratova",
+  "elevatorRequired": "Potrebni su podaci o liftu",
   "password": {
-    "minLength": "Najmanje 8 karaktera",
+    "minLength": "Najmanje 8 znakova",
     "uppercase": "Jedno veliko slovo",
     "lowercase": "Jedno malo slovo",
     "number": "Jedan broj",
-    "specialChar": "Jedan specijalni karakter (!@#$%...)",
-    "noSequential": "Bez sekvencijalnih karaktera (123, abc, qwe)",
+    "specialChar": "Jedan poseban znak (!@#$%...)",
+    "noSequential": "Bez uzastopnih znakova (123, abc, qwe)",
     "notCommon": "Nije uobičajena lozinka",
-    "mismatch": "Lozinke se ne poklapaju"
+    "mismatch": "Lozinke se ne podudaraju"
   },
   "email": {
-    "required": "Email je obavezan",
-    "invalid": "Molimo unesite važeću email adresu"
+    "required": "E-mail je obavezan",
+    "invalid": "Unesite ispravnu e-mail adresu"
   },
   "phone": {
     "required": "Broj telefona je obavezan",
-    "invalid": "Molimo unesite važeći broj telefona"
+    "invalid": "Unesite ispravan broj telefona"
   },
   "required": "Ovo polje je obavezno",
-  "minLength": "Mora imati najmanje {{count}} karaktera",
-  "maxLength": "Mora imati najviše {{count}} karaktera",
+  "minLength": "Mora imati najmanje {{count}} znakova",
+  "maxLength": "Ne smije imati više od {{count}} znakova",
   "numeric": "Mora biti broj",
   "positive": "Mora biti pozitivan broj",
-  "url": "Molimo unesite važeću URL adresu",
+  "url": "Unesite ispravan URL",
   "date": {
-    "invalid": "Molimo unesite važeći datum",
+    "invalid": "Unesite ispravan datum",
     "future": "Datum mora biti u budućnosti",
     "past": "Datum mora biti u prošlosti"
   },
   "file": {
-    "required": "Molimo odaberite datoteku",
+    "required": "Odaberite datoteku",
     "size": "Veličina datoteke mora biti manja od {{size}}MB",
     "type": "Nevažeća vrsta datoteke. Dozvoljeno: {{types}}"
   },
   "form": {
-    "hasErrors": "Molimo ispravite greške prije slanja",
-    "submitError": "Došlo je do greške. Molimo pokušajte ponovo."
+    "hasErrors": "Ispravite greške prije slanja",
+    "submitError": "Došlo je do greške. Pokušajte ponovo."
   }
 }

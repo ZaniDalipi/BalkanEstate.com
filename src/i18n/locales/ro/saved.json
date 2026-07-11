@@ -10,9 +10,9 @@
       "singular": "Căutare Salvată",
       "plural": "Căutări Salvate"
     },
-    "badge": "Smart Property Alerts",
-    "titleHighlight": "Property Searches",
-    "description": "Track your favorite search criteria and get notified when new properties match"
+    "badge": "Alerte inteligente pentru proprietăți",
+    "titleHighlight": "căutări de proprietăți",
+    "description": "Urmăriți criteriile de căutare preferate și primiți notificări când apar proprietăți noi potrivite"
   },
   "loginRequired": {
     "title": "Conectați-vă pentru a vedea căutările salvate",
@@ -48,52 +48,52 @@
     "renameFailed": "Nu s-a putut redenumi căutarea salvată. Vă rugăm încercați din nou."
   },
   "stats": {
-    "savedSearches": "Saved Searches",
-    "alerts": "Email Alerts",
-    "countries": "Countries",
-    "toggleAlerts": "Toggle email alerts",
-    "upgradeForAlerts": "Upgrade to Pro for email alerts",
-    "proOnly": "Pro Feature"
+    "savedSearches": "Căutări salvate",
+    "alerts": "Alerte e-mail",
+    "countries": "Țări",
+    "toggleAlerts": "Comută alertele prin e-mail",
+    "upgradeForAlerts": "Treceți la Pro pentru alerte prin e-mail",
+    "proOnly": "Funcție Pro"
   },
   "badges": {
-    "instantAlerts": "Instant Alerts",
-    "customAreas": "Custom Areas",
-    "smartMatching": "Smart Matching"
+    "instantAlerts": "Alerte instant",
+    "customAreas": "Zone personalizate",
+    "smartMatching": "Potrivire inteligentă"
   },
   "alerts": {
-    "enabledTitle": "Alerts Enabled",
-    "enabledMessage": "You will receive email notifications for all saved searches",
-    "disabledTitle": "Alerts Disabled",
-    "disabledMessage": "Email notifications have been turned off",
-    "toggleFailed": "Failed to update alert settings"
+    "enabledTitle": "Alerte activate",
+    "enabledMessage": "Veți primi notificări prin e-mail pentru toate căutările salvate",
+    "disabledTitle": "Alerte dezactivate",
+    "disabledMessage": "Notificările prin e-mail au fost dezactivate",
+    "toggleFailed": "Actualizarea setărilor de alertă a eșuat"
   },
   "clearAll": {
-    "button": "Clear All",
-    "clearing": "Clearing...",
-    "confirmTitle": "Delete All Saved Searches",
-    "confirmMessage": "Are you sure you want to delete all saved searches? This cannot be undone.",
-    "confirmButton": "Delete All",
-    "cancelButton": "Cancel"
+    "button": "Șterge tot",
+    "clearing": "Se șterge...",
+    "confirmTitle": "Ștergeți toate căutările salvate",
+    "confirmMessage": "Sigur doriți să ștergeți toate căutările salvate? Această acțiune nu poate fi anulată.",
+    "confirmButton": "Șterge tot",
+    "cancelButton": "Anulează"
   },
-  "sortBy": "Sort by",
+  "sortBy": "Sortează după",
   "favorites": {
-    "badge": "Your Favorites Collection",
-    "heroTitle": "Your Curated",
-    "heroTitleHighlight": "Favorites Collection",
-    "heroDescription": "All your saved properties and trusted agents in one place, organized and ready to explore",
+    "badge": "Colecția dvs. de favorite",
+    "heroTitle": "Colecția dvs.",
+    "heroTitleHighlight": "de favorite",
+    "heroDescription": "Toate proprietățile salvate și agenții de încredere într-un singur loc, organizate și gata de explorat",
     "stats": {
-      "properties": "Properties",
-      "agents": "Agents",
-      "countries": "Countries"
+      "properties": "Proprietăți",
+      "agents": "Agenți",
+      "countries": "Țări"
     },
     "tabs": {
-      "properties": "Properties",
-      "agents": "Agents"
+      "properties": "Proprietăți",
+      "agents": "Agenți"
     },
     "badges": {
-      "quickAccess": "Quick Access",
-      "organized": "Organized by Location",
-      "compare": "Easy Comparison"
+      "quickAccess": "Acces rapid",
+      "organized": "Organizate după locație",
+      "compare": "Comparație ușoară"
     }
   }
 }

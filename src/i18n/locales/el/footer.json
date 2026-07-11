@@ -20,7 +20,8 @@
     "analytics": "Αναλυτικά",
     "messages": "Μηνύματα",
     "myAccount": "Ο Λογαριασμός μου",
-    "howItWorks": "Πώς Λειτουργεί"
+    "howItWorks": "Πώς Λειτουργεί",
+    "blog": "Ιστολόγιο"
   },
   "countries": {
     "AL": "Αλβανία",
@@ -43,7 +44,7 @@
     "privacyPolicy": "Πολιτική Απορρήτου",
     "termsOfService": "Όροι Χρήσης",
     "cookiePolicy": "Πολιτική Cookies",
-    "disclaimer": "Αποποίηση Ευθύνης",
+    "disclaimer": "Αποποίηση ευθύνης",
     "accessibility": "Προσβασιμότητα"
   },
   "social": {
@@ -55,35 +56,35 @@
     "youtube": "YouTube"
   },
   "app": {
-    "downloadApp": "Κατεβάστε την Εφαρμογή μας",
-    "availableOn": "Διαθέσιμο στο",
+    "downloadApp": "Κατεβάστε την εφαρμογή μας",
+    "availableOn": "Διαθέσιμο σε",
     "appStore": "App Store",
     "playStore": "Google Play"
   },
   "newsletter": {
-    "title": "Εγγραφή στο Newsletter",
-    "placeholder": "Εισάγετε το email σας",
+    "title": "Εγγραφή στο ενημερωτικό δελτίο",
+    "placeholder": "Εισαγάγετε το email σας",
     "subscribe": "Εγγραφή",
     "subscribed": "Ευχαριστούμε για την εγγραφή!"
   },
   "support": {
     "title": "Υποστήριξη",
-    "helpCenter": "Κέντρο Βοήθειας",
+    "helpCenter": "Κέντρο βοήθειας",
     "contactUs": "Επικοινωνήστε μαζί μας",
-    "faq": "Συχνές Ερωτήσεις",
-    "feedback": "Αφήστε Σχόλια"
+    "faq": "Συχνές ερωτήσεις",
+    "feedback": "Αφήστε σχόλια"
   },
   "company": {
     "title": "Εταιρεία",
-    "aboutUs": "Σχετικά με Εμάς",
+    "aboutUs": "Σχετικά με εμάς",
     "careers": "Καριέρα",
     "press": "Τύπος",
-    "blog": "Blog"
+    "blog": "Ιστολόγιο"
   },
   "partners": {
     "title": "Συνεργάτες",
-    "becomePartner": "Γίνετε Συνεργάτης",
+    "becomePartner": "Γίνετε συνεργάτης",
     "affiliates": "Συνεργάτες",
-    "developers": "Για Προγραμματιστές"
+    "developers": "Για προγραμματιστές"
   }
 }

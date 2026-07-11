@@ -20,7 +20,8 @@
     "analytics": "Аналитика",
     "messages": "Съобщения",
     "myAccount": "Моят Профил",
-    "howItWorks": "Как Работи"
+    "howItWorks": "Как Работи",
+    "blog": "Блог"
   },
   "countries": {
     "AL": "Албания",
@@ -61,10 +62,10 @@
     "playStore": "Google Play"
   },
   "newsletter": {
-    "title": "Абонирайте се за бюлетина",
+    "title": "Абонирай се за бюлетина",
     "placeholder": "Въведете своя имейл",
-    "subscribe": "Абониране",
-    "subscribed": "Благодарим ви за абонамента!"
+    "subscribe": "Абонирай се",
+    "subscribed": "Благодарим за абонамента!"
   },
   "support": {
     "title": "Поддръжка",
@@ -83,7 +84,7 @@
   "partners": {
     "title": "Партньори",
     "becomePartner": "Станете партньор",
-    "affiliates": "Партньорска програма",
+    "affiliates": "Партньори",
     "developers": "За разработчици"
   }
 }

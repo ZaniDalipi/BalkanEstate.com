@@ -10,9 +10,9 @@
       "singular": "Сачувана претрага",
       "plural": "Сачуване претраге"
     },
-    "badge": "Smart Property Alerts",
-    "titleHighlight": "Property Searches",
-    "description": "Track your favorite search criteria and get notified when new properties match"
+    "badge": "Паметна обавештења о некретнинама",
+    "titleHighlight": "претраге некретнина",
+    "description": "Пратите омиљене критеријуме претраге и будите обавештени када се појаве нове одговарајуће некретнине"
   },
   "loginRequired": {
     "title": "Пријавите се да видите сачуване претраге",
@@ -48,52 +48,52 @@
     "renameFailed": "Преименовање претраге није успело. Молимо покушајте поново."
   },
   "stats": {
-    "savedSearches": "Saved Searches",
-    "alerts": "Email Alerts",
-    "countries": "Countries",
-    "toggleAlerts": "Toggle email alerts",
-    "upgradeForAlerts": "Upgrade to Pro for email alerts",
-    "proOnly": "Pro Feature"
+    "savedSearches": "Сачуване претраге",
+    "alerts": "Имејл обавештења",
+    "countries": "Државе",
+    "toggleAlerts": "Укључи/искључи имејл обавештења",
+    "upgradeForAlerts": "Пређите на Про за имејл обавештења",
+    "proOnly": "Про функција"
   },
   "badges": {
-    "instantAlerts": "Instant Alerts",
-    "customAreas": "Custom Areas",
-    "smartMatching": "Smart Matching"
+    "instantAlerts": "Тренутна обавештења",
+    "customAreas": "Прилагођене области",
+    "smartMatching": "Паметно упаривање"
   },
   "alerts": {
-    "enabledTitle": "Alerts Enabled",
-    "enabledMessage": "You will receive email notifications for all saved searches",
-    "disabledTitle": "Alerts Disabled",
-    "disabledMessage": "Email notifications have been turned off",
-    "toggleFailed": "Failed to update alert settings"
+    "enabledTitle": "Обавештења укључена",
+    "enabledMessage": "Примаћете имејл обавештења за све сачуване претраге",
+    "disabledTitle": "Обавештења искључена",
+    "disabledMessage": "Имејл обавештења су искључена",
+    "toggleFailed": "Ажурирање подешавања обавештења није успело"
   },
   "clearAll": {
-    "button": "Clear All",
-    "clearing": "Clearing...",
-    "confirmTitle": "Delete All Saved Searches",
-    "confirmMessage": "Are you sure you want to delete all saved searches? This cannot be undone.",
-    "confirmButton": "Delete All",
-    "cancelButton": "Cancel"
+    "button": "Обриши све",
+    "clearing": "Брисање...",
+    "confirmTitle": "Обриши све сачуване претраге",
+    "confirmMessage": "Да ли сте сигурни да желите да обришете све сачуване претраге? Ово се не може опозвати.",
+    "confirmButton": "Обриши све",
+    "cancelButton": "Откажи"
   },
-  "sortBy": "Sort by",
+  "sortBy": "Сортирај по",
   "favorites": {
-    "badge": "Your Favorites Collection",
-    "heroTitle": "Your Curated",
-    "heroTitleHighlight": "Favorites Collection",
-    "heroDescription": "All your saved properties and trusted agents in one place, organized and ready to explore",
+    "badge": "Ваша колекција омиљених",
+    "heroTitle": "Ваша одабрана",
+    "heroTitleHighlight": "колекција омиљених",
+    "heroDescription": "Све сачуване некретнине и поуздани агенти на једном месту, организовани и спремни за истраживање",
     "stats": {
-      "properties": "Properties",
-      "agents": "Agents",
-      "countries": "Countries"
+      "properties": "Некретнине",
+      "agents": "Агенти",
+      "countries": "Државе"
     },
     "tabs": {
-      "properties": "Properties",
-      "agents": "Agents"
+      "properties": "Некретнине",
+      "agents": "Агенти"
     },
     "badges": {
-      "quickAccess": "Quick Access",
-      "organized": "Organized by Location",
-      "compare": "Easy Comparison"
+      "quickAccess": "Брзи приступ",
+      "organized": "Организовано по локацији",
+      "compare": "Лако поређење"
     }
   }
 }

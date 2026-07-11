@@ -56,7 +56,8 @@
     "perMonth": "/мес",
     "promoted": "Промотиран",
     "new": "Нов",
-    "priceReduced": "Намалена Цена"
+    "priceReduced": "Намалена Цена",
+    "byNegotiation": "По договаряне"
   },
   "categories": {
     "title": "Търсете по Категория",

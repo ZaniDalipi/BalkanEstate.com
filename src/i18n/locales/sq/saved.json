@@ -10,36 +10,36 @@
       "singular": "Kërkim i Ruajtur",
       "plural": "Kërkime të Ruajtura"
     },
-    "badge": "Njoftime të Zgjuara për Prona",
-    "titleHighlight": "Kërkimet e Pronave",
+    "badge": "Njoftime inteligjente për pronat",
+    "titleHighlight": "Kërkime pronash",
     "description": "Ndiqni kriteret tuaja të preferuara të kërkimit dhe njoftohuni kur prona të reja përputhen"
   },
   "stats": {
-    "savedSearches": "Kërkime të Ruajtura",
-    "alerts": "Njoftime Email",
-    "countries": "Vende",
-    "toggleAlerts": "Aktivizo/çaktivizo njoftimet email",
-    "upgradeForAlerts": "Përmirëso në Pro për njoftime email",
+    "savedSearches": "Kërkime të ruajtura",
+    "alerts": "Njoftime me email",
+    "countries": "Shtete",
+    "toggleAlerts": "Aktivizo/çaktivizo njoftimet me email",
+    "upgradeForAlerts": "Përmirësoni në Pro për njoftime me email",
     "proOnly": "Veçori Pro"
   },
   "badges": {
-    "instantAlerts": "Njoftime të Menjëhershme",
-    "customAreas": "Zona të Personalizuara",
-    "smartMatching": "Përputhje e Zgjuar"
+    "instantAlerts": "Njoftime të menjëhershme",
+    "customAreas": "Zona të personalizuara",
+    "smartMatching": "Përputhje inteligjente"
   },
   "alerts": {
-    "enabledTitle": "Njoftimet u Aktivizuan",
-    "enabledMessage": "Do të merrni njoftime email për të gjitha kërkimet e ruajtura",
-    "disabledTitle": "Njoftimet u Çaktivizuan",
-    "disabledMessage": "Njoftimet email janë çaktivizuar",
-    "toggleFailed": "Dështoi përditësimi i cilësimeve të njoftimeve"
+    "enabledTitle": "Njoftimet të aktivizuara",
+    "enabledMessage": "Do të merrni njoftime me email për të gjitha kërkimet e ruajtura",
+    "disabledTitle": "Njoftimet të çaktivizuara",
+    "disabledMessage": "Njoftimet me email janë çaktivizuar",
+    "toggleFailed": "Përditësimi i cilësimeve të njoftimeve dështoi"
   },
   "clearAll": {
-    "button": "Pastro të Gjitha",
-    "clearing": "Duke Pastruar...",
-    "confirmTitle": "Fshi të Gjitha Kërkimet e Ruajtura",
-    "confirmMessage": "Jeni të sigurt që dëshironi të fshini të gjitha kërkimet e ruajtura? Kjo nuk mund të zhbëhet.",
-    "confirmButton": "Fshi të Gjitha",
+    "button": "Pastro të gjitha",
+    "clearing": "Duke pastruar...",
+    "confirmTitle": "Fshi të gjitha kërkimet e ruajtura",
+    "confirmMessage": "Jeni i sigurt që doni të fshini të gjitha kërkimet e ruajtura? Ky veprim nuk mund të zhbëhet.",
+    "confirmButton": "Fshi të gjitha",
     "cancelButton": "Anulo"
   },
   "sortBy": "Rendit sipas",
@@ -77,23 +77,23 @@
     "renameFailed": "Riemërimi i kërkimit dështoi. Ju lutemi provoni përsëri."
   },
   "favorites": {
-    "badge": "Your Favorites Collection",
-    "heroTitle": "Your Curated",
-    "heroTitleHighlight": "Favorites Collection",
-    "heroDescription": "All your saved properties and trusted agents in one place, organized and ready to explore",
+    "badge": "Koleksioni juaj i të preferuarave",
+    "heroTitle": "Të përzgjedhurat tuaja",
+    "heroTitleHighlight": "Koleksioni i të preferuarave",
+    "heroDescription": "Të gjitha pronat e ruajtura dhe agjentët e besuar në një vend, të organizuara dhe gati për t'u eksploruar",
     "stats": {
-      "properties": "Properties",
-      "agents": "Agents",
-      "countries": "Countries"
+      "properties": "Prona",
+      "agents": "Agjentë",
+      "countries": "Shtete"
     },
     "tabs": {
-      "properties": "Properties",
-      "agents": "Agents"
+      "properties": "Prona",
+      "agents": "Agjentë"
     },
     "badges": {
-      "quickAccess": "Quick Access",
-      "organized": "Organized by Location",
-      "compare": "Easy Comparison"
+      "quickAccess": "Qasje e shpejtë",
+      "organized": "Të organizuara sipas vendndodhjes",
+      "compare": "Krahasim i lehtë"
     }
   }
 }

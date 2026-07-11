@@ -20,7 +20,8 @@
     "analytics": "Analiză",
     "messages": "Mesaje",
     "myAccount": "Contul Meu",
-    "howItWorks": "Cum Funcționează"
+    "howItWorks": "Cum Funcționează",
+    "blog": "Blog"
   },
   "countries": {
     "AL": "Albania",
@@ -43,11 +44,11 @@
     "privacyPolicy": "Politica de Confidențialitate",
     "termsOfService": "Termeni și Condiții",
     "cookiePolicy": "Politica Cookies",
-    "disclaimer": "Declinarea Responsabilității",
+    "disclaimer": "Declinarea responsabilității",
     "accessibility": "Accesibilitate"
   },
   "social": {
-    "followUs": "Urmărește-ne",
+    "followUs": "Urmăriți-ne",
     "facebook": "Facebook",
     "twitter": "Twitter",
     "instagram": "Instagram",
@@ -55,35 +56,35 @@
     "youtube": "YouTube"
   },
   "app": {
-    "downloadApp": "Descarcă Aplicația Noastră",
-    "availableOn": "Disponibilă pe",
+    "downloadApp": "Descărcați aplicația noastră",
+    "availableOn": "Disponibil pe",
     "appStore": "App Store",
     "playStore": "Google Play"
   },
   "newsletter": {
-    "title": "Abonează-te la Newsletter",
-    "placeholder": "Introdu emailul tău",
+    "title": "Abonează-te la newsletter",
+    "placeholder": "Introduceți e-mailul",
     "subscribe": "Abonează-te",
-    "subscribed": "Mulțumim pentru abonare!"
+    "subscribed": "Vă mulțumim pentru abonare!"
   },
   "support": {
-    "title": "Suport",
-    "helpCenter": "Centru de Ajutor",
-    "contactUs": "Contactează-ne",
-    "faq": "Întrebări Frecvente",
-    "feedback": "Oferă Feedback"
+    "title": "Asistență",
+    "helpCenter": "Centru de asistență",
+    "contactUs": "Contactați-ne",
+    "faq": "Întrebări frecvente",
+    "feedback": "Trimiteți feedback"
   },
   "company": {
     "title": "Companie",
-    "aboutUs": "Despre Noi",
+    "aboutUs": "Despre noi",
     "careers": "Cariere",
     "press": "Presă",
     "blog": "Blog"
   },
   "partners": {
     "title": "Parteneri",
-    "becomePartner": "Devino Partener",
+    "becomePartner": "Deveniți partener",
     "affiliates": "Afiliați",
-    "developers": "Pentru Dezvoltatori"
+    "developers": "Pentru dezvoltatori"
   }
 }

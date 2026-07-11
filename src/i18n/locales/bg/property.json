@@ -146,7 +146,8 @@
         "sat": "Съб"
       },
       "slotDuration": "{{minutes}} мин слотове"
-    }
+    },
+    "floorPlanInteractiveHint": "Интерактивен визуализатор с мащабиране, преместване и етикети"
   },
   "distances": {
     "title": "Разстояния",
@@ -194,7 +195,7 @@
     "tour3d": "3D обиколка",
     "tour360": "360° обиколка",
     "photos": "Снимки",
-    "streetView": "Уличен изглед",
+    "streetView": "Изглед на улицата",
     "video": "Видео",
     "all": "Всички",
     "sendInquiry": "Изпрати запитване по имейл",
@@ -233,8 +234,8 @@
     "title": "360° виртуална обиколка",
     "description": "Разгледайте този имот в завладяващ 360°",
     "openInNewTab": "Отворете в нов раздел за пълно преживяване",
-    "failedToLoad": "Failed to load virtual tour",
-    "loading": "Loading virtual tour...",
+    "failedToLoad": "Зареждането на виртуалната обиколка е неуспешно",
+    "loading": "Зареждане на виртуалната обиколка...",
     "exit": "Изход от турнето",
     "floor": "Етаж {{floor}}",
     "hint": "Плъзнете за разглеждане • Скролвайте за мащабиране",
@@ -276,16 +277,16 @@
     "popularProperties": "Ето някои популярни имоти",
     "featuredAgencies": "Препоръчани агенции",
     "tabs": {
-      "properties": "Properties",
-      "agents": "Agents"
+      "properties": "Имоти",
+      "agents": "Агенти"
     },
     "agents": {
-      "title": "Saved Agents",
-      "noSaved": "You haven't saved any agents yet.",
-      "clickHeart": "Click the heart icon on any agent profile to save them here.",
-      "browseAgents": "Browse Agents",
-      "agentSaved": "Agent Saved",
-      "agentsSaved": "Agents Saved"
+      "title": "Запазени агенти",
+      "noSaved": "Все още не сте запазили никакви агенти.",
+      "clickHeart": "Кликнете иконата на сърце на всеки профил на агент, за да го запазите тук.",
+      "browseAgents": "Разгледай агенти",
+      "agentSaved": "Агентът е запазен",
+      "agentsSaved": "Запазени агенти"
     }
   },
   "comparison": {
@@ -341,7 +342,8 @@
         "standard": "ПРОМОТИРАНО"
       },
       "promotedCount_one": "{{count}} promoted listing",
-      "promotedCount_other": "{{count}} promoted listings"
+      "promotedCount_other": "{{count}} promoted listings",
+      "distanceFromYou": "на {{distance}} от вас"
     },
     "agentRecommendations": {
       "premium": {
@@ -397,9 +399,9 @@
       "view": "Гледка",
       "other": "Друго"
     },
-    "images": "photos",
-    "view": "View",
-    "tapToView": "Tap to view in gallery"
+    "images": "снимки",
+    "view": "Преглед",
+    "tapToView": "Докоснете за преглед в галерията"
   },
   "mapLink": {
     "title": "Виж на карта",
@@ -529,15 +531,15 @@
     "moreListings": "Още Обяви"
   },
   "gallery": {
-    "mute": "Mute",
-    "unmute": "Unmute",
-    "fullscreen": "Fullscreen",
-    "exitFullscreen": "Exit fullscreen",
-    "enterFullscreen": "Enter fullscreen",
-    "propertyShowcase": "Property Showcase",
-    "skipVideo": "Skip Video",
-    "videoTour": "Video Tour",
-    "enter3DTour": "Enter 3D Tour",
+    "mute": "Изключи звука",
+    "unmute": "Включи звука",
+    "fullscreen": "Цял екран",
+    "exitFullscreen": "Изход от цял екран",
+    "enterFullscreen": "Влез на цял екран",
+    "propertyShowcase": "Представяне на имота",
+    "skipVideo": "Пропусни видеото",
+    "videoTour": "Видео тура",
+    "enter3DTour": "Влез в 3D тура",
     "view3DMap": "3D карта на местоположението"
   },
   "viewings": {
@@ -573,33 +575,33 @@
   },
   "floorPlan": {
     "viewer": {
-      "ariaLabel": "Преглед на етажен план",
+      "ariaLabel": "Визуализатор на план",
       "panMode": "Режим на преместване",
-      "panTitle": "Премести и Увеличи (плъзни за преместване, скролирай за увеличаване)",
-      "pan": "Премести",
-      "annotateMode": "Режим на маркиране",
-      "annotateTitle": "Кликнете върху етажния план, за да добавите етикети на стаите",
+      "panTitle": "Преместване и мащабиране (плъзнете за преместване, превъртете за мащабиране)",
+      "pan": "Преместване",
+      "annotateMode": "Режим на анотиране",
+      "annotateTitle": "Кликнете върху плана, за да добавите етикети на стаи",
       "label": "Етикет",
       "clearLabels": "Изчисти всички етикети",
-      "zoomOut": "Намали",
-      "zoomIn": "Увеличи",
+      "zoomOut": "Отдалечи",
+      "zoomIn": "Приближи",
       "fitToScreen": "Побери в екрана",
       "fitToScreenShortcut": "Побери в екрана (0)",
-      "close": "Затвори прегледа на етажния план",
+      "close": "Затвори визуализатора на плана",
       "closeShortcut": "Затвори (Esc)",
-      "clickToAddLabel": "Кликнете навсякъде върху етажния план, за да добавите етикет на стая",
-      "loading": "Зареждане на етажен план...",
-      "loadFailed": "Неуспешно Зареждане на Етажен План",
-      "loadFailedDesc": "Изображението на етажния план не можа да бъде заредено. Може да е преместено или изтрито.",
-      "floorPlanAlt": "Етажен План",
+      "clickToAddLabel": "Кликнете навсякъде върху плана, за да добавите етикет на стая",
+      "loading": "Зареждане на плана...",
+      "loadFailed": "Зареждането на плана е неуспешно",
+      "loadFailedDesc": "Изображението на плана не можа да се зареди. Може да е преместено или изтрито.",
+      "floorPlanAlt": "План на етажа",
       "roomNamePlaceholder": "Име на стая...",
-      "closeDetails": "Затвори детайли",
-      "roomType": "Тип Стая",
+      "closeDetails": "Затвори подробностите",
+      "roomType": "Тип стая",
       "rooms": {
         "bedroom": "Спалня",
         "bathroom": "Баня",
         "kitchen": "Кухня",
-        "living": "Дневна",
+        "living": "Всекидневна",
         "dining": "Трапезария",
         "office": "Офис",
         "garage": "Гараж",
@@ -613,24 +615,24 @@
       "notes": "Бележки",
       "notesPlaceholder": "Прозорец на юг, вграден гардероб...",
       "rename": "Преименувай",
-      "removeLabel": "Премахни етикет",
-      "zoomLevel": "Ниво на увеличение",
-      "roomLabels": "Етикети на Стаи",
+      "removeLabel": "Премахни етикета",
+      "zoomLevel": "Ниво на мащабиране",
+      "roomLabels": "Етикети на стаи",
       "shortcuts": {
-        "scroll": "Скролирай: Увеличи | Плъзни: Премести | Двоен клик: Бързо увеличаване",
-        "keys": "+/-: Увеличи | 0: Нулирай | Esc: Затвори",
-        "annotate": "Клик: Добави етикет | Esc: Излез от режим на маркиране"
+        "scroll": "Превъртане: Мащабиране | Плъзгане: Преместване | Двойно щракване: Бързо мащабиране",
+        "keys": "+/-: Мащабиране | 0: Нулиране | Esc: Затвори",
+        "annotate": "Клик: Добави етикет | Esc: Изход от режим на етикети"
       }
     }
   },
   "imageViewer": {
-    "ariaLabel": "Преглед на изображения: {{current}} от {{total}}",
-    "close": "Затвори прегледа на изображения",
+    "ariaLabel": "Визуализатор на изображения: {{current}} от {{total}}",
+    "close": "Затвори визуализатора на изображения",
     "previous": "Предишно изображение ({{current}} от {{total}})",
     "next": "Следващо изображение ({{current}} от {{total}})",
-    "loadError": "Изображението не можа да бъде заредено",
-    "imageAlt": "Изображение на имот {{current}} от {{total}}",
-    "resetZoom": "Reset zoom",
+    "loadError": "Изображението не можа да се зареди",
+    "imageAlt": "Изображение на имота {{current}} от {{total}}",
+    "resetZoom": "Нулирай мащабирането",
     "annotate": {
       "label": "Анотиране",
       "done": "Готово",
@@ -650,5 +652,10 @@
     "priceHistory": "История на цените",
     "similar": "Подобни имоти",
     "onThisPage": "На тази страница"
+  },
+  "seo": {
+    "description": "{{type}} с {{beds}} спални, {{baths}} бани за {{listingAction}} в {{city}}, {{country}}. {{sqft}}m² за €{{price}}.",
+    "forRent": "Наем",
+    "forSale": "Продажба"
   }
 }

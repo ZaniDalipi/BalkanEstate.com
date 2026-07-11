@@ -12,7 +12,7 @@
   "savedSearches": "Запазени търсения",
   "savedProperties": "Запазени имоти",
   "favorites": "Любими",
-  "inbox": "Входяща кутия",
+  "inbox": "Входяща поща",
   "messages": "Съобщения",
   "account": "Моят акаунт",
   "myAccount": "Моят акаунт",
@@ -88,7 +88,7 @@
     "agent": "Агент",
     "search": "Търсене",
     "rentals": "Наеми",
-    "inbox": "Входяща кутия",
+    "inbox": "Входяща поща",
     "account": "Моят акаунт",
     "savedProperties": "Запазени",
     "savedSearches": "Запазени търсения",
@@ -108,7 +108,9 @@
     "cityDashboard": "Градско табло",
     "default": "BalkanEstate",
     "blog": "Блог и Статии",
-    "guides": "Ръководства"
+    "guides": "Ръководства",
+    "home": "Начало"
   },
-  "blog": "Блог и Статии"
+  "blog": "Блог и Статии",
+  "agencyDashboard": "Табло на агенцията"
 }
