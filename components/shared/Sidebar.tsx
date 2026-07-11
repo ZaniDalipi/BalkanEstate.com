@@ -4,9 +4,17 @@ import { useAppContext } from '../../context/AppContext';
 import { AppView, UserRole } from '../../types';
 import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, BuildingStorefrontIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, RentIcon, HomeIcon, BookOpenIcon } from '../../constants';
 
-const HomeModernIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg className={className ?? 'h-5 w-5'} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-4.5m0 0l4.5 4.5M6.75 7.5V21" />
+// Luxury villa nav icon — an elegant villa crowned with a diamond, echoing
+// the emerald-gem beacon on the map markers. Gold tint marks it as premium.
+const LuxuryVillaIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg className={className ?? 'h-5 w-5'} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2.3 l1.7 1.8 -1.7 1.8 -1.7 -1.8 z" />
+        <path d="M4 12 L12 6.4 L20 12" />
+        <path d="M6 11 V20 H18 V11" />
+        <path d="M10.4 20 V16.4 a1.6 1.6 0 0 1 3.2 0 V20" />
+        <path d="M7.2 13 h1.7 v1.7 h-1.7 z" />
+        <path d="M15.1 13 h1.7 v1.7 h-1.7 z" />
+        <path d="M3.5 20 H20.5" />
     </svg>
 );
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
@@ -183,7 +191,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       { view: 'home' as AppView, label: t('nav:home'), icon: <HomeIcon /> },
       { view: 'search' as AppView, label: t('nav:search'), icon: <SearchIcon /> },
       { view: 'rentals' as AppView, label: t('nav:rentals'), icon: <RentIcon /> },
-      { view: 'villas' as AppView, label: t('nav:villas'), icon: <HomeModernIcon /> },
+      { view: 'villas' as AppView, label: t('nav:villas'), icon: <LuxuryVillaIcon className="h-5 w-5 text-[#FFA500]" /> },
       { view: 'explore-cities' as AppView, label: t('nav:exploreCities'), icon: <SparklesIcon /> },
       { view: 'saved-searches' as AppView, label: t('nav:savedSearches'), icon: <MagnifyingGlassPlusIcon /> },
       { view: 'saved-properties' as AppView, label: t('nav:savedProperties'), icon: <HeartIcon /> },

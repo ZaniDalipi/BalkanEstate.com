@@ -10,6 +10,7 @@ const PROPERTY_TYPE_COLORS: Record<string, string> = {
   house: '#0252CD',
   apartment: '#28a745',
   villa: '#6f42c1',
+  'luxury-villa': '#FFA500', // Gilded gold — exclusive to the Luxury Villas tab
   land: '#8B4513',
   other: '#6c757d',
 };
@@ -20,6 +21,89 @@ const PROMOTION_TIER_COLORS: Record<string, string> = {
   highlight: '#0EA5E9',
   featured: '#7C3AED',
   standard: '#9ca3af',
+};
+
+/**
+ * Luxury villa palette — kept in sync with the Leaflet marker
+ * (src/components/map/MapPropertyMarker.tsx). Gilded gold body signals
+ * exclusivity; the emerald beacon marks a live, verified estate.
+ */
+const VILLA_GOLD = { light: '#FFE9A3', mid: '#E8B820', deep: '#B8860B', edge: '#7A5000', ink: '#2C1A00' } as const;
+const VILLA_EMERALD = { light: '#6EE7B7', mid: '#10B981', deep: '#047857', edge: '#065F46' } as const;
+
+/** Inject the emerald-beacon + gold-sheen keyframes once (Google map path). */
+const injectVillaMarkerStyles = (): void => {
+  if (typeof document === 'undefined') return;
+  const id = 'villa-google-marker-styles';
+  if (document.getElementById(id)) return;
+  const style = document.createElement('style');
+  style.id = id;
+  style.textContent = `
+    @keyframes villaEmeraldPulseG {
+      0%, 100% { opacity: 0.55; transform: scale(0.92); }
+      50%      { opacity: 1;    transform: scale(1.18); }
+    }
+    .villa-g-halo { transform-box: fill-box; transform-origin: center; animation: villaEmeraldPulseG 2.2s ease-in-out infinite; }
+    @keyframes villaSheenG {
+      0% { opacity: 0; transform: translateX(-60%); }
+      45% { opacity: 0.55; }
+      100% { opacity: 0; transform: translateX(60%); }
+    }
+    .villa-g-sheen { transform-box: fill-box; transform-origin: center; animation: villaSheenG 4.5s ease-in-out infinite; }
+  `;
+  document.head.appendChild(style);
+};
+
+/** Emerald gemstone beacon SVG fragment with a soft radial glow. */
+const buildEmeraldBeacon = (cx: number, cy: number, size: number, uid: string): string => {
+  const gid = `emGg_${uid}`;
+  const hid = `emHg_${uid}`;
+  const w = size * 0.82;
+  const r = (n: number) => Math.round(n * 100) / 100;
+  return `
+    <radialGradient id="${hid}" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="${VILLA_EMERALD.light}" stop-opacity="0.7"/>
+      <stop offset="45%" stop-color="${VILLA_EMERALD.mid}" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="${VILLA_EMERALD.mid}" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${VILLA_EMERALD.light}"/>
+      <stop offset="55%" stop-color="${VILLA_EMERALD.mid}"/>
+      <stop offset="100%" stop-color="${VILLA_EMERALD.deep}"/>
+    </linearGradient>
+    <circle class="villa-g-halo" cx="${r(cx)}" cy="${r(cy)}" r="${r(size * 1.8)}" fill="url(#${hid})"/>
+    <path d="M${r(cx)} ${r(cy - size)} L${r(cx + w)} ${r(cy)} L${r(cx)} ${r(cy + size)} L${r(cx - w)} ${r(cy)} Z" fill="url(#${gid})" stroke="${VILLA_EMERALD.edge}" stroke-width="0.7"/>
+    <path d="M${r(cx)} ${r(cy - size)} L${r(cx + w)} ${r(cy)} L${r(cx)} ${r(cy)} Z" fill="#A7F3D0" opacity="0.75"/>
+    <circle cx="${r(cx - w * 0.32)}" cy="${r(cy - size * 0.32)}" r="${r(size * 0.2)}" fill="#ffffff" opacity="0.92"/>
+  `;
+};
+
+/**
+ * Build a gilded villa marker (dynamic width) as an SVG string for the
+ * Google AdvancedMarkerElement. Gold gabled house, animated sheen, price in
+ * the body, crowned with the emerald beacon and anchored on a pin tip.
+ */
+const buildLuxuryVillaSVG = (price: string, uid: string): string => {
+  const W = Math.max(64, price.length * 7 + 22);
+  const H = 58;
+  const cx = W / 2;
+  const scale = 0.82; // display px per viewBox unit
+  const gid = `lvGm_${uid}`;
+  const clip = `lvClipM_${uid}`;
+  const beacon = buildEmeraldBeacon(cx, 9, 4.5, uid);
+  return `<svg width="${Math.round(W * scale)}" height="${Math.round(H * scale)}" viewBox="0 0 ${W} ${H}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 7px rgba(212,168,0,0.85)) drop-shadow(0 0 12px rgba(16,185,129,0.3)) drop-shadow(0 2px 4px rgba(0,0,0,0.4));display:block;">
+    <defs>
+      <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${VILLA_GOLD.light}"/><stop offset="52%" stop-color="${VILLA_GOLD.mid}"/><stop offset="100%" stop-color="${VILLA_GOLD.deep}"/></linearGradient>
+      <clipPath id="${clip}"><rect x="4" y="30" width="${W - 8}" height="18" rx="2"/></clipPath>
+    </defs>
+    <path d="M${cx} ${H} L${cx - 8} 48 H${cx + 8} Z" fill="${VILLA_GOLD.edge}"/>
+    <rect x="4" y="30" width="${W - 8}" height="18" rx="2" fill="url(#${gid})" stroke="${VILLA_GOLD.edge}" stroke-width="1.25"/>
+    <path class="villa-g-sheen" clip-path="url(#${clip})" d="M${cx - 3} 30 L${cx + 5} 30 L${cx + 1} 48 L${cx - 7} 48 Z" fill="#FFFFFF" opacity="0.5"/>
+    <path d="M4 30 L${cx} 15 L${W - 4} 30 Z" fill="url(#${gid})" stroke="${VILLA_GOLD.edge}" stroke-width="1.25" stroke-linejoin="round"/>
+    <path d="M${cx - 10} 27 L${cx} 18 L${cx + 10} 27" stroke="${VILLA_GOLD.light}" stroke-width="1" opacity="0.65" fill="none" stroke-linecap="round"/>
+    ${beacon}
+    <text x="${cx}" y="40" font-family="Inter,sans-serif" font-size="10.5" font-weight="800" fill="${VILLA_GOLD.ink}" text-anchor="middle" dominant-baseline="middle">${price}</text>
+  </svg>`;
 };
 
 const formatMarkerPrice = (property: Property): string => {
@@ -205,6 +289,7 @@ export const useMapMarkers = ({
   useEffect(() => {
     if (!map || !clustererRef.current || !isLoaded) return;
 
+    injectVillaMarkerStyles();
     clustererRef.current.clearMarkers();
     markersRef.current.clear();
     markerDivsRef.current.clear();
@@ -222,42 +307,60 @@ export const useMapMarkers = ({
         markerDiv.className = 'property-marker';
 
         const price = formatMarkerPrice(property);
-        const color = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
         const isActivelyPromoted = property.isPromoted && property.promotionEndDate && property.promotionEndDate > Date.now();
-        let borderColor = 'white';
-        let borderWidth = 2;
-        if (isActivelyPromoted && property.promotionTier) {
-          borderColor = PROMOTION_TIER_COLORS[property.promotionTier] || PROMOTION_TIER_COLORS.standard;
-          borderWidth = 3;
-          markerDiv.classList.add(`promoted-marker-${property.promotionTier}`);
+        const isLuxuryVilla = property.propertyType === 'luxury-villa';
+
+        if (isLuxuryVilla) {
+          // Gilded villa marker — anchored on its pin tip, no pill chrome
+          markerDiv.classList.add('luxury-villa-marker');
+          markerDiv.style.cssText = `cursor:pointer;user-select:none;transform-origin:bottom center;transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1);`;
+          markerDiv.innerHTML = buildLuxuryVillaSVG(price, `${property.id}`.slice(-6) || String(i));
+
+          markerDiv.onmouseenter = () => {
+            markerDiv.style.transform = 'scale(1.18) translateY(-2px)';
+            markerDiv.style.zIndex = '1000';
+          };
+          markerDiv.onmouseleave = () => {
+            markerDiv.style.transform = '';
+            markerDiv.style.zIndex = isActivelyPromoted ? '100' : '2';
+          };
+        } else {
+          const color = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
+          let borderColor = 'white';
+          let borderWidth = 2;
+          if (isActivelyPromoted && property.promotionTier) {
+            borderColor = PROMOTION_TIER_COLORS[property.promotionTier] || PROMOTION_TIER_COLORS.standard;
+            borderWidth = 3;
+            markerDiv.classList.add(`promoted-marker-${property.promotionTier}`);
+          }
+
+          markerDiv.style.cssText = `
+            padding: 2px 6px;
+            background: ${color};
+            border: ${borderWidth}px solid ${borderColor};
+            border-radius: 999px;
+            color: white;
+            font-weight: 700;
+            font-size: 10px;
+            font-family: Inter, system-ui, sans-serif;
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+            white-space: nowrap;
+            user-select: none;
+          `;
+          markerDiv.textContent = price;
+
+          markerDiv.onmouseenter = () => {
+            markerDiv.style.transform = 'scale(1.25) translateY(-2px)';
+            markerDiv.style.boxShadow = '0 4px 10px rgba(0,0,0,0.35)';
+            markerDiv.style.zIndex = '1000';
+          };
+          markerDiv.onmouseleave = () => {
+            markerDiv.style.transform = '';
+            markerDiv.style.boxShadow = '';
+            markerDiv.style.zIndex = isActivelyPromoted ? '100' : '1';
+          };
         }
-
-        markerDiv.style.cssText = `
-          padding: 2px 6px;
-          background: ${color};
-          border: ${borderWidth}px solid ${borderColor};
-          border-radius: 999px;
-          color: white;
-          font-weight: 700;
-          font-size: 10px;
-          font-family: Inter, system-ui, sans-serif;
-          cursor: pointer;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.25);
-          white-space: nowrap;
-          user-select: none;
-        `;
-        markerDiv.textContent = price;
-
-        markerDiv.onmouseenter = () => {
-          markerDiv.style.transform = 'scale(1.25) translateY(-2px)';
-          markerDiv.style.boxShadow = '0 4px 10px rgba(0,0,0,0.35)';
-          markerDiv.style.zIndex = '1000';
-        };
-        markerDiv.onmouseleave = () => {
-          markerDiv.style.transform = '';
-          markerDiv.style.boxShadow = '';
-          markerDiv.style.zIndex = isActivelyPromoted ? '100' : '1';
-        };
 
         markerDiv.onclick = (e) => {
           e.stopPropagation();
@@ -296,16 +399,19 @@ export const useMapMarkers = ({
   // Handle hover state changes
   useEffect(() => {
     markerDivsRef.current.forEach((div, id) => {
+      // Villa markers carry their own soft drop-shadow via the SVG filter —
+      // a rectangular box-shadow on the transparent wrapper would look wrong.
+      const isVilla = div.classList.contains('luxury-villa-marker');
       if (id === hoveredPropertyId) {
-        div.style.transform = 'scale(1.2) translateY(-2px)';
-        div.style.boxShadow = '0 6px 16px rgba(0,0,0,0.35)';
+        div.style.transform = isVilla ? 'scale(1.18) translateY(-2px)' : 'scale(1.2) translateY(-2px)';
+        if (!isVilla) div.style.boxShadow = '0 6px 16px rgba(0,0,0,0.35)';
         div.style.zIndex = '1000';
       } else {
-        div.style.transform = 'scale(1)';
-        div.style.boxShadow = '0 2px 8px rgba(0,0,0,0.25)';
+        div.style.transform = isVilla ? '' : 'scale(1)';
+        if (!isVilla) div.style.boxShadow = '0 2px 8px rgba(0,0,0,0.25)';
         const prop = validProperties.find(p => p.id === id);
         const isPromoted = prop?.isPromoted && prop?.promotionEndDate && prop.promotionEndDate > Date.now();
-        div.style.zIndex = isPromoted ? '100' : '1';
+        div.style.zIndex = isPromoted ? '100' : (isVilla ? '2' : '1');
       }
     });
   }, [hoveredPropertyId, validProperties]);
