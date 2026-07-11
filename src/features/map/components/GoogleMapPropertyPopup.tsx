@@ -15,9 +15,13 @@ interface GoogleMapPropertyPopupProps {
   onViewDetails: () => void;
   /** Distance from the user's current location, pre-formatted (e.g. "3.2 km"). */
   distanceLabel?: string | null;
+  /** Whether the card opens above ('top') or below ('bottom') the marker. */
+  placement?: 'top' | 'bottom';
+  /** Horizontal offset (px) applied to the pointer tail so it points at the marker. */
+  tailOffsetX?: number;
 }
 
-const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ property, onClose, onViewDetails, distanceLabel }) => {
+const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ property, onClose, onViewDetails, distanceLabel, placement = 'top', tailOffsetX = 0 }) => {
   const { t } = useTranslation(['property']);
   const imageUrl = property.images?.[0]
     ? (typeof property.images[0] === 'string' ? property.images[0] : property.images[0].url)
@@ -40,8 +44,12 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
       style={{ width: 248, maxWidth: '88vw' }}
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Pointer tail toward the marker */}
-      <div className="map-popup-tail" aria-hidden="true" />
+      {/* Pointer tail toward the marker (flips to the top when card opens below) */}
+      <div
+        className={placement === 'bottom' ? 'map-popup-tail map-popup-tail-top' : 'map-popup-tail'}
+        style={{ left: `calc(50% + ${tailOffsetX}px)` }}
+        aria-hidden="true"
+      />
 
       {/* Close button */}
       <button
@@ -59,20 +67,31 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
       </button>
 
       {/* Image container */}
-      <div className="relative h-32 rounded-t-2xl overflow-hidden bg-gray-100">
+      <div className="relative h-32 rounded-t-2xl overflow-hidden bg-gray-200">
         {imageUrl ? (
           <>
             {/* Shimmer skeleton while the image loads */}
             {!imageLoaded && (
               <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 bg-[length:200%_100%] animate-shimmer" />
             )}
+            {/* Blurred fill — the same image scaled to cover, sitting behind the
+                contained hero so letterbox bars are filled instead of empty. */}
+            <img
+              src={imageUrl}
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              decoding="async"
+              className={`absolute -inset-8 w-[calc(100%+4rem)] h-[calc(100%+4rem)] object-cover blur-xl animate-map-popup-kenburns transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            />
+            {/* Foreground hero — object-contain so the whole building is visible. */}
             <img
               src={imageUrl}
               alt={property.title || property.address}
               loading="lazy"
               decoding="async"
               onLoad={() => setImageLoaded(true)}
-              className={`w-full h-full object-cover animate-map-popup-kenburns transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              className={`relative w-full h-full object-contain transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             />
           </>
         ) : (

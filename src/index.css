@@ -1441,7 +1441,9 @@ html[data-zoom] #root {
 .map-popup-reveal-3 { animation-delay: 0.26s; }
 .map-popup-reveal-4 { animation-delay: 0.32s; }
 
-/* Little pointer tail under the card, pointing down at the marker */
+/* Little pointer tail under the card, pointing down at the marker.
+   `left` is set inline so the tail can track the marker when the card is
+   clamped horizontally. */
 .map-popup-tail {
   position: absolute;
   left: 50%;
@@ -1455,6 +1457,19 @@ html[data-zoom] #root {
   border-bottom-right-radius: 3px;
   box-shadow: 3px 3px 6px -3px rgba(0, 0, 0, 0.12);
   z-index: -1;
+}
+
+/* Flipped tail — sits on top of the card, pointing up at the marker above */
+.map-popup-tail.map-popup-tail-top {
+  top: -7px;
+  bottom: auto;
+  border-right: none;
+  border-bottom: none;
+  border-left: 1px solid rgba(243, 244, 246, 0.5);
+  border-top: 1px solid rgba(243, 244, 246, 0.5);
+  border-bottom-right-radius: 0;
+  border-top-left-radius: 3px;
+  box-shadow: -3px -3px 6px -3px rgba(0, 0, 0, 0.08);
 }
 
 /* Sweeping sheen that glides across the CTA button on hover */
