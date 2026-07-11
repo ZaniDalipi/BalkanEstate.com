@@ -243,8 +243,8 @@ const injectMapMarkerStyles = () => {
 
     /* Luxury villa: emerald "available / verified" beacon halo pulse */
     @keyframes emeraldBeaconPulse {
-      0%, 100% { opacity: 0.28; transform: scale(1); }
-      50%      { opacity: 0.7;  transform: scale(1.55); }
+      0%, 100% { opacity: 0.55; transform: scale(0.92); }
+      50%      { opacity: 1;    transform: scale(1.18); }
     }
     .villa-emerald-halo {
       transform-box: fill-box;
@@ -321,15 +321,21 @@ const VILLA_EMERALD = { light: '#6EE7B7', mid: '#10B981', deep: '#047857', edge:
  */
 const buildEmeraldBeacon = (cx: number, cy: number, size: number, uid: string): string => {
   const gid = `emG_${uid}`;
+  const hid = `emH_${uid}`;
   const w = size * 0.82;                       // gem half-width (narrower than tall)
   const round = (n: number) => Math.round(n * 100) / 100;
   return `
-    <circle class="villa-emerald-halo" cx="${round(cx)}" cy="${round(cy)}" r="${round(size * 1.4)}" fill="${VILLA_EMERALD.mid}" opacity="0.32"/>
+    <radialGradient id="${hid}" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="${VILLA_EMERALD.light}" stop-opacity="0.7"/>
+      <stop offset="45%" stop-color="${VILLA_EMERALD.mid}" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="${VILLA_EMERALD.mid}" stop-opacity="0"/>
+    </radialGradient>
     <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="${VILLA_EMERALD.light}"/>
       <stop offset="55%" stop-color="${VILLA_EMERALD.mid}"/>
       <stop offset="100%" stop-color="${VILLA_EMERALD.deep}"/>
     </linearGradient>
+    <circle class="villa-emerald-halo" cx="${round(cx)}" cy="${round(cy)}" r="${round(size * 1.8)}" fill="url(#${hid})"/>
     <path d="M${round(cx)} ${round(cy - size)} L${round(cx + w)} ${round(cy)} L${round(cx)} ${round(cy + size)} L${round(cx - w)} ${round(cy)} Z" fill="url(#${gid})" stroke="${VILLA_EMERALD.edge}" stroke-width="0.7"/>
     <path d="M${round(cx)} ${round(cy - size)} L${round(cx + w)} ${round(cy)} L${round(cx)} ${round(cy)} Z" fill="#A7F3D0" opacity="0.75"/>
     <circle cx="${round(cx - w * 0.32)}" cy="${round(cy - size * 0.32)}" r="${round(size * 0.2)}" fill="#ffffff" opacity="0.92"/>
