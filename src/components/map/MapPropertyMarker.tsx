@@ -9,6 +9,17 @@ import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
 import { BuildingOfficeIcon } from '@/constants';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
+import { validateCoordinates } from '@/shared/utils/validation';
+
+/**
+ * A property is mappable only when it carries coordinates that are real
+ * numbers inside the valid lat/lng ranges. Guards against corrupt API rows
+ * (null island, out-of-range, NaN) placing markers in the ocean.
+ */
+const hasValidCoordinates = (prop: Property): prop is Property & { lat: number; lng: number } => {
+  if (prop.lat == null || prop.lng == null) return false;
+  return validateCoordinates(prop.lat, prop.lng).isValid;
+};
 
 // Inject CSS animations for map markers
 const injectMapMarkerStyles = () => {
@@ -229,6 +240,28 @@ const injectMapMarkerStyles = () => {
     .promoted-property-popup .leaflet-popup-tip {
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
+
+    /* Luxury villa: emerald "available / verified" beacon halo pulse */
+    @keyframes emeraldBeaconPulse {
+      0%, 100% { opacity: 0.28; transform: scale(1); }
+      50%      { opacity: 0.7;  transform: scale(1.55); }
+    }
+    .villa-emerald-halo {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: emeraldBeaconPulse 2.2s ease-in-out infinite;
+    }
+    /* Subtle sheen sweep across the gilded villa body */
+    @keyframes villaGoldSheen {
+      0%   { opacity: 0; transform: translateX(-60%); }
+      45%  { opacity: 0.55; }
+      100% { opacity: 0; transform: translateX(60%); }
+    }
+    .villa-gold-sheen {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: villaGoldSheen 4.5s ease-in-out infinite;
+    }
   `;
   document.head.appendChild(style);
 };
@@ -265,6 +298,42 @@ const PROPERTY_TYPE_COLORS: Record<
   'luxury-villa': '#FFA500', // Amber/gold — exclusive to the Luxury Villas tab
   land: '#8B4513',    // Brown for land
   other: '#6c757d',
+};
+
+/**
+ * Luxury villa palette.
+ * Gilded gold body = exclusivity; emerald beacon = a live, verified, special
+ * estate (green reads as "available / premium" without clashing with the
+ * green apartment pins, which stay a flat #28a745 pill).
+ */
+const VILLA_GOLD = { light: '#FFE9A3', mid: '#E8B820', deep: '#B8860B', edge: '#7A5000', ink: '#2C1A00' } as const;
+const VILLA_EMERALD = { light: '#6EE7B7', mid: '#10B981', deep: '#047857', edge: '#065F46' } as const;
+
+/**
+ * Build the emerald gemstone "special estate" beacon as an SVG fragment.
+ * Rendered at the roof apex of every luxury-villa marker. The halo pulses
+ * via the injected `.villa-emerald-halo` keyframes; the facets are static.
+ *
+ * @param cx     centre-x in viewBox units
+ * @param cy     centre-y in viewBox units
+ * @param size   gem half-height (also drives halo radius + facet width)
+ * @param uid    marker-unique suffix so gradient ids never collide in the DOM
+ */
+const buildEmeraldBeacon = (cx: number, cy: number, size: number, uid: string): string => {
+  const gid = `emG_${uid}`;
+  const w = size * 0.82;                       // gem half-width (narrower than tall)
+  const round = (n: number) => Math.round(n * 100) / 100;
+  return `
+    <circle class="villa-emerald-halo" cx="${round(cx)}" cy="${round(cy)}" r="${round(size * 1.4)}" fill="${VILLA_EMERALD.mid}" opacity="0.32"/>
+    <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${VILLA_EMERALD.light}"/>
+      <stop offset="55%" stop-color="${VILLA_EMERALD.mid}"/>
+      <stop offset="100%" stop-color="${VILLA_EMERALD.deep}"/>
+    </linearGradient>
+    <path d="M${round(cx)} ${round(cy - size)} L${round(cx + w)} ${round(cy)} L${round(cx)} ${round(cy + size)} L${round(cx - w)} ${round(cy)} Z" fill="url(#${gid})" stroke="${VILLA_EMERALD.edge}" stroke-width="0.7"/>
+    <path d="M${round(cx)} ${round(cy - size)} L${round(cx + w)} ${round(cy)} L${round(cx)} ${round(cy)} Z" fill="#A7F3D0" opacity="0.75"/>
+    <circle cx="${round(cx - w * 0.32)}" cy="${round(cy - size * 0.32)}" r="${round(size * 0.2)}" fill="#ffffff" opacity="0.92"/>
+  `;
 };
 
 /**
@@ -411,36 +480,44 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
 
   const hoverClass = isHovered ? 'drop-shadow-lg' : '';
 
-  // Luxury villa: house-silhouette marker instead of a price pill
+  // Luxury villa: refined gilded villa silhouette crowned with an emerald beacon
   if (isLuxuryVilla) {
-    const houseBaseWidth = Math.max(62, getMarkerWidthForPrice(price) + 18);
-    const houseBaseH = 52; // roof(20) + body(18) + pin(14)
-    const houseScaledW = Math.round(houseBaseWidth * zoomScale);
-    const houseScaledH = Math.round(houseBaseH * zoomScale);
-    const cx = houseBaseWidth / 2;
-    // unique gradient id per marker to avoid SVG gradient collisions in DOM
-    const gid = `lvGs_${String(property._id).slice(-6)}`;
+    const W = Math.max(64, getMarkerWidthForPrice(price) + 20);
+    const H = 58; // beacon crown + roof(15) + body(18) + pin(10)
+    const scaledW = Math.round(W * zoomScale);
+    const scaledH = Math.round(H * zoomScale);
+    const cx = W / 2;
+    // unique id suffix per marker so gradient/clip ids never collide in the DOM
+    const uid = `s${String(property._id).slice(-6)}`;
+    const gid = `lvGs_${uid}`;
+    const clip = `lvClipS_${uid}`;
+    const beacon = buildEmeraldBeacon(cx, 9, 4.5, uid);
     const svgHouseHtml = `
-      <div class="promoted-marker-wrapper ${nightModeClass}" style="width:${houseScaledW}px;height:${houseScaledH}px;">
-        <div class="${promotedInnerClass}" style="width:${houseScaledW}px;height:${houseScaledH}px;transform:scale(${hoverScale});transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);">
-          <svg width="${houseScaledW}" height="${houseScaledH}" viewBox="0 0 ${houseBaseWidth} ${houseBaseH}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:${pillFilter};">
+      <div class="promoted-marker-wrapper ${nightModeClass}" style="width:${scaledW}px;height:${scaledH}px;">
+        <div class="${promotedInnerClass}" style="width:${scaledW}px;height:${scaledH}px;transform:scale(${hoverScale});transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);">
+          <svg width="${scaledW}" height="${scaledH}" viewBox="0 0 ${W} ${H}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:${pillFilter};">
             <defs>
               <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#F5DC6E"/>
-                <stop offset="50%" stop-color="#E8B820"/>
-                <stop offset="100%" stop-color="#B8860B"/>
+                <stop offset="0%" stop-color="${VILLA_GOLD.light}"/>
+                <stop offset="52%" stop-color="${VILLA_GOLD.mid}"/>
+                <stop offset="100%" stop-color="${VILLA_GOLD.deep}"/>
               </linearGradient>
+              <clipPath id="${clip}"><rect x="4" y="30" width="${W - 8}" height="18" rx="2"/></clipPath>
             </defs>
             <!-- Pin pointer -->
-            <path d="M${cx} ${houseBaseH} L${cx - 9} 38 H${cx + 9} Z" fill="#5C3A00"/>
-            <!-- House body -->
-            <rect x="3" y="20" width="${houseBaseWidth - 6}" height="18" rx="2" fill="url(#${gid})" stroke="#7A5000" stroke-width="1.5"/>
+            <path d="M${cx} ${H} L${cx - 8} 48 H${cx + 8} Z" fill="${VILLA_GOLD.edge}"/>
+            <!-- Villa body -->
+            <rect x="4" y="30" width="${W - 8}" height="18" rx="2" fill="url(#${gid})" stroke="${VILLA_GOLD.edge}" stroke-width="1.25"/>
+            <!-- Animated gold sheen (clipped to body) -->
+            <path class="villa-gold-sheen" clip-path="url(#${clip})" d="M${cx - 3} 30 L${cx + 5} 30 L${cx + 1} 48 L${cx - 7} 48 Z" fill="#FFFFFF" opacity="0.5"/>
             <!-- Roof gable -->
-            <path d="M3 20 L${cx} 3 L${houseBaseWidth - 3} 20 Z" fill="url(#${gid})" stroke="#7A5000" stroke-width="1.5"/>
-            <!-- ✦ at roof peak -->
-            <text x="${cx}" y="13" font-family="Inter,sans-serif" font-size="8" font-weight="900" fill="#2C1A00" text-anchor="middle" dominant-baseline="middle">✦</text>
+            <path d="M4 30 L${cx} 15 L${W - 4} 30 Z" fill="url(#${gid})" stroke="${VILLA_GOLD.edge}" stroke-width="1.25" stroke-linejoin="round"/>
+            <!-- Roof ridge highlight -->
+            <path d="M${cx - 10} 27 L${cx} 18 L${cx + 10} 27" stroke="${VILLA_GOLD.light}" stroke-width="1" opacity="0.65" fill="none" stroke-linecap="round"/>
+            <!-- Emerald "special estate" beacon at the apex -->
+            ${beacon}
             <!-- Price in body -->
-            <text x="${cx}" y="31" font-family="Inter,sans-serif" font-size="10" font-weight="800" fill="#2C1A00" text-anchor="middle" dominant-baseline="middle">${price}</text>
+            <text x="${cx}" y="40" font-family="Inter,sans-serif" font-size="10.5" font-weight="800" fill="${VILLA_GOLD.ink}" text-anchor="middle" dominant-baseline="middle">${price}</text>
           </svg>
         </div>
       </div>
@@ -448,9 +525,9 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
     return L.divIcon({
       html: svgHouseHtml,
       className: hoverClass,
-      iconSize: [houseScaledW, houseScaledH],
-      iconAnchor: [houseScaledW / 2, houseScaledH], // anchor at pointer tip
-      popupAnchor: [0, -houseScaledH],
+      iconSize: [scaledW, scaledH],
+      iconAnchor: [scaledW / 2, scaledH], // anchor at pointer tip
+      popupAnchor: [0, -scaledH],
     });
   }
 
@@ -562,44 +639,56 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
   const nightModeClass = shouldGlow ? 'night-mode-marker-pulse' : '';
   const hoverClass = isHovered ? 'drop-shadow-xl' : '';
 
-  // Luxury villa: Mediterranean villa silhouette — gabled roof + flat parapet wings + columns
+  // Luxury villa: refined Mediterranean estate — gabled roof, parapet wings,
+  // colonnade, gilded body with a live sheen, crowned by the emerald beacon.
   if (isLuxuryVilla) {
-    // viewBox 80×72: pin(14) + body(20) + parapet(6) + gable(22) + crown area(10)
-    const vbW = 80; const vbH = 72;
+    const vbW = 80; const vbH = 80; // beacon crown + roof + body + plinth + pin
     const scaledW = Math.round(vbW * zoomScale);
     const scaledH = Math.round(vbH * zoomScale);
-    const gid = `lvGd_${String(property._id).slice(-6)}`;
+    const uid = `d${String(property._id).slice(-6)}`;
+    const gid = `lvGd_${uid}`;
+    const clip = `lvClipD_${uid}`;
     const fSize = Math.max(10, Math.round(12 * zoomScale));
+    const beacon = buildEmeraldBeacon(40, 13, 6, uid);
+    // Warm gold glow layered with a faint emerald under-glow for the "special" cue
+    const villaFilter = isNightMode
+      ? finalFilter
+      : 'drop-shadow(0 0 10px rgba(212,168,0,0.85)) drop-shadow(0 0 18px rgba(16,185,129,0.35)) drop-shadow(0 4px 10px rgba(0,0,0,0.4))';
     const svgVillaHtml = `
       <div class="promoted-marker-wrapper ${nightModeClass}" style="width:${scaledW}px;height:${scaledH}px;">
         <div class="${promotedInnerClass}" style="width:${scaledW}px;height:${scaledH}px;">
           <svg width="${scaledW}" height="${scaledH}" viewBox="0 0 ${vbW} ${vbH}" fill="none" xmlns="http://www.w3.org/2000/svg"
-               style="filter:${finalFilter};transform-origin:bottom center;transform:scale(${scale});transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);">
+               style="filter:${villaFilter};transform-origin:bottom center;transform:scale(${scale});transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);">
             <defs>
               <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#F5DC6E"/>
-                <stop offset="50%" stop-color="#E8B820"/>
-                <stop offset="100%" stop-color="#B8860B"/>
+                <stop offset="0%" stop-color="${VILLA_GOLD.light}"/>
+                <stop offset="52%" stop-color="${VILLA_GOLD.mid}"/>
+                <stop offset="100%" stop-color="${VILLA_GOLD.deep}"/>
               </linearGradient>
+              <clipPath id="${clip}"><rect x="6" y="42" width="68" height="22" rx="1.5"/></clipPath>
             </defs>
             <!-- Pin pointer -->
-            <path d="M40 72L30 58H50L40 72Z" fill="#5C3A00"/>
-            <!-- Villa main body -->
-            <rect x="4" y="38" width="72" height="20" rx="1" fill="url(#${gid})" stroke="#7A5000" stroke-width="1.5"/>
-            <!-- Left flat parapet wing -->
-            <rect x="4" y="32" width="14" height="6" rx="1" fill="url(#${gid})" stroke="#7A5000" stroke-width="1.5"/>
-            <!-- Right flat parapet wing -->
-            <rect x="62" y="32" width="14" height="6" rx="1" fill="url(#${gid})" stroke="#7A5000" stroke-width="1.5"/>
-            <!-- Central gabled roof -->
-            <path d="M14 38L40 14L66 38Z" fill="url(#${gid})" stroke="#7A5000" stroke-width="1.5"/>
-            <!-- Left column pillar -->
-            <rect x="13" y="38" width="3.5" height="20" fill="#B8860B" opacity="0.5"/>
-            <!-- Right column pillar -->
-            <rect x="63.5" y="38" width="3.5" height="20" fill="#B8860B" opacity="0.5"/>
-            <!-- ✦ crown at roof peak -->
-            <text x="40" y="22" font-family="Inter,sans-serif" font-size="11" font-weight="900" fill="#2C1A00" text-anchor="middle" dominant-baseline="middle">✦</text>
+            <path d="M40 80 L31 65 H49 Z" fill="${VILLA_GOLD.edge}"/>
+            <!-- Parapet wings -->
+            <rect x="6" y="36" width="12" height="6" rx="1" fill="url(#${gid})" stroke="${VILLA_GOLD.edge}" stroke-width="1.25"/>
+            <rect x="62" y="36" width="12" height="6" rx="1" fill="url(#${gid})" stroke="${VILLA_GOLD.edge}" stroke-width="1.25"/>
+            <!-- Villa body -->
+            <rect x="6" y="42" width="68" height="22" rx="1.5" fill="url(#${gid})" stroke="${VILLA_GOLD.edge}" stroke-width="1.5"/>
+            <!-- Animated gold sheen (clipped to body) -->
+            <path class="villa-gold-sheen" clip-path="url(#${clip})" d="M34 42 L44 42 L38 64 L28 64 Z" fill="#FFFFFF" opacity="0.55"/>
+            <!-- Colonnade -->
+            <rect x="14.5" y="43" width="3.5" height="21" fill="${VILLA_GOLD.deep}" opacity="0.45"/>
+            <rect x="62" y="43" width="3.5" height="21" fill="${VILLA_GOLD.deep}" opacity="0.45"/>
+            <!-- Base plinth -->
+            <rect x="3" y="62.5" width="74" height="3.5" rx="1.5" fill="${VILLA_GOLD.deep}" stroke="${VILLA_GOLD.edge}" stroke-width="0.75"/>
+            <!-- Gabled roof -->
+            <path d="M14 42 L40 20 L66 42 Z" fill="url(#${gid})" stroke="${VILLA_GOLD.edge}" stroke-width="1.5" stroke-linejoin="round"/>
+            <!-- Roof ridge highlight -->
+            <path d="M28 39 L40 25 L52 39" stroke="${VILLA_GOLD.light}" stroke-width="1.25" opacity="0.7" fill="none" stroke-linecap="round"/>
+            <!-- Emerald "special estate" beacon at the apex -->
+            ${beacon}
             <!-- Price in body -->
-            <text x="40" y="50" font-family="Inter,sans-serif" font-size="${fSize}" font-weight="bold" fill="#2C1A00" text-anchor="middle" dominant-baseline="middle">${price}</text>
+            <text x="40" y="54" font-family="Inter,sans-serif" font-size="${fSize}" font-weight="bold" fill="${VILLA_GOLD.ink}" text-anchor="middle" dominant-baseline="middle">${price}</text>
           </svg>
         </div>
       </div>
@@ -1015,7 +1104,7 @@ const computeColocatedOffsets = (properties: Property[]): Map<string, [number, n
   // Group properties by rounded lat/lng
   const groups = new Map<string, Property[]>();
   for (const prop of properties) {
-    if (prop.lat == null || prop.lng == null) continue;
+    if (!hasValidCoordinates(prop)) continue;
     const key = `${prop.lat.toFixed(PRECISION)},${prop.lng.toFixed(PRECISION)}`;
     const group = groups.get(key);
     if (group) {
@@ -1131,8 +1220,8 @@ const MarkersComponent: React.FC<MarkersProps> = ({ properties, onPopupClick, ho
   return (
     <>
       {properties.map((prop, idx) => {
-        // Skip properties without valid coordinates
-        if (prop.lat == null || prop.lng == null || isNaN(prop.lat) || isNaN(prop.lng)) {
+        // Skip properties without valid, in-range coordinates
+        if (!hasValidCoordinates(prop)) {
           return null;
         }
         const isPromoted = isPropertyPromoted(prop);
