@@ -74,24 +74,25 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
             {!imageLoaded && (
               <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 bg-[length:200%_100%] animate-shimmer" />
             )}
-            {/* Blurred fill — the same image scaled to cover, sitting behind the
-                contained hero so letterbox bars are filled instead of empty. */}
+            {/* Blurred fill — the same image scaled to cover, dimmed slightly so
+                the sharp hero pops. Fills letterbox bars instead of empty space. */}
             <img
               src={imageUrl}
               alt=""
               aria-hidden="true"
               loading="lazy"
               decoding="async"
-              className={`absolute -inset-8 w-[calc(100%+4rem)] h-[calc(100%+4rem)] object-cover blur-xl animate-map-popup-kenburns transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              className={`absolute -inset-8 w-[calc(100%+4rem)] h-[calc(100%+4rem)] object-cover blur-2xl brightness-90 saturate-125 animate-map-popup-kenburns transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             />
-            {/* Foreground hero — object-contain so the whole building is visible. */}
+            {/* Foreground hero — object-contain so the whole building is visible,
+                with a soft shadow to lift it off the blurred backdrop. */}
             <img
               src={imageUrl}
               alt={property.title || property.address}
               loading="lazy"
               decoding="async"
               onLoad={() => setImageLoaded(true)}
-              className={`relative w-full h-full object-contain transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              className={`relative w-full h-full object-contain drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)] transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             />
           </>
         ) : (
@@ -99,6 +100,12 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
             <span className="text-2xl opacity-50 animate-float">🏠</span>
           </div>
         )}
+        {/* Vignette — darkens the edges so the blurred bars recede and the
+            centered image reads as the focal point. */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.22) 100%)' }}
+        />
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/5 to-transparent pointer-events-none" />
 
