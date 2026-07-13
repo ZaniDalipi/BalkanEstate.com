@@ -187,11 +187,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         onClose();
     };
 
+    // Luxury Villa Booking is a rental offering — surface it only within the
+    // Rent context (the Rent view or the villas page itself), not under Buy.
+    const showVillaBooking = activeView === 'rentals' || activeView === 'villas';
+
     const baseNavItems = [
       { view: 'home' as AppView, label: t('nav:home'), icon: <HomeIcon /> },
       { view: 'search' as AppView, label: t('nav:search'), icon: <SearchIcon /> },
       { view: 'rentals' as AppView, label: t('nav:rentals'), icon: <RentIcon /> },
-      { view: 'villas' as AppView, label: t('nav:villas'), icon: <LuxuryVillaIcon className="h-5 w-5 text-[#FFA500]" /> },
+      ...(showVillaBooking
+        ? [{ view: 'villas' as AppView, label: t('nav:villas'), icon: <LuxuryVillaIcon className="h-5 w-5 text-[#FFA500]" /> }]
+        : []),
       { view: 'explore-cities' as AppView, label: t('nav:exploreCities'), icon: <SparklesIcon /> },
       { view: 'saved-searches' as AppView, label: t('nav:savedSearches'), icon: <MagnifyingGlassPlusIcon /> },
       { view: 'saved-properties' as AppView, label: t('nav:savedProperties'), icon: <HeartIcon /> },
