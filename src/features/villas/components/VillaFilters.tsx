@@ -62,6 +62,7 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
         filters.minPrice != null ||
         filters.maxPrice != null ||
         filters.beds != null ||
+        filters.baths != null ||
         (filters.viewType && filters.viewType !== 'any') ||
         (filters as any).hasPool === true ||
         (filters as any).hasGarden === true ||
@@ -146,6 +147,30 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                                 }`}
                             >
                                 {n === null ? t('common:any', 'Any') : `${n}+`} 🛏️
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Thin divider */}
+                <div className="flex-shrink-0 w-px h-5 bg-gray-200 mx-2.5" />
+
+                {/* Baths quick chips — Any / 1+ / 2+ / 3+ */}
+                <div className="flex items-center gap-1 flex-shrink-0">
+                    {([null, 1, 2, 3] as (number | null)[]).map(n => {
+                        const isActive = (filters.baths ?? null) === n;
+                        return (
+                            <button
+                                key={n ?? 'any'}
+                                type="button"
+                                onClick={() => onFilterChange('baths', n)}
+                                className={`flex-shrink-0 h-7 px-2.5 rounded-lg text-[11px] font-semibold border transition-all ${
+                                    isActive
+                                        ? 'bg-[#FFA500]/15 text-[#0252CD] border-[#FFA500]'
+                                        : 'bg-white text-gray-500 border-gray-200 hover:border-[#FFA500]/60 hover:text-[#0252CD]'
+                                }`}
+                            >
+                                {n === null ? t('common:any', 'Any') : `${n}+`} 🛁
                             </button>
                         );
                     })}
@@ -276,6 +301,30 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                             );
                         })}
                     </div>
+                </div>
+            </div>
+
+            {/* Bathrooms */}
+            <div>
+                <label className={fullLabelClasses}>{t('villas:filters.bathrooms', 'Bathrooms')}</label>
+                <div className="flex gap-2">
+                    {([null, 1, 2, 3] as (number | null)[]).map(n => {
+                        const isActive = (filters.baths ?? null) === n;
+                        return (
+                            <button
+                                key={n ?? 'any'}
+                                type="button"
+                                onClick={() => onFilterChange('baths', n)}
+                                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
+                                    isActive
+                                        ? 'bg-[#FFA500]/15 text-[#0252CD] border-[#FFA500]'
+                                        : 'bg-white text-gray-500 border-gray-200 hover:border-[#FFA500]/60 hover:text-[#0252CD]'
+                                }`}
+                            >
+                                {n === null ? t('common:any', 'Any') : `${n}+ 🛁`}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 

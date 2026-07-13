@@ -325,10 +325,10 @@ const useCountUp = (target: number): number => {
 const TrustStrip: React.FC = () => {
     const { t } = useTranslation(['villas']);
     const items = [
-        { icon: '🏛️', title: t('villas:trust.handpicked'), desc: t('villas:trust.handpickedDesc') },
-        { icon: '🎩', title: t('villas:trust.concierge'),  desc: t('villas:trust.conciergeDesc')  },
-        { icon: '💎', title: t('villas:trust.bestPrice'),  desc: t('villas:trust.bestPriceDesc')  },
-        { icon: '🔒', title: t('villas:trust.privacy'),    desc: t('villas:trust.privacyDesc')    },
+        { icon: '🏛️', title: t('villas:trust.handpicked', 'Handpicked Estates'), desc: t('villas:trust.handpickedDesc', 'Every villa personally vetted for exceptional quality') },
+        { icon: '🎩', title: t('villas:trust.concierge', 'Dedicated Concierge'),  desc: t('villas:trust.conciergeDesc', 'White-glove support from inquiry to checkout')  },
+        { icon: '💎', title: t('villas:trust.bestPrice', 'Best-Price Promise'),  desc: t('villas:trust.bestPriceDesc', 'No hidden fees — ever. Book with total confidence')  },
+        { icon: '🔒', title: t('villas:trust.privacy', 'Complete Privacy'),    desc: t('villas:trust.privacyDesc', 'Your stay, your retreat — absolute discretion guaranteed')    },
     ];
     return (
         <div
@@ -637,6 +637,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
         if (filters.minPrice != null) count++;
         if (filters.maxPrice != null) count++;
         if (filters.beds != null) count++;
+        if (filters.baths != null) count++;
         if (filters.viewType && filters.viewType !== 'any') count++;
         if ((filters as any).hasPool === true) count++;
         if ((filters as any).hasGarden === true) count++;

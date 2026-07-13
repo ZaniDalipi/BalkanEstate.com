@@ -78,7 +78,8 @@
     "sqftHigh": "Largest First",
     "listingType": "Type",
     "forSale": "For Sale",
-    "forRent": "For Rent"
+    "forRent": "For Rent",
+    "bathrooms": "Bathrooms"
   },
   "seo": {
     "title": "Luxury Villas for Rent in the Balkans | BalkanEstate",
