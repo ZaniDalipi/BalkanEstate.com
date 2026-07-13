@@ -7,6 +7,7 @@ import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { formatPrice } from '@/utils/currency';
 import PropertyImage from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
+import VillaBookingModal from './VillaBookingModal';
 
 const VIEW_TYPE: Record<string, { emoji: string; label: string }> = {
     sea:      { emoji: '🌊', label: 'Sea View'     },
@@ -30,11 +31,17 @@ interface LuxuryVillaCardProps {
 }
 
 const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priority }) => {
-    const { t } = useTranslation(['property', 'rental', 'common']);
+    const { t } = useTranslation(['villas', 'property', 'rental', 'common']);
     const { state, dispatch, toggleSavedHome } = useAppContext();
     const [imgIndex, setImgIndex] = useState(0);
     const [touchStart, setTouchStart] = useState<number | null>(null);
+    const [bookingOpen, setBookingOpen] = useState(false);
     const cardRef = useRef<HTMLDivElement>(null);
+
+    const openBooking = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        setBookingOpen(true);
+    }, []);
 
     const isFavorited = state.savedHomes.some(p => p.id === property.id);
 
@@ -364,13 +371,31 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                     )}
                 </div>
 
-                {/* ── "Reserve" CTA — emerges on hover ── */}
-                <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
-                    <div className="villa-cta-btn px-6 py-2.5 rounded-full text-sm font-bold text-white border border-white/35 backdrop-blur-sm shadow-2xl">
-                        Reserve &rarr;
+                {/* ── "Request to Book" CTA — emerges on hover, opens booking ── */}
+                {!isSold && (
+                    <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
+                        <button
+                            type="button"
+                            onClick={openBooking}
+                            className="villa-cta-btn pointer-events-auto px-6 py-2.5 rounded-full text-sm font-bold text-white border border-white/35 backdrop-blur-sm shadow-2xl hover:bg-white/20 focus:outline-none"
+                            aria-label={t('villas:booking.requestToBook', 'Request to Book')}
+                        >
+                            {t('villas:booking.requestToBook', 'Request to Book')} &rarr;
+                        </button>
                     </div>
-                </div>
+                )}
             </div>
+
+            {bookingOpen && (
+                <VillaBookingModal
+                    property={property}
+                    isOpen={bookingOpen}
+                    onClose={() => setBookingOpen(false)}
+                    defaultName={state.currentUser?.name ?? ''}
+                    defaultEmail={state.currentUser?.email ?? ''}
+                    defaultPhone={state.currentUser?.phone ?? ''}
+                />
+            )}
         </div>
     );
 });
