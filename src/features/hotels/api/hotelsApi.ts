@@ -4,6 +4,7 @@ import type {
   HotelFilters,
   HotelsResponse,
   CreateHotelData,
+  HotelListingCode,
 } from '@/src/shared/types/hotel.types';
 
 export const getHotels = async (filters?: HotelFilters): Promise<HotelsResponse> => {
@@ -70,4 +71,36 @@ export const uploadHotelPhotos = async (
     `/hotels/${id}/upload-photos`,
     formData
   );
+};
+
+// ---- Listing access codes ----
+
+export const validateHotelCode = async (
+  code: string
+): Promise<{ valid: boolean; message: string }> => {
+  return apiRequest('/hotel-codes/validate', { method: 'POST', body: { code } });
+};
+
+export const generateHotelCodes = async (
+  count: number,
+  note?: string,
+  expiresAt?: string
+): Promise<{ codes: HotelListingCode[]; count: number }> => {
+  return apiRequest('/hotel-codes/generate', {
+    method: 'POST',
+    body: { count, note, expiresAt },
+    requiresAuth: true,
+  });
+};
+
+export const getHotelCodes = async (): Promise<{
+  codes: HotelListingCode[];
+  total: number;
+  stats: { active: number; redeemed: number };
+}> => {
+  return apiRequest('/hotel-codes', { requiresAuth: true });
+};
+
+export const revokeHotelCode = async (id: string): Promise<{ message: string }> => {
+  return apiRequest(`/hotel-codes/${id}`, { method: 'DELETE', requiresAuth: true });
 };

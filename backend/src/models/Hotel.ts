@@ -127,6 +127,8 @@ export interface IHotel extends Document {
   petsAllowed: boolean;
   smokingAllowed: boolean;
   languagesSpoken?: string[];
+  accessCode?: string;
+  isComped: boolean;
   isActive: boolean;
   isVerified: boolean;
   views: number;
@@ -336,6 +338,9 @@ const HotelSchema: Schema = new Schema(
       trim: true,
       maxlength: [50, 'Language name cannot exceed 50 characters'],
     }],
+    // Access-code / comp tracking (interim monetization bridge).
+    accessCode: { type: String, trim: true, uppercase: true },
+    isComped: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true, index: true },
     isVerified: { type: Boolean, default: false },
     views: { type: Number, default: 0 },

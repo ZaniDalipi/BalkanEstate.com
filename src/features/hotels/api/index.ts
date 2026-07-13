@@ -8,4 +8,8 @@ export {
   deleteHotel,
   uploadHotelCover,
   uploadHotelPhotos,
+  validateHotelCode,
+  generateHotelCodes,
+  getHotelCodes,
+  revokeHotelCode,
 } from './hotelsApi';

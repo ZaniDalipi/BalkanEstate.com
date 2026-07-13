@@ -180,7 +180,23 @@ export interface CreateRoomData {
   amenities?: HotelAmenity[];
 }
 
+export type HotelCodeStatus = 'active' | 'redeemed' | 'revoked';
+
+export interface HotelListingCode {
+  id: string;
+  code: string;
+  status: HotelCodeStatus;
+  note?: string;
+  redeemedBy?: { id?: string; name?: string; email?: string } | null;
+  redeemedHotel?: { id?: string; name?: string; slug?: string } | null;
+  redeemedAt?: string;
+  expiresAt?: string;
+  createdAt: string;
+}
+
 export interface CreateHotelData {
+  /** Optional access code (interim monetization bridge). */
+  listingCode?: string;
   name: string;
   description?: string;
   propertyType: HotelPropertyType;

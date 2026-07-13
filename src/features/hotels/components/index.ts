@@ -3,3 +3,4 @@ export { default as HotelCard } from './HotelCard';
 export { default as HotelDetailPage } from './HotelDetailPage';
 export { default as CreateHotelListingForm } from './CreateHotelListingForm';
 export { default as ManageHotelsPage } from './ManageHotelsPage';
+export { default as ManageHotelCodesPage } from './ManageHotelCodesPage';

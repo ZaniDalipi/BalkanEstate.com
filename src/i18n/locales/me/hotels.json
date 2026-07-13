@@ -80,7 +80,8 @@
     "unrated": "Unrated",
     "minNightsShort": "{{count}} night minimum",
     "minNightsShort_one": "{{count}} night minimum",
-    "directBooking": "Direct booking — no fees"
+    "directBooking": "Direct booking — no fees",
+    "showAllPhotos": "Show all {{count}} photos"
   },
   "propertyTypes": {
     "hotel": "Hotel",
@@ -247,7 +248,15 @@
     "editTitle": "Edit your property",
     "editSubtitle": "Update your details, rooms and pricing. Changes go live immediately.",
     "saveChanges": "Save changes",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "code": {
+      "title": "Have an access code?",
+      "hint": "If we sent you a code to publish for free, enter it here. Otherwise just leave it blank.",
+      "apply": "Apply",
+      "checking": "Checking…",
+      "valid": "Code applied — this listing will be published for free.",
+      "invalid": "This code is invalid, used or expired."
+    }
   },
   "manage": {
     "title": "My properties",
@@ -261,5 +270,28 @@
     "view": "View",
     "roomsLine": "{{count}} room types",
     "backToManage": "Back to my properties"
+  },
+  "codes": {
+    "title": "Listing access codes",
+    "subtitle": "Generate codes and send them to hotels so they can publish for free while payments are set up.",
+    "statActive": "{{count}} active",
+    "statRedeemed": "{{count}} used",
+    "generate": "Generate codes",
+    "generating": "Generating…",
+    "count": "How many",
+    "note": "Note (optional)",
+    "notePlaceholder": "e.g. for Hotel Adriatic",
+    "generatedTitle": "{{count}} new codes — copy and send them",
+    "copyAll": "Copy all",
+    "copied": "Copied!",
+    "allCodes": "All codes",
+    "empty": "No codes yet. Generate some above.",
+    "revoke": "Revoke",
+    "manageCodes": "Access codes",
+    "status": {
+      "active": "Active",
+      "redeemed": "Used",
+      "revoked": "Revoked"
+    }
   }
 }

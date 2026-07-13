@@ -9,6 +9,8 @@ import Hotel, {
   type IRoom,
 } from '../models/Hotel';
 import { IUser } from '../models/User';
+import HotelListingCode from '../models/HotelListingCode';
+import { redeemCodeForHotel } from './hotelCodeController';
 import { uploadImage, deleteImage } from '../services/cloudinaryService';
 import { getParam, getObjectIdParam } from '../utils/validateParams';
 import { encodeId, resolveId } from '../utils/idObfuscation';
@@ -18,7 +20,7 @@ const MAX_HOTELS_PER_USER = 10;
 /** Transform lean document: map _id → obfuscated id, strip internals */
 const transformLean = (doc: any) => {
   if (!doc) return doc;
-  const { _id, __v, coverImagePublicId, images, ...rest } = doc;
+  const { _id, __v, coverImagePublicId, images, accessCode, ...rest } = doc;
   const hex = _id?.toString();
   const cleanImages = Array.isArray(images)
     ? images.map((img: any) => {
@@ -311,7 +313,32 @@ export const createHotel = async (req: Request, res: Response): Promise<void> =>
         : [],
     };
 
+    // Optional access code (interim monetization bridge). Validate up-front so
+    // an invalid code fails before we create anything.
+    const rawCode = typeof req.body.listingCode === 'string' ? req.body.listingCode.trim().toUpperCase() : '';
+    if (rawCode) {
+      const preview = await HotelListingCode.findOne({ code: rawCode });
+      if (!preview || !(preview as any).isRedeemable?.()) {
+        res.status(400).json({ message: 'Invalid, used or expired access code' });
+        return;
+      }
+    }
+
     const hotel = await Hotel.create(hotelData);
+
+    // Atomically redeem the code now that we have a hotel id. If it lost a race,
+    // the listing is still created (just not comped) — never fail after create.
+    if (rawCode) {
+      try {
+        const code = await redeemCodeForHotel(rawCode, currentUser._id as any, hotel._id as any);
+        hotel.accessCode = code;
+        hotel.isComped = true;
+        await hotel.save();
+      } catch {
+        // Code was taken between validation and redemption — leave as non-comped.
+      }
+    }
+
     const leanHotel = hotel.toObject();
 
     res.status(201).json({ hotel: transformLean(leanHotel), message: 'Hotel listing created successfully' });

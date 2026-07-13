@@ -7,4 +7,7 @@ export {
   useDeleteHotel,
   useUploadHotelCover,
   useUploadHotelPhotos,
+  useHotelCodes,
+  useGenerateHotelCodes,
+  useRevokeHotelCode,
 } from './useHotels';

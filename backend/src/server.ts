@@ -116,6 +116,7 @@ import testimonialRoutes from './routes/testimonialRoutes';
 import pushRoutes from './routes/pushRoutes';
 import businessListingRoutes from './routes/businessListingRoutes';
 import hotelRoutes from './routes/hotelRoutes';
+import hotelCodeRoutes from './routes/hotelCodeRoutes';
 import listingSourceRoutes from './routes/listingSourceRoutes';
 import userListingSourceRoutes from './routes/userListingSourceRoutes';
 import imageProxyRoutes from './routes/imageProxyRoutes';
@@ -378,6 +379,7 @@ app.use('/api/testimonials', testimonialRoutes); // User testimonials (submit + 
 app.use('/api/push', pushRoutes); // Push notification subscriptions
 app.use('/api/business-listings', businessListingRoutes); // Business directory listings
 app.use('/api/hotels', hotelRoutes); // Hotels & rooms for rent
+app.use('/api/hotel-codes', hotelCodeRoutes); // Hotel listing access codes
 app.use('/api/admin/listing-sources', sensitiveRateLimiter, listingSourceRoutes); // Universal external-listing ingestion (admin only)
 app.use('/api/listing-sources', sensitiveRateLimiter, userListingSourceRoutes); // Per-user external-listing feeds
 app.use('/api/image-proxy', imageProxyRoutes); // Proxy external scraped images to avoid CORS

@@ -9,8 +9,13 @@ import {
   deleteHotel,
   uploadHotelCover,
   uploadHotelPhotos,
+  generateHotelCodes,
+  getHotelCodes,
+  revokeHotelCode,
 } from '../api';
 import type { HotelFilters, CreateHotelData } from '@/src/shared/types/hotel.types';
+
+const HOTEL_CODES_KEY = ['hotel-codes'] as const;
 
 export function useHotels(filters?: HotelFilters) {
   const { data, isLoading, error, refetch } = useQuery({
@@ -118,6 +123,42 @@ export function useUploadHotelCover() {
     isLoading: mutation.isPending,
     error: mutation.error,
   };
+}
+
+export function useHotelCodes(enabled = true) {
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: HOTEL_CODES_KEY,
+    queryFn: getHotelCodes,
+    enabled,
+    staleTime: 30 * 1000,
+  });
+  return {
+    codes: data?.codes || [],
+    stats: data?.stats || { active: 0, redeemed: 0 },
+    total: data?.total || 0,
+    isLoading,
+    error,
+    refetch,
+  };
+}
+
+export function useGenerateHotelCodes() {
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: ({ count, note, expiresAt }: { count: number; note?: string; expiresAt?: string }) =>
+      generateHotelCodes(count, note, expiresAt),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: HOTEL_CODES_KEY }),
+  });
+  return { generate: mutation.mutateAsync, isLoading: mutation.isPending, error: mutation.error };
+}
+
+export function useRevokeHotelCode() {
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: (id: string) => revokeHotelCode(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: HOTEL_CODES_KEY }),
+  });
+  return { revoke: mutation.mutateAsync, isLoading: mutation.isPending, error: mutation.error };
 }
 
 export function useUploadHotelPhotos() {

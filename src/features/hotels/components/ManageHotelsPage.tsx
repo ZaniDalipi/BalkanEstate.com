@@ -13,11 +13,14 @@ interface ManageHotelsPageProps {
   onCreate: () => void;
   onEdit: (hotel: Hotel) => void;
   onView: (hotel: Hotel) => void;
+  onManageCodes: () => void;
 }
 
-const ManageHotelsPage: React.FC<ManageHotelsPageProps> = ({ onBack, onCreate, onEdit, onView }) => {
+const ManageHotelsPage: React.FC<ManageHotelsPageProps> = ({ onBack, onCreate, onEdit, onView, onManageCodes }) => {
   const { t } = useTranslation('hotels');
-  const { dispatch } = useAppContext();
+  const { state, dispatch } = useAppContext();
+  const role = state.currentUser?.role;
+  const isAdmin = role === 'admin' || role === 'super_admin';
   const { hotels, isLoading, refetch } = useMyHotels();
   const { deleteHotel } = useDeleteHotel();
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -53,12 +56,22 @@ const ManageHotelsPage: React.FC<ManageHotelsPageProps> = ({ onBack, onCreate, o
               </h1>
               <p className="mt-1 text-white/70 text-sm">{t('manage.subtitle')}</p>
             </div>
-            <button
-              onClick={onCreate}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-indigo-900 font-semibold hover:bg-white/90 transition-colors shrink-0"
-            >
-              <PlusIcon className="w-5 h-5" /> {t('page.listYourProperty')}
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              {isAdmin && (
+                <button
+                  onClick={onManageCodes}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 text-white font-medium hover:bg-white/20 transition-colors"
+                >
+                  {t('codes.manageCodes')}
+                </button>
+              )}
+              <button
+                onClick={onCreate}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-indigo-900 font-semibold hover:bg-white/90 transition-colors"
+              >
+                <PlusIcon className="w-5 h-5" /> {t('page.listYourProperty')}
+              </button>
+            </div>
           </div>
         </div>
       </div>

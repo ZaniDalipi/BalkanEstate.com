@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from 
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCreateHotel, useUpdateHotel, useUploadHotelCover, useUploadHotelPhotos } from '../hooks';
+import { validateHotelCode } from '../api';
 import { useHotelDraftStore, HOTEL_DRAFT_TTL_MS, type HotelDraft } from '../store/hotelDraftStore';
 import {
   HOTEL_PROPERTY_TYPES,
@@ -226,6 +227,25 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
   // so every missing field can be highlighted red at once.
   const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set());
   const isInvalid = useCallback((key: string) => invalidFields.has(key), [invalidFields]);
+
+  // Optional access code (interim monetization bridge). Create mode only.
+  const [accessCode, setAccessCode] = useState('');
+  const [codeState, setCodeState] = useState<'idle' | 'checking' | 'valid' | 'invalid'>('idle');
+  const [codeMsg, setCodeMsg] = useState('');
+
+  const checkAccessCode = useCallback(async () => {
+    const code = accessCode.trim();
+    if (!code) { setCodeState('idle'); setCodeMsg(''); return; }
+    setCodeState('checking');
+    try {
+      const res = await validateHotelCode(code);
+      if (res.valid) { setCodeState('valid'); setCodeMsg(res.message || ''); }
+      else { setCodeState('invalid'); setCodeMsg(res.message || t('form.code.invalid')); }
+    } catch (err: any) {
+      setCodeState('invalid');
+      setCodeMsg(err?.message || t('form.code.invalid'));
+    }
+  }, [accessCode, t]);
 
   // Blocking submit overlay state — prevents interaction & double-submits.
   const [submitting, setSubmitting] = useState(false);
@@ -519,6 +539,7 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
       if (whatsapp) payload.whatsapp = whatsapp;
       const cleanWebsite = normalizeWebsiteUrl(website);
       if (cleanWebsite) payload.website = cleanWebsite;
+      if (!isEdit && accessCode.trim()) payload.listingCode = accessCode.trim();
       if (address.trim()) payload.address = address.trim();
       if (lat !== 0 && lng !== 0) { payload.latitude = lat; payload.longitude = lng; }
       if (amenities.length > 0) payload.amenities = amenities;
@@ -567,7 +588,7 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
     submitting, name, propertyType, starRating, contactPhone, selectedCountry, selectedCity, rooms, minNights, maxNights,
     description, contactEmail, whatsapp, website, address, lat, lng, amenities, currency, checkInTime,
     checkOutTime, cancellationPolicy, houseRules, languagesSpoken, petsAllowed, smokingAllowed,
-    coverFile, galleryFiles, createHotel, updateHotel, isEdit, editHotel, uploadCover, uploadPhotos, onSuccess, t, clearErrors, clearDraft, setValidationError,
+    coverFile, galleryFiles, accessCode, createHotel, updateHotel, isEdit, editHotel, uploadCover, uploadPhotos, onSuccess, t, clearErrors, clearDraft, setValidationError,
   ]);
 
   const displayError = formError || (error as Error)?.message;
@@ -654,6 +675,44 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
               {t('form.discardDraft')}
             </button>
           </div>
+        )}
+
+        {/* --- Access code (optional, create only) --- */}
+        {!isEdit && (
+          <section className="bg-white rounded-2xl border border-neutral-200 p-6">
+            <h2 className="text-lg font-semibold text-neutral-900">{t('form.code.title')}</h2>
+            <p className="mt-1 text-sm text-neutral-500">{t('form.code.hint')}</p>
+            <div className="mt-3 flex gap-2">
+              <input
+                type="text"
+                value={accessCode}
+                onChange={(e) => { setAccessCode(e.target.value.toUpperCase()); setCodeState('idle'); setCodeMsg(''); }}
+                onBlur={checkAccessCode}
+                placeholder="HOTEL-XXXX-XXXX"
+                className={`flex-1 px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors tracking-wider uppercase ${
+                  codeState === 'valid' ? 'border-emerald-500 ring-2 ring-emerald-100'
+                    : codeState === 'invalid' ? 'border-red-500 ring-2 ring-red-100'
+                    : 'border-neutral-300'
+                }`}
+              />
+              <button
+                type="button"
+                onClick={checkAccessCode}
+                disabled={!accessCode.trim() || codeState === 'checking'}
+                className="px-4 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-sm font-medium disabled:opacity-50"
+              >
+                {codeState === 'checking' ? t('form.code.checking') : t('form.code.apply')}
+              </button>
+            </div>
+            {codeState === 'valid' && (
+              <p className="mt-2 flex items-center gap-1.5 text-sm text-emerald-600">
+                <CheckIcon className="w-4 h-4" /> {t('form.code.valid')}
+              </p>
+            )}
+            {codeState === 'invalid' && codeMsg && (
+              <p className="mt-2 text-sm text-red-600">{codeMsg}</p>
+            )}
+          </section>
         )}
 
         {/* --- Section: Basics --- */}
