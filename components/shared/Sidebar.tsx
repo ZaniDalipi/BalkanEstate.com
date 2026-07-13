@@ -2,21 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { AppView, UserRole } from '../../types';
-import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, BuildingStorefrontIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, RentIcon, HomeIcon, BookOpenIcon } from '../../constants';
-
-// Luxury villa nav icon — an elegant villa crowned with a diamond, echoing
-// the emerald-gem beacon on the map markers. Gold tint marks it as premium.
-const LuxuryVillaIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg className={className ?? 'h-5 w-5'} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2.3 l1.7 1.8 -1.7 1.8 -1.7 -1.8 z" />
-        <path d="M4 12 L12 6.4 L20 12" />
-        <path d="M6 11 V20 H18 V11" />
-        <path d="M10.4 20 V16.4 a1.6 1.6 0 0 1 3.2 0 V20" />
-        <path d="M7.2 13 h1.7 v1.7 h-1.7 z" />
-        <path d="M15.1 13 h1.7 v1.7 h-1.7 z" />
-        <path d="M3.5 20 H20.5" />
-    </svg>
-);
+import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, BuildingStorefrontIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, RentIcon, HomeIcon, BookOpenIcon, LuxuryVillaIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import UserAvatar from './UserAvatar';

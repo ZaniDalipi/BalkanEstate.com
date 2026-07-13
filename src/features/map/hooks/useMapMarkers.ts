@@ -4,6 +4,7 @@
 import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { MarkerClusterer, SuperClusterAlgorithm } from '@googlemaps/markerclusterer';
 import { Property } from '@/types';
+import { VILLA_ONYX, VILLA_GOLD, buildEmeraldBeacon } from '@/shared/map/villaMarker';
 
 // Property type colors
 const PROPERTY_TYPE_COLORS: Record<string, string> = {
@@ -22,18 +23,6 @@ const PROMOTION_TIER_COLORS: Record<string, string> = {
   featured: '#7C3AED',
   standard: '#9ca3af',
 };
-
-/**
- * Luxury villa palette — kept in sync with the Leaflet marker
- * (src/components/map/MapPropertyMarker.tsx). Gilded gold body signals
- * exclusivity; the emerald beacon marks a live, verified estate.
- */
-// Onyx-and-gold "black card" luxury palette: near-black body, gilded roof
-// and trim, gold price text — the most premium look and distinct from the
-// blue/purple/green pins used by the other property types.
-const VILLA_ONYX = { light: '#332C22', dark: '#141009' } as const;      // warm near-black body
-const VILLA_GOLD = { light: '#FFE9A3', mid: '#E8B820', deep: '#B8860B', edge: '#6E5716', text: '#F7E7A6' } as const;
-const VILLA_EMERALD = { light: '#6EE7B7', mid: '#10B981', deep: '#047857', edge: '#065F46' } as const;
 
 /** Inject the emerald-beacon + gold-sheen keyframes once (Google map path). */
 const injectVillaMarkerStyles = (): void => {
@@ -58,30 +47,6 @@ const injectVillaMarkerStyles = (): void => {
   document.head.appendChild(style);
 };
 
-/** Emerald gemstone beacon SVG fragment with a soft radial glow. */
-const buildEmeraldBeacon = (cx: number, cy: number, size: number, uid: string): string => {
-  const gid = `emGg_${uid}`;
-  const hid = `emHg_${uid}`;
-  const w = size * 0.82;
-  const r = (n: number) => Math.round(n * 100) / 100;
-  return `
-    <radialGradient id="${hid}" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="${VILLA_EMERALD.light}" stop-opacity="0.7"/>
-      <stop offset="45%" stop-color="${VILLA_EMERALD.mid}" stop-opacity="0.35"/>
-      <stop offset="100%" stop-color="${VILLA_EMERALD.mid}" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="${VILLA_EMERALD.light}"/>
-      <stop offset="55%" stop-color="${VILLA_EMERALD.mid}"/>
-      <stop offset="100%" stop-color="${VILLA_EMERALD.deep}"/>
-    </linearGradient>
-    <circle class="villa-g-halo" cx="${r(cx)}" cy="${r(cy)}" r="${r(size * 1.8)}" fill="url(#${hid})"/>
-    <path d="M${r(cx)} ${r(cy - size)} L${r(cx + w)} ${r(cy)} L${r(cx)} ${r(cy + size)} L${r(cx - w)} ${r(cy)} Z" fill="url(#${gid})" stroke="${VILLA_EMERALD.edge}" stroke-width="0.7"/>
-    <path d="M${r(cx)} ${r(cy - size)} L${r(cx + w)} ${r(cy)} L${r(cx)} ${r(cy)} Z" fill="#A7F3D0" opacity="0.75"/>
-    <circle cx="${r(cx - w * 0.32)}" cy="${r(cy - size * 0.32)}" r="${r(size * 0.2)}" fill="#ffffff" opacity="0.92"/>
-  `;
-};
-
 /**
  * Build a gilded villa marker (dynamic width) as an SVG string for the
  * Google AdvancedMarkerElement. Gold gabled house, animated sheen, price in
@@ -95,7 +60,7 @@ const buildLuxuryVillaSVG = (price: string, uid: string): string => {
   const bid = `lvBd_${uid}`;   // onyx body gradient
   const rid = `lvRf_${uid}`;   // gold roof gradient
   const clip = `lvClipM_${uid}`;
-  const beacon = buildEmeraldBeacon(cx, 9, 4.5, uid);
+  const beacon = buildEmeraldBeacon(cx, 9, 4.5, uid, 'villa-g-halo');
   return `<svg width="${Math.round(W * scale)}" height="${Math.round(H * scale)}" viewBox="0 0 ${W} ${H}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 7px rgba(212,168,0,0.7)) drop-shadow(0 0 12px rgba(16,185,129,0.3)) drop-shadow(0 2px 5px rgba(0,0,0,0.5));display:block;">
     <defs>
       <linearGradient id="${bid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${VILLA_ONYX.light}"/><stop offset="100%" stop-color="${VILLA_ONYX.dark}"/></linearGradient>
@@ -108,7 +73,7 @@ const buildLuxuryVillaSVG = (price: string, uid: string): string => {
     <path d="M4 30 L${cx} 15 L${W - 4} 30 Z" fill="url(#${rid})" stroke="${VILLA_GOLD.deep}" stroke-width="1.25" stroke-linejoin="round"/>
     <path d="M${cx - 10} 27 L${cx} 18 L${cx + 10} 27" stroke="${VILLA_GOLD.light}" stroke-width="1" opacity="0.7" fill="none" stroke-linecap="round"/>
     ${beacon}
-    <text x="${cx}" y="40" font-family="Inter,sans-serif" font-size="10.5" font-weight="800" fill="${VILLA_GOLD.text}" text-anchor="middle" dominant-baseline="middle">${price}</text>
+    <text x="${cx}" y="40" font-family="Inter,sans-serif" font-size="10.5" font-weight="800" fill="${VILLA_GOLD.ink}" text-anchor="middle" dominant-baseline="middle">${price}</text>
   </svg>`;
 };
 

@@ -10,6 +10,7 @@ import { formatPrice } from '@/utils/currency';
 import { BuildingOfficeIcon } from '@/constants';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { validateCoordinates } from '@/shared/utils/validation';
+import { VILLA_ONYX, VILLA_GOLD, buildEmeraldBeacon } from '@/shared/map/villaMarker';
 
 /**
  * A property is mappable only when it carries coordinates that are real
@@ -300,48 +301,11 @@ const PROPERTY_TYPE_COLORS: Record<
   other: '#6c757d',
 };
 
-/**
- * Luxury villa palette.
- * Gilded gold body = exclusivity; emerald beacon = a live, verified, special
- * estate (green reads as "available / premium" without clashing with the
- * green apartment pins, which stay a flat #28a745 pill).
- */
-const VILLA_ONYX = { light: '#332C22', dark: '#141009' } as const;      // warm near-black body
-const VILLA_GOLD = { light: '#FFE9A3', mid: '#E8B820', deep: '#B8860B', edge: '#6E5716', ink: '#F7E7A6' } as const;
-const VILLA_EMERALD = { light: '#6EE7B7', mid: '#10B981', deep: '#047857', edge: '#065F46' } as const;
-
-/**
- * Build the emerald gemstone "special estate" beacon as an SVG fragment.
- * Rendered at the roof apex of every luxury-villa marker. The halo pulses
- * via the injected `.villa-emerald-halo` keyframes; the facets are static.
- *
- * @param cx     centre-x in viewBox units
- * @param cy     centre-y in viewBox units
- * @param size   gem half-height (also drives halo radius + facet width)
- * @param uid    marker-unique suffix so gradient ids never collide in the DOM
- */
-const buildEmeraldBeacon = (cx: number, cy: number, size: number, uid: string): string => {
-  const gid = `emG_${uid}`;
-  const hid = `emH_${uid}`;
-  const w = size * 0.82;                       // gem half-width (narrower than tall)
-  const round = (n: number) => Math.round(n * 100) / 100;
-  return `
-    <radialGradient id="${hid}" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="${VILLA_EMERALD.light}" stop-opacity="0.7"/>
-      <stop offset="45%" stop-color="${VILLA_EMERALD.mid}" stop-opacity="0.35"/>
-      <stop offset="100%" stop-color="${VILLA_EMERALD.mid}" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="${VILLA_EMERALD.light}"/>
-      <stop offset="55%" stop-color="${VILLA_EMERALD.mid}"/>
-      <stop offset="100%" stop-color="${VILLA_EMERALD.deep}"/>
-    </linearGradient>
-    <circle class="villa-emerald-halo" cx="${round(cx)}" cy="${round(cy)}" r="${round(size * 1.8)}" fill="url(#${hid})"/>
-    <path d="M${round(cx)} ${round(cy - size)} L${round(cx + w)} ${round(cy)} L${round(cx)} ${round(cy + size)} L${round(cx - w)} ${round(cy)} Z" fill="url(#${gid})" stroke="${VILLA_EMERALD.edge}" stroke-width="0.7"/>
-    <path d="M${round(cx)} ${round(cy - size)} L${round(cx + w)} ${round(cy)} L${round(cx)} ${round(cy)} Z" fill="#A7F3D0" opacity="0.75"/>
-    <circle cx="${round(cx - w * 0.32)}" cy="${round(cy - size * 0.32)}" r="${round(size * 0.2)}" fill="#ffffff" opacity="0.92"/>
-  `;
-};
+// Luxury villa palette + emerald-beacon builder are shared with the Google
+// marker (src/features/map/hooks/useMapMarkers.ts) via @/shared/map/villaMarker.
+// The halo pulses via the `.villa-emerald-halo` keyframes injected below.
+const buildLeafletBeacon = (cx: number, cy: number, size: number, uid: string): string =>
+  buildEmeraldBeacon(cx, cy, size, uid, 'villa-emerald-halo');
 
 /**
  * Format price for marker display (short format)
@@ -495,11 +459,11 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
     const scaledH = Math.round(H * zoomScale);
     const cx = W / 2;
     // unique id suffix per marker so gradient/clip ids never collide in the DOM
-    const uid = `s${String(property._id).slice(-6)}`;
+    const uid = `s${String(property.id).slice(-6)}`;
     const bid = `lvBs_${uid}`;   // onyx body gradient
     const rid = `lvRs_${uid}`;   // gold roof gradient
     const clip = `lvClipS_${uid}`;
-    const beacon = buildEmeraldBeacon(cx, 9, 4.5, uid);
+    const beacon = buildLeafletBeacon(cx, 9, 4.5, uid);
     const svgHouseHtml = `
       <div class="promoted-marker-wrapper ${nightModeClass}" style="width:${scaledW}px;height:${scaledH}px;">
         <div class="${promotedInnerClass}" style="width:${scaledW}px;height:${scaledH}px;transform:scale(${hoverScale});transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);">
@@ -657,12 +621,12 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
     const vbW = 80; const vbH = 80; // beacon crown + roof + body + plinth + pin
     const scaledW = Math.round(vbW * zoomScale);
     const scaledH = Math.round(vbH * zoomScale);
-    const uid = `d${String(property._id).slice(-6)}`;
+    const uid = `d${String(property.id).slice(-6)}`;
     const bid = `lvBd_${uid}`;   // onyx body gradient
     const rid = `lvRd_${uid}`;   // gold roof/trim gradient
     const clip = `lvClipD_${uid}`;
     const fSize = Math.max(10, Math.round(12 * zoomScale));
-    const beacon = buildEmeraldBeacon(40, 13, 6, uid);
+    const beacon = buildLeafletBeacon(40, 13, 6, uid);
     // Gold glow layered with a faint emerald under-glow for the "special" cue
     const villaFilter = isNightMode
       ? finalFilter

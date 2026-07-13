@@ -1,0 +1,59 @@
+/**
+ * Shared luxury-villa marker design tokens and SVG builders.
+ *
+ * Both map engines render the same villa marker language:
+ *  - Leaflet: src/components/map/MapPropertyMarker.tsx
+ *  - Google:  src/features/map/hooks/useMapMarkers.ts
+ *
+ * Keeping the palette and the emerald-beacon geometry here (instead of
+ * duplicated in each file) means a design tweak lands in one place.
+ *
+ * These are framework-agnostic string builders — no React/Leaflet/Google
+ * imports — so either engine can drop the fragment into its own SVG.
+ */
+
+/** Onyx-and-gold "black card" palette. Near-black body, gilded roof/trim. */
+export const VILLA_ONYX = { light: '#332C22', dark: '#141009' } as const;
+export const VILLA_GOLD = { light: '#FFE9A3', mid: '#E8B820', deep: '#B8860B', edge: '#6E5716', ink: '#F7E7A6' } as const;
+export const VILLA_EMERALD = { light: '#6EE7B7', mid: '#10B981', deep: '#047857', edge: '#065F46' } as const;
+
+const round = (n: number): number => Math.round(n * 100) / 100;
+
+/**
+ * Emerald gemstone "special estate" beacon as an SVG fragment with a soft
+ * radial glow. The halo pulses via `haloClass` (each engine injects its own
+ * keyframes under that class name); the facets are static.
+ *
+ * @param cx        centre-x in viewBox units
+ * @param cy        centre-y in viewBox units
+ * @param size      gem half-height (also drives halo radius + facet width)
+ * @param uid       marker-unique suffix so gradient ids never collide
+ * @param haloClass CSS class carrying the pulse animation
+ */
+export const buildEmeraldBeacon = (
+  cx: number,
+  cy: number,
+  size: number,
+  uid: string,
+  haloClass: string,
+): string => {
+  const gid = `emG_${uid}`;
+  const hid = `emH_${uid}`;
+  const w = size * 0.82;
+  return `
+    <radialGradient id="${hid}" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="${VILLA_EMERALD.light}" stop-opacity="0.7"/>
+      <stop offset="45%" stop-color="${VILLA_EMERALD.mid}" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="${VILLA_EMERALD.mid}" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${VILLA_EMERALD.light}"/>
+      <stop offset="55%" stop-color="${VILLA_EMERALD.mid}"/>
+      <stop offset="100%" stop-color="${VILLA_EMERALD.deep}"/>
+    </linearGradient>
+    <circle class="${haloClass}" cx="${round(cx)}" cy="${round(cy)}" r="${round(size * 1.8)}" fill="url(#${hid})"/>
+    <path d="M${round(cx)} ${round(cy - size)} L${round(cx + w)} ${round(cy)} L${round(cx)} ${round(cy + size)} L${round(cx - w)} ${round(cy)} Z" fill="url(#${gid})" stroke="${VILLA_EMERALD.edge}" stroke-width="0.7"/>
+    <path d="M${round(cx)} ${round(cy - size)} L${round(cx + w)} ${round(cy)} L${round(cx)} ${round(cy)} Z" fill="#A7F3D0" opacity="0.75"/>
+    <circle cx="${round(cx - w * 0.32)}" cy="${round(cy - size * 0.32)}" r="${round(size * 0.2)}" fill="#ffffff" opacity="0.92"/>
+  `;
+};
