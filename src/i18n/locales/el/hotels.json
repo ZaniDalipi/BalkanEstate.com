@@ -68,7 +68,18 @@
     "callToBook": "Call to book",
     "email": "Email",
     "website": "Visit website",
-    "languages": "Languages spoken"
+    "languages": "Languages spoken",
+    "bathroomsCount": "{{count}} bathrooms",
+    "bathroomsCount_one": "{{count}} bathroom",
+    "reserve": "Reserve",
+    "about": "About this place",
+    "amenitiesCount": "{{count}} amenities",
+    "amenitiesCount_one": "{{count}} amenity",
+    "starLabel": "{{count}}-star",
+    "unrated": "Unrated",
+    "minNightsShort": "{{count}} night minimum",
+    "minNightsShort_one": "{{count}} night minimum",
+    "directBooking": "Direct booking — no fees"
   },
   "propertyTypes": {
     "hotel": "Hotel",
@@ -115,7 +126,17 @@
     "balcony": "Balcony",
     "sea_view": "Sea view",
     "mountain_view": "Mountain view",
-    "elevator": "Elevator"
+    "elevator": "Elevator",
+    "jacuzzi": "Jacuzzi",
+    "private_pool": "Private pool",
+    "minibar": "Minibar",
+    "tv": "TV",
+    "terrace": "Terrace",
+    "kitchenette": "Kitchenette",
+    "safe": "Safe",
+    "coffee_machine": "Coffee machine",
+    "private_bathroom": "Private bathroom",
+    "workspace": "Workspace"
   },
   "cancellationPolicies": {
     "flexible": "Flexible",
@@ -180,7 +201,11 @@
       "petsAllowed": "Pets allowed",
       "smokingAllowed": "Smoking allowed",
       "houseRules": "House rules",
-      "languagesSpoken": "Languages spoken"
+      "languagesSpoken": "Languages spoken",
+      "websiteHint": "Just type your domain — we’ll add https:// for you.",
+      "roomAmenities": "Room amenities",
+      "roomAmenitiesHint": "Pick what this specific room offers (e.g. jacuzzi, balcony, sea view).",
+      "optional": "(optional)"
     },
     "placeholders": {
       "name": "e.g. Hotel Adriatic",
@@ -206,6 +231,16 @@
       "imageInvalidType": "Only JPG, PNG or WebP images are allowed",
       "imageTooLarge": "Each image must be smaller than 5MB",
       "generic": "Something went wrong. Please try again."
+    },
+    "draftRestored": "We saved your progress. You can pick up right where you left off.",
+    "discardDraft": "Discard",
+    "progress": {
+      "title": "Publishing your listing",
+      "preparing": "Preparing your details…",
+      "creating": "Creating your listing…",
+      "uploadingCover": "Uploading cover photo…",
+      "uploadingPhotos": "Uploading gallery photos…",
+      "done": "All done!"
     }
   }
 }

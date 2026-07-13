@@ -55,6 +55,16 @@ export const HOTEL_AMENITIES = [
   'sea_view',
   'mountain_view',
   'elevator',
+  'jacuzzi',
+  'private_pool',
+  'minibar',
+  'tv',
+  'terrace',
+  'kitchenette',
+  'safe',
+  'coffee_machine',
+  'private_bathroom',
+  'workspace',
 ] as const;
 
 export type HotelAmenity = typeof HOTEL_AMENITIES[number];

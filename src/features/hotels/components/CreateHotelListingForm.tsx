@@ -1,6 +1,8 @@
-import React, { useState, useCallback, useRef, lazy, Suspense } from 'react';
+import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useCreateHotel, useUploadHotelCover, useUploadHotelPhotos } from '../hooks';
+import { useHotelDraftStore, HOTEL_DRAFT_TTL_MS, type HotelDraft } from '../store/hotelDraftStore';
 import {
   HOTEL_PROPERTY_TYPES,
   HOTEL_AMENITIES,
@@ -20,6 +22,9 @@ import {
   validateHotelName,
   validateStarRating,
   validateRoom,
+  validatePricePerNight,
+  validateGuestCount,
+  normalizeWebsiteUrl,
 } from '@/src/shared/utils/validation';
 import { MapPinIcon, PlusIcon, TrashIcon, CheckIcon, PhotoIcon, HomeIcon } from '@/constants';
 import { BALKAN_LOCATIONS, type CityData } from '@/utils/balkanLocations';
@@ -39,15 +44,43 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_GALLERY = 15;
 
-const emptyRoom = (): CreateRoomData => ({
+// Map a Balkan location country name → its international dial code, so the
+// phone inputs default to the property's country ("geo location").
+const COUNTRY_PHONE_CODES: Record<string, string> = {
+  'Kosovo': '+383',
+  'Albania': '+355',
+  'North Macedonia': '+389',
+  'Serbia': '+381',
+  'Bosnia and Herzegovina': '+387',
+  'Croatia': '+385',
+  'Montenegro': '+382',
+  'Greece': '+30',
+  'Bulgaria': '+359',
+  'Romania': '+40',
+};
+
+// While editing, numeric room fields may be an empty string so that clearing an
+// input shows a blank box (not 0) and never silently auto-fills a value.
+// They are coerced to numbers only at submit time.
+type NumOrBlank = number | '';
+interface RoomFormData extends Omit<CreateRoomData, 'maxGuests' | 'beds' | 'bathrooms' | 'sizeSqm' | 'pricePerNight' | 'quantity'> {
+  maxGuests: NumOrBlank;
+  beds: NumOrBlank;
+  bathrooms: NumOrBlank;
+  sizeSqm: NumOrBlank;
+  pricePerNight: NumOrBlank;
+  quantity: NumOrBlank;
+}
+
+const emptyRoom = (): RoomFormData => ({
   name: '',
   roomType: 'double',
   description: '',
   maxGuests: 2,
   beds: 1,
   bathrooms: 1,
-  sizeSqm: undefined,
-  pricePerNight: undefined as unknown as number,
+  sizeSqm: '',
+  pricePerNight: '',
   currency: 'EUR',
   quantity: 1,
   amenities: [],
@@ -70,45 +103,63 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
     rooms: useRef<HTMLDivElement>(null),
   };
 
+  // Restore a persisted draft so a page refresh never loses input. Read the
+  // store once (guarded by a ref) and ignore drafts older than the TTL.
+  const { setDraft, clearDraft } = useHotelDraftStore();
+  const savedDraftRef = useRef<Partial<HotelDraft> | null>(null);
+  if (savedDraftRef.current === null) {
+    const d = useHotelDraftStore.getState().draft;
+    savedDraftRef.current =
+      d && d.savedAt && Date.now() - d.savedAt < HOTEL_DRAFT_TTL_MS ? d : {};
+  }
+  const draft = savedDraftRef.current || {};
+  const [draftRestored, setDraftRestored] = useState(
+    () => !!(draft.name || draft.description || (draft.rooms && draft.rooms.some((r) => r.name)))
+  );
+
   // --- Basics ---
-  const [name, setName] = useState('');
-  const [propertyType, setPropertyType] = useState<HotelPropertyType | ''>('');
-  const [starRating, setStarRating] = useState<number | undefined>(undefined);
-  const [description, setDescription] = useState('');
-  const [currency, setCurrency] = useState<SupportedCurrency>('EUR');
+  const [name, setName] = useState(draft.name ?? '');
+  const [propertyType, setPropertyType] = useState<HotelPropertyType | ''>(draft.propertyType ?? '');
+  const [starRating, setStarRating] = useState<number | undefined>(draft.starRating);
+  const [description, setDescription] = useState(draft.description ?? '');
+  const [currency, setCurrency] = useState<SupportedCurrency>(draft.currency ?? 'EUR');
 
   // --- Location ---
-  const [selectedCountry, setSelectedCountry] = useState('');
-  const [selectedCity, setSelectedCity] = useState('');
-  const [address, setAddress] = useState('');
-  const [availableCities, setAvailableCities] = useState<CityData[]>([]);
-  const [lat, setLat] = useState(0);
-  const [lng, setLng] = useState(0);
-  const [showMap, setShowMap] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState(draft.country ?? '');
+  const [selectedCity, setSelectedCity] = useState(draft.city ?? '');
+  const [address, setAddress] = useState(draft.address ?? '');
+  const [availableCities, setAvailableCities] = useState<CityData[]>(
+    () => BALKAN_LOCATIONS.find((c) => c.name === draft.country)?.cities ?? []
+  );
+  const [lat, setLat] = useState(draft.lat ?? 0);
+  const [lng, setLng] = useState(draft.lng ?? 0);
+  const [showMap, setShowMap] = useState(!!(draft.lat && draft.lng));
 
   // --- Contact ---
-  const [contactPhone, setContactPhone] = useState(currentUser?.phone || '');
-  const [contactEmail, setContactEmail] = useState(currentUser?.email || '');
-  const [whatsapp, setWhatsapp] = useState('');
-  const [website, setWebsite] = useState('');
+  const [contactPhone, setContactPhone] = useState(draft.contactPhone ?? currentUser?.phone ?? '');
+  const [contactEmail, setContactEmail] = useState(draft.contactEmail ?? currentUser?.email ?? '');
+  const [whatsapp, setWhatsapp] = useState(draft.whatsapp ?? '');
+  const [website, setWebsite] = useState(draft.website ?? '');
 
   // --- Amenities ---
-  const [amenities, setAmenities] = useState<HotelAmenity[]>([]);
+  const [amenities, setAmenities] = useState<HotelAmenity[]>(draft.amenities ?? []);
 
   // --- Rooms ---
-  const [rooms, setRooms] = useState<CreateRoomData[]>([emptyRoom()]);
+  const [rooms, setRooms] = useState<RoomFormData[]>(
+    draft.rooms && draft.rooms.length > 0 ? (draft.rooms as RoomFormData[]) : [emptyRoom()]
+  );
 
   // --- Policies ---
-  const [checkInTime, setCheckInTime] = useState('14:00');
-  const [checkOutTime, setCheckOutTime] = useState('11:00');
-  const [minNights, setMinNights] = useState<number | undefined>(1);
-  const [maxNights, setMaxNights] = useState<number | undefined>(undefined);
-  const [cancellationPolicy, setCancellationPolicy] = useState<CancellationPolicy | ''>('');
-  const [petsAllowed, setPetsAllowed] = useState(false);
-  const [smokingAllowed, setSmokingAllowed] = useState(false);
-  const [houseRules, setHouseRules] = useState<string[]>([]);
+  const [checkInTime, setCheckInTime] = useState(draft.checkInTime ?? '14:00');
+  const [checkOutTime, setCheckOutTime] = useState(draft.checkOutTime ?? '11:00');
+  const [minNights, setMinNights] = useState<number | undefined>(draft.minNights ?? 1);
+  const [maxNights, setMaxNights] = useState<number | undefined>(draft.maxNights);
+  const [cancellationPolicy, setCancellationPolicy] = useState<CancellationPolicy | ''>(draft.cancellationPolicy ?? '');
+  const [petsAllowed, setPetsAllowed] = useState(draft.petsAllowed ?? false);
+  const [smokingAllowed, setSmokingAllowed] = useState(draft.smokingAllowed ?? false);
+  const [houseRules, setHouseRules] = useState<string[]>(draft.houseRules ?? []);
   const [houseRuleInput, setHouseRuleInput] = useState('');
-  const [languagesSpoken, setLanguagesSpoken] = useState<string[]>([]);
+  const [languagesSpoken, setLanguagesSpoken] = useState<string[]>(draft.languagesSpoken ?? []);
   const [languageInput, setLanguageInput] = useState('');
 
   // --- Images ---
@@ -120,10 +171,56 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
   // --- Error state ---
   const [formError, setFormError] = useState<string | null>(null);
   const [fieldError, setFieldError] = useState<FieldErrorKey | null>(null);
+  // All required fields that failed validation (top-level keys + `room-<i>-<field>`),
+  // so every missing field can be highlighted red at once.
+  const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set());
+  const isInvalid = useCallback((key: string) => invalidFields.has(key), [invalidFields]);
+
+  // Blocking submit overlay state — prevents interaction & double-submits.
+  const [submitting, setSubmitting] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [progressLabel, setProgressLabel] = useState('');
+
+  // Dial code for the phone inputs, derived from the selected property country.
+  const locationPhoneCode = COUNTRY_PHONE_CODES[selectedCountry];
+
+  // Auto-save the draft (debounced) whenever any serialisable field changes, so
+  // a refresh or accidental navigation preserves everything except file uploads.
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      setDraft({
+        name, propertyType, starRating, description, currency,
+        country: selectedCountry, city: selectedCity, address, lat, lng,
+        contactPhone, contactEmail, whatsapp, website,
+        amenities, rooms: rooms as unknown as CreateRoomData[], checkInTime, checkOutTime, minNights, maxNights,
+        cancellationPolicy, petsAllowed, smokingAllowed, houseRules, languagesSpoken,
+      });
+    }, 600);
+    return () => clearTimeout(handle);
+  }, [
+    name, propertyType, starRating, description, currency, selectedCountry, selectedCity,
+    address, lat, lng, contactPhone, contactEmail, whatsapp, website, amenities, rooms,
+    checkInTime, checkOutTime, minNights, maxNights, cancellationPolicy, petsAllowed,
+    smokingAllowed, houseRules, languagesSpoken, setDraft,
+  ]);
+
+  const discardDraft = useCallback(() => {
+    clearDraft();
+    setDraftRestored(false);
+    setName(''); setPropertyType(''); setStarRating(undefined); setDescription('');
+    setCurrency('EUR'); setSelectedCountry(''); setSelectedCity(''); setAddress('');
+    setAvailableCities([]); setLat(0); setLng(0); setShowMap(false);
+    setContactPhone(currentUser?.phone ?? ''); setContactEmail(currentUser?.email ?? '');
+    setWhatsapp(''); setWebsite(''); setAmenities([]); setRooms([emptyRoom()]);
+    setCheckInTime('14:00'); setCheckOutTime('11:00'); setMinNights(1); setMaxNights(undefined);
+    setCancellationPolicy(''); setPetsAllowed(false); setSmokingAllowed(false);
+    setHouseRules([]); setLanguagesSpoken([]);
+  }, [clearDraft, currentUser]);
 
   const clearErrors = useCallback(() => {
     setFormError(null);
     setFieldError(null);
+    setInvalidFields((prev) => (prev.size ? new Set() : prev));
   }, []);
 
   const setValidationError = useCallback((field: FieldErrorKey, message: string) => {
@@ -179,10 +276,28 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
   }, []);
 
   // --- Rooms handlers ---
-  const updateRoom = useCallback(<K extends keyof CreateRoomData>(index: number, key: K, value: CreateRoomData[K]) => {
+  const updateRoom = useCallback(<K extends keyof RoomFormData>(index: number, key: K, value: RoomFormData[K]) => {
     setRooms((prev) => prev.map((room, i) => (i === index ? { ...room, [key]: value } : room)));
     clearErrors();
   }, [clearErrors]);
+
+  // Numeric room field handler: blank input stays blank (never coerced to 0).
+  const updateRoomNumber = useCallback((index: number, key: keyof RoomFormData, raw: string) => {
+    const value: NumOrBlank = raw === '' ? '' : Number(raw);
+    if (raw !== '' && Number.isNaN(value as number)) return;
+    updateRoom(index, key, value as never);
+  }, [updateRoom]);
+
+  const toggleRoomAmenity = useCallback((index: number, amenity: HotelAmenity) => {
+    setRooms((prev) => prev.map((room, i) => {
+      if (i !== index) return room;
+      const current = room.amenities || [];
+      return {
+        ...room,
+        amenities: current.includes(amenity) ? current.filter((a) => a !== amenity) : [...current, amenity],
+      };
+    }));
+  }, []);
 
   const addRoom = useCallback(() => {
     setRooms((prev) => (prev.length >= 50 ? prev : [...prev, emptyRoom()]));
@@ -261,43 +376,65 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
   // --- Submit ---
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return; // guard against double-submit
     clearErrors();
 
-    // 1. Name
+    // Collect ALL missing/invalid required fields so each can be flagged red,
+    // while still scrolling to (and focusing) the first one.
+    const invalid = new Set<string>();
+    let firstField: FieldErrorKey | null = null;
+    let firstMsg = '';
+    const flag = (field: FieldErrorKey, key: string, msg: string) => {
+      invalid.add(key);
+      if (!firstField) { firstField = field; firstMsg = msg; }
+    };
+
     const nameResult = validateHotelName(name);
-    if (!nameResult.isValid) { setValidationError('name', nameResult.error!); return; }
+    if (!nameResult.isValid) flag('name', 'name', nameResult.error!);
+    if (!propertyType) flag('propertyType', 'propertyType', t('form.errors.propertyTypeRequired'));
 
-    // 2. Property type
-    if (!propertyType) { setValidationError('propertyType', t('form.errors.propertyTypeRequired')); return; }
-
-    // 3. Star rating (optional)
-    const starResult = validateStarRating(starRating);
-    if (!starResult.isValid) { setFormError(starResult.error!); return; }
-
-    // 4. Phone
     const phoneClean = parsePhoneValue(contactPhone).localDigits;
-    if (!phoneClean || phoneClean.length < 6) { setValidationError('contactPhone', t('form.errors.phoneRequired')); return; }
+    if (!phoneClean || phoneClean.length < 6) flag('contactPhone', 'contactPhone', t('form.errors.phoneRequired'));
 
-    // 5. Location
-    if (!selectedCountry.trim()) { setValidationError('country', t('form.errors.countryRequired')); return; }
-    if (!selectedCity.trim()) { setValidationError('city', t('form.errors.cityRequired')); return; }
+    if (!selectedCountry.trim()) flag('country', 'country', t('form.errors.countryRequired'));
+    if (!selectedCity.trim()) flag('city', 'city', t('form.errors.cityRequired'));
 
-    // 6. Rooms — at least one, each valid
-    if (rooms.length === 0) { setValidationError('rooms', t('form.errors.roomsRequired')); return; }
-    for (let i = 0; i < rooms.length; i++) {
-      const roomResult = validateRoom(rooms[i]);
-      if (!roomResult.isValid) {
-        setValidationError('rooms', t('form.errors.roomInvalid', { index: i + 1, error: roomResult.error }));
-        return;
+    // Rooms — at least one; flag each invalid field on each room.
+    if (rooms.length === 0) flag('rooms', 'rooms', t('form.errors.roomsRequired'));
+    rooms.forEach((r, i) => {
+      if (!r.name.trim()) invalid.add(`room-${i}-name`);
+      if (!validatePricePerNight(r.pricePerNight).isValid) invalid.add(`room-${i}-pricePerNight`);
+      if (!validateGuestCount(r.maxGuests).isValid) invalid.add(`room-${i}-maxGuests`);
+      const bedsNum = Number(r.beds);
+      if (!(Number.isFinite(bedsNum) && bedsNum >= 1)) invalid.add(`room-${i}-beds`);
+      const roomResult = validateRoom(r);
+      if (!roomResult.isValid && !firstField) {
+        firstField = 'rooms';
+        firstMsg = t('form.errors.roomInvalid', { index: i + 1, error: roomResult.error });
       }
+    });
+
+    // Non-highlight validations (surface message only).
+    const starResult = validateStarRating(starRating);
+    if (!starResult.isValid && !firstMsg) firstMsg = starResult.error!;
+    if (minNights != null && maxNights != null && maxNights < minNights && !firstMsg) {
+      firstMsg = t('form.errors.nightsRange');
     }
 
-    // 7. Nights coherence
-    if (minNights != null && maxNights != null && maxNights < minNights) {
-      setFormError(t('form.errors.nightsRange'));
+    if (invalid.size > 0 || firstMsg) {
+      setInvalidFields(invalid);
+      if (firstField) {
+        setValidationError(firstField, firstMsg || t('form.errors.generic'));
+      } else {
+        setFormError(firstMsg || t('form.errors.generic'));
+      }
       return;
     }
+    setInvalidFields(new Set());
 
+    setSubmitting(true);
+    setProgress(8);
+    setProgressLabel(t('form.progress.preparing'));
     try {
       const payload: CreateHotelData = {
         name: name.trim(),
@@ -312,11 +449,11 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
           description: r.description?.trim() || undefined,
           maxGuests: Number(r.maxGuests),
           beds: Number(r.beds),
-          bathrooms: r.bathrooms != null ? Number(r.bathrooms) : 1,
-          sizeSqm: r.sizeSqm != null && r.sizeSqm !== ('' as unknown) ? Number(r.sizeSqm) : undefined,
+          bathrooms: r.bathrooms === '' || r.bathrooms == null ? 1 : Number(r.bathrooms),
+          sizeSqm: r.sizeSqm === '' || r.sizeSqm == null ? undefined : Number(r.sizeSqm),
           pricePerNight: Number(r.pricePerNight),
           currency: r.currency || currency,
-          quantity: r.quantity != null ? Number(r.quantity) : 1,
+          quantity: r.quantity === '' || r.quantity == null ? 1 : Number(r.quantity),
           amenities: r.amenities && r.amenities.length > 0 ? r.amenities : undefined,
         })),
         petsAllowed,
@@ -327,7 +464,8 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
       if (description.trim()) payload.description = description.trim();
       if (contactEmail.trim()) payload.contactEmail = contactEmail.trim();
       if (whatsapp) payload.whatsapp = whatsapp;
-      if (website.trim()) payload.website = website.trim();
+      const cleanWebsite = normalizeWebsiteUrl(website);
+      if (cleanWebsite) payload.website = cleanWebsite;
       if (address.trim()) payload.address = address.trim();
       if (lat !== 0 && lng !== 0) { payload.latitude = lat; payload.longitude = lng; }
       if (amenities.length > 0) payload.amenities = amenities;
@@ -339,33 +477,89 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
       if (houseRules.length > 0) payload.houseRules = houseRules;
       if (languagesSpoken.length > 0) payload.languagesSpoken = languagesSpoken;
 
+      setProgress(35);
+      setProgressLabel(t('form.progress.creating'));
       const result = await createHotel(payload);
+      setProgress(60);
 
       // Upload images after creation (non-blocking on failure)
       if (result.hotel?.id) {
         if (coverFile) {
+          setProgressLabel(t('form.progress.uploadingCover'));
           try { await uploadCover({ id: result.hotel.id, file: coverFile }); } catch { /* cover optional */ }
+          setProgress(78);
         }
         if (galleryFiles.length > 0) {
+          setProgressLabel(t('form.progress.uploadingPhotos'));
           try { await uploadPhotos({ id: result.hotel.id, files: galleryFiles }); } catch { /* gallery optional */ }
         }
       }
 
+      setProgress(100);
+      setProgressLabel(t('form.progress.done'));
+      clearDraft(); // published successfully → discard the saved draft
+      // Small beat so the finished bar is visible before the view changes.
+      await new Promise((r) => setTimeout(r, 500));
       onSuccess();
     } catch (err: any) {
+      setSubmitting(false);
+      setProgress(0);
       setFormError(err?.message || t('form.errors.generic'));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [
-    name, propertyType, starRating, contactPhone, selectedCountry, selectedCity, rooms, minNights, maxNights,
+    submitting, name, propertyType, starRating, contactPhone, selectedCountry, selectedCity, rooms, minNights, maxNights,
     description, contactEmail, whatsapp, website, address, lat, lng, amenities, currency, checkInTime,
     checkOutTime, cancellationPolicy, houseRules, languagesSpoken, petsAllowed, smokingAllowed,
-    coverFile, galleryFiles, createHotel, uploadCover, uploadPhotos, onSuccess, t, clearErrors, setValidationError,
+    coverFile, galleryFiles, createHotel, uploadCover, uploadPhotos, onSuccess, t, clearErrors, clearDraft, setValidationError,
   ]);
 
   const displayError = formError || (error as Error)?.message;
 
   return (
     <div className="min-h-screen bg-neutral-50">
+      {/* Blocking submit overlay with animated progress — prevents interaction
+          and double-submits while the listing is being published. */}
+      <AnimatePresence>
+        {submitting && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md px-6"
+            aria-live="assertive"
+            role="alertdialog"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+              className="w-full max-w-sm rounded-3xl bg-white shadow-2xl p-8 text-center"
+            >
+              <div className="mx-auto mb-5 w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 1.1, ease: 'linear' }}
+                  className="w-8 h-8 rounded-full border-[3px] border-white/40 border-t-white"
+                />
+              </div>
+              <h3 className="text-lg font-bold text-neutral-900">{t('form.progress.title')}</h3>
+              <p className="mt-1 text-sm text-neutral-500 h-5">{progressLabel}</p>
+
+              <div className="mt-5 h-2.5 w-full rounded-full bg-neutral-100 overflow-hidden">
+                <motion.div
+                  className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-600"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ ease: 'easeOut', duration: 0.5 }}
+                />
+              </div>
+              <p className="mt-2 text-xs font-semibold text-neutral-400">{progress}%</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 relative overflow-hidden">
         <div className="absolute top-5 right-[15%] w-40 h-40 bg-violet-500/20 rounded-full blur-3xl" />
@@ -393,6 +587,19 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
           </div>
         )}
 
+        {/* Draft restored banner */}
+        {draftRestored && (
+          <div className="flex items-center justify-between gap-3 rounded-xl bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800">
+            <span className="flex items-center gap-2">
+              <CheckIcon className="w-4 h-4 shrink-0" />
+              {t('form.draftRestored')}
+            </span>
+            <button type="button" onClick={discardDraft} className="font-semibold text-blue-700 hover:text-blue-900 underline shrink-0">
+              {t('form.discardDraft')}
+            </button>
+          </div>
+        )}
+
         {/* --- Section: Basics --- */}
         <section className="bg-white rounded-2xl border border-neutral-200 p-6 space-y-5">
           <h2 className="text-lg font-semibold text-neutral-900">{t('form.sections.basics')}</h2>
@@ -408,7 +615,7 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
               onChange={(e) => { setName(e.target.value); clearErrors(); }}
               placeholder={t('form.placeholders.name')}
               maxLength={120}
-              className={inputClasses(fieldError === 'name')}
+              className={inputClasses(isInvalid('name'))}
             />
           </div>
 
@@ -416,7 +623,7 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
             <label className="block text-sm font-medium text-neutral-700 mb-1.5">
               {t('form.fields.propertyType')} <span className="text-red-500">*</span>
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className={`grid grid-cols-2 sm:grid-cols-4 gap-2 ${isInvalid('propertyType') ? 'p-2 -m-2 rounded-xl ring-2 ring-red-200 border border-red-400' : ''}`}>
               {HOTEL_PROPERTY_TYPES.map((type) => (
                 <button
                   key={type}
@@ -497,7 +704,7 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                 ref={fieldRefs.country}
                 value={selectedCountry}
                 onChange={handleCountryChange}
-                className={inputClasses(fieldError === 'country')}
+                className={inputClasses(isInvalid('country'))}
               >
                 <option value="">{t('form.placeholders.selectCountry')}</option>
                 {BALKAN_LOCATIONS.map((c) => (
@@ -514,7 +721,7 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                 value={selectedCity}
                 onChange={handleCityChange}
                 disabled={!selectedCountry}
-                className={inputClasses(fieldError === 'city')}
+                className={inputClasses(isInvalid('city'))}
               >
                 <option value="">{t('form.placeholders.selectCity')}</option>
                 {availableCities.map((c) => (
@@ -567,7 +774,8 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
               value={contactPhone}
               onChange={(v) => { setContactPhone(v); clearErrors(); }}
               variant="bordered"
-              error={fieldError === 'contactPhone' ? t('form.errors.phoneRequired') : undefined}
+              defaultCountryCode={locationPhoneCode}
+              error={isInvalid('contactPhone') ? t('form.errors.phoneRequired') : undefined}
             />
           </div>
 
@@ -585,18 +793,21 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1.5">{t('form.fields.website')}</label>
               <input
-                type="url"
+                type="text"
+                inputMode="url"
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
-                placeholder="https://"
+                onBlur={() => setWebsite((w) => normalizeWebsiteUrl(w))}
+                placeholder="balkanestateai.com"
                 className={inputClasses()}
               />
+              <p className="mt-1 text-xs text-neutral-400">{t('form.fields.websiteHint')}</p>
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1.5">{t('form.fields.whatsapp')}</label>
-            <PhoneInput value={whatsapp} onChange={setWhatsapp} variant="bordered" />
+            <PhoneInput value={whatsapp} onChange={setWhatsapp} variant="bordered" defaultCountryCode={locationPhoneCode} />
           </div>
         </section>
 
@@ -634,7 +845,7 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                     onChange={(e) => updateRoom(index, 'name', e.target.value)}
                     placeholder={t('form.placeholders.roomName')}
                     maxLength={100}
-                    className={inputClasses()}
+                    className={inputClasses(isInvalid(`room-${index}-name`))}
                   />
                 </div>
                 <div>
@@ -657,10 +868,11 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                   <input
                     type="number"
                     min={1}
-                    value={room.pricePerNight ?? ''}
-                    onChange={(e) => updateRoom(index, 'pricePerNight', e.target.value === '' ? (undefined as unknown as number) : Number(e.target.value))}
+                    inputMode="numeric"
+                    value={room.pricePerNight}
+                    onChange={(e) => updateRoomNumber(index, 'pricePerNight', e.target.value)}
                     placeholder="50"
-                    className={inputClasses()}
+                    className={inputClasses(isInvalid(`room-${index}-pricePerNight`))}
                   />
                 </div>
                 <div>
@@ -669,9 +881,11 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                     type="number"
                     min={1}
                     max={30}
+                    inputMode="numeric"
                     value={room.maxGuests}
-                    onChange={(e) => updateRoom(index, 'maxGuests', Number(e.target.value))}
-                    className={inputClasses()}
+                    onChange={(e) => updateRoomNumber(index, 'maxGuests', e.target.value)}
+                    placeholder="2"
+                    className={inputClasses(isInvalid(`room-${index}-maxGuests`))}
                   />
                 </div>
                 <div>
@@ -680,9 +894,11 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                     type="number"
                     min={1}
                     max={20}
+                    inputMode="numeric"
                     value={room.beds}
-                    onChange={(e) => updateRoom(index, 'beds', Number(e.target.value))}
-                    className={inputClasses()}
+                    onChange={(e) => updateRoomNumber(index, 'beds', e.target.value)}
+                    placeholder="1"
+                    className={inputClasses(isInvalid(`room-${index}-beds`))}
                   />
                 </div>
                 <div>
@@ -691,8 +907,10 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                     type="number"
                     min={0}
                     max={10}
-                    value={room.bathrooms ?? 1}
-                    onChange={(e) => updateRoom(index, 'bathrooms', Number(e.target.value))}
+                    inputMode="numeric"
+                    value={room.bathrooms}
+                    onChange={(e) => updateRoomNumber(index, 'bathrooms', e.target.value)}
+                    placeholder="1"
                     className={inputClasses()}
                   />
                 </div>
@@ -704,8 +922,9 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                   <input
                     type="number"
                     min={1}
-                    value={room.sizeSqm ?? ''}
-                    onChange={(e) => updateRoom(index, 'sizeSqm', e.target.value === '' ? undefined : Number(e.target.value))}
+                    inputMode="numeric"
+                    value={room.sizeSqm}
+                    onChange={(e) => updateRoomNumber(index, 'sizeSqm', e.target.value)}
                     placeholder="25"
                     className={inputClasses()}
                   />
@@ -716,8 +935,10 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                     type="number"
                     min={1}
                     max={500}
-                    value={room.quantity ?? 1}
-                    onChange={(e) => updateRoom(index, 'quantity', Number(e.target.value))}
+                    inputMode="numeric"
+                    value={room.quantity}
+                    onChange={(e) => updateRoomNumber(index, 'quantity', e.target.value)}
+                    placeholder="1"
                     className={inputClasses()}
                   />
                 </div>
@@ -745,6 +966,35 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                   placeholder={t('form.placeholders.roomDescription')}
                   className={inputClasses()}
                 />
+              </div>
+
+              {/* Per-room amenities (optional) — e.g. this room has a jacuzzi */}
+              <div>
+                <label className="block text-xs font-medium text-neutral-600 mb-1.5">
+                  {t('form.fields.roomAmenities')}{' '}
+                  <span className="text-neutral-400 font-normal">{t('form.fields.optional')}</span>
+                </label>
+                <p className="text-xs text-neutral-400 mb-2">{t('form.fields.roomAmenitiesHint')}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {HOTEL_AMENITIES.map((amenity) => {
+                    const active = room.amenities?.includes(amenity);
+                    return (
+                      <button
+                        key={amenity}
+                        type="button"
+                        onClick={() => toggleRoomAmenity(index, amenity)}
+                        className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs border transition-colors ${
+                          active
+                            ? 'bg-primary/10 text-primary border-primary'
+                            : 'bg-white text-neutral-500 border-neutral-300 hover:border-primary/40'
+                        }`}
+                      >
+                        {active && <CheckIcon className="w-3 h-3" />}
+                        {t(`amenities.${amenity}`)}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           ))}
@@ -968,7 +1218,7 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
           </button>
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || submitting}
             className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold hover:brightness-110 shadow-lg shadow-cyan-500/25 transition-all disabled:opacity-60 flex items-center gap-2"
           >
             {isLoading && (

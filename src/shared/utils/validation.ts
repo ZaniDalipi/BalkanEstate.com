@@ -386,6 +386,35 @@ export function validateRoomCount(count: number | string, fieldName = 'Count'): 
 }
 
 /**
+ * Smartly normalise a website URL the user typed loosely.
+ * Accepts "balkanestateai.com", "www.balkanestateai.com", "http://x.com",
+ * markdown-style "[label](url)", or a full https URL and returns a clean
+ * "https://..." string. Returns "" for empty input.
+ */
+export function normalizeWebsiteUrl(input: string): string {
+  if (!input || typeof input !== 'string') return '';
+  let url = input.trim();
+  if (!url) return '';
+
+  // Pull the URL out of a markdown link: [label](url)
+  const md = url.match(/\]\(([^)]+)\)/);
+  if (md) url = md[1].trim();
+
+  // Strip any leading "url:" / mailto noise and surrounding angle brackets
+  url = url.replace(/^<|>$/g, '').trim();
+
+  // Already has a scheme? normalise http → https, leave https as-is.
+  if (/^https?:\/\//i.test(url)) {
+    return url.replace(/^http:\/\//i, 'https://');
+  }
+  // Protocol-relative //host → https
+  if (/^\/\//.test(url)) return `https:${url}`;
+
+  // Bare domain (optionally with www / path) → prepend https://
+  return `https://${url.replace(/^\/+/, '')}`;
+}
+
+/**
  * Validate a hotel/accommodation listing name.
  */
 export function validateHotelName(name: string): ValidationResult {

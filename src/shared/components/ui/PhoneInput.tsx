@@ -15,6 +15,12 @@ interface PhoneInputProps {
   className?: string;
   /** Style variant: "glass" (auth modal style) | "bordered" (default form style) */
   variant?: 'glass' | 'bordered';
+  /**
+   * Preferred dial code (e.g. "+355") used as the default selection while the
+   * field is empty — typically derived from the listing/geo location. It never
+   * overrides a number the user has already started typing.
+   */
+  defaultCountryCode?: string;
 }
 
 /**
@@ -96,14 +102,18 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
   required = false,
   className = '',
   variant = 'bordered',
+  defaultCountryCode,
 }) => {
   // Parse the incoming value to extract any country code already embedded in it
   const parsed = parsePhoneValue(value);
 
   // Track selected country code in LOCAL state so it persists even when
   // the phone field is empty — without this, every re-render with value=""
-  // resets back to the default (Kosovo).
-  const [selectedCode, setSelectedCode] = useState<string>(parsed.countryCode);
+  // resets back to the default (Kosovo). When the field is empty we prefer the
+  // caller-supplied default (geo/location) code.
+  const [selectedCode, setSelectedCode] = useState<string>(
+    value && value.trim() ? parsed.countryCode : (defaultCountryCode || parsed.countryCode)
+  );
 
   // If the parent pushes a value that contains a country code (e.g. loading
   // a saved profile), sync our local state to match.
@@ -113,6 +123,15 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
       setSelectedCode(countryCode);
     }
   }, [value]);
+
+  // While the field is still empty, follow the caller's default code (e.g. the
+  // user picks the property's country → the dial code updates to match). This
+  // never clobbers a number the user has already begun typing.
+  useEffect(() => {
+    if (defaultCountryCode && !parsed.localDigits) {
+      setSelectedCode(defaultCountryCode);
+    }
+  }, [defaultCountryCode, parsed.localDigits]);
 
   // Local digits are always derived from the value prop
   const localDigits = parsed.localDigits;
