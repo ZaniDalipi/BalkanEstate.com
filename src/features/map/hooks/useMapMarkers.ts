@@ -28,7 +28,11 @@ const PROMOTION_TIER_COLORS: Record<string, string> = {
  * (src/components/map/MapPropertyMarker.tsx). Gilded gold body signals
  * exclusivity; the emerald beacon marks a live, verified estate.
  */
-const VILLA_GOLD = { light: '#FFE9A3', mid: '#E8B820', deep: '#B8860B', edge: '#7A5000', ink: '#2C1A00' } as const;
+// Onyx-and-gold "black card" luxury palette: near-black body, gilded roof
+// and trim, gold price text — the most premium look and distinct from the
+// blue/purple/green pins used by the other property types.
+const VILLA_ONYX = { light: '#332C22', dark: '#141009' } as const;      // warm near-black body
+const VILLA_GOLD = { light: '#FFE9A3', mid: '#E8B820', deep: '#B8860B', edge: '#6E5716', text: '#F7E7A6' } as const;
 const VILLA_EMERALD = { light: '#6EE7B7', mid: '#10B981', deep: '#047857', edge: '#065F46' } as const;
 
 /** Inject the emerald-beacon + gold-sheen keyframes once (Google map path). */
@@ -88,21 +92,23 @@ const buildLuxuryVillaSVG = (price: string, uid: string): string => {
   const H = 58;
   const cx = W / 2;
   const scale = 0.82; // display px per viewBox unit
-  const gid = `lvGm_${uid}`;
+  const bid = `lvBd_${uid}`;   // onyx body gradient
+  const rid = `lvRf_${uid}`;   // gold roof gradient
   const clip = `lvClipM_${uid}`;
   const beacon = buildEmeraldBeacon(cx, 9, 4.5, uid);
-  return `<svg width="${Math.round(W * scale)}" height="${Math.round(H * scale)}" viewBox="0 0 ${W} ${H}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 7px rgba(212,168,0,0.85)) drop-shadow(0 0 12px rgba(16,185,129,0.3)) drop-shadow(0 2px 4px rgba(0,0,0,0.4));display:block;">
+  return `<svg width="${Math.round(W * scale)}" height="${Math.round(H * scale)}" viewBox="0 0 ${W} ${H}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 7px rgba(212,168,0,0.7)) drop-shadow(0 0 12px rgba(16,185,129,0.3)) drop-shadow(0 2px 5px rgba(0,0,0,0.5));display:block;">
     <defs>
-      <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${VILLA_GOLD.light}"/><stop offset="52%" stop-color="${VILLA_GOLD.mid}"/><stop offset="100%" stop-color="${VILLA_GOLD.deep}"/></linearGradient>
+      <linearGradient id="${bid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${VILLA_ONYX.light}"/><stop offset="100%" stop-color="${VILLA_ONYX.dark}"/></linearGradient>
+      <linearGradient id="${rid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${VILLA_GOLD.light}"/><stop offset="52%" stop-color="${VILLA_GOLD.mid}"/><stop offset="100%" stop-color="${VILLA_GOLD.deep}"/></linearGradient>
       <clipPath id="${clip}"><rect x="4" y="30" width="${W - 8}" height="18" rx="2"/></clipPath>
     </defs>
-    <path d="M${cx} ${H} L${cx - 8} 48 H${cx + 8} Z" fill="${VILLA_GOLD.edge}"/>
-    <rect x="4" y="30" width="${W - 8}" height="18" rx="2" fill="url(#${gid})" stroke="${VILLA_GOLD.edge}" stroke-width="1.25"/>
-    <path class="villa-g-sheen" clip-path="url(#${clip})" d="M${cx - 3} 30 L${cx + 5} 30 L${cx + 1} 48 L${cx - 7} 48 Z" fill="#FFFFFF" opacity="0.5"/>
-    <path d="M4 30 L${cx} 15 L${W - 4} 30 Z" fill="url(#${gid})" stroke="${VILLA_GOLD.edge}" stroke-width="1.25" stroke-linejoin="round"/>
-    <path d="M${cx - 10} 27 L${cx} 18 L${cx + 10} 27" stroke="${VILLA_GOLD.light}" stroke-width="1" opacity="0.65" fill="none" stroke-linecap="round"/>
+    <path d="M${cx} ${H} L${cx - 8} 48 H${cx + 8} Z" fill="${VILLA_GOLD.deep}"/>
+    <rect x="4" y="30" width="${W - 8}" height="18" rx="2" fill="url(#${bid})" stroke="url(#${rid})" stroke-width="1.5"/>
+    <path class="villa-g-sheen" clip-path="url(#${clip})" d="M${cx - 3} 30 L${cx + 5} 30 L${cx + 1} 48 L${cx - 7} 48 Z" fill="${VILLA_GOLD.light}" opacity="0.28"/>
+    <path d="M4 30 L${cx} 15 L${W - 4} 30 Z" fill="url(#${rid})" stroke="${VILLA_GOLD.deep}" stroke-width="1.25" stroke-linejoin="round"/>
+    <path d="M${cx - 10} 27 L${cx} 18 L${cx + 10} 27" stroke="${VILLA_GOLD.light}" stroke-width="1" opacity="0.7" fill="none" stroke-linecap="round"/>
     ${beacon}
-    <text x="${cx}" y="40" font-family="Inter,sans-serif" font-size="10.5" font-weight="800" fill="${VILLA_GOLD.ink}" text-anchor="middle" dominant-baseline="middle">${price}</text>
+    <text x="${cx}" y="40" font-family="Inter,sans-serif" font-size="10.5" font-weight="800" fill="${VILLA_GOLD.text}" text-anchor="middle" dominant-baseline="middle">${price}</text>
   </svg>`;
 };
 
