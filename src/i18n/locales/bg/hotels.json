@@ -36,7 +36,8 @@
     "propertyType": "Property type",
     "sortBy": "Sort by",
     "createdSuccessTitle": "Listing published",
-    "createdSuccessMessage": "Your property is now live and travellers can find it."
+    "createdSuccessMessage": "Your property is now live and travellers can find it.",
+    "myProperties": "My properties"
   },
   "sort": {
     "newest": "Newest",
@@ -240,7 +241,25 @@
       "creating": "Creating your listing…",
       "uploadingCover": "Uploading cover photo…",
       "uploadingPhotos": "Uploading gallery photos…",
-      "done": "All done!"
-    }
+      "done": "All done!",
+      "saving": "Saving your changes…"
+    },
+    "editTitle": "Edit your property",
+    "editSubtitle": "Update your details, rooms and pricing. Changes go live immediately.",
+    "saveChanges": "Save changes",
+    "saving": "Saving..."
+  },
+  "manage": {
+    "title": "My properties",
+    "subtitle": "Manage the hotels and rooms you have listed.",
+    "empty": "You haven’t listed any properties yet.",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this listing? This cannot be undone.",
+    "active": "Live",
+    "inactive": "Hidden",
+    "view": "View",
+    "roomsLine": "{{count}} room types",
+    "backToManage": "Back to my properties"
   }
 }

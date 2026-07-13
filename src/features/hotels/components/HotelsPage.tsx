@@ -6,6 +6,7 @@ import { useHotels } from '../hooks';
 import HotelCard from './HotelCard';
 import HotelDetailPage from './HotelDetailPage';
 import CreateHotelListingForm from './CreateHotelListingForm';
+import ManageHotelsPage from './ManageHotelsPage';
 import {
   HOTEL_PROPERTY_TYPES,
   HOTEL_AMENITIES,
@@ -22,7 +23,7 @@ import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import Footer from '@/components/shared/Footer';
 
-type SubView = 'list' | 'detail' | 'create';
+type SubView = 'list' | 'detail' | 'create' | 'mine' | 'edit';
 
 const SORT_OPTIONS: Array<{ value: NonNullable<HotelFilters['sort']>; labelKey: string }> = [
   { value: 'newest', labelKey: 'sort.newest' },
@@ -52,12 +53,14 @@ const HotelsPage: React.FC = () => {
     const parts = window.location.pathname.split('/hotels/');
     const tail = parts[1]?.replace(/\/$/, '') || '';
     if (tail === 'list-property') return { view: 'create' as SubView, id: null };
+    if (tail === 'my-properties') return { view: 'mine' as SubView, id: null };
     if (tail) return { view: 'detail' as SubView, id: decodeURIComponent(tail) };
     return { view: 'list' as SubView, id: null };
   }, []);
 
   const [subView, setSubView] = useState<SubView>(initial.view);
   const [selectedHotelId, setSelectedHotelId] = useState<string | null>(initial.id);
+  const [editHotel, setEditHotel] = useState<Hotel | null>(null);
 
   // --- Filters ---
   const [searchInput, setSearchInput] = useState('');
@@ -148,12 +151,28 @@ const HotelsPage: React.FC = () => {
   }, [state.isAuthenticated, dispatch]);
 
   useEffect(() => {
-    if (subView === 'create' && !state.isAuthenticated) {
+    if ((subView === 'create' || subView === 'mine' || subView === 'edit') && !state.isAuthenticated) {
       setSubView('list');
       window.history.replaceState({}, '', buildLocalizedPath('/hotels'));
       dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
     }
   }, [subView, state.isAuthenticated, dispatch]);
+
+  const openManage = useCallback(() => {
+    if (!state.isAuthenticated) {
+      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
+      return;
+    }
+    setSubView('mine');
+    window.history.pushState({}, '', buildLocalizedPath('/hotels/my-properties'));
+    window.scrollTo(0, 0);
+  }, [state.isAuthenticated, dispatch]);
+
+  const openEdit = useCallback((hotel: Hotel) => {
+    setEditHotel(hotel);
+    setSubView('edit');
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleCreateSuccess = useCallback(() => {
     setSubView('list');
@@ -170,8 +189,40 @@ const HotelsPage: React.FC = () => {
     });
   }, [refetch, dispatch, t]);
 
+  const handleEditSuccess = useCallback(() => {
+    setEditHotel(null);
+    setSubView('mine');
+    refetch();
+    window.scrollTo(0, 0);
+    dispatch({
+      type: 'SHOW_ALERT',
+      payload: { type: 'success', title: t('page.createdSuccessTitle'), message: t('manage.subtitle') },
+    });
+  }, [refetch, dispatch, t]);
+
   if (subView === 'create') {
     return <CreateHotelListingForm onBack={backToList} onSuccess={handleCreateSuccess} />;
+  }
+
+  if (subView === 'edit' && editHotel) {
+    return (
+      <CreateHotelListingForm
+        editHotel={editHotel}
+        onBack={() => { setEditHotel(null); setSubView('mine'); }}
+        onSuccess={handleEditSuccess}
+      />
+    );
+  }
+
+  if (subView === 'mine') {
+    return (
+      <ManageHotelsPage
+        onBack={backToList}
+        onCreate={openCreate}
+        onEdit={openEdit}
+        onView={openDetail}
+      />
+    );
   }
 
   if (subView === 'detail' && selectedHotelId) {
@@ -219,17 +270,27 @@ const HotelsPage: React.FC = () => {
                 <span className="flex items-center gap-1.5"><CheckIcon className="w-4 h-4 text-cyan-300" /> {t('page.trustNoFees')}</span>
               </div>
             </motion.div>
-            <motion.button
+            <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4, delay: 0.1 }}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={openCreate}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-indigo-900 font-semibold shadow-lg shadow-black/20 shrink-0"
+              className="flex flex-col sm:items-end gap-2 shrink-0"
             >
-              <PlusIcon className="w-5 h-5" /> {t('page.listYourProperty')}
-            </motion.button>
+              <button
+                onClick={openCreate}
+                className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white text-indigo-900 font-semibold shadow-lg shadow-black/20 hover:bg-white/90 transition-colors"
+              >
+                <PlusIcon className="w-5 h-5" /> {t('page.listYourProperty')}
+              </button>
+              {state.isAuthenticated && (
+                <button
+                  onClick={openManage}
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium text-sm transition-colors"
+                >
+                  <HomeIcon className="w-4 h-4" /> {t('page.myProperties')}
+                </button>
+              )}
+            </motion.div>
           </div>
 
           {/* Floating search card */}

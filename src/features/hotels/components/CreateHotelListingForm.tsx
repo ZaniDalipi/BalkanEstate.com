@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useCreateHotel, useUploadHotelCover, useUploadHotelPhotos } from '../hooks';
+import { useCreateHotel, useUpdateHotel, useUploadHotelCover, useUploadHotelPhotos } from '../hooks';
 import { useHotelDraftStore, HOTEL_DRAFT_TTL_MS, type HotelDraft } from '../store/hotelDraftStore';
 import {
   HOTEL_PROPERTY_TYPES,
@@ -10,6 +10,7 @@ import {
   SUPPORTED_CURRENCIES,
   CANCELLATION_POLICIES,
   CURRENCY_SYMBOLS,
+  type Hotel,
   type CreateHotelData,
   type CreateRoomData,
   type HotelPropertyType,
@@ -36,7 +37,50 @@ const MapLocationPicker = lazy(() => import('@/src/features/seller/components/Ma
 interface CreateHotelListingFormProps {
   onBack: () => void;
   onSuccess: () => void;
+  /** When provided, the form runs in EDIT mode (prefilled, PUT on submit). */
+  editHotel?: Hotel;
 }
+
+/** Map an existing hotel into the same shape the form initialises from. */
+const mapHotelToDraft = (h: Hotel): Partial<HotelDraft> => ({
+  name: h.name,
+  propertyType: h.propertyType,
+  starRating: h.starRating,
+  description: h.description ?? '',
+  currency: h.currency,
+  country: h.country,
+  city: h.city,
+  address: h.address ?? '',
+  lat: h.latitude ?? 0,
+  lng: h.longitude ?? 0,
+  contactPhone: h.contactPhone ?? '',
+  contactEmail: h.contactEmail ?? '',
+  whatsapp: h.whatsapp ?? '',
+  website: h.website ?? '',
+  amenities: h.amenities ?? [],
+  rooms: (h.rooms ?? []).map((r) => ({
+    name: r.name,
+    roomType: r.roomType,
+    description: r.description ?? '',
+    maxGuests: r.maxGuests,
+    beds: r.beds,
+    bathrooms: r.bathrooms,
+    sizeSqm: r.sizeSqm,
+    pricePerNight: r.pricePerNight,
+    currency: r.currency,
+    quantity: r.quantity,
+    amenities: r.amenities ?? [],
+  })) as CreateRoomData[],
+  checkInTime: h.checkInTime ?? '14:00',
+  checkOutTime: h.checkOutTime ?? '11:00',
+  minNights: h.minNights,
+  maxNights: h.maxNights,
+  cancellationPolicy: h.cancellationPolicy ?? '',
+  petsAllowed: h.petsAllowed,
+  smokingAllowed: h.smokingAllowed,
+  houseRules: h.houseRules ?? [],
+  languagesSpoken: h.languagesSpoken ?? [],
+});
 
 type FieldErrorKey = 'name' | 'propertyType' | 'contactPhone' | 'country' | 'city' | 'rooms';
 
@@ -86,11 +130,14 @@ const emptyRoom = (): RoomFormData => ({
   amenities: [],
 });
 
-const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack, onSuccess }) => {
+const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack, onSuccess, editHotel }) => {
   const { t } = useTranslation('hotels');
   const { state } = useAppContext();
   const currentUser = state.currentUser;
-  const { createHotel, isLoading, error } = useCreateHotel();
+  const isEdit = !!editHotel;
+  const { createHotel, isLoading: creating, error } = useCreateHotel();
+  const { updateHotel, isLoading: updating } = useUpdateHotel();
+  const isLoading = creating || updating;
   const { uploadCover } = useUploadHotelCover();
   const { uploadPhotos } = useUploadHotelPhotos();
 
@@ -103,18 +150,22 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
     rooms: useRef<HTMLDivElement>(null),
   };
 
-  // Restore a persisted draft so a page refresh never loses input. Read the
-  // store once (guarded by a ref) and ignore drafts older than the TTL.
+  // In CREATE mode, restore a persisted draft so a refresh never loses input.
+  // In EDIT mode, initialise from the existing hotel and never touch the draft.
   const { setDraft, clearDraft } = useHotelDraftStore();
   const savedDraftRef = useRef<Partial<HotelDraft> | null>(null);
   if (savedDraftRef.current === null) {
-    const d = useHotelDraftStore.getState().draft;
-    savedDraftRef.current =
-      d && d.savedAt && Date.now() - d.savedAt < HOTEL_DRAFT_TTL_MS ? d : {};
+    if (isEdit) {
+      savedDraftRef.current = mapHotelToDraft(editHotel!);
+    } else {
+      const d = useHotelDraftStore.getState().draft;
+      savedDraftRef.current =
+        d && d.savedAt && Date.now() - d.savedAt < HOTEL_DRAFT_TTL_MS ? d : {};
+    }
   }
   const draft = savedDraftRef.current || {};
   const [draftRestored, setDraftRestored] = useState(
-    () => !!(draft.name || draft.description || (draft.rooms && draft.rooms.some((r) => r.name)))
+    () => !isEdit && !!(draft.name || draft.description || (draft.rooms && draft.rooms.some((r) => r.name)))
   );
 
   // --- Basics ---
@@ -164,7 +215,7 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
 
   // --- Images ---
   const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(editHotel?.coverImageUrl ?? null);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
 
@@ -186,7 +237,9 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
 
   // Auto-save the draft (debounced) whenever any serialisable field changes, so
   // a refresh or accidental navigation preserves everything except file uploads.
+  // Disabled in edit mode — we must not overwrite the "new listing" draft.
   useEffect(() => {
+    if (isEdit) return;
     const handle = setTimeout(() => {
       setDraft({
         name, propertyType, starRating, description, currency,
@@ -201,7 +254,7 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
     name, propertyType, starRating, description, currency, selectedCountry, selectedCity,
     address, lat, lng, contactPhone, contactEmail, whatsapp, website, amenities, rooms,
     checkInTime, checkOutTime, minNights, maxNights, cancellationPolicy, petsAllowed,
-    smokingAllowed, houseRules, languagesSpoken, setDraft,
+    smokingAllowed, houseRules, languagesSpoken, setDraft, isEdit,
   ]);
 
   const discardDraft = useCallback(() => {
@@ -478,26 +531,29 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
       if (languagesSpoken.length > 0) payload.languagesSpoken = languagesSpoken;
 
       setProgress(35);
-      setProgressLabel(t('form.progress.creating'));
-      const result = await createHotel(payload);
+      setProgressLabel(t(isEdit ? 'form.progress.saving' : 'form.progress.creating'));
+      const result = isEdit
+        ? await updateHotel({ id: editHotel!.id, data: payload })
+        : await createHotel(payload);
       setProgress(60);
 
-      // Upload images after creation (non-blocking on failure)
-      if (result.hotel?.id) {
+      // Upload images after save (non-blocking on failure)
+      const hotelId = result.hotel?.id;
+      if (hotelId) {
         if (coverFile) {
           setProgressLabel(t('form.progress.uploadingCover'));
-          try { await uploadCover({ id: result.hotel.id, file: coverFile }); } catch { /* cover optional */ }
+          try { await uploadCover({ id: hotelId, file: coverFile }); } catch { /* cover optional */ }
           setProgress(78);
         }
         if (galleryFiles.length > 0) {
           setProgressLabel(t('form.progress.uploadingPhotos'));
-          try { await uploadPhotos({ id: result.hotel.id, files: galleryFiles }); } catch { /* gallery optional */ }
+          try { await uploadPhotos({ id: hotelId, files: galleryFiles }); } catch { /* gallery optional */ }
         }
       }
 
       setProgress(100);
       setProgressLabel(t('form.progress.done'));
-      clearDraft(); // published successfully → discard the saved draft
+      if (!isEdit) clearDraft(); // published successfully → discard the saved draft
       // Small beat so the finished bar is visible before the view changes.
       await new Promise((r) => setTimeout(r, 500));
       onSuccess();
@@ -511,7 +567,7 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
     submitting, name, propertyType, starRating, contactPhone, selectedCountry, selectedCity, rooms, minNights, maxNights,
     description, contactEmail, whatsapp, website, address, lat, lng, amenities, currency, checkInTime,
     checkOutTime, cancellationPolicy, houseRules, languagesSpoken, petsAllowed, smokingAllowed,
-    coverFile, galleryFiles, createHotel, uploadCover, uploadPhotos, onSuccess, t, clearErrors, clearDraft, setValidationError,
+    coverFile, galleryFiles, createHotel, updateHotel, isEdit, editHotel, uploadCover, uploadPhotos, onSuccess, t, clearErrors, clearDraft, setValidationError,
   ]);
 
   const displayError = formError || (error as Error)?.message;
@@ -573,9 +629,9 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
           </button>
           <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
             <HomeIcon className="w-7 h-7" />
-            {t('form.title')}
+            {t(isEdit ? 'form.editTitle' : 'form.title')}
           </h1>
-          <p className="mt-2 text-white/70 text-sm max-w-xl">{t('form.subtitle')}</p>
+          <p className="mt-2 text-white/70 text-sm max-w-xl">{t(isEdit ? 'form.editSubtitle' : 'form.subtitle')}</p>
         </div>
       </div>
 
@@ -1227,7 +1283,9 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
             )}
-            {isLoading ? t('form.publishing') : t('form.publish')}
+            {isLoading
+              ? t(isEdit ? 'form.saving' : 'form.publishing')
+              : t(isEdit ? 'form.saveChanges' : 'form.publish')}
           </button>
         </div>
       </form>
