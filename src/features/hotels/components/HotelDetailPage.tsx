@@ -331,32 +331,32 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
             className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center"
             onClick={closeLightbox}
           >
-            <button onClick={closeLightbox} className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white" aria-label="Close">
-              <XMarkIcon className="w-6 h-6" />
-            </button>
-            <span className="absolute top-5 left-5 text-white/80 text-sm font-medium">
-              {lightboxIndex + 1} / {gallery.length}
-            </span>
-            {gallery.length > 1 && (
-              <button
-                onClick={(e) => { e.stopPropagation(); prevImage(); }}
-                className="absolute left-3 sm:left-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white text-2xl"
-                aria-label="Previous"
-              >‹</button>
-            )}
             <motion.img
               key={lightboxIndex}
               src={optimizeCloudinaryUrl(gallery[lightboxIndex].url, { width: 1600, quality: 'auto' })}
               alt={`${hotel.name} ${lightboxIndex + 1}`}
               initial={{ scale: 0.96, opacity: 0.5 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="max-h-[85vh] max-w-[92vw] object-contain rounded-lg"
+              className="relative z-0 max-h-[85vh] max-w-[92vw] object-contain rounded-lg"
               onClick={(e) => e.stopPropagation()}
             />
+            <button onClick={closeLightbox} className="absolute top-4 right-4 z-20 p-2 rounded-full bg-white/15 hover:bg-white/30 text-white" aria-label="Close">
+              <XMarkIcon className="w-6 h-6" />
+            </button>
+            <span className="absolute top-5 left-5 z-20 text-white/80 text-sm font-medium">
+              {lightboxIndex + 1} / {gallery.length}
+            </span>
+            {gallery.length > 1 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                className="absolute left-3 sm:left-6 z-20 p-3 rounded-full bg-white/15 hover:bg-white/30 text-white text-2xl leading-none"
+                aria-label="Previous"
+              >‹</button>
+            )}
             {gallery.length > 1 && (
               <button
                 onClick={(e) => { e.stopPropagation(); nextImage(); }}
-                className="absolute right-3 sm:right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white text-2xl"
+                className="absolute right-3 sm:right-6 z-20 p-3 rounded-full bg-white/15 hover:bg-white/30 text-white text-2xl leading-none"
                 aria-label="Next"
               >›</button>
             )}
