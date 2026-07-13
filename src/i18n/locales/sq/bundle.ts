@@ -30,6 +30,7 @@ import rental from './rental.json';
 import agencyDashboard from './agencyDashboard.json';
 import home from './home.json';
 import businessDirectory from './businessDirectory.json';
+import hotels from './hotels.json';
 import listingFeeds from './listingFeeds.json';
 import blog from './blog.json';
 
@@ -38,5 +39,5 @@ export default {
   calculators, pricing, validation, admin, account, seller, agents, modals,
   payment, saved, exploreCities, analytics, subscription, agencies,
   agencyDetails, agentProfile, newListing, valuation, howItWorks, rental, agencyDashboard, home,
-  businessDirectory, listingFeeds, blog,
+  businessDirectory, hotels, listingFeeds, blog,
 };

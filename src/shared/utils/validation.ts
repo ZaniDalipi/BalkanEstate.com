@@ -385,6 +385,95 @@ export function validateRoomCount(count: number | string, fieldName = 'Count'): 
   return { isValid: true };
 }
 
+/**
+ * Validate a hotel/accommodation listing name.
+ */
+export function validateHotelName(name: string): ValidationResult {
+  if (!name || typeof name !== 'string' || name.trim().length === 0) {
+    return { isValid: false, error: 'Property name is required' };
+  }
+  const trimmed = name.trim();
+  if (trimmed.length < 2) {
+    return { isValid: false, error: 'Property name is too short' };
+  }
+  if (trimmed.length > 120) {
+    return { isValid: false, error: 'Property name cannot exceed 120 characters' };
+  }
+  return { isValid: true };
+}
+
+/**
+ * Validate a star rating (1-5, optional — pass undefined to skip).
+ */
+export function validateStarRating(rating?: number | null): ValidationResult {
+  if (rating == null) return { isValid: true };
+  const num = Number(rating);
+  if (!Number.isFinite(num) || num < 1 || num > 5) {
+    return { isValid: false, error: 'Star rating must be between 1 and 5' };
+  }
+  return { isValid: true };
+}
+
+/**
+ * Validate a nightly price. Must be a positive, realistic number.
+ */
+export function validatePricePerNight(price: unknown): ValidationResult {
+  const num = Number(price);
+  if (price === '' || price == null || !Number.isFinite(num)) {
+    return { isValid: false, error: 'Price per night is required' };
+  }
+  if (num < 1) {
+    return { isValid: false, error: 'Price per night must be at least 1' };
+  }
+  if (num > 1000000) {
+    return { isValid: false, error: 'Price per night seems unrealistically high' };
+  }
+  return { isValid: true };
+}
+
+/**
+ * Validate a guest count for a room (1-30).
+ */
+export function validateGuestCount(count: unknown): ValidationResult {
+  const num = Number(count);
+  if (count === '' || count == null || !Number.isFinite(num)) {
+    return { isValid: false, error: 'Maximum guests is required' };
+  }
+  if (num < 1) {
+    return { isValid: false, error: 'A room must sleep at least 1 guest' };
+  }
+  if (num > 30) {
+    return { isValid: false, error: 'Maximum guests cannot exceed 30' };
+  }
+  return { isValid: true };
+}
+
+/**
+ * Validate a single room definition. Returns the first failing field's error.
+ */
+export function validateRoom(room: {
+  name?: string;
+  pricePerNight?: unknown;
+  maxGuests?: unknown;
+  beds?: unknown;
+}): ValidationResult {
+  if (!room.name || room.name.trim().length === 0) {
+    return { isValid: false, error: 'Each room needs a name' };
+  }
+  const price = validatePricePerNight(room.pricePerNight);
+  if (!price.isValid) return price;
+  const guests = validateGuestCount(room.maxGuests);
+  if (!guests.isValid) return guests;
+  const bedsNum = Number(room.beds);
+  if (!Number.isFinite(bedsNum) || bedsNum < 1) {
+    return { isValid: false, error: 'A room must have at least 1 bed' };
+  }
+  if (bedsNum > 20) {
+    return { isValid: false, error: 'Number of beds cannot exceed 20' };
+  }
+  return { isValid: true };
+}
+
 export default {
   validateEmail,
   validatePhone,
@@ -401,4 +490,9 @@ export default {
   validateArea,
   validateYearBuilt,
   validateRoomCount,
+  validateHotelName,
+  validateStarRating,
+  validatePricePerNight,
+  validateGuestCount,
+  validateRoom,
 };

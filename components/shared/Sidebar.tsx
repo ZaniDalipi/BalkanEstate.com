@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { AppView, UserRole } from '../../types';
-import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, BuildingStorefrontIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, RentIcon, HomeIcon, BookOpenIcon } from '../../constants';
+import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, BuildingStorefrontIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, RentIcon, HomeIcon, BookOpenIcon, BedIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import UserAvatar from './UserAvatar';
@@ -183,6 +183,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       { view: 'agents' as AppView, label: t('nav:topAgents'), icon: <AgentsIcon /> },
       { view: 'agencies' as AppView, label: t('nav:agencies'), icon: <BuildingOfficeIcon /> },
       { view: 'business-directory' as AppView, label: t('nav:businessDirectory'), icon: <BuildingStorefrontIcon /> },
+      { view: 'hotels' as AppView, label: t('nav:hotels'), icon: <BedIcon /> },
       { view: 'how-it-works' as AppView, label: t('nav:howItWorks'), icon: <InformationCircleIcon /> },
       { view: 'blog' as AppView, label: t('nav:blog', 'Blog & Articles'), icon: <BookOpenIcon /> },
     ];

@@ -23,3 +23,6 @@ export * from './location.types';
 
 // App state types
 export * from './app.types';
+
+// Hotel types
+export * from './hotel.types';

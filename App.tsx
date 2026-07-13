@@ -111,6 +111,7 @@ const ContactUsPage = lazy(() => import('./src/features/contact/components/Conta
 const BuyingGuidesPage = lazy(() => import('./src/features/guides/components/BuyingGuidesPage'));
 const HomePage = lazyWithRetry(() => import('./src/features/home/components/HomePage'));
 const BusinessDirectoryPage = lazy(() => import('./src/features/business-directory/components/BusinessDirectoryPage'));
+const HotelsPage = lazy(() => import('./src/features/hotels/components/HotelsPage'));
 const BlogPage = lazy(() => import('./src/features/blog/components/BlogPage'));
 const ArticlePage = lazy(() => import('./src/features/blog/components/ArticlePage'));
 
@@ -331,6 +332,17 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
+        return;
+      }
+
+      // Hotels & rooms-for-rent routes: /hotels, /hotels/list-property, /hotels/:slug
+      const hotelsMatch = path.match(/^\/hotels(?:\/(.+))?$/);
+      if (hotelsMatch) {
+        dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        const view: AppView = hotelsMatch[1] === 'list-property' ? 'create-hotel' : 'hotels';
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
         return;
       }
 
@@ -704,6 +716,9 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return <QueryErrorBoundary><AgenciesListPage /></QueryErrorBoundary>;
       case 'business-directory':
         return <QueryErrorBoundary><BusinessDirectoryPage selectedListingId={state.selectedBusinessListingId} /></QueryErrorBoundary>;
+      case 'hotels':
+      case 'create-hotel':
+        return <QueryErrorBoundary><HotelsPage /></QueryErrorBoundary>;
       case 'admin':
         // Only load admin dashboard for admin/super_admin users
         if (state.currentUser?.role === UserRole.ADMIN || state.currentUser?.role === UserRole.SUPER_ADMIN) {

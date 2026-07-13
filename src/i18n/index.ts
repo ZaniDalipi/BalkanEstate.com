@@ -57,6 +57,7 @@ import enRental from './locales/en/rental.json';
 import enAgencyDashboard from './locales/en/agencyDashboard.json';
 import enHome from './locales/en/home.json';
 import enBusinessDirectory from './locales/en/businessDirectory.json';
+import enHotels from './locales/en/hotels.json';
 import enListingFeeds from './locales/en/listingFeeds.json';
 import enBlog from './locales/en/blog.json';
 
@@ -83,7 +84,7 @@ const NAMESPACES = [
   'seller', 'agents', 'modals', 'payment', 'saved', 'exploreCities',
   'analytics', 'subscription', 'agencies', 'agencyDetails', 'agentProfile',
   'newListing', 'valuation', 'howItWorks', 'rental', 'agencyDashboard', 'home', 'businessDirectory',
-  'listingFeeds',
+  'hotels', 'listingFeeds',
 ] as const;
 
 // English resources (always available as fallback)
@@ -119,6 +120,7 @@ const enResources = {
   agencyDashboard: enAgencyDashboard,
   home: enHome,
   businessDirectory: enBusinessDirectory,
+  hotels: enHotels,
   listingFeeds: enListingFeeds,
   blog: enBlog,
 };

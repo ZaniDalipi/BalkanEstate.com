@@ -61,6 +61,8 @@ type UploadType =
   | 'agency-cover'      // Agency cover image
   | 'business-logo'     // Business listing logo
   | 'business-banner'   // Business listing banner
+  | 'hotel-cover'       // Hotel/room cover image
+  | 'hotel-photo'       // Hotel/room gallery photo
   | 'site-logo'         // Site branding logo
   | 'site-email-logo';  // Site email branding logo
 
@@ -72,6 +74,7 @@ interface UploadOptions {
   propertyTitle?: string;
   agencyId?: string;
   businessListingId?: string;
+  hotelId?: string;
   credentialId?: string;
   type: UploadType;
   maxWidth?: number;
@@ -124,7 +127,7 @@ const sanitizeEmailForFolder = (email: string): string => {
  * - Agencies: balkan-estate/agencies/{agencyId}/{subfolder}
  */
 const buildFolderPath = (options: UploadOptions): string => {
-  const { userId, userEmail, propertyId, propertyTitle, agencyId, businessListingId, credentialId, type } = options;
+  const { userId, userEmail, propertyId, propertyTitle, agencyId, businessListingId, hotelId, credentialId, type } = options;
   const ROOT = 'balkan-estate';
   // ID first, readable slug appended — keeps prefix-based deletes
   // (e.g. .../listings/{propertyId}) matching the slugged folder.
@@ -180,6 +183,20 @@ const buildFolderPath = (options: UploadOptions): string => {
       const emailFolder = userEmail ? sanitizeEmailForFolder(userEmail) : userId;
       const listingId = businessListingId || userId;
       return `${ROOT}/businesses/${emailFolder}/${listingId}/banner`;
+    }
+
+    case 'hotel-cover': {
+      // balkan-estate/hotels/{userEmail}/{hotelId}/cover
+      const emailFolder = userEmail ? sanitizeEmailForFolder(userEmail) : userId;
+      const listingId = hotelId || userId;
+      return `${ROOT}/hotels/${emailFolder}/${listingId}/cover`;
+    }
+
+    case 'hotel-photo': {
+      // balkan-estate/hotels/{userEmail}/{hotelId}/photos
+      const emailFolder = userEmail ? sanitizeEmailForFolder(userEmail) : userId;
+      const listingId = hotelId || userId;
+      return `${ROOT}/hotels/${emailFolder}/${listingId}/photos`;
     }
 
     case 'site-logo':
