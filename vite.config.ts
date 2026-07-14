@@ -258,11 +258,27 @@ export default defineConfig(({ mode }) => {
               // NOTE: API routes are NOT cached by service worker
               // Payment verification and other API calls must always be fresh
             ],
-            // Do NOT skipWaiting/clientsClaim: forcing a new SW to activate
-            // mid-session is what caused the disruptive production reloads.
-            // Let the updated SW stay in "waiting" and take control on the
-            // user's next page load, following the standard SW lifecycle.
-            skipWaiting: false,
+            // skipWaiting: activate the updated SW as soon as it installs
+            // instead of leaving it "waiting" until every tab is closed.
+            //
+            // This is required to recover browsers stuck on an OLDER,
+            // precache-only service worker (from before sw-safari-fix.js added
+            // network-first navigations + precache wipe-on-activate). While that
+            // old SW stays active it serves a stale index.html referencing
+            // deleted chunk hashes, producing "Failed to load module script …
+            // MIME type text/html" — and with skipWaiting:false the fixed SW
+            // could never take over on a normal refresh, only after all tabs
+            // closed. skipWaiting lets the fixed SW activate on the next load so
+            // a single reload recovers the user.
+            //
+            // The disruptive "page keeps refreshing" issue came specifically
+            // from registerType:'autoUpdate', which injects a
+            // controllerchange→window.location.reload() listener. We use
+            // registerType:'prompt' and never call updateSW(), so no such
+            // listener exists — activating a new SW does NOT reload the page.
+            // clientsClaim stays false so the new SW does not forcibly seize
+            // already-open pages mid-session; it controls the next navigation.
+            skipWaiting: true,
             clientsClaim: false
           },
           devOptions: {
