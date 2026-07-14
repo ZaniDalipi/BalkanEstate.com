@@ -532,8 +532,12 @@ export const getOAuthUrl = (provider: 'google' | 'apple'): string => {
 };
 
 export const loginWithSocial = (provider: 'google' | 'apple'): void => {
-  // Redirect to backend OAuth endpoint
-  window.location.href = getOAuthUrl(provider);
+  // Redirect to backend OAuth endpoint.
+  // Use replace() rather than setting href so the transient "Redirecting…"
+  // page is not kept in session history. Otherwise the OS/in-app browser back
+  // button returns to it and its auto-redirect timer re-fires the OAuth flow —
+  // one of the ways Google login "looped" in installed-PWA/in-app-browser mode.
+  window.location.replace(getOAuthUrl(provider));
 };
 
 // Email Verification Functions

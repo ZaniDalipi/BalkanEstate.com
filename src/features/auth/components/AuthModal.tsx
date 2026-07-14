@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { AppleIcon, EnvelopeIcon, GoogleIcon, LogoIcon, XMarkIcon, EyeIcon } from '@/constants';
@@ -404,11 +404,25 @@ const AuthPage: React.FC = () => {
         setSocialLoginProvider(provider);
     };
 
-    const handleSocialLoginSuccess = (provider: SocialProvider) => {
+    // Guards against the OAuth redirect being initiated more than once. Belt and
+    // suspenders alongside the single-fire guard inside SocialLoginPopup — a
+    // second window.location navigation is never wanted and, in a PWA, showed up
+    // as the login looping through multiple redirects before completing.
+    const hasStartedOAuthRef = useRef(false);
+
+    const handleSocialLoginSuccess = useCallback((provider: SocialProvider) => {
+        if (hasStartedOAuthRef.current) return;
+        hasStartedOAuthRef.current = true;
         // Initiate OAuth flow by redirecting to backend
         loginWithSocial(provider);
         // No need to close modal or handle success here - the OAuth callback page will handle it
-    };
+    }, [loginWithSocial]);
+
+    const handleSocialLoginPopupClose = useCallback(() => {
+        hasStartedOAuthRef.current = false;
+        setSocialLoginProvider(null);
+        setIsLoading(false);
+    }, []);
 
     const handleEmailSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -874,10 +888,7 @@ const AuthPage: React.FC = () => {
                 <SocialLoginPopup
                     provider={socialLoginProvider}
                     onSuccess={() => handleSocialLoginSuccess(socialLoginProvider)}
-                    onClose={() => {
-                        setSocialLoginProvider(null);
-                        setIsLoading(false);
-                    }}
+                    onClose={handleSocialLoginPopupClose}
                 />
             )}
 

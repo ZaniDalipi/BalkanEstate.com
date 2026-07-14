@@ -250,7 +250,9 @@ export const isEmbeddedWebView = (): boolean => {
 };
 
 export const loginWithSocial = (provider: 'google' | 'facebook' | 'apple'): void => {
-  window.location.href = getOAuthUrl(provider);
+  // Use replace() so the transient "Redirecting…" page is not left in history;
+  // a back navigation to it would re-fire its auto-redirect and re-trigger OAuth.
+  window.location.replace(getOAuthUrl(provider));
 };
 
 // --- Phone Auth ---
