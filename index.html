@@ -20,6 +20,92 @@
       })();
     </script>
 
+    <!--
+      Stale-deploy chunk-load guard (inline, runs before the module bundle).
+
+      After a deploy Vite re-hashes every chunk and removes the old files. A
+      client still on the previous build (an open tab, or a precached service
+      worker serving the old index.html) requests a chunk like
+      i18n.<oldhash>.js that no longer exists. It either 404s or, via the SPA
+      fallback, comes back as index.html — and the browser reports
+      "Failed to load module script: … MIME type text/html".
+
+      The recovery listeners in index.tsx (vite:preloadError / module-script
+      error) live INSIDE the entry module graph. When the missing chunk is a
+      STATIC dependency of that graph (the i18n and react-vendor chunks are —
+      App.tsx does `import './src/i18n'`), the whole graph fails to instantiate,
+      index.tsx never runs, and those listeners never attach — so nothing
+      self-heals and the user is stranded on a broken page. This inline guard
+      runs regardless of whether the bundle loads, so that case recovers too.
+
+      It shares the throttle key + window with src/utils/chunkRecovery.ts so the
+      inline guard and the in-bundle recovery never double-reload and share the
+      same loop protection.
+    -->
+    <script>
+      (function () {
+        var KEY = 'be:hard-recover';
+        var THROTTLE_MS = 30000;
+
+        function recentlyAttempted() {
+          try {
+            var last = Number(sessionStorage.getItem(KEY) || '0');
+            if (last && Date.now() - last < THROTTLE_MS) return true;
+            sessionStorage.setItem(KEY, String(Date.now()));
+          } catch (e) {
+            // sessionStorage blocked (private mode): attempt once, can't track loops.
+          }
+          return false;
+        }
+
+        function recover() {
+          if (recentlyAttempted()) return;
+          var done = false;
+          function reload() {
+            if (done) return;
+            done = true;
+            window.location.reload();
+          }
+          try {
+            var tasks = [];
+            if ('serviceWorker' in navigator) {
+              tasks.push(
+                navigator.serviceWorker.getRegistrations().then(function (regs) {
+                  return Promise.all(regs.map(function (r) { return r.unregister(); }));
+                }).catch(function () {})
+              );
+            }
+            if (window.caches && caches.keys) {
+              tasks.push(
+                caches.keys().then(function (keys) {
+                  return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+                }).catch(function () {})
+              );
+            }
+            Promise.all(tasks).then(reload, reload);
+            // Safety net: reload even if teardown hangs.
+            setTimeout(reload, 2000);
+          } catch (e) {
+            reload();
+          }
+        }
+
+        // Resource-load errors don't bubble, so listen in the capture phase.
+        window.addEventListener('error', function (event) {
+          var t = event && event.target;
+          if (!t || t === window) return;
+          var tag = t.tagName;
+          var isModuleScript = tag === 'SCRIPT' && t.type === 'module';
+          var isModulePreload = tag === 'LINK' && t.rel === 'modulepreload';
+          if (!isModuleScript && !isModulePreload) return;
+          // Only our own hashed chunks (same-origin) — ignore third-party failures.
+          var src = t.src || t.href || '';
+          if (src && src.indexOf(window.location.origin) !== 0) return;
+          recover();
+        }, true);
+      })();
+    </script>
+
     <link rel="icon" type="image/svg+xml" href="/icons/logo-3d.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
