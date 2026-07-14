@@ -3,6 +3,57 @@
   <head>
     <meta charset="UTF-8" />
 
+    <!--
+      Stale-deploy chunk recovery. Runs inline and FIRST in <head> so it is
+      active before any module script loads. After a deploy, a client still
+      holding an older index.html requests hashed chunks (e.g. i18n.<oldhash>.js,
+      the entry bundle) that no longer exist; the SPA fallback answers with
+      index.html (text/html) and the browser reports "Failed to load module
+      script … MIME type text/html". Because this listener lives in the HTML —
+      not in the app bundle — it still fires when the ENTRY bundle or an early
+      static dependency (i18n, vendor) is the chunk that failed, a case the
+      in-bundle recovery (src/utils/chunkRecovery.ts) cannot catch because the
+      bundle never executes. Recovery: unregister the service worker, clear all
+      caches, reload once (throttled) to fetch a fresh bundle.
+    -->
+    <script>
+      (function () {
+        var KEY = 'be:hard-recover', THROTTLE = 30000, running = false;
+        function recover() {
+          if (running) return;
+          running = true;
+          try {
+            var last = +(sessionStorage.getItem(KEY) || 0);
+            if (last && Date.now() - last < THROTTLE) return; // already tried recently
+            sessionStorage.setItem(KEY, String(Date.now()));
+          } catch (e) { /* storage blocked: attempt recovery once */ }
+          var reload = function () { window.location.reload(); };
+          try {
+            var tasks = [];
+            if ('serviceWorker' in navigator) {
+              tasks.push(navigator.serviceWorker.getRegistrations().then(function (regs) {
+                return Promise.all(regs.map(function (r) { return r.unregister(); }));
+              }));
+            }
+            if (window.caches && caches.keys) {
+              tasks.push(caches.keys().then(function (keys) {
+                return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+              }));
+            }
+            Promise.all(tasks).then(reload, reload);
+          } catch (e) { reload(); }
+        }
+        // Failed module <script>/dependency loads surface as a window "error"
+        // event on the element; resource errors don't bubble, so use capture.
+        window.addEventListener('error', function (e) {
+          var t = e && e.target;
+          if (t && t.tagName === 'SCRIPT' && t.type === 'module') recover();
+        }, true);
+        // Vite dispatches this when a dynamically imported chunk fails to load.
+        window.addEventListener('vite:preloadError', recover);
+      })();
+    </script>
+
     <!-- Ziggy Polyfill: Prevents errors from external scripts expecting Laravel Ziggy -->
     <script>
       (function() {
