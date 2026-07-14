@@ -46,6 +46,7 @@ export interface Seller {
     agencyName?: string;
     agencyLogo?: string;
     agencyId?: string;
+    agentId?: string;
 }
 
 export interface Testimonial {

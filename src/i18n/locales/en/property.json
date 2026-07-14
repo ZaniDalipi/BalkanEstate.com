@@ -227,7 +227,10 @@
     "phone": "Phone",
     "email": "Email",
     "website": "Website",
-    "viewProfile": "View Profile"
+    "viewProfile": "View Profile",
+    "moreFromAgent": "More listings from this agent",
+    "noOtherListings": "No other active listings right now",
+    "viewFullProfile": "View full profile"
   },
   "navigation": {
     "back": "Back",
