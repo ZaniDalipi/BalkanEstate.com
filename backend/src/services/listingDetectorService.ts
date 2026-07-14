@@ -1004,6 +1004,17 @@ const unwrapMongoExtendedJson = (input: unknown): unknown => {
   return input;
 };
 
+/**
+ * Cleans up common copy-paste corruption from humans pasting JSON that was
+ * typed/edited in Word, Notes, or a browser with smart-quote autocorrect
+ * (curly quotes, trailing commas). Only safe to run on hand-typed text —
+ * it rewrites characters without any awareness of JSON string boundaries,
+ * so running it on machine-generated JSON (e.g. `JSON.stringify` output)
+ * can corrupt otherwise-valid data whenever a *value* legitimately contains
+ * a curly quote (an apostrophe like "Owner's Association", a size like 5”).
+ * Use `trusted: true` (see `detectFromJsonSample`) for anything that isn't
+ * literally pasted by a human into the "Paste JSON" textarea.
+ */
 const sanitizePastedJson = (raw: string): string => {
   return raw
     .replace(/^﻿/, '')          // Strip BOM
@@ -1013,8 +1024,11 @@ const sanitizePastedJson = (raw: string): string => {
     .trim();
 };
 
-export const detectFromJsonSample = (jsonString: string): DetectResult => {
-  const trimmed = sanitizePastedJson(jsonString);
+/** Strips only a leading BOM and surrounding whitespace — safe for machine-generated JSON. */
+const stripBomAndTrim = (raw: string): string => raw.replace(/^﻿/, '').trim();
+
+export const detectFromJsonSample = (jsonString: string, options: { trusted?: boolean } = {}): DetectResult => {
+  const trimmed = options.trusted ? stripBomAndTrim(jsonString) : sanitizePastedJson(jsonString);
   if (!trimmed) {
     throw new Error('Please paste a JSON sample to analyze.');
   }

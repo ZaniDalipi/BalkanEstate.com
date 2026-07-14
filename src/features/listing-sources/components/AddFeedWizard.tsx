@@ -280,7 +280,10 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
           setError(fileError || 'Choose a CSV or Excel file to analyze first.');
           return;
         }
-        result = await detectFeed('sampleJson', { sampleJson: JSON.stringify(parsedSheet.rows) });
+        // `trusted: true` — this JSON came from our own CSV/Excel parser, not a human
+        // paste, so skip the smart-quote/trailing-comma cleanup that's meant for
+        // hand-typed text (it would otherwise corrupt values like "Owner's Association").
+        result = await detectFeed('sampleJson', { sampleJson: JSON.stringify(parsedSheet.rows), trusted: true });
       } else if (method === 'sampleJson') {
         const sanitized = sanitizeJsonInput(sampleJson);
         if (!sanitized) {

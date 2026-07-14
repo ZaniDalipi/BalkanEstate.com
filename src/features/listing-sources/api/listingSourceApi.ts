@@ -226,7 +226,7 @@ export type DetectMethod = 'url' | 'rss' | 'sampleJson' | 'customApi';
 
 export const detectFeed = async (
   method: DetectMethod,
-  payload: { url?: string; sampleJson?: string; authHeaders?: Record<string, string> }
+  payload: { url?: string; sampleJson?: string; authHeaders?: Record<string, string>; trusted?: boolean }
 ): Promise<DetectResult> => {
   return apiRequest<DetectResult>(`${BASE}/detect`, {
     method: 'POST',

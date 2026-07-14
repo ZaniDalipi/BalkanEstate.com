@@ -437,7 +437,7 @@ export const detect = async (req: Request, res: Response): Promise<void> => {
   const userId = requireUserId(req, res);
   if (!userId) return;
 
-  const { method = 'url', url, sampleJson, authHeaders } = req.body || {};
+  const { method = 'url', url, sampleJson, authHeaders, trusted } = req.body || {};
 
   try {
     if (method === 'sampleJson') {
@@ -445,7 +445,12 @@ export const detect = async (req: Request, res: Response): Promise<void> => {
         res.status(400).json({ message: 'sampleJson is required' });
         return;
       }
-      const result = detectFromJsonSample(sampleJson);
+      // `trusted: true` marks JSON we generated ourselves (e.g. rows parsed from a
+      // user-uploaded CSV/Excel file) — it skips the human-paste cleanup (smart
+      // quotes, trailing commas) that would otherwise corrupt legitimate values
+      // like "Owner's Association" or a 5” window size. Only affects cosmetics of
+      // parsing, never a security boundary: untrusted input just gets parsed as-is.
+      const result = detectFromJsonSample(sampleJson, { trusted: trusted === true });
       res.json(result);
       return;
     }
