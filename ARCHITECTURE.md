@@ -182,6 +182,28 @@ Raw URL → optimizeCloudinaryUrl(url, { width, quality }) → <img src>
 
 ---
 
+## External Listing Feed Import (`src/features/listing-sources`)
+
+`AddFeedWizard.tsx` connects an external listing source via 5 methods: Website URL (auto-detect), RSS/Atom, **CSV/Excel upload**, paste-JSON sample, and Custom API.
+
+```
+File (.csv/.tsv/.xlsx/.xls)
+  └── src/features/listing-sources/utils/spreadsheetImport.ts
+        ├── CSV  → papaparse (client-side, dynamic typing, BOM/blank-row/dup-header handling)
+        ├── Excel → read-excel-file/browser (picks the sheet with the most data)
+        └── → Record<string, unknown>[] rows keyed by cleaned header name
+              └── POST /listing-sources/detect  { method: 'sampleJson', sampleJson: JSON.stringify(rows) }
+                    └── backend buildJsonFieldMap() — same header-name heuristics used for
+                        pasted JSON/API responses — maps "Price (EUR)", "Bedrooms", etc.
+                        to canonical property fields automatically.
+```
+
+**Why no backend changes were needed**: a parsed spreadsheet row is just a plain JSON object keyed by header name, so it's fed straight into the existing `sampleJson` detect/ingest pipeline (`adapterType: 'jsonFeed'`, `adapterConfig.inlineJson`) instead of a bespoke CSV adapter — reusing the tested field-mapping, dedupe, and normalization logic instead of duplicating it.
+
+**Validation** (`spreadsheetImport.ts`): file type/size limits (8MB), row cap (2000, capped client-side before the 10MB JSON body limit), empty-file/no-data-row detection, duplicate-header dedup, blank-row skipping, multi-sheet Excel workbooks (largest sheet wins) — all surfaced to the user as inline errors or non-fatal warnings before the field-mapping step. Server-side, `isValidListingItem` and `buildJsonFieldMap` (same backend code path as JSON/API imports) do the rest.
+
+---
+
 ## Security Notes
 - All API mutations use CSRF cookie (`credentials: 'include'`)
 - JWT stored in httpOnly cookies (not localStorage)

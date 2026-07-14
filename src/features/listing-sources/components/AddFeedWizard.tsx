@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   type DetectMethod,
@@ -8,6 +8,11 @@ import {
   detectFeed,
   createMyListingSource,
 } from '../api/listingSourceApi';
+import {
+  parseSpreadsheetFile,
+  SpreadsheetImportError,
+  type ParsedSpreadsheet,
+} from '../utils/spreadsheetImport';
 
 /**
  * Normalize MongoDB Extended JSON ({ "$oid": "..." }, { "$date": ... }, etc.)
@@ -177,7 +182,7 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
   const { t } = useTranslation(['listingFeeds', 'common']);
 
   const [step, setStep] = useState<Step>('input');
-  const [method, setMethod] = useState<DetectMethod>('url');
+  const [method, setMethod] = useState<DetectMethod | 'fileImport'>('url');
 
   // Shared
   const [name, setName] = useState('');
@@ -192,6 +197,13 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
 
   // JSON sample method
   const [sampleJson, setSampleJson] = useState('');
+
+  // CSV / Excel file import method
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [parsedSheet, setParsedSheet] = useState<ParsedSpreadsheet | null>(null);
+  const [fileParsing, setFileParsing] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   // Custom API method
   const [apiUrl, setApiUrl] = useState('');
@@ -221,13 +233,39 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
     try { setName(new URL(rawUrl).hostname.replace('www.', '')); } catch { /* ignore */ }
   };
 
+  const handleFileSelect = async (file: File | null) => {
+    setFileError(null);
+    setParsedSheet(null);
+    setSelectedFile(file);
+    if (!file) return;
+    setFileParsing(true);
+    try {
+      const parsed = await parseSpreadsheetFile(file);
+      setParsedSheet(parsed);
+      if (!name) {
+        setName(file.name.replace(/\.[^./\\]+$/, ''));
+      }
+    } catch (err) {
+      setParsedSheet(null);
+      setFileError(err instanceof SpreadsheetImportError ? err.message : (err as Error).message);
+    } finally {
+      setFileParsing(false);
+    }
+  };
+
   const handleDetect = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setDetecting(true);
     try {
       let result: DetectResult;
-      if (method === 'sampleJson') {
+      if (method === 'fileImport') {
+        if (!parsedSheet || parsedSheet.rows.length === 0) {
+          setError(fileError || 'Choose a CSV or Excel file to analyze first.');
+          return;
+        }
+        result = await detectFeed('sampleJson', { sampleJson: JSON.stringify(parsedSheet.rows) });
+      } else if (method === 'sampleJson') {
         const sanitized = sanitizeJsonInput(sampleJson);
         if (!sanitized) {
           setError('Please paste a JSON sample to analyze.');
@@ -273,13 +311,17 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
       const trimmedApiUrl = apiUrl.trim();
       const baseUrl =
         method === 'customApi' ? trimmedApiUrl :
+        method === 'fileImport' ? `manual://imported-file/${encodeURIComponent(selectedFile?.name || 'spreadsheet')}` :
         method === 'sampleJson' ? (trimmedApiUrl || (detected.adapterConfig.url as string | undefined) || 'manual://imported') :
         url.trim();
 
-      // For sampleJson with NO API URL we wire the pasted JSON inline so the
-      // first sync can replay it; with an API URL we use the URL as endpoint.
+      // For sampleJson/fileImport with NO API URL we wire the data inline so
+      // the first sync can replay it; with an API URL we use it as the endpoint.
       let adapterConfig: Record<string, unknown> = { ...detected.adapterConfig };
-      if (method === 'sampleJson') {
+      if (method === 'fileImport') {
+        adapterConfig.inlineJson = JSON.stringify(parsedSheet?.rows ?? []);
+        delete adapterConfig.endpoint;
+      } else if (method === 'sampleJson') {
         if (trimmedApiUrl) {
           adapterConfig.endpoint = trimmedApiUrl;
           delete adapterConfig.inlineJson;
@@ -291,7 +333,7 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
 
       const sourceName = name.trim() || (baseUrl && !baseUrl.startsWith('manual://')
         ? (() => { try { return new URL(baseUrl).hostname; } catch { return 'My feed'; } })()
-        : 'Pasted JSON');
+        : selectedFile?.name || 'Pasted JSON');
 
       const input: ListingSourceInput = {
         name: sourceName,
@@ -309,9 +351,10 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
     }
   };
 
-  const methodOptions: { id: DetectMethod; labelKey: string; descKey: string; icon: string }[] = [
+  const methodOptions: { id: DetectMethod | 'fileImport'; labelKey: string; descKey: string; icon: string }[] = [
     { id: 'url',       labelKey: 'method.url',       descKey: 'method.urlDesc',       icon: '🔗' },
     { id: 'rss',       labelKey: 'method.rss',       descKey: 'method.rssDesc',       icon: '📡' },
+    { id: 'fileImport', labelKey: 'method.fileImport', descKey: 'method.fileImportDesc', icon: '📄' },
     { id: 'sampleJson', labelKey: 'method.sampleJson', descKey: 'method.sampleJsonDesc', icon: '{ }' },
     { id: 'customApi', labelKey: 'method.customApi', descKey: 'method.customApiDesc', icon: '🔑' },
   ];
@@ -334,7 +377,7 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
       {step === 'input' && (
         <form onSubmit={handleDetect} className="space-y-5">
           {/* Method picker */}
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
             {methodOptions.map((opt) => (
               <button
                 key={opt.id}
@@ -393,6 +436,65 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
                     className="mt-1 w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:ring-2 focus:ring-primary/30"
                   />
                 </label>
+              </>
+            )}
+
+            {/* CSV / Excel file import */}
+            {method === 'fileImport' && (
+              <>
+                <p className="text-gray-600 text-sm">{t('listingFeeds:method.fileImportHint')}</p>
+                <div
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const file = e.dataTransfer.files?.[0];
+                    if (file) handleFileSelect(file);
+                  }}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors"
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".csv,.tsv,.txt,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+                    className="hidden"
+                    onChange={(e) => handleFileSelect(e.target.files?.[0] ?? null)}
+                  />
+                  <p className="text-3xl mb-2">📄</p>
+                  {selectedFile ? (
+                    <p className="text-sm font-semibold text-gray-800">{selectedFile.name}</p>
+                  ) : (
+                    <p className="text-sm font-semibold text-gray-700">{t('listingFeeds:method.chooseFile')}</p>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">{t('listingFeeds:method.fileTypesHint')}</p>
+                </div>
+
+                {fileParsing && (
+                  <p className="text-sm text-gray-500 flex items-center gap-2">
+                    <span className="inline-block w-3.5 h-3.5 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
+                    {t('listingFeeds:method.parsingFile')}
+                  </p>
+                )}
+
+                {fileError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 text-sm">{fileError}</div>
+                )}
+
+                {parsedSheet && !fileError && (
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-sm text-emerald-800 space-y-1">
+                    <p className="font-semibold">
+                      {t('listingFeeds:method.fileParsed', {
+                        count: parsedSheet.rows.length,
+                        columns: parsedSheet.headers.length,
+                      })}
+                    </p>
+                    {parsedSheet.warnings.length > 0 && (
+                      <ul className="list-disc list-inside text-xs text-emerald-700 space-y-0.5">
+                        {parsedSheet.warnings.map((w, i) => <li key={i}>{w}</li>)}
+                      </ul>
+                    )}
+                  </div>
+                )}
               </>
             )}
 
@@ -542,15 +644,15 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
 
           <button
             type="submit"
-            disabled={detecting}
+            disabled={detecting || fileParsing || (method === 'fileImport' && !parsedSheet)}
             className="w-full py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {detecting ? (
               <>
                 <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                {method === 'sampleJson' ? t('listingFeeds:analyzing') : t('listingFeeds:detecting')}
+                {method === 'sampleJson' || method === 'fileImport' ? t('listingFeeds:analyzing') : t('listingFeeds:detecting')}
               </>
-            ) : method === 'sampleJson' ? t('listingFeeds:analyzeButton') : t('listingFeeds:detectButton')}
+            ) : method === 'sampleJson' || method === 'fileImport' ? t('listingFeeds:analyzeButton') : t('listingFeeds:detectButton')}
           </button>
         </form>
       )}
@@ -560,7 +662,9 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
         <div className="space-y-4">
           <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
             <p className="font-semibold text-emerald-800 mb-1">
-              ✓ {ADAPTER_LABELS[detected.adapterType] ?? detected.adapterType} {t('listingFeeds:detected')}
+              ✓ {method === 'fileImport'
+                ? t(`listingFeeds:method.${parsedSheet?.kind === 'excel' ? 'excelFile' : 'csvFile'}`)
+                : (ADAPTER_LABELS[detected.adapterType] ?? detected.adapterType)} {t('listingFeeds:detected')}
             </p>
             <p className="text-sm text-emerald-700">{detected.hint}</p>
           </div>
