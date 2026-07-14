@@ -49,6 +49,9 @@ suppressConsoleLogs();
 import { initSecurity } from './src/utils/security';
 initSecurity();
 
+// Shared stale-deploy chunk recovery (unregister SW + clear caches + reload once)
+import { recoverFromStaleChunk } from './src/utils/chunkRecovery';
+
 const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error("Could not find root element to mount to");
@@ -64,60 +67,13 @@ root.render(
 // block the critical rendering path (LCP/FCP). VitePWA's injectRegister
 // is set to null so we handle it manually here.
 
-// Reload at most once within a short window to recover from stale chunks
-// after a deploy. Without this guard a persistently-stale page (e.g. a
-// service worker serving a precached index.html that references old hashed
-// filenames) would reload, hit the same failure, and reload again forever —
-// the cause of the visible "page keeps refreshing" loop. Mirrors the guard
-// in src/app/components/ErrorBoundary.tsx.
-const recoverViaReload = () => {
-  try {
-    const key = 'be:auto-reload';
-    const last = Number(sessionStorage.getItem(key) || '0');
-    // Already reloaded recently → reloading won't help (HTML still stale).
-    // Bail and let the in-app ErrorBoundary render a fallback instead.
-    if (last && Date.now() - last < 30000) return;
-    sessionStorage.setItem(key, String(Date.now()));
-  } catch {
-    // sessionStorage unavailable (private mode / blocked storage): fall
-    // through and reload once, accepting we can't track loops here.
-  }
-  window.location.reload();
-};
-
-// Hard recovery for the "app won't load" case: a stale service worker serving a
-// precached index.html that references hashed chunk filenames which 404 on the
-// server (the browser then gets text/html for a module script and the app can't
-// boot). A plain reload re-serves the same stale HTML, so here we first tear down
-// the service worker and all caches, then reload to fetch a clean bundle.
-const hardRecover = async () => {
-  try {
-    const key = 'be:hard-recover';
-    const last = Number(sessionStorage.getItem(key) || '0');
-    if (last && Date.now() - last < 30000) return; // already tried recently
-    sessionStorage.setItem(key, String(Date.now()));
-  } catch {
-    // ignore storage failures and attempt recovery once
-  }
-  try {
-    if ('serviceWorker' in navigator) {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map((r) => r.unregister()));
-    }
-    if ('caches' in window) {
-      const keys = await caches.keys();
-      await Promise.all(keys.map((k) => caches.delete(k)));
-    }
-  } catch {
-    // best-effort cleanup; reload regardless
-  }
-  window.location.reload();
-};
-
 // Reload when a lazy-loaded chunk fails (e.g. stale page referencing old
 // hashed filenames after a new deploy). Vite 5+ fires this before throwing.
+// recoverFromStaleChunk tears down the SW + caches and reloads once (throttled),
+// which is what a plain reload cannot do when a precached SW keeps serving the
+// stale index.html that references the missing chunk hashes.
 window.addEventListener('vite:preloadError', () => {
-  hardRecover();
+  recoverFromStaleChunk();
 });
 
 // A failed ES module script load surfaces as a window "error" event whose target
@@ -128,7 +84,7 @@ window.addEventListener(
   (event) => {
     const target = event.target as HTMLElement | null;
     if (target && target.tagName === 'SCRIPT' && (target as HTMLScriptElement).type === 'module') {
-      hardRecover();
+      recoverFromStaleChunk();
     }
   },
   true // capture phase: resource load errors don't bubble
