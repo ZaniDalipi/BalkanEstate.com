@@ -126,22 +126,16 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
 
     marker.bindPopup(`<b>${t('search:map.dragToAdjust')}</b><br>${address.length > 60 ? address.slice(0, 60) + '…' : address}`, { maxWidth: 220 }).openPopup();
 
-    // Handle marker drag
-    marker.on('dragstart', () => {
-      setIsDragging(true);
-    });
-
-    marker.on('dragend', async (e) => {
-      const position = e.target.getLatLng();
-      setIsDragging(false);
-
-      // If city is selected, validate that the dragged location is within the city area
+    // Shared logic for moving the marker to a new position, used by both
+    // marker drag-end and map click (tap-to-pin, like Google Maps).
+    const moveMarkerTo = async (newLat: number, newLng: number) => {
+      // If city is selected, validate that the new location is within the city area
       // Use refs to always access current city values (not stale closure)
       const currentCity = cityRef.current;
       const currentCityLat = cityLatRef.current;
       const currentCityLng = cityLngRef.current;
       if (currentCity && currentCityLat && currentCityLng) {
-        const distance = calculateDistance(currentCityLat, currentCityLng, position.lat, position.lng);
+        const distance = calculateDistance(currentCityLat, currentCityLng, newLat, newLng);
         if (distance > 30) {
           // Snap marker back to previous position
           marker.setLatLng([latRef.current, lngRef.current]);
@@ -159,14 +153,15 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
         }
       }
 
-      onLocationChange(position.lat, position.lng);
-      marker.setPopupContent(`<b>${t('search:map.locationSet')}</b><br>Lat: ${position.lat.toFixed(6)}, Lng: ${position.lng.toFixed(6)}`);
+      marker.setLatLng([newLat, newLng]);
+      onLocationChange(newLat, newLng);
+      marker.setPopupContent(`<b>${t('search:map.locationSet')}</b><br>Lat: ${newLat.toFixed(6)}, Lng: ${newLng.toFixed(6)}`);
       marker.openPopup();
 
       // Reverse geocode to get address for the new pin location
       if (onAddressChange) {
         try {
-          const result = await reverseGeocode(position.lat, position.lng);
+          const result = await reverseGeocode(newLat, newLng);
           if (result) {
             // Use the full display_name to preserve complete location information
             const locationName = result.display_name;
@@ -176,11 +171,27 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
           // Error removed
         }
       }
+    };
+
+    // Handle marker drag
+    marker.on('dragstart', () => {
+      setIsDragging(true);
+    });
+
+    marker.on('dragend', (e) => {
+      const position = e.target.getLatLng();
+      setIsDragging(false);
+      moveMarkerTo(position.lat, position.lng);
     });
 
     marker.on('drag', (e) => {
       const position = e.target.getLatLng();
       marker.setPopupContent(`<b>${t('search:map.dragging')}</b><br>Lat: ${position.lat.toFixed(6)}, Lng: ${position.lng.toFixed(6)}`);
+    });
+
+    // Tap/click anywhere on the map to move the marker there, like pinning in Google Maps
+    map.on('click', (e: L.LeafletMouseEvent) => {
+      moveMarkerTo(e.latlng.lat, e.latlng.lng);
     });
 
     mapRef.current = map;
