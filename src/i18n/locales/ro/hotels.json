@@ -163,9 +163,10 @@
       "contact": "Contact details",
       "rooms": "Rooms & pricing",
       "roomsHint": "Add each room type you offer with its nightly price. The lowest price is shown as your \"from\" rate.",
-      "amenities": "Amenities",
+      "amenities": "Property amenities",
       "photos": "Photos",
-      "policies": "Policies & house rules"
+      "policies": "Policies & house rules",
+      "amenitiesHint": "Available to all guests across the whole property."
     },
     "fields": {
       "name": "Property name",
@@ -207,7 +208,13 @@
       "websiteHint": "Just type your domain — we’ll add https:// for you.",
       "roomAmenities": "Room amenities",
       "roomAmenitiesHint": "Pick what this specific room offers (e.g. jacuzzi, balcony, sea view).",
-      "optional": "(optional)"
+      "optional": "(optional)",
+      "bedConfiguration": "Bed configuration",
+      "addBedType": "Add another bed type",
+      "totalBeds": "{{count}} beds total",
+      "totalBeds_one": "{{count}} bed total",
+      "decreaseQuantity": "Decrease quantity",
+      "increaseQuantity": "Increase quantity"
     },
     "placeholders": {
       "name": "e.g. Hotel Adriatic",
@@ -293,5 +300,14 @@
       "redeemed": "Used",
       "revoked": "Revoked"
     }
+  },
+  "bedTypes": {
+    "single": "Single bed",
+    "twin": "Twin bed",
+    "double": "Double bed",
+    "queen": "Queen bed",
+    "king": "King bed",
+    "sofa_bed": "Sofa bed",
+    "bunk": "Bunk bed"
   }
 }

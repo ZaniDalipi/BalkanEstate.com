@@ -181,9 +181,17 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-50 border border-neutral-200 text-xs text-neutral-600">
                           <UsersIcon className="w-3.5 h-3.5" /> {t('detail.sleeps', { count: room.maxGuests })}
                         </span>
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-50 border border-neutral-200 text-xs text-neutral-600">
-                          {t('detail.bedsCount', { count: room.beds })}
-                        </span>
+                        {room.bedConfiguration && room.bedConfiguration.length > 0 ? (
+                          room.bedConfiguration.map((bed, bi) => (
+                            <span key={bi} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-50 border border-neutral-200 text-xs text-neutral-600">
+                              {bed.quantity}× {t(`bedTypes.${bed.bedType}`)}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-50 border border-neutral-200 text-xs text-neutral-600">
+                            {t('detail.bedsCount', { count: room.beds })}
+                          </span>
+                        )}
                         {room.bathrooms ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-50 border border-neutral-200 text-xs text-neutral-600">
                             {t('detail.bathroomsCount', { count: room.bathrooms })}

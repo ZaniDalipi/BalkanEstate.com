@@ -26,6 +26,19 @@ export const ROOM_TYPES = [
 ] as const;
 export type RoomType = typeof ROOM_TYPES[number];
 
+// Bed types a host can mix & match within a room (e.g. "1 king bed" or
+// "2 single beds" or "1 queen + 1 sofa bed"). Mirrors backend BED_TYPES.
+export const BED_TYPES = [
+  'single',
+  'twin',
+  'double',
+  'queen',
+  'king',
+  'sofa_bed',
+  'bunk',
+] as const;
+export type BedType = typeof BED_TYPES[number];
+
 export const HOTEL_AMENITIES = [
   'wifi',
   'parking',
@@ -81,13 +94,21 @@ export const CURRENCY_SYMBOLS: Record<SupportedCurrency, string> = {
 export const CANCELLATION_POLICIES = ['flexible', 'moderate', 'strict', 'non_refundable'] as const;
 export type CancellationPolicy = typeof CANCELLATION_POLICIES[number];
 
+export interface BedOption {
+  bedType: BedType;
+  quantity: number;
+}
+
 export interface Room {
   _id?: string;
   name: string;
   roomType: RoomType;
   description?: string;
   maxGuests: number;
+  /** Total bed count — derived from bedConfiguration when it's set. */
   beds: number;
+  /** Structured bed breakdown, e.g. [{ bedType: 'king', quantity: 1 }]. */
+  bedConfiguration?: BedOption[];
   bathrooms: number;
   sizeSqm?: number;
   pricePerNight: number;
@@ -172,6 +193,7 @@ export interface CreateRoomData {
   description?: string;
   maxGuests: number;
   beds: number;
+  bedConfiguration?: BedOption[];
   bathrooms?: number;
   sizeSqm?: number;
   pricePerNight: number;

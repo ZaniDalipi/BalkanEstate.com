@@ -29,6 +29,20 @@ export const ROOM_TYPES = [
 
 export type RoomType = typeof ROOM_TYPES[number];
 
+// Bed types a host can mix & match within a room (e.g. "1 king bed" or
+// "2 single beds" or "1 queen + 1 sofa bed").
+export const BED_TYPES = [
+  'single',
+  'twin',
+  'double',
+  'queen',
+  'king',
+  'sofa_bed',
+  'bunk',
+] as const;
+
+export type BedType = typeof BED_TYPES[number];
+
 // Amenities offered at the property level
 export const HOTEL_AMENITIES = [
   'wifi',
@@ -75,12 +89,20 @@ export type SupportedCurrency = typeof SUPPORTED_CURRENCIES[number];
 export const CANCELLATION_POLICIES = ['flexible', 'moderate', 'strict', 'non_refundable'] as const;
 export type CancellationPolicy = typeof CANCELLATION_POLICIES[number];
 
+export interface IBedOption {
+  bedType: BedType;
+  quantity: number;
+}
+
 export interface IRoom {
   name: string;
   roomType: RoomType;
   description?: string;
   maxGuests: number;
+  /** Total bed count — derived from bedConfiguration when provided. */
   beds: number;
+  /** Structured bed breakdown, e.g. [{ bedType: 'king', quantity: 1 }]. */
+  bedConfiguration?: IBedOption[];
   bathrooms: number;
   sizeSqm?: number;
   pricePerNight: number;
@@ -165,6 +187,23 @@ const RoomSchema = new Schema<IRoom>(
       required: [true, 'Number of beds is required'],
       min: [1, 'A room must have at least 1 bed'],
       max: [20, 'Number of beds cannot exceed 20'],
+    },
+    bedConfiguration: {
+      type: [{
+        bedType: {
+          type: String,
+          enum: { values: BED_TYPES, message: 'Invalid bed type: {VALUE}' },
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+          min: [1, 'Bed quantity must be at least 1'],
+          max: [10, 'Bed quantity cannot exceed 10'],
+        },
+      }],
+      default: [],
+      _id: false,
     },
     bathrooms: {
       type: Number,

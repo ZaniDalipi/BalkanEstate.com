@@ -8,6 +8,7 @@ import {
   HOTEL_PROPERTY_TYPES,
   HOTEL_AMENITIES,
   ROOM_TYPES,
+  BED_TYPES,
   SUPPORTED_CURRENCIES,
   CANCELLATION_POLICIES,
   CURRENCY_SYMBOLS,
@@ -17,6 +18,8 @@ import {
   type HotelPropertyType,
   type HotelAmenity,
   type RoomType,
+  type BedType,
+  type BedOption,
   type SupportedCurrency,
   type CancellationPolicy,
 } from '@/src/shared/types/hotel.types';
@@ -65,6 +68,9 @@ const mapHotelToDraft = (h: Hotel): Partial<HotelDraft> => ({
     description: r.description ?? '',
     maxGuests: r.maxGuests,
     beds: r.beds,
+    bedConfiguration: r.bedConfiguration && r.bedConfiguration.length > 0
+      ? r.bedConfiguration
+      : [{ bedType: 'double', quantity: r.beds || 1 }],
     bathrooms: r.bathrooms,
     sizeSqm: r.sizeSqm,
     pricePerNight: r.pricePerNight,
@@ -110,12 +116,19 @@ const COUNTRY_PHONE_CODES: Record<string, string> = {
 type NumOrBlank = number | '';
 interface RoomFormData extends Omit<CreateRoomData, 'maxGuests' | 'beds' | 'bathrooms' | 'sizeSqm' | 'pricePerNight' | 'quantity'> {
   maxGuests: NumOrBlank;
+  /** Kept in sync with the sum of bedConfiguration quantities. */
   beds: NumOrBlank;
+  bedConfiguration: BedOption[];
   bathrooms: NumOrBlank;
   sizeSqm: NumOrBlank;
   pricePerNight: NumOrBlank;
   quantity: NumOrBlank;
 }
+
+const emptyBedOption = (): BedOption => ({ bedType: 'double', quantity: 1 });
+
+const sumBeds = (config: BedOption[]): number =>
+  Math.max(1, config.reduce((sum, b) => sum + (Number(b.quantity) || 0), 0));
 
 const emptyRoom = (): RoomFormData => ({
   name: '',
@@ -123,6 +136,7 @@ const emptyRoom = (): RoomFormData => ({
   description: '',
   maxGuests: 2,
   beds: 1,
+  bedConfiguration: [emptyBedOption()],
   bathrooms: 1,
   sizeSqm: '',
   pricePerNight: '',
@@ -197,9 +211,17 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
   const [amenities, setAmenities] = useState<HotelAmenity[]>(draft.amenities ?? []);
 
   // --- Rooms ---
-  const [rooms, setRooms] = useState<RoomFormData[]>(
-    draft.rooms && draft.rooms.length > 0 ? (draft.rooms as RoomFormData[]) : [emptyRoom()]
-  );
+  // Normalise rooms restored from an older draft/hotel that predates bed
+  // configuration — ensure every room has at least one bed option.
+  const [rooms, setRooms] = useState<RoomFormData[]>(() => {
+    const source = draft.rooms && draft.rooms.length > 0 ? (draft.rooms as RoomFormData[]) : [emptyRoom()];
+    return source.map((r) => ({
+      ...r,
+      bedConfiguration: r.bedConfiguration && r.bedConfiguration.length > 0
+        ? r.bedConfiguration
+        : [{ bedType: 'double' as BedType, quantity: (typeof r.beds === 'number' && r.beds > 0) ? r.beds : 1 }],
+    }));
+  });
 
   // --- Policies ---
   const [checkInTime, setCheckInTime] = useState(draft.checkInTime ?? '14:00');
@@ -372,6 +394,46 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
     }));
   }, []);
 
+  // --- Bed configuration handlers ---
+  // Beds are chosen as a set of { bedType, quantity } entries (e.g. "1 king
+  // bed" or "2 twin beds") instead of a single raw count — quantity is
+  // adjusted with +/- steppers so it can never be cleared to an invalid 0.
+  const addBedOption = useCallback((roomIndex: number) => {
+    setRooms((prev) => prev.map((room, i) => {
+      if (i !== roomIndex || room.bedConfiguration.length >= 6) return room;
+      const nextConfig = [...room.bedConfiguration, emptyBedOption()];
+      return { ...room, bedConfiguration: nextConfig, beds: sumBeds(nextConfig) };
+    }));
+    clearErrors();
+  }, [clearErrors]);
+
+  const removeBedOption = useCallback((roomIndex: number, bedIndex: number) => {
+    setRooms((prev) => prev.map((room, i) => {
+      if (i !== roomIndex || room.bedConfiguration.length <= 1) return room;
+      const nextConfig = room.bedConfiguration.filter((_, bi) => bi !== bedIndex);
+      return { ...room, bedConfiguration: nextConfig, beds: sumBeds(nextConfig) };
+    }));
+  }, []);
+
+  const updateBedType = useCallback((roomIndex: number, bedIndex: number, bedType: BedType) => {
+    setRooms((prev) => prev.map((room, i) => {
+      if (i !== roomIndex) return room;
+      const nextConfig = room.bedConfiguration.map((b, bi) => (bi === bedIndex ? { ...b, bedType } : b));
+      return { ...room, bedConfiguration: nextConfig };
+    }));
+  }, []);
+
+  const adjustBedQuantity = useCallback((roomIndex: number, bedIndex: number, delta: number) => {
+    setRooms((prev) => prev.map((room, i) => {
+      if (i !== roomIndex) return room;
+      const nextConfig = room.bedConfiguration.map((b, bi) =>
+        bi === bedIndex ? { ...b, quantity: Math.min(10, Math.max(1, b.quantity + delta)) } : b
+      );
+      return { ...room, bedConfiguration: nextConfig, beds: sumBeds(nextConfig) };
+    }));
+    clearErrors();
+  }, [clearErrors]);
+
   const addRoom = useCallback(() => {
     setRooms((prev) => (prev.length >= 50 ? prev : [...prev, emptyRoom()]));
   }, []);
@@ -521,7 +583,8 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
           roomType: r.roomType,
           description: r.description?.trim() || undefined,
           maxGuests: Number(r.maxGuests),
-          beds: Number(r.beds),
+          beds: sumBeds(r.bedConfiguration),
+          bedConfiguration: r.bedConfiguration,
           bathrooms: r.bathrooms === '' || r.bathrooms == null ? 1 : Number(r.bathrooms),
           sizeSqm: r.sizeSqm === '' || r.sizeSqm == null ? undefined : Number(r.sizeSqm),
           pricePerNight: Number(r.pricePerNight),
@@ -977,7 +1040,7 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-neutral-600 mb-1">{t('form.fields.pricePerNight')} <span className="text-red-500">*</span></label>
                   <input
@@ -1004,19 +1067,6 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-neutral-600 mb-1">{t('form.fields.beds')} <span className="text-red-500">*</span></label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={20}
-                    inputMode="numeric"
-                    value={room.beds}
-                    onChange={(e) => updateRoomNumber(index, 'beds', e.target.value)}
-                    placeholder="1"
-                    className={inputClasses(isInvalid(`room-${index}-beds`))}
-                  />
-                </div>
-                <div>
                   <label className="block text-xs font-medium text-neutral-600 mb-1">{t('form.fields.bathrooms')}</label>
                   <input
                     type="number"
@@ -1028,6 +1078,67 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                     placeholder="1"
                     className={inputClasses()}
                   />
+                </div>
+              </div>
+
+              {/* Bed configuration — pick bed type(s) instead of a raw count.
+                  e.g. "1 King bed", or "2 Twin beds", or a mix. */}
+              <div className={isInvalid(`room-${index}-beds`) ? 'p-3 -m-3 rounded-xl ring-2 ring-red-200 border border-red-400' : ''}>
+                <label className="block text-xs font-medium text-neutral-600 mb-1">
+                  {t('form.fields.bedConfiguration')} <span className="text-red-500">*</span>
+                </label>
+                <div className="space-y-2">
+                  {room.bedConfiguration.map((bed, bedIndex) => (
+                    <div key={bedIndex} className="flex items-center gap-2">
+                      <select
+                        value={bed.bedType}
+                        onChange={(e) => updateBedType(index, bedIndex, e.target.value as BedType)}
+                        className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      >
+                        {BED_TYPES.map((bt) => (
+                          <option key={bt} value={bt}>{t(`bedTypes.${bt}`)}</option>
+                        ))}
+                      </select>
+                      <div className="flex items-center gap-1 border border-neutral-300 rounded-lg px-1">
+                        <button
+                          type="button"
+                          onClick={() => adjustBedQuantity(index, bedIndex, -1)}
+                          disabled={bed.quantity <= 1}
+                          className="w-7 h-7 flex items-center justify-center text-neutral-500 hover:text-primary disabled:opacity-30 disabled:hover:text-neutral-500"
+                          aria-label={t('form.fields.decreaseQuantity')}
+                        >−</button>
+                        <span className="w-6 text-center text-sm font-medium tabular-nums">{bed.quantity}</span>
+                        <button
+                          type="button"
+                          onClick={() => adjustBedQuantity(index, bedIndex, 1)}
+                          disabled={bed.quantity >= 10}
+                          className="w-7 h-7 flex items-center justify-center text-neutral-500 hover:text-primary disabled:opacity-30 disabled:hover:text-neutral-500"
+                          aria-label={t('form.fields.increaseQuantity')}
+                        >+</button>
+                      </div>
+                      {room.bedConfiguration.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeBedOption(index, bedIndex)}
+                          className="text-neutral-400 hover:text-red-500 shrink-0"
+                          aria-label={t('form.remove')}
+                        >
+                          <TrashIcon className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-2 flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => addBedOption(index)}
+                    disabled={room.bedConfiguration.length >= 6}
+                    className="flex items-center gap-1 text-xs font-medium text-primary hover:underline disabled:opacity-40 disabled:no-underline"
+                  >
+                    <PlusIcon className="w-3.5 h-3.5" /> {t('form.fields.addBedType')}
+                  </button>
+                  <span className="text-xs text-neutral-400">{t('form.fields.totalBeds', { count: sumBeds(room.bedConfiguration) })}</span>
                 </div>
               </div>
 
@@ -1126,7 +1237,10 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
 
         {/* --- Section: Amenities --- */}
         <section className="bg-white rounded-2xl border border-neutral-200 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-neutral-900">{t('form.sections.amenities')}</h2>
+          <div>
+            <h2 className="text-lg font-semibold text-neutral-900">{t('form.sections.amenities')}</h2>
+            <p className="mt-1 text-sm text-neutral-500">{t('form.sections.amenitiesHint')}</p>
+          </div>
           <div className="flex flex-wrap gap-2">
             {HOTEL_AMENITIES.map((amenity) => {
               const active = amenities.includes(amenity);

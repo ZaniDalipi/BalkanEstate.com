@@ -4,9 +4,11 @@ import Hotel, {
   HOTEL_PROPERTY_TYPES,
   HOTEL_AMENITIES,
   ROOM_TYPES,
+  BED_TYPES,
   SUPPORTED_CURRENCIES,
   CANCELLATION_POLICIES,
   type IRoom,
+  type IBedOption,
 } from '../models/Hotel';
 import { IUser } from '../models/User';
 import HotelListingCode from '../models/HotelListingCode';
@@ -50,7 +52,28 @@ const sanitizeRoom = (raw: any): IRoom | { error: string } => {
   if (!Number.isFinite(maxGuests) || maxGuests < 1) {
     return { error: `Room "${name}" needs a valid maximum guest count` };
   }
-  const beds = Number(raw.beds);
+
+  // Structured bed breakdown (e.g. "1 king bed" or "2 twin beds"). When
+  // provided, it's the source of truth and the total bed count is derived
+  // from it; otherwise fall back to a plain bed count for compatibility.
+  let bedConfiguration: IBedOption[] | undefined;
+  if (Array.isArray(raw.bedConfiguration) && raw.bedConfiguration.length > 0) {
+    bedConfiguration = [];
+    for (const entry of raw.bedConfiguration.slice(0, 6)) {
+      if (!BED_TYPES.includes(entry?.bedType)) {
+        return { error: `Room "${name}" has an invalid bed type` };
+      }
+      const quantity = Number(entry?.quantity);
+      if (!Number.isFinite(quantity) || quantity < 1) {
+        return { error: `Room "${name}" needs a valid bed quantity` };
+      }
+      bedConfiguration.push({ bedType: entry.bedType, quantity: Math.min(10, quantity) });
+    }
+  }
+
+  const beds = bedConfiguration
+    ? bedConfiguration.reduce((sum, b) => sum + b.quantity, 0)
+    : Number(raw.beds);
   if (!Number.isFinite(beds) || beds < 1) {
     return { error: `Room "${name}" needs at least 1 bed` };
   }
@@ -61,6 +84,7 @@ const sanitizeRoom = (raw: any): IRoom | { error: string } => {
     description: typeof raw.description === 'string' ? raw.description.trim() : undefined,
     maxGuests,
     beds,
+    bedConfiguration,
     bathrooms: Number.isFinite(Number(raw.bathrooms)) ? Number(raw.bathrooms) : 1,
     sizeSqm: raw.sizeSqm != null && Number.isFinite(Number(raw.sizeSqm)) ? Number(raw.sizeSqm) : undefined,
     pricePerNight,
