@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCreateHotel, useUpdateHotel, useUploadHotelCover, useUploadHotelPhotos } from '../hooks';
@@ -659,46 +660,53 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
   return (
     <div className="min-h-screen bg-neutral-50">
       {/* Blocking submit overlay with animated progress — prevents interaction
-          and double-submits while the listing is being published. */}
-      <AnimatePresence>
-        {submitting && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md px-6"
-            aria-live="assertive"
-            role="alertdialog"
-          >
+          and double-submits while the listing is being published.
+          Portaled to document.body: a page-transition ancestor applies a CSS
+          transform, which turns `position: fixed` into "fixed to that
+          ancestor" instead of the viewport — without the portal the overlay
+          gets clipped to the transformed box and sits under the sidebar. */}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {submitting && (
             <motion.div
-              initial={{ scale: 0.9, y: 20, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-              className="w-full max-w-sm rounded-3xl bg-white shadow-2xl p-8 text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900/60 backdrop-blur-md px-6"
+              aria-live="assertive"
+              role="alertdialog"
             >
-              <div className="mx-auto mb-5 w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 1.1, ease: 'linear' }}
-                  className="w-8 h-8 rounded-full border-[3px] border-white/40 border-t-white"
-                />
-              </div>
-              <h3 className="text-lg font-bold text-neutral-900">{t('form.progress.title')}</h3>
-              <p className="mt-1 text-sm text-neutral-500 h-5">{progressLabel}</p>
+              <motion.div
+                initial={{ scale: 0.9, y: 20, opacity: 0 }}
+                animate={{ scale: 1, y: 0, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+                className="w-full max-w-sm rounded-3xl bg-white shadow-2xl p-8 text-center"
+              >
+                <div className="mx-auto mb-5 w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 1.1, ease: 'linear' }}
+                    className="w-8 h-8 rounded-full border-[3px] border-white/40 border-t-white"
+                  />
+                </div>
+                <h3 className="text-lg font-bold text-neutral-900">{t('form.progress.title')}</h3>
+                <p className="mt-1 text-sm text-neutral-500 h-5">{progressLabel}</p>
 
-              <div className="mt-5 h-2.5 w-full rounded-full bg-neutral-100 overflow-hidden">
-                <motion.div
-                  className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-600"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ ease: 'easeOut', duration: 0.5 }}
-                />
-              </div>
-              <p className="mt-2 text-xs font-semibold text-neutral-400">{progress}%</p>
+                <div className="mt-5 h-2.5 w-full rounded-full bg-neutral-100 overflow-hidden">
+                  <motion.div
+                    className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-600"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ ease: 'easeOut', duration: 0.5 }}
+                  />
+                </div>
+                <p className="mt-2 text-xs font-semibold text-neutral-400">{progress}%</p>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
       {/* Header */}
       <div className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 relative overflow-hidden">
