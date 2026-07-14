@@ -183,5 +183,11 @@
     "subtitle": "Примајте обавештења о некретнинама и тржишне увиде на ваш email.",
     "placeholder": "Унесите ваш email",
     "button": "Претплатите Се"
+  },
+  "hotelsTeaser": {
+    "badge": "New",
+    "title": "Hotels & rooms for your next stay",
+    "subtitle": "Book direct with hosts across the Balkans — no booking fees.",
+    "exploreAll": "Explore all stays"
   }
 }

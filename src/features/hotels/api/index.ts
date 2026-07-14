@@ -13,3 +13,8 @@ export {
   getHotelCodes,
   revokeHotelCode,
 } from './hotelsApi';
+export {
+  getHotelFavorites,
+  toggleHotelFavorite,
+  checkHotelFavorite,
+} from './hotelFavoritesApi';

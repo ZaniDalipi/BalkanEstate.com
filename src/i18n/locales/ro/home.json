@@ -183,5 +183,11 @@
     "subtitle": "Primește alerte despre proprietăți și informații de piață pe email.",
     "placeholder": "Introdu adresa ta de email",
     "button": "Abonează-te"
+  },
+  "hotelsTeaser": {
+    "badge": "New",
+    "title": "Hotels & rooms for your next stay",
+    "subtitle": "Book direct with hosts across the Balkans — no booking fees.",
+    "exploreAll": "Explore all stays"
   }
 }

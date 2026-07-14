@@ -183,5 +183,11 @@
     "subtitle": "Λάβετε ειδοποιήσεις ακινήτων και γνώσεις αγοράς στο email σας.",
     "placeholder": "Εισάγετε το email σας",
     "button": "Εγγραφή"
+  },
+  "hotelsTeaser": {
+    "badge": "New",
+    "title": "Hotels & rooms for your next stay",
+    "subtitle": "Book direct with hosts across the Balkans — no booking fees.",
+    "exploreAll": "Explore all stays"
   }
 }

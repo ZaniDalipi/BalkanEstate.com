@@ -37,7 +37,10 @@
     "sortBy": "Sort by",
     "createdSuccessTitle": "Listing published",
     "createdSuccessMessage": "Your property is now live and travellers can find it.",
-    "myProperties": "My properties"
+    "myProperties": "My properties",
+    "savedTab": "Saved",
+    "savedEmptyTitle": "No saved properties yet",
+    "savedEmptySubtitle": "Tap the heart on any listing to save it here for later."
   },
   "sort": {
     "newest": "Newest",
@@ -53,7 +56,11 @@
     "viewDetails": "View details",
     "roomsCount": "{{count}} rooms",
     "roomsCount_one": "{{count}} room",
-    "sleepsCount": "Sleeps {{count}}"
+    "sleepsCount": "Sleeps {{count}}",
+    "save": "Save",
+    "unsave": "Remove from saved",
+    "savedToast": "Saved to your favourites",
+    "unsavedToast": "Removed from favourites"
   },
   "detail": {
     "notFound": "This property could not be found.",
@@ -81,7 +88,12 @@
     "minNightsShort": "{{count}} night minimum",
     "minNightsShort_one": "{{count}} night minimum",
     "directBooking": "Direct booking — no fees",
-    "showAllPhotos": "Show all {{count}} photos"
+    "showAllPhotos": "Show all {{count}} photos",
+    "save": "Save",
+    "saved": "Saved",
+    "share": "Share",
+    "linkCopied": "Link copied to clipboard",
+    "shareTitle": "Check out {{name}} on BalkanEstate"
   },
   "propertyTypes": {
     "hotel": "Hotel",
@@ -276,7 +288,11 @@
     "inactive": "Hidden",
     "view": "View",
     "roomsLine": "{{count}} room types",
-    "backToManage": "Back to my properties"
+    "backToManage": "Back to my properties",
+    "viewsCount": "{{count}} views",
+    "viewsCount_one": "{{count}} view",
+    "completeness": "{{percent}}% complete",
+    "improveListing": "Improve listing"
   },
   "codes": {
     "title": "Listing access codes",

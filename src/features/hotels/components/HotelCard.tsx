@@ -3,12 +3,15 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import type { Hotel } from '@/src/shared/types/hotel.types';
 import { CURRENCY_SYMBOLS } from '@/src/shared/types/hotel.types';
-import { MapPinIcon, StarIconSolid, UsersIcon, CheckBadgeIcon, EyeIcon, HomeIcon } from '@/constants';
+import { MapPinIcon, StarIconSolid, UsersIcon, CheckBadgeIcon, EyeIcon, HomeIcon, HeartIcon } from '@/constants';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 
 interface HotelCardProps {
   hotel: Hotel;
   onClick: (hotel: Hotel) => void;
+  /** Shows the save/heart toggle when provided. */
+  isSaved?: boolean;
+  onToggleSave?: (hotel: Hotel) => void;
 }
 
 const PROPERTY_TYPE_GRADIENTS: Record<string, string> = {
@@ -22,7 +25,7 @@ const PROPERTY_TYPE_GRADIENTS: Record<string, string> = {
   private_room: 'from-violet-500 to-indigo-600',
 };
 
-const HotelCard: React.FC<HotelCardProps> = ({ hotel, onClick }) => {
+const HotelCard: React.FC<HotelCardProps> = ({ hotel, onClick, isSaved, onToggleSave }) => {
   const { t } = useTranslation('hotels');
 
   const gradient = PROPERTY_TYPE_GRADIENTS[hotel.propertyType] || PROPERTY_TYPE_GRADIENTS.hotel;
@@ -67,12 +70,27 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, onClick }) => {
           {t(`propertyTypes.${hotel.propertyType}`)}
         </span>
 
-        {hotel.isVerified && (
-          <span className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500 text-white text-xs font-semibold shadow-sm">
-            <CheckBadgeIcon className="w-3.5 h-3.5" />
-            {t('card.verified')}
-          </span>
-        )}
+        <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
+          {onToggleSave && (
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleSave(hotel); }}
+              className={`w-8 h-8 rounded-full flex items-center justify-center shadow-sm backdrop-blur-sm transition-colors ${
+                isSaved ? 'bg-red-500 text-white' : 'bg-white/90 text-neutral-600 hover:bg-white hover:text-red-500'
+              }`}
+              aria-label={isSaved ? t('card.unsave') : t('card.save')}
+              aria-pressed={isSaved}
+            >
+              <HeartIcon className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
+            </button>
+          )}
+          {hotel.isVerified && (
+            <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500 text-white text-xs font-semibold shadow-sm">
+              <CheckBadgeIcon className="w-3.5 h-3.5" />
+              {t('card.verified')}
+            </span>
+          )}
+        </div>
 
         {hotel.starRating ? (
           <span className="absolute bottom-3 left-3 flex items-center gap-0.5 px-2 py-1 rounded-lg bg-white/90 backdrop-blur-sm text-amber-500 text-xs font-bold shadow-sm">

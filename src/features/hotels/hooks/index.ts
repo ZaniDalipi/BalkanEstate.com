@@ -11,3 +11,4 @@ export {
   useGenerateHotelCodes,
   useRevokeHotelCode,
 } from './useHotels';
+export { useHotelFavorites, useToggleHotelFavorite } from './useHotelFavorites';

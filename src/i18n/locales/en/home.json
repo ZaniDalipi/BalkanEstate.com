@@ -183,5 +183,11 @@
     "subtitle": "Get the latest property alerts and market insights delivered to your inbox.",
     "placeholder": "Enter your email",
     "button": "Subscribe"
+  },
+  "hotelsTeaser": {
+    "badge": "New",
+    "title": "Hotels & rooms for your next stay",
+    "subtitle": "Book direct with hosts across the Balkans — no booking fees.",
+    "exploreAll": "Explore all stays"
   }
 }

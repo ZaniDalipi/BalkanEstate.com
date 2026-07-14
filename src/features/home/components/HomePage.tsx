@@ -25,6 +25,7 @@ const RecentlyViewedSection = lazy(() => import('./RecentlyViewedSection'));
 const TopAgentsSection = lazy(() => import('./TopAgentsSection'));
 const TopAgenciesSection = lazy(() => import('./TopAgenciesSection'));
 const CategoriesSection = lazy(() => import('./CategoriesSection'));
+const HotelsTeaserSection = lazy(() => import('./HotelsTeaserSection'));
 const PopularCitiesSection = lazy(() => import('./PopularCitiesSection'));
 const HowItWorksSection = lazy(() => import('./HowItWorksSection'));
 const CTASection = lazy(() => import('./CTASection'));
@@ -273,6 +274,10 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
       <div className="content-below-fold">
         <Suspense fallback={<SectionFallback />}>
           <CategoriesSection onCategoryClick={handleCategoryClick} />
+        </Suspense>
+
+        <Suspense fallback={<SectionFallback />}>
+          <HotelsTeaserSection onNavigate={handleNavigate} />
         </Suspense>
       </div>
 

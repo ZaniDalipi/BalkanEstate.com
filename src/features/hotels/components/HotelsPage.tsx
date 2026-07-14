@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
-import { useHotels } from '../hooks';
+import { useHotels, useHotelFavorites, useToggleHotelFavorite } from '../hooks';
 import HotelCard from './HotelCard';
 import HotelDetailPage from './HotelDetailPage';
 import CreateHotelListingForm from './CreateHotelListingForm';
@@ -18,7 +18,7 @@ import {
 } from '@/src/shared/types/hotel.types';
 import {
   SearchIcon, PlusIcon, HomeIcon, UsersIcon, MapPinIcon, CheckBadgeIcon,
-  XMarkIcon, CheckIcon,
+  XMarkIcon, CheckIcon, HeartIcon,
 } from '@/constants';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
@@ -96,6 +96,23 @@ const HotelsPage: React.FC = () => {
   }), [search, propertyType, guests, country, city, minPrice, maxPrice, amenities, sort]);
 
   const { hotels, total, isLoading, error, refetch } = useHotels(filters);
+
+  // --- Saved (favourited) hotels ---
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
+  const { hotels: favoriteHotels, favoritedIds, isLoading: favoritesLoading } = useHotelFavorites(state.isAuthenticated);
+  const { toggle: toggleFavorite } = useToggleHotelFavorite();
+
+  const handleToggleSave = useCallback((hotel: Hotel) => {
+    if (!state.isAuthenticated) {
+      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
+      return;
+    }
+    toggleFavorite(hotel);
+  }, [state.isAuthenticated, dispatch, toggleFavorite]);
+
+  const displayedHotels = showSavedOnly ? favoriteHotels : hotels;
+  const displayedTotal = showSavedOnly ? favoriteHotels.length : total;
+  const displayedLoading = showSavedOnly ? favoritesLoading : isLoading;
 
   const activeFilterCount = useMemo(() => {
     let n = 0;
@@ -359,6 +376,25 @@ const HotelsPage: React.FC = () => {
             )}
           </button>
 
+          {state.isAuthenticated && (
+            <button
+              onClick={() => setShowSavedOnly((s) => !s)}
+              className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                showSavedOnly ? 'bg-red-500 text-white border-red-500' : 'bg-white text-neutral-700 border-neutral-300 hover:border-red-300'
+              }`}
+            >
+              <HeartIcon className={`w-4 h-4 ${showSavedOnly ? 'fill-current' : ''}`} />
+              {t('page.savedTab')}
+              {favoriteHotels.length > 0 && (
+                <span className={`ml-0.5 min-w-5 h-5 px-1 inline-flex items-center justify-center rounded-full text-xs font-bold ${
+                  showSavedOnly ? 'bg-white text-red-500' : 'bg-neutral-100 text-neutral-600'
+                }`}>
+                  {favoriteHotels.length}
+                </span>
+              )}
+            </button>
+          )}
+
           <div className="w-px h-6 bg-neutral-200 shrink-0" />
 
           <button
@@ -522,11 +558,11 @@ const HotelsPage: React.FC = () => {
           </div>
         )}
 
-        {!isLoading && !error && (
-          <p className="text-sm text-neutral-500 mb-4">{t('page.resultsCount', { count: total })}</p>
+        {!displayedLoading && !error && (
+          <p className="text-sm text-neutral-500 mb-4">{t('page.resultsCount', { count: displayedTotal })}</p>
         )}
 
-        {isLoading ? (
+        {displayedLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="rounded-2xl border border-neutral-200 overflow-hidden">
@@ -539,29 +575,45 @@ const HotelsPage: React.FC = () => {
               </div>
             ))}
           </div>
-        ) : error ? (
+        ) : !showSavedOnly && error ? (
           <div className="text-center py-16">
             <p className="text-neutral-600 mb-4">{t('page.loadError')}</p>
             <button onClick={() => refetch()} className="px-5 py-2.5 rounded-xl bg-primary text-white font-medium">
               {t('page.retry')}
             </button>
           </div>
-        ) : hotels.length === 0 ? (
+        ) : displayedHotels.length === 0 ? (
           <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-20">
             <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-indigo-100 to-cyan-100 flex items-center justify-center">
-              <HomeIcon className="w-10 h-10 text-indigo-400" />
-            </div>
-            <p className="text-neutral-700 mb-1 font-semibold text-lg">{t('page.emptyTitle')}</p>
-            <p className="text-neutral-400 text-sm mb-6">{t('page.emptySubtitle')}</p>
-            <div className="flex items-center justify-center gap-3">
-              {activeFilterCount > 0 && (
-                <button onClick={clearAllFilters} className="px-5 py-2.5 rounded-xl border border-neutral-300 text-neutral-700 font-medium hover:bg-neutral-100">
-                  {t('page.clearFilters')}
-                </button>
+              {showSavedOnly ? (
+                <HeartIcon className="w-10 h-10 text-indigo-400" />
+              ) : (
+                <HomeIcon className="w-10 h-10 text-indigo-400" />
               )}
-              <button onClick={openCreate} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-medium">
-                <PlusIcon className="w-4 h-4" /> {t('page.listYourProperty')}
-              </button>
+            </div>
+            <p className="text-neutral-700 mb-1 font-semibold text-lg">
+              {showSavedOnly ? t('page.savedEmptyTitle') : t('page.emptyTitle')}
+            </p>
+            <p className="text-neutral-400 text-sm mb-6">
+              {showSavedOnly ? t('page.savedEmptySubtitle') : t('page.emptySubtitle')}
+            </p>
+            <div className="flex items-center justify-center gap-3">
+              {showSavedOnly ? (
+                <button onClick={() => setShowSavedOnly(false)} className="px-5 py-2.5 rounded-xl border border-neutral-300 text-neutral-700 font-medium hover:bg-neutral-100">
+                  {t('page.allTypes')}
+                </button>
+              ) : (
+                <>
+                  {activeFilterCount > 0 && (
+                    <button onClick={clearAllFilters} className="px-5 py-2.5 rounded-xl border border-neutral-300 text-neutral-700 font-medium hover:bg-neutral-100">
+                      {t('page.clearFilters')}
+                    </button>
+                  )}
+                  <button onClick={openCreate} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-medium">
+                    <PlusIcon className="w-4 h-4" /> {t('page.listYourProperty')}
+                  </button>
+                </>
+              )}
             </div>
           </motion.div>
         ) : (
@@ -571,9 +623,14 @@ const HotelsPage: React.FC = () => {
             animate="visible"
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
           >
-            {hotels.map((hotel) => (
+            {displayedHotels.map((hotel) => (
               <motion.div key={hotel.id} variants={itemVariants}>
-                <HotelCard hotel={hotel} onClick={openDetail} />
+                <HotelCard
+                  hotel={hotel}
+                  onClick={openDetail}
+                  isSaved={favoritedIds.has(hotel.id)}
+                  onToggleSave={handleToggleSave}
+                />
               </motion.div>
             ))}
           </motion.div>

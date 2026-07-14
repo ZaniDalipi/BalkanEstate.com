@@ -183,5 +183,11 @@
     "subtitle": "Merrni njoftime pronash dhe njohuri tregu në emailin tuaj.",
     "placeholder": "Shkruani emailin tuaj",
     "button": "Abonohu"
+  },
+  "hotelsTeaser": {
+    "badge": "New",
+    "title": "Hotels & rooms for your next stay",
+    "subtitle": "Book direct with hosts across the Balkans — no booking fees.",
+    "exploreAll": "Explore all stays"
   }
 }

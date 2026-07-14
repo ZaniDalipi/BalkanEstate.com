@@ -4,6 +4,7 @@ import Hotel from '../models/Hotel';
 import { IUser } from '../models/User';
 import { apiLogger } from '../utils/logger';
 import { encodeId, resolveId } from '../utils/idObfuscation';
+import { getParam } from '../utils/validateParams';
 
 const HOTEL_CARD_FIELDS =
   'name slug propertyType starRating city country coverImageUrl images amenities rooms priceFrom currency isVerified views';
@@ -95,7 +96,8 @@ export const checkHotelFavorite = async (req: Request, res: Response): Promise<v
       return;
     }
 
-    const hotelId = resolveId(req.params.hotelId) || req.params.hotelId;
+    const rawHotelId = getParam(req, 'hotelId') || '';
+    const hotelId = resolveId(rawHotelId) || rawHotelId;
     const userId = String((req.user as IUser)._id);
     const existing = await HotelFavorite.exists({ userId, hotelId });
 

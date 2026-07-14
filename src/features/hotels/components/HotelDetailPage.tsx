@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useHotel } from '../hooks';
-import { CURRENCY_SYMBOLS } from '@/src/shared/types/hotel.types';
+import { useHotel, useHotelFavorites, useToggleHotelFavorite } from '../hooks';
+import { CURRENCY_SYMBOLS, type Hotel } from '@/src/shared/types/hotel.types';
 import {
   MapPinIcon, StarIconSolid, UsersIcon, PhoneIcon, EnvelopeIcon, GlobeAltIcon,
-  CheckIcon, CheckBadgeIcon, HomeIcon, PhotoIcon, XMarkIcon,
+  CheckIcon, CheckBadgeIcon, HomeIcon, PhotoIcon, XMarkIcon, HeartIcon, ShareIcon,
 } from '@/constants';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { useAppContext } from '@/context/AppContext';
 
 interface HotelDetailPageProps {
   hotelId: string;
@@ -16,8 +17,36 @@ interface HotelDetailPageProps {
 
 const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) => {
   const { t } = useTranslation('hotels');
+  const { state, dispatch } = useAppContext();
   const { hotel, isLoading, error } = useHotel(hotelId);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const { favoritedIds } = useHotelFavorites(state.isAuthenticated);
+  const { toggle: toggleFavorite } = useToggleHotelFavorite();
+
+  const handleToggleSave = useCallback(() => {
+    if (!hotel) return;
+    if (!state.isAuthenticated) {
+      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
+      return;
+    }
+    toggleFavorite(hotel);
+  }, [hotel, state.isAuthenticated, dispatch, toggleFavorite]);
+
+  const handleShare = useCallback(async () => {
+    if (!hotel) return;
+    const url = window.location.href;
+    const shareData = { title: t('detail.shareTitle', { name: hotel.name }), url };
+    if (navigator.share) {
+      try { await navigator.share(shareData); return; } catch { /* user cancelled or unsupported — fall through */ }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      dispatch({
+        type: 'SHOW_ALERT',
+        payload: { type: 'success', title: t('detail.share'), message: t('detail.linkCopied') },
+      });
+    } catch { /* clipboard unavailable — silently ignore */ }
+  }, [hotel, t, dispatch]);
 
   if (isLoading) {
     return (
@@ -284,11 +313,38 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
             <div className="lg:sticky lg:top-6 rounded-2xl overflow-hidden shadow-lg shadow-black/5 border border-neutral-200 bg-white">
               {/* Price header */}
               <div className="p-6 border-b border-neutral-100">
-                <p className="text-sm text-neutral-400">{t('card.from')}</p>
-                <p className="text-4xl font-extrabold text-neutral-900">
-                  {currencySymbol}{hotel.priceFrom ?? '—'}
-                  <span className="text-sm font-normal text-neutral-400"> / {t('card.night')}</span>
-                </p>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm text-neutral-400">{t('card.from')}</p>
+                    <p className="text-4xl font-extrabold text-neutral-900">
+                      {currencySymbol}{hotel.priceFrom ?? '—'}
+                      <span className="text-sm font-normal text-neutral-400"> / {t('card.night')}</span>
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={handleToggleSave}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center border transition-colors ${
+                        favoritedIds.has(hotel.id)
+                          ? 'bg-red-500 border-red-500 text-white'
+                          : 'bg-white border-neutral-200 text-neutral-500 hover:text-red-500 hover:border-red-200'
+                      }`}
+                      aria-label={favoritedIds.has(hotel.id) ? t('detail.saved') : t('detail.save')}
+                      aria-pressed={favoritedIds.has(hotel.id)}
+                    >
+                      <HeartIcon className={`w-4.5 h-4.5 ${favoritedIds.has(hotel.id) ? 'fill-current' : ''}`} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleShare}
+                      className="w-10 h-10 rounded-full flex items-center justify-center border border-neutral-200 text-neutral-500 hover:text-primary hover:border-primary/30 transition-colors"
+                      aria-label={t('detail.share')}
+                    >
+                      <ShareIcon className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
                 {hotel.minNights ? (
                   <p className="mt-1 text-xs text-neutral-400">{t('detail.minNightsShort', { count: hotel.minNights })}</p>
                 ) : null}

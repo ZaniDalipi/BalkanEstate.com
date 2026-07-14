@@ -8,6 +8,21 @@ import { CURRENCY_SYMBOLS } from '@/src/shared/types/hotel.types';
 import { PlusIcon, HomeIcon, PencilIcon, TrashIcon, EyeIcon, MapPinIcon } from '@/constants';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 
+/**
+ * Rough listing-quality score (0-100) to nudge hosts toward a fuller
+ * profile — more photos/amenities/description tends to mean more clicks.
+ */
+const computeCompleteness = (hotel: Hotel): number => {
+  let score = 0;
+  if (hotel.coverImageUrl) score += 20;
+  if ((hotel.images?.length || 0) >= 3) score += 20;
+  if ((hotel.description?.length || 0) >= 80) score += 20;
+  if ((hotel.amenities?.length || 0) >= 3) score += 15;
+  if (hotel.rooms?.length && hotel.rooms.every((r) => (r.description?.length || 0) > 0)) score += 15;
+  if ((hotel.languagesSpoken?.length || 0) > 0 || (hotel.houseRules?.length || 0) > 0) score += 10;
+  return Math.min(100, score);
+};
+
 interface ManageHotelsPageProps {
   onBack: () => void;
   onCreate: () => void;
@@ -98,6 +113,7 @@ const ManageHotelsPage: React.FC<ManageHotelsPageProps> = ({ onBack, onCreate, o
             {hotels.map((hotel, i) => {
               const currencySymbol = CURRENCY_SYMBOLS[hotel.currency] || '€';
               const cover = hotel.coverImageUrl || hotel.images?.[0]?.url;
+              const completeness = computeCompleteness(hotel);
               return (
                 <motion.div
                   key={hotel.id}
@@ -129,7 +145,34 @@ const ManageHotelsPage: React.FC<ManageHotelsPageProps> = ({ onBack, onCreate, o
                     <div className="mt-2 flex items-center gap-3 text-xs text-neutral-500">
                       <span>{t('manage.roomsLine', { count: hotel.rooms?.length || 0 })}</span>
                       <span className="font-semibold text-neutral-700">{currencySymbol}{hotel.priceFrom ?? '—'} / {t('card.night')}</span>
+                      <span className="flex items-center gap-1">
+                        <EyeIcon className="w-3.5 h-3.5" /> {t('manage.viewsCount', { count: hotel.views || 0 })}
+                      </span>
                     </div>
+
+                    {/* Listing-quality nudge — encourages hosts back into the edit flow */}
+                    {completeness < 100 && (
+                      <button
+                        type="button"
+                        onClick={() => onEdit(hotel)}
+                        className="mt-3 w-full max-w-xs text-left group/nudge"
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[11px] font-medium text-neutral-500 group-hover/nudge:text-primary transition-colors">
+                            {t('manage.completeness', { percent: completeness })}
+                          </span>
+                          <span className="text-[11px] font-semibold text-primary opacity-0 group-hover/nudge:opacity-100 transition-opacity">
+                            {t('manage.improveListing')} →
+                          </span>
+                        </div>
+                        <div className="h-1.5 w-full rounded-full bg-neutral-100 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-amber-400 to-primary transition-all"
+                            style={{ width: `${completeness}%` }}
+                          />
+                        </div>
+                      </button>
+                    )}
                   </div>
 
                   {/* Actions */}
