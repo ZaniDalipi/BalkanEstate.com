@@ -922,8 +922,8 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
           </div>
 
           {showMap && (
-            <div className="h-64 rounded-xl overflow-hidden border border-neutral-200">
-              <Suspense fallback={<div className="h-full flex items-center justify-center text-sm text-neutral-400">{t('form.loadingMap')}</div>}>
+            <div className="rounded-xl overflow-visible">
+              <Suspense fallback={<div className="h-96 flex items-center justify-center text-sm text-neutral-400 border border-neutral-200 rounded-lg">{t('form.loadingMap')}</div>}>
                 <MapLocationPicker
                   lat={lat || 41.9981}
                   lng={lng || 21.4254}
@@ -934,6 +934,7 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                   onLocationChange={(newLat: number, newLng: number) => { setLat(newLat); setLng(newLng); }}
                   onAddressChange={(a: string) => setAddress(a)}
                   autoDetectLocation={false}
+                  mapHeightClassName="h-[480px]"
                 />
               </Suspense>
             </div>

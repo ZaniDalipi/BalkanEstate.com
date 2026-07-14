@@ -29,9 +29,11 @@ interface MapLocationPickerProps {
   onLocationChange: (lat: number, lng: number) => void;
   onAddressChange?: (address: string) => void;
   autoDetectLocation?: boolean;
+  /** Tailwind height class for the map canvas itself. Defaults to h-96. */
+  mapHeightClassName?: string;
 }
 
-const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address, zoom = 15, country, city, cityLat, cityLng, onLocationChange, onAddressChange, autoDetectLocation }) => {
+const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address, zoom = 15, country, city, cityLat, cityLng, onLocationChange, onAddressChange, autoDetectLocation, mapHeightClassName = 'h-96' }) => {
   const { t } = useTranslation(['search']);
   const { dispatch } = useAppContext();
   const mapRef = useRef<L.Map | null>(null);
@@ -624,7 +626,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
       <div className="relative">
         <div
           ref={mapContainerRef}
-          className="w-full h-96 rounded-lg border-2 border-neutral-300 shadow-sm"
+          className={`w-full ${mapHeightClassName} rounded-lg border-2 border-neutral-300 shadow-sm`}
           style={{ zIndex: 0 }}
         />
 
