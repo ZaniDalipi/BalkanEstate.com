@@ -42,6 +42,10 @@
   "createListing": {
     "title": "Create a New Listing",
     "editTitle": "Edit Your Listing",
+    "missingFields": {
+      "title": "This listing is missing some details",
+      "description": "Please fill in the following before saving: {{fields}}"
+    },
     "aiPowered": "AI-Powered Listing Creator",
     "aiDescription": "Upload photos of your property to automatically generate a detailed listing, or fill out the form manually. You can review and edit all details before publishing.",
     "valueCalculator": "Value Calculator",
@@ -392,6 +396,8 @@
     "forRent": "For Rent",
     "forSale": "For Sale",
     "noMapLocation": "No Map Location",
+    "incomplete": "Incomplete - Edit to fix",
+    "incompleteHint": "Open Edit to fill in the missing details.",
     "rentedUntil": "Rented until {{date}}",
     "canRenewIn": "Can renew in {{hours}}h {{minutes}}m",
     "forSaleCount": "For Sale ({{count}})",
