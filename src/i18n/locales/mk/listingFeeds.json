@@ -171,5 +171,7 @@
   "incompleteListingsTitle": "Some listings need attention",
   "incompleteListingsBody": "{{count}} of your listings from this source are missing an address, city, or price. Editing them will help buyers find your properties.",
   "incompleteListingsBodyGeneric": "Some of your newly imported listings may be missing an address, city, or price. Editing them helps buyers find your properties.",
-  "incompleteListingsReview": "Review my listings"
+  "incompleteListingsReview": "Review my listings",
+  "fieldMapMissingTitle": "{{count}} recommended field(s) weren't found in your data",
+  "fieldMapMissingBody": "These will be left blank on imported listings. Map them below if your file uses a different column name, or add them manually after import:"
 }

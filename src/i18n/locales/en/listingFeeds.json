@@ -171,5 +171,7 @@
     "jsonLdDesc": "Pages with embedded schema.org RealEstateListing JSON-LD.",
     "customApi": "Custom API",
     "customApiDesc": "REST endpoint with optional bearer / API-key auth and pagination."
-  }
+  },
+  "fieldMapMissingTitle": "{{count}} recommended field(s) weren't found in your data",
+  "fieldMapMissingBody": "These will be left blank on imported listings. Map them below if your file uses a different column name, or add them manually after import:"
 }

@@ -122,6 +122,22 @@ const SamplePreview: React.FC<{ sample?: Record<string, unknown>; fieldMap: Reco
   );
 };
 
+// ── Recommended field coverage ───────────────────────────────────────────────
+
+/** Canonical property fields worth calling out when a source doesn't supply them. */
+const RECOMMENDED_FIELDS: { key: string; label: string }[] = [
+  { key: 'title', label: 'Title' },
+  { key: 'price', label: 'Price' },
+  { key: 'city', label: 'City' },
+  { key: 'address', label: 'Address' },
+  { key: 'description', label: 'Description' },
+  { key: 'imageUrl', label: 'Photo' },
+  { key: 'propertyType', label: 'Property type' },
+  { key: 'beds', label: 'Bedrooms' },
+  { key: 'baths', label: 'Bathrooms' },
+  { key: 'sqft', label: 'Area' },
+];
+
 // ── Auth header rows component ───────────────────────────────────────────────
 
 interface HeaderRow { key: string; value: string }
@@ -382,7 +398,13 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
               <button
                 key={opt.id}
                 type="button"
-                onClick={() => setMethod(opt.id)}
+                onClick={() => {
+                  setMethod(opt.id);
+                  // Switching methods invalidates whatever error was showing for the
+                  // previous method (e.g. a JSON parse error shouldn't linger once the
+                  // user moves on to uploading a file).
+                  setError(null);
+                }}
                 className={`flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-colors ${
                   method === opt.id
                     ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
@@ -686,6 +708,27 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
               className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/30"
             />
           </label>
+
+          {/* Missing recommended fields — left blank rather than blocking the import */}
+          {editingFieldMap && (() => {
+            const missing = RECOMMENDED_FIELDS.filter((f) => !(f.key in editingFieldMap));
+            if (missing.length === 0) return null;
+            return (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
+                <p className="font-semibold mb-1">
+                  {t('listingFeeds:fieldMapMissingTitle', { count: missing.length })}
+                </p>
+                <p className="text-amber-700 mb-1.5">{t('listingFeeds:fieldMapMissingBody')}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {missing.map((f) => (
+                    <span key={f.key} className="px-2 py-0.5 bg-amber-100 border border-amber-200 rounded-full text-xs font-medium">
+                      {f.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Field Mapping Editor */}
           {editingFieldMap && (
