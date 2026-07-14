@@ -34,6 +34,26 @@ const transformLean = (doc: any) => {
 };
 
 /**
+ * Sanitize a free-text "custom amenity" list: trim, drop empties/duplicates,
+ * cap length per entry and total count.
+ */
+const sanitizeCustomAmenities = (raw: any, maxCount: number, maxLen = 40): string[] => {
+  if (!Array.isArray(raw)) return [];
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const entry of raw) {
+    if (typeof entry !== 'string') continue;
+    const trimmed = entry.trim().slice(0, maxLen);
+    const key = trimmed.toLowerCase();
+    if (!trimmed || seen.has(key)) continue;
+    seen.add(key);
+    result.push(trimmed);
+    if (result.length >= maxCount) break;
+  }
+  return result;
+};
+
+/**
  * Sanitize a single room from client input. Returns null when the room is
  * structurally invalid so callers can reject the whole request.
  */
@@ -93,6 +113,7 @@ const sanitizeRoom = (raw: any): IRoom | { error: string } => {
     amenities: Array.isArray(raw.amenities)
       ? raw.amenities.filter((a: any) => HOTEL_AMENITIES.includes(a)).slice(0, 30)
       : [],
+    customAmenities: sanitizeCustomAmenities(raw.customAmenities, 10),
   };
   return room;
 };
@@ -318,6 +339,7 @@ export const createHotel = async (req: Request, res: Response): Promise<void> =>
       amenities: Array.isArray(req.body.amenities)
         ? req.body.amenities.filter((a: any) => HOTEL_AMENITIES.includes(a)).slice(0, 40)
         : [],
+      customAmenities: sanitizeCustomAmenities(req.body.customAmenities, 15),
       rooms: sanitizedRooms,
       currency: SUPPORTED_CURRENCIES.includes(req.body.currency) ? req.body.currency : 'EUR',
       checkInTime: req.body.checkInTime,
@@ -402,7 +424,7 @@ export const updateHotel = async (req: Request, res: Response): Promise<void> =>
     const allowedFields = [
       'name', 'description', 'propertyType', 'starRating', 'contactPhone', 'contactEmail',
       'website', 'whatsapp', 'address', 'city', 'country', 'latitude', 'longitude',
-      'amenities', 'currency', 'checkInTime', 'checkOutTime', 'minNights', 'maxNights',
+      'amenities', 'customAmenities', 'currency', 'checkInTime', 'checkOutTime', 'minNights', 'maxNights',
       'cancellationPolicy', 'houseRules', 'petsAllowed', 'smokingAllowed', 'languagesSpoken',
       'isActive',
     ];
@@ -428,6 +450,9 @@ export const updateHotel = async (req: Request, res: Response): Promise<void> =>
 
     if (updates.amenities && Array.isArray(updates.amenities)) {
       updates.amenities = updates.amenities.filter((a: any) => HOTEL_AMENITIES.includes(a)).slice(0, 40);
+    }
+    if (updates.customAmenities !== undefined) {
+      updates.customAmenities = sanitizeCustomAmenities(updates.customAmenities, 15);
     }
     if (updates.houseRules && Array.isArray(updates.houseRules)) {
       updates.houseRules = updates.houseRules.filter((r: any) => typeof r === 'string').slice(0, 20);

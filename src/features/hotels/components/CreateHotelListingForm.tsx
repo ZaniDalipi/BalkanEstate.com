@@ -63,6 +63,7 @@ const mapHotelToDraft = (h: Hotel): Partial<HotelDraft> => ({
   whatsapp: h.whatsapp ?? '',
   website: h.website ?? '',
   amenities: h.amenities ?? [],
+  customAmenities: h.customAmenities ?? [],
   rooms: (h.rooms ?? []).map((r) => ({
     name: r.name,
     roomType: r.roomType,
@@ -78,6 +79,7 @@ const mapHotelToDraft = (h: Hotel): Partial<HotelDraft> => ({
     currency: r.currency,
     quantity: r.quantity,
     amenities: r.amenities ?? [],
+    customAmenities: r.customAmenities ?? [],
   })) as CreateRoomData[],
   checkInTime: h.checkInTime ?? '14:00',
   checkOutTime: h.checkOutTime ?? '11:00',
@@ -144,6 +146,7 @@ const emptyRoom = (): RoomFormData => ({
   currency: 'EUR',
   quantity: 1,
   amenities: [],
+  customAmenities: [],
 });
 
 const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack, onSuccess, editHotel }) => {
@@ -210,10 +213,13 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
 
   // --- Amenities ---
   const [amenities, setAmenities] = useState<HotelAmenity[]>(draft.amenities ?? []);
+  const [customAmenities, setCustomAmenities] = useState<string[]>(draft.customAmenities ?? []);
+  const [customAmenityInput, setCustomAmenityInput] = useState('');
 
   // --- Rooms ---
   // Normalise rooms restored from an older draft/hotel that predates bed
-  // configuration — ensure every room has at least one bed option.
+  // configuration / custom amenities — ensure every room has at least one
+  // bed option and a customAmenities array to render safely.
   const [rooms, setRooms] = useState<RoomFormData[]>(() => {
     const source = draft.rooms && draft.rooms.length > 0 ? (draft.rooms as RoomFormData[]) : [emptyRoom()];
     return source.map((r) => ({
@@ -221,8 +227,11 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
       bedConfiguration: r.bedConfiguration && r.bedConfiguration.length > 0
         ? r.bedConfiguration
         : [{ bedType: 'double' as BedType, quantity: (typeof r.beds === 'number' && r.beds > 0) ? r.beds : 1 }],
+      customAmenities: r.customAmenities ?? [],
     }));
   });
+  // Pending "add custom amenity" text per room, keyed by room index.
+  const [roomCustomAmenityInput, setRoomCustomAmenityInput] = useState<Record<number, string>>({});
 
   // --- Policies ---
   const [checkInTime, setCheckInTime] = useState(draft.checkInTime ?? '14:00');
@@ -288,14 +297,14 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
         name, propertyType, starRating, description, currency,
         country: selectedCountry, city: selectedCity, address, lat, lng,
         contactPhone, contactEmail, whatsapp, website,
-        amenities, rooms: rooms as unknown as CreateRoomData[], checkInTime, checkOutTime, minNights, maxNights,
+        amenities, customAmenities, rooms: rooms as unknown as CreateRoomData[], checkInTime, checkOutTime, minNights, maxNights,
         cancellationPolicy, petsAllowed, smokingAllowed, houseRules, languagesSpoken,
       });
     }, 600);
     return () => clearTimeout(handle);
   }, [
     name, propertyType, starRating, description, currency, selectedCountry, selectedCity,
-    address, lat, lng, contactPhone, contactEmail, whatsapp, website, amenities, rooms,
+    address, lat, lng, contactPhone, contactEmail, whatsapp, website, amenities, customAmenities, rooms,
     checkInTime, checkOutTime, minNights, maxNights, cancellationPolicy, petsAllowed,
     smokingAllowed, houseRules, languagesSpoken, setDraft, isEdit,
   ]);
@@ -307,7 +316,8 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
     setCurrency('EUR'); setSelectedCountry(''); setSelectedCity(''); setAddress('');
     setAvailableCities([]); setLat(0); setLng(0); setShowMap(false);
     setContactPhone(currentUser?.phone ?? ''); setContactEmail(currentUser?.email ?? '');
-    setWhatsapp(''); setWebsite(''); setAmenities([]); setRooms([emptyRoom()]);
+    setWhatsapp(''); setWebsite(''); setAmenities([]); setCustomAmenities([]); setCustomAmenityInput('');
+    setRoomCustomAmenityInput({}); setRooms([emptyRoom()]);
     setCheckInTime('14:00'); setCheckOutTime('11:00'); setMinNights(1); setMaxNights(undefined);
     setCancellationPolicy(''); setPetsAllowed(false); setSmokingAllowed(false);
     setHouseRules([]); setLanguagesSpoken([]);
@@ -371,6 +381,19 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
     );
   }, []);
 
+  // Free-text amenities the host defines beyond the standard list (property-wide).
+  const addCustomAmenity = useCallback(() => {
+    const trimmed = customAmenityInput.trim();
+    if (!trimmed || customAmenities.length >= 15) return;
+    if (customAmenities.some((a) => a.toLowerCase() === trimmed.toLowerCase())) return;
+    setCustomAmenities((prev) => [...prev, trimmed]);
+    setCustomAmenityInput('');
+  }, [customAmenityInput, customAmenities]);
+
+  const removeCustomAmenity = useCallback((value: string) => {
+    setCustomAmenities((prev) => prev.filter((a) => a !== value));
+  }, []);
+
   // --- Rooms handlers ---
   const updateRoom = useCallback(<K extends keyof RoomFormData>(index: number, key: K, value: RoomFormData[K]) => {
     setRooms((prev) => prev.map((room, i) => (i === index ? { ...room, [key]: value } : room)));
@@ -393,6 +416,25 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
         amenities: current.includes(amenity) ? current.filter((a) => a !== amenity) : [...current, amenity],
       };
     }));
+  }, []);
+
+  // Free-text amenities the host defines for a specific room (e.g. "Rooftop access").
+  const addRoomCustomAmenity = useCallback((roomIndex: number) => {
+    const trimmed = (roomCustomAmenityInput[roomIndex] || '').trim();
+    if (!trimmed) return;
+    setRooms((prev) => prev.map((room, i) => {
+      if (i !== roomIndex) return room;
+      const current = room.customAmenities || [];
+      if (current.length >= 10 || current.some((a) => a.toLowerCase() === trimmed.toLowerCase())) return room;
+      return { ...room, customAmenities: [...current, trimmed] };
+    }));
+    setRoomCustomAmenityInput((prev) => ({ ...prev, [roomIndex]: '' }));
+  }, [roomCustomAmenityInput]);
+
+  const removeRoomCustomAmenity = useCallback((roomIndex: number, value: string) => {
+    setRooms((prev) => prev.map((room, i) => (
+      i === roomIndex ? { ...room, customAmenities: (room.customAmenities || []).filter((a) => a !== value) } : room
+    )));
   }, []);
 
   // --- Bed configuration handlers ---
@@ -592,6 +634,7 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
           currency: r.currency || currency,
           quantity: r.quantity === '' || r.quantity == null ? 1 : Number(r.quantity),
           amenities: r.amenities && r.amenities.length > 0 ? r.amenities : undefined,
+          customAmenities: r.customAmenities && r.customAmenities.length > 0 ? r.customAmenities : undefined,
         })),
         petsAllowed,
         smokingAllowed,
@@ -607,6 +650,7 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
       if (address.trim()) payload.address = address.trim();
       if (lat !== 0 && lng !== 0) { payload.latitude = lat; payload.longitude = lng; }
       if (amenities.length > 0) payload.amenities = amenities;
+      if (customAmenities.length > 0) payload.customAmenities = customAmenities;
       if (checkInTime) payload.checkInTime = checkInTime;
       if (checkOutTime) payload.checkOutTime = checkOutTime;
       if (minNights != null) payload.minNights = minNights;
@@ -650,7 +694,7 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
     }
   }, [
     submitting, name, propertyType, starRating, contactPhone, selectedCountry, selectedCity, rooms, minNights, maxNights,
-    description, contactEmail, whatsapp, website, address, lat, lng, amenities, currency, checkInTime,
+    description, contactEmail, whatsapp, website, address, lat, lng, amenities, customAmenities, currency, checkInTime,
     checkOutTime, cancellationPolicy, houseRules, languagesSpoken, petsAllowed, smokingAllowed,
     coverFile, galleryFiles, accessCode, createHotel, updateHotel, isEdit, editHotel, uploadCover, uploadPhotos, onSuccess, t, clearErrors, clearDraft, setValidationError,
   ]);
@@ -1230,6 +1274,37 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                     );
                   })}
                 </div>
+
+                {/* Custom room amenities — free text, e.g. "Rooftop access" */}
+                <div className="mt-2 flex gap-2">
+                  <input
+                    type="text"
+                    value={roomCustomAmenityInput[index] || ''}
+                    onChange={(e) => setRoomCustomAmenityInput((prev) => ({ ...prev, [index]: e.target.value }))}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addRoomCustomAmenity(index); } }}
+                    placeholder={t('form.fields.customAmenityPlaceholder')}
+                    maxLength={40}
+                    className="flex-1 px-3 py-1.5 border border-neutral-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => addRoomCustomAmenity(index)}
+                    disabled={(room.customAmenities?.length || 0) >= 10}
+                    className="px-3 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-xs font-medium disabled:opacity-40"
+                  >
+                    {t('form.add')}
+                  </button>
+                </div>
+                {room.customAmenities && room.customAmenities.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {room.customAmenities.map((a) => (
+                      <span key={a} className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs bg-amber-50 text-amber-700 border border-amber-200">
+                        {a}
+                        <button type="button" onClick={() => removeRoomCustomAmenity(index, a)} className="text-amber-400 hover:text-red-500" aria-label={t('form.remove')}>×</button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -1269,6 +1344,40 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                 </button>
               );
             })}
+          </div>
+
+          {/* Custom property amenities — free text, e.g. "Rooftop bar" */}
+          <div className="pt-3 border-t border-neutral-100">
+            <label className="block text-sm font-medium text-neutral-700 mb-1.5">{t('form.fields.customAmenities')}</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={customAmenityInput}
+                onChange={(e) => setCustomAmenityInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCustomAmenity(); } }}
+                placeholder={t('form.fields.customAmenityPlaceholder')}
+                maxLength={40}
+                className={inputClasses()}
+              />
+              <button
+                type="button"
+                onClick={addCustomAmenity}
+                disabled={customAmenities.length >= 15}
+                className="px-4 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-sm font-medium disabled:opacity-40"
+              >
+                {t('form.add')}
+              </button>
+            </div>
+            {customAmenities.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {customAmenities.map((a) => (
+                  <span key={a} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm bg-amber-50 text-amber-700 border border-amber-200">
+                    {a}
+                    <button type="button" onClick={() => removeCustomAmenity(a)} className="text-amber-400 hover:text-red-500" aria-label={t('form.remove')}>×</button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 

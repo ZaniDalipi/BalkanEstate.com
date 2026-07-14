@@ -31,8 +31,12 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, onClick, isSaved, onToggle
   const gradient = PROPERTY_TYPE_GRADIENTS[hotel.propertyType] || PROPERTY_TYPE_GRADIENTS.hotel;
   const currencySymbol = CURRENCY_SYMBOLS[hotel.currency] || '€';
   const maxGuests = hotel.rooms?.reduce((max, r) => Math.max(max, r.maxGuests || 0), 0) || 0;
-  const previewAmenities = (hotel.amenities || []).slice(0, 3);
-  const extraAmenities = Math.max(0, (hotel.amenities?.length || 0) - previewAmenities.length);
+  const allAmenityLabels = [
+    ...(hotel.amenities || []).map((a) => t(`amenities.${a}`)),
+    ...(hotel.customAmenities || []),
+  ];
+  const previewAmenities = allAmenityLabels.slice(0, 3);
+  const extraAmenities = Math.max(0, allAmenityLabels.length - previewAmenities.length);
 
   const coverSrc = hotel.coverImageUrl
     ? optimizeCloudinaryUrl(hotel.coverImageUrl, { width: 600, quality: 'auto', crop: 'fill' })
@@ -124,9 +128,9 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, onClick, isSaved, onToggle
         {/* Amenity preview */}
         {previewAmenities.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {previewAmenities.map((a) => (
-              <span key={a} className="px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 text-[11px] font-medium">
-                {t(`amenities.${a}`)}
+            {previewAmenities.map((a, i) => (
+              <span key={`${a}-${i}`} className="px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 text-[11px] font-medium">
+                {a}
               </span>
             ))}
             {extraAmenities > 0 && (

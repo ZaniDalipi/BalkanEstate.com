@@ -115,6 +115,8 @@ export interface Room {
   currency: SupportedCurrency;
   quantity: number;
   amenities?: HotelAmenity[];
+  /** Free-text amenities the host defines beyond the standard list. */
+  customAmenities?: string[];
 }
 
 export interface HotelImage {
@@ -147,6 +149,8 @@ export interface Hotel {
   coverImageUrl?: string;
   images: HotelImage[];
   amenities: HotelAmenity[];
+  /** Free-text amenities the host defines beyond the standard list. */
+  customAmenities?: string[];
   rooms: Room[];
   priceFrom?: number;
   currency: SupportedCurrency;
@@ -200,6 +204,8 @@ export interface CreateRoomData {
   currency?: SupportedCurrency;
   quantity?: number;
   amenities?: HotelAmenity[];
+  /** Free-text amenities the host defines beyond the standard list. */
+  customAmenities?: string[];
 }
 
 export type HotelCodeStatus = 'active' | 'redeemed' | 'revoked';
@@ -233,6 +239,8 @@ export interface CreateHotelData {
   latitude?: number;
   longitude?: number;
   amenities?: HotelAmenity[];
+  /** Free-text amenities the host defines beyond the standard list. */
+  customAmenities?: string[];
   rooms: CreateRoomData[];
   currency?: SupportedCurrency;
   checkInTime?: string;

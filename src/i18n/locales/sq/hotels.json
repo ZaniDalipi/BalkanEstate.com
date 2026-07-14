@@ -226,7 +226,9 @@
       "totalBeds": "{{count}} beds total",
       "totalBeds_one": "{{count}} bed total",
       "decreaseQuantity": "Decrease quantity",
-      "increaseQuantity": "Increase quantity"
+      "increaseQuantity": "Increase quantity",
+      "customAmenities": "Add your own amenity",
+      "customAmenityPlaceholder": "e.g. Rooftop bar"
     },
     "placeholders": {
       "name": "e.g. Hotel Adriatic",

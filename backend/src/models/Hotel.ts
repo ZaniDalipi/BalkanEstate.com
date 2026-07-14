@@ -109,6 +109,8 @@ export interface IRoom {
   currency: SupportedCurrency;
   quantity: number;
   amenities?: HotelAmenity[];
+  /** Free-text amenities the host defines beyond the standard list. */
+  customAmenities?: string[];
 }
 
 export interface IHotelImage {
@@ -137,6 +139,8 @@ export interface IHotel extends Document {
   coverImagePublicId?: string;
   images: IHotelImage[];
   amenities: HotelAmenity[];
+  /** Free-text amenities the host defines beyond the standard list. */
+  customAmenities?: string[];
   rooms: IRoom[];
   priceFrom?: number;
   currency: SupportedCurrency;
@@ -237,6 +241,14 @@ const RoomSchema = new Schema<IRoom>(
       type: String,
       enum: { values: HOTEL_AMENITIES, message: 'Invalid amenity: {VALUE}' },
     }],
+    customAmenities: {
+      type: [{ type: String, trim: true, maxlength: [40, 'Custom amenity cannot exceed 40 characters'] }],
+      default: [],
+      validate: {
+        validator: (arr: string[]) => arr.length <= 10,
+        message: 'A room cannot have more than 10 custom amenities',
+      },
+    },
   },
   { _id: true }
 );
@@ -343,6 +355,14 @@ const HotelSchema: Schema = new Schema(
       type: String,
       enum: { values: HOTEL_AMENITIES, message: 'Invalid amenity: {VALUE}' },
     }],
+    customAmenities: {
+      type: [{ type: String, trim: true, maxlength: [40, 'Custom amenity cannot exceed 40 characters'] }],
+      default: [],
+      validate: {
+        validator: (arr: string[]) => arr.length <= 15,
+        message: 'A property cannot have more than 15 custom amenities',
+      },
+    },
     rooms: {
       type: [RoomSchema],
       default: [],

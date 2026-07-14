@@ -30,6 +30,7 @@ export interface HotelDraft {
   whatsapp: string;
   website: string;
   amenities: HotelAmenity[];
+  customAmenities: string[];
   rooms: CreateRoomData[];
   checkInTime: string;
   checkOutTime: string;

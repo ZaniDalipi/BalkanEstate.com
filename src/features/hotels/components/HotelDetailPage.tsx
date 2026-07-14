@@ -162,7 +162,7 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
           {[
             { icon: <HomeIcon className="w-5 h-5" />, label: t('card.roomsCount', { count: hotel.rooms?.length || 0 }), color: 'bg-blue-500' },
             { icon: <UsersIcon className="w-5 h-5" />, label: t('detail.sleeps', { count: maxSleeps }), color: 'bg-emerald-500' },
-            { icon: <CheckIcon className="w-5 h-5" />, label: t('detail.amenitiesCount', { count: hotel.amenities?.length || 0 }), color: 'bg-violet-500' },
+            { icon: <CheckIcon className="w-5 h-5" />, label: t('detail.amenitiesCount', { count: (hotel.amenities?.length || 0) + (hotel.customAmenities?.length || 0) }), color: 'bg-violet-500' },
             { icon: <StarIconSolid className="w-5 h-5" />, label: hotel.starRating ? t('detail.starLabel', { count: hotel.starRating }) : t('detail.unrated'), color: 'bg-amber-500' },
           ].map((s, i) => (
             <div key={i} className="flex items-center gap-3">
@@ -240,11 +240,16 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
                       )}
 
                       {/* Per-room amenities */}
-                      {room.amenities && room.amenities.length > 0 && (
+                      {((room.amenities && room.amenities.length > 0) || (room.customAmenities && room.customAmenities.length > 0)) && (
                         <div className="mt-3 flex flex-wrap gap-1.5">
-                          {room.amenities.map((a) => (
+                          {room.amenities?.map((a) => (
                             <span key={a} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/5 text-primary text-[11px] font-medium">
                               <CheckIcon className="w-3 h-3" /> {t(`amenities.${a}`)}
+                            </span>
+                          ))}
+                          {room.customAmenities?.map((a) => (
+                            <span key={a} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[11px] font-medium">
+                              <CheckIcon className="w-3 h-3" /> {a}
                             </span>
                           ))}
                         </div>
@@ -273,16 +278,24 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
             </div>
 
             {/* Amenities */}
-            {hotel.amenities?.length > 0 && (
+            {((hotel.amenities?.length || 0) > 0 || (hotel.customAmenities?.length || 0) > 0) && (
               <div className="bg-white rounded-2xl border border-neutral-200 p-6">
                 <h2 className="text-lg font-semibold text-neutral-900 mb-4">{t('detail.amenities')}</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                  {hotel.amenities.map((amenity) => (
+                  {hotel.amenities?.map((amenity) => (
                     <div key={amenity} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-neutral-50 border border-neutral-100 text-sm text-neutral-700 hover:border-primary/30 hover:bg-primary/5 transition-colors">
                       <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
                         <CheckIcon className="w-3.5 h-3.5" />
                       </span>
                       {t(`amenities.${amenity}`)}
+                    </div>
+                  ))}
+                  {hotel.customAmenities?.map((amenity) => (
+                    <div key={amenity} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-amber-50 border border-amber-100 text-sm text-amber-800 hover:border-amber-300 transition-colors">
+                      <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                        <CheckIcon className="w-3.5 h-3.5" />
+                      </span>
+                      {amenity}
                     </div>
                   ))}
                 </div>
