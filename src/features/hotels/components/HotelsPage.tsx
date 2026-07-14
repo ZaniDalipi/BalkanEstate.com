@@ -264,89 +264,83 @@ const HotelsPage: React.FC = () => {
   amenities.forEach((a) => activeChips.push({ key: `am-${a}`, label: t(`amenities.${a}`), clear: () => toggleAmenity(a) }));
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col">
-      {/* ===== Hero ===== */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-950 via-blue-900 to-slate-900">
-        {/* animated aurora orbs */}
-        <motion.div
-          className="absolute -top-16 -left-10 w-72 h-72 bg-cyan-500/25 rounded-full blur-3xl"
-          animate={{ x: [0, 40, 0], y: [0, 25, 0] }}
-          transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* ===== Hero — quiet, high-contrast, generous whitespace ===== */}
+      <div className="relative overflow-hidden bg-neutral-950">
+        {/* one restrained glow, no motion blobs — a hint of depth, not decoration */}
+        <div
+          className="absolute -top-1/2 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-[0.15] blur-3xl pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(120,140,255,0.5) 0%, transparent 65%)' }}
         />
-        <motion.div
-          className="absolute top-10 right-[8%] w-80 h-80 bg-violet-500/20 rounded-full blur-3xl"
-          animate={{ x: [0, -30, 0], y: [0, 30, 0] }}
-          transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
 
-        <div className="relative z-10 max-w-6xl mx-auto px-4 pt-12 pb-8 sm:pt-16">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-5">
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <h1 className="text-3xl sm:text-5xl font-bold text-white tracking-tight">
-                {t('page.title')}
-              </h1>
-              <p className="mt-3 text-white/70 max-w-xl text-base sm:text-lg">{t('page.subtitle')}</p>
-              <div className="mt-4 flex flex-wrap gap-4 text-white/60 text-sm">
-                <span className="flex items-center gap-1.5"><CheckBadgeIcon className="w-4 h-4 text-cyan-300" /> {t('page.trustStays')}</span>
-                <span className="flex items-center gap-1.5"><MapPinIcon className="w-4 h-4 text-cyan-300" /> {t('page.trustBalkans')}</span>
-                <span className="flex items-center gap-1.5"><CheckIcon className="w-4 h-4 text-cyan-300" /> {t('page.trustNoFees')}</span>
-              </div>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-              className="flex flex-col sm:items-end gap-2 shrink-0"
+        <div className="relative z-10 max-w-5xl mx-auto px-6 pt-20 pb-14 sm:pt-28 sm:pb-16 text-center">
+          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
+            <h1 className="text-4xl sm:text-6xl font-semibold text-white tracking-tight leading-[1.05]">
+              {t('page.title')}
+            </h1>
+            <p className="mt-5 text-white/60 max-w-xl mx-auto text-lg sm:text-xl font-light leading-relaxed">
+              {t('page.subtitle')}
+            </p>
+            <div className="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-2 text-white/45 text-sm tracking-wide">
+              <span className="flex items-center gap-1.5"><CheckBadgeIcon className="w-4 h-4" /> {t('page.trustStays')}</span>
+              <span className="flex items-center gap-1.5"><MapPinIcon className="w-4 h-4" /> {t('page.trustBalkans')}</span>
+              <span className="flex items-center gap-1.5"><CheckIcon className="w-4 h-4" /> {t('page.trustNoFees')}</span>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="mt-8 flex flex-wrap items-center justify-center gap-3"
+          >
+            <button
+              onClick={openCreate}
+              className="flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white text-neutral-950 font-medium hover:bg-white/90 transition-colors"
             >
+              <PlusIcon className="w-4 h-4" /> {t('page.listYourProperty')}
+            </button>
+            {state.isAuthenticated && (
               <button
-                onClick={openCreate}
-                className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white text-indigo-900 font-semibold shadow-lg shadow-black/20 hover:bg-white/90 transition-colors"
+                onClick={openManage}
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-white/20 hover:border-white/40 hover:bg-white/5 text-white font-medium transition-colors"
               >
-                <PlusIcon className="w-5 h-5" /> {t('page.listYourProperty')}
+                <HomeIcon className="w-4 h-4" /> {t('page.myProperties')}
               </button>
-              {state.isAuthenticated && (
-                <button
-                  onClick={openManage}
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium text-sm transition-colors"
-                >
-                  <HomeIcon className="w-4 h-4" /> {t('page.myProperties')}
-                </button>
-              )}
-            </motion.div>
-          </div>
+            )}
+          </motion.div>
 
           {/* Floating search card */}
           <motion.form
             onSubmit={handleSearchSubmit}
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.15 }}
-            className="mt-8 bg-white/95 backdrop-blur rounded-2xl shadow-2xl shadow-black/25 p-2 flex flex-col md:flex-row gap-2"
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mt-10 max-w-2xl mx-auto bg-white rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] p-1.5 flex flex-col sm:flex-row gap-1.5 text-left"
           >
             <div className="flex-1 relative">
-              <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+              <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-neutral-400" />
               <input
                 type="text"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder={t('page.searchPlaceholder')}
-                className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-transparent outline-none text-neutral-800 placeholder:text-neutral-400"
+                className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-transparent outline-none text-neutral-900 placeholder:text-neutral-400 text-[15px]"
               />
             </div>
-            <div className="hidden md:block w-px bg-neutral-200 my-2" />
-            <div className="relative md:w-40">
-              <UsersIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+            <div className="hidden sm:block w-px bg-neutral-100 my-2.5" />
+            <div className="relative sm:w-36">
+              <UsersIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-neutral-400" />
               <input
                 type="number"
                 min={1}
                 value={guestsInput}
                 onChange={(e) => setGuestsInput(e.target.value === '' ? '' : Number(e.target.value))}
                 placeholder={t('page.guests')}
-                className="w-full pl-11 pr-3 py-3.5 rounded-xl bg-transparent outline-none text-neutral-800 placeholder:text-neutral-400"
+                className="w-full pl-11 pr-3 py-3.5 rounded-xl bg-transparent outline-none text-neutral-900 placeholder:text-neutral-400 text-[15px]"
               />
             </div>
-            <button type="submit" className="px-7 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold hover:brightness-110 transition-all shadow-lg shadow-cyan-500/30">
+            <button type="submit" className="px-7 py-3.5 rounded-xl bg-neutral-950 text-white font-medium hover:bg-neutral-800 transition-colors">
               {t('page.searchButton')}
             </button>
           </motion.form>
@@ -354,14 +348,14 @@ const HotelsPage: React.FC = () => {
       </div>
 
       {/* ===== Sticky toolbar ===== */}
-      <div className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-neutral-200">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-2 overflow-x-auto no-scrollbar">
+      <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-neutral-100">
+        <div className="max-w-6xl mx-auto px-4 py-3.5 flex items-center gap-2 overflow-x-auto no-scrollbar">
           <button
             onClick={() => setShowFilters((s) => !s)}
             className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium border transition-colors ${
               showFilters || activeFilterCount > 0
-                ? 'bg-primary text-white border-primary'
-                : 'bg-white text-neutral-700 border-neutral-300 hover:border-primary/40'
+                ? 'bg-neutral-950 text-white border-neutral-950'
+                : 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-300'
             }`}
           >
             {/* sliders icon */}
@@ -370,7 +364,7 @@ const HotelsPage: React.FC = () => {
             </svg>
             {t('page.filters')}
             {activeFilterCount > 0 && (
-              <span className="ml-0.5 min-w-5 h-5 px-1 inline-flex items-center justify-center rounded-full bg-white text-primary text-xs font-bold">
+              <span className="ml-0.5 min-w-5 h-5 px-1 inline-flex items-center justify-center rounded-full bg-white text-neutral-950 text-xs font-bold">
                 {activeFilterCount}
               </span>
             )}
@@ -380,7 +374,7 @@ const HotelsPage: React.FC = () => {
             <button
               onClick={() => setShowSavedOnly((s) => !s)}
               className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-                showSavedOnly ? 'bg-red-500 text-white border-red-500' : 'bg-white text-neutral-700 border-neutral-300 hover:border-red-300'
+                showSavedOnly ? 'bg-red-500 text-white border-red-500' : 'bg-white text-neutral-700 border-neutral-200 hover:border-red-200'
               }`}
             >
               <HeartIcon className={`w-4 h-4 ${showSavedOnly ? 'fill-current' : ''}`} />
@@ -395,12 +389,12 @@ const HotelsPage: React.FC = () => {
             </button>
           )}
 
-          <div className="w-px h-6 bg-neutral-200 shrink-0" />
+          <div className="w-px h-5 bg-neutral-100 shrink-0" />
 
           <button
             onClick={() => setPropertyType('')}
             className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-              propertyType === '' ? 'bg-neutral-900 text-white border-neutral-900' : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+              propertyType === '' ? 'bg-neutral-950 text-white border-neutral-950' : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-300'
             }`}
           >
             {t('page.allTypes')}
@@ -410,7 +404,7 @@ const HotelsPage: React.FC = () => {
               key={type}
               onClick={() => setPropertyType((prev) => (prev === type ? '' : type))}
               className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-                propertyType === type ? 'bg-neutral-900 text-white border-neutral-900' : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+                propertyType === type ? 'bg-neutral-950 text-white border-neutral-950' : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-300'
               }`}
             >
               {t(`propertyTypes.${type}`)}
@@ -422,7 +416,7 @@ const HotelsPage: React.FC = () => {
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as NonNullable<HotelFilters['sort']>)}
-              className="px-3 py-1.5 rounded-lg border border-neutral-300 text-sm bg-white cursor-pointer"
+              className="px-3 py-1.5 rounded-full border border-neutral-200 text-sm bg-white cursor-pointer text-neutral-700"
             >
               {SORT_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
@@ -439,16 +433,16 @@ const HotelsPage: React.FC = () => {
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.25 }}
-              className="overflow-hidden border-t border-neutral-100 bg-neutral-50/60"
+              className="overflow-hidden border-t border-neutral-100 bg-neutral-50/50"
             >
-              <div className="max-w-6xl mx-auto px-4 py-5 grid grid-cols-1 md:grid-cols-4 gap-5">
+              <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-4 gap-5">
                 {/* Country */}
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-500 mb-1.5">{t('page.country')}</label>
+                  <label className="block text-xs font-medium text-neutral-500 mb-1.5">{t('page.country')}</label>
                   <select
                     value={country}
                     onChange={(e) => { setCountry(e.target.value); setCity(''); }}
-                    className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 bg-white text-sm"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm text-neutral-800"
                   >
                     <option value="">{t('page.anyCountry')}</option>
                     {BALKAN_LOCATIONS.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
@@ -456,12 +450,12 @@ const HotelsPage: React.FC = () => {
                 </div>
                 {/* City */}
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-500 mb-1.5">{t('page.city')}</label>
+                  <label className="block text-xs font-medium text-neutral-500 mb-1.5">{t('page.city')}</label>
                   <select
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     disabled={!country}
-                    className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 bg-white text-sm disabled:opacity-50"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm text-neutral-800 disabled:opacity-50"
                   >
                     <option value="">{t('page.anyCity')}</option>
                     {availableCities.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
@@ -469,40 +463,40 @@ const HotelsPage: React.FC = () => {
                 </div>
                 {/* Price range */}
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-500 mb-1.5">{t('page.priceRange')}</label>
+                  <label className="block text-xs font-medium text-neutral-500 mb-1.5">{t('page.priceRange')}</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="number" min={0}
                       value={minPrice}
                       onChange={(e) => setMinPrice(e.target.value === '' ? '' : Number(e.target.value))}
                       placeholder={t('page.priceFrom')}
-                      className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 bg-white text-sm"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm text-neutral-800"
                     />
-                    <span className="text-neutral-400">–</span>
+                    <span className="text-neutral-300">–</span>
                     <input
                       type="number" min={0}
                       value={maxPrice}
                       onChange={(e) => setMaxPrice(e.target.value === '' ? '' : Number(e.target.value))}
                       placeholder={t('page.priceTo')}
-                      className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 bg-white text-sm"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm text-neutral-800"
                     />
                   </div>
                 </div>
                 {/* Guests */}
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-500 mb-1.5">{t('page.guests')}</label>
+                  <label className="block text-xs font-medium text-neutral-500 mb-1.5">{t('page.guests')}</label>
                   <input
                     type="number" min={1}
                     value={guestsInput}
                     onChange={(e) => { const v = e.target.value === '' ? '' : Number(e.target.value); setGuestsInput(v); setGuests(v); }}
                     placeholder={t('page.guests')}
-                    className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 bg-white text-sm"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm text-neutral-800"
                   />
                 </div>
 
                 {/* Amenities */}
                 <div className="md:col-span-4">
-                  <label className="block text-xs font-semibold text-neutral-500 mb-2">{t('page.amenitiesFilter')}</label>
+                  <label className="block text-xs font-medium text-neutral-500 mb-2">{t('page.amenitiesFilter')}</label>
                   <div className="flex flex-wrap gap-2">
                     {HOTEL_AMENITIES.map((a) => {
                       const active = amenities.includes(a);
@@ -511,7 +505,7 @@ const HotelsPage: React.FC = () => {
                           key={a}
                           onClick={() => toggleAmenity(a)}
                           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border transition-colors ${
-                            active ? 'bg-primary/10 text-primary border-primary' : 'bg-white text-neutral-600 border-neutral-300 hover:border-primary/40'
+                            active ? 'bg-neutral-950 text-white border-neutral-950' : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-300'
                           }`}
                         >
                           {active && <CheckIcon className="w-3.5 h-3.5" />}
@@ -522,11 +516,11 @@ const HotelsPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="md:col-span-4 flex items-center justify-between pt-1">
-                  <button onClick={clearAllFilters} className="text-sm text-neutral-500 hover:text-red-500 font-medium">
+                <div className="md:col-span-4 flex items-center justify-between pt-2 border-t border-neutral-100">
+                  <button onClick={clearAllFilters} className="text-sm text-neutral-500 hover:text-neutral-900 font-medium">
                     {t('page.clearAll')}
                   </button>
-                  <button onClick={() => setShowFilters(false)} className="px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90">
+                  <button onClick={() => setShowFilters(false)} className="px-5 py-2.5 rounded-full bg-neutral-950 text-white text-sm font-medium hover:bg-neutral-800">
                     {t('page.applyFilters')}
                   </button>
                 </div>
@@ -537,79 +531,79 @@ const HotelsPage: React.FC = () => {
       </div>
 
       {/* ===== Results ===== */}
-      <div className="flex-1 max-w-6xl mx-auto px-4 py-8 w-full">
+      <div className="flex-1 max-w-6xl mx-auto px-4 py-10 w-full">
         {/* Active filter chips */}
         {activeChips.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 mb-5">
-            <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wide">{t('page.activeFilters')}:</span>
+          <div className="flex flex-wrap items-center gap-2 mb-6">
+            <span className="text-xs font-medium text-neutral-400 uppercase tracking-wide">{t('page.activeFilters')}:</span>
             {activeChips.map((chip) => (
               <button
                 key={chip.key}
                 onClick={chip.clear}
-                className="group flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-sm hover:bg-primary/20 transition-colors"
+                className="group flex items-center gap-1 px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-700 text-sm hover:bg-neutral-200 transition-colors"
               >
                 {chip.label}
-                <XMarkIcon className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100" />
+                <XMarkIcon className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100" />
               </button>
             ))}
-            <button onClick={clearAllFilters} className="text-xs text-neutral-500 hover:text-red-500 font-medium ml-1">
+            <button onClick={clearAllFilters} className="text-xs text-neutral-500 hover:text-neutral-900 font-medium ml-1">
               {t('page.clearAll')}
             </button>
           </div>
         )}
 
         {!displayedLoading && !error && (
-          <p className="text-sm text-neutral-500 mb-4">{t('page.resultsCount', { count: displayedTotal })}</p>
+          <p className="text-sm text-neutral-400 mb-5">{t('page.resultsCount', { count: displayedTotal })}</p>
         )}
 
         {displayedLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="rounded-2xl border border-neutral-200 overflow-hidden">
-                <div className="h-48 bg-gradient-to-br from-neutral-200 to-neutral-100 animate-pulse" />
-                <div className="p-4 space-y-3">
-                  <div className="h-4 bg-neutral-200 rounded w-3/4 animate-pulse" />
-                  <div className="h-3 bg-neutral-200 rounded w-1/2 animate-pulse" />
-                  <div className="h-8 bg-neutral-200 rounded animate-pulse" />
+              <div key={i} className="rounded-3xl border border-neutral-100 overflow-hidden">
+                <div className="h-52 bg-neutral-100 animate-pulse" />
+                <div className="p-5 space-y-3">
+                  <div className="h-4 bg-neutral-100 rounded w-3/4 animate-pulse" />
+                  <div className="h-3 bg-neutral-100 rounded w-1/2 animate-pulse" />
+                  <div className="h-8 bg-neutral-100 rounded animate-pulse" />
                 </div>
               </div>
             ))}
           </div>
         ) : !showSavedOnly && error ? (
           <div className="text-center py-16">
-            <p className="text-neutral-600 mb-4">{t('page.loadError')}</p>
-            <button onClick={() => refetch()} className="px-5 py-2.5 rounded-xl bg-primary text-white font-medium">
+            <p className="text-neutral-500 mb-4">{t('page.loadError')}</p>
+            <button onClick={() => refetch()} className="px-5 py-2.5 rounded-full bg-neutral-950 text-white text-sm font-medium hover:bg-neutral-800">
               {t('page.retry')}
             </button>
           </div>
         ) : displayedHotels.length === 0 ? (
-          <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-20">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-indigo-100 to-cyan-100 flex items-center justify-center">
+          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-24">
+            <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-neutral-100 flex items-center justify-center">
               {showSavedOnly ? (
-                <HeartIcon className="w-10 h-10 text-indigo-400" />
+                <HeartIcon className="w-7 h-7 text-neutral-400" />
               ) : (
-                <HomeIcon className="w-10 h-10 text-indigo-400" />
+                <HomeIcon className="w-7 h-7 text-neutral-400" />
               )}
             </div>
-            <p className="text-neutral-700 mb-1 font-semibold text-lg">
+            <p className="text-neutral-900 mb-1 font-semibold text-lg">
               {showSavedOnly ? t('page.savedEmptyTitle') : t('page.emptyTitle')}
             </p>
-            <p className="text-neutral-400 text-sm mb-6">
+            <p className="text-neutral-400 text-sm mb-7">
               {showSavedOnly ? t('page.savedEmptySubtitle') : t('page.emptySubtitle')}
             </p>
             <div className="flex items-center justify-center gap-3">
               {showSavedOnly ? (
-                <button onClick={() => setShowSavedOnly(false)} className="px-5 py-2.5 rounded-xl border border-neutral-300 text-neutral-700 font-medium hover:bg-neutral-100">
+                <button onClick={() => setShowSavedOnly(false)} className="px-5 py-2.5 rounded-full border border-neutral-200 text-neutral-700 font-medium hover:bg-neutral-50">
                   {t('page.allTypes')}
                 </button>
               ) : (
                 <>
                   {activeFilterCount > 0 && (
-                    <button onClick={clearAllFilters} className="px-5 py-2.5 rounded-xl border border-neutral-300 text-neutral-700 font-medium hover:bg-neutral-100">
+                    <button onClick={clearAllFilters} className="px-5 py-2.5 rounded-full border border-neutral-200 text-neutral-700 font-medium hover:bg-neutral-50">
                       {t('page.clearFilters')}
                     </button>
                   )}
-                  <button onClick={openCreate} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-medium">
+                  <button onClick={openCreate} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-neutral-950 text-white font-medium hover:bg-neutral-800">
                     <PlusIcon className="w-4 h-4" /> {t('page.listYourProperty')}
                   </button>
                 </>
@@ -621,7 +615,7 @@ const HotelsPage: React.FC = () => {
             variants={gridVariants}
             initial="hidden"
             animate="visible"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {displayedHotels.map((hotel) => (
               <motion.div key={hotel.id} variants={itemVariants}>

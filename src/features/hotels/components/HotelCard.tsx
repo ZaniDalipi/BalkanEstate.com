@@ -50,7 +50,7 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, onClick, isSaved, onToggle
       onClick={() => onClick(hotel)}
       whileHover={{ y: -6 }}
       transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-      className="group text-left w-full bg-white rounded-2xl overflow-hidden border border-neutral-200 hover:border-primary/30 hover:shadow-2xl hover:shadow-neutral-300/50 transition-shadow duration-300 focus:outline-none focus:ring-2 focus:ring-primary/30"
+      className="group text-left w-full bg-white rounded-3xl overflow-hidden border border-neutral-100 hover:border-neutral-200 hover:shadow-[0_24px_60px_-16px_rgba(0,0,0,0.16)] transition-shadow duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-900/10"
       aria-label={t('card.viewAria', { name: hotel.name })}
     >
       {/* Cover */}
@@ -115,13 +115,13 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, onClick, isSaved, onToggle
       </div>
 
       {/* Body */}
-      <div className="p-4">
-        <h3 className="font-semibold text-neutral-900 text-base line-clamp-1 group-hover:text-primary transition-colors">
+      <div className="p-5">
+        <h3 className="font-semibold text-neutral-900 text-[15px] tracking-tight line-clamp-1">
           {hotel.name}
         </h3>
 
-        <p className="mt-1 flex items-center gap-1 text-sm text-neutral-500">
-          <MapPinIcon className="w-4 h-4 shrink-0" />
+        <p className="mt-1 flex items-center gap-1 text-[13px] text-neutral-400">
+          <MapPinIcon className="w-3.5 h-3.5 shrink-0" />
           <span className="line-clamp-1">{hotel.city}, {hotel.country}</span>
         </p>
 
@@ -129,30 +129,30 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, onClick, isSaved, onToggle
         {previewAmenities.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {previewAmenities.map((a, i) => (
-              <span key={`${a}-${i}`} className="px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 text-[11px] font-medium">
+              <span key={`${a}-${i}`} className="px-2 py-0.5 rounded-md bg-neutral-50 text-neutral-500 text-[11px] font-medium">
                 {a}
               </span>
             ))}
             {extraAmenities > 0 && (
-              <span className="px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-500 text-[11px] font-medium">
+              <span className="px-2 py-0.5 rounded-md bg-neutral-50 text-neutral-400 text-[11px] font-medium">
                 +{extraAmenities}
               </span>
             )}
           </div>
         )}
 
-        <div className="mt-4 flex items-center gap-3 text-xs text-neutral-500 border-t border-neutral-100 pt-3">
+        <div className="mt-4 flex items-center gap-3 text-xs text-neutral-400 border-t border-neutral-100 pt-3.5">
           <span className="flex items-center gap-1">
-            <HomeIcon className="w-4 h-4" />
+            <HomeIcon className="w-3.5 h-3.5" />
             {t('card.roomsCount', { count: hotel.rooms?.length || 0 })}
           </span>
           {maxGuests > 0 && (
             <span className="flex items-center gap-1">
-              <UsersIcon className="w-4 h-4" />
+              <UsersIcon className="w-3.5 h-3.5" />
               {t('card.sleepsCount', { count: maxGuests })}
             </span>
           )}
-          <span className="flex items-center gap-1 ml-auto text-primary font-medium group-hover:underline">
+          <span className="flex items-center gap-1 ml-auto text-neutral-900 font-medium group-hover:underline underline-offset-2">
             {t('card.viewDetails')}
           </span>
         </div>
