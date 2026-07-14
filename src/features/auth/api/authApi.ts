@@ -249,7 +249,16 @@ export const isEmbeddedWebView = (): boolean => {
   return false;
 };
 
+// Tracks an in-flight OAuth redirect so any duplicate trigger is ignored
+// silently instead of firing a second navigation / flashing another loading state.
+let oauthRedirectInFlight = false;
+
 export const loginWithSocial = (provider: 'google' | 'facebook' | 'apple'): void => {
+  // If a redirect is already underway, silently do nothing.
+  if (oauthRedirectInFlight) return;
+  oauthRedirectInFlight = true;
+  // Safety valve: allow a genuine retry later if navigation was blocked.
+  setTimeout(() => { oauthRedirectInFlight = false; }, 5000);
   // Use replace() so the transient "Redirecting…" page is not left in history;
   // a back navigation to it would re-fire its auto-redirect and re-trigger OAuth.
   window.location.replace(getOAuthUrl(provider));

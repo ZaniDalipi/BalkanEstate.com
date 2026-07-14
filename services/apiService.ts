@@ -531,7 +531,19 @@ export const getOAuthUrl = (provider: 'google' | 'apple'): string => {
   return `${baseUrl}/api/auth/${provider}`;
 };
 
+// Tracks an in-flight OAuth redirect so any duplicate trigger (a re-render, a
+// stray timer, an in-app-browser back navigation) is ignored silently instead
+// of firing a second navigation / flashing another loading state.
+let oauthRedirectInFlight = false;
+
 export const loginWithSocial = (provider: 'google' | 'apple'): void => {
+  // If a redirect is already underway, do nothing — silently. This is what makes
+  // "firing multiple times" a no-op rather than a visible re-loading loop.
+  if (oauthRedirectInFlight) return;
+  oauthRedirectInFlight = true;
+  // Safety valve: if navigation was blocked and the page never unloaded, allow a
+  // genuine retry later rather than trapping the user.
+  setTimeout(() => { oauthRedirectInFlight = false; }, 5000);
   // Redirect to backend OAuth endpoint.
   // Use replace() rather than setting href so the transient "Redirecting…"
   // page is not kept in session history. Otherwise the OS/in-app browser back
