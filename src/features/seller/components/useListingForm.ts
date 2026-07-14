@@ -186,7 +186,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 propertyId: propertyToEdit.propertyId || '',
                 title: propertyToEdit.title || '',
                 listingType: propertyToEdit.listingType || 'sale',
-                streetAddress: propertyToEdit.address,
+                streetAddress: propertyToEdit.address || '',
                 price: propertyToEdit.price,
                 isNegotiable: propertyToEdit.isNegotiable || false,
                 bedrooms: propertyToEdit.beds,
@@ -198,7 +198,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 specialFeatures: propertyToEdit.specialFeatures,
                 materials: propertyToEdit.materials,
                 amenities: propertyToEdit.amenities || [],
-                description: propertyToEdit.description,
+                description: propertyToEdit.description || '',
                 tourUrl: propertyToEdit.tourUrl || '',
                 virtualTour360Url: propertyToEdit.virtualTour360Url || '',
                 propertyType: propertyToEdit.propertyType || 'house',
@@ -246,8 +246,8 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             });
 
             // Set country and city from property
-            setSelectedCountry(propertyToEdit.country);
-            setSelectedCity(propertyToEdit.city);
+            setSelectedCountry(propertyToEdit.country || '');
+            setSelectedCity(propertyToEdit.city || '');
 
             // Load cities for the country
             const country = BALKAN_LOCATIONS.find(c => c.name === propertyToEdit.country);

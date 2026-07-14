@@ -468,8 +468,8 @@ export const getProperty = async (
         return;
       }
 
+      await Property.updateOne({ _id: refreshed._id }, { $inc: { views: 1 } });
       refreshed.views += 1;
-      await refreshed.save();
       await incrementViewCount(String(refreshed.sellerId._id || refreshed.sellerId));
 
       let enrichedProperty = refreshed.toObject();
@@ -483,9 +483,12 @@ export const getProperty = async (
       return;
     }
 
-    // Increment views on property
+    // Increment views on property. Use a targeted update rather than
+    // property.save() so this read path never fails full-document schema
+    // validation for legacy/feed-imported documents that may be missing
+    // fields the ingest upsert doesn't validate (e.g. address/city/country).
+    await Property.updateOne({ _id: property._id }, { $inc: { views: 1 } });
     property.views += 1;
-    await property.save();
 
     // Update seller's stats in real-time
     await incrementViewCount(String(property.sellerId._id || property.sellerId));
