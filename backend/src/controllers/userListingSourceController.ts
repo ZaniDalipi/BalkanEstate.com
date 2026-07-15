@@ -8,6 +8,7 @@ import { previewSource, getPreviewSession, deletePreviewSession } from '../servi
 import {
   detectFeedForUrl,
   detectFromJsonSample,
+  detectFromParsedListingData,
   detectFeedForUrlWithAuth,
 } from '../services/listingDetectorService';
 import { resolveId } from '../utils/idObfuscation';
@@ -437,20 +438,32 @@ export const detect = async (req: Request, res: Response): Promise<void> => {
   const userId = requireUserId(req, res);
   if (!userId) return;
 
-  const { method = 'url', url, sampleJson, authHeaders, trusted } = req.body || {};
+  const { method = 'url', url, sampleJson, sampleData, authHeaders } = req.body || {};
 
   try {
     if (method === 'sampleJson') {
-      if (!sampleJson || typeof sampleJson !== 'string') {
-        res.status(400).json({ message: 'sampleJson is required' });
+      // `sampleData`: already-parsed rows (e.g. from a CSV/Excel upload parsed
+      // client-side). Express has already JSON-parsed the whole request body,
+      // so this is used exactly as sent — no re-parsing, no human-paste text
+      // cleanup (smart quotes / trailing commas), so nothing can corrupt a
+      // value that happens to contain a quote, comma, or curly apostrophe.
+      if (sampleData !== undefined) {
+        if (!Array.isArray(sampleData) && (typeof sampleData !== 'object' || sampleData === null)) {
+          res.status(400).json({ message: 'sampleData must be an array or object' });
+          return;
+        }
+        const result = detectFromParsedListingData(sampleData);
+        res.json(result);
         return;
       }
-      // `trusted: true` marks JSON we generated ourselves (e.g. rows parsed from a
-      // user-uploaded CSV/Excel file) — it skips the human-paste cleanup (smart
-      // quotes, trailing commas) that would otherwise corrupt legitimate values
-      // like "Owner's Association" or a 5” window size. Only affects cosmetics of
-      // parsing, never a security boundary: untrusted input just gets parsed as-is.
-      const result = detectFromJsonSample(sampleJson, { trusted: trusted === true });
+
+      // `sampleJson`: raw text a human pasted into the "Paste JSON" box —
+      // still goes through cleanup for smart quotes / trailing commas.
+      if (!sampleJson || typeof sampleJson !== 'string') {
+        res.status(400).json({ message: 'sampleJson or sampleData is required' });
+        return;
+      }
+      const result = detectFromJsonSample(sampleJson);
       res.json(result);
       return;
     }

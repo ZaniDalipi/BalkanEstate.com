@@ -226,7 +226,14 @@ export type DetectMethod = 'url' | 'rss' | 'sampleJson' | 'customApi';
 
 export const detectFeed = async (
   method: DetectMethod,
-  payload: { url?: string; sampleJson?: string; authHeaders?: Record<string, string>; trusted?: boolean }
+  payload: {
+    url?: string;
+    /** Raw text a human pasted — goes through smart-quote/trailing-comma cleanup server-side. */
+    sampleJson?: string;
+    /** Already-parsed rows/object (e.g. from a CSV/Excel upload) — sent as real JSON, never re-parsed from text. */
+    sampleData?: unknown;
+    authHeaders?: Record<string, string>;
+  }
 ): Promise<DetectResult> => {
   return apiRequest<DetectResult>(`${BASE}/detect`, {
     method: 'POST',
