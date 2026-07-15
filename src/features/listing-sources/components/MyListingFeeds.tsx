@@ -135,7 +135,7 @@ const MyListingFeeds: React.FC = () => {
           <p className="text-sm text-gray-600">{t('listingFeeds:description')}</p>
           {termsStatus?.acceptedAt && (
             <p className="text-xs text-gray-400 mt-1">
-              {t('listingFeeds:termsAcceptedOn', 'Terms accepted on')}{' '}
+              {t('listingFeeds:termsAcceptedOn')}{' '}
               {new Date(termsStatus.acceptedAt).toLocaleDateString(undefined, {
                 year: 'numeric', month: 'long', day: 'numeric',
               })}
@@ -157,10 +157,8 @@ const MyListingFeeds: React.FC = () => {
           <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
         </svg>
         <span>
-          <strong>{t('listingFeeds:alphaNoticeTitle', 'Alpha feature — review all imported data.')}</strong>{' '}
-          {t('listingFeeds:alphaNoticeBody',
-            'Imported prices, areas, and descriptions may be inaccurate. Always verify and edit each property before publishing.'
-          )}
+          <strong>{t('listingFeeds:alphaNoticeTitle')}</strong>{' '}
+          {t('listingFeeds:alphaNoticeBody')}
         </span>
       </div>
 

@@ -44,7 +44,7 @@ const ListingSourcesAlphaTerms: React.FC<Props> = ({ onAccepted }) => {
             Alpha
           </span>
           <h2 className="text-2xl font-bold text-gray-900">
-            {t('listingFeeds:termsTitle', 'Listing Sources — Terms of Use')}
+            {t('listingFeeds:termsTitle')}
           </h2>
         </div>
 
@@ -57,12 +57,10 @@ const ListingSourcesAlphaTerms: React.FC<Props> = ({ onAccepted }) => {
             </svg>
             <div>
               <p className="text-sm font-semibold text-amber-800">
-                {t('listingFeeds:termsBetaWarning', 'This is an experimental alpha feature')}
+                {t('listingFeeds:termsBetaWarning')}
               </p>
               <p className="text-xs text-amber-700 mt-0.5">
-                {t('listingFeeds:termsBetaDescription',
-                  'Listing Sources is under active development. Data may be incomplete, incorrect, or missing. You must review and correct all imported properties before publishing them.'
-                )}
+                {t('listingFeeds:termsBetaDescription')}
               </p>
             </div>
           </div>
@@ -195,13 +193,11 @@ const ListingSourcesAlphaTerms: React.FC<Props> = ({ onAccepted }) => {
               {accepting && (
                 <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
               )}
-              {t('listingFeeds:termsAcceptButton', 'I understand and accept — continue')}
+              {t('listingFeeds:termsAcceptButton')}
             </button>
 
             <p className="text-center text-xs text-gray-400 mt-3">
-              {t('listingFeeds:termsAcceptNote',
-                'Your acceptance is logged with a timestamp for legal record-keeping purposes.'
-              )}
+              {t('listingFeeds:termsAcceptNote')}
             </p>
           </div>
         </div>
