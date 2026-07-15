@@ -134,7 +134,15 @@ export class JsonFeedAdapter implements SourceAdapter {
           const recovered = cfg.inlineJson.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
           parsed = JSON.parse(recovered);
         } catch {
-          throw new Error(`JsonFeedAdapter: inlineJson is not valid JSON (source ${source.slug}): ${(firstErr as Error).message}`);
+          // Surface a preview of the actual stored value (length + first/last
+          // characters) so a failure is self-diagnosing from the error message
+          // alone, instead of requiring direct database access to inspect.
+          const raw = cfg.inlineJson;
+          const preview = raw.length > 160 ? `${raw.slice(0, 80)}…[${raw.length} chars total]…${raw.slice(-80)}` : raw;
+          throw new Error(
+            `JsonFeedAdapter: inlineJson is not valid JSON (source ${source.slug}): ${(firstErr as Error).message}. ` +
+            `Stored value preview: ${JSON.stringify(preview)}`
+          );
         }
       }
       const items = queryArray(parsed, cfg.itemsPath);
