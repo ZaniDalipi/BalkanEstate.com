@@ -141,7 +141,8 @@
     "adapterConfigHint": "JSON object with feed URLs, selectors, headers, etc.",
     "fieldMap": "Field mapping (JSON)",
     "fieldMapHint": "Map your source's fields to BalkanEstate property fields. Example: { \"title\": \"name\", \"price\": \"price.amount\" }",
-    "enableNow": "Enable this feed immediately"
+    "enableNow": "Enable this feed immediately",
+    "inlineDataPreserved": "This feed's embedded data (from your uploaded file or pasted sample) isn't shown here and won't be changed by editing the fields above."
   },
   "preview": {
     "title": "Review listings before importing",

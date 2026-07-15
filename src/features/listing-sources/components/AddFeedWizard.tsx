@@ -345,7 +345,13 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
           adapterConfig.endpoint = trimmedApiUrl;
           delete adapterConfig.inlineJson;
         } else {
-          adapterConfig.inlineJson = sampleJson.trim();
+          // Store the re-serialized, already-validated value (the same one detect()
+          // parsed and confirmed), never the raw pasted text — a raw paste can carry
+          // smart quotes or other characters that never get cleaned again, since every
+          // future sync parses inlineJson directly with no text-cleanup step.
+          const sanitized = sanitizeJsonInput(sampleJson);
+          const parsedSample = normalizeMongoExtendedJson(JSON.parse(sanitized));
+          adapterConfig.inlineJson = JSON.stringify(parsedSample);
           delete adapterConfig.endpoint;
         }
       }
@@ -538,6 +544,8 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
                     placeholder={'[\n  { "title": "Modern apartment", "price": 95000, "city": "Zagreb" }\n]'}
                     className="mt-1 w-full px-4 py-3 border border-gray-200 rounded-xl text-sm font-mono focus:ring-2 focus:ring-primary/30 resize-y"
                     spellCheck={false}
+                    autoCorrect="off"
+                    autoCapitalize="off"
                   />
                 </label>
                 <label className="block">

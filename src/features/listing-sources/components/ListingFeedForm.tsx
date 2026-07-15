@@ -22,6 +22,32 @@ const ADAPTER_OPTIONS: { value: ListingAdapterType; labelKey: string; descKey: s
   { value: 'customApi', labelKey: 'listingFeeds:adapter.customApi', descKey: 'listingFeeds:adapter.customApiDesc' },
 ];
 
+/**
+ * Config keys that hold large, machine-generated data rather than something
+ * a human should hand-edit as raw text (e.g. `inlineJson` — the full row set
+ * from a CSV/Excel upload or pasted JSON sample, which can be hundreds of KB).
+ * Exposing these in a free-text `<textarea>` risks silent corruption from
+ * OS/browser-level "smart quotes" substitution (macOS Safari does this by
+ * default) — a curly quote swapped into the middle of that blob breaks JSON
+ * parsing on every future sync. These keys are hidden from the editable text
+ * and always carried over from the original config untouched.
+ */
+const NON_EDITABLE_CONFIG_KEYS = ['inlineJson'] as const;
+
+const splitEditableConfig = (
+  config: Record<string, unknown> | undefined
+): { editable: Record<string, unknown>; preserved: Record<string, unknown> } => {
+  const editable: Record<string, unknown> = { ...(config ?? {}) };
+  const preserved: Record<string, unknown> = {};
+  for (const key of NON_EDITABLE_CONFIG_KEYS) {
+    if (key in editable) {
+      preserved[key] = editable[key];
+      delete editable[key];
+    }
+  }
+  return { editable, preserved };
+};
+
 const tryParseJson = (input: string, fieldName: string, fallback: Record<string, unknown> = {}): Record<string, unknown> => {
   if (!input.trim()) return fallback;
   let parsed: unknown;
@@ -44,8 +70,12 @@ const ListingFeedForm: React.FC<Props> = ({ initial, onCancel, onSaved }) => {
     (initial?.adapterType as ListingAdapterType | undefined) ?? 'rss'
   );
   const [enabled, setEnabled] = useState(initial?.enabled ?? true);
+  const { editable: initialEditableConfig, preserved: preservedConfig } = useMemo(
+    () => splitEditableConfig(initial?.adapterConfig),
+    [initial]
+  );
   const [adapterConfigText, setAdapterConfigText] = useState(
-    initial ? JSON.stringify(initial.adapterConfig ?? {}, null, 2) : '{\n  "feedUrls": []\n}'
+    initial ? JSON.stringify(initialEditableConfig, null, 2) : '{\n  "feedUrls": []\n}'
   );
   const [fieldMapText, setFieldMapText] = useState(
     initial
@@ -65,7 +95,10 @@ const ListingFeedForm: React.FC<Props> = ({ initial, onCancel, onSaved }) => {
     setError(null);
     setSubmitting(true);
     try {
-      const adapterConfig = tryParseJson(adapterConfigText, 'Adapter config');
+      const adapterConfig = {
+        ...tryParseJson(adapterConfigText, 'Adapter config'),
+        ...preservedConfig, // e.g. inlineJson — carried over untouched, never hand-edited as text
+      };
       const fieldMapParsed = tryParseJson(fieldMapText, 'Field map');
       const fieldMap: Record<string, string> = {};
       for (const [k, v] of Object.entries(fieldMapParsed)) {
@@ -161,9 +194,20 @@ const ListingFeedForm: React.FC<Props> = ({ initial, onCancel, onSaved }) => {
           value={adapterConfigText}
           onChange={(e) => setAdapterConfigText(e.target.value)}
           spellCheck={false}
+          // Prevent macOS/Safari "smart quotes" and "smart dashes" from silently
+          // rewriting characters in this JSON — any substitution here breaks
+          // parsing on every future sync. autoCorrect/autoCapitalize are
+          // non-standard WebKit attributes but harmless elsewhere.
+          autoCorrect="off"
+          autoCapitalize="off"
           className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg font-mono text-xs focus:ring-2 focus:ring-primary/30"
         />
         <p className="mt-1 text-xs text-gray-500">{t('listingFeeds:fields.adapterConfigHint')}</p>
+        {'inlineJson' in preservedConfig && (
+          <p className="mt-1 text-xs text-amber-600">
+            {t('listingFeeds:fields.inlineDataPreserved')}
+          </p>
+        )}
       </label>
 
       <label className="block">
@@ -173,6 +217,8 @@ const ListingFeedForm: React.FC<Props> = ({ initial, onCancel, onSaved }) => {
           value={fieldMapText}
           onChange={(e) => setFieldMapText(e.target.value)}
           spellCheck={false}
+          autoCorrect="off"
+          autoCapitalize="off"
           className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg font-mono text-xs focus:ring-2 focus:ring-primary/30"
         />
         <p className="mt-1 text-xs text-gray-500">{t('listingFeeds:fields.fieldMapHint')}</p>

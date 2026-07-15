@@ -141,7 +141,8 @@
     "adapterConfigHint": "JSON objekt s URL-ovima feeda, selektorima, zaglavljima itd.",
     "fieldMap": "Mapiranje polja (JSON)",
     "fieldMapHint": "Mapirajte polja vašeg izvora na polja BalkanEstate nekretnine. Primjer: { \"title\": \"name\", \"price\": \"price.amount\" }",
-    "enableNow": "Odmah omogući ovaj feed"
+    "enableNow": "Odmah omogući ovaj feed",
+    "inlineDataPreserved": "Ugrađeni podaci ovog feeda (iz vaše učitane datoteke ili zalijepljenog uzorka) nisu prikazani ovdje i neće biti promijenjeni uređivanjem polja iznad."
   },
   "preview": {
     "title": "Pregledaj oglase prije uvoza",

@@ -141,7 +141,8 @@
     "adapterConfigHint": "Objekt JSON me URL kanalesh, selektorë, koka, etj.",
     "fieldMap": "Hartëzimi i fushave (JSON)",
     "fieldMapHint": "Hartëzoni fushat e burimit tuaj me fushat e pronës BalkanEstate. Shembull: { \"title\": \"name\", \"price\": \"price.amount\" }",
-    "enableNow": "Aktivizo këtë kanal menjëherë"
+    "enableNow": "Aktivizo këtë kanal menjëherë",
+    "inlineDataPreserved": "Të dhënat e ngulitura të këtij kanali (nga skedari juaj i ngarkuar ose mostra e ngjitur) nuk shfaqen këtu dhe nuk do të ndryshohen duke redaktuar fushat më sipër."
   },
   "preview": {
     "title": "Rishiko listimet para importimit",

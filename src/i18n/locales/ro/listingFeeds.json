@@ -141,7 +141,8 @@
     "adapterConfigHint": "Obiect JSON cu URL-uri de flux, selectori, antete etc.",
     "fieldMap": "Maparea câmpurilor (JSON)",
     "fieldMapHint": "Mapați câmpurile sursei dvs. la câmpurile proprietății BalkanEstate. Exemplu: { \"title\": \"name\", \"price\": \"price.amount\" }",
-    "enableNow": "Activează acest flux imediat"
+    "enableNow": "Activează acest flux imediat",
+    "inlineDataPreserved": "Datele încorporate ale acestui flux (din fișierul încărcat sau eșantionul lipit) nu sunt afișate aici și nu vor fi modificate prin editarea câmpurilor de mai sus."
   },
   "preview": {
     "title": "Revizuiește anunțurile înainte de import",

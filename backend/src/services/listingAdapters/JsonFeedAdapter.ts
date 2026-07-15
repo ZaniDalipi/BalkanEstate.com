@@ -123,8 +123,19 @@ export class JsonFeedAdapter implements SourceAdapter {
       let parsed: unknown;
       try {
         parsed = JSON.parse(cfg.inlineJson);
-      } catch (err) {
-        throw new Error(`JsonFeedAdapter: inlineJson is not valid JSON (source ${source.slug}): ${(err as Error).message}`);
+      } catch (firstErr) {
+        // One-time recovery for sources saved before curly “smart quotes” (typically
+        // introduced by macOS/Safari autocorrect when someone hand-edited the raw
+        // config in the "Edit feed" form) were stripped out of inlineJson before
+        // storage. Only swaps quote *characters* — never restructures the JSON —
+        // so it can't mask a genuinely different problem; if this also fails we
+        // throw the original error.
+        try {
+          const recovered = cfg.inlineJson.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+          parsed = JSON.parse(recovered);
+        } catch {
+          throw new Error(`JsonFeedAdapter: inlineJson is not valid JSON (source ${source.slug}): ${(firstErr as Error).message}`);
+        }
       }
       const items = queryArray(parsed, cfg.itemsPath);
       let syntheticIdx = 0;
