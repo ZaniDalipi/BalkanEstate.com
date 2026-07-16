@@ -728,6 +728,19 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     }
   }, [map, onMapMove]);
 
+  // Close the property popup on zoom in/out. Without this the popup stays open
+  // and MapPopupOverlay re-projects + replays its open animation on every zoom
+  // step, so the card visibly "refreshes" the whole time the user is zooming.
+  // Dismissing it on zoom keeps the interaction clean.
+  useEffect(() => {
+    const mapToUse = map || mapInstanceRef.current;
+    if (!mapToUse) return;
+    const listener = mapToUse.addListener('zoom_changed', () => {
+      setSelectedProperty(null);
+    });
+    return () => listener.remove();
+  }, [map]);
+
   // Update map type when it changes (styles are controlled via mapId in Cloud Console)
   useEffect(() => {
     if (!map || !isLoaded) return;
