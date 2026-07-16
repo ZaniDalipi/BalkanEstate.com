@@ -49,6 +49,13 @@ suppressConsoleLogs();
 import { initSecurity } from './src/utils/security';
 initSecurity();
 
+// Initialize the performance / power governor. Sets classes on <html> that CSS
+// uses to disable heavy decorative animations on mobile / reduced-motion and to
+// pause ALL animation while the app is backgrounded — the main cause of the PWA
+// heating up the device.
+import { initPerfMode } from './src/utils/perfMode';
+initPerfMode();
+
 // Shared stale-deploy chunk recovery (unregister SW + clear caches + reload once)
 import { recoverFromStaleChunk } from './src/utils/chunkRecovery';
 

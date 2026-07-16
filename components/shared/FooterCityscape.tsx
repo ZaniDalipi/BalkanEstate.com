@@ -1,4 +1,5 @@
 import React from 'react';
+import { usePauseWhenOffscreen } from '../../src/shared/hooks/usePauseWhenOffscreen';
 
 // Balkan country flags for the animation
 const balkanFlags = [
@@ -15,8 +16,11 @@ const balkanFlags = [
 ];
 
 const FooterCityscape: React.FC = () => {
+    const { ref, offscreen } = usePauseWhenOffscreen<HTMLDivElement>();
     return (
-        <div className="relative w-full h-[100px] sm:h-[120px] md:h-[140px] overflow-hidden">
+        <div
+            ref={ref}
+            className={`relative w-full h-[100px] sm:h-[120px] md:h-[140px] overflow-hidden${offscreen ? ' decorative-offscreen' : ''}`}>
             {/* Gradient sky */}
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-indigo-950 to-transparent" />
 

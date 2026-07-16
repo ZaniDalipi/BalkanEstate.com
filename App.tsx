@@ -3,6 +3,7 @@ import { useSubscriptionExpiry } from './src/features/subscription/hooks/useSubs
 import { useTranslation } from 'react-i18next';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
 import { HelmetProvider, Helmet } from 'react-helmet-async';
+import { MotionConfig } from 'framer-motion';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { tokenService } from './src/shared/api/tokenService';
 import { AlertProvider } from './context/AlertContext';
@@ -1272,6 +1273,9 @@ const App: React.FC = () => {
 
   return (
     <ErrorBoundary level="app">
+      {/* reducedMotion="user" makes every framer-motion animation honor the
+          OS "Reduce Motion" setting without touching each component. */}
+      <MotionConfig reducedMotion="user">
       <HelmetProvider>
         <QueryProvider>
           <AppProvider>
@@ -1310,6 +1314,7 @@ const App: React.FC = () => {
           </AppProvider>
         </QueryProvider>
       </HelmetProvider>
+      </MotionConfig>
     </ErrorBoundary>
   );
 };

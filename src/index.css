@@ -1520,3 +1520,72 @@ html[data-zoom] #root {
   }
 }
 
+/* ============================================================================
+   Performance / Power Governor
+   Classes on <html> are toggled by src/utils/perfMode.ts:
+     .app-hidden   – app is backgrounded → pause ALL animation (GPU goes idle)
+     .reduce-motion – OS "reduce motion" → disable every decorative loop
+     .save-power   – phone/tablet/low-end → disable the heavy *decorative*
+                     loops while keeping meaningful UI motion.
+   These target animation UTILITY CLASSES, so they apply no matter which
+   component file renders them (the app has duplicate Footer/Decorative trees).
+   ============================================================================ */
+
+/* --- Backgrounded: freeze everything. The single biggest battery win — an
+   unseen page should never keep the compositor busy. Browsers already throttle
+   rAF when hidden, but CSS keyframes (and standalone-PWA edge cases) can keep
+   running, so we pause them explicitly. ------------------------------------ */
+html.app-hidden *,
+html.app-hidden *::before,
+html.app-hidden *::after {
+  animation-play-state: paused !important;
+  transition: none !important;
+}
+
+/* --- The heavy always-on DECORATIVE loops. These run 100% of the time,
+   regardless of whether they're on screen, and are the main sustained GPU
+   load. Disabled for reduce-motion (all devices) and save-power (mobile). --- */
+html.reduce-motion .animate-aurora,
+html.save-power   .animate-aurora,
+html.reduce-motion .glass-orb,
+html.save-power   .glass-orb,
+html.reduce-motion .glass-shimmer-border::before,
+html.save-power   .glass-shimmer-border::before,
+html.reduce-motion .animate-pulse-glow,
+html.save-power   .animate-pulse-glow,
+html.reduce-motion .animate-glow-pulse,
+html.save-power   .animate-glow-pulse,
+html.reduce-motion .animate-float,
+html.save-power   .animate-float,
+html.reduce-motion .animate-split-bubble,
+html.save-power   .animate-split-bubble,
+/* FooterCityscape ambient loops (twinkling stars, lit windows, sparkles) —
+   dozens of independent compositor animations sitting in the footer of every
+   page. */
+html.reduce-motion .animate-twinkle,
+html.save-power   .animate-twinkle,
+html.reduce-motion .animate-window,
+html.save-power   .animate-window,
+html.reduce-motion .animate-float-sparkle,
+html.save-power   .animate-float-sparkle {
+  animation: none !important;
+}
+
+/* --- Reduced motion is an accessibility request: kill the remaining generic
+   infinite loops too (skeleton shimmer is kept — it communicates loading). --- */
+html.reduce-motion .animate-shimmer,
+html.reduce-motion .liquid-glass-bg,
+html.reduce-motion [style*="animation"][class*="infinite"] {
+  animation: none !important;
+}
+
+/* Off-screen decorative wrappers opt into this via IntersectionObserver
+   (see FooterCityscape). Pausing beats disabling — it resumes instantly when
+   scrolled back into view. */
+.decorative-offscreen,
+.decorative-offscreen *,
+.decorative-offscreen *::before,
+.decorative-offscreen *::after {
+  animation-play-state: paused !important;
+}
+
