@@ -152,7 +152,7 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, onClick, isSaved, onToggle
               {t('card.sleepsCount', { count: maxGuests })}
             </span>
           )}
-          <span className="flex items-center gap-1 ml-auto text-neutral-900 font-medium group-hover:underline underline-offset-2">
+          <span className="flex items-center gap-1 ml-auto text-primary font-medium group-hover:underline underline-offset-2">
             {t('card.viewDetails')}
           </span>
         </div>
