@@ -539,7 +539,14 @@ export const xssSanitizer = (req: Request, _res: Response, next: NextFunction): 
     'url', 'imageUrl', 'previewUrl', 'floorplanUrl', 'tourUrl',
     'virtualTour360Url', 'avatarUrl', 'publicId', 'images',
     'text', 'message', 'description', 'title', 'name', 'content', 'excerpt', // User-facing text fields - React handles XSS escaping
-    'bodyTemplate', 'footerHtml', 'headerHtml', 'subject', 'preheaderText', 'headerGradient' // Email template fields - contain intentional HTML edited by admins
+    'bodyTemplate', 'footerHtml', 'headerHtml', 'subject', 'preheaderText', 'headerGradient', // Email template fields - contain intentional HTML edited by admins
+    // Listing Sources config payloads: structured data (embedded JSON, JSONPath
+    // expressions, header maps), never rendered as HTML. Character-escaping
+    // these corrupts their syntax outright — e.g. inlineJson is a JSON *string*
+    // whose own `"` delimiters would become `&quot;`, breaking every future
+    // JSON.parse of it. Skipping the whole object also protects its children
+    // (itemsPath, idPath, urlPath, endpoint, headers, inlineJson, etc.) in one go.
+    'adapterConfig', 'fieldMap', 'sampleJson', 'sampleData', 'authHeaders',
   ]);
 
   // Recursive function to sanitize strings

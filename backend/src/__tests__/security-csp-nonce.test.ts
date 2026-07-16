@@ -224,4 +224,39 @@ describe('XSS Sanitizer Middleware', () => {
 
     expect(wasNextCalled()).toBe(true);
   });
+
+  it('should not touch adapterConfig (Listing Sources embedded JSON/JSONPath config)', () => {
+    // Regression test: adapterConfig.inlineJson is a *string containing JSON
+    // syntax* (rows parsed from a CSV/Excel upload). Escaping its own `"`
+    // characters to `&quot;` breaks every future JSON.parse of it — this must
+    // never happen, no matter how deeply nested.
+    const { req, res, next } = createMocks();
+    const inlineJson = JSON.stringify([{ id: 1, title: "Owner's flat", note: 'Spacious, 5" windows' }]);
+    req.body = {
+      adapterConfig: { inlineJson, itemsPath: '$[*]', idPath: '$.id' },
+      fieldMap: { title: 'title' },
+    };
+
+    xssSanitizer(req, res, next);
+
+    expect(req.body.adapterConfig.inlineJson).toBe(inlineJson);
+    expect(() => JSON.parse(req.body.adapterConfig.inlineJson)).not.toThrow();
+    expect(req.body.fieldMap).toEqual({ title: 'title' });
+  });
+
+  it('should not touch top-level sampleJson/sampleData/authHeaders (Listing Sources detect payload)', () => {
+    const { req, res, next } = createMocks();
+    const sampleJson = JSON.stringify([{ title: "Owner's flat" }]);
+    req.body = {
+      sampleJson,
+      sampleData: [{ title: "Owner's flat" }],
+      authHeaders: { 'X-Api-Key': 'value"with"quotes' },
+    };
+
+    xssSanitizer(req, res, next);
+
+    expect(req.body.sampleJson).toBe(sampleJson);
+    expect(req.body.sampleData).toEqual([{ title: "Owner's flat" }]);
+    expect(req.body.authHeaders).toEqual({ 'X-Api-Key': 'value"with"quotes' });
+  });
 });

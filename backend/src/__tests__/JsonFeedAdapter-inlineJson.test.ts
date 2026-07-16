@@ -33,6 +33,17 @@ describe('JsonFeedAdapter inlineJson parsing', () => {
     expect(out[0].raw).toMatchObject({ title: "Owner's flat", city: 'Split' });
   });
 
+  it('self-heals inlineJson that was HTML-entity-escaped (the actual bug: a global request sanitizer escaping "/\' before this field was exempted)', async () => {
+    const escaped = JSON.stringify([row])
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;');
+
+    const adapter = new JsonFeedAdapter();
+    const out = await adapter.fetchListings(makeSource(escaped));
+    expect(out).toHaveLength(1);
+    expect(out[0].raw).toMatchObject({ title: "Owner's flat", city: 'Split' });
+  });
+
   it('throws a clear error when inlineJson is genuinely unrecoverable', async () => {
     const adapter = new JsonFeedAdapter();
     await expect(adapter.fetchListings(makeSource('{ not json at all'))).rejects.toThrow(

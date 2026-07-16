@@ -124,16 +124,36 @@ export class JsonFeedAdapter implements SourceAdapter {
       try {
         parsed = JSON.parse(cfg.inlineJson);
       } catch (firstErr) {
-        // One-time recovery for sources saved before curly “smart quotes” (typically
-        // introduced by macOS/Safari autocorrect when someone hand-edited the raw
-        // config in the "Edit feed" form) were stripped out of inlineJson before
-        // storage. Only swaps quote *characters* — never restructures the JSON —
-        // so it can't mask a genuinely different problem; if this also fails we
-        // throw the original error.
-        try {
-          const recovered = cfg.inlineJson.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
-          parsed = JSON.parse(recovered);
-        } catch {
+        // One-time recovery for sources saved before two now-fixed bugs stopped
+        // corrupting inlineJson before storage:
+        //  1. A global request-body sanitizer HTML-escaped inlineJson's own `"`/`'`
+        //     characters (e.g. `"` → `&quot;`) because it didn't know this string's
+        //     content *is* JSON syntax, not HTML to render — the dominant cause.
+        //  2. curly "smart quotes" from OS-level autocorrect when someone hand-edited
+        //     the raw config in the old "Edit feed" form.
+        // Neither pass restructures the JSON, only swaps characters, so recovery
+        // can't mask a genuinely different problem — if both fail we throw the
+        // original error.
+        const recoveryAttempts = [
+          (s: string) => s
+            .replace(/&quot;/g, '"')
+            .replace(/&#x27;/g, "'")
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&#96;/g, '`')
+            .replace(/&amp;/g, '&'),
+          (s: string) => s.replace(/[“”]/g, '"').replace(/[‘’]/g, "'"),
+        ];
+        let recovered: unknown;
+        for (const attempt of recoveryAttempts) {
+          try {
+            recovered = JSON.parse(attempt(cfg.inlineJson));
+            break;
+          } catch {
+            continue;
+          }
+        }
+        if (recovered === undefined) {
           // Surface a preview of the actual stored value (length + first/last
           // characters) so a failure is self-diagnosing from the error message
           // alone, instead of requiring direct database access to inspect.
@@ -144,6 +164,7 @@ export class JsonFeedAdapter implements SourceAdapter {
             `Stored value preview: ${JSON.stringify(preview)}`
           );
         }
+        parsed = recovered;
       }
       const items = queryArray(parsed, cfg.itemsPath);
       let syntheticIdx = 0;
