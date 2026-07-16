@@ -29,29 +29,20 @@ let initialized = false;
 
 /**
  * Heuristic for "this device benefits from spending less GPU/battery on
- * decoration". We deliberately target touch devices (phones/tablets) — that is
- * where heat and battery are user-visible and where large decorative blurs and
- * auroras add the least value. Desktops keep the full experience.
+ * decoration". We target phones/tablets — where heat and battery are
+ * user-visible and where large decorative blurs and auroras add the least
+ * value. Desktops keep the full experience.
  *
- * Low reported memory / core counts reinforce the signal when the browser
- * exposes them (Chromium). iOS Safari exposes neither, so the coarse-pointer
- * check carries it there.
+ * `(pointer: coarse)` reflects the device's PRIMARY pointer: it is true on
+ * touch-first devices (phones/tablets) and false on desktops — even a
+ * touchscreen laptop whose primary pointer is a mouse reports `fine`. This is a
+ * more reliable and less surprising signal than deviceMemory/hardwareConcurrency,
+ * which report low values (<=4) on plenty of ordinary laptops and would strip
+ * animations from desktop users unexpectedly. iOS Safari supports it too.
  */
 function isPowerSensitiveDevice(): boolean {
-  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
-
-  const coarsePointer =
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(pointer: coarse)').matches &&
-    !window.matchMedia('(pointer: fine)').matches;
-
-  // Explicit low-end signals (only present on some browsers).
-  const nav = navigator as Navigator & { deviceMemory?: number };
-  const lowMemory = typeof nav.deviceMemory === 'number' && nav.deviceMemory <= 4;
-  const lowCores =
-    typeof navigator.hardwareConcurrency === 'number' && navigator.hardwareConcurrency <= 4;
-
-  return coarsePointer || lowMemory || lowCores;
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
+  return window.matchMedia('(pointer: coarse)').matches;
 }
 
 /**

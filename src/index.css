@@ -1567,8 +1567,22 @@ html.save-power   .animate-twinkle,
 html.reduce-motion .animate-window,
 html.save-power   .animate-window,
 html.reduce-motion .animate-float-sparkle,
-html.save-power   .animate-float-sparkle {
+html.save-power   .animate-float-sparkle,
+/* FooterCityscape flag marquee + walking-people leg loops (0.8s infinite). */
+html.reduce-motion .flags-scroll,
+html.save-power   .flags-scroll,
+html.reduce-motion .leg-left,
+html.save-power   .leg-left,
+html.reduce-motion .leg-right,
+html.save-power   .leg-right {
   animation: none !important;
+}
+
+/* Hide the walking people entirely rather than freezing them mid-stride —
+   they're purely ambient and a frozen figure looks broken. */
+html.reduce-motion .person-walking,
+html.save-power   .person-walking {
+  display: none !important;
 }
 
 /* --- Reduced motion is an accessibility request: kill the remaining generic
