@@ -1923,6 +1923,10 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       },
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       disableDefaultUI: true,
+      // Disable Google's built-in POI/place labels click behaviour — clicking a
+      // place name would otherwise open Google's native "View on Google Maps"
+      // info window over our own property markers.
+      clickableIcons: false,
       mapTypeControl: false,
       streetViewControl: false,
       fullscreenControl: false,
