@@ -18,7 +18,7 @@ import {
 } from '@/src/shared/types/hotel.types';
 import {
   SearchIcon, PlusIcon, HomeIcon, UsersIcon, MapPinIcon, CheckBadgeIcon,
-  XMarkIcon, CheckIcon, HeartIcon,
+  XMarkIcon, CheckIcon, HeartIcon, BedIcon, GlobeAltIcon,
 } from '@/constants';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
@@ -113,6 +113,14 @@ const HotelsPage: React.FC = () => {
   const displayedHotels = showSavedOnly ? favoriteHotels : hotels;
   const displayedTotal = showSavedOnly ? favoriteHotels.length : total;
   const displayedLoading = showSavedOnly ? favoritesLoading : isLoading;
+
+  // --- Hero stats (computed from the loaded listings) ---
+  const heroStats = useMemo(() => {
+    const roomCount = hotels.reduce((sum, h) => sum + (h.rooms?.length || 0), 0);
+    const cityCount = new Set(hotels.map((h) => h.city).filter(Boolean)).size;
+    const countryCount = new Set(hotels.map((h) => h.country).filter(Boolean)).size;
+    return { properties: total, rooms: roomCount, cities: cityCount, countries: countryCount };
+  }, [hotels, total]);
 
   const activeFilterCount = useMemo(() => {
     let n = 0;
@@ -269,11 +277,22 @@ const HotelsPage: React.FC = () => {
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900" />
         <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-violet-600/20" />
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 opacity-10">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="hotels-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="0.5" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#hotels-grid)" />
+          </svg>
+        </div>
         {/* soft light accents */}
         <div className="absolute -top-24 -left-16 w-72 h-72 rounded-full bg-cyan-500/15 blur-3xl pointer-events-none" />
         <div className="absolute top-6 right-[8%] w-80 h-80 rounded-full bg-violet-500/15 blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 max-w-5xl mx-auto px-6 pt-16 pb-14 sm:pt-24 sm:pb-16 text-center">
+        <div className="relative z-10 max-w-5xl mx-auto px-6 pt-16 pb-20 sm:pt-24 sm:pb-24 text-center">
           <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
             <h1 className="text-4xl sm:text-6xl font-bold text-white tracking-tight leading-[1.05]">
               {t('page.title')}
@@ -345,7 +364,43 @@ const HotelsPage: React.FC = () => {
             </button>
           </motion.form>
         </div>
+
+        {/* Wave divider */}
+        <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
+          <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
+            <path d="M0 80V40C240 0 480 0 720 40C960 80 1200 80 1440 40V80H0Z" fill="#ffffff" />
+          </svg>
+        </div>
       </div>
+
+      {/* ===== Stats bar ===== */}
+      {!showSavedOnly && !displayedLoading && !error && heroStats.properties > 0 && (
+        <motion.div
+          className="max-w-6xl mx-auto px-4 sm:px-6 -mt-6 sm:-mt-8 mb-2 relative z-10"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.25 }}
+        >
+          <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-xl shadow-neutral-200/60 border border-neutral-100 p-4 sm:p-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+              {[
+                { icon: <HomeIcon className="w-5 h-5 text-primary" />, value: heroStats.properties, label: t('page.statProperties'), color: 'from-primary/10 to-blue-500/10' },
+                { icon: <BedIcon className="w-5 h-5 text-blue-500" />, value: heroStats.rooms, label: t('page.statRooms'), color: 'from-blue-500/10 to-cyan-500/10' },
+                { icon: <MapPinIcon className="w-5 h-5 text-violet-500" />, value: heroStats.cities, label: t('page.statCities'), color: 'from-violet-500/10 to-purple-500/10' },
+                { icon: <GlobeAltIcon className="w-5 h-5 text-amber-500" />, value: heroStats.countries, label: t('page.statCountries'), color: 'from-amber-500/10 to-orange-500/10' },
+              ].map((stat) => (
+                <div key={stat.label} className={`text-center p-3 rounded-xl bg-gradient-to-br ${stat.color}`}>
+                  <div className="flex items-center justify-center gap-1.5 mb-1">
+                    {stat.icon}
+                    <span className="text-2xl sm:text-3xl font-black text-neutral-900">{stat.value}</span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-neutral-500 font-medium">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* ===== Sticky toolbar ===== */}
       <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-neutral-100">

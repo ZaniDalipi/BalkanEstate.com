@@ -56,12 +56,23 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, onClick, isSaved, onToggle
       {/* Cover */}
       <div className={`relative h-52 bg-gradient-to-br ${gradient} overflow-hidden`}>
         {coverSrc ? (
-          <img
-            src={coverSrc}
-            alt={hotel.name}
-            loading="lazy"
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-          />
+          <>
+            {/* Blurred fill of the same image so any aspect ratio sits cleanly — no dead letterbox bars */}
+            <img
+              src={coverSrc}
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              className="absolute inset-0 w-full h-full object-cover scale-110 blur-xl opacity-70"
+            />
+            {/* Full image, never cropped */}
+            <img
+              src={coverSrc}
+              alt={hotel.name}
+              loading="lazy"
+              className="relative w-full h-full object-contain group-hover:scale-105 transition-transform duration-700 ease-out"
+            />
+          </>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-white/80">
             <HomeIcon className="w-14 h-14" />

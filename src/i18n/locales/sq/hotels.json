@@ -40,8 +40,11 @@
     "myProperties": "My properties",
     "savedTab": "Saved",
     "savedEmptyTitle": "No saved properties yet",
-    "savedEmptySubtitle": "Tap the heart on any listing to save it here for later."
-  },
+    "savedEmptySubtitle": "Tap the heart on any listing to save it here for later.",
+    "statProperties": "Pronat",
+    "statRooms": "Dhomat",
+    "statCities": "Qytete",
+    "statCountries": "Shtete"},
   "sort": {
     "newest": "Newest",
     "priceAsc": "Price: low to high",
