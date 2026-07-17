@@ -11,7 +11,7 @@
  * to project them — invalid markers render nothing rather than throwing.
  */
 
-import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { OverlayView, OverlayViewF } from '@react-google-maps/api';
 import { Property } from '@/types';
 import { validateCoordinates } from '@/shared/utils/validation';
