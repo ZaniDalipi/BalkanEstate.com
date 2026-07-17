@@ -58,6 +58,11 @@ const MapPopupOverlay: React.FC<MapPopupOverlayProps> = ({
   const cardRef = useRef<HTMLDivElement | null>(null);
   const [layout, setLayout] = useState<Layout>(DEFAULT_LAYOUT);
 
+  // Keep the latest onClose in a ref so the outside-press effect doesn't
+  // re-subscribe every render (the parent passes a fresh inline callback).
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   // Validate coordinates up-front — never feed NaN/out-of-range values to the
   // Maps projection. Hooks below still run so hook order stays stable.
   const coords = validateCoordinates(property.lat as number, property.lng as number);
@@ -105,6 +110,32 @@ const MapPopupOverlay: React.FC<MapPopupOverlayProps> = ({
         : { placement, offsetX, tailOffsetX }
     );
   }, [map]);
+
+  // Dismiss the card when the user interacts anywhere outside it — not just on
+  // the map tiles. A press on the map's own `click` event doesn't fire for the
+  // property list, page chrome, or control buttons, so we hit-test against the
+  // card's DOM node at the document level instead. Marker presses fall outside
+  // the card too, so tapping another marker closes this card and its own click
+  // handler opens the next one.
+  useEffect(() => {
+    if (!coords.isValid) return;
+
+    const handleOutside = (event: Event) => {
+      const target = event.target as Node | null;
+      if (target && cardRef.current && cardRef.current.contains(target)) return;
+      onCloseRef.current();
+    };
+
+    // Pointer/touch start (not click) so the card dismisses as soon as the press
+    // lands, before any downstream click handling.
+    document.addEventListener('mousedown', handleOutside, true);
+    document.addEventListener('touchstart', handleOutside, true);
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutside, true);
+      document.removeEventListener('touchstart', handleOutside, true);
+    };
+  }, [coords.isValid, property.id]);
 
   // Recompute on selection, map movement, card resize (e.g. image loads), and
   // window resize. OverlayView keeps the anchor glued to the marker on pan, so
