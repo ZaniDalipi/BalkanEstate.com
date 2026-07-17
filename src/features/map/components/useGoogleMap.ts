@@ -741,6 +741,18 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     return () => listener.remove();
   }, [map]);
 
+  // Close the property popup when the user clicks anywhere on the map outside
+  // the card (marker clicks stop propagation, so this only fires on empty map).
+  // Skipped while measuring, where a map click adds a measurement point instead.
+  useEffect(() => {
+    const mapToUse = map || mapInstanceRef.current;
+    if (!mapToUse || showMeasurement) return;
+    const listener = mapToUse.addListener('click', () => {
+      setSelectedProperty(null);
+    });
+    return () => listener.remove();
+  }, [map, showMeasurement]);
+
   // Update map type when it changes (styles are controlled via mapId in Cloud Console)
   useEffect(() => {
     if (!map || !isLoaded) return;
