@@ -12,6 +12,9 @@ import {
   BED_TYPES,
   SUPPORTED_CURRENCIES,
   CANCELLATION_POLICIES,
+  PARKING_TYPES,
+  PAYMENT_METHODS,
+  ROOM_VIEWS,
   CURRENCY_SYMBOLS,
   type Hotel,
   type CreateHotelData,
@@ -23,6 +26,9 @@ import {
   type BedOption,
   type SupportedCurrency,
   type CancellationPolicy,
+  type ParkingType,
+  type PaymentMethod,
+  type RoomView,
 } from '@/src/shared/types/hotel.types';
 import {
   validateHotelName,
@@ -56,6 +62,8 @@ const mapHotelToDraft = (h: Hotel): Partial<HotelDraft> => ({
   country: h.country,
   city: h.city,
   address: h.address ?? '',
+  neighborhood: h.neighborhood ?? '',
+  postalCode: h.postalCode ?? '',
   lat: h.latitude ?? 0,
   lng: h.longitude ?? 0,
   contactPhone: h.contactPhone ?? '',
@@ -80,6 +88,10 @@ const mapHotelToDraft = (h: Hotel): Partial<HotelDraft> => ({
     quantity: r.quantity,
     amenities: r.amenities ?? [],
     customAmenities: r.customAmenities ?? [],
+    view: r.view ?? 'none',
+    breakfastIncluded: r.breakfastIncluded ?? false,
+    freeCancellation: r.freeCancellation ?? false,
+    nonSmoking: r.nonSmoking ?? false,
   })) as CreateRoomData[],
   checkInTime: h.checkInTime ?? '14:00',
   checkOutTime: h.checkOutTime ?? '11:00',
@@ -90,6 +102,11 @@ const mapHotelToDraft = (h: Hotel): Partial<HotelDraft> => ({
   smokingAllowed: h.smokingAllowed,
   houseRules: h.houseRules ?? [],
   languagesSpoken: h.languagesSpoken ?? [],
+  checkInMinAge: h.checkInMinAge,
+  breakfastIncluded: h.breakfastIncluded ?? false,
+  parkingType: h.parkingType ?? '',
+  paymentMethods: h.paymentMethods ?? [],
+  prepaymentRequired: h.prepaymentRequired ?? false,
 });
 
 type FieldErrorKey = 'name' | 'propertyType' | 'contactPhone' | 'country' | 'city' | 'rooms';
@@ -126,6 +143,10 @@ interface RoomFormData extends Omit<CreateRoomData, 'maxGuests' | 'beds' | 'bath
   sizeSqm: NumOrBlank;
   pricePerNight: NumOrBlank;
   quantity: NumOrBlank;
+  view: RoomView;
+  breakfastIncluded: boolean;
+  freeCancellation: boolean;
+  nonSmoking: boolean;
 }
 
 const emptyBedOption = (): BedOption => ({ bedType: 'double', quantity: 1 });
@@ -147,6 +168,10 @@ const emptyRoom = (): RoomFormData => ({
   quantity: 1,
   amenities: [],
   customAmenities: [],
+  view: 'none',
+  breakfastIncluded: false,
+  freeCancellation: false,
+  nonSmoking: false,
 });
 
 const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack, onSuccess, editHotel }) => {
@@ -198,6 +223,8 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
   const [selectedCountry, setSelectedCountry] = useState(draft.country ?? '');
   const [selectedCity, setSelectedCity] = useState(draft.city ?? '');
   const [address, setAddress] = useState(draft.address ?? '');
+  const [neighborhood, setNeighborhood] = useState(draft.neighborhood ?? '');
+  const [postalCode, setPostalCode] = useState(draft.postalCode ?? '');
   const [availableCities, setAvailableCities] = useState<CityData[]>(
     () => BALKAN_LOCATIONS.find((c) => c.name === draft.country)?.cities ?? []
   );
@@ -228,6 +255,10 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
         ? r.bedConfiguration
         : [{ bedType: 'double' as BedType, quantity: (typeof r.beds === 'number' && r.beds > 0) ? r.beds : 1 }],
       customAmenities: r.customAmenities ?? [],
+      view: r.view ?? 'none',
+      breakfastIncluded: r.breakfastIncluded ?? false,
+      freeCancellation: r.freeCancellation ?? false,
+      nonSmoking: r.nonSmoking ?? false,
     }));
   });
   // Pending "add custom amenity" text per room, keyed by room index.
@@ -245,6 +276,19 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
   const [houseRuleInput, setHouseRuleInput] = useState('');
   const [languagesSpoken, setLanguagesSpoken] = useState<string[]>(draft.languagesSpoken ?? []);
   const [languageInput, setLanguageInput] = useState('');
+
+  // --- Booking & payment ---
+  const [checkInMinAge, setCheckInMinAge] = useState<number | undefined>(draft.checkInMinAge);
+  const [breakfastIncluded, setBreakfastIncluded] = useState(draft.breakfastIncluded ?? false);
+  const [parkingType, setParkingType] = useState<ParkingType | ''>(draft.parkingType ?? '');
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(draft.paymentMethods ?? []);
+  const [prepaymentRequired, setPrepaymentRequired] = useState(draft.prepaymentRequired ?? false);
+
+  const togglePaymentMethod = useCallback((method: PaymentMethod) => {
+    setPaymentMethods((prev) =>
+      prev.includes(method) ? prev.filter((m) => m !== method) : [...prev, method]
+    );
+  }, []);
 
   // --- Images ---
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -295,18 +339,20 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
     const handle = setTimeout(() => {
       setDraft({
         name, propertyType, starRating, description, currency,
-        country: selectedCountry, city: selectedCity, address, lat, lng,
+        country: selectedCountry, city: selectedCity, address, neighborhood, postalCode, lat, lng,
         contactPhone, contactEmail, whatsapp, website,
         amenities, customAmenities, rooms: rooms as unknown as CreateRoomData[], checkInTime, checkOutTime, minNights, maxNights,
         cancellationPolicy, petsAllowed, smokingAllowed, houseRules, languagesSpoken,
+        checkInMinAge, breakfastIncluded, parkingType, paymentMethods, prepaymentRequired,
       });
     }, 600);
     return () => clearTimeout(handle);
   }, [
     name, propertyType, starRating, description, currency, selectedCountry, selectedCity,
-    address, lat, lng, contactPhone, contactEmail, whatsapp, website, amenities, customAmenities, rooms,
+    address, neighborhood, postalCode, lat, lng, contactPhone, contactEmail, whatsapp, website, amenities, customAmenities, rooms,
     checkInTime, checkOutTime, minNights, maxNights, cancellationPolicy, petsAllowed,
-    smokingAllowed, houseRules, languagesSpoken, setDraft, isEdit,
+    smokingAllowed, houseRules, languagesSpoken, checkInMinAge, breakfastIncluded, parkingType,
+    paymentMethods, prepaymentRequired, setDraft, isEdit,
   ]);
 
   const discardDraft = useCallback(() => {
@@ -314,6 +360,7 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
     setDraftRestored(false);
     setName(''); setPropertyType(''); setStarRating(undefined); setDescription('');
     setCurrency('EUR'); setSelectedCountry(''); setSelectedCity(''); setAddress('');
+    setNeighborhood(''); setPostalCode('');
     setAvailableCities([]); setLat(0); setLng(0); setShowMap(false);
     setContactPhone(currentUser?.phone ?? ''); setContactEmail(currentUser?.email ?? '');
     setWhatsapp(''); setWebsite(''); setAmenities([]); setCustomAmenities([]); setCustomAmenityInput('');
@@ -321,6 +368,8 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
     setCheckInTime('14:00'); setCheckOutTime('11:00'); setMinNights(1); setMaxNights(undefined);
     setCancellationPolicy(''); setPetsAllowed(false); setSmokingAllowed(false);
     setHouseRules([]); setLanguagesSpoken([]);
+    setCheckInMinAge(undefined); setBreakfastIncluded(false); setParkingType('');
+    setPaymentMethods([]); setPrepaymentRequired(false);
   }, [clearDraft, currentUser]);
 
   const clearErrors = useCallback(() => {
@@ -635,6 +684,10 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
           quantity: r.quantity === '' || r.quantity == null ? 1 : Number(r.quantity),
           amenities: r.amenities && r.amenities.length > 0 ? r.amenities : undefined,
           customAmenities: r.customAmenities && r.customAmenities.length > 0 ? r.customAmenities : undefined,
+          view: r.view && r.view !== 'none' ? r.view : undefined,
+          breakfastIncluded: r.breakfastIncluded || undefined,
+          freeCancellation: r.freeCancellation || undefined,
+          nonSmoking: r.nonSmoking || undefined,
         })),
         petsAllowed,
         smokingAllowed,
@@ -648,6 +701,8 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
       if (cleanWebsite) payload.website = cleanWebsite;
       if (!isEdit && accessCode.trim()) payload.listingCode = accessCode.trim();
       if (address.trim()) payload.address = address.trim();
+      if (neighborhood.trim()) payload.neighborhood = neighborhood.trim();
+      if (postalCode.trim()) payload.postalCode = postalCode.trim();
       if (lat !== 0 && lng !== 0) { payload.latitude = lat; payload.longitude = lng; }
       if (amenities.length > 0) payload.amenities = amenities;
       if (customAmenities.length > 0) payload.customAmenities = customAmenities;
@@ -658,6 +713,11 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
       if (cancellationPolicy) payload.cancellationPolicy = cancellationPolicy;
       if (houseRules.length > 0) payload.houseRules = houseRules;
       if (languagesSpoken.length > 0) payload.languagesSpoken = languagesSpoken;
+      if (checkInMinAge != null) payload.checkInMinAge = checkInMinAge;
+      payload.breakfastIncluded = breakfastIncluded;
+      if (parkingType) payload.parkingType = parkingType;
+      if (paymentMethods.length > 0) payload.paymentMethods = paymentMethods;
+      payload.prepaymentRequired = prepaymentRequired;
 
       setProgress(35);
       setProgressLabel(t(isEdit ? 'form.progress.saving' : 'form.progress.creating'));
@@ -694,8 +754,9 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
     }
   }, [
     submitting, name, propertyType, starRating, contactPhone, selectedCountry, selectedCity, rooms, minNights, maxNights,
-    description, contactEmail, whatsapp, website, address, lat, lng, amenities, customAmenities, currency, checkInTime,
+    description, contactEmail, whatsapp, website, address, neighborhood, postalCode, lat, lng, amenities, customAmenities, currency, checkInTime,
     checkOutTime, cancellationPolicy, houseRules, languagesSpoken, petsAllowed, smokingAllowed,
+    checkInMinAge, breakfastIncluded, parkingType, paymentMethods, prepaymentRequired,
     coverFile, galleryFiles, accessCode, createHotel, updateHotel, isEdit, editHotel, uploadCover, uploadPhotos, onSuccess, t, clearErrors, clearDraft, setValidationError,
   ]);
 
@@ -973,6 +1034,31 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
             />
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1.5">{t('form.fields.neighborhood')}</label>
+              <input
+                type="text"
+                value={neighborhood}
+                onChange={(e) => setNeighborhood(e.target.value)}
+                placeholder={t('form.placeholders.neighborhood')}
+                maxLength={100}
+                className={inputClasses()}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1.5">{t('form.fields.postalCode')}</label>
+              <input
+                type="text"
+                value={postalCode}
+                onChange={(e) => setPostalCode(e.target.value)}
+                placeholder={t('form.placeholders.postalCode')}
+                maxLength={20}
+                className={inputClasses()}
+              />
+            </div>
+          </div>
+
           {showMap && (
             <div className="rounded-xl overflow-visible">
               <Suspense fallback={<div className="h-96 flex items-center justify-center text-sm text-neutral-400 border border-neutral-200 rounded-lg">{t('form.loadingMap')}</div>}>
@@ -1247,6 +1333,39 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                 />
               </div>
 
+              {/* Room view + booking flags (breakfast, free cancellation, non-smoking) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-neutral-600 mb-1">{t('form.fields.roomView')}</label>
+                  <select
+                    value={room.view}
+                    onChange={(e) => updateRoom(index, 'view', e.target.value as RoomView)}
+                    className={inputClasses()}
+                  >
+                    {ROOM_VIEWS.map((v) => (
+                      <option key={v} value={v}>{t(`roomViews.${v}`)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-wrap items-end gap-3 pb-1">
+                  {([
+                    ['breakfastIncluded', room.breakfastIncluded] as const,
+                    ['freeCancellation', room.freeCancellation] as const,
+                    ['nonSmoking', room.nonSmoking] as const,
+                  ]).map(([key, val]) => (
+                    <label key={key} className="flex items-center gap-1.5 text-xs text-neutral-600 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={val}
+                        onChange={(e) => updateRoom(index, key, e.target.checked as never)}
+                        className="rounded"
+                      />
+                      {t(`form.fields.${key}`)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               {/* Per-room amenities (optional) — e.g. this room has a jacuzzi */}
               <div>
                 <label className="block text-xs font-medium text-neutral-600 mb-1.5">
@@ -1436,6 +1555,78 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                 </label>
               )}
             </div>
+          </div>
+        </section>
+
+        {/* --- Section: Booking & payment --- */}
+        <section className="bg-white rounded-2xl border border-neutral-200 p-6 space-y-5">
+          <div>
+            <h2 className="text-lg font-semibold text-neutral-900">{t('form.sections.booking')}</h2>
+            <p className="mt-1 text-sm text-neutral-500">{t('form.sections.bookingHint')}</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1.5">{t('form.fields.parkingType')}</label>
+              <select
+                value={parkingType}
+                onChange={(e) => setParkingType(e.target.value as ParkingType)}
+                className={inputClasses()}
+              >
+                <option value="">{t('form.placeholders.selectParking')}</option>
+                {PARKING_TYPES.map((p) => (
+                  <option key={p} value={p}>{t(`parkingTypes.${p}`)}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1.5">{t('form.fields.checkInMinAge')}</label>
+              <input
+                type="number"
+                min={0}
+                max={99}
+                inputMode="numeric"
+                value={checkInMinAge ?? ''}
+                onChange={(e) => setCheckInMinAge(e.target.value === '' ? undefined : Number(e.target.value))}
+                placeholder="18"
+                className={inputClasses()}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-1.5">{t('form.fields.paymentMethods')}</label>
+            <div className="flex flex-wrap gap-2">
+              {PAYMENT_METHODS.map((method) => {
+                const active = paymentMethods.includes(method);
+                return (
+                  <button
+                    key={method}
+                    type="button"
+                    onClick={() => togglePaymentMethod(method)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border transition-colors ${
+                      active
+                        ? 'bg-primary/10 text-primary border-primary'
+                        : 'bg-white text-neutral-600 border-neutral-300 hover:border-primary/40'
+                    }`}
+                  >
+                    {active && <CheckIcon className="w-3.5 h-3.5" />}
+                    {t(`paymentMethods.${method}`)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-4 pt-1">
+            <label className="flex items-center gap-2 text-sm text-neutral-700 cursor-pointer">
+              <input type="checkbox" checked={breakfastIncluded} onChange={(e) => setBreakfastIncluded(e.target.checked)} className="rounded" />
+              {t('form.fields.breakfastIncluded')}
+            </label>
+            <label className="flex items-center gap-2 text-sm text-neutral-700 cursor-pointer">
+              <input type="checkbox" checked={prepaymentRequired} onChange={(e) => setPrepaymentRequired(e.target.checked)} className="rounded" />
+              {t('form.fields.prepaymentRequired')}
+            </label>
           </div>
         </section>
 

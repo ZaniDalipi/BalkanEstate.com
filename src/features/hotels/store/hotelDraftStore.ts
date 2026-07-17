@@ -11,6 +11,8 @@ import type {
   HotelAmenity,
   SupportedCurrency,
   CancellationPolicy,
+  ParkingType,
+  PaymentMethod,
   CreateRoomData,
 } from '@/src/shared/types/hotel.types';
 
@@ -23,6 +25,8 @@ export interface HotelDraft {
   country: string;
   city: string;
   address: string;
+  neighborhood: string;
+  postalCode: string;
   lat: number;
   lng: number;
   contactPhone: string;
@@ -41,6 +45,11 @@ export interface HotelDraft {
   smokingAllowed: boolean;
   houseRules: string[];
   languagesSpoken: string[];
+  checkInMinAge?: number;
+  breakfastIncluded: boolean;
+  parkingType: ParkingType | '';
+  paymentMethods: PaymentMethod[];
+  prepaymentRequired: boolean;
   savedAt: number;
 }
 

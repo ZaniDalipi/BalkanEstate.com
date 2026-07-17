@@ -94,6 +94,18 @@ export const CURRENCY_SYMBOLS: Record<SupportedCurrency, string> = {
 export const CANCELLATION_POLICIES = ['flexible', 'moderate', 'strict', 'non_refundable'] as const;
 export type CancellationPolicy = typeof CANCELLATION_POLICIES[number];
 
+// On-site parking options a guest needs to know before booking.
+export const PARKING_TYPES = ['none', 'free', 'paid', 'street'] as const;
+export type ParkingType = typeof PARKING_TYPES[number];
+
+// Payment methods a property accepts.
+export const PAYMENT_METHODS = ['cash', 'credit_card', 'debit_card', 'bank_transfer', 'mobile_payment'] as const;
+export type PaymentMethod = typeof PAYMENT_METHODS[number];
+
+// Outlook a specific room offers.
+export const ROOM_VIEWS = ['none', 'sea', 'city', 'garden', 'pool', 'mountain', 'courtyard'] as const;
+export type RoomView = typeof ROOM_VIEWS[number];
+
 export interface BedOption {
   bedType: BedType;
   quantity: number;
@@ -117,6 +129,14 @@ export interface Room {
   amenities?: HotelAmenity[];
   /** Free-text amenities the host defines beyond the standard list. */
   customAmenities?: string[];
+  /** Outlook from the room (e.g. sea, city). */
+  view?: RoomView;
+  /** Whether breakfast is included in this room's nightly rate. */
+  breakfastIncluded?: boolean;
+  /** Whether this room can be cancelled free of charge. */
+  freeCancellation?: boolean;
+  /** Whether this is a non-smoking room. */
+  nonSmoking?: boolean;
 }
 
 export interface HotelImage {
@@ -142,6 +162,8 @@ export interface Hotel {
   website?: string;
   whatsapp?: string;
   address?: string;
+  neighborhood?: string;
+  postalCode?: string;
   city: string;
   country: string;
   latitude?: number;
@@ -163,6 +185,11 @@ export interface Hotel {
   petsAllowed: boolean;
   smokingAllowed: boolean;
   languagesSpoken?: string[];
+  checkInMinAge?: number;
+  breakfastIncluded?: boolean;
+  parkingType?: ParkingType;
+  paymentMethods?: PaymentMethod[];
+  prepaymentRequired?: boolean;
   isActive: boolean;
   isVerified: boolean;
   views: number;
@@ -206,6 +233,10 @@ export interface CreateRoomData {
   amenities?: HotelAmenity[];
   /** Free-text amenities the host defines beyond the standard list. */
   customAmenities?: string[];
+  view?: RoomView;
+  breakfastIncluded?: boolean;
+  freeCancellation?: boolean;
+  nonSmoking?: boolean;
 }
 
 export type HotelCodeStatus = 'active' | 'redeemed' | 'revoked';
@@ -234,6 +265,8 @@ export interface CreateHotelData {
   website?: string;
   whatsapp?: string;
   address?: string;
+  neighborhood?: string;
+  postalCode?: string;
   city: string;
   country: string;
   latitude?: number;
@@ -252,4 +285,9 @@ export interface CreateHotelData {
   petsAllowed?: boolean;
   smokingAllowed?: boolean;
   languagesSpoken?: string[];
+  checkInMinAge?: number;
+  breakfastIncluded?: boolean;
+  parkingType?: ParkingType;
+  paymentMethods?: PaymentMethod[];
+  prepaymentRequired?: boolean;
 }

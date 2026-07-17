@@ -103,7 +103,7 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
             <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">{hotel.name}</h1>
             <p className="mt-1 flex items-center gap-1.5 text-sm text-neutral-500">
               <MapPinIcon className="w-4 h-4" />
-              {hotel.address || `${hotel.city}, ${hotel.country}`}
+              {[hotel.address, hotel.neighborhood, hotel.postalCode].filter(Boolean).join(', ') || `${hotel.city}, ${hotel.country}`}
             </p>
           </div>
           {hotel.isVerified && (
@@ -231,7 +231,33 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
                             {room.sizeSqm} m²
                           </span>
                         ) : null}
+                        {room.view && room.view !== 'none' ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-50 border border-neutral-200 text-xs text-neutral-600">
+                            {t(`roomViews.${room.view}`)}
+                          </span>
+                        ) : null}
                       </div>
+
+                      {/* Booking perks */}
+                      {(room.breakfastIncluded || room.freeCancellation || room.nonSmoking) && (
+                        <div className="mt-2.5 flex flex-wrap gap-1.5">
+                          {room.breakfastIncluded && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[11px] font-medium">
+                              <CheckIcon className="w-3 h-3" /> {t('form.fields.breakfastIncluded')}
+                            </span>
+                          )}
+                          {room.freeCancellation && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[11px] font-medium">
+                              <CheckIcon className="w-3 h-3" /> {t('form.fields.freeCancellation')}
+                            </span>
+                          )}
+                          {room.nonSmoking && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 text-[11px] font-medium">
+                              <CheckIcon className="w-3 h-3" /> {t('form.fields.nonSmoking')}
+                            </span>
+                          )}
+                        </div>
+                      )}
 
                       {room.description && (
                         <p className="mt-3 text-sm text-neutral-600 leading-relaxed break-words line-clamp-3">
@@ -310,9 +336,25 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
                 {hotel.checkOutTime && (<><dt className="text-neutral-500">{t('form.fields.checkOut')}</dt><dd className="text-neutral-900 text-right">{hotel.checkOutTime}</dd></>)}
                 {hotel.minNights != null && (<><dt className="text-neutral-500">{t('form.fields.minNights')}</dt><dd className="text-neutral-900 text-right">{hotel.minNights}</dd></>)}
                 {hotel.cancellationPolicy && (<><dt className="text-neutral-500">{t('form.fields.cancellationPolicy')}</dt><dd className="text-neutral-900 text-right">{t(`cancellationPolicies.${hotel.cancellationPolicy}`)}</dd></>)}
+                {hotel.parkingType && (<><dt className="text-neutral-500">{t('form.fields.parkingType')}</dt><dd className="text-neutral-900 text-right">{t(`parkingTypes.${hotel.parkingType}`)}</dd></>)}
+                {hotel.checkInMinAge != null && (<><dt className="text-neutral-500">{t('form.fields.checkInMinAge')}</dt><dd className="text-neutral-900 text-right">{hotel.checkInMinAge}+</dd></>)}
+                <dt className="text-neutral-500">{t('form.fields.breakfastIncluded')}</dt><dd className="text-neutral-900 text-right">{hotel.breakfastIncluded ? t('detail.yes') : t('detail.no')}</dd>
+                <dt className="text-neutral-500">{t('form.fields.prepaymentRequired')}</dt><dd className="text-neutral-900 text-right">{hotel.prepaymentRequired ? t('detail.yes') : t('detail.no')}</dd>
                 <dt className="text-neutral-500">{t('form.fields.petsAllowed')}</dt><dd className="text-neutral-900 text-right">{hotel.petsAllowed ? t('detail.yes') : t('detail.no')}</dd>
                 <dt className="text-neutral-500">{t('form.fields.smokingAllowed')}</dt><dd className="text-neutral-900 text-right">{hotel.smokingAllowed ? t('detail.yes') : t('detail.no')}</dd>
               </dl>
+              {hotel.paymentMethods?.length ? (
+                <div className="mt-4">
+                  <p className="text-sm text-neutral-500 mb-1.5">{t('form.fields.paymentMethods')}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {hotel.paymentMethods.map((m) => (
+                      <span key={m} className="px-2.5 py-1 rounded-lg bg-neutral-100 text-neutral-700 text-xs font-medium">
+                        {t(`paymentMethods.${m}`)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
               {hotel.houseRules?.length ? (
                 <ul className="mt-4 list-disc list-inside text-sm text-neutral-600 space-y-1">
                   {hotel.houseRules.map((rule) => <li key={rule}>{rule}</li>)}

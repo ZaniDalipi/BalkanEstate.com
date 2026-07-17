@@ -44,7 +44,8 @@
     "statProperties": "Proprietăți",
     "statRooms": "Camere",
     "statCities": "Orașe",
-    "statCountries": "Țări"},
+    "statCountries": "Țări"
+  },
   "sort": {
     "newest": "Newest",
     "priceAsc": "Price: low to high",
@@ -181,7 +182,9 @@
       "amenities": "Property amenities",
       "photos": "Photos",
       "policies": "Policies & house rules",
-      "amenitiesHint": "Available to all guests across the whole property."
+      "amenitiesHint": "Available to all guests across the whole property.",
+      "booking": "Rezervare și plată",
+      "bookingHint": "Spuneți oaspeților cum plătesc, unde parchează și la ce să se aștepte la check-in."
     },
     "fields": {
       "name": "Property name",
@@ -231,7 +234,17 @@
       "decreaseQuantity": "Decrease quantity",
       "increaseQuantity": "Increase quantity",
       "customAmenities": "Add your own amenity",
-      "customAmenityPlaceholder": "e.g. Rooftop bar"
+      "customAmenityPlaceholder": "e.g. Rooftop bar",
+      "neighborhood": "Cartier / zonă",
+      "postalCode": "Cod poștal",
+      "roomView": "Priveliște cameră",
+      "breakfastIncluded": "Mic dejun inclus",
+      "freeCancellation": "Anulare gratuită",
+      "nonSmoking": "Nefumători",
+      "parkingType": "Parcare",
+      "checkInMinAge": "Vârsta minimă la check-in",
+      "paymentMethods": "Metode de plată",
+      "prepaymentRequired": "Plată în avans necesară"
     },
     "placeholders": {
       "name": "e.g. Hotel Adriatic",
@@ -243,7 +256,10 @@
       "roomDescription": "What's included in this room?",
       "houseRule": "e.g. No parties",
       "language": "e.g. English",
-      "selectPolicy": "Select a policy"
+      "selectPolicy": "Select a policy",
+      "neighborhood": "ex. Orașul Vechi",
+      "postalCode": "ex. 1000",
+      "selectParking": "Selectați parcarea"
     },
     "errors": {
       "nameRequired": "Property name is required",
@@ -330,5 +346,27 @@
     "king": "King bed",
     "sofa_bed": "Sofa bed",
     "bunk": "Bunk bed"
+  },
+  "roomViews": {
+    "none": "Fără priveliște anume",
+    "sea": "Vedere la mare",
+    "city": "Vedere la oraș",
+    "garden": "Vedere la grădină",
+    "pool": "Vedere la piscină",
+    "mountain": "Vedere la munte",
+    "courtyard": "Vedere la curte"
+  },
+  "parkingTypes": {
+    "none": "Fără parcare",
+    "free": "Parcare gratuită",
+    "paid": "Parcare cu plată",
+    "street": "Parcare pe stradă"
+  },
+  "paymentMethods": {
+    "cash": "Numerar",
+    "credit_card": "Card de credit",
+    "debit_card": "Card de debit",
+    "bank_transfer": "Transfer bancar",
+    "mobile_payment": "Plată mobilă"
   }
 }

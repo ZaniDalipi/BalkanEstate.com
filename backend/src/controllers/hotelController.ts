@@ -7,6 +7,9 @@ import Hotel, {
   BED_TYPES,
   SUPPORTED_CURRENCIES,
   CANCELLATION_POLICIES,
+  PARKING_TYPES,
+  PAYMENT_METHODS,
+  ROOM_VIEWS,
   type IRoom,
   type IBedOption,
 } from '../models/Hotel';
@@ -114,6 +117,10 @@ const sanitizeRoom = (raw: any): IRoom | { error: string } => {
       ? raw.amenities.filter((a: any) => HOTEL_AMENITIES.includes(a)).slice(0, 30)
       : [],
     customAmenities: sanitizeCustomAmenities(raw.customAmenities, 10),
+    view: ROOM_VIEWS.includes(raw.view) ? raw.view : undefined,
+    breakfastIncluded: Boolean(raw.breakfastIncluded),
+    freeCancellation: Boolean(raw.freeCancellation),
+    nonSmoking: Boolean(raw.nonSmoking),
   };
   return room;
 };
@@ -332,6 +339,8 @@ export const createHotel = async (req: Request, res: Response): Promise<void> =>
       website: req.body.website,
       whatsapp: req.body.whatsapp,
       address: req.body.address,
+      neighborhood: req.body.neighborhood,
+      postalCode: req.body.postalCode,
       city: String(city).trim(),
       country: String(country).trim(),
       latitude: req.body.latitude != null ? Number(req.body.latitude) : undefined,
@@ -357,6 +366,13 @@ export const createHotel = async (req: Request, res: Response): Promise<void> =>
       languagesSpoken: Array.isArray(req.body.languagesSpoken)
         ? req.body.languagesSpoken.filter((l: any) => typeof l === 'string').slice(0, 10)
         : [],
+      checkInMinAge: req.body.checkInMinAge != null ? Number(req.body.checkInMinAge) : undefined,
+      breakfastIncluded: Boolean(req.body.breakfastIncluded),
+      parkingType: PARKING_TYPES.includes(req.body.parkingType) ? req.body.parkingType : undefined,
+      paymentMethods: Array.isArray(req.body.paymentMethods)
+        ? req.body.paymentMethods.filter((m: any) => PAYMENT_METHODS.includes(m)).slice(0, PAYMENT_METHODS.length)
+        : [],
+      prepaymentRequired: Boolean(req.body.prepaymentRequired),
     };
 
     // Optional access code (interim monetization bridge). Validate up-front so
@@ -423,9 +439,10 @@ export const updateHotel = async (req: Request, res: Response): Promise<void> =>
 
     const allowedFields = [
       'name', 'description', 'propertyType', 'starRating', 'contactPhone', 'contactEmail',
-      'website', 'whatsapp', 'address', 'city', 'country', 'latitude', 'longitude',
+      'website', 'whatsapp', 'address', 'neighborhood', 'postalCode', 'city', 'country', 'latitude', 'longitude',
       'amenities', 'customAmenities', 'currency', 'checkInTime', 'checkOutTime', 'minNights', 'maxNights',
       'cancellationPolicy', 'houseRules', 'petsAllowed', 'smokingAllowed', 'languagesSpoken',
+      'checkInMinAge', 'breakfastIncluded', 'parkingType', 'paymentMethods', 'prepaymentRequired',
       'isActive',
     ];
 
@@ -459,6 +476,17 @@ export const updateHotel = async (req: Request, res: Response): Promise<void> =>
     }
     if (updates.languagesSpoken && Array.isArray(updates.languagesSpoken)) {
       updates.languagesSpoken = updates.languagesSpoken.filter((l: any) => typeof l === 'string').slice(0, 10);
+    }
+    if (updates.parkingType !== undefined && !PARKING_TYPES.includes(updates.parkingType)) {
+      delete updates.parkingType;
+    }
+    if (updates.paymentMethods !== undefined) {
+      updates.paymentMethods = Array.isArray(updates.paymentMethods)
+        ? updates.paymentMethods.filter((m: any) => PAYMENT_METHODS.includes(m)).slice(0, PAYMENT_METHODS.length)
+        : [];
+    }
+    if (updates.checkInMinAge !== undefined && updates.checkInMinAge !== null) {
+      updates.checkInMinAge = Number(updates.checkInMinAge);
     }
 
     // Rooms replace the whole array when provided

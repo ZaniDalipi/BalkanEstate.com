@@ -44,7 +44,8 @@
     "statProperties": "Pronat",
     "statRooms": "Dhomat",
     "statCities": "Qytete",
-    "statCountries": "Shtete"},
+    "statCountries": "Shtete"
+  },
   "sort": {
     "newest": "Newest",
     "priceAsc": "Price: low to high",
@@ -181,7 +182,9 @@
       "amenities": "Property amenities",
       "photos": "Photos",
       "policies": "Policies & house rules",
-      "amenitiesHint": "Available to all guests across the whole property."
+      "amenitiesHint": "Available to all guests across the whole property.",
+      "booking": "Rezervimi & pagesa",
+      "bookingHint": "Tregoni si paguajnë mysafirët, ku parkojnë dhe çfarë të presin në check-in."
     },
     "fields": {
       "name": "Property name",
@@ -231,7 +234,17 @@
       "decreaseQuantity": "Decrease quantity",
       "increaseQuantity": "Increase quantity",
       "customAmenities": "Add your own amenity",
-      "customAmenityPlaceholder": "e.g. Rooftop bar"
+      "customAmenityPlaceholder": "e.g. Rooftop bar",
+      "neighborhood": "Lagjja / zona",
+      "postalCode": "Kodi postar",
+      "roomView": "Pamja e dhomës",
+      "breakfastIncluded": "Mëngjesi i përfshirë",
+      "freeCancellation": "Anulim falas",
+      "nonSmoking": "Pa duhan",
+      "parkingType": "Parkimi",
+      "checkInMinAge": "Mosha minimale për check-in",
+      "paymentMethods": "Mënyrat e pagesës",
+      "prepaymentRequired": "Kërkohet parapagim"
     },
     "placeholders": {
       "name": "e.g. Hotel Adriatic",
@@ -243,7 +256,10 @@
       "roomDescription": "What's included in this room?",
       "houseRule": "e.g. No parties",
       "language": "e.g. English",
-      "selectPolicy": "Select a policy"
+      "selectPolicy": "Select a policy",
+      "neighborhood": "p.sh. Qyteti i Vjetër",
+      "postalCode": "p.sh. 1000",
+      "selectParking": "Zgjidhni parkimin"
     },
     "errors": {
       "nameRequired": "Property name is required",
@@ -330,5 +346,27 @@
     "king": "King bed",
     "sofa_bed": "Sofa bed",
     "bunk": "Bunk bed"
+  },
+  "roomViews": {
+    "none": "Pa pamje të veçantë",
+    "sea": "Pamje nga deti",
+    "city": "Pamje nga qyteti",
+    "garden": "Pamje nga kopshti",
+    "pool": "Pamje nga pishina",
+    "mountain": "Pamje nga mali",
+    "courtyard": "Pamje nga oborri"
+  },
+  "parkingTypes": {
+    "none": "Pa parkim",
+    "free": "Parkim falas",
+    "paid": "Parkim me pagesë",
+    "street": "Parkim në rrugë"
+  },
+  "paymentMethods": {
+    "cash": "Para në dorë",
+    "credit_card": "Kartë krediti",
+    "debit_card": "Kartë debiti",
+    "bank_transfer": "Transfertë bankare",
+    "mobile_payment": "Pagesë celulare"
   }
 }

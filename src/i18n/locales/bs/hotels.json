@@ -44,7 +44,8 @@
     "statProperties": "Objekti",
     "statRooms": "Sobe",
     "statCities": "Gradovi",
-    "statCountries": "Države"},
+    "statCountries": "Države"
+  },
   "sort": {
     "newest": "Newest",
     "priceAsc": "Price: low to high",
@@ -181,7 +182,9 @@
       "amenities": "Property amenities",
       "photos": "Photos",
       "policies": "Policies & house rules",
-      "amenitiesHint": "Available to all guests across the whole property."
+      "amenitiesHint": "Available to all guests across the whole property.",
+      "booking": "Rezervacija i plaćanje",
+      "bookingHint": "Recite gostima kako plaćaju, gdje parkiraju i šta očekivati pri prijavi."
     },
     "fields": {
       "name": "Property name",
@@ -231,7 +234,17 @@
       "decreaseQuantity": "Decrease quantity",
       "increaseQuantity": "Increase quantity",
       "customAmenities": "Add your own amenity",
-      "customAmenityPlaceholder": "e.g. Rooftop bar"
+      "customAmenityPlaceholder": "e.g. Rooftop bar",
+      "neighborhood": "Kvart / područje",
+      "postalCode": "Poštanski broj",
+      "roomView": "Pogled iz sobe",
+      "breakfastIncluded": "Doručak uključen",
+      "freeCancellation": "Besplatno otkazivanje",
+      "nonSmoking": "Za nepušače",
+      "parkingType": "Parking",
+      "checkInMinAge": "Minimalna dob za prijavu",
+      "paymentMethods": "Načini plaćanja",
+      "prepaymentRequired": "Potrebna avansna uplata"
     },
     "placeholders": {
       "name": "e.g. Hotel Adriatic",
@@ -243,7 +256,10 @@
       "roomDescription": "What's included in this room?",
       "houseRule": "e.g. No parties",
       "language": "e.g. English",
-      "selectPolicy": "Select a policy"
+      "selectPolicy": "Select a policy",
+      "neighborhood": "npr. Stari grad",
+      "postalCode": "npr. 1000",
+      "selectParking": "Odaberite parking"
     },
     "errors": {
       "nameRequired": "Property name is required",
@@ -330,5 +346,27 @@
     "king": "King bed",
     "sofa_bed": "Sofa bed",
     "bunk": "Bunk bed"
+  },
+  "roomViews": {
+    "none": "Bez posebnog pogleda",
+    "sea": "Pogled na more",
+    "city": "Pogled na grad",
+    "garden": "Pogled na vrt",
+    "pool": "Pogled na bazen",
+    "mountain": "Pogled na planinu",
+    "courtyard": "Pogled na dvorište"
+  },
+  "parkingTypes": {
+    "none": "Bez parkinga",
+    "free": "Besplatan parking",
+    "paid": "Parking uz naknadu",
+    "street": "Ulični parking"
+  },
+  "paymentMethods": {
+    "cash": "Gotovina",
+    "credit_card": "Kreditna kartica",
+    "debit_card": "Debitna kartica",
+    "bank_transfer": "Bankovni transfer",
+    "mobile_payment": "Mobilno plaćanje"
   }
 }

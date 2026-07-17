@@ -89,6 +89,18 @@ export type SupportedCurrency = typeof SUPPORTED_CURRENCIES[number];
 export const CANCELLATION_POLICIES = ['flexible', 'moderate', 'strict', 'non_refundable'] as const;
 export type CancellationPolicy = typeof CANCELLATION_POLICIES[number];
 
+// On-site parking options a guest needs to know before booking
+export const PARKING_TYPES = ['none', 'free', 'paid', 'street'] as const;
+export type ParkingType = typeof PARKING_TYPES[number];
+
+// Payment methods a property accepts
+export const PAYMENT_METHODS = ['cash', 'credit_card', 'debit_card', 'bank_transfer', 'mobile_payment'] as const;
+export type PaymentMethod = typeof PAYMENT_METHODS[number];
+
+// Outlook a specific room offers
+export const ROOM_VIEWS = ['none', 'sea', 'city', 'garden', 'pool', 'mountain', 'courtyard'] as const;
+export type RoomView = typeof ROOM_VIEWS[number];
+
 export interface IBedOption {
   bedType: BedType;
   quantity: number;
@@ -111,6 +123,14 @@ export interface IRoom {
   amenities?: HotelAmenity[];
   /** Free-text amenities the host defines beyond the standard list. */
   customAmenities?: string[];
+  /** Outlook from the room (e.g. sea, city). */
+  view?: RoomView;
+  /** Whether breakfast is included in this room's nightly rate. */
+  breakfastIncluded?: boolean;
+  /** Whether this room can be cancelled free of charge. */
+  freeCancellation?: boolean;
+  /** Whether this is a non-smoking room. */
+  nonSmoking?: boolean;
 }
 
 export interface IHotelImage {
@@ -131,6 +151,8 @@ export interface IHotel extends Document {
   website?: string;
   whatsapp?: string;
   address?: string;
+  neighborhood?: string;
+  postalCode?: string;
   city: string;
   country: string;
   latitude?: number;
@@ -153,6 +175,16 @@ export interface IHotel extends Document {
   petsAllowed: boolean;
   smokingAllowed: boolean;
   languagesSpoken?: string[];
+  /** Minimum guest age allowed to check in. */
+  checkInMinAge?: number;
+  /** Whether breakfast is included in the rate by default. */
+  breakfastIncluded?: boolean;
+  /** On-site parking option. */
+  parkingType?: ParkingType;
+  /** Payment methods the property accepts. */
+  paymentMethods?: PaymentMethod[];
+  /** Whether prepayment is required to confirm a booking. */
+  prepaymentRequired?: boolean;
   accessCode?: string;
   isComped: boolean;
   isActive: boolean;
@@ -249,6 +281,13 @@ const RoomSchema = new Schema<IRoom>(
         message: 'A room cannot have more than 10 custom amenities',
       },
     },
+    view: {
+      type: String,
+      enum: { values: ROOM_VIEWS, message: 'Invalid room view: {VALUE}' },
+    },
+    breakfastIncluded: { type: Boolean, default: false },
+    freeCancellation: { type: Boolean, default: false },
+    nonSmoking: { type: Boolean, default: false },
   },
   { _id: true }
 );
@@ -327,6 +366,16 @@ const HotelSchema: Schema = new Schema(
       trim: true,
       maxlength: [200, 'Address cannot exceed 200 characters'],
     },
+    neighborhood: {
+      type: String,
+      trim: true,
+      maxlength: [100, 'Neighborhood cannot exceed 100 characters'],
+    },
+    postalCode: {
+      type: String,
+      trim: true,
+      maxlength: [20, 'Postal code cannot exceed 20 characters'],
+    },
     city: {
       type: String,
       required: [true, 'City is required'],
@@ -397,6 +446,17 @@ const HotelSchema: Schema = new Schema(
       trim: true,
       maxlength: [50, 'Language name cannot exceed 50 characters'],
     }],
+    checkInMinAge: { type: Number, min: [0, 'Age cannot be negative'], max: [99, 'Age cannot exceed 99'] },
+    breakfastIncluded: { type: Boolean, default: false },
+    parkingType: {
+      type: String,
+      enum: { values: PARKING_TYPES, message: 'Invalid parking type: {VALUE}' },
+    },
+    paymentMethods: [{
+      type: String,
+      enum: { values: PAYMENT_METHODS, message: 'Invalid payment method: {VALUE}' },
+    }],
+    prepaymentRequired: { type: Boolean, default: false },
     // Access-code / comp tracking (interim monetization bridge).
     accessCode: { type: String, trim: true, uppercase: true },
     isComped: { type: Boolean, default: false },

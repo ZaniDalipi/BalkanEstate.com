@@ -44,7 +44,8 @@
     "statProperties": "Објекти",
     "statRooms": "Соби",
     "statCities": "Градови",
-    "statCountries": "Земји"},
+    "statCountries": "Земји"
+  },
   "sort": {
     "newest": "Newest",
     "priceAsc": "Price: low to high",
@@ -181,7 +182,9 @@
       "amenities": "Property amenities",
       "photos": "Photos",
       "policies": "Policies & house rules",
-      "amenitiesHint": "Available to all guests across the whole property."
+      "amenitiesHint": "Available to all guests across the whole property.",
+      "booking": "Резервација и плаќање",
+      "bookingHint": "Кажете им на гостите како плаќаат, каде паркираат и што да очекуваат при пријавување."
     },
     "fields": {
       "name": "Property name",
@@ -231,7 +234,17 @@
       "decreaseQuantity": "Decrease quantity",
       "increaseQuantity": "Increase quantity",
       "customAmenities": "Add your own amenity",
-      "customAmenityPlaceholder": "e.g. Rooftop bar"
+      "customAmenityPlaceholder": "e.g. Rooftop bar",
+      "neighborhood": "Населба / област",
+      "postalCode": "Поштенски код",
+      "roomView": "Поглед од собата",
+      "breakfastIncluded": "Појадок вклучен",
+      "freeCancellation": "Бесплатно откажување",
+      "nonSmoking": "За непушачи",
+      "parkingType": "Паркинг",
+      "checkInMinAge": "Минимална возраст за пријавување",
+      "paymentMethods": "Начини на плаќање",
+      "prepaymentRequired": "Потребна претплата"
     },
     "placeholders": {
       "name": "e.g. Hotel Adriatic",
@@ -243,7 +256,10 @@
       "roomDescription": "What's included in this room?",
       "houseRule": "e.g. No parties",
       "language": "e.g. English",
-      "selectPolicy": "Select a policy"
+      "selectPolicy": "Select a policy",
+      "neighborhood": "на пр. Стар град",
+      "postalCode": "на пр. 1000",
+      "selectParking": "Изберете паркинг"
     },
     "errors": {
       "nameRequired": "Property name is required",
@@ -330,5 +346,27 @@
     "king": "King bed",
     "sofa_bed": "Sofa bed",
     "bunk": "Bunk bed"
+  },
+  "roomViews": {
+    "none": "Без посебен поглед",
+    "sea": "Поглед на море",
+    "city": "Поглед на град",
+    "garden": "Поглед на градина",
+    "pool": "Поглед на базен",
+    "mountain": "Поглед на планина",
+    "courtyard": "Поглед на двор"
+  },
+  "parkingTypes": {
+    "none": "Без паркинг",
+    "free": "Бесплатен паркинг",
+    "paid": "Паркинг со наплата",
+    "street": "Улично паркирање"
+  },
+  "paymentMethods": {
+    "cash": "Готовина",
+    "credit_card": "Кредитна картичка",
+    "debit_card": "Дебитна картичка",
+    "bank_transfer": "Банкарски трансфер",
+    "mobile_payment": "Мобилно плаќање"
   }
 }

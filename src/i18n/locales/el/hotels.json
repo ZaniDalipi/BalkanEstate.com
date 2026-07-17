@@ -44,7 +44,8 @@
     "statProperties": "Καταλύματα",
     "statRooms": "Δωμάτια",
     "statCities": "Πόλεις",
-    "statCountries": "Χώρες"},
+    "statCountries": "Χώρες"
+  },
   "sort": {
     "newest": "Newest",
     "priceAsc": "Price: low to high",
@@ -181,7 +182,9 @@
       "amenities": "Property amenities",
       "photos": "Photos",
       "policies": "Policies & house rules",
-      "amenitiesHint": "Available to all guests across the whole property."
+      "amenitiesHint": "Available to all guests across the whole property.",
+      "booking": "Κράτηση & πληρωμή",
+      "bookingHint": "Πείτε στους επισκέπτες πώς πληρώνουν, πού παρκάρουν και τι να περιμένουν κατά το check-in."
     },
     "fields": {
       "name": "Property name",
@@ -231,7 +234,17 @@
       "decreaseQuantity": "Decrease quantity",
       "increaseQuantity": "Increase quantity",
       "customAmenities": "Add your own amenity",
-      "customAmenityPlaceholder": "e.g. Rooftop bar"
+      "customAmenityPlaceholder": "e.g. Rooftop bar",
+      "neighborhood": "Γειτονιά / περιοχή",
+      "postalCode": "Ταχυδρομικός κώδικας",
+      "roomView": "Θέα δωματίου",
+      "breakfastIncluded": "Πρωινό περιλαμβάνεται",
+      "freeCancellation": "Δωρεάν ακύρωση",
+      "nonSmoking": "Μη καπνιστών",
+      "parkingType": "Στάθμευση",
+      "checkInMinAge": "Ελάχιστη ηλικία check-in",
+      "paymentMethods": "Τρόποι πληρωμής",
+      "prepaymentRequired": "Απαιτείται προπληρωμή"
     },
     "placeholders": {
       "name": "e.g. Hotel Adriatic",
@@ -243,7 +256,10 @@
       "roomDescription": "What's included in this room?",
       "houseRule": "e.g. No parties",
       "language": "e.g. English",
-      "selectPolicy": "Select a policy"
+      "selectPolicy": "Select a policy",
+      "neighborhood": "π.χ. Παλιά Πόλη",
+      "postalCode": "π.χ. 1000",
+      "selectParking": "Επιλέξτε στάθμευση"
     },
     "errors": {
       "nameRequired": "Property name is required",
@@ -330,5 +346,27 @@
     "king": "King bed",
     "sofa_bed": "Sofa bed",
     "bunk": "Bunk bed"
+  },
+  "roomViews": {
+    "none": "Χωρίς συγκεκριμένη θέα",
+    "sea": "Θέα στη θάλασσα",
+    "city": "Θέα στην πόλη",
+    "garden": "Θέα στον κήπο",
+    "pool": "Θέα στην πισίνα",
+    "mountain": "Θέα στο βουνό",
+    "courtyard": "Θέα στην αυλή"
+  },
+  "parkingTypes": {
+    "none": "Χωρίς στάθμευση",
+    "free": "Δωρεάν στάθμευση",
+    "paid": "Στάθμευση επί πληρωμή",
+    "street": "Στάθμευση στον δρόμο"
+  },
+  "paymentMethods": {
+    "cash": "Μετρητά",
+    "credit_card": "Πιστωτική κάρτα",
+    "debit_card": "Χρεωστική κάρτα",
+    "bank_transfer": "Τραπεζικό έμβασμα",
+    "mobile_payment": "Πληρωμή μέσω κινητού"
   }
 }
