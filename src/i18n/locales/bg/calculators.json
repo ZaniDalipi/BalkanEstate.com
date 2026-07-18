@@ -65,7 +65,8 @@
     "step2Title": "Adjust Parameters",
     "step2Desc": "Set your down payment, loan term, and interest rate",
     "step3Title": "See Your Payment",
-    "step3Desc": "Get your estimated monthly mortgage payment instantly"
+    "step3Desc": "Get your estimated monthly mortgage payment instantly",
+    "rateContext": "Типичен лихвен процент за {{country}}: {{min}}%–{{max}}% (пазарна средна стойност за {{year}}). Коригирайте според офертата на вашата банка."
   },
   "rentVsBuy": {
     "title": "Калкулатор: Наем срещу покупка",

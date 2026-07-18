@@ -65,7 +65,8 @@
       "yearly": "Yearly",
       "total": "Total"
     },
-    "disclaimer": "This is an estimate for informational purposes only. Consult with a financial professional for actual rates and payments."
+    "disclaimer": "This is an estimate for informational purposes only. Consult with a financial professional for actual rates and payments.",
+    "rateContext": "Typical {{country}} rate: {{min}}%–{{max}}% ({{year}} market average). Adjust for your bank's offer."
   },
   "rentVsBuy": {
     "title": "Rent vs. Buy Calculator",

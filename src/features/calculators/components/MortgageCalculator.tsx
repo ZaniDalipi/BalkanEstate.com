@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { formatPrice, getCurrencySymbol } from '@/utils/currency';
+import {
+  getMortgageProfile,
+  formatLocalCurrency,
+  getLocalCurrencySymbol,
+  MORTGAGE_DATA_YEAR,
+} from '../data/mortgageMarketData';
 
 interface MortgageCalculatorProps {
   propertyPrice: number;
@@ -23,14 +28,31 @@ const TermButton: React.FC<{ term: number, selectedTerm: number, onClick: (term:
 
 const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, country }) => {
     const { t } = useTranslation(['calculators']);
-    const [downPayment, setDownPayment] = useState(20);
+    const profile = useMemo(() => getMortgageProfile(country), [country]);
+
+    const [downPayment, setDownPayment] = useState(profile.defaultDownPaymentPercent);
     const [downPaymentType, setDownPaymentType] = useState<'percent' | 'amount'>('percent');
-    const [interestRate, setInterestRate] = useState(3.5);
-    const [loanTerm, setLoanTerm] = useState(30);
+    const [interestRate, setInterestRate] = useState(profile.typicalRate);
+    const [loanTerm, setLoanTerm] = useState(profile.defaultTermYears);
     const [monthlyPayment, setMonthlyPayment] = useState(0);
     const [isSliderActive, setIsSliderActive] = useState(false);
 
-    const currencySymbol = getCurrencySymbol(country);
+    const currencySymbol = getLocalCurrencySymbol(country);
+
+    // Term presets, trimmed to what the selected market actually offers.
+    const termOptions = useMemo(
+        () => [15, 20, 25, 30, 35].filter((term) => term <= profile.maxTermYears),
+        [profile],
+    );
+
+    // Re-seed the location-specific defaults whenever the country changes so the
+    // pre-filled rate, down payment and term always reflect the selected market.
+    useEffect(() => {
+        setDownPayment(profile.defaultDownPaymentPercent);
+        setDownPaymentType('percent');
+        setInterestRate(profile.typicalRate);
+        setLoanTerm(profile.defaultTermYears);
+    }, [profile]);
 
     // Handle slider interaction states
     const handleSliderStart = useCallback(() => setIsSliderActive(true), []);
@@ -103,7 +125,7 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
             <div className="space-y-4">
                 <div>
                     <label className="text-xs font-medium text-neutral-500">{t('calculators:mortgage.fields.propertyPrice')}</label>
-                    <p className="text-lg font-bold text-neutral-800">{formatPrice(propertyPrice, country)}</p>
+                    <p className="text-lg font-bold text-neutral-800">{formatLocalCurrency(propertyPrice, country)}</p>
                 </div>
 
                 <div>
@@ -236,7 +258,7 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
 
                     {/* Value display with input */}
                     <div className="flex items-center justify-between mt-2">
-                        <p className="text-sm font-semibold text-primary">{formatPrice(downPaymentAmount, country)}</p>
+                        <p className="text-sm font-semibold text-primary">{formatLocalCurrency(downPaymentAmount, country)}</p>
                         <input
                             type="number"
                             value={downPayment}
@@ -251,7 +273,7 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                  <div>
                     <label className="block text-xs font-semibold text-neutral-700 mb-1.5">{t('calculators:mortgage.fields.loanTerm')}</label>
                     <div className="flex items-center space-x-1 bg-neutral-100 p-1 rounded-full border border-neutral-200">
-                        {[15, 20, 25, 30].map(term => (
+                        {termOptions.map(term => (
                             <TermButton key={term} term={term} selectedTerm={loanTerm} onClick={setLoanTerm} yrsLabel={t('calculators:mortgage.fields.yrs')} />
                         ))}
                     </div>
@@ -267,12 +289,21 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                         onChange={e => setInterestRate(e.target.valueAsNumber || 0)}
                         className="w-full text-sm font-semibold bg-neutral-50 border border-neutral-200 rounded-md p-2 text-neutral-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                     />
+                    <p className="text-[10px] text-neutral-500 mt-1.5">
+                        {t('calculators:mortgage.rateContext', {
+                            country: profile.name,
+                            min: profile.rateRange.min,
+                            max: profile.rateRange.max,
+                            year: MORTGAGE_DATA_YEAR,
+                            defaultValue: 'Typical {{country}} rate: {{min}}%–{{max}}% ({{year}} market average). Adjust for your bank\'s offer.',
+                        })}
+                    </p>
                 </div>
 
                 <div className="border-t border-neutral-200 pt-4 text-center">
                     <p className="text-xs font-semibold text-neutral-600">{t('calculators:mortgage.results.estimatedMonthlyPayment')}</p>
                     <p className="text-3xl font-extrabold bg-gradient-to-r from-primary via-violet-500 to-primary bg-clip-text text-transparent mt-1">
-                        {formatPrice(monthlyPayment, country)}
+                        {formatLocalCurrency(monthlyPayment, country)}
                     </p>
                 </div>
             </div>

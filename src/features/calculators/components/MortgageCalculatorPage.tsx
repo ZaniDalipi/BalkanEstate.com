@@ -4,21 +4,7 @@ import { motion } from 'framer-motion';
 import MortgageCalculator from './MortgageCalculator';
 import { CalculatorIcon } from '@/constants';
 import Footer from '@/components/shared/Footer';
-
-// Balkan countries with their currency codes
-const COUNTRIES = [
-  { code: 'MK', name: 'North Macedonia', currency: 'MKD' },
-  { code: 'AL', name: 'Albania', currency: 'ALL' },
-  { code: 'RS', name: 'Serbia', currency: 'RSD' },
-  { code: 'XK', name: 'Kosovo', currency: 'EUR' },
-  { code: 'ME', name: 'Montenegro', currency: 'EUR' },
-  { code: 'BA', name: 'Bosnia and Herzegovina', currency: 'BAM' },
-  { code: 'HR', name: 'Croatia', currency: 'EUR' },
-  { code: 'SI', name: 'Slovenia', currency: 'EUR' },
-  { code: 'BG', name: 'Bulgaria', currency: 'BGN' },
-  { code: 'GR', name: 'Greece', currency: 'EUR' },
-  { code: 'RO', name: 'Romania', currency: 'RON' },
-];
+import { MORTGAGE_COUNTRIES as COUNTRIES } from '../data/mortgageMarketData';
 
 const MortgageCalculatorPage: React.FC = () => {
   const { t } = useTranslation(['calculators', 'common']);

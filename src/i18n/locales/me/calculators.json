@@ -65,7 +65,8 @@
       "yearly": "Godišnje",
       "total": "Ukupno"
     },
-    "disclaimer": "Ovo je procjena samo u informativne svrhe. Konsultujte se sa finansijskim stručnjakom za stvarne stope i plaćanja."
+    "disclaimer": "Ovo je procjena samo u informativne svrhe. Konsultujte se sa finansijskim stručnjakom za stvarne stope i plaćanja.",
+    "rateContext": "Tipična stopa za {{country}}: {{min}}%–{{max}}% (tržišni prosjek {{year}}). Prilagodite ponudi svoje banke."
   },
   "rentVsBuy": {
     "title": "Kalkulator Najam vs. Kupovina",
