@@ -741,17 +741,11 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     return () => listener.remove();
   }, [map]);
 
-  // Close the property popup when the user clicks anywhere on the map outside
-  // the card (marker clicks stop propagation, so this only fires on empty map).
-  // Skipped while measuring, where a map click adds a measurement point instead.
-  useEffect(() => {
-    const mapToUse = map || mapInstanceRef.current;
-    if (!mapToUse || showMeasurement) return;
-    const listener = mapToUse.addListener('click', () => {
-      setSelectedProperty(null);
-    });
-    return () => listener.remove();
-  }, [map, showMeasurement]);
+  // Note: dismissing the popup when the user interacts outside the card
+  // (empty map, the property list, page chrome, another marker) is handled at
+  // the document level inside MapPopupOverlay, which hit-tests against the
+  // card's own DOM node and works for both mouse and touch. Keeping that logic
+  // in one place avoids a second, map-only close path that misses off-map taps.
 
   // Update map type when it changes (styles are controlled via mapId in Cloud Console)
   useEffect(() => {

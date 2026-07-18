@@ -126,8 +126,11 @@ const MapPopupOverlay: React.FC<MapPopupOverlayProps> = ({
       onCloseRef.current();
     };
 
-    // Pointer/touch start (not click) so the card dismisses as soon as the press
-    // lands, before any downstream click handling.
+    // Capture phase on purpose: Google Maps stops propagation of pointer events
+    // on its own canvas to drive dragging, so a bubble-phase listener would never
+    // see a press on the map tiles. Capturing at the document root fires before
+    // Maps can swallow it. mousedown + touchstart cover desktop and touch so the
+    // card dismisses on the press itself, before any downstream click handling.
     document.addEventListener('mousedown', handleOutside, true);
     document.addEventListener('touchstart', handleOutside, true);
 
