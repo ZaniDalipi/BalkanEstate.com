@@ -70,7 +70,8 @@
     "notFound": "This property could not be found.",
     "backToList": "Back to results",
     "rooms": "Rooms & rates",
-    "sleeps": "Sleeps {{count}}",
+    "sleeps": "Up to {{count}} guests",
+    "sleeps_one": "Up to {{count}} guest",
     "bedsCount": "{{count}} beds",
     "bedsCount_one": "{{count}} bed",
     "amenities": "Amenities",
@@ -98,7 +99,7 @@
     "share": "Share",
     "linkCopied": "Link copied to clipboard",
     "shareTitle": "Check out {{name}} on BalkanEstate",
-    "reserve": {
+    "booking": {
       "checkIn": "Check-in",
       "checkOut": "Check-out",
       "guests": "Guests",

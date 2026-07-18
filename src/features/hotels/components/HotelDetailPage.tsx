@@ -6,7 +6,7 @@ import { CURRENCY_SYMBOLS } from '@/src/shared/types/hotel.types';
 import ReservationWidget from './ReservationWidget';
 import {
   MapPinIcon, StarIconSolid, UsersIcon, PhoneIcon, EnvelopeIcon, GlobeAltIcon,
-  CheckIcon, CheckBadgeIcon, HomeIcon, PhotoIcon, XMarkIcon, HeartIcon, ShareIcon,
+  CheckIcon, CheckBadgeIcon, HomeIcon, PhotoIcon, XMarkIcon, HeartIcon, ShareIcon, BedIcon,
 } from '@/constants';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { useAppContext } from '@/context/AppContext';
@@ -197,59 +197,52 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
             <div className="bg-white rounded-2xl border border-neutral-200 p-6">
               <h2 className="text-lg font-semibold text-neutral-900 mb-4">{t('detail.rooms')}</h2>
               <div className="space-y-4">
-                {hotel.rooms?.map((room, i) => (
+                {hotel.rooms?.map((room, i) => {
+                  const bedSummary = room.bedConfiguration && room.bedConfiguration.length > 0
+                    ? room.bedConfiguration.map((b) => `${b.quantity} ${t(`bedTypes.${b.bedType}`)}`).join(' · ')
+                    : t('detail.bedsCount', { count: room.beds });
+                  return (
                   <div
                     key={room._id || i}
-                    className="group relative flex flex-col sm:flex-row rounded-2xl border border-neutral-200 overflow-hidden hover:border-primary/40 hover:shadow-lg transition-all"
+                    className="group flex flex-col sm:flex-row rounded-2xl border border-neutral-200 bg-white overflow-hidden hover:border-primary/50 hover:shadow-[0_12px_32px_-12px_rgba(2,82,205,0.18)] transition-all"
                   >
-                    {/* Left accent bar */}
-                    <div className="hidden sm:block w-1.5 bg-primary" />
-
                     {/* Content */}
                     <div className="flex-1 min-w-0 p-5">
-                      <div className="flex items-start gap-2 flex-wrap">
-                        <h3 className="font-semibold text-neutral-900 text-base break-words min-w-0">{room.name}</h3>
-                        <span className="px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600 text-[11px] font-medium shrink-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-semibold text-neutral-900 text-[15px] break-words min-w-0">{room.name}</h3>
+                        <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[11px] font-semibold shrink-0">
                           {t(`roomTypes.${room.roomType}`)}
                         </span>
                       </div>
 
-                      {/* Spec chips */}
-                      <div className="mt-3 flex flex-wrap items-center gap-2">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-50 border border-neutral-200 text-xs text-neutral-600">
-                          <UsersIcon className="w-3.5 h-3.5" /> {t('detail.sleeps', { count: room.maxGuests })}
+                      {/* Spec row — clean inline facts with icons */}
+                      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px] text-neutral-600">
+                        <span className="inline-flex items-center gap-1.5">
+                          <UsersIcon className="w-4 h-4 text-neutral-400" /> {t('detail.sleeps', { count: room.maxGuests })}
                         </span>
-                        {room.bedConfiguration && room.bedConfiguration.length > 0 ? (
-                          room.bedConfiguration.map((bed, bi) => (
-                            <span key={bi} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-50 border border-neutral-200 text-xs text-neutral-600">
-                              {bed.quantity}× {t(`bedTypes.${bed.bedType}`)}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-50 border border-neutral-200 text-xs text-neutral-600">
-                            {t('detail.bedsCount', { count: room.beds })}
-                          </span>
-                        )}
+                        <span className="inline-flex items-center gap-1.5">
+                          <BedIcon className="w-4 h-4 text-neutral-400" /> {bedSummary}
+                        </span>
                         {room.bathrooms ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-50 border border-neutral-200 text-xs text-neutral-600">
-                            {t('detail.bathroomsCount', { count: room.bathrooms })}
+                          <span className="inline-flex items-center gap-1.5">
+                            <CheckBadgeIcon className="w-4 h-4 text-neutral-400" /> {t('detail.bathroomsCount', { count: room.bathrooms })}
                           </span>
                         ) : null}
                         {room.sizeSqm ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-50 border border-neutral-200 text-xs text-neutral-600">
-                            {room.sizeSqm} m²
+                          <span className="inline-flex items-center gap-1.5">
+                            <HomeIcon className="w-4 h-4 text-neutral-400" /> {room.sizeSqm} m²
                           </span>
                         ) : null}
                         {room.view && room.view !== 'none' ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-50 border border-neutral-200 text-xs text-neutral-600">
-                            {t(`roomViews.${room.view}`)}
+                          <span className="inline-flex items-center gap-1.5">
+                            <MapPinIcon className="w-4 h-4 text-neutral-400" /> {t(`roomViews.${room.view}`)}
                           </span>
                         ) : null}
                       </div>
 
                       {/* Booking perks */}
                       {(room.breakfastIncluded || room.freeCancellation || room.nonSmoking) && (
-                        <div className="mt-2.5 flex flex-wrap gap-1.5">
+                        <div className="mt-3 flex flex-wrap gap-1.5">
                           {room.breakfastIncluded && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[11px] font-medium">
                               <CheckIcon className="w-3 h-3" /> {t('form.fields.breakfastIncluded')}
@@ -292,24 +285,29 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
                     </div>
 
                     {/* Price panel */}
-                    <div className="shrink-0 sm:w-44 border-t sm:border-t-0 sm:border-l border-neutral-100 bg-neutral-50/60 p-5 flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 text-right">
+                    <div className="shrink-0 sm:w-52 border-t sm:border-t-0 sm:border-l border-neutral-100 bg-gradient-to-br from-neutral-50 to-white p-5 flex sm:flex-col items-end sm:items-stretch justify-between gap-3 sm:text-right">
                       <div>
-                        <p className="text-xs text-neutral-400">{t('card.from')}</p>
-                        <p className="text-2xl font-extrabold text-neutral-900 leading-none">
-                          {CURRENCY_SYMBOLS[room.currency] || currencySymbol}{room.pricePerNight}
+                        <p className="leading-none">
+                          <span className="text-2xl font-extrabold text-neutral-900">{CURRENCY_SYMBOLS[room.currency] || currencySymbol}{room.pricePerNight}</span>
+                          <span className="text-sm font-normal text-neutral-400"> / {t('card.night')}</span>
                         </p>
-                        <p className="text-xs text-neutral-400 mt-0.5">/ {t('card.night')}</p>
+                        {room.freeCancellation && (
+                          <p className="mt-1.5 hidden sm:block text-[11px] font-medium text-emerald-600">
+                            {t('form.fields.freeCancellation')}
+                          </p>
+                        )}
                       </div>
                       <button
                         type="button"
                         onClick={() => reserveRoom(i)}
-                        className="px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors whitespace-nowrap"
+                        className="px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 shadow-sm shadow-primary/20 hover:shadow-md hover:shadow-primary/25 transition-all whitespace-nowrap"
                       >
                         {t('detail.reserve')}
                       </button>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -425,7 +423,7 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
               ) : null}
 
               <div className="p-6">
-                <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-2">{t('detail.reserve.contactHost')}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-2">{t('detail.booking.contactHost')}</p>
                 <div className="space-y-2">
                   <a href={`tel:${hotel.contactPhone}`} className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-neutral-300 text-neutral-700 font-medium hover:bg-neutral-50 transition-colors">
                     <PhoneIcon className="w-4 h-4" /> {t('detail.callToBook')}

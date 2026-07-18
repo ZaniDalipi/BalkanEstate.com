@@ -58,13 +58,13 @@ const ReservationWidget: React.FC<ReservationWidgetProps> = ({ hotel, selectedRo
 
   const requestMessage = useMemo(() => {
     const lines = [
-      t('detail.reserve.messageIntro', { name: hotel.name }),
-      `• ${t('detail.reserve.roomLabel')}: ${room?.name ?? ''}`,
-      `• ${t('detail.reserve.checkIn')}: ${fmtDate(checkIn)}`,
-      `• ${t('detail.reserve.checkOut')}: ${fmtDate(checkOut)}`,
-      `• ${t('detail.reserve.nights')}: ${nights}`,
-      `• ${t('detail.reserve.guests')}: ${guests}`,
-      `• ${t('detail.reserve.estimatedTotal')}: ${symbol}${subtotal}`,
+      t('detail.booking.messageIntro', { name: hotel.name }),
+      `• ${t('detail.booking.roomLabel')}: ${room?.name ?? ''}`,
+      `• ${t('detail.booking.checkIn')}: ${fmtDate(checkIn)}`,
+      `• ${t('detail.booking.checkOut')}: ${fmtDate(checkOut)}`,
+      `• ${t('detail.booking.nights')}: ${nights}`,
+      `• ${t('detail.booking.guests')}: ${guests}`,
+      `• ${t('detail.booking.estimatedTotal')}: ${symbol}${subtotal}`,
     ];
     return lines.join('\n');
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -78,7 +78,7 @@ const ReservationWidget: React.FC<ReservationWidgetProps> = ({ hotel, selectedRo
       return;
     }
     if (hotel.contactEmail) {
-      const subject = t('detail.reserve.emailSubject', { name: hotel.name });
+      const subject = t('detail.booking.emailSubject', { name: hotel.name });
       window.location.href = `mailto:${hotel.contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(requestMessage)}`;
       return;
     }
@@ -96,7 +96,7 @@ const ReservationWidget: React.FC<ReservationWidgetProps> = ({ hotel, selectedRo
       {/* Date range */}
       <div className="grid grid-cols-2 rounded-xl border border-neutral-300 overflow-hidden">
         <label className="p-3 border-r border-neutral-300 cursor-pointer">
-          <span className="block text-[11px] font-semibold uppercase tracking-wide text-neutral-400">{t('detail.reserve.checkIn')}</span>
+          <span className="block text-[11px] font-semibold uppercase tracking-wide text-neutral-400">{t('detail.booking.checkIn')}</span>
           <input
             type="date"
             value={checkIn}
@@ -110,7 +110,7 @@ const ReservationWidget: React.FC<ReservationWidgetProps> = ({ hotel, selectedRo
           />
         </label>
         <label className="p-3 cursor-pointer">
-          <span className="block text-[11px] font-semibold uppercase tracking-wide text-neutral-400">{t('detail.reserve.checkOut')}</span>
+          <span className="block text-[11px] font-semibold uppercase tracking-wide text-neutral-400">{t('detail.booking.checkOut')}</span>
           <input
             type="date"
             value={checkOut}
@@ -124,7 +124,7 @@ const ReservationWidget: React.FC<ReservationWidgetProps> = ({ hotel, selectedRo
       {/* Guests */}
       <div className="mt-2 flex items-center justify-between rounded-xl border border-neutral-300 px-3 py-2.5">
         <span className="flex items-center gap-2 text-sm text-neutral-600">
-          <UsersIcon className="w-4 h-4 text-neutral-400" /> {t('detail.reserve.guests')}
+          <UsersIcon className="w-4 h-4 text-neutral-400" /> {t('detail.booking.guests')}
         </span>
         <div className="flex items-center gap-1">
           <button
@@ -164,9 +164,9 @@ const ReservationWidget: React.FC<ReservationWidgetProps> = ({ hotel, selectedRo
       {/* Warnings */}
       {(belowMinNights || aboveMaxNights || tooManyGuests) && (
         <div className="mt-2 space-y-1">
-          {belowMinNights && <p className="text-xs text-amber-600">{t('detail.reserve.minNightsWarning', { count: minNights })}</p>}
-          {aboveMaxNights && <p className="text-xs text-amber-600">{t('detail.reserve.maxNightsWarning', { count: hotel.maxNights })}</p>}
-          {tooManyGuests && <p className="text-xs text-amber-600">{t('detail.reserve.guestsWarning', { count: room?.maxGuests || 0 })}</p>}
+          {belowMinNights && <p className="text-xs text-amber-600">{t('detail.booking.minNightsWarning', { count: minNights })}</p>}
+          {aboveMaxNights && <p className="text-xs text-amber-600">{t('detail.booking.maxNightsWarning', { count: hotel.maxNights })}</p>}
+          {tooManyGuests && <p className="text-xs text-amber-600">{t('detail.booking.guestsWarning', { count: room?.maxGuests || 0 })}</p>}
         </div>
       )}
 
@@ -174,11 +174,11 @@ const ReservationWidget: React.FC<ReservationWidgetProps> = ({ hotel, selectedRo
       {room && nights > 0 && (
         <div className="mt-4 space-y-1.5 text-sm">
           <div className="flex items-center justify-between text-neutral-600">
-            <span>{symbol}{room.pricePerNight} × {t('detail.reserve.nightsCount', { count: nights })}</span>
+            <span>{symbol}{room.pricePerNight} × {t('detail.booking.nightsCount', { count: nights })}</span>
             <span>{symbol}{subtotal}</span>
           </div>
           <div className="flex items-center justify-between pt-1.5 border-t border-neutral-100 font-semibold text-neutral-900">
-            <span>{t('detail.reserve.estimatedTotal')}</span>
+            <span>{t('detail.booking.estimatedTotal')}</span>
             <span>{symbol}{subtotal}</span>
           </div>
         </div>
@@ -191,10 +191,10 @@ const ReservationWidget: React.FC<ReservationWidgetProps> = ({ hotel, selectedRo
         disabled={!canRequest}
         className="mt-4 w-full py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
-        <CalendarIcon className="w-4 h-4" /> {t('detail.reserve.requestToBook')}
+        <CalendarIcon className="w-4 h-4" /> {t('detail.booking.requestToBook')}
       </button>
       <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-[11px] text-neutral-400">
-        <CheckIcon className="w-3.5 h-3.5 text-emerald-500" /> {t('detail.reserve.noChargeNote')}
+        <CheckIcon className="w-3.5 h-3.5 text-emerald-500" /> {t('detail.booking.noChargeNote')}
       </p>
     </div>
   );
