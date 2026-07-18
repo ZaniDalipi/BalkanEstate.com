@@ -140,5 +140,25 @@
       "title": "Obțineți Rezultate",
       "description": "Primiți evaluarea cu defalcare detaliată și analize"
     }
+  },
+  "marketReference": {
+    "title": "Referință preț de piață",
+    "subtitle": "Compară €/m² după sursa datelor",
+    "official": "Statistici oficiale",
+    "listings": "Anunțuri BalkanEstate",
+    "country": "Țară",
+    "avgOfficial": "Preț mediu · oficial",
+    "avgListings": "Preț mediu · anunțurile noastre",
+    "noListings": "Încă nu există date de piață pentru această zonă",
+    "noListingsHint": "Comutați la statistici oficiale pentru o valoare de referință.",
+    "thisProperty": "Această proprietate",
+    "marketOfficial": "Piață (oficial)",
+    "marketListings": "Piață (anunțuri)",
+    "aboveMarket": "{{pct}}% peste referința pieței",
+    "belowMarket": "{{pct}}% sub referința pieței",
+    "sourceLabel": "Sursă",
+    "sourceListings": "Agregat din anunțurile active BalkanEstate",
+    "live": "În timp real",
+    "disclaimer": "Referințele sunt valori orientative EUR/m² pentru {{year}}, nu o evaluare. Prețurile locale variază în funcție de cartier, stare și etaj."
   }
 }

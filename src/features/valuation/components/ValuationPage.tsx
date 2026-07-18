@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import ValuationForm from './ValuationForm';
 import ValuationResult from './ValuationResult';
+import MarketReferencePanel from './MarketReferencePanel';
 import { useCreateValuation } from '../hooks/useValuation';
 import type { ValuationInput, PropertyValuation } from '../types';
 import { SparklesIcon } from '@/constants';
@@ -161,6 +162,18 @@ const ValuationPage: React.FC = () => {
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-full" />
 
             <ValuationForm onSubmit={handleSubmit} isLoading={isPending} />
+          </motion.div>
+        )}
+
+        {/* Market Explorer — choose your data source */}
+        {!valuation && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.3 }}
+            className="mt-10"
+          >
+            <MarketReferencePanel />
           </motion.div>
         )}
 

@@ -144,5 +144,25 @@
       "title": "Get Results",
       "description": "Receive your valuation with detailed breakdown and insights"
     }
+  },
+  "marketReference": {
+    "title": "Market price reference",
+    "subtitle": "Compare €/m² by data source",
+    "official": "Official statistics",
+    "listings": "BalkanEstate listings",
+    "country": "Country",
+    "avgOfficial": "Average price · official",
+    "avgListings": "Average price · our listings",
+    "noListings": "No marketplace data yet for this area",
+    "noListingsHint": "Switch to official statistics for a reference figure.",
+    "thisProperty": "This property",
+    "marketOfficial": "Market (official)",
+    "marketListings": "Market (listings)",
+    "aboveMarket": "{{pct}}% above the market benchmark",
+    "belowMarket": "{{pct}}% below the market benchmark",
+    "sourceLabel": "Source",
+    "sourceListings": "Aggregated from active BalkanEstate listings",
+    "live": "Live",
+    "disclaimer": "Benchmarks are indicative EUR/m² reference points for {{year}}, not an appraisal. Local prices vary by neighbourhood, condition and floor."
   }
 }

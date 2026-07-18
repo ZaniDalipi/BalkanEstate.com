@@ -140,5 +140,25 @@
       "title": "Merr Rezultatet",
       "description": "Merrni vlerësimin tuaj me ndarje të detajuar dhe analiza"
     }
+  },
+  "marketReference": {
+    "title": "Referencë e çmimit të tregut",
+    "subtitle": "Krahaso €/m² sipas burimit të të dhënave",
+    "official": "Statistika zyrtare",
+    "listings": "Listimet e BalkanEstate",
+    "country": "Shteti",
+    "avgOfficial": "Çmimi mesatar · zyrtar",
+    "avgListings": "Çmimi mesatar · listimet tona",
+    "noListings": "Ende nuk ka të dhëna tregu për këtë zonë",
+    "noListingsHint": "Kalo te statistikat zyrtare për një vlerë reference.",
+    "thisProperty": "Kjo pronë",
+    "marketOfficial": "Tregu (zyrtar)",
+    "marketListings": "Tregu (listimet)",
+    "aboveMarket": "{{pct}}% mbi referencën e tregut",
+    "belowMarket": "{{pct}}% nën referencën e tregut",
+    "sourceLabel": "Burimi",
+    "sourceListings": "Grumbulluar nga listimet aktive të BalkanEstate",
+    "live": "Drejtpërdrejt",
+    "disclaimer": "Referencat janë vlera treguese EUR/m² për {{year}}, jo vlerësim. Çmimet lokale ndryshojnë sipas lagjes, gjendjes dhe katit."
   }
 }

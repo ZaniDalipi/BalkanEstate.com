@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { formatPrice } from '@/utils/currency';
 import type { PropertyValuation } from '../types';
+import MarketReferencePanel from './MarketReferencePanel';
 
 interface ValuationResultProps {
   valuation: PropertyValuation;
@@ -162,6 +163,14 @@ const ValuationResult: React.FC<ValuationResultProps> = ({ valuation, onNewValua
           </p>
         </div>
       </div>
+
+      {/* Market Reference — official vs. our listings */}
+      <MarketReferencePanel
+        countryName={valuation.country}
+        city={valuation.city}
+        comparePricePerSqm={valuation.pricePerSqm}
+        embedded
+      />
 
       {/* AI Insights */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
