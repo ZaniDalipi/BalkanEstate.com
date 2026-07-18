@@ -97,7 +97,25 @@
     "saved": "Saved",
     "share": "Share",
     "linkCopied": "Link copied to clipboard",
-    "shareTitle": "Check out {{name}} on BalkanEstate"
+    "shareTitle": "Check out {{name}} on BalkanEstate",
+    "reserve": {
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "guests": "Guests",
+      "roomLabel": "Room",
+      "nights": "Nights",
+      "nightsCount": "{{count}} nights",
+      "nightsCount_one": "{{count}} night",
+      "estimatedTotal": "Estimated total",
+      "requestToBook": "Request to book",
+      "noChargeNote": "You won't be charged here — this sends your request to the host.",
+      "contactHost": "Or contact the host",
+      "minNightsWarning": "This place requires a minimum of {{count}} nights.",
+      "maxNightsWarning": "This place allows a maximum of {{count}} nights.",
+      "guestsWarning": "This room sleeps up to {{count}} guests.",
+      "messageIntro": "Hi! I'd like to request a booking at {{name}}:",
+      "emailSubject": "Booking request — {{name}}"
+    }
   },
   "propertyTypes": {
     "hotel": "Hotel",

@@ -1,8 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHotel, useHotelFavorites, useToggleHotelFavorite } from '../hooks';
-import { CURRENCY_SYMBOLS, type Hotel } from '@/src/shared/types/hotel.types';
+import { CURRENCY_SYMBOLS } from '@/src/shared/types/hotel.types';
+import ReservationWidget from './ReservationWidget';
 import {
   MapPinIcon, StarIconSolid, UsersIcon, PhoneIcon, EnvelopeIcon, GlobeAltIcon,
   CheckIcon, CheckBadgeIcon, HomeIcon, PhotoIcon, XMarkIcon, HeartIcon, ShareIcon,
@@ -20,8 +21,16 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
   const { state, dispatch } = useAppContext();
   const { hotel, isLoading, error } = useHotel(hotelId);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [selectedRoomIndex, setSelectedRoomIndex] = useState(0);
+  const reserveRef = useRef<HTMLDivElement>(null);
   const { favoritedIds } = useHotelFavorites(state.isAuthenticated);
   const { toggle: toggleFavorite } = useToggleHotelFavorite();
+
+  // Pre-select a room in the reservation widget and scroll to it (from a room card).
+  const reserveRoom = useCallback((index: number) => {
+    setSelectedRoomIndex(index);
+    reserveRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   const handleToggleSave = useCallback(() => {
     if (!hotel) return;
@@ -291,12 +300,13 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
                         </p>
                         <p className="text-xs text-neutral-400 mt-0.5">/ {t('card.night')}</p>
                       </div>
-                      <a
-                        href={`tel:${hotel.contactPhone}`}
+                      <button
+                        type="button"
+                        onClick={() => reserveRoom(i)}
                         className="px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors whitespace-nowrap"
                       >
                         {t('detail.reserve')}
-                      </a>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -364,7 +374,7 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1" ref={reserveRef}>
             <div className="lg:sticky lg:top-6 rounded-2xl overflow-hidden shadow-lg shadow-black/5 border border-neutral-200 bg-white">
               {/* Price header */}
               <div className="p-6 border-b border-neutral-100">
@@ -405,9 +415,19 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
                 ) : null}
               </div>
 
+              {/* Self-service reservation: dates, guests, live total → request to host */}
+              {hotel.rooms?.length ? (
+                <ReservationWidget
+                  hotel={hotel}
+                  selectedRoomIndex={selectedRoomIndex}
+                  onSelectRoom={setSelectedRoomIndex}
+                />
+              ) : null}
+
               <div className="p-6">
+                <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-2">{t('detail.reserve.contactHost')}</p>
                 <div className="space-y-2">
-                  <a href={`tel:${hotel.contactPhone}`} className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-colors">
+                  <a href={`tel:${hotel.contactPhone}`} className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-neutral-300 text-neutral-700 font-medium hover:bg-neutral-50 transition-colors">
                     <PhoneIcon className="w-4 h-4" /> {t('detail.callToBook')}
                   </a>
                   {hotel.contactEmail && (
