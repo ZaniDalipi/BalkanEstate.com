@@ -123,6 +123,8 @@ export interface IRoom {
   amenities?: HotelAmenity[];
   /** Free-text amenities the host defines beyond the standard list. */
   customAmenities?: string[];
+  /** Photos of this specific room. */
+  images?: IHotelImage[];
   /** Outlook from the room (e.g. sea, city). */
   view?: RoomView;
   /** Whether breakfast is included in this room's nightly rate. */
@@ -279,6 +281,19 @@ const RoomSchema = new Schema<IRoom>(
       validate: {
         validator: (arr: string[]) => arr.length <= 10,
         message: 'A room cannot have more than 10 custom amenities',
+      },
+    },
+    images: {
+      type: [{
+        url: { type: String, required: true },
+        publicId: { type: String },
+        caption: { type: String, trim: true, maxlength: [200, 'Caption cannot exceed 200 characters'] },
+      }],
+      default: [],
+      _id: false,
+      validate: {
+        validator: (arr: IHotelImage[]) => arr.length <= 12,
+        message: 'A room cannot have more than 12 photos',
       },
     },
     view: {

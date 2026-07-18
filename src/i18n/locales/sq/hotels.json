@@ -113,7 +113,19 @@
       "guestsWarning": "Kjo dhomë strehon deri në {{count}} mysafirë.",
       "messageIntro": "Përshëndetje! Dëshiroj të rezervoj te {{name}}:",
       "emailSubject": "Kërkesë për rezervim — {{name}}",
-      "nightsCount_one": "{{count}} natë"
+      "nightsCount_one": "{{count}} natë",
+      "yourName": "Emri juaj",
+      "yourPhone": "Telefoni juaj",
+      "yourEmail": "Email-i juaj (opsional)",
+      "messagePlaceholder": "Shto një mesazh për pritësin (opsional)",
+      "sendRequest": "Dërgo kërkesën",
+      "sending": "Duke dërguar…",
+      "nameRequired": "Ju lutemi shkruani emrin tuaj.",
+      "phoneRequired": "Ju lutemi shkruani një numër të vlefshëm telefoni.",
+      "sendError": "Kërkesa nuk u dërgua. Provoni përsëri.",
+      "sentTitle": "Kërkesa u dërgua!",
+      "sentBody": "Pritësi e ka kërkesën tuaj dhe do ta konfirmojë së shpejti. Mund t'i shkruani edhe tani.",
+      "messageHost": "Shkruaji pritësit"
     },
     "reserve": "Rezervo",
     "sleeps_one": "Deri në {{count}} mysafir"
@@ -263,7 +275,8 @@
       "parkingType": "Parkimi",
       "checkInMinAge": "Mosha minimale për check-in",
       "paymentMethods": "Mënyrat e pagesës",
-      "prepaymentRequired": "Kërkohet parapagim"
+      "prepaymentRequired": "Kërkohet parapagim",
+      "roomPhotos": "Fotot e dhomës"
     },
     "placeholders": {
       "name": "e.g. Hotel Adriatic",
@@ -387,5 +400,25 @@
     "debit_card": "Kartë debiti",
     "bank_transfer": "Transfertë bankare",
     "mobile_payment": "Pagesë celulare"
+  },
+  "bookings": {
+    "title": "Kërkesat për rezervim",
+    "subtitle": "Kërkesat që mysafirët kanë dërguar për pronat tuaja. Konfirmojini ose refuzojini.",
+    "backToManage": "Kthehu te pronat e mia",
+    "empty": "Ende nuk ka kërkesa për rezervim.",
+    "confirm": "Konfirmo",
+    "decline": "Refuzo",
+    "filter": {
+      "all": "Të gjitha",
+      "pending": "Në pritje",
+      "confirmed": "Të konfirmuara",
+      "declined": "Të refuzuara"
+    },
+    "status": {
+      "pending": "Në pritje",
+      "confirmed": "Konfirmuar",
+      "declined": "Refuzuar",
+      "cancelled": "Anuluar"
+    }
   }
 }

@@ -2,10 +2,10 @@ import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
-import { useMyHotels, useDeleteHotel } from '../hooks';
+import { useMyHotels, useDeleteHotel, useHostBookings } from '../hooks';
 import type { Hotel } from '@/src/shared/types/hotel.types';
 import { CURRENCY_SYMBOLS } from '@/src/shared/types/hotel.types';
-import { PlusIcon, HomeIcon, PencilIcon, TrashIcon, EyeIcon, MapPinIcon } from '@/constants';
+import { PlusIcon, HomeIcon, PencilIcon, TrashIcon, EyeIcon, MapPinIcon, CalendarIcon } from '@/constants';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 
 /**
@@ -29,14 +29,16 @@ interface ManageHotelsPageProps {
   onEdit: (hotel: Hotel) => void;
   onView: (hotel: Hotel) => void;
   onManageCodes: () => void;
+  onViewBookings: () => void;
 }
 
-const ManageHotelsPage: React.FC<ManageHotelsPageProps> = ({ onBack, onCreate, onEdit, onView, onManageCodes }) => {
+const ManageHotelsPage: React.FC<ManageHotelsPageProps> = ({ onBack, onCreate, onEdit, onView, onManageCodes, onViewBookings }) => {
   const { t } = useTranslation('hotels');
   const { state, dispatch } = useAppContext();
   const role = state.currentUser?.role;
   const isAdmin = role === 'admin' || role === 'super_admin';
   const { hotels, isLoading, refetch } = useMyHotels();
+  const { pendingCount } = useHostBookings(true);
   const { deleteHotel } = useDeleteHotel();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -72,6 +74,17 @@ const ManageHotelsPage: React.FC<ManageHotelsPageProps> = ({ onBack, onCreate, o
               <p className="mt-1 text-white/70 text-sm">{t('manage.subtitle')}</p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={onViewBookings}
+                className="relative flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 text-white font-medium hover:bg-white/20 transition-colors"
+              >
+                <CalendarIcon className="w-5 h-5" /> {t('bookings.title')}
+                {pendingCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 min-w-5 h-5 px-1 inline-flex items-center justify-center rounded-full bg-amber-400 text-indigo-900 text-[11px] font-bold">
+                    {pendingCount}
+                  </span>
+                )}
+              </button>
               {isAdmin && (
                 <button
                   onClick={onManageCodes}

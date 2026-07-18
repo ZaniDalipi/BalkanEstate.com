@@ -8,6 +8,7 @@ import HotelDetailPage from './HotelDetailPage';
 import CreateHotelListingForm from './CreateHotelListingForm';
 import ManageHotelsPage from './ManageHotelsPage';
 import ManageHotelCodesPage from './ManageHotelCodesPage';
+import HostBookingsPage from './HostBookingsPage';
 import {
   HOTEL_PROPERTY_TYPES,
   HOTEL_AMENITIES,
@@ -24,7 +25,7 @@ import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import Footer from '@/components/shared/Footer';
 
-type SubView = 'list' | 'detail' | 'create' | 'mine' | 'edit' | 'codes';
+type SubView = 'list' | 'detail' | 'create' | 'mine' | 'edit' | 'codes' | 'bookings';
 
 const SORT_OPTIONS: Array<{ value: NonNullable<HotelFilters['sort']>; labelKey: string }> = [
   { value: 'newest', labelKey: 'sort.newest' },
@@ -248,12 +249,17 @@ const HotelsPage: React.FC = () => {
         onEdit={openEdit}
         onView={openDetail}
         onManageCodes={() => { setSubView('codes'); window.scrollTo(0, 0); }}
+        onViewBookings={() => { setSubView('bookings'); window.scrollTo(0, 0); }}
       />
     );
   }
 
   if (subView === 'codes') {
     return <ManageHotelCodesPage onBack={() => setSubView('mine')} />;
+  }
+
+  if (subView === 'bookings') {
+    return <HostBookingsPage onBack={() => setSubView('mine')} />;
   }
 
   if (subView === 'detail' && selectedHotelId) {

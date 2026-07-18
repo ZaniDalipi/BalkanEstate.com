@@ -117,6 +117,12 @@ const sanitizeRoom = (raw: any): IRoom | { error: string } => {
       ? raw.amenities.filter((a: any) => HOTEL_AMENITIES.includes(a)).slice(0, 30)
       : [],
     customAmenities: sanitizeCustomAmenities(raw.customAmenities, 10),
+    images: Array.isArray(raw.images)
+      ? raw.images
+          .filter((img: any) => img && typeof img.url === 'string')
+          .slice(0, 12)
+          .map((img: any) => ({ url: img.url, publicId: typeof img.publicId === 'string' ? img.publicId : undefined }))
+      : [],
     view: ROOM_VIEWS.includes(raw.view) ? raw.view : undefined,
     breakfastIncluded: Boolean(raw.breakfastIncluded),
     freeCancellation: Boolean(raw.freeCancellation),
@@ -566,6 +572,34 @@ export const deleteHotel = async (req: Request, res: Response): Promise<void> =>
 // @desc    Upload hotel cover image
 // @route   POST /api/hotels/:id/upload-cover
 // @access  Private (owner only)
+// @desc    Upload a single image (e.g. a room photo) and return its URL.
+//          Used while composing a listing, before rooms are persisted.
+// @route   POST /api/hotels/upload-image
+// @access  Private
+export const uploadHotelImage = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+    if (!req.file) {
+      res.status(400).json({ message: 'No file uploaded' });
+      return;
+    }
+    const currentUser = req.user as IUser;
+    const result = await uploadImage(req.file.buffer, {
+      userId: String(currentUser._id),
+      userEmail: currentUser.email,
+      type: 'hotel-photo',
+      maxWidth: 1600,
+      maxHeight: 1200,
+    });
+    res.status(200).json({ url: result.url, publicId: result.publicId });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to upload image', error: error.message });
+  }
+};
+
 export const uploadHotelCover = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {

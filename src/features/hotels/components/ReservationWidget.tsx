@@ -2,6 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CURRENCY_SYMBOLS, type Hotel } from '@/src/shared/types/hotel.types';
 import { CheckIcon, UsersIcon, CalendarIcon } from '@/constants';
+import { useAppContext } from '@/context/AppContext';
+import { useCreateBooking } from '../hooks';
 
 interface ReservationWidgetProps {
   hotel: Hotel;
@@ -23,14 +25,20 @@ const nightsBetween = (from: string, to: string): number => {
 };
 const onlyDigits = (v?: string) => (v || '').replace(/[^\d]/g, '');
 
+type Step = 'select' | 'details' | 'sent';
+
 /**
  * Self-service reservation widget. The guest picks dates, guests and a room,
- * sees a live nightly breakdown + total, and sends a fully pre-filled booking
- * request straight to the host (WhatsApp → email → phone). No account, no fee —
- * simpler than an OTA, and the host gets every detail in one message.
+ * sees a live nightly breakdown + total, then submits a booking request that
+ * is persisted for the host (and can also be sent straight to them on
+ * WhatsApp). No account, no fee — simpler than an OTA.
  */
 const ReservationWidget: React.FC<ReservationWidgetProps> = ({ hotel, selectedRoomIndex, onSelectRoom }) => {
   const { t, i18n } = useTranslation('hotels');
+  const { state } = useAppContext();
+  const currentUser = state.currentUser;
+  const { createBooking, isLoading: submitting } = useCreateBooking();
+
   const rooms = hotel.rooms || [];
   const room = rooms[selectedRoomIndex] || rooms[0];
 
@@ -40,6 +48,14 @@ const ReservationWidget: React.FC<ReservationWidgetProps> = ({ hotel, selectedRo
   const [checkIn, setCheckIn] = useState(() => toISO(addDays(today, 1)));
   const [checkOut, setCheckOut] = useState(() => toISO(addDays(today, 1 + minNights)));
   const [guests, setGuests] = useState(1);
+  const [step, setStep] = useState<Step>('select');
+
+  // Guest contact (prefilled from the signed-in user where possible)
+  const [guestName, setGuestName] = useState(currentUser?.name ?? '');
+  const [guestPhone, setGuestPhone] = useState(currentUser?.phone ?? '');
+  const [guestEmail, setGuestEmail] = useState(currentUser?.email ?? '');
+  const [message, setMessage] = useState('');
+  const [formError, setFormError] = useState<string | null>(null);
 
   const nights = nightsBetween(checkIn, checkOut);
   const symbol = room ? CURRENCY_SYMBOLS[room.currency] || CURRENCY_SYMBOLS[hotel.currency] || '€' : '€';
@@ -56,40 +72,75 @@ const ReservationWidget: React.FC<ReservationWidgetProps> = ({ hotel, selectedRo
     catch { return iso; }
   };
 
-  const requestMessage = useMemo(() => {
-    const lines = [
-      t('detail.booking.messageIntro', { name: hotel.name }),
-      `• ${t('detail.booking.roomLabel')}: ${room?.name ?? ''}`,
-      `• ${t('detail.booking.checkIn')}: ${fmtDate(checkIn)}`,
-      `• ${t('detail.booking.checkOut')}: ${fmtDate(checkOut)}`,
-      `• ${t('detail.booking.nights')}: ${nights}`,
-      `• ${t('detail.booking.guests')}: ${guests}`,
-      `• ${t('detail.booking.estimatedTotal')}: ${symbol}${subtotal}`,
-    ];
-    return lines.join('\n');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hotel.name, room, checkIn, checkOut, nights, guests, symbol, subtotal, t, i18n.language]);
+  const buildMessage = () => [
+    t('detail.booking.messageIntro', { name: hotel.name }),
+    `• ${t('detail.booking.roomLabel')}: ${room?.name ?? ''}`,
+    `• ${t('detail.booking.checkIn')}: ${fmtDate(checkIn)}`,
+    `• ${t('detail.booking.checkOut')}: ${fmtDate(checkOut)}`,
+    `• ${t('detail.booking.nights')}: ${nights}`,
+    `• ${t('detail.booking.guests')}: ${guests}`,
+    `• ${t('detail.booking.estimatedTotal')}: ${symbol}${subtotal}`,
+    message ? `\n${message}` : '',
+  ].filter(Boolean).join('\n');
 
-  const handleRequest = () => {
-    if (!canRequest) return;
+  const openHostChannel = () => {
+    const text = buildMessage();
     const waDigits = onlyDigits(hotel.whatsapp) || onlyDigits(hotel.contactPhone);
     if (hotel.whatsapp && waDigits) {
-      window.open(`https://wa.me/${waDigits}?text=${encodeURIComponent(requestMessage)}`, '_blank', 'noopener');
-      return;
+      window.open(`https://wa.me/${waDigits}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+    } else if (hotel.contactEmail) {
+      window.location.href = `mailto:${hotel.contactEmail}?subject=${encodeURIComponent(t('detail.booking.emailSubject', { name: hotel.name }))}&body=${encodeURIComponent(text)}`;
+    } else if (waDigits) {
+      window.location.href = `https://wa.me/${waDigits}?text=${encodeURIComponent(text)}`;
+    } else {
+      window.location.href = `tel:${hotel.contactPhone}`;
     }
-    if (hotel.contactEmail) {
-      const subject = t('detail.booking.emailSubject', { name: hotel.name });
-      window.location.href = `mailto:${hotel.contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(requestMessage)}`;
-      return;
+  };
+
+  const handleSend = async () => {
+    setFormError(null);
+    if (!guestName.trim()) { setFormError(t('detail.booking.nameRequired')); return; }
+    if (onlyDigits(guestPhone).length < 6) { setFormError(t('detail.booking.phoneRequired')); return; }
+    try {
+      await createBooking({
+        hotelId: hotel.id,
+        roomName: room.name,
+        checkIn,
+        checkOut,
+        guests,
+        guestName: guestName.trim(),
+        guestPhone: guestPhone.trim(),
+        guestEmail: guestEmail.trim() || undefined,
+        message: message.trim() || undefined,
+      });
+      setStep('sent');
+    } catch (err: any) {
+      setFormError(err?.message || t('detail.booking.sendError'));
     }
-    if (waDigits) {
-      window.location.href = `https://wa.me/${waDigits}?text=${encodeURIComponent(requestMessage)}`;
-      return;
-    }
-    window.location.href = `tel:${hotel.contactPhone}`;
   };
 
   const dateInputClass = 'w-full bg-transparent text-sm font-medium text-neutral-900 outline-none';
+  const fieldClass = 'w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm text-neutral-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20';
+
+  // ---- Success state ----
+  if (step === 'sent') {
+    return (
+      <div className="p-6 border-b border-neutral-100 text-center">
+        <div className="mx-auto mb-3 w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+          <CheckIcon className="w-7 h-7" />
+        </div>
+        <h3 className="text-base font-bold text-neutral-900">{t('detail.booking.sentTitle')}</h3>
+        <p className="mt-1 text-sm text-neutral-500">{t('detail.booking.sentBody')}</p>
+        <button
+          type="button"
+          onClick={openHostChannel}
+          className="mt-4 w-full py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-colors"
+        >
+          {t('detail.booking.messageHost')}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="p-5 border-b border-neutral-100">
@@ -150,7 +201,7 @@ const ReservationWidget: React.FC<ReservationWidgetProps> = ({ hotel, selectedRo
           <select
             value={selectedRoomIndex}
             onChange={(e) => onSelectRoom(Number(e.target.value))}
-            className="w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm text-neutral-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className={fieldClass}
           >
             {rooms.map((r, i) => (
               <option key={r._id || i} value={i}>
@@ -184,15 +235,62 @@ const ReservationWidget: React.FC<ReservationWidgetProps> = ({ hotel, selectedRo
         </div>
       )}
 
+      {/* Guest details (revealed on request) */}
+      {step === 'details' && (
+        <div className="mt-4 space-y-2">
+          <input
+            type="text"
+            value={guestName}
+            onChange={(e) => setGuestName(e.target.value)}
+            placeholder={t('detail.booking.yourName')}
+            className={fieldClass}
+          />
+          <input
+            type="tel"
+            value={guestPhone}
+            onChange={(e) => setGuestPhone(e.target.value)}
+            placeholder={t('detail.booking.yourPhone')}
+            className={fieldClass}
+          />
+          <input
+            type="email"
+            value={guestEmail}
+            onChange={(e) => setGuestEmail(e.target.value)}
+            placeholder={t('detail.booking.yourEmail')}
+            className={fieldClass}
+          />
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            rows={2}
+            maxLength={1000}
+            placeholder={t('detail.booking.messagePlaceholder')}
+            className={fieldClass}
+          />
+          {formError && <p className="text-xs text-red-600">{formError}</p>}
+        </div>
+      )}
+
       {/* CTA */}
-      <button
-        type="button"
-        onClick={handleRequest}
-        disabled={!canRequest}
-        className="mt-4 w-full py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-      >
-        <CalendarIcon className="w-4 h-4" /> {t('detail.booking.requestToBook')}
-      </button>
+      {step === 'select' ? (
+        <button
+          type="button"
+          onClick={() => setStep('details')}
+          disabled={!canRequest}
+          className="mt-4 w-full py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          <CalendarIcon className="w-4 h-4" /> {t('detail.booking.requestToBook')}
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={handleSend}
+          disabled={submitting}
+          className="mt-4 w-full py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+        >
+          {submitting ? t('detail.booking.sending') : t('detail.booking.sendRequest')}
+        </button>
+      )}
       <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-[11px] text-neutral-400">
         <CheckIcon className="w-3.5 h-3.5 text-emerald-500" /> {t('detail.booking.noChargeNote')}
       </p>

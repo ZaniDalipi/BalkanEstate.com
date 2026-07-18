@@ -201,11 +201,34 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
                   const bedSummary = room.bedConfiguration && room.bedConfiguration.length > 0
                     ? room.bedConfiguration.map((b) => `${b.quantity} ${t(`bedTypes.${b.bedType}`)}`).join(' · ')
                     : t('detail.bedsCount', { count: room.beds });
+                  const roomThumb = room.images?.[0]?.url || hotel.coverImageUrl || hotel.images?.[0]?.url || null;
                   return (
                   <div
                     key={room._id || i}
                     className="group flex flex-col sm:flex-row rounded-2xl border border-neutral-200 bg-white overflow-hidden hover:border-primary/50 hover:shadow-[0_12px_32px_-12px_rgba(2,82,205,0.18)] transition-all"
                   >
+                    {/* Room photo */}
+                    {roomThumb && (
+                      <button
+                        type="button"
+                        onClick={() => reserveRoom(i)}
+                        className="sm:w-48 shrink-0 h-40 sm:h-auto relative overflow-hidden bg-neutral-100"
+                        aria-label={room.name}
+                      >
+                        <img
+                          src={optimizeCloudinaryUrl(roomThumb, { width: 500, quality: 'auto', crop: 'fill' })}
+                          alt={room.name}
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        {(room.images?.length || 0) > 1 && (
+                          <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md bg-black/55 text-white text-[10px] font-medium">
+                            {room.images!.length} <PhotoIcon className="inline w-3 h-3 -mt-0.5" />
+                          </span>
+                        )}
+                      </button>
+                    )}
+
                     {/* Content */}
                     <div className="flex-1 min-w-0 p-5">
                       <div className="flex items-center gap-2 flex-wrap">

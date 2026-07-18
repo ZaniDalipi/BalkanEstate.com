@@ -73,6 +73,15 @@ export const uploadHotelPhotos = async (
   );
 };
 
+/** Upload a single room photo, returning its hosted URL (used while composing a listing). */
+export const uploadRoomImage = async (
+  file: File
+): Promise<{ url: string; publicId: string }> => {
+  const formData = new FormData();
+  formData.append('image', file);
+  return uploadRequest<{ url: string; publicId: string }>('/hotels/upload-image', formData);
+};
+
 // ---- Listing access codes ----
 
 export const validateHotelCode = async (

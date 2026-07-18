@@ -12,3 +12,9 @@ export {
   useRevokeHotelCode,
 } from './useHotels';
 export { useHotelFavorites, useToggleHotelFavorite } from './useHotelFavorites';
+export {
+  useCreateBooking,
+  useHostBookings,
+  useUpdateBookingStatus,
+  useUploadRoomImage,
+} from './useHotelBookings';

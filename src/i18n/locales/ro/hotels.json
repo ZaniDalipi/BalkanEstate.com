@@ -113,7 +113,19 @@
       "guestsWarning": "Această cameră găzduiește până la {{count}} oaspeți.",
       "messageIntro": "Bună! Aș dori să rezerv la {{name}}:",
       "emailSubject": "Cerere de rezervare — {{name}}",
-      "nightsCount_one": "{{count}} noapte"
+      "nightsCount_one": "{{count}} noapte",
+      "yourName": "Numele dvs.",
+      "yourPhone": "Telefonul dvs.",
+      "yourEmail": "Emailul dvs. (opțional)",
+      "messagePlaceholder": "Adăugați un mesaj pentru gazdă (opțional)",
+      "sendRequest": "Trimite cererea",
+      "sending": "Se trimite…",
+      "nameRequired": "Vă rugăm introduceți numele.",
+      "phoneRequired": "Vă rugăm introduceți un număr de telefon valid.",
+      "sendError": "Cererea nu a putut fi trimisă. Încercați din nou.",
+      "sentTitle": "Cerere trimisă!",
+      "sentBody": "Gazda a primit cererea dvs. și o va confirma în curând. Îi puteți scrie și acum.",
+      "messageHost": "Scrie gazdei"
     },
     "reserve": "Rezervă",
     "sleeps_one": "Până la {{count}} oaspete"
@@ -263,7 +275,8 @@
       "parkingType": "Parcare",
       "checkInMinAge": "Vârsta minimă la check-in",
       "paymentMethods": "Metode de plată",
-      "prepaymentRequired": "Plată în avans necesară"
+      "prepaymentRequired": "Plată în avans necesară",
+      "roomPhotos": "Fotografii cameră"
     },
     "placeholders": {
       "name": "e.g. Hotel Adriatic",
@@ -387,5 +400,25 @@
     "debit_card": "Card de debit",
     "bank_transfer": "Transfer bancar",
     "mobile_payment": "Plată mobilă"
+  },
+  "bookings": {
+    "title": "Cereri de rezervare",
+    "subtitle": "Cereri trimise de oaspeți pentru proprietățile dvs. Confirmați sau refuzați fiecare.",
+    "backToManage": "Înapoi la proprietățile mele",
+    "empty": "Încă nu există cereri de rezervare.",
+    "confirm": "Confirmă",
+    "decline": "Refuză",
+    "filter": {
+      "all": "Toate",
+      "pending": "În așteptare",
+      "confirmed": "Confirmate",
+      "declined": "Refuzate"
+    },
+    "status": {
+      "pending": "În așteptare",
+      "confirmed": "Confirmată",
+      "declined": "Refuzată",
+      "cancelled": "Anulată"
+    }
   }
 }

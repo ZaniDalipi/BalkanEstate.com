@@ -113,7 +113,19 @@
       "guestsWarning": "Оваа соба прима до {{count}} гости.",
       "messageIntro": "Здраво! Сакам да резервирам во {{name}}:",
       "emailSubject": "Барање за резервација — {{name}}",
-      "nightsCount_one": "{{count}} ноќ"
+      "nightsCount_one": "{{count}} ноќ",
+      "yourName": "Вашето име",
+      "yourPhone": "Вашиот телефон",
+      "yourEmail": "Вашата е-пошта (опционално)",
+      "messagePlaceholder": "Додајте порака за домаќинот (опционално)",
+      "sendRequest": "Испрати барање",
+      "sending": "Се испраќа…",
+      "nameRequired": "Ве молиме внесете го вашето име.",
+      "phoneRequired": "Ве молиме внесете важечки телефонски број.",
+      "sendError": "Барањето не беше испратено. Обидете се повторно.",
+      "sentTitle": "Барањето е испратено!",
+      "sentBody": "Домаќинот го има вашето барање и наскоро ќе го потврди. Можете и сега да му пишете.",
+      "messageHost": "Пиши му на домаќинот"
     },
     "reserve": "Резервирај",
     "sleeps_one": "До {{count}} гостин"
@@ -263,7 +275,8 @@
       "parkingType": "Паркинг",
       "checkInMinAge": "Минимална возраст за пријавување",
       "paymentMethods": "Начини на плаќање",
-      "prepaymentRequired": "Потребна претплата"
+      "prepaymentRequired": "Потребна претплата",
+      "roomPhotos": "Фотографии од собата"
     },
     "placeholders": {
       "name": "e.g. Hotel Adriatic",
@@ -387,5 +400,25 @@
     "debit_card": "Дебитна картичка",
     "bank_transfer": "Банкарски трансфер",
     "mobile_payment": "Мобилно плаќање"
+  },
+  "bookings": {
+    "title": "Барања за резервација",
+    "subtitle": "Барања што гостите ги испратиле за вашите објекти. Потврдете или одбијте секое.",
+    "backToManage": "Назад кон моите објекти",
+    "empty": "Сè уште нема барања за резервација.",
+    "confirm": "Потврди",
+    "decline": "Одбиј",
+    "filter": {
+      "all": "Сите",
+      "pending": "Во исчекување",
+      "confirmed": "Потврдени",
+      "declined": "Одбиени"
+    },
+    "status": {
+      "pending": "Во исчекување",
+      "confirmed": "Потврдено",
+      "declined": "Одбиено",
+      "cancelled": "Откажано"
+    }
   }
 }

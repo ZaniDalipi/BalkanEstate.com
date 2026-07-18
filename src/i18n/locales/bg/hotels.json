@@ -113,7 +113,19 @@
       "guestsWarning": "Тази стая побира до {{count}} гости.",
       "messageIntro": "Здравейте! Бих искал да резервирам в {{name}}:",
       "emailSubject": "Заявка за резервация — {{name}}",
-      "nightsCount_one": "{{count}} нощувка"
+      "nightsCount_one": "{{count}} нощувка",
+      "yourName": "Вашето име",
+      "yourPhone": "Вашият телефон",
+      "yourEmail": "Вашият имейл (по избор)",
+      "messagePlaceholder": "Добавете съобщение за домакина (по избор)",
+      "sendRequest": "Изпрати заявка",
+      "sending": "Изпращане…",
+      "nameRequired": "Моля, въведете вашето име.",
+      "phoneRequired": "Моля, въведете валиден телефонен номер.",
+      "sendError": "Заявката не беше изпратена. Опитайте отново.",
+      "sentTitle": "Заявката е изпратена!",
+      "sentBody": "Домакинът получи вашата заявка и скоро ще я потвърди. Можете и сега да му пишете.",
+      "messageHost": "Пишете на домакина"
     },
     "reserve": "Резервирай",
     "sleeps_one": "До {{count}} гост"
@@ -263,7 +275,8 @@
       "parkingType": "Паркинг",
       "checkInMinAge": "Минимална възраст за настаняване",
       "paymentMethods": "Начини на плащане",
-      "prepaymentRequired": "Изисква се предплащане"
+      "prepaymentRequired": "Изисква се предплащане",
+      "roomPhotos": "Снимки на стаята"
     },
     "placeholders": {
       "name": "e.g. Hotel Adriatic",
@@ -387,5 +400,25 @@
     "debit_card": "Дебитна карта",
     "bank_transfer": "Банков превод",
     "mobile_payment": "Мобилно плащане"
+  },
+  "bookings": {
+    "title": "Заявки за резервация",
+    "subtitle": "Заявки, които гостите са изпратили за вашите обекти. Потвърдете или отхвърлете всяка.",
+    "backToManage": "Назад към моите обекти",
+    "empty": "Все още няма заявки за резервация.",
+    "confirm": "Потвърди",
+    "decline": "Отхвърли",
+    "filter": {
+      "all": "Всички",
+      "pending": "Изчакващи",
+      "confirmed": "Потвърдени",
+      "declined": "Отхвърлени"
+    },
+    "status": {
+      "pending": "Изчаква",
+      "confirmed": "Потвърдена",
+      "declined": "Отхвърлена",
+      "cancelled": "Отменена"
+    }
   }
 }

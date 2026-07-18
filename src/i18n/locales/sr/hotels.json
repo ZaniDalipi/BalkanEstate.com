@@ -113,7 +113,19 @@
       "guestsWarning": "Ova soba prima do {{count}} gostiju.",
       "messageIntro": "Zdravo! Želim da rezervišem u {{name}}:",
       "emailSubject": "Zahtev za rezervaciju — {{name}}",
-      "nightsCount_one": "{{count}} noć"
+      "nightsCount_one": "{{count}} noć",
+      "yourName": "Vaše ime",
+      "yourPhone": "Vaš telefon",
+      "yourEmail": "Vaš email (opciono)",
+      "messagePlaceholder": "Dodajte poruku za domaćina (opciono)",
+      "sendRequest": "Pošalji zahtev",
+      "sending": "Slanje…",
+      "nameRequired": "Unesite svoje ime.",
+      "phoneRequired": "Unesite ispravan broj telefona.",
+      "sendError": "Slanje zahteva nije uspelo. Pokušajte ponovo.",
+      "sentTitle": "Zahtev poslat!",
+      "sentBody": "Domaćin je dobio vaš zahtev i uskoro će ga potvrditi. Možete mu i sada poslati poruku.",
+      "messageHost": "Pošalji poruku domaćinu"
     },
     "reserve": "Rezerviši",
     "sleeps_one": "Do {{count}} gosta"
@@ -263,7 +275,8 @@
       "parkingType": "Parking",
       "checkInMinAge": "Minimalni uzrast za prijavu",
       "paymentMethods": "Načini plaćanja",
-      "prepaymentRequired": "Potrebna avansna uplata"
+      "prepaymentRequired": "Potrebna avansna uplata",
+      "roomPhotos": "Fotografije sobe"
     },
     "placeholders": {
       "name": "e.g. Hotel Adriatic",
@@ -387,5 +400,25 @@
     "debit_card": "Debitna kartica",
     "bank_transfer": "Bankovni transfer",
     "mobile_payment": "Mobilno plaćanje"
+  },
+  "bookings": {
+    "title": "Zahtevi za rezervaciju",
+    "subtitle": "Zahtevi koje su gosti poslali za vaše objekte. Potvrdite ili odbijte svaki.",
+    "backToManage": "Nazad na moje objekte",
+    "empty": "Još nema zahteva za rezervaciju.",
+    "confirm": "Potvrdi",
+    "decline": "Odbij",
+    "filter": {
+      "all": "Svi",
+      "pending": "Na čekanju",
+      "confirmed": "Potvrđeni",
+      "declined": "Odbijeni"
+    },
+    "status": {
+      "pending": "Na čekanju",
+      "confirmed": "Potvrđeno",
+      "declined": "Odbijeno",
+      "cancelled": "Otkazano"
+    }
   }
 }

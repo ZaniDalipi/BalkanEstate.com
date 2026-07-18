@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from 
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useCreateHotel, useUpdateHotel, useUploadHotelCover, useUploadHotelPhotos } from '../hooks';
+import { useCreateHotel, useUpdateHotel, useUploadHotelCover, useUploadHotelPhotos, useUploadRoomImage } from '../hooks';
 import { validateHotelCode } from '../api';
 import { useHotelDraftStore, HOTEL_DRAFT_TTL_MS, type HotelDraft } from '../store/hotelDraftStore';
 import {
@@ -88,6 +88,7 @@ const mapHotelToDraft = (h: Hotel): Partial<HotelDraft> => ({
     quantity: r.quantity,
     amenities: r.amenities ?? [],
     customAmenities: r.customAmenities ?? [],
+    images: r.images ?? [],
     view: r.view ?? 'none',
     breakfastIncluded: r.breakfastIncluded ?? false,
     freeCancellation: r.freeCancellation ?? false,
@@ -168,6 +169,7 @@ const emptyRoom = (): RoomFormData => ({
   quantity: 1,
   amenities: [],
   customAmenities: [],
+  images: [],
   view: 'none',
   breakfastIncluded: false,
   freeCancellation: false,
@@ -184,6 +186,9 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
   const isLoading = creating || updating;
   const { uploadCover } = useUploadHotelCover();
   const { uploadPhotos } = useUploadHotelPhotos();
+  const { uploadRoomImage } = useUploadRoomImage();
+  // Rooms currently uploading a photo, so the tile can show a spinner.
+  const [uploadingRoomImage, setUploadingRoomImage] = useState<Record<number, boolean>>({});
 
   const fieldRefs = {
     name: useRef<HTMLInputElement>(null),
@@ -255,6 +260,7 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
         ? r.bedConfiguration
         : [{ bedType: 'double' as BedType, quantity: (typeof r.beds === 'number' && r.beds > 0) ? r.beds : 1 }],
       customAmenities: r.customAmenities ?? [],
+      images: r.images ?? [],
       view: r.view ?? 'none',
       breakfastIncluded: r.breakfastIncluded ?? false,
       freeCancellation: r.freeCancellation ?? false,
@@ -480,6 +486,36 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
     setRoomCustomAmenityInput((prev) => ({ ...prev, [roomIndex]: '' }));
   }, [roomCustomAmenityInput]);
 
+  // Upload room photo(s) immediately (returns hosted URLs) and attach to the room.
+  const handleRoomImageChange = useCallback(async (roomIndex: number, files: FileList | null) => {
+    const list = Array.from(files || []);
+    if (list.length === 0) return;
+    setUploadingRoomImage((prev) => ({ ...prev, [roomIndex]: true }));
+    try {
+      for (const file of list) {
+        if (!ACCEPTED_TYPES.includes(file.type)) { setFormError(t('form.errors.imageInvalidType')); continue; }
+        if (file.size > MAX_IMAGE_SIZE) { setFormError(t('form.errors.imageTooLarge')); continue; }
+        const { url, publicId } = await uploadRoomImage(file);
+        setRooms((prev) => prev.map((room, i) => {
+          if (i !== roomIndex) return room;
+          const current = room.images || [];
+          if (current.length >= 12) return room;
+          return { ...room, images: [...current, { url, publicId }] };
+        }));
+      }
+    } catch (err: any) {
+      setFormError(err?.message || t('form.errors.generic'));
+    } finally {
+      setUploadingRoomImage((prev) => ({ ...prev, [roomIndex]: false }));
+    }
+  }, [uploadRoomImage, t]);
+
+  const removeRoomImage = useCallback((roomIndex: number, url: string) => {
+    setRooms((prev) => prev.map((room, i) => (
+      i === roomIndex ? { ...room, images: (room.images || []).filter((img) => img.url !== url) } : room
+    )));
+  }, []);
+
   const removeRoomCustomAmenity = useCallback((roomIndex: number, value: string) => {
     setRooms((prev) => prev.map((room, i) => (
       i === roomIndex ? { ...room, customAmenities: (room.customAmenities || []).filter((a) => a !== value) } : room
@@ -684,6 +720,7 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
           quantity: r.quantity === '' || r.quantity == null ? 1 : Number(r.quantity),
           amenities: r.amenities && r.amenities.length > 0 ? r.amenities : undefined,
           customAmenities: r.customAmenities && r.customAmenities.length > 0 ? r.customAmenities : undefined,
+          images: r.images && r.images.length > 0 ? r.images : undefined,
           view: r.view && r.view !== 'none' ? r.view : undefined,
           breakfastIncluded: r.breakfastIncluded || undefined,
           freeCancellation: r.freeCancellation || undefined,
@@ -1331,6 +1368,39 @@ const CreateHotelListingForm: React.FC<CreateHotelListingFormProps> = ({ onBack,
                   placeholder={t('form.placeholders.roomDescription')}
                   className={inputClasses()}
                 />
+              </div>
+
+              {/* Room photos */}
+              <div>
+                <label className="block text-xs font-medium text-neutral-600 mb-1.5">
+                  {t('form.fields.roomPhotos')}{' '}
+                  <span className="text-neutral-400 font-normal">{t('form.fields.optional')}</span>
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {(room.images || []).map((img) => (
+                    <div key={img.url} className="relative w-20 h-20 rounded-lg overflow-hidden border border-neutral-200 group/img">
+                      <img src={img.url} alt="" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeRoomImage(index, img.url)}
+                        className="absolute top-0.5 right-0.5 p-1 rounded-full bg-black/60 text-white opacity-0 group-hover/img:opacity-100 transition-opacity"
+                        aria-label={t('form.remove')}
+                      >
+                        <TrashIcon className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                  {(room.images?.length || 0) < 12 && (
+                    <label className="w-20 h-20 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-neutral-300 cursor-pointer hover:border-primary/50 transition-colors text-neutral-400">
+                      {uploadingRoomImage[index] ? (
+                        <span className="w-5 h-5 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+                      ) : (
+                        <PhotoIcon className="w-6 h-6" />
+                      )}
+                      <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => { handleRoomImageChange(index, e.target.files); e.target.value = ''; }} />
+                    </label>
+                  )}
+                </div>
               </div>
 
               {/* Room view + booking flags (breakfast, free cancellation, non-smoking) */}

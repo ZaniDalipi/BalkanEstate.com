@@ -9,6 +9,7 @@ import {
   deleteHotel,
   uploadHotelCover,
   uploadHotelPhotos,
+  uploadHotelImage,
 } from '../controllers/hotelController';
 import { protect } from '../middleware/auth';
 
@@ -40,6 +41,7 @@ router.get('/', getHotels);
 // Protected routes (must come before /:id to avoid conflicts)
 router.get('/my-listings', protect, getMyHotels);
 router.post('/', protect, createHotel);
+router.post('/upload-image', protect, upload.single('image'), uploadHotelImage);
 
 // Parameterized routes
 router.get('/:id', getHotel);

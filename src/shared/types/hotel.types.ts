@@ -129,6 +129,8 @@ export interface Room {
   amenities?: HotelAmenity[];
   /** Free-text amenities the host defines beyond the standard list. */
   customAmenities?: string[];
+  /** Photos of this specific room. */
+  images?: HotelImage[];
   /** Outlook from the room (e.g. sea, city). */
   view?: RoomView;
   /** Whether breakfast is included in this room's nightly rate. */
@@ -141,6 +143,7 @@ export interface Room {
 
 export interface HotelImage {
   url: string;
+  publicId?: string;
   caption?: string;
 }
 
@@ -233,6 +236,7 @@ export interface CreateRoomData {
   amenities?: HotelAmenity[];
   /** Free-text amenities the host defines beyond the standard list. */
   customAmenities?: string[];
+  images?: HotelImage[];
   view?: RoomView;
   breakfastIncluded?: boolean;
   freeCancellation?: boolean;
@@ -290,4 +294,52 @@ export interface CreateHotelData {
   parkingType?: ParkingType;
   paymentMethods?: PaymentMethod[];
   prepaymentRequired?: boolean;
+}
+
+// ---- Bookings ----
+
+export const BOOKING_STATUSES = ['pending', 'confirmed', 'declined', 'cancelled'] as const;
+export type BookingStatus = typeof BOOKING_STATUSES[number];
+
+/** A summary of the property attached to a booking. */
+export interface BookingHotelSummary {
+  id: string;
+  name: string;
+  slug?: string;
+  city?: string;
+  country?: string;
+  coverImageUrl?: string;
+}
+
+export interface HotelBooking {
+  id: string;
+  hotel?: BookingHotelSummary;
+  roomName: string;
+  roomType?: string;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  guests: number;
+  pricePerNight: number;
+  totalPrice: number;
+  currency: SupportedCurrency;
+  guestName: string;
+  guestPhone: string;
+  guestEmail?: string;
+  message?: string;
+  status: BookingStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateBookingData {
+  hotelId: string;
+  roomName: string;
+  checkIn: string;
+  checkOut: string;
+  guests: number;
+  guestName: string;
+  guestPhone: string;
+  guestEmail?: string;
+  message?: string;
 }
