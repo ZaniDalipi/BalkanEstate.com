@@ -48,7 +48,8 @@
       "title": "Payment Breakdown",
       "monthly": "Monthly",
       "yearly": "Yearly",
-      "total": "Total"
+      "total": "Total",
+      "overYears": "pe parcursul a {{years}} ani"
     },
     "disclaimer": "This is an estimate for informational purposes only. Consult with a financial professional for actual rates and payments.",
     "features": {

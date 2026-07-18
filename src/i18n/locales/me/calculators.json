@@ -63,7 +63,8 @@
       "title": "Raspored Plaćanja",
       "monthly": "Mjesečno",
       "yearly": "Godišnje",
-      "total": "Ukupno"
+      "total": "Ukupno",
+      "overYears": "tokom {{years}} godina"
     },
     "disclaimer": "Ovo je procjena samo u informativne svrhe. Konsultujte se sa finansijskim stručnjakom za stvarne stope i plaćanja.",
     "rateContext": "Tipična stopa za {{country}}: {{min}}%–{{max}}% (tržišni prosjek {{year}}). Prilagodite ponudi svoje banke."

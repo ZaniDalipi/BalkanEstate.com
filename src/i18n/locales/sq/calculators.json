@@ -48,7 +48,8 @@
       "title": "Zbërthimi i Pagesave",
       "monthly": "Mujore",
       "yearly": "Vjetore",
-      "total": "Totale"
+      "total": "Totale",
+      "overYears": "gjatë {{years}} viteve"
     },
     "disclaimer": "Ky është një vlerësim vetëm për qëllime informative. Konsultohuni me një profesionist financiar për normat dhe pagesat aktuale.",
     "features": {
