@@ -728,6 +728,25 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     }
   }, [map, onMapMove]);
 
+  // Close the property popup on zoom in/out. Without this the popup stays open
+  // and MapPopupOverlay re-projects + replays its open animation on every zoom
+  // step, so the card visibly "refreshes" the whole time the user is zooming.
+  // Dismissing it on zoom keeps the interaction clean.
+  useEffect(() => {
+    const mapToUse = map || mapInstanceRef.current;
+    if (!mapToUse) return;
+    const listener = mapToUse.addListener('zoom_changed', () => {
+      setSelectedProperty(null);
+    });
+    return () => listener.remove();
+  }, [map]);
+
+  // Note: dismissing the popup when the user interacts outside the card
+  // (empty map, the property list, page chrome, another marker) is handled at
+  // the document level inside MapPopupOverlay, which hit-tests against the
+  // card's own DOM node and works for both mouse and touch. Keeping that logic
+  // in one place avoids a second, map-only close path that misses off-map taps.
+
   // Update map type when it changes (styles are controlled via mapId in Cloud Console)
   useEffect(() => {
     if (!map || !isLoaded) return;
@@ -1898,6 +1917,10 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       },
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       disableDefaultUI: true,
+      // Disable Google's built-in POI/place labels click behaviour — clicking a
+      // place name would otherwise open Google's native "View on Google Maps"
+      // info window over our own property markers.
+      clickableIcons: false,
       mapTypeControl: false,
       streetViewControl: false,
       fullscreenControl: false,
