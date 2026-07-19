@@ -92,7 +92,9 @@
     "newValuation": "Nova Procjena",
     "readyToSell": "Spremni za Prodaju?",
     "listPropertyCTA": "Objavite svoju nekretninu na BalkanEstate i dosegnite hiljade kupaca širom Balkana.",
-    "listPropertyButton": "Objavite Moju Nekretninu"
+    "listPropertyButton": "Objavite Moju Nekretninu",
+    "reportTitle": "Izvještaj o procjeni",
+    "savedBadge": "Sačuvano u vašoj istoriji"
   },
   "breakdown": {
     "baseValue": "Osnovna Vrijednost (iz uporedivih)",
@@ -164,5 +166,11 @@
     "sourceListings": "Agregirano iz aktivnih BalkanEstate oglasa",
     "live": "Uživo",
     "disclaimer": "Reference su okvirne EUR/m² vrijednosti za {{year}}, ne procjena. Lokalne cijene variraju prema kvartu, stanju i spratu."
+  },
+  "history": {
+    "title": "Vaše sačuvane procjene",
+    "count": "{{count}} sačuvano na ovom uređaju",
+    "clearAll": "Obriši sve",
+    "remove": "Ukloni"
   }
 }

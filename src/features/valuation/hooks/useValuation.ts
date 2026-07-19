@@ -33,11 +33,13 @@ export function useValuation(id: string | undefined) {
 /**
  * Hook for fetching user's valuation history
  */
-export function useValuationHistory(limit = 10) {
+export function useValuationHistory(limit = 10, enabled = true) {
   return useQuery({
     queryKey: valuationKeys.history(),
     queryFn: () => getValuationHistory(limit),
     staleTime: 2 * 60 * 1000, // 2 minutes
+    enabled, // only fetch when signed in — the endpoint requires auth
+    retry: false,
   });
 }
 

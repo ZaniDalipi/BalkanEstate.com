@@ -92,7 +92,9 @@
     "newValuation": "Vlerësim i Ri",
     "readyToSell": "Gati për të Shitur?",
     "listPropertyCTA": "Listoni pronën tuaj në BalkanEstate dhe arrini mijëra blerës në të gjithë Ballkanin.",
-    "listPropertyButton": "Listo Pronën Time"
+    "listPropertyButton": "Listo Pronën Time",
+    "reportTitle": "Raport vlerësimi",
+    "savedBadge": "Ruajtur në historikun tuaj"
   },
   "breakdown": {
     "baseValue": "Vlera Bazë (nga krahasueset)",
@@ -160,5 +162,11 @@
     "sourceListings": "Grumbulluar nga listimet aktive të BalkanEstate",
     "live": "Drejtpërdrejt",
     "disclaimer": "Referencat janë vlera treguese EUR/m² për {{year}}, jo vlerësim. Çmimet lokale ndryshojnë sipas lagjes, gjendjes dhe katit."
+  },
+  "history": {
+    "title": "Vlerësimet tuaja të ruajtura",
+    "count": "{{count}} të ruajtura në këtë pajisje",
+    "clearAll": "Pastro të gjitha",
+    "remove": "Hiq"
   }
 }

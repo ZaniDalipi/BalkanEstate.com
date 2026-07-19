@@ -11,7 +11,7 @@ interface ValuationResultProps {
 }
 
 const ValuationResult: React.FC<ValuationResultProps> = ({ valuation, onNewValuation }) => {
-  const { t } = useTranslation(['valuation', 'common']);
+  const { t, i18n } = useTranslation(['valuation', 'common']);
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [showComparables, setShowComparables] = useState(false);
 
@@ -63,6 +63,14 @@ const ValuationResult: React.FC<ValuationResultProps> = ({ valuation, onNewValua
     }
   };
 
+  // Short human-readable reference for the report header.
+  const reference = (valuation._id || '')
+    .slice(-6).toUpperCase() || 'LOCAL';
+  const valuedOn = valuation.createdAt ? new Date(valuation.createdAt) : new Date();
+  const valuedOnLabel = new Intl.DateTimeFormat(i18n.language || undefined, {
+    day: 'numeric', month: 'short', year: 'numeric',
+  }).format(Number.isNaN(valuedOn.getTime()) ? new Date() : valuedOn);
+
   // Calculate breakdown percentages for the bar chart
   const { breakdown } = valuation;
   const totalAdjustments =
@@ -77,6 +85,31 @@ const ValuationResult: React.FC<ValuationResultProps> = ({ valuation, onNewValua
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
+      {/* Report header — professional summary band */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white rounded-xl border border-neutral-200 px-4 py-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-primary/10 flex-shrink-0">
+            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </span>
+          <div className="min-w-0">
+            <h3 className="text-sm font-bold text-neutral-800 leading-tight truncate">
+              {t('valuation:result.reportTitle', 'Valuation Report')}
+            </h3>
+            <p className="text-[11px] text-neutral-500 truncate">
+              {valuation.city}, {valuation.country} · {valuedOnLabel} · #{reference}
+            </p>
+          </div>
+        </div>
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-green-600 bg-green-50 border border-green-100 rounded-full px-2.5 py-1 flex-shrink-0">
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+          </svg>
+          {t('valuation:result.savedBadge', 'Saved to your history')}
+        </span>
+      </div>
+
       {/* Main Value Card */}
       <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-6 border border-primary/20">
         <div className="text-center">

@@ -92,7 +92,9 @@
     "newValuation": "Evaluare Nouă",
     "readyToSell": "Pregătit să Vindeți?",
     "listPropertyCTA": "Publicați proprietatea pe BalkanEstate și ajungeți la mii de cumpărători din Balcani.",
-    "listPropertyButton": "Publică Proprietatea"
+    "listPropertyButton": "Publică Proprietatea",
+    "reportTitle": "Raport de evaluare",
+    "savedBadge": "Salvat în istoricul tău"
   },
   "breakdown": {
     "baseValue": "Valoare de Bază (din comparabile)",
@@ -160,5 +162,11 @@
     "sourceListings": "Agregat din anunțurile active BalkanEstate",
     "live": "În timp real",
     "disclaimer": "Referințele sunt valori orientative EUR/m² pentru {{year}}, nu o evaluare. Prețurile locale variază în funcție de cartier, stare și etaj."
+  },
+  "history": {
+    "title": "Evaluările tale salvate",
+    "count": "{{count}} salvate pe acest dispozitiv",
+    "clearAll": "Șterge tot",
+    "remove": "Elimină"
   }
 }

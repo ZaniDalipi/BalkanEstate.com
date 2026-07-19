@@ -96,7 +96,9 @@
     "newValuation": "New Valuation",
     "readyToSell": "Ready to Sell?",
     "listPropertyCTA": "List your property on BalkanEstate and reach thousands of buyers across the Balkans.",
-    "listPropertyButton": "List My Property"
+    "listPropertyButton": "List My Property",
+    "reportTitle": "Valuation Report",
+    "savedBadge": "Saved to your history"
   },
   "breakdown": {
     "baseValue": "Base Value (from comparables)",
@@ -164,5 +166,11 @@
     "sourceListings": "Aggregated from active BalkanEstate listings",
     "live": "Live",
     "disclaimer": "Benchmarks are indicative EUR/m² reference points for {{year}}, not an appraisal. Local prices vary by neighbourhood, condition and floor."
+  },
+  "history": {
+    "title": "Your saved valuations",
+    "count": "{{count}} saved on this device",
+    "clearAll": "Clear all",
+    "remove": "Remove"
   }
 }
