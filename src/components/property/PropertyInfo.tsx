@@ -509,6 +509,36 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
               </DetailItem>
             )}
 
+          {!!property.kitchens && property.kitchens > 0 && (
+            <DetailItem icon={<span className="text-2xl">🍳</span>} label={t('details.kitchens', 'Kitchens')}>
+              {property.kitchens}
+            </DetailItem>
+          )}
+
+          {!!property.diningRooms && property.diningRooms > 0 && (
+            <DetailItem icon={<span className="text-2xl">🍽️</span>} label={t('details.diningRooms', 'Dining rooms')}>
+              {property.diningRooms}
+            </DetailItem>
+          )}
+
+          {!!property.toilets && property.toilets > 0 && (
+            <DetailItem icon={<span className="text-2xl">🚻</span>} label={t('details.toilets', 'Toilets (WC)')}>
+              {property.toilets}
+            </DetailItem>
+          )}
+
+          {!!property.storageRooms && property.storageRooms > 0 && (
+            <DetailItem icon={<span className="text-2xl">📦</span>} label={t('details.storageRooms', 'Storage rooms')}>
+              {property.storageRooms}
+            </DetailItem>
+          )}
+
+          {!!property.offices && property.offices > 0 && (
+            <DetailItem icon={<span className="text-2xl">💼</span>} label={t('details.offices', 'Office / study')}>
+              {property.offices}
+            </DetailItem>
+          )}
+
           {property.furnishing && property.furnishing !== 'any' && (
             <DetailItem icon={<span className="text-2xl">🛋️</span>} label={t('details.furnishing')}>
               <span className="capitalize">{property.furnishing.replace('-', ' ')}</span>

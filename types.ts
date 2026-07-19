@@ -325,6 +325,11 @@ export interface Property {
     beds: number;
     baths: number;
     livingRooms: number;
+    kitchens?: number;
+    diningRooms?: number;
+    toilets?: number;
+    storageRooms?: number;
+    offices?: number;
     sqft: number;
     yearBuilt: number;
     parking: number;

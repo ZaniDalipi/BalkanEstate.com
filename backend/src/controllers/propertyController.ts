@@ -851,7 +851,8 @@ export const createProperty = async (
     const ALLOWED_PROPERTY_FIELDS = [
       'propertyId', 'listingType', 'title', 'status', 'price', 'isNegotiable', 'originalPrice', 'priceIntervals',
       'address', 'city', 'country',
-      'beds', 'baths', 'livingRooms', 'sqft', 'yearBuilt', 'parking',
+      'beds', 'baths', 'livingRooms', 'kitchens', 'diningRooms', 'toilets', 'storageRooms', 'offices',
+      'sqft', 'yearBuilt', 'parking',
       'description', 'specialFeatures', 'materials',
       'tourUrl', 'virtualTour360Url', 'hasVirtualTour360', 'videoUrl',
       'imageUrl', 'imagePublicId', 'images',
@@ -1089,7 +1090,8 @@ export const updateProperty = async (
     // This preserves existing data when fields are not included in the update
     const fieldsToUpdate = [
       'propertyId', 'status', 'title', 'price', 'isNegotiable', 'address', 'city', 'country',
-      'beds', 'baths', 'livingRooms', 'sqft', 'yearBuilt', 'parking',
+      'beds', 'baths', 'livingRooms', 'kitchens', 'diningRooms', 'toilets', 'storageRooms', 'offices',
+      'sqft', 'yearBuilt', 'parking',
       'description', 'specialFeatures', 'materials', 'amenities',
       'tourUrl', 'virtualTour360Url', 'hasVirtualTour360',
       'imageUrl', 'images', 'lat', 'lng',
