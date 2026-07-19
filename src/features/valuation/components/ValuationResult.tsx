@@ -367,6 +367,21 @@ const ValuationResult: React.FC<ValuationResultProps> = ({ valuation, onNewValua
             <span className="text-neutral-500">{t('valuation:result.bathrooms')}:</span>
             <p className="font-medium text-neutral-800">{valuation.baths}</p>
           </div>
+          {[
+            { key: 'livingRooms', label: t('valuation:result.livingRooms', 'Living rooms'), value: valuation.livingRooms },
+            { key: 'kitchens', label: t('valuation:result.kitchens', 'Kitchens'), value: valuation.kitchens },
+            { key: 'diningRooms', label: t('valuation:result.diningRooms', 'Dining rooms'), value: valuation.diningRooms },
+            { key: 'toilets', label: t('valuation:result.toilets', 'Toilets (WC)'), value: valuation.toilets },
+            { key: 'storageRooms', label: t('valuation:result.storageRooms', 'Storage rooms'), value: valuation.storageRooms },
+            { key: 'offices', label: t('valuation:result.offices', 'Office / study'), value: valuation.offices },
+          ]
+            .filter((r) => typeof r.value === 'number' && r.value > 0)
+            .map((r) => (
+              <div key={r.key}>
+                <span className="text-neutral-500">{r.label}:</span>
+                <p className="font-medium text-neutral-800">{r.value}</p>
+              </div>
+            ))}
           {valuation.condition && (
             <div>
               <span className="text-neutral-500">{t('valuation:result.condition')}:</span>

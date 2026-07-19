@@ -42,8 +42,19 @@ const ValuationPage: React.FC = () => {
   const handleSubmit = (data: ValuationInput) => {
     createValuation(data, {
       onSuccess: (result) => {
-        setValuation(result);
-        setHistory(saveValuation(result)); // auto-save every completed valuation
+        // The API may not echo the newer room fields; keep what the user entered
+        // so the report and saved history reflect the full room layout.
+        const enriched: PropertyValuation = {
+          ...result,
+          livingRooms: result.livingRooms ?? data.livingRooms,
+          kitchens: result.kitchens ?? data.kitchens,
+          diningRooms: result.diningRooms ?? data.diningRooms,
+          toilets: result.toilets ?? data.toilets,
+          storageRooms: result.storageRooms ?? data.storageRooms,
+          offices: result.offices ?? data.offices,
+        };
+        setValuation(enriched);
+        setHistory(saveValuation(enriched)); // auto-save every completed valuation
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
       onError: () => {

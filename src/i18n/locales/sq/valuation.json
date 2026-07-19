@@ -33,7 +33,15 @@
     "hideAdvanced": "Fshih Opsionet",
     "getValuation": "Merr Vlerësimin Tim",
     "calculating": "Duke Analizuar...",
-    "disclaimer": "Ky është një vlerësim automatik vetëm për qëllime informative. Vlera reale e tregut mund të ndryshojë."
+    "disclaimer": "Ky është një vlerësim automatik vetëm për qëllime informative. Vlera reale e tregut mund të ndryshojë.",
+    "roomsSection": "Dhomat",
+    "roomsTotal": "{{count}} dhoma gjithsej",
+    "livingRooms": "Dhoma ndenjeje",
+    "kitchens": "Kuzhina",
+    "diningRooms": "Dhoma ngrënieje",
+    "toilets": "Tualete (WC)",
+    "storageRooms": "Dhoma depoje",
+    "offices": "Zyrë / studio"
   },
   "propertyTypes": {
     "apartment": "Apartament",
@@ -94,7 +102,13 @@
     "listPropertyCTA": "Listoni pronën tuaj në BalkanEstate dhe arrini mijëra blerës në të gjithë Ballkanin.",
     "listPropertyButton": "Listo Pronën Time",
     "reportTitle": "Raport vlerësimi",
-    "savedBadge": "Ruajtur në historikun tuaj"
+    "savedBadge": "Ruajtur në historikun tuaj",
+    "livingRooms": "Dhoma ndenjeje",
+    "kitchens": "Kuzhina",
+    "diningRooms": "Dhoma ngrënieje",
+    "toilets": "Tualete (WC)",
+    "storageRooms": "Dhoma depoje",
+    "offices": "Zyrë / studio"
   },
   "breakdown": {
     "baseValue": "Vlera Bazë (nga krahasueset)",

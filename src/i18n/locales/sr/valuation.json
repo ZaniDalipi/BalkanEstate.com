@@ -33,7 +33,15 @@
     "hideAdvanced": "Сакриј Опције",
     "getValuation": "Добиј Процену",
     "calculating": "Анализирам...",
-    "disclaimer": "Ово је аутоматска процена само у информативне сврхе. Стварна тржишна вредност може варирати."
+    "disclaimer": "Ово је аутоматска процена само у информативне сврхе. Стварна тржишна вредност може варирати.",
+    "roomsSection": "Собе",
+    "roomsTotal": "укупно {{count}} соба",
+    "livingRooms": "Дневне собе",
+    "kitchens": "Кухиње",
+    "diningRooms": "Трпезарије",
+    "toilets": "Тоалети (WC)",
+    "storageRooms": "Оставе",
+    "offices": "Канцеларија / радна соба"
   },
   "propertyTypes": {
     "apartment": "Стан",
@@ -94,7 +102,13 @@
     "listPropertyCTA": "Објавите своју некретнину на BalkanEstate и доприте до хиљада купаца широм Балкана.",
     "listPropertyButton": "Објави Некретнину",
     "reportTitle": "Извештај о процени",
-    "savedBadge": "Сачувано у вашој историји"
+    "savedBadge": "Сачувано у вашој историји",
+    "livingRooms": "Дневне собе",
+    "kitchens": "Кухиње",
+    "diningRooms": "Трпезарије",
+    "toilets": "Тоалети (WC)",
+    "storageRooms": "Оставе",
+    "offices": "Канцеларија / радна соба"
   },
   "breakdown": {
     "baseValue": "Основна Вредност (из упоредивих)",

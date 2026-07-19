@@ -33,7 +33,15 @@
     "hideAdvanced": "Ascunde Opțiuni",
     "getValuation": "Obține Evaluarea",
     "calculating": "Analizez...",
-    "disclaimer": "Aceasta este o estimare automată doar în scop informativ. Valoarea reală de piață poate varia."
+    "disclaimer": "Aceasta este o estimare automată doar în scop informativ. Valoarea reală de piață poate varia.",
+    "roomsSection": "Camere",
+    "roomsTotal": "{{count}} camere în total",
+    "livingRooms": "Camere de zi",
+    "kitchens": "Bucătării",
+    "diningRooms": "Sufragerii",
+    "toilets": "Toalete (WC)",
+    "storageRooms": "Debarale",
+    "offices": "Birou / cameră de lucru"
   },
   "propertyTypes": {
     "apartment": "Apartament",
@@ -94,7 +102,13 @@
     "listPropertyCTA": "Publicați proprietatea pe BalkanEstate și ajungeți la mii de cumpărători din Balcani.",
     "listPropertyButton": "Publică Proprietatea",
     "reportTitle": "Raport de evaluare",
-    "savedBadge": "Salvat în istoricul tău"
+    "savedBadge": "Salvat în istoricul tău",
+    "livingRooms": "Camere de zi",
+    "kitchens": "Bucătării",
+    "diningRooms": "Sufragerii",
+    "toilets": "Toalete (WC)",
+    "storageRooms": "Debarale",
+    "offices": "Birou / cameră de lucru"
   },
   "breakdown": {
     "baseValue": "Valoare de Bază (din comparabile)",

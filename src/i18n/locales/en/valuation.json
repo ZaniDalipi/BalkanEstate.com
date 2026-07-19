@@ -37,7 +37,15 @@
     "hideAdvanced": "Hide Options",
     "getValuation": "Get My Valuation",
     "calculating": "Analyzing...",
-    "disclaimer": "This is an automated estimate for informational purposes only. Actual market value may vary."
+    "disclaimer": "This is an automated estimate for informational purposes only. Actual market value may vary.",
+    "roomsSection": "Rooms",
+    "roomsTotal": "{{count}} rooms total",
+    "livingRooms": "Living rooms",
+    "kitchens": "Kitchens",
+    "diningRooms": "Dining rooms",
+    "toilets": "Toilets (WC)",
+    "storageRooms": "Storage rooms",
+    "offices": "Office / study"
   },
   "propertyTypes": {
     "apartment": "Apartment",
@@ -98,7 +106,13 @@
     "listPropertyCTA": "List your property on BalkanEstate and reach thousands of buyers across the Balkans.",
     "listPropertyButton": "List My Property",
     "reportTitle": "Valuation Report",
-    "savedBadge": "Saved to your history"
+    "savedBadge": "Saved to your history",
+    "livingRooms": "Living rooms",
+    "kitchens": "Kitchens",
+    "diningRooms": "Dining rooms",
+    "toilets": "Toilets (WC)",
+    "storageRooms": "Storage rooms",
+    "offices": "Office / study"
   },
   "breakdown": {
     "baseValue": "Base Value (from comparables)",
