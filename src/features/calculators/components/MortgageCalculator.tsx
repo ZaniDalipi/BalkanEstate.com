@@ -4,13 +4,22 @@ import {
   getMortgageProfile,
   formatLocalCurrency,
   getLocalCurrencySymbol,
+  hasLocalCurrencyOption,
   MORTGAGE_DATA_YEAR,
 } from '../data/mortgageMarketData';
 
 interface MortgageCalculatorProps {
   propertyPrice: number;
   country: string;
+  /** Display all amounts in EUR instead of the local currency. */
+  displayInEur?: boolean;
+  /** Toggle the EUR/local display currency from within the results view. */
+  onDisplayInEurChange?: (useEur: boolean) => void;
 }
+
+/** Sensible bounds for the editable interest-rate field. */
+const MIN_RATE = 0.01;
+const MAX_RATE = 30;
 
 // Categorical colours for the principal/interest split. Validated (dataviz):
 // CVD ΔE 38+ between the pair; the amber's low surface contrast is covered by
@@ -83,18 +92,22 @@ const StatTile: React.FC<{ label: string; value: string; accent?: string }> = ({
     </div>
 );
 
-const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, country }) => {
+const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, country, displayInEur = false, onDisplayInEurChange }) => {
     const { t } = useTranslation(['calculators']);
     const profile = useMemo(() => getMortgageProfile(country), [country]);
+    const useEur = displayInEur;
 
     const [downPayment, setDownPayment] = useState(profile.defaultDownPaymentPercent);
     const [downPaymentType, setDownPaymentType] = useState<'percent' | 'amount'>('percent');
     const [interestRate, setInterestRate] = useState(profile.typicalRate);
+    const [rateError, setRateError] = useState<string | undefined>();
     const [loanTerm, setLoanTerm] = useState(profile.defaultTermYears);
     const [monthlyPayment, setMonthlyPayment] = useState(0);
     const [isSliderActive, setIsSliderActive] = useState(false);
 
-    const currencySymbol = getLocalCurrencySymbol(country);
+    const currencySymbol = getLocalCurrencySymbol(country, useEur);
+    const showCurrencyToggle = hasLocalCurrencyOption(country) && !!onDisplayInEurChange;
+    const fmt = useCallback((amount: number) => formatLocalCurrency(amount, country, useEur), [country, useEur]);
 
     // Term presets, trimmed to what the selected market actually offers.
     const termOptions = useMemo(
@@ -181,21 +194,58 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
         }
     };
 
+    const handleInterestRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const raw = e.target.valueAsNumber;
+        if (Number.isNaN(raw)) {
+            setInterestRate(0);
+            setRateError(t('calculators:mortgage.errors.rateRequired', 'Enter an interest rate'));
+            return;
+        }
+        setInterestRate(raw);
+        if (raw < MIN_RATE || raw > MAX_RATE) {
+            setRateError(t('calculators:mortgage.errors.rateRange', 'Rate must be between {{min}}% and {{max}}%', { min: MIN_RATE, max: MAX_RATE }));
+        } else {
+            setRateError(undefined);
+        }
+    };
+
     return (
         <div className="bg-white rounded-2xl shadow-xl border border-neutral-200/80 overflow-hidden animate-fade-in">
             {/* Header */}
-            <div className="flex items-center gap-2.5 px-5 py-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-b border-neutral-100">
-                <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 text-lg">💰</span>
-                <div>
-                    <h3 className="text-sm font-bold text-neutral-800 leading-tight">{t('calculators:mortgage.title')}</h3>
-                    <p className="text-[11px] text-neutral-500">{profile.name}</p>
+            <div className="flex items-center justify-between gap-2.5 px-5 py-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-b border-neutral-100">
+                <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 text-lg flex-shrink-0">💰</span>
+                    <div className="min-w-0">
+                        <h3 className="text-sm font-bold text-neutral-800 leading-tight truncate">{t('calculators:mortgage.title')}</h3>
+                        <p className="text-[11px] text-neutral-500 truncate">{profile.name}</p>
+                    </div>
                 </div>
+                {showCurrencyToggle && (
+                    <div className="bg-white/70 p-0.5 rounded-full flex items-center text-[11px] font-semibold flex-shrink-0 border border-neutral-200/70" role="group" aria-label={t('calculators:mortgage.fields.currency', 'Currency')}>
+                        <button
+                            type="button"
+                            onClick={() => onDisplayInEurChange!(false)}
+                            aria-pressed={!useEur}
+                            className={`px-2.5 py-1 rounded-full transition-all ${!useEur ? 'bg-primary text-white shadow-sm' : 'text-neutral-500'}`}
+                        >
+                            {profile.currency}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => onDisplayInEurChange!(true)}
+                            aria-pressed={useEur}
+                            className={`px-2.5 py-1 rounded-full transition-all ${useEur ? 'bg-primary text-white shadow-sm' : 'text-neutral-500'}`}
+                        >
+                            EUR
+                        </button>
+                    </div>
+                )}
             </div>
 
             <div className="p-5 space-y-5">
                 <div className="flex items-baseline justify-between">
                     <label className="text-xs font-medium text-neutral-500">{t('calculators:mortgage.fields.propertyPrice')}</label>
-                    <p className="text-lg font-bold text-neutral-800 tabular-nums">{formatLocalCurrency(propertyPrice, country)}</p>
+                    <p className="text-lg font-bold text-neutral-800 tabular-nums">{fmt(propertyPrice)}</p>
                 </div>
 
                 <div>
@@ -328,7 +378,7 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
 
                     {/* Value display with input */}
                     <div className="flex items-center justify-between mt-2">
-                        <p className="text-sm font-semibold text-primary">{formatLocalCurrency(downPaymentAmount, country)}</p>
+                        <p className="text-sm font-semibold text-primary">{fmt(downPaymentAmount)}</p>
                         <input
                             type="number"
                             value={downPayment}
@@ -355,10 +405,21 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                         id="interest-rate"
                         type="number"
                         step="0.01"
+                        min={MIN_RATE}
+                        max={MAX_RATE}
                         value={interestRate}
-                        onChange={e => setInterestRate(e.target.valueAsNumber || 0)}
-                        className="w-full text-sm font-semibold bg-neutral-50 border border-neutral-200 rounded-md p-2 text-neutral-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        onChange={handleInterestRateChange}
+                        aria-invalid={!!rateError}
+                        aria-describedby={rateError ? 'interest-rate-error' : undefined}
+                        className={`w-full text-sm font-semibold bg-neutral-50 border rounded-md p-2 text-neutral-900 focus:ring-2 transition-all ${
+                            rateError
+                                ? 'border-red-300 focus:ring-red-200 focus:border-red-400'
+                                : 'border-neutral-200 focus:ring-primary/20 focus:border-primary'
+                        }`}
                     />
+                    {rateError && (
+                        <p id="interest-rate-error" role="alert" className="text-[11px] font-medium text-red-600 mt-1">{rateError}</p>
+                    )}
                     <p className="text-[10px] text-neutral-500 mt-1.5">
                         {t('calculators:mortgage.rateContext', {
                             country: profile.name,
@@ -375,7 +436,7 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                     <div className="text-center">
                         <p className="text-xs font-semibold text-neutral-600">{t('calculators:mortgage.results.estimatedMonthlyPayment')}</p>
                         <p className="text-4xl font-extrabold bg-gradient-to-r from-primary via-violet-500 to-primary bg-clip-text text-transparent mt-1 tabular-nums">
-                            {formatLocalCurrency(monthlyPayment, country)}
+                            {fmt(monthlyPayment)}
                         </p>
                         <p className="text-[11px] text-neutral-400 mt-0.5">{t('calculators:common.perMonth', '/month')}</p>
                     </div>
@@ -387,21 +448,21 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                                 <BreakdownDonut
                                     principalPct={breakdown.principalPct}
                                     centerLabel={t('calculators:mortgage.results.totalPayment')}
-                                    centerValue={formatLocalCurrency(breakdown.totalPayment, country)}
+                                    centerValue={fmt(breakdown.totalPayment)}
                                 />
                                 <div className="space-y-2.5">
                                     <div className="flex items-center gap-2">
                                         <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: PRINCIPAL_COLOR }} />
                                         <div>
                                             <p className="text-[11px] text-neutral-500 leading-tight">{t('calculators:mortgage.results.principal')}</p>
-                                            <p className="text-sm font-bold text-neutral-800 tabular-nums">{formatLocalCurrency(breakdown.loanAmount, country)}</p>
+                                            <p className="text-sm font-bold text-neutral-800 tabular-nums">{fmt(breakdown.loanAmount)}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: INTEREST_COLOR }} />
                                         <div>
                                             <p className="text-[11px] text-neutral-500 leading-tight">{t('calculators:mortgage.results.interest')}</p>
-                                            <p className="text-sm font-bold text-neutral-800 tabular-nums">{formatLocalCurrency(breakdown.totalInterest, country)}</p>
+                                            <p className="text-sm font-bold text-neutral-800 tabular-nums">{fmt(breakdown.totalInterest)}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -411,17 +472,17 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                             <div className="grid grid-cols-3 gap-2.5 mt-5">
                                 <StatTile
                                     label={t('calculators:mortgage.fields.loanAmount')}
-                                    value={formatLocalCurrency(breakdown.loanAmount, country)}
+                                    value={fmt(breakdown.loanAmount)}
                                     accent={PRINCIPAL_COLOR}
                                 />
                                 <StatTile
                                     label={t('calculators:mortgage.results.totalInterest')}
-                                    value={formatLocalCurrency(breakdown.totalInterest, country)}
+                                    value={fmt(breakdown.totalInterest)}
                                     accent={INTEREST_COLOR}
                                 />
                                 <StatTile
                                     label={t('calculators:mortgage.results.totalPayment')}
-                                    value={formatLocalCurrency(breakdown.totalPayment, country)}
+                                    value={fmt(breakdown.totalPayment)}
                                 />
                             </div>
                             <p className="text-center text-[11px] text-neutral-400 mt-2.5">

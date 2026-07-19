@@ -4,26 +4,42 @@ import { motion } from 'framer-motion';
 import MortgageCalculator from './MortgageCalculator';
 import { CalculatorIcon } from '@/constants';
 import Footer from '@/components/shared/Footer';
-import { MORTGAGE_COUNTRIES as COUNTRIES } from '../data/mortgageMarketData';
+import { MORTGAGE_COUNTRIES as COUNTRIES, hasLocalCurrencyOption } from '../data/mortgageMarketData';
+import { validatePrice } from '@/shared/utils/validation';
 
 const MortgageCalculatorPage: React.FC = () => {
   const { t } = useTranslation(['calculators', 'common']);
   const [propertyPrice, setPropertyPrice] = useState<number>(100000);
   const [country, setCountry] = useState<string>('MK');
+  const [displayInEur, setDisplayInEur] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
+  const [priceError, setPriceError] = useState<string | undefined>();
 
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
-    if (propertyPrice > 0) {
-      setShowCalculator(true);
+    // Validate at the form boundary (CLAUDE.md validation pattern).
+    const result = validatePrice(propertyPrice, { min: 1000, max: 1_000_000_000 });
+    if (!result.isValid) {
+      setPriceError(result.error);
+      return;
     }
+    setPriceError(undefined);
+    setShowCalculator(true);
   };
 
   const handleReset = () => {
     setShowCalculator(false);
   };
 
+  const handlePriceChange = (value: number) => {
+    const next = Math.max(0, value || 0);
+    setPropertyPrice(next);
+    if (priceError) setPriceError(undefined); // clear error as the user corrects it
+  };
+
   const selectedCountry = COUNTRIES.find(c => c.code === country);
+  const showCurrencyToggle = hasLocalCurrencyOption(country);
+  const currencyLabel = displayInEur ? 'EUR' : (selectedCountry?.currency ?? 'EUR');
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
@@ -56,7 +72,7 @@ const MortgageCalculatorPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <MortgageCalculator propertyPrice={propertyPrice} country={country} />
+            <MortgageCalculator propertyPrice={propertyPrice} country={country} displayInEur={displayInEur} onDisplayInEurChange={setDisplayInEur} />
             <div className="mt-6 text-center">
               <button
                 onClick={handleReset}
@@ -94,23 +110,58 @@ const MortgageCalculatorPage: React.FC = () => {
 
               {/* Property Price */}
               <div>
-                <label className="block text-sm font-semibold text-neutral-700 mb-2">
-                  {t('calculators:mortgage.fields.propertyPrice')}
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label htmlFor="mortgage-price" className="block text-sm font-semibold text-neutral-700">
+                    {t('calculators:mortgage.fields.propertyPrice')}
+                  </label>
+                  {/* Currency choice — view any non-euro market in EUR if preferred */}
+                  {showCurrencyToggle && (
+                    <div className="bg-neutral-100 p-0.5 rounded-full flex items-center text-xs font-semibold" role="group" aria-label={t('calculators:mortgage.fields.currency', 'Currency')}>
+                      <button
+                        type="button"
+                        onClick={() => setDisplayInEur(false)}
+                        aria-pressed={!displayInEur}
+                        className={`px-3 py-1 rounded-full transition-all ${!displayInEur ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'}`}
+                      >
+                        {selectedCountry?.currency}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDisplayInEur(true)}
+                        aria-pressed={displayInEur}
+                        className={`px-3 py-1 rounded-full transition-all ${displayInEur ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'}`}
+                      >
+                        EUR €
+                      </button>
+                    </div>
+                  )}
+                </div>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 font-medium">
-                    {selectedCountry?.currency}
+                    {currencyLabel}
                   </span>
                   <input
+                    id="mortgage-price"
                     type="number"
                     value={propertyPrice}
-                    onChange={(e) => setPropertyPrice(Math.max(0, e.target.valueAsNumber || 0))}
-                    className="w-full pl-16 pr-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-800 font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                    onChange={(e) => handlePriceChange(e.target.valueAsNumber)}
+                    aria-invalid={!!priceError}
+                    aria-describedby={priceError ? 'mortgage-price-error' : undefined}
+                    className={`w-full pl-20 pr-4 py-3 bg-neutral-50 border rounded-xl text-neutral-800 font-medium focus:outline-none focus:ring-2 transition-colors ${
+                      priceError
+                        ? 'border-red-300 focus:ring-red-200 focus:border-red-400'
+                        : 'border-neutral-200 focus:ring-primary/20 focus:border-primary'
+                    }`}
                     min="0"
                     step="1000"
                     required
                   />
                 </div>
+                {priceError && (
+                  <p id="mortgage-price-error" role="alert" className="mt-1.5 text-xs font-medium text-red-600">
+                    {priceError}
+                  </p>
+                )}
               </div>
 
               {/* Quick Price Buttons */}

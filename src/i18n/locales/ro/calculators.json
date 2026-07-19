@@ -34,7 +34,8 @@
       "years": "years",
       "yrs": "yrs",
       "country": "Country",
-      "quickSelect": "Quick select:"
+      "quickSelect": "Quick select:",
+      "currency": "Monedă"
     },
     "results": {
       "monthlyPayment": "Monthly Payment",
@@ -67,7 +68,11 @@
     "step2Desc": "Set your down payment, loan term, and interest rate",
     "step3Title": "See Your Payment",
     "step3Desc": "Get your estimated monthly mortgage payment instantly",
-    "rateContext": "Rată tipică pentru {{country}}: {{min}}%–{{max}}% (media pieței {{year}}). Ajustați în funcție de oferta băncii dvs."
+    "rateContext": "Rată tipică pentru {{country}}: {{min}}%–{{max}}% (media pieței {{year}}). Ajustați în funcție de oferta băncii dvs.",
+    "errors": {
+      "rateRequired": "Introduceți o rată a dobânzii",
+      "rateRange": "Rata trebuie să fie între {{min}}% și {{max}}%"
+    }
   },
   "rentVsBuy": {
     "title": "Rent vs. Buy Calculator",

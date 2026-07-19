@@ -34,7 +34,8 @@
       "years": "години",
       "yrs": "г.",
       "country": "Country",
-      "quickSelect": "Quick select:"
+      "quickSelect": "Quick select:",
+      "currency": "Валута"
     },
     "results": {
       "monthlyPayment": "Месечно плащане",
@@ -67,7 +68,11 @@
     "step2Desc": "Set your down payment, loan term, and interest rate",
     "step3Title": "See Your Payment",
     "step3Desc": "Get your estimated monthly mortgage payment instantly",
-    "rateContext": "Типичен лихвен процент за {{country}}: {{min}}%–{{max}}% (пазарна средна стойност за {{year}}). Коригирайте според офертата на вашата банка."
+    "rateContext": "Типичен лихвен процент за {{country}}: {{min}}%–{{max}}% (пазарна средна стойност за {{year}}). Коригирайте според офертата на вашата банка.",
+    "errors": {
+      "rateRequired": "Въведете лихвен процент",
+      "rateRange": "Процентът трябва да е между {{min}}% и {{max}}%"
+    }
   },
   "rentVsBuy": {
     "title": "Калкулатор: Наем срещу покупка",

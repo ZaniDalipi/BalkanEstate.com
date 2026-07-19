@@ -34,7 +34,8 @@
       "years": "years",
       "yrs": "yrs",
       "country": "Country",
-      "quickSelect": "Quick select:"
+      "quickSelect": "Quick select:",
+      "currency": "Νόμισμα"
     },
     "results": {
       "monthlyPayment": "Monthly Payment",
@@ -67,7 +68,11 @@
     "step2Desc": "Set your down payment, loan term, and interest rate",
     "step3Title": "See Your Payment",
     "step3Desc": "Get your estimated monthly mortgage payment instantly",
-    "rateContext": "Τυπικό επιτόκιο για {{country}}: {{min}}%–{{max}}% (μέσος όρος αγοράς {{year}}). Προσαρμόστε το στην προσφορά της τράπεζάς σας."
+    "rateContext": "Τυπικό επιτόκιο για {{country}}: {{min}}%–{{max}}% (μέσος όρος αγοράς {{year}}). Προσαρμόστε το στην προσφορά της τράπεζάς σας.",
+    "errors": {
+      "rateRequired": "Εισαγάγετε επιτόκιο",
+      "rateRange": "Το επιτόκιο πρέπει να είναι μεταξύ {{min}}% και {{max}}%"
+    }
   },
   "rentVsBuy": {
     "title": "Rent vs. Buy Calculator",

@@ -34,7 +34,8 @@
       "years": "vite",
       "yrs": "vite",
       "country": "Country",
-      "quickSelect": "Quick select:"
+      "quickSelect": "Quick select:",
+      "currency": "Monedha"
     },
     "results": {
       "monthlyPayment": "Pagesa Mujore",
@@ -67,7 +68,11 @@
     "step2Desc": "Set your down payment, loan term, and interest rate",
     "step3Title": "See Your Payment",
     "step3Desc": "Get your estimated monthly mortgage payment instantly",
-    "rateContext": "Norma tipike për {{country}}: {{min}}%–{{max}}% (mesatarja e tregut {{year}}). Përshtateni me ofertën e bankës suaj."
+    "rateContext": "Norma tipike për {{country}}: {{min}}%–{{max}}% (mesatarja e tregut {{year}}). Përshtateni me ofertën e bankës suaj.",
+    "errors": {
+      "rateRequired": "Vendosni një normë interesi",
+      "rateRange": "Norma duhet të jetë midis {{min}}% dhe {{max}}%"
+    }
   },
   "rentVsBuy": {
     "title": "Qira vs Blerje",

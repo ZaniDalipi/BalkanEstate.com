@@ -134,27 +134,42 @@ export function getMortgageProfile(countryCode: string): CountryMortgageProfile 
   return COUNTRY_MORTGAGE_PROFILES[countryCode] ?? DEFAULT_MORTGAGE_PROFILE;
 }
 
-/**
- * Format an amount in a country's local mortgage currency. Unlike the shared
- * `formatPrice` helper (which is keyed by country name and collapses every
- * Balkan country to EUR), this respects each country's actual currency.
- */
-export function formatLocalCurrency(amount: number, countryCode: string): string {
-  const profile = getMortgageProfile(countryCode);
-  return new Intl.NumberFormat(profile.locale, {
+/** Locale used when displaying amounts in euros. */
+export const EUR_LOCALE = 'de-DE';
+
+/** Format an amount in an explicit currency + locale. */
+export function formatMoney(amount: number, currency: string, locale: string): string {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: profile.currency,
+    currency,
     maximumFractionDigits: 0,
     minimumFractionDigits: 0,
   }).format(Math.round(amount));
 }
 
-/** Currency symbol (or code) for a country's mortgage currency. */
-export function getLocalCurrencySymbol(countryCode: string): string {
+/**
+ * Format an amount in a country's mortgage currency. Unlike the shared
+ * `formatPrice` helper (which is keyed by country name and collapses every
+ * Balkan country to EUR), this respects each country's actual currency — and,
+ * when `useEur` is set, lets the user view any market's figures in euros.
+ */
+export function formatLocalCurrency(amount: number, countryCode: string, useEur = false): string {
   const profile = getMortgageProfile(countryCode);
-  const parts = new Intl.NumberFormat(profile.locale, {
-    style: 'currency',
-    currency: profile.currency,
-  }).formatToParts(1);
-  return parts.find((p) => p.type === 'currency')?.value ?? profile.currency;
+  return useEur
+    ? formatMoney(amount, 'EUR', EUR_LOCALE)
+    : formatMoney(amount, profile.currency, profile.locale);
+}
+
+/** Currency symbol (or code) for a country's mortgage currency (or EUR). */
+export function getLocalCurrencySymbol(countryCode: string, useEur = false): string {
+  const profile = getMortgageProfile(countryCode);
+  const currency = useEur ? 'EUR' : profile.currency;
+  const locale = useEur ? EUR_LOCALE : profile.locale;
+  const parts = new Intl.NumberFormat(locale, { style: 'currency', currency }).formatToParts(1);
+  return parts.find((p) => p.type === 'currency')?.value ?? currency;
+}
+
+/** Whether a country uses a non-euro local currency (so the EUR toggle is useful). */
+export function hasLocalCurrencyOption(countryCode: string): boolean {
+  return getMortgageProfile(countryCode).currency !== 'EUR';
 }
