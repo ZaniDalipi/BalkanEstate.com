@@ -13,6 +13,7 @@ import { useListingForm } from './useListingForm';
 import ListingFormFields from './ListingFormFields';
 import ListingPropertyFeatures from './ListingPropertyFeatures';
 import ListingImageUpload from './ListingImageUpload';
+import ListingSubmitOverlay from './ListingSubmitOverlay';
 import ListingPreview from './ListingPreview';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
 import { LiquidGlassControl } from '@/components/ui/liquid-glass-control';
@@ -139,6 +140,13 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     return (
         <>
         {generatingModal}
+        {/* Full-screen blurred overlay shown while the listing is being published */}
+        <ListingSubmitOverlay
+            isCompressing={isCompressing}
+            isUploading={isUploading}
+            isSubmitting={isSubmitting}
+            uploadProgress={uploadProgress}
+        />
         <form className="listing-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') e.preventDefault(); }}>
             {/* Listing Type Toggle: Sale / Rent */}
             <div className="flex justify-center mb-6">
@@ -600,10 +608,6 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         images={images}
                         imageTags={listingData.image_tags}
                         floorplanImage={floorplanImage}
-                        isCompressing={isCompressing}
-                        isUploading={isUploading}
-                        isSubmitting={isSubmitting}
-                        uploadProgress={uploadProgress}
                         handleImageChange={handleImageChange}
                         handleFloorplanImageChange={handleFloorplanImageChange}
                         removeImage={removeImage}
