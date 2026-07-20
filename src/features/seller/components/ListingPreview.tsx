@@ -10,6 +10,7 @@ import {
 import RentalTermsSection from '@/src/features/rental/components/RentalTermsSection';
 import ImageViewerModal from '@/src/features/property-details/components/ImageViewerModal';
 import FloorPlanViewerModal from '@/src/features/property-details/components/FloorPlanViewerModal';
+import ListingSubmitOverlay from './ListingSubmitOverlay';
 import { Button } from '@/components/ui/liquid-glass-button';
 
 interface ListingPreviewProps {
@@ -70,65 +71,15 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
         onPublish(e as unknown as React.FormEvent);
     }, [onPublish]);
 
-    const isProcessing = isSubmitting || isCompressing || isUploading;
-
     return (
         <div className="liquid-glass-bg min-h-screen animate-fade-in">
-            {/* Full-screen submission overlay */}
-            {isProcessing && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
-                    <div className="bg-white/90 backdrop-blur-xl rounded-3xl p-8 sm:p-10 shadow-2xl border border-white/50 max-w-sm w-full mx-4 text-center">
-                        {/* Animated spinner */}
-                        <div className="relative w-20 h-20 mx-auto mb-6">
-                            <div className="absolute inset-0 rounded-full border-4 border-gray-200" />
-                            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-500 border-r-blue-400 animate-spin" />
-                            {isUploading && (
-                                <div className="absolute inset-2 flex items-center justify-center">
-                                    <span className="text-sm font-bold text-blue-600">{Math.round(uploadProgress)}%</span>
-                                </div>
-                            )}
-                            {!isUploading && (
-                                <div className="absolute inset-2 flex items-center justify-center">
-                                    <svg className="w-8 h-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                        {isCompressing ? (
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                                        ) : (
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
-                                        )}
-                                    </svg>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Status text */}
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">
-                            {isCompressing && t('seller:createListing.progress.compressing', 'Compressing images...')}
-                            {isUploading && t('seller:createListing.progress.uploading', 'Uploading to cloud...')}
-                            {isSubmitting && !isUploading && !isCompressing && t('seller:createListing.progress.creating', 'Creating listing...')}
-                        </h3>
-                        <p className="text-sm text-gray-500 mb-5">
-                            {isCompressing && t('seller:createListing.progress.compressingHint', 'Optimizing your images for the best quality...')}
-                            {isUploading && t('seller:createListing.progress.uploadingHint', 'Securely uploading your photos...')}
-                            {isSubmitting && !isUploading && !isCompressing && t('seller:createListing.progress.creatingHint', 'Almost there! Saving your listing...')}
-                        </p>
-
-                        {/* Progress bar */}
-                        {isUploading && (
-                            <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                                <div
-                                    className="bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 h-2.5 rounded-full transition-all duration-500 ease-out"
-                                    style={{ width: `${uploadProgress}%` }}
-                                />
-                            </div>
-                        )}
-                        {!isUploading && (
-                            <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                                <div className="bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 h-2.5 rounded-full animate-pulse w-2/3" />
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
+            {/* Full-screen submission overlay (blurs the whole screen while publishing) */}
+            <ListingSubmitOverlay
+                isCompressing={isCompressing}
+                isUploading={isUploading}
+                isSubmitting={isSubmitting}
+                uploadProgress={uploadProgress}
+            />
 
             {/* Floating orbs */}
             <div className="glass-orb w-64 h-64 bg-blue-200/30 top-20 -left-10" />
