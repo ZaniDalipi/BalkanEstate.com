@@ -116,8 +116,10 @@ const MortgageCalculatorPage: React.FC = () => {
                   <input
                     id="mortgage-price"
                     type="number"
-                    value={propertyPrice}
+                    value={propertyPrice === 0 ? '' : propertyPrice}
                     onChange={(e) => handlePriceChange(e.target.valueAsNumber)}
+                    onFocus={(e) => e.target.select()}
+                    placeholder="100000"
                     aria-invalid={!!priceError}
                     aria-describedby={priceError ? 'mortgage-price-error' : undefined}
                     className={`w-full pl-9 pr-4 py-3 bg-neutral-50 border rounded-xl text-neutral-800 font-medium focus:outline-none focus:ring-2 transition-colors ${

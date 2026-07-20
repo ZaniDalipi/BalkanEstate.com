@@ -90,15 +90,21 @@ const BreakdownDonut: React.FC<{
  * value-right row on mobile (full width, so large local-currency totals fit on
  * one line) and as a stacked card from sm up.
  */
-const StatTile: React.FC<{ label: string; value: string; accent?: string }> = ({ label, value, accent }) => (
-    <div className="rounded-xl bg-neutral-50 border border-neutral-100 p-2.5 sm:p-3 min-w-0 flex items-center justify-between gap-3 sm:block">
-        <div className="flex items-center gap-1.5 min-w-0">
-            {accent && <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: accent }} />}
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500 leading-tight">{label}</span>
+const StatTile: React.FC<{ label: string; value: string; accent?: string }> = ({ label, value, accent }) => {
+    // Scale the figure down as it grows so big euro totals stay on one line
+    // instead of breaking mid-number.
+    const len = value.length;
+    const valueClass = len > 14 ? 'text-[10px]' : len > 11 ? 'text-[11px]' : len > 8 ? 'text-xs' : 'text-sm';
+    return (
+        <div className="rounded-xl bg-neutral-50 border border-neutral-100 p-2.5 sm:p-3 min-w-0 flex items-center justify-between gap-3 sm:block">
+            <div className="flex items-center gap-1.5 min-w-0">
+                {accent && <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: accent }} />}
+                <span className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500 leading-tight">{label}</span>
+            </div>
+            <p className={`${valueClass} font-bold text-neutral-800 tabular-nums whitespace-nowrap leading-tight min-w-0 text-right sm:text-left sm:mt-1`} title={value}>{value}</p>
         </div>
-        <p className="text-sm font-bold text-neutral-800 tabular-nums break-words leading-tight min-w-0 text-right sm:text-left sm:mt-1" title={value}>{value}</p>
-    </div>
-);
+    );
+};
 
 const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, country }) => {
     const { t } = useTranslation(['calculators']);
@@ -106,11 +112,16 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
 
     const [downPayment, setDownPayment] = useState(profile.defaultDownPaymentPercent);
     const [downPaymentType, setDownPaymentType] = useState<'percent' | 'amount'>('percent');
-    const [interestRate, setInterestRate] = useState(profile.typicalRate);
+    // Rate is string-backed so the field can be empty while editing (no sticky 0)
+    // and accepts decimals cleanly.
+    const [rateInput, setRateInput] = useState<string>(String(profile.typicalRate));
     const [rateError, setRateError] = useState<string | undefined>();
     const [loanTerm, setLoanTerm] = useState(profile.defaultTermYears);
     const [monthlyPayment, setMonthlyPayment] = useState(0);
     const [isSliderActive, setIsSliderActive] = useState(false);
+
+    const interestRate = parseFloat(rateInput);
+    const effectiveRate = Number.isFinite(interestRate) && interestRate > 0 ? interestRate : 0;
 
     // Single currency across the calculator: euros.
     const currencySymbol = '€';
@@ -127,7 +138,8 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
     useEffect(() => {
         setDownPayment(profile.defaultDownPaymentPercent);
         setDownPaymentType('percent');
-        setInterestRate(profile.typicalRate);
+        setRateInput(String(profile.typicalRate));
+        setRateError(undefined);
         setLoanTerm(profile.defaultTermYears);
     }, [profile]);
 
@@ -153,24 +165,18 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
     useEffect(() => {
         const principal = propertyPrice - downPaymentAmount;
 
-        if (principal <= 0 || interestRate <= 0 || loanTerm <= 0) {
+        if (principal <= 0 || effectiveRate <= 0 || loanTerm <= 0) {
             setMonthlyPayment(0);
             return;
         }
 
-        const monthlyInterestRate = (interestRate / 100) / 12;
+        const monthlyInterestRate = (effectiveRate / 100) / 12;
         const numberOfPayments = loanTerm * 12;
-
-        // Handle case where interest rate is 0
-        if (monthlyInterestRate === 0) {
-            setMonthlyPayment(principal / numberOfPayments);
-            return;
-        }
 
         const M = principal * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments)) / (Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1);
 
         setMonthlyPayment(M > 0 ? M : 0);
-    }, [propertyPrice, downPaymentAmount, interestRate, loanTerm]);
+    }, [propertyPrice, downPaymentAmount, effectiveRate, loanTerm]);
 
     // Full repayment breakdown derived from the monthly payment.
     const breakdown = useMemo(() => {
@@ -202,14 +208,15 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
     };
 
     const handleInterestRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const raw = e.target.valueAsNumber;
-        if (Number.isNaN(raw)) {
-            setInterestRate(0);
+        let v = e.target.value.replace(',', '.'); // accept comma decimals
+        if (!/^\d*\.?\d*$/.test(v)) return;       // ignore anything not numeric
+        if (/^0\d/.test(v)) v = v.replace(/^0+/, ''); // drop a stuck leading zero (04 -> 4)
+        setRateInput(v);
+
+        const num = parseFloat(v);
+        if (v === '' || Number.isNaN(num)) {
             setRateError(t('calculators:mortgage.errors.rateRequired', 'Enter an interest rate'));
-            return;
-        }
-        setInterestRate(raw);
-        if (raw < MIN_RATE || raw > MAX_RATE) {
+        } else if (num < MIN_RATE || num > MAX_RATE) {
             setRateError(t('calculators:mortgage.errors.rateRange', 'Rate must be between {{min}}% and {{max}}%', { min: MIN_RATE, max: MAX_RATE }));
         } else {
             setRateError(undefined);
@@ -366,10 +373,11 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                         <p className="text-sm font-semibold text-primary tabular-nums break-words min-w-0">{fmt(downPaymentAmount)}</p>
                         <input
                             type="number"
-                            value={downPayment}
+                            value={downPayment === 0 ? '' : downPayment}
                             onChange={handleDownPaymentChange}
-                            onFocus={handleSliderStart}
+                            onFocus={(e) => { handleSliderStart(); e.target.select(); }}
                             onBlur={handleSliderEnd}
+                            placeholder="0"
                             className="w-20 flex-shrink-0 text-xs font-semibold bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-center text-neutral-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                         />
                     </div>
@@ -388,12 +396,11 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                     <label htmlFor="interest-rate" className="block text-xs font-semibold text-neutral-700 mb-1">{t('calculators:mortgage.fields.interestRate')}</label>
                     <input
                         id="interest-rate"
-                        type="number"
-                        step="0.01"
-                        min={MIN_RATE}
-                        max={MAX_RATE}
-                        value={interestRate}
+                        type="text"
+                        inputMode="decimal"
+                        value={rateInput}
                         onChange={handleInterestRateChange}
+                        onFocus={(e) => e.target.select()}
                         aria-invalid={!!rateError}
                         aria-describedby={rateError ? 'interest-rate-error' : undefined}
                         className={`w-full text-sm font-semibold bg-neutral-50 border rounded-md p-2 text-neutral-900 focus:ring-2 transition-all ${
