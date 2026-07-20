@@ -87,7 +87,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   isFavorited = false,
   onFavoriteClick,
 }) => {
-  const { t } = useTranslation(['property']);
+  const { t } = useTranslation(['property', 'rental']);
 
   // Internal state for uncontrolled mode
   const [internalCategory, setInternalCategory] = useState<PropertyImageTag | 'all'>('all');
@@ -908,7 +908,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 {property.price ? (
                   <div className="flex items-center gap-3 mb-2">
                     <span className="text-white font-bold text-2xl sm:text-3xl drop-shadow-lg">
-                      € {property.price.toLocaleString()}{property.listingType === 'rent' ? t('property:seo.perMonth', '/mo') : ''}
+                      € {property.price.toLocaleString()}{property.listingType === 'rent' ? (property.rentPeriod === 'weekly' ? t('rental:perWeek', '/wk') : property.rentPeriod === 'daily' ? t('rental:perDay', '/day') : t('property:seo.perMonth', '/mo')) : ''}
                     </span>
                     <span className={`text-xs font-bold px-3 py-1 rounded-full flex-shrink-0 ${
                       property.listingType === 'rent' ? 'bg-blue-500 text-white' : 'bg-emerald-500 text-white'

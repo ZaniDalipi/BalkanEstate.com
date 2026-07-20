@@ -123,11 +123,19 @@
   "moveIn": {
     "title": "Move-in Cost",
     "firstMonthRent": "First month rent",
+    "firstWeekRent": "First week rent",
+    "firstDayRent": "First day rent",
     "securityDeposit": "Security deposit",
     "estimatedUtilities": "Est. utilities (1st month)",
+    "estimatedUtilitiesWeek": "Est. utilities (1st week)",
+    "estimatedUtilitiesDay": "Est. utilities (1st day)",
     "estimatedInternet": "Est. internet (1st month)",
+    "estimatedInternetWeek": "Est. internet (1st week)",
+    "estimatedInternetDay": "Est. internet (1st day)",
     "totalUpfront": "Total upfront",
     "monthlyOngoing": "Monthly ongoing cost",
+    "weeklyOngoing": "Weekly ongoing cost",
+    "dailyOngoing": "Daily ongoing cost",
     "disclaimer": "* Utility and internet costs are estimates based on averages. Actual costs may vary."
   },
   "viewing": {
