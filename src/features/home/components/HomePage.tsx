@@ -17,6 +17,7 @@ import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import AppShowcaseSection from './AppShowcaseSection';
 import QuickAccessSection from './QuickAccessSection';
 import Footer from '@/components/shared/Footer';
+import { AdBannerSlot } from '@/src/features/ads';
 
 // Lazy-load below-fold sections to reduce initial bundle
 const StackedCards = lazy(() => import('@/src/components/ui/glass-cards').then(m => ({ default: m.StackedCards })));
@@ -223,6 +224,10 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
         onNavigate={handleNavigate}
       />
 
+      <div className="max-w-6xl mx-auto w-full px-4 mt-4">
+        <AdBannerSlot placement="home-below-hero" />
+      </div>
+
       <AppShowcaseSection onNavigate={handleNavigate} />
 
       {isAuthenticated && currentUser && (
@@ -250,6 +255,10 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
             onViewAll={() => handleNavigate('search', '/search')}
           />
         </Suspense>
+      </div>
+
+      <div className="max-w-6xl mx-auto w-full px-4 my-8">
+        <AdBannerSlot placement="home-mid" />
       </div>
 
       <div className="content-below-fold">

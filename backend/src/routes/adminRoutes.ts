@@ -113,6 +113,13 @@ import {
   updateSystemSettings,
   resetSystemSettings,
 } from '../controllers/systemSettingsController';
+import {
+  getAllBanners,
+  createBanner,
+  updateBanner,
+  deleteBanner,
+  uploadBannerImage,
+} from '../controllers/adBannerController';
 import multer from 'multer';
 import Article from '../models/Article';
 
@@ -805,5 +812,24 @@ router.post('/articles/upload-image', logAdminAction('UPLOAD_ARTICLE_IMAGE'), ar
     res.status(500).json({ message: 'Failed to upload image', error: String(err) });
   }
 });
+
+// ===== Ad Banner Management (advertiser banners / paid placements) =====
+const adBannerImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  },
+});
+
+router.get('/ad-banners', logAdminAction('VIEW_AD_BANNERS'), getAllBanners);
+router.post('/ad-banners', logAdminAction('CREATE_AD_BANNER'), createBanner);
+router.post('/ad-banners/upload-image', logAdminAction('UPLOAD_AD_BANNER_IMAGE'), adBannerImageUpload.single('image'), uploadBannerImage);
+router.patch('/ad-banners/:id', logAdminAction('UPDATE_AD_BANNER'), updateBanner);
+router.delete('/ad-banners/:id', logAdminAction('DELETE_AD_BANNER'), deleteBanner);
 
 export default router;
