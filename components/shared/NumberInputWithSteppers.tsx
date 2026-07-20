@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, memo } from 'react';
+import React, { useMemo, useCallback, memo, useState, useEffect } from 'react';
 
 interface NumberInputWithSteppersProps {
     label: string;
@@ -7,39 +7,74 @@ interface NumberInputWithSteppersProps {
     min?: number;
     max?: number;
     step?: number;
+    /** Allow fractional values to be typed (e.g. 102.2 m²). Defaults to integers only. */
+    allowDecimals?: boolean;
 }
 
-const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = memo(({ label, value, onChange, min = 0, max, step = 1 }) => {
+const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = memo(({ label, value, onChange, min = 0, max, step = 1, allowDecimals = false }) => {
     const id = useMemo(() => `number-input-${label.toLowerCase().replace(/\s+/g, '-')}`, [label]);
 
+    // Local text state so partial decimal entry (e.g. "102." or "102.20") isn't
+    // clobbered while the user is still typing.
+    const [inputStr, setInputStr] = useState<string>(value === undefined || value === null ? '' : String(value));
+    const [isEditing, setIsEditing] = useState(false);
+
+    useEffect(() => {
+        if (!isEditing) {
+            setInputStr(value === undefined || value === null ? '' : String(value));
+        }
+    }, [value, isEditing]);
+
+    const clamp = useCallback((n: number) => {
+        let c = n;
+        if (min !== undefined && c < min) c = min;
+        if (max !== undefined && c > max) c = max;
+        return c;
+    }, [min, max]);
+
+    // Avoid floating point noise from repeated stepping (e.g. 0.1 + 0.2).
+    const round = useCallback((n: number) => Math.round(n * 1e6) / 1e6, []);
+
     const handleIncrement = useCallback(() => {
-        const newValue = (value || 0) + step;
+        const newValue = round((value || 0) + step);
         if (max === undefined || newValue <= max) {
             onChange(newValue);
         }
-    }, [value, step, max, onChange]);
+    }, [value, step, max, onChange, round]);
 
     const handleDecrement = useCallback(() => {
-        const newValue = (value || 0) - step;
+        const newValue = round((value || 0) - step);
         if (min === undefined || newValue >= min) {
             onChange(newValue);
         }
-    }, [value, step, min, onChange]);
+    }, [value, step, min, onChange, round]);
 
     const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const inputValue = e.target.value;
-        if (inputValue === '') {
+        const raw = e.target.value;
+        setInputStr(raw);
+
+        if (raw === '') {
             onChange(min ?? 0);
             return;
         }
-        const numValue = parseInt(inputValue, 10);
+
+        const numValue = allowDecimals ? parseFloat(raw) : parseInt(raw, 10);
         if (!isNaN(numValue)) {
-            let clampedValue = numValue;
-            if (min !== undefined && clampedValue < min) clampedValue = min;
-            if (max !== undefined && clampedValue > max) clampedValue = max;
-            onChange(clampedValue);
+            onChange(clamp(numValue));
         }
-    }, [min, max, onChange]);
+    }, [allowDecimals, min, clamp, onChange]);
+
+    const handleFocus = useCallback(() => setIsEditing(true), []);
+
+    const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+        setIsEditing(false);
+        const raw = e.target.value;
+        if (raw === '' || isNaN(Number(raw))) {
+            onChange(min ?? 0);
+            return;
+        }
+        onChange(clamp(Number(raw)));
+    }, [min, clamp, onChange]);
 
     const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
@@ -67,12 +102,15 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = memo(({ 
                 <input
                     type="number"
                     id={id}
-                    value={value === undefined || value === null ? '' : value}
+                    value={isEditing ? inputStr : (value === undefined || value === null ? '' : value)}
                     onChange={handleChange}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
                     onKeyDown={handleKeyDown}
                     className="flex-1 min-w-0 text-center text-lg font-semibold text-neutral-900 border-x border-neutral-200 h-full bg-transparent focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     min={min}
                     max={max}
+                    step={allowDecimals ? 'any' : step}
                     aria-label={label}
                 />
                 <button

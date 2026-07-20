@@ -261,7 +261,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                         <NumberInputWithSteppers label={t('seller:createListing.fields.offices', 'Office / study')} value={listingData.offices} onChange={(val) => setListingData(p => ({ ...p, offices: val }))} />
                     </>
                 )}
-                <NumberInputWithSteppers label={t('seller:createListing.fields.area')} value={listingData.sq_meters} step={5} onChange={(val) => setListingData(p => ({ ...p, sq_meters: val }))} />
+                <NumberInputWithSteppers label={t('seller:createListing.fields.area')} value={listingData.sq_meters} step={5} allowDecimals onChange={(val) => setListingData(p => ({ ...p, sq_meters: val }))} />
                 {listingData.propertyType !== 'land' && (
                     <NumberInputWithSteppers label={t('seller:createListing.fields.yearBuilt')} value={listingData.year_built} max={new Date().getFullYear()} onChange={(val) => setListingData(p => ({ ...p, year_built: val }))} />
                 )}
