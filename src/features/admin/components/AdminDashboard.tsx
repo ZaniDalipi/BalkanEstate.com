@@ -24,6 +24,7 @@ import SiteSettingsManager from './SiteSettingsManager';
 import PendingLicenses from './PendingLicenses';
 import BusinessListingManager from './BusinessListingManager';
 import ArticleManager from './ArticleManager';
+import AdBannerManager from './AdBannerManager';
 import type { AdminSection } from '@/types';
 import { tokenService } from '@/src/shared/api/tokenService';
 
@@ -47,6 +48,7 @@ const urlToAdminView: Record<AdminSection, AdminView> = {
   'site-settings': 'siteSettings',
   'business-listings': 'businessListings',
   'articles': 'articles',
+  'ad-banners': 'adBanners',
 };
 
 // Map AdminView to URL sections
@@ -69,6 +71,7 @@ const adminViewToUrl: Record<AdminView, string> = {
   'siteSettings': 'site-settings',
   'businessListings': 'business-listings',
   'articles': 'articles',
+  'adBanners': 'ad-banners',
 };
 
 const AdminDashboard: React.FC = () => {
@@ -237,6 +240,8 @@ const AdminDashboard: React.FC = () => {
         return <BusinessListingManager />;
       case 'articles':
         return <ArticleManager />;
+      case 'adBanners':
+        return <AdBannerManager />;
       default:
         return <AnalyticsDashboard />;
     }

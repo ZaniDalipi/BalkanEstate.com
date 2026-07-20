@@ -637,5 +637,10 @@
     "whyBuy": "Зошто да купите во {{country}}?"
   },
   "removeFromFavorites": "Отстрани од омилени",
-  "saved": "Зачувано"
+  "saved": "Зачувано",
+  "ads": {
+    "advertisement": "Advertisement",
+    "sponsored": "Sponsored",
+    "close": "Close advertisement"
+  }
 }

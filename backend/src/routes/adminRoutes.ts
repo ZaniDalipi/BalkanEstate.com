@@ -86,6 +86,13 @@ import {
   uploadVideo,
 } from '../controllers/siteContentController';
 import {
+  getAllAdBanners,
+  createAdBanner,
+  updateAdBanner,
+  deleteAdBanner,
+  uploadAdBannerImage,
+} from '../controllers/adBannerController';
+import {
   getSiteSettings,
   updateSiteSettings,
   resetSiteSettings,
@@ -420,6 +427,29 @@ const logoUpload = multer({
 });
 router.post('/site-settings/upload-logo', logAdminAction('UPLOAD_SITE_LOGO'), logoUpload.single('logo'), uploadSiteLogo);
 router.post('/site-settings/upload-email-logo', logAdminAction('UPLOAD_EMAIL_LOGO'), logoUpload.single('logo'), uploadEmailLogo);
+
+// ===== Ad Banner Management (advertising placements) =====
+const adBannerUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (_req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) {
+      cb(new Error('Only image files are allowed'));
+      return;
+    }
+    // Block SVG to prevent stored XSS
+    if (file.mimetype === 'image/svg+xml') {
+      cb(new Error('SVG files are not allowed'));
+      return;
+    }
+    cb(null, true);
+  },
+});
+router.get('/ad-banners', logAdminAction('VIEW_AD_BANNERS'), getAllAdBanners);
+router.post('/ad-banners', logAdminAction('CREATE_AD_BANNER'), createAdBanner);
+router.patch('/ad-banners/:id', logAdminAction('UPDATE_AD_BANNER'), updateAdBanner);
+router.delete('/ad-banners/:id', logAdminAction('DELETE_AD_BANNER'), deleteAdBanner);
+router.post('/ad-banners/upload-image', logAdminAction('UPLOAD_AD_BANNER_IMAGE'), adBannerUpload.single('image'), uploadAdBannerImage);
 
 // ===== System Settings Management =====
 router.get('/system-settings', logAdminAction('VIEW_SYSTEM_SETTINGS'), getSystemSettings);

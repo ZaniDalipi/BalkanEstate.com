@@ -62,7 +62,8 @@ type UploadType =
   | 'business-logo'     // Business listing logo
   | 'business-banner'   // Business listing banner
   | 'site-logo'         // Site branding logo
-  | 'site-email-logo';  // Site email branding logo
+  | 'site-email-logo'   // Site email branding logo
+  | 'ad-banner';        // Advertising banner (admin-managed)
 
 interface UploadOptions {
   userId: string;
@@ -189,6 +190,10 @@ const buildFolderPath = (options: UploadOptions): string => {
     case 'site-email-logo':
       // balkan-estate/site/email-logo
       return `${ROOT}/site/email-logo`;
+
+    case 'ad-banner':
+      // balkan-estate/site/ad-banners
+      return `${ROOT}/site/ad-banners`;
 
     default:
       return `${ROOT}/misc/${userId}`;

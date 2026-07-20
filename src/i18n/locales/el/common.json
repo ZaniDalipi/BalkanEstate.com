@@ -637,5 +637,10 @@
     "whyBuy": "Γιατί να αγοράσετε στην {{country}};"
   },
   "removeFromFavorites": "Αφαίρεση από τα αγαπημένα",
-  "saved": "Αποθηκευμένο"
+  "saved": "Αποθηκευμένο",
+  "ads": {
+    "advertisement": "Advertisement",
+    "sponsored": "Sponsored",
+    "close": "Close advertisement"
+  }
 }

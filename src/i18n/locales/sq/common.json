@@ -637,5 +637,10 @@
     "whyBuy": "Pse të blini në {{country}}?"
   },
   "removeFromFavorites": "Hiq nga të preferuarat",
-  "saved": "Të ruajtura"
+  "saved": "Të ruajtura",
+  "ads": {
+    "advertisement": "Advertisement",
+    "sponsored": "Sponsored",
+    "close": "Close advertisement"
+  }
 }
