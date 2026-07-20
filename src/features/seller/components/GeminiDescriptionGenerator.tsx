@@ -417,7 +417,11 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
                                 {/* Min Lease */}
                                 <NumberInputWithSteppers
-                                    label={t('rental:form.minLeaseDuration')}
+                                    label={
+                                        listingData.rentPeriod === 'daily' ? t('rental:form.minLeaseDurationDays', 'Min Lease (days)')
+                                            : listingData.rentPeriod === 'weekly' ? t('rental:form.minLeaseDurationWeeks', 'Min Lease (weeks)')
+                                                : t('rental:form.minLeaseDuration')
+                                    }
                                     value={listingData.minimumLeaseDuration}
                                     min={1}
                                     max={60}
@@ -426,7 +430,11 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
                                 {/* Max Lease */}
                                 <NumberInputWithSteppers
-                                    label={t('rental:form.maxLeaseDuration')}
+                                    label={
+                                        listingData.rentPeriod === 'daily' ? t('rental:form.maxLeaseDurationDays', 'Max Lease (days)')
+                                            : listingData.rentPeriod === 'weekly' ? t('rental:form.maxLeaseDurationWeeks', 'Max Lease (weeks)')
+                                                : t('rental:form.maxLeaseDuration')
+                                    }
                                     value={listingData.maximumLeaseDuration}
                                     min={1}
                                     max={120}

@@ -20,6 +20,26 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
             ? t('rental:details.daily')
             : t('rental:details.monthly');
 
+    // Lease duration is expressed in the same unit as the rent period
+    const leaseUnit = property.rentPeriod === 'weekly' ? 'Weeks'
+        : property.rentPeriod === 'daily' ? 'Days'
+            : 'Months';
+    const leaseDurationLabel = property.minimumLeaseDuration && property.maximumLeaseDuration
+        ? t(`rental:details.minToMax${leaseUnit}`, {
+            min: property.minimumLeaseDuration,
+            max: property.maximumLeaseDuration,
+            defaultValue: `{{min}} - {{max}} ${leaseUnit.toLowerCase()}`,
+        })
+        : property.minimumLeaseDuration
+            ? t(`rental:details.min${leaseUnit}`, {
+                min: property.minimumLeaseDuration,
+                defaultValue: `{{min}} ${leaseUnit.toLowerCase()} min`,
+            })
+            : t(`rental:details.max${leaseUnit}`, {
+                max: property.maximumLeaseDuration,
+                defaultValue: `{{max}} ${leaseUnit.toLowerCase()} max`,
+            });
+
     const availableDate = property.availableFrom
         ? new Date(property.availableFrom)
         : null;
@@ -82,11 +102,7 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
                             <div>
                                 <p className="text-xs text-neutral-500">{t('rental:details.leaseDuration')}</p>
                                 <p className="text-sm font-semibold text-neutral-800">
-                                    {property.minimumLeaseDuration && property.maximumLeaseDuration
-                                        ? t('rental:details.minToMaxMonths', { min: property.minimumLeaseDuration, max: property.maximumLeaseDuration })
-                                        : property.minimumLeaseDuration
-                                            ? t('rental:details.minMonths', { min: property.minimumLeaseDuration })
-                                            : t('rental:details.maxMonths', { max: property.maximumLeaseDuration })}
+                                    {leaseDurationLabel}
                                 </p>
                             </div>
                         </div>
