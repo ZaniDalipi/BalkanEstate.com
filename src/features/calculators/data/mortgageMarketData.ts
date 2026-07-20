@@ -129,9 +129,41 @@ export const DEFAULT_MORTGAGE_PROFILE: CountryMortgageProfile = COUNTRY_MORTGAGE
 /** Year the reference figures were last reviewed — surfaced in the UI. */
 export const MORTGAGE_DATA_YEAR = 2025;
 
-/** Look up a country's mortgage profile by code, falling back to a default. */
-export function getMortgageProfile(countryCode: string): CountryMortgageProfile {
-  return COUNTRY_MORTGAGE_PROFILES[countryCode] ?? DEFAULT_MORTGAGE_PROFILE;
+/**
+ * Look up a country's mortgage profile by ISO code ('MK') OR full country name
+ * ('North Macedonia', 'Serbia', …). Property records store the country as a
+ * name, so name resolution is what keeps the embedded calculator tied to the
+ * country the property is actually in — not the default.
+ */
+export function getMortgageProfile(country: string): CountryMortgageProfile {
+  if (!country) return DEFAULT_MORTGAGE_PROFILE;
+
+  // Exact ISO code, case-insensitive (e.g. 'mk' → MK).
+  const byCode = COUNTRY_MORTGAGE_PROFILES[country.toUpperCase()];
+  if (byCode) return byCode;
+
+  // Exact country name / code, case-insensitive.
+  const norm = country.trim().toLowerCase();
+  const exact = MORTGAGE_COUNTRIES.find(
+    (c) => c.name.toLowerCase() === norm || c.code.toLowerCase() === norm,
+  );
+  if (exact) return exact;
+
+  // Common names, native names and partial matches.
+  const includes = (...needles: string[]) => needles.some((n) => norm.includes(n));
+  if (includes('macedon')) return COUNTRY_MORTGAGE_PROFILES.MK;
+  if (includes('albania', 'shqip')) return COUNTRY_MORTGAGE_PROFILES.AL;
+  if (includes('serbia', 'srbij')) return COUNTRY_MORTGAGE_PROFILES.RS;
+  if (includes('kosov')) return COUNTRY_MORTGAGE_PROFILES.XK;
+  if (includes('montenegro', 'crna gora')) return COUNTRY_MORTGAGE_PROFILES.ME;
+  if (includes('bosnia', 'herzegov', 'bosna')) return COUNTRY_MORTGAGE_PROFILES.BA;
+  if (includes('croat', 'hrvat')) return COUNTRY_MORTGAGE_PROFILES.HR;
+  if (includes('sloven')) return COUNTRY_MORTGAGE_PROFILES.SI;
+  if (includes('bulgar', 'българ')) return COUNTRY_MORTGAGE_PROFILES.BG;
+  if (includes('greece', 'hellen', 'ελλ')) return COUNTRY_MORTGAGE_PROFILES.GR;
+  if (includes('romania', 'român', 'roman')) return COUNTRY_MORTGAGE_PROFILES.RO;
+
+  return DEFAULT_MORTGAGE_PROFILE;
 }
 
 /** Locale used when displaying amounts in euros. */
@@ -147,29 +179,7 @@ export function formatMoney(amount: number, currency: string, locale: string): s
   }).format(Math.round(amount));
 }
 
-/**
- * Format an amount in a country's mortgage currency. Unlike the shared
- * `formatPrice` helper (which is keyed by country name and collapses every
- * Balkan country to EUR), this respects each country's actual currency — and,
- * when `useEur` is set, lets the user view any market's figures in euros.
- */
-export function formatLocalCurrency(amount: number, countryCode: string, useEur = false): string {
-  const profile = getMortgageProfile(countryCode);
-  return useEur
-    ? formatMoney(amount, 'EUR', EUR_LOCALE)
-    : formatMoney(amount, profile.currency, profile.locale);
-}
-
-/** Currency symbol (or code) for a country's mortgage currency (or EUR). */
-export function getLocalCurrencySymbol(countryCode: string, useEur = false): string {
-  const profile = getMortgageProfile(countryCode);
-  const currency = useEur ? 'EUR' : profile.currency;
-  const locale = useEur ? EUR_LOCALE : profile.locale;
-  const parts = new Intl.NumberFormat(locale, { style: 'currency', currency }).formatToParts(1);
-  return parts.find((p) => p.type === 'currency')?.value ?? currency;
-}
-
-/** Whether a country uses a non-euro local currency (so the EUR toggle is useful). */
-export function hasLocalCurrencyOption(countryCode: string): boolean {
-  return getMortgageProfile(countryCode).currency !== 'EUR';
+/** Format an amount in euros — the single currency used across the calculator. */
+export function formatEur(amount: number): string {
+  return formatMoney(amount, 'EUR', EUR_LOCALE);
 }

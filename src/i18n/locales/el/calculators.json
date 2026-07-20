@@ -58,8 +58,8 @@
       "accurateDesc": "Get precise monthly payment calculations",
       "flexible": "Flexible Terms",
       "flexibleDesc": "Compare different loan terms and rates",
-      "local": "Local Currencies",
-      "localDesc": "Support for all Balkan currencies"
+      "local": "Τιμές σε ευρώ",
+      "localDesc": "Σαφείς εκτιμήσεις σε ευρώ σε όλα τα Βαλκάνια"
     },
     "howItWorks": "How It Works",
     "step1Title": "Enter Property Price",

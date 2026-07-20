@@ -4,16 +4,16 @@ import { motion } from 'framer-motion';
 import MortgageCalculator from './MortgageCalculator';
 import { CalculatorIcon } from '@/constants';
 import Footer from '@/components/shared/Footer';
-import { MORTGAGE_COUNTRIES as COUNTRIES, hasLocalCurrencyOption } from '../data/mortgageMarketData';
+import { MORTGAGE_COUNTRIES as COUNTRIES } from '../data/mortgageMarketData';
 import { validatePrice } from '@/shared/utils/validation';
 
 const MortgageCalculatorPage: React.FC = () => {
   const { t } = useTranslation(['calculators', 'common']);
   const [propertyPrice, setPropertyPrice] = useState<number>(100000);
   const [country, setCountry] = useState<string>('MK');
-  const [displayInEur, setDisplayInEur] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
   const [priceError, setPriceError] = useState<string | undefined>();
+  const [priceFocused, setPriceFocused] = useState(false); // blank the field only while editing
 
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,9 +37,6 @@ const MortgageCalculatorPage: React.FC = () => {
     if (priceError) setPriceError(undefined); // clear error as the user corrects it
   };
 
-  const selectedCountry = COUNTRIES.find(c => c.code === country);
-  const showCurrencyToggle = hasLocalCurrencyOption(country);
-  const currencyLabel = displayInEur ? 'EUR' : (selectedCountry?.currency ?? 'EUR');
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
@@ -72,7 +69,7 @@ const MortgageCalculatorPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <MortgageCalculator propertyPrice={propertyPrice} country={country} displayInEur={displayInEur} onDisplayInEurChange={setDisplayInEur} />
+            <MortgageCalculator propertyPrice={propertyPrice} country={country} />
             <div className="mt-6 text-center">
               <button
                 onClick={handleReset}
@@ -102,52 +99,32 @@ const MortgageCalculatorPage: React.FC = () => {
                 >
                   {COUNTRIES.map((c) => (
                     <option key={c.code} value={c.code}>
-                      {c.name} ({c.currency})
+                      {c.name}
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* Property Price */}
+              {/* Property Price — always in EUR */}
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label htmlFor="mortgage-price" className="block text-sm font-semibold text-neutral-700">
-                    {t('calculators:mortgage.fields.propertyPrice')}
-                  </label>
-                  {/* Currency choice — view any non-euro market in EUR if preferred */}
-                  {showCurrencyToggle && (
-                    <div className="bg-neutral-100 p-0.5 rounded-full flex items-center text-xs font-semibold" role="group" aria-label={t('calculators:mortgage.fields.currency', 'Currency')}>
-                      <button
-                        type="button"
-                        onClick={() => setDisplayInEur(false)}
-                        aria-pressed={!displayInEur}
-                        className={`px-3 py-1 rounded-full transition-all ${!displayInEur ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'}`}
-                      >
-                        {selectedCountry?.currency}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setDisplayInEur(true)}
-                        aria-pressed={displayInEur}
-                        className={`px-3 py-1 rounded-full transition-all ${displayInEur ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'}`}
-                      >
-                        EUR €
-                      </button>
-                    </div>
-                  )}
-                </div>
+                <label htmlFor="mortgage-price" className="block text-sm font-semibold text-neutral-700 mb-2">
+                  {t('calculators:mortgage.fields.propertyPrice')}
+                </label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 font-medium">
-                    {currencyLabel}
+                    €
                   </span>
                   <input
                     id="mortgage-price"
                     type="number"
-                    value={propertyPrice}
+                    value={priceFocused && propertyPrice === 0 ? '' : propertyPrice}
                     onChange={(e) => handlePriceChange(e.target.valueAsNumber)}
+                    onFocus={(e) => { setPriceFocused(true); e.target.select(); }}
+                    onBlur={() => setPriceFocused(false)}
+                    placeholder="100000"
                     aria-invalid={!!priceError}
                     aria-describedby={priceError ? 'mortgage-price-error' : undefined}
-                    className={`w-full pl-20 pr-4 py-3 bg-neutral-50 border rounded-xl text-neutral-800 font-medium focus:outline-none focus:ring-2 transition-colors ${
+                    className={`w-full pl-9 pr-4 py-3 bg-neutral-50 border rounded-xl text-neutral-800 font-medium focus:outline-none focus:ring-2 transition-colors ${
                       priceError
                         ? 'border-red-300 focus:ring-red-200 focus:border-red-400'
                         : 'border-neutral-200 focus:ring-primary/20 focus:border-primary'
