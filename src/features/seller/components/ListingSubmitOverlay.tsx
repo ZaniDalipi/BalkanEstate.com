@@ -67,8 +67,18 @@ const ListingSubmitOverlay: React.FC<ListingSubmitOverlayProps> = ({
 
     return createPortal(
         <div
-            className="submit-overlay-backdrop fixed inset-0 z-[6000] flex items-center justify-center px-4"
-            style={{ background: 'rgba(15,23,42,0.55)' }}
+            className="submit-overlay-backdrop fixed inset-0 z-[6000] flex items-center justify-center"
+            style={{
+                background: 'rgba(15,23,42,0.55)',
+                backdropFilter: 'blur(14px)',
+                WebkitBackdropFilter: 'blur(14px)',
+                // Base 16px gutter, expanded by the device safe-area so the card
+                // clears the notch on mobile/tablet in any orientation.
+                paddingTop: 'max(1rem, env(safe-area-inset-top, 0px))',
+                paddingRight: 'max(1rem, env(safe-area-inset-right, 0px))',
+                paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 0px))',
+                paddingLeft: 'max(1rem, env(safe-area-inset-left, 0px))',
+            }}
             role="alertdialog"
             aria-live="assertive"
             aria-busy="true"

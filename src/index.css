@@ -1607,9 +1607,12 @@ html.reduce-motion [style*="animation"][class*="infinite"] {
    Full-screen "we're publishing your listing" overlay: a blurred, progressively
    darkening backdrop with a floating glass card, orbiting particles and a
    sweeping progress bar. Used by ListingSubmitOverlay. --- */
+/* Animate opacity only — the blur itself is set statically on the element so it
+   renders reliably on mobile Safari, which does not reliably animate
+   backdrop-filter inside keyframes. */
 @keyframes submitOverlayIn {
-  from { opacity: 0; backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px); }
-  to   { opacity: 1; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 @keyframes submitCardIn {
   0%   { opacity: 0; transform: translateY(24px) scale(0.9); filter: blur(8px); }
