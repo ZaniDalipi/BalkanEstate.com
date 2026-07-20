@@ -147,29 +147,7 @@ export function formatMoney(amount: number, currency: string, locale: string): s
   }).format(Math.round(amount));
 }
 
-/**
- * Format an amount in a country's mortgage currency. Unlike the shared
- * `formatPrice` helper (which is keyed by country name and collapses every
- * Balkan country to EUR), this respects each country's actual currency — and,
- * when `useEur` is set, lets the user view any market's figures in euros.
- */
-export function formatLocalCurrency(amount: number, countryCode: string, useEur = false): string {
-  const profile = getMortgageProfile(countryCode);
-  return useEur
-    ? formatMoney(amount, 'EUR', EUR_LOCALE)
-    : formatMoney(amount, profile.currency, profile.locale);
-}
-
-/** Currency symbol (or code) for a country's mortgage currency (or EUR). */
-export function getLocalCurrencySymbol(countryCode: string, useEur = false): string {
-  const profile = getMortgageProfile(countryCode);
-  const currency = useEur ? 'EUR' : profile.currency;
-  const locale = useEur ? EUR_LOCALE : profile.locale;
-  const parts = new Intl.NumberFormat(locale, { style: 'currency', currency }).formatToParts(1);
-  return parts.find((p) => p.type === 'currency')?.value ?? currency;
-}
-
-/** Whether a country uses a non-euro local currency (so the EUR toggle is useful). */
-export function hasLocalCurrencyOption(countryCode: string): boolean {
-  return getMortgageProfile(countryCode).currency !== 'EUR';
+/** Format an amount in euros — the single currency used across the calculator. */
+export function formatEur(amount: number): string {
+  return formatMoney(amount, 'EUR', EUR_LOCALE);
 }

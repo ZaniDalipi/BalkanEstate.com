@@ -2,19 +2,13 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   getMortgageProfile,
-  formatLocalCurrency,
-  getLocalCurrencySymbol,
-  hasLocalCurrencyOption,
+  formatEur,
   MORTGAGE_DATA_YEAR,
 } from '../data/mortgageMarketData';
 
 interface MortgageCalculatorProps {
   propertyPrice: number;
   country: string;
-  /** Display all amounts in EUR instead of the local currency. */
-  displayInEur?: boolean;
-  /** Toggle the EUR/local display currency from within the results view. */
-  onDisplayInEurChange?: (useEur: boolean) => void;
 }
 
 /** Sensible bounds for the editable interest-rate field. */
@@ -56,9 +50,10 @@ const BreakdownDonut: React.FC<{
     const gap = principalPct > 0 && principalPct < 1 ? 3 : 0; // 3px visual gap
     const principalLen = Math.max(0, principalPct * c - gap);
     const interestLen = Math.max(0, (1 - principalPct) * c - gap);
-    // Shrink the centre figure as it grows so long totals stay inside the ring.
+    // Shrink the centre figure as it grows so long totals stay inside the ring
+    // without distorting the glyphs (no textLength squishing).
     const len = centerValue.length;
-    const valueFontSize = len > 15 ? 5.5 : len > 12 ? 6.5 : len > 9 ? 7.5 : 9;
+    const valueFontSize = len > 16 ? 6 : len > 13 ? 7 : len > 10 ? 8 : 9.5;
     return (
         <svg viewBox="0 0 100 100" className="w-32 h-32 sm:w-36 sm:h-36 -rotate-90 flex-shrink-0" role="img" aria-label={`${centerLabel}: ${centerValue}`}>
             <circle cx="50" cy="50" r={r} fill="none" stroke="#F1F5F9" strokeWidth="11" />
@@ -82,8 +77,6 @@ const BreakdownDonut: React.FC<{
                 <text
                     x="50" y="58" textAnchor="middle" className="fill-neutral-800"
                     style={{ fontSize: `${valueFontSize}px`, fontWeight: 800 }}
-                    textLength={len > 9 ? 66 : undefined}
-                    lengthAdjust="spacingAndGlyphs"
                 >
                     {centerValue}
                 </text>
@@ -107,10 +100,9 @@ const StatTile: React.FC<{ label: string; value: string; accent?: string }> = ({
     </div>
 );
 
-const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, country, displayInEur = false, onDisplayInEurChange }) => {
+const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, country }) => {
     const { t } = useTranslation(['calculators']);
     const profile = useMemo(() => getMortgageProfile(country), [country]);
-    const useEur = displayInEur;
 
     const [downPayment, setDownPayment] = useState(profile.defaultDownPaymentPercent);
     const [downPaymentType, setDownPaymentType] = useState<'percent' | 'amount'>('percent');
@@ -120,9 +112,9 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
     const [monthlyPayment, setMonthlyPayment] = useState(0);
     const [isSliderActive, setIsSliderActive] = useState(false);
 
-    const currencySymbol = getLocalCurrencySymbol(country, useEur);
-    const showCurrencyToggle = hasLocalCurrencyOption(country) && !!onDisplayInEurChange;
-    const fmt = useCallback((amount: number) => formatLocalCurrency(amount, country, useEur), [country, useEur]);
+    // Single currency across the calculator: euros.
+    const currencySymbol = '€';
+    const fmt = formatEur;
 
     // Term presets, trimmed to what the selected market actually offers.
     const termOptions = useMemo(
@@ -227,34 +219,12 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
     return (
         <div className="bg-white rounded-2xl shadow-xl border border-neutral-200/80 overflow-hidden animate-fade-in">
             {/* Header */}
-            <div className="flex items-center justify-between gap-2.5 px-5 py-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-b border-neutral-100">
-                <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 text-lg flex-shrink-0">💰</span>
-                    <div className="min-w-0">
-                        <h3 className="text-sm font-bold text-neutral-800 leading-tight truncate">{t('calculators:mortgage.title')}</h3>
-                        <p className="text-[11px] text-neutral-500 truncate">{profile.name}</p>
-                    </div>
+            <div className="flex items-center gap-2.5 px-5 py-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-b border-neutral-100">
+                <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 text-lg flex-shrink-0">💰</span>
+                <div className="min-w-0">
+                    <h3 className="text-sm font-bold text-neutral-800 leading-tight truncate">{t('calculators:mortgage.title')}</h3>
+                    <p className="text-[11px] text-neutral-500 truncate">{profile.name}</p>
                 </div>
-                {showCurrencyToggle && (
-                    <div className="bg-white/70 p-0.5 rounded-full flex items-center text-[11px] font-semibold flex-shrink-0 border border-neutral-200/70" role="group" aria-label={t('calculators:mortgage.fields.currency', 'Currency')}>
-                        <button
-                            type="button"
-                            onClick={() => onDisplayInEurChange!(true)}
-                            aria-pressed={useEur}
-                            className={`px-2.5 py-1 rounded-full transition-all ${useEur ? 'bg-primary text-white shadow-sm' : 'text-neutral-500'}`}
-                        >
-                            EUR
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => onDisplayInEurChange!(false)}
-                            aria-pressed={!useEur}
-                            className={`px-2.5 py-1 rounded-full transition-all ${!useEur ? 'bg-primary text-white shadow-sm' : 'text-neutral-500'}`}
-                        >
-                            {profile.currency}
-                        </button>
-                    </div>
-                )}
             </div>
 
             <div className="p-5 space-y-5">
