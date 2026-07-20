@@ -447,6 +447,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                     <input
                                         type="date"
                                         id="availableFrom"
+                                        lang="en-GB"
                                         value={listingData.availableFrom}
                                         onChange={(e) => setListingData(prev => ({ ...prev, availableFrom: e.target.value }))}
                                         className={inputBaseClasses}
