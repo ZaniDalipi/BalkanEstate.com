@@ -13,6 +13,7 @@ const MortgageCalculatorPage: React.FC = () => {
   const [country, setCountry] = useState<string>('MK');
   const [showCalculator, setShowCalculator] = useState(false);
   const [priceError, setPriceError] = useState<string | undefined>();
+  const [priceFocused, setPriceFocused] = useState(false); // blank the field only while editing
 
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,9 +117,10 @@ const MortgageCalculatorPage: React.FC = () => {
                   <input
                     id="mortgage-price"
                     type="number"
-                    value={propertyPrice === 0 ? '' : propertyPrice}
+                    value={priceFocused && propertyPrice === 0 ? '' : propertyPrice}
                     onChange={(e) => handlePriceChange(e.target.valueAsNumber)}
-                    onFocus={(e) => e.target.select()}
+                    onFocus={(e) => { setPriceFocused(true); e.target.select(); }}
+                    onBlur={() => setPriceFocused(false)}
                     placeholder="100000"
                     aria-invalid={!!priceError}
                     aria-describedby={priceError ? 'mortgage-price-error' : undefined}

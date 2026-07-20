@@ -119,6 +119,7 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
     const [loanTerm, setLoanTerm] = useState(profile.defaultTermYears);
     const [monthlyPayment, setMonthlyPayment] = useState(0);
     const [isSliderActive, setIsSliderActive] = useState(false);
+    const [dpFocused, setDpFocused] = useState(false); // blank the field only while editing
 
     const interestRate = parseFloat(rateInput);
     const effectiveRate = Number.isFinite(interestRate) && interestRate > 0 ? interestRate : 0;
@@ -373,10 +374,10 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                         <p className="text-sm font-semibold text-primary tabular-nums break-words min-w-0">{fmt(downPaymentAmount)}</p>
                         <input
                             type="number"
-                            value={downPayment === 0 ? '' : downPayment}
+                            value={dpFocused && downPayment === 0 ? '' : downPayment}
                             onChange={handleDownPaymentChange}
-                            onFocus={(e) => { handleSliderStart(); e.target.select(); }}
-                            onBlur={handleSliderEnd}
+                            onFocus={(e) => { handleSliderStart(); setDpFocused(true); e.target.select(); }}
+                            onBlur={() => { handleSliderEnd(); setDpFocused(false); }}
                             placeholder="0"
                             className="w-20 flex-shrink-0 text-xs font-semibold bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-center text-neutral-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                         />
@@ -401,6 +402,7 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                         value={rateInput}
                         onChange={handleInterestRateChange}
                         onFocus={(e) => e.target.select()}
+                        onBlur={() => { if (rateInput.trim() === '' || rateInput === '.') setRateInput('0'); }}
                         aria-invalid={!!rateError}
                         aria-describedby={rateError ? 'interest-rate-error' : undefined}
                         className={`w-full text-sm font-semibold bg-neutral-50 border rounded-md p-2 text-neutral-900 focus:ring-2 transition-all ${
