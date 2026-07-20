@@ -32,6 +32,7 @@ import {
   SocialVideoEmbed,
 } from '@/src/components/property';
 import SimilarProperties from '@/src/components/property/SimilarProperties';
+import { AdBannerSlot } from '@/src/features/ads';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import { useRecentlyViewed } from '@/src/hooks/useRecentlyViewed';
@@ -966,6 +967,11 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
         />
       </div>
 
+      {/* Advertiser banner slot */}
+      <div className="max-w-screen-xl mx-auto w-full px-3 sm:px-4 md:px-6 lg:px-8 mt-4 empty:hidden">
+        <AdBannerSlot placement="property-details-top" />
+      </div>
+
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 overflow-x-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
@@ -1033,6 +1039,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               isCreatingConversation={isCreatingConversation}
               onContactSeller={handleContactSeller}
             />
+            {/* Advertiser banner slot */}
+            <AdBannerSlot placement="property-details-sidebar" className="mt-6" />
           </div>
         </div>
       </main>

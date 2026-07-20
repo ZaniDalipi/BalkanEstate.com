@@ -16,6 +16,7 @@ import { generatePropertySlug } from '@/utils/slug';
 import SearchHeader from './SearchHeader';
 import SearchLocationBar from './SearchLocationBar';
 import SearchMobileFilters from './SearchMobileFilters';
+import { AdBannerSlot } from '@/src/features/ads';
 
 const AiChatModal: React.FC<{
     isOpen: boolean;
@@ -287,7 +288,14 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                             onSuggestionClick={handleSuggestionClick}
                         />
                     )}
+                    <div className="flex-shrink-0 px-3 pt-2">
+                        <AdBannerSlot placement="search-top" />
+                    </div>
                     <PropertyList {...propertyListProps} />
+                    {/* Persistent sidebar-style ad slot at the foot of the results panel (desktop) */}
+                    <div className="hidden lg:block flex-shrink-0 px-3 py-2 border-t border-neutral-100">
+                        <AdBannerSlot placement="search-sidebar" rotate />
+                    </div>
                 </div>
 
 

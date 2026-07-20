@@ -217,6 +217,10 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
       <OrganizationSchema />
       <FAQSchema faqs={realEstateFAQs} />
 
+      <div className="max-w-6xl mx-auto w-full px-4 pt-3 empty:hidden">
+        <AdBannerSlot placement="home-top" />
+      </div>
+
       <HeroSection
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
@@ -224,7 +228,7 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
         onNavigate={handleNavigate}
       />
 
-      <div className="max-w-6xl mx-auto w-full px-4 mt-4">
+      <div className="max-w-6xl mx-auto w-full px-4 mt-4 empty:hidden">
         <AdBannerSlot placement="home-below-hero" />
       </div>
 
@@ -257,7 +261,7 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
         </Suspense>
       </div>
 
-      <div className="max-w-6xl mx-auto w-full px-4 my-8">
+      <div className="max-w-6xl mx-auto w-full px-4 my-8 empty:hidden">
         <AdBannerSlot placement="home-mid" />
       </div>
 
