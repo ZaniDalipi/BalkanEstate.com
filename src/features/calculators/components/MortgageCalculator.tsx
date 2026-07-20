@@ -56,8 +56,11 @@ const BreakdownDonut: React.FC<{
     const gap = principalPct > 0 && principalPct < 1 ? 3 : 0; // 3px visual gap
     const principalLen = Math.max(0, principalPct * c - gap);
     const interestLen = Math.max(0, (1 - principalPct) * c - gap);
+    // Shrink the centre figure as it grows so long totals stay inside the ring.
+    const len = centerValue.length;
+    const valueFontSize = len > 15 ? 5.5 : len > 12 ? 6.5 : len > 9 ? 7.5 : 9;
     return (
-        <svg viewBox="0 0 100 100" className="w-32 h-32 sm:w-36 sm:h-36 -rotate-90" role="img" aria-label={`${centerLabel}: ${centerValue}`}>
+        <svg viewBox="0 0 100 100" className="w-32 h-32 sm:w-36 sm:h-36 -rotate-90 flex-shrink-0" role="img" aria-label={`${centerLabel}: ${centerValue}`}>
             <circle cx="50" cy="50" r={r} fill="none" stroke="#F1F5F9" strokeWidth="11" />
             <circle
                 cx="50" cy="50" r={r} fill="none" stroke={INTEREST_COLOR} strokeWidth="11"
@@ -72,23 +75,35 @@ const BreakdownDonut: React.FC<{
                 strokeLinecap="round"
                 style={{ transition: 'stroke-dasharray 400ms ease-out' }}
             />
-            {/* Counter-rotate the text so it reads horizontally */}
+            {/* Counter-rotate the text so it reads horizontally. textLength caps
+                the width so an extreme value can never spill past the ring. */}
             <g transform="rotate(90 50 50)">
                 <text x="50" y="46" textAnchor="middle" className="fill-neutral-400" style={{ fontSize: '6px', fontWeight: 600 }}>{centerLabel}</text>
-                <text x="50" y="58" textAnchor="middle" className="fill-neutral-800" style={{ fontSize: '9px', fontWeight: 800 }}>{centerValue}</text>
+                <text
+                    x="50" y="58" textAnchor="middle" className="fill-neutral-800"
+                    style={{ fontSize: `${valueFontSize}px`, fontWeight: 800 }}
+                    textLength={len > 9 ? 66 : undefined}
+                    lengthAdjust="spacingAndGlyphs"
+                >
+                    {centerValue}
+                </text>
             </g>
         </svg>
     );
 };
 
-/** Compact labelled figure for the results grid. */
+/**
+ * Compact labelled figure for the results grid. Renders as a label-left /
+ * value-right row on mobile (full width, so large local-currency totals fit on
+ * one line) and as a stacked card from sm up.
+ */
 const StatTile: React.FC<{ label: string; value: string; accent?: string }> = ({ label, value, accent }) => (
-    <div className="rounded-xl bg-neutral-50 border border-neutral-100 p-3">
-        <div className="flex items-center gap-1.5">
+    <div className="rounded-xl bg-neutral-50 border border-neutral-100 p-2.5 sm:p-3 min-w-0 flex items-center justify-between gap-3 sm:block">
+        <div className="flex items-center gap-1.5 min-w-0">
             {accent && <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: accent }} />}
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500">{label}</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500 leading-tight">{label}</span>
         </div>
-        <p className="text-sm sm:text-base font-bold text-neutral-800 mt-1 tabular-nums">{value}</p>
+        <p className="text-sm font-bold text-neutral-800 tabular-nums break-words leading-tight min-w-0 text-right sm:text-left sm:mt-1" title={value}>{value}</p>
     </div>
 );
 
@@ -243,9 +258,9 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
             </div>
 
             <div className="p-5 space-y-5">
-                <div className="flex items-baseline justify-between">
-                    <label className="text-xs font-medium text-neutral-500">{t('calculators:mortgage.fields.propertyPrice')}</label>
-                    <p className="text-lg font-bold text-neutral-800 tabular-nums">{fmt(propertyPrice)}</p>
+                <div className="flex items-baseline justify-between gap-3">
+                    <label className="text-xs font-medium text-neutral-500 flex-shrink-0">{t('calculators:mortgage.fields.propertyPrice')}</label>
+                    <p className="text-lg font-bold text-neutral-800 tabular-nums text-right break-words min-w-0">{fmt(propertyPrice)}</p>
                 </div>
 
                 <div>
@@ -377,15 +392,15 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                     </div>
 
                     {/* Value display with input */}
-                    <div className="flex items-center justify-between mt-2">
-                        <p className="text-sm font-semibold text-primary">{fmt(downPaymentAmount)}</p>
+                    <div className="flex items-center justify-between gap-2 mt-2">
+                        <p className="text-sm font-semibold text-primary tabular-nums break-words min-w-0">{fmt(downPaymentAmount)}</p>
                         <input
                             type="number"
                             value={downPayment}
                             onChange={handleDownPaymentChange}
                             onFocus={handleSliderStart}
                             onBlur={handleSliderEnd}
-                            className="w-20 text-xs font-semibold bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-center text-neutral-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                            className="w-20 flex-shrink-0 text-xs font-semibold bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-center text-neutral-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                         />
                     </div>
                 </div>
@@ -435,7 +450,7 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                 <div className="rounded-2xl bg-gradient-to-br from-primary/[0.06] to-violet-500/[0.04] border border-primary/10 p-5">
                     <div className="text-center">
                         <p className="text-xs font-semibold text-neutral-600">{t('calculators:mortgage.results.estimatedMonthlyPayment')}</p>
-                        <p className="text-4xl font-extrabold bg-gradient-to-r from-primary via-violet-500 to-primary bg-clip-text text-transparent mt-1 tabular-nums">
+                        <p className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-primary via-violet-500 to-primary bg-clip-text text-transparent mt-1 tabular-nums break-words leading-tight px-1">
                             {fmt(monthlyPayment)}
                         </p>
                         <p className="text-[11px] text-neutral-400 mt-0.5">{t('calculators:common.perMonth', '/month')}</p>
@@ -450,26 +465,26 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                                     centerLabel={t('calculators:mortgage.results.totalPayment')}
                                     centerValue={fmt(breakdown.totalPayment)}
                                 />
-                                <div className="space-y-2.5">
-                                    <div className="flex items-center gap-2">
+                                <div className="space-y-2.5 w-full sm:w-auto min-w-0">
+                                    <div className="flex items-center gap-2 min-w-0">
                                         <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: PRINCIPAL_COLOR }} />
-                                        <div>
+                                        <div className="min-w-0">
                                             <p className="text-[11px] text-neutral-500 leading-tight">{t('calculators:mortgage.results.principal')}</p>
-                                            <p className="text-sm font-bold text-neutral-800 tabular-nums">{fmt(breakdown.loanAmount)}</p>
+                                            <p className="text-sm font-bold text-neutral-800 tabular-nums break-words">{fmt(breakdown.loanAmount)}</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-2 min-w-0">
                                         <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: INTEREST_COLOR }} />
-                                        <div>
+                                        <div className="min-w-0">
                                             <p className="text-[11px] text-neutral-500 leading-tight">{t('calculators:mortgage.results.interest')}</p>
-                                            <p className="text-sm font-bold text-neutral-800 tabular-nums">{fmt(breakdown.totalInterest)}</p>
+                                            <p className="text-sm font-bold text-neutral-800 tabular-nums break-words">{fmt(breakdown.totalInterest)}</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Stat tiles */}
-                            <div className="grid grid-cols-3 gap-2.5 mt-5">
+                            {/* Stat tiles — stacked rows on mobile, cards from sm up */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5 mt-5">
                                 <StatTile
                                     label={t('calculators:mortgage.fields.loanAmount')}
                                     value={fmt(breakdown.loanAmount)}
