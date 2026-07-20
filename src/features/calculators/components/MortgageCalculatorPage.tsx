@@ -11,7 +11,9 @@ const MortgageCalculatorPage: React.FC = () => {
   const { t } = useTranslation(['calculators', 'common']);
   const [propertyPrice, setPropertyPrice] = useState<number>(100000);
   const [country, setCountry] = useState<string>('MK');
-  const [displayInEur, setDisplayInEur] = useState(false);
+  // Default to EUR — property across the Balkans is commonly quoted in euros and
+  // it reads universally; users can switch to the local currency if they prefer.
+  const [displayInEur, setDisplayInEur] = useState(true);
   const [showCalculator, setShowCalculator] = useState(false);
   const [priceError, setPriceError] = useState<string | undefined>();
 
@@ -119,19 +121,19 @@ const MortgageCalculatorPage: React.FC = () => {
                     <div className="bg-neutral-100 p-0.5 rounded-full flex items-center text-xs font-semibold" role="group" aria-label={t('calculators:mortgage.fields.currency', 'Currency')}>
                       <button
                         type="button"
-                        onClick={() => setDisplayInEur(false)}
-                        aria-pressed={!displayInEur}
-                        className={`px-3 py-1 rounded-full transition-all ${!displayInEur ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'}`}
-                      >
-                        {selectedCountry?.currency}
-                      </button>
-                      <button
-                        type="button"
                         onClick={() => setDisplayInEur(true)}
                         aria-pressed={displayInEur}
                         className={`px-3 py-1 rounded-full transition-all ${displayInEur ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'}`}
                       >
                         EUR €
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDisplayInEur(false)}
+                        aria-pressed={!displayInEur}
+                        className={`px-3 py-1 rounded-full transition-all ${!displayInEur ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'}`}
+                      >
+                        {selectedCountry?.currency}
                       </button>
                     </div>
                   )}

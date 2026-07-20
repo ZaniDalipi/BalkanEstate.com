@@ -224,19 +224,19 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                     <div className="bg-white/70 p-0.5 rounded-full flex items-center text-[11px] font-semibold flex-shrink-0 border border-neutral-200/70" role="group" aria-label={t('calculators:mortgage.fields.currency', 'Currency')}>
                         <button
                             type="button"
-                            onClick={() => onDisplayInEurChange!(false)}
-                            aria-pressed={!useEur}
-                            className={`px-2.5 py-1 rounded-full transition-all ${!useEur ? 'bg-primary text-white shadow-sm' : 'text-neutral-500'}`}
-                        >
-                            {profile.currency}
-                        </button>
-                        <button
-                            type="button"
                             onClick={() => onDisplayInEurChange!(true)}
                             aria-pressed={useEur}
                             className={`px-2.5 py-1 rounded-full transition-all ${useEur ? 'bg-primary text-white shadow-sm' : 'text-neutral-500'}`}
                         >
                             EUR
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => onDisplayInEurChange!(false)}
+                            aria-pressed={!useEur}
+                            className={`px-2.5 py-1 rounded-full transition-all ${!useEur ? 'bg-primary text-white shadow-sm' : 'text-neutral-500'}`}
+                        >
+                            {profile.currency}
                         </button>
                     </div>
                 )}
