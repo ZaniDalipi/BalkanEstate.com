@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { XMarkIcon } from '@/constants';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { useAdBanners, selectByPlacement } from '../hooks/useAdBanners';
 import { trackClick, trackImpression } from '../api/adBannerApi';
@@ -16,25 +15,36 @@ interface StickyAdBannerProps {
 const SESSION_DISMISS_PREFIX = 'ad-banner-dismissed:';
 
 /**
- * Renders the highest-priority active banner for a page + placement.
+ * Renders the highest-priority active banner for a page + placement as a
+ * compact, self-contained card.
  *
- * `sticky-top` / `sticky-bottom` pin to the viewport edge; other placements
- * render inline. Visitors can dismiss a sticky banner for the session.
+ * Layout-critical properties (card height, image object-fit, positioning) use
+ * inline styles rather than utility classes so the banner renders identically
+ * regardless of the CSS build — an ad image can never blow past the card.
  */
 const StickyAdBanner: React.FC<StickyAdBannerProps> = ({ page, placement = 'sticky-bottom' }) => {
   const { t } = useTranslation(['common']);
   const { data } = useAdBanners(page);
   const [dismissed, setDismissed] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const trackedRef = useRef<string | null>(null);
 
   const banner = useMemo(() => selectByPlacement(data, placement)[0], [data, placement]);
+
+  // Track viewport so we can clear the mobile bottom nav on small screens.
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    const update = () => setIsDesktop(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
 
   // Restore per-session dismissal for this specific banner.
   useEffect(() => {
     if (!banner) return;
     try {
-      const key = `${SESSION_DISMISS_PREFIX}${banner.id}`;
-      setDismissed(sessionStorage.getItem(key) === '1');
+      setDismissed(sessionStorage.getItem(`${SESSION_DISMISS_PREFIX}${banner.id}`) === '1');
     } catch {
       /* sessionStorage unavailable — treat as not dismissed */
     }
@@ -51,16 +61,9 @@ const StickyAdBanner: React.FC<StickyAdBannerProps> = ({ page, placement = 'stic
   if (!banner || dismissed) return null;
 
   const isSticky = placement === 'sticky-top' || placement === 'sticky-bottom';
-  // sticky-bottom sits above the mobile bottom nav (3.5rem + safe area), flush to
-  // the bottom on desktop where the bottom nav is hidden (md:).
-  const stickyPosition =
-    placement === 'sticky-top'
-      ? 'fixed top-0 left-0 right-0'
-      : 'fixed left-0 right-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom,0px))] md:bottom-0';
+  const isTop = placement === 'sticky-top';
 
-  const handleClick = () => {
-    trackClick(banner.id);
-  };
+  const handleClick = () => trackClick(banner.id);
 
   const handleDismiss = () => {
     setDismissed(true);
@@ -71,47 +74,108 @@ const StickyAdBanner: React.FC<StickyAdBannerProps> = ({ page, placement = 'stic
     }
   };
 
-  const imageSrc = optimizeCloudinaryUrl(banner.imageUrl, { width: 1200, quality: 'auto' });
+  const imageSrc = optimizeCloudinaryUrl(banner.imageUrl, { width: 1000, quality: 'auto' });
+
+  // Card height — fixed so any image (square logo or wide banner) fits neatly.
+  const cardHeight = isDesktop ? 96 : 68;
+
+  // Vertical anchor: clear the mobile bottom nav (3.5rem + safe area) on small
+  // screens; float a small gap from the edge on desktop.
+  const edgeOffset = isTop
+    ? { top: isDesktop ? 12 : 'calc(env(safe-area-inset-top, 0px) + 8px)' }
+    : { bottom: isDesktop ? 12 : 'calc(3.5rem + env(safe-area-inset-bottom, 0px) + 8px)' };
+
+  const outerStyle: React.CSSProperties = isSticky
+    ? {
+        position: 'fixed',
+        left: 0,
+        right: 0,
+        zIndex: 120,
+        pointerEvents: 'none',
+        padding: '0 12px',
+        ...edgeOffset,
+      }
+    : { position: 'relative', width: '100%', padding: '8px 12px' };
 
   return (
-    <div
-      className={`${isSticky ? `${stickyPosition} z-[120]` : 'relative w-full'} pointer-events-none`}
-      role="complementary"
-      aria-label={t('ads.advertisement', 'Advertisement')}
-    >
-      <div className="pointer-events-auto mx-auto flex max-w-5xl items-stretch justify-center px-2 pb-2 pt-2 sm:px-4">
-        <div className="relative flex w-full overflow-hidden rounded-xl border border-neutral-200/70 bg-white shadow-lg">
-          {/* Sponsored label */}
-          <span className="absolute left-2 top-1 z-10 rounded bg-black/55 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white">
-            {t('ads.sponsored', 'Sponsored')}
-          </span>
+    <div style={outerStyle} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
+      <div
+        style={{
+          pointerEvents: 'auto',
+          margin: '0 auto',
+          maxWidth: 728,
+          position: 'relative',
+          height: cardHeight,
+          background: '#ffffff',
+          border: '1px solid rgba(0,0,0,0.1)',
+          borderRadius: 14,
+          boxShadow: '0 6px 24px rgba(0,0,0,0.16)',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Sponsored label */}
+        <span
+          style={{
+            position: 'absolute',
+            top: 6,
+            left: 6,
+            zIndex: 2,
+            background: 'rgba(0,0,0,0.6)',
+            color: '#fff',
+            fontSize: 9,
+            fontWeight: 600,
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+            padding: '2px 6px',
+            borderRadius: 5,
+          }}
+        >
+          {t('ads.sponsored', 'Sponsored')}
+        </span>
 
-          <a
-            href={banner.linkUrl}
-            target="_blank"
-            rel="noopener noreferrer sponsored"
-            onClick={handleClick}
-            className="block w-full"
-            aria-label={banner.title}
-          >
-            <img
-              src={imageSrc}
-              alt={banner.title}
-              loading="lazy"
-              className="h-16 w-full object-cover sm:h-20 md:h-24"
-            />
-          </a>
+        <a
+          href={banner.linkUrl}
+          target="_blank"
+          rel="noopener noreferrer sponsored"
+          onClick={handleClick}
+          aria-label={banner.title}
+          style={{ display: 'block', width: '100%', height: '100%' }}
+        >
+          <img
+            src={imageSrc}
+            alt={banner.title}
+            loading="lazy"
+            style={{ display: 'block', width: '100%', height: '100%', objectFit: 'contain', background: '#fff' }}
+          />
+        </a>
 
-          {/* Dismiss */}
-          <button
-            type="button"
-            onClick={handleDismiss}
-            className="absolute right-1.5 top-1.5 z-10 rounded-full bg-black/45 p-1 text-white transition-colors hover:bg-black/70"
-            aria-label={t('ads.close', 'Close advertisement')}
-          >
-            <XMarkIcon className="h-4 w-4" />
-          </button>
-        </div>
+        {/* Dismiss */}
+        <button
+          type="button"
+          onClick={handleDismiss}
+          aria-label={t('ads.close', 'Close advertisement')}
+          style={{
+            position: 'absolute',
+            top: 6,
+            right: 6,
+            zIndex: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 24,
+            height: 24,
+            borderRadius: '9999px',
+            background: 'rgba(0,0,0,0.5)',
+            color: '#fff',
+            border: 'none',
+            cursor: 'pointer',
+            lineHeight: 0,
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
     </div>
   );
