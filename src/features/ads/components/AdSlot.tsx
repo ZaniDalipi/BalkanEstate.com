@@ -5,7 +5,20 @@ import { useAdBanners, selectByPlacement } from '../hooks/useAdBanners';
 import { trackClick, trackImpression } from '../api/adBannerApi';
 import type { AdPage, AdPlacement } from '../types';
 
-type Orientation = 'horizontal' | 'vertical';
+/**
+ * Standard IAB display-ad units. Slots reserve the exact aspect ratio so the
+ * layout doesn't shift and correctly-sized creatives fill edge to edge — the
+ * same approach the major listing portals use.
+ */
+export const AD_FORMATS = {
+  billboard: { w: 970, h: 250 },   // large in-content leaderboard
+  leaderboard: { w: 728, h: 90 },  // classic thin leaderboard
+  rectangle: { w: 300, h: 250 },   // medium rectangle (MPU)
+  skyscraper: { w: 160, h: 600 },  // wide skyscraper (narrow side rail)
+  halfpage: { w: 300, h: 600 },    // half-page (wide sidebar)
+} as const;
+
+export type AdFormat = keyof typeof AD_FORMATS;
 
 interface AdSlotProps {
   /** Which page the visitor is on (drives which banners load). */
@@ -15,8 +28,8 @@ interface AdSlotProps {
   /** Which banner within the placement to show (0-based). Lets one page host
    *  several independent slots from the same placement (e.g. left/right rails). */
   index?: number;
-  /** 'horizontal' = leaderboard band; 'vertical' = skyscraper rail. */
-  orientation?: Orientation;
+  /** IAB ad format. Defaults to a billboard leaderboard. */
+  format?: AdFormat;
   /** Extra wrapper class (e.g. spacing / column spans). */
   className?: string;
   /** Extra wrapper style. */
@@ -26,16 +39,16 @@ interface AdSlotProps {
 /**
  * Inline advertising slot rendered inside page content (not sticky).
  *
- * Renders the selected active banner for a page + placement as a contained,
- * fixed-size card. Layout-critical properties use inline styles so the image
- * can never overflow the card, regardless of the CSS build. Renders nothing
+ * Renders the selected active banner for a page + placement as a contained
+ * card sized to a standard IAB ad unit. Layout-critical properties use inline
+ * styles so the slot is exact regardless of the CSS build. Renders nothing
  * when no banner is configured, so empty slots collapse cleanly.
  */
 const AdSlot: React.FC<AdSlotProps> = ({
   page,
   placement = 'in-content',
   index = 0,
-  orientation = 'horizontal',
+  format = 'billboard',
   className,
   style,
 }) => {
@@ -54,27 +67,27 @@ const AdSlot: React.FC<AdSlotProps> = ({
 
   if (!banner) return null;
 
-  const isVertical = orientation === 'vertical';
+  const { w, h } = AD_FORMATS[format];
+  const isTall = h > w;
   const imageSrc = optimizeCloudinaryUrl(banner.imageUrl, {
-    width: isVertical ? 400 : 1000,
+    width: isTall ? 400 : 1000,
     quality: 'auto',
   });
-
-  const cardStyle: React.CSSProperties = isVertical
-    ? { width: '100%', height: 600, maxHeight: '80vh' }
-    : { width: '100%', maxWidth: 970, height: 130, margin: '0 auto' };
 
   return (
     <div className={className} style={style} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
       <div
         style={{
           position: 'relative',
+          width: '100%',
+          maxWidth: w,
+          aspectRatio: `${w} / ${h}`,
+          margin: '0 auto',
           background: '#ffffff',
           border: '1px solid rgba(0,0,0,0.08)',
-          borderRadius: 14,
+          borderRadius: 12,
           boxShadow: '0 4px 18px rgba(0,0,0,0.08)',
           overflow: 'hidden',
-          ...cardStyle,
         }}
       >
         <span
@@ -108,7 +121,7 @@ const AdSlot: React.FC<AdSlotProps> = ({
             src={imageSrc}
             alt={banner.title}
             loading="lazy"
-            style={{ display: 'block', width: '100%', height: '100%', objectFit: 'contain', background: '#fafafa' }}
+            style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', background: '#fafafa' }}
           />
         </a>
       </div>

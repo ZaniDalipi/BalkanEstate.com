@@ -21,6 +21,16 @@ const labelCls = 'block text-sm font-medium text-gray-700 mb-1';
 const inputCls =
   'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none';
 
+/** Recommended creative size (px) per placement, matching the rendered ad slot. */
+const RECOMMENDED_SIZE: Record<string, string> = {
+  'in-content': '970 × 250 (billboard leaderboard)',
+  'sticky-bottom': '970 × 90 (leaderboard)',
+  'sticky-top': '970 × 90 (leaderboard)',
+  'header': '970 × 90 (leaderboard)',
+  'sidebar': '300 × 600 (half-page) — or 160 × 600 for home side rails',
+  'footer': '970 × 250 (billboard)',
+};
+
 const AdBannerManagerForm: React.FC<Props> = ({
   editingItem,
   formData,
@@ -90,8 +100,14 @@ const AdBannerManagerForm: React.FC<Props> = ({
                     ? t('admin:adBanners.uploading', 'Uploading…')
                     : t('admin:adBanners.uploadImage', 'Upload Image')}
                 </label>
-                <p className="text-xs text-gray-400 mt-2">
-                  {t('admin:adBanners.imageHint', 'Recommended ~1200×250px. PNG/JPG, max 5MB.')}
+                <p className="text-xs text-gray-500 mt-2">
+                  {t('admin:adBanners.recommendedSize', 'Recommended size')}:{' '}
+                  <span className="font-medium text-gray-700">
+                    {RECOMMENDED_SIZE[formData.placement] || '970 × 250'}
+                  </span>
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  {t('admin:adBanners.imageHint2', 'PNG or JPG, max 5MB. The image fills the slot, so match the size for a clean fit.')}
                 </p>
               </div>
             </div>

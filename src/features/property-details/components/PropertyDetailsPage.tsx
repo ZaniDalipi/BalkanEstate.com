@@ -1096,7 +1096,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           {/* Ad — vertical skyscraper in the otherwise-empty right column (desktop only) */}
           <div className="hidden lg:block lg:col-span-1 min-w-0">
             <div className="sticky top-24">
-              <AdSlot page="property-details" placement="sidebar" orientation="vertical" />
+              <AdSlot page="property-details" placement="sidebar" format="halfpage" />
             </div>
           </div>
         </div>

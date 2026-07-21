@@ -41,7 +41,7 @@ const SideRailAds: React.FC<SideRailAdsProps> = ({ page, contentMaxWidth = 1280,
             page={page}
             placement="sidebar"
             index={0}
-            orientation="vertical"
+            format="skyscraper"
             style={{
               position: 'absolute',
               top: 40,
@@ -54,7 +54,7 @@ const SideRailAds: React.FC<SideRailAdsProps> = ({ page, contentMaxWidth = 1280,
             page={page}
             placement="sidebar"
             index={1}
-            orientation="vertical"
+            format="skyscraper"
             style={{
               position: 'absolute',
               top: 40,
