@@ -43,6 +43,7 @@ import Footer from '@/components/shared/Footer';
 import Modal from '@/components/shared/Modal';
 import * as api from '@/services/apiService';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { AdSlot } from '@/src/features/ads';
 
 /**
  * PropertyDetailsPage Component
@@ -1037,6 +1038,9 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
         </div>
       </main>
 
+      {/* Ad — horizontal leaderboard between the property details and the location map */}
+      <AdSlot page="property-details" placement="in-content" className="w-full px-3 sm:px-4 lg:px-6 my-6 sm:my-8" />
+
       {/* 3D Map — full-bleed full-width band, rendered outside the main container so it
           spans the full screen width, right after the description to keep readers engaged.
           id + data-section kept so the section nav still targets it. */}
@@ -1087,6 +1091,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <FeaturedAgencies />
             </div>
 
+          </div>
+
+          {/* Ad — vertical skyscraper in the otherwise-empty right column (desktop only) */}
+          <div className="hidden lg:block lg:col-span-1 min-w-0">
+            <div className="sticky top-24">
+              <AdSlot page="property-details" placement="sidebar" orientation="vertical" />
+            </div>
           </div>
         </div>
       </main>

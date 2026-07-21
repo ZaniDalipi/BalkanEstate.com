@@ -10,6 +10,7 @@ import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import ArticleCard from './ArticleCard';
 import BlogFilters from './BlogFilters';
 import ArticlePage from './ArticlePage';
+import { AdSlot } from '@/src/features/ads';
 
 const BlogPage: React.FC = () => {
   const { t } = useTranslation('blog');
@@ -140,6 +141,9 @@ const BlogPage: React.FC = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Ad — horizontal leaderboard below the hero */}
+      <AdSlot page="blog" placement="in-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-6" />
 
       {/* Active filter chips */}
       {(selectedCategory || selectedCountry || selectedTag || searchQuery) && (

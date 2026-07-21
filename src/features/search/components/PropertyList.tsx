@@ -7,6 +7,7 @@ import { SearchIcon, XMarkIcon, BellIcon, BuildingLibraryIcon, ChevronUpIcon, Ch
 import AiSearch from './AiSearch';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import Footer from '@/components/shared/Footer';
+import { AdSlot } from '@/src/features/ads';
 
 interface PropertyListProps {
   properties: Property[];
@@ -996,14 +997,21 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                 <>
                                     <HighlightedPropertiesSection properties={properties} />
                                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 xl:gap-6 property-grid-transition">
-                                        {properties.slice(0, visibleCount).map((prop, index) => (
-                                            <AnimatedPropertyCard
-                                                key={prop.id || `prop-${index}`}
-                                                property={prop}
-                                                index={index}
-                                                onHover={onPropertyHover}
-                                                animateEntrance={animateCards || animateFilteredCards}
-                                            />
+                                        {properties.slice(0, visibleCount).map((prop, index, arr) => (
+                                            <React.Fragment key={prop.id || `prop-${index}`}>
+                                                <AnimatedPropertyCard
+                                                    property={prop}
+                                                    index={index}
+                                                    onHover={onPropertyHover}
+                                                    animateEntrance={animateCards || animateFilteredCards}
+                                                />
+                                                {/* In-feed ad — full width across the results grid, after the 4th card */}
+                                                {index === Math.min(3, arr.length - 1) && (
+                                                    <div className="xl:col-span-2">
+                                                        <AdSlot page="search" placement="in-content" />
+                                                    </div>
+                                                )}
+                                            </React.Fragment>
                                         ))}
                                     </div>
                                     {visibleCount < properties.length && (

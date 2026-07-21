@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { SEO } from '@/src/components/seo';
 import Footer from '@/components/shared/Footer';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
+import { AdSlot } from '@/src/features/ads';
 
 // Country guide data — structured for SEO with rich content
 const COUNTRY_GUIDES = [
@@ -361,6 +362,9 @@ const BuyingGuidesPage: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* Ad — horizontal leaderboard below the hero */}
+      <AdSlot page="guides" placement="in-content" className="max-w-6xl mx-auto px-4 sm:px-6 my-6" />
 
       {/* Quick Jump Navigation */}
       <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-neutral-200 shadow-sm">
