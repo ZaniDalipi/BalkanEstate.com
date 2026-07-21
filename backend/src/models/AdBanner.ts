@@ -10,14 +10,9 @@ export const AD_PLACEMENTS = [
   'home-top',
   'home-below-hero',
   'home-mid',
-  'search-top',
   'search-sidebar',
   'property-details-top',
   'property-details-sidebar',
-  'agencies-top',
-  'agents-top',
-  'blog-sidebar',
-  'global-sticky-bottom',
 ] as const;
 
 export type AdPlacement = (typeof AD_PLACEMENTS)[number];

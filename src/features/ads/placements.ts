@@ -5,14 +5,9 @@ export type AdPlacement =
   | 'home-top'
   | 'home-below-hero'
   | 'home-mid'
-  | 'search-top'
   | 'search-sidebar'
   | 'property-details-top'
-  | 'property-details-sidebar'
-  | 'agencies-top'
-  | 'agents-top'
-  | 'blog-sidebar'
-  | 'global-sticky-bottom';
+  | 'property-details-sidebar';
 
 export interface PlacementDef {
   id: AdPlacement;
@@ -46,12 +41,6 @@ export const PLACEMENTS: PlacementDef[] = [
     recommendedSize: '160 × 600',
   },
   {
-    id: 'search-top',
-    label: 'Search — Results Top',
-    description: 'Banner at the very top of the property results list.',
-    recommendedSize: '728 × 90',
-  },
-  {
     id: 'search-sidebar',
     label: 'Search — In Results',
     description: 'Full-width banner inside the results list, between property rows.',
@@ -68,31 +57,6 @@ export const PLACEMENTS: PlacementDef[] = [
     label: 'Property — Side Column',
     description: 'Tall banner in the property page right-hand column, beside the neighborhood & price-history sections.',
     recommendedSize: '300 × 600',
-  },
-  {
-    id: 'agencies-top',
-    label: 'Agencies Page — Top',
-    description: 'Banner at the top of the agencies directory.',
-    recommendedSize: '970 × 120',
-  },
-  {
-    id: 'agents-top',
-    label: 'Agents Page — Top',
-    description: 'Banner at the top of the agents directory.',
-    recommendedSize: '970 × 120',
-  },
-  {
-    id: 'blog-sidebar',
-    label: 'Blog — Sidebar',
-    description: 'Vertical banner in the blog sidebar.',
-    recommendedSize: '300 × 600',
-  },
-  {
-    id: 'global-sticky-bottom',
-    label: 'Sticky Bottom Bar (site-wide)',
-    description: 'Sticky banner fixed to the bottom of the viewport on every page.',
-    recommendedSize: '970 × 90',
-    sticky: true,
   },
 ];
 

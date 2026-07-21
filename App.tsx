@@ -120,7 +120,6 @@ const RefundPolicyPage = lazy(() => import('./src/features/legal/components/Refu
 const ContactUsPage = lazy(() => import('./src/features/contact/components/ContactUsPage'));
 const BuyingGuidesPage = lazy(() => import('./src/features/guides/components/BuyingGuidesPage'));
 const HomePage = lazyWithRetry(() => import('./src/features/home/components/HomePage'));
-const StickyAdBanner = lazyWithRetry(() => import('./src/features/ads/components/AdBannerSlot'));
 const BusinessDirectoryPage = lazy(() => import('./src/features/business-directory/components/BusinessDirectoryPage'));
 const BlogPage = lazy(() => import('./src/features/blog/components/BlogPage'));
 const ArticlePage = lazy(() => import('./src/features/blog/components/ArticlePage'));
@@ -1039,14 +1038,6 @@ const MainLayout: React.FC = () => {
             </main>
 
         </div>
-
-        {/* Site-wide sticky advertiser banner (managed from Admin → Ad Banners).
-            Hidden on property detail (mobile action bar owns the bottom) and admin. */}
-        {!state.selectedProperty && state.activeView !== 'admin' && (
-          <Suspense fallback={null}>
-            <StickyAdBanner placement="global-sticky-bottom" />
-          </Suspense>
-        )}
 
         {/* Lazy loaded modals - only render when open */}
         <Suspense fallback={null}>

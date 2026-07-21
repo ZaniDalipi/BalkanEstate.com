@@ -10,7 +10,6 @@ import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import ArticleCard from './ArticleCard';
 import BlogFilters from './BlogFilters';
 import ArticlePage from './ArticlePage';
-import { AdBannerSlot } from '@/src/features/ads';
 
 const BlogPage: React.FC = () => {
   const { t } = useTranslation('blog');
@@ -191,8 +190,6 @@ const BlogPage: React.FC = () => {
                   onTagChange={handleTagChange}
                 />
               </div>
-              {/* Advertiser banner slot */}
-              <AdBannerSlot placement="blog-sidebar" className="mt-6" />
             </motion.div>
 
             {/* Articles Grid */}

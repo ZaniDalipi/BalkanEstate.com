@@ -15,7 +15,6 @@ import { SEO } from '@/src/components/seo';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
 import { FloatingSphere, GlossyPill, AbstractBlob, RealEstateOrb, Decorative3DStyles } from '@/components/shared/Decorative3D';
 import AgentsHeroBanner from '@/components/shared/AgentsHeroBanner';
-import { AdBannerSlot } from '@/src/features/ads';
 import { HERO_IMAGES } from '@/config/cloudinaryConfig';
 import { apiRequest } from '@/src/shared/api';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
@@ -575,8 +574,6 @@ const AgentsPage: React.FC = () => {
       {/* Main Content */}
       <main className="w-full flex-grow">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          {/* Advertiser banner slot */}
-          <AdBannerSlot placement="agents-top" className="mb-6" />
           {/* Filters and Sort Section */}
           <div className="mb-6">
             <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 sm:p-6">

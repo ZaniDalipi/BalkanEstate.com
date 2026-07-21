@@ -34,7 +34,6 @@ import { useAppContext } from '../context/AppContext';
 import Footer from './shared/Footer';
 import { SEO } from '../src/components/seo';
 import AgenciesHeroBanner from './shared/AgenciesHeroBanner';
-import { AdBannerSlot } from '../src/features/ads';
 import { FloatingSphere, GlossyPill, AbstractBlob, RealEstateOrb, Decorative3DStyles } from './shared/Decorative3D';
 import MagneticTiltCard from '../src/features/business-directory/components/MagneticTiltCard';
 import { API_URL } from '../src/shared/api/config';
@@ -501,8 +500,6 @@ const AgenciesListPage: React.FC = () => {
       {/* Main Content */}
       <main className="w-full flex-grow">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          {/* Advertiser banner slot */}
-          <AdBannerSlot placement="agencies-top" className="mb-6" />
           {/* Filters Section - Mobile Optimized */}
           <div className="bg-white rounded-2xl sm:rounded-3xl shadow-md sm:shadow-xl border border-gray-200 p-4 sm:p-6 md:p-8 mb-6 sm:mb-8">
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 items-stretch sm:items-center justify-between">
