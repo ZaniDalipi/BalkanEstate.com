@@ -288,14 +288,10 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                             onSuggestionClick={handleSuggestionClick}
                         />
                     )}
-                    <div className="flex-shrink-0 px-3 pt-2">
+                    <div className="flex-shrink-0 px-3 pt-2 empty:hidden">
                         <AdBannerSlot placement="search-top" />
                     </div>
                     <PropertyList {...propertyListProps} />
-                    {/* Persistent sidebar-style ad slot at the foot of the results panel (desktop) */}
-                    <div className="hidden lg:block flex-shrink-0 px-3 py-2 border-t border-neutral-100">
-                        <AdBannerSlot placement="search-sidebar" rotate />
-                    </div>
                 </div>
 
 

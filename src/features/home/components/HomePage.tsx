@@ -217,10 +217,6 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
       <OrganizationSchema />
       <FAQSchema faqs={realEstateFAQs} />
 
-      <div className="max-w-6xl mx-auto w-full px-4 pt-3 empty:hidden">
-        <AdBannerSlot placement="home-top" />
-      </div>
-
       <HeroSection
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
@@ -261,17 +257,25 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
         </Suspense>
       </div>
 
-      <div className="max-w-6xl mx-auto w-full px-4 my-8 empty:hidden">
-        <AdBannerSlot placement="home-mid" />
-      </div>
-
       <div className="content-below-fold">
         <Suspense fallback={<SectionFallback />}>
           <HomeSpecialOffersSection onNavigate={handleNavigate} />
         </Suspense>
       </div>
 
-      <div className="content-below-fold">
+      {/* Top Agents with left/right advertiser skyscraper rails on very wide screens.
+          Rails overlay the empty side margins so the section stays full-bleed. */}
+      <div className="relative content-below-fold">
+        <div className="hidden 2xl:block absolute inset-y-0 left-2 w-[160px] z-10">
+          <div className="sticky top-24 empty:hidden">
+            <AdBannerSlot placement="home-top" />
+          </div>
+        </div>
+        <div className="hidden 2xl:block absolute inset-y-0 right-2 w-[160px] z-10">
+          <div className="sticky top-24 empty:hidden">
+            <AdBannerSlot placement="home-mid" />
+          </div>
+        </div>
         <Suspense fallback={<SectionFallback />}>
           <TopAgentsSection />
         </Suspense>

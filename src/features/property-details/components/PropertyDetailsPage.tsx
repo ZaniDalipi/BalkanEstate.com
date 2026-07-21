@@ -967,11 +967,6 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
         />
       </div>
 
-      {/* Advertiser banner slot */}
-      <div className="max-w-screen-xl mx-auto w-full px-3 sm:px-4 md:px-6 lg:px-8 mt-4 empty:hidden">
-        <AdBannerSlot placement="property-details-top" />
-      </div>
-
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 overflow-x-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
@@ -1030,6 +1025,11 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
             </div>
 
+            {/* Advertiser banner — in the details column, below the amenities */}
+            <div className="empty:hidden">
+              <AdBannerSlot placement="property-details-top" />
+            </div>
+
           </div>
 
           {/* Right Column - Contact Sidebar (Desktop only - mobile version shown above) */}
@@ -1039,8 +1039,6 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               isCreatingConversation={isCreatingConversation}
               onContactSeller={handleContactSeller}
             />
-            {/* Advertiser banner slot */}
-            <AdBannerSlot placement="property-details-sidebar" className="mt-6" />
           </div>
         </div>
       </main>
@@ -1095,6 +1093,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <FeaturedAgencies />
             </div>
 
+          </div>
+
+          {/* Right Column - advertiser banner beside the lower content (desktop only) */}
+          <div className="hidden lg:block lg:col-span-1 min-w-0">
+            <div className="sticky top-24 empty:hidden">
+              <AdBannerSlot placement="property-details-sidebar" />
+            </div>
           </div>
         </div>
       </main>
