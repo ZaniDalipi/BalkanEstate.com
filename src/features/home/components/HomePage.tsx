@@ -17,6 +17,7 @@ import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import AppShowcaseSection from './AppShowcaseSection';
 import QuickAccessSection from './QuickAccessSection';
 import Footer from '@/components/shared/Footer';
+import { AdBannerSlot } from '@/src/features/ads';
 
 // Lazy-load below-fold sections to reduce initial bundle
 const StackedCards = lazy(() => import('@/src/components/ui/glass-cards').then(m => ({ default: m.StackedCards })));
@@ -223,6 +224,10 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
         onNavigate={handleNavigate}
       />
 
+      <div className="max-w-6xl mx-auto w-full px-4 mt-4 empty:hidden">
+        <AdBannerSlot placement="home-below-hero" />
+      </div>
+
       <AppShowcaseSection onNavigate={handleNavigate} />
 
       {isAuthenticated && currentUser && (
@@ -258,7 +263,19 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
         </Suspense>
       </div>
 
-      <div className="content-below-fold">
+      {/* Top Agents with left/right advertiser skyscraper rails on very wide screens.
+          Rails overlay the empty side margins so the section stays full-bleed. */}
+      <div className="relative content-below-fold">
+        <div className="hidden 2xl:block absolute inset-y-0 left-2 w-[160px] z-10">
+          <div className="sticky top-24 empty:hidden">
+            <AdBannerSlot placement="home-top" />
+          </div>
+        </div>
+        <div className="hidden 2xl:block absolute inset-y-0 right-2 w-[160px] z-10">
+          <div className="sticky top-24 empty:hidden">
+            <AdBannerSlot placement="home-mid" />
+          </div>
+        </div>
         <Suspense fallback={<SectionFallback />}>
           <TopAgentsSection />
         </Suspense>

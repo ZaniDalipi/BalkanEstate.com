@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
+import { AdBannerSlot } from '@/src/features/ads';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
 import { SearchIcon, XMarkIcon, BellIcon, BuildingLibraryIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon, AdjustmentsHorizontalIcon } from '@/constants';
 import AiSearch from './AiSearch';
@@ -997,13 +998,20 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     <HighlightedPropertiesSection properties={properties} />
                                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 xl:gap-6 property-grid-transition">
                                         {properties.slice(0, visibleCount).map((prop, index) => (
-                                            <AnimatedPropertyCard
-                                                key={prop.id || `prop-${index}`}
-                                                property={prop}
-                                                index={index}
-                                                onHover={onPropertyHover}
-                                                animateEntrance={animateCards || animateFilteredCards}
-                                            />
+                                            <React.Fragment key={prop.id || `prop-${index}`}>
+                                                <AnimatedPropertyCard
+                                                    property={prop}
+                                                    index={index}
+                                                    onHover={onPropertyHover}
+                                                    animateEntrance={animateCards || animateFilteredCards}
+                                                />
+                                                {/* Advertiser banner injected between rows, spanning both columns */}
+                                                {index === 1 && (
+                                                    <div className="xl:col-span-2 empty:hidden">
+                                                        <AdBannerSlot placement="search-sidebar" />
+                                                    </div>
+                                                )}
+                                            </React.Fragment>
                                         ))}
                                     </div>
                                     {visibleCount < properties.length && (

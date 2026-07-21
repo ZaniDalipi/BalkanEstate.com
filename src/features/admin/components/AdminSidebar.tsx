@@ -19,6 +19,7 @@ import {
   PlayCircleIcon,
   RocketLaunchIcon,
   BuildingStorefrontIcon,
+  PhotoIcon,
 } from '@/constants';
 import type { AdminView } from './AdminLayout';
 
@@ -169,6 +170,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           id: 'promotionCoupons',
           label: t('admin:sidebar.promotionCoupons'),
           icon: <SparklesIcon className="w-5 h-5" />
+        },
+        {
+          id: 'adBanners',
+          label: t('admin:sidebar.adBanners', 'Ad Banners'),
+          icon: <PhotoIcon className="w-5 h-5" />
         },
       ]
     },

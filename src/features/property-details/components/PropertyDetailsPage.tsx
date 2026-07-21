@@ -32,6 +32,7 @@ import {
   SocialVideoEmbed,
 } from '@/src/components/property';
 import SimilarProperties from '@/src/components/property/SimilarProperties';
+import { AdBannerSlot } from '@/src/features/ads';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import { useRecentlyViewed } from '@/src/hooks/useRecentlyViewed';
@@ -1024,6 +1025,11 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
             </div>
 
+            {/* Advertiser banner — in the details column, below the amenities */}
+            <div className="empty:hidden">
+              <AdBannerSlot placement="property-details-top" />
+            </div>
+
           </div>
 
           {/* Right Column - Contact Sidebar (Desktop only - mobile version shown above) */}
@@ -1087,6 +1093,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <FeaturedAgencies />
             </div>
 
+          </div>
+
+          {/* Right Column - advertiser banner beside the lower content (desktop only) */}
+          <div className="hidden lg:block lg:col-span-1 min-w-0">
+            <div className="sticky top-24 empty:hidden">
+              <AdBannerSlot placement="property-details-sidebar" />
+            </div>
           </div>
         </div>
       </main>

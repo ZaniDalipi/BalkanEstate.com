@@ -239,3 +239,19 @@ export function getPromotionPlanInvalidationKeys() {
     analyticsKeys.all,
   ];
 }
+
+// ============================================================================
+// Ad Banner Query Keys
+// Used by: AdBannerSlot (public placements), Admin AdBannerManager
+// ============================================================================
+
+export const adBannerKeys = {
+  all: ['adBanners'] as const,
+
+  // Public - live banners for a given placement slot
+  placement: (placement: string) => [...adBannerKeys.all, 'placement', placement] as const,
+
+  // Admin - all banners (optionally filtered)
+  admin: () => [...adBannerKeys.all, 'admin'] as const,
+  adminList: (filter?: string) => [...adBannerKeys.admin(), filter ?? 'all'] as const,
+};
