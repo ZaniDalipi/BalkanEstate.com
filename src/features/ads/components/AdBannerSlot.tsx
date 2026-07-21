@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { XMarkIcon } from '@/constants';
+import { PhotoIcon } from '@/constants';
 import { adBannerKeys } from '@/src/shared/query/queryKeys';
 import { getBannersForPlacement, trackBannerImpression, trackBannerClick } from '../api/adBannerApi';
 import { PLACEMENT_MAP, type AdPlacement } from '../placements';
@@ -8,12 +8,14 @@ import type { AdBanner } from '../types';
 
 interface AdBannerSlotProps {
   placement: AdPlacement;
-  /** Extra classes for the wrapper (ignored for the sticky bottom variant). */
+  /** Extra classes for the wrapper. */
   className?: string;
   /** Rotate through multiple banners in this slot (default true). */
   rotate?: boolean;
   /** Rotation interval in ms (default 8000). */
   rotationMs?: number;
+  /** Show a "Your Ad Here" placeholder when the slot has no banner (default true). */
+  showPlaceholder?: boolean;
 }
 
 const ROTATION_DEFAULT_MS = 8000;
@@ -22,19 +24,20 @@ const ROTATION_DEFAULT_MS = 8000;
  * Renders advertiser banners for a named placement slot.
  *
  * - Fetches the live banners for the placement (respecting active + schedule on the server).
- * - Rotates through multiple banners in the same slot.
- * - Tracks impressions (once per banner shown) and clicks.
- * - Renders as a fixed, dismissible bar for sticky placements.
- * - Renders nothing when there are no banners to show.
+ * - Sizes every creative to the slot's fixed aspect ratio and fills it (object-cover),
+ *   so uploads of any dimensions always fit the slot cleanly.
+ * - Rotates through multiple banners in the same slot and tracks impressions/clicks.
+ * - When empty, shows a tasteful "Your Ad Here" placeholder (unless disabled).
  */
 const AdBannerSlot: React.FC<AdBannerSlotProps> = ({
   placement,
   className = '',
   rotate = true,
   rotationMs = ROTATION_DEFAULT_MS,
+  showPlaceholder = true,
 }) => {
   const placementDef = PLACEMENT_MAP[placement];
-  const isStickyPlacement = !!placementDef?.sticky;
+  const aspectRatio = placementDef?.aspectRatio || '16 / 9';
 
   const { data: banners = [] } = useQuery<AdBanner[]>({
     queryKey: adBannerKeys.placement(placement),
@@ -46,7 +49,6 @@ const AdBannerSlot: React.FC<AdBannerSlotProps> = ({
   });
 
   const [activeIndex, setActiveIndex] = useState(0);
-  const [dismissed, setDismissed] = useState(false);
   const trackedImpressions = useRef<Set<string>>(new Set());
 
   // Reset rotation when the banner set changes.
@@ -73,95 +75,59 @@ const AdBannerSlot: React.FC<AdBannerSlotProps> = ({
     trackBannerImpression(active._id);
   }, [active]);
 
-  // Restore per-session dismissal for sticky bars.
-  const dismissKey = `adbanner_dismissed_${placement}`;
-  useEffect(() => {
-    if (isStickyPlacement && sessionStorage.getItem(dismissKey) === 'true') {
-      setDismissed(true);
-    }
-  }, [isStickyPlacement, dismissKey]);
-
-  const handleClick = useCallback(() => {
-    if (active) trackBannerClick(active._id);
-  }, [active]);
-
-  const handleDismiss = useCallback(() => {
-    setDismissed(true);
-    try {
-      sessionStorage.setItem(dismissKey, 'true');
-    } catch {
-      /* ignore storage errors */
-    }
-  }, [dismissKey]);
-
-  if (!active || dismissed) return null;
-
-  const label = active.advertiserName ? `Ad · ${active.advertiserName}` : 'Advertisement';
-
-  const creative = (
-    <a
-      href={active.linkUrl}
-      target={active.openInNewTab ? '_blank' : undefined}
-      rel={active.openInNewTab ? 'noopener noreferrer sponsored' : 'sponsored'}
-      onClick={handleClick}
-      className="block w-full"
-      aria-label={active.title}
-    >
-      <picture>
-        {active.mobileImageUrl && (
-          <source media="(max-width: 640px)" srcSet={active.mobileImageUrl} />
-        )}
-        <img
-          src={active.imageUrl}
-          alt={active.title}
-          loading="lazy"
-          className="w-full h-auto object-contain mx-auto"
-        />
-      </picture>
-    </a>
-  );
-
-  // Sticky bottom bar variant.
-  if (isStickyPlacement) {
+  // ---- Empty slot: show a "Your Ad Here" placeholder ----
+  if (!active) {
+    if (!showPlaceholder) return null;
     return (
-      <div
-        // Hidden on phones so it never covers the mobile bottom navigation bar.
-        className="hidden md:block fixed inset-x-0 bottom-0 z-[150] bg-white/95 backdrop-blur-md border-t border-neutral-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
-        role="complementary"
-        aria-label="Advertisement"
-      >
-        <div className="relative max-w-5xl mx-auto flex items-center justify-center px-10 py-2">
-          <span className="absolute left-2 top-1 text-[9px] uppercase tracking-wide text-neutral-400 font-medium">
-            {label}
+      <div className={`relative w-full ${className}`} role="complementary" aria-label="Advertising slot">
+        <span className="block text-[9px] uppercase tracking-wide text-neutral-400 font-medium mb-1 text-center">
+          Advertisement
+        </span>
+        <div
+          className="w-full rounded-xl border-2 border-dashed border-neutral-300 bg-neutral-50/70 flex flex-col items-center justify-center text-center gap-1.5 p-3"
+          style={{ aspectRatio }}
+        >
+          <PhotoIcon className="w-6 h-6 text-neutral-300" />
+          <span className="text-sm font-semibold text-neutral-500">Your Ad Here</span>
+          <span className="text-[11px] text-neutral-400 leading-tight">
+            Advertise on BalkanEstate
+            <br />
+            <span className="text-neutral-300">{placementDef?.recommendedSize}px</span>
           </span>
-          <div className="w-full max-h-24 overflow-hidden flex items-center justify-center">
-            {creative}
-          </div>
-          {active.dismissible && (
-            <button
-              type="button"
-              onClick={handleDismiss}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
-              aria-label="Dismiss advertisement"
-            >
-              <XMarkIcon className="w-4 h-4" />
-            </button>
-          )}
         </div>
       </div>
     );
   }
 
-  // Inline / in-flow variant.
+  // ---- Live banner ----
+  const label = active.advertiserName ? `Ad · ${active.advertiserName}` : 'Advertisement';
+
   return (
     <div className={`relative w-full ${className}`} role="complementary" aria-label="Advertisement">
       <span className="block text-[9px] uppercase tracking-wide text-neutral-400 font-medium mb-1 text-center">
         {label}
       </span>
-      <div className="rounded-xl overflow-hidden border border-neutral-200/70 bg-neutral-50">
-        {creative}
-      </div>
+      <a
+        href={active.linkUrl}
+        target={active.openInNewTab ? '_blank' : undefined}
+        rel={active.openInNewTab ? 'noopener noreferrer sponsored' : 'sponsored'}
+        onClick={() => trackBannerClick(active._id)}
+        className="block w-full rounded-xl overflow-hidden border border-neutral-200/70 bg-neutral-100"
+        style={{ aspectRatio }}
+        aria-label={active.title}
+      >
+        <picture>
+          {active.mobileImageUrl && (
+            <source media="(max-width: 640px)" srcSet={active.mobileImageUrl} />
+          )}
+          <img
+            src={active.imageUrl}
+            alt={active.title}
+            loading="lazy"
+            className="w-full h-full object-cover"
+          />
+        </picture>
+      </a>
     </div>
   );
 };
