@@ -70,6 +70,17 @@ const AdBannerManager: React.FC = () => {
         </button>
       </div>
 
+      {/* How it works */}
+      <div className="rounded-xl border border-blue-100 bg-blue-50/60 p-4 text-sm text-blue-900">
+        <p className="font-semibold mb-1">{t('admin:adBanners.howTitle', 'How ad banners work')}</p>
+        <ol className="list-decimal list-inside space-y-0.5 text-blue-800/90">
+          <li>{t('admin:adBanners.how1', 'Click "Add Banner" and upload the advertiser\'s image.')}</li>
+          <li>{t('admin:adBanners.how2', 'Pick the Target Page and Placement — a live preview shows exactly where it appears.')}</li>
+          <li>{t('admin:adBanners.how3', 'Set the price/tier for your records, then activate it.')}</li>
+          <li>{t('admin:adBanners.how4', 'Empty slots show a "Your Ad Here" placeholder until a banner is booked.')}</li>
+        </ol>
+      </div>
+
       {/* Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-white rounded-xl border border-gray-200 p-4">

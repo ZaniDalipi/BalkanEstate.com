@@ -999,6 +999,14 @@
     "endDate": "End Date",
     "order": "Order",
     "activeLabel": "Active",
-    "stickyLabel": "Sticky"
+    "stickyLabel": "Sticky",
+    "whereItShows": "Where it shows",
+    "howTitle": "How ad banners work",
+    "how1": "Click \"Add Banner\" and upload the advertiser's image.",
+    "how2": "Pick the Target Page and Placement — a live preview shows exactly where it appears.",
+    "how3": "Set the price/tier for your records, then activate it.",
+    "how4": "Empty slots show a \"Your Ad Here\" placeholder until a banner is booked.",
+    "recommendedSize": "Recommended size",
+    "imageHint2": "PNG or JPG, max 5MB. The image fills the slot, so match the size for a clean fit."
   }
 }

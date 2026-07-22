@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { XMarkIcon, PhotoIcon } from '@/constants';
 import type { AdBannerAdmin } from '@/src/features/ads/types';
 import { AdBannerFormData, PLACEMENT_OPTIONS, PAGE_OPTIONS } from './useAdBannerManager';
+import AdLocationPreview from './AdLocationPreview';
 
 interface Props {
   editingItem: AdBannerAdmin | null;
@@ -191,6 +192,12 @@ const AdBannerManagerForm: React.FC<Props> = ({
                 ))}
               </select>
             </div>
+          </div>
+
+          {/* Live location preview — shows exactly where this banner will appear */}
+          <div>
+            <label className={labelCls}>{t('admin:adBanners.whereItShows', 'Where it shows')}</label>
+            <AdLocationPreview page={formData.page} placement={formData.placement} />
           </div>
 
           {/* Category + price */}
