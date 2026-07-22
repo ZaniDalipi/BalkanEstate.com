@@ -90,18 +90,43 @@ const AdSlot: React.FC<AdSlotProps> = ({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 4,
+            gap: 6,
             textAlign: 'center',
             padding: 12,
-            background: '#f8fafc',
-            border: '2px dashed rgba(0,0,0,0.14)',
-            color: '#94a3b8',
+            border: '2px dashed rgba(79,70,229,0.35)',
+            backgroundColor: '#eef2ff',
+            // Layered: diagonal "ad space" stripes over a soft indigo→violet gradient.
+            backgroundImage:
+              'repeating-linear-gradient(45deg, rgba(79,70,229,0.07) 0px, rgba(79,70,229,0.07) 12px, transparent 12px, transparent 24px), linear-gradient(135deg, #eef2ff 0%, #faf5ff 55%, #eef2ff 100%)',
+            color: '#6366f1',
           }}
         >
-          <span style={{ fontWeight: 700, fontSize: isTall ? 14 : 16, color: '#64748b' }}>
+          {/* Icon badge */}
+          <span
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: isTall ? 34 : 30,
+              height: isTall ? 34 : 30,
+              borderRadius: '9999px',
+              background: 'rgba(255,255,255,0.85)',
+              boxShadow: '0 2px 6px rgba(79,70,229,0.18)',
+              marginBottom: 2,
+            }}
+          >
+            <svg width={isTall ? 18 : 16} height={isTall ? 18 : 16} viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 11l14-7v16L3 13v-2z" />
+              <path d="M7 12v5a2 2 0 0 0 2 2h1" />
+              <path d="M17 9a3 3 0 0 1 0 6" />
+            </svg>
+          </span>
+          <span style={{ fontWeight: 800, fontSize: isTall ? 15 : 17, color: '#4338ca', letterSpacing: '0.01em' }}>
             {t('ads.yourAdHere', 'Your Ad Here')}
           </span>
-          <span style={{ fontSize: 11 }}>{t('ads.advertiseWithUs', 'Advertise with us')}</span>
+          <span style={{ fontSize: 11, fontWeight: 500, color: '#6366f1' }}>
+            {t('ads.advertiseWithUs', 'Advertise with us')}
+          </span>
         </div>
       </div>
     );
