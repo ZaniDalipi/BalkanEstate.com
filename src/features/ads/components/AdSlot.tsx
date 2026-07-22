@@ -65,10 +65,48 @@ const AdSlot: React.FC<AdSlotProps> = ({
     trackImpression(banner.id);
   }, [banner]);
 
-  if (!banner) return null;
-
   const { w, h } = AD_FORMATS[format];
   const isTall = h > w;
+
+  const baseBoxStyle: React.CSSProperties = {
+    position: 'relative',
+    width: '100%',
+    maxWidth: w,
+    aspectRatio: `${w} / ${h}`,
+    margin: '0 auto',
+    borderRadius: 12,
+    overflow: 'hidden',
+  };
+
+  // No banner configured — show a "Your Ad Here" placeholder so the ad space
+  // is always visible and sellable, sized to the real ad slot.
+  if (!banner) {
+    return (
+      <div className={className} style={style} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
+        <div
+          style={{
+            ...baseBoxStyle,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 4,
+            textAlign: 'center',
+            padding: 12,
+            background: '#f8fafc',
+            border: '2px dashed rgba(0,0,0,0.14)',
+            color: '#94a3b8',
+          }}
+        >
+          <span style={{ fontWeight: 700, fontSize: isTall ? 14 : 16, color: '#64748b' }}>
+            {t('ads.yourAdHere', 'Your Ad Here')}
+          </span>
+          <span style={{ fontSize: 11 }}>{t('ads.advertiseWithUs', 'Advertise with us')}</span>
+        </div>
+      </div>
+    );
+  }
+
   const imageSrc = optimizeCloudinaryUrl(banner.imageUrl, {
     width: isTall ? 400 : 1000,
     quality: 'auto',
@@ -78,16 +116,10 @@ const AdSlot: React.FC<AdSlotProps> = ({
     <div className={className} style={style} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
       <div
         style={{
-          position: 'relative',
-          width: '100%',
-          maxWidth: w,
-          aspectRatio: `${w} / ${h}`,
-          margin: '0 auto',
+          ...baseBoxStyle,
           background: '#ffffff',
           border: '1px solid rgba(0,0,0,0.08)',
-          borderRadius: 12,
           boxShadow: '0 4px 18px rgba(0,0,0,0.08)',
-          overflow: 'hidden',
         }}
       >
         <span

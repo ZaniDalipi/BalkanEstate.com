@@ -641,6 +641,8 @@
   "ads": {
     "advertisement": "Advertisement",
     "sponsored": "Sponsored",
-    "close": "Close advertisement"
+    "close": "Close advertisement",
+    "yourAdHere": "Your Ad Here",
+    "advertiseWithUs": "Advertise with us"
   }
 }
