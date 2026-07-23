@@ -63,6 +63,26 @@ export const generateDescriptionFromImages = async (
     return uploadRequest<PropertyAnalysisResult>('/ai/generate-description', formData);
 };
 
+export interface RoomStyleResponse {
+    imageDataUrl: string;
+    style: string;
+}
+
+/**
+ * Restyle a room photo (by its Cloudinary URL) into a chosen interior design style.
+ * Returns a base64 data URL of the AI-generated image.
+ */
+export const restyleRoom = async (
+    imageUrl: string,
+    style: string
+): Promise<RoomStyleResponse> => {
+    return apiRequest<RoomStyleResponse>('/ai/restyle-room', {
+        method: 'POST',
+        body: { imageUrl, style },
+        requiresAuth: true,
+    });
+};
+
 export const calculatePropertyDistances = async (
     address: string,
     city: string,

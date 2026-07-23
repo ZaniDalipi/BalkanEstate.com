@@ -6,6 +6,7 @@ import {
   calculateDistances,
   aiChat,
   generateSearchName,
+  restyleRoom,
 } from '../controllers/aiController';
 
 const router = express.Router();
@@ -28,5 +29,8 @@ router.post('/chat', aiChat);
 
 // POST /api/ai/generate-search-name - Generate human-readable search name
 router.post('/generate-search-name', generateSearchName);
+
+// POST /api/ai/restyle-room - Restyle a room photo into a chosen interior design style
+router.post('/restyle-room', restyleRoom);
 
 export default router;

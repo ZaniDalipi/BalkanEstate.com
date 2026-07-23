@@ -654,6 +654,23 @@
       "sendToChat": "Send"
     }
   },
+  "roomStyler": {
+    "reimagine": "Reimagine",
+    "title": "Reimagine this room",
+    "subtitle": "See this room in a different interior design style",
+    "close": "Close",
+    "chooseStyle": "Choose a style",
+    "generate": "Generate",
+    "generating": "Restyling in {{style}}…",
+    "generating2": "Generating…",
+    "tryAnother": "Try another style",
+    "download": "Download",
+    "before": "Original",
+    "roomPhoto": "Room photo",
+    "limitReached": "You have reached your monthly room-styling limit.",
+    "genericError": "Something went wrong. Please try again.",
+    "upgrade": "Upgrade for more restyles"
+  },
   "sectionNav": {
     "ariaLabel": "Property sections",
     "overview": "Overview",

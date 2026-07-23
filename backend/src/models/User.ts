@@ -237,6 +237,12 @@ export interface IUser extends Document {
     monthResetDate: Date;        // When the monthly counter resets
   };
 
+  // AI Room Styler Usage Tracking
+  roomStyleUsage?: {
+    monthlyCount: number;        // Number of room restyles generated this month
+    monthResetDate: Date;        // When the monthly counter resets
+  };
+
   // Weekly Search Usage Tracking
   weeklySearches?: {
     weeklyCount: number;         // Number of searches performed this week
@@ -821,6 +827,22 @@ const UserSchema: Schema = new Schema(
       },
     },
     imageDescriptionUsage: {
+      monthlyCount: {
+        type: Number,
+        default: 0,
+      },
+      monthResetDate: {
+        type: Date,
+        default: () => {
+          const nextMonth = new Date();
+          nextMonth.setMonth(nextMonth.getMonth() + 1);
+          nextMonth.setDate(1);
+          nextMonth.setHours(0, 0, 0, 0);
+          return nextMonth;
+        },
+      },
+    },
+    roomStyleUsage: {
       monthlyCount: {
         type: Number,
         default: 0,

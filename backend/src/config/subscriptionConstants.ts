@@ -28,6 +28,7 @@ export const FREE_TIER_LIMITS: {
   AI_MESSAGES: number;
   AI_INSIGHTS: number;
   IMAGE_DESCRIPTIONS: number;
+  ROOM_STYLES: number;
   PROMOTION_COUPONS: number;
   PREMIUM_COUPONS: number;
   HIGHLIGHTED_COUPONS: number;
@@ -39,6 +40,7 @@ export const FREE_TIER_LIMITS: {
   AI_MESSAGES: 3,
   AI_INSIGHTS: 3,
   IMAGE_DESCRIPTIONS: 0,
+  ROOM_STYLES: 2,
   PROMOTION_COUPONS: 0,
   PREMIUM_COUPONS: 0,
   HIGHLIGHTED_COUPONS: 0,
@@ -57,6 +59,7 @@ export const PRO_TIER_LIMITS: {
     SAVED_SEARCHES: number;
     AI_MESSAGES: number;
     IMAGE_DESCRIPTIONS: number;
+    ROOM_STYLES: number;
   };
   YEARLY: {
     LISTINGS: number;
@@ -67,6 +70,7 @@ export const PRO_TIER_LIMITS: {
     SAVED_SEARCHES: number;
     AI_MESSAGES: number;
     IMAGE_DESCRIPTIONS: number;
+    ROOM_STYLES: number;
   };
 } = {
   MONTHLY: {
@@ -78,6 +82,7 @@ export const PRO_TIER_LIMITS: {
     SAVED_SEARCHES: -1, // unlimited
     AI_MESSAGES: -1, // unlimited (rate limited)
     IMAGE_DESCRIPTIONS: -1, // unlimited
+    ROOM_STYLES: 50, // AI room restyles per month (image generation — capped for cost)
   },
   YEARLY: {
     LISTINGS: 450,
@@ -88,6 +93,7 @@ export const PRO_TIER_LIMITS: {
     SAVED_SEARCHES: -1, // unlimited
     AI_MESSAGES: -1, // unlimited
     IMAGE_DESCRIPTIONS: -1, // unlimited
+    ROOM_STYLES: 50, // AI room restyles per month (image generation — capped for cost)
   },
 };
 
@@ -103,6 +109,7 @@ export const ENTERPRISE_TIER_LIMITS: {
   SAVED_SEARCHES: number;
   AI_MESSAGES: number;
   IMAGE_DESCRIPTIONS: number;
+  ROOM_STYLES: number;
 } = {
   LISTINGS: 1000,
   TEAM_MEMBERS: 5,
@@ -114,6 +121,7 @@ export const ENTERPRISE_TIER_LIMITS: {
   SAVED_SEARCHES: -1, // unlimited
   AI_MESSAGES: -1, // unlimited
   IMAGE_DESCRIPTIONS: -1, // unlimited
+  ROOM_STYLES: -1, // unlimited
 };
 
 // Trial limits (for agents on trial)
@@ -160,6 +168,7 @@ export const PRO_BUYER_LIMITS = {
   SAVED_SEARCHES: -1, // unlimited
   AI_MESSAGES: -1, // unlimited
   AI_INSIGHTS: 50, // per month
+  ROOM_STYLES: 30, // AI room restyles per month (image generation — capped for cost)
 };
 
 // Pricing (in EUR)

@@ -66,6 +66,11 @@ export interface AiChatResponse {
   isFinalQuery: boolean;
 }
 
+export interface RoomStyleResult {
+  imageBase64: string;
+  mimeType: string;
+}
+
 // Retry configuration for handling 503 and other transient errors
 const MAX_RETRIES = 5;
 const INITIAL_DELAY = 2000; // 2 seconds
@@ -335,6 +340,60 @@ export const generateDescriptionFromImages = async (
   } catch (_e) {
     throw new Error("Failed to get a valid response from the AI. Please try again.");
   }
+};
+
+/**
+ * Restyle a room photo into a chosen interior design style.
+ * Uses Gemini's image model ("Nano Banana") to re-render the SAME room in a new
+ * style while preserving the architecture, camera angle and proportions.
+ * Returns the generated image as base64 + its mime type.
+ */
+export const restyleRoomImage = async (
+  imageBase64: string,
+  mimeType: string,
+  styleLabel: string,
+  stylePrompt: string
+): Promise<RoomStyleResult> => {
+  const prompt = `You are an expert interior designer and architectural visualizer. Re-render the provided photograph of a room in the "${styleLabel}" interior design style.
+
+STYLE BRIEF — ${styleLabel}: ${stylePrompt}
+
+STRICT REQUIREMENTS:
+- Keep the room's architecture and structure EXACTLY the same: wall positions, window and door locations and sizes, ceiling height, floor plan, and room proportions must be unchanged.
+- Keep the SAME camera angle, perspective and framing as the original photo.
+- Only restyle the interior: furniture, decor, textiles, rugs, wall treatment/paint, flooring finish, lighting fixtures, and the overall color palette — so the result convincingly matches the "${styleLabel}" style.
+- The result must be photorealistic, well-lit, and look like a professional real-estate photograph of the same room.
+- Do NOT add people, pets, text, logos, watermarks, or captions.
+- Preserve any real view visible through windows.
+
+Output only the edited image.`;
+
+  const result = await retryWithBackoff(() =>
+    getAI().models.generateContent({
+      model: 'gemini-2.5-flash-image',
+      contents: {
+        parts: [
+          { text: prompt },
+          { inlineData: { data: imageBase64, mimeType: mimeType || 'image/jpeg' } },
+        ],
+      },
+    })
+  );
+
+  const parts = result.candidates?.[0]?.content?.parts ?? [];
+  const imagePart = parts.find((p: any) => p.inlineData?.data);
+
+  if (!imagePart?.inlineData?.data) {
+    // No image returned — likely a safety block or a text-only response.
+    const textPart = parts.find((p: any) => typeof p.text === 'string')?.text;
+    apiLogger.warn(`Room restyle returned no image. Text response: ${textPart || '(none)'}`);
+    throw new Error('The AI did not return a styled image. Please try a different photo or style.');
+  }
+
+  return {
+    imageBase64: imagePart.inlineData.data,
+    mimeType: imagePart.inlineData.mimeType || 'image/png',
+  };
 };
 
 /**
