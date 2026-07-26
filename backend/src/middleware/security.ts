@@ -459,6 +459,30 @@ export const uploadRateLimiter = rateLimit({
 });
 
 /**
+ * Short-window anti-spam cooldown for the AI Room Styler.
+ * Each generation is an expensive image-model call, so cap rapid-fire bursts
+ * to a few per minute per user — on top of the monthly quota and the hourly
+ * aiRateLimiter. Keyed by authenticated user ID.
+ */
+export const roomStyleCooldownLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 3, // max 3 generations per minute per user
+  message: {
+    error: 'Too many requests',
+    message: "You're generating too fast. Please wait a moment and try again.",
+    retryAfter: 60,
+  },
+  standardHeaders: !isProduction,
+  legacyHeaders: false,
+  skip: () => isDevelopment, // Skip in development
+  keyGenerator: (req: Request) => {
+    const userId = (req as any).user?.id || (req as any).user?._id;
+    return userId ? `roomstyle_user_${userId}` : ipKeyGenerator(req.ip || 'unknown');
+  },
+  validate: { xForwardedForHeader: false, keyGeneratorIpFallback: false },
+});
+
+/**
  * HPP (HTTP Parameter Pollution) Protection
  */
 export const hppProtection = hpp({

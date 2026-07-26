@@ -637,5 +637,11 @@
     "whyBuy": "Zašto kupiti u {{country}}?"
   },
   "removeFromFavorites": "Ukloni iz favorita",
-  "saved": "Spremljeno"
+  "saved": "Spremljeno",
+  "usageMeter": {
+    "label": "Mjesečna potrošnja",
+    "usedOfLimit": "{{used}} / {{limit}} iskorišteno",
+    "unlimited": "Neograničeno",
+    "resetsOn": "Obnavlja se {{date}}"
+  }
 }

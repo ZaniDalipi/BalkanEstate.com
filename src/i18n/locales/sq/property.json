@@ -655,5 +655,29 @@
     "description": "{{type}} me {{beds}} dhoma gjumi, {{baths}} banjo për {{listingAction}} në {{city}}, {{country}}. {{sqft}}m² për €{{price}}.",
     "forRent": "Qira",
     "forSale": "Shitje"
+  },
+  "roomStyler": {
+    "reimagine": "Rimagjino",
+    "title": "Rimagjino këtë dhomë",
+    "subtitle": "Shihni këtë dhomë në një stil tjetër dizajni",
+    "close": "Mbyll",
+    "chooseStyle": "Zgjidhni një stil",
+    "generate": "Gjenero",
+    "generating": "Duke ristiluar në {{style}}…",
+    "generating2": "Duke gjeneruar…",
+    "tryAnother": "Provo një stil tjetër",
+    "download": "Shkarko HD",
+    "before": "Origjinali",
+    "roomPhoto": "Fotoja e dhomës",
+    "limitReached": "Keni arritur kufirin mujor të ristilimit të dhomave.",
+    "genericError": "Diçka shkoi keq. Ju lutemi provoni përsëri.",
+    "upgrade": "Shiko planet",
+    "meterLabel": "Stilisti AI i Dhomave",
+    "meterSubtitle": "Rimagjino dhomat në stile të ndryshme dizajni",
+    "meterUsageLabel": "Ristilime këtë muaj",
+    "limitTitle": "I keni përdorur të gjitha ristilimet këtë muaj",
+    "limitMessage": "Përmirësoni në Pro Buyer ose një plan tjetër për të vazhduar — ose prisni derisa kuota juaj të rifreskohet.",
+    "unlimitedNote": "Ristilime të pakufizuara në planin tuaj",
+    "remainingNote": "{{remaining}} të mbetura këtë muaj"
   }
 }

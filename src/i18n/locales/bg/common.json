@@ -637,5 +637,11 @@
     "whyBuy": "Защо да купите в {{country}}?"
   },
   "removeFromFavorites": "Премахни от любими",
-  "saved": "Запазено"
+  "saved": "Запазено",
+  "usageMeter": {
+    "label": "Месечно потребление",
+    "usedOfLimit": "{{used}} / {{limit}} използвани",
+    "unlimited": "Неограничено",
+    "resetsOn": "Обновява се на {{date}}"
+  }
 }

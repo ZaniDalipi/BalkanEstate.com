@@ -655,5 +655,29 @@
     "description": "{{type}} cu {{beds}} dormitoare, {{baths}} băi de {{listingAction}} în {{city}}, {{country}}. {{sqft}}m² pentru €{{price}}.",
     "forRent": "Închiriere",
     "forSale": "Vânzare"
+  },
+  "roomStyler": {
+    "reimagine": "Reimaginează",
+    "title": "Reimaginează această cameră",
+    "subtitle": "Vezi această cameră într-un alt stil de design interior",
+    "close": "Închide",
+    "chooseStyle": "Alege un stil",
+    "generate": "Generează",
+    "generating": "Restilizare în {{style}}…",
+    "generating2": "Se generează…",
+    "tryAnother": "Încearcă alt stil",
+    "download": "Descarcă HD",
+    "before": "Original",
+    "roomPhoto": "Fotografia camerei",
+    "limitReached": "Ai atins limita lunară de restilizare a camerelor.",
+    "genericError": "Ceva n-a mers bine. Te rugăm încearcă din nou.",
+    "upgrade": "Vezi planurile",
+    "meterLabel": "Stilist AI de Camere",
+    "meterSubtitle": "Reimaginează camere în diferite stiluri de design",
+    "meterUsageLabel": "Restilizări luna aceasta",
+    "limitTitle": "Ai folosit toate restilizările luna aceasta",
+    "limitMessage": "Fă upgrade la Pro Buyer sau alt plan pentru a continua — sau așteaptă până se resetează cota.",
+    "unlimitedNote": "Restilizări nelimitate în planul tău",
+    "remainingNote": "{{remaining}} rămase luna aceasta"
   }
 }

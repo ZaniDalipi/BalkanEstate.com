@@ -655,5 +655,29 @@
     "description": "{{type}} s {{beds}} spavaćih soba, {{baths}} kupaonica za {{listingAction}} u {{city}}, {{country}}. {{sqft}}m² za €{{price}}.",
     "forRent": "Najam",
     "forSale": "Prodaja"
+  },
+  "roomStyler": {
+    "reimagine": "Zamisli iznova",
+    "title": "Zamislite ovu sobu iznova",
+    "subtitle": "Pogledajte ovu sobu u drugom stilu uređenja",
+    "close": "Zatvori",
+    "chooseStyle": "Odaberite stil",
+    "generate": "Generiraj",
+    "generating": "Preuređivanje u stil {{style}}…",
+    "generating2": "Generiranje…",
+    "tryAnother": "Isprobaj drugi stil",
+    "download": "Preuzmi HD",
+    "before": "Original",
+    "roomPhoto": "Fotografija sobe",
+    "limitReached": "Dosegli ste mjesečni limit za preuređivanje soba.",
+    "genericError": "Nešto je pošlo po zlu. Molimo pokušajte ponovno.",
+    "upgrade": "Pogledaj planove",
+    "meterLabel": "AI Stilist Soba",
+    "meterSubtitle": "Zamislite sobe u različitim stilovima uređenja",
+    "meterUsageLabel": "Preuređivanja ovog mjeseca",
+    "limitTitle": "Iskoristili ste sva preuređivanja ovog mjeseca",
+    "limitMessage": "Nadogradite na Pro Buyer ili drugi plan kako biste nastavili — ili pričekajte da se kvota obnovi.",
+    "unlimitedNote": "Neograničena preuređivanja na vašem planu",
+    "remainingNote": "Preostalo {{remaining}} ovog mjeseca"
   }
 }

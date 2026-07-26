@@ -265,7 +265,7 @@ const ProductSchema: Schema = new Schema(
     },
     roomStyleLimit: {
       type: Number,
-      default: 2, // 2 for free, 50 for pro, -1 (unlimited) for enterprise
+      default: 3, // 3 for free, 50 for pro, -1 (unlimited) for enterprise
     },
 
     // Buyer-specific Benefits

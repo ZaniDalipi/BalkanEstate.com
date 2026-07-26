@@ -664,12 +664,19 @@
     "generating": "Restyling in {{style}}…",
     "generating2": "Generating…",
     "tryAnother": "Try another style",
-    "download": "Download",
+    "download": "Download HD",
     "before": "Original",
     "roomPhoto": "Room photo",
     "limitReached": "You have reached your monthly room-styling limit.",
     "genericError": "Something went wrong. Please try again.",
-    "upgrade": "Upgrade for more restyles"
+    "upgrade": "View plans",
+    "meterLabel": "AI Room Styler",
+    "meterSubtitle": "Reimagine rooms in different design styles",
+    "meterUsageLabel": "Restyles this month",
+    "limitTitle": "You've used all your restyles this month",
+    "limitMessage": "Upgrade to Pro Buyer or another plan to keep reimagining rooms — or wait until your quota resets.",
+    "unlimitedNote": "Unlimited restyles on your plan",
+    "remainingNote": "{{remaining}} left this month"
   },
   "sectionNav": {
     "ariaLabel": "Property sections",

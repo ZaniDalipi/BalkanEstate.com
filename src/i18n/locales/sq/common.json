@@ -637,5 +637,11 @@
     "whyBuy": "Pse të blini në {{country}}?"
   },
   "removeFromFavorites": "Hiq nga të preferuarat",
-  "saved": "Të ruajtura"
+  "saved": "Të ruajtura",
+  "usageMeter": {
+    "label": "Përdorimi mujor",
+    "usedOfLimit": "{{used}} / {{limit}} të përdorura",
+    "unlimited": "Të pakufizuara",
+    "resetsOn": "Rifreskohet më {{date}}"
+  }
 }

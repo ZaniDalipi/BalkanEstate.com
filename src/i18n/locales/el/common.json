@@ -637,5 +637,11 @@
     "whyBuy": "Γιατί να αγοράσετε στην {{country}};"
   },
   "removeFromFavorites": "Αφαίρεση από τα αγαπημένα",
-  "saved": "Αποθηκευμένο"
+  "saved": "Αποθηκευμένο",
+  "usageMeter": {
+    "label": "Μηνιαία χρήση",
+    "usedOfLimit": "{{used}} / {{limit}} σε χρήση",
+    "unlimited": "Απεριόριστα",
+    "resetsOn": "Ανανεώνεται στις {{date}}"
+  }
 }

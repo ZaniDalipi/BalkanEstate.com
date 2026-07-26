@@ -68,6 +68,25 @@ export interface RoomStyleResponse {
     style: string;
 }
 
+export interface RoomStyleUsage {
+    used: number;
+    limit: number;       // -1 = unlimited
+    remaining: number;   // -1 = unlimited
+    resetDate: string;
+    isPremium: boolean;
+}
+
+/**
+ * Fetch the current user's room-styler usage + resolved monthly limit.
+ * The limit reflects the user's real account status (agency/pro/buyer/free).
+ */
+export const getRoomStyleUsage = async (): Promise<RoomStyleUsage> => {
+    return apiRequest<RoomStyleUsage>('/ai/room-style/usage', {
+        method: 'GET',
+        requiresAuth: true,
+    });
+};
+
 /**
  * Restyle a room photo (by its Cloudinary URL) into a chosen interior design style.
  * Returns a base64 data URL of the AI-generated image.

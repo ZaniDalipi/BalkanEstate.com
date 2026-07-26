@@ -1,10 +1,14 @@
 import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import { XMarkIcon } from '@/constants';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { useAppContext } from '@/context/AppContext';
+import { UsageMeter } from '@/src/shared/components/ui';
+import { roomStylerKeys } from '@/src/shared/query/queryKeys';
 import { restyleRoom } from '../../../../services/geminiService';
 import { ROOM_STYLE_OPTIONS } from '../data/styles';
+import { useRoomStylerUsage } from '../hooks/useRoomStylerUsage';
 import BeforeAfterSlider from './BeforeAfterSlider';
 
 interface RoomStylerModalProps {
@@ -17,16 +21,23 @@ type Status = 'idle' | 'loading' | 'done' | 'error';
 
 const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) => {
     const { t } = useTranslation(['property']);
-    const { dispatch } = useAppContext();
+    const { state, dispatch } = useAppContext();
+    const queryClient = useQueryClient();
+
+    // Fetch the user's real quota FIRST so we only show "limit reached" when the
+    // account has actually run out — subscribers/agency users see their true limit.
+    const { usage, isLoading: usageLoading } = useRoomStylerUsage(state.isAuthenticated);
 
     const [selectedStyle, setSelectedStyle] = useState<string>(ROOM_STYLE_OPTIONS[0].id);
     const [status, setStatus] = useState<Status>('idle');
     const [resultUrl, setResultUrl] = useState<string | null>(null);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-    // Send a reasonably-sized version to the AI (keeps the request small & fast,
-    // and guarantees the URL stays on the Cloudinary host the backend allows).
-    const sourceUrl = optimizeCloudinaryUrl(imageUrl, { width: 1280, quality: 'auto' }) || imageUrl;
+    // Send a high-res version to the AI for a better result (still a Cloudinary URL).
+    const sourceUrl = optimizeCloudinaryUrl(imageUrl, { width: 1600, quality: 'auto' }) || imageUrl;
+
+    const isUnlimited = usage?.limit === -1;
+    const isExhausted = !!usage && usage.limit !== -1 && usage.remaining <= 0;
 
     const handleGenerate = useCallback(async () => {
         setStatus('loading');
@@ -36,17 +47,19 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
             const { imageDataUrl } = await restyleRoom(sourceUrl, selectedStyle);
             setResultUrl(imageDataUrl);
             setStatus('done');
+            // Refresh the meter so the bar reflects the just-consumed restyle.
+            queryClient.invalidateQueries({ queryKey: roomStylerKeys.usage() });
         } catch (err: any) {
             if (err?.statusCode === 429) {
-                // Monthly limit reached — send the user to the pricing page to upgrade.
                 setErrorMsg(err?.message || t('property:roomStyler.limitReached', 'You have reached your monthly room-styling limit.'));
                 setStatus('error');
+                queryClient.invalidateQueries({ queryKey: roomStylerKeys.usage() });
             } else {
                 setErrorMsg(err?.message || t('property:roomStyler.genericError', 'Something went wrong. Please try again.'));
                 setStatus('error');
             }
         }
-    }, [sourceUrl, selectedStyle, t]);
+    }, [sourceUrl, selectedStyle, t, queryClient]);
 
     const goToPricing = useCallback(() => {
         onClose();
@@ -56,7 +69,8 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
     }, [dispatch, onClose]);
 
     const selectedLabel = ROOM_STYLE_OPTIONS.find(s => s.id === selectedStyle)?.label ?? '';
-    const isLimit = status === 'error' && errorMsg?.toLowerCase().includes('limit');
+    const showUpgrade = isExhausted || (status === 'error' && !!errorMsg?.toLowerCase().includes('limit'));
+    const generateDisabled = status === 'loading' || isExhausted;
 
     return (
         <div className="fixed inset-0 z-[6100] flex items-center justify-center bg-black/80 p-3 sm:p-6" role="dialog" aria-modal="true">
@@ -84,6 +98,19 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
 
                 {/* Body */}
                 <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+                    {/* Usage meter — reflects the user's real plan */}
+                    {state.isAuthenticated && (usageLoading || usage) && (
+                        <UsageMeter
+                            className="mb-4"
+                            label={t('property:roomStyler.meterLabel', 'AI Room Styler')}
+                            used={usage?.used ?? 0}
+                            limit={usage?.limit ?? 0}
+                            remaining={usage?.remaining ?? 0}
+                            resetDate={usage?.resetDate}
+                            isLoading={usageLoading && !usage}
+                        />
+                    )}
+
                     {/* Preview / result */}
                     <div className="relative mb-4 flex items-center justify-center rounded-xl bg-neutral-100 dark:bg-neutral-800 min-h-[220px] max-h-[46vh] overflow-hidden">
                         {status === 'done' && resultUrl ? (
@@ -114,19 +141,29 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
                         )}
                     </div>
 
-                    {/* Error */}
-                    {status === 'error' && errorMsg && (
+                    {/* Generic (non-limit) error */}
+                    {status === 'error' && errorMsg && !showUpgrade && (
                         <div className="mb-4 rounded-lg border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/40 px-3 py-2.5 text-sm text-red-700 dark:text-red-300">
                             <p>{errorMsg}</p>
-                            {isLimit && (
-                                <button
-                                    type="button"
-                                    onClick={goToPricing}
-                                    className="mt-2 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary/90 transition-colors"
-                                >
-                                    {t('property:roomStyler.upgrade', 'Upgrade for more restyles')}
-                                </button>
-                            )}
+                        </div>
+                    )}
+
+                    {/* Limit-reached upsell — proactive when quota is spent */}
+                    {showUpgrade && (
+                        <div className="mb-4 rounded-xl border border-violet-200 bg-gradient-to-r from-violet-50 to-purple-50 dark:border-violet-900/50 dark:from-violet-950/40 dark:to-purple-950/40 p-4">
+                            <p className="text-sm font-semibold text-violet-800 dark:text-violet-200">
+                                {t('property:roomStyler.limitTitle', "You've used all your restyles this month")}
+                            </p>
+                            <p className="mt-1 text-xs text-violet-700 dark:text-violet-300">
+                                {t('property:roomStyler.limitMessage', 'Upgrade to Pro Buyer or another plan to keep reimagining rooms — or wait until your quota resets.')}
+                            </p>
+                            <button
+                                type="button"
+                                onClick={goToPricing}
+                                className="mt-3 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary/90 transition-colors"
+                            >
+                                {t('property:roomStyler.upgrade', 'View plans')}
+                            </button>
                         </div>
                     )}
 
@@ -159,28 +196,37 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
                 </div>
 
                 {/* Footer actions */}
-                <div className="flex items-center justify-end gap-2 border-t border-neutral-200 dark:border-neutral-800 px-4 py-3 sm:px-5">
-                    {status === 'done' && resultUrl && (
-                        <a
-                            href={resultUrl}
-                            download={`balkanestate-${selectedStyle}.png`}
-                            className="rounded-lg border border-neutral-300 dark:border-neutral-600 px-4 py-2 text-sm font-semibold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                <div className="flex items-center justify-between gap-2 border-t border-neutral-200 dark:border-neutral-800 px-4 py-3 sm:px-5">
+                    <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                        {isUnlimited
+                            ? t('property:roomStyler.unlimitedNote', 'Unlimited restyles on your plan')
+                            : usage
+                                ? t('property:roomStyler.remainingNote', '{{remaining}} left this month', { remaining: Math.max(0, usage.remaining) })
+                                : ''}
+                    </span>
+                    <div className="flex items-center gap-2">
+                        {status === 'done' && resultUrl && (
+                            <a
+                                href={resultUrl}
+                                download={`balkanestate-${selectedStyle}.png`}
+                                className="rounded-lg border border-neutral-300 dark:border-neutral-600 px-4 py-2 text-sm font-semibold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                            >
+                                {t('property:roomStyler.download', 'Download HD')}
+                            </a>
+                        )}
+                        <button
+                            type="button"
+                            onClick={handleGenerate}
+                            disabled={generateDisabled}
+                            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
                         >
-                            {t('property:roomStyler.download', 'Download')}
-                        </a>
-                    )}
-                    <button
-                        type="button"
-                        onClick={handleGenerate}
-                        disabled={status === 'loading'}
-                        className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-                    >
-                        {status === 'loading'
-                            ? t('property:roomStyler.generating2', 'Generating…')
-                            : status === 'done'
-                                ? t('property:roomStyler.tryAnother', 'Try another style')
-                                : t('property:roomStyler.generate', 'Generate')}
-                    </button>
+                            {status === 'loading'
+                                ? t('property:roomStyler.generating2', 'Generating…')
+                                : status === 'done'
+                                    ? t('property:roomStyler.tryAnother', 'Try another style')
+                                    : t('property:roomStyler.generate', 'Generate')}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

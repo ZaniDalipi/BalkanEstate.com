@@ -10,6 +10,7 @@ import {
   PRO_BUYER_LIMITS,
 } from '../config/subscriptionConstants';
 import { getRoomStyle } from '../data/roomStyles';
+import { getRoomStyleUsageStats } from '../utils/roomStyleLimits';
 
 function getNextMonthStart(): Date {
   const d = new Date();
@@ -316,57 +317,28 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // Enforce roomStyle monthly limit (mirrors AI chat limit logic).
+    // Enforce roomStyle monthly limit. Resolve the limit from the user's REAL
+    // account status (agency/pro/buyer via embedded subscription, Subscription
+    // doc, proSubscription, or the isSubscribed flag) — not just `isSubscribed`,
+    // so paying/agency users are never wrongly capped at the free tier.
     const userId = (req.user as any)?._id;
+    let resolvedLimit: number = FREE_TIER_LIMITS.ROOM_STYLES;
     if (userId) {
       const user = await User.findById(userId);
       if (user) {
-        const now = new Date();
-        if (!user.roomStyleUsage) {
-          user.roomStyleUsage = { monthlyCount: 0, monthResetDate: getNextMonthStart() };
-        }
-        if (now >= user.roomStyleUsage.monthResetDate) {
-          user.roomStyleUsage.monthlyCount = 0;
-          user.roomStyleUsage.monthResetDate = getNextMonthStart();
-        }
+        const stats = await getRoomStyleUsageStats(user);
+        resolvedLimit = stats.limit;
 
-        const isSubscribed = user.isSubscribed && user.hasActiveSubscription();
-        let styleLimit: number = FREE_TIER_LIMITS.ROOM_STYLES; // Default for free users
-
-        if (isSubscribed && user.subscriptionPlan) {
-          const product = await Product.findOne({ productId: user.subscriptionPlan });
-          const rawLimit = product?.roomStyleLimit;
-          const limit = typeof rawLimit === 'number' ? rawLimit : undefined;
-
-          if (typeof limit === 'number') {
-            styleLimit = limit;
-          } else {
-            // Product doesn't have roomStyleLimit set - use plan-based defaults.
-            const plan = user.subscriptionPlan.toLowerCase();
-            if (plan.includes('enterprise') || plan.includes('agency')) {
-              styleLimit = ENTERPRISE_TIER_LIMITS.ROOM_STYLES;
-            } else if (plan.includes('buyer')) {
-              styleLimit = PRO_BUYER_LIMITS.ROOM_STYLES;
-            } else if (plan.includes('yearly')) {
-              styleLimit = PRO_TIER_LIMITS.YEARLY.ROOM_STYLES;
-            } else if (plan.includes('monthly')) {
-              styleLimit = PRO_TIER_LIMITS.MONTHLY.ROOM_STYLES;
-            }
-          }
-        }
-
-        // Enforce limit (-1 = unlimited, skip check).
-        if (styleLimit !== -1) {
-          if (user.roomStyleUsage.monthlyCount >= styleLimit) {
-            res.status(429).json({
-              message: `Room styler limit reached. You have used all ${styleLimit} restyles for this month.`,
-              limit: styleLimit,
-              used: user.roomStyleUsage.monthlyCount,
-              remaining: 0,
-              resetDate: user.roomStyleUsage.monthResetDate,
-            });
-            return;
-          }
+        // Enforce only when the plan is limited (-1 = unlimited).
+        if (stats.limit !== -1 && stats.remaining <= 0) {
+          res.status(429).json({
+            message: `Room styler limit reached. You have used all ${stats.limit} restyles for this month.`,
+            limit: stats.limit,
+            used: stats.used,
+            remaining: 0,
+            resetDate: stats.resetDate,
+          });
+          return;
         }
       }
     }
@@ -415,25 +387,12 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
       styleDef.prompt
     );
 
-    // Count usage only on a successful generation.
-    if (userId) {
-      const user = await User.findById(userId);
-      if (user) {
-        const isSubscribed = user.isSubscribed && user.hasActiveSubscription();
-        let styleLimit: number = FREE_TIER_LIMITS.ROOM_STYLES;
-        if (isSubscribed && user.subscriptionPlan) {
-          const product = await Product.findOne({ productId: user.subscriptionPlan });
-          const rawLimit = product?.roomStyleLimit;
-          if (typeof rawLimit === 'number') styleLimit = rawLimit;
-        }
-        if (styleLimit !== -1) {
-          if (!user.roomStyleUsage) {
-            user.roomStyleUsage = { monthlyCount: 0, monthResetDate: getNextMonthStart() };
-          }
-          user.roomStyleUsage.monthlyCount += 1;
-          await user.save();
-        }
-      }
+    // Count usage only on a successful generation, and only for limited plans.
+    // Atomic $inc avoids a read-modify-write race between concurrent requests.
+    if (userId && resolvedLimit !== -1) {
+      await User.findByIdAndUpdate(userId, {
+        $inc: { 'roomStyleUsage.monthlyCount': 1 },
+      });
     }
 
     const imageDataUrl = `data:${result.mimeType};base64,${result.imageBase64}`;
@@ -441,6 +400,40 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
   } catch (error) {
     apiLogger.error('Error in restyleRoom:', error instanceof Error ? error.message : String(error));
     res.status(500).json({ message: 'Failed to restyle the room. Please try again later.' });
+  }
+};
+
+/**
+ * GET /api/ai/room-style/usage
+ * Return the current user's room-styler usage + resolved monthly limit so the
+ * client can render a usage meter and only show the upgrade prompt when the
+ * user's REAL account status has actually run out (limit !== -1 && remaining 0).
+ */
+export const getRoomStyleUsage = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req.user as any)?._id;
+    if (!userId) {
+      res.status(401).json({ message: 'Authentication required' });
+      return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(401).json({ message: 'User not found' });
+      return;
+    }
+
+    const stats = await getRoomStyleUsageStats(user);
+    res.json({
+      used: stats.used,
+      limit: stats.limit,
+      remaining: stats.remaining,
+      resetDate: stats.resetDate,
+      isPremium: stats.isPremium,
+    });
+  } catch (error) {
+    apiLogger.error('Error in getRoomStyleUsage:', error instanceof Error ? error.message : String(error));
+    res.status(500).json({ message: 'Failed to load room styler usage.' });
   }
 };
 

@@ -1,5 +1,9 @@
 import { GoogleGenAI, Type } from '@google/genai';
+import sharp from 'sharp';
 import { apiLogger } from '../utils/logger';
+
+// Target long-edge (px) for the high-quality downloadable restyle image.
+const HQ_LONG_EDGE = 2048;
 
 let ai: GoogleGenAI | null = null;
 
@@ -390,10 +394,36 @@ Output only the edited image.`;
     throw new Error('The AI did not return a styled image. Please try a different photo or style.');
   }
 
-  return {
-    imageBase64: imagePart.inlineData.data,
-    mimeType: imagePart.inlineData.mimeType || 'image/png',
-  };
+  const rawBuffer = Buffer.from(imagePart.inlineData.data, 'base64');
+
+  // Upscale to a high-quality version for download. The generative model outputs
+  // ~1024px on the long edge; enlarge with a high-quality kernel + gentle sharpen
+  // so the saved file is crisp for viewing/printing. Falls back to the raw image
+  // if sharp fails for any reason.
+  try {
+    const meta = await sharp(rawBuffer).metadata();
+    const longEdge = Math.max(meta.width || 0, meta.height || 0);
+    let pipeline = sharp(rawBuffer);
+    if (longEdge > 0 && longEdge < HQ_LONG_EDGE) {
+      const scale = HQ_LONG_EDGE / longEdge;
+      pipeline = pipeline
+        .resize({
+          width: Math.round((meta.width || longEdge) * scale),
+          height: Math.round((meta.height || longEdge) * scale),
+          kernel: 'lanczos3',
+          fit: 'fill',
+        })
+        .sharpen();
+    }
+    const hqBuffer = await pipeline.png({ quality: 100, compressionLevel: 6 }).toBuffer();
+    return { imageBase64: hqBuffer.toString('base64'), mimeType: 'image/png' };
+  } catch (e) {
+    apiLogger.warn(`HQ upscale failed, returning raw model image: ${e instanceof Error ? e.message : String(e)}`);
+    return {
+      imageBase64: imagePart.inlineData.data,
+      mimeType: imagePart.inlineData.mimeType || 'image/png',
+    };
+  }
 };
 
 /**

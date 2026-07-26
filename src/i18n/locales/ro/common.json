@@ -637,5 +637,11 @@
     "whyBuy": "De ce să cumpărați în {{country}}?"
   },
   "removeFromFavorites": "Elimină de la favorite",
-  "saved": "Salvat"
+  "saved": "Salvat",
+  "usageMeter": {
+    "label": "Utilizare lunară",
+    "usedOfLimit": "{{used}} / {{limit}} folosite",
+    "unlimited": "Nelimitat",
+    "resetsOn": "Se resetează pe {{date}}"
+  }
 }
