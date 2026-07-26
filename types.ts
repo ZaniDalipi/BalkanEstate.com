@@ -781,6 +781,9 @@ export interface AppState {
     agencyDashboardSection: AgencyDashboardSection;
     // Session expired modal
     isSessionExpiredModalOpen: boolean;
+    // True when the app is showing cached saved data because the network/API is
+    // unavailable (offline). Used to render a read-only "you're offline" UI.
+    isOfflineMode: boolean;
 }
 
 export type AdminSection = 'dashboard' | 'heatmap' | 'users' | 'inquiries' | 'agent-requests' | 'discounts' | 'promotions' | 'promotion-plans' | 'properties' | 'agencies' | 'pricing' | 'activity' | 'settings' | 'site-settings' | 'how-it-works' | 'email-templates' | 'business-listings' | 'articles';
@@ -851,4 +854,6 @@ export type AppAction =
     | { type: 'CLEAR_ALL_SAVED_SEARCHES' }
     | { type: 'SET_CURRENT_USER', payload: User }
     | { type: 'SESSION_EXPIRED' }
-    | { type: 'HIDE_SESSION_EXPIRED_MODAL' };
+    | { type: 'HIDE_SESSION_EXPIRED_MODAL' }
+    | { type: 'SET_OFFLINE_MODE', payload: boolean }
+    | { type: 'RESTORE_OFFLINE_DATA', payload: { user: User, savedHomes: Property[], savedSearches: SavedSearch[] } };

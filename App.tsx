@@ -140,6 +140,7 @@ const SplashScreen = lazy(() => import('./src/components/ui/SplashScreen'));
 // Global liquid glass SVG filter (needed for glass buttons & controls)
 import { LiquidGlassFilter } from './components/ui/liquid-glass-button';
 import { LogoLoader } from './src/shared/components/ui/LogoLoader';
+import OfflineBanner from './components/shared/OfflineBanner';
 
 // PWA Install Prompt (lazy loaded)
 const PWAInstallPrompt = lazy(() => import('./src/shared/components/PWAInstallPrompt'));
@@ -958,6 +959,9 @@ const MainLayout: React.FC = () => {
         )}
 
         <div className={`relative transition-all duration-300 ease-in-out h-full flex flex-col md:pl-20 overflow-x-hidden max-w-full ${isOverlayVisible ? 'blur-sm pointer-events-none' : ''}`}>
+            {/* Offline status bar — shown when browsing cached saved data with no network */}
+            <OfflineBanner />
+
             <Suspense fallback={null}>
               {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isFloatingHeaderView} />}
             </Suspense>

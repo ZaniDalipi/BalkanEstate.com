@@ -25,6 +25,12 @@ import { MUNICIPALITY_DATA } from '../services/propertyService';
 import { socketService } from '../services/socketService';
 import { notificationService } from '../services/notificationService';
 import { tokenService, hasLikelyValidSession } from '../src/shared/api/tokenService';
+import {
+  saveOfflineSnapshot,
+  loadOfflineSnapshot,
+  clearOfflineSnapshot,
+  isOffline,
+} from '../utils/offlineSavedStorage';
 
 const initialSearchPageState: SearchPageState = {
     filters: initialFilters,
@@ -151,6 +157,7 @@ const initialState: AppState = {
   adminSection: 'dashboard',
   agencyDashboardSection: 'overview',
   isSessionExpiredModalOpen: false,
+  isOfflineMode: false,
 };
 
 
@@ -214,7 +221,25 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
     case 'USER_DATA_LOADING':
         return { ...state, isLoadingUserData: true };
     case 'USER_DATA_SUCCESS':
-        return { ...state, ...action.payload, isLoadingUserData: false };
+        // A successful data load means we're back online with live data.
+        return { ...state, ...action.payload, isLoadingUserData: false, isOfflineMode: false };
+    case 'SET_OFFLINE_MODE':
+        return { ...state, isOfflineMode: action.payload };
+    case 'RESTORE_OFFLINE_DATA':
+        // Restore the last-known saved data from cache so the user can browse
+        // what they saved before while the network is unavailable. This marks the
+        // session authenticated (read-only) purely from the cached snapshot.
+        return {
+            ...state,
+            isAuthenticating: false,
+            isAuthenticated: true,
+            isLoadingUserData: false,
+            isOfflineMode: true,
+            onboardingComplete: true,
+            currentUser: action.payload.user,
+            savedHomes: action.payload.savedHomes,
+            savedSearches: action.payload.savedSearches,
+        };
     case 'ADD_SAVED_SEARCH':
       return { ...state, savedSearches: [action.payload, ...state.savedSearches] };
     case 'UPDATE_SAVED_SEARCH':
@@ -484,6 +509,22 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
+  // Restore the last-known saved data from the offline cache. Returns true when a
+  // usable snapshot existed and was applied, so callers can decide the fallback.
+  const restoreOfflineData = useCallback((): boolean => {
+    const snapshot = loadOfflineSnapshot();
+    if (!snapshot || !snapshot.user) return false;
+    dispatch({
+      type: 'RESTORE_OFFLINE_DATA',
+      payload: {
+        user: snapshot.user,
+        savedHomes: snapshot.savedHomes,
+        savedSearches: snapshot.savedSearches,
+      },
+    });
+    return true;
+  }, []);
+
   const checkAuthStatus = useCallback(async () => {
     const hasSession = hasLikelyValidSession();
     const hasToken = !!tokenService.getAccessToken();
@@ -495,33 +536,53 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
 
+    // Offline: the auth/data requests below can't complete without a network.
+    // Restore the cached saved data (if any) so the user can still see what they
+    // saved before, and skip the doomed network round-trips.
+    if (isOffline()) {
+      if (!restoreOfflineData()) {
+        dispatch({ type: 'AUTH_CHECK_COMPLETE', payload: { isAuthenticated: false, user: null } });
+      }
+      return;
+    }
+
     dispatch({ type: 'AUTH_CHECK_START' });
 
-    // Attempt silent token refresh only when a session hint exists, i.e. the user
-    // has previously authenticated and the httpOnly refresh cookie is likely present.
-    // Skipping this for visitors with no session avoids a pointless POST /auth/refresh-token
-    // that would return 400 and add ~500 ms–2 s of unnecessary latency.
-    if (!hasToken && hasSession) {
-      await tokenService.forceRefresh();
+    try {
+      // Attempt silent token refresh only when a session hint exists, i.e. the user
+      // has previously authenticated and the httpOnly refresh cookie is likely present.
+      // Skipping this for visitors with no session avoids a pointless POST /auth/refresh-token
+      // that would return 400 and add ~500 ms–2 s of unnecessary latency.
+      if (!hasToken && hasSession) {
+        await tokenService.forceRefresh();
+      }
+
+      const user = await apiCheckAuth();
+      dispatch({ type: 'AUTH_CHECK_COMPLETE', payload: { isAuthenticated: !!user, user } });
+      if (user) {
+          dispatch({ type: 'USER_DATA_LOADING' });
+          const userData = await apiGetMyData();
+          dispatch({ type: 'USER_DATA_SUCCESS', payload: userData });
+
+          // Connect to WebSocket with user ID
+          const token = tokenService.getAccessToken();
+          if (token) {
+            socketService.connect(token, user.id);
+          }
+
+          // Initialize proactive token refresh
+          tokenService.initializeProactiveRefresh();
+      }
+    } catch (err) {
+      // The network dropped mid-check (or the browser only just reported offline).
+      // Fall back to cached saved data so the user isn't left with an empty app.
+      const restored = restoreOfflineData();
+      if (!restored) {
+        dispatch({ type: 'AUTH_CHECK_COMPLETE', payload: { isAuthenticated: false, user: null } });
+        throw err;
+      }
     }
-
-    const user = await apiCheckAuth();
-    dispatch({ type: 'AUTH_CHECK_COMPLETE', payload: { isAuthenticated: !!user, user } });
-    if (user) {
-        dispatch({ type: 'USER_DATA_LOADING' });
-        const userData = await apiGetMyData();
-        dispatch({ type: 'USER_DATA_SUCCESS', payload: userData });
-
-        // Connect to WebSocket with user ID
-        const token = tokenService.getAccessToken();
-        if (token) {
-          socketService.connect(token, user.id);
-        }
-
-        // Initialize proactive token refresh
-        tokenService.initializeProactiveRefresh();
-    }
-  }, []);
+  }, [restoreOfflineData]);
 
   const login = useCallback(async (emailOrPhone: string, pass: string) => {
     const user = await apiLogin(emailOrPhone, pass);
@@ -638,6 +699,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const logout = useCallback(async () => {
     await apiLogout();
+    // Clear cached saved data so it isn't shown after logout / on a shared device.
+    clearOfflineSnapshot();
     // Disconnect from WebSocket
     socketService.disconnect();
     dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: false, user: null } });
@@ -645,6 +708,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const logoutAllDevices = useCallback(async () => {
     await apiLogoutAllDevices();
+    // Clear cached saved data so it isn't shown after logout / on a shared device.
+    clearOfflineSnapshot();
     // Disconnect from WebSocket
     socketService.disconnect();
     dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: false, user: null } });
@@ -737,6 +802,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const isSaved = savedHomesRef.current.some(p => p.id === property.id);
     // Optimistic update: update UI immediately before API call
     dispatch({ type: 'TOGGLE_SAVED_HOME', payload: property });
+    // Offline: keep the local change (it persists to the offline cache) instead of
+    // firing a doomed request that would only revert the UI. It re-syncs with the
+    // server on the next online load.
+    if (isOffline()) return;
     try {
       await apiToggleSavedHome(property.id, isSaved);
     } catch {
@@ -811,9 +880,53 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     dispatch({ type: 'UPDATE_SAVED_SEARCH_ACCESS_TIME', payload: { searchId, seenPropertyIds } });
   }, []);
 
+  // Persist the user's saved data to the offline cache whenever it changes while
+  // authenticated & online. On the next visit — even with no network — the app can
+  // restore this snapshot so people still see the properties they saved before.
+  useEffect(() => {
+    if (state.isAuthenticated && state.currentUser && !state.isOfflineMode) {
+      saveOfflineSnapshot({
+        user: state.currentUser,
+        savedHomes: state.savedHomes,
+        savedSearches: state.savedSearches,
+      });
+    }
+  }, [
+    state.isAuthenticated,
+    state.isOfflineMode,
+    state.currentUser,
+    state.savedHomes,
+    state.savedSearches,
+  ]);
+
+  // Track connectivity so the UI can show a "you're offline" state, and refresh
+  // live data automatically once the connection returns.
+  useEffect(() => {
+    const handleOnline = () => {
+      dispatch({ type: 'SET_OFFLINE_MODE', payload: false });
+      // Replace any cached snapshot with fresh live data.
+      checkAuthStatus().catch(() => {
+        // Still unreachable — stay on cached data, no action needed.
+      });
+    };
+    const handleOffline = () => {
+      dispatch({ type: 'SET_OFFLINE_MODE', payload: true });
+    };
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    // Reflect the initial state (e.g. app opened while already offline).
+    if (isOffline()) dispatch({ type: 'SET_OFFLINE_MODE', payload: true });
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [checkAuthStatus]);
+
   // Set up session expired callback for proactive token refresh
   useEffect(() => {
     tokenService.onSessionExpired(() => {
+      // Clear cached saved data — the session is no longer valid.
+      clearOfflineSnapshot();
       // Disconnect from WebSocket
       socketService.disconnect();
       // Show SessionExpiredModal (also clears auth state via reducer)

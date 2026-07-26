@@ -144,5 +144,8 @@
     "unauthorized": "You are not authorized to perform this action",
     "networkError": "Network error. Please check your connection.",
     "validationError": "Please check the form for errors"
+  },
+  "offline": {
+    "banner": "You're offline — showing your saved items"
   }
 }
