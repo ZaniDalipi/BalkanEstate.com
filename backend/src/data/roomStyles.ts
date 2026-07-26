@@ -95,6 +95,66 @@ export const ROOM_STYLES: RoomStyleDefinition[] = [
     prompt:
       'Warm southern-European look. Terracotta and warm earth tones, textured plaster walls, wrought-iron details, arched shapes, patterned tile, natural wood, rustic yet elegant.',
   },
+  {
+    id: 'arts-and-crafts',
+    label: 'Arts & Crafts',
+    prompt:
+      'Early-1900s Craftsman/bungalow look reacting against mass production. Artisan-made pottery, stained-glass lamps and handcrafted wood furniture, rich woodwork and built-ins, a sophisticated palette of olive green, deep purples, vermilion red and earthy tones complementing natural wood.',
+  },
+  {
+    id: 'biophilic',
+    label: 'Biophilic',
+    prompt:
+      'Nature-connected (naturalist) design. Greens, browns and blues drawn from sky, trees and earth; abundant houseplants and living greenery, natural materials, large connection to the outdoors and lots of daylight, calm and organic.',
+  },
+  {
+    id: 'cottagecore',
+    label: 'Cottagecore',
+    prompt:
+      'Nostalgic English-countryside coziness. Muted pastels, dainty floral patterns, heirloom and vintage furniture, natural textiles like linen and knit throws, layered patterns and textures, warm ambient lamp lighting (not harsh overhead), quaint and lived-in.',
+  },
+  {
+    id: 'japandi',
+    label: 'Japandi',
+    prompt:
+      'Japanese + Scandinavian blend. Clutter-free minimalism, natural wood, stone and paper; light Scandi woods paired with darker, richer accents — black, deep green, deep red, aubergine; slatted wood walls, low furniture, earthy yet airy and serene.',
+  },
+  {
+    id: 'maximalism',
+    label: 'Maximalism',
+    prompt:
+      'Bold "more is more" style. Layered textiles, clashing patterns and mixed design eras held together by a cohesive palette (jewel tones or rich earth tones), statement wallpaper and art, abundant curated objects — vibrant, harmonious and expressive rather than cluttered.',
+  },
+  {
+    id: 'shabby-chic',
+    label: 'Shabby Chic',
+    prompt:
+      'Romantic vintage cottage revival. Mix of vintage and new furniture with distressed/painted finishes and machine-washable slipcovers, soft colors like rose, cream and light blue, floral accents, comfortable, cozy and lightly worn.',
+  },
+  {
+    id: 'southwestern',
+    label: 'Southwestern',
+    prompt:
+      'American Southwest (Pueblo/adobe) look blending Spanish, Native American and Mexican influences. Heavy wood beams (vigas), desert palette of cactus greens, adobe beiges and whites, sky blue and turquoise with deep orange, red and yellow; distressed wood with metal accents, tile floors, bold graphic patterns and woven rugs, with a boho touch.',
+  },
+  {
+    id: 'memphis',
+    label: 'Memphis',
+    prompt:
+      '1980s Memphis design. Simple geometric shapes with pops of bright, fun clashing colors, bold graphic patterns, playful and energetic, laminate and lacquer surfaces — form and function with an uninhibited, unique personality.',
+  },
+  {
+    id: 'hollywood-regency',
+    label: 'Hollywood Regency',
+    prompt:
+      'Old-Hollywood glamour (1920s–50s golden age). Luxurious and maximalist: velvet, satin and faux fur, gold and metallic flourishes on furniture and walls, high-gloss lacquer, mirrored surfaces, bold jewel tones, dramatic and opulent.',
+  },
+  {
+    id: '1970s-revival',
+    label: '1970s Revival',
+    prompt:
+      'Modern, toned-down 1970s comeback. Warm avocado greens and burnt oranges as accents, organic shapes (kidney-bean sofas), low-slung seating, textures like macramé and rattan, wood wall paneling — groovy retro warmth paired with clean modern lines.',
+  },
 ];
 
 export const ROOM_STYLE_IDS = ROOM_STYLES.map(s => s.id);

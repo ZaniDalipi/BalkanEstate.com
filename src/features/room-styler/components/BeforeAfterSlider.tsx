@@ -60,7 +60,7 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
     return (
         <div
             ref={containerRef}
-            className={`relative select-none overflow-hidden rounded-xl touch-none ${className}`}
+            className={`relative select-none overflow-hidden rounded-xl touch-none bg-neutral-900 ${className}`}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
             onPointerLeave={onPointerUp}

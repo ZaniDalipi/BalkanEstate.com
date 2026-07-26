@@ -73,7 +73,7 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
     const generateDisabled = status === 'loading' || isExhausted;
 
     return (
-        <div className="fixed inset-0 z-[6100] flex items-center justify-center bg-black/80 p-3 sm:p-6" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-[6100] flex items-center justify-center bg-black/95 backdrop-blur-md p-3 sm:p-6" role="dialog" aria-modal="true">
             <div className="relative flex w-full max-w-3xl max-h-[92vh] flex-col overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 shadow-2xl">
 
                 {/* Header */}
@@ -112,7 +112,7 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
                     )}
 
                     {/* Preview / result */}
-                    <div className="relative mb-4 flex items-center justify-center rounded-xl bg-neutral-100 dark:bg-neutral-800 min-h-[220px] max-h-[46vh] overflow-hidden">
+                    <div className="relative mb-4 flex items-center justify-center rounded-xl bg-neutral-900 min-h-[220px] max-h-[46vh] overflow-hidden">
                         {status === 'done' && resultUrl ? (
                             <BeforeAfterSlider
                                 beforeSrc={sourceUrl}

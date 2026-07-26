@@ -358,19 +358,26 @@ export const restyleRoomImage = async (
   styleLabel: string,
   stylePrompt: string
 ): Promise<RoomStyleResult> => {
-  const prompt = `You are an expert interior designer and architectural visualizer. Re-render the provided photograph of a room in the "${styleLabel}" interior design style.
+  const prompt = `You are an expert interior designer and architectural photographer. Re-render the provided photograph of a room in the "${styleLabel}" interior design style.
 
 STYLE BRIEF — ${styleLabel}: ${stylePrompt}
 
-STRICT REQUIREMENTS:
+STRICT REQUIREMENTS (structure):
 - Keep the room's architecture and structure EXACTLY the same: wall positions, window and door locations and sizes, ceiling height, floor plan, and room proportions must be unchanged.
 - Keep the SAME camera angle, perspective and framing as the original photo.
 - Only restyle the interior: furniture, decor, textiles, rugs, wall treatment/paint, flooring finish, lighting fixtures, and the overall color palette — so the result convincingly matches the "${styleLabel}" style.
-- The result must be photorealistic, well-lit, and look like a professional real-estate photograph of the same room.
 - Do NOT add people, pets, text, logos, watermarks, or captions.
 - Preserve any real view visible through windows.
 
-Output only the edited image.`;
+PHOTOREALISM (this is critical — the result must look like a REAL photo, not AI):
+- Render it as a genuine real-estate listing PHOTOGRAPH, as if shot with a full-frame DSLR camera and a ~24mm wide-angle lens.
+- Use natural daylight coming through the room's real windows; match the original photo's lighting direction, warmth and time of day.
+- Include realistic, physically-accurate soft shadows and contact shadows under furniture, accurate reflections, and true-to-life material textures (wood grain, fabric weave, matte and gloss surfaces).
+- Keep natural color balance and realistic dynamic range; avoid over-saturation and over-sharpening.
+- Preserve subtle real-world imperfections and fine surface detail. Add a very slight, natural photographic grain.
+- It MUST NOT look like a 3D render, CGI, a video-game screenshot, an illustration, or digital art. Avoid the over-smooth, waxy, plastic, "too perfect" AI look.
+
+Output only the edited photograph.`;
 
   const result = await retryWithBackoff(() =>
     getAI().models.generateContent({
