@@ -28,6 +28,7 @@ import { useConfirmation } from '../../src/shared/hooks/useConfirmation';
 import { useNotification } from '../../src/shared/hooks/useNotification';
 import { buildLocalizedPath } from '../../src/utils/languageRouting';
 import { API_URL } from '../../src/shared/api/config';
+import { convertToUploadableImage, isHeicFile } from '../../src/shared/utils/imageConversion';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 import { apiLogger } from '../../src/shared/utils/logger';
 import { tokenService } from '../../src/shared/api/tokenService';
@@ -1453,13 +1454,16 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
     };
 
     const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+        const selected = e.target.files?.[0];
+        if (!selected) return;
 
-        if (!file.type.startsWith('image/')) {
+        if (!selected.type.startsWith('image/') && !isHeicFile(selected)) {
             setError(t('errors.selectImage'));
             return;
         }
+
+        // Convert HEIC/HEIF (iPhone photos) to JPEG so the avatar previews and uploads correctly.
+        const file = await convertToUploadableImage(selected);
 
         if (file.size > 5 * 1024 * 1024) {
             setError(t('errors.imageTooLarge'));

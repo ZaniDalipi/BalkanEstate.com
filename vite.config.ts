@@ -354,6 +354,11 @@ export default defineConfig(({ mode }) => {
                 if (id.includes('browser-image-compression')) {
                   return 'image-utils';
                 }
+                // HEIC/HEIF decoder - heavy, only loaded on demand when a user
+                // actually uploads a HEIC image (dynamic import in imageConversion).
+                if (id.includes('heic2any') || id.includes('libheif')) {
+                  return 'heic-converter';
+                }
                 // Form handling
                 if (id.includes('react-hook-form') || id.includes('@hookform')) {
                   return 'forms';
