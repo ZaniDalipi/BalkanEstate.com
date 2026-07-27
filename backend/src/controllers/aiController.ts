@@ -383,6 +383,7 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
     const result = await geminiService.restyleRoomImage(
       imageBase64,
       sourceMime,
+      styleDef.id,
       styleDef.label,
       styleDef.prompt
     );

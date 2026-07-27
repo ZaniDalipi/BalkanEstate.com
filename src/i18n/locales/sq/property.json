@@ -678,6 +678,7 @@
     "limitTitle": "I keni përdorur të gjitha ristilimet këtë muaj",
     "limitMessage": "Përmirësoni në Pro Buyer ose një plan tjetër për të vazhduar — ose prisni derisa kuota juaj të rifreskohet.",
     "unlimitedNote": "Ristilime të pakufizuara në planin tuaj",
-    "remainingNote": "{{remaining}} të mbetura këtë muaj"
+    "remainingNote": "{{remaining}} të mbetura këtë muaj",
+    "disclaimer": "Skenë e krijuar me AI vetëm për qëllime demonstrimi. Këto imazhe nuk janë foto reale të pronës dhe mund të përmbajnë artikuj që nuk janë pjesë e shpalljes."
   }
 }

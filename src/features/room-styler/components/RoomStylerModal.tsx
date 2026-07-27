@@ -74,7 +74,7 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
 
     return (
         <div className="fixed inset-0 z-[6100] flex items-center justify-center bg-black/95 backdrop-blur-md p-3 sm:p-6" role="dialog" aria-modal="true">
-            <div className="relative flex w-full max-w-3xl max-h-[92vh] flex-col overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 shadow-2xl">
+            <div className="relative flex w-full max-w-6xl max-h-[95vh] flex-col overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 shadow-2xl">
 
                 {/* Header */}
                 <div className="flex items-center justify-between gap-3 border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 sm:px-5">
@@ -112,21 +112,21 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
                     )}
 
                     {/* Preview / result */}
-                    <div className="relative mb-4 flex items-center justify-center rounded-xl bg-neutral-900 min-h-[220px] max-h-[46vh] overflow-hidden">
+                    <div className="relative mb-3 flex items-center justify-center rounded-xl bg-neutral-900 min-h-[260px] max-h-[70vh] overflow-hidden">
                         {status === 'done' && resultUrl ? (
                             <BeforeAfterSlider
                                 beforeSrc={sourceUrl}
                                 afterSrc={resultUrl}
                                 beforeLabel={t('property:roomStyler.before', 'Original')}
                                 afterLabel={selectedLabel}
-                                className="w-full max-h-[46vh]"
+                                className="w-full max-h-[70vh]"
                             />
                         ) : (
                             <>
                                 <img
                                     src={sourceUrl}
                                     alt={t('property:roomStyler.roomPhoto', 'Room photo')}
-                                    className="max-h-[46vh] w-full object-contain"
+                                    className="max-h-[70vh] w-full object-contain"
                                     crossOrigin="anonymous"
                                 />
                                 {status === 'loading' && (
@@ -139,6 +139,16 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
                                 )}
                             </>
                         )}
+                    </div>
+
+                    {/* Disclaimer — generated images are AI staging, not real photos */}
+                    <div className="mb-4 flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 px-3 py-2 text-[11px] leading-snug text-amber-800 dark:text-amber-200">
+                        <svg className="mt-0.5 h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>
+                            {t('property:roomStyler.disclaimer', 'AI-generated staging for demonstration only. These images are not real photos of the property and may include items that are not part of the listing.')}
+                        </span>
                     </div>
 
                     {/* Generic (non-limit) error */}

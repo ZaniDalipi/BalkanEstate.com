@@ -11,6 +11,7 @@ export interface RoomStyleOption {
 }
 
 export const ROOM_STYLE_OPTIONS: RoomStyleOption[] = [
+  { id: 'no-furniture', label: 'No Furniture', blurb: 'Empty the room — remove all furniture' },
   { id: 'scandinavian', label: 'Scandinavian', blurb: 'Light woods, whites & cozy minimalism' },
   { id: 'modern', label: 'Modern', blurb: 'Clean lines & neutral simplicity' },
   { id: 'contemporary', label: 'Contemporary', blurb: 'Current, sleek & sophisticated' },

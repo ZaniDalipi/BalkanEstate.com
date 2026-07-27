@@ -678,6 +678,7 @@
     "limitTitle": "Ai folosit toate restilizările luna aceasta",
     "limitMessage": "Fă upgrade la Pro Buyer sau alt plan pentru a continua — sau așteaptă până se resetează cota.",
     "unlimitedNote": "Restilizări nelimitate în planul tău",
-    "remainingNote": "{{remaining}} rămase luna aceasta"
+    "remainingNote": "{{remaining}} rămase luna aceasta",
+    "disclaimer": "Amenajare generată de AI doar în scop demonstrativ. Aceste imagini nu sunt fotografii reale ale proprietății și pot include obiecte care nu fac parte din anunț."
   }
 }

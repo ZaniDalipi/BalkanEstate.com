@@ -346,33 +346,81 @@ export const generateDescriptionFromImages = async (
   }
 };
 
+const DISCLAIMER_TEXT = 'VIRTUALLY STAGED · AI-GENERATED · FOR DEMONSTRATION ONLY — NOT AN ACTUAL PHOTO OF THE PROPERTY';
+
 /**
- * Restyle a room photo into a chosen interior design style.
- * Uses Gemini's image model ("Nano Banana") to re-render the SAME room in a new
- * style while preserving the architecture, camera angle and proportions.
- * Returns the generated image as base64 + its mime type.
+ * Composite a disclaimer caption bar onto the bottom of a generated image so the
+ * AI staging can never be mistaken for a real listing photo, even once downloaded.
+ * Non-fatal: returns the original buffer if compositing fails (e.g. missing fonts).
+ */
+const addDisclaimerCaption = async (buffer: Buffer): Promise<Buffer> => {
+  try {
+    const meta = await sharp(buffer).metadata();
+    const width = meta.width || 0;
+    const height = meta.height || 0;
+    if (!width || !height) return buffer;
+
+    const barHeight = Math.max(28, Math.round(height * 0.05));
+    const fontSize = Math.max(11, Math.round(barHeight * 0.4));
+    const svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="${height - barHeight}" width="${width}" height="${barHeight}" fill="rgba(0,0,0,0.6)"/>
+      <text x="50%" y="${height - barHeight / 2}" text-anchor="middle" dominant-baseline="central"
+        font-family="Arial, Helvetica, sans-serif" font-size="${fontSize}" font-weight="600"
+        letter-spacing="0.5" fill="#ffffff">${DISCLAIMER_TEXT}</text>
+    </svg>`;
+
+    return await sharp(buffer)
+      .composite([{ input: Buffer.from(svg), gravity: 'south' }])
+      .png({ quality: 100, compressionLevel: 6 })
+      .toBuffer();
+  } catch (e) {
+    apiLogger.warn(`Disclaimer caption failed, returning image without it: ${e instanceof Error ? e.message : String(e)}`);
+    return buffer;
+  }
+};
+
+/**
+ * Restyle (or empty) a room photo in a chosen interior design style.
+ * Uses Gemini's image model ("Nano Banana") to re-render the SAME space while
+ * preserving the architecture, camera angle and proportions. A disclaimer caption
+ * is baked onto the result. Returns the generated image as base64 + its mime type.
  */
 export const restyleRoomImage = async (
   imageBase64: string,
   mimeType: string,
+  styleId: string,
   styleLabel: string,
   stylePrompt: string
 ): Promise<RoomStyleResult> => {
-  const prompt = `You are an expert interior designer and architectural photographer. Re-render the provided photograph of a room in the "${styleLabel}" interior design style.
+  const isEmptyRoom = styleId === 'no-furniture';
 
-STYLE BRIEF — ${styleLabel}: ${stylePrompt}
-
-STRICT REQUIREMENTS (structure):
-- Keep the room's architecture and structure EXACTLY the same: wall positions, window and door locations and sizes, ceiling height, floor plan, and room proportions must be unchanged.
+  const subjectPreservation = `SUBJECT PRESERVATION (critical):
+- Keep the EXACT same space as the input photo: wall positions, window and door locations and sizes, ceiling height, floor plan and proportions must be unchanged.
 - Keep the SAME camera angle, perspective and framing as the original photo.
-- Only restyle the interior: furniture, decor, textiles, rugs, wall treatment/paint, flooring finish, lighting fixtures, and the overall color palette — so the result convincingly matches the "${styleLabel}" style.
-- Do NOT add people, pets, text, logos, watermarks, or captions.
-- Preserve any real view visible through windows.
+- NEVER invent or hallucinate a different room, building, or scene, and never change the type of space.
+- If the photo is a building EXTERIOR, garden, or outdoor area (not an interior room), keep the SAME building and structure and only tastefully clean it up — do NOT turn it into an interior or a different building.
+- Preserve any real view visible through the windows.
+- Do NOT add people, pets, on-image text, logos, watermarks, or captions.`;
+
+  const task = isEmptyRoom
+    ? `TASK — EMPTY THE ROOM:
+- Remove ALL furniture, rugs, decor, wall art, plants, curtains and clutter so the room is completely empty and unfurnished.
+- Keep the existing wall color/finish and flooring exactly as they are — do NOT repaint or re-floor.
+- Result: a clean, bright, empty real-estate photograph of the same space.`
+    : `TASK — RESTYLE THE INTERIOR in the "${styleLabel}" style:
+STYLE BRIEF — ${styleLabel}: ${stylePrompt}
+- Only restyle the interior: furniture, decor, textiles, rugs, wall treatment/paint, flooring finish, lighting fixtures and the overall color palette — so the result convincingly matches the "${styleLabel}" style.`;
+
+  const prompt = `You are an expert interior designer and architectural photographer. Edit the provided real-estate photograph exactly as instructed.
+
+${subjectPreservation}
+
+${task}
 
 PHOTOREALISM (this is critical — the result must look like a REAL photo, not AI):
 - Render it as a genuine real-estate listing PHOTOGRAPH, as if shot with a full-frame DSLR camera and a ~24mm wide-angle lens.
 - Use natural daylight coming through the room's real windows; match the original photo's lighting direction, warmth and time of day.
-- Include realistic, physically-accurate soft shadows and contact shadows under furniture, accurate reflections, and true-to-life material textures (wood grain, fabric weave, matte and gloss surfaces).
+- Include realistic, physically-accurate soft shadows and contact shadows, accurate reflections, and true-to-life material textures (wood grain, fabric weave, matte and gloss surfaces).
 - Keep natural color balance and realistic dynamic range; avoid over-saturation and over-sharpening.
 - Preserve subtle real-world imperfections and fine surface detail. Add a very slight, natural photographic grain.
 - It MUST NOT look like a 3D render, CGI, a video-game screenshot, an illustration, or digital art. Avoid the over-smooth, waxy, plastic, "too perfect" AI look.
@@ -406,7 +454,8 @@ Output only the edited photograph.`;
   // Upscale to a high-quality version for download. The generative model outputs
   // ~1024px on the long edge; enlarge with a high-quality kernel + gentle sharpen
   // so the saved file is crisp for viewing/printing. Falls back to the raw image
-  // if sharp fails for any reason.
+  // if sharp fails for any reason. A disclaimer caption is baked on either way.
+  let finalBuffer: Buffer = rawBuffer;
   try {
     const meta = await sharp(rawBuffer).metadata();
     const longEdge = Math.max(meta.width || 0, meta.height || 0);
@@ -422,15 +471,13 @@ Output only the edited photograph.`;
         })
         .sharpen();
     }
-    const hqBuffer = await pipeline.png({ quality: 100, compressionLevel: 6 }).toBuffer();
-    return { imageBase64: hqBuffer.toString('base64'), mimeType: 'image/png' };
+    finalBuffer = await pipeline.png({ quality: 100, compressionLevel: 6 }).toBuffer();
   } catch (e) {
-    apiLogger.warn(`HQ upscale failed, returning raw model image: ${e instanceof Error ? e.message : String(e)}`);
-    return {
-      imageBase64: imagePart.inlineData.data,
-      mimeType: imagePart.inlineData.mimeType || 'image/png',
-    };
+    apiLogger.warn(`HQ upscale failed, using raw model image: ${e instanceof Error ? e.message : String(e)}`);
   }
+
+  finalBuffer = await addDisclaimerCaption(finalBuffer);
+  return { imageBase64: finalBuffer.toString('base64'), mimeType: 'image/png' };
 };
 
 /**
