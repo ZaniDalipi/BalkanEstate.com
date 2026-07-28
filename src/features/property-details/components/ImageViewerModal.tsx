@@ -66,6 +66,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const isDrawingRef = useRef(false);
     const imageElRef = useRef<HTMLImageElement>(null);
+    const imageAreaRef = useRef<HTMLDivElement>(null);
 
     // Touch tracking (never causes re-renders)
     const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
@@ -226,10 +227,36 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
         });
     }, []);
 
+    // Clamp pan so the (scaled) image can travel all the way to its own edges —
+    // no further, no less. Bounds are derived from the real container + image
+    // sizes rather than a fixed constant, so panning works on any screen size.
     const clampPan = useCallback((x: number, y: number, z: number) => {
-        const max = (z - 1) * 160;
-        return { x: Math.max(-max, Math.min(max, x)), y: Math.max(-max, Math.min(max, y)) };
+        const container = imageAreaRef.current;
+        const img = imageElRef.current;
+        if (!container || !img || !img.naturalWidth || !img.naturalHeight) {
+            const max = (z - 1) * 160;
+            return { x: Math.max(-max, Math.min(max, x)), y: Math.max(-max, Math.min(max, y)) };
+        }
+        const cw = container.clientWidth;
+        const ch = container.clientHeight;
+        // Image is rendered with object-contain, so it fits inside the container first.
+        const fit = Math.min(cw / img.naturalWidth, ch / img.naturalHeight);
+        const renderedW = img.naturalWidth * fit;
+        const renderedH = img.naturalHeight * fit;
+        // Half of the amount the scaled image overflows the container on each axis.
+        const maxX = Math.max(0, (renderedW * z - cw) / 2);
+        const maxY = Math.max(0, (renderedH * z - ch) / 2);
+        return { x: Math.max(-maxX, Math.min(maxX, x)), y: Math.max(-maxY, Math.min(maxY, y)) };
     }, []);
+
+    // Keep the pan within bounds whenever the zoom level changes (e.g. via the
+    // +/- buttons or wheel), so zooming out re-centers instead of leaving gaps.
+    useEffect(() => {
+        if (zoom <= 1) return;
+        const c = clampPan(panXRef.current, panYRef.current, zoom);
+        if (c.x !== panXRef.current) setPanX(c.x);
+        if (c.y !== panYRef.current) setPanY(c.y);
+    }, [zoom, clampPan]);
 
     // ── Navigation ───────────────────────────────────────────────────────────
     const goNext = useCallback(() => {
@@ -541,6 +568,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
 
             {/* ── Image area ───────────────────────────────────────────────── */}
             <div
+                ref={imageAreaRef}
                 className="relative flex-1 overflow-hidden"
                 onTouchStart={annotateMode ? undefined : handleTouchStart}
                 onTouchMove={annotateMode ? undefined : handleTouchMove}
