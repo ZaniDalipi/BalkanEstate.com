@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { XMarkIcon } from '../../constants';
+import { convertToUploadableImage, isHeicFile } from '@/shared/utils/imageConversion';
 import { createAvatar } from '@dicebear/core';
 import { avataaars } from '@dicebear/collection';
 import ConfirmationModal from '../../src/shared/components/ui/ConfirmationModal';
@@ -300,12 +301,14 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
     });
   }, [hairStyles, isFemale]);
 
-  const handleFileSelect = useCallback((file: File) => {
+  const handleFileSelect = useCallback(async (selected: File) => {
     setUploadError('');
-    if (!file.type.startsWith('image/')) {
+    if (!selected.type.startsWith('image/') && !isHeicFile(selected)) {
       setUploadError(t('account:errors.selectImage'));
       return;
     }
+    // Convert HEIC/HEIF (iPhone photos) to JPEG so the avatar previews and uploads correctly.
+    const file = await convertToUploadableImage(selected);
     if (file.size > 5 * 1024 * 1024) {
       setUploadError(t('account:errors.imageTooLarge'));
       return;

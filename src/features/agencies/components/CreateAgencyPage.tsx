@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import { canCreateAgency } from '@/src/shared/utils/subscriptionHelpers';
+import { convertToUploadableImage } from '@/shared/utils/imageConversion';
 import { UserRole } from '@/types';
 import Footer from '@/components/shared/Footer';
 import {
@@ -261,9 +262,12 @@ const CreateAgencyPage: React.FC = () => {
   const MAX_LOGO_SIZE = 5 * 1024 * 1024; // 5MB
   const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'];
 
-  const handleLogoChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleLogoChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (!selected) return;
+
+    // Convert HEIC/HEIF (iPhone photos) to JPEG so it previews and uploads correctly.
+    const file = await convertToUploadableImage(selected);
 
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
       setError(t('create.errors.logoInvalidType', 'Please upload a JPEG, PNG, WebP, or SVG image'));
@@ -609,7 +613,7 @@ const CreateAgencyPage: React.FC = () => {
                         {logoFile ? t('create.buttons.changeLogo', 'Change Logo') : t('create.buttons.uploadLogo', 'Upload Logo')}
                         <input
                           type="file"
-                          accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                          accept="image/jpeg,image/png,image/webp,image/svg+xml,image/heic,image/heif"
                           onChange={handleLogoChange}
                           className="hidden"
                         />

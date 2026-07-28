@@ -6,6 +6,7 @@ import { User } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { BuildingOfficeIcon, PhoneIcon, EnvelopeIcon, MapPinIcon, StarIcon, ArrowLeftIcon, UserCircleIcon, BellIcon, TrophyIcon, ChartBarIcon, HomeIcon, UsersIcon, XMarkIcon, ShieldCheckIcon, PencilIcon, SparklesIcon, UserGroupIcon, CalendarIcon, AcademicCapIcon, GlobeAltIcon, ChevronRightIcon } from '../constants';
 import NotificationCenter from '../src/shared/components/NotificationCenter';
+import { convertToUploadableImage, isHeicFile } from '../src/shared/utils/imageConversion';
 import PropertyCard from '../src/features/property-details/components/PropertyCard';
 import PropertyCardSkeleton from '../src/features/property-details/components/PropertyCardSkeleton';
 import AgencyJoinRequestsModal from './AgencyJoinRequestsModal';
@@ -1128,13 +1129,16 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     }
   };
 
-  const uploadLogoFile = async (file: File) => {
+  const uploadLogoFile = async (selected: File) => {
     if (!isOwner) return;
 
-    if (!file.type.startsWith('image/')) {
+    if (!selected.type.startsWith('image/') && !isHeicFile(selected)) {
       setUploadError(t('messages.selectImageFile'));
       return;
     }
+
+    // Convert HEIC/HEIF (iPhone photos) to JPEG so the logo previews and uploads correctly.
+    const file = await convertToUploadableImage(selected);
 
     if (file.size > 5 * 1024 * 1024) {
       setUploadError(t('messages.imageSizeLimit'));
@@ -1192,13 +1196,16 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     await uploadLogoFile(file);
   };
 
-  const uploadCoverFile = async (file: File) => {
+  const uploadCoverFile = async (selected: File) => {
     if (!isAdmin) return;
 
-    if (!file.type.startsWith('image/')) {
+    if (!selected.type.startsWith('image/') && !isHeicFile(selected)) {
       setUploadError(t('messages.selectImageFile'));
       return;
     }
+
+    // Convert HEIC/HEIF (iPhone photos) to JPEG so the cover previews and uploads correctly.
+    const file = await convertToUploadableImage(selected);
 
     if (file.size > 5 * 1024 * 1024) {
       setUploadError(t('messages.imageSizeLimit'));

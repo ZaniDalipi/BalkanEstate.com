@@ -6,6 +6,7 @@ import { useBusinessListing, useUpdateBusinessListing, useUploadBusinessBanner, 
 import { useAppContext } from '@/context/AppContext';
 import NotificationCenter from '@/shared/components/NotificationCenter';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
+import { convertToUploadableImage } from '@/shared/utils/imageConversion';
 
 const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
 const EditBusinessListingForm = lazy(() => import('./EditBusinessListingForm'));
@@ -378,9 +379,12 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
   }, [t]);
 
   const handleBannerUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !listing) return;
+    const selected = e.target.files?.[0];
+    if (!selected || !listing) return;
     e.target.value = '';
+
+    // Convert HEIC/HEIF (iPhone photos) to JPEG so it uploads and renders correctly.
+    const file = await convertToUploadableImage(selected);
 
     const error = validateImageFile(file);
     if (error) { setUploadError(error); return; }
@@ -395,9 +399,12 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
   }, [listing, uploadBanner, validateImageFile, t]);
 
   const handleLogoUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !listing) return;
+    const selected = e.target.files?.[0];
+    if (!selected || !listing) return;
     e.target.value = '';
+
+    // Convert HEIC/HEIF (iPhone photos) to JPEG so it uploads and renders correctly.
+    const file = await convertToUploadableImage(selected);
 
     const error = validateImageFile(file);
     if (error) { setUploadError(error); return; }
@@ -707,8 +714,8 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
           {/* Owner: Customize button + dropdown (hidden during reposition) */}
           {isOwner && !isRepositioning && (
             <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20" ref={customizeRef}>
-              <input ref={bannerInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleBannerUpload} className="hidden" />
-              <input ref={logoInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleLogoUpload} className="hidden" />
+              <input ref={bannerInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" onChange={handleBannerUpload} className="hidden" />
+              <input ref={logoInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" onChange={handleLogoUpload} className="hidden" />
 
               <button
                 type="button"

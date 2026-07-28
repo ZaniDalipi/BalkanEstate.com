@@ -16,6 +16,7 @@ import {
   UsersIcon,
 } from '@/constants';
 import { Credential, addCredential, updateCredential, deleteCredential } from '../api/credentialApi';
+import { convertToUploadableImage } from '@/shared/utils/imageConversion';
 import { submitLicense, getLicenseFormatHint } from '../api/licenseApi';
 
 interface CredentialsSectionProps {
@@ -369,8 +370,10 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
     if (submitError) setSubmitError(null);
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0] || null;
+    // Convert HEIC/HEIF images to JPEG; non-images (e.g. PDF) pass through unchanged.
+    const file = selected ? await convertToUploadableImage(selected) : null;
     if (file) {
       // Immediate validation
       if (file.size > FILE_SIZE_LIMIT) {
@@ -1073,7 +1076,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
+                    accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,application/pdf"
                     onChange={handleFileSelect}
                     className="hidden"
                     id="credential-file-upload"

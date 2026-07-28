@@ -7,6 +7,7 @@ import { useAlert } from '@/context/AlertContext';
 import { BALKAN_LOCATIONS, CityData } from '@/utils/balkanLocations';
 import * as api from '@/services/apiService';
 import imageCompression from 'browser-image-compression';
+import { convertToUploadableImage, isHeicFile, needsConversion } from '@/shared/utils/imageConversion';
 import { PLAN_LISTING_LIMITS } from '@/shared/utils/subscriptionHelpers';
 import { SubscriptionPlan } from '@/shared/types/user.types';
 import { apiRequest } from '@/src/shared/api';
@@ -377,29 +378,51 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             };
 
             const compressedImages: ImageData[] = [];
+            const failedFileNames: string[] = [];
 
             // Process images in batches for better performance
             for (let i = 0; i < filesToProcess.length; i++) {
                 const file = filesToProcess[i];
+
+                // Convert HEIC/HEIF (and other browser-unsupported formats) to JPEG
+                // first — otherwise the canvas-based compressor can't decode them and
+                // we'd end up uploading a broken image.
+                const normalizedFile = await convertToUploadableImage(file);
+
+                // If the file still needs conversion here, the HEIC decoder failed
+                // (e.g. dependency not installed / unsupported variant). Never push a
+                // raw HEIC — browsers can't render it, so it would show a broken
+                // preview and upload broken. Skip it and report it to the user.
+                if (needsConversion(normalizedFile)) {
+                    failedFileNames.push(file.name);
+                    continue;
+                }
+
                 try {
-                    // Log removed
-
-                    const compressedFile = await imageCompression(file, compressionOptions);
-
-                    // Log removed
-
+                    const compressedFile = await imageCompression(normalizedFile, compressionOptions);
                     compressedImages.push({
                         file: compressedFile,
                         previewUrl: URL.createObjectURL(compressedFile)
                     });
                 } catch (compressionError) {
-                    // Error removed
-                    // Fallback to original file if compression fails
+                    // Compression failed but the format is already browser-friendly
+                    // (JPEG/PNG/etc.) — use the normalized file directly.
                     compressedImages.push({
-                        file,
-                        previewUrl: URL.createObjectURL(file)
+                        file: normalizedFile,
+                        previewUrl: URL.createObjectURL(normalizedFile)
                     });
                 }
+            }
+
+            if (failedFileNames.length > 0) {
+                showError(
+                    t('newListing:errors.imageProcessingFailed', 'Image Processing Failed'),
+                    t(
+                        'newListing:errors.heicConversionFailed',
+                        "We couldn't convert {{files}}. Please try re-saving it as JPEG or PNG and upload again.",
+                        { files: failedFileNames.join(', ') }
+                    )
+                );
             }
 
             // Always append new images to existing ones
@@ -432,12 +455,13 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
 
-            // Validate file format
+            // Validate file format. HEIC/HEIF is accepted here because it's
+            // converted to JPEG below before compression/upload.
             const ALLOWED_FORMATS = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
-            if (!ALLOWED_FORMATS.includes(file.type)) {
+            if (!ALLOWED_FORMATS.includes(file.type) && !isHeicFile(file)) {
                 showError(
                     t('newListing:floorplan.invalidFormat', 'Invalid File Format'),
-                    t('newListing:floorplan.invalidFormatMessage', 'Please upload a valid image file (JPEG, PNG, WebP, GIF, or SVG).')
+                    t('newListing:floorplan.invalidFormatMessage', 'Please upload a valid image file (JPEG, PNG, WebP, GIF, HEIC, or SVG).')
                 );
                 return;
             }
@@ -463,12 +487,29 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     initialQuality: 0.8,
                 };
 
-                const compressedFile = await imageCompression(file, compressionOptions);
+                // Convert HEIC/HEIF to JPEG before the canvas-based compressor runs.
+                const normalizedFile = await convertToUploadableImage(file);
 
-                setFloorplanImage({ file: compressedFile, previewUrl: URL.createObjectURL(compressedFile) });
-            } catch (error) {
-                // Fallback to original
-                setFloorplanImage({ file, previewUrl: URL.createObjectURL(file) });
+                // Conversion failed and it's still HEIC — don't set a broken preview.
+                if (needsConversion(normalizedFile)) {
+                    showError(
+                        t('newListing:floorplan.invalidFormat', 'Invalid File Format'),
+                        t(
+                            'newListing:errors.heicConversionFailed',
+                            "We couldn't convert {{files}}. Please try re-saving it as JPEG or PNG and upload again.",
+                            { files: file.name }
+                        )
+                    );
+                    return;
+                }
+
+                try {
+                    const compressedFile = await imageCompression(normalizedFile, compressionOptions);
+                    setFloorplanImage({ file: compressedFile, previewUrl: URL.createObjectURL(compressedFile) });
+                } catch (error) {
+                    // Compression failed but the format is already browser-friendly.
+                    setFloorplanImage({ file: normalizedFile, previewUrl: URL.createObjectURL(normalizedFile) });
+                }
             } finally {
                 setIsCompressing(false);
             }
