@@ -239,6 +239,7 @@
     "uploadFailed": "Ngarkimi Dështoi",
     "uploadFailedMessage": "Dështoi ngarkimi i imazheve: {{error}}. Ju lutem provoni përsëri.",
     "imageProcessingFailed": "Përpunimi i Imazheve Dështoi",
+    "heicConversionFailed": "Nuk mundëm ta konvertojmë {{files}}. Ju lutemi ruajeni si JPEG ose PNG dhe ngarkojeni përsëri.",
     "failedToProcessImages": "Dështoi përpunimi i imazheve. Ju lutem provoni përsëri.",
     "noNewImages": "Nuk Ka Imazhe të Reja",
     "noNewImagesMessage": "Nuk u ngarkuan imazhe të reja për analizë. Ju lutem shtoni skedarë të rinj imazhesh.",

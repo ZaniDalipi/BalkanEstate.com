@@ -77,7 +77,13 @@ export const convertToUploadableImage = async (
 
   try {
     // Dynamic import keeps the HEIC decoder out of the main bundle.
-    const heic2any = (await import('heic2any')).default;
+    // heic2any ships as UMD; depending on interop the function may be the
+    // module's default export or the namespace itself — handle both.
+    const mod: any = await import('heic2any');
+    const heic2any = mod?.default ?? mod;
+    if (typeof heic2any !== 'function') {
+      throw new Error('heic2any failed to load');
+    }
 
     const converted = await heic2any({
       blob: file,

@@ -233,6 +233,7 @@
     "uploadFailedMessage": "Failed to upload images: {{error}}. Please try again.",
     "publishFailed": "Failed to publish listing. Please try again.",
     "imageProcessingFailed": "Image Processing Failed",
+    "heicConversionFailed": "We couldn't convert {{files}}. Please try re-saving it as JPEG or PNG and upload again.",
     "failedToProcessImages": "Failed to process images. Please try again.",
     "noNewImages": "No New Images",
     "noNewImagesMessage": "No new images were uploaded to analyze. Please add new image files.",

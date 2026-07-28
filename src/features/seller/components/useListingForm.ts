@@ -7,7 +7,7 @@ import { useAlert } from '@/context/AlertContext';
 import { BALKAN_LOCATIONS, CityData } from '@/utils/balkanLocations';
 import * as api from '@/services/apiService';
 import imageCompression from 'browser-image-compression';
-import { convertToUploadableImage, isHeicFile } from '@/shared/utils/imageConversion';
+import { convertToUploadableImage, isHeicFile, needsConversion } from '@/shared/utils/imageConversion';
 import { PLAN_LISTING_LIMITS } from '@/shared/utils/subscriptionHelpers';
 import { SubscriptionPlan } from '@/shared/types/user.types';
 import { apiRequest } from '@/src/shared/api';
@@ -378,37 +378,51 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             };
 
             const compressedImages: ImageData[] = [];
+            const failedFileNames: string[] = [];
 
             // Process images in batches for better performance
             for (let i = 0; i < filesToProcess.length; i++) {
                 const file = filesToProcess[i];
+
+                // Convert HEIC/HEIF (and other browser-unsupported formats) to JPEG
+                // first — otherwise the canvas-based compressor can't decode them and
+                // we'd end up uploading a broken image.
+                const normalizedFile = await convertToUploadableImage(file);
+
+                // If the file still needs conversion here, the HEIC decoder failed
+                // (e.g. dependency not installed / unsupported variant). Never push a
+                // raw HEIC — browsers can't render it, so it would show a broken
+                // preview and upload broken. Skip it and report it to the user.
+                if (needsConversion(normalizedFile)) {
+                    failedFileNames.push(file.name);
+                    continue;
+                }
+
                 try {
-                    // Convert HEIC/HEIF (and other browser-unsupported formats) to JPEG
-                    // first — otherwise the canvas-based compressor can't decode them and
-                    // we'd end up uploading a broken image.
-                    const normalizedFile = await convertToUploadableImage(file);
-
                     const compressedFile = await imageCompression(normalizedFile, compressionOptions);
-
                     compressedImages.push({
                         file: compressedFile,
                         previewUrl: URL.createObjectURL(compressedFile)
                     });
                 } catch (compressionError) {
-                    // Error removed
-                    // Fallback: still try to normalize the format so the preview/upload
-                    // doesn't break, even if compression itself failed.
-                    let fallbackFile = file;
-                    try {
-                        fallbackFile = await convertToUploadableImage(file);
-                    } catch {
-                        // keep original
-                    }
+                    // Compression failed but the format is already browser-friendly
+                    // (JPEG/PNG/etc.) — use the normalized file directly.
                     compressedImages.push({
-                        file: fallbackFile,
-                        previewUrl: URL.createObjectURL(fallbackFile)
+                        file: normalizedFile,
+                        previewUrl: URL.createObjectURL(normalizedFile)
                     });
                 }
+            }
+
+            if (failedFileNames.length > 0) {
+                showError(
+                    t('newListing:errors.imageProcessingFailed', 'Image Processing Failed'),
+                    t(
+                        'newListing:errors.heicConversionFailed',
+                        "We couldn't convert {{files}}. Please try re-saving it as JPEG or PNG and upload again.",
+                        { files: failedFileNames.join(', ') }
+                    )
+                );
             }
 
             // Always append new images to existing ones
@@ -475,19 +489,27 @@ export const useListingForm = (propertyToEdit: Property | null) => {
 
                 // Convert HEIC/HEIF to JPEG before the canvas-based compressor runs.
                 const normalizedFile = await convertToUploadableImage(file);
-                const compressedFile = await imageCompression(normalizedFile, compressionOptions);
 
-                setFloorplanImage({ file: compressedFile, previewUrl: URL.createObjectURL(compressedFile) });
-            } catch (error) {
-                // Fallback: normalize the format even if compression failed, so the
-                // preview and upload don't break on HEIC/HEIF.
-                let fallbackFile = file;
-                try {
-                    fallbackFile = await convertToUploadableImage(file);
-                } catch {
-                    // keep original
+                // Conversion failed and it's still HEIC — don't set a broken preview.
+                if (needsConversion(normalizedFile)) {
+                    showError(
+                        t('newListing:floorplan.invalidFormat', 'Invalid File Format'),
+                        t(
+                            'newListing:errors.heicConversionFailed',
+                            "We couldn't convert {{files}}. Please try re-saving it as JPEG or PNG and upload again.",
+                            { files: file.name }
+                        )
+                    );
+                    return;
                 }
-                setFloorplanImage({ file: fallbackFile, previewUrl: URL.createObjectURL(fallbackFile) });
+
+                try {
+                    const compressedFile = await imageCompression(normalizedFile, compressionOptions);
+                    setFloorplanImage({ file: compressedFile, previewUrl: URL.createObjectURL(compressedFile) });
+                } catch (error) {
+                    // Compression failed but the format is already browser-friendly.
+                    setFloorplanImage({ file: normalizedFile, previewUrl: URL.createObjectURL(normalizedFile) });
+                }
             } finally {
                 setIsCompressing(false);
             }
