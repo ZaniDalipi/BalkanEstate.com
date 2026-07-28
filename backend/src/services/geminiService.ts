@@ -398,7 +398,8 @@ export const restyleRoomImage = async (
   const isExtRefresh = styleId === 'ext-refresh';
 
   const subjectPreservation = `SUBJECT PRESERVATION (critical):
-- Keep the EXACT same space as the input photo: for interiors keep wall positions, window and door locations and sizes, ceiling height, floor plan and proportions; for exteriors keep the building's footprint, rooflines, window/door positions and number of floors. Everything structural must be unchanged.
+- Keep the EXACT same space as the input photo: for interiors keep wall positions, window and door locations and sizes, ceiling height, floor plan and proportions; for exteriors keep the building's footprint, rooflines, window/door positions and number of floors. The structural shell must be unchanged.
+- Built-in fixtures (bathtub, shower, sink, toilet, tiles, kitchen cabinets/counters, etc.) are NOT part of the structure: keep them in their existing POSITIONS with realistic plumbing, but their style, material and finish SHOULD change to match the chosen style.
 - Keep the SAME camera angle, perspective and framing as the original photo.
 - NEVER invent or hallucinate a different room, building, or scene, and never change the type of space.
 - Preserve any real view visible through the windows and the real surroundings.
@@ -422,7 +423,12 @@ STYLE BRIEF — ${styleLabel}: ${stylePrompt}
   } else {
     task = `TASK — RESTYLE THE INTERIOR in the "${styleLabel}" style:
 STYLE BRIEF — ${styleLabel}: ${stylePrompt}
-- Only restyle the interior: furniture, decor, textiles, rugs, wall treatment/paint, flooring finish, lighting fixtures and the overall color palette — so the result convincingly matches the "${styleLabel}" style.`;
+- Restyle EVERY interior element to match the style: furniture, decor, textiles, rugs, wall treatment/paint, flooring finish, lighting fixtures and the overall color palette.
+- Also restyle the built-in fixtures and fittings that are present in the room:
+  · Bathroom: the bathtub, shower, vanity, sink/basin, faucets and taps, toilet, wall & floor tiles, mirror, towel rails, radiators and all hardware.
+  · Kitchen: the cabinetry, countertops, backsplash, sink, faucet and visible appliances.
+- Update each fixture's design, material and finish to suit the "${styleLabel}" style, and update or neatly conceal any exposed pipes/plumbing to match. Keep every fixture in its EXISTING position and keep the plumbing layout realistic.
+- Do NOT leave any element in the original style — the whole room should convincingly read as "${styleLabel}".`;
   }
 
   const prompt = `You are an expert interior designer and architectural photographer. Edit the provided real-estate photograph exactly as instructed.
