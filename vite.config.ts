@@ -464,7 +464,11 @@ export default defineConfig(({ mode }) => {
       },
       // Optimize dependencies for faster dev startup
       optimizeDeps: {
-        include: ['maplibre-gl'],
+        // heic2any is only ever reached via a dynamic import() (HEIC upload
+        // conversion), so Vite's startup scan doesn't discover it and would
+        // otherwise optimize it on-demand on first use — causing a
+        // "504 Outdated Optimize Dep" failure on that request. Pre-bundle it here.
+        include: ['maplibre-gl', 'heic2any'],
         esbuildOptions: {
           // Use esnext so class fields stay native and the __publicField helper
           // is never injected — fixes "not defined" errors in MapLibre GL workers
