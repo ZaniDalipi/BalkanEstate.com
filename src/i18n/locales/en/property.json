@@ -677,7 +677,9 @@
     "limitMessage": "Upgrade to Pro Buyer or another plan to keep reimagining rooms — or wait until your quota resets.",
     "unlimitedNote": "Unlimited restyles on your plan",
     "remainingNote": "{{remaining}} left this month",
-    "disclaimer": "AI-generated staging for demonstration only. These images are not real photos of the property and may include items that are not part of the listing."
+    "disclaimer": "AI-generated staging for demonstration only. These images are not real photos of the property and may include items that are not part of the listing.",
+    "interior": "Interior",
+    "exterior": "Exterior"
   },
   "sectionNav": {
     "ariaLabel": "Property sections",

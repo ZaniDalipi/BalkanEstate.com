@@ -8,6 +8,7 @@ export interface RoomStyleDefinition {
   id: string;
   label: string;
   prompt: string;
+  category?: 'interior' | 'exterior';
 }
 
 export const ROOM_STYLES: RoomStyleDefinition[] = [
@@ -163,7 +164,85 @@ export const ROOM_STYLES: RoomStyleDefinition[] = [
   },
 ];
 
-export const ROOM_STYLE_IDS = ROOM_STYLES.map(s => s.id);
+/**
+ * Exterior / architectural style catalog. Used when the user toggles the styler
+ * to "Exterior". These restyle the facade, roof, front door, garage, driveway and
+ * landscaping — never interior furniture. Ids are prefixed `ext-` to avoid
+ * colliding with interior ids that share a name.
+ */
+export const EXTERIOR_STYLES: RoomStyleDefinition[] = [
+  {
+    id: 'ext-refresh',
+    label: 'Refresh & Landscaping',
+    category: 'exterior',
+    prompt:
+      'A clean, well-maintained version of the same house: healthy green lawn, tidy plants and trimmed hedges, clean driveway and paths, no clutter, cars, bins or debris. The architecture stays unchanged.',
+  },
+  {
+    id: 'ext-modern',
+    label: 'Modern',
+    category: 'exterior',
+    prompt:
+      'Modern exterior: smooth rendered/stucco facade in white or light grey, large glazing with slim dark window frames, flat or low-slope roof, a sleek front door, clean geometric lines, and minimalist architectural landscaping with a neat concrete path.',
+  },
+  {
+    id: 'ext-contemporary',
+    label: 'Contemporary',
+    category: 'exterior',
+    prompt:
+      'Contemporary exterior: mixed cladding (wood, render and stone) in bold contrasting tones, generous glazing, a mono-pitch or flat roof, a statement front door, warm exterior lighting, and tidy modern landscaping with hardscaping.',
+  },
+  {
+    id: 'ext-mediterranean',
+    label: 'Mediterranean Villa',
+    category: 'exterior',
+    prompt:
+      'Mediterranean villa exterior: warm cream or terracotta stucco walls, a low-pitched terracotta tile roof, arched windows and doorways, wrought-iron details, wooden shutters, stone accents, and olive trees with a gravel or tiled courtyard.',
+  },
+  {
+    id: 'ext-farmhouse',
+    label: 'Modern Farmhouse',
+    category: 'exterior',
+    prompt:
+      'Modern farmhouse exterior: white or soft-grey board-and-batten siding, black-framed windows, a gabled metal or shingle roof, a covered front porch, natural wood accents, and simple tidy planting beds.',
+  },
+  {
+    id: 'ext-traditional',
+    label: 'Traditional / Colonial',
+    category: 'exterior',
+    prompt:
+      'Traditional / Colonial exterior: a symmetrical facade in red brick or painted clapboard, multi-pane windows with shutters, a central panelled front door with a portico, a pitched shingle roof, and classic manicured landscaping with hedges.',
+  },
+  {
+    id: 'ext-craftsman',
+    label: 'Craftsman',
+    category: 'exterior',
+    prompt:
+      'Craftsman/bungalow exterior: a low-pitched gabled roof with wide eaves and exposed rafters, tapered columns on a front porch, earthy paint tones, natural wood and stone, and cottage-style landscaping.',
+  },
+  {
+    id: 'ext-rustic',
+    label: 'Rustic Cabin',
+    category: 'exterior',
+    prompt:
+      'Rustic cabin/chalet exterior: natural timber or log cladding with a stone base, a steep pitched roof, warm wood tones, chunky wooden beams, and a natural mountain/forest landscaping setting.',
+  },
+  {
+    id: 'ext-tudor',
+    label: 'Tudor',
+    category: 'exterior',
+    prompt:
+      'Tudor exterior: decorative half-timbering over cream stucco or brick, steeply pitched gable roofs, tall narrow leaded windows, a prominent brick chimney, an arched front door, and traditional landscaping.',
+  },
+];
+
+// Combined catalog — interior styles get category 'interior', exterior are explicit.
+export const ALL_ROOM_STYLES: RoomStyleDefinition[] = [
+  ...ROOM_STYLES.map(s => ({ ...s, category: 'interior' as const })),
+  ...EXTERIOR_STYLES,
+];
+
+export const ROOM_STYLE_IDS = ALL_ROOM_STYLES.map(s => s.id);
 
 export const getRoomStyle = (id: string): RoomStyleDefinition | undefined =>
-  ROOM_STYLES.find(s => s.id === id);
+  ALL_ROOM_STYLES.find(s => s.id === id);

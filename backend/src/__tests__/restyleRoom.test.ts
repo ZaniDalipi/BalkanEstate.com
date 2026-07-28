@@ -103,6 +103,26 @@ describe('restyleRoom controller', () => {
     expect(mockFindByIdAndUpdate).not.toHaveBeenCalled();
   });
 
+  it('accepts an exterior style (ext-modern) and generates', async () => {
+    mockFindById.mockResolvedValue({
+      _id: 'u6',
+      isSubscribed: false,
+      subscriptionPlan: null,
+      hasActiveSubscription: () => false,
+      roomStyleUsage: { monthlyCount: 0, monthResetDate: FUTURE },
+      save: jest.fn(),
+    });
+    const res = makeRes();
+    await restyleRoom(makeReq({ imageUrl: CLOUDINARY_URL, style: 'ext-modern' }, { _id: 'u6' }), res);
+
+    expect(mockGenerate).toHaveBeenCalledTimes(1);
+    // Service is called with category 'exterior' for ext- styles.
+    expect(mockGenerate).toHaveBeenCalledWith(
+      expect.anything(), expect.anything(), 'ext-modern', expect.anything(), expect.anything(), 'exterior'
+    );
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ style: 'ext-modern' }));
+  });
+
   it('returns 200 and atomically increments usage for a FREE user', async () => {
     mockFindById.mockResolvedValue({
       _id: 'u3',

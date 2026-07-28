@@ -7,7 +7,7 @@ import { useAppContext } from '@/context/AppContext';
 import { UsageMeter } from '@/src/shared/components/ui';
 import { roomStylerKeys } from '@/src/shared/query/queryKeys';
 import { restyleRoom } from '../../../../services/geminiService';
-import { ROOM_STYLE_OPTIONS } from '../data/styles';
+import { ROOM_STYLE_OPTIONS, EXTERIOR_STYLE_OPTIONS } from '../data/styles';
 import { useRoomStylerUsage } from '../hooks/useRoomStylerUsage';
 import BeforeAfterSlider from './BeforeAfterSlider';
 
@@ -18,6 +18,7 @@ interface RoomStylerModalProps {
 }
 
 type Status = 'idle' | 'loading' | 'done' | 'error';
+type Mode = 'interior' | 'exterior';
 
 const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) => {
     const { t } = useTranslation(['property']);
@@ -28,10 +29,22 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
     // account has actually run out — subscribers/agency users see their true limit.
     const { usage, isLoading: usageLoading } = useRoomStylerUsage(state.isAuthenticated);
 
+    const [mode, setMode] = useState<Mode>('interior');
+    const styleOptions = mode === 'exterior' ? EXTERIOR_STYLE_OPTIONS : ROOM_STYLE_OPTIONS;
     const [selectedStyle, setSelectedStyle] = useState<string>(ROOM_STYLE_OPTIONS[0].id);
     const [status, setStatus] = useState<Status>('idle');
     const [resultUrl, setResultUrl] = useState<string | null>(null);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+    // Switch the style set when toggling interior/exterior; reset selection + result.
+    const switchMode = useCallback((next: Mode) => {
+        if (next === mode) return;
+        setMode(next);
+        setSelectedStyle((next === 'exterior' ? EXTERIOR_STYLE_OPTIONS : ROOM_STYLE_OPTIONS)[0].id);
+        setStatus('idle');
+        setResultUrl(null);
+        setErrorMsg(null);
+    }, [mode]);
 
     // Send a high-res version to the AI for a better result (still a Cloudinary URL).
     const sourceUrl = optimizeCloudinaryUrl(imageUrl, { width: 1600, quality: 'auto' }) || imageUrl;
@@ -68,7 +81,7 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
         window.history.pushState({}, '', '/subscribe');
     }, [dispatch, onClose]);
 
-    const selectedLabel = ROOM_STYLE_OPTIONS.find(s => s.id === selectedStyle)?.label ?? '';
+    const selectedLabel = styleOptions.find(s => s.id === selectedStyle)?.label ?? '';
     const showUpgrade = isExhausted || (status === 'error' && !!errorMsg?.toLowerCase().includes('limit'));
     const generateDisabled = status === 'loading' || isExhausted;
 
@@ -177,12 +190,34 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
                         </div>
                     )}
 
+                    {/* Interior / Exterior toggle */}
+                    <div className="mb-3 inline-flex rounded-lg border border-neutral-200 dark:border-neutral-700 p-0.5">
+                        {(['interior', 'exterior'] as const).map(m => (
+                            <button
+                                key={m}
+                                type="button"
+                                onClick={() => switchMode(m)}
+                                disabled={status === 'loading'}
+                                className={`rounded-md px-4 py-1.5 text-sm font-semibold transition-colors disabled:opacity-60 ${
+                                    mode === m
+                                        ? 'bg-primary text-white'
+                                        : 'text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                                }`}
+                                aria-pressed={mode === m}
+                            >
+                                {m === 'interior'
+                                    ? t('property:roomStyler.interior', 'Interior')
+                                    : t('property:roomStyler.exterior', 'Exterior')}
+                            </button>
+                        ))}
+                    </div>
+
                     {/* Style picker */}
                     <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
                         {t('property:roomStyler.chooseStyle', 'Choose a style')}
                     </p>
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                        {ROOM_STYLE_OPTIONS.map(style => {
+                        {styleOptions.map(style => {
                             const active = style.id === selectedStyle;
                             return (
                                 <button

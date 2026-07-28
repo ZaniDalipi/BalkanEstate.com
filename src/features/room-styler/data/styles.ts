@@ -37,3 +37,19 @@ export const ROOM_STYLE_OPTIONS: RoomStyleOption[] = [
   { id: 'hollywood-regency', label: 'Hollywood Regency', blurb: 'Glam velvet, gold & mirrors' },
   { id: '1970s-revival', label: '1970s Revival', blurb: 'Retro greens, oranges & rattan' },
 ];
+
+/**
+ * Exterior / architectural styles — shown when the user toggles to "Exterior".
+ * Ids must match the backend EXTERIOR_STYLES catalog (prefixed `ext-`).
+ */
+export const EXTERIOR_STYLE_OPTIONS: RoomStyleOption[] = [
+  { id: 'ext-refresh', label: 'Refresh & Landscaping', blurb: 'Tidy the yard — keep the house' },
+  { id: 'ext-modern', label: 'Modern', blurb: 'Render, glass & clean lines' },
+  { id: 'ext-contemporary', label: 'Contemporary', blurb: 'Mixed cladding & bold tones' },
+  { id: 'ext-mediterranean', label: 'Mediterranean Villa', blurb: 'Stucco, terracotta & arches' },
+  { id: 'ext-farmhouse', label: 'Modern Farmhouse', blurb: 'Board-and-batten & porch' },
+  { id: 'ext-traditional', label: 'Traditional / Colonial', blurb: 'Brick, shutters & symmetry' },
+  { id: 'ext-craftsman', label: 'Craftsman', blurb: 'Gables, wood & stone porch' },
+  { id: 'ext-rustic', label: 'Rustic Cabin', blurb: 'Timber, log & stone' },
+  { id: 'ext-tudor', label: 'Tudor', blurb: 'Half-timbering & steep gables' },
+];

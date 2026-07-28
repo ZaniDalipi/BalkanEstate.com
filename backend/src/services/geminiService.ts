@@ -390,26 +390,40 @@ export const restyleRoomImage = async (
   mimeType: string,
   styleId: string,
   styleLabel: string,
-  stylePrompt: string
+  stylePrompt: string,
+  category: 'interior' | 'exterior' = 'interior'
 ): Promise<RoomStyleResult> => {
   const isEmptyRoom = styleId === 'no-furniture';
+  const isExterior = category === 'exterior';
+  const isExtRefresh = styleId === 'ext-refresh';
 
   const subjectPreservation = `SUBJECT PRESERVATION (critical):
-- Keep the EXACT same space as the input photo: wall positions, window and door locations and sizes, ceiling height, floor plan and proportions must be unchanged.
+- Keep the EXACT same space as the input photo: for interiors keep wall positions, window and door locations and sizes, ceiling height, floor plan and proportions; for exteriors keep the building's footprint, rooflines, window/door positions and number of floors. Everything structural must be unchanged.
 - Keep the SAME camera angle, perspective and framing as the original photo.
 - NEVER invent or hallucinate a different room, building, or scene, and never change the type of space.
-- If the photo is a building EXTERIOR, garden, or outdoor area (not an interior room), keep the SAME building and structure and only tastefully clean it up — do NOT turn it into an interior or a different building.
-- Preserve any real view visible through the windows.
+- Preserve any real view visible through the windows and the real surroundings.
 - Do NOT add people, pets, on-image text, logos, watermarks, or captions.`;
 
-  const task = isEmptyRoom
-    ? `TASK — EMPTY THE ROOM:
+  let task: string;
+  if (isEmptyRoom) {
+    task = `TASK — EMPTY THE ROOM:
 - Remove ALL furniture, rugs, decor, wall art, plants, curtains and clutter so the room is completely empty and unfurnished.
 - Keep the existing wall color/finish and flooring exactly as they are — do NOT repaint or re-floor.
-- Result: a clean, bright, empty real-estate photograph of the same space.`
-    : `TASK — RESTYLE THE INTERIOR in the "${styleLabel}" style:
+- Result: a clean, bright, empty real-estate photograph of the same space.`;
+  } else if (isExtRefresh) {
+    task = `TASK — REFRESH & LANDSCAPING (exterior):
+- Keep the same house exactly as it is. Only tidy and refresh the outdoors: healthy green lawn and plants, trimmed hedges, clean driveway and paths, and remove clutter, cars, bins and debris. Clean the facade.
+- Do NOT restyle or change the architecture, materials or colours of the building.`;
+  } else if (isExterior) {
+    task = `TASK — RESTYLE THE EXTERIOR of the house in the "${styleLabel}" architectural style:
+STYLE BRIEF — ${styleLabel}: ${stylePrompt}
+- Restyle the facade cladding/paint, roof material and colour, front door, window frames and trim, garage, driveway/path and landscaping so the house convincingly matches the "${styleLabel}" style.
+- Keep the building's structure, footprint, rooflines, window and door positions and number of floors unchanged — never add or remove floors or change the building's shape.`;
+  } else {
+    task = `TASK — RESTYLE THE INTERIOR in the "${styleLabel}" style:
 STYLE BRIEF — ${styleLabel}: ${stylePrompt}
 - Only restyle the interior: furniture, decor, textiles, rugs, wall treatment/paint, flooring finish, lighting fixtures and the overall color palette — so the result convincingly matches the "${styleLabel}" style.`;
+  }
 
   const prompt = `You are an expert interior designer and architectural photographer. Edit the provided real-estate photograph exactly as instructed.
 
@@ -419,7 +433,7 @@ ${task}
 
 PHOTOREALISM (this is critical — the result must look like a REAL photo, not AI):
 - Render it as a genuine real-estate listing PHOTOGRAPH, as if shot with a full-frame DSLR camera and a ~24mm wide-angle lens.
-- Use natural daylight coming through the room's real windows; match the original photo's lighting direction, warmth and time of day.
+- Use natural daylight; match the original photo's lighting direction, warmth and time of day.
 - Include realistic, physically-accurate soft shadows and contact shadows, accurate reflections, and true-to-life material textures (wood grain, fabric weave, matte and gloss surfaces).
 - Keep natural color balance and realistic dynamic range; avoid over-saturation and over-sharpening.
 - Preserve subtle real-world imperfections and fine surface detail. Add a very slight, natural photographic grain.

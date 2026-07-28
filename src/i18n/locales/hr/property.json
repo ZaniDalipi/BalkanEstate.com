@@ -679,6 +679,8 @@
     "limitMessage": "Nadogradite na Pro Buyer ili drugi plan kako biste nastavili — ili pričekajte da se kvota obnovi.",
     "unlimitedNote": "Neograničena preuređivanja na vašem planu",
     "remainingNote": "Preostalo {{remaining}} ovog mjeseca",
-    "disclaimer": "AI-generirano uređenje samo u svrhu demonstracije. Ove slike nisu stvarne fotografije nekretnine i mogu sadržavati predmete koji nisu dio oglasa."
+    "disclaimer": "AI-generirano uređenje samo u svrhu demonstracije. Ove slike nisu stvarne fotografije nekretnine i mogu sadržavati predmete koji nisu dio oglasa.",
+    "interior": "Interijer",
+    "exterior": "Eksterijer"
   }
 }

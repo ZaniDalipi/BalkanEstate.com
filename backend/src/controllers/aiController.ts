@@ -385,7 +385,8 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
       sourceMime,
       styleDef.id,
       styleDef.label,
-      styleDef.prompt
+      styleDef.prompt,
+      styleDef.category === 'exterior' ? 'exterior' : 'interior'
     );
 
     // Count usage only on a successful generation, and only for limited plans.
