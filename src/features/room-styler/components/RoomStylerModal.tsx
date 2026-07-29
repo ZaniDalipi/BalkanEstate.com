@@ -135,14 +135,14 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
                                 afterSrc={resultUrl}
                                 beforeLabel={t('property:roomStyler.before', 'Original')}
                                 afterLabel={selectedLabel}
-                                className="max-h-[42vh] w-full sm:max-h-[58vh] lg:max-h-[68vh]"
+                                className="max-h-[42vh] sm:max-h-[58vh] lg:max-h-[68vh]"
                             />
                         ) : (
                             <>
                                 <img
                                     src={sourceUrl}
                                     alt={t('property:roomStyler.roomPhoto', 'Room photo')}
-                                    className="max-h-[42vh] w-full object-contain sm:max-h-[58vh] lg:max-h-[68vh]"
+                                    className="mx-auto block h-auto w-auto max-w-full object-contain max-h-[42vh] sm:max-h-[58vh] lg:max-h-[68vh]"
                                     crossOrigin="anonymous"
                                 />
                                 {status === 'loading' && (
