@@ -1,5 +1,7 @@
 import { GoogleGenAI, Type } from '@google/genai';
 import sharp from 'sharp';
+import fs from 'fs';
+import path from 'path';
 import { apiLogger } from '../utils/logger';
 
 // Target long-edge (px) for the high-quality downloadable restyle image.
@@ -349,9 +351,29 @@ export const generateDescriptionFromImages = async (
 const DISCLAIMER_TEXT = 'VIRTUALLY STAGED · AI-GENERATED · FOR DEMONSTRATION ONLY — NOT AN ACTUAL PHOTO OF THE PROPERTY';
 
 /**
+ * A font bundled with the app so the caption always has glyphs to draw. Rendering
+ * the text via an SVG `<text>` element relies on a system font being installed,
+ * which minimal deploy containers don't have — the text then rasterises as empty
+ * "tofu" boxes. We resolve a real font file and hand it to sharp's text renderer
+ * instead. `__dirname` is `.../src/services` under ts-node and `.../dist/services`
+ * once compiled; both sit two levels below `backend/`, so `../../assets/fonts`
+ * points at the bundled font in dev and production alike.
+ */
+const DISCLAIMER_FONT_PATH = [
+  path.resolve(__dirname, '../../assets/fonts/DejaVuSans-Bold.ttf'),
+  path.resolve(__dirname, '../assets/fonts/DejaVuSans-Bold.ttf'),
+  '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+].find((p) => {
+  try { return fs.existsSync(p); } catch { return false; }
+});
+
+const escapePangoMarkup = (s: string): string =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/**
  * Composite a disclaimer caption bar onto the bottom of a generated image so the
  * AI staging can never be mistaken for a real listing photo, even once downloaded.
- * Non-fatal: returns the original buffer if compositing fails (e.g. missing fonts).
+ * Non-fatal: returns the original buffer if compositing fails.
  */
 const addDisclaimerCaption = async (buffer: Buffer): Promise<Buffer> => {
   try {
@@ -360,17 +382,50 @@ const addDisclaimerCaption = async (buffer: Buffer): Promise<Buffer> => {
     const height = meta.height || 0;
     if (!width || !height) return buffer;
 
-    const barHeight = Math.max(28, Math.round(height * 0.05));
-    const fontSize = Math.max(11, Math.round(barHeight * 0.4));
-    const svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-      <rect x="0" y="${height - barHeight}" width="${width}" height="${barHeight}" fill="rgba(0,0,0,0.6)"/>
-      <text x="50%" y="${height - barHeight / 2}" text-anchor="middle" dominant-baseline="central"
-        font-family="Arial, Helvetica, sans-serif" font-size="${fontSize}" font-weight="600"
-        letter-spacing="0.5" fill="#ffffff">${DISCLAIMER_TEXT}</text>
-    </svg>`;
+    const fontSize = Math.max(12, Math.round(height * 0.02));
+
+    // Render the caption with sharp's (Pango) text renderer using an explicit
+    // bundled font, so glyphs draw regardless of which fonts the host has.
+    let textPng = await sharp({
+      text: {
+        text: `<span foreground="white">${escapePangoMarkup(DISCLAIMER_TEXT)}</span>`,
+        ...(DISCLAIMER_FONT_PATH ? { fontfile: DISCLAIMER_FONT_PATH } : {}),
+        font: `DejaVu Sans Bold ${fontSize}`,
+        rgba: true,
+        align: 'center',
+      },
+    }).png().toBuffer();
+
+    let tMeta = await sharp(textPng).metadata();
+    let textWidth = tMeta.width || 0;
+    let textHeight = tMeta.height || 0;
+
+    // Guarantee the single-line caption fits the image width.
+    const maxTextWidth = Math.round(width * 0.96);
+    if (textWidth > maxTextWidth && textWidth > 0) {
+      textPng = await sharp(textPng).resize({ width: maxTextWidth }).png().toBuffer();
+      tMeta = await sharp(textPng).metadata();
+      textWidth = tMeta.width || 0;
+      textHeight = tMeta.height || 0;
+    }
+
+    const verticalPadding = Math.round(textHeight * 0.9);
+    const barHeight = Math.max(28, textHeight + verticalPadding);
+    const barTop = height - barHeight;
+    const textLeft = Math.max(0, Math.round((width - textWidth) / 2));
+    const textTop = Math.round(barTop + (barHeight - textHeight) / 2);
 
     return await sharp(buffer)
-      .composite([{ input: Buffer.from(svg), gravity: 'south' }])
+      .composite([
+        {
+          input: {
+            create: { width, height: barHeight, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0.6 } },
+          },
+          left: 0,
+          top: barTop,
+        },
+        { input: textPng, left: textLeft, top: textTop },
+      ])
       .png({ quality: 100, compressionLevel: 6 })
       .toBuffer();
   } catch (e) {
