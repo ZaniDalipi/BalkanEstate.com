@@ -287,11 +287,16 @@ export function usePropertyManager() {
     }).format(price);
   };
 
+  // Includes the exact time (hour and minute) alongside the date — listings
+  // show created/updated timestamps, so admins can see precisely when each
+  // happened, not just the day.
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   };
 
