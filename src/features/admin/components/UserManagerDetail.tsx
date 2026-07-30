@@ -26,6 +26,7 @@ interface UserManagerDetailProps {
   handleUpdateUser: (e: React.FormEvent) => void;
   handleEditUser: (user: User) => void;
   formatDate: (dateString: string) => string;
+  formatDateTime: (dateString: string) => string;
   getRoleBadgeColor: (role: string) => string;
   // Callback to refresh user data after updates
   onUserUpdated?: () => void;
@@ -43,6 +44,7 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
   handleUpdateUser,
   handleEditUser,
   formatDate,
+  formatDateTime,
   getRoleBadgeColor,
   onUserUpdated,
 }) => {
@@ -198,12 +200,12 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <label className="text-xs text-gray-500">{t('userDetail.joined')}</label>
-                  <p>{formatDate(viewingUser.createdAt)}</p>
+                  <p>{formatDateTime(viewingUser.createdAt)}</p>
                 </div>
                 {viewingUser.lastLogin && (
                   <div>
                     <label className="text-xs text-gray-500">{t('userDetail.lastLogin')}</label>
-                    <p>{formatDate(viewingUser.lastLogin)}</p>
+                    <p>{formatDateTime(viewingUser.lastLogin)}</p>
                   </div>
                 )}
               </div>

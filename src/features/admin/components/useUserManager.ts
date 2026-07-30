@@ -264,6 +264,18 @@ export function useUserManager() {
     });
   };
 
+  // Like formatDate but also includes the time (hour and minute) — used for the
+  // "Joined" column so admins can see exactly when a user registered.
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'agent':
@@ -312,6 +324,7 @@ export function useUserManager() {
     handleToggleLicenseVerification,
     handleDeleteUser,
     formatDate,
+    formatDateTime,
     getRoleBadgeColor,
   };
 }

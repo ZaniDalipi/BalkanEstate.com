@@ -51,6 +51,7 @@ const UserManager: React.FC = () => {
     handleToggleLicenseVerification,
     handleDeleteUser,
     formatDate,
+    formatDateTime,
     getRoleBadgeColor,
   } = useUserManager();
 
@@ -259,7 +260,7 @@ const UserManager: React.FC = () => {
                   )}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {formatDate(user.createdAt)}
+                  {formatDateTime(user.createdAt)}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex gap-1">
@@ -335,6 +336,7 @@ const UserManager: React.FC = () => {
         handleUpdateUser={handleUpdateUser}
         handleEditUser={handleEditUser}
         formatDate={formatDate}
+        formatDateTime={formatDateTime}
         getRoleBadgeColor={getRoleBadgeColor}
         onUserUpdated={refetch}
       />
