@@ -128,21 +128,21 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
                     )}
 
                     {/* Preview / result */}
-                    <div className="relative mb-3 flex max-h-[42vh] min-h-[200px] items-center justify-center overflow-hidden rounded-xl bg-neutral-900 sm:max-h-[58vh] sm:min-h-[260px] lg:max-h-[68vh]">
+                    <div className="relative mb-3 flex h-[42vh] items-center justify-center overflow-hidden rounded-xl bg-neutral-900 sm:h-[54vh] lg:h-[62vh]">
                         {status === 'done' && resultUrl ? (
                             <BeforeAfterSlider
                                 beforeSrc={sourceUrl}
                                 afterSrc={resultUrl}
                                 beforeLabel={t('property:roomStyler.before', 'Original')}
                                 afterLabel={selectedLabel}
-                                className="max-h-[42vh] sm:max-h-[58vh] lg:max-h-[68vh]"
+                                className="h-full w-full"
                             />
                         ) : (
                             <>
                                 <img
                                     src={sourceUrl}
                                     alt={t('property:roomStyler.roomPhoto', 'Room photo')}
-                                    className="mx-auto block h-auto w-auto max-w-full object-contain max-h-[42vh] sm:max-h-[58vh] lg:max-h-[68vh]"
+                                    className="h-full w-full object-contain"
                                     crossOrigin="anonymous"
                                 />
                                 {status === 'loading' && (

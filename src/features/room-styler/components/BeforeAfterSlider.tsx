@@ -60,18 +60,18 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
     return (
         <div
             ref={containerRef}
-            className="relative mx-auto inline-block max-w-full select-none overflow-hidden rounded-xl touch-none bg-neutral-900"
+            className={`relative block h-full w-full select-none overflow-hidden rounded-xl touch-none bg-neutral-900 ${className}`}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
             onPointerLeave={onPointerUp}
         >
-            {/* After (base layer) — the in-flow sizer: the container shrink-wraps this
-                image at its natural aspect ratio, capped by max-height (from `className`)
-                and max-width, so portrait/landscape photos always show in full, no crop. */}
+            {/* After (base layer) — fills the fixed-size parent frame; object-contain shows
+                the whole image letterboxed inside, so portrait/landscape photos always show
+                in full (no crop) and the frame stays the same size for every image. */}
             <img
                 src={afterSrc}
                 alt={afterLabel}
-                className={`block h-auto w-auto max-w-full object-contain pointer-events-none ${className}`}
+                className="block h-full w-full object-contain pointer-events-none"
                 draggable={false}
             />
             <span className="absolute top-2 right-2 z-10 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white pointer-events-none">
