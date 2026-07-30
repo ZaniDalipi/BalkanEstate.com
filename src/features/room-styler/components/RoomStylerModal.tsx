@@ -86,23 +86,26 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
     const generateDisabled = status === 'loading' || isExhausted;
 
     return (
-        <div className="fixed inset-0 z-[6100] flex items-center justify-center bg-black/95 backdrop-blur-md p-3 sm:p-6" role="dialog" aria-modal="true">
-            <div className="relative flex w-full max-w-6xl max-h-[95vh] flex-col overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 shadow-2xl">
+        <div className="fixed inset-0 z-[6100] flex items-stretch justify-center bg-black/95 backdrop-blur-md p-0 sm:items-center sm:p-6" role="dialog" aria-modal="true">
+            <div className="relative flex h-full w-full max-h-full flex-col overflow-hidden bg-white shadow-2xl dark:bg-neutral-900 sm:h-auto sm:max-h-[95vh] sm:max-w-6xl sm:rounded-2xl">
 
                 {/* Header */}
-                <div className="flex items-center justify-between gap-3 border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 sm:px-5">
-                    <div>
-                        <h2 className="text-base sm:text-lg font-semibold text-neutral-900 dark:text-white">
+                <div
+                    className="flex flex-shrink-0 items-center justify-between gap-3 border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 sm:px-5"
+                    style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
+                >
+                    <div className="min-w-0">
+                        <h2 className="truncate text-base font-semibold text-neutral-900 dark:text-white sm:text-lg">
                             {t('property:roomStyler.title', 'Reimagine this room')}
                         </h2>
-                        <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                        <p className="truncate text-xs text-neutral-500 dark:text-neutral-400">
                             {t('property:roomStyler.subtitle', 'See this room in a different interior design style')}
                         </p>
                     </div>
                     <button
                         type="button"
                         onClick={onClose}
-                        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
                         aria-label={t('property:roomStyler.close', 'Close')}
                     >
                         <XMarkIcon className="h-6 w-6" />
@@ -110,7 +113,7 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
                 </div>
 
                 {/* Body */}
-                <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+                <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-5">
                     {/* Usage meter — reflects the user's real plan */}
                     {state.isAuthenticated && (usageLoading || usage) && (
                         <UsageMeter
@@ -125,25 +128,25 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
                     )}
 
                     {/* Preview / result */}
-                    <div className="relative mb-3 flex items-center justify-center rounded-xl bg-neutral-900 min-h-[260px] max-h-[70vh] overflow-hidden">
+                    <div className="relative mb-3 flex max-h-[42vh] min-h-[200px] items-center justify-center overflow-hidden rounded-xl bg-neutral-900 sm:max-h-[58vh] sm:min-h-[260px] lg:max-h-[68vh]">
                         {status === 'done' && resultUrl ? (
                             <BeforeAfterSlider
                                 beforeSrc={sourceUrl}
                                 afterSrc={resultUrl}
                                 beforeLabel={t('property:roomStyler.before', 'Original')}
                                 afterLabel={selectedLabel}
-                                className="w-full max-h-[70vh]"
+                                className="max-h-[42vh] sm:max-h-[58vh] lg:max-h-[68vh]"
                             />
                         ) : (
                             <>
                                 <img
                                     src={sourceUrl}
                                     alt={t('property:roomStyler.roomPhoto', 'Room photo')}
-                                    className="max-h-[70vh] w-full object-contain"
+                                    className="mx-auto block h-auto w-auto max-w-full object-contain max-h-[42vh] sm:max-h-[58vh] lg:max-h-[68vh]"
                                     crossOrigin="anonymous"
                                 />
                                 {status === 'loading' && (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60 backdrop-blur-sm">
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60 px-4 text-center backdrop-blur-sm">
                                         <div className="h-10 w-10 animate-spin rounded-full border-4 border-white/30 border-t-white" />
                                         <p className="text-sm font-medium text-white">
                                             {t('property:roomStyler.generating', 'Restyling in {{style}}…', { style: selectedLabel })}
@@ -191,14 +194,14 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
                     )}
 
                     {/* Interior / Exterior toggle */}
-                    <div className="mb-3 inline-flex rounded-lg border border-neutral-200 dark:border-neutral-700 p-0.5">
+                    <div className="mb-3 flex w-full rounded-lg border border-neutral-200 p-0.5 dark:border-neutral-700 sm:inline-flex sm:w-auto">
                         {(['interior', 'exterior'] as const).map(m => (
                             <button
                                 key={m}
                                 type="button"
                                 onClick={() => switchMode(m)}
                                 disabled={status === 'loading'}
-                                className={`rounded-md px-4 py-1.5 text-sm font-semibold transition-colors disabled:opacity-60 ${
+                                className={`flex-1 rounded-md px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-60 sm:flex-none ${
                                     mode === m
                                         ? 'bg-primary text-white'
                                         : 'text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800'
@@ -216,7 +219,7 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
                     <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
                         {t('property:roomStyler.chooseStyle', 'Choose a style')}
                     </p>
-                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
                         {styleOptions.map(style => {
                             const active = style.id === selectedStyle;
                             return (
@@ -241,36 +244,41 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
                 </div>
 
                 {/* Footer actions */}
-                <div className="flex items-center justify-between gap-2 border-t border-neutral-200 dark:border-neutral-800 px-4 py-3 sm:px-5">
-                    <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                        {isUnlimited
-                            ? t('property:roomStyler.unlimitedNote', 'Unlimited restyles on your plan')
-                            : usage
-                                ? t('property:roomStyler.remainingNote', '{{remaining}} left this month', { remaining: Math.max(0, usage.remaining) })
-                                : ''}
-                    </span>
-                    <div className="flex items-center gap-2">
-                        {status === 'done' && resultUrl && (
-                            <a
-                                href={resultUrl}
-                                download={`balkanestate-${selectedStyle}.png`}
-                                className="rounded-lg border border-neutral-300 dark:border-neutral-600 px-4 py-2 text-sm font-semibold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                <div
+                    className="flex-shrink-0 border-t border-neutral-200 dark:border-neutral-800 px-4 py-3 sm:px-5"
+                    style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
+                >
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                        <span className="text-center text-xs text-neutral-500 dark:text-neutral-400 sm:text-left">
+                            {isUnlimited
+                                ? t('property:roomStyler.unlimitedNote', 'Unlimited restyles on your plan')
+                                : usage
+                                    ? t('property:roomStyler.remainingNote', '{{remaining}} left this month', { remaining: Math.max(0, usage.remaining) })
+                                    : ''}
+                        </span>
+                        <div className="flex items-center gap-2">
+                            {status === 'done' && resultUrl && (
+                                <a
+                                    href={resultUrl}
+                                    download={`balkanestate-${selectedStyle}.png`}
+                                    className="flex-1 whitespace-nowrap rounded-lg border border-neutral-300 px-4 py-2.5 text-center text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800 sm:flex-none"
+                                >
+                                    {t('property:roomStyler.download', 'Download HD')}
+                                </a>
+                            )}
+                            <button
+                                type="button"
+                                onClick={handleGenerate}
+                                disabled={generateDisabled}
+                                className="flex-1 whitespace-nowrap rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
                             >
-                                {t('property:roomStyler.download', 'Download HD')}
-                            </a>
-                        )}
-                        <button
-                            type="button"
-                            onClick={handleGenerate}
-                            disabled={generateDisabled}
-                            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-                        >
-                            {status === 'loading'
-                                ? t('property:roomStyler.generating2', 'Generating…')
-                                : status === 'done'
-                                    ? t('property:roomStyler.tryAnother', 'Try another style')
-                                    : t('property:roomStyler.generate', 'Generate')}
-                        </button>
+                                {status === 'loading'
+                                    ? t('property:roomStyler.generating2', 'Generating…')
+                                    : status === 'done'
+                                        ? t('property:roomStyler.tryAnother', 'Try another style')
+                                        : t('property:roomStyler.generate', 'Generate')}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
