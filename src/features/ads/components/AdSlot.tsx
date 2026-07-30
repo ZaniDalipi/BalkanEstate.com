@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { useAdBanners, selectByPlacement } from '../hooks/useAdBanners';
+import { useAdPreview } from '../hooks/useAdPreview';
 import { trackClick, trackImpression } from '../api/adBannerApi';
 import type { AdPage, AdPlacement } from '../types';
 
@@ -54,7 +55,9 @@ const AdSlot: React.FC<AdSlotProps> = ({
 }) => {
   const { t } = useTranslation(['common']);
   const { data } = useAdBanners(page);
+  const preview = useAdPreview();
   const trackedRef = useRef<string | null>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const banner = selectByPlacement(data, placement)[index];
 
@@ -65,8 +68,22 @@ const AdSlot: React.FC<AdSlotProps> = ({
     trackImpression(banner.id);
   }, [banner]);
 
+  // In preview mode, scroll the focused placement into view so it's easy to find.
+  useEffect(() => {
+    if (preview.active && preview.focus === placement && index === 0 && wrapperRef.current) {
+      const el = wrapperRef.current;
+      const id = window.setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 400);
+      return () => window.clearTimeout(id);
+    }
+  }, [preview.active, preview.focus, placement, index]);
+
   const { w, h } = AD_FORMATS[format];
   const isTall = h > w;
+
+  // Highlight ring shown around every slot while in preview mode.
+  const previewWrap: React.CSSProperties = preview.active
+    ? { outline: '3px solid #6366f1', outlineOffset: 4, borderRadius: 14, position: 'relative' }
+    : {};
 
   const baseBoxStyle: React.CSSProperties = {
     position: 'relative',
@@ -82,7 +99,7 @@ const AdSlot: React.FC<AdSlotProps> = ({
   // is always visible and sellable, sized to the real ad slot.
   if (!banner) {
     return (
-      <div className={className} style={style} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
+      <div ref={wrapperRef} className={className} style={{ ...style, ...previewWrap }} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
         <div
           style={{
             ...baseBoxStyle,
@@ -132,13 +149,14 @@ const AdSlot: React.FC<AdSlotProps> = ({
     );
   }
 
+  // Request ~2× the slot's CSS width so the creative stays sharp on hi-DPI screens.
   const imageSrc = optimizeCloudinaryUrl(banner.imageUrl, {
-    width: isTall ? 400 : 1000,
+    width: isTall ? 700 : 1600,
     quality: 'auto',
   });
 
   return (
-    <div className={className} style={style} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
+    <div ref={wrapperRef} className={className} style={{ ...style, ...previewWrap }} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
       <div
         style={{
           ...baseBoxStyle,
@@ -178,7 +196,7 @@ const AdSlot: React.FC<AdSlotProps> = ({
             src={imageSrc}
             alt={banner.title}
             loading="lazy"
-            style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', background: '#fafafa' }}
+            style={{ display: 'block', width: '100%', height: '100%', objectFit: 'contain', background: '#ffffff' }}
           />
         </a>
       </div>

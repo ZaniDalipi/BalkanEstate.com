@@ -643,5 +643,10 @@
     "usedOfLimit": "{{used}} / {{limit}} искоришћено",
     "unlimited": "Неограничено",
     "resetsOn": "Обнавља се {{date}}"
+  },
+  "ads": {
+    "previewMode": "Ad preview — ad slots are highlighted",
+    "exitPreview": "Exit",
+    "stickyBottomBar": "Sticky bottom bar"
   }
 }

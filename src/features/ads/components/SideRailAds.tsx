@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import AdSlot from './AdSlot';
+import { useAdPreview } from '../hooks/useAdPreview';
 import type { AdPage } from '../types';
 
 interface SideRailAdsProps {
@@ -22,16 +23,21 @@ const GAP = 24;
  */
 const SideRailAds: React.FC<SideRailAdsProps> = ({ page, contentMaxWidth = 1280, children }) => {
   const [showRails, setShowRails] = useState(false);
+  const preview = useAdPreview();
 
   useEffect(() => {
-    // Need room for content + both rails + gaps on either side.
-    const minWidth = contentMaxWidth + 2 * (RAIL_WIDTH + GAP) + 32;
+    // Normally need room for content + both rails + gaps on either side.
+    // In preview mode, drop the bar to any wide-ish desktop so the admin can
+    // see the rails without an ultra-wide monitor.
+    const minWidth = preview.active
+      ? 1100
+      : contentMaxWidth + 2 * (RAIL_WIDTH + GAP) + 32;
     const mq = window.matchMedia(`(min-width: ${minWidth}px)`);
     const update = () => setShowRails(mq.matches);
     update();
     mq.addEventListener('change', update);
     return () => mq.removeEventListener('change', update);
-  }, [contentMaxWidth]);
+  }, [contentMaxWidth, preview.active]);
 
   return (
     <div style={{ position: 'relative' }}>

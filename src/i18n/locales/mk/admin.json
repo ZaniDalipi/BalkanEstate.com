@@ -1007,7 +1007,7 @@
     "how3": "Set the price/tier for your records, then activate it.",
     "how4": "Empty slots show a \"Your Ad Here\" placeholder until a banner is booked.",
     "recommendedSize": "Recommended size",
-    "imageHint2": "PNG or JPG, max 5MB. The image fills the slot — match the size so it looks sharp and not stretched or cropped.",
+    "imageHint2": "PNG or JPG, max 5MB. The whole image is shown (never cropped) — upload at the exact size so it fills the slot without empty bars.",
     "replaceImage": "Replace Image",
     "imageTooSmall": "⚠ Uploaded image is {{w}}×{{h}}px — smaller than recommended. It may look blurry. Use at least {{rw}}×{{rh}}px.",
     "imageGood": "✓ Uploaded image is {{w}}×{{h}}px — good fit.",
@@ -1023,6 +1023,8 @@
     "endHint": "Optional — hidden after this date.",
     "orderHint": "Lower shows first. Home rails: 0 = left, 1 = right.",
     "activeHint": "Uncheck to hide without deleting.",
-    "stickyHint": "Only affects the sticky bar placements."
+    "stickyHint": "Only affects the sticky bar placements.",
+    "viewOnSite": "View on site",
+    "viewOnSiteHint": "Opens the page in a new tab with the ad slot highlighted so you can see exactly how it looks."
   }
 }

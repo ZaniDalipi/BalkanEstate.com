@@ -643,5 +643,10 @@
     "usedOfLimit": "{{used}} / {{limit}} iskorišteno",
     "unlimited": "Neograničeno",
     "resetsOn": "Obnavlja se {{date}}"
+  },
+  "ads": {
+    "previewMode": "Ad preview — ad slots are highlighted",
+    "exitPreview": "Exit",
+    "stickyBottomBar": "Sticky bottom bar"
   }
 }

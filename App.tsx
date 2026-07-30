@@ -103,6 +103,7 @@ const ListingLimitWarningModal = lazy(() => import('./components/shared/ListingL
 const DiscountGameModal = lazy(() => import('./components/shared/DiscountGameModal'));
 const AdminDashboard = lazy(() => import('./src/features/admin/components/AdminDashboard'));
 const StickyAdBanner = lazy(() => import('./src/features/ads/components/StickyAdBanner'));
+const AdPreviewIndicator = lazy(() => import('./src/features/ads/components/AdPreviewIndicator'));
 const AgencyDashboardPage = lazy(() => import('./src/features/agency-dashboard/components/AgencyDashboardPage'));
 const NotFoundPage = lazy(() => import('./src/components/ui/not-found-2').then(m => ({ default: m.NotFound })));
 const ResetPasswordPage = lazyWithRetry(() => import('./src/features/auth/components/ResetPasswordPage'));
@@ -979,6 +980,12 @@ const MainLayout: React.FC = () => {
             <StickyAdBanner page={adPage} placement="sticky-bottom" />
           </Suspense>
         )}
+
+        {/* Ad preview mode indicator (opened from admin "View on site") */}
+        <Suspense fallback={null}>
+          <AdPreviewIndicator />
+        </Suspense>
+
 
         {/* Mobile floating hamburger for home page — rendered outside all scroll/overflow containers
             so position:fixed works correctly in iOS Safari PWA standalone mode */}

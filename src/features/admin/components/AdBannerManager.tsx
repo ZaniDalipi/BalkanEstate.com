@@ -13,12 +13,13 @@ import {
 } from '@/constants';
 import { useAdBannerManager, PLACEMENT_OPTIONS, PAGE_OPTIONS } from './useAdBannerManager';
 import AdBannerManagerForm from './AdBannerManagerForm';
+import { buildAdPreviewUrl } from './AdLocationPreview';
 
 const placementLabel = (id: string) => PLACEMENT_OPTIONS.find((p) => p.id === id)?.label || id;
 const pageLabel = (id: string) => PAGE_OPTIONS.find((p) => p.id === id)?.label || id;
 
 const AdBannerManager: React.FC = () => {
-  const { t } = useTranslation(['admin']);
+  const { t, i18n } = useTranslation(['admin']);
   const {
     banners,
     isLoading,
@@ -198,11 +199,20 @@ const AdBannerManager: React.FC = () => {
                   {/* Actions */}
                   <div className="flex items-center gap-1">
                     <a
+                      href={buildAdPreviewUrl(item.page, item.placement, i18n.language)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                      title={t('admin:adBanners.viewOnSite', 'View on site')}
+                    >
+                      <EyeIcon className="w-5 h-5" />
+                    </a>
+                    <a
                       href={item.linkUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
-                      title={t('admin:adBanners.visitLink', 'Open link')}
+                      title={t('admin:adBanners.visitLink', 'Open advertiser link')}
                     >
                       <ArrowTopRightOnSquareIcon className="w-5 h-5" />
                     </a>

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { XMarkIcon, PhotoIcon } from '@/constants';
 import type { AdBannerAdmin } from '@/src/features/ads/types';
 import { AdBannerFormData, PLACEMENT_OPTIONS, PAGE_OPTIONS } from './useAdBannerManager';
-import AdLocationPreview from './AdLocationPreview';
+import AdLocationPreview, { buildAdPreviewUrl } from './AdLocationPreview';
 
 interface Props {
   editingItem: AdBannerAdmin | null;
@@ -45,9 +45,10 @@ const AdBannerManagerForm: React.FC<Props> = ({
   onSubmit,
   onFileUpload,
 }) => {
-  const { t } = useTranslation(['admin']);
+  const { t, i18n } = useTranslation(['admin']);
   const set = <K extends keyof AdBannerFormData>(key: K, value: AdBannerFormData[K]) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
+  const previewUrl = buildAdPreviewUrl(formData.page, formData.placement, i18n.language);
 
   const dims = RECOMMENDED_DIMS[formData.placement] || RECOMMENDED_DIMS['in-content'];
   const isTall = dims.h > dims.w;
@@ -62,8 +63,8 @@ const AdBannerManagerForm: React.FC<Props> = ({
     imgDims !== null && (imgDims.w < dims.w * 0.8 || imgDims.h < dims.h * 0.8);
 
   const previewBoxStyle: React.CSSProperties = isTall
-    ? { height: 168, aspectRatio: `${dims.w} / ${dims.h}` }
-    : { width: 280, maxWidth: '100%', aspectRatio: `${dims.w} / ${dims.h}` };
+    ? { height: 300, aspectRatio: `${dims.w} / ${dims.h}`, background: '#fff' }
+    : { width: 300, maxWidth: '100%', aspectRatio: `${dims.w} / ${dims.h}`, background: '#fff' };
 
   return (
     <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4">
@@ -101,7 +102,7 @@ const AdBannerManagerForm: React.FC<Props> = ({
                     src={formData.imageUrl}
                     alt="preview"
                     className="w-full h-full"
-                    style={{ objectFit: 'cover', display: 'block' }}
+                    style={{ objectFit: 'contain', display: 'block' }}
                     onLoad={(e) =>
                       setImgDims({
                         w: e.currentTarget.naturalWidth,
@@ -254,8 +255,26 @@ const AdBannerManagerForm: React.FC<Props> = ({
 
           {/* Live location preview */}
           <div>
-            <label className={labelCls}>{t('admin:adBanners.whereItShows', 'Where it shows')}</label>
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <label className="block text-sm font-medium text-gray-700">{t('admin:adBanners.whereItShows', 'Where it shows')}</label>
+              <a
+                href={previewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                {t('admin:adBanners.viewOnSite', 'View on site')}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <path d="M15 3h6v6" />
+                  <path d="M10 14L21 3" />
+                </svg>
+              </a>
+            </div>
             <AdLocationPreview page={formData.page} placement={formData.placement} />
+            <p className={hintCls}>
+              {t('admin:adBanners.viewOnSiteHint', 'Opens the page in a new tab with the ad slot highlighted so you can see exactly how it looks.')}
+            </p>
           </div>
 
           {/* Category + price */}

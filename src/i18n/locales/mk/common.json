@@ -643,5 +643,10 @@
     "usedOfLimit": "{{used}} / {{limit}} искористени",
     "unlimited": "Неограничено",
     "resetsOn": "Се обновува на {{date}}"
+  },
+  "ads": {
+    "previewMode": "Ad preview — ad slots are highlighted",
+    "exitPreview": "Exit",
+    "stickyBottomBar": "Sticky bottom bar"
   }
 }

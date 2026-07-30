@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { useAdBanners, selectByPlacement } from '../hooks/useAdBanners';
+import { useAdPreview } from '../hooks/useAdPreview';
 import { trackClick, trackImpression } from '../api/adBannerApi';
 import type { AdPage, AdPlacement } from '../types';
 
@@ -25,6 +26,7 @@ const SESSION_DISMISS_PREFIX = 'ad-banner-dismissed:';
 const StickyAdBanner: React.FC<StickyAdBannerProps> = ({ page, placement = 'sticky-bottom' }) => {
   const { t } = useTranslation(['common']);
   const { data } = useAdBanners(page);
+  const preview = useAdPreview();
   const [dismissed, setDismissed] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const trackedRef = useRef<string | null>(null);
@@ -58,7 +60,10 @@ const StickyAdBanner: React.FC<StickyAdBannerProps> = ({ page, placement = 'stic
     trackImpression(banner.id);
   }, [banner, dismissed]);
 
-  if (!banner || dismissed) return null;
+  // Hide when empty/dismissed — unless preview mode is on, where we show a
+  // placeholder so the position is visible.
+  const showPlaceholder = !banner || dismissed;
+  if (showPlaceholder && !preview.active) return null;
 
   const isSticky = placement === 'sticky-top' || placement === 'sticky-bottom';
   const isTop = placement === 'sticky-top';
@@ -74,7 +79,7 @@ const StickyAdBanner: React.FC<StickyAdBannerProps> = ({ page, placement = 'stic
     }
   };
 
-  const imageSrc = optimizeCloudinaryUrl(banner.imageUrl, { width: 1000, quality: 'auto' });
+  const imageSrc = banner ? optimizeCloudinaryUrl(banner.imageUrl, { width: 1000, quality: 'auto' }) : '';
 
   // Card height — fixed so any image (square logo or wide banner) fits neatly.
   const cardHeight = isDesktop ? 96 : 68;
@@ -111,71 +116,100 @@ const StickyAdBanner: React.FC<StickyAdBannerProps> = ({ page, placement = 'stic
           borderRadius: 14,
           boxShadow: '0 6px 24px rgba(0,0,0,0.16)',
           overflow: 'hidden',
+          ...(preview.active ? { outline: '3px solid #6366f1', outlineOffset: 2 } : {}),
         }}
       >
-        {/* Sponsored label */}
-        <span
-          style={{
-            position: 'absolute',
-            top: 6,
-            left: 6,
-            zIndex: 2,
-            background: 'rgba(0,0,0,0.6)',
-            color: '#fff',
-            fontSize: 9,
-            fontWeight: 600,
-            letterSpacing: '0.06em',
-            textTransform: 'uppercase',
-            padding: '2px 6px',
-            borderRadius: 5,
-          }}
-        >
-          {t('ads.sponsored', 'Sponsored')}
-        </span>
+        {showPlaceholder ? (
+          // Preview placeholder — makes the sticky position visible.
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              height: '100%',
+              gap: 2,
+              backgroundColor: '#eef2ff',
+              backgroundImage:
+                'repeating-linear-gradient(45deg, rgba(79,70,229,0.07) 0px, rgba(79,70,229,0.07) 12px, transparent 12px, transparent 24px)',
+              color: '#4338ca',
+            }}
+          >
+            <span style={{ fontWeight: 800, fontSize: 15 }}>{t('ads.yourAdHere', 'Your Ad Here')}</span>
+            <span style={{ fontSize: 11, color: '#6366f1' }}>
+              {t('ads.stickyBottomBar', 'Sticky bottom bar')}
+            </span>
+          </div>
+        ) : (
+          <>
+            {/* Sponsored label */}
+            <span
+              style={{
+                position: 'absolute',
+                top: 6,
+                left: 6,
+                zIndex: 2,
+                background: 'rgba(0,0,0,0.6)',
+                color: '#fff',
+                fontSize: 9,
+                fontWeight: 600,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                padding: '2px 6px',
+                borderRadius: 5,
+              }}
+            >
+              {t('ads.sponsored', 'Sponsored')}
+            </span>
 
-        <a
-          href={banner.linkUrl}
-          target="_blank"
-          rel="noopener noreferrer sponsored"
-          onClick={handleClick}
-          aria-label={banner.title}
-          style={{ display: 'block', width: '100%', height: '100%' }}
-        >
-          <img
-            src={imageSrc}
-            alt={banner.title}
-            loading="lazy"
-            style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', background: '#fff' }}
-          />
-        </a>
+            <a
+              href={banner!.linkUrl}
+              target="_blank"
+              rel="noopener noreferrer sponsored"
+              onClick={handleClick}
+              aria-label={banner!.title}
+              style={{ display: 'block', width: '100%', height: '100%' }}
+            >
+              <img
+                src={imageSrc}
+                alt={banner!.title}
+                loading="lazy"
+                style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', background: '#fff' }}
+              />
+            </a>
+          </>
+        )}
 
-        {/* Dismiss */}
-        <button
-          type="button"
-          onClick={handleDismiss}
-          aria-label={t('ads.close', 'Close advertisement')}
-          style={{
-            position: 'absolute',
-            top: 6,
-            right: 6,
-            zIndex: 2,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 24,
-            height: 24,
-            borderRadius: '9999px',
-            background: 'rgba(0,0,0,0.5)',
-            color: '#fff',
-            border: 'none',
-            cursor: 'pointer',
-            lineHeight: 0,
-          }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        {/* Dismiss (real banner only) */}
+        {!showPlaceholder && (
+          <button
+            type="button"
+            onClick={handleDismiss}
+            aria-label={t('ads.close', 'Close advertisement')}
+            style={{
+              position: 'absolute',
+              top: 6,
+              right: 6,
+              zIndex: 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 24,
+              height: 24,
+              borderRadius: '9999px',
+              background: 'rgba(0,0,0,0.5)',
+              color: '#fff',
+              border: 'none',
+              cursor: 'pointer',
+              lineHeight: 0,
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );

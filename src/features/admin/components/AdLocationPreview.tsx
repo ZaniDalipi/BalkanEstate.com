@@ -54,6 +54,23 @@ export const PLACEMENT_INFO: Record<AdPlacement, { label: string; description: s
   },
 };
 
+/**
+ * Build a live-site URL that opens the page where this banner shows, with ad
+ * preview mode on (slots highlighted) and the placement focused for scroll.
+ * property-details / all have no single URL, so we land on a sensible page and
+ * preview mode stays on as the user navigates.
+ */
+export const buildAdPreviewUrl = (page: AdPage, placement: AdPlacement, lang: string): string => {
+  let route = PAGE_ROUTE[page].path;
+  if (page === 'all') route = '/';
+  if (page === 'property-details') route = '/search'; // open a listing from here
+  if (!route.startsWith('/')) route = '/';
+  const prefix = `/${lang || 'en'}`;
+  const full = route === '/' ? prefix : `${prefix}${route}`;
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  return `${origin}${full}?adPreview=1&adFocus=${placement}`;
+};
+
 const HIGHLIGHT = 'rgba(79,70,229,0.92)';
 
 /** Where the highlighted ad block sits on the mini page wireframe. */
