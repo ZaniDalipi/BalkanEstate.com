@@ -17,8 +17,8 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
         // Text search - match if ANY query term matches city or address
         let queryMatch = true;
         if (query && queryTerms.length > 0) {
-            const addressLower = p.address.toLowerCase();
-            const cityLower = p.city.toLowerCase();
+            const addressLower = (p.address || '').toLowerCase();
+            const cityLower = (p.city || '').toLowerCase();
 
             // Check if any term from the query matches the property's city or address
             // Also check if the city/address contains any of the query terms
@@ -36,11 +36,12 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
             const filterVal = filters.country.toLowerCase();
             const selectedCountry = BALKAN_COUNTRIES[filterVal]
                 || Object.values(BALKAN_COUNTRIES).find(c => c.name.toLowerCase() === filterVal);
+            const propCountryLower = (p.country || '').toLowerCase();
             if (selectedCountry) {
-                countryMatch = p.country.toLowerCase() === selectedCountry.name.toLowerCase();
+                countryMatch = propCountryLower === selectedCountry.name.toLowerCase();
             } else {
                 // Direct string comparison fallback
-                countryMatch = p.country.toLowerCase() === filterVal;
+                countryMatch = propCountryLower === filterVal;
             }
         }
 
@@ -57,7 +58,7 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
         const livingRoomsMatch = filters.livingRooms ? p.livingRooms >= filters.livingRooms : true;
         const minSqftMatch = filters.minSqft ? p.sqft >= filters.minSqft : true;
         const maxSqftMatch = filters.maxSqft ? p.sqft <= filters.maxSqft : true;
-        const sellerTypeMatch = filters.sellerType !== 'any' ? p.seller.type === filters.sellerType : true;
+        const sellerTypeMatch = filters.sellerType !== 'any' ? p.seller?.type === filters.sellerType : true;
         const propertyTypeMatch = filters.propertyType !== 'any' ? p.propertyType === filters.propertyType : true;
 
         // Advanced filters
