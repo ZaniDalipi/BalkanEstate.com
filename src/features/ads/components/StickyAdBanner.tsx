@@ -145,7 +145,7 @@ const StickyAdBanner: React.FC<StickyAdBannerProps> = ({ page, placement = 'stic
             src={imageSrc}
             alt={banner.title}
             loading="lazy"
-            style={{ display: 'block', width: '100%', height: '100%', objectFit: 'contain', background: '#fff' }}
+            style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', background: '#fff' }}
           />
         </a>
 

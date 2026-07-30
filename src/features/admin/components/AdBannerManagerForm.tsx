@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { XMarkIcon, PhotoIcon } from '@/constants';
 import type { AdBannerAdmin } from '@/src/features/ads/types';
@@ -19,17 +19,18 @@ interface Props {
 }
 
 const labelCls = 'block text-sm font-medium text-gray-700 mb-1';
+const hintCls = 'text-xs text-gray-400 mt-1';
 const inputCls =
   'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none';
 
-/** Recommended creative size (px) per placement, matching the rendered ad slot. */
-const RECOMMENDED_SIZE: Record<string, string> = {
-  'in-content': '970 × 250 (billboard leaderboard)',
-  'sticky-bottom': '970 × 90 (leaderboard)',
-  'sticky-top': '970 × 90 (leaderboard)',
-  'header': '970 × 90 (leaderboard)',
-  'sidebar': '300 × 600 (half-page) — or 160 × 600 for home side rails',
-  'footer': '970 × 250 (billboard)',
+/** Recommended creative dimensions (px) per placement — drives the preview aspect + size check. */
+const RECOMMENDED_DIMS: Record<string, { w: number; h: number; label: string }> = {
+  'in-content': { w: 970, h: 250, label: '970 × 250 — billboard leaderboard' },
+  'sticky-bottom': { w: 970, h: 90, label: '970 × 90 — leaderboard' },
+  'sticky-top': { w: 970, h: 90, label: '970 × 90 — leaderboard' },
+  header: { w: 970, h: 90, label: '970 × 90 — leaderboard' },
+  sidebar: { w: 300, h: 600, label: '300 × 600 — half-page (or 160 × 600 for home side rails)' },
+  footer: { w: 970, h: 250, label: '970 × 250 — billboard' },
 };
 
 const AdBannerManagerForm: React.FC<Props> = ({
@@ -48,11 +49,27 @@ const AdBannerManagerForm: React.FC<Props> = ({
   const set = <K extends keyof AdBannerFormData>(key: K, value: AdBannerFormData[K]) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
 
+  const dims = RECOMMENDED_DIMS[formData.placement] || RECOMMENDED_DIMS['in-content'];
+  const isTall = dims.h > dims.w;
+
+  // Natural size of the uploaded image, read on load, to warn when it's too small.
+  const [imgDims, setImgDims] = useState<{ w: number; h: number } | null>(null);
+  useEffect(() => {
+    setImgDims(null);
+  }, [formData.imageUrl]);
+
+  const tooSmall =
+    imgDims !== null && (imgDims.w < dims.w * 0.8 || imgDims.h < dims.h * 0.8);
+
+  const previewBoxStyle: React.CSSProperties = isTall
+    ? { height: 168, aspectRatio: `${dims.w} / ${dims.h}` }
+    : { width: 280, maxWidth: '100%', aspectRatio: `${dims.w} / ${dims.h}` };
+
   return (
     <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
           <h2 className="text-lg font-bold text-gray-900">
             {editingItem
               ? t('admin:adBanners.editBanner', 'Edit Ad Banner')
@@ -63,7 +80,7 @@ const AdBannerManagerForm: React.FC<Props> = ({
           </button>
         </div>
 
-        <form onSubmit={onSubmit} className="p-6 space-y-4">
+        <form onSubmit={onSubmit} className="p-6 space-y-5">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
               {error}
@@ -73,17 +90,32 @@ const AdBannerManagerForm: React.FC<Props> = ({
           {/* Image upload */}
           <div>
             <label className={labelCls}>{t('admin:adBanners.image', 'Banner Image')} *</label>
-            <div className="flex items-center gap-4">
-              <div className="w-40 h-20 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex-shrink-0">
+            <div className="flex flex-col sm:flex-row items-start gap-4">
+              {/* Preview at the exact slot proportions so you see the real fit */}
+              <div
+                className="rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex-shrink-0"
+                style={previewBoxStyle}
+              >
                 {formData.imageUrl ? (
-                  <img src={formData.imageUrl} alt="preview" className="w-full h-full object-cover" />
+                  <img
+                    src={formData.imageUrl}
+                    alt="preview"
+                    className="w-full h-full"
+                    style={{ objectFit: 'cover', display: 'block' }}
+                    onLoad={(e) =>
+                      setImgDims({
+                        w: e.currentTarget.naturalWidth,
+                        h: e.currentTarget.naturalHeight,
+                      })
+                    }
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <PhotoIcon className="w-6 h-6 text-gray-300" />
                   </div>
                 )}
               </div>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -99,21 +131,39 @@ const AdBannerManagerForm: React.FC<Props> = ({
                   <PhotoIcon className="w-5 h-5" />
                   {isUploading
                     ? t('admin:adBanners.uploading', 'Uploading…')
+                    : formData.imageUrl
+                    ? t('admin:adBanners.replaceImage', 'Replace Image')
                     : t('admin:adBanners.uploadImage', 'Upload Image')}
                 </label>
                 <p className="text-xs text-gray-500 mt-2">
                   {t('admin:adBanners.recommendedSize', 'Recommended size')}:{' '}
-                  <span className="font-medium text-gray-700">
-                    {RECOMMENDED_SIZE[formData.placement] || '970 × 250'}
-                  </span>
+                  <span className="font-medium text-gray-700">{dims.label}</span>
                 </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  {t('admin:adBanners.imageHint2', 'PNG or JPG, max 5MB. The image fills the slot, so match the size for a clean fit.')}
+                <p className={hintCls}>
+                  {t('admin:adBanners.imageHint2', 'PNG or JPG, max 5MB. The image fills the slot — match the size so it looks sharp and not stretched or cropped.')}
                 </p>
+                {imgDims && (
+                  <p className={`text-xs mt-1 ${tooSmall ? 'text-amber-600 font-medium' : 'text-green-600'}`}>
+                    {tooSmall
+                      ? t('admin:adBanners.imageTooSmall', {
+                          defaultValue: '⚠ Uploaded image is {{w}}×{{h}}px — smaller than recommended. It may look blurry. Use at least {{rw}}×{{rh}}px.',
+                          w: imgDims.w,
+                          h: imgDims.h,
+                          rw: dims.w,
+                          rh: dims.h,
+                        })
+                      : t('admin:adBanners.imageGood', {
+                          defaultValue: '✓ Uploaded image is {{w}}×{{h}}px — good fit.',
+                          w: imgDims.w,
+                          h: imgDims.h,
+                        })}
+                  </p>
+                )}
               </div>
             </div>
           </div>
 
+          {/* Title + Advertiser */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>{t('admin:adBanners.bannerTitle', 'Title / Label')} *</label>
@@ -122,9 +172,10 @@ const AdBannerManagerForm: React.FC<Props> = ({
                 value={formData.title}
                 onChange={(e) => set('title', e.target.value)}
                 className={inputCls}
-                placeholder={t('admin:adBanners.titlePlaceholder', 'Internal label')}
+                placeholder={t('admin:adBanners.titlePlaceholder', 'e.g. Summer campaign — Bank X')}
                 required
               />
+              <p className={hintCls}>{t('admin:adBanners.titleHint', 'Internal name only — not shown to visitors.')}</p>
             </div>
             <div>
               <label className={labelCls}>{t('admin:adBanners.advertiser', 'Advertiser')} *</label>
@@ -136,9 +187,11 @@ const AdBannerManagerForm: React.FC<Props> = ({
                 placeholder={t('admin:adBanners.advertiserPlaceholder', 'Company name')}
                 required
               />
+              <p className={hintCls}>{t('admin:adBanners.advertiserHint', 'The company buying this slot.')}</p>
             </div>
           </div>
 
+          {/* Link */}
           <div>
             <label className={labelCls}>{t('admin:adBanners.linkUrl', 'Link URL')} *</label>
             <input
@@ -149,8 +202,10 @@ const AdBannerManagerForm: React.FC<Props> = ({
               placeholder="https://advertiser.example.com"
               required
             />
+            <p className={hintCls}>{t('admin:adBanners.linkHint', 'Where visitors go when they click the banner (opens in a new tab).')}</p>
           </div>
 
+          {/* Advertiser contact */}
           <div>
             <label className={labelCls}>{t('admin:adBanners.advertiserContact', 'Advertiser Contact')}</label>
             <input
@@ -158,14 +213,15 @@ const AdBannerManagerForm: React.FC<Props> = ({
               value={formData.advertiserContact}
               onChange={(e) => set('advertiserContact', e.target.value)}
               className={inputCls}
-              placeholder={t('admin:adBanners.contactPlaceholder', 'Email or phone (for billing)')}
+              placeholder={t('admin:adBanners.contactPlaceholder', 'Email or phone')}
             />
+            <p className={hintCls}>{t('admin:adBanners.contactHint', 'For your billing records only — never shown publicly.')}</p>
           </div>
 
           {/* Placement + Page */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className={labelCls}>{t('admin:adBanners.placement', 'Placement')}</label>
+              <label className={labelCls}>{t('admin:adBanners.placement', 'Placement')} *</label>
               <select
                 value={formData.placement}
                 onChange={(e) => set('placement', e.target.value as AdBannerFormData['placement'])}
@@ -177,9 +233,10 @@ const AdBannerManagerForm: React.FC<Props> = ({
                   </option>
                 ))}
               </select>
+              <p className={hintCls}>{t('admin:adBanners.placementHint', 'Where on the page the banner sits.')}</p>
             </div>
             <div>
-              <label className={labelCls}>{t('admin:adBanners.page', 'Target Page')}</label>
+              <label className={labelCls}>{t('admin:adBanners.page', 'Target Page')} *</label>
               <select
                 value={formData.page}
                 onChange={(e) => set('page', e.target.value as AdBannerFormData['page'])}
@@ -191,10 +248,11 @@ const AdBannerManagerForm: React.FC<Props> = ({
                   </option>
                 ))}
               </select>
+              <p className={hintCls}>{t('admin:adBanners.pageHint', 'Which page(s) show it. "All Pages" shows everywhere.')}</p>
             </div>
           </div>
 
-          {/* Live location preview — shows exactly where this banner will appear */}
+          {/* Live location preview */}
           <div>
             <label className={labelCls}>{t('admin:adBanners.whereItShows', 'Where it shows')}</label>
             <AdLocationPreview page={formData.page} placement={formData.placement} />
@@ -211,6 +269,7 @@ const AdBannerManagerForm: React.FC<Props> = ({
                 className={inputCls}
                 placeholder={t('admin:adBanners.categoryPlaceholder', 'e.g. premium')}
               />
+              <p className={hintCls}>{t('admin:adBanners.categoryHint', 'Group by pricing tier.')}</p>
             </div>
             <div>
               <label className={labelCls}>{t('admin:adBanners.price', 'Price / month')}</label>
@@ -223,6 +282,7 @@ const AdBannerManagerForm: React.FC<Props> = ({
                 className={inputCls}
                 placeholder="0"
               />
+              <p className={hintCls}>{t('admin:adBanners.priceHint', 'For your records only.')}</p>
             </div>
             <div>
               <label className={labelCls}>{t('admin:adBanners.currency', 'Currency')}</label>
@@ -237,7 +297,7 @@ const AdBannerManagerForm: React.FC<Props> = ({
             </div>
           </div>
 
-          {/* Schedule */}
+          {/* Schedule + order */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className={labelCls}>{t('admin:adBanners.startDate', 'Start Date')}</label>
@@ -247,6 +307,7 @@ const AdBannerManagerForm: React.FC<Props> = ({
                 onChange={(e) => set('startDate', e.target.value)}
                 className={inputCls}
               />
+              <p className={hintCls}>{t('admin:adBanners.startHint', 'Optional — hidden before this date.')}</p>
             </div>
             <div>
               <label className={labelCls}>{t('admin:adBanners.endDate', 'End Date')}</label>
@@ -256,6 +317,7 @@ const AdBannerManagerForm: React.FC<Props> = ({
                 onChange={(e) => set('endDate', e.target.value)}
                 className={inputCls}
               />
+              <p className={hintCls}>{t('admin:adBanners.endHint', 'Optional — hidden after this date.')}</p>
             </div>
             <div>
               <label className={labelCls}>{t('admin:adBanners.order', 'Order')}</label>
@@ -265,28 +327,35 @@ const AdBannerManagerForm: React.FC<Props> = ({
                 onChange={(e) => set('order', Number(e.target.value))}
                 className={inputCls}
               />
+              <p className={hintCls}>{t('admin:adBanners.orderHint', 'Lower shows first. Home rails: 0 = left, 1 = right.')}</p>
             </div>
           </div>
 
           {/* Toggles */}
-          <div className="flex items-center gap-6">
-            <label className="flex items-center gap-2 cursor-pointer">
+          <div className="flex flex-wrap items-start gap-6 rounded-lg bg-gray-50 border border-gray-200 p-4">
+            <label className="flex items-start gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={formData.isActive}
                 onChange={(e) => set('isActive', e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="w-4 h-4 mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
-              <span className="text-sm text-gray-700">{t('admin:adBanners.activeLabel', 'Active')}</span>
+              <span>
+                <span className="block text-sm font-medium text-gray-700">{t('admin:adBanners.activeLabel', 'Active')}</span>
+                <span className="block text-xs text-gray-400">{t('admin:adBanners.activeHint', 'Uncheck to hide without deleting.')}</span>
+              </span>
             </label>
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label className="flex items-start gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={formData.isSticky}
                 onChange={(e) => set('isSticky', e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="w-4 h-4 mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
-              <span className="text-sm text-gray-700">{t('admin:adBanners.stickyLabel', 'Sticky')}</span>
+              <span>
+                <span className="block text-sm font-medium text-gray-700">{t('admin:adBanners.stickyLabel', 'Sticky')}</span>
+                <span className="block text-xs text-gray-400">{t('admin:adBanners.stickyHint', 'Only affects the sticky bar placements.')}</span>
+              </span>
             </label>
           </div>
 
