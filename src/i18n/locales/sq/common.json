@@ -638,11 +638,10 @@
   },
   "removeFromFavorites": "Hiq nga të preferuarat",
   "saved": "Të ruajtura",
-  "ads": {
-    "advertisement": "Advertisement",
-    "sponsored": "Sponsored",
-    "close": "Close advertisement",
-    "yourAdHere": "Your Ad Here",
-    "advertiseWithUs": "Advertise with us"
+  "usageMeter": {
+    "label": "Përdorimi mujor",
+    "usedOfLimit": "{{used}} / {{limit}} të përdorura",
+    "unlimited": "Të pakufizuara",
+    "resetsOn": "Rifreskohet më {{date}}"
   }
 }

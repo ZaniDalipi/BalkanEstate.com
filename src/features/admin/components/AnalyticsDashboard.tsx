@@ -90,7 +90,7 @@ const AnalyticsDashboard: React.FC = () => {
 
   const fetchPendingLicenses = async () => {
     try {
-      const token = localStorage.getItem('balkan_estate_token');
+      const token = tokenService.getAccessToken();
       const response = await fetch(`${API_URL}/admin/users?role=agent&licenseVerified=false&limit=10&sortBy=createdAt&order=desc`, {
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -6,6 +6,7 @@ import { Animated } from '@/src/components/ui/Animations';
 import { BuildingStorefrontIcon, UserIcon, MapPinIcon } from '@/constants';
 import { BALKAN_LOCATIONS, type CityData } from '@/utils/balkanLocations';
 import PhoneInput, { parsePhoneValue } from '@/src/shared/components/ui/PhoneInput';
+import { convertToUploadableImage } from '@/shared/utils/imageConversion';
 
 const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
 
@@ -264,9 +265,12 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
   const MAX_LOGO_SIZE = 5 * 1024 * 1024;
   const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
-  const handleLogoChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleLogoChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (!selected) return;
+
+    // Convert HEIC/HEIF (iPhone photos) to JPEG so it previews and uploads correctly.
+    const file = await convertToUploadableImage(selected);
 
     if (!ACCEPTED_TYPES.includes(file.type)) {
       setFormError(t('form.errors.logoInvalidType'));
@@ -289,9 +293,12 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
     setLogoPreview(null);
   }, []);
 
-  const handleBannerChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleBannerChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (!selected) return;
+
+    // Convert HEIC/HEIF (iPhone photos) to JPEG so it previews and uploads correctly.
+    const file = await convertToUploadableImage(selected);
 
     if (!ACCEPTED_TYPES.includes(file.type)) {
       setFormError(t('form.errors.logoInvalidType'));
@@ -578,7 +585,7 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
                       {logoPreview ? t('form.logoChange') : t('form.logoUpload')}
                       <input
                         type="file"
-                        accept="image/jpeg,image/png,image/webp"
+                        accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
                         onChange={handleLogoChange}
                         className="hidden"
                       />
@@ -623,7 +630,7 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
                     {bannerPreview ? t('form.bannerChange', 'Change Banner') : t('form.bannerUpload', 'Upload Banner')}
                     <input
                       type="file"
-                      accept="image/jpeg,image/png,image/webp"
+                      accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
                       onChange={handleBannerChange}
                       className="hidden"
                     />

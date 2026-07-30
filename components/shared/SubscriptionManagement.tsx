@@ -5,6 +5,7 @@ import { useAppContext } from '../../context/AppContext';
 import { User } from '../../types';
 import PaymentWindow from './PaymentWindow';
 import { UpgradeOptionsGrid, useUpgradeOptions } from './upgrade-plan-card';
+import { RoomStylerUsageCard } from '../../src/features/room-styler';
 import { replacePlaceholders, ProductValues } from '../../src/shared/utils/featurePlaceholders';
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
@@ -1303,6 +1304,9 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           </div>
         </div>
       </div>
+
+      {/* AI Room Styler usage */}
+      <RoomStylerUsageCard enabled={!!user} />
 
       {/* Listing Limit Info - Monthly Counter (or Yearly Total for Yearly Plans) */}
       <div className="bg-white rounded-xl border border-neutral-200 p-4 shadow-sm">

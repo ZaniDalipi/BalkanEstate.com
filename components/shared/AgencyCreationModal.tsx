@@ -9,6 +9,7 @@ import {
 import { useAppContext } from '../../context/AppContext';
 import { BALKAN_LOCATIONS, CityData } from '../../utils/balkanLocations';
 import { canCreateAgency } from '../../src/shared/utils/subscriptionHelpers';
+import { convertToUploadableImage } from '../../src/shared/utils/imageConversion';
 import { UserRole } from '../../types';
 import { createAgency } from '../../src/features/agencies/api/agencyApi';
 import { uploadRequest } from '../../src/shared/api/httpClient';
@@ -308,9 +309,12 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
   const MAX_LOGO_SIZE = 5 * 1024 * 1024; // 5MB
   const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'];
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (!selected) return;
+
+    // Convert HEIC/HEIF (iPhone photos) to JPEG so it previews and uploads correctly.
+    const file = await convertToUploadableImage(selected);
 
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
       setFieldErrors(prev => ({ ...prev, logo: t('agents:agencyCreation.validation.logoInvalidType', 'Please upload a JPEG, PNG, WebP, or SVG image') }));

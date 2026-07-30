@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaperAirplaneIcon, PhotoIcon, XMarkIcon } from '@/constants';
+import { convertToUploadableImage, isHeicFile } from '@/shared/utils/imageConversion';
 
 interface MessageInputProps {
     onSendMessage: (text: string, imageFile?: File) => Promise<void>;
@@ -17,9 +18,12 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, onTyping, di
     const fileInputRef = useRef<HTMLInputElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file && file.type.startsWith('image/')) {
+    const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selected = e.target.files?.[0];
+        // HEIC/HEIF from iOS often has an empty MIME type, so also accept by extension.
+        if (selected && (selected.type.startsWith('image/') || isHeicFile(selected))) {
+            // Convert HEIC/HEIF to JPEG so the preview and the sent image aren't broken.
+            const file = await convertToUploadableImage(selected);
             setImageFile(file);
             const reader = new FileReader();
             reader.onload = () => {

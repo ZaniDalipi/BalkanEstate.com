@@ -240,6 +240,7 @@
     "uploadFailedMessage": "Učitavanje slika nije uspjelo: {{error}}. Molimo pokušajte ponovo.",
     "publishFailed": "Objavljivanje oglasa nije uspjelo. Molimo pokušajte ponovo.",
     "imageProcessingFailed": "Obrada Slika Nije Uspjela",
+    "heicConversionFailed": "Nismo mogli konvertovati {{files}}. Molimo sačuvajte je kao JPEG ili PNG i pokušajte ponovo.",
     "failedToProcessImages": "Obrada slika nije uspjela. Molimo pokušajte ponovo.",
     "noNewImages": "Nema Novih Slika",
     "noNewImagesMessage": "Nisu učitane nove slike za analizu. Molimo dodajte nove datoteke slika.",

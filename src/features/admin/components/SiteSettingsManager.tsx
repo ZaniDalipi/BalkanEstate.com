@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { convertToUploadableImage, isHeicFile } from '@/shared/utils/imageConversion';
 import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
@@ -54,8 +55,10 @@ const LogoUpload: React.FC<LogoUploadProps> = ({
     setImgError(false);
   }, [currentUrl]);
 
-  const handleFile = useCallback((file: File) => {
-    if (!file.type.startsWith('image/')) return;
+  const handleFile = useCallback(async (selected: File) => {
+    if (!selected.type.startsWith('image/') && !isHeicFile(selected)) return;
+    // Convert HEIC/HEIF to JPEG before upload so the logo renders everywhere.
+    const file = await convertToUploadableImage(selected);
     if (file.size > 5 * 1024 * 1024) return;
     onUpload(file);
   }, [onUpload]);
@@ -100,7 +103,7 @@ const LogoUpload: React.FC<LogoUploadProps> = ({
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/png,image/jpeg,image/webp,image/gif"
+          accept="image/png,image/jpeg,image/webp,image/gif,image/heic,image/heif"
           onChange={e => {
             const file = e.target.files?.[0];
             if (file) handleFile(file);

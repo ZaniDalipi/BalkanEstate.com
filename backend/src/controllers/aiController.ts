@@ -9,6 +9,8 @@ import {
   ENTERPRISE_TIER_LIMITS,
   PRO_BUYER_LIMITS,
 } from '../config/subscriptionConstants';
+import { getRoomStyle } from '../data/roomStyles';
+import { getRoomStyleUsageStats } from '../utils/roomStyleLimits';
 
 function getNextMonthStart(): Date {
   const d = new Date();
@@ -266,6 +268,174 @@ export const aiChat = async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     apiLogger.error('Error in aiChat:', error instanceof Error ? error.message : String(error));
     res.status(500).json({ message: 'Failed to get AI chat response. Please try again later.' });
+  }
+};
+
+/**
+ * POST /api/ai/restyle-room
+ * Restyle a listing's room photo into a chosen interior design style.
+ * Expects JSON body { imageUrl, style }. The image is fetched server-side
+ * (restricted to Cloudinary) and sent to Gemini's image model.
+ */
+const MAX_RESTYLE_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB
+const ALLOWED_IMAGE_HOSTS = new Set(['res.cloudinary.com']);
+
+export const restyleRoom = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!isApiKeyConfigured()) {
+      res.status(503).json({ message: 'AI service is not available. GOOGLE_AI_API_KEY is not configured.' });
+      return;
+    }
+
+    const { imageUrl, style } = req.body;
+
+    if (!imageUrl || typeof imageUrl !== 'string') {
+      res.status(400).json({ message: 'imageUrl is required.' });
+      return;
+    }
+    if (!style || typeof style !== 'string') {
+      res.status(400).json({ message: 'style is required.' });
+      return;
+    }
+
+    const styleDef = getRoomStyle(style);
+    if (!styleDef) {
+      res.status(400).json({ message: 'Unknown style.' });
+      return;
+    }
+
+    // SSRF guard: only allow https Cloudinary image URLs (listing photos).
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(imageUrl);
+    } catch {
+      res.status(400).json({ message: 'Invalid imageUrl.' });
+      return;
+    }
+    if (parsedUrl.protocol !== 'https:' || !ALLOWED_IMAGE_HOSTS.has(parsedUrl.hostname)) {
+      res.status(400).json({ message: 'imageUrl must be a Cloudinary https URL.' });
+      return;
+    }
+
+    // Enforce roomStyle monthly limit. Resolve the limit from the user's REAL
+    // account status (agency/pro/buyer via embedded subscription, Subscription
+    // doc, proSubscription, or the isSubscribed flag) — not just `isSubscribed`,
+    // so paying/agency users are never wrongly capped at the free tier.
+    const userId = (req.user as any)?._id;
+    let resolvedLimit: number = FREE_TIER_LIMITS.ROOM_STYLES;
+    if (userId) {
+      const user = await User.findById(userId);
+      if (user) {
+        const stats = await getRoomStyleUsageStats(user);
+        resolvedLimit = stats.limit;
+
+        // Enforce only when the plan is limited (-1 = unlimited).
+        if (stats.limit !== -1 && stats.remaining <= 0) {
+          res.status(429).json({
+            message: `Room styler limit reached. You have used all ${stats.limit} restyles for this month.`,
+            limit: stats.limit,
+            used: stats.used,
+            remaining: 0,
+            resetDate: stats.resetDate,
+          });
+          return;
+        }
+      }
+    }
+
+    // Fetch the source image server-side.
+    let imageBase64: string;
+    let sourceMime: string;
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15_000);
+      const upstream = await fetch(imageUrl, {
+        signal: controller.signal,
+        headers: { 'User-Agent': 'BalkanEstate/1.0 (+https://balkanestate.com)' },
+      });
+      clearTimeout(timeout);
+
+      if (!upstream.ok) {
+        res.status(400).json({ message: 'Could not fetch the source image.' });
+        return;
+      }
+
+      sourceMime = (upstream.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
+      if (!sourceMime.startsWith('image/')) {
+        res.status(400).json({ message: 'imageUrl does not point to an image.' });
+        return;
+      }
+
+      const arrayBuffer = await upstream.arrayBuffer();
+      if (arrayBuffer.byteLength > MAX_RESTYLE_IMAGE_BYTES) {
+        res.status(400).json({ message: 'Source image is too large (max 10 MB).' });
+        return;
+      }
+      imageBase64 = Buffer.from(arrayBuffer).toString('base64');
+    } catch (fetchErr) {
+      apiLogger.error('Error fetching source image for restyle:', fetchErr instanceof Error ? fetchErr.message : String(fetchErr));
+      res.status(400).json({ message: 'Could not fetch the source image.' });
+      return;
+    }
+
+    apiLogger.info(`Restyling room image in "${styleDef.label}" style`);
+
+    const result = await geminiService.restyleRoomImage(
+      imageBase64,
+      sourceMime,
+      styleDef.id,
+      styleDef.label,
+      styleDef.prompt,
+      styleDef.category === 'exterior' ? 'exterior' : 'interior'
+    );
+
+    // Count usage only on a successful generation, and only for limited plans.
+    // Atomic $inc avoids a read-modify-write race between concurrent requests.
+    if (userId && resolvedLimit !== -1) {
+      await User.findByIdAndUpdate(userId, {
+        $inc: { 'roomStyleUsage.monthlyCount': 1 },
+      });
+    }
+
+    const imageDataUrl = `data:${result.mimeType};base64,${result.imageBase64}`;
+    res.json({ imageDataUrl, style: styleDef.id });
+  } catch (error) {
+    apiLogger.error('Error in restyleRoom:', error instanceof Error ? error.message : String(error));
+    res.status(500).json({ message: 'Failed to restyle the room. Please try again later.' });
+  }
+};
+
+/**
+ * GET /api/ai/room-style/usage
+ * Return the current user's room-styler usage + resolved monthly limit so the
+ * client can render a usage meter and only show the upgrade prompt when the
+ * user's REAL account status has actually run out (limit !== -1 && remaining 0).
+ */
+export const getRoomStyleUsage = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req.user as any)?._id;
+    if (!userId) {
+      res.status(401).json({ message: 'Authentication required' });
+      return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(401).json({ message: 'User not found' });
+      return;
+    }
+
+    const stats = await getRoomStyleUsageStats(user);
+    res.json({
+      used: stats.used,
+      limit: stats.limit,
+      remaining: stats.remaining,
+      resetDate: stats.resetDate,
+      isPremium: stats.isPremium,
+    });
+  } catch (error) {
+    apiLogger.error('Error in getRoomStyleUsage:', error instanceof Error ? error.message : String(error));
+    res.status(500).json({ message: 'Failed to load room styler usage.' });
   }
 };
 

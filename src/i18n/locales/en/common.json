@@ -638,11 +638,10 @@
     "ctaDescription": "Search across all 11 Balkan countries with AI-powered matching. 10 languages, verified agents, instant valuations.",
     "ctaButton": "Start Searching"
   },
-  "ads": {
-    "advertisement": "Advertisement",
-    "sponsored": "Sponsored",
-    "close": "Close advertisement",
-    "yourAdHere": "Your Ad Here",
-    "advertiseWithUs": "Advertise with us"
+  "usageMeter": {
+    "label": "Monthly usage",
+    "usedOfLimit": "{{used}} / {{limit}} used",
+    "unlimited": "Unlimited",
+    "resetsOn": "Resets on {{date}}"
   }
 }

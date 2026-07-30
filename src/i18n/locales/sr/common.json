@@ -638,11 +638,10 @@
   },
   "removeFromFavorites": "Уклони из омиљених",
   "saved": "Сачувано",
-  "ads": {
-    "advertisement": "Advertisement",
-    "sponsored": "Sponsored",
-    "close": "Close advertisement",
-    "yourAdHere": "Your Ad Here",
-    "advertiseWithUs": "Advertise with us"
+  "usageMeter": {
+    "label": "Месечна потрошња",
+    "usedOfLimit": "{{used}} / {{limit}} искоришћено",
+    "unlimited": "Неограничено",
+    "resetsOn": "Обнавља се {{date}}"
   }
 }

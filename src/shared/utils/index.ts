@@ -6,3 +6,4 @@ export * from './validation';
 export * from './logger';
 export * from './subscriptionHelpers';
 export * from './featurePlaceholders';
+export * from './imageConversion';

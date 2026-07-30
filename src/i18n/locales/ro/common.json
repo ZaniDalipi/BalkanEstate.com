@@ -638,11 +638,10 @@
   },
   "removeFromFavorites": "Elimină de la favorite",
   "saved": "Salvat",
-  "ads": {
-    "advertisement": "Advertisement",
-    "sponsored": "Sponsored",
-    "close": "Close advertisement",
-    "yourAdHere": "Your Ad Here",
-    "advertiseWithUs": "Advertise with us"
+  "usageMeter": {
+    "label": "Utilizare lunară",
+    "usedOfLimit": "{{used}} / {{limit}} folosite",
+    "unlimited": "Nelimitat",
+    "resetsOn": "Se resetează pe {{date}}"
   }
 }

@@ -655,5 +655,32 @@
     "description": "{{type}} sa {{beds}} spavaćih soba, {{baths}} kupatila za {{listingAction}} u {{city}}, {{country}}. {{sqft}}m² za €{{price}}.",
     "forRent": "Najam",
     "forSale": "Prodaja"
+  },
+  "roomStyler": {
+    "reimagine": "Zamisli iznova",
+    "title": "Zamislite ovu sobu iznova",
+    "subtitle": "Pogledajte ovu sobu u drugom stilu uređenja",
+    "close": "Zatvori",
+    "chooseStyle": "Odaberite stil",
+    "generate": "Generiši",
+    "generating": "Preuređivanje u stil {{style}}…",
+    "generating2": "Generisanje…",
+    "tryAnother": "Probaj drugi stil",
+    "download": "Preuzmi HD",
+    "before": "Original",
+    "roomPhoto": "Fotografija sobe",
+    "limitReached": "Dostigli ste mjesečni limit za preuređivanje soba.",
+    "genericError": "Nešto je pošlo po zlu. Molimo pokušajte ponovo.",
+    "upgrade": "Pogledaj planove",
+    "meterLabel": "AI Stilista Soba",
+    "meterSubtitle": "Zamislite sobe u različitim stilovima uređenja",
+    "meterUsageLabel": "Preuređivanja ovog mjeseca",
+    "limitTitle": "Iskoristili ste sva preuređivanja ovog mjeseca",
+    "limitMessage": "Nadogradite na Pro Buyer ili drugi plan da nastavite — ili sačekajte da se kvota obnovi.",
+    "unlimitedNote": "Neograničena preuređivanja na vašem planu",
+    "remainingNote": "Preostalo {{remaining}} ovog mjeseca",
+    "disclaimer": "AI-generisano uređenje samo u svrhu demonstracije. Ove slike nisu stvarne fotografije nekretnine i mogu sadržavati predmete koji nisu dio oglasa.",
+    "interior": "Enterijer",
+    "exterior": "Eksterijer"
   }
 }
