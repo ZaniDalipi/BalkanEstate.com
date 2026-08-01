@@ -66,6 +66,15 @@ const emptyForm = (order = 0): AdBannerFormData => ({
 
 const toDateInput = (iso?: string): string => (iso ? iso.slice(0, 10) : '');
 
+/** Prepend https:// when the admin typed a bare domain (e.g. "example.com"). */
+export const normalizeUrl = (raw: string): string => {
+  const value = (raw || '').trim();
+  if (!value) return value;
+  if (/^https?:\/\//i.test(value)) return value;
+  // Strip an accidental leading "//" then add the scheme.
+  return `https://${value.replace(/^\/+/, '')}`;
+};
+
 export function useAdBannerManager() {
   const [banners, setBanners] = useState<AdBannerAdmin[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -126,6 +135,9 @@ export function useAdBannerManager() {
       return;
     }
 
+    // Add https:// automatically if the admin didn't type a scheme.
+    const linkUrl = normalizeUrl(formData.linkUrl);
+
     setIsSaving(true);
     try {
       const payload = {
@@ -134,7 +146,7 @@ export function useAdBannerManager() {
         advertiserContact: formData.advertiserContact || undefined,
         imageUrl: formData.imageUrl,
         imagePublicId: formData.imagePublicId || undefined,
-        linkUrl: formData.linkUrl,
+        linkUrl,
         placement: formData.placement,
         page: formData.page,
         category: formData.category || undefined,

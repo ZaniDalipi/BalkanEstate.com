@@ -1014,7 +1014,7 @@
     "imageGood": "✓ Uploaded image is {{w}}×{{h}}px — good fit.",
     "titleHint": "Internal name only — not shown to visitors.",
     "advertiserHint": "The company buying this slot.",
-    "linkHint": "Where visitors go when they click the banner (opens in a new tab).",
+    "linkHint": "Where visitors go when they click the banner (opens in a new tab). No need to type https:// — we add it automatically.",
     "contactHint": "For your billing records only — never shown publicly.",
     "placementHint": "Where on the page the banner sits.",
     "pageHint": "Which page(s) show it. \"All Pages\" shows everywhere.",

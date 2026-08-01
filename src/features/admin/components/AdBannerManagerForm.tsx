@@ -196,14 +196,15 @@ const AdBannerManagerForm: React.FC<Props> = ({
           <div>
             <label className={labelCls}>{t('admin:adBanners.linkUrl', 'Link URL')} *</label>
             <input
-              type="url"
+              type="text"
+              inputMode="url"
               value={formData.linkUrl}
               onChange={(e) => set('linkUrl', e.target.value)}
               className={inputCls}
-              placeholder="https://advertiser.example.com"
+              placeholder="advertiser.com"
               required
             />
-            <p className={hintCls}>{t('admin:adBanners.linkHint', 'Where visitors go when they click the banner (opens in a new tab).')}</p>
+            <p className={hintCls}>{t('admin:adBanners.linkHint', 'Where visitors go when they click the banner (opens in a new tab). No need to type https:// — we add it automatically.')}</p>
           </div>
 
           {/* Advertiser contact */}
