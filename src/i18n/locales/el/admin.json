@@ -40,7 +40,8 @@
     "marketing": "Marketing & Sales",
     "system": "System",
     "inquiries": "Inquiries",
-    "pricing": "Pricing & Plans"
+    "pricing": "Pricing & Plans",
+    "villaApprovals": "Εγκρίσεις βιλών"
   },
   "properties": {
     "title": "Property Manager",
@@ -956,5 +957,21 @@
     "howItWorks": "Πώς λειτουργεί η βαθμολόγηση",
     "agentFormula": "Πράκτορες: αξιολόγηση×20 + πωλήσεις×5 + αγγελίες×2 + κριτικές×1 (μέγ. 180 π.)",
     "agencyFormula": "Πρακτορεία: αγγελίες×3 + ομάδα×5 + εμπειρία×2 + προβεβλημένα×20 (μέγ. 160 π.)"
+  },
+  "villas": {
+    "title": "Εγκρίσεις πολυτελών βιλών",
+    "subtitle": "Επιμεληθείτε την καρτέλα Πολυτελείς Βίλες — μόνο οι εγκεκριμένες βίλες εμφανίζονται δημόσια.",
+    "pending": "Σε εκκρεμότητα",
+    "approved": "Εγκρίθηκε",
+    "rejected": "Απορρίφθηκε",
+    "approve": "Έγκριση",
+    "reject": "Απόρριψη",
+    "rejectPrompt": "Λόγος απόρριψης (προαιρετικά):",
+    "loadError": "Αποτυχία φόρτωσης εγκρίσεων",
+    "approveError": "Αποτυχία έγκρισης βίλας",
+    "rejectError": "Αποτυχία απόρριψης βίλας",
+    "empty": "Καμία βίλα εδώ.",
+    "untitled": "Βίλα χωρίς τίτλο",
+    "negotiable": "Κατόπιν συνεννόησης"
   }
 }

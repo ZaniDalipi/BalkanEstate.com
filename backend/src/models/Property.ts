@@ -45,6 +45,13 @@ export interface IProperty extends Document {
   listingType: 'sale' | 'rent'; // Whether this property is for sale or rent
   title?: string; // Optional title/headline for the property listing
   status: 'active' | 'pending' | 'sold' | 'rented' | 'draft';
+  // Luxury-villa listings are curated: they stay hidden from the public
+  // Luxury Villas tab until an admin approves them. Only applicable when
+  // propertyType === 'luxury-villa'.
+  villaApprovalStatus?: 'pending' | 'approved' | 'rejected';
+  villaApprovalReviewedBy?: string;
+  villaApprovalReviewedAt?: Date;
+  villaApprovalReason?: string;
   soldAt?: Date;
   price: number;
   isNegotiable?: boolean; // When true, price is "By Negotiation" (price field can be 0)
@@ -217,6 +224,15 @@ const PropertySchema: Schema = new Schema(
       default: 'active',
       index: true,
     },
+    // Admin curation for luxury villas — see interface for details
+    villaApprovalStatus: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      index: true,
+    },
+    villaApprovalReviewedBy: { type: String },
+    villaApprovalReviewedAt: { type: Date },
+    villaApprovalReason: { type: String, maxlength: 1000 },
     soldAt: {
       type: Date,
       index: true,
@@ -605,6 +621,8 @@ PropertySchema.index({ lat: 1, lng: 1 });
 PropertySchema.index({ price: 1, status: 1 });
 // Index for property type and city queries
 PropertySchema.index({ propertyType: 1, city: 1, status: 1 });
+// Luxury-villa approval queue + public "approved only" villa listing
+PropertySchema.index({ propertyType: 1, villaApprovalStatus: 1, status: 1 });
 // Index for promoted properties
 PropertySchema.index({ isPromoted: 1, status: 1 });
 // Index for promoted properties by tier (for sorting)

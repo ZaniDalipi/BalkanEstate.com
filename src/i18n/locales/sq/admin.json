@@ -40,7 +40,8 @@
     "marketing": "Marketing & Sales",
     "system": "System",
     "inquiries": "Inquiries",
-    "pricing": "Pricing & Plans"
+    "pricing": "Pricing & Plans",
+    "villaApprovals": "Miratimi i Vilave"
   },
   "properties": {
     "title": "Menaxheri i Pronave",
@@ -955,5 +956,21 @@
     "howItWorks": "Si funksionon vlerësimi",
     "agentFormula": "Agjentë: vlerësim×20 + shitje×5 + listë×2 + komente×1 (maks 180 pikë)",
     "agencyFormula": "Agjenci: listë×3 + ekip×5 + eksperiencë×2 + të veçuar×20 (maks 160 pikë)"
+  },
+  "villas": {
+    "title": "Miratimi i Vilave Luksoze",
+    "subtitle": "Kuroni skedën e Vilave Luksoze — vetëm vilat e miratuara shfaqen publikisht.",
+    "pending": "Në pritje",
+    "approved": "Miratuar",
+    "rejected": "Refuzuar",
+    "approve": "Mirato",
+    "reject": "Refuzo",
+    "rejectPrompt": "Arsyeja e refuzimit (opsionale):",
+    "loadError": "Dështoi ngarkimi i miratimeve",
+    "approveError": "Dështoi miratimi i vilës",
+    "rejectError": "Dështoi refuzimi i vilës",
+    "empty": "Nuk ka vila këtu.",
+    "untitled": "Vilë pa titull",
+    "negotiable": "Me marrëveshje"
   }
 }

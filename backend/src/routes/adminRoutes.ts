@@ -27,6 +27,9 @@ import {
   getPendingLicenses,
   approveLicense,
   rejectLicense,
+  getVillaApprovals,
+  approveVilla,
+  rejectVilla,
 } from '../controllers/adminController';
 import {
   getAllDiscountCodes,
@@ -381,6 +384,11 @@ router.post('/test-emails/daily-activity-report', logAdminAction('TRIGGER_DAILY_
 router.get('/pending-licenses', logAdminAction('VIEW_PENDING_LICENSES'), getPendingLicenses);
 router.post('/approve-license/:userId', logAdminAction('APPROVE_LICENSE'), approveLicense);
 router.post('/reject-license/:userId', logAdminAction('REJECT_LICENSE'), rejectLicense);
+
+// Luxury villa approval queue
+router.get('/villa-approvals', logAdminAction('VIEW_VILLA_APPROVALS'), getVillaApprovals);
+router.post('/villa-approvals/:id/approve', logAdminAction('APPROVE_VILLA'), approveVilla);
+router.post('/villa-approvals/:id/reject', logAdminAction('REJECT_VILLA'), rejectVilla);
 
 // ===== Site Content Management (How It Works videos, etc.) =====
 const videoUpload = multer({

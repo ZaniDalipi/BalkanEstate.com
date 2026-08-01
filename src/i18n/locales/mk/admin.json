@@ -40,7 +40,8 @@
     "marketing": "Marketing & Sales",
     "system": "System",
     "inquiries": "Inquiries",
-    "pricing": "Pricing & Plans"
+    "pricing": "Pricing & Plans",
+    "villaApprovals": "Одобрувања вили"
   },
   "properties": {
     "title": "Управување со недвижности",
@@ -955,5 +956,21 @@
     "howItWorks": "Како функционира бодувањето",
     "agentFormula": "Агенти: оцена×20 + продажби×5 + огласи×2 + рецензии×1 (макс 180 поени)",
     "agencyFormula": "Агенции: огласи×3 + тим×5 + искуство×2 + истакнати×20 (макс 160 поени)"
+  },
+  "villas": {
+    "title": "Одобрувања на луксузни вили",
+    "subtitle": "Курирајте го делот Луксузни вили — само одобрените вили се прикажуваат јавно.",
+    "pending": "Во чекање",
+    "approved": "Одобрено",
+    "rejected": "Одбиено",
+    "approve": "Одобри",
+    "reject": "Одбиј",
+    "rejectPrompt": "Причина за одбивање (изборно):",
+    "loadError": "Не успеа вчитувањето на одобрувањата",
+    "approveError": "Не успеа одобрувањето",
+    "rejectError": "Не успеа одбивањето",
+    "empty": "Нема вили тука.",
+    "untitled": "Вила без наслов",
+    "negotiable": "По договор"
   }
 }

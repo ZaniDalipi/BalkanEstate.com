@@ -785,7 +785,7 @@ export interface AppState {
     isSessionExpiredModalOpen: boolean;
 }
 
-export type AdminSection = 'dashboard' | 'heatmap' | 'users' | 'inquiries' | 'agent-requests' | 'discounts' | 'promotions' | 'promotion-plans' | 'properties' | 'agencies' | 'pricing' | 'activity' | 'settings' | 'site-settings' | 'how-it-works' | 'email-templates' | 'business-listings' | 'articles';
+export type AdminSection = 'dashboard' | 'heatmap' | 'users' | 'inquiries' | 'agent-requests' | 'discounts' | 'promotions' | 'promotion-plans' | 'properties' | 'agencies' | 'pricing' | 'activity' | 'settings' | 'site-settings' | 'how-it-works' | 'email-templates' | 'business-listings' | 'articles' | 'villa-approvals';
 
 export type AgencyDashboardSection = 'overview' | 'agents' | 'properties' | 'leads' | 'analytics' | 'financial' | 'profile' | 'team';
 

@@ -30,6 +30,7 @@ export const getAdminStats = async (req: Request, res: Response): Promise<void> 
       todayProperties,
       totalInquiries,
       newInquiries,
+      pendingVillas,
     ] = await Promise.all([
       User.countDocuments(),
       Agent.countDocuments({ isActive: true }),
@@ -44,6 +45,7 @@ export const getAdminStats = async (req: Request, res: Response): Promise<void> 
       }),
       Inquiry.countDocuments(),
       Inquiry.countDocuments({ status: 'new' }),
+      Property.countDocuments({ propertyType: 'luxury-villa', villaApprovalStatus: 'pending' }),
     ]);
 
     // User role breakdown
@@ -71,6 +73,7 @@ export const getAdminStats = async (req: Request, res: Response): Promise<void> 
         todayProperties,
         totalInquiries,
         newInquiries,
+        pendingVillas,
       },
       usersByRole: usersByRole.reduce((acc: any, item: any) => {
         acc[item._id] = item.count;
@@ -1278,5 +1281,99 @@ export const rejectLicense = async (req: Request, res: Response): Promise<void> 
   } catch (error: any) {
     adminLogger.error('Reject license error:', error);
     res.status(500).json({ message: 'Error rejecting license' });
+  }
+};
+
+// ============================================================================
+// Luxury villa approval queue — curated listings must be approved by an admin
+// before they appear on the public Luxury Villas tab.
+// ============================================================================
+
+// @desc    List luxury villas by approval status (default: pending)
+// @route   GET /api/admin/villa-approvals?status=pending
+// @access  Private/Admin
+export const getVillaApprovals = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const status = (req.query.status as string) || 'pending';
+    const allowed = ['pending', 'approved', 'rejected'];
+    const filter: Record<string, unknown> = { propertyType: 'luxury-villa' };
+    if (allowed.includes(status)) filter.villaApprovalStatus = status;
+
+    const villas = await Property.find(filter)
+      .populate('sellerId', 'name email phone role')
+      .sort({ createdAt: -1 })
+      .limit(200)
+      .lean();
+
+    res.json({ count: villas.length, status, villas });
+  } catch (error: any) {
+    adminLogger.error('Get villa approvals error:', error);
+    res.status(500).json({ message: 'Error fetching villa approvals' });
+  }
+};
+
+// @desc    Approve a luxury villa listing (publishes it to the villas tab)
+// @route   POST /api/admin/villa-approvals/:id/approve
+// @access  Private/Admin
+export const approveVilla = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const villa = await Property.findById(id);
+    if (!villa) {
+      res.status(404).json({ message: 'Villa not found' });
+      return;
+    }
+    if (villa.propertyType !== 'luxury-villa') {
+      res.status(400).json({ message: 'Property is not a luxury villa' });
+      return;
+    }
+
+    villa.villaApprovalStatus = 'approved';
+    villa.villaApprovalReviewedBy = String((req.user as any)?._id || '');
+    villa.villaApprovalReviewedAt = new Date();
+    villa.villaApprovalReason = undefined;
+    await villa.save();
+
+    adminLogger.info(`Luxury villa ${id} approved`);
+    res.json({ message: 'Villa approved', id: String(villa._id), villaApprovalStatus: 'approved' });
+  } catch (error: any) {
+    adminLogger.error('Approve villa error:', error);
+    res.status(500).json({ message: 'Error approving villa' });
+  }
+};
+
+// @desc    Reject a luxury villa listing (keeps it hidden from the villas tab)
+// @route   POST /api/admin/villa-approvals/:id/reject
+// @access  Private/Admin
+export const rejectVilla = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const { reason } = req.body;
+
+    const villa = await Property.findById(id);
+    if (!villa) {
+      res.status(404).json({ message: 'Villa not found' });
+      return;
+    }
+    if (villa.propertyType !== 'luxury-villa') {
+      res.status(400).json({ message: 'Property is not a luxury villa' });
+      return;
+    }
+
+    villa.villaApprovalStatus = 'rejected';
+    villa.villaApprovalReviewedBy = String((req.user as any)?._id || '');
+    villa.villaApprovalReviewedAt = new Date();
+    if (reason) villa.villaApprovalReason = String(reason).slice(0, 1000);
+    await villa.save();
+
+    adminLogger.info(`Luxury villa ${id} rejected (reason: ${reason || 'none'})`);
+    res.json({ message: 'Villa rejected', id: String(villa._id), villaApprovalStatus: 'rejected', reason: reason || undefined });
+  } catch (error: any) {
+    adminLogger.error('Reject villa error:', error);
+    res.status(500).json({ message: 'Error rejecting villa' });
   }
 };

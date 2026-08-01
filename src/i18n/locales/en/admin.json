@@ -40,7 +40,8 @@
     "marketing": "Marketing & Sales",
     "system": "System",
     "inquiries": "Inquiries",
-    "pricing": "Pricing & Plans"
+    "pricing": "Pricing & Plans",
+    "villaApprovals": "Villa Approvals"
   },
   "properties": {
     "title": "Property Manager",
@@ -1158,5 +1159,21 @@
     "howItWorks": "How scoring works",
     "agentFormula": "Agents: rating×20 + sales×5 + listings×2 + reviews×1 (max 180 pts)",
     "agencyFormula": "Agencies: listings×3 + team×5 + experience×2 + featured×20 (max 160 pts)"
+  },
+  "villas": {
+    "title": "Luxury Villa Approvals",
+    "subtitle": "Curate the Luxury Villas tab — only approved villas appear publicly.",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "approve": "Approve",
+    "reject": "Reject",
+    "rejectPrompt": "Reason for rejection (optional):",
+    "loadError": "Failed to load villa approvals",
+    "approveError": "Failed to approve villa",
+    "rejectError": "Failed to reject villa",
+    "empty": "No villas here.",
+    "untitled": "Untitled villa",
+    "negotiable": "By negotiation"
   }
 }

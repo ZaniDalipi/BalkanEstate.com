@@ -136,6 +136,12 @@ export const getProperties = async (
       filter.propertyType = propertyType;
     }
 
+    // Luxury villas are admin-curated: the public listing only ever shows
+    // approved villas. (The admin approval queue uses its own endpoint.)
+    if (propertyType === 'luxury-villa') {
+      filter.villaApprovalStatus = 'approved';
+    }
+
     // Exclude specific property types (e.g. luxury-villa is exclusive to its own tab)
     if (req.query.excludePropertyType) {
       filter.propertyType = { ...filter.propertyType, $ne: req.query.excludePropertyType };
@@ -883,6 +889,12 @@ export const createProperty = async (
     const propertyData = {
       ...sanitizedBody,
       sellerId: String(currentUser._id),
+      // Luxury villas are curated — they require admin approval before they
+      // appear on the public Luxury Villas tab. Set server-side so a client
+      // can never self-approve (villaApprovalStatus is not an allowed field).
+      ...(sanitizedBody.propertyType === 'luxury-villa' && {
+        villaApprovalStatus: 'pending' as const,
+      }),
       // Add user identification for 1:1 relationship tracking
       createdByName: user.name,
       createdByEmail: user.email,

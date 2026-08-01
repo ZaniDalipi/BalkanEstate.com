@@ -124,6 +124,33 @@ export const rejectProperty = async (propertyId: string, reason?: string): Promi
   });
 };
 
+// --- Luxury villa approval queue ---
+
+export type VillaApprovalStatus = 'pending' | 'approved' | 'rejected';
+
+export const getVillaApprovals = async (
+  status: VillaApprovalStatus = 'pending'
+): Promise<{ count: number; status: string; villas: any[] }> => {
+  return apiRequest(`/admin/villa-approvals?status=${status}`, {
+    requiresAuth: true,
+  });
+};
+
+export const approveVilla = async (villaId: string): Promise<any> => {
+  return apiRequest(`/admin/villa-approvals/${villaId}/approve`, {
+    method: 'POST',
+    requiresAuth: true,
+  });
+};
+
+export const rejectVilla = async (villaId: string, reason?: string): Promise<any> => {
+  return apiRequest(`/admin/villa-approvals/${villaId}/reject`, {
+    method: 'POST',
+    body: { reason },
+    requiresAuth: true,
+  });
+};
+
 // --- Admin Analytics ---
 
 export const getAdminAnalytics = async (): Promise<any> => {

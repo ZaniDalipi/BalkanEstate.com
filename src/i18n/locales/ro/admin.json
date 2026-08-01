@@ -40,7 +40,8 @@
     "marketing": "Marketing & Sales",
     "system": "System",
     "inquiries": "Inquiries",
-    "pricing": "Pricing & Plans"
+    "pricing": "Pricing & Plans",
+    "villaApprovals": "Aprobări vile"
   },
   "properties": {
     "title": "Property Manager",
@@ -1058,5 +1059,21 @@
     "howItWorks": "Cum funcționează punctajul",
     "agentFormula": "Agenți: evaluare×20 + vânzări×5 + anunțuri×2 + recenzii×1 (max 180 pct.)",
     "agencyFormula": "Agenții: anunțuri×3 + echipă×5 + experiență×2 + promovate×20 (max 160 pct.)"
+  },
+  "villas": {
+    "title": "Aprobări vile de lux",
+    "subtitle": "Curatați fila Vile de Lux — doar vilele aprobate apar public.",
+    "pending": "În așteptare",
+    "approved": "Aprobate",
+    "rejected": "Respinse",
+    "approve": "Aprobă",
+    "reject": "Respinge",
+    "rejectPrompt": "Motivul respingerii (opțional):",
+    "loadError": "Eroare la încărcarea aprobărilor",
+    "approveError": "Eroare la aprobarea vilei",
+    "rejectError": "Eroare la respingerea vilei",
+    "empty": "Nicio vilă aici.",
+    "untitled": "Vilă fără titlu",
+    "negotiable": "Prin negociere"
   }
 }

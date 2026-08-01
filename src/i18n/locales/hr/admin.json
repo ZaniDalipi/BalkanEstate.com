@@ -40,7 +40,8 @@
     "marketing": "Marketing i prodaja",
     "system": "Sustav",
     "inquiries": "Upiti",
-    "pricing": "Cijene i planovi"
+    "pricing": "Cijene i planovi",
+    "villaApprovals": "Odobrenja vila"
   },
   "properties": {
     "title": "Upravljanje nekretninama",
@@ -1058,5 +1059,21 @@
     "howItWorks": "Kako funkcionira bodovanje",
     "agentFormula": "Agenti: ocjena×20 + prodaje×5 + oglasi×2 + recenzije×1 (maks 180 bod.)",
     "agencyFormula": "Agencije: oglasi×3 + tim×5 + iskustvo×2 + istaknuti×20 (maks 160 bod.)"
+  },
+  "villas": {
+    "title": "Odobrenja luksuznih vila",
+    "subtitle": "Kurirajte karticu Luksuzne vile — samo odobrene vile prikazuju se javno.",
+    "pending": "Na čekanju",
+    "approved": "Odobreno",
+    "rejected": "Odbijeno",
+    "approve": "Odobri",
+    "reject": "Odbij",
+    "rejectPrompt": "Razlog odbijanja (nije obavezno):",
+    "loadError": "Greška pri učitavanju odobrenja",
+    "approveError": "Greška pri odobravanju vile",
+    "rejectError": "Greška pri odbijanju vile",
+    "empty": "Nema vila ovdje.",
+    "untitled": "Vila bez naziva",
+    "negotiable": "Po dogovoru"
   }
 }
