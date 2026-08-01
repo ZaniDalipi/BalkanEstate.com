@@ -25,6 +25,7 @@ const SUBJECT_OPTIONS = [
   { value: 'agency', labelKey: 'contact:subjects.agency' },
   { value: 'support', labelKey: 'contact:subjects.support' },
   { value: 'partnership', labelKey: 'contact:subjects.partnership' },
+  { value: 'advertising', labelKey: 'contact:subjects.advertising', fallback: 'Advertising / Ad placement' },
 ] as const;
 
 const ContactForm: React.FC<ContactFormProps> = ({
@@ -125,7 +126,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
         >
           {SUBJECT_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
-              {t(option.labelKey, option.value)}
+              {t(option.labelKey, (option as { fallback?: string }).fallback ?? option.value)}
             </option>
           ))}
         </select>

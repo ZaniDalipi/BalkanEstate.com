@@ -19,8 +19,8 @@ const INITIAL_FORM_DATA: ContactFormData = {
 const MESSAGE_MIN_LENGTH = 10;
 const MESSAGE_MAX_LENGTH = 2000;
 
-export function useContactForm() {
-  const [formData, setFormData] = useState<ContactFormData>(INITIAL_FORM_DATA);
+export function useContactForm(overrides?: Partial<ContactFormData>) {
+  const [formData, setFormData] = useState<ContactFormData>({ ...INITIAL_FORM_DATA, ...overrides });
   const [errors, setErrors] = useState<ContactFormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);

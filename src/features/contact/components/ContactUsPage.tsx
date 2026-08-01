@@ -50,6 +50,26 @@ const ClockIcon: React.FC<{ className?: string }> = ({ className }) => (
 const ContactUsPage: React.FC = () => {
   const { t } = useTranslation(['contact', 'common']);
   const { dispatch } = useAppContext();
+
+  // Preselect the "advertising" subject (and a starter message) when arriving
+  // from a "Your Ad Here" placeholder (?topic=advertise).
+  const isAdvertising = (() => {
+    try {
+      return new URLSearchParams(window.location.search).get('topic') === 'advertise';
+    } catch {
+      return false;
+    }
+  })();
+  const advertisingOverrides = isAdvertising
+    ? {
+        subject: 'advertising',
+        message: t(
+          'contact:advertising.prefill',
+          "Hi, I'd like to advertise on BalkanEstate. Please send me your ad placements and pricing."
+        ),
+      }
+    : undefined;
+
   const {
     formData,
     errors,
@@ -60,7 +80,7 @@ const ContactUsPage: React.FC = () => {
     handlePhoneChange,
     handleSubmit,
     reset,
-  } = useContactForm();
+  } = useContactForm(advertisingOverrides);
 
   const handleBack = useCallback(() => {
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });

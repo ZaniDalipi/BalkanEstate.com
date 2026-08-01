@@ -24,7 +24,8 @@ export type ContactSubject =
   | 'selling'
   | 'agency'
   | 'support'
-  | 'partnership';
+  | 'partnership'
+  | 'advertising';
 
 export interface ContactSubmitResponse {
   message: string;

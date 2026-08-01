@@ -8,7 +8,7 @@ import { apiLogger } from '../utils/logger';
 import { resolveId } from '../utils/idObfuscation';
 
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'contact@balkanestateai.com';
-const VALID_SUBJECTS = ['general', 'buying', 'selling', 'agency', 'support', 'partnership'];
+const VALID_SUBJECTS = ['general', 'buying', 'selling', 'agency', 'support', 'partnership', 'advertising'];
 
 /**
  * @desc    Send inquiry to agent about a property
@@ -367,10 +367,15 @@ export const sendContactInquiry = async (
     // Sanitize phone if provided
     const trimmedPhone = phone ? String(phone).trim() : undefined;
 
+    // Advertising requests are treated as high-priority leads.
+    const isAdvertising = subject === 'advertising';
+    const priority = isAdvertising ? 'high' : 'normal';
+
     // Save the inquiry to database
     const inquiry = await Inquiry.create({
       type: 'contact',
       status: 'new',
+      priority,
       buyerName: trimmedName,
       buyerEmail: trimmedEmail,
       buyerPhone: trimmedPhone,
@@ -380,11 +385,20 @@ export const sendContactInquiry = async (
 
     // Send notification email to platform team
     try {
+      const emailSubject = isAdvertising
+        ? `🔥 [ADVERTISING REQUEST] ${trimmedName} wants to advertise with us`
+        : `[Contact Form] ${subject} - from ${trimmedName}`;
+      const leadBanner = isAdvertising
+        ? `<div style="background:#4338ca;color:#fff;padding:12px 16px;border-radius:8px;font-weight:700;margin-bottom:12px;">
+             🔥 New advertising request — someone wants to advertise with us. Follow up ASAP.
+           </div>`
+        : '';
       await sendEmail({
         to: CONTACT_EMAIL,
-        subject: `[Contact Form] ${subject} - from ${trimmedName}`,
+        subject: emailSubject,
         html: `
-          <h2>New Contact Form Submission</h2>
+          ${leadBanner}
+          <h2>${isAdvertising ? 'New Advertising Request' : 'New Contact Form Submission'}</h2>
           <p><strong>From:</strong> ${trimmedName} (${trimmedEmail})</p>
           ${trimmedPhone ? `<p><strong>Phone:</strong> ${trimmedPhone}</p>` : ''}
           <p><strong>Subject:</strong> ${subject}</p>
@@ -394,7 +408,7 @@ export const sendContactInquiry = async (
           <hr />
           <p><em>Inquiry ID: ${inquiry._id}</em></p>
         `,
-        text: `New contact form submission from ${trimmedName} (${trimmedEmail}). Subject: ${subject}. Message: ${trimmedMessage}`,
+        text: `${isAdvertising ? 'ADVERTISING REQUEST — someone wants to advertise with us. ' : ''}New contact form submission from ${trimmedName} (${trimmedEmail}). Subject: ${subject}. Message: ${trimmedMessage}`,
       });
     } catch (emailError) {
       apiLogger.warn(`[inquiryController] Contact email notification failed but inquiry saved: ${emailError}`);

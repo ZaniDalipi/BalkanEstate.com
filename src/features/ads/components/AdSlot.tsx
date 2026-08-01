@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { useAppContext } from '@/context/AppContext';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { useAdBanners, selectByPlacement } from '../hooks/useAdBanners';
 import { useAdPreview } from '../hooks/useAdPreview';
 import { trackClick, trackImpression } from '../api/adBannerApi';
@@ -56,8 +58,20 @@ const AdSlot: React.FC<AdSlotProps> = ({
   const { t } = useTranslation(['common']);
   const { data } = useAdBanners(page);
   const preview = useAdPreview();
+  const { dispatch } = useAppContext();
   const trackedRef = useRef<string | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // "Your Ad Here" placeholder → open the contact form as an advertising lead.
+  const contactHref = `${buildLocalizedPath('/contact')}?topic=advertise`;
+  const goToAdvertise = (e: React.MouseEvent) => {
+    // Let modified clicks (new tab) use the href; otherwise navigate in-app.
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+    e.preventDefault();
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'contact' });
+    window.history.pushState({}, '', contactHref);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  };
 
   const banner = selectByPlacement(data, placement)[index];
 
@@ -100,7 +114,10 @@ const AdSlot: React.FC<AdSlotProps> = ({
   if (!banner) {
     return (
       <div ref={wrapperRef} className={className} style={{ ...style, ...previewWrap }} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
-        <div
+        <a
+          href={contactHref}
+          onClick={goToAdvertise}
+          title={t('ads.advertiseCta', 'Advertise with us — get in touch')}
           style={{
             ...baseBoxStyle,
             display: 'flex',
@@ -110,6 +127,8 @@ const AdSlot: React.FC<AdSlotProps> = ({
             gap: 6,
             textAlign: 'center',
             padding: 12,
+            cursor: 'pointer',
+            textDecoration: 'none',
             border: '2px dashed rgba(79,70,229,0.35)',
             backgroundColor: '#eef2ff',
             // Layered: diagonal "ad space" stripes over a soft indigo→violet gradient.
@@ -144,7 +163,20 @@ const AdSlot: React.FC<AdSlotProps> = ({
           <span style={{ fontSize: 11, fontWeight: 500, color: '#6366f1' }}>
             {t('ads.advertiseWithUs', 'Advertise with us')}
           </span>
-        </div>
+          <span
+            style={{
+              marginTop: 4,
+              fontSize: 10,
+              fontWeight: 700,
+              color: '#fff',
+              background: '#4f46e5',
+              padding: '3px 10px',
+              borderRadius: 9999,
+            }}
+          >
+            {t('ads.getInTouch', 'Get in touch →')}
+          </span>
+        </a>
       </div>
     );
   }

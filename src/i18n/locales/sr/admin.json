@@ -1027,5 +1027,8 @@
     "stickyHint": "Only affects the sticky bar placements.",
     "viewOnSite": "View on site",
     "viewOnSiteHint": "Opens the page in a new tab with the ad slot highlighted so you can see exactly how it looks."
+  },
+  "inquiries": {
+    "advertising": "Advertising"
   }
 }
