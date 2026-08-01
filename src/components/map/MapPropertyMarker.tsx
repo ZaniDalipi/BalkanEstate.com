@@ -10,7 +10,7 @@ import { formatPrice } from '@/utils/currency';
 import { BuildingOfficeIcon } from '@/constants';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { validateCoordinates } from '@/shared/utils/validation';
-import { VILLA_ONYX, VILLA_GOLD, buildEmeraldBeacon } from '@/shared/map/villaMarker';
+import { VILLA_GOLD, buildEmeraldBeacon } from '@/shared/map/villaMarker';
 
 /**
  * A property is mappable only when it carries coordinates that are real
@@ -460,8 +460,7 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
     const cx = W / 2;
     // unique id suffix per marker so gradient/clip ids never collide in the DOM
     const uid = `s${String(property.id).slice(-6)}`;
-    const bid = `lvBs_${uid}`;   // onyx body gradient
-    const rid = `lvRs_${uid}`;   // gold roof gradient
+    const gid = `lvGs_${uid}`;   // gilded gold gradient (body + roof)
     const clip = `lvClipS_${uid}`;
     const beacon = buildLeafletBeacon(cx, 9, 4.5, uid);
     const svgHouseHtml = `
@@ -469,11 +468,7 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
         <div class="${promotedInnerClass}" style="width:${scaledW}px;height:${scaledH}px;transform:scale(${hoverScale});transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);">
           <svg width="${scaledW}" height="${scaledH}" viewBox="0 0 ${W} ${H}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:${pillFilter};">
             <defs>
-              <linearGradient id="${bid}" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="${VILLA_ONYX.light}"/>
-                <stop offset="100%" stop-color="${VILLA_ONYX.dark}"/>
-              </linearGradient>
-              <linearGradient id="${rid}" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="${VILLA_GOLD.light}"/>
                 <stop offset="52%" stop-color="${VILLA_GOLD.mid}"/>
                 <stop offset="100%" stop-color="${VILLA_GOLD.deep}"/>
@@ -482,17 +477,17 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
             </defs>
             <!-- Pin pointer -->
             <path d="M${cx} ${H} L${cx - 8} 48 H${cx + 8} Z" fill="${VILLA_GOLD.deep}"/>
-            <!-- Villa body (onyx) -->
-            <rect x="4" y="30" width="${W - 8}" height="18" rx="2" fill="url(#${bid})" stroke="url(#${rid})" stroke-width="1.5"/>
-            <!-- Animated gold sheen (clipped to body) -->
-            <path class="villa-gold-sheen" clip-path="url(#${clip})" d="M${cx - 3} 30 L${cx + 5} 30 L${cx + 1} 48 L${cx - 7} 48 Z" fill="${VILLA_GOLD.light}" opacity="0.28"/>
+            <!-- Villa body (gold) -->
+            <rect x="4" y="30" width="${W - 8}" height="18" rx="2" fill="url(#${gid})" stroke="${VILLA_GOLD.edge}" stroke-width="1.25"/>
+            <!-- Animated sheen (clipped to body) -->
+            <path class="villa-gold-sheen" clip-path="url(#${clip})" d="M${cx - 3} 30 L${cx + 5} 30 L${cx + 1} 48 L${cx - 7} 48 Z" fill="#FFFFFF" opacity="0.5"/>
             <!-- Roof gable (gold) -->
-            <path d="M4 30 L${cx} 15 L${W - 4} 30 Z" fill="url(#${rid})" stroke="${VILLA_GOLD.deep}" stroke-width="1.25" stroke-linejoin="round"/>
+            <path d="M4 30 L${cx} 15 L${W - 4} 30 Z" fill="url(#${gid})" stroke="${VILLA_GOLD.edge}" stroke-width="1.25" stroke-linejoin="round"/>
             <!-- Roof ridge highlight -->
             <path d="M${cx - 10} 27 L${cx} 18 L${cx + 10} 27" stroke="${VILLA_GOLD.light}" stroke-width="1" opacity="0.7" fill="none" stroke-linecap="round"/>
             <!-- Emerald "special estate" beacon at the apex -->
             ${beacon}
-            <!-- Price in body (gold) -->
+            <!-- Price in body (dark on gold) -->
             <text x="${cx}" y="40" font-family="Inter,sans-serif" font-size="10.5" font-weight="800" fill="${VILLA_GOLD.ink}" text-anchor="middle" dominant-baseline="middle">${price}</text>
           </svg>
         </div>
@@ -622,26 +617,21 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
     const scaledW = Math.round(vbW * zoomScale);
     const scaledH = Math.round(vbH * zoomScale);
     const uid = `d${String(property.id).slice(-6)}`;
-    const bid = `lvBd_${uid}`;   // onyx body gradient
-    const rid = `lvRd_${uid}`;   // gold roof/trim gradient
+    const gid = `lvGd_${uid}`;   // gilded gold gradient (body + roof + trim)
     const clip = `lvClipD_${uid}`;
     const fSize = Math.max(10, Math.round(12 * zoomScale));
     const beacon = buildLeafletBeacon(40, 13, 6, uid);
-    // Gold glow layered with a faint emerald under-glow for the "special" cue
+    // Warm gold glow (with a faint emerald under-glow from the beacon)
     const villaFilter = isNightMode
       ? finalFilter
-      : 'drop-shadow(0 0 10px rgba(212,168,0,0.7)) drop-shadow(0 0 18px rgba(16,185,129,0.35)) drop-shadow(0 4px 10px rgba(0,0,0,0.5))';
+      : 'drop-shadow(0 0 10px rgba(232,184,32,0.9)) drop-shadow(0 0 20px rgba(200,150,0,0.55)) drop-shadow(0 4px 10px rgba(0,0,0,0.45))';
     const svgVillaHtml = `
       <div class="promoted-marker-wrapper ${nightModeClass}" style="width:${scaledW}px;height:${scaledH}px;">
         <div class="${promotedInnerClass}" style="width:${scaledW}px;height:${scaledH}px;">
           <svg width="${scaledW}" height="${scaledH}" viewBox="0 0 ${vbW} ${vbH}" fill="none" xmlns="http://www.w3.org/2000/svg"
                style="filter:${villaFilter};transform-origin:bottom center;transform:scale(${scale});transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);">
             <defs>
-              <linearGradient id="${bid}" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="${VILLA_ONYX.light}"/>
-                <stop offset="100%" stop-color="${VILLA_ONYX.dark}"/>
-              </linearGradient>
-              <linearGradient id="${rid}" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="${VILLA_GOLD.light}"/>
                 <stop offset="52%" stop-color="${VILLA_GOLD.mid}"/>
                 <stop offset="100%" stop-color="${VILLA_GOLD.deep}"/>
@@ -651,21 +641,21 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
             <!-- Pin pointer -->
             <path d="M40 80 L31 65 H49 Z" fill="${VILLA_GOLD.deep}"/>
             <!-- Parapet wings (gold) -->
-            <rect x="6" y="36" width="12" height="6" rx="1" fill="url(#${rid})" stroke="${VILLA_GOLD.deep}" stroke-width="1.25"/>
-            <rect x="62" y="36" width="12" height="6" rx="1" fill="url(#${rid})" stroke="${VILLA_GOLD.deep}" stroke-width="1.25"/>
-            <!-- Villa body (onyx) -->
-            <rect x="6" y="42" width="68" height="22" rx="1.5" fill="url(#${bid})" stroke="url(#${rid})" stroke-width="1.5"/>
-            <!-- Animated gold sheen (clipped to body) -->
-            <path class="villa-gold-sheen" clip-path="url(#${clip})" d="M34 42 L44 42 L38 64 L28 64 Z" fill="${VILLA_GOLD.light}" opacity="0.22"/>
-            <!-- Colonnade (gold) -->
-            <rect x="14.5" y="43" width="3.5" height="21" fill="${VILLA_GOLD.mid}" opacity="0.7"/>
-            <rect x="62" y="43" width="3.5" height="21" fill="${VILLA_GOLD.mid}" opacity="0.7"/>
+            <rect x="6" y="36" width="12" height="6" rx="1" fill="url(#${gid})" stroke="${VILLA_GOLD.edge}" stroke-width="1.25"/>
+            <rect x="62" y="36" width="12" height="6" rx="1" fill="url(#${gid})" stroke="${VILLA_GOLD.edge}" stroke-width="1.25"/>
+            <!-- Villa body (gold) -->
+            <rect x="6" y="42" width="68" height="22" rx="1.5" fill="url(#${gid})" stroke="${VILLA_GOLD.edge}" stroke-width="1.5"/>
+            <!-- Animated sheen (clipped to body) -->
+            <path class="villa-gold-sheen" clip-path="url(#${clip})" d="M34 42 L44 42 L38 64 L28 64 Z" fill="#FFFFFF" opacity="0.4"/>
+            <!-- Colonnade (engraved deep-gold) -->
+            <rect x="14.5" y="43" width="3.5" height="21" fill="${VILLA_GOLD.deep}" opacity="0.55"/>
+            <rect x="62" y="43" width="3.5" height="21" fill="${VILLA_GOLD.deep}" opacity="0.55"/>
             <!-- Base plinth (gold) -->
-            <rect x="3" y="62.5" width="74" height="3.5" rx="1.5" fill="url(#${rid})" stroke="${VILLA_GOLD.deep}" stroke-width="0.75"/>
+            <rect x="3" y="62.5" width="74" height="3.5" rx="1.5" fill="url(#${gid})" stroke="${VILLA_GOLD.edge}" stroke-width="0.75"/>
             <!-- Gabled roof (gold) -->
-            <path d="M14 42 L40 20 L66 42 Z" fill="url(#${rid})" stroke="${VILLA_GOLD.deep}" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M14 42 L40 20 L66 42 Z" fill="url(#${gid})" stroke="${VILLA_GOLD.edge}" stroke-width="1.5" stroke-linejoin="round"/>
             <!-- Roof ridge highlight -->
-            <path d="M28 39 L40 25 L52 39" stroke="${VILLA_GOLD.light}" stroke-width="1.25" opacity="0.75" fill="none" stroke-linecap="round"/>
+            <path d="M28 39 L40 25 L52 39" stroke="#FFFFFF" stroke-width="1.25" opacity="0.6" fill="none" stroke-linecap="round"/>
             <!-- Emerald "special estate" beacon at the apex -->
             ${beacon}
             <!-- Price in body (gold) -->

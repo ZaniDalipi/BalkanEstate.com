@@ -48,18 +48,30 @@ const VillaAnimationStyles = () => (
       animation: goldShimmer 2.5s linear infinite;
     }
 
-    /* ── 3D magnetic tilt card ── */
+    /* ── 3D magnetic tilt card with a persistent gilded-glow border ── */
     .villa-tilt-card {
       transform: perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
-      transition: transform 0.14s ease-out, box-shadow 0.35s ease;
+      transition: transform 0.14s ease-out, box-shadow 0.4s ease;
       will-change: transform;
+      /* resting state: fine gold hairline + soft warm glow */
+      box-shadow:
+        0 0 0 1px rgba(232,184,32,0.55),
+        0 10px 28px rgba(0,0,0,0.20),
+        0 0 22px rgba(232,184,32,0.16);
     }
+    @keyframes villaGoldBreath {
+      0%, 100% { box-shadow: 0 0 0 1px rgba(232,184,32,0.50), 0 10px 28px rgba(0,0,0,0.20), 0 0 20px rgba(232,184,32,0.14); }
+      50%      { box-shadow: 0 0 0 1px rgba(232,184,32,0.70), 0 10px 30px rgba(0,0,0,0.22), 0 0 30px rgba(232,184,32,0.26); }
+    }
+    .villa-tilt-card { animation: villaGoldBreath 4.2s ease-in-out infinite; }
     .luxury-villa-card:hover.villa-tilt-card,
     .luxury-villa-card:hover .villa-tilt-card {
+      animation: none;
       box-shadow:
-        0 32px 60px rgba(0,0,0,0.38),
-        0 0 0 1px rgba(255,165,0,0.12),
-        0 0 50px rgba(255,165,0,0.06);
+        0 30px 60px rgba(0,0,0,0.40),
+        0 0 0 1.5px rgba(232,184,32,0.95),
+        0 0 44px rgba(232,184,32,0.42),
+        0 0 80px rgba(232,184,32,0.22);
     }
 
     /* ── Parallax image layer ── */
@@ -932,7 +944,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             style={{ background: 'linear-gradient(to bottom, transparent, #F8F9FC)' }}
                                         />
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                         {[...Array(6)].map((_, i) => <PropertyCardSkeleton key={i} index={i} />)}
                                     </div>
                                 </>
@@ -994,7 +1006,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     />
                                     <TrustStrip />
                                     <HighlightedPropertiesSection properties={listProperties} />
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-4">
                                         {listProperties.slice(0, visibleCount).map((property, index) => (
                                             <AnimatedVillaCard
                                                 key={property.id}
@@ -1008,7 +1020,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     {visibleCount < listProperties.length && (
                                         <div ref={loadMoreRef}>
                                             {isLoadingMore && (
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-4">
                                                     {Array.from({ length: Math.min(ITEMS_PER_PAGE, listProperties.length - visibleCount) }).map((_, i) => (
                                                         <PropertyCardSkeleton key={i} index={i} />
                                                     ))}

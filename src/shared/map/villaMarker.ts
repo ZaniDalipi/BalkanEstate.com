@@ -12,9 +12,14 @@
  * imports — so either engine can drop the fragment into its own SVG.
  */
 
-/** Onyx-and-gold "black card" palette. Near-black body, gilded roof/trim. */
+/**
+ * Gilded villa palette. The marker body is metallic gold (the luxury signal);
+ * `ink` is the dark engraving colour used for the price text on that gold.
+ * VILLA_ONYX is kept for the optional dark-card variant but the default
+ * markers render fully gold.
+ */
 export const VILLA_ONYX = { light: '#332C22', dark: '#141009' } as const;
-export const VILLA_GOLD = { light: '#FFE9A3', mid: '#E8B820', deep: '#B8860B', edge: '#6E5716', ink: '#F7E7A6' } as const;
+export const VILLA_GOLD = { light: '#FFEFB0', mid: '#E8B820', deep: '#B8860B', edge: '#6E5716', ink: '#2C1A00' } as const;
 export const VILLA_EMERALD = { light: '#6EE7B7', mid: '#10B981', deep: '#047857', edge: '#065F46' } as const;
 
 const round = (n: number): number => Math.round(n * 100) / 100;
