@@ -13,7 +13,7 @@ const PROPERTY_TYPE_COLORS: Record<string, string> = {
   villa: '#6f42c1',
   'luxury-villa': '#FFA500', // Gilded gold — exclusive to the Luxury Villas tab
   land: '#8B4513',
-  other: '#6c757d',
+  other: '#0D9488', // Teal — friendlier than the old gray, distinct from the other types
 };
 
 // Promotion tier colors

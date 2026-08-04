@@ -298,7 +298,7 @@ const PROPERTY_TYPE_COLORS: Record<
   villa: '#6f42c1',
   'luxury-villa': '#FFA500', // Amber/gold — exclusive to the Luxury Villas tab
   land: '#8B4513',    // Brown for land
-  other: '#6c757d',
+  other: '#0D9488',   // Teal — friendlier than the old gray, distinct from the other types
 };
 
 // Luxury villa palette + emerald-beacon builder are shared with the Google
