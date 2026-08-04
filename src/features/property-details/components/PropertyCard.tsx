@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo, useRef, useMemo } from 'react';
+import React, { useState, useCallback, memo, useRef, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
@@ -10,7 +10,7 @@ import { formatPrice } from '@/utils/currency';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
-import PropertyImage from '@/src/components/ui/PropertyImage';
+import PropertyImage, { getPropertyImageSources } from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import ExternalSourceBadge from '@/features/properties/components/ExternalSourceBadge';
 
@@ -145,6 +145,31 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
     touchStartXRef.current = null;
   }, [allImages.length]);
 
+  // Preload the adjacent images (next + previous) so the switch is near-instant
+  // instead of triggering a fresh network fetch on each arrow/swipe. We build the
+  // exact URLs the <img> would request (same widths/sizes) so the browser serves
+  // them straight from cache. Only runs for multi-image cards.
+  const IMAGE_WIDTHS = useMemo(() => [320, 480, 640], []);
+  const IMAGE_SIZES = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw';
+  useEffect(() => {
+    if (allImages.length <= 1) return;
+    const neighbors = [
+      (currentImageIndex + 1) % allImages.length,
+      (currentImageIndex - 1 + allImages.length) % allImages.length,
+    ];
+    neighbors.forEach((idx) => {
+      const url = allImages[idx];
+      if (!url) return;
+      const { mainSrc, srcSet } = getPropertyImageSources(url, IMAGE_WIDTHS);
+      const img = new Image();
+      // Set sizes/srcSet before src so the browser picks the same responsive
+      // candidate the rendered <img> will use.
+      img.sizes = IMAGE_SIZES;
+      if (srcSet) img.srcset = srcSet;
+      img.src = mainSrc;
+    });
+  }, [currentImageIndex, allImages, IMAGE_WIDTHS]);
+
   // Safe access with fallbacks
   const safeProperty = {
     ...property,
@@ -222,8 +247,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               src={currentImageUrl}
               alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
               priority={priority}
-              widths={[320, 480, 640]}
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              widths={IMAGE_WIDTHS}
+              sizes={IMAGE_SIZES}
+              transitionDurationClass={currentImageIndex === 0 ? 'duration-300' : 'duration-150'}
               imgClassName={isSold || isRented ? 'grayscale' : 'group-hover:scale-[1.02] transition-transform duration-300'}
             />
           </div>
