@@ -4,6 +4,7 @@ import MapComponent from '@/src/features/map/components/MapComponent';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
 import VillaFilters from './VillaFilters';
+import VillaListingModeToggle from './VillaListingModeToggle';
 import LuxuryVillaCard from './LuxuryVillaCard';
 import Toast from '@/components/shared/Toast';
 import { useVillaSearch } from '../hooks/useVillaSearch';
@@ -556,6 +557,8 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
         drawnBounds,
         baseFilteredProperties,
         listProperties,
+        listingMode,
+        handleListingModeChange,
         toggleDrawing,
         handleDrawComplete,
         handleFilterChange,
@@ -842,6 +845,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             {t('villas:exclusiveVillas', 'exclusive villas')}
                                         </span>
                                     </p>
+                                    <VillaListingModeToggle mode={listingMode} onChange={handleListingModeChange} />
                                     {filters.query && (
                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFA500]/10 text-[#0252CD] text-[11px] font-medium max-w-[140px]">
                                             <MapIcon className="w-3 h-3 flex-shrink-0" />
@@ -867,7 +871,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             </button>
                                         </span>
                                     )}
-                                    {minResultPrice != null && listProperties.length > 0 && (
+                                    {minResultPrice != null && listProperties.length > 0 && listingMode === 'rent' && (
                                         <span className="hidden sm:inline text-[11px] text-gray-400 flex-shrink-0">
                                             {t('villas:fromPerNight', 'from {{price}}/night', { price: `€${minResultPrice.toLocaleString()}` })}
                                         </span>

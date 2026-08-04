@@ -79,7 +79,8 @@
     "listingType": "Vrsta",
     "forSale": "Na Prodaju",
     "forRent": "Za Najam",
-    "bathrooms": "Kupaonice"
+    "bathrooms": "Kupaonice",
+    "allListings": "Sve"
   },
   "seo": {
     "title": "Luksuzne Vile Za Najam na Balkanu | BalkanEstate",
@@ -117,6 +118,12 @@
     "successBody": "Domaćin vile nazvat će vas na {{phone}} kako bi potvrdio dostupnost i vaš boravak.",
     "disclaimerTitle": "Napomena",
     "disclaimer": "BalkanEstate je samo platforma za oglase. Nismo strana u ovoj rezervaciji, ne rukujemo plaćanjima i ne preuzimamo nikakvu odgovornost za rezervaciju, nekretninu, boravak, plaćanja ni bilo kakve odnose između vas i domaćina. Svi se dogovori sklapaju izravno s domaćinom, na vaš rizik.",
-    "errDates": "Odaberite valjane datume prijave i odjave."
+    "errDates": "Odaberite valjane datume prijave i odjave.",
+    "enquire": "Zatraži detalje",
+    "enquireTitle": "Zatraži detalje",
+    "enquiryHeading": "UPIT ZA PRODAJU LUKSUZNE VILE",
+    "enquirySuccessTitle": "Upit je poslan",
+    "enquirySuccessBody": "Vlasnik vile nazvat će vas na {{phone}} s detaljima i kako bi dogovorio razgledavanje.",
+    "enquireNote": "Bez online plaćanja. Pošaljite upit i vlasnik vile nazvat će vas izravno s detaljima i kako bi dogovorio razgledavanje."
   }
 }

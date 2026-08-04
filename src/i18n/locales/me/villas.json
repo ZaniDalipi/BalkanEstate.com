@@ -79,7 +79,8 @@
     "listingType": "Vrsta",
     "forSale": "Za Prodaju",
     "forRent": "Za Iznajmljivanje",
-    "bathrooms": "Kupatila"
+    "bathrooms": "Kupatila",
+    "allListings": "Sve"
   },
   "seo": {
     "title": "Luksuzne Vile Za Iznajmljivanje na Balkanu | BalkanEstate",
@@ -117,6 +118,12 @@
     "successBody": "Domaćin vile će vas pozvati na {{phone}} da potvrdi dostupnost i vaš boravak.",
     "disclaimerTitle": "Napomena",
     "disclaimer": "BalkanEstate je samo platforma za oglase. Nijesmo strana u ovoj rezervaciji, ne rukujemo plaćanjima i ne preuzimamo nikakvu odgovornost za rezervaciju, nekretninu, boravak, plaćanja ili bilo kakve odnose između vas i domaćina. Svi dogovori se prave direktno sa domaćinom, na vaš rizik.",
-    "errDates": "Izaberite ispravne datume prijave i odjave."
+    "errDates": "Izaberite ispravne datume prijave i odjave.",
+    "enquire": "Zatraži detalje",
+    "enquireTitle": "Zatraži detalje",
+    "enquiryHeading": "UPIT ZA PRODAJU LUKSUZNE VILE",
+    "enquirySuccessTitle": "Upit je poslat",
+    "enquirySuccessBody": "Vlasnik vile će vas pozvati na {{phone}} sa detaljima i da dogovori obilazak.",
+    "enquireNote": "Bez online plaćanja. Pošaljite upit i vlasnik vile vas poziva direktno sa detaljima i da dogovori obilazak."
   }
 }

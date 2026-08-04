@@ -79,7 +79,8 @@
     "listingType": "Tip",
     "forSale": "De Vânzare",
     "forRent": "De Închiriat",
-    "bathrooms": "Băi"
+    "bathrooms": "Băi",
+    "allListings": "Toate"
   },
   "seo": {
     "title": "Vile de Lux de Închiriat în Balcani | BalkanEstate",
@@ -117,6 +118,12 @@
     "successBody": "Gazda vilei vă va suna la {{phone}} pentru a confirma disponibilitatea și sejurul.",
     "disclaimerTitle": "Vă rugăm să rețineți",
     "disclaimer": "BalkanEstate este doar o platformă de anunțuri. Nu suntem parte în această rezervare, nu gestionăm plăți și nu ne asumăm nicio responsabilitate pentru rezervare, proprietate, sejur, plăți sau orice relații între dvs. și gazdă. Toate aranjamentele se fac direct cu gazda, pe propriul dvs. risc.",
-    "errDates": "Alegeți date valide de check-in și check-out."
+    "errDates": "Alegeți date valide de check-in și check-out.",
+    "enquire": "Solicită detalii",
+    "enquireTitle": "Solicită detalii",
+    "enquiryHeading": "SOLICITARE VÂNZARE VILĂ DE LUX",
+    "enquirySuccessTitle": "Solicitarea a fost trimisă",
+    "enquirySuccessBody": "Proprietarul vilei vă va suna la {{phone}} cu detaliile și pentru a stabili o vizionare.",
+    "enquireNote": "Fără plată online. Trimiteți solicitarea, iar proprietarul vilei vă sună direct cu detaliile și pentru a stabili o vizionare."
   }
 }

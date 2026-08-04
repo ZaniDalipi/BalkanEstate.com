@@ -15,6 +15,9 @@ const VILLA_DEFAULTS: Partial<Filters> = {
     propertyType: 'luxury-villa',
 };
 
+/** Which luxury villas to show: both markets, only rentals, or only for-sale. */
+export type VillaListingMode = 'any' | 'rent' | 'sale';
+
 export function useVillaSearch() {
     const { t } = useTranslation(['search', 'villas', 'common']);
     const { state, dispatch, updateSearchPageState, addSavedSearch } = useAppContext();
@@ -23,6 +26,10 @@ export function useVillaSearch() {
     const [villaProperties, setVillaProperties] = useState<Property[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // Luxury villas can be listed for rent OR for sale; the page shows both by
+    // default and lets the visitor narrow to one market.
+    const [listingMode, setListingMode] = useState<VillaListingMode>('any');
 
     const [filters, setFilters] = useState<Filters>({
         ...initialFilters,
@@ -57,7 +64,9 @@ export function useVillaSearch() {
         setError(null);
         try {
             const params = new URLSearchParams();
-            params.set('listingType', 'rent');
+            // Omit listingType to fetch both markets; the backend already
+            // returns only admin-approved luxury villas for this propertyType.
+            if (listingMode !== 'any') params.set('listingType', listingMode);
             params.set('propertyType', 'luxury-villa');
             params.set('limit', '3000');
 
@@ -103,7 +112,7 @@ export function useVillaSearch() {
         } finally {
             if (!controller.signal.aborted) setIsLoading(false);
         }
-    }, [t]);
+    }, [t, listingMode]);
 
     useEffect(() => {
         fetchVillas();
@@ -202,7 +211,11 @@ export function useVillaSearch() {
     }, [drawnBoundsJSON]);
 
     const baseFilteredProperties = useMemo(() => {
-        const filtered = filterProperties(villaProperties, { ...filters, propertyType: 'luxury-villa', listingType: 'rent' });
+        const filtered = filterProperties(villaProperties, {
+            ...filters,
+            propertyType: 'luxury-villa',
+            listingType: listingMode === 'any' ? 'any' : listingMode,
+        });
         const now = Date.now();
 
         const boundsToUse = drawnBounds || mapBounds;
@@ -253,7 +266,7 @@ export function useVillaSearch() {
                     return getPropertyTime(b) - getPropertyTime(a);
             }
         });
-    }, [villaProperties, filters, mapBounds, drawnBounds]);
+    }, [villaProperties, filters, mapBounds, drawnBounds, listingMode]);
 
     const listProperties = baseFilteredProperties;
 
@@ -270,8 +283,13 @@ export function useVillaSearch() {
 
     const handleResetFilters = useCallback(() => {
         setFilters({ ...initialFilters, ...VILLA_DEFAULTS });
+        setListingMode('any');
         setDrawnBoundsJSON(null);
         setFlyToTarget({ center: [42.5, 20.5], zoom: 6 });
+    }, []);
+
+    const handleListingModeChange = useCallback((mode: VillaListingMode) => {
+        setListingMode(mode);
     }, []);
 
     const handleSortChange = useCallback((sortBy: string) => {
@@ -397,6 +415,8 @@ export function useVillaSearch() {
         isLoading,
         error,
         filters,
+        listingMode,
+        handleListingModeChange,
         isAuthenticated,
         currentUser,
         mobileView,

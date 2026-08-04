@@ -79,7 +79,8 @@
     "listingType": "Type",
     "forSale": "For Sale",
     "forRent": "For Rent",
-    "bathrooms": "Bathrooms"
+    "bathrooms": "Bathrooms",
+    "allListings": "All"
   },
   "seo": {
     "title": "Luxury Villas for Rent in the Balkans | BalkanEstate",
@@ -117,6 +118,12 @@
     "successBody": "The villa host will call you on {{phone}} to confirm availability and arrange your stay.",
     "disclaimerTitle": "Please note",
     "disclaimer": "BalkanEstate is a listings platform only. We are not a party to this booking, handle no payments, and accept no responsibility or liability for the booking, the property, your stay, payments, or any dealings between you and the host. All arrangements are made directly with the host at your own risk.",
-    "errDates": "Please choose valid check-in and check-out dates."
+    "errDates": "Please choose valid check-in and check-out dates.",
+    "enquire": "Request Details",
+    "enquireTitle": "Request Details",
+    "enquiryHeading": "LUXURY VILLA SALE ENQUIRY",
+    "enquirySuccessTitle": "Enquiry sent",
+    "enquirySuccessBody": "The villa owner will call you on {{phone}} with the details and to arrange a viewing.",
+    "enquireNote": "No online payment. Send your enquiry and the villa owner calls you directly with the details and to arrange a viewing."
   }
 }

@@ -79,7 +79,8 @@
     "listingType": "Lloji",
     "forSale": "Për Shitje",
     "forRent": "Me Qira",
-    "bathrooms": "Banjo"
+    "bathrooms": "Banjo",
+    "allListings": "Të gjitha"
   },
   "seo": {
     "title": "Vila Luksoze me Qira në Ballkan | BalkanEstate",
@@ -117,6 +118,12 @@
     "successBody": "Pritësi i vilës do t’ju telefonojë në {{phone}} për të konfirmuar disponueshmërinë dhe qëndrimin tuaj.",
     "disclaimerTitle": "Ju lutemi vini re",
     "disclaimer": "BalkanEstate është vetëm një platformë listimesh. Ne nuk jemi palë në këtë rezervim, nuk trajtojmë pagesa dhe nuk marrim asnjë përgjegjësi për rezervimin, pronën, qëndrimin, pagesat apo çdo marrëdhënie mes jush dhe pritësit. Të gjitha marrëveshjet bëhen drejtpërdrejt me pritësin, me rrezikun tuaj.",
-    "errDates": "Ju lutemi zgjidhni data të vlefshme hyrjeje dhe daljeje."
+    "errDates": "Ju lutemi zgjidhni data të vlefshme hyrjeje dhe daljeje.",
+    "enquire": "Kërko Detaje",
+    "enquireTitle": "Kërko Detaje",
+    "enquiryHeading": "KËRKESË PËR BLERJE VILE LUKSOZE",
+    "enquirySuccessTitle": "Kërkesa u dërgua",
+    "enquirySuccessBody": "Pronari i vilës do t’ju telefonojë në {{phone}} me detajet dhe për të organizuar një vizitë.",
+    "enquireNote": "Pa pagesë online. Dërgoni kërkesën dhe pronari i vilës ju telefonon drejtpërdrejt me detajet dhe për të organizuar një vizitë."
   }
 }

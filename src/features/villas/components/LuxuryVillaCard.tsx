@@ -138,6 +138,7 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
     const viewType  = property.viewType ? VIEW_TYPE[property.viewType] : null;
     const isSold    = property.status === 'sold';
     const isRented  = property.status === 'rented';
+    const isForRent = property.listingType !== 'sale';
     const gradId    = `vbg_${String(property.id || '').slice(-8)}`;
 
     return (
@@ -210,6 +211,10 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                         {/* Animated gold badge */}
                         <div className="villa-luxury-badge inline-flex items-center gap-1 px-2.5 py-[5px] rounded-full text-[10px] font-black tracking-wider shadow-lg">
                             <span style={{ fontSize: '7px' }}>✦</span> LUXURY VILLA
+                        </div>
+                        {/* Market chip: for rent vs for sale */}
+                        <div className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] font-bold bg-black/45 backdrop-blur-sm text-white border border-white/15 shadow w-fit">
+                            {isForRent ? t('villas:filters.forRent', 'For Rent') : t('villas:filters.forSale', 'For Sale')}
                         </div>
                         {isSold && (
                             <div className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] font-bold bg-red-500/85 backdrop-blur-sm text-white shadow">
@@ -347,9 +352,11 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                                          style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
                                         {formatPrice(property.price, property.country)}
                                     </div>
-                                    <div className="text-[10px] font-bold text-center mt-0.5" style={{ color: '#FFA500' }}>
-                                        / night
-                                    </div>
+                                    {isForRent && (
+                                        <div className="text-[10px] font-bold text-center mt-0.5" style={{ color: '#FFA500' }}>
+                                            {t('villas:booking.perNight', '/ night')}
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -371,16 +378,16 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                     )}
                 </div>
 
-                {/* ── "Request to Book" CTA — emerges on hover, opens booking ── */}
+                {/* ── CTA — emerges on hover; booking (rent) or enquiry (sale) ── */}
                 {!isSold && (
                     <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
                         <button
                             type="button"
                             onClick={openBooking}
                             className="villa-cta-btn pointer-events-auto px-6 py-2.5 rounded-full text-sm font-bold text-white border border-white/35 backdrop-blur-sm shadow-2xl hover:bg-white/20 focus:outline-none"
-                            aria-label={t('villas:booking.requestToBook', 'Request to Book')}
+                            aria-label={isForRent ? t('villas:booking.requestToBook', 'Request to Book') : t('villas:booking.enquire', 'Request Details')}
                         >
-                            {t('villas:booking.requestToBook', 'Request to Book')} &rarr;
+                            {isForRent ? t('villas:booking.requestToBook', 'Request to Book') : t('villas:booking.enquire', 'Request Details')} &rarr;
                         </button>
                     </div>
                 )}

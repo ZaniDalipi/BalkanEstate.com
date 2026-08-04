@@ -45,6 +45,9 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
   defaultPhone = '',
 }) => {
   const { t } = useTranslation(['villas', 'common']);
+  // Rentals collect stay dates + guests; for-sale villas are a viewing/details
+  // enquiry (no dates). The host still calls the enquirer back either way.
+  const isForRent = property.listingType !== 'sale';
   const [mounted, setMounted] = useState(false);
   const [form, setForm] = useState({
     checkIn: '',
@@ -92,22 +95,27 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
     if (!phoneCheck.isValid) { setError(phoneCheck.error!); return; }
     const emailCheck = validateEmail(form.email);
     if (!emailCheck.isValid) { setError(emailCheck.error!); return; }
-    if (!form.checkIn || !form.checkOut || nights <= 0) {
+    if (isForRent && (!form.checkIn || !form.checkOut || nights <= 0)) {
       setError(t('villas:booking.errDates', 'Please choose valid check-in and check-out dates.'));
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // Compose a booking request the host receives as an inquiry
+      // Compose a request the host/seller receives as an inquiry
       const ref = [property.propertyId, property.title].filter(Boolean).join(' - ');
+      const heading = isForRent
+        ? t('villas:booking.requestHeading', 'LUXURY VILLA BOOKING REQUEST')
+        : t('villas:booking.enquiryHeading', 'LUXURY VILLA SALE ENQUIRY');
       const lines = [
-        `★ ${t('villas:booking.requestHeading', 'LUXURY VILLA BOOKING REQUEST')}`,
+        `★ ${heading}`,
         ref ? `[${ref}]` : '',
-        `${t('villas:booking.checkIn', 'Check-in')}: ${form.checkIn}`,
-        `${t('villas:booking.checkOut', 'Check-out')}: ${form.checkOut}`,
-        `${t('villas:booking.nights', 'Nights')}: ${nights}`,
-        `${t('villas:booking.guests', 'Guests')}: ${form.guests}`,
+        ...(isForRent ? [
+          `${t('villas:booking.checkIn', 'Check-in')}: ${form.checkIn}`,
+          `${t('villas:booking.checkOut', 'Check-out')}: ${form.checkOut}`,
+          `${t('villas:booking.nights', 'Nights')}: ${nights}`,
+          `${t('villas:booking.guests', 'Guests')}: ${form.guests}`,
+        ] : []),
         `${t('villas:booking.callGuestAt', 'Please call the guest at')}: ${form.phone}`,
         form.notes.trim() ? `${t('villas:booking.notes', 'Notes')}: ${sanitizeText(form.notes.trim())}` : '',
       ].filter(Boolean);
@@ -169,7 +177,7 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
             <div className="min-w-0">
               <h2 className="text-lg font-bold text-[#F7E7A6] flex items-center gap-1.5">
                 <span style={{ fontSize: '10px' }}>✦</span>
-                {t('villas:booking.title', 'Request to Book')}
+                {isForRent ? t('villas:booking.title', 'Request to Book') : t('villas:booking.enquireTitle', 'Request Details')}
               </h2>
               <p className="text-sm text-white/60 line-clamp-1">{property.title}</p>
             </div>
@@ -188,10 +196,12 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  {t('villas:booking.successTitle', 'Booking request sent')}
+                  {isForRent ? t('villas:booking.successTitle', 'Booking request sent') : t('villas:booking.enquirySuccessTitle', 'Enquiry sent')}
                 </h3>
                 <p className="text-gray-600 mb-5 text-sm leading-relaxed">
-                  {t('villas:booking.successBody', 'The villa host will call you on {{phone}} to confirm availability and arrange your stay.', { phone: form.phone })}
+                  {isForRent
+                    ? t('villas:booking.successBody', 'The villa host will call you on {{phone}} to confirm availability and arrange your stay.', { phone: form.phone })
+                    : t('villas:booking.enquirySuccessBody', 'The villa owner will call you on {{phone}} with the details and to arrange a viewing.', { phone: form.phone })}
                 </p>
                 <div className="text-left mb-5"><Disclaimer /></div>
                 <button
@@ -221,7 +231,7 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
                     {!property.isNegotiable && property.price > 0 ? (
                       <p className="text-base font-bold mt-1" style={{ color: '#B8860B' }}>
                         {formatPrice(property.price, property.country)}
-                        <span className="text-xs font-semibold text-neutral-400"> {t('villas:booking.perNight', '/ night')}</span>
+                        {isForRent && <span className="text-xs font-semibold text-neutral-400"> {t('villas:booking.perNight', '/ night')}</span>}
                       </p>
                     ) : (
                       <p className="text-sm font-bold mt-1" style={{ color: '#B8860B' }}>{t('villas:booking.byNegotiation', 'By negotiation')}</p>
@@ -233,7 +243,9 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
                 <div className="flex items-start gap-2 mb-4 rounded-xl border border-[#E8B820]/30 bg-[#FFFBEE] p-3">
                   <span className="text-lg leading-none">📞</span>
                   <p className="text-[12px] leading-relaxed text-neutral-700">
-                    {t('villas:booking.callYouNote', 'No online payment. Send your request and the villa host calls you directly to confirm dates, price and arrange your stay.')}
+                    {isForRent
+                      ? t('villas:booking.callYouNote', 'No online payment. Send your request and the villa host calls you directly to confirm dates, price and arrange your stay.')
+                      : t('villas:booking.enquireNote', 'No online payment. Send your enquiry and the villa owner calls you directly with the details and to arrange a viewing.')}
                   </p>
                 </div>
 
@@ -244,6 +256,7 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {isForRent && (<>
                   {/* Dates */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
@@ -301,6 +314,7 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
                       {t('villas:booking.estimateNote', 'Estimate only — the host confirms the final price when they call.')}
                     </p>
                   )}
+                  </>)}
 
                   {/* Name */}
                   <div>
