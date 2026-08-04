@@ -256,8 +256,8 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                 )}
             </fieldset>
 
-            {/* Daily Rental Details — shown only for Luxury Villa */}
-            {listingData.propertyType === 'luxury-villa' && (
+            {/* Daily Rental Details — only for a Luxury Villa listed for rent */}
+            {listingData.propertyType === 'luxury-villa' && listingData.listingType === 'rent' && (
                 <fieldset className="space-y-4 p-4 rounded-2xl border border-[#FFA500]/30 bg-[#FFA500]/5">
                     <legend className="px-2 text-sm font-semibold text-[#0252CD] flex items-center gap-2">
                         <span>🏛️</span>

@@ -100,7 +100,7 @@ export function buildPreviewProperty(
             tenantRequirements: listingData.tenantRequirements || [],
             maxOccupants: Number(listingData.maxOccupants) || 1,
         } : {}),
-        ...(listingData.propertyType === 'luxury-villa' ? {
+        ...(listingData.propertyType === 'luxury-villa' && listingData.listingType === 'rent' ? {
             checkInTime: listingData.checkInTime || '14:00',
             checkOutTime: listingData.checkOutTime || '11:00',
             cleaningFee: Number(listingData.cleaningFee) || 0,
@@ -483,7 +483,12 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     }, [showError, t]);
 
     const handleListingTypeChange = useCallback((val: string) => {
-        setListingData(prev => ({ ...prev, listingType: val as 'sale' | 'rent' }));
+        setListingData(prev => ({
+            ...prev,
+            listingType: val as 'sale' | 'rent',
+            // A luxury villa switched to rent defaults to per-night (daily) pricing.
+            ...(val === 'rent' && prev.propertyType === 'luxury-villa' ? { rentPeriod: 'daily' as const } : {}),
+        }));
     }, []);
 
     const handleVisitAvailabilityChange = useCallback((patch: Partial<ListingData['visitAvailability']>) => {
@@ -639,9 +644,10 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 ...prev,
                 [name]: isNumeric ? (value === '' ? '' : Number(value)) : value,
             };
-            // Luxury villas are always rent + daily
-            if (name === 'propertyType' && value === 'luxury-villa') {
-                updated.listingType = 'rent';
+            // Luxury villas can be listed for sale OR for rent. Keep whichever
+            // market the user chose; only default the rent period to daily when
+            // it's actually a rental (the villa booking flow is per-night).
+            if (name === 'propertyType' && value === 'luxury-villa' && prev.listingType === 'rent') {
                 updated.rentPeriod = 'daily';
             }
             return updated;
@@ -980,7 +986,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     maxOccupants: Number(listingData.maxOccupants) || 1,
                 } : {}),
                 // Daily rental / luxury villa fields
-                ...(listingData.propertyType === 'luxury-villa' ? {
+                ...(listingData.propertyType === 'luxury-villa' && listingData.listingType === 'rent' ? {
                     checkInTime: listingData.checkInTime || '14:00',
                     checkOutTime: listingData.checkOutTime || '11:00',
                     cleaningFee: Number(listingData.cleaningFee) || 0,
