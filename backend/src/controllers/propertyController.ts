@@ -136,10 +136,13 @@ export const getProperties = async (
       filter.propertyType = propertyType;
     }
 
-    // Luxury villas are admin-curated: the public listing only ever shows
-    // approved villas. (The admin approval queue uses its own endpoint.)
+    // Luxury villas are admin-curated: hide only the ones an admin has left
+    // pending or explicitly rejected. Approved villas — and legacy villas
+    // created before the approval field existed (status is null/absent) — stay
+    // visible, so the tab is never silently emptied. (The admin approval queue
+    // uses its own endpoint and sees every status.)
     if (propertyType === 'luxury-villa') {
-      filter.villaApprovalStatus = 'approved';
+      filter.villaApprovalStatus = { $nin: ['pending', 'rejected'] };
     }
 
     // Exclude specific property types (e.g. luxury-villa is exclusive to its own tab)
