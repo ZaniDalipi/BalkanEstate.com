@@ -84,6 +84,9 @@ export function useContactForm(overrides?: Partial<ContactFormData>) {
       phone: formData.phone.trim(),
       subject: formData.subject,
       message: sanitizeText(formData.message.trim()),
+      adPage: formData.adPage,
+      adPlacement: formData.adPlacement,
+      adImageUrl: formData.adImageUrl,
     }),
     [formData]
   );
@@ -123,6 +126,13 @@ export function useContactForm(overrides?: Partial<ContactFormData>) {
     setSubmitError(null);
   }, []);
 
+  const setField = useCallback(
+    (name: keyof ContactFormData, value: string | undefined) => {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    },
+    []
+  );
+
   return {
     formData,
     errors,
@@ -132,6 +142,7 @@ export function useContactForm(overrides?: Partial<ContactFormData>) {
     handleChange,
     handlePhoneChange,
     handleSubmit,
+    setField,
     reset,
   };
 }

@@ -8,6 +8,10 @@ export interface ContactFormData {
   phone: string;
   subject: string;
   message: string;
+  // Advertising requests only:
+  adPage?: string;
+  adPlacement?: string;
+  adImageUrl?: string;
 }
 
 export interface ContactFormErrors {

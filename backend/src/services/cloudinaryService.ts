@@ -78,6 +78,8 @@ interface UploadOptions {
   maxWidth?: number;
   maxHeight?: number;
   quality?: number;
+  /** Skip the ownership FileRecord (for public uploads with no real user). */
+  skipRegistration?: boolean;
 }
 
 /**
@@ -309,16 +311,19 @@ export const uploadImage = async (
 
     mediaLogger.info(`✅ Uploaded image to Cloudinary: ${result.public_id} (${Math.round(result.bytes / 1024)}KB)`);
 
-    // Step 4: Register file in storage access policy (ownership tracking)
-    await registerFileUpload({
-      publicId: result.public_id,
-      url: result.secure_url,
-      userId,
-      fileType: type,
-      resourceId: propertyId,
-      mimeType: `image/${result.format}`,
-      bytes: result.bytes,
-    });
+    // Step 4: Register file in storage access policy (ownership tracking).
+    // Skipped for public uploads (e.g. advertising creatives) that have no user.
+    if (!options.skipRegistration) {
+      await registerFileUpload({
+        publicId: result.public_id,
+        url: result.secure_url,
+        userId,
+        fileType: type,
+        resourceId: propertyId,
+        mimeType: `image/${result.format}`,
+        bytes: result.bytes,
+      });
+    }
 
     return {
       url: result.secure_url,

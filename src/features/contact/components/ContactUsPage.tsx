@@ -3,11 +3,11 @@
  * Full contact page with liquid glass design, form, and contact info
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { CONTACT_CONFIG } from '@/src/shared/config/contact';
-import { sendContactInquiry } from '@/services/apiService';
+import { sendContactInquiry, uploadAdvertisingImage } from '@/services/apiService';
 import { useContactForm } from '../hooks/use-contact-form';
 import ContactForm from './ContactForm';
 import ContactSuccess from './ContactSuccess';
@@ -63,6 +63,8 @@ const ContactUsPage: React.FC = () => {
   const advertisingOverrides = isAdvertising
     ? {
         subject: 'advertising',
+        adPage: 'all',
+        adPlacement: 'in-content',
         message: t(
           'contact:advertising.prefill',
           "Hi, I'd like to advertise on BalkanEstate. Please send me your ad placements and pricing."
@@ -79,8 +81,28 @@ const ContactUsPage: React.FC = () => {
     handleChange,
     handlePhoneChange,
     handleSubmit,
+    setField,
     reset,
   } = useContactForm(advertisingOverrides);
+
+  const [isAdImageUploading, setIsAdImageUploading] = useState(false);
+
+  const handleAdImageSelect = useCallback(
+    async (file: File) => {
+      setIsAdImageUploading(true);
+      try {
+        const { url } = await uploadAdvertisingImage(file);
+        setField('adImageUrl', url);
+      } catch {
+        /* silently ignore — the creative is optional */
+      } finally {
+        setIsAdImageUploading(false);
+      }
+    },
+    [setField]
+  );
+
+  const handleAdImageClear = useCallback(() => setField('adImageUrl', undefined), [setField]);
 
   const handleBack = useCallback(() => {
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
@@ -99,12 +121,16 @@ const ContactUsPage: React.FC = () => {
     (e: React.FormEvent) => {
       e.preventDefault();
       handleSubmit(async (data: ContactFormData) => {
+        const isAd = data.subject === 'advertising';
         await sendContactInquiry({
           name: data.name,
           email: data.email,
           phone: data.phone || undefined,
           subject: data.subject,
           message: data.message,
+          adPage: isAd ? data.adPage : undefined,
+          adPlacement: isAd ? data.adPlacement : undefined,
+          attachmentUrl: isAd ? data.adImageUrl : undefined,
         });
       });
     },
@@ -183,6 +209,9 @@ const ContactUsPage: React.FC = () => {
                     onChange={handleChange}
                     onPhoneChange={handlePhoneChange}
                     onSubmit={onFormSubmit}
+                    onAdImageSelect={handleAdImageSelect}
+                    onAdImageClear={handleAdImageClear}
+                    isAdImageUploading={isAdImageUploading}
                   />
                 )}
               </div>

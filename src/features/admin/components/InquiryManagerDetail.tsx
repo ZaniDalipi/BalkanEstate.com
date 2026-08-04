@@ -164,6 +164,41 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
             </div>
           )}
 
+          {/* Advertising request details */}
+          {(() => {
+            const adInq = inquiry as { adPage?: string; adPlacement?: string; attachmentUrl?: string };
+            if (!adInq.adPage && !adInq.adPlacement && !adInq.attachmentUrl) return null;
+            return (
+              <div className="bg-indigo-50 rounded-lg p-4">
+                <h4 className="font-semibold text-indigo-900 mb-2">
+                  🔥 {t('admin:inquiries.advertisingRequest', 'Advertising Request')}
+                </h4>
+                <div className="grid grid-cols-2 gap-4 mb-3">
+                  <div>
+                    <label className="text-xs text-gray-500">{t('admin:inquiries.requestedPage', 'Requested page')}</label>
+                    <p className="font-medium">{adInq.adPage || '-'}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">{t('admin:inquiries.requestedPlacement', 'Requested placement')}</label>
+                    <p className="font-medium">{adInq.adPlacement || '-'}</p>
+                  </div>
+                </div>
+                {adInq.attachmentUrl && (
+                  <div>
+                    <label className="text-xs text-gray-500 block mb-1">{t('admin:inquiries.creative', 'Attached creative')}</label>
+                    <a href={adInq.attachmentUrl} target="_blank" rel="noopener noreferrer">
+                      <img
+                        src={adInq.attachmentUrl}
+                        alt="Advertiser creative"
+                        className="max-h-64 rounded-lg border border-indigo-200 object-contain bg-white"
+                      />
+                    </a>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
           {/* Message */}
           <div>
             <h4 className="font-semibold text-gray-700 mb-2">{t('admin:inquiries.message')}</h4>

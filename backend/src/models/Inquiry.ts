@@ -29,6 +29,11 @@ export interface IInquiry extends Document {
   propertyType?: string; // For area search inquiries
   budget?: number; // For area search inquiries
 
+  // Advertising request details (subject === 'advertising')
+  adPage?: string;
+  adPlacement?: string;
+  attachmentUrl?: string;
+
   // Admin notes
   adminNotes?: string;
 
@@ -117,6 +122,11 @@ const InquirySchema: Schema = new Schema(
     budget: {
       type: Number,
     },
+
+    // Advertising request details
+    adPage: { type: String, trim: true },
+    adPlacement: { type: String, trim: true },
+    attachmentUrl: { type: String, trim: true },
 
     // Admin notes
     adminNotes: {
