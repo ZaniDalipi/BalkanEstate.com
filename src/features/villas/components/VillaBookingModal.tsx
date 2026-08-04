@@ -138,8 +138,8 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
   if (!isOpen || !mounted) return null;
 
   // Apple-minimal field styling: soft inset fill, hairline border, calm gold focus ring
-  const inputCls = 'block w-full text-[15px] text-neutral-900 rounded-xl px-3.5 py-3 bg-black/[0.03] border border-black/[0.07] placeholder:text-neutral-400 focus:outline-none focus:bg-white focus:border-[#C9A227]/50 focus:ring-[3px] focus:ring-[#C9A227]/15 transition-all duration-200';
-  const labelCls = 'block text-[13px] font-medium text-neutral-500 mb-1.5 tracking-[-0.01em]';
+  const inputCls = 'block w-full text-[15px] text-neutral-900 rounded-xl px-3.5 py-3 bg-neutral-100 border border-black/[0.10] placeholder:text-neutral-400 focus:outline-none focus:bg-white focus:border-[#C9A227]/60 focus:ring-[3px] focus:ring-[#C9A227]/15 transition-all duration-200';
+  const labelCls = 'block text-[13px] font-medium text-neutral-600 mb-1.5 tracking-[-0.01em]';
 
   // Liability disclaimer — quiet fine print, not a loud banner
   const Disclaimer = () => (
@@ -163,7 +163,7 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
           className="w-full sm:max-w-[440px] sm:rounded-[28px] rounded-t-[28px] max-h-[92vh] overflow-y-auto overscroll-contain"
           style={{
             fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, sans-serif',
-            background: 'rgba(255,255,255,0.86)',
+            background: 'rgba(255,255,255,0.96)',
             backdropFilter: 'blur(40px) saturate(180%)',
             WebkitBackdropFilter: 'blur(40px) saturate(180%)',
             boxShadow: '0 24px 70px rgba(0,0,0,0.28), 0 2px 8px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.7)',
