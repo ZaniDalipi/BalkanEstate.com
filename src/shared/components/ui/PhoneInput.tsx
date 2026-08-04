@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ALL_PHONE_COUNTRY_CODES,
   BALKAN_PHONE_CODES,
   formatPhoneNumber,
   getPhonePlaceholder,
+  detectPhoneCodeSync,
+  getCachedDefaultPhoneCode,
 } from '@/constants/phoneCountryCodes';
 
 interface PhoneInputProps {
@@ -101,9 +103,15 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
   const parsed = parsePhoneValue(value);
 
   // Track selected country code in LOCAL state so it persists even when
-  // the phone field is empty — without this, every re-render with value=""
-  // resets back to the default (Kosovo).
-  const [selectedCode, setSelectedCode] = useState<string>(parsed.countryCode);
+  // the phone field is empty. When there's no value yet, default to the
+  // visitor's own country (detected synchronously from timezone/locale).
+  const [selectedCode, setSelectedCode] = useState<string>(() =>
+    value && value.trim() ? parsed.countryCode : detectPhoneCodeSync()
+  );
+
+  // Becomes true once the user picks a country or types — after that we never
+  // auto-override their choice.
+  const userTouched = useRef(false);
 
   // If the parent pushes a value that contains a country code (e.g. loading
   // a saved profile), sync our local state to match.
@@ -114,6 +122,23 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
     }
   }, [value]);
 
+  // Refine the default via IP-based detection (cached) while the field is
+  // still empty and untouched — gives the most accurate "from" country.
+  useEffect(() => {
+    if (value && value.trim()) return;
+    let cancelled = false;
+    getCachedDefaultPhoneCode().then((code) => {
+      if (!cancelled && !userTouched.current && !(value && value.trim())) {
+        setSelectedCode(code);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+    // Run once on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Local digits are always derived from the value prop
   const localDigits = parsed.localDigits;
   const formattedLocal = formatPhoneNumber(selectedCode, localDigits);
@@ -122,6 +147,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
     const newCode = e.target.value;
     if (!newCode) return;
 
+    userTouched.current = true;
     // Update local code immediately — this is what keeps the dropdown
     // responsive even when there are no digits yet
     setSelectedCode(newCode);
@@ -135,6 +161,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
 
   const handleLocalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const digits = e.target.value.replace(/\D/g, '');
+    userTouched.current = true;
     // Always use selectedCode (local state) so the chosen country is respected
     onChange(buildFullPhone(selectedCode, digits));
   };

@@ -136,6 +136,120 @@ export const getDefaultPhoneCountryCode = async (): Promise<string> => {
     }
 };
 
+const isoToPhoneCode = (iso: string): string | undefined =>
+    ALL_PHONE_COUNTRY_CODES.find((pcc) => pcc.country === iso.toUpperCase())?.code;
+
+// Common IANA timezone → ISO country (Balkans + a few majors). Timezone is a
+// strong, offline signal of where the visitor actually is.
+const TIMEZONE_TO_ISO: Record<string, string> = {
+    'Europe/Pristina': 'XK', 'Europe/Tirane': 'AL', 'Europe/Belgrade': 'RS',
+    'Europe/Skopje': 'MK', 'Europe/Sarajevo': 'BA', 'Europe/Podgorica': 'ME',
+    'Europe/Zagreb': 'HR', 'Europe/Ljubljana': 'SI', 'Europe/Sofia': 'BG',
+    'Europe/Bucharest': 'RO', 'Europe/Athens': 'GR', 'Europe/London': 'GB',
+    'Europe/Berlin': 'DE', 'Europe/Paris': 'FR', 'Europe/Rome': 'IT',
+    'Europe/Madrid': 'ES', 'Europe/Vienna': 'AT', 'Europe/Zurich': 'CH',
+    'Europe/Amsterdam': 'NL', 'Europe/Brussels': 'BE', 'Europe/Stockholm': 'SE',
+    'America/New_York': 'US', 'America/Chicago': 'US', 'America/Denver': 'US',
+    'America/Los_Angeles': 'US', 'America/Toronto': 'CA',
+};
+
+// App language → primary Balkan country (last-resort fallback).
+const LANG_TO_ISO: Record<string, string> = {
+    sq: 'AL', mk: 'MK', sr: 'RS', bs: 'BA', hr: 'HR',
+    bg: 'BG', el: 'GR', me: 'ME', ro: 'RO', sl: 'SI',
+};
+
+/**
+ * Best-effort *synchronous* detection of the visitor's phone country code,
+ * using timezone → browser locale region → app language. Returns immediately
+ * so the field shows a sensible code on first render; IP detection can refine
+ * it afterwards. Falls back to Kosovo.
+ */
+export const detectPhoneCodeSync = (): string => {
+    try {
+        // 1. Timezone
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (tz && TIMEZONE_TO_ISO[tz]) {
+            const c = isoToPhoneCode(TIMEZONE_TO_ISO[tz]);
+            if (c) return c;
+        }
+        // 2. Browser locale region subtag (e.g. "sq-AL" → AL, "en-US" → US)
+        const langs =
+            typeof navigator !== 'undefined'
+                ? [navigator.language, ...(navigator.languages || [])]
+                : [];
+        for (const l of langs) {
+            const m = /[-_]([A-Za-z]{2})$/.exec(l || '');
+            if (m) {
+                const c = isoToPhoneCode(m[1]);
+                if (c) return c;
+            }
+        }
+        // 3. App/UI language → Balkan country
+        for (const l of langs) {
+            const base = (l || '').slice(0, 2).toLowerCase();
+            if (LANG_TO_ISO[base]) {
+                const c = isoToPhoneCode(LANG_TO_ISO[base]);
+                if (c) return c;
+            }
+        }
+    } catch {
+        /* ignore */
+    }
+    return ALL_PHONE_COUNTRY_CODES[0].code;
+};
+
+const PHONE_CODE_CACHE_KEY = 'be:defaultPhoneCode';
+let cachedPhoneCodePromise: Promise<string> | null = null;
+
+/**
+ * Cached IP-based phone country detection: resolves once per session (memoised
+ * promise + localStorage) so we don't hit the geo API on every mounted field.
+ * Falls back to the synchronous detection on any failure.
+ */
+export const getCachedDefaultPhoneCode = (): Promise<string> => {
+    if (cachedPhoneCodePromise) return cachedPhoneCodePromise;
+    cachedPhoneCodePromise = (async () => {
+        try {
+            const stored =
+                typeof localStorage !== 'undefined'
+                    ? localStorage.getItem(PHONE_CODE_CACHE_KEY)
+                    : null;
+            if (stored) return stored;
+
+            // Own fetch (with timeout) so a failure falls back to the accurate
+            // synchronous detection rather than a hardcoded country.
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 3500);
+            let resolved = detectPhoneCodeSync();
+            try {
+                const res = await fetch('https://ipapi.co/json/', {
+                    headers: { Accept: 'application/json' },
+                    signal: controller.signal,
+                });
+                if (res.ok) {
+                    const data = (await res.json()) as { country_code?: string };
+                    const iso = data.country_code?.toUpperCase();
+                    const code = iso ? isoToPhoneCode(iso) : undefined;
+                    if (code) resolved = code;
+                }
+            } finally {
+                clearTimeout(timer);
+            }
+
+            try {
+                localStorage?.setItem(PHONE_CODE_CACHE_KEY, resolved);
+            } catch {
+                /* ignore */
+            }
+            return resolved;
+        } catch {
+            return detectPhoneCodeSync();
+        }
+    })();
+    return cachedPhoneCodePromise;
+};
+
 // Phone number format patterns per country code (digit groupings)
 export const PHONE_FORMAT_PATTERNS: Record<string, number[]> = {
     // Balkan countries
