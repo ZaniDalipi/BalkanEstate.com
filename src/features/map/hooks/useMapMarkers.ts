@@ -4,7 +4,7 @@
 import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { MarkerClusterer, SuperClusterAlgorithm } from '@googlemaps/markerclusterer';
 import { Property } from '@/types';
-import { VILLA_GOLD, buildEmeraldBeacon } from '@/shared/map/villaMarker';
+import { getVillaMarkerPalette, buildEmeraldBeacon, type VillaMarkerPalette } from '@/shared/map/villaMarker';
 
 // Property type colors
 const PROPERTY_TYPE_COLORS: Record<string, string> = {
@@ -52,7 +52,7 @@ const injectVillaMarkerStyles = (): void => {
  * Google AdvancedMarkerElement. Gold gabled house, animated sheen, price in
  * the body, crowned with the emerald beacon and anchored on a pin tip.
  */
-const buildLuxuryVillaSVG = (price: string, uid: string): string => {
+const buildLuxuryVillaSVG = (price: string, uid: string, pal: VillaMarkerPalette): string => {
   const W = Math.max(64, price.length * 7 + 22);
   const H = 58;
   const cx = W / 2;
@@ -62,16 +62,16 @@ const buildLuxuryVillaSVG = (price: string, uid: string): string => {
   const beacon = buildEmeraldBeacon(cx, 9, 4.5, uid, 'villa-g-halo');
   return `<svg width="${Math.round(W * scale)}" height="${Math.round(H * scale)}" viewBox="0 0 ${W} ${H}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 8px rgba(232,184,32,0.9)) drop-shadow(0 0 16px rgba(200,150,0,0.55)) drop-shadow(0 2px 5px rgba(0,0,0,0.45));display:block;">
     <defs>
-      <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${VILLA_GOLD.light}"/><stop offset="52%" stop-color="${VILLA_GOLD.mid}"/><stop offset="100%" stop-color="${VILLA_GOLD.deep}"/></linearGradient>
+      <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${pal.light}"/><stop offset="52%" stop-color="${pal.mid}"/><stop offset="100%" stop-color="${pal.deep}"/></linearGradient>
       <clipPath id="${clip}"><rect x="4" y="30" width="${W - 8}" height="18" rx="2"/></clipPath>
     </defs>
-    <path d="M${cx} ${H} L${cx - 8} 48 H${cx + 8} Z" fill="${VILLA_GOLD.deep}"/>
-    <rect x="4" y="30" width="${W - 8}" height="18" rx="2" fill="url(#${gid})" stroke="${VILLA_GOLD.edge}" stroke-width="1.25"/>
+    <path d="M${cx} ${H} L${cx - 8} 48 H${cx + 8} Z" fill="${pal.deep}"/>
+    <rect x="4" y="30" width="${W - 8}" height="18" rx="2" fill="url(#${gid})" stroke="${pal.edge}" stroke-width="1.25"/>
     <path class="villa-g-sheen" clip-path="url(#${clip})" d="M${cx - 3} 30 L${cx + 5} 30 L${cx + 1} 48 L${cx - 7} 48 Z" fill="#FFFFFF" opacity="0.5"/>
-    <path d="M4 30 L${cx} 15 L${W - 4} 30 Z" fill="url(#${gid})" stroke="${VILLA_GOLD.edge}" stroke-width="1.25" stroke-linejoin="round"/>
-    <path d="M${cx - 10} 27 L${cx} 18 L${cx + 10} 27" stroke="${VILLA_GOLD.light}" stroke-width="1" opacity="0.7" fill="none" stroke-linecap="round"/>
+    <path d="M4 30 L${cx} 15 L${W - 4} 30 Z" fill="url(#${gid})" stroke="${pal.edge}" stroke-width="1.25" stroke-linejoin="round"/>
+    <path d="M${cx - 10} 27 L${cx} 18 L${cx + 10} 27" stroke="${pal.light}" stroke-width="1" opacity="0.7" fill="none" stroke-linecap="round"/>
     ${beacon}
-    <text x="${cx}" y="40" font-family="Inter,sans-serif" font-size="10.5" font-weight="800" fill="${VILLA_GOLD.ink}" text-anchor="middle" dominant-baseline="middle">${price}</text>
+    <text x="${cx}" y="40" font-family="Inter,sans-serif" font-size="10.5" font-weight="800" fill="${pal.ink}" text-anchor="middle" dominant-baseline="middle">${price}</text>
   </svg>`;
 };
 
@@ -283,7 +283,7 @@ export const useMapMarkers = ({
           // Gilded villa marker — anchored on its pin tip, no pill chrome
           markerDiv.classList.add('luxury-villa-marker');
           markerDiv.style.cssText = `cursor:pointer;user-select:none;transform-origin:bottom center;transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1);`;
-          markerDiv.innerHTML = buildLuxuryVillaSVG(price, `${property.id}`.slice(-6) || String(i));
+          markerDiv.innerHTML = buildLuxuryVillaSVG(price, `${property.id}`.slice(-6) || String(i), getVillaMarkerPalette(property.listingType));
 
           markerDiv.onmouseenter = () => {
             markerDiv.style.transform = 'scale(1.18) translateY(-2px)';

@@ -19,8 +19,16 @@
  * markers render fully gold.
  */
 export const VILLA_ONYX = { light: '#332C22', dark: '#141009' } as const;
+/** For-rent villas: metallic gold body, dark engraved price text. */
 export const VILLA_GOLD = { light: '#FFEFB0', mid: '#E8B820', deep: '#B8860B', edge: '#6E5716', ink: '#2C1A00' } as const;
+/** For-sale villas: sapphire-blue body, white price text — a clear second colour. */
+export const VILLA_SAPPHIRE = { light: '#7FB4FF', mid: '#2563EB', deep: '#1E40AF', edge: '#16307E', ink: '#FFFFFF' } as const;
 export const VILLA_EMERALD = { light: '#6EE7B7', mid: '#10B981', deep: '#047857', edge: '#065F46' } as const;
+
+/** Marker body palette by market: gold for rent, sapphire for sale. */
+export type VillaMarkerPalette = typeof VILLA_GOLD;
+export const getVillaMarkerPalette = (listingType?: string): VillaMarkerPalette =>
+  listingType === 'sale' ? VILLA_SAPPHIRE : VILLA_GOLD;
 
 const round = (n: number): number => Math.round(n * 100) / 100;
 

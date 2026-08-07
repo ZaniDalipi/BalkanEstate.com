@@ -130,12 +130,19 @@ const VillaAnimationStyles = () => (
       border: 1px solid rgba(255,165,0,0.2);
     }
 
-    /* ── "Reserve" CTA ── */
+    /* ── "Reserve" CTA — solid & high-contrast so the label is always legible ── */
     .villa-cta-btn {
-      background: rgba(255,255,255,0.10);
+      background: rgba(20,16,9,0.9) !important;
+      color: #ffffff;
+      border-color: rgba(255,231,166,0.65) !important;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.45);
       opacity: 0;
       transform: translateY(6px) scale(0.95);
-      transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1), background 0.2s ease;
+    }
+    .villa-cta-btn:hover {
+      background: rgba(20,16,9,0.98) !important;
     }
     .luxury-villa-card:hover .villa-cta-btn {
       opacity: 1;
