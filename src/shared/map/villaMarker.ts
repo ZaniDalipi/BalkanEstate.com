@@ -26,7 +26,13 @@ export const VILLA_SAPPHIRE = { light: '#7FB4FF', mid: '#2563EB', deep: '#1E40AF
 export const VILLA_EMERALD = { light: '#6EE7B7', mid: '#10B981', deep: '#047857', edge: '#065F46' } as const;
 
 /** Marker body palette by market: gold for rent, sapphire for sale. */
-export type VillaMarkerPalette = typeof VILLA_GOLD;
+export interface VillaMarkerPalette {
+  light: string;
+  mid: string;
+  deep: string;
+  edge: string;
+  ink: string;
+}
 export const getVillaMarkerPalette = (listingType?: string): VillaMarkerPalette =>
   listingType === 'sale' ? VILLA_SAPPHIRE : VILLA_GOLD;
 
