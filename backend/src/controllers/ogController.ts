@@ -116,7 +116,7 @@ function buildOgDescription(property: PropertyOgProjection): string {
 }
 
 function getOgImageUrl(property: Pick<PropertyOgProjection, 'imageUrl' | 'images'>): string {
-  return property.images?.[0]?.url ?? property.imageUrl ?? `${OG_BASE_URL}/og-image.png`;
+  return property.images?.[0]?.url ?? property.imageUrl ?? `${OG_BASE_URL}/og-image.jpg`;
 }
 
 /**
@@ -354,7 +354,7 @@ export const blogArticleOgMiddleware = async (
     }
 
     const canonicalUrl = `${OG_BASE_URL}/en/blog/${article.slug}`;
-    const imageUrl = article.coverImageUrl ?? `${OG_BASE_URL}/og-image.png`;
+    const imageUrl = article.coverImageUrl ?? `${OG_BASE_URL}/og-image.jpg`;
     const description = (article.excerpt ?? '').slice(0, 300);
     const title = `${article.title} | BalkanEstateAI`;
     const html = buildArticleOgHtml(title, description, imageUrl, canonicalUrl);

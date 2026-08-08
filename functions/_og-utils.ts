@@ -26,7 +26,7 @@ export const CRAWLER_USER_AGENTS = [
 export const API_BASE = 'https://api.balkanestateai.com/api';
 export const SITE_URL = 'https://balkanestateai.com';
 export const SITE_NAME = 'BalkanEstateAI';
-export const DEFAULT_IMAGE = `${SITE_URL}/og-image.png`;
+export const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
 
 export interface PropertyData {
   _id: string;
