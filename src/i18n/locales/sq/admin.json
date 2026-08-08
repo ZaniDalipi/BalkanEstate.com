@@ -1025,7 +1025,11 @@
     "activeHint": "Uncheck to hide without deleting.",
     "stickyHint": "Only affects the sticky bar placements.",
     "viewOnSite": "View on site",
-    "viewOnSiteHint": "Opens the page in a new tab with the ad slot highlighted so you can see exactly how it looks."
+    "viewOnSiteHint": "Opens the page in a new tab with the ad slot highlighted so you can see exactly how it looks.",
+    "bestFitSize": "Best fit",
+    "imageHint3": "Any image shape works — it's fitted automatically with a soft blurred background, so it never looks stretched or cropped. Use a large image (~1000px+) for a sharp result.",
+    "imageLowRes": "⚠ Image is only {{w}}×{{h}}px — it may look blurry. Use a larger image (~1000px or more).",
+    "imageGood2": "✓ Image is {{w}}×{{h}}px — looks good."
   },
   "inquiries": {
     "advertising": "Advertising"

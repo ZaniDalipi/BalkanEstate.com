@@ -216,19 +216,37 @@ const AdSlot: React.FC<AdSlotProps> = ({
           {t('ads.sponsored', 'Sponsored')}
         </span>
 
+        {/* Blurred fill of the same image — makes ANY aspect ratio fit the slot
+            cleanly (no white bars, no cropping of the real creative). */}
+        <img
+          src={imageSrc}
+          alt=""
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            filter: 'blur(18px)',
+            transform: 'scale(1.15)',
+            opacity: 0.9,
+          }}
+        />
+
         <a
           href={banner.linkUrl}
           target="_blank"
           rel="noopener noreferrer sponsored"
           onClick={() => trackClick(banner.id)}
           aria-label={banner.title}
-          style={{ display: 'block', width: '100%', height: '100%' }}
+          style={{ position: 'relative', display: 'block', width: '100%', height: '100%', zIndex: 1 }}
         >
           <img
             src={imageSrc}
             alt={banner.title}
             loading="lazy"
-            style={{ display: 'block', width: '100%', height: '100%', objectFit: 'contain', background: '#ffffff' }}
+            style={{ display: 'block', width: '100%', height: '100%', objectFit: 'contain' }}
           />
         </a>
       </div>

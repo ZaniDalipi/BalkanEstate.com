@@ -163,19 +163,35 @@ const StickyAdBanner: React.FC<StickyAdBannerProps> = ({ page, placement = 'stic
               {t('ads.sponsored', 'Sponsored')}
             </span>
 
+            {/* Blurred fill so any image fits the bar cleanly. */}
+            <img
+              src={imageSrc}
+              alt=""
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                filter: 'blur(16px)',
+                transform: 'scale(1.15)',
+                opacity: 0.9,
+              }}
+            />
             <a
               href={banner!.linkUrl}
               target="_blank"
               rel="noopener noreferrer sponsored"
               onClick={handleClick}
               aria-label={banner!.title}
-              style={{ display: 'block', width: '100%', height: '100%' }}
+              style={{ position: 'relative', display: 'block', width: '100%', height: '100%', zIndex: 1 }}
             >
               <img
                 src={imageSrc}
                 alt={banner!.title}
                 loading="lazy"
-                style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', background: '#fff' }}
+                style={{ display: 'block', width: '100%', height: '100%', objectFit: 'contain' }}
               />
             </a>
           </>

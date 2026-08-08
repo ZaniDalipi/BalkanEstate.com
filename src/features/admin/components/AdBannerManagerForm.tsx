@@ -59,8 +59,9 @@ const AdBannerManagerForm: React.FC<Props> = ({
     setImgDims(null);
   }, [formData.imageUrl]);
 
-  const tooSmall =
-    imgDims !== null && (imgDims.w < dims.w * 0.8 || imgDims.h < dims.h * 0.8);
+  // Any shape fits now (blurred background fill), so only flag genuinely
+  // low-resolution images that would look blurry.
+  const tooSmall = imgDims !== null && Math.max(imgDims.w, imgDims.h) < 500;
 
   const previewBoxStyle: React.CSSProperties = isTall
     ? { height: 300, aspectRatio: `${dims.w} / ${dims.h}`, background: '#fff' }
@@ -94,22 +95,32 @@ const AdBannerManagerForm: React.FC<Props> = ({
             <div className="flex flex-col sm:flex-row items-start gap-4">
               {/* Preview at the exact slot proportions so you see the real fit */}
               <div
-                className="rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex-shrink-0"
+                className="relative rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex-shrink-0"
                 style={previewBoxStyle}
               >
                 {formData.imageUrl ? (
-                  <img
-                    src={formData.imageUrl}
-                    alt="preview"
-                    className="w-full h-full"
-                    style={{ objectFit: 'contain', display: 'block' }}
-                    onLoad={(e) =>
-                      setImgDims({
-                        w: e.currentTarget.naturalWidth,
-                        h: e.currentTarget.naturalHeight,
-                      })
-                    }
-                  />
+                  <>
+                    {/* Blurred fill — mirrors how the live ad slot renders. */}
+                    <img
+                      src={formData.imageUrl}
+                      alt=""
+                      aria-hidden="true"
+                      className="absolute inset-0 w-full h-full"
+                      style={{ objectFit: 'cover', filter: 'blur(14px)', transform: 'scale(1.15)', opacity: 0.9 }}
+                    />
+                    <img
+                      src={formData.imageUrl}
+                      alt="preview"
+                      className="relative w-full h-full"
+                      style={{ objectFit: 'contain', display: 'block', zIndex: 1 }}
+                      onLoad={(e) =>
+                        setImgDims({
+                          w: e.currentTarget.naturalWidth,
+                          h: e.currentTarget.naturalHeight,
+                        })
+                      }
+                    />
+                  </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <PhotoIcon className="w-6 h-6 text-gray-300" />
@@ -137,24 +148,22 @@ const AdBannerManagerForm: React.FC<Props> = ({
                     : t('admin:adBanners.uploadImage', 'Upload Image')}
                 </label>
                 <p className="text-xs text-gray-500 mt-2">
-                  {t('admin:adBanners.recommendedSize', 'Recommended size')}:{' '}
+                  {t('admin:adBanners.bestFitSize', 'Best fit')}:{' '}
                   <span className="font-medium text-gray-700">{dims.label}</span>
                 </p>
                 <p className={hintCls}>
-                  {t('admin:adBanners.imageHint2', 'PNG or JPG, max 5MB. The image fills the slot — match the size so it looks sharp and not stretched or cropped.')}
+                  {t('admin:adBanners.imageHint3', 'Any image shape works — it\'s fitted automatically with a soft blurred background, so it never looks stretched or cropped. Use a large image (~1000px+) for a sharp result.')}
                 </p>
                 {imgDims && (
                   <p className={`text-xs mt-1 ${tooSmall ? 'text-amber-600 font-medium' : 'text-green-600'}`}>
                     {tooSmall
-                      ? t('admin:adBanners.imageTooSmall', {
-                          defaultValue: '⚠ Uploaded image is {{w}}×{{h}}px — smaller than recommended. It may look blurry. Use at least {{rw}}×{{rh}}px.',
+                      ? t('admin:adBanners.imageLowRes', {
+                          defaultValue: '⚠ Image is only {{w}}×{{h}}px — it may look blurry. Use a larger image (~1000px or more).',
                           w: imgDims.w,
                           h: imgDims.h,
-                          rw: dims.w,
-                          rh: dims.h,
                         })
-                      : t('admin:adBanners.imageGood', {
-                          defaultValue: '✓ Uploaded image is {{w}}×{{h}}px — good fit.',
+                      : t('admin:adBanners.imageGood2', {
+                          defaultValue: '✓ Image is {{w}}×{{h}}px — looks good.',
                           w: imgDims.w,
                           h: imgDims.h,
                         })}
