@@ -309,6 +309,11 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
     : '';
   const countryFlag = article.country ? COUNTRY_FLAGS[article.country] : '';
   const pageTitle = `${article.title} | BalkanEstate Blog`;
+  // Share preview image: the article's own cover when it has one, otherwise the
+  // site default so a shared blog link always renders a picture (never a blank
+  // placeholder). Many auto-generated market articles have no cover of their own.
+  const siteOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://balkanestateai.com';
+  const shareImage = article.coverImageUrl || `${siteOrigin}/og-image.jpg`;
 
   return (
     <>
@@ -321,7 +326,8 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
         <meta property="og:description" content={article.excerpt} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={shareUrl} />
-        {article.coverImageUrl && <meta property="og:image" content={article.coverImageUrl} />}
+        <meta property="og:image" content={shareImage} />
+        <meta property="og:image:alt" content={article.title} />
         <meta property="og:site_name" content="BalkanEstate" />
         {article.publishedAt && <meta property="article:published_time" content={article.publishedAt} />}
         {article.tags?.map(tag => <meta key={tag} property="article:tag" content={tag} />)}
@@ -329,12 +335,13 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={article.title} />
         <meta name="twitter:description" content={article.excerpt} />
-        {article.coverImageUrl && <meta name="twitter:image" content={article.coverImageUrl} />}
+        <meta name="twitter:image" content={shareImage} />
+        <meta name="twitter:image:alt" content={article.title} />
         <meta name="twitter:site" content="@balkanestate" />
         {/* Open Graph image dimensions */}
-        {article.coverImageUrl && <meta property="og:image:width" content="1200" />}
-        {article.coverImageUrl && <meta property="og:image:height" content="628" />}
-        {article.coverImageUrl && <meta property="og:image:type" content="image/jpeg" />}
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:type" content="image/jpeg" />
         {/* JSON-LD structured data — improves link previews and rich snippets */}
         <script type="application/ld+json">{JSON.stringify({
           '@context': 'https://schema.org',
