@@ -212,8 +212,13 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                         <div className="villa-luxury-badge inline-flex items-center gap-1 px-2.5 py-[5px] rounded-full text-[10px] font-black tracking-wider shadow-lg">
                             <span style={{ fontSize: '7px' }}>✦</span> LUXURY VILLA
                         </div>
-                        {/* Market chip: for rent vs for sale */}
-                        <div className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] font-bold bg-black/45 backdrop-blur-sm text-white border border-white/15 shadow w-fit">
+                        {/* Market chip — colour matches the map pin (gold = rent, sapphire = sale) */}
+                        <div
+                            className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] font-bold shadow w-fit"
+                            style={isForRent
+                                ? { background: 'linear-gradient(135deg,#FFE9A3,#E8B820)', color: '#2C1A00' }
+                                : { background: 'linear-gradient(135deg,#4C86F0,#2563EB)', color: '#FFFFFF' }}
+                        >
                             {isForRent ? t('villas:filters.forRent', 'For Rent') : t('villas:filters.forSale', 'For Sale')}
                         </div>
                         {isSold && (
