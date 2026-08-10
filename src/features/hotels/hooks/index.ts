@@ -18,3 +18,8 @@ export {
   useUpdateBookingStatus,
   useUploadRoomImage,
 } from './useHotelBookings';
+export {
+  useHotelReviews,
+  useCreateReview,
+  useDeleteReview,
+} from './useHotelReviews';

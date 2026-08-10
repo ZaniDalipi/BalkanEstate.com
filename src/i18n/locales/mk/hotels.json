@@ -444,5 +444,24 @@
     "services": "Услуги",
     "suitability": "Погодно за",
     "more": "Повеќе"
+  },
+  "reviews": {
+    "title": "Рецензии",
+    "reviewsCount": "{{count}} рецензии",
+    "reviewsCount_one": "{{count}} рецензија",
+    "writeReview": "Напишете рецензија",
+    "yourRating": "Вашата оцена",
+    "commentPlaceholder": "Споделете каков беше вашиот престој…",
+    "submit": "Објави рецензија",
+    "submitting": "Објавување…",
+    "ratingRequired": "Ве молиме изберете оцена со ѕвезди.",
+    "thanks": "Ви благодариме за рецензијата!",
+    "beFirst": "Сè уште нема рецензии — бидете први што ќе оцени.",
+    "categories": {
+      "cleanliness": "Чистота",
+      "location": "Локација",
+      "value": "Вредност",
+      "service": "Услуга"
+    }
   }
 }

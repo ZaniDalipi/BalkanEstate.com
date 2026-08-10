@@ -444,5 +444,24 @@
     "services": "Servicii",
     "suitability": "Potrivit pentru",
     "more": "Mai multe"
+  },
+  "reviews": {
+    "title": "Recenzii",
+    "reviewsCount": "{{count}} recenzii",
+    "reviewsCount_one": "{{count}} recenzie",
+    "writeReview": "Scrieți o recenzie",
+    "yourRating": "Evaluarea dvs.",
+    "commentPlaceholder": "Spuneți cum a fost sejurul dvs…",
+    "submit": "Publică recenzia",
+    "submitting": "Se publică…",
+    "ratingRequired": "Vă rugăm alegeți o notă.",
+    "thanks": "Mulțumim pentru recenzie!",
+    "beFirst": "Încă nu există recenzii — fiți primul care evaluează.",
+    "categories": {
+      "cleanliness": "Curățenie",
+      "location": "Locație",
+      "value": "Raport calitate-preț",
+      "service": "Servicii"
+    }
   }
 }

@@ -444,5 +444,24 @@
     "services": "Shërbime",
     "suitability": "E përshtatshme për",
     "more": "Më shumë"
+  },
+  "reviews": {
+    "title": "Vlerësimet",
+    "reviewsCount": "{{count}} vlerësime",
+    "reviewsCount_one": "{{count}} vlerësim",
+    "writeReview": "Shkruaj një vlerësim",
+    "yourRating": "Vlerësimi juaj",
+    "commentPlaceholder": "Tregoni si ishte qëndrimi juaj…",
+    "submit": "Publiko vlerësimin",
+    "submitting": "Duke publikuar…",
+    "ratingRequired": "Ju lutemi zgjidhni një vlerësim me yje.",
+    "thanks": "Faleminderit për vlerësimin!",
+    "beFirst": "Ende pa vlerësime — bëhuni i pari që e vlerëson.",
+    "categories": {
+      "cleanliness": "Pastërtia",
+      "location": "Vendndodhja",
+      "value": "Vlera",
+      "service": "Shërbimi"
+    }
   }
 }

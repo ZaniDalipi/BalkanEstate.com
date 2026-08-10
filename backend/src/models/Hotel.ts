@@ -188,6 +188,8 @@ export interface IHotel extends Document {
   /** Whether prepayment is required to confirm a booking. */
   prepaymentRequired?: boolean;
   accessCode?: string;
+  avgRating: number;
+  reviewCount: number;
   isComped: boolean;
   isActive: boolean;
   isVerified: boolean;
@@ -474,6 +476,9 @@ const HotelSchema: Schema = new Schema(
     prepaymentRequired: { type: Boolean, default: false },
     // Access-code / comp tracking (interim monetization bridge).
     accessCode: { type: String, trim: true, uppercase: true },
+    // Aggregate guest-review score (0-5) and count, kept in sync by the review controller.
+    avgRating: { type: Number, default: 0, min: 0, max: 5 },
+    reviewCount: { type: Number, default: 0, min: 0 },
     isComped: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true, index: true },
     isVerified: { type: Boolean, default: false },

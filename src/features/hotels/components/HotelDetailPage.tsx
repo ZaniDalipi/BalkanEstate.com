@@ -5,6 +5,7 @@ import { useHotel, useHotelFavorites, useToggleHotelFavorite } from '../hooks';
 import { CURRENCY_SYMBOLS } from '@/src/shared/types/hotel.types';
 import ReservationWidget from './ReservationWidget';
 import AmenitiesSection from './AmenitiesSection';
+import ReviewsSection from './ReviewsSection';
 import {
   MapPinIcon, StarIconSolid, UsersIcon, PhoneIcon, EnvelopeIcon, GlobeAltIcon,
   CheckIcon, CheckBadgeIcon, HomeIcon, PhotoIcon, XMarkIcon, HeartIcon, ShareIcon, BedIcon,
@@ -121,10 +122,19 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
               ) : null}
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">{hotel.name}</h1>
-            <p className="mt-1 flex items-center gap-1.5 text-sm text-neutral-500">
-              <MapPinIcon className="w-4 h-4" />
-              {[hotel.address, hotel.neighborhood, hotel.postalCode].filter(Boolean).join(', ') || `${hotel.city}, ${hotel.country}`}
-            </p>
+            <div className="mt-1 flex items-center gap-2 flex-wrap text-sm text-neutral-500">
+              {(hotel.reviewCount || 0) > 0 && (
+                <span className="flex items-center gap-1 font-semibold text-neutral-900">
+                  <StarIconSolid className="w-4 h-4 text-amber-400" />
+                  {(hotel.avgRating || 0).toFixed(1)}
+                  <span className="font-normal text-neutral-500">· {t('reviews.reviewsCount', { count: hotel.reviewCount })}</span>
+                </span>
+              )}
+              <span className="flex items-center gap-1.5">
+                <MapPinIcon className="w-4 h-4" />
+                {[hotel.address, hotel.neighborhood, hotel.postalCode].filter(Boolean).join(', ') || `${hotel.city}, ${hotel.country}`}
+              </span>
+            </div>
           </div>
           {hotel.isVerified && (
             <span className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-emerald-50 text-emerald-600 text-xs font-semibold shrink-0">
@@ -398,6 +408,9 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
                 </ul>
               ) : null}
             </div>
+
+            {/* Guest reviews */}
+            <ReviewsSection hotelId={hotelId} />
           </div>
 
           {/* Sidebar */}

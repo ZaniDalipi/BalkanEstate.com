@@ -444,5 +444,24 @@
     "services": "Υπηρεσίες",
     "suitability": "Κατάλληλο για",
     "more": "Περισσότερα"
+  },
+  "reviews": {
+    "title": "Κριτικές",
+    "reviewsCount": "{{count}} κριτικές",
+    "reviewsCount_one": "{{count}} κριτική",
+    "writeReview": "Γράψτε κριτική",
+    "yourRating": "Η βαθμολογία σας",
+    "commentPlaceholder": "Μοιραστείτε πώς ήταν η διαμονή σας…",
+    "submit": "Δημοσίευση κριτικής",
+    "submitting": "Δημοσίευση…",
+    "ratingRequired": "Παρακαλώ επιλέξτε βαθμολογία.",
+    "thanks": "Ευχαριστούμε για την κριτική!",
+    "beFirst": "Δεν υπάρχουν ακόμη κριτικές — γίνετε ο πρώτος.",
+    "categories": {
+      "cleanliness": "Καθαριότητα",
+      "location": "Τοποθεσία",
+      "value": "Αξία",
+      "service": "Εξυπηρέτηση"
+    }
   }
 }

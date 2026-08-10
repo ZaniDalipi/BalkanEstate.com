@@ -205,7 +205,7 @@ export const getHotels = async (req: Request, res: Response): Promise<void> => {
         sort = { createdAt: -1 };
         break;
       case 'rating':
-        sort = { starRating: -1, isVerified: -1 };
+        sort = { avgRating: -1, reviewCount: -1, starRating: -1, isVerified: -1 };
         break;
     }
 

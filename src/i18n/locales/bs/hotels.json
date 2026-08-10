@@ -444,5 +444,24 @@
     "services": "Usluge",
     "suitability": "Pogodno za",
     "more": "Više"
+  },
+  "reviews": {
+    "title": "Recenzije",
+    "reviewsCount": "{{count}} recenzija",
+    "reviewsCount_one": "{{count}} recenzija",
+    "writeReview": "Napišite recenziju",
+    "yourRating": "Vaša ocjena",
+    "commentPlaceholder": "Podijelite kakav je bio vaš boravak…",
+    "submit": "Objavi recenziju",
+    "submitting": "Objavljivanje…",
+    "ratingRequired": "Molimo odaberite ocjenu.",
+    "thanks": "Hvala na recenziji!",
+    "beFirst": "Još nema recenzija — budite prvi koji će ocijeniti.",
+    "categories": {
+      "cleanliness": "Čistoća",
+      "location": "Lokacija",
+      "value": "Vrijednost",
+      "service": "Usluga"
+    }
   }
 }

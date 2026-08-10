@@ -119,6 +119,7 @@ import hotelRoutes from './routes/hotelRoutes';
 import hotelCodeRoutes from './routes/hotelCodeRoutes';
 import hotelFavoriteRoutes from './routes/hotelFavoriteRoutes';
 import hotelBookingRoutes from './routes/hotelBookingRoutes';
+import hotelReviewRoutes from './routes/hotelReviewRoutes';
 import listingSourceRoutes from './routes/listingSourceRoutes';
 import userListingSourceRoutes from './routes/userListingSourceRoutes';
 import imageProxyRoutes from './routes/imageProxyRoutes';
@@ -384,6 +385,7 @@ app.use('/api/hotels', hotelRoutes); // Hotels & rooms for rent
 app.use('/api/hotel-codes', hotelCodeRoutes); // Hotel listing access codes
 app.use('/api/hotel-favorites', hotelFavoriteRoutes); // Saved hotels
 app.use('/api/hotel-bookings', hotelBookingRoutes); // Booking requests
+app.use('/api/hotel-reviews', hotelReviewRoutes); // Guest reviews
 app.use('/api/admin/listing-sources', sensitiveRateLimiter, listingSourceRoutes); // Universal external-listing ingestion (admin only)
 app.use('/api/listing-sources', sensitiveRateLimiter, userListingSourceRoutes); // Per-user external-listing feeds
 app.use('/api/image-proxy', imageProxyRoutes); // Proxy external scraped images to avoid CORS

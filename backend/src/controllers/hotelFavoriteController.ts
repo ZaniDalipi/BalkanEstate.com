@@ -7,7 +7,7 @@ import { encodeId, resolveId } from '../utils/idObfuscation';
 import { getParam } from '../utils/validateParams';
 
 const HOTEL_CARD_FIELDS =
-  'name slug propertyType starRating city country coverImageUrl images amenities rooms priceFrom currency isVerified views';
+  'name slug propertyType starRating city country coverImageUrl images amenities rooms priceFrom currency isVerified views avgRating reviewCount';
 
 /** Transform a populated hotel subdocument into the shape the frontend card expects. */
 const transformHotel = (doc: any) => {

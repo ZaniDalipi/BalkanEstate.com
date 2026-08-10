@@ -24,3 +24,8 @@ export {
   getHostBookings,
   updateBookingStatus,
 } from './hotelBookingsApi';
+export {
+  getHotelReviews,
+  createReview,
+  deleteReview,
+} from './hotelReviewsApi';

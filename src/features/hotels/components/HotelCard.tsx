@@ -116,9 +116,18 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, onClick, isSaved, onToggle
 
       {/* Body */}
       <div className="p-5">
-        <h3 className="font-semibold text-neutral-900 text-[15px] tracking-tight line-clamp-1">
-          {hotel.name}
-        </h3>
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="font-semibold text-neutral-900 text-[15px] tracking-tight line-clamp-1">
+            {hotel.name}
+          </h3>
+          {(hotel.reviewCount || 0) > 0 && (
+            <span className="flex items-center gap-0.5 shrink-0 text-[13px] font-semibold text-neutral-900">
+              <StarIconSolid className="w-3.5 h-3.5 text-amber-400" />
+              {(hotel.avgRating || 0).toFixed(1)}
+              <span className="font-normal text-neutral-400">({hotel.reviewCount})</span>
+            </span>
+          )}
+        </div>
 
         <p className="mt-1 flex items-center gap-1 text-[13px] text-neutral-400">
           <MapPinIcon className="w-3.5 h-3.5 shrink-0" />

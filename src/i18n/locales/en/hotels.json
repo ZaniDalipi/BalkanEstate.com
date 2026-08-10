@@ -201,6 +201,25 @@
     "private_bathroom": "Private bathroom",
     "workspace": "Workspace"
   },
+  "reviews": {
+    "title": "Reviews",
+    "reviewsCount": "{{count}} reviews",
+    "reviewsCount_one": "{{count}} review",
+    "writeReview": "Write a review",
+    "yourRating": "Your rating",
+    "commentPlaceholder": "Share what your stay was like…",
+    "submit": "Post review",
+    "submitting": "Posting…",
+    "ratingRequired": "Please choose a star rating.",
+    "thanks": "Thanks for your review!",
+    "beFirst": "No reviews yet — be the first to review this place.",
+    "categories": {
+      "cleanliness": "Cleanliness",
+      "location": "Location",
+      "value": "Value",
+      "service": "Service"
+    }
+  },
   "amenityCategories": {
     "general": "General",
     "kitchen": "Kitchen & dining",

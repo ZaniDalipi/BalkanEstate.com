@@ -196,6 +196,8 @@ export interface Hotel {
   isActive: boolean;
   isVerified: boolean;
   views: number;
+  avgRating?: number;
+  reviewCount?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -342,4 +344,52 @@ export interface CreateBookingData {
   guestPhone: string;
   guestEmail?: string;
   message?: string;
+}
+
+// ---- Reviews ----
+
+export const REVIEW_CATEGORIES = ['cleanliness', 'location', 'value', 'service'] as const;
+export type ReviewCategory = typeof REVIEW_CATEGORIES[number];
+
+export interface HotelReview {
+  id: string;
+  guestName: string;
+  guestAvatar?: string;
+  rating: number;
+  comment?: string;
+  cleanliness?: number;
+  location?: number;
+  value?: number;
+  service?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReviewSummary {
+  avgRating: number;
+  reviewCount: number;
+  categories: {
+    cleanliness: number | null;
+    location: number | null;
+    value: number | null;
+    service: number | null;
+  };
+}
+
+export interface HotelReviewsResponse {
+  reviews: HotelReview[];
+  total: number;
+  page: number;
+  totalPages: number;
+  summary: ReviewSummary;
+}
+
+export interface CreateReviewData {
+  hotelId: string;
+  rating: number;
+  comment?: string;
+  cleanliness?: number;
+  location?: number;
+  value?: number;
+  service?: number;
 }
