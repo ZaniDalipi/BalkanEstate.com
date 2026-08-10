@@ -128,7 +128,21 @@
       "messageHost": "Pošalji poruku domaćinu"
     },
     "reserve": "Rezerviši",
-    "sleeps_one": "Do {{count}} gosta"
+    "sleeps_one": "Do {{count}} gosta",
+    "amenitiesTitle": "Šta ovo mesto nudi",
+    "showAllAmenities": "Prikaži svih {{count}} sadržaja",
+    "highlights": {
+      "freeCancellationTitle": "Besplatno otkazivanje",
+      "freeCancellationSub": "Za odabrane sobe — planovi se menjaju.",
+      "breakfastTitle": "Doručak uključen",
+      "breakfastSub": "Započnite dan bez izlaska.",
+      "topRatedTitle": "Kvalitet {{count}} zvezdice",
+      "topRatedSub": "Visoko ocenjeno mesto.",
+      "receptionTitle": "Recepcija 24 sata",
+      "receptionSub": "Uvek je neko tu da pomogne.",
+      "noFeesTitle": "Direktna rezervacija",
+      "noFeesSub": "Bez provizije — dogovarate se s domaćinom."
+    }
   },
   "propertyTypes": {
     "hotel": "Hotel",
@@ -420,5 +434,15 @@
       "declined": "Odbijeno",
       "cancelled": "Otkazano"
     }
+  },
+  "amenityCategories": {
+    "general": "Opšte",
+    "kitchen": "Kuhinja i obroci",
+    "bathroom": "Kupatilo",
+    "outdoor": "Spolja i pogledi",
+    "wellness": "Velnes",
+    "services": "Usluge",
+    "suitability": "Pogodno za",
+    "more": "Više"
   }
 }

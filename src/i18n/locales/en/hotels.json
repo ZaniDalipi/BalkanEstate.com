@@ -86,6 +86,20 @@
     "bathroomsCount_one": "{{count}} bathroom",
     "reserve": "Reserve",
     "about": "About this place",
+    "amenitiesTitle": "What this place offers",
+    "showAllAmenities": "Show all {{count}} amenities",
+    "highlights": {
+      "freeCancellationTitle": "Free cancellation",
+      "freeCancellationSub": "On selected rooms — plans can change.",
+      "breakfastTitle": "Breakfast included",
+      "breakfastSub": "Start your day without leaving.",
+      "topRatedTitle": "{{count}}-star quality",
+      "topRatedSub": "A highly rated place to stay.",
+      "receptionTitle": "24-hour reception",
+      "receptionSub": "Someone's always there to help.",
+      "noFeesTitle": "Direct booking",
+      "noFeesSub": "No booking fees — you deal with the host."
+    },
     "amenitiesCount": "{{count}} amenities",
     "amenitiesCount_one": "{{count}} amenity",
     "starLabel": "{{count}}-star",
@@ -186,6 +200,16 @@
     "coffee_machine": "Coffee machine",
     "private_bathroom": "Private bathroom",
     "workspace": "Workspace"
+  },
+  "amenityCategories": {
+    "general": "General",
+    "kitchen": "Kitchen & dining",
+    "bathroom": "Bathroom",
+    "outdoor": "Outdoor & views",
+    "wellness": "Wellness",
+    "services": "Services",
+    "suitability": "Suitable for",
+    "more": "More"
   },
   "cancellationPolicies": {
     "flexible": "Flexible",

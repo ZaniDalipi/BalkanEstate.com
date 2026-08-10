@@ -128,7 +128,21 @@
       "messageHost": "Пишете на домакина"
     },
     "reserve": "Резервирай",
-    "sleeps_one": "До {{count}} гост"
+    "sleeps_one": "До {{count}} гост",
+    "amenitiesTitle": "Какво предлага мястото",
+    "showAllAmenities": "Покажи всички {{count}} удобства",
+    "highlights": {
+      "freeCancellationTitle": "Безплатно анулиране",
+      "freeCancellationSub": "За избрани стаи — плановете се менят.",
+      "breakfastTitle": "Включена закуска",
+      "breakfastSub": "Започнете деня, без да излизате.",
+      "topRatedTitle": "Качество {{count}} звезди",
+      "topRatedSub": "Високо оценено място за престой.",
+      "receptionTitle": "Рецепция 24 часа",
+      "receptionSub": "Винаги има кой да помогне.",
+      "noFeesTitle": "Директна резервация",
+      "noFeesSub": "Без такси — договаряте се с домакина."
+    }
   },
   "propertyTypes": {
     "hotel": "Hotel",
@@ -420,5 +434,15 @@
       "declined": "Отхвърлена",
       "cancelled": "Отменена"
     }
+  },
+  "amenityCategories": {
+    "general": "Общи",
+    "kitchen": "Кухня и хранене",
+    "bathroom": "Баня",
+    "outdoor": "На открито и гледки",
+    "wellness": "Уелнес",
+    "services": "Услуги",
+    "suitability": "Подходящо за",
+    "more": "Още"
   }
 }

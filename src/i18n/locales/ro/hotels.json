@@ -128,7 +128,21 @@
       "messageHost": "Scrie gazdei"
     },
     "reserve": "Rezervă",
-    "sleeps_one": "Până la {{count}} oaspete"
+    "sleeps_one": "Până la {{count}} oaspete",
+    "amenitiesTitle": "Ce oferă acest loc",
+    "showAllAmenities": "Arată toate cele {{count}} facilități",
+    "highlights": {
+      "freeCancellationTitle": "Anulare gratuită",
+      "freeCancellationSub": "La camere selectate — planurile se schimbă.",
+      "breakfastTitle": "Mic dejun inclus",
+      "breakfastSub": "Începeți ziua fără să ieșiți.",
+      "topRatedTitle": "Calitate {{count}} stele",
+      "topRatedSub": "Un loc foarte bine apreciat.",
+      "receptionTitle": "Recepție 24 de ore",
+      "receptionSub": "Mereu e cineva să vă ajute.",
+      "noFeesTitle": "Rezervare directă",
+      "noFeesSub": "Fără comisioane — tratați cu gazda."
+    }
   },
   "propertyTypes": {
     "hotel": "Hotel",
@@ -420,5 +434,15 @@
       "declined": "Refuzată",
       "cancelled": "Anulată"
     }
+  },
+  "amenityCategories": {
+    "general": "Generale",
+    "kitchen": "Bucătărie și masă",
+    "bathroom": "Baie",
+    "outdoor": "Exterior și priveliști",
+    "wellness": "Wellness",
+    "services": "Servicii",
+    "suitability": "Potrivit pentru",
+    "more": "Mai multe"
   }
 }

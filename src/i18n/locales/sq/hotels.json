@@ -128,7 +128,21 @@
       "messageHost": "Shkruaji pritësit"
     },
     "reserve": "Rezervo",
-    "sleeps_one": "Deri në {{count}} mysafir"
+    "sleeps_one": "Deri në {{count}} mysafir",
+    "amenitiesTitle": "Çfarë ofron ky vend",
+    "showAllAmenities": "Shfaq të {{count}} lehtësirat",
+    "highlights": {
+      "freeCancellationTitle": "Anulim falas",
+      "freeCancellationSub": "Për dhoma të zgjedhura — planet ndryshojnë.",
+      "breakfastTitle": "Mëngjesi i përfshirë",
+      "breakfastSub": "Nisni ditën pa dalë jashtë.",
+      "topRatedTitle": "Cilësi {{count}} yje",
+      "topRatedSub": "Një vend me vlerësim të lartë.",
+      "receptionTitle": "Recepsion 24 orë",
+      "receptionSub": "Gjithmonë dikush për t'ju ndihmuar.",
+      "noFeesTitle": "Rezervim i drejtpërdrejtë",
+      "noFeesSub": "Pa tarifa — merreni drejt me pritësin."
+    }
   },
   "propertyTypes": {
     "hotel": "Hotel",
@@ -420,5 +434,15 @@
       "declined": "Refuzuar",
       "cancelled": "Anuluar"
     }
+  },
+  "amenityCategories": {
+    "general": "Të përgjithshme",
+    "kitchen": "Kuzhina & ushqimi",
+    "bathroom": "Banjo",
+    "outdoor": "Jashtë & pamje",
+    "wellness": "Mirëqenie",
+    "services": "Shërbime",
+    "suitability": "E përshtatshme për",
+    "more": "Më shumë"
   }
 }

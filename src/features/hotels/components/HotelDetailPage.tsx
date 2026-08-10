@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useHotel, useHotelFavorites, useToggleHotelFavorite } from '../hooks';
 import { CURRENCY_SYMBOLS } from '@/src/shared/types/hotel.types';
 import ReservationWidget from './ReservationWidget';
+import AmenitiesSection from './AmenitiesSection';
 import {
   MapPinIcon, StarIconSolid, UsersIcon, PhoneIcon, EnvelopeIcon, GlobeAltIcon,
   CheckIcon, CheckBadgeIcon, HomeIcon, PhotoIcon, XMarkIcon, HeartIcon, ShareIcon, BedIcon,
@@ -82,6 +83,16 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
     ...(hotel.images || []),
   ];
   const maxSleeps = hotel.rooms?.reduce((m, r) => Math.max(m, r.maxGuests || 0), 0) || 0;
+
+  // Airbnb-style "why book here" highlights, derived from the listing data.
+  const anyFreeCancellation = hotel.rooms?.some((r) => r.freeCancellation);
+  const anyBreakfast = hotel.breakfastIncluded || hotel.rooms?.some((r) => r.breakfastIncluded);
+  const highlights: Array<{ icon: React.ReactNode; title: string; subtitle: string }> = [];
+  if (anyFreeCancellation) highlights.push({ icon: <CheckBadgeIcon className="w-5 h-5" />, title: t('detail.highlights.freeCancellationTitle'), subtitle: t('detail.highlights.freeCancellationSub') });
+  if (anyBreakfast) highlights.push({ icon: <CheckIcon className="w-5 h-5" />, title: t('detail.highlights.breakfastTitle'), subtitle: t('detail.highlights.breakfastSub') });
+  if (hotel.starRating && hotel.starRating >= 4) highlights.push({ icon: <StarIconSolid className="w-5 h-5" />, title: t('detail.highlights.topRatedTitle', { count: hotel.starRating }), subtitle: t('detail.highlights.topRatedSub') });
+  if (hotel.amenities?.includes('reception_24h')) highlights.push({ icon: <HomeIcon className="w-5 h-5" />, title: t('detail.highlights.receptionTitle'), subtitle: t('detail.highlights.receptionSub') });
+  if (highlights.length < 3) highlights.push({ icon: <CheckBadgeIcon className="w-5 h-5" />, title: t('detail.highlights.noFeesTitle'), subtitle: t('detail.highlights.noFeesSub') });
 
   const openLightbox = (i: number) => setLightboxIndex(i);
   const closeLightbox = () => setLightboxIndex(null);
@@ -186,6 +197,21 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Why book here — quick highlights */}
+            {highlights.length > 0 && (
+              <div className="bg-white rounded-2xl border border-neutral-200 divide-y divide-neutral-100 sm:divide-y-0 sm:grid sm:grid-cols-3 sm:divide-x">
+                {highlights.slice(0, 3).map((h, i) => (
+                  <div key={i} className="flex items-start gap-3 p-5">
+                    <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">{h.icon}</span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-neutral-900 leading-tight">{h.title}</p>
+                      <p className="mt-0.5 text-xs text-neutral-500 leading-snug">{h.subtitle}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {hotel.description && (
               <div className="bg-white rounded-2xl border border-neutral-200 p-6">
                 <h2 className="text-lg font-semibold text-neutral-900 mb-3">{t('detail.about')}</h2>
@@ -334,29 +360,9 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
               </div>
             </div>
 
-            {/* Amenities */}
+            {/* Amenities — grouped "What this place offers" with a show-all modal */}
             {((hotel.amenities?.length || 0) > 0 || (hotel.customAmenities?.length || 0) > 0) && (
-              <div className="bg-white rounded-2xl border border-neutral-200 p-6">
-                <h2 className="text-lg font-semibold text-neutral-900 mb-4">{t('detail.amenities')}</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                  {hotel.amenities?.map((amenity) => (
-                    <div key={amenity} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-neutral-50 border border-neutral-100 text-sm text-neutral-700 hover:border-primary/30 hover:bg-primary/5 transition-colors">
-                      <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                        <CheckIcon className="w-3.5 h-3.5" />
-                      </span>
-                      {t(`amenities.${amenity}`)}
-                    </div>
-                  ))}
-                  {hotel.customAmenities?.map((amenity) => (
-                    <div key={amenity} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-amber-50 border border-amber-100 text-sm text-amber-800 hover:border-amber-300 transition-colors">
-                      <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
-                        <CheckIcon className="w-3.5 h-3.5" />
-                      </span>
-                      {amenity}
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <AmenitiesSection amenities={hotel.amenities || []} customAmenities={hotel.customAmenities} />
             )}
 
             {/* Policies */}
@@ -479,6 +485,26 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotelId, onBack }) =>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ===== Mobile sticky reserve bar (Airbnb/Booking pattern) ===== */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-neutral-200 px-4 py-3 flex items-center justify-between gap-3">
+        <div>
+          <p className="leading-none">
+            <span className="text-lg font-extrabold text-neutral-900">{currencySymbol}{hotel.priceFrom ?? '—'}</span>
+            <span className="text-xs font-normal text-neutral-400"> / {t('card.night')}</span>
+          </p>
+          {hotel.minNights ? (
+            <p className="text-[11px] text-neutral-400">{t('detail.minNightsShort', { count: hotel.minNights })}</p>
+          ) : null}
+        </div>
+        <button
+          type="button"
+          onClick={() => reserveRoom(selectedRoomIndex)}
+          className="px-6 py-2.5 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20"
+        >
+          {t('detail.reserve')}
+        </button>
       </div>
 
       {/* ===== Lightbox ===== */}

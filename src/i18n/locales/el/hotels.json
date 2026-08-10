@@ -128,7 +128,21 @@
       "messageHost": "Μήνυμα στον οικοδεσπότη"
     },
     "reserve": "Κράτηση",
-    "sleeps_one": "Έως {{count}} επισκέπτη"
+    "sleeps_one": "Έως {{count}} επισκέπτη",
+    "amenitiesTitle": "Τι προσφέρει το κατάλυμα",
+    "showAllAmenities": "Εμφάνιση και των {{count}} παροχών",
+    "highlights": {
+      "freeCancellationTitle": "Δωρεάν ακύρωση",
+      "freeCancellationSub": "Σε επιλεγμένα δωμάτια — τα σχέδια αλλάζουν.",
+      "breakfastTitle": "Πρωινό περιλαμβάνεται",
+      "breakfastSub": "Ξεκινήστε τη μέρα χωρίς να βγείτε.",
+      "topRatedTitle": "Ποιότητα {{count}} αστέρων",
+      "topRatedSub": "Ένα κατάλυμα με υψηλή βαθμολογία.",
+      "receptionTitle": "Ρεσεψιόν 24 ώρες",
+      "receptionSub": "Πάντα κάποιος για να βοηθήσει.",
+      "noFeesTitle": "Άμεση κράτηση",
+      "noFeesSub": "Χωρίς χρεώσεις — συνεννοείστε με τον οικοδεσπότη."
+    }
   },
   "propertyTypes": {
     "hotel": "Hotel",
@@ -420,5 +434,15 @@
       "declined": "Απορρίφθηκε",
       "cancelled": "Ακυρώθηκε"
     }
+  },
+  "amenityCategories": {
+    "general": "Γενικά",
+    "kitchen": "Κουζίνα & γεύματα",
+    "bathroom": "Μπάνιο",
+    "outdoor": "Εξωτερικά & θέα",
+    "wellness": "Ευεξία",
+    "services": "Υπηρεσίες",
+    "suitability": "Κατάλληλο για",
+    "more": "Περισσότερα"
   }
 }

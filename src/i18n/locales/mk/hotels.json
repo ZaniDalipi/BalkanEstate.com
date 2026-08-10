@@ -128,7 +128,21 @@
       "messageHost": "Пиши му на домаќинот"
     },
     "reserve": "Резервирај",
-    "sleeps_one": "До {{count}} гостин"
+    "sleeps_one": "До {{count}} гостин",
+    "amenitiesTitle": "Што нуди ова место",
+    "showAllAmenities": "Прикажи ги сите {{count}} содржини",
+    "highlights": {
+      "freeCancellationTitle": "Бесплатно откажување",
+      "freeCancellationSub": "За избрани соби — плановите се менуваат.",
+      "breakfastTitle": "Појадок вклучен",
+      "breakfastSub": "Започнете го денот без излегување.",
+      "topRatedTitle": "Квалитет од {{count}} ѕвезди",
+      "topRatedSub": "Високо оценето место за престој.",
+      "receptionTitle": "Рецепција 24 часа",
+      "receptionSub": "Секогаш има некој да помогне.",
+      "noFeesTitle": "Директна резервација",
+      "noFeesSub": "Без такси — се договарате со домаќинот."
+    }
   },
   "propertyTypes": {
     "hotel": "Hotel",
@@ -420,5 +434,15 @@
       "declined": "Одбиено",
       "cancelled": "Откажано"
     }
+  },
+  "amenityCategories": {
+    "general": "Општо",
+    "kitchen": "Кујна и оброци",
+    "bathroom": "Бања",
+    "outdoor": "Надвор и погледи",
+    "wellness": "Велнес",
+    "services": "Услуги",
+    "suitability": "Погодно за",
+    "more": "Повеќе"
   }
 }
