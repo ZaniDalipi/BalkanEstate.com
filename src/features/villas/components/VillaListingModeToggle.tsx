@@ -24,7 +24,7 @@ const VillaListingModeToggle: React.FC<VillaListingModeToggleProps> = memo(({ mo
     <div
       role="tablist"
       aria-label={t('villas:filters.listingType', 'Listing type')}
-      className={`inline-flex items-center rounded-full bg-black/5 p-0.5 ${className}`}
+      className={`inline-flex items-center rounded-lg bg-neutral-100 p-0.5 ${className}`}
     >
       {OPTIONS.map(opt => {
         const active = mode === opt.value;
@@ -35,10 +35,10 @@ const VillaListingModeToggle: React.FC<VillaListingModeToggleProps> = memo(({ mo
             role="tab"
             aria-selected={active}
             onClick={() => onChange(opt.value)}
-            className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all whitespace-nowrap ${
+            className={`px-3 py-1 rounded-md text-[12px] font-medium transition-all whitespace-nowrap ${
               active
-                ? 'bg-gradient-to-r from-[#E8B820] to-[#B8860B] text-[#2C1A00] shadow-sm'
-                : 'text-gray-500 hover:text-[#0252CD]'
+                ? 'bg-white text-neutral-900 shadow-sm'
+                : 'text-neutral-500 hover:text-neutral-800'
             }`}
           >
             {t(opt.labelKey, opt.fallback)}

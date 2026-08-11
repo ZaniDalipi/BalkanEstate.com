@@ -246,29 +246,6 @@ const VillaAnimationStyles = () => (
   `}</style>
 );
 
-/* ── Deterministic star positions (index-based, not random) ── */
-const STARS = Array.from({ length: 48 }, (_, i) => ({
-    left:  `${((i * 73 + 17) % 100)}%`,
-    top:   `${((i * 41 + 31) % 100)}%`,
-    size:  (i % 3 === 0) ? 2 : (i % 3 === 1) ? 1.5 : 1,
-    dur:   `${2.2 + (i % 7) * 0.45}s`,
-    delay: `${(i * 0.23) % 4}s`,
-    so:    0.18 + (i % 5) * 0.1,
-    sp:    0.6  + (i % 4) * 0.1,
-}));
-
-/* ── Floating gold motes ── */
-const MOTES = Array.from({ length: 14 }, (_, i) => ({
-    left:  `${((i * 61 + 9) % 92) + 4}%`,
-    top:   `${((i * 37 + 23) % 60) + 20}%`,
-    size:  (i % 3 === 0) ? 4 : (i % 3 === 1) ? 3 : 2,
-    dur:   `${3.5 + (i % 6) * 0.7}s`,
-    delay: `${(i * 0.55) % 5}s`,
-    mx:    `${((i % 5) - 2) * 6}px`,
-    my:    `-${40 + (i % 4) * 15}px`,
-    mo:    0.4 + (i % 3) * 0.15,
-}));
-
 /* ── Destinations with landscape SVG silhouettes ── */
 const DESTINATIONS = [
     {
@@ -352,16 +329,16 @@ const TrustStrip: React.FC = () => {
     ];
     return (
         <div
-            className="overflow-x-auto border-b border-[#FFA500]/10"
-            style={{ background: 'linear-gradient(135deg, #fffdf5 0%, #fffbee 100%)', scrollbarWidth: 'none' }}
+            className="overflow-x-auto border-b border-black/[0.06] bg-white"
+            style={{ scrollbarWidth: 'none' }}
         >
-            <div className="flex min-w-max lg:min-w-0 lg:grid lg:grid-cols-4 divide-x divide-[#FFA500]/10">
+            <div className="flex min-w-max lg:min-w-0 lg:grid lg:grid-cols-4 divide-x divide-black/[0.05]">
                 {items.map((item, i) => (
                     <div key={i} className="flex items-start gap-2.5 px-4 py-3 min-w-[170px] lg:min-w-0">
                         <span className="text-base flex-shrink-0 mt-0.5">{item.icon}</span>
                         <div className="min-w-0">
-                            <p className="text-[11px] font-bold text-gray-800 leading-tight truncate">{item.title}</p>
-                            <p className="text-[10px] text-gray-400 leading-snug mt-0.5">{item.desc}</p>
+                            <p className="text-[11px] font-semibold text-neutral-700 leading-tight truncate">{item.title}</p>
+                            <p className="text-[10px] text-neutral-400 leading-snug mt-0.5">{item.desc}</p>
                         </div>
                     </div>
                 ))}
@@ -382,96 +359,38 @@ const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, minPrice, activeQuery, o
     const displayCount = useCountUp(count);
     return (
         <div
-            className="relative overflow-hidden -mx-3 -mt-2 mb-0"
-            style={{ background: 'linear-gradient(160deg, #020818 0%, #06112e 30%, #0a1d4a 60%, #040c22 100%)', minHeight: '220px' }}
+            className="relative -mx-3 -mt-2 mb-0 border-b border-black/[0.06]"
+            style={{ background: 'linear-gradient(180deg, #fbfbfd 0%, #f4f6f9 100%)' }}
         >
-            {/* ── Aurora nebula blobs ── */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <div className="aurora-1 absolute rounded-full"
-                     style={{ width: '75%', height: '200%', left: '-18%', top: '-60%',
-                              background: 'radial-gradient(ellipse, rgba(15,50,210,0.55) 0%, rgba(8,25,120,0.18) 50%, transparent 70%)',
-                              filter: 'blur(52px)' }} />
-                <div className="aurora-2 absolute rounded-full"
-                     style={{ width: '65%', height: '160%', right: '-12%', top: '-25%',
-                              background: 'radial-gradient(ellipse, rgba(110,20,220,0.42) 0%, rgba(60,8,130,0.12) 50%, transparent 70%)',
-                              filter: 'blur(58px)' }} />
-                <div className="aurora-3 absolute rounded-full"
-                     style={{ width: '58%', height: '140%', left: '18%', top: '5%',
-                              background: 'radial-gradient(ellipse, rgba(0,130,200,0.32) 0%, rgba(0,70,110,0.08) 50%, transparent 70%)',
-                              filter: 'blur(48px)' }} />
-                <div className="aurora-4 absolute rounded-full"
-                     style={{ width: '40%', height: '80%', left: '30%', top: '-20%',
-                              background: 'radial-gradient(ellipse, rgba(200,130,0,0.22) 0%, transparent 65%)',
-                              filter: 'blur(44px)' }} />
-            </div>
-
-            {/* ── Star field ── */}
-            <div className="absolute inset-0 pointer-events-none">
-                {STARS.map((s, i) => (
-                    <div
-                        key={i}
-                        className="star-dot"
-                        style={{
-                            left: s.left, top: s.top,
-                            width: `${s.size}px`, height: `${s.size}px`,
-                            '--dur': s.dur, '--delay': s.delay,
-                            '--so': s.so, '--sp': s.sp,
-                            opacity: s.so,
-                        } as React.CSSProperties}
-                    />
-                ))}
-            </div>
-
-            {/* ── Floating gold motes ── */}
-            <div className="absolute inset-0 pointer-events-none">
-                {MOTES.map((m, i) => (
-                    <div
-                        key={i}
-                        className="gold-mote"
-                        style={{
-                            left: m.left, top: m.top,
-                            width: `${m.size}px`, height: `${m.size}px`,
-                            '--dur': m.dur, '--delay': m.delay,
-                            '--mx': m.mx, '--my': m.my, '--mo': m.mo,
-                        } as React.CSSProperties}
-                    />
-                ))}
-            </div>
-
-            {/* ── Gold shimmer at top ── */}
-            <div className="absolute top-0 left-0 right-0 h-[2px] gold-shimmer" />
-
-            {/* ── Content ── */}
-            <div className="relative px-5 pt-8 pb-7 text-center">
+            <div className="relative px-5 pt-6 pb-5 text-center max-w-3xl mx-auto">
                 {/* Eyebrow */}
-                <p className="text-[9px] font-black tracking-[0.45em] uppercase mb-3"
-                   style={{ color: '#FFA500', letterSpacing: '0.4em', textShadow: '0 0 20px rgba(255,165,0,0.6)' }}>
-                    {t('villas:hero.tagline', '✦ EXCLUSIVE COLLECTION ✦')}
+                <p className="text-[10px] font-semibold tracking-[0.22em] uppercase text-neutral-400 mb-2">
+                    {t('villas:hero.tagline2', 'Curated collection')}
                 </p>
 
-                {/* Animated title */}
-                <h2 className="font-black leading-none mb-2" style={{ fontSize: 'clamp(26px,5vw,38px)' }}>
-                    <span className="hero-word text-white" style={{ '--wd': '80ms' } as React.CSSProperties}>{t('villas:hero.title1', 'Luxury')}&nbsp;</span>
-                    <span className="hero-word" style={{ '--wd': '220ms', color: '#FFC740', textShadow: '0 0 30px rgba(255,180,0,0.45)' } as React.CSSProperties}>{t('villas:hero.title2', 'Villas')}</span>
+                {/* Title */}
+                <h2 className="font-semibold tracking-[-0.02em] text-neutral-900 leading-tight mb-1.5" style={{ fontSize: 'clamp(24px,4vw,32px)' }}>
+                    {t('villas:hero.title1', 'Luxury')}{' '}
+                    <span style={{ color: '#B8860B' }}>{t('villas:hero.title2', 'Villas')}</span>
                 </h2>
 
-                <p className="text-white/35 text-[11px] tracking-wide mb-1">
+                <p className="text-neutral-400 text-[12px] mb-4">
                     {t('villas:hero.privateEstates', 'Private estates · Extraordinary settings · The Balkans')}
                 </p>
 
                 {/* Live count */}
                 {count > 0 && (
-                    <p className="text-[11px] font-semibold mb-5" style={{ color: 'rgba(255,185,0,0.8)' }}>
-                        <span className="font-black text-[13px]" style={{ color: '#FFA500' }}>{displayCount}</span>
+                    <p className="text-[12px] text-neutral-500 mb-4">
+                        <span className="font-semibold text-neutral-800">{displayCount}</span>
                         {' '}{count === 1 ? t('villas:hero.villaAvailable', 'villa available') : t('villas:hero.villasAvailable', 'villas available')}
                         {minPrice != null ? (
-                            <span className="text-white/40"> · {t('villas:hero.from', 'from')} <span style={{ color: 'rgba(255,185,0,0.75)' }}>€{minPrice.toLocaleString()}</span>/night</span>
+                            <span className="text-neutral-400"> · {t('villas:hero.from', 'from')} <span className="font-medium" style={{ color: '#B8860B' }}>€{minPrice.toLocaleString()}</span>/night</span>
                         ) : null}
                     </p>
                 )}
-                {count === 0 && <div className="mb-5" />}
+                {count === 0 && <div className="mb-4" />}
 
-                {/* ── Destination pills with landscape SVG reveal ── */}
+                {/* Destination quick-jumps — clean soft chips */}
                 <div className="flex flex-wrap justify-center gap-2">
                     {DESTINATIONS.map(dest => {
                         const isActive = activeQuery === dest.query;
@@ -479,39 +398,18 @@ const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, minPrice, activeQuery, o
                             <button
                                 key={dest.query}
                                 onClick={() => onDestinationClick(dest)}
-                                className={`villa-dest-pill flex flex-col items-center px-3 pt-[6px] pb-[5px] rounded-xl text-[11px] font-semibold border focus:outline-none ${isActive ? 'active' : ''}`}
-                                style={isActive ? {
-                                    background: 'rgba(255,165,0,0.20)',
-                                    borderColor: 'rgba(255,165,0,0.7)',
-                                    color: '#FFC740',
-                                    boxShadow: '0 0 16px rgba(255,165,0,0.2)',
-                                } : {
-                                    background: 'rgba(255,255,255,0.05)',
-                                    borderColor: 'rgba(255,255,255,0.12)',
-                                    color: 'rgba(255,255,255,0.62)',
-                                }}
+                                className={`px-3 py-1.5 rounded-full text-[12px] font-medium border transition-all focus:outline-none ${
+                                    isActive
+                                        ? 'bg-primary/10 text-primary border-primary/40'
+                                        : 'bg-white text-neutral-600 border-black/[0.08] hover:border-primary/30 hover:text-primary'
+                                }`}
                             >
-                                <span>{t(`villas:${dest.labelKey}`, dest.fallback)}</span>
-                                {/* Landscape silhouette — slides down on hover/active */}
-                                <div className="villa-dest-landscape w-full mt-1">
-                                    <svg viewBox="0 0 60 20" width="60" height="16" style={{ display: 'block', margin: '0 auto' }}>
-                                        <defs>
-                                            <linearGradient id={`lg_${dest.query}`} x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="0%" stopColor={isActive ? '#FFA500' : 'rgba(255,255,255,0.5)'} />
-                                                <stop offset="100%" stopColor={isActive ? 'rgba(255,165,0,0.2)' : 'rgba(255,255,255,0.1)'} />
-                                            </linearGradient>
-                                        </defs>
-                                        <path d={dest.landscape} fill={`url(#lg_${dest.query})`} />
-                                    </svg>
-                                </div>
+                                {t(`villas:${dest.labelKey}`, dest.fallback)}
                             </button>
                         );
                     })}
                 </div>
             </div>
-
-            {/* Gold shimmer at bottom */}
-            <div className="absolute bottom-0 left-0 right-0 h-[1px] gold-shimmer" />
         </div>
     );
 };
@@ -921,34 +819,15 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                             {(isLoading || isSearchFiltering) ? (
                                 /* Cinematic loading state */
                                 <>
-                                    <VillaAnimationStyles />
-                                    <div className="relative overflow-hidden -mx-3 -mt-2 mb-4"
-                                        style={{ background: 'linear-gradient(135deg, #050d1f 0%, #0a1a3a 50%, #080f1f 100%)' }}
+                                    <div className="relative -mx-3 -mt-2 mb-4 border-b border-black/[0.06]"
+                                        style={{ background: 'linear-gradient(180deg, #fbfbfd 0%, #f4f6f9 100%)' }}
                                     >
-                                        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                                            {STARS.slice(0, 18).map((s, i) => (
-                                                <div key={i} className="star-dot"
-                                                    style={{ left: s.left, top: s.top, width: `${s.size}px`, height: `${s.size}px`, '--dur': s.dur, '--delay': s.delay, '--so': s.so, '--sp': s.sp, opacity: s.so } as React.CSSProperties}
-                                                />
-                                            ))}
-                                        </div>
-                                        <div className="absolute top-0 left-0 right-0 h-[2px] gold-shimmer" />
-                                        <div className="relative px-5 py-10 text-center">
-                                            <p className="text-[10px] font-bold tracking-[0.3em] mb-3" style={{ color: '#FFA500' }}>
-                                                {t('villas:hero.tagline', '✦ EXCLUSIVE COLLECTION ✦')}
-                                            </p>
-                                            <div className="relative mx-auto w-12 h-12 mb-3">
-                                                <div className="absolute inset-0 rounded-full border-2 border-white/10" />
-                                                <div className="absolute inset-0 rounded-full border-2 border-t-[#FFA500] border-r-[#0252CD] animate-spin" />
-                                                <span className="absolute inset-0 flex items-center justify-center text-xl">✦</span>
-                                            </div>
-                                            <p className="text-white/60 text-xs font-medium">
+                                        <div className="relative px-5 py-8 text-center">
+                                            <div className="mx-auto w-8 h-8 mb-3 rounded-full border-2 border-neutral-200 border-t-primary animate-spin" />
+                                            <p className="text-neutral-500 text-xs font-medium">
                                                 {t('villas:discoveringVillas', 'Curating your exclusive collection...')}
                                             </p>
                                         </div>
-                                        <div className="absolute bottom-0 inset-x-0 h-6"
-                                            style={{ background: 'linear-gradient(to bottom, transparent, #F8F9FC)' }}
-                                        />
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                         {[...Array(6)].map((_, i) => <PropertyCardSkeleton key={i} index={i} />)}
