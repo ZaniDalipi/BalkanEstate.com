@@ -51,10 +51,24 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
     const activeViewType   = filters.viewType || 'any';
     const activeAmenities: string[] = (filters.amenities as string[]) || [];
 
-    /* Chip class helpers — matching the spec */
+    // Price validation: reject non-numeric / negative input at the boundary,
+    // and flag an impossible min > max range so the user gets clear feedback.
+    const parsePrice = (raw: string): number | null => {
+        if (raw.trim() === '') return null;
+        const n = Number(raw);
+        if (!Number.isFinite(n) || n < 0) return null;
+        return Math.floor(n);
+    };
+    const handlePriceChange = (key: 'minPrice' | 'maxPrice', raw: string) => {
+        onFilterChange(key, parsePrice(raw));
+    };
+    const priceInvalid = filters.minPrice != null && filters.maxPrice != null && filters.minPrice > filters.maxPrice;
+    const priceRing = priceInvalid ? ' ring-2 ring-red-400/60 !border-red-300' : '';
+
+    /* Chip class helpers — gilded gold accent to match the villa brand */
     const chipBase     = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all cursor-pointer whitespace-nowrap select-none';
-    const chipActive   = 'bg-[#FFA500]/15 text-[#0252CD] border-[#FFA500] font-semibold';
-    const chipInactive = 'bg-white text-gray-500 border-gray-200 hover:border-[#FFA500]/60 hover:text-[#0252CD]';
+    const chipActive   = 'bg-[#E8B820]/15 text-[#8A6D1F] border-[#E8B820] font-semibold';
+    const chipInactive = 'bg-white text-gray-500 border-gray-200 hover:border-[#E8B820]/60 hover:text-[#8A6D1F]';
 
     const hasActiveFilters =
         (filters.query && filters.query.trim()) ||
@@ -195,20 +209,26 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                 {/* Min price */}
                 <input
                     type="number"
+                    inputMode="numeric"
+                    min={0}
                     placeholder={`${currencySymbol} min`}
                     value={filters.minPrice ?? ''}
-                    onChange={(e) => onFilterChange('minPrice', e.target.value ? Number(e.target.value) : null)}
-                    className="flex-shrink-0 glass-input text-[11px] h-7 px-2 py-0 w-[72px] rounded-lg ml-1.5"
+                    onChange={(e) => handlePriceChange('minPrice', e.target.value)}
+                    aria-invalid={priceInvalid}
+                    className={`flex-shrink-0 glass-input text-[11px] h-7 px-2 py-0 w-[72px] rounded-lg ml-1.5${priceRing}`}
                     aria-label={t('villas:filters.minRentPerNight', 'Min price per night')}
                 />
 
                 {/* Max price */}
                 <input
                     type="number"
+                    inputMode="numeric"
+                    min={0}
                     placeholder={`${currencySymbol} max`}
                     value={filters.maxPrice ?? ''}
-                    onChange={(e) => onFilterChange('maxPrice', e.target.value ? Number(e.target.value) : null)}
-                    className="flex-shrink-0 glass-input text-[11px] h-7 px-2 py-0 w-[72px] rounded-lg ml-1.5"
+                    onChange={(e) => handlePriceChange('maxPrice', e.target.value)}
+                    aria-invalid={priceInvalid}
+                    className={`flex-shrink-0 glass-input text-[11px] h-7 px-2 py-0 w-[72px] rounded-lg ml-1.5${priceRing}`}
                     aria-label={t('villas:filters.maxRentPerNight', 'Max price per night')}
                 />
 
@@ -336,10 +356,13 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">{currencySymbol}</span>
                         <input
                             type="number"
+                            inputMode="numeric"
+                            min={0}
                             placeholder="500"
                             value={filters.minPrice ?? ''}
-                            onChange={(e) => onFilterChange('minPrice', e.target.value ? Number(e.target.value) : null)}
-                            className={`${fullInputClasses} pl-6`}
+                            onChange={(e) => handlePriceChange('minPrice', e.target.value)}
+                            aria-invalid={priceInvalid}
+                            className={`${fullInputClasses} pl-6${priceRing}`}
                             aria-label={t('villas:filters.minRentPerNight', 'Min price per night')}
                         />
                     </div>
@@ -347,14 +370,22 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">{currencySymbol}</span>
                         <input
                             type="number"
+                            inputMode="numeric"
+                            min={0}
                             placeholder={t('villas:filters.noLimit', 'No limit')}
                             value={filters.maxPrice ?? ''}
-                            onChange={(e) => onFilterChange('maxPrice', e.target.value ? Number(e.target.value) : null)}
-                            className={`${fullInputClasses} pl-6`}
+                            onChange={(e) => handlePriceChange('maxPrice', e.target.value)}
+                            aria-invalid={priceInvalid}
+                            className={`${fullInputClasses} pl-6${priceRing}`}
                             aria-label={t('villas:filters.maxRentPerNight', 'Max price per night')}
                         />
                     </div>
                 </div>
+                {priceInvalid && (
+                    <p className="mt-1.5 text-[11px] text-red-500" role="alert">
+                        {t('villas:filters.priceRangeInvalid', 'Minimum price is higher than the maximum.')}
+                    </p>
+                )}
             </div>
 
             {/* Premium amenities */}
