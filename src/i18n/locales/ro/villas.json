@@ -80,7 +80,8 @@
     "forSale": "De Vânzare",
     "forRent": "De Închiriat",
     "bathrooms": "Băi",
-    "allListings": "Toate"
+    "allListings": "Toate",
+    "priceRangeInvalid": "Prețul minim este mai mare decât cel maxim."
   },
   "seo": {
     "title": "Vile de Lux de Închiriat în Balcani | BalkanEstate",

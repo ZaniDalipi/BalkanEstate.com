@@ -80,7 +80,8 @@
     "forSale": "За Продажба",
     "forRent": "За Наем",
     "bathrooms": "Бани",
-    "allListings": "Всички"
+    "allListings": "Всички",
+    "priceRangeInvalid": "Минималната цена е по-висока от максималната."
   },
   "seo": {
     "title": "Луксозни Вили под Наем на Балканите | BalkanEstate",

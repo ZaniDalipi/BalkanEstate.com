@@ -80,7 +80,8 @@
     "forSale": "Për Shitje",
     "forRent": "Me Qira",
     "bathrooms": "Banjo",
-    "allListings": "Të gjitha"
+    "allListings": "Të gjitha",
+    "priceRangeInvalid": "Çmimi minimal është më i lartë se maksimali."
   },
   "seo": {
     "title": "Vila Luksoze me Qira në Ballkan | BalkanEstate",

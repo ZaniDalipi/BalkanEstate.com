@@ -80,7 +80,8 @@
     "forSale": "For Sale",
     "forRent": "For Rent",
     "bathrooms": "Bathrooms",
-    "allListings": "All"
+    "allListings": "All",
+    "priceRangeInvalid": "Minimum price is higher than the maximum."
   },
   "seo": {
     "title": "Luxury Villas for Rent in the Balkans | BalkanEstate",

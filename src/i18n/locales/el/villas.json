@@ -80,7 +80,8 @@
     "forSale": "Προς Πώληση",
     "forRent": "Προς Ενοικίαση",
     "bathrooms": "Μπάνια",
-    "allListings": "Όλες"
+    "allListings": "Όλες",
+    "priceRangeInvalid": "Η ελάχιστη τιμή είναι υψηλότερη από τη μέγιστη."
   },
   "seo": {
     "title": "Πολυτελείς Βίλες για Ενοικίαση στα Βαλκάνια | BalkanEstate",

@@ -80,7 +80,8 @@
     "forSale": "За Продажба",
     "forRent": "За Кирија",
     "bathrooms": "Бањи",
-    "allListings": "Сите"
+    "allListings": "Сите",
+    "priceRangeInvalid": "Минималната цена е повисока од максималната."
   },
   "seo": {
     "title": "Луксузни Вили За Изнајмување на Балканот | BalkanEstate",

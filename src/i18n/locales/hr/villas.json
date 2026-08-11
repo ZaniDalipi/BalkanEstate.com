@@ -80,7 +80,8 @@
     "forSale": "Na Prodaju",
     "forRent": "Za Najam",
     "bathrooms": "Kupaonice",
-    "allListings": "Sve"
+    "allListings": "Sve",
+    "priceRangeInvalid": "Minimalna cijena je viša od najviše."
   },
   "seo": {
     "title": "Luksuzne Vile Za Najam na Balkanu | BalkanEstate",
