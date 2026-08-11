@@ -734,31 +734,27 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                     {/* Desktop header — sticky, new 3-tier design */}
                     <div className="hidden lg:block sticky top-0 z-20">
 
-                        {/* Tier 1: Blue brand bar — 56px, animated gold bottom border */}
+                        {/* Tier 1: Soft liquid-glass brand bar — frosted white, hairline edge */}
                         <div
-                            className="relative flex items-center justify-between px-4 overflow-hidden"
-                            style={{ height: '56px', background: 'linear-gradient(135deg, #0252CD 0%, #0640a8 100%)' }}
+                            className="relative flex items-center justify-between px-4 border-b border-black/[0.06]"
+                            style={{ height: '56px', background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
                         >
-                            {/* Subtle shimmer overlay */}
-                            <div className="absolute inset-0 opacity-10 gold-shimmer pointer-events-none" />
-                            {/* Gold animated border at bottom */}
-                            <div className="absolute bottom-0 left-0 right-0 h-[2px] gold-shimmer" />
                             {/* Left: brand + stats */}
-                            <div className="flex items-center gap-3 min-w-0">
-                                <span className="text-xl flex-shrink-0">🏛️</span>
-                                <span className="text-white font-bold text-base tracking-tight flex-shrink-0">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                                <span className="text-lg flex-shrink-0">🏛️</span>
+                                <span className="text-neutral-900 font-semibold text-base tracking-[-0.01em] flex-shrink-0">
                                     {t('villas:title', 'Luxury Villas')}
                                 </span>
                                 {listProperties.length > 0 && (
                                     <>
-                                        <span className="text-blue-300/60 text-sm flex-shrink-0">·</span>
-                                        <span className="text-blue-200 text-sm flex-shrink-0">
+                                        <span className="text-neutral-300 text-sm flex-shrink-0">·</span>
+                                        <span className="text-neutral-500 text-sm flex-shrink-0">
                                             {listProperties.length} {listProperties.length === 1 ? t('villas:villa', 'villa') : t('villas:villas', 'villas')}
                                         </span>
                                         {minResultPrice != null && (
                                             <>
-                                                <span className="text-blue-300/60 text-sm flex-shrink-0">·</span>
-                                                <span className="text-sm flex-shrink-0" style={{ color: '#FFA500' }}>
+                                                <span className="text-neutral-300 text-sm flex-shrink-0">·</span>
+                                                <span className="text-sm flex-shrink-0 font-medium" style={{ color: '#B8860B' }}>
                                                     {t('villas:fromPerNight', 'from {{price}}/night', { price: `€${minResultPrice.toLocaleString()}` })}
                                                 </span>
                                             </>
@@ -769,17 +765,16 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                             {/* Right: List Your Villa CTA */}
                             <button
                                 onClick={handleListVilla}
-                                className="flex-shrink-0 ml-4 h-8 px-3 rounded-lg text-xs font-bold transition-opacity hover:opacity-90 active:opacity-80"
-                                style={{ background: '#FFA500', color: '#0252CD' }}
+                                className="flex-shrink-0 ml-4 h-8 px-3.5 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-dark transition-colors active:scale-95 shadow-sm"
                             >
                                 + {t('villas:createListing', 'List Your Villa')}
                             </button>
                         </div>
 
-                        {/* Tier 2: Search bar — 44px white */}
+                        {/* Tier 2: Search bar — 44px */}
                         <div
                             className="flex items-center px-4"
-                            style={{ height: '44px', background: '#FFFFFF', borderBottom: '1px solid rgba(0,0,0,0.07)' }}
+                            style={{ height: '44px', background: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}
                         >
                             <div ref={searchWrapperRef} className="relative w-full">
                                 <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
