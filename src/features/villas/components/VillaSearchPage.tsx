@@ -460,6 +460,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
         userLocation,
         mapBounds,
         drawnBounds,
+        villaProperties,
         baseFilteredProperties,
         listProperties,
         listingMode,
@@ -566,12 +567,20 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
         return count;
     }, [filters]);
 
-    /* Min price from results for "from €X/night" display */
+    /* Min price from the filtered results ("from €X/night" in the results bar) */
     const minResultPrice = useMemo(() => {
         if (listProperties.length === 0) return null;
         const prices = listProperties.map(p => p.price).filter(Boolean);
         return prices.length > 0 ? Math.min(...prices) : null;
     }, [listProperties]);
+
+    /* Hero shows the whole fetched collection (live DB reference), so it never
+       reads a hardcoded 0 — the "no matches" card handles empty filter results. */
+    const collectionCount = villaProperties.length;
+    const collectionMinPrice = useMemo(() => {
+        const prices = villaProperties.map(p => p.price).filter((n): n is number => typeof n === 'number' && n > 0);
+        return prices.length > 0 ? Math.min(...prices) : null;
+    }, [villaProperties]);
 
     const showSplitView = !isMobile && !isTablet;
     const showViewToggle = isMobile || isTablet;
@@ -844,8 +853,8 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                 /* Cinematic empty state */
                                 <>
                                     <LuxuryHero
-                                        count={0}
-                                        minPrice={null}
+                                        count={collectionCount}
+                                        minPrice={collectionMinPrice}
                                         activeQuery={filters.query ?? ''}
                                         onDestinationClick={(dest) => {
                                             handleFilterChange('query', dest.query);
@@ -877,8 +886,8 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     <VillaAnimationStyles />
                                     {/* Cinematic hero banner — scrolls away */}
                                     <LuxuryHero
-                                        count={listProperties.length}
-                                        minPrice={minResultPrice}
+                                        count={collectionCount}
+                                        minPrice={collectionMinPrice}
                                         activeQuery={filters.query ?? ''}
                                         onDestinationClick={(dest) => {
                                             const isActive = (filters.query ?? '') === dest.query;
