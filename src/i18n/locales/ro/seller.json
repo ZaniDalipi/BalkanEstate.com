@@ -319,7 +319,20 @@
       "title": "Luxury Villas Collection",
       "hint": "This listing will appear in the exclusive Luxury Villas tab — visible to premium buyers searching for high-end Balkan retreats."
     },
-    "luxuryVillaBadge": "Appears in Luxury Villas"
+    "luxuryVillaBadge": "Appears in Luxury Villas",
+    "quickAmenities": {
+      "label": "Facilități populare",
+      "sauna": "Saună",
+      "wineCellar": "Cramă de vinuri",
+      "panoramic": "Panoramic",
+      "jacuzzi": "Jacuzzi",
+      "hotTub": "Cadă cu hidromasaj",
+      "gym": "Sală de sport",
+      "fireplace": "Șemineu",
+      "bbq": "Grătar",
+      "homeCinema": "Cinema acasă",
+      "beachAccess": "Acces la plajă"
+    }
   },
   "myListings": {
     "title": "Anunțurile Mele",

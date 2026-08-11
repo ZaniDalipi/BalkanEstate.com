@@ -319,7 +319,20 @@
       "title": "Luxury Villas Collection",
       "hint": "This listing will appear in the exclusive Luxury Villas tab — visible to premium buyers searching for high-end Balkan retreats."
     },
-    "luxuryVillaBadge": "Appears in Luxury Villas"
+    "luxuryVillaBadge": "Appears in Luxury Villas",
+    "quickAmenities": {
+      "label": "Δημοφιλείς παροχές",
+      "sauna": "Σάουνα",
+      "wineCellar": "Κάβα κρασιού",
+      "panoramic": "Πανοραμική",
+      "jacuzzi": "Τζακούζι",
+      "hotTub": "Θερμαινόμενος κάδος",
+      "gym": "Γυμναστήριο",
+      "fireplace": "Τζάκι",
+      "bbq": "Ψησταριά",
+      "homeCinema": "Οικιακός κινηματογράφος",
+      "beachAccess": "Πρόσβαση σε παραλία"
+    }
   },
   "myListings": {
     "title": "Οι Αγγελίες Μου",

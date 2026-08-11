@@ -319,7 +319,20 @@
       "title": "Luxury Villas Collection",
       "hint": "This listing will appear in the exclusive Luxury Villas tab — visible to premium buyers searching for high-end Balkan retreats."
     },
-    "luxuryVillaBadge": "Appears in Luxury Villas"
+    "luxuryVillaBadge": "Appears in Luxury Villas",
+    "quickAmenities": {
+      "label": "Komoditete të njohura",
+      "sauna": "Sauna",
+      "wineCellar": "Bodrum vere",
+      "panoramic": "Panoramike",
+      "jacuzzi": "Xhakuzi",
+      "hotTub": "Vaskë me ujë të nxehtë",
+      "gym": "Palestër",
+      "fireplace": "Oxhak",
+      "bbq": "Zgarë",
+      "homeCinema": "Kinema shtëpiake",
+      "beachAccess": "Qasje në plazh"
+    }
   },
   "propertyTypes": {
     "apartment": "Apartament",
