@@ -235,40 +235,38 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                     {/* Spacer for floating mobile header */}
                     {isMobile && <div className="h-14 flex-shrink-0" />}
 
-                    {/* Header with city search — desktop only (mobile uses floating pill bar) */}
-                    <div className="hidden lg:block sticky top-0 z-20" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', borderBottom: '1px solid rgba(217,119,6,0.3)' }}>
-                        {/* Gold shimmer top bar */}
-                        <div className="h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
+                    {/* Header with city search — desktop only (mobile uses floating pill bar).
+                        Soft liquid-glass bar: frosted white, hairline edge, muted text. */}
+                    <div
+                        className="hidden lg:block sticky top-0 z-20 border-b border-black/[0.06]"
+                        style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+                    >
                         <div className="px-4 pt-3 pb-2 flex items-center justify-between gap-3">
                             <div>
                                 <div className="flex items-center gap-2">
-                                    <svg className="w-5 h-5 text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                                    <svg className="w-5 h-5 text-primary/80 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205 3 1m1.5.5-1.5-.5M6.75 7.364V3h-3v18m3-13.636 10.5-3.819" />
                                     </svg>
-                                    <h1 className="text-lg font-bold text-white tracking-wide">{t('rental:title', 'Properties for Rent')}</h1>
+                                    <h1 className="text-lg font-semibold text-neutral-900 tracking-[-0.01em]">{t('rental:title', 'Properties for Rent')}</h1>
                                 </div>
-                                <p className="text-xs mt-0.5" style={{ color: 'rgba(251,191,36,0.8)' }}>
+                                <p className="text-xs mt-0.5 text-neutral-500">
                                     {listProperties.length > 0 ? (
                                         <>
-                                            <span className="font-semibold text-amber-300">{listProperties.length}</span>
+                                            <span className="font-semibold text-neutral-700">{listProperties.length}</span>
                                             {' '}{t('rental:propertiesFound', 'properties available')}
                                             {listProperties.some(p => p.price) && (
-                                                <> · {t('rental:from', 'from')} <span className="font-semibold text-amber-300">€{Math.min(...listProperties.filter(p => p.price).map(p => p.price!)).toLocaleString()}</span>{t('rental:perMonth', '/mo')}</>
+                                                <> · {t('rental:from', 'from')} <span className="font-semibold text-neutral-700">€{Math.min(...listProperties.filter(p => p.price).map(p => p.price!)).toLocaleString()}</span>{t('rental:perMonth', '/mo')}</>
                                             )}
                                         </>
                                     ) : (
-                                        <span className="text-amber-300/60">{t('rental:premiumCollection', 'Rentals across the Balkans')}</span>
+                                        <span className="text-neutral-400">{t('rental:premiumCollection', 'Rentals across the Balkans')}</span>
                                     )}
                                 </p>
                             </div>
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={handleCreateRental}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white transition-all active:scale-95 whitespace-nowrap"
-                                    style={{
-                                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%)',
-                                        boxShadow: '0 2px 12px rgba(217,119,6,0.5), inset 0 1px 0 rgba(255,255,255,0.2)',
-                                    }}
+                                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-dark transition-colors active:scale-95 whitespace-nowrap shadow-sm"
                                 >
                                     + {t('rental:createListing', 'List for Rent')}
                                 </button>
@@ -279,7 +277,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                         <div className="px-4 pb-2">
                             <div ref={searchWrapperRef} className="relative">
                                 <div className="relative">
-                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400/70" />
+                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                                     <input
                                         type="text"
                                         value={filters.query}
@@ -287,18 +285,13 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                         onFocus={() => setIsQueryInputFocused(true)}
                                         onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
                                         placeholder={t('rental:filters.searchCity', 'Search by location...')}
-                                        className="w-full pl-9 pr-9 py-2 text-sm rounded-xl border outline-none transition-all"
-                                        style={{
-                                            background: 'rgba(255,255,255,0.08)',
-                                            border: '1px solid rgba(217,119,6,0.3)',
-                                            color: 'rgba(255,255,255,0.9)',
-                                        }}
+                                        className="w-full pl-9 pr-9 py-2 text-sm rounded-xl outline-none transition-all bg-black/[0.03] border border-black/[0.08] text-neutral-800 placeholder:text-neutral-400 focus:bg-white focus:border-primary/40 focus:ring-[3px] focus:ring-primary/10"
                                         aria-label={t('rental:filters.searchCity', 'Search by city or location...')}
                                     />
                                     {filters.query && (
                                         <button
                                             onClick={() => handleFilterChange('query', '')}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-400/60 hover:text-amber-300 transition-colors"
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
                                             aria-label={t('common:aria.clearSearch')}
                                         >
                                             <XMarkIcon className="w-4 h-4" />
@@ -323,7 +316,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                 )}
                                 {isSearchingLocation && (
                                     <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 p-3 text-center">
-                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-amber-400 mx-auto" />
+                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mx-auto" />
                                     </div>
                                 )}
                             </div>
@@ -359,16 +352,11 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                                 handleFilterChange(chip.field, isActive ? (chip.field === 'viewType' ? 'any' : null) : chip.value);
                                             }
                                         }}
-                                        className="flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-all whitespace-nowrap"
-                                        style={isActive ? {
-                                            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                                            color: '#fff',
-                                            boxShadow: '0 2px 8px rgba(217,119,6,0.45)',
-                                        } : {
-                                            background: 'rgba(255,255,255,0.1)',
-                                            color: 'rgba(255,255,255,0.75)',
-                                            border: '1px solid rgba(217,119,6,0.25)',
-                                        }}
+                                        className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold border transition-all whitespace-nowrap ${
+                                            isActive
+                                                ? 'bg-primary/10 text-primary border-primary/40'
+                                                : 'bg-black/[0.03] text-neutral-500 border-black/[0.07] hover:border-primary/30 hover:text-primary'
+                                        }`}
                                     >
                                         {chip.label}
                                     </button>
@@ -382,16 +370,11 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                     <button
                                         key={`beds-${idx}`}
                                         onClick={() => handleFilterChange('beds', beds)}
-                                        className="flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-all whitespace-nowrap"
-                                        style={isActive ? {
-                                            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                                            color: '#fff',
-                                            boxShadow: '0 2px 8px rgba(217,119,6,0.45)',
-                                        } : {
-                                            background: 'rgba(255,255,255,0.1)',
-                                            color: 'rgba(255,255,255,0.75)',
-                                            border: '1px solid rgba(217,119,6,0.25)',
-                                        }}
+                                        className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold border transition-all whitespace-nowrap ${
+                                            isActive
+                                                ? 'bg-primary/10 text-primary border-primary/40'
+                                                : 'bg-black/[0.03] text-neutral-500 border-black/[0.07] hover:border-primary/30 hover:text-primary'
+                                        }`}
                                     >
                                         {label === 'Any' ? label : `🛏 ${label}`}
                                     </button>
