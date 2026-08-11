@@ -245,19 +245,19 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                     <svg className="w-5 h-5 text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205 3 1m1.5.5-1.5-.5M6.75 7.364V3h-3v18m3-13.636 10.5-3.819" />
                                     </svg>
-                                    <h1 className="text-lg font-bold text-white tracking-wide">{t('rental:luxuryVillas', 'Luxury Villas')}</h1>
+                                    <h1 className="text-lg font-bold text-white tracking-wide">{t('rental:title', 'Properties for Rent')}</h1>
                                 </div>
                                 <p className="text-xs mt-0.5" style={{ color: 'rgba(251,191,36,0.8)' }}>
                                     {listProperties.length > 0 ? (
                                         <>
                                             <span className="font-semibold text-amber-300">{listProperties.length}</span>
-                                            {' '}{t('rental:exclusiveVillas', 'exclusive villas')}
+                                            {' '}{t('rental:propertiesFound', 'properties available')}
                                             {listProperties.some(p => p.price) && (
-                                                <> · {t('rental:from', 'from')} <span className="font-semibold text-amber-300">€{Math.min(...listProperties.filter(p => p.price).map(p => p.price!)).toLocaleString()}</span>/{t('rental:perDayShort', 'night')}</>
+                                                <> · {t('rental:from', 'from')} <span className="font-semibold text-amber-300">€{Math.min(...listProperties.filter(p => p.price).map(p => p.price!)).toLocaleString()}</span>{t('rental:perMonth', '/mo')}</>
                                             )}
                                         </>
                                     ) : (
-                                        <span className="text-amber-300/60">{t('rental:premiumVillaCollection', 'Premium villa collection')}</span>
+                                        <span className="text-amber-300/60">{t('rental:premiumCollection', 'Rentals across the Balkans')}</span>
                                     )}
                                 </p>
                             </div>
@@ -270,7 +270,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                         boxShadow: '0 2px 12px rgba(217,119,6,0.5), inset 0 1px 0 rgba(255,255,255,0.2)',
                                     }}
                                 >
-                                    + {t('rental:listYourVilla', 'List Your Villa')}
+                                    + {t('rental:createListing', 'List for Rent')}
                                 </button>
                             </div>
                         </div>
@@ -329,7 +329,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                             </div>
                         </div>
 
-                        {/* Luxury Quick-Filter Chips */}
+                        {/* Quick-filter chips (view type + key amenities) */}
                         <div className="px-4 pb-3 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
                             {[
                                 { label: '⛰ Mountain', field: 'viewType' as const, value: 'mountain' },
