@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, memo, useRef } from 'react';
+import React, { useState, useCallback, useMemo, memo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { useAppContext } from '@/context/AppContext';
@@ -34,9 +34,16 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
     const { t } = useTranslation(['villas', 'property', 'rental', 'common']);
     const { state, dispatch, toggleSavedHome } = useAppContext();
     const [imgIndex, setImgIndex] = useState(0);
+    const [seenImages, setSeenImages] = useState<Set<number>>(() => new Set([0]));
     const [touchStart, setTouchStart] = useState<number | null>(null);
     const [bookingOpen, setBookingOpen] = useState(false);
     const cardRef = useRef<HTMLDivElement>(null);
+
+    // Remember every image the user has landed on so it stays mounted and can
+    // cross-fade back in instantly (no reload flash) when revisited.
+    useEffect(() => {
+        setSeenImages(prev => (prev.has(imgIndex) ? prev : new Set(prev).add(imgIndex)));
+    }, [imgIndex]);
 
     const openBooking = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
@@ -187,16 +194,35 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
             {/* ── Image hero ── */}
             <div className="relative w-full aspect-[3/2] overflow-hidden bg-neutral-900">
 
-                {/* Parallax image (zoom + shift driven by CSS custom props) */}
+                {/* Parallax wrapper (hover zoom/shift). Images are stacked and
+                    cross-fade between each other for a seamless switch. */}
                 <div className="villa-img-wrap absolute inset-0">
-                    <PropertyImage
-                        src={allImages[imgIndex] ?? property.imageUrl}
-                        alt={property.title || 'Luxury Villa'}
-                        priority={priority}
-                        widths={[400, 640, 800]}
-                        sizes="(max-width: 640px) 100vw, 50vw"
-                        imgClassName={`object-cover w-full h-full ${isSold || isRented ? 'grayscale opacity-70' : ''}`}
-                    />
+                    {(allImages.length ? allImages : [property.imageUrl]).map((src, i) => {
+                        const active = i === imgIndex;
+                        // Mount current, already-seen, and the immediate neighbours so
+                        // the next/prev image is preloaded and the fade never pops.
+                        const neighbour = Math.abs(i - imgIndex) <= 1
+                            || (imgIndex === 0 && i === allImages.length - 1)
+                            || (imgIndex === allImages.length - 1 && i === 0);
+                        if (!active && !seenImages.has(i) && !neighbour) return null;
+                        return (
+                            <div
+                                key={`${src}-${i}`}
+                                className="absolute inset-0 transition-opacity duration-[550ms] ease-out"
+                                style={{ opacity: active ? 1 : 0, zIndex: active ? 2 : 1 }}
+                                aria-hidden={!active}
+                            >
+                                <PropertyImage
+                                    src={src ?? property.imageUrl}
+                                    alt={property.title || 'Luxury Villa'}
+                                    priority={priority && i === 0}
+                                    widths={[400, 640, 800]}
+                                    sizes="(max-width: 640px) 100vw, 50vw"
+                                    imgClassName={`object-cover w-full h-full ${isSold || isRented ? 'grayscale opacity-70' : ''}`}
+                                />
+                            </div>
+                        );
+                    })}
                 </div>
 
                 {/* Cinematic gradient stack */}
