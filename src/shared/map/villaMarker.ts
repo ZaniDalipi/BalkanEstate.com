@@ -45,9 +45,9 @@ export const getVillaMarkerPalette = (listingType?: string): VillaMarkerPalette 
  * (not hardcoded gold). `strong` gives the larger halo used by the detailed marker.
  */
 export const villaGlowFilter = (pal: VillaMarkerPalette, strong = false): string => {
-  const [r1, r2] = strong ? [10, 20] : [8, 16];
-  const [a1, a2] = strong ? [0.9, 0.55] : [0.85, 0.5];
-  return `drop-shadow(0 0 ${r1}px rgba(${pal.glow},${a1})) drop-shadow(0 0 ${r2}px rgba(${pal.glow},${a2})) drop-shadow(0 2px 5px rgba(0,0,0,0.45))`;
+  const [r1, r2] = strong ? [6, 13] : [5, 11];
+  const [a1, a2] = strong ? [0.5, 0.28] : [0.42, 0.22];
+  return `drop-shadow(0 0 ${r1}px rgba(${pal.glow},${a1})) drop-shadow(0 0 ${r2}px rgba(${pal.glow},${a2})) drop-shadow(0 2px 4px rgba(0,0,0,0.35))`;
 };
 
 const round = (n: number): number => Math.round(n * 100) / 100;
@@ -116,24 +116,31 @@ export const injectVillaMarkerStyles = (): void => {
  * sapphire for sale); crowned with the emerald beacon on a pin tip.
  */
 export const buildLuxuryVillaSVG = (price: string, uid: string, pal: VillaMarkerPalette): string => {
-  const W = Math.max(64, price.length * 7 + 22);
-  const H = 58;
+  // Clean, professional price pill with a small sparkle + a downward pointer.
+  const padL = 22;               // room for the leading sparkle
+  const padR = 12;
+  const W = Math.max(58, price.length * 7 + padL + padR);
+  const H = 40;
   const cx = W / 2;
-  const scale = 0.82;
+  const scale = 0.85;
   const gid = `lvG_${uid}`;
-  const clip = `lvClipM_${uid}`;
-  const beacon = buildEmeraldBeacon(cx, 9, 4.5, uid, 'villa-g-halo');
+  const gloss = `lvGl_${uid}`;
+  const starCx = 13;
+  const starCy = 16;
   return `<svg width="${Math.round(W * scale)}" height="${Math.round(H * scale)}" viewBox="0 0 ${W} ${H}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:${villaGlowFilter(pal)};display:block;">
     <defs>
-      <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${pal.light}"/><stop offset="52%" stop-color="${pal.mid}"/><stop offset="100%" stop-color="${pal.deep}"/></linearGradient>
-      <clipPath id="${clip}"><rect x="4" y="30" width="${W - 8}" height="18" rx="2"/></clipPath>
+      <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${pal.light}"/><stop offset="55%" stop-color="${pal.mid}"/><stop offset="100%" stop-color="${pal.deep}"/></linearGradient>
+      <linearGradient id="${gloss}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/><stop offset="55%" stop-color="#FFFFFF" stop-opacity="0"/></linearGradient>
     </defs>
-    <path d="M${cx} ${H} L${cx - 8} 48 H${cx + 8} Z" fill="${pal.deep}"/>
-    <rect x="4" y="30" width="${W - 8}" height="18" rx="2" fill="url(#${gid})" stroke="${pal.edge}" stroke-width="1.25"/>
-    <path class="villa-g-sheen" clip-path="url(#${clip})" d="M${cx - 3} 30 L${cx + 5} 30 L${cx + 1} 48 L${cx - 7} 48 Z" fill="#FFFFFF" opacity="0.5"/>
-    <path d="M4 30 L${cx} 15 L${W - 4} 30 Z" fill="url(#${gid})" stroke="${pal.edge}" stroke-width="1.25" stroke-linejoin="round"/>
-    <path d="M${cx - 10} 27 L${cx} 18 L${cx + 10} 27" stroke="${pal.light}" stroke-width="1" opacity="0.7" fill="none" stroke-linecap="round"/>
-    ${beacon}
-    <text x="${cx}" y="40" font-family="Inter,sans-serif" font-size="10.5" font-weight="800" fill="${pal.ink}" text-anchor="middle" dominant-baseline="middle">${price}</text>
+    <!-- Pointer -->
+    <path d="M${cx - 6} 26 L${cx} 34 L${cx + 6} 26 Z" fill="${pal.deep}"/>
+    <!-- Pill body -->
+    <rect x="1.5" y="4" width="${W - 3}" height="22" rx="11" fill="url(#${gid})" stroke="${pal.edge}" stroke-width="1"/>
+    <!-- Top gloss -->
+    <rect x="3" y="5.5" width="${W - 6}" height="9" rx="4.5" fill="url(#${gloss})"/>
+    <!-- Sparkle accent -->
+    <path d="M${starCx} ${starCy - 4.5} Q${starCx + 0.6} ${starCy - 0.6} ${starCx + 4.5} ${starCy} Q${starCx + 0.6} ${starCy + 0.6} ${starCx} ${starCy + 4.5} Q${starCx - 0.6} ${starCy + 0.6} ${starCx - 4.5} ${starCy} Q${starCx - 0.6} ${starCy - 0.6} ${starCx} ${starCy - 4.5} Z" fill="${pal.ink}" opacity="0.9"/>
+    <!-- Price -->
+    <text x="${(starCx + 4.5 + (W - padR) ) / 2 + 1}" y="16.5" font-family="Inter,-apple-system,sans-serif" font-size="11" font-weight="700" fill="${pal.ink}" text-anchor="middle" dominant-baseline="middle" letter-spacing="-0.02em">${price}</text>
   </svg>`;
 };
