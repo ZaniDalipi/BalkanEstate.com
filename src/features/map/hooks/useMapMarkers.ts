@@ -4,7 +4,7 @@
 import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { MarkerClusterer, SuperClusterAlgorithm } from '@googlemaps/markerclusterer';
 import { Property } from '@/types';
-import { getVillaMarkerPalette, buildEmeraldBeacon, type VillaMarkerPalette } from '@/shared/map/villaMarker';
+import { getVillaMarkerPalette, buildEmeraldBeacon, villaGlowFilter, type VillaMarkerPalette } from '@/shared/map/villaMarker';
 
 // Property type colors
 const PROPERTY_TYPE_COLORS: Record<string, string> = {
@@ -60,7 +60,7 @@ const buildLuxuryVillaSVG = (price: string, uid: string, pal: VillaMarkerPalette
   const gid = `lvG_${uid}`;    // gilded gold gradient (body + roof)
   const clip = `lvClipM_${uid}`;
   const beacon = buildEmeraldBeacon(cx, 9, 4.5, uid, 'villa-g-halo');
-  return `<svg width="${Math.round(W * scale)}" height="${Math.round(H * scale)}" viewBox="0 0 ${W} ${H}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 8px rgba(232,184,32,0.9)) drop-shadow(0 0 16px rgba(200,150,0,0.55)) drop-shadow(0 2px 5px rgba(0,0,0,0.45));display:block;">
+  return `<svg width="${Math.round(W * scale)}" height="${Math.round(H * scale)}" viewBox="0 0 ${W} ${H}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:${villaGlowFilter(pal)};display:block;">
     <defs>
       <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${pal.light}"/><stop offset="52%" stop-color="${pal.mid}"/><stop offset="100%" stop-color="${pal.deep}"/></linearGradient>
       <clipPath id="${clip}"><rect x="4" y="30" width="${W - 8}" height="18" rx="2"/></clipPath>

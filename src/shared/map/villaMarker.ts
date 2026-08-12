@@ -19,10 +19,12 @@
  * markers render fully gold.
  */
 export const VILLA_ONYX = { light: '#332C22', dark: '#141009' } as const;
-/** For-rent villas: metallic gold body, dark engraved price text. */
-export const VILLA_GOLD = { light: '#FFEFB0', mid: '#E8B820', deep: '#B8860B', edge: '#6E5716', ink: '#2C1A00' } as const;
+/** For-rent villas: metallic gold body, dark engraved price text. `glow` is the
+ *  "r,g,b" triplet used for the marker's drop-shadow halo (so the glow tracks
+ *  the body colour instead of being hardcoded). */
+export const VILLA_GOLD = { light: '#FFEFB0', mid: '#E8B820', deep: '#B8860B', edge: '#6E5716', ink: '#2C1A00', glow: '232,184,32' } as const;
 /** For-sale villas: sapphire-blue body, white price text — a clear second colour. */
-export const VILLA_SAPPHIRE = { light: '#7FB4FF', mid: '#2563EB', deep: '#1E40AF', edge: '#16307E', ink: '#FFFFFF' } as const;
+export const VILLA_SAPPHIRE = { light: '#7FB4FF', mid: '#2563EB', deep: '#1E40AF', edge: '#16307E', ink: '#FFFFFF', glow: '37,99,235' } as const;
 export const VILLA_EMERALD = { light: '#6EE7B7', mid: '#10B981', deep: '#047857', edge: '#065F46' } as const;
 
 /** Marker body palette by market: gold for rent, sapphire for sale. */
@@ -32,9 +34,21 @@ export interface VillaMarkerPalette {
   deep: string;
   edge: string;
   ink: string;
+  /** "r,g,b" triplet for the drop-shadow glow. */
+  glow: string;
 }
 export const getVillaMarkerPalette = (listingType?: string): VillaMarkerPalette =>
   listingType === 'sale' ? VILLA_SAPPHIRE : VILLA_GOLD;
+
+/**
+ * Drop-shadow filter for a villa marker, tinted to the palette's glow colour
+ * (not hardcoded gold). `strong` gives the larger halo used by the detailed marker.
+ */
+export const villaGlowFilter = (pal: VillaMarkerPalette, strong = false): string => {
+  const [r1, r2] = strong ? [10, 20] : [8, 16];
+  const [a1, a2] = strong ? [0.9, 0.55] : [0.85, 0.5];
+  return `drop-shadow(0 0 ${r1}px rgba(${pal.glow},${a1})) drop-shadow(0 0 ${r2}px rgba(${pal.glow},${a2})) drop-shadow(0 2px 5px rgba(0,0,0,0.45))`;
+};
 
 const round = (n: number): number => Math.round(n * 100) / 100;
 

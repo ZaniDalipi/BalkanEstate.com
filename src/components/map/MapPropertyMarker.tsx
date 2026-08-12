@@ -10,7 +10,7 @@ import { formatPrice } from '@/utils/currency';
 import { BuildingOfficeIcon } from '@/constants';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { validateCoordinates } from '@/shared/utils/validation';
-import { getVillaMarkerPalette, buildEmeraldBeacon } from '@/shared/map/villaMarker';
+import { getVillaMarkerPalette, buildEmeraldBeacon, villaGlowFilter } from '@/shared/map/villaMarker';
 
 /**
  * A property is mappable only when it carries coordinates that are real
@@ -467,7 +467,7 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
     const svgHouseHtml = `
       <div class="promoted-marker-wrapper ${nightModeClass}" style="width:${scaledW}px;height:${scaledH}px;">
         <div class="${promotedInnerClass}" style="width:${scaledW}px;height:${scaledH}px;transform:scale(${hoverScale});transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);">
-          <svg width="${scaledW}" height="${scaledH}" viewBox="0 0 ${W} ${H}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:${pillFilter};">
+          <svg width="${scaledW}" height="${scaledH}" viewBox="0 0 ${W} ${H}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:${villaGlowFilter(pal)};">
             <defs>
               <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="${pal.light}"/>
@@ -623,10 +623,8 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
     const clip = `lvClipD_${uid}`;
     const fSize = Math.max(10, Math.round(12 * zoomScale));
     const beacon = buildLeafletBeacon(40, 13, 6, uid);
-    // Warm gold glow (with a faint emerald under-glow from the beacon)
-    const villaFilter = isNightMode
-      ? finalFilter
-      : 'drop-shadow(0 0 10px rgba(232,184,32,0.9)) drop-shadow(0 0 20px rgba(200,150,0,0.55)) drop-shadow(0 4px 10px rgba(0,0,0,0.45))';
+    // Glow tinted to the palette (gold for rent, sapphire for sale)
+    const villaFilter = villaGlowFilter(pal, true);
     const svgVillaHtml = `
       <div class="promoted-marker-wrapper ${nightModeClass}" style="width:${scaledW}px;height:${scaledH}px;">
         <div class="${promotedInnerClass}" style="width:${scaledW}px;height:${scaledH}px;">
