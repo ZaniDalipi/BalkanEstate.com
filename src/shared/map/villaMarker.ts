@@ -90,3 +90,50 @@ export const buildEmeraldBeacon = (
     <circle cx="${round(cx - w * 0.32)}" cy="${round(cy - size * 0.32)}" r="${round(size * 0.2)}" fill="#ffffff" opacity="0.92"/>
   `;
 };
+
+/**
+ * Inject the emerald-beacon halo + body-sheen keyframes once. Both map engines
+ * reference the `villa-g-halo` / `villa-g-sheen` classes used by the SVG below.
+ */
+export const injectVillaMarkerStyles = (): void => {
+  if (typeof document === 'undefined') return;
+  const id = 'villa-marker-styles';
+  if (document.getElementById(id)) return;
+  const style = document.createElement('style');
+  style.id = id;
+  style.textContent = `
+    @keyframes villaEmeraldPulseG { 0%,100% { opacity:0.55; transform:scale(0.92);} 50% { opacity:1; transform:scale(1.18);} }
+    .villa-g-halo { transform-box: fill-box; transform-origin: center; animation: villaEmeraldPulseG 2.2s ease-in-out infinite; }
+    @keyframes villaSheenG { 0% { opacity:0; transform:translateX(-60%);} 45% { opacity:0.55;} 100% { opacity:0; transform:translateX(60%);} }
+    .villa-g-sheen { transform-box: fill-box; transform-origin: center; animation: villaSheenG 4.5s ease-in-out infinite; }
+  `;
+  document.head.appendChild(style);
+};
+
+/**
+ * Gilded villa marker as an SVG string (dynamic width) for an AdvancedMarker /
+ * divIcon. Body + roof + trim + price text come from `pal` (gold for rent,
+ * sapphire for sale); crowned with the emerald beacon on a pin tip.
+ */
+export const buildLuxuryVillaSVG = (price: string, uid: string, pal: VillaMarkerPalette): string => {
+  const W = Math.max(64, price.length * 7 + 22);
+  const H = 58;
+  const cx = W / 2;
+  const scale = 0.82;
+  const gid = `lvG_${uid}`;
+  const clip = `lvClipM_${uid}`;
+  const beacon = buildEmeraldBeacon(cx, 9, 4.5, uid, 'villa-g-halo');
+  return `<svg width="${Math.round(W * scale)}" height="${Math.round(H * scale)}" viewBox="0 0 ${W} ${H}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:${villaGlowFilter(pal)};display:block;">
+    <defs>
+      <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${pal.light}"/><stop offset="52%" stop-color="${pal.mid}"/><stop offset="100%" stop-color="${pal.deep}"/></linearGradient>
+      <clipPath id="${clip}"><rect x="4" y="30" width="${W - 8}" height="18" rx="2"/></clipPath>
+    </defs>
+    <path d="M${cx} ${H} L${cx - 8} 48 H${cx + 8} Z" fill="${pal.deep}"/>
+    <rect x="4" y="30" width="${W - 8}" height="18" rx="2" fill="url(#${gid})" stroke="${pal.edge}" stroke-width="1.25"/>
+    <path class="villa-g-sheen" clip-path="url(#${clip})" d="M${cx - 3} 30 L${cx + 5} 30 L${cx + 1} 48 L${cx - 7} 48 Z" fill="#FFFFFF" opacity="0.5"/>
+    <path d="M4 30 L${cx} 15 L${W - 4} 30 Z" fill="url(#${gid})" stroke="${pal.edge}" stroke-width="1.25" stroke-linejoin="round"/>
+    <path d="M${cx - 10} 27 L${cx} 18 L${cx + 10} 27" stroke="${pal.light}" stroke-width="1" opacity="0.7" fill="none" stroke-linecap="round"/>
+    ${beacon}
+    <text x="${cx}" y="40" font-family="Inter,sans-serif" font-size="10.5" font-weight="800" fill="${pal.ink}" text-anchor="middle" dominant-baseline="middle">${price}</text>
+  </svg>`;
+};

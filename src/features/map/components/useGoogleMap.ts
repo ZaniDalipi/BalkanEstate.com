@@ -44,6 +44,7 @@ import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { useRainViewer } from '../hooks/useRainViewer';
 import { useOpenMeteoGrid, type MapBounds } from '../hooks/useOpenMeteoGrid';
 import { useMapServices, weatherTileProxyUrl, firmsWmsProxyUrl } from '../hooks/useMapServices';
+import { buildLuxuryVillaSVG, getVillaMarkerPalette, injectVillaMarkerStyles } from '@/shared/map/villaMarker';
 import {
   MapStyleType,
   ClimateRiskType,
@@ -953,34 +954,43 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       markerDiv.dataset.propertyId = property.id;
 
       const price = formatMarkerPrice(property);
-      const color = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
       const isActivelyPromoted = property.isPromoted && property.promotionEndDate && property.promotionEndDate > Date.now();
-      let borderColor = 'white';
-      let borderWidth = 2;
-      if (isActivelyPromoted && property.promotionTier) {
-        borderColor = PROMOTION_TIER_COLORS[property.promotionTier] || PROMOTION_TIER_COLORS.standard;
-        borderWidth = 3;
-      }
+      const isLuxuryVilla = property.propertyType === 'luxury-villa';
 
       if (isActivelyPromoted && property.promotionTier) {
         markerDiv.classList.add(`promoted-marker-${property.promotionTier}`);
       }
 
-      markerDiv.style.cssText = `
-        padding: 2px 6px;
-        background: ${color};
-        border: ${borderWidth}px solid ${borderColor};
-        border-radius: 999px;
-        color: white;
-        font-weight: 700;
-        font-size: 10px;
-        font-family: Inter, system-ui, sans-serif;
-        cursor: pointer;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.25);
-        white-space: nowrap;
-        user-select: none;
-        transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
-      `;
+      if (isLuxuryVilla) {
+        // Gilded villa marker (gold for rent, sapphire for sale) — same design
+        // as the Leaflet map, from the shared villaMarker module.
+        injectVillaMarkerStyles();
+        markerDiv.style.cssText = 'cursor:pointer;user-select:none;transform-origin:bottom center;transition:transform 0.15s ease-out;';
+        markerDiv.innerHTML = buildLuxuryVillaSVG(price, `${property.id}`.slice(-6), getVillaMarkerPalette(property.listingType));
+      } else {
+        const color = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
+        let borderColor = 'white';
+        let borderWidth = 2;
+        if (isActivelyPromoted && property.promotionTier) {
+          borderColor = PROMOTION_TIER_COLORS[property.promotionTier] || PROMOTION_TIER_COLORS.standard;
+          borderWidth = 3;
+        }
+        markerDiv.style.cssText = `
+          padding: 2px 6px;
+          background: ${color};
+          border: ${borderWidth}px solid ${borderColor};
+          border-radius: 999px;
+          color: white;
+          font-weight: 700;
+          font-size: 10px;
+          font-family: Inter, system-ui, sans-serif;
+          cursor: pointer;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+          white-space: nowrap;
+          user-select: none;
+          transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+        `;
+      }
 
       if (animate) {
         const goldenAngle = 137.508 * (Math.PI / 180);
@@ -1005,7 +1015,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         }, delay + 900);
       }
 
-      markerDiv.textContent = price;
+      if (!isLuxuryVilla) markerDiv.textContent = price;
 
       markerDiv.onmouseenter = () => {
         if (!markerDiv.classList.contains('marker-highlighted') && !markerDiv.classList.contains('gmarker-entrance-fly')) {
