@@ -44,7 +44,7 @@ import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { useRainViewer } from '../hooks/useRainViewer';
 import { useOpenMeteoGrid, type MapBounds } from '../hooks/useOpenMeteoGrid';
 import { useMapServices, weatherTileProxyUrl, firmsWmsProxyUrl } from '../hooks/useMapServices';
-import { buildLuxuryVillaSVG, getVillaMarkerPalette, injectVillaMarkerStyles } from '@/shared/map/villaMarker';
+import { buildLuxuryVillaMarkerHTML, getVillaMarkerPalette } from '@/shared/map/villaMarker';
 import {
   MapStyleType,
   ClimateRiskType,
@@ -962,11 +962,15 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       }
 
       if (isLuxuryVilla) {
-        // Gilded villa marker (gold for rent, sapphire for sale) — same design
-        // as the Leaflet map, from the shared villaMarker module.
-        injectVillaMarkerStyles();
+        // Branded villa pin (crown = signature, star = actively promoted),
+        // gold for rent / sapphire for sale — same design as the Leaflet map.
         markerDiv.style.cssText = 'cursor:pointer;user-select:none;transform-origin:bottom center;transition:transform 0.15s ease-out;';
-        markerDiv.innerHTML = buildLuxuryVillaSVG(price, `${property.id}`.slice(-6), getVillaMarkerPalette(property.listingType));
+        markerDiv.innerHTML = buildLuxuryVillaMarkerHTML(
+          price,
+          `${property.id}`.slice(-6),
+          getVillaMarkerPalette(property.listingType),
+          isActivelyPromoted ? 'star' : 'crown',
+        );
       } else {
         const color = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
         let borderColor = 'white';
