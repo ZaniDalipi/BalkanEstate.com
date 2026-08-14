@@ -127,5 +127,10 @@
     "enquirySuccessTitle": "Solicitarea a fost trimisă",
     "enquirySuccessBody": "Proprietarul vilei vă va suna la {{phone}} cu detaliile și pentru a stabili o vizionare.",
     "enquireNote": "Fără plată online. Trimiteți solicitarea, iar proprietarul vilei vă sună direct cu detaliile și pentru a stabili o vizionare."
+  },
+  "badges": {
+    "signature": "VILĂ DE LUX",
+    "featured": "Recomandat",
+    "beachfront": "La plajă"
   }
 }

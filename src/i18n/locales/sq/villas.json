@@ -127,5 +127,10 @@
     "enquirySuccessTitle": "Kërkesa u dërgua",
     "enquirySuccessBody": "Pronari i vilës do t’ju telefonojë në {{phone}} me detajet dhe për të organizuar një vizitë.",
     "enquireNote": "Pa pagesë online. Dërgoni kërkesën dhe pronari i vilës ju telefonon drejtpërdrejt me detajet dhe për të organizuar një vizitë."
+  },
+  "badges": {
+    "signature": "VILË LUKSOZE",
+    "featured": "I veçantë",
+    "beachfront": "Buzë detit"
   }
 }

@@ -127,5 +127,10 @@
     "enquirySuccessTitle": "Upit je poslat",
     "enquirySuccessBody": "Vlasnik vile će vas pozvati na {{phone}} sa detaljima i da dogovori obilazak.",
     "enquireNote": "Bez onlajn plaćanja. Pošaljite upit i vlasnik vile vas poziva direktno sa detaljima i da dogovori obilazak."
+  },
+  "badges": {
+    "signature": "LUKSUZNA VILA",
+    "featured": "Izdvojeno",
+    "beachfront": "Na plaži"
   }
 }

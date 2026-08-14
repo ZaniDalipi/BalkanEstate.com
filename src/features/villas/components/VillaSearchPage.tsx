@@ -117,12 +117,6 @@ const VillaAnimationStyles = () => (
     }
 
     /* ── Luxury badge on card ── */
-    .villa-luxury-badge {
-      background: linear-gradient(135deg, #FFF0A0 0%, #FFA500 45%, #E8850A 100%);
-      color: #3D1F00;
-      box-shadow: 0 2px 12px rgba(255,165,0,0.35);
-    }
-
     /* ── Price tag ── */
     .villa-price-tag {
       background: rgba(0,0,0,0.45);
