@@ -188,7 +188,7 @@ const VILLA_PIN_GLYPHS: Record<VillaPinGlyph, { sw: number; d: string[] }[]> = {
  * as a standalone SVG string. `uid` namespaces the gradient/filter ids so
  * multiple pins on the same map never collide.
  */
-export const buildVillaPinSVG = (glyph: VillaPinGlyph, uid: string, pal: VillaMarkerPalette, displaySize = 40): string => {
+export const buildVillaPinSVG = (glyph: VillaPinGlyph, uid: string, pal: VillaMarkerPalette, displaySize = 26): string => {
   const gid = `lvPin_${uid}`;
   const fid = `lvPinGlow_${uid}`;
   const groups = VILLA_PIN_GLYPHS[glyph]
@@ -200,7 +200,7 @@ export const buildVillaPinSVG = (glyph: VillaPinGlyph, uid: string, pal: VillaMa
       <filter id="${fid}" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
       <linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${pal.light}"/><stop offset="45%" stop-color="${pal.mid}"/><stop offset="100%" stop-color="${pal.deep}"/></linearGradient>
     </defs>
-    <path d="${VILLA_PIN_OUTLINE}" fill="#101B2D" stroke="url(#${gid})" stroke-width="4" filter="url(#${fid})"/>
+    <path d="${VILLA_PIN_OUTLINE}" fill="transparent" stroke="url(#${gid})" stroke-width="5" filter="url(#${fid})"/>
     ${groups}
   </svg>`;
 };
@@ -216,10 +216,11 @@ export const buildLuxuryVillaMarkerHTML = (
   uid: string,
   pal: VillaMarkerPalette,
   glyph: VillaPinGlyph = 'crown',
+  pinSize = 26,
 ): string => {
-  const pin = buildVillaPinSVG(glyph, uid, pal, 40);
+  const pin = buildVillaPinSVG(glyph, uid, pal, pinSize);
   return `<div style="display:flex;flex-direction:column;align-items:center;filter:${villaGlowFilter(pal)};">
-    <div style="padding:3px 9px;border-radius:999px;background:linear-gradient(135deg,${pal.light},${pal.mid} 55%,${pal.deep});color:${pal.ink};border:1px solid ${pal.edge};font-family:Inter,-apple-system,sans-serif;font-size:11px;font-weight:700;letter-spacing:-0.02em;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.35);margin-bottom:-4px;">${price}</div>
+    <div style="padding:2px 7px;border-radius:999px;background:linear-gradient(135deg,${pal.light},${pal.mid} 55%,${pal.deep});color:${pal.ink};border:1px solid ${pal.edge};font-family:Inter,-apple-system,sans-serif;font-size:9.5px;font-weight:700;letter-spacing:-0.02em;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,0.3);margin-bottom:-3px;">${price}</div>
     ${pin}
   </div>`;
 };
