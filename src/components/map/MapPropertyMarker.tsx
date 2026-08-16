@@ -450,11 +450,11 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
 
   // Luxury villa: branded pin (crown = signature, star = actively promoted)
   if (isLuxuryVilla) {
-    const scaledW = Math.round(26 * zoomScale);
-    const scaledH = Math.round(42 * zoomScale); // price label + pin
+    const scaledW = Math.round(19 * zoomScale);
+    const scaledH = Math.round(32 * zoomScale); // price label + pin
     const uid = `s${String(property.id).slice(-6)}`;
     const pal = getVillaMarkerPalette(property.listingType);
-    const markerHtml = buildLuxuryVillaMarkerHTML(price, uid, pal, isActivelyPromoted ? 'star' : 'crown', 26);
+    const markerHtml = buildLuxuryVillaMarkerHTML(price, uid, pal, isActivelyPromoted ? 'star' : 'crown', 19);
     const svgHouseHtml = `
       <div class="promoted-marker-wrapper ${nightModeClass}" style="width:${scaledW}px;height:${scaledH}px;">
         <div class="${promotedInnerClass}" style="width:${scaledW}px;height:${scaledH}px;transform:scale(${hoverScale});transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);">
@@ -581,11 +581,11 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
 
   // Luxury villa: branded pin (crown = signature, star = actively promoted)
   if (isLuxuryVilla) {
-    const scaledW = Math.round(30 * zoomScale);
-    const scaledH = Math.round(48 * zoomScale); // price label + pin
+    const scaledW = Math.round(22 * zoomScale);
+    const scaledH = Math.round(36 * zoomScale); // price label + pin
     const uid = `d${String(property.id).slice(-6)}`;
     const pal = getVillaMarkerPalette(property.listingType);
-    const markerHtml = buildLuxuryVillaMarkerHTML(price, uid, pal, isActivelyPromoted ? 'star' : 'crown', 30);
+    const markerHtml = buildLuxuryVillaMarkerHTML(price, uid, pal, isActivelyPromoted ? 'star' : 'crown', 22);
     const svgVillaHtml = `
       <div class="promoted-marker-wrapper ${nightModeClass}" style="width:${scaledW}px;height:${scaledH}px;">
         <div class="${promotedInnerClass}" style="width:${scaledW}px;height:${scaledH}px;transform-origin:bottom center;transform:scale(${scale});transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);">
