@@ -188,7 +188,7 @@ const VILLA_PIN_GLYPHS: Record<VillaPinGlyph, { sw: number; d: string[] }[]> = {
  * as a standalone SVG string. `uid` namespaces the gradient/filter ids so
  * multiple pins on the same map never collide.
  */
-export const buildVillaPinSVG = (glyph: VillaPinGlyph, uid: string, pal: VillaMarkerPalette, displaySize = 19): string => {
+export const buildVillaPinSVG = (glyph: VillaPinGlyph, uid: string, pal: VillaMarkerPalette, displaySize = 24): string => {
   const gid = `lvPin_${uid}`;
   const groups = VILLA_PIN_GLYPHS[glyph]
     .map(({ sw, d }) => `<g fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" color="${pal.mid}">${d.map(p => `<path d="${p}"/>`).join('')}</g>`)
@@ -219,11 +219,11 @@ export const buildLuxuryVillaMarkerHTML = (
   uid: string,
   pal: VillaMarkerPalette,
   glyph: VillaPinGlyph = 'crown',
-  pinSize = 19,
+  pinSize = 24,
 ): string => {
   const pin = buildVillaPinSVG(glyph, uid, pal, pinSize);
   return `<div style="display:flex;flex-direction:column;align-items:center;filter:${villaGlowFilter(pal)};">
-    <div style="padding:1.5px 6px;border-radius:999px;background:linear-gradient(135deg,${pal.light},${pal.mid} 55%,${pal.deep});color:${pal.ink};border:1px solid ${pal.edge};font-family:Inter,-apple-system,sans-serif;font-size:8.5px;font-weight:700;letter-spacing:-0.01em;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,0.3);margin-bottom:-2px;">${price}</div>
+    <div style="padding:2px 7px;border-radius:999px;background:linear-gradient(135deg,${pal.light},${pal.mid} 55%,${pal.deep});color:${pal.ink};border:1px solid ${pal.edge};font-family:Inter,-apple-system,sans-serif;font-size:9.5px;font-weight:700;letter-spacing:-0.01em;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,0.3);margin-bottom:-2.5px;">${price}</div>
     ${pin}
   </div>`;
 };
