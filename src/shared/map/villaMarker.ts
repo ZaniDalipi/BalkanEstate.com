@@ -190,17 +190,20 @@ const VILLA_PIN_GLYPHS: Record<VillaPinGlyph, { sw: number; d: string[] }[]> = {
  */
 export const buildVillaPinSVG = (glyph: VillaPinGlyph, uid: string, pal: VillaMarkerPalette, displaySize = 19): string => {
   const gid = `lvPin_${uid}`;
-  const fid = `lvPinGlow_${uid}`;
   const groups = VILLA_PIN_GLYPHS[glyph]
     .map(({ sw, d }) => `<g fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" color="${pal.mid}">${d.map(p => `<path d="${p}"/>`).join('')}</g>`)
     .join('');
   const h = Math.round(displaySize * 1.2);
-  return `<svg width="${displaySize}" height="${h}" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+  // Solid navy teardrop with the gradient rim (the designer's look), on a fully
+  // transparent canvas. No SVG filter here on purpose: feGaussianBlur renders
+  // over the filter region and left a faint rectangular box behind each pin.
+  // The soft halo comes from villaGlowFilter() (CSS drop-shadow) on the wrapper,
+  // which follows the pin's silhouette instead of a box.
+  return `<svg width="${displaySize}" height="${h}" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg" style="display:block;background:transparent;overflow:visible;">
     <defs>
-      <filter id="${fid}" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
       <linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${pal.light}"/><stop offset="45%" stop-color="${pal.mid}"/><stop offset="100%" stop-color="${pal.deep}"/></linearGradient>
     </defs>
-    <path d="${VILLA_PIN_OUTLINE}" fill="transparent" stroke="url(#${gid})" stroke-width="5" filter="url(#${fid})"/>
+    <path d="${VILLA_PIN_OUTLINE}" fill="#101B2D" stroke="url(#${gid})" stroke-width="5" stroke-linejoin="round"/>
     ${groups}
   </svg>`;
 };
