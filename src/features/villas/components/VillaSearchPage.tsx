@@ -293,22 +293,39 @@ const DESTINATIONS = [
 ];
 
 /* ── Count-up hook for hero ── */
+/**
+ * Counts up from 0 to `target`.
+ *
+ * Must stay idempotent: React 18 StrictMode mounts effects twice (run →
+ * cleanup → run). A "have I already animated this value?" ref guard breaks
+ * that — the first run starts the interval, the cleanup clears it, and the
+ * second run early-returns, leaving the number frozen at 0. So the effect
+ * derives everything from `target` alone and is safe to re-run.
+ */
 const useCountUp = (target: number): number => {
-    const [val, setVal] = React.useState(0);
-    const prev = useRef(0);
+    const safeTarget = Number.isFinite(target) && target > 0 ? Math.floor(target) : 0;
+    const [val, setVal] = React.useState(safeTarget);
+
     useEffect(() => {
-        if (target === prev.current) return;
-        prev.current = target;
-        if (target === 0) { setVal(0); return; }
+        if (safeTarget === 0) { setVal(0); return; }
+
+        // Reduced motion: land on the final number without the animation.
+        const reduceMotion = typeof window !== 'undefined'
+            && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+        if (reduceMotion) { setVal(safeTarget); return; }
+
         let current = 0;
-        const step = Math.max(1, Math.ceil(target / 28));
+        setVal(0);
+        const step = Math.max(1, Math.ceil(safeTarget / 28));
         const id = setInterval(() => {
-            current = Math.min(current + step, target);
+            current = Math.min(current + step, safeTarget);
             setVal(current);
-            if (current >= target) clearInterval(id);
+            if (current >= safeTarget) clearInterval(id);
         }, 22);
-        return () => clearInterval(id);
-    }, [target]);
+        // If the animation is cut short, still show the true total.
+        return () => { clearInterval(id); setVal(safeTarget); };
+    }, [safeTarget]);
+
     return val;
 };
 
