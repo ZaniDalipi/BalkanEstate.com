@@ -82,7 +82,9 @@
     "forRent": "Προς Ενοικίαση",
     "bathrooms": "Μπάνια",
     "allListings": "Όλες",
-    "priceRangeInvalid": "Η ελάχιστη τιμή είναι υψηλότερη από τη μέγιστη."
+    "priceRangeInvalid": "Η ελάχιστη τιμή είναι υψηλότερη από τη μέγιστη.",
+    "gardenView": "Θέα Κήπου",
+    "streetView": "Θέα Δρόμου"
   },
   "seo": {
     "title": "Πολυτελείς Βίλες για Ενοικίαση στα Βαλκάνια | BalkanEstate",
@@ -132,5 +134,24 @@
     "signature": "ΠΟΛΥΤΕΛΗΣ ΒΙΛΑ",
     "featured": "Προτεινόμενο",
     "beachfront": "Παραλιακό"
-  }
+  },
+  "cancellation": {
+    "flexible": "Ευέλικτη ακύρωση",
+    "moderate": "Μέτρια πολιτική",
+    "strict": "Αυστηρή πολιτική",
+    "nonRefundable": "Μη επιστρέψιμο"
+  },
+  "amenities": {
+    "breakfast": "Πρωινό",
+    "towels": "Πετσέτες",
+    "parking": "Πάρκινγκ"
+  },
+  "card": {
+    "defaultTitle": "Πολυτελής Βίλα",
+    "bedTitle": "Πολυτελής Βίλα {{beds}} Υπνοδωματίων",
+    "goToImage": "Μετάβαση στην εικόνα {{n}}",
+    "cleaningFee": "+{{price}} καθαρισμός"
+  },
+  "perNightSuffix": "/νύχτα",
+  "fromPrice": "από {{price}}"
 }

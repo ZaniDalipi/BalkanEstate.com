@@ -82,7 +82,9 @@
     "forRent": "За Наем",
     "bathrooms": "Бани",
     "allListings": "Всички",
-    "priceRangeInvalid": "Минималната цена е по-висока от максималната."
+    "priceRangeInvalid": "Минималната цена е по-висока от максималната.",
+    "gardenView": "Изглед към градина",
+    "streetView": "Изглед към улица"
   },
   "seo": {
     "title": "Луксозни Вили под Наем на Балканите | BalkanEstate",
@@ -132,5 +134,24 @@
     "signature": "ЛУКСОЗНА ВИЛА",
     "featured": "Препоръчано",
     "beachfront": "На плажа"
-  }
+  },
+  "cancellation": {
+    "flexible": "Гъвкаво анулиране",
+    "moderate": "Умерена политика",
+    "strict": "Строга политика",
+    "nonRefundable": "Без възстановяване"
+  },
+  "amenities": {
+    "breakfast": "Закуска",
+    "towels": "Кърпи",
+    "parking": "Паркинг"
+  },
+  "card": {
+    "defaultTitle": "Луксозна вила",
+    "bedTitle": "Луксозна вила с {{beds}} спални",
+    "goToImage": "Към изображение {{n}}",
+    "cleaningFee": "+{{price}} почистване"
+  },
+  "perNightSuffix": "/нощ",
+  "fromPrice": "от {{price}}"
 }

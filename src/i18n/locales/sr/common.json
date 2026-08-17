@@ -306,7 +306,8 @@
     "measure": "Мери",
     "legend": "Легенда",
     "climate": "Клима",
-    "premiumOnly": "Само Premium"
+    "premiumOnly": "Само Premium",
+    "clearFilter": "Obriši filter"
   },
   "social": {
     "facebook": "Facebook",
@@ -637,5 +638,6 @@
     "whyBuy": "Зашто купити у {{country}}?"
   },
   "removeFromFavorites": "Уклони из омиљених",
-  "saved": "Сачувано"
+  "saved": "Сачувано",
+  "any": "Bilo koji"
 }

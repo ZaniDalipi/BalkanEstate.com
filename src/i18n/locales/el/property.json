@@ -38,7 +38,7 @@
     "office": "Γραφείο",
     "garage": "Γκαράζ",
     "other": "Άλλο",
-    "luxury-villa": "Luxury Villa"
+    "luxury-villa": "Πολυτελής Βίλα"
   },
   "features": {
     "bedrooms": "Υπνοδωμάτια",
@@ -319,7 +319,7 @@
       "villa": "Βίλα",
       "land": "Οικόπεδο",
       "other": "Άλλο",
-      "luxury-villa": "Luxury Villa"
+      "luxury-villa": "Πολυτελής Βίλα"
     },
     "promotedListings": "Προωθημένες Αγγελίες",
     "agentHint": "Κλικ για προτάσεις!",

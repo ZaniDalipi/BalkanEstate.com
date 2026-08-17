@@ -9,20 +9,22 @@ import PropertyImage from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import VillaBookingModal from './VillaBookingModal';
 
-const VIEW_TYPE: Record<string, { emoji: string; label: string }> = {
-    sea:      { emoji: '🌊', label: 'Sea View'     },
-    mountain: { emoji: '⛰️',  label: 'Mountain'     },
-    park:     { emoji: '🌲', label: 'Lake / Forest' },
-    city:     { emoji: '🏙️', label: 'City View'    },
-    garden:   { emoji: '🌷', label: 'Garden View'   },
-    street:   { emoji: '🏘️', label: 'Street View'   },
+/** View types and cancellation policies keyed to the same strings VillaFilters
+ *  uses, so the card and the filter chips always read identically. */
+const VIEW_TYPE: Record<string, { emoji: string; key: string; fallback: string }> = {
+    sea:      { emoji: '🌊', key: 'villas:filters.sea',        fallback: 'Sea View'      },
+    mountain: { emoji: '⛰️',  key: 'villas:filters.mountain',  fallback: 'Mountain'      },
+    park:     { emoji: '🌲', key: 'villas:filters.lakeForest', fallback: 'Lake / Forest' },
+    city:     { emoji: '🏙️', key: 'villas:filters.cityView',  fallback: 'City View'     },
+    garden:   { emoji: '🌷', key: 'villas:filters.gardenView', fallback: 'Garden View'   },
+    street:   { emoji: '🏘️', key: 'villas:filters.streetView', fallback: 'Street View'  },
 };
 
-const CANCEL_LABEL: Record<string, string> = {
-    flexible:         'Flexible cancellation',
-    moderate:         'Moderate policy',
-    strict:           'Strict policy',
-    'non-refundable': 'Non-refundable',
+const CANCEL_LABEL: Record<string, { key: string; fallback: string }> = {
+    flexible:         { key: 'villas:cancellation.flexible',      fallback: 'Flexible cancellation' },
+    moderate:         { key: 'villas:cancellation.moderate',      fallback: 'Moderate policy'       },
+    strict:           { key: 'villas:cancellation.strict',        fallback: 'Strict policy'         },
+    'non-refundable': { key: 'villas:cancellation.nonRefundable', fallback: 'Non-refundable'        },
 };
 
 interface LuxuryVillaCardProps {
@@ -44,6 +46,12 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
     useEffect(() => {
         setSeenImages(prev => (prev.has(imgIndex) ? prev : new Set(prev).add(imgIndex)));
     }, [imgIndex]);
+
+    // Inner controls stop click bubbling; without the same guard on keydown a
+    // keyboard Enter on the heart/arrows also triggered the card's navigation.
+    const stopKeys = useCallback((e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') e.stopPropagation();
+    }, []);
 
     const openBooking = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
@@ -77,13 +85,17 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
         }
     }, [state.isAuthenticated, dispatch, toggleSavedHome, property]);
 
+    // Every index computation below is guarded on a non-empty gallery: with no
+    // images `% 0` yields NaN, and an opacity keyed off NaN renders nothing.
     const prevImg = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
+        if (allImages.length < 2) return;
         setImgIndex(i => (i - 1 + allImages.length) % allImages.length);
     }, [allImages.length]);
 
     const nextImg = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
+        if (allImages.length < 2) return;
         setImgIndex(i => (i + 1) % allImages.length);
     }, [allImages.length]);
 
@@ -94,7 +106,7 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
     const handleTouchEnd = useCallback((e: React.TouchEvent) => {
         if (touchStart === null) return;
         const diff = touchStart - e.changedTouches[0].clientX;
-        if (Math.abs(diff) > 40) {
+        if (allImages.length > 1 && Math.abs(diff) > 40) {
             setImgIndex(i => diff > 0
                 ? (i + 1) % allImages.length
                 : (i - 1 + allImages.length) % allImages.length
@@ -130,16 +142,20 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
     }, []);
 
     // Amenity chips (up to 5 shown on the card)
-    const amenities: string[] = (property.amenities as string[]) || [];
+    const amenities: unknown[] = (property.amenities as unknown[]) || [];
+    // Amenity entries are user-supplied and occasionally null/numeric, so
+    // coerce before matching rather than calling toLowerCase on them.
+    const hasAmenity = (needle: string) =>
+        amenities.some(a => typeof a === 'string' && a.toLowerCase().includes(needle));
     const chips = [
-        property.hasPool                                           && { emoji: '🏊', label: 'Pool'       },
-        property.hasGarden                                         && { emoji: '🌿', label: 'Garden'     },
-        amenities.some(a => a.toLowerCase().includes('sauna'))     && { emoji: '🧖', label: 'Sauna'      },
-        amenities.some(a => a.toLowerCase().includes('wine'))      && { emoji: '🍷', label: 'Wine Cellar' },
-        amenities.some(a => a.toLowerCase().includes('panoramic')) && { emoji: '🏔️', label: 'Panoramic'  },
-        property.breakfastIncluded                                 && { emoji: '🍳', label: 'Breakfast'  },
-        property.towelsIncluded                                    && { emoji: '🛁', label: 'Towels'     },
-        property.parkingIncluded                                   && { emoji: '🚗', label: 'Parking'    },
+        property.hasPool           && { emoji: '🏊', label: t('villas:filters.pool', 'Pool') },
+        property.hasGarden         && { emoji: '🌿', label: t('villas:filters.garden', 'Garden') },
+        hasAmenity('sauna')        && { emoji: '🧖', label: t('villas:filters.sauna', 'Sauna') },
+        hasAmenity('wine')         && { emoji: '🍷', label: t('villas:filters.wineCellar', 'Wine Cellar') },
+        hasAmenity('panoramic')    && { emoji: '🏔️', label: t('villas:filters.panoramic', 'Panoramic') },
+        property.breakfastIncluded && { emoji: '🍳', label: t('villas:amenities.breakfast', 'Breakfast') },
+        property.towelsIncluded    && { emoji: '🛁', label: t('villas:amenities.towels', 'Towels') },
+        property.parkingIncluded   && { emoji: '🚗', label: t('villas:amenities.parking', 'Parking') },
     ].filter(Boolean).slice(0, 5) as { emoji: string; label: string }[];
 
     const viewType  = property.viewType ? VIEW_TYPE[property.viewType] : null;
@@ -157,9 +173,9 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
             onMouseLeave={handleMouseLeave}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
-            role="article"
+            role="link"
             tabIndex={0}
-            aria-label={`${property.title || 'Luxury Villa'} — ${property.city}, ${property.country}`}
+            aria-label={`${property.title || t('villas:card.defaultTitle', 'Luxury Villa')} — ${property.city}, ${property.country}`}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
         >
             {/* ── Gold SVG border traces around the card on hover ── */}
@@ -214,7 +230,7 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                             >
                                 <PropertyImage
                                     src={src ?? property.imageUrl}
-                                    alt={property.title || 'Luxury Villa'}
+                                    alt={property.title || t('villas:card.defaultTitle', 'Luxury Villa')}
                                     priority={priority && i === 0}
                                     widths={[400, 640, 800]}
                                     sizes="(max-width: 640px) 100vw, 50vw"
@@ -270,12 +286,12 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                         </div>
                         {isSold && (
                             <div className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] font-bold bg-red-500/85 backdrop-blur-sm text-white shadow">
-                                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse inline-block" /> SOLD
+                                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse inline-block" /> {t('property:sold', 'Sold')}
                             </div>
                         )}
                         {isRented && (
                             <div className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] font-bold bg-orange-500/85 backdrop-blur-sm text-white shadow">
-                                <span className="w-1.5 h-1.5 bg-white rounded-full inline-block" /> RENTED
+                                <span className="w-1.5 h-1.5 bg-white rounded-full inline-block" /> {t('property:rented', 'Rented')}
                             </div>
                         )}
                     </div>
@@ -292,14 +308,17 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                             </span>
                         ) : viewType && (
                             <span className="px-2 py-[5px] rounded-full text-[10px] font-semibold text-white/90 bg-black/35 backdrop-blur-sm border border-white/10">
-                                {viewType.emoji} {viewType.label}
+                                <span aria-hidden="true">{viewType.emoji}</span> {t(viewType.key, viewType.fallback)}
                             </span>
                         )}
                         <button
                             onClick={handleFav}
-                            aria-label={isFavorited ? 'Remove from favourites' : 'Save to favourites'}
+                            onKeyDown={stopKeys}
+                            aria-label={isFavorited
+                                ? t('common:removeFromFavorites', 'Remove from favourites')
+                                : t('common:addToFavorites', 'Add to favourites')}
                             aria-pressed={isFavorited}
-                            className={`w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 shadow-lg focus:outline-none active:scale-90 ${
+                            className={`w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 shadow-lg focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none active:scale-90 ${
                                 isFavorited
                                     ? 'bg-red-500 text-white shadow-red-500/30'
                                     : 'bg-black/30 backdrop-blur-sm text-white border border-white/20 hover:border-white/40'
@@ -322,7 +341,8 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                                 className={`transition-all duration-200 rounded-full ${
                                     i === imgIndex ? 'w-5 h-1.5 bg-white shadow-sm' : 'w-1.5 h-1.5 bg-white/40 hover:bg-white/70'
                                 }`}
-                                aria-label={`Image ${i + 1}`}
+                                onKeyDown={stopKeys}
+                                aria-label={t('villas:card.goToImage', 'Go to image {{n}}', { n: i + 1 })}
                             />
                         ))}
                     </div>
@@ -332,15 +352,17 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                 {allImages.length > 1 && (
                     <>
                         <button onClick={prevImg}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-black/60 focus:outline-none"
-                            aria-label="Previous image">
+                            className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-black/60 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
+                            onKeyDown={stopKeys}
+                            aria-label={t('property:imageViewer.previous', 'Previous image')}>
                             <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                             </svg>
                         </button>
                         <button onClick={nextImg}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-black/60 focus:outline-none"
-                            aria-label="Next image">
+                            className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-black/60 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
+                            onKeyDown={stopKeys}
+                            aria-label={t('property:imageViewer.next', 'Next image')}>
                             <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                             </svg>
@@ -356,7 +378,7 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                                 className="luxury-chip bg-black/55 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[4px] rounded-full border border-white/12"
                                 style={{ transitionDelay: `${ci * 35}ms` }}
                             >
-                                {chip.emoji} {chip.label}
+                                <span aria-hidden="true">{chip.emoji}</span> {chip.label}
                             </span>
                         ))}
                     </div>
@@ -368,7 +390,9 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                         {/* Left: title + location + stats */}
                         <div className="min-w-0 flex-1">
                             <h3 className="text-white font-bold text-sm sm:text-[15px] leading-snug mb-0.5 drop-shadow-md line-clamp-1">
-                                {property.title || `${property.beds > 0 ? property.beds + '-Bed ' : ''}Luxury Villa`}
+                                {property.title || (property.beds > 0
+                                    ? t('villas:card.bedTitle', '{{beds}}-Bed Luxury Villa', { beds: property.beds })
+                                    : t('villas:card.defaultTitle', 'Luxury Villa'))}
                             </h3>
                             <p className="flex items-center gap-1 text-white/60 text-[11px] mb-2">
                                 <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -406,7 +430,7 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                                 <span className="text-xs font-bold px-2.5 py-1.5 rounded-xl"
                                     style={{ color: '#FFA500', background: 'rgba(255,165,0,0.15)', border: '1px solid rgba(255,165,0,0.25)' }}
                                 >
-                                    By Negotiation
+                                    {t('property:byNegotiation', 'By Negotiation')}
                                 </span>
                             ) : (
                                 <div className="villa-price-tag inline-block px-3 py-1.5 rounded-xl">
@@ -431,10 +455,14 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                                 <span>⏰ {property.checkInTime}{property.checkOutTime ? `–${property.checkOutTime}` : ''}</span>
                             )}
                             {(property.cleaningFee ?? 0) > 0 && (
-                                <span>· +€{property.cleaningFee} cleaning</span>
+                                <span>· {t('villas:card.cleaningFee', '+{{price}} cleaning', {
+                                    price: formatPrice(property.cleaningFee as number, property.country),
+                                })}</span>
                             )}
                             {property.cancellationPolicy && (
-                                <span>· {CANCEL_LABEL[property.cancellationPolicy] ?? property.cancellationPolicy}</span>
+                                <span>· {CANCEL_LABEL[property.cancellationPolicy]
+                                    ? t(CANCEL_LABEL[property.cancellationPolicy].key, CANCEL_LABEL[property.cancellationPolicy].fallback)
+                                    : property.cancellationPolicy}</span>
                             )}
                         </div>
                     )}
@@ -446,7 +474,8 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                         <button
                             type="button"
                             onClick={openBooking}
-                            className="villa-cta-btn pointer-events-auto px-6 py-2.5 rounded-full text-sm font-bold text-white border border-white/35 backdrop-blur-sm shadow-2xl hover:bg-white/20 focus:outline-none"
+                            onKeyDown={stopKeys}
+                            className="villa-cta-btn pointer-events-auto px-6 py-2.5 rounded-full text-sm font-bold text-white border border-white/35 backdrop-blur-sm shadow-2xl hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
                             aria-label={isForRent ? t('villas:booking.requestToBook', 'Request to Book') : t('villas:booking.enquire', 'Request Details')}
                         >
                             {isForRent ? t('villas:booking.requestToBook', 'Request to Book') : t('villas:booking.enquire', 'Request Details')} &rarr;

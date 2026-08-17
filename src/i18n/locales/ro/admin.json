@@ -1074,6 +1074,7 @@
     "rejectError": "Eroare la respingerea vilei",
     "empty": "Nicio vilă aici.",
     "untitled": "Vilă fără titlu",
-    "negotiable": "Prin negociere"
+    "negotiable": "Prin negociere",
+    "showingFirst": "Se afișează primele {{shown}} din {{total}} vile."
   }
 }

@@ -56,7 +56,10 @@ export function buildPreviewProperty(
         tourUrl: listingData.tourUrl,
         virtualTour360Url: listingData.virtualTour360Url || undefined,
         hasVirtualTour360: !!listingData.virtualTour360Url,
-        imageUrl: images.length > 0 ? images[0].previewUrl : 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=500',
+        // No stock photo stand-in: persisting one would make a listing without
+        // photos indistinguishable from one that has them. The UI has its own
+        // placeholder for the empty case.
+        imageUrl: images.length > 0 ? images[0].previewUrl : '',
         images: imageUrls,
         lat: listingData.lat,
         lng: listingData.lng,
@@ -932,7 +935,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 tourUrl: listingData.tourUrl,
                 virtualTour360Url: listingData.virtualTour360Url || undefined,
                 hasVirtualTour360: !!listingData.virtualTour360Url,
-                imageUrl: imageUrls.length > 0 ? imageUrls[0].url : 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=500',
+                imageUrl: imageUrls.length > 0 ? imageUrls[0].url : '',
                 images: imageUrls,
                 lat: lat,
                 lng: lng,

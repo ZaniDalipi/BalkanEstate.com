@@ -38,7 +38,7 @@
     "office": "Zyrë",
     "garage": "Garazh",
     "other": "Tjetër",
-    "luxury-villa": "Luxury Villa"
+    "luxury-villa": "Vilë Luksoze"
   },
   "features": {
     "bedrooms": "Dhoma Gjumi",
@@ -319,7 +319,7 @@
       "villa": "Vilë",
       "land": "Tokë",
       "other": "Tjetër",
-      "luxury-villa": "Luxury Villa"
+      "luxury-villa": "Vilë Luksoze"
     },
     "promotedListings": "Listime të Promovuara",
     "agentHint": "Kliko për rekomandime!",

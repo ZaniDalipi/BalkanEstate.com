@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { sendPropertyInquiry } from '@/services/apiService';
@@ -61,6 +61,8 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
     setMounted(true);
@@ -74,6 +76,50 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
       setError(null);
     }
   }, [isOpen]);
+
+  // Dialog behaviour: lock the page behind it, close on Escape, keep focus in.
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    document.body.style.overflow = 'hidden';
+
+    const focusable = () => Array.from(
+      dialogRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      ) ?? []
+    );
+
+    focusable()[0]?.focus();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const items = focusable();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown, true);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown, true);
+      document.body.style.overflow = previousOverflow;
+      previouslyFocused?.focus?.();
+    };
+  }, [isOpen, onClose]);
 
   const nights = useMemo(() => nightsBetween(form.checkIn, form.checkOut), [form.checkIn, form.checkOut]);
   const showEstimate = !property.isNegotiable && property.price > 0 && nights > 0;
@@ -157,9 +203,15 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
       <div
         className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center p-0 sm:p-4"
         style={{ backgroundColor: 'rgba(0,0,0,0.28)', backdropFilter: 'blur(14px) saturate(120%)', WebkitBackdropFilter: 'blur(14px) saturate(120%)', animation: 'vbk-fade 0.25s ease-out' }}
-        onClick={onClose}
+        onClick={(e) => { e.stopPropagation(); onClose(); }}
+        onMouseDown={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         <div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
           className="w-full sm:max-w-[440px] sm:rounded-[28px] rounded-t-[28px] max-h-[92vh] overflow-y-auto overscroll-contain"
           style={{
             fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, sans-serif',
@@ -175,8 +227,8 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
           <div className="px-6 pt-5 pb-4 flex items-start justify-between sticky top-0 z-10 border-b border-black/[0.06]"
                style={{ background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
             <div className="min-w-0">
-              <h2 className="text-[19px] font-semibold text-neutral-900 tracking-[-0.02em] flex items-center gap-1.5">
-                <span className="text-[#C9A227] text-[12px]">✦</span>
+              <h2 id={titleId} className="text-[19px] font-semibold text-neutral-900 tracking-[-0.02em] flex items-center gap-1.5">
+                <span className="text-[#C9A227] text-[12px]" aria-hidden="true">✦</span>
                 {isForRent ? t('villas:booking.title', 'Request to Book') : t('villas:booking.enquireTitle', 'Request Details')}
               </h2>
               <p className="text-[13px] text-neutral-400 line-clamp-1 mt-0.5">{property.title}</p>

@@ -1074,6 +1074,7 @@
     "rejectError": "Greška pri odbijanju vile",
     "empty": "Nema vila ovdje.",
     "untitled": "Vila bez naziva",
-    "negotiable": "Po dogovoru"
+    "negotiable": "Po dogovoru",
+    "showingFirst": "Prikazano prvih {{shown}} od {{total}} vila."
   }
 }

@@ -82,7 +82,9 @@
     "forRent": "De Închiriat",
     "bathrooms": "Băi",
     "allListings": "Toate",
-    "priceRangeInvalid": "Prețul minim este mai mare decât cel maxim."
+    "priceRangeInvalid": "Prețul minim este mai mare decât cel maxim.",
+    "gardenView": "Vedere la Grădină",
+    "streetView": "Vedere la Stradă"
   },
   "seo": {
     "title": "Vile de Lux de Închiriat în Balcani | BalkanEstate",
@@ -132,5 +134,24 @@
     "signature": "VILĂ DE LUX",
     "featured": "Recomandat",
     "beachfront": "La plajă"
-  }
+  },
+  "cancellation": {
+    "flexible": "Anulare flexibilă",
+    "moderate": "Politică moderată",
+    "strict": "Politică strictă",
+    "nonRefundable": "Nerambursabil"
+  },
+  "amenities": {
+    "breakfast": "Mic dejun",
+    "towels": "Prosoape",
+    "parking": "Parcare"
+  },
+  "card": {
+    "defaultTitle": "Vilă de Lux",
+    "bedTitle": "Vilă de Lux cu {{beds}} Dormitoare",
+    "goToImage": "Mergi la imaginea {{n}}",
+    "cleaningFee": "+{{price}} curățenie"
+  },
+  "perNightSuffix": "/noapte",
+  "fromPrice": "de la {{price}}"
 }

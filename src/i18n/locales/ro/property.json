@@ -38,7 +38,7 @@
     "office": "Birou",
     "garage": "Garaj",
     "other": "Altele",
-    "luxury-villa": "Luxury Villa"
+    "luxury-villa": "Vilă de Lux"
   },
   "features": {
     "bedrooms": "Dormitoare",
@@ -319,7 +319,7 @@
       "villa": "Vilă",
       "land": "Teren",
       "other": "Altele",
-      "luxury-villa": "Luxury Villa"
+      "luxury-villa": "Vilă de Lux"
     },
     "promotedListings": "Anunțuri Promovate",
     "agentHint": "Click pentru recomandări!",

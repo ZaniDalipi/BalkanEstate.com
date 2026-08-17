@@ -971,6 +971,7 @@
     "rejectError": "Dështoi refuzimi i vilës",
     "empty": "Nuk ka vila këtu.",
     "untitled": "Vilë pa titull",
-    "negotiable": "Me marrëveshje"
+    "negotiable": "Me marrëveshje",
+    "showingFirst": "Duke shfaqur {{shown}} vilat e para nga {{total}}."
   }
 }

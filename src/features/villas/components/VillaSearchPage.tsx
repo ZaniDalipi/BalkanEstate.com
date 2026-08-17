@@ -32,23 +32,6 @@ const VillaAnimationStyles = () => (
       animation-delay: var(--card-delay, 0ms);
     }
 
-    /* ── Gold shimmer bar ── */
-    @keyframes goldShimmer {
-      0%   { background-position: -200% center; }
-      100% { background-position:  200% center; }
-    }
-    .gold-shimmer {
-      background: linear-gradient(90deg,
-        transparent 0%,
-        rgba(255,165,0,0.28) 38%,
-        rgba(255,210,60,0.50) 50%,
-        rgba(255,165,0,0.28) 62%,
-        transparent 100%
-      );
-      background-size: 200% auto;
-      animation: goldShimmer 2.5s linear infinite;
-    }
-
     /* ── 3D magnetic tilt card with a persistent gilded-glow border ── */
     .villa-tilt-card {
       transform: perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
@@ -102,10 +85,6 @@ const VillaAnimationStyles = () => (
       8%   { opacity: 1; }
       100% { stroke-dashoffset: 0; opacity: 1; }
     }
-    @keyframes borderFade {
-      0%   { stroke-dashoffset: 0; opacity: 1; }
-      100% { stroke-dashoffset: 1; opacity: 0; }
-    }
     .villa-border-trace {
       stroke-dasharray: 1;
       stroke-dashoffset: 1;
@@ -116,7 +95,6 @@ const VillaAnimationStyles = () => (
       animation: borderTrace 1.1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
     }
 
-    /* ── Luxury badge on card ── */
     /* ── Price tag ── */
     .villa-price-tag {
       background: rgba(0,0,0,0.45);
@@ -131,116 +109,64 @@ const VillaAnimationStyles = () => (
       border-color: rgba(255,231,166,0.65) !important;
       text-shadow: 0 1px 2px rgba(0,0,0,0.6);
       box-shadow: 0 6px 20px rgba(0,0,0,0.45);
-      opacity: 0;
-      transform: translateY(6px) scale(0.95);
       transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1), background 0.2s ease;
     }
     .villa-cta-btn:hover {
       background: rgba(20,16,9,0.98) !important;
     }
-    .luxury-villa-card:hover .villa-cta-btn {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
 
     /* ── Chip reveal ── */
     .luxury-chip {
-      opacity: 0;
-      transform: translateY(8px);
       transition: opacity 0.32s ease, transform 0.32s cubic-bezier(0.34,1.56,0.64,1);
     }
-    .luxury-villa-card:hover .luxury-chip {
-      opacity: 1;
-      transform: translateY(0);
+
+    /* The CTA and chips are hidden until hover only where hovering is possible.
+       On touch there is no hover, so they must be visible and tappable — they
+       used to be opacity:0 forever, making "Request to Book" unreachable. */
+    @media (hover: hover) and (pointer: fine) {
+      .villa-cta-btn {
+        opacity: 0;
+        transform: translateY(6px) scale(0.95);
+      }
+      .luxury-villa-card:hover .villa-cta-btn,
+      .luxury-villa-card:focus-within .villa-cta-btn {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      .luxury-chip {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      .luxury-villa-card:hover .luxury-chip,
+      .luxury-villa-card:focus-within .luxury-chip {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    /* ── Aurora blobs in hero ── */
-    @keyframes aurora1 {
-      0%   { transform: translate(0%,0%) scale(1);    }
-      25%  { transform: translate(8%,-6%) scale(1.1); }
-      50%  { transform: translate(2%,9%) scale(0.94); }
-      75%  { transform: translate(-7%,-2%) scale(1.06);}
-      100% { transform: translate(0%,0%) scale(1);    }
-    }
-    @keyframes aurora2 {
-      0%   { transform: translate(0%,0%) scale(1.08); }
-      33%  { transform: translate(-12%,7%) scale(0.88);}
-      66%  { transform: translate(6%,-9%) scale(1.18); }
-      100% { transform: translate(0%,0%) scale(1.08); }
-    }
-    @keyframes aurora3 {
-      0%   { transform: translate(0%,0%) scale(0.92); }
-      40%  { transform: translate(11%,-11%) scale(1.12);}
-      70%  { transform: translate(-4%,6%) scale(1.0);  }
-      100% { transform: translate(0%,0%) scale(0.92); }
-    }
-    .aurora-1 { animation: aurora1 22s ease-in-out infinite; }
-    .aurora-2 { animation: aurora2 28s ease-in-out infinite 3s; }
-    .aurora-3 { animation: aurora3 18s ease-in-out infinite 6s; }
-    .aurora-4 { animation: aurora1 14s ease-in-out infinite 1s; }
 
-    /* ── Star twinkle ── */
-    @keyframes starTwinkle {
-      0%,100% { opacity: var(--so,0.25); }
-      50%      { opacity: var(--sp,0.85); }
-    }
-    .star-dot {
-      position: absolute;
-      border-radius: 50%;
-      background: white;
-      animation: starTwinkle var(--dur,2.5s) ease-in-out infinite;
-      animation-delay: var(--delay,0s);
-    }
-
-    /* ── Destination pill landscape reveal ── */
-    .villa-dest-landscape {
-      max-height: 0;
-      overflow: hidden;
-      opacity: 0;
-      transition: max-height 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
-    }
-    .villa-dest-pill:hover .villa-dest-landscape,
-    .villa-dest-pill.active .villa-dest-landscape {
-      max-height: 22px;
-      opacity: 1;
-    }
-    .villa-dest-pill {
-      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), background 0.2s ease, border-color 0.2s ease;
-    }
-    .villa-dest-pill:hover { transform: scale(1.06) translateY(-1px); }
-    .villa-dest-pill.active { transform: scale(1.04); }
-
-    /* ── Hero title word reveal ── */
-    @keyframes wordDrop {
-      0%   { opacity: 0; transform: translateY(-20px) scale(0.9); }
-      100% { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    .hero-word {
-      display: inline-block;
-      opacity: 0;
-      animation: wordDrop 0.65s cubic-bezier(0.34,1.56,0.64,1) forwards;
-      animation-delay: var(--wd, 0ms);
-    }
-
-    /* ── Floating gold motes in hero ── */
-    @keyframes moteFloat {
-      0%   { transform: translateY(0px) translateX(0px); opacity: 0; }
-      15%  { opacity: var(--mo, 0.6); }
-      85%  { opacity: var(--mo, 0.4); }
-      100% { transform: translateY(var(--my,-60px)) translateX(var(--mx,8px)); opacity: 0; }
-    }
-    .gold-mote {
-      position: absolute;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,200,50,0.9) 0%, rgba(255,140,0,0.4) 70%, transparent 100%);
-      animation: moteFloat var(--dur,4s) ease-out infinite;
-      animation-delay: var(--delay,0s);
-      pointer-events: none;
+    /* ── Respect the OS "reduce motion" setting ──
+       The card carries a permanent breathing glow plus parallax, specular and
+       fly-in animations; all of them are decorative. */
+    @media (prefers-reduced-motion: reduce) {
+      .villa-card-fly,
+      .villa-tilt-card,
+      .villa-border-trace,
+      .villa-img-wrap,
+      .villa-cta-btn,
+      .luxury-chip {
+        animation: none !important;
+        transition: none !important;
+      }
+      .villa-card-fly { opacity: 1; }
+      .villa-tilt-card { transform: none; }
+      .luxury-villa-card:hover .villa-img-wrap { transform: none; }
+      .villa-specular { display: none; }
     }
   `}</style>
 );
 
-/* ── Destinations with landscape SVG silhouettes ── */
+/* ── Destination quick-jumps for the hero ── */
 const DESTINATIONS = [
     {
         labelKey: 'destinations.julianAlps' as const,
@@ -248,7 +174,6 @@ const DESTINATIONS = [
         query: 'Bled',
         center: [46.3683, 14.1146] as [number, number],
         zoom: 11,
-        landscape: 'M0 20 L6 8 L10 13 L16 3 L22 9 L27 2 L33 8 L38 5 L43 12 L48 6 L53 13 L57 7 L60 15 L60 20 Z',
     },
     {
         labelKey: 'destinations.kotorBay' as const,
@@ -256,7 +181,6 @@ const DESTINATIONS = [
         query: 'Kotor',
         center: [42.4247, 18.7712] as [number, number],
         zoom: 12,
-        landscape: 'M0 20 L0 11 C8 7 16 14 24 8 C32 3 40 13 48 7 C52 5 56 10 60 8 L60 20 Z',
     },
     {
         labelKey: 'destinations.budvaRiviera' as const,
@@ -264,7 +188,6 @@ const DESTINATIONS = [
         query: 'Budva',
         center: [42.2864, 18.8400] as [number, number],
         zoom: 12,
-        landscape: 'M0 20 L0 13 C12 9 22 16 36 9 C46 4 53 12 60 9 L60 20 Z',
     },
     {
         labelKey: 'destinations.lakeOhrid' as const,
@@ -272,7 +195,6 @@ const DESTINATIONS = [
         query: 'Ohrid',
         center: [41.1172, 20.8016] as [number, number],
         zoom: 11,
-        landscape: 'M0 20 L0 14 C16 11 30 16 44 12 C51 10 56 13 60 12 L60 20 Z',
     },
     {
         labelKey: 'destinations.dubrovnik' as const,
@@ -280,7 +202,6 @@ const DESTINATIONS = [
         query: 'Dubrovnik',
         center: [42.6507, 18.0944] as [number, number],
         zoom: 13,
-        landscape: 'M0 20 L0 11 L4 11 L4 8 L7 8 L7 5 L10 5 L10 8 L14 8 L14 6 L18 6 L18 9 L22 9 L26 13 L30 13 L34 8 L38 7 L42 10 L46 13 L50 10 L54 8 L57 11 L60 12 L60 20 Z',
     },
     {
         labelKey: 'destinations.pirinMountains' as const,
@@ -288,7 +209,6 @@ const DESTINATIONS = [
         query: 'Bansko',
         center: [41.8374, 23.4882] as [number, number],
         zoom: 12,
-        landscape: 'M0 20 L4 9 L8 14 L13 4 L19 10 L24 2 L29 8 L33 5 L38 12 L43 7 L48 11 L53 6 L57 13 L60 17 L60 20 Z',
     },
 ];
 
@@ -361,11 +281,13 @@ const TrustStrip: React.FC = () => {
 interface LuxuryHeroProps {
     count: number;
     minPrice: number | null;
+    /** Only rentals are priced per night; sale villas must not say "/night". */
+    isNightly: boolean;
     activeQuery: string;
     onDestinationClick: (dest: typeof DESTINATIONS[number]) => void;
 }
 
-const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, minPrice, activeQuery, onDestinationClick }) => {
+const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, minPrice, isNightly, activeQuery, onDestinationClick }) => {
     const { t } = useTranslation(['villas']);
     const displayCount = useCountUp(count);
     return (
@@ -395,7 +317,7 @@ const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, minPrice, activeQuery, o
                         <span className="font-semibold text-neutral-800">{displayCount}</span>
                         {' '}{count === 1 ? t('villas:hero.villaAvailable', 'villa available') : t('villas:hero.villasAvailable', 'villas available')}
                         {minPrice != null ? (
-                            <span className="text-neutral-400"> · {t('villas:hero.from', 'from')} <span className="font-medium" style={{ color: '#B8860B' }}>€{minPrice.toLocaleString()}</span>/night</span>
+                            <span className="text-neutral-400"> · {t('villas:hero.from', 'from')} <span className="font-medium" style={{ color: '#B8860B' }}>€{minPrice.toLocaleString()}</span>{isNightly ? t('villas:perNightSuffix', '/night') : ''}</span>
                         ) : null}
                     </p>
                 )}
@@ -472,6 +394,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
         mapBounds,
         drawnBounds,
         villaProperties,
+        totalVillaCount,
         baseFilteredProperties,
         listProperties,
         listingMode,
@@ -503,14 +426,16 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
 
     /* Entrance animation: animate cards when villa data first loads */
     const [animateCards, setAnimateCards] = useState(true);
-    const prevLoadingRef = useRef(true);
+    // The entrance plays once, on the first load. It used to `return` before
+    // updating the ref, so the flag stayed true and every realtime refetch
+    // replayed the 2.5s staggered fly-in over cards already on screen.
+    const hasPlayedEntranceRef = useRef(false);
     useEffect(() => {
-        if (prevLoadingRef.current && !isLoading) {
-            setAnimateCards(true);
-            const timer = setTimeout(() => setAnimateCards(false), 2500);
-            return () => clearTimeout(timer);
-        }
-        prevLoadingRef.current = isLoading;
+        if (isLoading || hasPlayedEntranceRef.current) return;
+        hasPlayedEntranceRef.current = true;
+        setAnimateCards(true);
+        const timer = setTimeout(() => setAnimateCards(false), 2500);
+        return () => clearTimeout(timer);
     }, [isLoading]);
 
     /* Filter-change shimmer: show skeleton briefly when filters change */
@@ -545,11 +470,12 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
 
     useEffect(() => {
         if (!loadMoreRef.current) return;
+        let pageTimer: ReturnType<typeof setTimeout> | null = null;
         const observer = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting && !isLoadingMore && visibleCount < listProperties.length) {
                     setIsLoadingMore(true);
-                    setTimeout(() => {
+                    pageTimer = setTimeout(() => {
                         setVisibleCount(prev => Math.min(prev + ITEMS_PER_PAGE, listProperties.length));
                         setIsLoadingMore(false);
                     }, 400);
@@ -558,7 +484,10 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
             { rootMargin: '200px', threshold: 0 }
         );
         observer.observe(loadMoreRef.current);
-        return () => observer.disconnect();
+        return () => {
+            observer.disconnect();
+            if (pageTimer) clearTimeout(pageTimer);
+        };
     }, [visibleCount, listProperties.length, isLoadingMore]);
 
     /* Active filter count for badge */
@@ -573,10 +502,14 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
         if (filters.viewType && filters.viewType !== 'any') count++;
         if ((filters as any).hasPool === true) count++;
         if ((filters as any).hasGarden === true) count++;
+        if (filters.furnishing && filters.furnishing !== 'any') count++;
+        // Reset also clears the market toggle, so it has to count here —
+        // otherwise "For Sale" hid the Reset button that would undo it.
+        if (listingMode !== 'any') count++;
         const amenities = (filters.amenities as string[] | undefined) ?? [];
-        if (amenities.length > 0) count += amenities.length;
+        count += amenities.length;
         return count;
-    }, [filters]);
+    }, [filters, listingMode]);
 
     /* Min price from the filtered results ("from €X/night" in the results bar) */
     const minResultPrice = useMemo(() => {
@@ -585,15 +518,15 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
         return prices.length > 0 ? Math.min(...prices) : null;
     }, [listProperties]);
 
-    /* Hero shows the whole fetched collection (live DB reference), so it never
-       reads a hardcoded 0 — the "no matches" card handles empty filter results. */
-    const collectionCount = villaProperties.length;
+    /* Hero shows the size of the whole collection, taken from the API's own
+       countDocuments rather than the length of the page we happened to fetch.
+       The filtered count lives in the results bar. */
+    const collectionCount = totalVillaCount || villaProperties.length;
     const collectionMinPrice = useMemo(() => {
         const prices = villaProperties.map(p => p.price).filter((n): n is number => typeof n === 'number' && n > 0);
         return prices.length > 0 ? Math.min(...prices) : null;
     }, [villaProperties]);
 
-    const showSplitView = !isMobile && !isTablet;
     const showViewToggle = isMobile || isTablet;
 
     const mapProps = {
@@ -673,7 +606,9 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             <>
                                                 <span className="text-neutral-300 text-sm flex-shrink-0">·</span>
                                                 <span className="text-sm flex-shrink-0 font-medium" style={{ color: '#B8860B' }}>
-                                                    {t('villas:fromPerNight', 'from {{price}}/night', { price: `€${minResultPrice.toLocaleString()}` })}
+                                                    {listingMode === 'rent'
+                                                        ? t('villas:fromPerNight', 'from {{price}}/night', { price: `€${minResultPrice.toLocaleString()}` })
+                                                        : t('villas:fromPrice', 'from {{price}}', { price: `€${minResultPrice.toLocaleString()}` })}
                                                 </span>
                                             </>
                                         )}
@@ -866,6 +801,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     <LuxuryHero
                                         count={collectionCount}
                                         minPrice={collectionMinPrice}
+                                        isNightly={listingMode === 'rent'}
                                         activeQuery={filters.query ?? ''}
                                         onDestinationClick={(dest) => {
                                             handleFilterChange('query', dest.query);
@@ -899,6 +835,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     <LuxuryHero
                                         count={collectionCount}
                                         minPrice={collectionMinPrice}
+                                        isNightly={listingMode === 'rent'}
                                         activeQuery={filters.query ?? ''}
                                         onDestinationClick={(dest) => {
                                             const isActive = (filters.query ?? '') === dest.query;
@@ -1002,9 +939,9 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                                     onChange={(e) => handleFilterChange('query', e.target.value)}
                                                     onFocus={() => setIsQueryInputFocused(true)}
                                                     onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
-                                                    placeholder={t('villas:filters.searchCity', 'Search villas...')}
+                                                    placeholder={t('villas:filters.searchCity', 'Search by location...')}
                                                     className="w-full pl-9 pr-8 py-2 text-sm bg-transparent border-none outline-none placeholder-gray-400"
-                                                    aria-label={t('villas:filters.searchCity', 'Search villas...')}
+                                                    aria-label={t('villas:filters.searchCity', 'Search by location...')}
                                                 />
                                                 {filters.query && (
                                                     <button
@@ -1074,7 +1011,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             style={{ background: '#0252CD' }}
                                         >
                                             <span>🏛️</span>
-                                            <span>{t('villas:title', 'LUXURY VILLAS')}</span>
+                                            <span>{t('villas:title', 'Luxury Villas')}</span>
                                             {activeFilterCount > 0 && (
                                                 <span
                                                     className="ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold"

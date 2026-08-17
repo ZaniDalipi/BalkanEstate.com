@@ -62,7 +62,8 @@
     "floorNumber": "Broj sprata",
     "advancedFilters": "Napredni filteri",
     "moreFilters": "Više filtera",
-    "lessFilters": "Manje filtera"
+    "lessFilters": "Manje filtera",
+    "sortBy": "Sortiraj po"
   },
   "options": {
     "any": "Bilo koji",
@@ -476,5 +477,7 @@
     "queryTitle": "Nekretnine za prodaju u {{query}} - Oglasi nekretnina",
     "tagline": "Pretraga nekretnina pokretana vještačkom inteligencijom na BalkanEstateAI — 11 zemalja, 10 jezika.",
     "typesForSale": "kuće, stanovi i vile za prodaju"
-  }
+  },
+  "saving": "Spremanje...",
+  "saveSearch": "Sačuvaj pretragu"
 }

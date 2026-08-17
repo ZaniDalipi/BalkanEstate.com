@@ -82,7 +82,9 @@
     "forRent": "For Rent",
     "bathrooms": "Bathrooms",
     "allListings": "All",
-    "priceRangeInvalid": "Minimum price is higher than the maximum."
+    "priceRangeInvalid": "Minimum price is higher than the maximum.",
+    "gardenView": "Garden View",
+    "streetView": "Street View"
   },
   "seo": {
     "title": "Luxury Villas for Rent in the Balkans | BalkanEstate",
@@ -132,5 +134,24 @@
     "signature": "LUXURY VILLA",
     "featured": "Featured",
     "beachfront": "Beachfront"
-  }
+  },
+  "cancellation": {
+    "flexible": "Flexible cancellation",
+    "moderate": "Moderate policy",
+    "strict": "Strict policy",
+    "nonRefundable": "Non-refundable"
+  },
+  "amenities": {
+    "breakfast": "Breakfast",
+    "towels": "Towels",
+    "parking": "Parking"
+  },
+  "card": {
+    "defaultTitle": "Luxury Villa",
+    "bedTitle": "{{beds}}-Bed Luxury Villa",
+    "goToImage": "Go to image {{n}}",
+    "cleaningFee": "+{{price}} cleaning"
+  },
+  "perNightSuffix": "/night",
+  "fromPrice": "from {{price}}"
 }

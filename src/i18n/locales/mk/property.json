@@ -38,7 +38,7 @@
     "office": "Канцеларија",
     "garage": "Гаража",
     "other": "Друго",
-    "luxury-villa": "Luxury Villa"
+    "luxury-villa": "Луксузна вила"
   },
   "features": {
     "bedrooms": "Спални соби",
@@ -319,7 +319,7 @@
       "villa": "Вила",
       "land": "Земјиште",
       "other": "Друго",
-      "luxury-villa": "Luxury Villa"
+      "luxury-villa": "Луксузна вила"
     },
     "promotedListings": "Промовирани огласи",
     "agentHint": "Кликнете за препораки!",

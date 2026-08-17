@@ -82,7 +82,9 @@
     "forRent": "За Кирија",
     "bathrooms": "Бањи",
     "allListings": "Сите",
-    "priceRangeInvalid": "Минималната цена е повисока од максималната."
+    "priceRangeInvalid": "Минималната цена е повисока од максималната.",
+    "gardenView": "Поглед кон градина",
+    "streetView": "Поглед кон улица"
   },
   "seo": {
     "title": "Луксузни Вили За Изнајмување на Балканот | BalkanEstate",
@@ -132,5 +134,24 @@
     "signature": "ЛУКСУЗНА ВИЛА",
     "featured": "Издвоено",
     "beachfront": "На плажа"
-  }
+  },
+  "cancellation": {
+    "flexible": "Флексибилно откажување",
+    "moderate": "Умерена политика",
+    "strict": "Строга политика",
+    "nonRefundable": "Без поврат на средства"
+  },
+  "amenities": {
+    "breakfast": "Појадок",
+    "towels": "Пешкири",
+    "parking": "Паркинг"
+  },
+  "card": {
+    "defaultTitle": "Луксузна вила",
+    "bedTitle": "Луксузна вила со {{beds}} спални",
+    "goToImage": "Оди на слика {{n}}",
+    "cleaningFee": "+{{price}} чистење"
+  },
+  "perNightSuffix": "/ноќ",
+  "fromPrice": "од {{price}}"
 }

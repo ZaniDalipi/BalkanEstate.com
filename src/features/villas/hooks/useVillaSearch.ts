@@ -24,6 +24,9 @@ export function useVillaSearch() {
     const { isAuthenticated, currentUser } = state;
 
     const [villaProperties, setVillaProperties] = useState<Property[]>([]);
+    // The DB's own countDocuments for the whole villa collection, straight off
+    // `pagination.total`. villaProperties.length is only ever one page of it.
+    const [totalVillaCount, setTotalVillaCount] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -64,9 +67,9 @@ export function useVillaSearch() {
         setError(null);
         try {
             const params = new URLSearchParams();
-            // Omit listingType to fetch both markets; the backend already
-            // returns only admin-approved luxury villas for this propertyType.
-            if (listingMode !== 'any') params.set('listingType', listingMode);
+            // Always fetch both markets — narrowing to rent/sale is done client
+            // side in baseFilteredProperties, so switching the toggle must not
+            // cost a round trip (and a skeleton flash) for data we already hold.
             params.set('propertyType', 'luxury-villa');
             params.set('limit', '3000');
 
@@ -77,15 +80,16 @@ export function useVillaSearch() {
                 const msg = t('villas:fetchError', 'Failed to fetch villas');
                 throw new Error(`${msg} (${response.status})`);
             }
-            const data: { properties?: Record<string, unknown>[] } = await response.json();
+            const data: {
+                properties?: Record<string, unknown>[];
+                pagination?: { total?: number };
+            } = await response.json();
 
             const transformed = (data.properties ?? []).map((p) => {
                 const seller = p.sellerId as Record<string, unknown> | null | undefined;
                 return {
                     ...p,
                     id: (p.id || p._id) as string,
-                    propertyType: 'luxury-villa' as const,
-                    listingType: (p.listingType as string) || 'rent',
                     sellerId: seller?.id || seller?._id || p.sellerId,
                     rentedAt: p.rentedAt ? new Date(p.rentedAt as string).getTime() : undefined,
                     rentedUntil: p.rentedUntil ? new Date(p.rentedUntil as string).getTime() : undefined,
@@ -105,6 +109,7 @@ export function useVillaSearch() {
             });
 
             setVillaProperties(transformed as Property[]);
+            setTotalVillaCount(data.pagination?.total ?? transformed.length);
         } catch (err: unknown) {
             if (err instanceof Error && err.name === 'AbortError') return;
             const message = err instanceof Error ? err.message : t('common:unknownError', 'An unknown error occurred');
@@ -112,7 +117,7 @@ export function useVillaSearch() {
         } finally {
             if (!controller.signal.aborted) setIsLoading(false);
         }
-    }, [t, listingMode]);
+    }, [t]);
 
     useEffect(() => {
         fetchVillas();
@@ -279,7 +284,9 @@ export function useVillaSearch() {
         setFilters(prev => ({ ...prev, [key]: value }));
     }, []);
 
-    const handleSearch = useCallback(() => {}, []);
+    // Filtering is client side, so a search is a refetch of the collection —
+    // which also makes this usable as the error state's "Try Again".
+    const handleSearch = useCallback(() => { void fetchVillas(); }, [fetchVillas]);
 
     const handleResetFilters = useCallback(() => {
         setFilters({ ...initialFilters, ...VILLA_DEFAULTS });
@@ -343,7 +350,14 @@ export function useVillaSearch() {
         try {
             let newSearch: SavedSearch;
             const now = Date.now();
-            const villaFilters = { ...(isAreaOnly ? initialFilters : filters), ...VILLA_DEFAULTS };
+            // Record the market actually being browsed. Spreading VILLA_DEFAULTS
+            // wholesale stamped every saved search as 'rent' even from the
+            // "For Sale" / "All" tabs.
+            const villaFilters: Filters = {
+                ...(isAreaOnly ? initialFilters : filters),
+                propertyType: 'luxury-villa',
+                listingType: listingMode === 'any' ? 'any' : listingMode,
+            };
 
             if (drawnBounds) {
                 const center = drawnBounds.getCenter();
@@ -355,7 +369,7 @@ export function useVillaSearch() {
             } else if (mapBounds) {
                 const center = mapBounds.getCenter();
                 const name = await generateSearchNameFromCoords(center.lat, center.lng, mapBounds);
-                newSearch = { id: `ss-${now}`, name: t('search:areaNear', { name, defaultValue: `Area near ${name}` }), filters: { ...initialFilters, ...VILLA_DEFAULTS }, drawnBoundsJSON: serializeBounds(mapBounds), createdAt: now, lastAccessed: now, seenPropertyIds: [] };
+                newSearch = { id: `ss-${now}`, name: t('search:areaNear', { name, defaultValue: `Area near ${name}` }), filters: villaFilters, drawnBoundsJSON: serializeBounds(mapBounds), createdAt: now, lastAccessed: now, seenPropertyIds: [] };
             } else {
                 showToast(t('search:cannotSaveEmptySearch', 'Cannot save an empty search. Please add some criteria or move to an area on the map.'), 'error');
                 setIsSaving(false);
@@ -370,7 +384,7 @@ export function useVillaSearch() {
         } finally {
             setIsSaving(false);
         }
-    }, [isAuthenticated, isSaving, dispatch, addSavedSearch, filters, isFormSearchActive, showToast, drawnBounds, mapBounds, t]);
+    }, [isAuthenticated, isSaving, dispatch, addSavedSearch, filters, listingMode, isFormSearchActive, showToast, drawnBounds, mapBounds, t]);
 
     const handleSaveSearchArea = useCallback(() => handleSaveSearch(true), [handleSaveSearch]);
 
@@ -412,6 +426,7 @@ export function useVillaSearch() {
         state,
         dispatch,
         villaProperties,
+        totalVillaCount,
         isLoading,
         error,
         filters,

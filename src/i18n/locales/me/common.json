@@ -306,7 +306,8 @@
     "measure": "Mjeri",
     "legend": "Legenda",
     "climate": "Klima",
-    "premiumOnly": "Samo Premium"
+    "premiumOnly": "Samo Premium",
+    "clearFilter": "Obriši filter"
   },
   "social": {
     "facebook": "Facebook",
@@ -637,5 +638,6 @@
     "ctaTitle": "Spremni da pronađete svoju nekretninu?",
     "ctaDescription": "Pretražujte svih 11 balkanskih zemalja uz uparivanje pokretano vještačkom inteligencijom. 10 jezika, provjereni agenti, trenutne procjene.",
     "ctaButton": "Počni pretragu"
-  }
+  },
+  "any": "Bilo koji"
 }

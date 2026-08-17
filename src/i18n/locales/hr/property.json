@@ -38,7 +38,7 @@
     "office": "Ured",
     "garage": "Garaža",
     "other": "Ostalo",
-    "luxury-villa": "Luxury Villa"
+    "luxury-villa": "Luksuzna vila"
   },
   "features": {
     "bedrooms": "Spavaće Sobe",
@@ -319,7 +319,7 @@
       "villa": "Vila",
       "land": "Zemljište",
       "other": "Ostalo",
-      "luxury-villa": "Luxury Villa"
+      "luxury-villa": "Luksuzna vila"
     },
     "promotedListings": "Promovirani Oglasi",
     "agentHint": "Kliknite za preporuke!",

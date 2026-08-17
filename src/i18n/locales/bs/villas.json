@@ -82,7 +82,9 @@
     "forRent": "Za Iznajmljivanje",
     "bathrooms": "Kupatila",
     "allListings": "Sve",
-    "priceRangeInvalid": "Minimalna cijena je veća od maksimalne."
+    "priceRangeInvalid": "Minimalna cijena je veća od maksimalne.",
+    "gardenView": "Pogled na vrt",
+    "streetView": "Pogled na ulicu"
   },
   "seo": {
     "title": "Luksuzne Vile Za Iznajmljivanje na Balkanu | BalkanEstate",
@@ -132,5 +134,24 @@
     "signature": "LUKSUZNA VILA",
     "featured": "Izdvojeno",
     "beachfront": "Na plaži"
-  }
+  },
+  "cancellation": {
+    "flexible": "Fleksibilno otkazivanje",
+    "moderate": "Umjerena politika",
+    "strict": "Stroga politika",
+    "nonRefundable": "Bez povrata novca"
+  },
+  "amenities": {
+    "breakfast": "Doručak",
+    "towels": "Peškiri",
+    "parking": "Parking"
+  },
+  "card": {
+    "defaultTitle": "Luksuzna vila",
+    "bedTitle": "Luksuzna vila sa {{beds}} spavaćih soba",
+    "goToImage": "Idi na sliku {{n}}",
+    "cleaningFee": "+{{price}} čišćenje"
+  },
+  "perNightSuffix": "/noć",
+  "fromPrice": "od {{price}}"
 }

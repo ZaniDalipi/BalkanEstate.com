@@ -1174,6 +1174,7 @@
     "rejectError": "Failed to reject villa",
     "empty": "No villas here.",
     "untitled": "Untitled villa",
-    "negotiable": "By negotiation"
+    "negotiable": "By negotiation",
+    "showingFirst": "Showing the first {{shown}} of {{total}} villas."
   }
 }

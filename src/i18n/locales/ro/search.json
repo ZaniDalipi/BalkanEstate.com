@@ -62,7 +62,8 @@
     "advancedFilters": "Filtre Avansate",
     "moreFilters": "Mai Multe Filtre",
     "lessFilters": "Mai Puține Filtre",
-    "anyCountry": "Orice țară"
+    "anyCountry": "Orice țară",
+    "sortBy": "Sortează după"
   },
   "options": {
     "any": "Oricare",
@@ -476,5 +477,7 @@
     "queryTitle": "Proprietăți de vânzare în {{query}} - Anunțuri imobiliare",
     "tagline": "Căutare de proprietăți bazată pe inteligență artificială pe BalkanEstateAI — 11 țări, 10 limbi.",
     "typesForSale": "case, apartamente și vile de vânzare"
-  }
+  },
+  "saving": "Se salvează...",
+  "saveSearch": "Salvează căutarea"
 }

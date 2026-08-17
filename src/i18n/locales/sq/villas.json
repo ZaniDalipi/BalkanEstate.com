@@ -82,7 +82,9 @@
     "forRent": "Me Qira",
     "bathrooms": "Banjo",
     "allListings": "Të gjitha",
-    "priceRangeInvalid": "Çmimi minimal është më i lartë se maksimali."
+    "priceRangeInvalid": "Çmimi minimal është më i lartë se maksimali.",
+    "gardenView": "Pamje Kopshti",
+    "streetView": "Pamje Rruge"
   },
   "seo": {
     "title": "Vila Luksoze me Qira në Ballkan | BalkanEstate",
@@ -132,5 +134,24 @@
     "signature": "VILË LUKSOZE",
     "featured": "I veçantë",
     "beachfront": "Buzë detit"
-  }
+  },
+  "cancellation": {
+    "flexible": "Anulim fleksibël",
+    "moderate": "Politikë e moderuar",
+    "strict": "Politikë e rreptë",
+    "nonRefundable": "Pa rimbursim"
+  },
+  "amenities": {
+    "breakfast": "Mëngjes",
+    "towels": "Peshqirë",
+    "parking": "Parkim"
+  },
+  "card": {
+    "defaultTitle": "Vilë Luksoze",
+    "bedTitle": "Vilë Luksoze me {{beds}} Dhoma",
+    "goToImage": "Shko te fotoja {{n}}",
+    "cleaningFee": "+{{price}} pastrim"
+  },
+  "perNightSuffix": "/natë",
+  "fromPrice": "nga {{price}}"
 }

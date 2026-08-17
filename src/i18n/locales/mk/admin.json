@@ -971,6 +971,7 @@
     "rejectError": "Не успеа одбивањето",
     "empty": "Нема вили тука.",
     "untitled": "Вила без наслов",
-    "negotiable": "По договор"
+    "negotiable": "По договор",
+    "showingFirst": "Прикажани се првите {{shown}} од {{total}} вили."
   }
 }

@@ -306,7 +306,8 @@
     "measure": "Mat",
     "legend": "Legjenda",
     "climate": "Klima",
-    "premiumOnly": "Vetëm Premium"
+    "premiumOnly": "Vetëm Premium",
+    "clearFilter": "Pastro filtrin"
   },
   "social": {
     "facebook": "Facebook",
@@ -637,5 +638,6 @@
     "whyBuy": "Pse të blini në {{country}}?"
   },
   "removeFromFavorites": "Hiq nga të preferuarat",
-  "saved": "Të ruajtura"
+  "saved": "Të ruajtura",
+  "any": "Çdo"
 }

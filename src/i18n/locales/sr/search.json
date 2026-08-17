@@ -62,7 +62,8 @@
     "floorNumber": "Спрат",
     "advancedFilters": "Напредни Филтери",
     "moreFilters": "Више Филтера",
-    "lessFilters": "Мање Филтера"
+    "lessFilters": "Мање Филтера",
+    "sortBy": "Sortiraj po"
   },
   "options": {
     "any": "Било који",
@@ -476,5 +477,7 @@
     "queryTitle": "Некретнине за продају у {{query}} - Огласи некретнина",
     "tagline": "Претрага некретнина покретана вештачком интелигенцијом на BalkanEstateAI — 11 земаља, 10 језика.",
     "typesForSale": "куће, станови и виле за продају"
-  }
+  },
+  "saving": "Čuvanje...",
+  "saveSearch": "Sačuvaj pretragu"
 }
