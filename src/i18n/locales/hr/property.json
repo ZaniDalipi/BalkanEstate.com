@@ -147,7 +147,12 @@
       },
       "slotDuration": "{{minutes}} min termini"
     },
-    "floorPlanInteractiveHint": "Interaktivni preglednik sa zumiranjem, pomicanjem i oznakama"
+    "floorPlanInteractiveHint": "Interaktivni preglednik sa zumiranjem, pomicanjem i oznakama",
+    "kitchens": "Kuhinje",
+    "diningRooms": "Blagovaonice",
+    "toilets": "Toaleti (WC)",
+    "storageRooms": "Ostave",
+    "offices": "Ured / radna soba"
   },
   "distances": {
     "title": "Udaljenosti",
@@ -221,7 +226,10 @@
     "phone": "Telefon",
     "email": "E-pošta",
     "website": "Web stranica",
-    "viewProfile": "Pogledaj profil"
+    "viewProfile": "Pogledaj profil",
+    "moreFromAgent": "Više oglasa ovog agenta",
+    "noOtherListings": "Trenutno nema drugih aktivnih oglasa",
+    "viewFullProfile": "Pogledaj cijeli profil"
   },
   "navigation": {
     "back": "Natrag",
@@ -656,6 +664,35 @@
   "seo": {
     "description": "{{type}} s {{beds}} spavaćih soba, {{baths}} kupaonica za {{listingAction}} u {{city}}, {{country}}. {{sqft}}m² za €{{price}}.",
     "forRent": "Najam",
-    "forSale": "Prodaja"
+    "forSale": "Prodaja",
+    "perMonth": "/mj",
+    "title": "{{type}} s {{beds}} spavaćih soba za {{listingAction}} u {{city}}, {{country}} - €{{price}}"
+  },
+  "roomStyler": {
+    "reimagine": "Zamisli iznova",
+    "title": "Zamislite ovu sobu iznova",
+    "subtitle": "Pogledajte ovu sobu u drugom stilu uređenja",
+    "close": "Zatvori",
+    "chooseStyle": "Odaberite stil",
+    "generate": "Generiraj",
+    "generating": "Preuređivanje u stil {{style}}…",
+    "generating2": "Generiranje…",
+    "tryAnother": "Isprobaj drugi stil",
+    "download": "Preuzmi HD",
+    "before": "Original",
+    "roomPhoto": "Fotografija sobe",
+    "limitReached": "Dosegli ste mjesečni limit za preuređivanje soba.",
+    "genericError": "Nešto je pošlo po zlu. Molimo pokušajte ponovno.",
+    "upgrade": "Pogledaj planove",
+    "meterLabel": "AI Stilist Soba",
+    "meterSubtitle": "Zamislite sobe u različitim stilovima uređenja",
+    "meterUsageLabel": "Preuređivanja ovog mjeseca",
+    "limitTitle": "Iskoristili ste sva preuređivanja ovog mjeseca",
+    "limitMessage": "Nadogradite na Pro Buyer ili drugi plan kako biste nastavili — ili pričekajte da se kvota obnovi.",
+    "unlimitedNote": "Neograničena preuređivanja na vašem planu",
+    "remainingNote": "Preostalo {{remaining}} ovog mjeseca",
+    "disclaimer": "AI-generirano uređenje samo u svrhu demonstracije. Ove slike nisu stvarne fotografije nekretnine i mogu sadržavati predmete koji nisu dio oglasa.",
+    "interior": "Interijer",
+    "exterior": "Eksterijer"
   }
 }

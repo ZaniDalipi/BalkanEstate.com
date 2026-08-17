@@ -7,6 +7,7 @@ import { useAlert } from '@/context/AlertContext';
 import { BALKAN_LOCATIONS, CityData } from '@/utils/balkanLocations';
 import * as api from '@/services/apiService';
 import imageCompression from 'browser-image-compression';
+import { convertToUploadableImage, isHeicFile, needsConversion } from '@/shared/utils/imageConversion';
 import { PLAN_LISTING_LIMITS } from '@/shared/utils/subscriptionHelpers';
 import { SubscriptionPlan } from '@/shared/types/user.types';
 import { apiRequest } from '@/src/shared/api';
@@ -46,6 +47,11 @@ export function buildPreviewProperty(
         beds: Number(listingData.bedrooms),
         baths: Number(listingData.bathrooms),
         livingRooms: Number(listingData.livingRooms),
+        kitchens: Number(listingData.kitchens),
+        diningRooms: Number(listingData.diningRooms),
+        toilets: Number(listingData.toilets),
+        storageRooms: Number(listingData.storageRooms),
+        offices: Number(listingData.offices),
         sqft: Number(listingData.sq_meters),
         yearBuilt: Number(listingData.year_built),
         parking: Number(listingData.parking_spots),
@@ -198,19 +204,24 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 propertyId: propertyToEdit.propertyId || '',
                 title: propertyToEdit.title || '',
                 listingType: propertyToEdit.listingType || 'sale',
-                streetAddress: propertyToEdit.address,
+                streetAddress: propertyToEdit.address || '',
                 price: propertyToEdit.price,
                 isNegotiable: propertyToEdit.isNegotiable || false,
                 bedrooms: propertyToEdit.beds,
                 bathrooms: propertyToEdit.baths,
                 livingRooms: propertyToEdit.livingRooms,
+                kitchens: propertyToEdit.kitchens || 0,
+                diningRooms: propertyToEdit.diningRooms || 0,
+                toilets: propertyToEdit.toilets || 0,
+                storageRooms: propertyToEdit.storageRooms || 0,
+                offices: propertyToEdit.offices || 0,
                 sq_meters: propertyToEdit.sqft,
                 year_built: propertyToEdit.yearBuilt,
                 parking_spots: propertyToEdit.parking,
                 specialFeatures: propertyToEdit.specialFeatures,
                 materials: propertyToEdit.materials,
                 amenities: propertyToEdit.amenities || [],
-                description: propertyToEdit.description,
+                description: propertyToEdit.description || '',
                 tourUrl: propertyToEdit.tourUrl || '',
                 virtualTour360Url: propertyToEdit.virtualTour360Url || '',
                 propertyType: propertyToEdit.propertyType || 'house',
@@ -266,8 +277,8 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             });
 
             // Set country and city from property
-            setSelectedCountry(propertyToEdit.country);
-            setSelectedCity(propertyToEdit.city);
+            setSelectedCountry(propertyToEdit.country || '');
+            setSelectedCity(propertyToEdit.city || '');
 
             // Load cities for the country
             const country = BALKAN_LOCATIONS.find(c => c.name === propertyToEdit.country);
@@ -387,29 +398,51 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             };
 
             const compressedImages: ImageData[] = [];
+            const failedFileNames: string[] = [];
 
             // Process images in batches for better performance
             for (let i = 0; i < filesToProcess.length; i++) {
                 const file = filesToProcess[i];
+
+                // Convert HEIC/HEIF (and other browser-unsupported formats) to JPEG
+                // first — otherwise the canvas-based compressor can't decode them and
+                // we'd end up uploading a broken image.
+                const normalizedFile = await convertToUploadableImage(file);
+
+                // If the file still needs conversion here, the HEIC decoder failed
+                // (e.g. dependency not installed / unsupported variant). Never push a
+                // raw HEIC — browsers can't render it, so it would show a broken
+                // preview and upload broken. Skip it and report it to the user.
+                if (needsConversion(normalizedFile)) {
+                    failedFileNames.push(file.name);
+                    continue;
+                }
+
                 try {
-                    // Log removed
-
-                    const compressedFile = await imageCompression(file, compressionOptions);
-
-                    // Log removed
-
+                    const compressedFile = await imageCompression(normalizedFile, compressionOptions);
                     compressedImages.push({
                         file: compressedFile,
                         previewUrl: URL.createObjectURL(compressedFile)
                     });
                 } catch (compressionError) {
-                    // Error removed
-                    // Fallback to original file if compression fails
+                    // Compression failed but the format is already browser-friendly
+                    // (JPEG/PNG/etc.) — use the normalized file directly.
                     compressedImages.push({
-                        file,
-                        previewUrl: URL.createObjectURL(file)
+                        file: normalizedFile,
+                        previewUrl: URL.createObjectURL(normalizedFile)
                     });
                 }
+            }
+
+            if (failedFileNames.length > 0) {
+                showError(
+                    t('newListing:errors.imageProcessingFailed', 'Image Processing Failed'),
+                    t(
+                        'newListing:errors.heicConversionFailed',
+                        "We couldn't convert {{files}}. Please try re-saving it as JPEG or PNG and upload again.",
+                        { files: failedFileNames.join(', ') }
+                    )
+                );
             }
 
             // Always append new images to existing ones
@@ -442,12 +475,13 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
 
-            // Validate file format
+            // Validate file format. HEIC/HEIF is accepted here because it's
+            // converted to JPEG below before compression/upload.
             const ALLOWED_FORMATS = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
-            if (!ALLOWED_FORMATS.includes(file.type)) {
+            if (!ALLOWED_FORMATS.includes(file.type) && !isHeicFile(file)) {
                 showError(
                     t('newListing:floorplan.invalidFormat', 'Invalid File Format'),
-                    t('newListing:floorplan.invalidFormatMessage', 'Please upload a valid image file (JPEG, PNG, WebP, GIF, or SVG).')
+                    t('newListing:floorplan.invalidFormatMessage', 'Please upload a valid image file (JPEG, PNG, WebP, GIF, HEIC, or SVG).')
                 );
                 return;
             }
@@ -473,12 +507,29 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     initialQuality: 0.8,
                 };
 
-                const compressedFile = await imageCompression(file, compressionOptions);
+                // Convert HEIC/HEIF to JPEG before the canvas-based compressor runs.
+                const normalizedFile = await convertToUploadableImage(file);
 
-                setFloorplanImage({ file: compressedFile, previewUrl: URL.createObjectURL(compressedFile) });
-            } catch (error) {
-                // Fallback to original
-                setFloorplanImage({ file, previewUrl: URL.createObjectURL(file) });
+                // Conversion failed and it's still HEIC — don't set a broken preview.
+                if (needsConversion(normalizedFile)) {
+                    showError(
+                        t('newListing:floorplan.invalidFormat', 'Invalid File Format'),
+                        t(
+                            'newListing:errors.heicConversionFailed',
+                            "We couldn't convert {{files}}. Please try re-saving it as JPEG or PNG and upload again.",
+                            { files: file.name }
+                        )
+                    );
+                    return;
+                }
+
+                try {
+                    const compressedFile = await imageCompression(normalizedFile, compressionOptions);
+                    setFloorplanImage({ file: compressedFile, previewUrl: URL.createObjectURL(compressedFile) });
+                } catch (error) {
+                    // Compression failed but the format is already browser-friendly.
+                    setFloorplanImage({ file: normalizedFile, previewUrl: URL.createObjectURL(normalizedFile) });
+                }
             } finally {
                 setIsCompressing(false);
             }
@@ -925,6 +976,11 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 beds: Number(listingData.bedrooms),
                 baths: Number(listingData.bathrooms),
                 livingRooms: Number(listingData.livingRooms),
+                kitchens: Number(listingData.kitchens),
+                diningRooms: Number(listingData.diningRooms),
+                toilets: Number(listingData.toilets),
+                storageRooms: Number(listingData.storageRooms),
+                offices: Number(listingData.offices),
                 sqft: Number(listingData.sq_meters),
                 yearBuilt: Number(listingData.year_built),
                 parking: Number(listingData.parking_spots),

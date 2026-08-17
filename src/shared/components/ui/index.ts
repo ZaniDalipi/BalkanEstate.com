@@ -15,3 +15,5 @@ export { default as AlertDialog } from './AlertDialog';
 export { default as StarRating } from './StarRating';
 export { default as NumberInputWithSteppers } from './NumberInputWithSteppers';
 export { default as ListingCardSkeleton } from './ListingCardSkeleton';
+export { default as UsageMeter } from './UsageMeter';
+export type { UsageMeterProps } from './UsageMeter';

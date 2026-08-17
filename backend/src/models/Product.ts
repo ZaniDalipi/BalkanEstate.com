@@ -72,6 +72,7 @@ export interface IProduct extends Document {
   aiMessagesLimit?: number; // AI chat messages limit per month (-1 = unlimited)
   aiInsightsLimit?: number; // Generate insights limit per month (-1 = unlimited)
   imageDescriptionLimit?: number; // Auto-generate image description limit (-1 = unlimited)
+  roomStyleLimit?: number; // AI room restyle limit per month (-1 = unlimited)
 
   // Buyer-specific Benefits
   savedSearchesLimit?: number; // Saved searches limit (3 free, -1 unlimited for pro/buyer)
@@ -261,6 +262,10 @@ const ProductSchema: Schema = new Schema(
     imageDescriptionLimit: {
       type: Number,
       default: 0, // 0 for free, -1 (unlimited) for pro
+    },
+    roomStyleLimit: {
+      type: Number,
+      default: 3, // 3 for free, 50 for pro, -1 (unlimited) for enterprise
     },
 
     // Buyer-specific Benefits

@@ -1,5 +1,11 @@
 import { GoogleGenAI, Type } from '@google/genai';
+import sharp from 'sharp';
+import fs from 'fs';
+import path from 'path';
 import { apiLogger } from '../utils/logger';
+
+// Target long-edge (px) for the high-quality downloadable restyle image.
+const HQ_LONG_EDGE = 2048;
 
 let ai: GoogleGenAI | null = null;
 
@@ -64,6 +70,11 @@ export interface AiChatResponse {
   responseMessage: string;
   searchQuery: Record<string, any> | null;
   isFinalQuery: boolean;
+}
+
+export interface RoomStyleResult {
+  imageBase64: string;
+  mimeType: string;
 }
 
 // Retry configuration for handling 503 and other transient errors
@@ -335,6 +346,213 @@ export const generateDescriptionFromImages = async (
   } catch (_e) {
     throw new Error("Failed to get a valid response from the AI. Please try again.");
   }
+};
+
+const DISCLAIMER_TEXT = 'VIRTUALLY STAGED · AI-GENERATED · FOR DEMONSTRATION ONLY — NOT AN ACTUAL PHOTO OF THE PROPERTY';
+
+/**
+ * A font bundled with the app so the caption always has glyphs to draw. Rendering
+ * the text via an SVG `<text>` element relies on a system font being installed,
+ * which minimal deploy containers don't have — the text then rasterises as empty
+ * "tofu" boxes. We resolve a real font file and hand it to sharp's text renderer
+ * instead. `__dirname` is `.../src/services` under ts-node and `.../dist/services`
+ * once compiled; both sit two levels below `backend/`, so `../../assets/fonts`
+ * points at the bundled font in dev and production alike.
+ */
+const DISCLAIMER_FONT_PATH = [
+  path.resolve(__dirname, '../../assets/fonts/DejaVuSans-Bold.ttf'),
+  path.resolve(__dirname, '../assets/fonts/DejaVuSans-Bold.ttf'),
+  '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+].find((p) => {
+  try { return fs.existsSync(p); } catch { return false; }
+});
+
+const escapePangoMarkup = (s: string): string =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/**
+ * Composite a disclaimer caption bar onto the bottom of a generated image so the
+ * AI staging can never be mistaken for a real listing photo, even once downloaded.
+ * Non-fatal: returns the original buffer if compositing fails.
+ */
+const addDisclaimerCaption = async (buffer: Buffer): Promise<Buffer> => {
+  try {
+    const meta = await sharp(buffer).metadata();
+    const width = meta.width || 0;
+    const height = meta.height || 0;
+    if (!width || !height) return buffer;
+
+    const fontSize = Math.max(12, Math.round(height * 0.02));
+
+    // Render the caption with sharp's (Pango) text renderer using an explicit
+    // bundled font, so glyphs draw regardless of which fonts the host has.
+    let textPng = await sharp({
+      text: {
+        text: `<span foreground="white">${escapePangoMarkup(DISCLAIMER_TEXT)}</span>`,
+        ...(DISCLAIMER_FONT_PATH ? { fontfile: DISCLAIMER_FONT_PATH } : {}),
+        font: `DejaVu Sans Bold ${fontSize}`,
+        rgba: true,
+        align: 'center',
+      },
+    }).png().toBuffer();
+
+    let tMeta = await sharp(textPng).metadata();
+    let textWidth = tMeta.width || 0;
+    let textHeight = tMeta.height || 0;
+
+    // Guarantee the single-line caption fits the image width.
+    const maxTextWidth = Math.round(width * 0.96);
+    if (textWidth > maxTextWidth && textWidth > 0) {
+      textPng = await sharp(textPng).resize({ width: maxTextWidth }).png().toBuffer();
+      tMeta = await sharp(textPng).metadata();
+      textWidth = tMeta.width || 0;
+      textHeight = tMeta.height || 0;
+    }
+
+    const verticalPadding = Math.round(textHeight * 0.9);
+    const barHeight = Math.max(28, textHeight + verticalPadding);
+    const barTop = height - barHeight;
+    const textLeft = Math.max(0, Math.round((width - textWidth) / 2));
+    const textTop = Math.round(barTop + (barHeight - textHeight) / 2);
+
+    return await sharp(buffer)
+      .composite([
+        {
+          input: {
+            create: { width, height: barHeight, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0.6 } },
+          },
+          left: 0,
+          top: barTop,
+        },
+        { input: textPng, left: textLeft, top: textTop },
+      ])
+      .png({ quality: 100, compressionLevel: 6 })
+      .toBuffer();
+  } catch (e) {
+    apiLogger.warn(`Disclaimer caption failed, returning image without it: ${e instanceof Error ? e.message : String(e)}`);
+    return buffer;
+  }
+};
+
+/**
+ * Restyle (or empty) a room photo in a chosen interior design style.
+ * Uses Gemini's image model ("Nano Banana") to re-render the SAME space while
+ * preserving the architecture, camera angle and proportions. A disclaimer caption
+ * is baked onto the result. Returns the generated image as base64 + its mime type.
+ */
+export const restyleRoomImage = async (
+  imageBase64: string,
+  mimeType: string,
+  styleId: string,
+  styleLabel: string,
+  stylePrompt: string,
+  category: 'interior' | 'exterior' = 'interior'
+): Promise<RoomStyleResult> => {
+  const isEmptyRoom = styleId === 'no-furniture';
+  const isExterior = category === 'exterior';
+  const isExtRefresh = styleId === 'ext-refresh';
+
+  const subjectPreservation = `SUBJECT PRESERVATION (critical):
+- Keep the EXACT same space as the input photo: for interiors keep wall positions, window and door locations and sizes, ceiling height, floor plan and proportions; for exteriors keep the building's footprint, rooflines, window/door positions and number of floors. The structural shell must be unchanged.
+- Built-in fixtures (bathtub, shower, sink, toilet, tiles, kitchen cabinets/counters, etc.) are NOT part of the structure: keep them in their existing POSITIONS with realistic plumbing, but their style, material and finish SHOULD change to match the chosen style.
+- Keep the SAME camera angle, perspective and framing as the original photo.
+- NEVER invent or hallucinate a different room, building, or scene, and never change the type of space.
+- Preserve any real view visible through the windows and the real surroundings.
+- Do NOT add people, pets, on-image text, logos, watermarks, or captions.`;
+
+  let task: string;
+  if (isEmptyRoom) {
+    task = `TASK — EMPTY THE ROOM:
+- Remove ALL furniture, rugs, decor, wall art, plants, curtains and clutter so the room is completely empty and unfurnished.
+- Keep the existing wall color/finish and flooring exactly as they are — do NOT repaint or re-floor.
+- Result: a clean, bright, empty real-estate photograph of the same space.`;
+  } else if (isExtRefresh) {
+    task = `TASK — REFRESH & LANDSCAPING (exterior):
+- Keep the same house exactly as it is. Only tidy and refresh the outdoors: healthy green lawn and plants, trimmed hedges, clean driveway and paths, and remove clutter, cars, bins and debris. Clean the facade.
+- Do NOT restyle or change the architecture, materials or colours of the building.`;
+  } else if (isExterior) {
+    task = `TASK — RESTYLE THE EXTERIOR of the house in the "${styleLabel}" architectural style:
+STYLE BRIEF — ${styleLabel}: ${stylePrompt}
+- Restyle the facade cladding/paint, roof material and colour, front door, window frames and trim, garage, driveway/path and landscaping so the house convincingly matches the "${styleLabel}" style.
+- Keep the building's structure, footprint, rooflines, window and door positions and number of floors unchanged — never add or remove floors or change the building's shape.`;
+  } else {
+    task = `TASK — RESTYLE THE INTERIOR in the "${styleLabel}" style:
+STYLE BRIEF — ${styleLabel}: ${stylePrompt}
+- Restyle EVERY interior element to match the style: furniture, decor, textiles, rugs, wall treatment/paint, flooring finish, lighting fixtures and the overall color palette.
+- Also restyle the built-in fixtures and fittings that are present in the room:
+  · Bathroom: the bathtub, shower, vanity, sink/basin, faucets and taps, toilet, wall & floor tiles, mirror, towel rails, radiators and all hardware.
+  · Kitchen: the cabinetry, countertops, backsplash, sink, faucet and visible appliances.
+- Update each fixture's design, material and finish to suit the "${styleLabel}" style, and update or neatly conceal any exposed pipes/plumbing to match. Keep every fixture in its EXISTING position and keep the plumbing layout realistic.
+- Do NOT leave any element in the original style — the whole room should convincingly read as "${styleLabel}".`;
+  }
+
+  const prompt = `You are an expert interior designer and architectural photographer. Edit the provided real-estate photograph exactly as instructed.
+
+${subjectPreservation}
+
+${task}
+
+PHOTOREALISM (this is critical — the result must look like a REAL photo, not AI):
+- Render it as a genuine real-estate listing PHOTOGRAPH, as if shot with a full-frame DSLR camera and a ~24mm wide-angle lens.
+- Use natural daylight; match the original photo's lighting direction, warmth and time of day.
+- Include realistic, physically-accurate soft shadows and contact shadows, accurate reflections, and true-to-life material textures (wood grain, fabric weave, matte and gloss surfaces).
+- Keep natural color balance and realistic dynamic range; avoid over-saturation and over-sharpening.
+- Preserve subtle real-world imperfections and fine surface detail. Add a very slight, natural photographic grain.
+- It MUST NOT look like a 3D render, CGI, a video-game screenshot, an illustration, or digital art. Avoid the over-smooth, waxy, plastic, "too perfect" AI look.
+
+Output only the edited photograph.`;
+
+  const result = await retryWithBackoff(() =>
+    getAI().models.generateContent({
+      model: 'gemini-2.5-flash-image',
+      contents: {
+        parts: [
+          { text: prompt },
+          { inlineData: { data: imageBase64, mimeType: mimeType || 'image/jpeg' } },
+        ],
+      },
+    })
+  );
+
+  const parts = result.candidates?.[0]?.content?.parts ?? [];
+  const imagePart = parts.find((p: any) => p.inlineData?.data);
+
+  if (!imagePart?.inlineData?.data) {
+    // No image returned — likely a safety block or a text-only response.
+    const textPart = parts.find((p: any) => typeof p.text === 'string')?.text;
+    apiLogger.warn(`Room restyle returned no image. Text response: ${textPart || '(none)'}`);
+    throw new Error('The AI did not return a styled image. Please try a different photo or style.');
+  }
+
+  const rawBuffer = Buffer.from(imagePart.inlineData.data, 'base64');
+
+  // Upscale to a high-quality version for download. The generative model outputs
+  // ~1024px on the long edge; enlarge with a high-quality kernel + gentle sharpen
+  // so the saved file is crisp for viewing/printing. Falls back to the raw image
+  // if sharp fails for any reason. A disclaimer caption is baked on either way.
+  let finalBuffer: Buffer = rawBuffer;
+  try {
+    const meta = await sharp(rawBuffer).metadata();
+    const longEdge = Math.max(meta.width || 0, meta.height || 0);
+    let pipeline = sharp(rawBuffer);
+    if (longEdge > 0 && longEdge < HQ_LONG_EDGE) {
+      const scale = HQ_LONG_EDGE / longEdge;
+      pipeline = pipeline
+        .resize({
+          width: Math.round((meta.width || longEdge) * scale),
+          height: Math.round((meta.height || longEdge) * scale),
+          kernel: 'lanczos3',
+          fit: 'fill',
+        })
+        .sharpen();
+    }
+    finalBuffer = await pipeline.png({ quality: 100, compressionLevel: 6 }).toBuffer();
+  } catch (e) {
+    apiLogger.warn(`HQ upscale failed, using raw model image: ${e instanceof Error ? e.message : String(e)}`);
+  }
+
+  finalBuffer = await addDisclaimerCaption(finalBuffer);
+  return { imageBase64: finalBuffer.toString('base64'), mimeType: 'image/png' };
 };
 
 /**

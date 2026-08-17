@@ -1,8 +1,12 @@
 import React from 'react';
+import { usePauseWhenOffscreen } from '../../hooks/usePauseWhenOffscreen';
 
 const FooterCityscape: React.FC = () => {
+  const { ref, offscreen } = usePauseWhenOffscreen<HTMLDivElement>();
   return (
-    <div className="relative w-full min-h-[100px] overflow-visible bg-gradient-to-b from-transparent to-primary-dark/50 pb-0">
+    <div
+      ref={ref}
+      className={`relative w-full min-h-[100px] overflow-visible bg-gradient-to-b from-transparent to-primary-dark/50 pb-0${offscreen ? ' decorative-offscreen' : ''}`}>
       {/* Sky background with better contrast */}
       <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/90 to-indigo-600/60"></div>
 

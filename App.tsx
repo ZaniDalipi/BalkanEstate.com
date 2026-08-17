@@ -3,6 +3,7 @@ import { useSubscriptionExpiry } from './src/features/subscription/hooks/useSubs
 import { useTranslation } from 'react-i18next';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
 import { HelmetProvider, Helmet } from 'react-helmet-async';
+import { MotionConfig } from 'framer-motion';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { tokenService } from './src/shared/api/tokenService';
 import { AlertProvider } from './context/AlertContext';
@@ -48,14 +49,23 @@ initSecurity();
 // Language routing utilities
 import { parseLanguageFromPath, initializeLanguageFromUrl, buildLocalizedPath } from './src/utils/languageRouting';
 
-// Retry wrapper for lazy imports — handles stale chunk hashes after deployments
-// by retrying the import once with a cache-busting query parameter
+// Stale-deploy chunk recovery (unregister SW + clear caches + reload once)
+import { recoverFromStaleChunk } from './src/utils/chunkRecovery';
+
+// Retry wrapper for lazy imports — handles stale chunk hashes after deployments.
+// A stale build requests a chunk whose hashed filename no longer exists; the SPA
+// fallback then returns index.html (text/html) and the module fails to parse. We
+// retry once for a transient blip, then hand off to recoverFromStaleChunk, which
+// tears down the service worker + caches and reloads to a clean bundle (the only
+// thing that reliably fixes a precached-SW stale HTML).
 function lazyWithRetry(importFn: () => Promise<{ default: React.ComponentType<any> }>) {
   return lazy(() =>
-    importFn().catch(() => {
-      // First import failed (likely stale chunk hash) — retry with cache bust
-      return importFn();
-    })
+    importFn().catch(() =>
+      importFn().catch((err) => {
+        void recoverFromStaleChunk();
+        throw err;
+      })
+    )
   );
 }
 
@@ -66,10 +76,10 @@ const Header = lazyWithRetry(() => import('./components/shared/Header'));
 
 // Lazy load all pages and conditional components to reduce initial bundle
 const SearchPage = lazy(() => import('./src/features/search/components').then(m => ({ default: m.SearchPage })));
-const AuthPage = lazy(() => import('./src/features/auth/components/AuthModal'));
-const EmailVerificationRequired = lazy(() => import('./src/features/auth/components/EmailVerificationRequired'));
+const AuthPage = lazyWithRetry(() => import('./src/features/auth/components/AuthModal'));
+const EmailVerificationRequired = lazyWithRetry(() => import('./src/features/auth/components/EmailVerificationRequired'));
 const AlertDialog = lazy(() => import('./components/shared/AlertDialog'));
-const SessionExpiredModal = lazy(() => import('./src/features/auth/components/SessionExpiredModal'));
+const SessionExpiredModal = lazyWithRetry(() => import('./src/features/auth/components/SessionExpiredModal'));
 const SubscriptionExpiryModals = lazy(() => import('./src/features/subscription/components/SubscriptionExpiryModals'));
 
 // Lazy loaded components (loaded on demand)
@@ -95,8 +105,8 @@ const DiscountGameModal = lazy(() => import('./components/shared/DiscountGameMod
 const AdminDashboard = lazy(() => import('./src/features/admin/components/AdminDashboard'));
 const AgencyDashboardPage = lazy(() => import('./src/features/agency-dashboard/components/AgencyDashboardPage'));
 const NotFoundPage = lazy(() => import('./src/components/ui/not-found-2').then(m => ({ default: m.NotFound })));
-const ResetPasswordPage = lazy(() => import('./src/features/auth/components/ResetPasswordPage'));
-const VerifyEmailPage = lazy(() => import('./src/features/auth/components/VerifyEmailPage'));
+const ResetPasswordPage = lazyWithRetry(() => import('./src/features/auth/components/ResetPasswordPage'));
+const VerifyEmailPage = lazyWithRetry(() => import('./src/features/auth/components/VerifyEmailPage'));
 // LoginPage and RegisterPage are no longer used as standalone pages.
 // The /login and /register routes now open the AuthModal over the search page.
 const AnalyticsPage = lazy(() => import('./src/features/analytics/components/AnalyticsPage'));
@@ -1270,6 +1280,9 @@ const App: React.FC = () => {
 
   return (
     <ErrorBoundary level="app">
+      {/* reducedMotion="user" makes every framer-motion animation honor the
+          OS "Reduce Motion" setting without touching each component. */}
+      <MotionConfig reducedMotion="user">
       <HelmetProvider>
         <QueryProvider>
           <AppProvider>
@@ -1308,6 +1321,7 @@ const App: React.FC = () => {
           </AppProvider>
         </QueryProvider>
       </HelmetProvider>
+      </MotionConfig>
     </ErrorBoundary>
   );
 };

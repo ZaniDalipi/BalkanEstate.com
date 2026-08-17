@@ -476,7 +476,8 @@
     "property": "Некретнина",
     "queryTitle": "Некретнине за продају у {{query}} - Огласи некретнина",
     "tagline": "Претрага некретнина покретана вештачком интелигенцијом на BalkanEstateAI — 11 земаља, 10 језика.",
-    "typesForSale": "куће, станови и виле за продају"
+    "typesForSale": "куће, станови и виле за продају",
+    "in": "u"
   },
   "saving": "Čuvanje...",
   "saveSearch": "Sačuvaj pretragu"

@@ -4,40 +4,39 @@ import { motion } from 'framer-motion';
 import MortgageCalculator from './MortgageCalculator';
 import { CalculatorIcon } from '@/constants';
 import Footer from '@/components/shared/Footer';
-
-// Balkan countries with their currency codes
-const COUNTRIES = [
-  { code: 'MK', name: 'North Macedonia', currency: 'MKD' },
-  { code: 'AL', name: 'Albania', currency: 'ALL' },
-  { code: 'RS', name: 'Serbia', currency: 'RSD' },
-  { code: 'XK', name: 'Kosovo', currency: 'EUR' },
-  { code: 'ME', name: 'Montenegro', currency: 'EUR' },
-  { code: 'BA', name: 'Bosnia and Herzegovina', currency: 'BAM' },
-  { code: 'HR', name: 'Croatia', currency: 'EUR' },
-  { code: 'SI', name: 'Slovenia', currency: 'EUR' },
-  { code: 'BG', name: 'Bulgaria', currency: 'BGN' },
-  { code: 'GR', name: 'Greece', currency: 'EUR' },
-  { code: 'RO', name: 'Romania', currency: 'RON' },
-];
+import { MORTGAGE_COUNTRIES as COUNTRIES } from '../data/mortgageMarketData';
+import { validatePrice } from '@/shared/utils/validation';
 
 const MortgageCalculatorPage: React.FC = () => {
   const { t } = useTranslation(['calculators', 'common']);
   const [propertyPrice, setPropertyPrice] = useState<number>(100000);
   const [country, setCountry] = useState<string>('MK');
   const [showCalculator, setShowCalculator] = useState(false);
+  const [priceError, setPriceError] = useState<string | undefined>();
+  const [priceFocused, setPriceFocused] = useState(false); // blank the field only while editing
 
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
-    if (propertyPrice > 0) {
-      setShowCalculator(true);
+    // Validate at the form boundary (CLAUDE.md validation pattern).
+    const result = validatePrice(propertyPrice, { min: 1000, max: 1_000_000_000 });
+    if (!result.isValid) {
+      setPriceError(result.error);
+      return;
     }
+    setPriceError(undefined);
+    setShowCalculator(true);
   };
 
   const handleReset = () => {
     setShowCalculator(false);
   };
 
-  const selectedCountry = COUNTRIES.find(c => c.code === country);
+  const handlePriceChange = (value: number) => {
+    const next = Math.max(0, value || 0);
+    setPropertyPrice(next);
+    if (priceError) setPriceError(undefined); // clear error as the user corrects it
+  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
@@ -100,31 +99,46 @@ const MortgageCalculatorPage: React.FC = () => {
                 >
                   {COUNTRIES.map((c) => (
                     <option key={c.code} value={c.code}>
-                      {c.name} ({c.currency})
+                      {c.name}
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* Property Price */}
+              {/* Property Price — always in EUR */}
               <div>
-                <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                <label htmlFor="mortgage-price" className="block text-sm font-semibold text-neutral-700 mb-2">
                   {t('calculators:mortgage.fields.propertyPrice')}
                 </label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 font-medium">
-                    {selectedCountry?.currency}
+                    €
                   </span>
                   <input
+                    id="mortgage-price"
                     type="number"
-                    value={propertyPrice}
-                    onChange={(e) => setPropertyPrice(Math.max(0, e.target.valueAsNumber || 0))}
-                    className="w-full pl-16 pr-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-800 font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                    value={priceFocused && propertyPrice === 0 ? '' : propertyPrice}
+                    onChange={(e) => handlePriceChange(e.target.valueAsNumber)}
+                    onFocus={(e) => { setPriceFocused(true); e.target.select(); }}
+                    onBlur={() => setPriceFocused(false)}
+                    placeholder="100000"
+                    aria-invalid={!!priceError}
+                    aria-describedby={priceError ? 'mortgage-price-error' : undefined}
+                    className={`w-full pl-9 pr-4 py-3 bg-neutral-50 border rounded-xl text-neutral-800 font-medium focus:outline-none focus:ring-2 transition-colors ${
+                      priceError
+                        ? 'border-red-300 focus:ring-red-200 focus:border-red-400'
+                        : 'border-neutral-200 focus:ring-primary/20 focus:border-primary'
+                    }`}
                     min="0"
                     step="1000"
                     required
                   />
                 </div>
+                {priceError && (
+                  <p id="mortgage-price-error" role="alert" className="mt-1.5 text-xs font-medium text-red-600">
+                    {priceError}
+                  </p>
+                )}
               </div>
 
               {/* Quick Price Buttons */}

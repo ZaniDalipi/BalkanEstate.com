@@ -639,5 +639,11 @@
   },
   "removeFromFavorites": "Уклони из омиљених",
   "saved": "Сачувано",
-  "any": "Bilo koji"
+  "any": "Bilo koji",
+  "usageMeter": {
+    "label": "Месечна потрошња",
+    "usedOfLimit": "{{used}} / {{limit}} искоришћено",
+    "unlimited": "Неограничено",
+    "resetsOn": "Обнавља се {{date}}"
+  }
 }

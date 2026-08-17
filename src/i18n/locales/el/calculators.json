@@ -34,7 +34,8 @@
       "years": "years",
       "yrs": "yrs",
       "country": "Country",
-      "quickSelect": "Quick select:"
+      "quickSelect": "Quick select:",
+      "currency": "Νόμισμα"
     },
     "results": {
       "monthlyPayment": "Monthly Payment",
@@ -48,7 +49,8 @@
       "title": "Payment Breakdown",
       "monthly": "Monthly",
       "yearly": "Yearly",
-      "total": "Total"
+      "total": "Total",
+      "overYears": "σε {{years}} χρόνια"
     },
     "disclaimer": "This is an estimate for informational purposes only. Consult with a financial professional for actual rates and payments.",
     "features": {
@@ -56,8 +58,8 @@
       "accurateDesc": "Get precise monthly payment calculations",
       "flexible": "Flexible Terms",
       "flexibleDesc": "Compare different loan terms and rates",
-      "local": "Local Currencies",
-      "localDesc": "Support for all Balkan currencies"
+      "local": "Τιμές σε ευρώ",
+      "localDesc": "Σαφείς εκτιμήσεις σε ευρώ σε όλα τα Βαλκάνια"
     },
     "howItWorks": "How It Works",
     "step1Title": "Enter Property Price",
@@ -65,7 +67,12 @@
     "step2Title": "Adjust Parameters",
     "step2Desc": "Set your down payment, loan term, and interest rate",
     "step3Title": "See Your Payment",
-    "step3Desc": "Get your estimated monthly mortgage payment instantly"
+    "step3Desc": "Get your estimated monthly mortgage payment instantly",
+    "rateContext": "Τυπικό επιτόκιο για {{country}}: {{min}}%–{{max}}% (μέσος όρος αγοράς {{year}}). Προσαρμόστε το στην προσφορά της τράπεζάς σας.",
+    "errors": {
+      "rateRequired": "Εισαγάγετε επιτόκιο",
+      "rateRange": "Το επιτόκιο πρέπει να είναι μεταξύ {{min}}% και {{max}}%"
+    }
   },
   "rentVsBuy": {
     "title": "Rent vs. Buy Calculator",

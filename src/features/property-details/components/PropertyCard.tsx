@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo, useRef, useMemo } from 'react';
+import React, { useState, useCallback, memo, useRef, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
@@ -10,7 +10,7 @@ import { formatPrice } from '@/utils/currency';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
-import PropertyImage from '@/src/components/ui/PropertyImage';
+import PropertyImage, { getPropertyImageSources } from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import ExternalSourceBadge from '@/features/properties/components/ExternalSourceBadge';
 
@@ -145,6 +145,31 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
     touchStartXRef.current = null;
   }, [allImages.length]);
 
+  // Preload the adjacent images (next + previous) so the switch is near-instant
+  // instead of triggering a fresh network fetch on each arrow/swipe. We build the
+  // exact URLs the <img> would request (same widths/sizes) so the browser serves
+  // them straight from cache. Only runs for multi-image cards.
+  const IMAGE_WIDTHS = useMemo(() => [320, 480, 640], []);
+  const IMAGE_SIZES = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw';
+  useEffect(() => {
+    if (allImages.length <= 1) return;
+    const neighbors = [
+      (currentImageIndex + 1) % allImages.length,
+      (currentImageIndex - 1 + allImages.length) % allImages.length,
+    ];
+    neighbors.forEach((idx) => {
+      const url = allImages[idx];
+      if (!url) return;
+      const { mainSrc, srcSet } = getPropertyImageSources(url, IMAGE_WIDTHS);
+      const img = new Image();
+      // Set sizes/srcSet before src so the browser picks the same responsive
+      // candidate the rendered <img> will use.
+      img.sizes = IMAGE_SIZES;
+      if (srcSet) img.srcset = srcSet;
+      img.src = mainSrc;
+    });
+  }, [currentImageIndex, allImages, IMAGE_WIDTHS]);
+
   // Safe access with fallbacks
   const safeProperty = {
     ...property,
@@ -251,8 +276,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               src={currentImageUrl}
               alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
               priority={priority}
-              widths={[320, 480, 640]}
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              widths={IMAGE_WIDTHS}
+              sizes={IMAGE_SIZES}
+              transitionDurationClass={currentImageIndex === 0 ? 'duration-300' : 'duration-150'}
               imgClassName={isSold || isRented ? 'grayscale' : 'group-hover:scale-[1.02] transition-transform duration-300'}
             />
           </div>
@@ -546,50 +572,54 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
         <div className="grid grid-cols-4 gap-1.5 mb-2.5">
           {/* Beds */}
           <div
-            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-[box-shadow,border-color] duration-200"
+            className="group relative flex flex-col items-center justify-center text-center py-2 px-0.5 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-[box-shadow,border-color] duration-200"
             aria-label={`${safeProperty.beds} ${safeProperty.beds === 1 ? t('property:features.bedroom') : t('property:features.bedrooms')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <svg className="w-4 h-4 text-blue-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M2 17V8a2 2 0 012-2h16a2 2 0 012 2v9M2 17v2a1 1 0 001 1h1m16-3v2a1 1 0 01-1 1h-1M2 17h20M6 12h12a2 2 0 012 2v1H4v-1a2 2 0 012-2z" />
             </svg>
-            <span className="font-bold text-xs text-neutral-700 relative z-10">{safeProperty.beds} <span className="font-medium text-[10px] text-neutral-500">{safeProperty.beds === 1 ? t('property:features.bedroom') : t('property:features.bedrooms')}</span></span>
+            <span className="font-bold text-sm text-neutral-800 leading-none relative z-10 tabular-nums">{safeProperty.beds}</span>
+            <span className="mt-0.5 font-medium text-[9px] leading-tight text-neutral-500 relative z-10">{safeProperty.beds === 1 ? t('property:features.bedroom') : t('property:features.bedrooms')}</span>
           </div>
 
           {/* Baths */}
           <div
-            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-emerald-100 transition-[box-shadow,border-color] duration-200"
+            className="group relative flex flex-col items-center justify-center text-center py-2 px-0.5 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-emerald-100 transition-[box-shadow,border-color] duration-200"
             aria-label={`${safeProperty.baths} ${safeProperty.baths === 1 ? t('property:features.bathroom') : t('property:features.bathrooms')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <svg className="w-4 h-4 text-emerald-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 12h16M4 12v6a2 2 0 002 2h12a2 2 0 002-2v-6M4 12V7a3 3 0 013-3h1M8 4v4M12 4v2m-1 2a1 1 0 102 0 1 1 0 00-2 0z" />
             </svg>
-            <span className="font-bold text-xs text-neutral-700 relative z-10">{safeProperty.baths} <span className="font-medium text-[10px] text-neutral-500">{safeProperty.baths === 1 ? t('property:features.bathroom') : t('property:features.bathrooms')}</span></span>
+            <span className="font-bold text-sm text-neutral-800 leading-none relative z-10 tabular-nums">{safeProperty.baths}</span>
+            <span className="mt-0.5 font-medium text-[9px] leading-tight text-neutral-500 relative z-10">{safeProperty.baths === 1 ? t('property:features.bathroom') : t('property:features.bathrooms')}</span>
           </div>
 
           {/* Living Rooms */}
           <div
-            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-purple-100 transition-[box-shadow,border-color] duration-200"
+            className="group relative flex flex-col items-center justify-center text-center py-2 px-0.5 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-purple-100 transition-[box-shadow,border-color] duration-200"
             aria-label={`${safeProperty.livingRooms} ${safeProperty.livingRooms === 1 ? t('property:features.livingRoom') : t('property:features.livingRooms')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-purple-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <svg className="w-4 h-4 text-purple-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 12h18M3 12v6a1 1 0 001 1h2v-4h12v4h2a1 1 0 001-1v-6M3 12V9a3 3 0 013-3h12a3 3 0 013 3v3M7 19v-4m10 4v-4" />
             </svg>
-            <span className="font-bold text-xs text-neutral-700 relative z-10">{safeProperty.livingRooms} <span className="font-medium text-[10px] text-neutral-500">{safeProperty.livingRooms === 1 ? t('property:features.livingRoom') : t('property:features.livingRooms')}</span></span>
+            <span className="font-bold text-sm text-neutral-800 leading-none relative z-10 tabular-nums">{safeProperty.livingRooms}</span>
+            <span className="mt-0.5 font-medium text-[9px] leading-tight text-neutral-500 relative z-10">{safeProperty.livingRooms === 1 ? t('property:features.livingRoom') : t('property:features.livingRooms')}</span>
           </div>
 
           {/* Sqft - Highlighted */}
           <div
-            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/60 shadow-sm hover:shadow-md hover:border-blue-300/70 transition-[box-shadow,border-color] duration-200"
+            className="group relative flex flex-col items-center justify-center text-center py-2 px-0.5 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/60 shadow-sm hover:shadow-md hover:border-blue-300/70 transition-[box-shadow,border-color] duration-200"
             aria-label={`${safeProperty.sqft} ${t('common:sqm')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-100/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <svg className="w-4 h-4 text-blue-600 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4h4M4 16v4h4M16 4h4v4M16 20h4v-4M9 9h6v6H9z" />
             </svg>
-            <span className="font-bold text-xs text-blue-600 relative z-10">{safeProperty.sqft}</span>
+            <span className="font-bold text-sm text-blue-600 leading-none relative z-10 tabular-nums">{safeProperty.sqft}</span>
+            <span className="mt-0.5 font-medium text-[9px] leading-tight text-blue-500/80 relative z-10">{t('common:sqm')}</span>
           </div>
         </div>
 

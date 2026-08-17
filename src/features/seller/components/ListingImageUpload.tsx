@@ -1,16 +1,11 @@
 import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SpinnerIcon } from '@/constants';
 import { ImageData, ALL_VALID_TAGS, UploadIcon, InfoIcon, ImageTagSelector } from './ListingFormHelpers';
 
 interface ListingImageUploadProps {
     images: ImageData[];
     imageTags: { index: number; tag: string }[];
     floorplanImage: ImageData;
-    isCompressing: boolean;
-    isUploading: boolean;
-    isSubmitting: boolean;
-    uploadProgress: number;
     handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleFloorplanImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     removeImage: (index: number) => void;
@@ -26,10 +21,6 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
     images,
     imageTags,
     floorplanImage,
-    isCompressing,
-    isUploading,
-    isSubmitting,
-    uploadProgress,
     handleImageChange,
     handleFloorplanImageChange,
     removeImage,
@@ -101,46 +92,8 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
                 )}
             </div>
 
-            {/* Progress Indicators */}
-            {(isCompressing || isUploading || isSubmitting) && (
-                <div className="mt-6 p-5 glass-fieldset border-blue-200 bg-blue-50/50" aria-live="polite">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="relative w-10 h-10 flex-shrink-0">
-                            <div className="absolute inset-0 rounded-full border-[3px] border-gray-200" />
-                            <div className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-blue-500 border-r-blue-400 animate-spin" />
-                            {isUploading && (
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className="text-[10px] font-bold text-blue-600">{Math.round(uploadProgress)}%</span>
-                                </div>
-                            )}
-                        </div>
-                        <div>
-                            <span className="text-sm font-bold text-blue-700 block">
-                                {isCompressing && t('seller:createListing.progress.compressing')}
-                                {isUploading && t('seller:createListing.progress.uploading')}
-                                {isSubmitting && !isUploading && !isCompressing && t('seller:createListing.progress.creating')}
-                            </span>
-                            <span className="text-xs text-blue-500">
-                                {isCompressing && t('seller:createListing.progress.compressingHint', 'Optimizing your images for the best quality...')}
-                                {isUploading && t('seller:createListing.progress.uploadingHint', 'Securely uploading your photos...')}
-                                {isSubmitting && !isUploading && !isCompressing && t('seller:createListing.progress.creatingHint', 'Almost there! Saving your listing...')}
-                            </span>
-                        </div>
-                    </div>
-                    {isUploading ? (
-                        <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                            <div
-                                className="bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 h-2.5 rounded-full transition-all duration-500 ease-out"
-                                style={{ width: `${uploadProgress}%` }}
-                            />
-                        </div>
-                    ) : (
-                        <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                            <div className="bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 h-2.5 rounded-full animate-pulse w-2/3" />
-                        </div>
-                    )}
-                </div>
-            )}
+            {/* Submission progress is shown as a full-screen overlay (ListingSubmitOverlay)
+                rendered by the parent form, so no inline indicator is needed here. */}
         </>
     );
 });

@@ -34,15 +34,16 @@
       "years": "godine",
       "yrs": "god",
       "country": "Zemlja",
-      "quickSelect": "Brzi odabir:"
+      "quickSelect": "Brzi odabir:",
+      "currency": "Valuta"
     },
     "features": {
       "accurate": "Točne Procjene",
       "accurateDesc": "Dobijte precizne izračune mjesečnih rata",
       "flexible": "Fleksibilni Uvjeti",
       "flexibleDesc": "Usporedite različite rokove kredita i stope",
-      "local": "Lokalne Valute",
-      "localDesc": "Podrška za sve balkanske valute"
+      "local": "Cijene u eurima",
+      "localDesc": "Jasne procjene u eurima diljem Balkana"
     },
     "howItWorks": "Kako Funkcionira",
     "step1Title": "Unesite Cijenu Nekretnine",
@@ -63,9 +64,15 @@
       "title": "Pregled Plaćanja",
       "monthly": "Mjesečno",
       "yearly": "Godišnje",
-      "total": "Ukupno"
+      "total": "Ukupno",
+      "overYears": "tijekom {{years}} godina"
     },
-    "disclaimer": "Ovo je procjena samo u informativne svrhe. Konzultirajte se s financijskim stručnjakom za točne stope i plaćanja."
+    "disclaimer": "Ovo je procjena samo u informativne svrhe. Konzultirajte se s financijskim stručnjakom za točne stope i plaćanja.",
+    "rateContext": "Tipična stopa za {{country}}: {{min}}%–{{max}}% (tržišni prosjek {{year}}). Prilagodite ponudi svoje banke.",
+    "errors": {
+      "rateRequired": "Unesite kamatnu stopu",
+      "rateRange": "Stopa mora biti između {{min}}% i {{max}}%"
+    }
   },
   "rentVsBuy": {
     "title": "Kalkulator Najam vs. Kupnja",

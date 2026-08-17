@@ -639,5 +639,11 @@
     "ctaDescription": "Pretražujte svih 11 balkanskih zemalja uz uparivanje pokretano vještačkom inteligencijom. 10 jezika, provjereni agenti, trenutne procjene.",
     "ctaButton": "Počni pretragu"
   },
-  "any": "Bilo koji"
+  "any": "Bilo koji",
+  "usageMeter": {
+    "label": "Mjesečna potrošnja",
+    "usedOfLimit": "{{used}} / {{limit}} iskorišteno",
+    "unlimited": "Neograničeno",
+    "resetsOn": "Obnavlja se {{date}}"
+  }
 }

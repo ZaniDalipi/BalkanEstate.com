@@ -34,6 +34,12 @@ export interface PropertyValuation {
   sqft: number;
   beds: number;
   baths: number;
+  livingRooms?: number;
+  kitchens?: number;
+  diningRooms?: number;
+  toilets?: number;
+  storageRooms?: number;
+  offices?: number;
   yearBuilt?: number;
   condition?: 'new' | 'excellent' | 'good' | 'fair' | 'needs-renovation';
   hasBalcony?: boolean;
@@ -72,6 +78,12 @@ export interface ValuationInput {
   sqft: number;
   beds: number;
   baths: number;
+  livingRooms?: number;
+  kitchens?: number;
+  diningRooms?: number;
+  toilets?: number;
+  storageRooms?: number;
+  offices?: number;
   yearBuilt?: number;
   condition?: 'new' | 'excellent' | 'good' | 'fair' | 'needs-renovation';
   hasBalcony?: boolean;

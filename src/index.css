@@ -1529,3 +1529,171 @@ html[data-zoom] #root {
   }
 }
 
+/* ============================================================================
+   Performance / Power Governor
+   Classes on <html> are toggled by src/utils/perfMode.ts:
+     .app-hidden   – app is backgrounded → pause ALL animation (GPU goes idle)
+     .reduce-motion – OS "reduce motion" → disable every decorative loop
+     .save-power   – phone/tablet/low-end → disable the heavy *decorative*
+                     loops while keeping meaningful UI motion.
+   These target animation UTILITY CLASSES, so they apply no matter which
+   component file renders them (the app has duplicate Footer/Decorative trees).
+   ============================================================================ */
+
+/* --- Backgrounded: freeze everything. The single biggest battery win — an
+   unseen page should never keep the compositor busy. Browsers already throttle
+   rAF when hidden, but CSS keyframes (and standalone-PWA edge cases) can keep
+   running, so we pause them explicitly. ------------------------------------ */
+html.app-hidden *,
+html.app-hidden *::before,
+html.app-hidden *::after {
+  animation-play-state: paused !important;
+  transition: none !important;
+}
+
+/* --- The heavy always-on DECORATIVE loops. These run 100% of the time,
+   regardless of whether they're on screen, and are the main sustained GPU
+   load. Disabled for reduce-motion (all devices) and save-power (mobile). --- */
+html.reduce-motion .animate-aurora,
+html.save-power   .animate-aurora,
+html.reduce-motion .glass-orb,
+html.save-power   .glass-orb,
+html.reduce-motion .glass-shimmer-border::before,
+html.save-power   .glass-shimmer-border::before,
+html.reduce-motion .animate-pulse-glow,
+html.save-power   .animate-pulse-glow,
+html.reduce-motion .animate-glow-pulse,
+html.save-power   .animate-glow-pulse,
+html.reduce-motion .animate-float,
+html.save-power   .animate-float,
+html.reduce-motion .animate-split-bubble,
+html.save-power   .animate-split-bubble,
+/* FooterCityscape ambient loops (twinkling stars, lit windows, sparkles) —
+   dozens of independent compositor animations sitting in the footer of every
+   page. */
+html.reduce-motion .animate-twinkle,
+html.save-power   .animate-twinkle,
+html.reduce-motion .animate-window,
+html.save-power   .animate-window,
+html.reduce-motion .animate-float-sparkle,
+html.save-power   .animate-float-sparkle,
+/* FooterCityscape flag marquee + walking-people leg loops (0.8s infinite). */
+html.reduce-motion .flags-scroll,
+html.save-power   .flags-scroll,
+html.reduce-motion .leg-left,
+html.save-power   .leg-left,
+html.reduce-motion .leg-right,
+html.save-power   .leg-right {
+  animation: none !important;
+}
+
+/* Hide the walking people entirely rather than freezing them mid-stride —
+   they're purely ambient and a frozen figure looks broken. */
+html.reduce-motion .person-walking,
+html.save-power   .person-walking {
+  display: none !important;
+}
+
+/* --- Reduced motion is an accessibility request: kill the remaining generic
+   infinite loops too (skeleton shimmer is kept — it communicates loading). --- */
+html.reduce-motion .animate-shimmer,
+html.reduce-motion .liquid-glass-bg,
+html.reduce-motion [style*="animation"][class*="infinite"] {
+  animation: none !important;
+}
+
+/* Off-screen decorative wrappers opt into this via IntersectionObserver
+   (see FooterCityscape). Pausing beats disabling — it resumes instantly when
+   scrolled back into view. */
+.decorative-offscreen,
+.decorative-offscreen *,
+.decorative-offscreen *::before,
+.decorative-offscreen *::after {
+  animation-play-state: paused !important;
+}
+
+/* --- Listing submission overlay ---------------------------------------------
+   Full-screen "we're publishing your listing" overlay: a blurred, progressively
+   darkening backdrop with a floating glass card, orbiting particles and a
+   sweeping progress bar. Used by ListingSubmitOverlay. --- */
+/* Animate opacity only — the blur itself is set statically on the element so it
+   renders reliably on mobile Safari, which does not reliably animate
+   backdrop-filter inside keyframes. */
+@keyframes submitOverlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes submitCardIn {
+  0%   { opacity: 0; transform: translateY(24px) scale(0.9); filter: blur(8px); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+/* One shared orbit ring; each dot is offset by an animation-delay so they trail
+   each other around the spinner. */
+@keyframes submitOrbit {
+  from { transform: rotate(0deg) translateX(38px) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(38px) rotate(-360deg); }
+}
+@keyframes submitRingSpin {
+  to { transform: rotate(360deg); }
+}
+@keyframes submitRingSpinReverse {
+  to { transform: rotate(-360deg); }
+}
+@keyframes submitBarSweep {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}
+@keyframes submitParticleFloat {
+  0%   { transform: translateY(0) scale(1); opacity: 0; }
+  15%  { opacity: 0.9; }
+  85%  { opacity: 0.9; }
+  100% { transform: translateY(-120px) scale(0.4); opacity: 0; }
+}
+@keyframes submitPulseHalo {
+  0%, 100% { transform: scale(1); opacity: 0.55; }
+  50%      { transform: scale(1.25); opacity: 0.15; }
+}
+
+.submit-overlay-backdrop {
+  animation: submitOverlayIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.submit-overlay-card {
+  animation: submitCardIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.submit-orbit-dot {
+  animation: submitOrbit 2.4s linear infinite;
+}
+.submit-ring-spin {
+  animation: submitRingSpin 1.1s linear infinite;
+}
+.submit-ring-spin-slow {
+  animation: submitRingSpinReverse 3s linear infinite;
+}
+.submit-bar-sweep {
+  animation: submitBarSweep 1.4s ease-in-out infinite;
+}
+.submit-particle {
+  animation: submitParticleFloat 3s ease-in-out infinite;
+}
+.submit-pulse-halo {
+  animation: submitPulseHalo 2.2s ease-in-out infinite;
+}
+
+/* Respect motion / power preferences: keep the overlay legible but calm. */
+html.reduce-motion .submit-orbit-dot,
+html.save-power   .submit-orbit-dot,
+html.reduce-motion .submit-ring-spin-slow,
+html.save-power   .submit-ring-spin-slow,
+html.reduce-motion .submit-bar-sweep,
+html.save-power   .submit-bar-sweep,
+html.reduce-motion .submit-particle,
+html.save-power   .submit-particle,
+html.reduce-motion .submit-pulse-halo,
+html.save-power   .submit-pulse-halo {
+  animation: none !important;
+}
+html.reduce-motion .submit-overlay-card,
+html.reduce-motion .submit-overlay-backdrop {
+  animation-duration: 0.2s !important;
+}
+

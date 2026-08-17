@@ -23,6 +23,27 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
             ? t('rental:details.daily')
             : t('rental:details.monthly');
 
+    // Lease duration is expressed in the same unit as the rent period. Daily
+    // rentals read in nights, matching how the villa card and booking modal
+    // present a stay.
+    const leaseUnit = isWeekly ? 'Weeks' : isDaily ? 'Nights' : 'Months';
+    const leaseUnitWord = leaseUnit.toLowerCase();
+    const leaseDurationLabel = property.minimumLeaseDuration && property.maximumLeaseDuration
+        ? t(`rental:details.minToMax${leaseUnit}`, {
+            min: property.minimumLeaseDuration,
+            max: property.maximumLeaseDuration,
+            defaultValue: `{{min}} - {{max}} ${leaseUnitWord}`,
+        })
+        : property.minimumLeaseDuration
+            ? t(`rental:details.min${leaseUnit}`, {
+                min: property.minimumLeaseDuration,
+                defaultValue: `{{min}} ${leaseUnitWord} min`,
+            })
+            : t(`rental:details.max${leaseUnit}`, {
+                max: property.maximumLeaseDuration,
+                defaultValue: `{{max}} ${leaseUnitWord} max`,
+            });
+
     const availableDate = property.availableFrom
         ? new Date(property.availableFrom)
         : null;
@@ -98,23 +119,7 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
                                             : t('rental:details.leaseDuration')}
                                 </p>
                                 <p className="text-sm font-semibold text-neutral-800">
-                                    {isDaily
-                                        ? property.minimumLeaseDuration && property.maximumLeaseDuration
-                                            ? t('rental:details.minToMaxNights', { min: property.minimumLeaseDuration, max: property.maximumLeaseDuration, defaultValue: `{{min}}–{{max}} nights` })
-                                            : property.minimumLeaseDuration
-                                                ? t('rental:details.minNights', { min: property.minimumLeaseDuration, defaultValue: `{{min}} nights min` })
-                                                : t('rental:details.maxNights', { max: property.maximumLeaseDuration, defaultValue: `up to {{max}} nights` })
-                                        : isWeekly
-                                            ? property.minimumLeaseDuration && property.maximumLeaseDuration
-                                                ? t('rental:details.minToMaxWeeks', { min: property.minimumLeaseDuration, max: property.maximumLeaseDuration, defaultValue: `{{min}}–{{max}} weeks` })
-                                                : property.minimumLeaseDuration
-                                                    ? t('rental:details.minWeeks', { min: property.minimumLeaseDuration, defaultValue: `{{min}} weeks min` })
-                                                    : t('rental:details.maxWeeks', { max: property.maximumLeaseDuration, defaultValue: `up to {{max}} weeks` })
-                                            : property.minimumLeaseDuration && property.maximumLeaseDuration
-                                                ? t('rental:details.minToMaxMonths', { min: property.minimumLeaseDuration, max: property.maximumLeaseDuration })
-                                                : property.minimumLeaseDuration
-                                                    ? t('rental:details.minMonths', { min: property.minimumLeaseDuration })
-                                                    : t('rental:details.maxMonths', { max: property.maximumLeaseDuration })}
+                                    {leaseDurationLabel}
                                 </p>
                             </div>
                         </div>
@@ -183,7 +188,7 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
                             <p className="text-sm font-semibold text-neutral-800">
                                 {isAvailableNow
                                     ? t('rental:details.immediately')
-                                    : availableDate!.toLocaleDateString()}
+                                    : availableDate!.toLocaleDateString('en-GB')}
                             </p>
                         </div>
                     </div>

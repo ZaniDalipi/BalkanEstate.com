@@ -100,7 +100,11 @@
     "towelsIncluded": "Towels & Linen",
     "parkingIncluded": "Parking",
     "guestRequirements": "Guest Requirements",
-    "guestRequirementsHint": "e.g. no parties, no smoking, ID verification required (press Enter to add)"
+    "guestRequirementsHint": "e.g. no parties, no smoking, ID verification required (press Enter to add)",
+    "minLeaseDurationDays": "Мин. престој (дена)",
+    "maxLeaseDurationDays": "Макс. престој (дена)",
+    "minLeaseDurationWeeks": "Мин. престој (недели)",
+    "maxLeaseDurationWeeks": "Макс. престој (недели)"
   },
   "details": {
     "rentalTerms": "Услови за издавање",
@@ -145,7 +149,10 @@
     "breakfastIncluded": "Breakfast",
     "towelsIncluded": "Towels & Linen",
     "parkingIncluded": "Parking",
-    "guestRequirements": "Guest Requirements"
+    "guestRequirements": "Guest Requirements",
+    "minDays": "мин. {{min}} дена",
+    "maxDays": "макс. {{max}} дена",
+    "minToMaxDays": "{{min}} - {{max}} дена"
   },
   "affordability": {
     "title": "Достапност на кирија",
@@ -165,7 +172,15 @@
     "estimatedInternet": "Процена интернет (1-ви месец)",
     "totalUpfront": "Вкупно однапред",
     "monthlyOngoing": "Месечен тековен трошок",
-    "disclaimer": "* Трошоците за комуналии и интернет се проценки базирани на просеци. Реалните трошоци може да се разликуваат."
+    "disclaimer": "* Трошоците за комуналии и интернет се проценки базирани на просеци. Реалните трошоци може да се разликуваат.",
+    "firstWeekRent": "Кирија за првата недела",
+    "firstDayRent": "Кирија за првиот ден",
+    "estimatedUtilitiesWeek": "Проценети трошоци (1. недела)",
+    "estimatedUtilitiesDay": "Проценети трошоци (1. ден)",
+    "estimatedInternetWeek": "Проценет интернет (1. недела)",
+    "estimatedInternetDay": "Проценет интернет (1. ден)",
+    "weeklyOngoing": "Неделен тековен трошок",
+    "dailyOngoing": "Дневен тековен трошок"
   },
   "viewing": {
     "title": "Закажете разгледување",

@@ -639,5 +639,11 @@
   },
   "removeFromFavorites": "Elimină de la favorite",
   "saved": "Salvat",
-  "any": "Oricare"
+  "any": "Oricare",
+  "usageMeter": {
+    "label": "Utilizare lunară",
+    "usedOfLimit": "{{used}} / {{limit}} folosite",
+    "unlimited": "Nelimitat",
+    "resetsOn": "Se resetează pe {{date}}"
+  }
 }

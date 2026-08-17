@@ -34,7 +34,8 @@
       "years": "vite",
       "yrs": "vite",
       "country": "Country",
-      "quickSelect": "Quick select:"
+      "quickSelect": "Quick select:",
+      "currency": "Monedha"
     },
     "results": {
       "monthlyPayment": "Pagesa Mujore",
@@ -48,7 +49,8 @@
       "title": "Zbërthimi i Pagesave",
       "monthly": "Mujore",
       "yearly": "Vjetore",
-      "total": "Totale"
+      "total": "Totale",
+      "overYears": "gjatë {{years}} viteve"
     },
     "disclaimer": "Ky është një vlerësim vetëm për qëllime informative. Konsultohuni me një profesionist financiar për normat dhe pagesat aktuale.",
     "features": {
@@ -56,8 +58,8 @@
       "accurateDesc": "Get precise monthly payment calculations",
       "flexible": "Flexible Terms",
       "flexibleDesc": "Compare different loan terms and rates",
-      "local": "Local Currencies",
-      "localDesc": "Support for all Balkan currencies"
+      "local": "Çmime në Euro",
+      "localDesc": "Vlerësime të qarta në euro në të gjithë Ballkanin"
     },
     "howItWorks": "How It Works",
     "step1Title": "Enter Property Price",
@@ -65,7 +67,12 @@
     "step2Title": "Adjust Parameters",
     "step2Desc": "Set your down payment, loan term, and interest rate",
     "step3Title": "See Your Payment",
-    "step3Desc": "Get your estimated monthly mortgage payment instantly"
+    "step3Desc": "Get your estimated monthly mortgage payment instantly",
+    "rateContext": "Norma tipike për {{country}}: {{min}}%–{{max}}% (mesatarja e tregut {{year}}). Përshtateni me ofertën e bankës suaj.",
+    "errors": {
+      "rateRequired": "Vendosni një normë interesi",
+      "rateRange": "Norma duhet të jetë midis {{min}}% dhe {{max}}%"
+    }
   },
   "rentVsBuy": {
     "title": "Qira vs Blerje",

@@ -100,7 +100,11 @@
     "towelsIncluded": "Towels & Linen",
     "parkingIncluded": "Parking",
     "guestRequirements": "Guest Requirements",
-    "guestRequirementsHint": "e.g. no parties, no smoking, ID verification required (press Enter to add)"
+    "guestRequirementsHint": "e.g. no parties, no smoking, ID verification required (press Enter to add)",
+    "minLeaseDurationDays": "Ședere min. (zile)",
+    "maxLeaseDurationDays": "Ședere max. (zile)",
+    "minLeaseDurationWeeks": "Ședere min. (săptămâni)",
+    "maxLeaseDurationWeeks": "Ședere max. (săptămâni)"
   },
   "details": {
     "rentalTerms": "Condiții de Închiriere",
@@ -145,7 +149,10 @@
     "breakfastIncluded": "Breakfast",
     "towelsIncluded": "Towels & Linen",
     "parkingIncluded": "Parking",
-    "guestRequirements": "Guest Requirements"
+    "guestRequirements": "Guest Requirements",
+    "minDays": "min. {{min}} zile",
+    "maxDays": "max. {{max}} zile",
+    "minToMaxDays": "{{min}} - {{max}} zile"
   },
   "affordability": {
     "title": "Accesibilitate Chirie",
@@ -165,7 +172,15 @@
     "estimatedInternet": "Est. internet (prima lună)",
     "totalUpfront": "Total inițial",
     "monthlyOngoing": "Cost lunar continuu",
-    "disclaimer": "* Costurile pentru utilități și internet sunt estimări bazate pe medii. Costurile reale pot varia."
+    "disclaimer": "* Costurile pentru utilități și internet sunt estimări bazate pe medii. Costurile reale pot varia.",
+    "firstWeekRent": "Chiria primei săptămâni",
+    "firstDayRent": "Chiria primei zile",
+    "estimatedUtilitiesWeek": "Utilități est. (săpt. 1)",
+    "estimatedUtilitiesDay": "Utilități est. (ziua 1)",
+    "estimatedInternetWeek": "Internet est. (săpt. 1)",
+    "estimatedInternetDay": "Internet est. (ziua 1)",
+    "weeklyOngoing": "Cost săptămânal recurent",
+    "dailyOngoing": "Cost zilnic recurent"
   },
   "viewing": {
     "title": "Programează o Vizionare",

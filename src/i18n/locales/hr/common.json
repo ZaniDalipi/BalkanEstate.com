@@ -639,5 +639,11 @@
   },
   "removeFromFavorites": "Ukloni iz favorita",
   "saved": "Spremljeno",
-  "any": "Bilo koji"
+  "any": "Bilo koji",
+  "usageMeter": {
+    "label": "Mjesečna potrošnja",
+    "usedOfLimit": "{{used}} / {{limit}} iskorišteno",
+    "unlimited": "Neograničeno",
+    "resetsOn": "Obnavlja se {{date}}"
+  }
 }

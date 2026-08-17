@@ -46,6 +46,7 @@ export interface Seller {
     agencyName?: string;
     agencyLogo?: string;
     agencyId?: string;
+    agentId?: string;
 }
 
 export interface Testimonial {
@@ -324,6 +325,11 @@ export interface Property {
     beds: number;
     baths: number;
     livingRooms: number;
+    kitchens?: number;
+    diningRooms?: number;
+    toilets?: number;
+    storageRooms?: number;
+    offices?: number;
     sqft: number;
     yearBuilt: number;
     parking: number;

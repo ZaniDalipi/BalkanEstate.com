@@ -476,7 +476,8 @@
     "property": "Proprietate",
     "queryTitle": "Proprietăți de vânzare în {{query}} - Anunțuri imobiliare",
     "tagline": "Căutare de proprietăți bazată pe inteligență artificială pe BalkanEstateAI — 11 țări, 10 limbi.",
-    "typesForSale": "case, apartamente și vile de vânzare"
+    "typesForSale": "case, apartamente și vile de vânzare",
+    "in": "în"
   },
   "saving": "Se salvează...",
   "saveSearch": "Salvează căutarea"

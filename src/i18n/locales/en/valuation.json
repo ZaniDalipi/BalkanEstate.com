@@ -37,7 +37,15 @@
     "hideAdvanced": "Hide Options",
     "getValuation": "Get My Valuation",
     "calculating": "Analyzing...",
-    "disclaimer": "This is an automated estimate for informational purposes only. Actual market value may vary."
+    "disclaimer": "This is an automated estimate for informational purposes only. Actual market value may vary.",
+    "roomsSection": "Rooms",
+    "roomsTotal": "{{count}} rooms total",
+    "livingRooms": "Living rooms",
+    "kitchens": "Kitchens",
+    "diningRooms": "Dining rooms",
+    "toilets": "Toilets (WC)",
+    "storageRooms": "Storage rooms",
+    "offices": "Office / study"
   },
   "propertyTypes": {
     "apartment": "Apartment",
@@ -96,7 +104,15 @@
     "newValuation": "New Valuation",
     "readyToSell": "Ready to Sell?",
     "listPropertyCTA": "List your property on BalkanEstate and reach thousands of buyers across the Balkans.",
-    "listPropertyButton": "List My Property"
+    "listPropertyButton": "List My Property",
+    "reportTitle": "Valuation Report",
+    "savedBadge": "Saved to your history",
+    "livingRooms": "Living rooms",
+    "kitchens": "Kitchens",
+    "diningRooms": "Dining rooms",
+    "toilets": "Toilets (WC)",
+    "storageRooms": "Storage rooms",
+    "offices": "Office / study"
   },
   "breakdown": {
     "baseValue": "Base Value (from comparables)",
@@ -144,5 +160,31 @@
       "title": "Get Results",
       "description": "Receive your valuation with detailed breakdown and insights"
     }
+  },
+  "marketReference": {
+    "title": "Market price reference",
+    "subtitle": "Compare €/m² by data source",
+    "official": "Official statistics",
+    "listings": "BalkanEstate listings",
+    "country": "Country",
+    "avgOfficial": "Average price · official",
+    "avgListings": "Average price · our listings",
+    "noListings": "No marketplace data yet for this area",
+    "noListingsHint": "Switch to official statistics for a reference figure.",
+    "thisProperty": "This property",
+    "marketOfficial": "Market (official)",
+    "marketListings": "Market (listings)",
+    "aboveMarket": "{{pct}}% above the market benchmark",
+    "belowMarket": "{{pct}}% below the market benchmark",
+    "sourceLabel": "Source",
+    "sourceListings": "Aggregated from active BalkanEstate listings",
+    "live": "Live",
+    "disclaimer": "Benchmarks are indicative EUR/m² reference points for {{year}}, not an appraisal. Local prices vary by neighbourhood, condition and floor."
+  },
+  "history": {
+    "title": "Your saved valuations",
+    "count": "{{count}} saved on this device",
+    "clearAll": "Clear all",
+    "remove": "Remove"
   }
 }

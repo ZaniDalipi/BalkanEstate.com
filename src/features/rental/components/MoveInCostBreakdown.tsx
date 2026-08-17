@@ -12,26 +12,51 @@ const MoveInCostBreakdown: React.FC<MoveInCostBreakdownProps> = ({ property }) =
     const [showDetails, setShowDetails] = useState(true);
     const currencySymbol = getCurrencySymbol(property.country);
 
-    const monthlyRent = (() => {
-        if (property.rentPeriod === 'weekly') return property.price * 4.33;
-        if (property.rentPeriod === 'daily') return property.price * 30;
-        return property.price;
-    })();
+    const period: 'monthly' | 'weekly' | 'daily' =
+        property.rentPeriod === 'weekly' ? 'weekly'
+            : property.rentPeriod === 'daily' ? 'daily'
+                : 'monthly';
+
+    // property.price is stored in the unit of the rent period (per day / week / month)
+    const periodRent = property.price;
+
+    // Per-period suffix and labels so the card reflects how rent is actually charged
+    const periodSuffix = period === 'weekly' ? t('rental:perWeek', '/wk')
+        : period === 'daily' ? t('rental:perDay', '/day')
+            : t('rental:perMonth', '/mo');
+
+    const firstRentLabel = period === 'weekly' ? t('rental:moveIn.firstWeekRent', 'First week rent')
+        : period === 'daily' ? t('rental:moveIn.firstDayRent', 'First day rent')
+            : t('rental:moveIn.firstMonthRent', 'First month rent');
+
+    const utilitiesLabel = period === 'weekly' ? t('rental:moveIn.estimatedUtilitiesWeek', 'Est. utilities (1st week)')
+        : period === 'daily' ? t('rental:moveIn.estimatedUtilitiesDay', 'Est. utilities (1st day)')
+            : t('rental:moveIn.estimatedUtilities', 'Est. utilities (1st month)');
+
+    const internetLabel = period === 'weekly' ? t('rental:moveIn.estimatedInternetWeek', 'Est. internet (1st week)')
+        : period === 'daily' ? t('rental:moveIn.estimatedInternetDay', 'Est. internet (1st day)')
+            : t('rental:moveIn.estimatedInternet', 'Est. internet (1st month)');
+
+    const ongoingLabel = period === 'weekly' ? t('rental:moveIn.weeklyOngoing', 'Weekly ongoing cost')
+        : period === 'daily' ? t('rental:moveIn.dailyOngoing', 'Daily ongoing cost')
+            : t('rental:moveIn.monthlyOngoing', 'Monthly ongoing cost');
 
     const deposit = property.securityDeposit || 0;
 
-    // Estimate utilities if not included
-    const estimatedUtilities = property.utilitiesIncluded ? 0 : Math.round(monthlyRent * 0.15);
-    const estimatedInternet = property.internetIncluded ? 0 : 25;
+    // Estimate utilities & internet for one billing period if not included.
+    // Internet baseline is ~€25/month, scaled to the rent period.
+    const internetBaseline = period === 'weekly' ? 6 : period === 'daily' ? 1 : 25;
+    const estimatedUtilities = property.utilitiesIncluded ? 0 : Math.round(periodRent * 0.15);
+    const estimatedInternet = property.internetIncluded ? 0 : internetBaseline;
 
-    const totalMoveIn = monthlyRent + deposit + estimatedUtilities + estimatedInternet;
+    const totalMoveIn = periodRent + deposit + estimatedUtilities + estimatedInternet;
 
     const fmt = (n: number) => new Intl.NumberFormat('de-DE').format(Math.round(n));
 
     const costItems = [
         {
-            label: t('rental:moveIn.firstMonthRent', 'First month rent'),
-            amount: monthlyRent,
+            label: firstRentLabel,
+            amount: periodRent,
             color: 'bg-blue-500',
             icon: (
                 <svg className="w-3.5 h-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -50,7 +75,7 @@ const MoveInCostBreakdown: React.FC<MoveInCostBreakdownProps> = ({ property }) =
             ),
         }] : []),
         ...(!property.utilitiesIncluded ? [{
-            label: t('rental:moveIn.estimatedUtilities', 'Est. utilities (1st month)'),
+            label: utilitiesLabel,
             amount: estimatedUtilities,
             color: 'bg-orange-400',
             icon: (
@@ -60,7 +85,7 @@ const MoveInCostBreakdown: React.FC<MoveInCostBreakdownProps> = ({ property }) =
             ),
         }] : []),
         ...(!property.internetIncluded ? [{
-            label: t('rental:moveIn.estimatedInternet', 'Est. internet (1st month)'),
+            label: internetLabel,
             amount: estimatedInternet,
             color: 'bg-purple-400',
             icon: (
@@ -139,10 +164,10 @@ const MoveInCostBreakdown: React.FC<MoveInCostBreakdownProps> = ({ property }) =
                     <div className="px-3 py-2 bg-neutral-50 rounded-lg">
                         <div className="flex items-center justify-between">
                             <span className="text-[10px] text-neutral-500">
-                                {t('rental:moveIn.monthlyOngoing', 'Monthly ongoing cost')}
+                                {ongoingLabel}
                             </span>
                             <span className="text-xs font-bold text-neutral-700">
-                                {currencySymbol}{fmt(monthlyRent + estimatedUtilities + estimatedInternet)}/mo
+                                {currencySymbol}{fmt(periodRent + estimatedUtilities + estimatedInternet)}{periodSuffix}
                             </span>
                         </div>
                     </div>

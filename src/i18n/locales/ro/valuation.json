@@ -33,7 +33,15 @@
     "hideAdvanced": "Ascunde Opțiuni",
     "getValuation": "Obține Evaluarea",
     "calculating": "Analizez...",
-    "disclaimer": "Aceasta este o estimare automată doar în scop informativ. Valoarea reală de piață poate varia."
+    "disclaimer": "Aceasta este o estimare automată doar în scop informativ. Valoarea reală de piață poate varia.",
+    "roomsSection": "Camere",
+    "roomsTotal": "{{count}} camere în total",
+    "livingRooms": "Camere de zi",
+    "kitchens": "Bucătării",
+    "diningRooms": "Sufragerii",
+    "toilets": "Toalete (WC)",
+    "storageRooms": "Debarale",
+    "offices": "Birou / cameră de lucru"
   },
   "propertyTypes": {
     "apartment": "Apartament",
@@ -92,7 +100,15 @@
     "newValuation": "Evaluare Nouă",
     "readyToSell": "Pregătit să Vindeți?",
     "listPropertyCTA": "Publicați proprietatea pe BalkanEstate și ajungeți la mii de cumpărători din Balcani.",
-    "listPropertyButton": "Publică Proprietatea"
+    "listPropertyButton": "Publică Proprietatea",
+    "reportTitle": "Raport de evaluare",
+    "savedBadge": "Salvat în istoricul tău",
+    "livingRooms": "Camere de zi",
+    "kitchens": "Bucătării",
+    "diningRooms": "Sufragerii",
+    "toilets": "Toalete (WC)",
+    "storageRooms": "Debarale",
+    "offices": "Birou / cameră de lucru"
   },
   "breakdown": {
     "baseValue": "Valoare de Bază (din comparabile)",
@@ -140,5 +156,31 @@
       "title": "Obțineți Rezultate",
       "description": "Primiți evaluarea cu defalcare detaliată și analize"
     }
+  },
+  "marketReference": {
+    "title": "Referință preț de piață",
+    "subtitle": "Compară €/m² după sursa datelor",
+    "official": "Statistici oficiale",
+    "listings": "Anunțuri BalkanEstate",
+    "country": "Țară",
+    "avgOfficial": "Preț mediu · oficial",
+    "avgListings": "Preț mediu · anunțurile noastre",
+    "noListings": "Încă nu există date de piață pentru această zonă",
+    "noListingsHint": "Comutați la statistici oficiale pentru o valoare de referință.",
+    "thisProperty": "Această proprietate",
+    "marketOfficial": "Piață (oficial)",
+    "marketListings": "Piață (anunțuri)",
+    "aboveMarket": "{{pct}}% peste referința pieței",
+    "belowMarket": "{{pct}}% sub referința pieței",
+    "sourceLabel": "Sursă",
+    "sourceListings": "Agregat din anunțurile active BalkanEstate",
+    "live": "În timp real",
+    "disclaimer": "Referințele sunt valori orientative EUR/m² pentru {{year}}, nu o evaluare. Prețurile locale variază în funcție de cartier, stare și etaj."
+  },
+  "history": {
+    "title": "Evaluările tale salvate",
+    "count": "{{count}} salvate pe acest dispozitiv",
+    "clearAll": "Șterge tot",
+    "remove": "Elimină"
   }
 }

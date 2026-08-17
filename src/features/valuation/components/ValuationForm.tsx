@@ -82,6 +82,44 @@ const AmenityIcon: React.FC<{ type: string; className?: string }> = ({ type, cla
   return icons[type] || <span />;
 };
 
+// Reusable +/- counter for room fields (keeps every room control identical).
+const RoomCounter: React.FC<{
+  label: string;
+  value: number;
+  onChange: (next: number) => void;
+  min?: number;
+  max?: number;
+}> = ({ label, value, onChange, min = 0, max = 20 }) => (
+  <div className="space-y-2">
+    <label className="block text-sm font-semibold text-neutral-700">{label}</label>
+    <div className="flex items-center border-2 border-neutral-200 rounded-xl overflow-hidden bg-neutral-50/50">
+      <button
+        type="button"
+        onClick={() => onChange(Math.max(min, value - 1))}
+        disabled={value <= min}
+        aria-label={`${label} −`}
+        className="px-3 py-3 text-neutral-600 hover:bg-neutral-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+        </svg>
+      </button>
+      <span className="flex-1 text-center font-bold text-lg tabular-nums" aria-live="polite">{value}</span>
+      <button
+        type="button"
+        onClick={() => onChange(Math.min(max, value + 1))}
+        disabled={value >= max}
+        aria-label={`${label} +`}
+        className="px-3 py-3 text-neutral-600 hover:bg-neutral-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        </svg>
+      </button>
+    </div>
+  </div>
+);
+
 const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = false }) => {
   const { t, i18n } = useTranslation(['valuation', 'common']);
 
@@ -95,6 +133,12 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
   const [sqft, setSqft] = useState<number>(80);
   const [beds, setBeds] = useState<number>(2);
   const [baths, setBaths] = useState<number>(1);
+  const [livingRooms, setLivingRooms] = useState<number>(1);
+  const [kitchens, setKitchens] = useState<number>(1);
+  const [diningRooms, setDiningRooms] = useState<number>(0);
+  const [toilets, setToilets] = useState<number>(0);
+  const [storageRooms, setStorageRooms] = useState<number>(0);
+  const [offices, setOffices] = useState<number>(0);
   const [yearBuilt, setYearBuilt] = useState<number | undefined>();
   const [condition, setCondition] = useState<PropertyCondition | undefined>();
   const [viewTypes, setViewTypes] = useState<ViewType[]>([]);
@@ -195,6 +239,12 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
       sqft,
       beds,
       baths,
+      livingRooms,
+      kitchens,
+      diningRooms,
+      toilets,
+      storageRooms,
+      offices,
       yearBuilt,
       condition,
       viewTypes: viewTypes.length > 0 ? viewTypes : undefined,
@@ -253,6 +303,18 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
     { value: 'furnished', label: t('valuation:furnishing.furnished') },
     { value: 'semi-furnished', label: t('valuation:furnishing.semiFurnished') },
     { value: 'unfurnished', label: t('valuation:furnishing.unfurnished') },
+  ];
+
+  // Every room type the valuation accepts, rendered as identical counters.
+  const roomCounters: { key: string; label: string; value: number; set: (n: number) => void }[] = [
+    { key: 'beds', label: t('valuation:form.bedrooms'), value: beds, set: setBeds },
+    { key: 'baths', label: t('valuation:form.bathrooms'), value: baths, set: setBaths },
+    { key: 'livingRooms', label: t('valuation:form.livingRooms', 'Living rooms'), value: livingRooms, set: setLivingRooms },
+    { key: 'kitchens', label: t('valuation:form.kitchens', 'Kitchens'), value: kitchens, set: setKitchens },
+    { key: 'diningRooms', label: t('valuation:form.diningRooms', 'Dining rooms'), value: diningRooms, set: setDiningRooms },
+    { key: 'toilets', label: t('valuation:form.toilets', 'Toilets (WC)'), value: toilets, set: setToilets },
+    { key: 'storageRooms', label: t('valuation:form.storageRooms', 'Storage rooms'), value: storageRooms, set: setStorageRooms },
+    { key: 'offices', label: t('valuation:form.offices', 'Office / study'), value: offices, set: setOffices },
   ];
 
   const amenities = [
@@ -381,83 +443,44 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
           <h3 className="text-lg font-bold text-neutral-800">{t('valuation:form.detailsSection', 'Property Details')}</h3>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
-          {/* Size */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-neutral-700">
-              {t('valuation:form.size')} <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={sqft}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/[^0-9]/g, '');
-                  setSqft(val ? Math.max(1, parseInt(val)) : 0);
-                }}
-                placeholder="80"
-                className="block w-full pl-4 pr-12 py-3 text-base border-2 border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-neutral-50/50"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-neutral-500 font-medium bg-neutral-100 px-2 py-0.5 rounded">m²</span>
-            </div>
+        {/* Size */}
+        <div className="space-y-2">
+          <label className="block text-sm font-semibold text-neutral-700">
+            {t('valuation:form.size')} <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={sqft}
+              onChange={(e) => {
+                const val = e.target.value.replace(/[^0-9]/g, '');
+                setSqft(val ? Math.max(1, parseInt(val)) : 0);
+              }}
+              placeholder="80"
+              className="block w-full pl-4 pr-12 py-3 text-base border-2 border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-neutral-50/50"
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-neutral-500 font-medium bg-neutral-100 px-2 py-0.5 rounded">m²</span>
           </div>
+        </div>
 
-          {/* Bedrooms */}
-          <div className="space-y-2">
+        {/* Rooms — bedrooms, bathrooms, living rooms and every other room type */}
+        <div className="space-y-3">
+          <div className="flex items-baseline justify-between">
             <label className="block text-sm font-semibold text-neutral-700">
-              {t('valuation:form.bedrooms')}
+              {t('valuation:form.roomsSection', 'Rooms')}
             </label>
-            <div className="flex items-center border-2 border-neutral-200 rounded-xl overflow-hidden bg-neutral-50/50">
-              <button
-                type="button"
-                onClick={() => setBeds(Math.max(0, beds - 1))}
-                className="px-3 py-3 text-neutral-600 hover:bg-neutral-100 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                </svg>
-              </button>
-              <span className="flex-1 text-center font-bold text-lg">{beds}</span>
-              <button
-                type="button"
-                onClick={() => setBeds(Math.min(10, beds + 1))}
-                className="px-3 py-3 text-neutral-600 hover:bg-neutral-100 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-              </button>
-            </div>
+            <span className="text-xs text-neutral-400">
+              {t('valuation:form.roomsTotal', '{{count}} rooms total', {
+                count: roomCounters.reduce((sum, r) => sum + r.value, 0),
+              })}
+            </span>
           </div>
-
-          {/* Bathrooms */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-neutral-700">
-              {t('valuation:form.bathrooms')}
-            </label>
-            <div className="flex items-center border-2 border-neutral-200 rounded-xl overflow-hidden bg-neutral-50/50">
-              <button
-                type="button"
-                onClick={() => setBaths(Math.max(0, baths - 1))}
-                className="px-3 py-3 text-neutral-600 hover:bg-neutral-100 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                </svg>
-              </button>
-              <span className="flex-1 text-center font-bold text-lg">{baths}</span>
-              <button
-                type="button"
-                onClick={() => setBaths(Math.min(10, baths + 1))}
-                className="px-3 py-3 text-neutral-600 hover:bg-neutral-100 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-              </button>
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {roomCounters.map((room) => (
+              <RoomCounter key={room.key} label={room.label} value={room.value} onChange={room.set} />
+            ))}
           </div>
         </div>
       </div>

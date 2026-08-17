@@ -147,7 +147,12 @@
       },
       "slotDuration": "{{minutes}} min slot"
     },
-    "floorPlanInteractiveHint": "Shikues interaktiv me zmadhim, lëvizje dhe etiketa"
+    "floorPlanInteractiveHint": "Shikues interaktiv me zmadhim, lëvizje dhe etiketa",
+    "kitchens": "Kuzhina",
+    "diningRooms": "Dhoma ngrënieje",
+    "toilets": "Tualete (WC)",
+    "storageRooms": "Dhoma depozitimi",
+    "offices": "Zyrë / studio"
   },
   "distances": {
     "title": "Distancat",
@@ -221,7 +226,10 @@
     "phone": "Telefoni",
     "email": "Email",
     "website": "Uebsajti",
-    "viewProfile": "Shiko Profilin"
+    "viewProfile": "Shiko Profilin",
+    "moreFromAgent": "Më shumë njoftime nga ky agjent",
+    "noOtherListings": "Nuk ka njoftime të tjera aktive për momentin",
+    "viewFullProfile": "Shiko profilin e plotë"
   },
   "navigation": {
     "back": "Kthehu",
@@ -656,6 +664,35 @@
   "seo": {
     "description": "{{type}} me {{beds}} dhoma gjumi, {{baths}} banjo për {{listingAction}} në {{city}}, {{country}}. {{sqft}}m² për €{{price}}.",
     "forRent": "Qira",
-    "forSale": "Shitje"
+    "forSale": "Shitje",
+    "perMonth": "/muaj",
+    "title": "{{type}} me {{beds}} dhoma për {{listingAction}} në {{city}}, {{country}} - €{{price}}"
+  },
+  "roomStyler": {
+    "reimagine": "Rimagjino",
+    "title": "Rimagjino këtë dhomë",
+    "subtitle": "Shihni këtë dhomë në një stil tjetër dizajni",
+    "close": "Mbyll",
+    "chooseStyle": "Zgjidhni një stil",
+    "generate": "Gjenero",
+    "generating": "Duke ristiluar në {{style}}…",
+    "generating2": "Duke gjeneruar…",
+    "tryAnother": "Provo një stil tjetër",
+    "download": "Shkarko HD",
+    "before": "Origjinali",
+    "roomPhoto": "Fotoja e dhomës",
+    "limitReached": "Keni arritur kufirin mujor të ristilimit të dhomave.",
+    "genericError": "Diçka shkoi keq. Ju lutemi provoni përsëri.",
+    "upgrade": "Shiko planet",
+    "meterLabel": "Stilisti AI i Dhomave",
+    "meterSubtitle": "Rimagjino dhomat në stile të ndryshme dizajni",
+    "meterUsageLabel": "Ristilime këtë muaj",
+    "limitTitle": "I keni përdorur të gjitha ristilimet këtë muaj",
+    "limitMessage": "Përmirësoni në Pro Buyer ose një plan tjetër për të vazhduar — ose prisni derisa kuota juaj të rifreskohet.",
+    "unlimitedNote": "Ristilime të pakufizuara në planin tuaj",
+    "remainingNote": "{{remaining}} të mbetura këtë muaj",
+    "disclaimer": "Skenë e krijuar me AI vetëm për qëllime demonstrimi. Këto imazhe nuk janë foto reale të pronës dhe mund të përmbajnë artikuj që nuk janë pjesë e shpalljes.",
+    "interior": "Interior",
+    "exterior": "Eksterier"
   }
 }

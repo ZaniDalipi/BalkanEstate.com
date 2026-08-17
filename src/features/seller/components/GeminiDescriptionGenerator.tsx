@@ -13,6 +13,7 @@ import { useListingForm } from './useListingForm';
 import ListingFormFields from './ListingFormFields';
 import ListingPropertyFeatures from './ListingPropertyFeatures';
 import ListingImageUpload from './ListingImageUpload';
+import ListingSubmitOverlay from './ListingSubmitOverlay';
 import ListingPreview from './ListingPreview';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
 import { LiquidGlassControl } from '@/components/ui/liquid-glass-control';
@@ -140,6 +141,13 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     return (
         <>
         {generatingModal}
+        {/* Full-screen blurred overlay shown while the listing is being published */}
+        <ListingSubmitOverlay
+            isCompressing={isCompressing}
+            isUploading={isUploading}
+            isSubmitting={isSubmitting}
+            uploadProgress={uploadProgress}
+        />
         <form className="listing-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') e.preventDefault(); }}>
             {/* Listing Type Toggle: Sale / Rent */}
             <div className="flex justify-center mb-6">
@@ -430,10 +438,8 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 {/* Min Stay — label adapts to rentPeriod */}
                                 <NumberInputWithSteppers
                                     label={
-                                        listingData.rentPeriod === 'daily'
-                                            ? t('rental:form.minStayNights', 'Min Stay (nights)')
-                                            : listingData.rentPeriod === 'weekly'
-                                                ? t('rental:form.minStayWeeks', 'Min Stay (weeks)')
+                                        listingData.rentPeriod === 'daily' ? t('rental:form.minLeaseDurationDays', 'Min Lease (days)')
+                                            : listingData.rentPeriod === 'weekly' ? t('rental:form.minLeaseDurationWeeks', 'Min Lease (weeks)')
                                                 : t('rental:form.minLeaseDuration')
                                     }
                                     value={listingData.minimumLeaseDuration}
@@ -445,10 +451,8 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 {/* Max Stay — label adapts to rentPeriod */}
                                 <NumberInputWithSteppers
                                     label={
-                                        listingData.rentPeriod === 'daily'
-                                            ? t('rental:form.maxStayNights', 'Max Stay (nights)')
-                                            : listingData.rentPeriod === 'weekly'
-                                                ? t('rental:form.maxStayWeeks', 'Max Stay (weeks)')
+                                        listingData.rentPeriod === 'daily' ? t('rental:form.maxLeaseDurationDays', 'Max Lease (days)')
+                                            : listingData.rentPeriod === 'weekly' ? t('rental:form.maxLeaseDurationWeeks', 'Max Lease (weeks)')
                                                 : t('rental:form.maxLeaseDuration')
                                     }
                                     value={listingData.maximumLeaseDuration}
@@ -463,6 +467,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                     <input
                                         type="date"
                                         id="availableFrom"
+                                        lang="en-GB"
                                         value={listingData.availableFrom}
                                         onChange={(e) => setListingData(prev => ({ ...prev, availableFrom: e.target.value }))}
                                         className={inputBaseClasses}
@@ -728,10 +733,6 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         images={images}
                         imageTags={listingData.image_tags}
                         floorplanImage={floorplanImage}
-                        isCompressing={isCompressing}
-                        isUploading={isUploading}
-                        isSubmitting={isSubmitting}
-                        uploadProgress={uploadProgress}
                         handleImageChange={handleImageChange}
                         handleFloorplanImageChange={handleFloorplanImageChange}
                         removeImage={removeImage}

@@ -34,7 +34,8 @@
       "years": "years",
       "yrs": "yrs",
       "country": "Country",
-      "quickSelect": "Quick select:"
+      "quickSelect": "Quick select:",
+      "currency": "Monedă"
     },
     "results": {
       "monthlyPayment": "Monthly Payment",
@@ -48,7 +49,8 @@
       "title": "Payment Breakdown",
       "monthly": "Monthly",
       "yearly": "Yearly",
-      "total": "Total"
+      "total": "Total",
+      "overYears": "pe parcursul a {{years}} ani"
     },
     "disclaimer": "This is an estimate for informational purposes only. Consult with a financial professional for actual rates and payments.",
     "features": {
@@ -56,8 +58,8 @@
       "accurateDesc": "Get precise monthly payment calculations",
       "flexible": "Flexible Terms",
       "flexibleDesc": "Compare different loan terms and rates",
-      "local": "Local Currencies",
-      "localDesc": "Support for all Balkan currencies"
+      "local": "Prețuri în euro",
+      "localDesc": "Estimări clare în euro în toți Balcanii"
     },
     "howItWorks": "How It Works",
     "step1Title": "Enter Property Price",
@@ -65,7 +67,12 @@
     "step2Title": "Adjust Parameters",
     "step2Desc": "Set your down payment, loan term, and interest rate",
     "step3Title": "See Your Payment",
-    "step3Desc": "Get your estimated monthly mortgage payment instantly"
+    "step3Desc": "Get your estimated monthly mortgage payment instantly",
+    "rateContext": "Rată tipică pentru {{country}}: {{min}}%–{{max}}% (media pieței {{year}}). Ajustați în funcție de oferta băncii dvs.",
+    "errors": {
+      "rateRequired": "Introduceți o rată a dobânzii",
+      "rateRange": "Rata trebuie să fie între {{min}}% și {{max}}%"
+    }
   },
   "rentVsBuy": {
     "title": "Rent vs. Buy Calculator",

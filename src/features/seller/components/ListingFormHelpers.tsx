@@ -18,6 +18,11 @@ export interface ListingData {
     bedrooms: number;
     bathrooms: number;
     livingRooms: number;
+    kitchens: number;
+    diningRooms: number;
+    toilets: number;
+    storageRooms: number;
+    offices: number;
     sq_meters: number;
     year_built: number;
     parking_spots: number;
@@ -85,6 +90,11 @@ export const initialListingData: ListingData = {
     bedrooms: 0,
     bathrooms: 0,
     livingRooms: 0,
+    kitchens: 0,
+    diningRooms: 0,
+    toilets: 0,
+    storageRooms: 0,
+    offices: 0,
     sq_meters: 0,
     year_built: new Date().getFullYear(),
     parking_spots: 0,

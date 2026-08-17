@@ -100,7 +100,11 @@
     "towelsIncluded": "Towels & Linen",
     "parkingIncluded": "Parking",
     "guestRequirements": "Guest Requirements",
-    "guestRequirementsHint": "e.g. no parties, no smoking, ID verification required (press Enter to add)"
+    "guestRequirementsHint": "e.g. no parties, no smoking, ID verification required (press Enter to add)",
+    "minLeaseDurationDays": "Ελάχ. διαμονή (ημέρες)",
+    "maxLeaseDurationDays": "Μέγ. διαμονή (ημέρες)",
+    "minLeaseDurationWeeks": "Ελάχ. διαμονή (εβδομάδες)",
+    "maxLeaseDurationWeeks": "Μέγ. διαμονή (εβδομάδες)"
   },
   "details": {
     "rentalTerms": "Όροι Ενοικίασης",
@@ -145,7 +149,10 @@
     "breakfastIncluded": "Breakfast",
     "towelsIncluded": "Towels & Linen",
     "parkingIncluded": "Parking",
-    "guestRequirements": "Guest Requirements"
+    "guestRequirements": "Guest Requirements",
+    "minDays": "ελάχ. {{min}} ημέρες",
+    "maxDays": "μέγ. {{max}} ημέρες",
+    "minToMaxDays": "{{min}} - {{max}} ημέρες"
   },
   "affordability": {
     "title": "Οικονομική Προσιτότητα Ενοικίου",
@@ -165,7 +172,15 @@
     "estimatedInternet": "Εκτίμ. ίντερνετ (1ος μήνας)",
     "totalUpfront": "Συνολικό αρχικό κόστος",
     "monthlyOngoing": "Μηνιαίο τρέχον κόστος",
-    "disclaimer": "* Τα κόστη κοινοχρήστων και ίντερνετ είναι εκτιμήσεις βάσει μέσων όρων. Τα πραγματικά κόστη μπορεί να διαφέρουν."
+    "disclaimer": "* Τα κόστη κοινοχρήστων και ίντερνετ είναι εκτιμήσεις βάσει μέσων όρων. Τα πραγματικά κόστη μπορεί να διαφέρουν.",
+    "firstWeekRent": "Ενοίκιο πρώτης εβδομάδας",
+    "firstDayRent": "Ενοίκιο πρώτης ημέρας",
+    "estimatedUtilitiesWeek": "Εκτ. λογαριασμοί (1η εβδ.)",
+    "estimatedUtilitiesDay": "Εκτ. λογαριασμοί (1η ημ.)",
+    "estimatedInternetWeek": "Εκτ. ίντερνετ (1η εβδ.)",
+    "estimatedInternetDay": "Εκτ. ίντερνετ (1η ημ.)",
+    "weeklyOngoing": "Εβδομαδιαίο τρέχον κόστος",
+    "dailyOngoing": "Ημερήσιο τρέχον κόστος"
   },
   "viewing": {
     "title": "Προγραμματισμός Επίσκεψης",

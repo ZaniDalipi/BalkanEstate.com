@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { tokenService } from '@/src/shared/api/tokenService';
 import { csrfHeaders } from '@/src/shared/api/httpClient';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
+import { convertToUploadableImage } from '@/shared/utils/imageConversion';
 
 interface ArticleManagerFormProps {
   articleId: string | null;
@@ -176,9 +177,11 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
 
   // ── Cover Image Upload ─────────────────────────────────────────────────────
 
-  const handleCoverUpload = async (file: File) => {
+  const handleCoverUpload = async (selected: File) => {
     try {
       setCoverUploading(true);
+      // Convert HEIC/HEIF to JPEG so the cover image renders in browsers.
+      const file = await convertToUploadableImage(selected);
       const token = tokenService.getAccessToken();
       const formData = new FormData();
       formData.append('image', file);
@@ -201,11 +204,13 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
 
   // ── Inline Image Upload ────────────────────────────────────────────────────
 
-  const handleInlineImageUpload = async (file: File) => {
+  const handleInlineImageUpload = async (selected: File) => {
     // Capture the saved range immediately — it was saved when the toolbar button was clicked
     const savedRange = savedRangeRef.current ? savedRangeRef.current.cloneRange() : null;
     try {
       setInlineUploading(true);
+      // Convert HEIC/HEIF to JPEG so the inserted image renders in browsers.
+      const file = await convertToUploadableImage(selected);
       const token = tokenService.getAccessToken();
       const formData = new FormData();
       formData.append('image', file);

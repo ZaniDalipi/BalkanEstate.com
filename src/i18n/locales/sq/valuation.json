@@ -33,7 +33,15 @@
     "hideAdvanced": "Fshih Opsionet",
     "getValuation": "Merr Vlerësimin Tim",
     "calculating": "Duke Analizuar...",
-    "disclaimer": "Ky është një vlerësim automatik vetëm për qëllime informative. Vlera reale e tregut mund të ndryshojë."
+    "disclaimer": "Ky është një vlerësim automatik vetëm për qëllime informative. Vlera reale e tregut mund të ndryshojë.",
+    "roomsSection": "Dhomat",
+    "roomsTotal": "{{count}} dhoma gjithsej",
+    "livingRooms": "Dhoma ndenjeje",
+    "kitchens": "Kuzhina",
+    "diningRooms": "Dhoma ngrënieje",
+    "toilets": "Tualete (WC)",
+    "storageRooms": "Dhoma depoje",
+    "offices": "Zyrë / studio"
   },
   "propertyTypes": {
     "apartment": "Apartament",
@@ -92,7 +100,15 @@
     "newValuation": "Vlerësim i Ri",
     "readyToSell": "Gati për të Shitur?",
     "listPropertyCTA": "Listoni pronën tuaj në BalkanEstate dhe arrini mijëra blerës në të gjithë Ballkanin.",
-    "listPropertyButton": "Listo Pronën Time"
+    "listPropertyButton": "Listo Pronën Time",
+    "reportTitle": "Raport vlerësimi",
+    "savedBadge": "Ruajtur në historikun tuaj",
+    "livingRooms": "Dhoma ndenjeje",
+    "kitchens": "Kuzhina",
+    "diningRooms": "Dhoma ngrënieje",
+    "toilets": "Tualete (WC)",
+    "storageRooms": "Dhoma depoje",
+    "offices": "Zyrë / studio"
   },
   "breakdown": {
     "baseValue": "Vlera Bazë (nga krahasueset)",
@@ -140,5 +156,31 @@
       "title": "Merr Rezultatet",
       "description": "Merrni vlerësimin tuaj me ndarje të detajuar dhe analiza"
     }
+  },
+  "marketReference": {
+    "title": "Referencë e çmimit të tregut",
+    "subtitle": "Krahaso €/m² sipas burimit të të dhënave",
+    "official": "Statistika zyrtare",
+    "listings": "Listimet e BalkanEstate",
+    "country": "Shteti",
+    "avgOfficial": "Çmimi mesatar · zyrtar",
+    "avgListings": "Çmimi mesatar · listimet tona",
+    "noListings": "Ende nuk ka të dhëna tregu për këtë zonë",
+    "noListingsHint": "Kalo te statistikat zyrtare për një vlerë reference.",
+    "thisProperty": "Kjo pronë",
+    "marketOfficial": "Tregu (zyrtar)",
+    "marketListings": "Tregu (listimet)",
+    "aboveMarket": "{{pct}}% mbi referencën e tregut",
+    "belowMarket": "{{pct}}% nën referencën e tregut",
+    "sourceLabel": "Burimi",
+    "sourceListings": "Grumbulluar nga listimet aktive të BalkanEstate",
+    "live": "Drejtpërdrejt",
+    "disclaimer": "Referencat janë vlera treguese EUR/m² për {{year}}, jo vlerësim. Çmimet lokale ndryshojnë sipas lagjes, gjendjes dhe katit."
+  },
+  "history": {
+    "title": "Vlerësimet tuaja të ruajtura",
+    "count": "{{count}} të ruajtura në këtë pajisje",
+    "clearAll": "Pastro të gjitha",
+    "remove": "Hiq"
   }
 }

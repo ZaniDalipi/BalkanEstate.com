@@ -1,35 +1,84 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import ValuationForm from './ValuationForm';
 import ValuationResult from './ValuationResult';
-import { useCreateValuation } from '../hooks/useValuation';
+import MarketReferencePanel from './MarketReferencePanel';
+import ValuationHistory from './ValuationHistory';
+import { useCreateValuation, useValuationHistory } from '../hooks/useValuation';
 import type { ValuationInput, PropertyValuation } from '../types';
+import {
+  readHistory, saveValuation, removeValuation, clearHistory, mergeHistories,
+} from '../data/valuationHistoryStore';
 import { SparklesIcon } from '@/constants';
 import Footer from '@/components/shared/Footer';
+import { useAppContext } from '@/context/AppContext';
 import { SEO } from '@/src/components/seo';
 import { Helmet } from 'react-helmet-async';
 
 const ValuationPage: React.FC = () => {
   const { t } = useTranslation(['valuation', 'common']);
+  const { state } = useAppContext();
+  const isAuthenticated = !!state?.isAuthenticated;
   const [valuation, setValuation] = useState<PropertyValuation | null>(null);
+  const [history, setHistory] = useState<PropertyValuation[]>([]);
 
   const { mutate: createValuation, isPending } = useCreateValuation();
+  // Server-backed history (signed-in users only) is merged with the local list.
+  const { data: serverHistory } = useValuationHistory(25, isAuthenticated);
+
+  // Load device-local history once on mount.
+  useEffect(() => {
+    setHistory(readHistory());
+  }, []);
+
+  // Merge in server history whenever it arrives.
+  useEffect(() => {
+    if (serverHistory && serverHistory.length > 0) {
+      setHistory((local) => mergeHistories(local, serverHistory));
+    }
+  }, [serverHistory]);
 
   const handleSubmit = (data: ValuationInput) => {
     createValuation(data, {
       onSuccess: (result) => {
-        setValuation(result);
+        // The API may not echo the newer room fields; keep what the user entered
+        // so the report and saved history reflect the full room layout.
+        const enriched: PropertyValuation = {
+          ...result,
+          livingRooms: result.livingRooms ?? data.livingRooms,
+          kitchens: result.kitchens ?? data.kitchens,
+          diningRooms: result.diningRooms ?? data.diningRooms,
+          toilets: result.toilets ?? data.toilets,
+          storageRooms: result.storageRooms ?? data.storageRooms,
+          offices: result.offices ?? data.offices,
+        };
+        setValuation(enriched);
+        setHistory(saveValuation(enriched)); // auto-save every completed valuation
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
-      onError: (error) => {
-        // Error removed
+      onError: () => {
+        // Surfaced by the form's own error state / QueryErrorBoundary.
       },
     });
   };
 
   const handleNewValuation = () => {
     setValuation(null);
+  };
+
+  const handleOpenHistory = (item: PropertyValuation) => {
+    setValuation(item);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleRemoveHistory = (key: string) => {
+    setHistory(removeValuation(key));
+  };
+
+  const handleClearHistory = () => {
+    clearHistory();
+    setHistory([]);
   };
 
   return (
@@ -161,6 +210,35 @@ const ValuationPage: React.FC = () => {
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-full" />
 
             <ValuationForm onSubmit={handleSubmit} isLoading={isPending} />
+          </motion.div>
+        )}
+
+        {/* Saved valuations history */}
+        {!valuation && history.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.25 }}
+            className="mt-10"
+          >
+            <ValuationHistory
+              items={history}
+              onOpen={handleOpenHistory}
+              onRemove={handleRemoveHistory}
+              onClear={handleClearHistory}
+            />
+          </motion.div>
+        )}
+
+        {/* Market Explorer — choose your data source */}
+        {!valuation && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.3 }}
+            className="mt-10"
+          >
+            <MarketReferencePanel />
           </motion.div>
         )}
 

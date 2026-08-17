@@ -639,5 +639,11 @@
   },
   "removeFromFavorites": "Αφαίρεση από τα αγαπημένα",
   "saved": "Αποθηκευμένο",
-  "any": "Οποιοδήποτε"
+  "any": "Οποιοδήποτε",
+  "usageMeter": {
+    "label": "Μηνιαία χρήση",
+    "usedOfLimit": "{{used}} / {{limit}} σε χρήση",
+    "unlimited": "Απεριόριστα",
+    "resetsOn": "Ανανεώνεται στις {{date}}"
+  }
 }

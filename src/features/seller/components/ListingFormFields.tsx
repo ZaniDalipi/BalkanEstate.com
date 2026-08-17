@@ -371,9 +371,14 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                         <NumberInputWithSteppers label={t('seller:createListing.fields.bedrooms')} value={listingData.bedrooms} onChange={(val) => setListingData(p => ({ ...p, bedrooms: val }))} />
                         <NumberInputWithSteppers label={t('seller:createListing.fields.bathrooms')} value={listingData.bathrooms} onChange={(val) => setListingData(p => ({ ...p, bathrooms: val }))} />
                         <NumberInputWithSteppers label={t('seller:createListing.fields.livingRooms')} value={listingData.livingRooms} onChange={(val) => setListingData(p => ({ ...p, livingRooms: val }))} />
+                        <NumberInputWithSteppers label={t('seller:createListing.fields.kitchens', 'Kitchens')} value={listingData.kitchens} onChange={(val) => setListingData(p => ({ ...p, kitchens: val }))} />
+                        <NumberInputWithSteppers label={t('seller:createListing.fields.diningRooms', 'Dining rooms')} value={listingData.diningRooms} onChange={(val) => setListingData(p => ({ ...p, diningRooms: val }))} />
+                        <NumberInputWithSteppers label={t('seller:createListing.fields.toilets', 'Toilets (WC)')} value={listingData.toilets} onChange={(val) => setListingData(p => ({ ...p, toilets: val }))} />
+                        <NumberInputWithSteppers label={t('seller:createListing.fields.storageRooms', 'Storage rooms')} value={listingData.storageRooms} onChange={(val) => setListingData(p => ({ ...p, storageRooms: val }))} />
+                        <NumberInputWithSteppers label={t('seller:createListing.fields.offices', 'Office / study')} value={listingData.offices} onChange={(val) => setListingData(p => ({ ...p, offices: val }))} />
                     </>
                 )}
-                <NumberInputWithSteppers label={t('seller:createListing.fields.area')} value={listingData.sq_meters} step={5} onChange={(val) => setListingData(p => ({ ...p, sq_meters: val }))} />
+                <NumberInputWithSteppers label={t('seller:createListing.fields.area')} value={listingData.sq_meters} step={5} allowDecimals onChange={(val) => setListingData(p => ({ ...p, sq_meters: val }))} />
                 {listingData.propertyType !== 'land' && (
                     <NumberInputWithSteppers label={t('seller:createListing.fields.yearBuilt')} value={listingData.year_built} max={new Date().getFullYear()} onChange={(val) => setListingData(p => ({ ...p, year_built: val }))} />
                 )}
@@ -400,6 +405,11 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
         d0.bedrooms === d1.bedrooms &&
         d0.bathrooms === d1.bathrooms &&
         d0.livingRooms === d1.livingRooms &&
+        d0.kitchens === d1.kitchens &&
+        d0.diningRooms === d1.diningRooms &&
+        d0.toilets === d1.toilets &&
+        d0.storageRooms === d1.storageRooms &&
+        d0.offices === d1.offices &&
         d0.sq_meters === d1.sq_meters &&
         d0.year_built === d1.year_built &&
         d0.parking_spots === d1.parking_spots &&

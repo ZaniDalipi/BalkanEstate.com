@@ -34,7 +34,8 @@
       "years": "години",
       "yrs": "г.",
       "country": "Country",
-      "quickSelect": "Quick select:"
+      "quickSelect": "Quick select:",
+      "currency": "Валута"
     },
     "results": {
       "monthlyPayment": "Месечно плащане",
@@ -48,7 +49,8 @@
       "title": "Разпределение на плащането",
       "monthly": "Месечно",
       "yearly": "Годишно",
-      "total": "Общо"
+      "total": "Общо",
+      "overYears": "за {{years}} години"
     },
     "disclaimer": "Това е приблизителна оценка само за информационни цели. Консултирайте се с финансов специалист за реални проценти и плащания.",
     "features": {
@@ -56,8 +58,8 @@
       "accurateDesc": "Get precise monthly payment calculations",
       "flexible": "Flexible Terms",
       "flexibleDesc": "Compare different loan terms and rates",
-      "local": "Local Currencies",
-      "localDesc": "Support for all Balkan currencies"
+      "local": "Цени в евро",
+      "localDesc": "Ясни оценки в евро в целите Балкани"
     },
     "howItWorks": "How It Works",
     "step1Title": "Enter Property Price",
@@ -65,7 +67,12 @@
     "step2Title": "Adjust Parameters",
     "step2Desc": "Set your down payment, loan term, and interest rate",
     "step3Title": "See Your Payment",
-    "step3Desc": "Get your estimated monthly mortgage payment instantly"
+    "step3Desc": "Get your estimated monthly mortgage payment instantly",
+    "rateContext": "Типичен лихвен процент за {{country}}: {{min}}%–{{max}}% (пазарна средна стойност за {{year}}). Коригирайте според офертата на вашата банка.",
+    "errors": {
+      "rateRequired": "Въведете лихвен процент",
+      "rateRange": "Процентът трябва да е между {{min}}% и {{max}}%"
+    }
   },
   "rentVsBuy": {
     "title": "Калкулатор: Наем срещу покупка",

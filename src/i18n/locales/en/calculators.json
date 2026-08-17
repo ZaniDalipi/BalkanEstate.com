@@ -34,15 +34,16 @@
       "years": "years",
       "yrs": "yrs",
       "country": "Country",
-      "quickSelect": "Quick select:"
+      "quickSelect": "Quick select:",
+      "currency": "Currency"
     },
     "features": {
       "accurate": "Accurate Estimates",
       "accurateDesc": "Get precise monthly payment calculations",
       "flexible": "Flexible Terms",
       "flexibleDesc": "Compare different loan terms and rates",
-      "local": "Local Currencies",
-      "localDesc": "Support for all Balkan currencies"
+      "local": "Euro Pricing",
+      "localDesc": "Clear euro estimates across the Balkans"
     },
     "howItWorks": "How It Works",
     "step1Title": "Enter Property Price",
@@ -63,9 +64,15 @@
       "title": "Payment Breakdown",
       "monthly": "Monthly",
       "yearly": "Yearly",
-      "total": "Total"
+      "total": "Total",
+      "overYears": "over {{years}} years"
     },
-    "disclaimer": "This is an estimate for informational purposes only. Consult with a financial professional for actual rates and payments."
+    "disclaimer": "This is an estimate for informational purposes only. Consult with a financial professional for actual rates and payments.",
+    "rateContext": "Typical {{country}} rate: {{min}}%–{{max}}% ({{year}} market average). Adjust for your bank's offer.",
+    "errors": {
+      "rateRequired": "Enter an interest rate",
+      "rateRange": "Rate must be between {{min}}% and {{max}}%"
+    }
   },
   "rentVsBuy": {
     "title": "Rent vs. Buy Calculator",

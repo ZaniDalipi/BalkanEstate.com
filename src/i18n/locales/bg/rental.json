@@ -100,7 +100,11 @@
     "towelsIncluded": "Towels & Linen",
     "parkingIncluded": "Parking",
     "guestRequirements": "Guest Requirements",
-    "guestRequirementsHint": "e.g. no parties, no smoking, ID verification required (press Enter to add)"
+    "guestRequirementsHint": "e.g. no parties, no smoking, ID verification required (press Enter to add)",
+    "minLeaseDurationDays": "Мин. престой (дни)",
+    "maxLeaseDurationDays": "Макс. престой (дни)",
+    "minLeaseDurationWeeks": "Мин. престой (седмици)",
+    "maxLeaseDurationWeeks": "Макс. престой (седмици)"
   },
   "details": {
     "rentalTerms": "Условия за наем",
@@ -145,7 +149,10 @@
     "breakfastIncluded": "Breakfast",
     "towelsIncluded": "Towels & Linen",
     "parkingIncluded": "Parking",
-    "guestRequirements": "Guest Requirements"
+    "guestRequirements": "Guest Requirements",
+    "minDays": "мин. {{min}} дни",
+    "maxDays": "макс. {{max}} дни",
+    "minToMaxDays": "{{min}} - {{max}} дни"
   },
   "affordability": {
     "title": "Достъпност на наема",
@@ -165,7 +172,15 @@
     "estimatedInternet": "Прибл. интернет (1-ви месец)",
     "totalUpfront": "Общо авансово",
     "monthlyOngoing": "Месечни текущи разходи",
-    "disclaimer": "* Разходите за комунални услуги и интернет са приблизителни, базирани на средни стойности. Действителните разходи може да варират."
+    "disclaimer": "* Разходите за комунални услуги и интернет са приблизителни, базирани на средни стойности. Действителните разходи може да варират.",
+    "firstWeekRent": "Наем за първата седмица",
+    "firstDayRent": "Наем за първия ден",
+    "estimatedUtilitiesWeek": "Прогн. консумативи (1-ва седмица)",
+    "estimatedUtilitiesDay": "Прогн. консумативи (1-ви ден)",
+    "estimatedInternetWeek": "Прогн. интернет (1-ва седмица)",
+    "estimatedInternetDay": "Прогн. интернет (1-ви ден)",
+    "weeklyOngoing": "Седмичен текущ разход",
+    "dailyOngoing": "Дневен текущ разход"
   },
   "viewing": {
     "title": "Запазете оглед",

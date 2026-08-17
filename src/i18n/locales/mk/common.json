@@ -639,5 +639,11 @@
   },
   "removeFromFavorites": "Отстрани од омилени",
   "saved": "Зачувано",
-  "any": "Било кој"
+  "any": "Било кој",
+  "usageMeter": {
+    "label": "Месечно користење",
+    "usedOfLimit": "{{used}} / {{limit}} искористени",
+    "unlimited": "Неограничено",
+    "resetsOn": "Се обновува на {{date}}"
+  }
 }

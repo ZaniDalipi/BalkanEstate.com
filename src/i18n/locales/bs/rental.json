@@ -100,7 +100,11 @@
     "towelsIncluded": "Towels & Linen",
     "parkingIncluded": "Parking",
     "guestRequirements": "Guest Requirements",
-    "guestRequirementsHint": "e.g. no parties, no smoking, ID verification required (press Enter to add)"
+    "guestRequirementsHint": "e.g. no parties, no smoking, ID verification required (press Enter to add)",
+    "minLeaseDurationDays": "Min. boravak (dana)",
+    "maxLeaseDurationDays": "Maks. boravak (dana)",
+    "minLeaseDurationWeeks": "Min. boravak (sedmica)",
+    "maxLeaseDurationWeeks": "Maks. boravak (sedmica)"
   },
   "details": {
     "rentalTerms": "Uslovi najma",
@@ -145,7 +149,10 @@
     "breakfastIncluded": "Breakfast",
     "towelsIncluded": "Towels & Linen",
     "parkingIncluded": "Parking",
-    "guestRequirements": "Guest Requirements"
+    "guestRequirements": "Guest Requirements",
+    "minDays": "min. {{min}} dana",
+    "maxDays": "maks. {{max}} dana",
+    "minToMaxDays": "{{min}} - {{max}} dana"
   },
   "affordability": {
     "title": "Pristupačnost najma",
@@ -165,7 +172,15 @@
     "estimatedInternet": "Proc. internet (1. mjesec)",
     "totalUpfront": "Ukupno unaprijed",
     "monthlyOngoing": "Mjesečni tekući troškovi",
-    "disclaimer": "* Troškovi režija i interneta su procjene zasnovane na prosjecima. Stvarni troškovi mogu varirati."
+    "disclaimer": "* Troškovi režija i interneta su procjene zasnovane na prosjecima. Stvarni troškovi mogu varirati.",
+    "firstWeekRent": "Najam za prvu sedmicu",
+    "firstDayRent": "Najam za prvi dan",
+    "estimatedUtilitiesWeek": "Procijenjene režije (1. sedmica)",
+    "estimatedUtilitiesDay": "Procijenjene režije (1. dan)",
+    "estimatedInternetWeek": "Procijenjeni internet (1. sedmica)",
+    "estimatedInternetDay": "Procijenjeni internet (1. dan)",
+    "weeklyOngoing": "Sedmični tekući trošak",
+    "dailyOngoing": "Dnevni tekući trošak"
   },
   "viewing": {
     "title": "Zakažite razgledanje",

@@ -639,5 +639,11 @@
   },
   "removeFromFavorites": "Премахни от любими",
   "saved": "Запазено",
-  "any": "Всички"
+  "any": "Всички",
+  "usageMeter": {
+    "label": "Месечно потребление",
+    "usedOfLimit": "{{used}} / {{limit}} използвани",
+    "unlimited": "Неограничено",
+    "resetsOn": "Обновява се на {{date}}"
+  }
 }

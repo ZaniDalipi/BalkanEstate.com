@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { GoogleIcon, AppleIcon, SpinnerIcon, XMarkIcon } from '@/constants';
 import { isEmbeddedWebView, getOAuthUrl } from '../api/authApi';
 
@@ -20,13 +20,30 @@ const SocialLoginPopup: React.FC<SocialLoginPopupProps> = ({ provider, onSuccess
     const isInApp = isEmbeddedWebView();
     const [copied, setCopied] = useState(false);
 
+    // Keep the latest onSuccess without making the redirect effect depend on it.
+    // AuthModal passes a fresh inline arrow on every render, so depending on
+    // `onSuccess` directly would re-run the effect on each re-render (loading
+    // state, context/websocket updates, …), tearing down and re-arming the
+    // timer — and re-firing the OAuth navigation. In an installed PWA that
+    // surfaced as the login "looping" through several Redirecting to Google…
+    // cycles before it finally completed.
+    const onSuccessRef = useRef(onSuccess);
+    onSuccessRef.current = onSuccess;
+
+    // Guarantees the OAuth redirect is triggered exactly once for the lifetime
+    // of this popup, no matter how many times the component re-renders.
+    const hasRedirectedRef = useRef(false);
+
     useEffect(() => {
         if (isInApp) return; // Don't auto-redirect in in-app browsers
+        if (hasRedirectedRef.current) return;
         const redirectTimer = setTimeout(() => {
-            onSuccess();
+            if (hasRedirectedRef.current) return;
+            hasRedirectedRef.current = true;
+            onSuccessRef.current();
         }, 500);
         return () => clearTimeout(redirectTimer);
-    }, [onSuccess, isInApp]);
+    }, [isInApp]);
 
     const pageUrl = window.location.href;
 

@@ -33,7 +33,15 @@
     "hideAdvanced": "Sakrij Opcije",
     "getValuation": "Dobijte Moju Procjenu",
     "calculating": "Analiza...",
-    "disclaimer": "Ovo je automatizovana procjena samo u informativne svrhe. Stvarna tržišna vrijednost može varirati."
+    "disclaimer": "Ovo je automatizovana procjena samo u informativne svrhe. Stvarna tržišna vrijednost može varirati.",
+    "roomsSection": "Sobe",
+    "roomsTotal": "ukupno {{count}} soba",
+    "livingRooms": "Dnevne sobe",
+    "kitchens": "Kuhinje",
+    "diningRooms": "Trpezarije",
+    "toilets": "Toaleti (WC)",
+    "storageRooms": "Ostave",
+    "offices": "Kancelarija / radna soba"
   },
   "propertyTypes": {
     "apartment": "Stan",
@@ -92,7 +100,15 @@
     "newValuation": "Nova Procjena",
     "readyToSell": "Spremni za Prodaju?",
     "listPropertyCTA": "Objavite svoju nekretninu na BalkanEstate i dosegnite hiljade kupaca širom Balkana.",
-    "listPropertyButton": "Objavite Moju Nekretninu"
+    "listPropertyButton": "Objavite Moju Nekretninu",
+    "reportTitle": "Izvještaj o procjeni",
+    "savedBadge": "Sačuvano u vašoj istoriji",
+    "livingRooms": "Dnevne sobe",
+    "kitchens": "Kuhinje",
+    "diningRooms": "Trpezarije",
+    "toilets": "Toaleti (WC)",
+    "storageRooms": "Ostave",
+    "offices": "Kancelarija / radna soba"
   },
   "breakdown": {
     "baseValue": "Osnovna Vrijednost (iz uporedivih)",
@@ -144,5 +160,31 @@
   "seo": {
     "title": "Free AI Property Valuation - Instant Balkan Property Estimate",
     "description": "Get a free AI-powered property valuation for any Balkan property. Instant price estimates for apartments, houses, and villas in Montenegro, Albania, Serbia, and 8 more countries."
+  },
+  "marketReference": {
+    "title": "Referenca tržišne cijene",
+    "subtitle": "Uporedi €/m² po izvoru podataka",
+    "official": "Zvanična statistika",
+    "listings": "BalkanEstate oglasi",
+    "country": "Država",
+    "avgOfficial": "Prosječna cijena · zvanično",
+    "avgListings": "Prosječna cijena · naši oglasi",
+    "noListings": "Još nema tržišnih podataka za ovo područje",
+    "noListingsHint": "Pređite na zvaničnu statistiku za referentnu vrijednost.",
+    "thisProperty": "Ova nekretnina",
+    "marketOfficial": "Tržište (zvanično)",
+    "marketListings": "Tržište (oglasi)",
+    "aboveMarket": "{{pct}}% iznad tržišne reference",
+    "belowMarket": "{{pct}}% ispod tržišne reference",
+    "sourceLabel": "Izvor",
+    "sourceListings": "Agregirano iz aktivnih BalkanEstate oglasa",
+    "live": "Uživo",
+    "disclaimer": "Reference su okvirne EUR/m² vrijednosti za {{year}}, ne procjena. Lokalne cijene variraju prema kvartu, stanju i spratu."
+  },
+  "history": {
+    "title": "Vaše sačuvane procjene",
+    "count": "{{count}} sačuvano na ovom uređaju",
+    "clearAll": "Obriši sve",
+    "remove": "Ukloni"
   }
 }

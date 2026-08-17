@@ -147,7 +147,12 @@
       },
       "slotDuration": "{{minutes}} min termini"
     },
-    "floorPlanInteractiveHint": "Интерактивни прегледач са зумирањем, померањем и ознакама"
+    "floorPlanInteractiveHint": "Интерактивни прегледач са зумирањем, померањем и ознакама",
+    "kitchens": "Kuhinje",
+    "diningRooms": "Trpezarije",
+    "toilets": "Toaleti (WC)",
+    "storageRooms": "Ostave",
+    "offices": "Kancelarija / radna soba"
   },
   "distances": {
     "title": "Удаљености",
@@ -221,7 +226,10 @@
     "phone": "Телефон",
     "email": "Имејл",
     "website": "Веб-сајт",
-    "viewProfile": "Погледај профил"
+    "viewProfile": "Погледај профил",
+    "moreFromAgent": "Više oglasa ovog agenta",
+    "noOtherListings": "Trenutno nema drugih aktivnih oglasa",
+    "viewFullProfile": "Pogledaj ceo profil"
   },
   "navigation": {
     "back": "Назад",
@@ -656,6 +664,35 @@
   "seo": {
     "description": "{{type}} са {{beds}} спаваћих соба, {{baths}} купатила за {{listingAction}} у {{city}}, {{country}}. {{sqft}}m² за €{{price}}.",
     "forRent": "Издавање",
-    "forSale": "Продаја"
+    "forSale": "Продаја",
+    "perMonth": "/mes",
+    "title": "{{type}} sa {{beds}} spavaćih soba za {{listingAction}} u {{city}}, {{country}} - €{{price}}"
+  },
+  "roomStyler": {
+    "reimagine": "Замисли изнова",
+    "title": "Замислите ову собу изнова",
+    "subtitle": "Погледајте ову собу у другом стилу уређења",
+    "close": "Затвори",
+    "chooseStyle": "Изаберите стил",
+    "generate": "Генериши",
+    "generating": "Преуређивање у стил {{style}}…",
+    "generating2": "Генерисање…",
+    "tryAnother": "Пробај други стил",
+    "download": "Преузми HD",
+    "before": "Оригинал",
+    "roomPhoto": "Фотографија собе",
+    "limitReached": "Достигли сте месечни лимит за преуређивање соба.",
+    "genericError": "Нешто је пошло по злу. Молимо покушајте поново.",
+    "upgrade": "Погледај планове",
+    "meterLabel": "АИ Стилиста Соба",
+    "meterSubtitle": "Замислите собе у различитим стиловима уређења",
+    "meterUsageLabel": "Преуређивања овог месеца",
+    "limitTitle": "Искористили сте сва преуређивања овог месеца",
+    "limitMessage": "Надоградите на Pro Buyer или други план да наставите — или сачекајте да се квота обнови.",
+    "unlimitedNote": "Неограничена преуређивања на вашем плану",
+    "remainingNote": "Преостало {{remaining}} овог месеца",
+    "disclaimer": "AI-генерисано уређење само у сврху демонстрације. Ове слике нису стварне фотографије некретнине и могу садржати предмете који нису део огласа.",
+    "interior": "Ентеријер",
+    "exterior": "Екстеријер"
   }
 }

@@ -100,7 +100,11 @@
     "towelsIncluded": "Towels & Linen",
     "parkingIncluded": "Parking",
     "guestRequirements": "Guest Requirements",
-    "guestRequirementsHint": "e.g. no parties, no smoking, ID verification required (press Enter to add)"
+    "guestRequirementsHint": "e.g. no parties, no smoking, ID verification required (press Enter to add)",
+    "minLeaseDurationDays": "Qëndrim min. (ditë)",
+    "maxLeaseDurationDays": "Qëndrim maks. (ditë)",
+    "minLeaseDurationWeeks": "Qëndrim min. (javë)",
+    "maxLeaseDurationWeeks": "Qëndrim maks. (javë)"
   },
   "details": {
     "rentalTerms": "Kushtet e Qirase",
@@ -145,7 +149,10 @@
     "breakfastIncluded": "Breakfast",
     "towelsIncluded": "Towels & Linen",
     "parkingIncluded": "Parking",
-    "guestRequirements": "Guest Requirements"
+    "guestRequirements": "Guest Requirements",
+    "minDays": "min. {{min}} ditë",
+    "maxDays": "maks. {{max}} ditë",
+    "minToMaxDays": "{{min}} - {{max}} ditë"
   },
   "affordability": {
     "title": "Perballueshmeria e Qirase",
@@ -165,7 +172,15 @@
     "estimatedInternet": "Internet i vleresuar (muaji i pare)",
     "totalUpfront": "Totali paraprak",
     "monthlyOngoing": "Kostoja mujore e vazhdueshme",
-    "disclaimer": "* Kostot e shpenzimeve dhe internetit jane vleresime bazuar ne mesatare. Kostot aktuale mund te ndryshojne."
+    "disclaimer": "* Kostot e shpenzimeve dhe internetit jane vleresime bazuar ne mesatare. Kostot aktuale mund te ndryshojne.",
+    "firstWeekRent": "Qiraja e javës së parë",
+    "firstDayRent": "Qiraja e ditës së parë",
+    "estimatedUtilitiesWeek": "Faturat e vlerësuara (java 1)",
+    "estimatedUtilitiesDay": "Faturat e vlerësuara (dita 1)",
+    "estimatedInternetWeek": "Interneti i vlerësuar (java 1)",
+    "estimatedInternetDay": "Interneti i vlerësuar (dita 1)",
+    "weeklyOngoing": "Kosto javore e vazhdueshme",
+    "dailyOngoing": "Kosto ditore e vazhdueshme"
   },
   "viewing": {
     "title": "Caktoni nje Vizite",

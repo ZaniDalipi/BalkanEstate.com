@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
+import { decorativeMotionEnabled } from '../../src/utils/perfMode';
 
 // Types for random bubble positioning
 interface BubblePosition {
@@ -99,6 +100,10 @@ export const RandomCityBubbles: React.FC<{
   // Split animation effect - randomly split a bubble every 6-12 seconds
   // Deferred to avoid blocking main thread during initial load
   useEffect(() => {
+    // Skip the timer entirely on reduced-motion / power-saving (mobile) — the
+    // bubbles are `hidden lg:block` so they don't even render there, yet the
+    // interval would keep firing React re-renders. Pure wasted work.
+    if (!decorativeMotionEnabled()) return;
     let splitInterval: ReturnType<typeof setInterval>;
     const startAnimations = () => {
       splitInterval = setInterval(() => {
@@ -153,6 +158,7 @@ export const RandomCityBubbles: React.FC<{
 
   // Periodically reposition a random bubble (deferred to avoid blocking main thread)
   useEffect(() => {
+    if (!decorativeMotionEnabled()) return;
     let repositionInterval: ReturnType<typeof setInterval>;
     const startRepositioning = () => {
       repositionInterval = setInterval(() => {

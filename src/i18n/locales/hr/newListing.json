@@ -334,6 +334,7 @@
     "continueManualEntry": "Možete nastaviti s ručnim unosom.",
     "uploadFailedMessage": "Učitavanje slika nije uspjelo: {{error}}. Molimo pokušajte ponovno.",
     "imageProcessingFailed": "Obrada Slika Nije Uspjela",
+    "heicConversionFailed": "Nismo mogli pretvoriti {{files}}. Molimo spremite datoteku kao JPEG ili PNG i pokušajte ponovno.",
     "failedToProcessImages": "Obrada slika nije uspjela. Molimo pokušajte ponovno.",
     "noNewImages": "Nema Novih Slika",
     "noNewImagesMessage": "Nisu učitane nove slike za analizu. Molimo dodajte nove datoteke slika.",

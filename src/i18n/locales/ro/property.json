@@ -147,7 +147,12 @@
       },
       "slotDuration": "{{minutes}} min sloturi"
     },
-    "floorPlanInteractiveHint": "Vizualizator interactiv cu zoom, deplasare și etichete"
+    "floorPlanInteractiveHint": "Vizualizator interactiv cu zoom, deplasare și etichete",
+    "kitchens": "Bucătării",
+    "diningRooms": "Sufragerii",
+    "toilets": "Toalete (WC)",
+    "storageRooms": "Debarale",
+    "offices": "Birou / cameră de lucru"
   },
   "distances": {
     "title": "Distanțe",
@@ -221,7 +226,10 @@
     "phone": "Telefon",
     "email": "E-mail",
     "website": "Site web",
-    "viewProfile": "Vezi profil"
+    "viewProfile": "Vezi profil",
+    "moreFromAgent": "Mai multe anunțuri de la acest agent",
+    "noOtherListings": "Momentan nu există alte anunțuri active",
+    "viewFullProfile": "Vezi profilul complet"
   },
   "navigation": {
     "back": "Înapoi",
@@ -656,6 +664,35 @@
   "seo": {
     "description": "{{type}} cu {{beds}} dormitoare, {{baths}} băi de {{listingAction}} în {{city}}, {{country}}. {{sqft}}m² pentru €{{price}}.",
     "forRent": "Închiriere",
-    "forSale": "Vânzare"
+    "forSale": "Vânzare",
+    "perMonth": "/lună",
+    "title": "{{type}} cu {{beds}} dormitoare pentru {{listingAction}} în {{city}}, {{country}} - €{{price}}"
+  },
+  "roomStyler": {
+    "reimagine": "Reimaginează",
+    "title": "Reimaginează această cameră",
+    "subtitle": "Vezi această cameră într-un alt stil de design interior",
+    "close": "Închide",
+    "chooseStyle": "Alege un stil",
+    "generate": "Generează",
+    "generating": "Restilizare în {{style}}…",
+    "generating2": "Se generează…",
+    "tryAnother": "Încearcă alt stil",
+    "download": "Descarcă HD",
+    "before": "Original",
+    "roomPhoto": "Fotografia camerei",
+    "limitReached": "Ai atins limita lunară de restilizare a camerelor.",
+    "genericError": "Ceva n-a mers bine. Te rugăm încearcă din nou.",
+    "upgrade": "Vezi planurile",
+    "meterLabel": "Stilist AI de Camere",
+    "meterSubtitle": "Reimaginează camere în diferite stiluri de design",
+    "meterUsageLabel": "Restilizări luna aceasta",
+    "limitTitle": "Ai folosit toate restilizările luna aceasta",
+    "limitMessage": "Fă upgrade la Pro Buyer sau alt plan pentru a continua — sau așteaptă până se resetează cota.",
+    "unlimitedNote": "Restilizări nelimitate în planul tău",
+    "remainingNote": "{{remaining}} rămase luna aceasta",
+    "disclaimer": "Amenajare generată de AI doar în scop demonstrativ. Aceste imagini nu sunt fotografii reale ale proprietății și pot include obiecte care nu fac parte din anunț.",
+    "interior": "Interior",
+    "exterior": "Exterior"
   }
 }

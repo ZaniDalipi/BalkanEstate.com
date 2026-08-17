@@ -476,7 +476,8 @@
     "property": "Nekretnina",
     "queryTitle": "Nekretnine za prodaju u {{query}} - Oglasi nekretnina",
     "tagline": "Pretraga nekretnina pokretana umjetnom inteligencijom na BalkanEstateAI — 11 zemalja, 10 jezika.",
-    "typesForSale": "kuće, stanovi i vile za prodaju"
+    "typesForSale": "kuće, stanovi i vile za prodaju",
+    "in": "u"
   },
   "saving": "Spremanje...",
   "saveSearch": "Spremi pretragu"

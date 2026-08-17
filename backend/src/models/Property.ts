@@ -65,6 +65,11 @@ export interface IProperty extends Document {
   beds: number;
   baths: number;
   livingRooms: number;
+  kitchens?: number;
+  diningRooms?: number;
+  toilets?: number;
+  storageRooms?: number;
+  offices?: number;
   sqft: number;
   yearBuilt: number;
   parking: number;
@@ -293,6 +298,31 @@ const PropertySchema: Schema = new Schema(
       type: Number,
       required: true,
       min: 0,
+    },
+    kitchens: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
+    diningRooms: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
+    toilets: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
+    storageRooms: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
+    offices: {
+      type: Number,
+      min: 0,
+      default: 0,
     },
     sqft: {
       type: Number,

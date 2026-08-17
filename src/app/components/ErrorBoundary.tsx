@@ -4,6 +4,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { captureError, addBreadcrumb } from '@/src/lib/sentry';
+import { isChunkLoadError, recoverFromStaleChunk } from '@/src/utils/chunkRecovery';
 
 interface Props {
   children: ReactNode;
@@ -58,18 +59,15 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Auto-recover from chunk load failures (stale HTML after deployment)
-    // by forcing a full page reload to get fresh HTML with correct chunk hashes
-    if (this.isChunkLoadError(error)) {
-      const reloadKey = 'chunk-reload-' + window.location.pathname;
-      const lastReload = sessionStorage.getItem(reloadKey);
-      const now = Date.now();
-      // Only auto-reload once per path per session (prevent reload loops)
-      if (!lastReload || now - Number(lastReload) > 30000) {
-        sessionStorage.setItem(reloadKey, String(now));
-        window.location.reload();
-        return;
-      }
+    // Auto-recover from chunk load failures (stale HTML after a deployment,
+    // e.g. a lazily-loaded `auth` chunk whose hashed filename no longer exists
+    // and comes back as index.html / text/html). A plain reload is not enough
+    // when a precached service worker keeps serving the stale index.html, so
+    // recoverFromStaleChunk unregisters the SW, clears caches, then reloads once
+    // (throttled) to fetch a clean bundle.
+    if (isChunkLoadError(error)) {
+      void recoverFromStaleChunk();
+      return;
     }
 
     // Call optional error handler
@@ -92,17 +90,6 @@ export class ErrorBoundary extends Component<Props, State> {
       level: this.props.level || 'app',
       componentStack: errorInfo.componentStack,
     });
-  }
-
-  private isChunkLoadError(error: Error): boolean {
-    const message = error.message || '';
-    return (
-      error.name === 'ChunkLoadError' ||
-      message.includes('Loading chunk') ||
-      message.includes('Loading CSS chunk') ||
-      message.includes('Failed to fetch dynamically imported module') ||
-      message.includes('Importing a module script failed')
-    );
   }
 
   handleReset = () => {

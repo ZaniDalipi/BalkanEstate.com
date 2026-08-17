@@ -334,6 +334,7 @@
     "uploadFailed": "Încărcare Eșuată",
     "uploadFailedMessage": "Încărcarea imaginilor a eșuat: {{error}}. Vă rugăm încercați din nou.",
     "imageProcessingFailed": "Procesarea Imaginilor a Eșuat",
+    "heicConversionFailed": "Nu am putut converti {{files}}. Vă rugăm să îl salvați ca JPEG sau PNG și să îl încărcați din nou.",
     "failedToProcessImages": "Procesarea imaginilor a eșuat. Vă rugăm încercați din nou.",
     "noNewImages": "Nu Există Imagini Noi",
     "noNewImagesMessage": "Nu au fost încărcate imagini noi pentru analiză. Vă rugăm adăugați fișiere imagine noi.",

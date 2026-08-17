@@ -31,6 +31,16 @@ export const productKeys = {
 };
 
 // ============================================================================
+// Room Styler Query Keys
+// Used by: RoomStylerModal usage meter, MyAccountPage AI usage meter
+// ============================================================================
+
+export const roomStylerKeys = {
+  all: ['roomStyler'] as const,
+  usage: () => [...roomStylerKeys.all, 'usage'] as const,
+};
+
+// ============================================================================
 // Discount Codes Query Keys
 // Used by: Admin DiscountCodeManager, Payment validation
 // ============================================================================
