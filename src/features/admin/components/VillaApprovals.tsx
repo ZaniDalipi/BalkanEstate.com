@@ -32,6 +32,8 @@ const VillaApprovals: React.FC = () => {
   const { t } = useTranslation(['admin']);
   const [tab, setTab] = useState<VillaApprovalStatus>('pending');
   const [villas, setVillas] = useState<VillaRow[]>([]);
+  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +44,8 @@ const VillaApprovals: React.FC = () => {
     try {
       const data = await getVillaApprovals(status);
       setVillas(data.villas || []);
+      setTotal(data.count ?? (data.villas || []).length);
+      setHasMore(Boolean(data.hasMore));
     } catch {
       setError(t('admin:villas.loadError', 'Failed to load villa approvals'));
     } finally {
@@ -51,29 +55,28 @@ const VillaApprovals: React.FC = () => {
 
   useEffect(() => { fetchVillas(tab); }, [tab, fetchVillas]);
 
-  const handleApprove = async (id: string) => {
+  // Splice the row out for instant feedback, then refetch so the count and any
+  // rows beyond the first page come from the server rather than local state.
+  const runAction = async (id: string, action: () => Promise<unknown>, errorKey: string, fallback: string) => {
     setProcessingId(id);
+    setError(null);
     try {
-      await approveVilla(id);
+      await action();
       setVillas(prev => prev.filter(v => v._id !== id));
+      await fetchVillas(tab);
     } catch {
-      setError(t('admin:villas.approveError', 'Failed to approve villa'));
+      setError(t(errorKey, fallback));
     } finally {
       setProcessingId(null);
     }
   };
 
-  const handleReject = async (id: string) => {
+  const handleApprove = (id: string) =>
+    runAction(id, () => approveVilla(id), 'admin:villas.approveError', 'Failed to approve villa');
+
+  const handleReject = (id: string) => {
     const reason = window.prompt(t('admin:villas.rejectPrompt', 'Reason for rejection (optional):')) ?? undefined;
-    setProcessingId(id);
-    try {
-      await rejectVilla(id, reason || undefined);
-      setVillas(prev => prev.filter(v => v._id !== id));
-    } catch {
-      setError(t('admin:villas.rejectError', 'Failed to reject villa'));
-    } finally {
-      setProcessingId(null);
-    }
+    return runAction(id, () => rejectVilla(id, reason || undefined), 'admin:villas.rejectError', 'Failed to reject villa');
   };
 
   const sellerName = (s: VillaRow['sellerId']): string =>
@@ -100,6 +103,7 @@ const VillaApprovals: React.FC = () => {
             }`}
           >
             {t(tb.labelKey, tb.fallback)}
+            {tab === tb.id && total > 0 && <span className="ml-1.5 opacity-70">{total}</span>}
           </button>
         ))}
       </div>
@@ -174,6 +178,14 @@ const VillaApprovals: React.FC = () => {
               )}
             </div>
           ))}
+          {hasMore && (
+            <p className="text-xs text-gray-400 text-center pt-1">
+              {t('admin:villas.showingFirst', 'Showing the first {{shown}} of {{total}} villas.', {
+                shown: villas.length,
+                total,
+              })}
+            </p>
+          )}
         </div>
       )}
     </div>

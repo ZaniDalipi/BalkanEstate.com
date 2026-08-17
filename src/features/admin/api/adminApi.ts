@@ -130,7 +130,7 @@ export type VillaApprovalStatus = 'pending' | 'approved' | 'rejected';
 
 export const getVillaApprovals = async (
   status: VillaApprovalStatus = 'pending'
-): Promise<{ count: number; status: string; villas: any[] }> => {
+): Promise<{ count: number; status: string; villas: any[]; hasMore?: boolean }> => {
   return apiRequest(`/admin/villa-approvals?status=${status}`, {
     requiresAuth: true,
   });

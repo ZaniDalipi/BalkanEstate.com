@@ -31,6 +31,58 @@ import { invalidateCache } from '../middleware/cache';
 import { getObjectIdParam, getParam } from '../utils/validateParams';
 
 /**
+ * Single source of truth for the client-settable property fields.
+ *
+ * `createProperty` accepts all of them; `updateProperty` accepts the same set
+ * minus IMMUTABLE_PROPERTY_FIELDS. Previously the two lists were maintained
+ * by hand and had drifted, so fields present only on create (videoUrl,
+ * imagePublicId, floorplanPublicId, originalPrice, priceIntervals) were
+ * write-once — a PUT would 200 having silently ignored them.
+ *
+ * Note: anything NOT listed here can never be set by a client. That is what
+ * keeps villaApprovalStatus server-controlled (no self-approval).
+ */
+export const ALLOWED_PROPERTY_FIELDS = [
+  'propertyId', 'listingType', 'title', 'status', 'price', 'isNegotiable', 'originalPrice', 'priceIntervals',
+  'address', 'city', 'country',
+  'beds', 'baths', 'livingRooms', 'sqft', 'yearBuilt', 'parking',
+  'description', 'specialFeatures', 'materials',
+  'tourUrl', 'virtualTour360Url', 'hasVirtualTour360', 'videoUrl',
+  'imageUrl', 'imagePublicId', 'images',
+  'lat', 'lng',
+  'propertyType', 'floorNumber', 'totalFloors', 'floorplanUrl', 'floorplanPublicId',
+  'amenities', 'hasBalcony', 'hasGarden', 'hasElevator', 'hasSecurity',
+  'hasAirConditioning', 'hasPool', 'petsAllowed',
+  'distanceToCenter', 'distanceToSea', 'distanceToSchool', 'distanceToHospital',
+  'furnishing', 'heatingType', 'condition', 'viewType', 'energyRating', 'orientation',
+  // Rental-specific fields
+  'rentPeriod', 'securityDeposit', 'minimumLeaseDuration', 'maximumLeaseDuration',
+  'availableFrom', 'utilitiesIncluded', 'internetIncluded',
+  'tenantRequirements', 'maxOccupants',
+  // Daily rental / luxury villa fields
+  'checkInTime', 'checkOutTime', 'cleaningFee', 'cancellationPolicy',
+  'breakfastIncluded', 'towelsIncluded', 'parkingIncluded',
+  'visitAvailability',
+] as const;
+
+/** Fields locked after creation (ownership/role provenance + sale-vs-rent market). */
+export const IMMUTABLE_PROPERTY_FIELDS = [
+  'createdAsRole',
+  'listingType',
+  'sellerId',
+  'createdByName',
+  'createdByEmail',
+  'createdByAgencyName',
+  'createdByAgencyId',
+  'createdByLicenseNumber',
+] as const;
+
+/** Fields a client may change on an existing property. */
+export const ALLOWED_UPDATE_FIELDS = ALLOWED_PROPERTY_FIELDS.filter(
+  (field) => !(IMMUTABLE_PROPERTY_FIELDS as readonly string[]).includes(field)
+);
+
+/**
  * ═══════════════════════════════════════════════════════════════════════════
  * PROPERTY ROLE SYSTEM - IMPORTANT BUSINESS LOGIC
  * ═══════════════════════════════════════════════════════════════════════════
@@ -859,29 +911,6 @@ export const createProperty = async (
 
     // Whitelist allowed fields to prevent mass assignment attacks
     // (e.g., attacker setting isPromoted, views, saves, etc.)
-    const ALLOWED_PROPERTY_FIELDS = [
-      'propertyId', 'listingType', 'title', 'status', 'price', 'isNegotiable', 'originalPrice', 'priceIntervals',
-      'address', 'city', 'country',
-      'beds', 'baths', 'livingRooms', 'sqft', 'yearBuilt', 'parking',
-      'description', 'specialFeatures', 'materials',
-      'tourUrl', 'virtualTour360Url', 'hasVirtualTour360', 'videoUrl',
-      'imageUrl', 'imagePublicId', 'images',
-      'lat', 'lng',
-      'propertyType', 'floorNumber', 'totalFloors', 'floorplanUrl', 'floorplanPublicId',
-      'amenities', 'hasBalcony', 'hasGarden', 'hasElevator', 'hasSecurity',
-      'hasAirConditioning', 'hasPool', 'petsAllowed',
-      'distanceToCenter', 'distanceToSea', 'distanceToSchool', 'distanceToHospital',
-      'furnishing', 'heatingType', 'condition', 'viewType', 'energyRating', 'orientation',
-      // Rental-specific fields
-      'rentPeriod', 'securityDeposit', 'minimumLeaseDuration', 'maximumLeaseDuration',
-      'availableFrom', 'utilitiesIncluded', 'internetIncluded',
-      'tenantRequirements', 'maxOccupants',
-      // Daily rental / luxury villa fields
-      'checkInTime', 'checkOutTime', 'cleaningFee', 'cancellationPolicy',
-      'breakfastIncluded', 'towelsIncluded', 'parkingIncluded',
-      'visitAvailability',
-    ] as const;
-
     const sanitizedBody: Record<string, any> = {};
     for (const field of ALLOWED_PROPERTY_FIELDS) {
       if (req.body[field] !== undefined) {
@@ -892,11 +921,12 @@ export const createProperty = async (
     const propertyData = {
       ...sanitizedBody,
       sellerId: String(currentUser._id),
-      // Luxury villas are curated — they require admin approval before they
-      // appear on the public Luxury Villas tab. Set server-side so a client
-      // can never self-approve (villaApprovalStatus is not an allowed field).
+      // Luxury villas publish immediately; admin review is optional curation
+      // (an admin can still reject one, which hides it). Set server-side so a
+      // client can never set this itself — villaApprovalStatus is deliberately
+      // absent from ALLOWED_PROPERTY_FIELDS.
       ...(sanitizedBody.propertyType === 'luxury-villa' && {
-        villaApprovalStatus: 'pending' as const,
+        villaApprovalStatus: 'approved' as const,
       }),
       // Add user identification for 1:1 relationship tracking
       createdByName: user.name,
@@ -1072,16 +1102,7 @@ export const updateProperty = async (
     // - sellerId: The owner of the listing
     // - createdByName, createdByEmail: Creator identification
     // - createdByAgencyName, createdByLicenseNumber: Agent credentials
-    const immutableFields = [
-      'createdAsRole',
-      'listingType',
-      'sellerId',
-      'createdByName',
-      'createdByEmail',
-      'createdByAgencyName',
-      'createdByAgencyId',
-      'createdByLicenseNumber',
-    ];
+    const immutableFields = IMMUTABLE_PROPERTY_FIELDS;
 
     // Remove immutable fields from update body to prevent tampering
     const updateData = { ...req.body };
@@ -1106,29 +1127,9 @@ export const updateProperty = async (
     });
 
     // IMPORTANT: Only update fields that are explicitly provided and not undefined
-    // This preserves existing data when fields are not included in the update
-    const fieldsToUpdate = [
-      'propertyId', 'status', 'title', 'price', 'isNegotiable', 'address', 'city', 'country',
-      'beds', 'baths', 'livingRooms', 'sqft', 'yearBuilt', 'parking',
-      'description', 'specialFeatures', 'materials', 'amenities',
-      'tourUrl', 'virtualTour360Url', 'hasVirtualTour360',
-      'imageUrl', 'images', 'lat', 'lng',
-      'propertyType', 'floorNumber', 'totalFloors', 'floorplanUrl',
-      'furnishing', 'heatingType', 'condition', 'viewType', 'energyRating',
-      'orientation',
-      'hasBalcony', 'hasGarden', 'hasElevator', 'hasSecurity',
-      'hasAirConditioning', 'hasPool', 'petsAllowed',
-      'distanceToCenter', 'distanceToSea', 'distanceToSchool', 'distanceToHospital',
-      // Rental-specific fields
-      'rentPeriod', 'securityDeposit', 'minimumLeaseDuration', 'maximumLeaseDuration',
-      'availableFrom', 'utilitiesIncluded', 'internetIncluded',
-      'tenantRequirements', 'maxOccupants',
-      // Daily rental / luxury villa fields
-      'checkInTime', 'checkOutTime', 'cleaningFee', 'cancellationPolicy',
-      'breakfastIncluded', 'towelsIncluded', 'parkingIncluded',
-      // Visit availability
-      'visitAvailability',
-    ];
+    // This preserves existing data when fields are not included in the update.
+    // Derived from the shared create whitelist so the two can no longer drift.
+    const fieldsToUpdate = ALLOWED_UPDATE_FIELDS;
 
     let updatedFields: string[] = [];
     fieldsToUpdate.forEach(field => {
@@ -1142,6 +1143,15 @@ export const updateProperty = async (
         updatedFields.push(field);
       }
     });
+
+    // A property edited into a luxury villa needs a curation status too.
+    // Without this it stays absent, and because the public villa filter uses
+    // $nin (which matches missing fields) the villa would go live having never
+    // passed through the approval pipeline at all.
+    if (property.propertyType === 'luxury-villa' && !property.villaApprovalStatus) {
+      property.villaApprovalStatus = 'approved';
+      updatedFields.push('villaApprovalStatus');
+    }
 
     // Log coordinates status
     propertyLogger.info(`📍 Property coordinates after update: lat=${property.lat}, lng=${property.lng}`);

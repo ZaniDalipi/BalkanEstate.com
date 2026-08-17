@@ -9,6 +9,7 @@ import { geocodeAddressWithRateLimit } from '../services/geocodingService';
 import { getWhitelistConfig } from '../middleware/adminAuth';
 import { adminLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
+import { emitPropertyUpdated } from '../sockets/propertySocket';
 import { migratePropertySchema } from '../utils/migratePropertySchema';
 import { getObjectIdParam } from '../utils/validateParams';
 import { escapeRegex } from '../utils/escapeRegex';
@@ -1299,13 +1300,20 @@ export const getVillaApprovals = async (req: Request, res: Response): Promise<vo
     const filter: Record<string, unknown> = { propertyType: 'luxury-villa' };
     if (allowed.includes(status)) filter.villaApprovalStatus = status;
 
-    const villas = await Property.find(filter)
-      .populate('sellerId', 'name email phone role')
-      .sort({ createdAt: -1 })
-      .limit(200)
-      .lean();
+    const PAGE_SIZE = 200;
+    // `count` is the true number of matching villas, not the page length —
+    // otherwise it silently disagrees with the sidebar badge (which uses its
+    // own countDocuments) once the queue exceeds a page.
+    const [villas, count] = await Promise.all([
+      Property.find(filter)
+        .populate('sellerId', 'name email phone role')
+        .sort({ createdAt: -1 })
+        .limit(PAGE_SIZE)
+        .lean(),
+      Property.countDocuments(filter),
+    ]);
 
-    res.json({ count: villas.length, status, villas });
+    res.json({ count, status, villas, hasMore: count > villas.length });
   } catch (error: any) {
     adminLogger.error('Get villa approvals error:', error);
     res.status(500).json({ message: 'Error fetching villa approvals' });
@@ -1335,6 +1343,13 @@ export const approveVilla = async (req: Request, res: Response): Promise<void> =
     villa.villaApprovalReviewedAt = new Date();
     villa.villaApprovalReason = undefined;
     await villa.save();
+
+    // GET /api/properties is cached and the public villa filter keys off
+    // villaApprovalStatus, so without this the approval is invisible until the
+    // cache expires. The change stream can't be relied on (it bails out on
+    // standalone deploys), hence the explicit emit as well.
+    invalidateCache('/api/properties');
+    emitPropertyUpdated(String(villa._id), villa.toObject());
 
     adminLogger.info(`Luxury villa ${id} approved`);
     res.json({ message: 'Villa approved', id: String(villa._id), villaApprovalStatus: 'approved' });
@@ -1367,8 +1382,13 @@ export const rejectVilla = async (req: Request, res: Response): Promise<void> =>
     villa.villaApprovalStatus = 'rejected';
     villa.villaApprovalReviewedBy = String((req.user as any)?._id || '');
     villa.villaApprovalReviewedAt = new Date();
-    if (reason) villa.villaApprovalReason = String(reason).slice(0, 1000);
+    // Always overwrite: leaving the previous reason in place when this rejection
+    // gave none would attribute an old explanation to a new decision.
+    villa.villaApprovalReason = reason ? String(reason).slice(0, 1000) : undefined;
     await villa.save();
+
+    invalidateCache('/api/properties');
+    emitPropertyUpdated(String(villa._id), villa.toObject());
 
     adminLogger.info(`Luxury villa ${id} rejected (reason: ${reason || 'none'})`);
     res.json({ message: 'Villa rejected', id: String(villa._id), villaApprovalStatus: 'rejected', reason: reason || undefined });
