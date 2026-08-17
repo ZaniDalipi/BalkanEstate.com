@@ -184,7 +184,7 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
   if (!isOpen || !mounted) return null;
 
   // Apple-minimal field styling: soft inset fill, hairline border, calm gold focus ring
-  const inputCls = 'block w-full text-[15px] text-neutral-900 rounded-xl px-3.5 py-3 bg-neutral-100 border border-black/[0.10] placeholder:text-neutral-400 focus:outline-none focus:bg-white focus:border-[#C9A227]/60 focus:ring-[3px] focus:ring-[#C9A227]/15 transition-all duration-200';
+  const inputCls = 'block w-full text-[15px] text-neutral-900 rounded-xl px-3.5 py-3 bg-neutral-100 border border-black/[0.10] placeholder:text-neutral-400 focus:outline-none focus:bg-white focus:border-[var(--color-villa-gold-calm)]/60 focus:ring-[3px] focus:ring-[var(--color-villa-gold-calm)]/15 transition-all duration-200';
   const labelCls = 'block text-[13px] font-medium text-neutral-600 mb-1.5 tracking-[-0.01em]';
 
   // Liability disclaimer — quiet fine print, not a loud banner
@@ -228,7 +228,7 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
                style={{ background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
             <div className="min-w-0">
               <h2 id={titleId} className="text-[19px] font-semibold text-neutral-900 tracking-[-0.02em] flex items-center gap-1.5">
-                <span className="text-[#C9A227] text-[12px]" aria-hidden="true">✦</span>
+                <span className="text-[var(--color-villa-gold-calm)] text-[12px]" aria-hidden="true">✦</span>
                 {isForRent ? t('villas:booking.title', 'Request to Book') : t('villas:booking.enquireTitle', 'Request Details')}
               </h2>
               <p className="text-[13px] text-neutral-400 line-clamp-1 mt-0.5">{property.title}</p>
@@ -248,7 +248,7 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
               <div className="text-center py-6">
                 <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-4"
                      style={{ background: 'rgba(201,162,39,0.12)' }}>
-                  <svg className="h-7 w-7" style={{ color: '#C9A227' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <svg className="h-7 w-7" style={{ color: 'var(--color-villa-gold-calm)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
                   </svg>
                 </div>

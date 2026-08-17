@@ -16,13 +16,16 @@ const OPTIONS: { value: VillaListingMode; labelKey: string; fallback: string }[]
 
 /**
  * Segmented control that switches the luxury-villa market between both,
- * rentals-only and for-sale-only. Gold active state to match the villa brand.
+ * rentals-only and for-sale-only.
+ *
+ * radiogroup, not tablist: there are no tabpanels here — the control filters
+ * a list that stays in place, which is exactly what a radio group describes.
  */
 const VillaListingModeToggle: React.FC<VillaListingModeToggleProps> = memo(({ mode, onChange, className = '' }) => {
   const { t } = useTranslation(['villas']);
   return (
     <div
-      role="tablist"
+      role="radiogroup"
       aria-label={t('villas:filters.listingType', 'Listing type')}
       className={`inline-flex items-center rounded-lg bg-neutral-100 p-0.5 ${className}`}
     >
@@ -32,10 +35,10 @@ const VillaListingModeToggle: React.FC<VillaListingModeToggleProps> = memo(({ mo
           <button
             key={opt.value}
             type="button"
-            role="tab"
-            aria-selected={active}
+            role="radio"
+            aria-checked={active}
             onClick={() => onChange(opt.value)}
-            className={`px-3 py-1 rounded-md text-[12px] font-medium transition-all whitespace-nowrap ${
+            className={`px-3 py-1 rounded-md text-[12px] font-medium transition-all whitespace-nowrap focus-visible:ring-2 focus-visible:ring-[var(--color-villa-gold-calm)]/60 focus-visible:outline-none ${
               active
                 ? 'bg-white text-neutral-900 shadow-sm'
                 : 'text-neutral-500 hover:text-neutral-800'

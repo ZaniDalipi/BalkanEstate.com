@@ -1048,10 +1048,31 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
           markerDiv.style.zIndex = isActivelyPromoted ? '100' : '1';
         }
       };
-      markerDiv.onclick = (e) => {
-        e.stopPropagation();
+      const activateMarker = () => {
         setSelectedProperty(property);
         mapToUse.panTo({ lat: property.lat, lng: property.lng });
+      };
+      markerDiv.onclick = (e) => {
+        e.stopPropagation();
+        activateMarker();
+      };
+
+      // A bare div with an onclick is invisible to keyboard and assistive tech.
+      // The label carries the price and location so the marker is identifiable
+      // without seeing the map.
+      markerDiv.setAttribute('role', 'button');
+      markerDiv.tabIndex = 0;
+      markerDiv.setAttribute(
+        'aria-label',
+        [price, property.title, [property.city, property.country].filter(Boolean).join(', ')]
+          .filter(Boolean)
+          .join(' — ')
+      );
+      markerDiv.onkeydown = (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        e.stopPropagation();
+        activateMarker();
       };
 
       const posOffset = colocatedOffsets.get(property.id);

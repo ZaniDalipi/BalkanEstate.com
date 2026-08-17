@@ -304,7 +304,7 @@ const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, minPrice, isNightly, act
                 {/* Title */}
                 <h2 className="font-semibold tracking-[-0.02em] text-neutral-900 leading-tight mb-1.5" style={{ fontSize: 'clamp(24px,4vw,32px)' }}>
                     {t('villas:hero.title1', 'Luxury')}{' '}
-                    <span style={{ color: '#B8860B' }}>{t('villas:hero.title2', 'Villas')}</span>
+                    <span style={{ color: 'var(--color-villa-gold-deep)' }}>{t('villas:hero.title2', 'Villas')}</span>
                 </h2>
 
                 <p className="text-neutral-400 text-[12px] mb-4">
@@ -317,7 +317,7 @@ const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, minPrice, isNightly, act
                         <span className="font-semibold text-neutral-800">{displayCount}</span>
                         {' '}{count === 1 ? t('villas:hero.villaAvailable', 'villa available') : t('villas:hero.villasAvailable', 'villas available')}
                         {minPrice != null ? (
-                            <span className="text-neutral-400"> · {t('villas:hero.from', 'from')} <span className="font-medium" style={{ color: '#B8860B' }}>€{minPrice.toLocaleString()}</span>{isNightly ? t('villas:perNightSuffix', '/night') : ''}</span>
+                            <span className="text-neutral-400"> · {t('villas:hero.from', 'from')} <span className="font-medium" style={{ color: 'var(--color-villa-gold-deep)' }}>€{minPrice.toLocaleString()}</span>{isNightly ? t('villas:perNightSuffix', '/night') : ''}</span>
                         ) : null}
                     </p>
                 )}
@@ -605,7 +605,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                         {minResultPrice != null && (
                                             <>
                                                 <span className="text-neutral-300 text-sm flex-shrink-0">·</span>
-                                                <span className="text-sm flex-shrink-0 font-medium" style={{ color: '#B8860B' }}>
+                                                <span className="text-sm flex-shrink-0 font-medium" style={{ color: 'var(--color-villa-gold-deep)' }}>
                                                     {listingMode === 'rent'
                                                         ? t('villas:fromPerNight', 'from {{price}}/night', { price: `€${minResultPrice.toLocaleString()}` })
                                                         : t('villas:fromPrice', 'from {{price}}', { price: `€${minResultPrice.toLocaleString()}` })}
@@ -666,7 +666,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                 )}
                                 {isSearchingLocation && (
                                     <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 p-3 text-center">
-                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#FFA500] mx-auto" />
+                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[var(--color-villa-gold-bright)] mx-auto" />
                                     </div>
                                 )}
                             </div>
@@ -687,14 +687,17 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                     </div>
 
                     {/* Property List */}
-                    <div className="flex-1 overflow-y-auto pb-28 lg:pb-3 glass-scrollbar" data-scroll-container aria-live="polite">
+                    <div className="flex-1 overflow-y-auto pb-28 lg:pb-3 glass-scrollbar" data-scroll-container>
 
                         {/* Results bar */}
                         <div className="sticky top-0 bg-white border-b border-gray-100 z-[100]">
                             <div className="px-4 py-2.5 flex items-center justify-between gap-2">
                                 {/* Left: count + active filter chips */}
                                 <div className="flex items-center gap-2 min-w-0 flex-wrap">
-                                    <p className="text-xs font-semibold text-gray-700 flex-shrink-0">
+                                    {/* The live region is this short count, not
+                                        the whole list — announcing every card on
+                                        each filter change is unusable. */}
+                                    <p className="text-xs font-semibold text-gray-700 flex-shrink-0" role="status" aria-live="polite" aria-atomic="true">
                                         {listProperties.length}{' '}
                                         <span className="text-gray-400 font-normal">
                                             {t('villas:exclusiveVillas', 'exclusive villas')}
@@ -702,7 +705,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     </p>
                                     <VillaListingModeToggle mode={listingMode} onChange={handleListingModeChange} />
                                     {filters.query && (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFA500]/10 text-[#0252CD] text-[11px] font-medium max-w-[140px]">
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--color-villa-gold-bright)]/10 text-[var(--color-primary)] text-[11px] font-medium max-w-[140px]">
                                             <MapIcon className="w-3 h-3 flex-shrink-0" />
                                             <span className="truncate">{filters.query}</span>
                                             <button
@@ -715,7 +718,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                         </span>
                                     )}
                                     {filters.country && filters.country !== 'any' && (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFA500]/10 text-[#0252CD] text-[11px] font-medium">
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--color-villa-gold-bright)]/10 text-[var(--color-primary)] text-[11px] font-medium">
                                             <span>{filters.country}</span>
                                             <button
                                                 onClick={() => handleFilterChange('country', 'any')}
@@ -749,7 +752,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             value={filters.sortBy || 'newest'}
                                             onChange={(e) => handleSortChange(e.target.value)}
                                             aria-label={t('search:filters.sortBy', 'Sort properties by')}
-                                            className="block text-xs bg-white border border-gray-200 rounded-xl text-gray-700 px-3 py-1.5 pr-7 focus:outline-none focus:border-[#0252CD]/40 focus:ring-1 focus:ring-[#0252CD]/20 transition-all appearance-none"
+                                            className="block text-xs bg-white border border-gray-200 rounded-xl text-gray-700 px-3 py-1.5 pr-7 focus:outline-none focus:border-[var(--color-primary)]/40 focus:ring-1 focus:ring-[var(--color-primary)]/20 transition-all appearance-none"
                                         >
                                             <option value="newest">{t('search:sort.newest')}</option>
                                             <option value="oldest">{t('search:sort.oldest')}</option>
@@ -791,7 +794,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                             ) : error ? (
                                 <div className="text-center py-12">
                                     <p className="text-sm text-red-400 mb-2">{error}</p>
-                                    <button onClick={handleSearch} className="text-sm text-[#0252CD] hover:underline">
+                                    <button onClick={handleSearch} className="text-sm text-[var(--color-primary)] hover:underline">
                                         {t('common:tryAgain')}
                                     </button>
                                 </div>
@@ -811,7 +814,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     />
                                     <TrustStrip />
                                     <div className="flex justify-center py-8 px-3">
-                                        <div className="bg-white rounded-2xl shadow-sm p-8 text-center max-w-md w-full border border-[#FFA500]/10">
+                                        <div className="bg-white rounded-2xl shadow-sm p-8 text-center max-w-md w-full border border-[var(--color-villa-gold-bright)]/10">
                                             <div className="text-5xl mb-3">🏛️</div>
                                             <h3 className="text-gray-800 font-bold text-lg mb-1">
                                                 {t('villas:noProperties', 'No luxury villas found')}
@@ -891,14 +894,21 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                 className="flex items-center gap-3 rounded-full px-3 py-1.5 text-[11px] font-semibold text-neutral-700 border border-black/[0.06] shadow-sm"
                                 style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(12px) saturate(160%)', WebkitBackdropFilter: 'blur(12px) saturate(160%)' }}
                             >
-                                <span className="flex items-center gap-1.5">
-                                    <span className="w-2.5 h-2.5 rounded-full ring-1 ring-white shadow-sm" style={{ background: '#E8B820' }} />
-                                    {t('villas:filters.forRent', 'For Rent')}
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                    <span className="w-2.5 h-2.5 rounded-full ring-1 ring-white shadow-sm" style={{ background: '#2563EB' }} />
-                                    {t('villas:filters.forSale', 'For Sale')}
-                                </span>
+                                {/* Only the key(s) that can actually appear for
+                                    the current market — a "For Sale" legend on a
+                                    rentals-only map explains nothing. */}
+                                {listingMode !== 'sale' && (
+                                    <span className="flex items-center gap-1.5">
+                                        <span className="w-2.5 h-2.5 rounded-full ring-1 ring-white shadow-sm" style={{ background: 'var(--color-villa-gold)' }} />
+                                        {t('villas:filters.forRent', 'For Rent')}
+                                    </span>
+                                )}
+                                {listingMode !== 'rent' && (
+                                    <span className="flex items-center gap-1.5">
+                                        <span className="w-2.5 h-2.5 rounded-full ring-1 ring-white shadow-sm" style={{ background: '#2563EB' }} />
+                                        {t('villas:filters.forSale', 'For Sale')}
+                                    </span>
+                                )}
                             </div>
                         </div>
                     )}
@@ -1008,14 +1018,14 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     <div className="flex justify-center">
                                         <span
                                             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-white text-[11px] font-semibold backdrop-blur-sm shadow-sm"
-                                            style={{ background: '#0252CD' }}
+                                            style={{ background: 'var(--color-primary)' }}
                                         >
                                             <span>🏛️</span>
                                             <span>{t('villas:title', 'Luxury Villas')}</span>
                                             {activeFilterCount > 0 && (
                                                 <span
                                                     className="ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold"
-                                                    style={{ background: '#FFA500', color: '#0252CD' }}
+                                                    style={{ background: 'var(--color-villa-gold-bright)', color: 'var(--color-primary)' }}
                                                 >
                                                     {activeFilterCount}
                                                 </span>
@@ -1065,7 +1075,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     {activeFilterCount > 0 && (
                                         <span
                                             className="px-2 py-0.5 rounded-full text-[11px] font-bold"
-                                            style={{ background: '#FFA500', color: '#0252CD' }}
+                                            style={{ background: 'var(--color-villa-gold-bright)', color: 'var(--color-primary)' }}
                                         >
                                             {activeFilterCount}
                                         </span>

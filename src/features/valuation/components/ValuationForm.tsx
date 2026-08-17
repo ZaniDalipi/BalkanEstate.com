@@ -28,6 +28,14 @@ const PropertyTypeIcon: React.FC<{ type: PropertyType; className?: string }> = (
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
       </svg>
     ),
+    // Same villa silhouette with a crown, matching the luxury-villa branding
+    // used on the cards and map pins.
+    'luxury-villa': (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 21h18M4 12h16v9H4v-9zM8 16v2m4-2v2m4-2v2" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 9l1.6-4L9 7.5 12 3l3 4.5L17.4 5 19 9H5z" />
+      </svg>
+    ),
     land: (
       <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />

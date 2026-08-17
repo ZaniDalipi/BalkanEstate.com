@@ -241,28 +241,6 @@ const injectMapMarkerStyles = () => {
     .promoted-property-popup .leaflet-popup-tip {
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
-
-    /* Luxury villa: emerald "available / verified" beacon halo pulse */
-    @keyframes emeraldBeaconPulse {
-      0%, 100% { opacity: 0.55; transform: scale(0.92); }
-      50%      { opacity: 1;    transform: scale(1.18); }
-    }
-    .villa-emerald-halo {
-      transform-box: fill-box;
-      transform-origin: center;
-      animation: emeraldBeaconPulse 2.2s ease-in-out infinite;
-    }
-    /* Subtle sheen sweep across the gilded villa body */
-    @keyframes villaGoldSheen {
-      0%   { opacity: 0; transform: translateX(-60%); }
-      45%  { opacity: 0.55; }
-      100% { opacity: 0; transform: translateX(60%); }
-    }
-    .villa-gold-sheen {
-      transform-box: fill-box;
-      transform-origin: center;
-      animation: villaGoldSheen 4.5s ease-in-out infinite;
-    }
   `;
   document.head.appendChild(style);
 };

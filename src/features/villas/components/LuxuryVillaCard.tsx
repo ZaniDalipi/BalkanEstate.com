@@ -187,8 +187,8 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                 <defs>
                     <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
                         <stop offset="0%"   stopColor="#FFF0A0" />
-                        <stop offset="30%"  stopColor="#FFA500" />
-                        <stop offset="60%"  stopColor="#E8B820" />
+                        <stop offset="30%"  stopColor="var(--color-villa-gold-bright)" />
+                        <stop offset="60%"  stopColor="var(--color-villa-gold)" />
                         <stop offset="100%" stopColor="#FFF0A0" />
                     </linearGradient>
                 </defs>
@@ -428,7 +428,7 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                         <div className="flex-shrink-0 text-right">
                             {property.isNegotiable ? (
                                 <span className="text-xs font-bold px-2.5 py-1.5 rounded-xl"
-                                    style={{ color: '#FFA500', background: 'rgba(255,165,0,0.15)', border: '1px solid rgba(255,165,0,0.25)' }}
+                                    style={{ color: 'var(--color-villa-gold-bright)', background: 'rgba(255,165,0,0.15)', border: '1px solid rgba(255,165,0,0.25)' }}
                                 >
                                     {t('property:byNegotiation', 'By Negotiation')}
                                 </span>
@@ -439,7 +439,7 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                                         {formatPrice(property.price, property.country)}
                                     </div>
                                     {isForRent && (
-                                        <div className="text-[10px] font-bold text-center mt-0.5" style={{ color: '#FFA500' }}>
+                                        <div className="text-[10px] font-bold text-center mt-0.5" style={{ color: 'var(--color-villa-gold-bright)' }}>
                                             {t('villas:booking.perNight', '/ night')}
                                         </div>
                                     )}
