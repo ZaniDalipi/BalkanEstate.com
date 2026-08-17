@@ -7,13 +7,13 @@
 # Usage: ./scripts/test-staging-payments.sh [staging-url] [auth-token]
 #
 # Example:
-#   ./scripts/test-staging-payments.sh https://staging-api.balkanestate.com
+#   ./scripts/test-staging-payments.sh https://staging-api.balkanestateai.com
 # ============================================================
 
 set -e
 
 # Configuration
-STAGING_URL="${1:-https://staging-api.balkanestate.com}"
+STAGING_URL="${1:-https://staging-api.balkanestateai.com}"
 AUTH_TOKEN="${2:-}"
 PASSED=0
 FAILED=0

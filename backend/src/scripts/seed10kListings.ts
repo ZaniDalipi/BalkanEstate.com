@@ -201,7 +201,7 @@ function generateProperty(sellerId: any, index: number): any {
   const property: any = {
     sellerId,
     createdByName: 'Demo Agent',
-    createdByEmail: 'demo@balkanestate.com',
+    createdByEmail: 'demo@balkanestateai.com',
     createdAsRole: 'agent', // Required field
     title: `${getRandomElement(titles[propertyType] || ['Property'])} in ${location.city}`,
     status: isSold ? 'sold' : 'active',
@@ -269,13 +269,13 @@ async function seed10kListings() {
     log.info('✅ Connected to MongoDB');
 
     // Find or create a demo user
-    let demoUser = await User.findOne({ email: 'demo@balkanestate.com' });
+    let demoUser = await User.findOne({ email: 'demo@balkanestateai.com' });
 
     if (!demoUser) {
       log.info('📝 Creating demo user...');
       demoUser = await User.create({
         name: 'Demo Agent',
-        email: 'demo@balkanestate.com',
+        email: 'demo@balkanestateai.com',
         password: 'demo123456',
         role: 'agent',
         isEmailVerified: true,

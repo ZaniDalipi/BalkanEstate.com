@@ -77,7 +77,7 @@ async function extractOgImage(url: string): Promise<string | null> {
     const { data: html } = await axios.get(url, {
       timeout: 8000,
       maxRedirects: 3,
-      headers: { 'User-Agent': 'BalkanEstateBot/1.0 (+https://balkanestate.com)' },
+      headers: { 'User-Agent': 'BalkanEstateBot/1.0 (+https://balkanestateai.com)' },
       responseType: 'text',
       // Only read first 50KB to extract meta tags
       maxContentLength: 50 * 1024,
@@ -215,7 +215,7 @@ async function fetchDedicatedFeed(feed: typeof DEDICATED_RSS_FEEDS[number]): Pro
   try {
     const { data: xml } = await axios.get(feed.url, {
       timeout: 12000,
-      headers: { 'User-Agent': 'BalkanEstateBot/1.0 (+https://balkanestate.com)' },
+      headers: { 'User-Agent': 'BalkanEstateBot/1.0 (+https://balkanestateai.com)' },
       responseType: 'text',
     });
 

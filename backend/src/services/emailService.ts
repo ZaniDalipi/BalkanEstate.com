@@ -2425,7 +2425,7 @@ class EmailService {
             <!-- Footer -->
             <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 24px; text-align: center;" class="ec-border">
               <p style="color: #9ca3af; font-size: 12px; margin: 0;" class="ec-text-muted">
-                Questions? Contact us at <a href="mailto:support@balkanestate.com" style="color: #2563eb;" class="ec-link">support@balkanestate.com</a>
+                Questions? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #2563eb;" class="ec-link">support@balkanestateai.com</a>
               </p>
             </div>
           </div>
@@ -2604,7 +2604,7 @@ class EmailService {
         <!-- Footer -->
         <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 24px; text-align: center;" class="ec-border">
           <p style="color: #9ca3af; font-size: 12px; margin: 0;" class="ec-text-muted">
-            Questions? Contact us at <a href="mailto:support@balkanestate.com" style="color: #2563eb;" class="ec-link">support@balkanestate.com</a>
+            Questions? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #2563eb;" class="ec-link">support@balkanestateai.com</a>
           </p>
         </div>
       </div>
@@ -2848,7 +2848,7 @@ class EmailService {
                 This receipt was sent to ${email}
               </p>
               <p style="color: #9ca3af; font-size: 11px;" class="ec-text-muted">
-                Questions? Contact us at <a href="mailto:support@balkanestate.com" style="color: #2563eb;" class="ec-link">support@balkanestate.com</a>
+                Questions? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #2563eb;" class="ec-link">support@balkanestateai.com</a>
               </p>
               <p style="color: #9ca3af; font-size: 11px; margin-top: 12px;" class="ec-text-muted">
                 BalkanEstateAI • Secure Payment Processing

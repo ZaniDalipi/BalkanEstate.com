@@ -33,7 +33,7 @@ async function main() {
       propertyTitle: 'Beautiful Apartment in Zagreb',
       propertyAddress: 'Ilica 123',
       propertyCity: 'Zagreb',
-      conversationUrl: 'https://balkanestate.com/inbox',
+      conversationUrl: 'https://balkanestateai.com/inbox',
     });
 
     log.info('\n✅ Test email sent successfully!');

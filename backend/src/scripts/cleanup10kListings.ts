@@ -15,7 +15,7 @@ async function cleanup10kListings() {
     log.info('✅ Connected to MongoDB');
 
     // Find the demo user
-    const demoUser = await User.findOne({ email: 'demo@balkanestate.com' });
+    const demoUser = await User.findOne({ email: 'demo@balkanestateai.com' });
 
     if (!demoUser) {
       log.info('⚠️  Demo user not found. Nothing to clean up.');
@@ -33,7 +33,7 @@ async function cleanup10kListings() {
 
     // Confirm deletion
     log.info(`\n⚠️  About to delete ${countBefore} demo properties...`);
-    log.info('   (This only removes properties created by demo@balkanestate.com)\n');
+    log.info('   (This only removes properties created by demo@balkanestateai.com)\n');
 
     // Delete all properties from demo user
     const result = await Property.deleteMany({ sellerId: demoUser._id });

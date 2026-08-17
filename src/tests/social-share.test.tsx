@@ -10,7 +10,7 @@ import { SocialShare } from '../components/marketing/SocialShare';
 
 describe('SocialShare', () => {
   const defaultProps = {
-    url: 'https://balkanestate.com/agencies/test-agency',
+    url: 'https://balkanestateai.com/agencies/test-agency',
     title: 'Test Agency - Real Estate Agency',
     description: 'A great agency with 10 agents',
   };
