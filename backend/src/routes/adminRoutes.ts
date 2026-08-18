@@ -836,11 +836,22 @@ const destinationImageUpload = multer({
  * Coordinates are the reason this exists: they drive a map fly-to on the
  * public site, so a typo must be rejected here rather than sending a visitor
  * to the middle of the ocean.
+ *
+ * `base` is the existing document on an update. A PATCH is allowed to send
+ * only the fields it means to change — the photo-upload flow saves just
+ * `imageUrl`/`imagePublicId` — so anything omitted from `body` falls back to
+ * `base` before validation runs, instead of validation seeing an empty name
+ * on a partial payload and rejecting the whole request.
  */
-function parseDestinationBody(body: any): { error?: string; value?: Record<string, unknown> } {
-  const name = String(body?.name ?? '').trim();
-  const query = String(body?.query ?? '').trim();
-  const country = String(body?.country ?? '').trim();
+function parseDestinationBody(
+  body: any,
+  base?: Record<string, unknown> | null
+): { error?: string; value?: Record<string, unknown> } {
+  const pick = (key: string) => (body?.[key] !== undefined ? body[key] : base?.[key]);
+
+  const name = String(pick('name') ?? '').trim();
+  const query = String(pick('query') ?? '').trim();
+  const country = String(pick('country') ?? '').trim();
   if (!name) return { error: 'Name is required' };
   if (!query) return { error: 'Search term is required' };
   if (!country) return { error: 'Country is required' };
@@ -848,27 +859,33 @@ function parseDestinationBody(body: any): { error?: string; value?: Record<strin
     return { error: 'Name, search term and country must be shorter' };
   }
 
-  const lat = Number(body?.lat);
-  const lng = Number(body?.lng);
+  const lat = Number(pick('lat'));
+  const lng = Number(pick('lng'));
   if (!Number.isFinite(lat) || lat < -90 || lat > 90) return { error: 'Latitude must be between -90 and 90' };
   if (!Number.isFinite(lng) || lng < -180 || lng > 180) return { error: 'Longitude must be between -180 and 180' };
 
-  const zoomRaw = body?.zoom;
+  const zoomRaw = pick('zoom');
   const zoom = zoomRaw === undefined || zoomRaw === null || zoomRaw === '' ? 12 : Number(zoomRaw);
   if (!Number.isFinite(zoom) || zoom < 1 || zoom > 20) return { error: 'Zoom must be between 1 and 20' };
 
-  const orderRaw = body?.displayOrder;
+  const orderRaw = pick('displayOrder');
   const displayOrder = orderRaw === undefined || orderRaw === null || orderRaw === '' ? 0 : Number(orderRaw);
   if (!Number.isFinite(displayOrder)) return { error: 'Display order must be a number' };
+
+  const imageUrl = pick('imageUrl');
+  const imagePublicId = pick('imagePublicId');
+  const imageCity = pick('imageCity');
+  const imageCountry = pick('imageCountry');
+  const isActive = pick('isActive');
 
   return {
     value: {
       name, query, country, lat, lng, zoom, displayOrder,
-      imageUrl: body?.imageUrl ? String(body.imageUrl).trim() : undefined,
-      imagePublicId: body?.imagePublicId ? String(body.imagePublicId).trim() : undefined,
-      imageCity: body?.imageCity ? String(body.imageCity).trim() : undefined,
-      imageCountry: body?.imageCountry ? String(body.imageCountry).trim() : undefined,
-      isActive: body?.isActive === undefined ? true : Boolean(body.isActive),
+      imageUrl: imageUrl ? String(imageUrl).trim() : undefined,
+      imagePublicId: imagePublicId ? String(imagePublicId).trim() : undefined,
+      imageCity: imageCity ? String(imageCity).trim() : undefined,
+      imageCountry: imageCountry ? String(imageCountry).trim() : undefined,
+      isActive: isActive === undefined ? true : Boolean(isActive),
     },
   };
 }
@@ -907,10 +924,13 @@ router.patch('/villa-destinations/:id', logAdminAction('UPDATE_VILLA_DESTINATION
     const id = getObjectIdParam(req, res, 'id');
     if (!id) return;
 
-    const { error, value } = parseDestinationBody(req.body);
+    const VillaDestination = (await import('../models/VillaDestination')).default;
+    const existing = await VillaDestination.findById(id).lean();
+    if (!existing) { res.status(404).json({ message: 'Villa destination not found' }); return; }
+
+    const { error, value } = parseDestinationBody(req.body, existing as Record<string, unknown>);
     if (error) { res.status(400).json({ message: error }); return; }
 
-    const VillaDestination = (await import('../models/VillaDestination')).default;
     const destination = await VillaDestination.findByIdAndUpdate(id, value!, { new: true, runValidators: true });
     if (!destination) { res.status(404).json({ message: 'Villa destination not found' }); return; }
 

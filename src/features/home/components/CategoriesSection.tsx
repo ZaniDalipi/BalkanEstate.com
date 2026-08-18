@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { ScrollAssemble, ScrollAssembleItem } from '@/src/components/ui/scroll-assemble';
 
 interface CategoriesSectionProps {
   onCategoryClick: (propertyType: string, listingType?: string) => void;
@@ -78,8 +79,8 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }
     <section className="py-12 sm:py-16 bg-white">
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ y: 10 }}
+          whileInView={{ y: 0 }}
           viewport={{ once: true }}
           className="text-center mb-8"
         >
@@ -91,18 +92,14 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4">
+        <ScrollAssemble count={categories.length} className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4">
           {categories.map((cat, i) => (
+            <ScrollAssembleItem key={cat.key} index={i}>
             <motion.button
-              key={cat.key}
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-30px' }}
-              transition={{ delay: i * 0.06, type: 'spring', stiffness: 300, damping: 30 }}
               whileHover={{ y: -4 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => onCategoryClick(cat.type, cat.listingType)}
-              className={`group flex flex-col items-center gap-2.5 p-4 sm:p-5 rounded-xl transition-all relative overflow-hidden ${
+              className={`group flex w-full flex-col items-center gap-2.5 p-4 sm:p-5 rounded-xl transition-all relative overflow-hidden ${
                 (cat as any).isLuxury
                   ? 'border-2 border-amber-400/60 hover:border-amber-500 hover:shadow-xl hover:shadow-amber-200/60 bg-gradient-to-b from-amber-50 to-white'
                   : 'border border-neutral-200 hover:border-neutral-300 hover:shadow-md bg-white'
@@ -135,8 +132,9 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }
                 </span>
               )}
             </motion.button>
+            </ScrollAssembleItem>
           ))}
-        </div>
+        </ScrollAssemble>
       </div>
     </section>
   );

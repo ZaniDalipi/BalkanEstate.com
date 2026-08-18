@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { ScrollAssemble, ScrollAssembleItem } from '@/src/components/ui/scroll-assemble';
 import { User } from '@/types';
 
 interface QuickAccessSectionProps {
@@ -105,8 +106,8 @@ const QuickAccessSection: React.FC<QuickAccessSectionProps> = ({
     <section className="py-8 sm:py-10 bg-white border-b border-slate-100">
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ y: 8 }}
+          whileInView={{ y: 0 }}
           viewport={{ once: true }}
           className="flex items-center justify-between mb-5"
         >
@@ -123,18 +124,14 @@ const QuickAccessSection: React.FC<QuickAccessSectionProps> = ({
           </span>
         </motion.div>
 
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+        <ScrollAssemble count={links.length} className="grid grid-cols-3 sm:grid-cols-6 gap-3">
           {links.map((link, i) => (
+            <ScrollAssembleItem key={link.key} index={i}>
             <motion.button
-              key={link.key}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05, type: 'spring', stiffness: 300, damping: 30 }}
               whileHover={{ y: -3 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => onNavigate(link.view, link.path)}
-              className="relative flex flex-col items-center gap-2 p-3.5 rounded-xl border border-white/30 hover:border-white/50 hover:shadow-sm bg-white/65 backdrop-blur-sm transition-all group"
+              className="relative flex w-full flex-col items-center gap-2 p-3.5 rounded-xl border border-white/30 hover:border-white/50 hover:shadow-sm bg-white/65 backdrop-blur-sm transition-all group"
             >
               <motion.div
                 whileHover={{ scale: 1.1 }}
@@ -151,8 +148,9 @@ const QuickAccessSection: React.FC<QuickAccessSectionProps> = ({
                 </span>
               )}
             </motion.button>
+            </ScrollAssembleItem>
           ))}
-        </div>
+        </ScrollAssemble>
       </div>
     </section>
   );
