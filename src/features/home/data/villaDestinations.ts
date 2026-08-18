@@ -28,6 +28,12 @@ export interface VillaDestination {
     imageCity: string;
     /** Country of `imageCity` — part of the Cloudinary public id. */
     imageCountry: string;
+    /**
+     * Admin-uploaded photo. When set it wins over the seeded city image —
+     * this is how a curator replaces an approximate stand-in (Ferizaj for
+     * Jezerc) with a picture of the actual place.
+     */
+    imageUrl?: string;
     /** Map focus when the villas page opens. */
     center: readonly [number, number];
     zoom: number;

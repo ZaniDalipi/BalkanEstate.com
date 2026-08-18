@@ -41,7 +41,8 @@
     "system": "System",
     "inquiries": "Inquiries",
     "pricing": "Pricing & Plans",
-    "villaApprovals": "Miratimi i Vilave"
+    "villaApprovals": "Miratimi i Vilave",
+    "villaDestinations": "Destinacionet e Vilave"
   },
   "properties": {
     "title": "Menaxheri i Pronave",
@@ -973,5 +974,41 @@
     "untitled": "Vilë pa titull",
     "negotiable": "Me marrëveshje",
     "showingFirst": "Duke shfaqur {{shown}} vilat e para nga {{total}}."
+  },
+  "villaDestinations": {
+    "title": "Destinacionet e Vilave",
+    "subtitle": "Vendet e shfaqura në vitrinën e vilave në faqen kryesore. Ngarkoni një foto për të zëvendësuar imazhin e përkohshëm të qytetit.",
+    "add": "Shto destinacion",
+    "edit": "Ndrysho",
+    "delete": "Fshij",
+    "save": "Ruaj",
+    "saving": "Duke ruajtur…",
+    "cancel": "Anulo",
+    "saved": "Destinacioni u ruajt",
+    "name": "Emri",
+    "query": "Termi i kërkimit",
+    "queryHint": "Dërgohet te faqja e vilave si kërkim vendndodhjeje.",
+    "country": "Shteti",
+    "lat": "Gjerësia",
+    "lng": "Gjatësia",
+    "zoom": "Zmadhimi",
+    "order": "Renditja",
+    "imageCity": "Qyteti i fotos rezervë",
+    "imageCityHint": "Përdoret vetëm derisa të ngarkoni një foto për këtë vend.",
+    "imageCountry": "Shteti i fotos rezervë",
+    "active": "Shfaq në faqen kryesore",
+    "hidden": "E fshehur",
+    "searches": "kërkon",
+    "usingCityPhoto": "duke përdorur foton e {{city}}",
+    "replacePhoto": "Foto",
+    "uploading": "Duke ngarkuar…",
+    "imageUpdated": "Fotoja u përditësua",
+    "empty": "Ende asnjë destinacion — faqja kryesore po përdor listën e integruar.",
+    "emptyHint": "Ekzekutoni “npm run seed:villa-destinations” në backend/ për të importuar listën, pastaj ndryshojeni këtu.",
+    "confirmDelete": "Ta hiqni {{name}} nga faqja kryesore?",
+    "loadError": "Dështoi ngarkimi i destinacioneve",
+    "saveError": "Dështoi ruajtja e destinacionit",
+    "deleteError": "Dështoi fshirja e destinacionit",
+    "uploadError": "Ngarkimi i fotos dështoi"
   }
 }

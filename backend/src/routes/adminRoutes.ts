@@ -1,6 +1,9 @@
 import express, { Request, Response } from 'express';
 import { protect } from '../middleware/auth';
 import { checkAdminRole, logAdminAction } from '../middleware/adminAuth';
+import { invalidateCache } from '../middleware/cache';
+import { getObjectIdParam } from '../utils/validateParams';
+import { adminLogger } from '../utils/logger';
 import {
   getAdminStats,
   getAllUsers,
@@ -813,5 +816,156 @@ router.post('/articles/upload-image', logAdminAction('UPLOAD_ARTICLE_IMAGE'), ar
     res.status(500).json({ message: 'Failed to upload image', error: String(err) });
   }
 });
+
+// ============================================================================
+// Villa destinations — the places showcased in the home-page corridor
+// ============================================================================
+
+const destinationImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Only image files are allowed'));
+  },
+});
+
+/**
+ * Validates and normalises a destination payload.
+ *
+ * Coordinates are the reason this exists: they drive a map fly-to on the
+ * public site, so a typo must be rejected here rather than sending a visitor
+ * to the middle of the ocean.
+ */
+function parseDestinationBody(body: any): { error?: string; value?: Record<string, unknown> } {
+  const name = String(body?.name ?? '').trim();
+  const query = String(body?.query ?? '').trim();
+  const country = String(body?.country ?? '').trim();
+  if (!name) return { error: 'Name is required' };
+  if (!query) return { error: 'Search term is required' };
+  if (!country) return { error: 'Country is required' };
+  if (name.length > 80 || query.length > 80 || country.length > 60) {
+    return { error: 'Name, search term and country must be shorter' };
+  }
+
+  const lat = Number(body?.lat);
+  const lng = Number(body?.lng);
+  if (!Number.isFinite(lat) || lat < -90 || lat > 90) return { error: 'Latitude must be between -90 and 90' };
+  if (!Number.isFinite(lng) || lng < -180 || lng > 180) return { error: 'Longitude must be between -180 and 180' };
+
+  const zoomRaw = body?.zoom;
+  const zoom = zoomRaw === undefined || zoomRaw === null || zoomRaw === '' ? 12 : Number(zoomRaw);
+  if (!Number.isFinite(zoom) || zoom < 1 || zoom > 20) return { error: 'Zoom must be between 1 and 20' };
+
+  const orderRaw = body?.displayOrder;
+  const displayOrder = orderRaw === undefined || orderRaw === null || orderRaw === '' ? 0 : Number(orderRaw);
+  if (!Number.isFinite(displayOrder)) return { error: 'Display order must be a number' };
+
+  return {
+    value: {
+      name, query, country, lat, lng, zoom, displayOrder,
+      imageUrl: body?.imageUrl ? String(body.imageUrl).trim() : undefined,
+      imagePublicId: body?.imagePublicId ? String(body.imagePublicId).trim() : undefined,
+      imageCity: body?.imageCity ? String(body.imageCity).trim() : undefined,
+      imageCountry: body?.imageCountry ? String(body.imageCountry).trim() : undefined,
+      isActive: body?.isActive === undefined ? true : Boolean(body.isActive),
+    },
+  };
+}
+
+// GET /api/admin/villa-destinations — every destination, active or not
+router.get('/villa-destinations', logAdminAction('VIEW_VILLA_DESTINATIONS'), async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const VillaDestination = (await import('../models/VillaDestination')).default;
+    const destinations = await VillaDestination.find({}).sort({ displayOrder: 1, name: 1 }).lean();
+    res.json({ destinations, count: destinations.length });
+  } catch (err) {
+    adminLogger.error('List villa destinations error:', err);
+    res.status(500).json({ message: 'Failed to load villa destinations' });
+  }
+});
+
+// POST /api/admin/villa-destinations
+router.post('/villa-destinations', logAdminAction('CREATE_VILLA_DESTINATION'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { error, value } = parseDestinationBody(req.body);
+    if (error) { res.status(400).json({ message: error }); return; }
+
+    const VillaDestination = (await import('../models/VillaDestination')).default;
+    const destination = await VillaDestination.create(value!);
+    void invalidateCache('/api/villa-destinations');
+    res.status(201).json({ destination });
+  } catch (err) {
+    adminLogger.error('Create villa destination error:', err);
+    res.status(500).json({ message: 'Failed to create villa destination' });
+  }
+});
+
+// PATCH /api/admin/villa-destinations/:id
+router.patch('/villa-destinations/:id', logAdminAction('UPDATE_VILLA_DESTINATION'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const { error, value } = parseDestinationBody(req.body);
+    if (error) { res.status(400).json({ message: error }); return; }
+
+    const VillaDestination = (await import('../models/VillaDestination')).default;
+    const destination = await VillaDestination.findByIdAndUpdate(id, value!, { new: true, runValidators: true });
+    if (!destination) { res.status(404).json({ message: 'Villa destination not found' }); return; }
+
+    void invalidateCache('/api/villa-destinations');
+    res.json({ destination });
+  } catch (err) {
+    adminLogger.error('Update villa destination error:', err);
+    res.status(500).json({ message: 'Failed to update villa destination' });
+  }
+});
+
+// DELETE /api/admin/villa-destinations/:id
+router.delete('/villa-destinations/:id', logAdminAction('DELETE_VILLA_DESTINATION'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const VillaDestination = (await import('../models/VillaDestination')).default;
+    const destination = await VillaDestination.findByIdAndDelete(id);
+    if (!destination) { res.status(404).json({ message: 'Villa destination not found' }); return; }
+
+    void invalidateCache('/api/villa-destinations');
+    res.json({ message: 'Villa destination deleted', id: String(destination._id) });
+  } catch (err) {
+    adminLogger.error('Delete villa destination error:', err);
+    res.status(500).json({ message: 'Failed to delete villa destination' });
+  }
+});
+
+// POST /api/admin/villa-destinations/upload-image
+router.post(
+  '/villa-destinations/upload-image',
+  logAdminAction('UPLOAD_VILLA_DESTINATION_IMAGE'),
+  destinationImageUpload.single('image'),
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      if (!req.file) { res.status(400).json({ message: 'No image file provided' }); return; }
+
+      const { uploadImage } = await import('../services/cloudinaryService');
+      // Portrait: the corridor card is 18:25 and a card fills a large part of
+      // the frame as it exits, so a small upload would visibly soften there.
+      const result = await uploadImage(req.file.buffer, {
+        userId: (req as any).user._id.toString(),
+        type: 'listing' as any,
+        maxWidth: 1200,
+        maxHeight: 1600,
+      });
+
+      void invalidateCache('/api/villa-destinations');
+      res.json({ url: result.url, publicId: result.publicId });
+    } catch (err) {
+      adminLogger.error('Upload villa destination image error:', err);
+      res.status(500).json({ message: 'Failed to upload image' });
+    }
+  }
+);
 
 export default router;

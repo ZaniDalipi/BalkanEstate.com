@@ -41,7 +41,8 @@
     "system": "System",
     "inquiries": "Inquiries",
     "pricing": "Pricing & Plans",
-    "villaApprovals": "Villa Approvals"
+    "villaApprovals": "Villa Approvals",
+    "villaDestinations": "Villa Destinations"
   },
   "properties": {
     "title": "Property Manager",
@@ -1176,5 +1177,41 @@
     "untitled": "Untitled villa",
     "negotiable": "By negotiation",
     "showingFirst": "Showing the first {{shown}} of {{total}} villas."
+  },
+  "villaDestinations": {
+    "title": "Villa Destinations",
+    "subtitle": "Places shown in the home-page villa showcase. Upload a photo to replace the stand-in city image.",
+    "add": "Add destination",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "saved": "Destination saved",
+    "name": "Name",
+    "query": "Search term",
+    "queryHint": "Sent to the villas page as the location search.",
+    "country": "Country",
+    "lat": "Latitude",
+    "lng": "Longitude",
+    "zoom": "Zoom",
+    "order": "Order",
+    "imageCity": "Fallback photo city",
+    "imageCityHint": "Used only until you upload a photo for this place.",
+    "imageCountry": "Fallback photo country",
+    "active": "Show on the home page",
+    "hidden": "Hidden",
+    "searches": "searches",
+    "usingCityPhoto": "using {{city}} photo",
+    "replacePhoto": "Photo",
+    "uploading": "Uploading…",
+    "imageUpdated": "Photo updated",
+    "empty": "No destinations yet — the home page is using its built-in list.",
+    "emptyHint": "Run “npm run seed:villa-destinations” in backend/ to import the built-in list, then edit it here.",
+    "confirmDelete": "Remove {{name}} from the home page?",
+    "loadError": "Failed to load villa destinations",
+    "saveError": "Failed to save destination",
+    "deleteError": "Failed to delete destination",
+    "uploadError": "Photo upload failed"
   }
 }

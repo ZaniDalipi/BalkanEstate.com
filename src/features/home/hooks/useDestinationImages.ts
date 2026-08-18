@@ -70,14 +70,18 @@ export function useDestinationImages(
         () =>
             destinations.map(dest => ({
                 id: dest.id,
-                url: getCityImageUrl(dest.imageCity, {
-                    country: dest.imageCountry,
-                    width: IMAGE_WIDTH,
-                    height: IMAGE_HEIGHT,
-                    crop: 'fill',
-                    gravity: 'auto',
-                    quality: 'auto:good',
-                }),
+                // An admin-curated photo always wins; the seeded city image is
+                // only the stand-in for places nobody has curated yet.
+                url: dest.imageUrl
+                    ? dest.imageUrl
+                    : getCityImageUrl(dest.imageCity, {
+                        country: dest.imageCountry,
+                        width: IMAGE_WIDTH,
+                        height: IMAGE_HEIGHT,
+                        crop: 'fill',
+                        gravity: 'auto',
+                        quality: 'auto:good',
+                    }),
             })),
         [destinations],
     );

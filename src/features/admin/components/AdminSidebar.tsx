@@ -132,6 +132,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           badgeColor: 'bg-[#E8B820]'
         },
         {
+          id: 'villaDestinations',
+          label: t('admin:sidebar.villaDestinations', 'Villa Destinations'),
+          icon: <SparklesIcon className="w-5 h-5" />,
+        },
+        {
           id: 'agencies',
           label: t('admin:sidebar.agencies'),
           icon: <BuildingOfficeIcon className="w-5 h-5" />,

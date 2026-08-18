@@ -532,3 +532,43 @@ export const rejectLicense = async (userId: string, reason?: string): Promise<{
     requiresAuth: true,
   });
 };
+
+// --- Villa Destinations (home-page corridor) ---
+
+export interface AdminVillaDestination {
+  _id: string;
+  name: string;
+  query: string;
+  country: string;
+  imageUrl?: string;
+  imagePublicId?: string;
+  imageCity?: string;
+  imageCountry?: string;
+  lat: number;
+  lng: number;
+  zoom: number;
+  displayOrder: number;
+  isActive: boolean;
+}
+
+export type VillaDestinationInput = Omit<AdminVillaDestination, '_id'>;
+
+export const getAdminVillaDestinations = async (): Promise<{
+  destinations: AdminVillaDestination[];
+  count: number;
+}> => apiRequest('/admin/villa-destinations', { requiresAuth: true });
+
+export const createVillaDestination = async (
+  body: Partial<VillaDestinationInput>
+): Promise<{ destination: AdminVillaDestination }> =>
+  apiRequest('/admin/villa-destinations', { method: 'POST', body, requiresAuth: true });
+
+export const updateVillaDestination = async (
+  id: string,
+  body: Partial<VillaDestinationInput>
+): Promise<{ destination: AdminVillaDestination }> =>
+  apiRequest(`/admin/villa-destinations/${id}`, { method: 'PATCH', body, requiresAuth: true });
+
+export const deleteVillaDestination = async (id: string): Promise<{ message: string }> =>
+  apiRequest(`/admin/villa-destinations/${id}`, { method: 'DELETE', requiresAuth: true });
+

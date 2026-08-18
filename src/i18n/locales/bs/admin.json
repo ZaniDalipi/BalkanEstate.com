@@ -41,7 +41,8 @@
     "system": "Sistem",
     "inquiries": "Upiti",
     "pricing": "Cijene i Planovi",
-    "villaApprovals": "Odobrenja vila"
+    "villaApprovals": "Odobrenja vila",
+    "villaDestinations": "Destinacije vila"
   },
   "properties": {
     "title": "Upravljanje Nekretninama",
@@ -1076,5 +1077,41 @@
     "untitled": "Vila bez naziva",
     "negotiable": "Po dogovoru",
     "showingFirst": "Prikazano prvih {{shown}} od {{total}} vila."
+  },
+  "villaDestinations": {
+    "title": "Destinacije vila",
+    "subtitle": "Mjesta prikazana u izlogu vila na početnoj stranici. Otpremite fotografiju da zamijenite privremenu sliku grada.",
+    "add": "Dodaj destinaciju",
+    "edit": "Uredi",
+    "delete": "Obriši",
+    "save": "Sačuvaj",
+    "saving": "Spremanje…",
+    "cancel": "Otkaži",
+    "saved": "Destinacija je sačuvana",
+    "name": "Naziv",
+    "query": "Pojam pretrage",
+    "queryHint": "Šalje se stranici vila kao pretraga lokacije.",
+    "country": "Država",
+    "lat": "Geografska širina",
+    "lng": "Geografska dužina",
+    "zoom": "Zum",
+    "order": "Redoslijed",
+    "imageCity": "Grad rezervne fotografije",
+    "imageCityHint": "Koristi se samo dok ne otpremite fotografiju za ovo mjesto.",
+    "imageCountry": "Država rezervne fotografije",
+    "active": "Prikaži na početnoj stranici",
+    "hidden": "Sakriveno",
+    "searches": "pretražuje",
+    "usingCityPhoto": "koristi fotografiju grada {{city}}",
+    "replacePhoto": "Fotografija",
+    "uploading": "Otpremanje…",
+    "imageUpdated": "Fotografija je ažurirana",
+    "empty": "Još nema destinacija — početna stranica koristi ugrađenu listu.",
+    "emptyHint": "Pokrenite „npm run seed:villa-destinations“ u backend/ da uvezete listu, pa je uredite ovdje.",
+    "confirmDelete": "Ukloniti {{name}} sa početne stranice?",
+    "loadError": "Učitavanje destinacija nije uspjelo",
+    "saveError": "Spremanje destinacije nije uspjelo",
+    "deleteError": "Brisanje destinacije nije uspjelo",
+    "uploadError": "Otpremanje fotografije nije uspjelo"
   }
 }

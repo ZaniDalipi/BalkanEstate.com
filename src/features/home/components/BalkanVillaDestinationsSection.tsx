@@ -1,11 +1,13 @@
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { ImageStreamHero } from '@/components/ui/image-stream-hero';
 import {
     VILLA_DESTINATIONS,
     buildVillaDestinationPath,
     type VillaDestination,
 } from '../data/villaDestinations';
+import { getVillaDestinations } from '../api/villaDestinationApi';
 import { useDestinationImages } from '../hooks/useDestinationImages';
 
 interface BalkanVillaDestinationsSectionProps {
@@ -26,12 +28,22 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
 }) => {
     const { t } = useTranslation(['villas', 'home']);
 
+    // Admin-curated destinations. `getVillaDestinations` already returns []
+    // for an error or an unseeded database, so a failure degrades to the
+    // built-in list rather than an empty corridor.
+    const { data: curated } = useQuery({
+        queryKey: ['villaDestinations'],
+        queryFn: ({ signal }) => getVillaDestinations(signal),
+        staleTime: 10 * 60 * 1000,
+        retry: 1,
+    });
+
     // Guard the corridor against an empty list: it would render an animated
     // ribbon of nothing rather than degrading to no section at all.
-    const destinations = useMemo(
-        () => VILLA_DESTINATIONS.filter(d => d.query.trim().length > 0),
-        [],
-    );
+    const destinations = useMemo(() => {
+        const source = curated && curated.length > 0 ? curated : VILLA_DESTINATIONS;
+        return source.filter(d => d.query.trim().length > 0);
+    }, [curated]);
 
     const labelFor = useCallback(
         (dest: VillaDestination) =>

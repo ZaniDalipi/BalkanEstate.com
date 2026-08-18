@@ -23,6 +23,7 @@ import EmailManager from './EmailManager';
 import SiteSettingsManager from './SiteSettingsManager';
 import PendingLicenses from './PendingLicenses';
 import VillaApprovals from './VillaApprovals';
+import VillaDestinationsManager from './VillaDestinationsManager';
 import BusinessListingManager from './BusinessListingManager';
 import ArticleManager from './ArticleManager';
 import type { AdminSection } from '@/types';
@@ -49,6 +50,7 @@ const urlToAdminView: Record<AdminSection, AdminView> = {
   'business-listings': 'businessListings',
   'articles': 'articles',
   'villa-approvals': 'villaApprovals',
+  'villa-destinations': 'villaDestinations',
 };
 
 // Map AdminView to URL sections
@@ -72,6 +74,7 @@ const adminViewToUrl: Record<AdminView, string> = {
   'businessListings': 'business-listings',
   'articles': 'articles',
   'villaApprovals': 'villa-approvals',
+  'villaDestinations': 'villa-destinations',
 };
 
 const AdminDashboard: React.FC = () => {
@@ -226,6 +229,8 @@ const AdminDashboard: React.FC = () => {
         );
       case 'villaApprovals':
         return <VillaApprovals />;
+      case 'villaDestinations':
+        return <VillaDestinationsManager />;
       case 'properties':
         return <PropertyManager />;
       case 'agencies':

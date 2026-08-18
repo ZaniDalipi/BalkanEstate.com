@@ -41,7 +41,8 @@
     "system": "Sustav",
     "inquiries": "Upiti",
     "pricing": "Cijene i planovi",
-    "villaApprovals": "Odobrenja vila"
+    "villaApprovals": "Odobrenja vila",
+    "villaDestinations": "Destinacije vila"
   },
   "properties": {
     "title": "Upravljanje nekretninama",
@@ -1076,5 +1077,41 @@
     "untitled": "Vila bez naziva",
     "negotiable": "Po dogovoru",
     "showingFirst": "Prikazano prvih {{shown}} od {{total}} vila."
+  },
+  "villaDestinations": {
+    "title": "Destinacije vila",
+    "subtitle": "Mjesta prikazana u izlogu vila na početnoj stranici. Prenesite fotografiju da zamijenite privremenu sliku grada.",
+    "add": "Dodaj destinaciju",
+    "edit": "Uredi",
+    "delete": "Obriši",
+    "save": "Spremi",
+    "saving": "Spremanje…",
+    "cancel": "Odustani",
+    "saved": "Destinacija je spremljena",
+    "name": "Naziv",
+    "query": "Pojam pretrage",
+    "queryHint": "Šalje se stranici vila kao pretraga lokacije.",
+    "country": "Država",
+    "lat": "Zemljopisna širina",
+    "lng": "Zemljopisna dužina",
+    "zoom": "Zum",
+    "order": "Redoslijed",
+    "imageCity": "Grad zamjenske fotografije",
+    "imageCityHint": "Koristi se samo dok ne prenesete fotografiju za ovo mjesto.",
+    "imageCountry": "Država zamjenske fotografije",
+    "active": "Prikaži na početnoj stranici",
+    "hidden": "Skriveno",
+    "searches": "pretražuje",
+    "usingCityPhoto": "koristi fotografiju grada {{city}}",
+    "replacePhoto": "Fotografija",
+    "uploading": "Prenošenje…",
+    "imageUpdated": "Fotografija je ažurirana",
+    "empty": "Još nema destinacija — početna stranica koristi ugrađeni popis.",
+    "emptyHint": "Pokrenite „npm run seed:villa-destinations“ u backend/ za uvoz popisa, zatim ga uredite ovdje.",
+    "confirmDelete": "Ukloniti {{name}} s početne stranice?",
+    "loadError": "Učitavanje destinacija nije uspjelo",
+    "saveError": "Spremanje destinacije nije uspjelo",
+    "deleteError": "Brisanje destinacije nije uspjelo",
+    "uploadError": "Prijenos fotografije nije uspio"
   }
 }
