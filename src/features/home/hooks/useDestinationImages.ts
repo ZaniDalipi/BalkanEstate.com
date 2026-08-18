@@ -43,6 +43,8 @@ export interface ResolvedDestinationImage {
     label: string;
     /** Short place name printed on the card. */
     caption: string;
+    /** Country, printed under the name. */
+    sublabel: string;
 }
 
 /**
@@ -117,6 +119,7 @@ export function useDestinationImages(
                 alt: '',
                 label: labelFor(dest),
                 caption: captionFor(dest),
+                sublabel: dest.country,
             })),
         [destinations, loaded, labelFor, captionFor],
     );

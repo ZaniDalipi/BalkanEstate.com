@@ -85,6 +85,9 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
                 // Slow enough to read a card's name and reach for it before it
                 // leaves; the pointer pause does the rest.
                 speed={34}
+                // Softer corners than the stock 0.4 — the cards carry a photo
+                // and a label, so they read as cards rather than film frames.
+                path={{ cardRadius: 0.9 }}
                 axis={55}
                 className="h-[440px] w-full sm:h-[520px]"
             >

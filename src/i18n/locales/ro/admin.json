@@ -1107,11 +1107,15 @@
     "uploading": "Se încarcă…",
     "imageUpdated": "Fotografie actualizată",
     "empty": "Încă nu există destinații — pagina principală folosește lista încorporată.",
-    "emptyHint": "Rulează „npm run seed:villa-destinations” în backend/ pentru a importa lista, apoi editeaz-o aici.",
+    "emptyHint": "Apasă „Importă locurile încorporate” de mai sus pentru a aduce cele paisprezece destinații, apoi editează-le aici.",
     "confirmDelete": "Elimini {{name}} de pe pagina principală?",
     "loadError": "Încărcarea destinațiilor a eșuat",
     "saveError": "Salvarea destinației a eșuat",
     "deleteError": "Ștergerea destinației a eșuat",
-    "uploadError": "Încărcarea fotografiei a eșuat"
+    "uploadError": "Încărcarea fotografiei a eșuat",
+    "import": "Importă locurile încorporate",
+    "importing": "Se importă…",
+    "imported": "Importate {{imported}} destinații, omise {{skipped}} existente",
+    "importError": "Importul destinațiilor a eșuat"
   }
 }

@@ -572,3 +572,9 @@ export const updateVillaDestination = async (
 export const deleteVillaDestination = async (id: string): Promise<{ message: string }> =>
   apiRequest(`/admin/villa-destinations/${id}`, { method: 'DELETE', requiresAuth: true });
 
+export const importDefaultVillaDestinations = async (): Promise<{
+  message: string;
+  imported: number;
+  skipped: number;
+}> => apiRequest('/admin/villa-destinations/import-defaults', { method: 'POST', requiresAuth: true });
+

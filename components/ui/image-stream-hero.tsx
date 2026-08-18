@@ -121,6 +121,8 @@ export type StreamImage = {
   label?: string;
   /** Short name printed on the card face — the place, not the full sentence. */
   caption?: string;
+  /** Secondary line under the caption, e.g. the country. */
+  sublabel?: string;
 };
 
 export type ImageStreamHeroProps = {
@@ -249,8 +251,21 @@ export function ImageStreamHero({
       (onImageSelect
         ? `.${card}{pointer-events:none}` +
           `.${card}:focus-within{animation-play-state:paused;z-index:20}` +
-          `.${face}{transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease}` +
-          `.${card}:focus-within .${face}{transform:scale(1.12);box-shadow:0 24px 60px rgba(0,0,0,.5)}`
+          // Resting depth: a cast shadow plus a hairline inner edge. Without
+          // the edge, neighbouring cards in the ribbon merge into one another
+          // where their photos happen to have similar tones.
+          `.${face}{transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease,filter .3s ease;` +
+          `box-shadow:0 10px 30px rgba(0,0,0,.34),inset 0 0 0 1px rgba(255,255,255,.14)}` +
+          // Active/focus: lift, deepen the cast shadow and switch the hairline
+          // to gold so the target of a click is unmistakable.
+          `.${card}:focus-within .${face},.${face}[data-active="true"]{transform:scale(1.12);` +
+          `box-shadow:0 26px 70px rgba(0,0,0,.55),inset 0 0 0 1.5px rgba(232,184,32,.9);` +
+          `filter:saturate(1.08) brightness(1.04)}` +
+          // The rule under the name grows on activation — a small, cheap tell
+          // that the card is live rather than decoration.
+          `.${cap} i{display:block;height:2px;width:14px;margin-bottom:.5cqw;border-radius:2px;` +
+          `background:linear-gradient(90deg,#FFEFB0,#E8B820);transition:width .3s ease}` +
+          `.${card}:focus-within .${cap} i,.${face}[data-active="true"] .${cap} i{width:34px}`
         : ""),
     [right, left, card, face, cap, onImageSelect, p],
   );
@@ -344,6 +359,7 @@ export function ImageStreamHero({
                       // the left duplicate would double every tab stop.
                       tabIndex={isPrimaryRail ? 0 : -1}
                       aria-hidden={isPrimaryRail ? undefined : true}
+                      data-active={isActive ? "true" : undefined}
                       className={cn(
                         face,
                         "relative block h-full w-full cursor-pointer overflow-hidden p-0",
@@ -357,6 +373,16 @@ export function ImageStreamHero({
                       }}
                     >
                       {media}
+                      {/* Vignette: darkens the corners so a bright photo does
+                          not bleed into the card beside it. */}
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 block"
+                        style={{
+                          background:
+                            "radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(0,0,0,.35) 100%)",
+                        }}
+                      />
                       {img?.caption ? (
                         <>
                           {/* Scrim keeps the name legible over any photo. */}
@@ -364,24 +390,42 @@ export function ImageStreamHero({
                             aria-hidden
                             className="pointer-events-none absolute inset-x-0 bottom-0 block"
                             style={{
-                              height: "45%",
+                              height: "52%",
                               background:
-                                "linear-gradient(to top, rgba(0,0,0,.78), rgba(0,0,0,.25) 55%, transparent)",
+                                "linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,.3) 55%, transparent)",
                             }}
                           />
                           {/* Sized in cqw so it tracks the corridor: distant
                               cards read as texture, near ones as a label. */}
                           <span
-                            className={cn(cap, "pointer-events-none absolute inset-x-0 bottom-0 block text-white")}
+                            className={cn(cap, "pointer-events-none absolute inset-x-0 bottom-0 block text-left text-white")}
                             style={{
-                              padding: "0 1.1cqw 1cqw",
-                              fontSize: "1.45cqw",
-                              fontWeight: 600,
-                              letterSpacing: "-0.01em",
-                              textShadow: "0 1px 3px rgba(0,0,0,.6)",
+                              padding: "0 1.2cqw 1.1cqw",
+                              textShadow: "0 1px 3px rgba(0,0,0,.65)",
                             }}
                           >
-                            {img.caption}
+                            <i aria-hidden />
+                            <span
+                              className="block"
+                              style={{ fontSize: "1.5cqw", fontWeight: 600, letterSpacing: "-0.01em", lineHeight: 1.15 }}
+                            >
+                              {img.caption}
+                            </span>
+                            {img.sublabel ? (
+                              <span
+                                className="block"
+                                style={{
+                                  fontSize: "0.95cqw",
+                                  fontWeight: 600,
+                                  letterSpacing: "0.14em",
+                                  textTransform: "uppercase",
+                                  color: "rgba(255,239,176,.85)",
+                                  marginTop: ".25cqw",
+                                }}
+                              >
+                                {img.sublabel}
+                              </span>
+                            ) : null}
                           </span>
                         </>
                       ) : null}

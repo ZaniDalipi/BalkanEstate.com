@@ -940,6 +940,36 @@ router.delete('/villa-destinations/:id', logAdminAction('DELETE_VILLA_DESTINATIO
   }
 });
 
+// POST /api/admin/villa-destinations/import-defaults
+// Brings the built-in destinations into the database so they can be curated.
+// Idempotent: matches on `query`, the field that drives the villa search, so
+// re-running never duplicates a destination an admin has since renamed.
+router.post('/villa-destinations/import-defaults', logAdminAction('IMPORT_VILLA_DESTINATIONS'), async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const VillaDestination = (await import('../models/VillaDestination')).default;
+    const { DEFAULT_VILLA_DESTINATIONS } = await import('../data/defaultVillaDestinations');
+
+    const existing = await VillaDestination.find({}, 'query').lean();
+    const taken = new Set(existing.map(d => String(d.query)));
+
+    const toInsert = DEFAULT_VILLA_DESTINATIONS
+      .map((d, index) => ({ ...d, displayOrder: index, isActive: true }))
+      .filter(d => !taken.has(d.query));
+
+    if (toInsert.length > 0) await VillaDestination.insertMany(toInsert);
+    void invalidateCache('/api/villa-destinations');
+
+    res.json({
+      message: 'Import complete',
+      imported: toInsert.length,
+      skipped: DEFAULT_VILLA_DESTINATIONS.length - toInsert.length,
+    });
+  } catch (err) {
+    adminLogger.error('Import villa destinations error:', err);
+    res.status(500).json({ message: 'Failed to import destinations' });
+  }
+});
+
 // POST /api/admin/villa-destinations/upload-image
 router.post(
   '/villa-destinations/upload-image',

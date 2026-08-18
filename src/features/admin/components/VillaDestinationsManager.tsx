@@ -8,6 +8,7 @@ import {
     createVillaDestination,
     updateVillaDestination,
     deleteVillaDestination,
+    importDefaultVillaDestinations,
     type AdminVillaDestination,
 } from '../api/adminApi';
 import VillaDestinationForm, { type DestinationDraft, emptyDraft } from './VillaDestinationForm';
@@ -29,6 +30,7 @@ const VillaDestinationsManager: React.FC = () => {
     const [editing, setEditing] = useState<DestinationDraft | null>(null);
     const [saving, setSaving] = useState(false);
     const [uploadingId, setUploadingId] = useState<string | null>(null);
+    const [importing, setImporting] = useState(false);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -89,6 +91,29 @@ const VillaDestinationsManager: React.FC = () => {
         }
     };
 
+    /**
+     * Pulls the built-in destinations into the database so they can be curated
+     * here. Idempotent server-side, so pressing it twice is harmless.
+     */
+    const handleImport = async () => {
+        setImporting(true);
+        setError(null);
+        try {
+            const result = await importDefaultVillaDestinations();
+            setNotice(
+                t('admin:villaDestinations.imported', 'Imported {{imported}} destination(s), skipped {{skipped}} already present', {
+                    imported: result.imported,
+                    skipped: result.skipped,
+                })
+            );
+            await load();
+        } catch {
+            setError(t('admin:villaDestinations.importError', 'Failed to import the built-in destinations'));
+        } finally {
+            setImporting(false);
+        }
+    };
+
     /** Uploads straight onto an existing row — the common case is swapping a photo. */
     const handleUpload = async (row: AdminVillaDestination, file: File) => {
         setUploadingId(row._id);
@@ -125,12 +150,23 @@ const VillaDestinationsManager: React.FC = () => {
                         {t('admin:villaDestinations.subtitle', 'Places shown in the home-page villa showcase. Upload a photo to replace the stand-in city image.')}
                     </p>
                 </div>
-                <button
-                    onClick={() => setEditing(emptyDraft(rows.length))}
-                    className="flex-shrink-0 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-white hover:bg-primary-dark"
-                >
-                    + {t('admin:villaDestinations.add', 'Add destination')}
-                </button>
+                <div className="flex flex-shrink-0 gap-2">
+                    <button
+                        onClick={handleImport}
+                        disabled={importing}
+                        className="rounded-lg bg-neutral-100 px-3.5 py-2 text-sm font-semibold text-gray-700 hover:bg-neutral-200 disabled:opacity-50"
+                    >
+                        {importing
+                            ? t('admin:villaDestinations.importing', 'Importing…')
+                            : t('admin:villaDestinations.import', 'Import built-in places')}
+                    </button>
+                    <button
+                        onClick={() => setEditing(emptyDraft(rows.length))}
+                        className="rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-white hover:bg-primary-dark"
+                    >
+                        + {t('admin:villaDestinations.add', 'Add destination')}
+                    </button>
+                </div>
             </div>
 
             {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
@@ -154,7 +190,7 @@ const VillaDestinationsManager: React.FC = () => {
                 <div className="rounded-xl border border-dashed border-gray-300 py-12 text-center text-sm text-gray-500">
                     <p>{t('admin:villaDestinations.empty', 'No destinations yet — the home page is using its built-in list.')}</p>
                     <p className="mt-1 text-xs text-gray-400">
-                        {t('admin:villaDestinations.emptyHint', 'Run “npm run seed:villa-destinations” in backend/ to import the built-in list, then edit it here.')}
+                        {t('admin:villaDestinations.emptyHint', 'Press “Import built-in places” above to bring in the fourteen shipped destinations, then edit them here.')}
                     </p>
                 </div>
             ) : (

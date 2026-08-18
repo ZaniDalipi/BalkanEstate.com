@@ -1107,11 +1107,15 @@
     "uploading": "Prenošenje…",
     "imageUpdated": "Fotografija je ažurirana",
     "empty": "Još nema destinacija — početna stranica koristi ugrađeni popis.",
-    "emptyHint": "Pokrenite „npm run seed:villa-destinations“ u backend/ za uvoz popisa, zatim ga uredite ovdje.",
+    "emptyHint": "Pritisnite „Uvezi ugrađena mjesta“ iznad za uvoz četrnaest destinacija, zatim ih uredite ovdje.",
     "confirmDelete": "Ukloniti {{name}} s početne stranice?",
     "loadError": "Učitavanje destinacija nije uspjelo",
     "saveError": "Spremanje destinacije nije uspjelo",
     "deleteError": "Brisanje destinacije nije uspjelo",
-    "uploadError": "Prijenos fotografije nije uspio"
+    "uploadError": "Prijenos fotografije nije uspio",
+    "import": "Uvezi ugrađena mjesta",
+    "importing": "Uvoz…",
+    "imported": "Uvezeno {{imported}} destinacija, preskočeno {{skipped}} postojećih",
+    "importError": "Uvoz destinacija nije uspio"
   }
 }
