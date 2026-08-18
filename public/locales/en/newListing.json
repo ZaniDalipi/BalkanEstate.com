@@ -218,7 +218,12 @@
     "selectCountry": "Please select a country",
     "selectCity": "Please select a city",
     "setLocation": "Please set the property location on the map",
-    "invalidPrice": "Please enter a valid price"
+    "invalidPrice": "Please enter a valid price",
+    "titleRequired": "Please enter a listing title",
+    "descriptionRequired": "Please add a description of the property",
+    "atLeastOnePhoto": "At least one photo is required to publish a listing.",
+    "fixHighlighted": "Please complete the fields highlighted in red:",
+    "apartmentTotalFloors": "For apartments, please enter the total number of floors (1 or greater)."
   },
   "success": {
     "title": "Listing Published!",

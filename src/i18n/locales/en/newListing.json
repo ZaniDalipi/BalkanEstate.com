@@ -217,7 +217,19 @@
     "selectCountry": "Please select a country",
     "selectCity": "Please select a city",
     "setLocation": "Please set the property location on the map",
-    "invalidPrice": "Please enter a valid price"
+    "invalidPrice": "Please enter a valid price",
+    "imagesRequired": "Please upload at least one image.",
+    "selectCountryCity": "Please select both country and city.",
+    "selectValidCity": "Please select a valid city to set the location.",
+    "apartmentFloorNumber": "For apartments, please enter a valid floor number (1 or greater).",
+    "houseTotalFloors": "For houses and villas, please enter the total number of floors (1 or greater).",
+    "apartmentElevator": "For apartments, please specify whether there is a lift/elevator (Yes or No).",
+    "floorExceedsTotal": "Floor number cannot exceed the total number of floors.",
+    "titleRequired": "Please enter a listing title",
+    "descriptionRequired": "Please add a description of the property",
+    "atLeastOnePhoto": "At least one photo is required to publish a listing.",
+    "fixHighlighted": "Please complete the fields highlighted in red:",
+    "apartmentTotalFloors": "For apartments, please enter the total number of floors (1 or greater)."
   },
   "success": {
     "title": "Listing Published!",
@@ -243,20 +255,5 @@
     "failedToCreateMessage": "Failed to create listing. Please try again.",
     "removeImagesFirst": "Please remove some images before adding more.",
     "onlyMoreImages": "Only {{count}} more image(s) can be added."
-  },
-  "validation": {
-    "required": "This field is required",
-    "minImages": "Please upload at least {{count}} images",
-    "selectCountry": "Please select a country",
-    "selectCity": "Please select a city",
-    "setLocation": "Please set the property location on the map",
-    "invalidPrice": "Please enter a valid price",
-    "imagesRequired": "Please upload at least one image.",
-    "selectCountryCity": "Please select both country and city.",
-    "selectValidCity": "Please select a valid city to set the location.",
-    "apartmentFloorNumber": "For apartments, please enter a valid floor number (1 or greater).",
-    "houseTotalFloors": "For houses and villas, please enter the total number of floors (1 or greater).",
-    "apartmentElevator": "For apartments, please specify whether there is a lift/elevator (Yes or No).",
-    "floorExceedsTotal": "Floor number cannot exceed the total number of floors."
   }
 }

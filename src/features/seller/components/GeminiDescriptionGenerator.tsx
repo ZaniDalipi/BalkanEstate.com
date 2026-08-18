@@ -22,6 +22,7 @@ import { getCurrencySymbol } from '@/utils/currency';
 import {
     LANGUAGES, CheckCircleIcon, UploadIcon, TagListInput,
     inputBaseClasses, labelClasses, selectClasses,
+    errorFieldClasses, errorLabelClasses, fieldAnchorId, FieldError, RequiredMark, FIELD_ERROR_ORDER,
 } from './ListingFormHelpers';
 
 // --- Main Component ---
@@ -46,6 +47,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
         isUploading,
         selectedCountry, selectedCity, availableCities,
         previewProperty,
+        fieldErrors,
         getZoomLevel, cityData,
         handleCountryChange, handleCityChange,
         handleMapLocationChange, handleMapAddressChange,
@@ -137,6 +139,11 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     const isRental = listingData.listingType === 'rent';
     const currencySymbol = getCurrencySymbol(selectedCountry);
 
+    // Missing fields, in form order, for the summary shown above the submit buttons
+    const errorSummary = FIELD_ERROR_ORDER
+        .filter(field => fieldErrors[field])
+        .map(field => ({ field, message: fieldErrors[field] }));
+
     return (
         <>
         {generatingModal}
@@ -147,7 +154,9 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             isSubmitting={isSubmitting}
             uploadProgress={uploadProgress}
         />
-        <form className="listing-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') e.preventDefault(); }}>
+        {/* noValidate: validation is handled in useListingForm so every missing
+            field is highlighted at once instead of one native browser tooltip */}
+        <form className="listing-form" noValidate onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') e.preventDefault(); }}>
             {/* Listing Type Toggle: Sale / Rent */}
             <div className="flex justify-center mb-6">
                 <LiquidGlassControl
@@ -338,10 +347,11 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                             )}
                         </div>
 
-                        <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-200 border-dashed rounded-xl cursor-pointer glass-fieldset hover:bg-gray-50 transition-colors">
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6"><UploadIcon className="w-10 h-10 mb-3 text-gray-300" /><p className="mb-2 text-sm text-gray-400"><span className="font-semibold text-gray-600">{t('seller:createListing.upload.clickToUpload')}</span></p><p className="text-xs text-gray-300">{t('seller:createListing.upload.fileTypes')}</p></div>
-                            <input id="image-upload" type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} />
+                        <label htmlFor="image-upload" className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer glass-fieldset transition-colors ${fieldErrors.images ? 'border-red-500 bg-red-50/60 hover:bg-red-50' : 'border-gray-200 hover:bg-gray-50'}`}>
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6"><UploadIcon className={`w-10 h-10 mb-3 ${fieldErrors.images ? 'text-red-400' : 'text-gray-300'}`} /><p className="mb-2 text-sm text-gray-400"><span className={`font-semibold ${fieldErrors.images ? 'text-red-600' : 'text-gray-600'}`}>{t('seller:createListing.upload.clickToUpload')}</span></p><p className="text-xs text-gray-300">{t('seller:createListing.upload.fileTypes')}</p></div>
+                            <input id="image-upload" type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} aria-invalid={!!fieldErrors.images} aria-required="true" />
                         </label>
+                        <FieldError message={fieldErrors.images} />
                         {images.length > 0 && (
                             <div className="mt-4"><p className="font-semibold text-sm mb-2 text-gray-600">{t('seller:createListing.upload.imagesSelected', { count: images.length })}</p><div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">{images.map((img, index) => (<div key={index} className="relative group"><img src={img.previewUrl} alt={`preview ${index}`} className="w-full h-24 object-cover rounded-lg border border-gray-200" /><button type="button" onClick={() => removeImage(index)} className="absolute -top-1 -right-1 bg-red-500/80 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">&times;</button></div>))}</div></div>
                         )}
@@ -367,12 +377,14 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         handleMapAddressChange={handleMapAddressChange}
                         getZoomLevel={getZoomLevel}
                         cityData={cityData}
+                        fieldErrors={fieldErrors}
                     />
 
                     <ListingPropertyFeatures
                         listingData={listingData}
                         setListingData={setListingData}
                         handleInputChange={handleInputChange}
+                        fieldErrors={fieldErrors}
                     />
 
                     {/* ===== Rental-Specific Fields (only shown when listingType is 'rent') ===== */}
@@ -611,9 +623,16 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                     </fieldset>
 
                     {/* Description */}
-                    <fieldset><label htmlFor="description" className="block text-sm font-medium text-gray-500 mb-1">{t('seller:createListing.fields.description')}</label><textarea id="description" name="description" value={listingData.description} onChange={handleInputChange} className={`${inputBaseClasses} h-48`} required /></fieldset>
+                    <fieldset id={fieldAnchorId('description')}>
+                        <label htmlFor="description" className={`block text-sm font-medium mb-1 ${fieldErrors.description ? 'text-red-600' : 'text-gray-500'}`}>
+                            {t('seller:createListing.fields.description')}<RequiredMark />
+                        </label>
+                        <textarea id="description" name="description" value={listingData.description} onChange={handleInputChange} className={`${inputBaseClasses} h-48 ${fieldErrors.description ? errorFieldClasses : ''}`} required aria-invalid={!!fieldErrors.description} />
+                        <FieldError message={fieldErrors.description} />
+                    </fieldset>
 
                     <ListingImageUpload
+                        imagesError={fieldErrors.images}
                         images={images}
                         imageTags={listingData.image_tags}
                         floorplanImage={floorplanImage}
@@ -762,6 +781,23 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                     </div>
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {/* Validation summary - lists every field still missing */}
+                    {errorSummary.length > 0 && (
+                        <div role="alert" className="rounded-xl border border-red-300 bg-red-50 p-4">
+                            <p className="flex items-center gap-2 text-sm font-semibold text-red-700">
+                                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                                </svg>
+                                {t('newListing:validation.fixHighlighted', 'Please complete the fields highlighted in red:')}
+                            </p>
+                            <ul className="mt-2 ml-7 list-disc space-y-1 text-sm text-red-600">
+                                {errorSummary.map(({ field, message }) => (
+                                    <li key={field}>{message}</li>
+                                ))}
+                            </ul>
                         </div>
                     )}
 
