@@ -246,11 +246,19 @@ export function ImageStreamHero({
       // entirely and the container picks the card under the cursor from their
       // projected rects — which getBoundingClientRect reports correctly.
       //
-      // Freezing the active card matters as much as the lift: the cards cross
-      // the corridor in seconds, so without a pause clicking one is luck.
+      // Freezing matters as much as the lift: the cards cross the corridor in
+      // seconds, so without a pause clicking one is luck. But the freeze
+      // (applied inline below, on every card at once — see the comment
+      // there for why it has to be inline) has to apply to every card at
+      // once, not just the one under the cursor: each card's CSS animation
+      // keeps its own clock, and `animationDelay` spaces them evenly by
+      // giving every card a different phase within that clock. Pausing a
+      // single card lets its siblings keep running, so however long the
+      // hold lasted gets added permanently to that one card's phase — it
+      // comes back out of its slot and stays there, rather than resyncing
+      // after a lap.
       (onImageSelect
         ? `.${card}{pointer-events:none}` +
-          `.${card}:focus-within{animation-play-state:paused;z-index:20}` +
           // Resting depth: a cast shadow plus a hairline inner edge. Without
           // the edge, neighbouring cards in the ribbon merge into one another
           // where their photos happen to have similar tones.
@@ -345,14 +353,31 @@ export function ImageStreamHero({
                     // corridor is already full on the first frame.
                     animationDelay: `${-(i * speed) / cards}s`,
                     backfaceVisibility: "hidden",
-                    // LOCAL ADDITION: freeze and raise the card under the cursor.
-                    ...(isActive ? { animationPlayState: "paused", zIndex: 20 } : null),
+                    // LOCAL ADDITION: pause every card — keyed on "is anything
+                    // active", not "is this card active" — so a hold of any
+                    // length can't desync one card's phase from its siblings.
+                    // Has to be inline, not a `[data-ish-paused] .card{...}`
+                    // stylesheet rule: the `animation` shorthand two lines up
+                    // is also inline, and it resets animation-play-state to
+                    // running as part of that same declaration — inline
+                    // always wins over an external rule for the same
+                    // property, no matter how the selector is written.
+                    ...(onImageSelect && active !== null ? { animationPlayState: "paused" } : null),
+                    // Raise the active card above its neighbours.
+                    ...(isActive ? { zIndex: 20 } : null),
                   }}
                 >
                   {onImageSelect ? (
                     <button
                       type="button"
                       onClick={() => onImageSelect(index)}
+                      // Keyboard focus drives the same `active` state pointer
+                      // hover does, so tabbing to a card freezes the whole
+                      // corridor exactly like hovering one does — one path
+                      // for both input modes, not a separate CSS trigger that
+                      // could pause a single card and desync it again.
+                      onFocus={() => setActive(slot)}
+                      onBlur={() => setActive((cur) => (cur === slot ? null : cur))}
                       aria-label={img?.label ?? img?.alt ?? undefined}
                       // The rails are a mirrored loop, so every card appears
                       // twice. Only the right rail is reachable by keyboard;
