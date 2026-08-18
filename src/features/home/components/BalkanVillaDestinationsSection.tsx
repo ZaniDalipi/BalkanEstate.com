@@ -67,16 +67,19 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
                 cards={9}
                 speed={20}
                 axis={55}
-                className="h-[520px] w-full sm:h-[560px]"
+                className="h-[440px] w-full sm:h-[520px]"
             >
-                {/* Overlay. pointer-events-none so the corridor stays clickable
-                    through the gaps; each control re-enables its own. */}
-                <div className="pointer-events-none relative z-10 flex h-full flex-col items-center justify-between py-10 text-center sm:py-12">
+                {/* Title top, supporting line bottom — the corridor owns the
+                    middle band, so nothing else may sit there or it collides
+                    with the ribbon. The chips live below the hero for that
+                    reason. `pointer-events-none` keeps the cards clickable
+                    through the gaps. */}
+                <div className="pointer-events-none relative z-10 flex h-full flex-col items-center justify-between py-8 text-center sm:py-10">
                     <div className="px-6">
-                        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-400">
+                        <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-400">
                             {t('villas:destinationsHero.eyebrow', 'Across the Balkans')}
                         </p>
-                        <h2 className="text-balance text-3xl font-medium tracking-tight text-neutral-900 sm:text-5xl">
+                        <h2 className="text-balance text-2xl font-medium tracking-tight text-neutral-900 sm:text-4xl">
                             {t('villas:destinationsHero.title1', 'Luxury villas,')}
                             <br />
                             <span style={{ color: 'var(--color-villa-gold-deep)' }}>
@@ -85,21 +88,7 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
                         </h2>
                     </div>
 
-                    {/* Destination chips — the keyboard and screen-reader path. */}
-                    <div className="pointer-events-auto flex max-w-3xl flex-wrap justify-center gap-2 px-6">
-                        {destinations.map(dest => (
-                            <button
-                                key={dest.id}
-                                type="button"
-                                onClick={() => openDestination(dest)}
-                                className="rounded-full border border-black/[0.08] bg-white/80 px-3 py-1.5 text-[12px] font-medium text-neutral-700 shadow-sm backdrop-blur-md transition-all hover:border-[var(--color-villa-gold)] hover:text-[var(--color-villa-gold-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-villa-gold)]"
-                            >
-                                {t(`villas:destinations.${dest.id}`, dest.fallback)}
-                            </button>
-                        ))}
-                    </div>
-
-                    <p className="max-w-md text-balance px-6 text-sm text-neutral-500">
+                    <p className="max-w-md text-balance px-6 text-[13px] text-neutral-500">
                         {t(
                             'villas:destinationsHero.subtitle',
                             'From the Sharr mountains to the Adriatic. Pick a place and see the villas waiting there.',
@@ -107,6 +96,21 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
                     </p>
                 </div>
             </ImageStreamHero>
+
+            {/* Destination chips — clear of the corridor, and the keyboard and
+                screen-reader path to the same destinations as the cards. */}
+            <div className="mx-auto flex max-w-4xl flex-wrap justify-center gap-2 px-4 pb-10 pt-5">
+                {destinations.map(dest => (
+                    <button
+                        key={dest.id}
+                        type="button"
+                        onClick={() => openDestination(dest)}
+                        className="rounded-full border border-black/[0.08] bg-white px-3.5 py-1.5 text-[12px] font-medium text-neutral-600 shadow-sm transition-all hover:-translate-y-0.5 hover:border-[var(--color-villa-gold)] hover:text-[var(--color-villa-gold-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-villa-gold)]"
+                    >
+                        {t(`villas:destinations.${dest.id}`, dest.fallback)}
+                    </button>
+                ))}
+            </div>
         </section>
     );
 };

@@ -19,7 +19,7 @@ const PLACEHOLDER_STOPS: readonly (readonly [string, string])[] = [
  * corridor is solid immediately — an empty `src` would render a transparent
  * card and tear a hole in the ribbon while the network is still working.
  */
-function gradientDataUri(index: number): string {
+export function gradientDataUri(index: number): string {
     const [from, to] = PLACEHOLDER_STOPS[index % PLACEHOLDER_STOPS.length];
     const svg =
         `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="66" viewBox="0 0 48 66">` +
