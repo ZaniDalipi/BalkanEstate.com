@@ -1,8 +1,10 @@
 import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ImageData, ALL_VALID_TAGS, UploadIcon, InfoIcon, ImageTagSelector } from './ListingFormHelpers';
+import { ImageData, ALL_VALID_TAGS, UploadIcon, InfoIcon, ImageTagSelector, FieldError, RequiredMark, fieldAnchorId } from './ListingFormHelpers';
 
 interface ListingImageUploadProps {
+    /** Validation message shown when no photo has been added yet. */
+    imagesError?: string;
     images: ImageData[];
     imageTags: { index: number; tag: string }[];
     floorplanImage: ImageData;
@@ -18,6 +20,7 @@ interface ListingImageUploadProps {
 }
 
 const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
+    imagesError,
     images,
     imageTags,
     floorplanImage,
@@ -36,16 +39,24 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
     return (
         <>
             {/* Image Management */}
-            <fieldset className="overflow-visible relative z-20">
-                <label className="block text-sm font-medium text-gray-500 mb-1">{t('seller:createListing.imageManagement.title')}</label>
-                <div className="p-4 glass-fieldset overflow-visible">
-                     <label htmlFor="image-upload-manual" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-200 border-dashed rounded-xl cursor-pointer glass-fieldset hover:bg-gray-50 transition-colors mb-4">
+            <fieldset className="overflow-visible relative z-20" id={fieldAnchorId('images')}>
+                <label className={`block text-sm font-medium mb-1 ${imagesError ? 'text-red-600' : 'text-gray-500'}`}>
+                    {t('seller:createListing.imageManagement.title')}<RequiredMark />
+                </label>
+                <div className={`p-4 glass-fieldset overflow-visible ${imagesError ? '!border-red-500' : ''}`}>
+                     <label htmlFor="image-upload-manual" className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer glass-fieldset transition-colors mb-4 ${imagesError ? 'border-red-500 bg-red-50/60 hover:bg-red-50' : 'border-gray-200 hover:bg-gray-50'}`}>
                         <div className="flex flex-col items-center justify-center">
-                            <UploadIcon className="w-8 h-8 mb-2 text-gray-300" />
-                            <p className="text-sm text-gray-400">{images.length > 0 ? t('seller:createListing.upload.uploadMore') : t('seller:createListing.upload.uploadProperty')}</p>
+                            <UploadIcon className={`w-8 h-8 mb-2 ${imagesError ? 'text-red-400' : 'text-gray-300'}`} />
+                            <p className={`text-sm ${imagesError ? 'text-red-600' : 'text-gray-400'}`}>{images.length > 0 ? t('seller:createListing.upload.uploadMore') : t('seller:createListing.upload.uploadProperty')}</p>
                         </div>
-                        <input id="image-upload-manual" type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} />
+                        <input id="image-upload-manual" type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} aria-invalid={!!imagesError} aria-required="true" />
                     </label>
+                    <FieldError message={imagesError} className="mb-3" />
+                    {!imagesError && images.length === 0 && (
+                        <p className="mb-3 text-xs text-gray-400">
+                            {t('newListing:validation.atLeastOnePhoto', 'At least one photo is required to publish a listing.')}
+                        </p>
+                    )}
 
                     {images.length > 0 && (
                         <div>

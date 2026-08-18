@@ -722,6 +722,19 @@ export const createProperty = async (
       return;
     }
 
+    // **At least one photo is required to create a listing**
+    const submittedImages = Array.isArray(req.body.images) ? req.body.images : [];
+    const hasImage = submittedImages.some(
+      (img: any) => typeof img === 'string' ? img.trim() !== '' : !!img?.url
+    );
+    if (!hasImage) {
+      res.status(422).json({
+        message: 'At least one photo is required to create a listing.',
+        code: 'IMAGES_REQUIRED',
+      });
+      return;
+    }
+
     // Agency agents can post as either agent or private_seller.
     // When posting as private_seller, the listing won't appear on the agency page.
     // Their profile role remains "agent" - only the listing's createdAsRole changes.

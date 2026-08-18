@@ -1,11 +1,12 @@
 import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ListingData, TagListInput, TriStateCheckbox, labelClasses, selectClasses } from './ListingFormHelpers';
+import { ListingData, TagListInput, TriStateCheckbox, labelClasses, selectClasses, FieldErrors, fieldAnchorId } from './ListingFormHelpers';
 
 interface ListingPropertyFeaturesProps {
     listingData: ListingData;
     setListingData: React.Dispatch<React.SetStateAction<ListingData>>;
     handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+    fieldErrors: FieldErrors;
 }
 
 const chevronIcon = (
@@ -18,6 +19,7 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
     listingData,
     setListingData,
     handleInputChange,
+    fieldErrors,
 }) => {
     const { t } = useTranslation(['newListing', 'seller', 'common']);
 
@@ -58,6 +60,8 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
                             label={t('seller:createListing.propertyFeatures.elevator')}
                             value={listingData.hasElevator}
                             onChange={(val) => setListingData(p => ({ ...p, hasElevator: val }))}
+                            error={fieldErrors.hasElevator}
+                            anchorId={fieldAnchorId('hasElevator')}
                         />
                     )}
                     <TriStateCheckbox
@@ -263,7 +267,8 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
         d0.energyRating === d1.energyRating &&
         d0.orientation === d1.orientation &&
         prev.setListingData === next.setListingData &&
-        prev.handleInputChange === next.handleInputChange
+        prev.handleInputChange === next.handleInputChange &&
+        prev.fieldErrors === next.fieldErrors
     );
 });
 

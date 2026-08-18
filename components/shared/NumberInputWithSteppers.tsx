@@ -9,9 +9,13 @@ interface NumberInputWithSteppersProps {
     step?: number;
     /** Allow fractional values to be typed (e.g. 102.2 m²). Defaults to integers only. */
     allowDecimals?: boolean;
+    /** Validation message - renders the control in red with the message underneath. */
+    error?: string;
+    /** Optional id on the wrapper, used to scroll the field into view on validation errors. */
+    anchorId?: string;
 }
 
-const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = memo(({ label, value, onChange, min = 0, max, step = 1, allowDecimals = false }) => {
+const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = memo(({ label, value, onChange, min = 0, max, step = 1, allowDecimals = false, error, anchorId }) => {
     const id = useMemo(() => `number-input-${label.toLowerCase().replace(/\s+/g, '-')}`, [label]);
 
     // Local text state so partial decimal entry (e.g. "102." or "102.20") isn't
@@ -87,9 +91,9 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = memo(({ 
     const canIncrement = max === undefined || value < max;
 
     return (
-        <div className="relative">
-            <label htmlFor={id} className="block text-sm font-medium text-neutral-700 mb-1">{label}</label>
-            <div className="flex items-center w-full h-[52px] bg-white rounded-xl border border-neutral-300 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all overflow-hidden">
+        <div className="relative" id={anchorId}>
+            <label htmlFor={id} className={`block text-sm font-medium mb-1 ${error ? 'text-red-600' : 'text-neutral-700'}`}>{label}</label>
+            <div className={`flex items-center w-full h-[52px] bg-white rounded-xl border transition-all overflow-hidden ${error ? 'border-red-500 ring-1 ring-red-500' : 'border-neutral-300 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary'}`}>
                 <button
                     type="button"
                     onClick={handleDecrement}
@@ -125,6 +129,14 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = memo(({ 
                     </svg>
                 </button>
             </div>
+            {error && (
+                <p role="alert" className="mt-1 flex items-center gap-1 text-xs font-medium text-red-600">
+                    <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                    </svg>
+                    {error}
+                </p>
+            )}
         </div>
     );
 });

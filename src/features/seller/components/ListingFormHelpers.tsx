@@ -158,6 +158,117 @@ export const inputBaseClasses = "glass-input block w-full text-base px-4 py-2.5 
 export const labelClasses = "block text-sm font-medium text-gray-500 mb-1.5";
 export const selectClasses = "glass-input block w-full text-base px-4 py-2.5 pr-10 appearance-none transition-all cursor-pointer";
 
+// --- Inline Validation ---
+
+/** Validation messages for the listing form, keyed by field name. */
+export type FieldErrors = Record<string, string>;
+
+/**
+ * Order used to decide which invalid field the form scrolls to first.
+ * Matches the top-to-bottom order of the fields in the form.
+ */
+export const FIELD_ERROR_ORDER = [
+    'country', 'city', 'title', 'price',
+    'totalFloors', 'floorNumber', 'hasElevator',
+    'description', 'images',
+] as const;
+
+/** Anchor id used to scroll a field into view when validation fails. */
+export const fieldAnchorId = (field: string) => `field-${field}`;
+
+/** Minimal translate signature: `(key, fallback) => string`. */
+type Translate = (key: string, fallback?: string) => string;
+
+/**
+ * Checks every mandatory field of a listing and returns a message per invalid
+ * field. An empty result means the listing can be published.
+ */
+export const validateListing = (
+    params: {
+        listingData: ListingData;
+        imageCount: number;
+        selectedCountry: string;
+        selectedCity: string;
+    },
+    t: Translate,
+): FieldErrors => {
+    const { listingData, imageCount, selectedCountry, selectedCity } = params;
+    const errors: FieldErrors = {};
+
+    if (!selectedCountry) {
+        errors.country = t('newListing:validation.selectCountry', 'Please select a country');
+    }
+    if (!selectedCity) {
+        errors.city = t('newListing:validation.selectCity', 'Please select a city');
+    } else if (!listingData.lat || !listingData.lng) {
+        errors.city = t('newListing:validation.setLocation', 'Please set the property location on the map');
+    }
+
+    if (!listingData.title.trim()) {
+        errors.title = t('newListing:validation.titleRequired', 'Please enter a listing title');
+    }
+
+    if (!listingData.isNegotiable && (!listingData.price || listingData.price <= 0)) {
+        errors.price = t('newListing:validation.invalidPrice', 'Please enter a valid price');
+    }
+
+    if (!listingData.description.trim()) {
+        errors.description = t('newListing:validation.descriptionRequired', 'Please add a description of the property');
+    }
+
+    // At least one photo is mandatory - a listing without images cannot be published
+    if (imageCount === 0) {
+        errors.images = t('newListing:validation.imagesRequired', 'Please upload at least one image.');
+    }
+
+    // Floor details - not applicable to land
+    if (listingData.propertyType !== 'land') {
+        if (listingData.propertyType === 'apartment') {
+            if (!listingData.floorNumber || listingData.floorNumber < 0) {
+                errors.floorNumber = t('newListing:validation.apartmentFloorNumber', 'For apartments, please enter a valid floor number (1 or greater).');
+            } else if (listingData.totalFloors && listingData.floorNumber > listingData.totalFloors) {
+                errors.floorNumber = t('newListing:validation.floorExceedsTotal', 'Floor number cannot exceed the total number of floors.');
+            }
+            if (!listingData.totalFloors || listingData.totalFloors < 1) {
+                errors.totalFloors = t('newListing:validation.apartmentTotalFloors', 'For apartments, please enter the total number of floors (1 or greater).');
+            }
+            if (listingData.hasElevator === undefined) {
+                errors.hasElevator = t('newListing:validation.apartmentElevator', 'For apartments, please specify whether there is a lift/elevator (Yes or No).');
+            }
+        }
+        if ((listingData.propertyType === 'house' || listingData.propertyType === 'villa')
+            && (!listingData.totalFloors || listingData.totalFloors < 1)) {
+            errors.totalFloors = t('newListing:validation.houseTotalFloors', 'For houses and villas, please enter the total number of floors (1 or greater).');
+        }
+    }
+
+    return errors;
+};
+
+/** Red ring/border applied to an invalid input. */
+export const errorFieldClasses = "!border-red-500 !ring-1 !ring-red-500 focus:!border-red-500 focus:!ring-red-500";
+
+/** Marks a label of a required field that is currently missing. */
+export const errorLabelClasses = "!text-red-600";
+
+/** Inline red message shown underneath an invalid field. */
+export const FieldError: React.FC<{ message?: string; className?: string }> = ({ message, className = '' }) => {
+    if (!message) return null;
+    return (
+        <p role="alert" className={`mt-1 flex items-center gap-1 text-xs font-medium text-red-600 ${className}`}>
+            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+            {message}
+        </p>
+    );
+};
+
+/** Red asterisk marking a required field. */
+export const RequiredMark: React.FC = () => (
+    <span className="text-red-500 ml-0.5" aria-hidden="true">*</span>
+);
+
 // Legacy floating label classes (kept for backward compatibility)
 export const floatingInputClasses = "glass-input block px-2.5 pb-2.5 pt-4 w-full text-base appearance-none peer";
 export const floatingLabelClasses = "absolute text-base text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-placeholder-shown:bg-transparent peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 peer-focus:bg-white start-1 peer-focus:text-blue-600";
@@ -307,7 +418,11 @@ export const TriStateCheckbox: React.FC<{
     label: string;
     value: boolean | undefined;
     onChange: (value: boolean | undefined) => void;
-}> = memo(({ label, value, onChange }) => {
+    /** Validation message - renders the control in red with the message underneath. */
+    error?: string;
+    /** Optional id on the wrapper, used to scroll the field into view on validation errors. */
+    anchorId?: string;
+}> = memo(({ label, value, onChange, error, anchorId }) => {
     const { t } = useTranslation(['seller']);
     const handleClick = () => {
         if (value === undefined) {
@@ -320,9 +435,9 @@ export const TriStateCheckbox: React.FC<{
     };
 
     return (
-        <div className="flex flex-col gap-2">
-            <label className="block text-sm font-medium text-gray-500">{label}</label>
-            <div className="flex gap-2">
+        <div className="flex flex-col gap-2" id={anchorId}>
+            <label className={`block text-sm font-medium ${error ? 'text-red-600' : 'text-gray-500'}`}>{label}</label>
+            <div className={`flex gap-2 ${error ? 'rounded-lg ring-1 ring-red-500 p-1 -m-1' : ''}`}>
                 <Button
                     type="button"
                     variant={value === false ? 'cool' : 'glass'}
@@ -351,6 +466,7 @@ export const TriStateCheckbox: React.FC<{
                     {t('seller:createListing.triState.yes', 'Yes')}
                 </Button>
             </div>
+            <FieldError message={error} className="!mt-0" />
         </div>
     );
 });

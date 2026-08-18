@@ -11,7 +11,7 @@ import { convertToUploadableImage, isHeicFile, needsConversion } from '@/shared/
 import { PLAN_LISTING_LIMITS } from '@/shared/utils/subscriptionHelpers';
 import { SubscriptionPlan } from '@/shared/types/user.types';
 import { apiRequest } from '@/src/shared/api';
-import { ListingData, ImageData, Step, Mode, initialListingData, ALL_VALID_TAGS } from './ListingFormHelpers';
+import { ListingData, ImageData, Step, Mode, initialListingData, ALL_VALID_TAGS, FieldErrors, FIELD_ERROR_ORDER, fieldAnchorId, validateListing } from './ListingFormHelpers';
 
 /** Builds a preview Property object from form state (no API calls, no uploads). */
 export function buildPreviewProperty(
@@ -167,6 +167,10 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     const [selectedCountry, setSelectedCountry] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
     const [availableCities, setAvailableCities] = useState<CityData[]>([]);
+
+    // Inline validation errors, keyed by field name. Fields present here are
+    // highlighted in red in the form until the user fixes them.
+    const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
     // Track modal state to react to it closing
     const wasModalOpen = useRef(isPricingModalOpen);
@@ -595,6 +599,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
 
     const handleGenerate = async () => {
         if (images.length === 0) {
+            setFieldErrors(prev => ({ ...prev, images: t('newListing:validation.imagesRequired', 'Please upload at least one image.') }));
             showError(t('validation:imagesRequired'), t('newListing:validation.imagesRequired'));
             return;
         }
@@ -698,10 +703,78 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         });
     }, []);
 
+    // --- Validation ---
+
+    /**
+     * Collects every missing/invalid required field so they can all be
+     * highlighted in red at once instead of one alert at a time.
+     */
+    const validateForm = useCallback((): FieldErrors => validateListing(
+        { listingData, imageCount: images.length, selectedCountry, selectedCity },
+        (key, fallback) => t(key, fallback ?? key),
+    ), [selectedCountry, selectedCity, listingData, images.length, t]);
+
+    // Drop the red highlight from a field as soon as the user fixes it. Only
+    // fields already flagged are re-checked, so nothing turns red while typing.
+    useEffect(() => {
+        setFieldErrors(prev => {
+            const flagged = Object.keys(prev);
+            if (flagged.length === 0) return prev;
+            const current = validateForm();
+            const next: FieldErrors = {};
+            flagged.forEach(field => {
+                if (current[field]) next[field] = current[field];
+            });
+            const unchanged = Object.keys(next).length === flagged.length
+                && flagged.every(field => next[field] === prev[field]);
+            return unchanged ? prev : next;
+        });
+    }, [validateForm]);
+
+    /** Scrolls the first field in error into view and focuses it. */
+    const focusFirstError = useCallback((errors: FieldErrors) => {
+        const firstField = FIELD_ERROR_ORDER.find(field => errors[field]);
+        if (!firstField) return;
+        // Wait for the fields to re-render in their error state before scrolling.
+        window.requestAnimationFrame(() => {
+            const anchor = document.getElementById(fieldAnchorId(firstField))
+                || document.getElementById(firstField);
+            if (!anchor) return;
+            anchor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const focusable = anchor.matches('input, select, textarea')
+                ? anchor
+                : anchor.querySelector<HTMLElement>('input, select, textarea');
+            focusable?.focus({ preventScroll: true });
+        });
+    }, []);
+
+    /**
+     * Runs validation, paints the offending fields red and surfaces a summary.
+     * Returns true when the form is good to submit.
+     */
+    const runValidation = useCallback((): boolean => {
+        const errors = validateForm();
+        setFieldErrors(errors);
+        if (Object.keys(errors).length === 0) return true;
+
+        const messages = FIELD_ERROR_ORDER.filter(field => errors[field]).map(field => errors[field]);
+        showError(
+            t('validation:form.hasErrors', 'Please fix the errors before submitting'),
+            messages.join(' • '),
+        );
+        // Errors are only visible on the form itself.
+        setStep('form');
+        focusFirstError(errors);
+        return false;
+    }, [validateForm, focusFirstError, showError, t]);
+
     // --- Preview Handlers ---
     const [previewProperty, setPreviewProperty] = useState<Property | null>(null);
 
     const handleGoToPreview = useCallback(() => {
+        // Don't preview a listing that can't be published - highlight what's missing instead
+        if (!runValidation()) return;
+
         // Build a temporary Property object from the form data for preview display
         const preview = buildPreviewProperty(
             listingData, images, floorplanImage,
@@ -711,7 +784,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         setPreviewProperty(preview);
         setStep('preview');
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, [listingData, images, floorplanImage, selectedCountry, selectedCity, selectedRole, currentUser, propertyToEdit]);
+    }, [runValidation, listingData, images, floorplanImage, selectedCountry, selectedCity, selectedRole, currentUser, propertyToEdit]);
 
     const handleBackToForm = useCallback(() => {
         setStep('form');
@@ -727,48 +800,10 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         }
         setIsSubmitting(true);
 
-        // Validation
-        if (!selectedCountry || !selectedCity) {
-            showError(t('validation:locationRequired'), t('newListing:validation.selectCountryCity'));
+        // Validate everything at once so all missing fields turn red together
+        if (!runValidation()) {
             setIsSubmitting(false);
             return;
-        }
-
-        if (listingData.lat === 0 || listingData.lng === 0) {
-            showError(t('validation:locationRequired'), t('newListing:validation.selectValidCity'));
-            setIsSubmitting(false);
-            return;
-        }
-
-        // Floor validation - skip for land
-        if (listingData.propertyType !== 'land') {
-            if (listingData.propertyType === 'apartment') {
-                if (!listingData.floorNumber || listingData.floorNumber < 0) {
-                    showError(t('validation:invalidFloorNumber'), t('newListing:validation.apartmentFloorNumber'));
-                    setIsSubmitting(false);
-                    return;
-                }
-                if (!listingData.totalFloors || listingData.totalFloors < 1) {
-                    showError(t('validation:invalidFloorCount'), t('newListing:validation.apartmentTotalFloors'));
-                    setIsSubmitting(false);
-                    return;
-                }
-                if (listingData.floorNumber > listingData.totalFloors) {
-                    showError(t('validation:invalidFloorNumber'), t('newListing:validation.floorExceedsTotal'));
-                    setIsSubmitting(false);
-                    return;
-                }
-                if (listingData.hasElevator === undefined) {
-                    showError(t('validation:elevatorRequired'), t('newListing:validation.apartmentElevator'));
-                    setIsSubmitting(false);
-                    return;
-                }
-            }
-            if ((listingData.propertyType === 'house' || listingData.propertyType === 'villa') && (!listingData.totalFloors || listingData.totalFloors < 1)) {
-                showError(t('validation:invalidFloorCount'), t('newListing:validation.houseTotalFloors'));
-                setIsSubmitting(false);
-                return;
-            }
         }
 
         try {
@@ -1220,6 +1255,13 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                         },
                     ]
                 );
+            } else if (errorCode === 'IMAGES_REQUIRED') {
+                // Server rejected a listing without photos - highlight the upload field
+                const message = t('newListing:validation.imagesRequired', 'Please upload at least one image.');
+                setFieldErrors(prev => ({ ...prev, images: message }));
+                setStep('form');
+                showError(t('validation:imagesRequired'), message);
+                focusFirstError({ images: message });
             } else if (errorCode === 'BUYER_CANNOT_CREATE_LISTING') {
                 showInfo(
                     t('seller:errors.switchRoleRequired'),
@@ -1349,6 +1391,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         isUploading,
         selectedCountry, selectedCity, availableCities,
         previewProperty,
+        fieldErrors,
         // Computed
         getZoomLevel, cityData,
         // Handlers
