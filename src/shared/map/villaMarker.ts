@@ -13,22 +13,29 @@
  */
 
 /**
- * Gilded villa palette. The marker body is metallic gold (the luxury signal);
- * `ink` is the dark engraving colour used for the price text on that gold.
+ * Deep navy shared by the teardrop pin body and the price pill above it. One
+ * dark ground for both is what lets the price be plain white at full contrast
+ * (~16:1) instead of dark ink on a pale gold fill, and it reads as a single
+ * object rather than a gold chip floating above a navy pin.
  */
-/** For-rent villas: metallic gold body, dark engraved price text. `glow` is the
- *  "r,g,b" triplet used for the marker's drop-shadow halo (so the glow tracks
- *  the body colour instead of being hardcoded). */
-export const VILLA_GOLD = { light: '#FFEFB0', mid: '#E8B820', deep: '#B8860B', edge: '#6E5716', ink: '#2C1A00', glow: '232,184,32' } as const;
-/** For-sale villas: sapphire-blue body, white price text — a clear second colour. */
-export const VILLA_SAPPHIRE = { light: '#7FB4FF', mid: '#2563EB', deep: '#1E40AF', edge: '#16307E', ink: '#FFFFFF', glow: '37,99,235' } as const;
+export const VILLA_PIN_BODY = '#101B2D';
+
+/**
+ * Villa marker palette. `light`/`mid`/`deep` drive the pin's gradient rim and
+ * the glyph line-art; `mid` doubles as the price pill's hairline. `ink` is the
+ * price text — white on both markets, against VILLA_PIN_BODY. `glow` is the
+ * "r,g,b" triplet for the drop-shadow halo, so the glow tracks the body colour.
+ */
+/** For-rent villas: gold rim and glyph. */
+export const VILLA_GOLD = { light: '#FFEFB0', mid: '#E8B820', deep: '#B8860B', ink: '#FFFFFF', glow: '232,184,32' } as const;
+/** For-sale villas: sapphire rim and glyph — a clear second colour. */
+export const VILLA_SAPPHIRE = { light: '#7FB4FF', mid: '#2563EB', deep: '#1E40AF', ink: '#FFFFFF', glow: '37,99,235' } as const;
 
 /** Marker body palette by market: gold for rent, sapphire for sale. */
 export interface VillaMarkerPalette {
   light: string;
   mid: string;
   deep: string;
-  edge: string;
   ink: string;
   /** "r,g,b" triplet for the drop-shadow glow. */
   glow: string;
@@ -101,7 +108,7 @@ export const buildVillaPinSVG = (glyph: VillaPinGlyph, uid: string, pal: VillaMa
     <defs>
       <linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${pal.light}"/><stop offset="45%" stop-color="${pal.mid}"/><stop offset="100%" stop-color="${pal.deep}"/></linearGradient>
     </defs>
-    <path d="${VILLA_PIN_OUTLINE}" fill="#101B2D" stroke="url(#${gid})" stroke-width="5" stroke-linejoin="round"/>
+    <path d="${VILLA_PIN_OUTLINE}" fill="${VILLA_PIN_BODY}" stroke="url(#${gid})" stroke-width="5" stroke-linejoin="round"/>
     ${groups}
   </svg>`;
 };
@@ -120,8 +127,26 @@ export const buildLuxuryVillaMarkerHTML = (
   pinSize = 24,
 ): string => {
   const pin = buildVillaPinSVG(glyph, uid, pal, pinSize);
+  // The pill is the pin's navy body with the market colour kept as a hairline
+  // rim, so the price is white at full contrast and the two parts read as one
+  // marker. A gradient fill behind small text is what made the old dark-ink
+  // version hard to scan at a glance.
+  const pill = [
+    'padding:2.5px 8px',
+    'border-radius:999px',
+    `background:${VILLA_PIN_BODY}`,
+    `color:${pal.ink}`,
+    `border:1px solid ${pal.mid}`,
+    'font-family:Inter,-apple-system,sans-serif',
+    'font-size:10.5px',
+    'font-weight:700',
+    'letter-spacing:-0.01em',
+    'white-space:nowrap',
+    `box-shadow:0 1px 3px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.08)`,
+    'margin-bottom:-2.5px',
+  ].join(';');
   return `<div style="display:flex;flex-direction:column;align-items:center;filter:${villaGlowFilter(pal)};">
-    <div style="padding:2px 7px;border-radius:999px;background:linear-gradient(135deg,${pal.light},${pal.mid} 55%,${pal.deep});color:${pal.ink};border:1px solid ${pal.edge};font-family:Inter,-apple-system,sans-serif;font-size:9.5px;font-weight:700;letter-spacing:-0.01em;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,0.3);margin-bottom:-2.5px;">${price}</div>
+    <div style="${pill};">${price}</div>
     ${pin}
   </div>`;
 };
