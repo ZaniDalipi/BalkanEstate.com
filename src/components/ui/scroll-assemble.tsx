@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useMemo, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -11,31 +11,33 @@ import { cn } from '@/lib/utils';
  * tiles can use it. Drag the scrollbar and the cards move with it; this is
  * deliberately not a fire-once entrance animation.
  *
- * Two things this gets right that a first attempt at it got wrong:
+ * The range the animation runs over is measured in absolute document
+ * pixels, not viewport-relative fractions ("row's top touches the
+ * viewport's bottom", etc). Two earlier attempts used viewport-relative
+ * offsets and both failed the same way for a reason that's easy to miss:
+ * for a row sitting close to the top of the page, the viewport-relative
+ * "entering" edge of that range corresponds to a *negative* scroll
+ * position — one that already happened before the page ever loaded, and
+ * can never be reached going forward. How much of the range survives
+ * clamping to real (non-negative) scroll depends entirely on how much
+ * content sits above the row, which is exactly the part that differs by
+ * breakpoint: this page's hero is noticeably shorter on mobile
+ * (`pt-12 pb-16` vs `sm:pt-24 sm:pb-28`), so a range tuned to look right
+ * on desktop had measurably less headroom on a phone — and for Quick
+ * Access specifically, none left at all.
  *
- * 1. The scroll range is the row's full transit through the viewport
- *    (`'start end'` → `'end start'`: from the row's top touching the
- *    viewport's bottom, to the row's bottom passing the viewport's top),
- *    not a short range like "top reaches centre". A short range resolves
- *    to "done" almost immediately for any row near the top of the page —
- *    at scroll position 0 there's no scroll room *before* it, so progress
- *    is already past the end and nothing visibly moves. The full-transit
- *    range doesn't have that failure mode: it's on the order of one
- *    viewport-height + one row-height long, which a row has real room to
- *    move through even when it's already partway into that range at load.
- *    Framer computes this from actual element/viewport geometry each
- *    frame, not by simulating scroll to a hypothetical negative position,
- *    so a row already visible at load simply starts partway through its
- *    range instead of failing to animate.
- * 2. Interpolated through a narrower sub-range (`[0, 0.4]`) of that
- *    transit, so the assembly settles well before the row scrolls fully
- *    past — matching the reference, whose characters finish at the
- *    scroll-fraction midpoint rather than only on the very last frame
- *    the section is on screen.
- *
- * Position only, never opacity: an item that's scattered is still fully
- * visible, just offset, so there's no blank first frame to flicker.
+ * Measuring the row's actual position in the document sidesteps that:
+ * the window is `[rowTop - LEAD_PX, rowTop + SETTLE_PX]` in absolute
+ * page-Y pixels, so how far above the row the hero happens to be doesn't
+ * change how much of the window is reachable — only how much *unrelated*
+ * scrolling happens before the window starts, which is fine. Remeasured
+ * on resize and shortly after mount (a `ResizeObserver` on the row itself
+ * catches height changes from async content — e.g. images finishing load
+ * above it — that a mount-only measurement would miss).
  */
+
+const LEAD_PX = 380;
+const SETTLE_PX = 60;
 
 interface AssembleContextValue {
     progress: MotionValue<number>;
@@ -56,15 +58,45 @@ interface ScrollAssembleProps {
 export const ScrollAssemble: React.FC<ScrollAssembleProps> = ({ count, className, children }) => {
     const ref = useRef<HTMLDivElement>(null);
     const reduced = useReducedMotion();
+    const { scrollY } = useScroll();
 
-    const { scrollYProgress } = useScroll({
-        target: ref,
-        offset: ['start end', 'end start'],
-    });
+    // The row's own top, in absolute document pixels — re-measured on resize
+    // and once more shortly after mount to catch async layout shifts (e.g.
+    // an image above the row finishing load and pushing it down).
+    const [rowTop, setRowTop] = useState<number | null>(null);
+
+    useEffect(() => {
+        const measure = () => {
+            const el = ref.current;
+            if (!el) return;
+            setRowTop(el.getBoundingClientRect().top + window.scrollY);
+        };
+        measure();
+        const settleTimer = window.setTimeout(measure, 400);
+
+        const ro = new ResizeObserver(measure);
+        if (ref.current) ro.observe(ref.current);
+        window.addEventListener('resize', measure);
+
+        return () => {
+            window.clearTimeout(settleTimer);
+            ro.disconnect();
+            window.removeEventListener('resize', measure);
+        };
+    }, []);
+
+    // Before the first measurement, or with no scroll room above the row
+    // (rowTop < LEAD_PX — content pinned right at the top of the page),
+    // clamp the window's start to 0: the animation simply begins on the
+    // very first pixel scrolled, rather than being undefined or negative.
+    const windowStart = rowTop === null ? 0 : Math.max(0, rowTop - LEAD_PX);
+    const windowEnd = rowTop === null ? 1 : Math.max(windowStart + 1, rowTop + SETTLE_PX);
+
+    const progress = useTransform(scrollY, [windowStart, windowEnd], [0, 1]);
 
     const value = useMemo<AssembleContextValue>(
-        () => ({ progress: scrollYProgress, centerIndex: (count - 1) / 2, still: !!reduced }),
-        [scrollYProgress, count, reduced],
+        () => ({ progress, centerIndex: (count - 1) / 2, still: !!reduced }),
+        [progress, count, reduced],
     );
 
     return (
@@ -108,27 +140,11 @@ const AssembleItemInner: React.FC<ScrollAssembleItemProps & { ctx: AssembleConte
     const { progress, centerIndex, still } = ctx;
     const offset = index - centerIndex;
 
-    // Settle late in the row's transit, not at the very end of it — matches
-    // the reference's own [0, 0.5]-style sub-range, just wider.
-    //
-    // It has to be wider than the reference's 0.5: their sections are 210vh
-    // tall and deliberately stacked to manufacture a huge scroll range, so
-    // a narrow settle window still has plenty of room to be visible. A
-    // compact row has no such artificial buffer — for one sitting close to
-    // the top of the page, most of its full-viewport-transit range is
-    // already behind the initial scroll position before the user has
-    // scrolled at all (there's no "before" to have scrolled through). A
-    // low SETTLE can end up already exceeded at load for exactly that case,
-    // which reads as "not animated" — the failure this replaced. 0.85 keeps
-    // that window as wide as the geometry allows without requiring the
-    // last, physically-unreachable sliver of the transit.
-    const SETTLE = 0.85;
-
     // Outer items travel furthest, so the row closes in from both ends.
-    const x = useTransform(progress, [0, SETTLE], [still ? 0 : offset * 46, 0]);
-    const y = useTransform(progress, [0, SETTLE], [still ? 0 : Math.abs(offset) * 14, 0]);
-    const rotate = useTransform(progress, [0, SETTLE], [still ? 0 : offset * 5, 0]);
-    const scale = useTransform(progress, [0, SETTLE], [still ? 1 : 0.86, 1]);
+    const x = useTransform(progress, [0, 1], [still ? 0 : offset * 46, 0]);
+    const y = useTransform(progress, [0, 1], [still ? 0 : Math.abs(offset) * 14, 0]);
+    const rotate = useTransform(progress, [0, 1], [still ? 0 : offset * 5, 0]);
+    const scale = useTransform(progress, [0, 1], [still ? 1 : 0.86, 1]);
 
     return (
         <motion.div
