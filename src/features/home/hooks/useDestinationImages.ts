@@ -2,9 +2,16 @@ import { useEffect, useMemo, useState } from 'react';
 import { getCityImageUrl } from '@/config/cloudinaryConfig';
 import type { VillaDestination } from '../data/villaDestinations';
 
-/** Card aspect in the corridor is 18:25, so ask Cloudinary for a portrait crop. */
-const IMAGE_WIDTH = 480;
-const IMAGE_HEIGHT = 666;
+/**
+ * Card aspect in the corridor is 18:25, so ask Cloudinary for a portrait crop.
+ *
+ * Sized for the *exit* of the corridor, not the waist: a card leaves the frame
+ * at `exitHeight` 46cqw, so on a 1440px-wide container it is ~660px tall and a
+ * smaller source would visibly soften right where the eye is. `f_auto` serves
+ * AVIF/WebP, which keeps the bytes reasonable at this size.
+ */
+const IMAGE_WIDTH = 900;
+const IMAGE_HEIGHT = 1250;
 
 /** Brand-toned gradient pairs — gold, emerald and navy, cycled per destination. */
 const PLACEHOLDER_STOPS: readonly (readonly [string, string])[] = [
@@ -32,7 +39,10 @@ export function gradientDataUri(index: number): string {
 export interface ResolvedDestinationImage {
     src: string;
     alt: string;
+    /** Full sentence for assistive tech. */
     label: string;
+    /** Short place name printed on the card. */
+    caption: string;
 }
 
 /**
@@ -51,6 +61,7 @@ export interface ResolvedDestinationImage {
 export function useDestinationImages(
     destinations: readonly VillaDestination[],
     labelFor: (dest: VillaDestination) => string,
+    captionFor: (dest: VillaDestination) => string,
 ): ResolvedDestinationImage[] {
     const [loaded, setLoaded] = useState<Record<string, string>>({});
 
@@ -65,6 +76,7 @@ export function useDestinationImages(
                     height: IMAGE_HEIGHT,
                     crop: 'fill',
                     gravity: 'auto',
+                    quality: 'auto:good',
                 }),
             })),
         [destinations],
@@ -97,10 +109,11 @@ export function useDestinationImages(
         () =>
             destinations.map((dest, i) => ({
                 src: loaded[dest.id] ?? gradientDataUri(i),
-                // The corridor is decorative; the button's label carries the meaning.
+                // The photo is decorative; the button's label carries the meaning.
                 alt: '',
                 label: labelFor(dest),
+                caption: captionFor(dest),
             })),
-        [destinations, loaded, labelFor],
+        [destinations, loaded, labelFor, captionFor],
     );
 }

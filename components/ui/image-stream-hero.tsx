@@ -119,6 +119,8 @@ export type StreamImage = {
   alt?: string;
   /** Announced on the card's button when `onImageSelect` makes the rails interactive. */
   label?: string;
+  /** Short name printed on the card face — the place, not the full sentence. */
+  caption?: string;
 };
 
 export type ImageStreamHeroProps = {
@@ -182,6 +184,9 @@ export function ImageStreamHero({
   const right = `ish-r-${id}`;
   const left = `ish-l-${id}`;
   const card = `ish-c-${id}`;
+  // LOCAL ADDITION: inner face (carries the hover lift) and its caption.
+  const face = `ish-f-${id}`;
+  const cap = `ish-p-${id}`;
 
   const p = React.useMemo(() => ({ ...PATH, ...path }), [path]);
 
@@ -191,8 +196,25 @@ export function ImageStreamHero({
       // Pausing rather than disabling keeps the corridor whole: every card is
       // already dropped mid-flight by its negative delay, so it freezes as a
       // finished still instead of collapsing onto the axis.
-      `@media(prefers-reduced-motion:reduce){.${card}{animation-play-state:paused}}`,
-    [right, left, card, p],
+      `@media(prefers-reduced-motion:reduce){.${card}{animation-play-state:paused}}` +
+      // LOCAL ADDITION: interactive rails.
+      //
+      // Hover/focus freezes just that card. Without it the cards are moving
+      // targets and clicking one is mostly luck — pausing is what actually
+      // makes them clickable, and it doubles as the "raise" affordance.
+      //
+      // The lift lives on the inner face, never on the card itself: the card's
+      // own transform is driven by the keyframes, and composing a scale onto it
+      // would scale its translated position too, throwing the card outward
+      // instead of growing it in place.
+      (onImageSelect
+        ? `.${card}{transition:filter .28s ease}` +
+          `.${card}:hover,.${card}:focus-within{animation-play-state:paused;z-index:20}` +
+          `.${face}{transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease}` +
+          `.${card}:hover .${face},.${card}:focus-within .${face}{transform:scale(1.12);box-shadow:0 24px 60px rgba(0,0,0,.5)}` +
+          `.${cap}{transition:opacity .3s ease}`
+        : ""),
+    [right, left, card, face, cap, onImageSelect, p],
   );
 
   return (
@@ -222,30 +244,25 @@ export function ImageStreamHero({
               // the right at every depth.
               const index = i % Math.max(images.length, 1);
               const img = images[index];
-              // LOCAL ADDITION: a button when interactive, else the plain div upstream renders.
-              const Tag = onImageSelect ? "button" : "div";
-              const interactive = onImageSelect
-                ? {
-                    type: "button" as const,
-                    onClick: () => onImageSelect(index),
-                    "aria-label": img?.label ?? img?.alt ?? undefined,
-                    // The rails are a mirrored loop, so every card appears twice.
-                    // Only the right rail is reachable by keyboard; the left is
-                    // its duplicate and would double every stop in the tab order.
-                    tabIndex: name === right ? 0 : -1,
-                    "aria-hidden": name === right ? undefined : true,
-                  }
-                : {};
+              // LOCAL ADDITION: interactive rails render an inner <button> face
+              // inside the animated card; decorative rails render exactly what
+              // upstream does — the image straight into the card.
+              const isPrimaryRail = name === right;
+              const media = img ? (
+                <img
+                  src={img.src}
+                  alt={img.alt ?? ""}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover"
+                  draggable={false}
+                />
+              ) : null;
+
               return (
-                <Tag
+                <div
                   key={`${name}-${i}`}
-                  {...interactive}
-                  className={cn(
-                    card,
-                    "absolute overflow-hidden",
-                    onImageSelect &&
-                      "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80",
-                  )}
+                  className={cn(card, "absolute", !onImageSelect && "overflow-hidden")}
                   style={{
                     left: "50%",
                     top: `${axis}%`,
@@ -253,7 +270,7 @@ export function ImageStreamHero({
                     height: `${p.cardHeight}cqw`,
                     marginLeft: `${-p.cardWidth / 2}cqw`,
                     marginTop: `${-p.cardHeight / 2}cqw`,
-                    borderRadius: `${p.cardRadius}cqw`,
+                    borderRadius: onImageSelect ? undefined : `${p.cardRadius}cqw`,
                     animation: `${name} ${speed}s linear infinite`,
                     // Negative delay drops each card mid-flight, so the
                     // corridor is already full on the first frame.
@@ -261,17 +278,57 @@ export function ImageStreamHero({
                     backfaceVisibility: "hidden",
                   }}
                 >
-                  {img ? (
-                    <img
-                      src={img.src}
-                      alt={img.alt ?? ""}
-                      loading="lazy"
-                      decoding="async"
-                      className="h-full w-full object-cover"
-                      draggable={false}
-                    />
-                  ) : null}
-                </Tag>
+                  {onImageSelect ? (
+                    <button
+                      type="button"
+                      onClick={() => onImageSelect(index)}
+                      aria-label={img?.label ?? img?.alt ?? undefined}
+                      // The rails are a mirrored loop, so every card appears
+                      // twice. Only the right rail is reachable by keyboard;
+                      // the left duplicate would double every tab stop.
+                      tabIndex={isPrimaryRail ? 0 : -1}
+                      aria-hidden={isPrimaryRail ? undefined : true}
+                      className={cn(
+                        face,
+                        "relative block h-full w-full cursor-pointer overflow-hidden p-0",
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/90",
+                      )}
+                      style={{ borderRadius: `${p.cardRadius}cqw` }}
+                    >
+                      {media}
+                      {img?.caption ? (
+                        <>
+                          {/* Scrim keeps the name legible over any photo. */}
+                          <span
+                            aria-hidden
+                            className="pointer-events-none absolute inset-x-0 bottom-0 block"
+                            style={{
+                              height: "45%",
+                              background:
+                                "linear-gradient(to top, rgba(0,0,0,.78), rgba(0,0,0,.25) 55%, transparent)",
+                            }}
+                          />
+                          {/* Sized in cqw so it tracks the corridor: distant
+                              cards read as texture, near ones as a label. */}
+                          <span
+                            className={cn(cap, "pointer-events-none absolute inset-x-0 bottom-0 block text-white")}
+                            style={{
+                              padding: "0 1.1cqw 1cqw",
+                              fontSize: "1.45cqw",
+                              fontWeight: 600,
+                              letterSpacing: "-0.01em",
+                              textShadow: "0 1px 3px rgba(0,0,0,.6)",
+                            }}
+                          >
+                            {img.caption}
+                          </span>
+                        </>
+                      ) : null}
+                    </button>
+                  ) : (
+                    media
+                  )}
+                </div>
               );
             }),
           )}

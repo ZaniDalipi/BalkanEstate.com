@@ -42,7 +42,12 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
         [t],
     );
 
-    const images = useDestinationImages(destinations, labelFor);
+    const captionFor = useCallback(
+        (dest: VillaDestination) => t(`villas:destinations.${dest.id}`, dest.fallback),
+        [t],
+    );
+
+    const images = useDestinationImages(destinations, labelFor, captionFor);
 
     const openDestination = useCallback(
         (dest: VillaDestination | undefined) => {
@@ -97,15 +102,17 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
                 </div>
             </ImageStreamHero>
 
-            {/* Destination chips — clear of the corridor, and the keyboard and
-                screen-reader path to the same destinations as the cards. */}
-            <div className="mx-auto flex max-w-4xl flex-wrap justify-center gap-2 px-4 pb-10 pt-5">
+            {/* The place names live on the cards themselves. This chip row is
+                the touch fallback only: hover-to-pause doesn't exist on a
+                phone, so tapping a moving card there is mostly luck. On
+                pointer devices the cards are the whole interface. */}
+            <div className="mx-auto flex max-w-4xl flex-wrap justify-center gap-2 px-4 pb-8 pt-4 sm:hidden">
                 {destinations.map(dest => (
                     <button
                         key={dest.id}
                         type="button"
                         onClick={() => openDestination(dest)}
-                        className="rounded-full border border-black/[0.08] bg-white px-3.5 py-1.5 text-[12px] font-medium text-neutral-600 shadow-sm transition-all hover:-translate-y-0.5 hover:border-[var(--color-villa-gold)] hover:text-[var(--color-villa-gold-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-villa-gold)]"
+                        className="rounded-full border border-black/[0.08] bg-white px-3.5 py-1.5 text-[12px] font-medium text-neutral-600 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-villa-gold)]"
                     >
                         {t(`villas:destinations.${dest.id}`, dest.fallback)}
                     </button>
