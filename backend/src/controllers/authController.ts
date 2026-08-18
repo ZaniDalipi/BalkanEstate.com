@@ -2758,7 +2758,7 @@ export const unsubscribeFromEmails = async (req: Request, res: Response): Promis
     await user.save();
 
     // Redirect to the app's notifications settings page with a success indicator
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
     const label = unsubscribeType === 'all' ? 'all' : unsubscribeType;
     res.redirect(`${frontendUrl}/account/notifications?unsubscribed=${encodeURIComponent(label)}`);
   } catch (error: any) {

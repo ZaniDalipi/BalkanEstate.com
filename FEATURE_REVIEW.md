@@ -1,4 +1,4 @@
-# BalkanEstate.com - Feature Gap Analysis & Recommendations
+# BalkanEstateAI - Feature Gap Analysis & Recommendations
 
 > Comprehensive review comparing current features against top real estate platforms
 > (Zillow, Rightmove, Idealista, ImmobilienScout24, Redfin, Trulia, Nekretnine.rs, Njuskalo.hr, Halooglasi)

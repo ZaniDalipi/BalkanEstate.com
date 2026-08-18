@@ -663,7 +663,7 @@ export const getMinimalFooter = (options: {
 }): string => {
   const { unsubscribeUrl, preferencesUrl, reason, showSocial = false } = options;
   const year = new Date().getFullYear();
-  const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+  const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
   return `
 <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 40px; padding-top: 24px; border-top: 1px solid ${BRAND_COLORS.border};" class="border-light">
@@ -690,7 +690,7 @@ export const getMinimalFooter = (options: {
       ` : ''}
 
       <p style="margin: 16px 0 0 0; font-size: 11px; color: ${BRAND_COLORS.textLight};" class="text-light">
-        © ${year} BalkanEstate<sup>AI</sup> · <a href="${frontendUrl}" style="color: ${BRAND_COLORS.textLight};" class="text-light">balkanestate.com</a>
+        © ${year} BalkanEstate<sup>AI</sup> · <a href="${frontendUrl}" style="color: ${BRAND_COLORS.textLight};" class="text-light">balkanestateai.com</a>
       </p>
     </td>
   </tr>

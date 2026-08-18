@@ -586,7 +586,7 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
       {/* Watermark toggle */}
       <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg">
         <div>
-          <span className="text-sm font-medium text-neutral-700">Include BalkanEstate.com watermark</span>
+          <span className="text-sm font-medium text-neutral-700">Include BalkanEstateAI watermark</span>
           <p className="text-xs text-neutral-500">Adds branding to your video for social sharing</p>
         </div>
         <label className="relative inline-flex items-center cursor-pointer">

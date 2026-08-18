@@ -1,4 +1,4 @@
-# BalkanEstate.com — Architecture
+# BalkanEstateAI — Architecture
 
 ## System Overview
 

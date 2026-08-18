@@ -15,7 +15,7 @@ const envFile =
 dotenv.config({ path: path.resolve(process.cwd(), envFile) });
 dotenv.config();
 
-const EMAIL = process.env.EXTERNAL_SELLER_EMAIL || 'external@balkanestate.com';
+const EMAIL = process.env.EXTERNAL_SELLER_EMAIL || 'external@balkanestateai.com';
 const NAME = 'External Source';
 
 const main = async () => {

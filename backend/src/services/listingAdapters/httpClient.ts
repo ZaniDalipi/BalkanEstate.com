@@ -11,7 +11,7 @@ const DEFAULT_USER_AGENT =
   '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
 /** Bot UA used only for robots.txt fetches so site owners can target us if they want. */
-const ROBOTS_USER_AGENT = 'BalkanEstateBot/1.0 (+https://balkanestate.com/bot)';
+const ROBOTS_USER_AGENT = 'BalkanEstateBot/1.0 (+https://balkanestateai.com/bot)';
 
 const DEFAULT_REQUEST_DELAY_MS = 1500;
 const DEFAULT_TIMEOUT_MS = 20000;
