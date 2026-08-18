@@ -1,29 +1,39 @@
 'use client';
 
-import React, { createContext, useContext, useMemo, useRef } from 'react';
-import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion';
+import React, { createContext, useContext, useMemo } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 /**
- * Scroll-driven "scatter then assemble" row.
+ * "Scatter then assemble" row — the technique from
+ * `components/ui/text-scroll-animation.tsx`, generalised so any row of tiles
+ * can use it: items start pushed away from the centre and slide into place
+ * when the row enters the viewport.
  *
- * Items start pushed away from the centre and slide into place as the row
- * scrolls into view — the technique from `components/ui/text-scroll-animation.tsx`,
- * generalised so any row of tiles can use it.
+ * Two things this deliberately gets right:
  *
- * Deliberately animates position only, never opacity. The `initial opacity 0`
- * + `whileInView` pattern it replaces flickers for any row that is already on
- * screen at first paint: the element renders invisible, then an
- * IntersectionObserver callback a frame or two later starts the fade, so a
- * refresh shows a blank row that pops in. Here every item is painted at full
- * opacity on the very first frame; only its offset changes.
+ * 1. Position only, never opacity. The `initial opacity 0` + `whileInView`
+ *    pattern it replaces flickers for a row already on screen at first
+ *    paint: the element renders invisible, then an IntersectionObserver
+ *    callback a frame or two later starts the fade, so a refresh shows a
+ *    blank row that pops in. Here every item is painted at full opacity on
+ *    the very first frame; only its offset changes.
+ *
+ * 2. Triggered by `whileInView` (an IntersectionObserver), not by a
+ *    continuous `useScroll` progress value. A first attempt used
+ *    `useScroll` so the assembly would track the scroll position directly —
+ *    but a row with no scroll room above it (e.g. sitting right below the
+ *    header) has no range to animate through: at scroll position 0 its
+ *    progress is already resolved to "fully assembled", so nothing visibly
+ *    moves. `whileInView` doesn't have that failure mode — it fires once
+ *    the row is in view, mount included, so above-the-fold rows still play
+ *    the entrance instead of skipping it.
  */
 
 interface AssembleContextValue {
-    progress: MotionValue<number>;
     centerIndex: number;
-    /** When true the transforms collapse to identity and nothing moves. */
-    still: boolean;
+    /** When true the animation is skipped entirely — prefers-reduced-motion. */
+    reduced: boolean;
 }
 
 const AssembleContext = createContext<AssembleContextValue | null>(null);
@@ -36,24 +46,14 @@ interface ScrollAssembleProps {
 }
 
 export const ScrollAssemble: React.FC<ScrollAssembleProps> = ({ count, className, children }) => {
-    const ref = useRef<HTMLDivElement>(null);
     const reduced = useReducedMotion();
-
-    // Assembly completes by the time the row reaches the middle of the
-    // viewport, so a row that is already on screen at load lands assembled
-    // rather than mid-flight.
-    const { scrollYProgress } = useScroll({
-        target: ref,
-        offset: ['start end', 'center center'],
-    });
-
     const value = useMemo<AssembleContextValue>(
-        () => ({ progress: scrollYProgress, centerIndex: (count - 1) / 2, still: !!reduced }),
-        [scrollYProgress, count, reduced],
+        () => ({ centerIndex: (count - 1) / 2, reduced: !!reduced }),
+        [count, reduced],
     );
 
     return (
-        <div ref={ref} className={className} style={{ perspective: '900px' }}>
+        <div className={className} style={{ perspective: '900px' }}>
             <AssembleContext.Provider value={value}>{children}</AssembleContext.Provider>
         </div>
     );
@@ -67,42 +67,31 @@ interface ScrollAssembleItemProps {
 
 /**
  * One tile. Must be rendered inside `ScrollAssemble`; outside it the item
- * simply renders static rather than throwing, so a mis-nested tile degrades to
- * "no animation" instead of taking the page down.
+ * simply renders static rather than throwing, so a mis-nested tile degrades
+ * to "no animation" instead of taking the page down.
  */
 export const ScrollAssembleItem: React.FC<ScrollAssembleItemProps> = ({ index, className, children }) => {
     const ctx = useContext(AssembleContext);
-    if (!ctx) return <div className={className}>{children}</div>;
-    return (
-        <AssembleItemInner index={index} className={className} ctx={ctx}>
-            {children}
-        </AssembleItemInner>
-    );
-};
+    if (!ctx || ctx.reduced) return <div className={className}>{children}</div>;
 
-/**
- * Split out because the transforms are hooks: they cannot sit behind the
- * null-context guard above without breaking the rules of hooks.
- */
-const AssembleItemInner: React.FC<ScrollAssembleItemProps & { ctx: AssembleContextValue }> = ({
-    index,
-    className,
-    children,
-    ctx,
-}) => {
-    const { progress, centerIndex, still } = ctx;
-    const offset = index - centerIndex;
-
-    // Outer items travel furthest, so the row closes in from both ends.
-    const x = useTransform(progress, [0, 1], [still ? 0 : offset * 46, 0]);
-    const y = useTransform(progress, [0, 1], [still ? 0 : Math.abs(offset) * 14, 0]);
-    const rotate = useTransform(progress, [0, 1], [still ? 0 : offset * 5, 0]);
-    const scale = useTransform(progress, [0, 1], [still ? 1 : 0.86, 1]);
+    const offset = index - ctx.centerIndex;
 
     return (
         <motion.div
             className={cn('will-change-transform', className)}
-            style={{ x, y, rotate, scale, transformOrigin: 'center' }}
+            style={{ transformOrigin: 'center' }}
+            // Outer items start furthest away, so the row closes in from both ends.
+            initial={{ x: offset * 46, y: Math.abs(offset) * 14, rotate: offset * 5, scale: 0.86 }}
+            whileInView={{ x: 0, y: 0, rotate: 0, scale: 1 }}
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{
+                type: 'spring',
+                stiffness: 260,
+                damping: 24,
+                // Outer items settle slightly later, so the assembly reads as
+                // closing inward rather than every tile snapping at once.
+                delay: Math.abs(offset) * 0.04,
+            }}
         >
             {children}
         </motion.div>

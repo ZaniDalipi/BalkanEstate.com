@@ -2,6 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { ImageStreamHero } from '@/components/ui/image-stream-hero';
+import { useIsMobile } from '@/src/hooks/useIsMobile';
 import {
     VILLA_DESTINATIONS,
     buildVillaDestinationPath,
@@ -27,6 +28,7 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
     onNavigate,
 }) => {
     const { t } = useTranslation(['villas', 'home']);
+    const isMobile = useIsMobile();
 
     // Admin-curated destinations. `getVillaDestinations` already returns []
     // for an error or an unseeded database, so a failure degrades to the
@@ -76,20 +78,36 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
 
     if (destinations.length === 0) return null;
 
+    // Fewer cards per rail means each consecutive one has to grow more to
+    // cover the same depth range, which opens visible gaps between them —
+    // the default 9 read as a dense, edge-to-edge wall on a narrow phone
+    // screen where there's little width to spread the ribbon across.
+    //
+    // On mobile the geometry is also pushed bigger and closer (larger
+    // birth/exit heights, a nearer axis) so cards read as legible tiles
+    // instead of a thin strip — a phone screen has far less width for the
+    // ribbon to occupy than a desktop viewport does.
+    const cards = isMobile ? 6 : 8;
+    const path = isMobile
+        ? { cardRadius: 0.9, birthHeight: 3.6, exitHeight: 64, railExit: 40 }
+        : { cardRadius: 0.9, exitHeight: 50 };
+
     return (
         <section className="bg-white">
             <ImageStreamHero
                 images={images}
                 onImageSelect={handleImageSelect}
-                cards={9}
+                cards={cards}
                 // Slow enough to read a card's name and reach for it before it
                 // leaves; the pointer pause does the rest.
                 speed={34}
-                // Softer corners than the stock 0.4 — the cards carry a photo
-                // and a label, so they read as cards rather than film frames.
-                path={{ cardRadius: 0.9 }}
-                axis={55}
-                className="h-[440px] w-full sm:h-[520px]"
+                path={path}
+                axis={isMobile ? 53 : 55}
+                // A shorter box on mobile means the (unchanged) title/subtitle
+                // padding leaves less unused margin around the bigger cards —
+                // at 500px the corridor read as a thin band with dead space
+                // above and below it.
+                className="h-[420px] w-full sm:h-[540px]"
             >
                 {/* Title top, supporting line bottom — the corridor owns the
                     middle band, so nothing else may sit there or it collides
