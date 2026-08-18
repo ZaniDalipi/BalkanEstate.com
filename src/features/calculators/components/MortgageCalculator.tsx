@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useDragSlider } from '../../../hooks/useDragSlider';
 import {
   getMortgageProfile,
   formatEur,
@@ -14,6 +15,23 @@ interface MortgageCalculatorProps {
 /** Sensible bounds for the editable interest-rate field. */
 const MIN_RATE = 0.01;
 const MAX_RATE = 30;
+
+/** Rendered thumb diameter — the slider geometry is derived from it. */
+const THUMB_SIZE = 28;
+
+/**
+ * Step for the €-amount slider: ~200 stops across the track (fine enough that a
+ * drag reads as continuous) rounded to a 1/2/5 figure so the number under the
+ * finger still looks deliberate.
+ */
+function amountStepFor(price: number): number {
+  if (!(price > 0)) return 1;
+  const raw = price / 200;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(raw)));
+  const normalized = raw / magnitude;
+  const nice = normalized >= 5 ? 5 : normalized >= 2 ? 2 : 1;
+  return Math.max(1, nice * magnitude);
+}
 
 // Categorical colours for the principal/interest split. Validated (dataviz):
 // CVD ΔE 38+ between the pair; the amber's low surface contrast is covered by
@@ -144,24 +162,43 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
         setLoanTerm(profile.defaultTermYears);
     }, [profile]);
 
-    // Handle slider interaction states
-    const handleSliderStart = useCallback(() => setIsSliderActive(true), []);
+    // Handle slider interaction states. The "active" flag drives the thumb's
+    // enlarged/glowing look, so it lingers briefly after release.
+    const restTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const handleSliderStart = useCallback(() => {
+        if (restTimer.current) clearTimeout(restTimer.current);
+        setIsSliderActive(true);
+    }, []);
     const handleSliderEnd = useCallback(() => {
         // Keep animation running briefly after release for smooth feel
-        setTimeout(() => setIsSliderActive(false), 800);
+        if (restTimer.current) clearTimeout(restTimer.current);
+        restTimer.current = setTimeout(() => setIsSliderActive(false), 800);
     }, []);
+    useEffect(() => () => { if (restTimer.current) clearTimeout(restTimer.current); }, []);
 
     const downPaymentAmount = useMemo(() => {
         return downPaymentType === 'percent' ? propertyPrice * (downPayment / 100) : downPayment;
     }, [propertyPrice, downPayment, downPaymentType]);
 
-    // Calculate slider percentage for visual display
-    const sliderPercent = useMemo(() => {
-        if (downPaymentType === 'percent') {
-            return downPayment;
-        }
-        return (downPayment / propertyPrice) * 100;
-    }, [downPayment, downPaymentType, propertyPrice]);
+    // Slider range: 0–100 in percent mode, 0–price in € mode. Guard against a
+    // missing/zero price so the track never divides by zero (which used to
+    // surface as "NaN €").
+    const sliderMax = downPaymentType === 'percent' ? 100 : Math.max(0, propertyPrice);
+    const sliderStep = downPaymentType === 'percent' ? 1 : amountStepFor(propertyPrice);
+
+    const { percent: sliderPercent, isDragging, offset: thumbOffset, trackProps } = useDragSlider({
+        value: Number.isFinite(downPayment) ? downPayment : 0,
+        min: 0,
+        max: sliderMax,
+        step: sliderStep,
+        onChange: setDownPayment,
+        onDragStart: handleSliderStart,
+        onDragEnd: handleSliderEnd,
+        disabled: sliderMax <= 0,
+        thumbSize: THUMB_SIZE,
+        'aria-label': t('calculators:mortgage.fields.downPayment'),
+        valueText: downPaymentType === 'percent' ? `${downPayment}%` : fmt(downPayment),
+    });
 
     useEffect(() => {
         const principal = propertyPrice - downPaymentAmount;
@@ -193,18 +230,19 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
         if (downPaymentType === 'percent') {
             setDownPayment(Math.max(0, Math.min(100, value)));
         } else {
-            setDownPayment(Math.max(0, Math.min(propertyPrice, value)));
+            setDownPayment(Math.max(0, Math.min(Math.max(0, propertyPrice), value)));
         }
     };
 
     const handleDownPaymentTypeChange = (type: 'percent' | 'amount') => {
         setDownPaymentType(type);
         if (type === 'percent') {
-            // Convert current amount back to percentage
-            setDownPayment(Math.round((downPaymentAmount / propertyPrice) * 100));
+            // Convert current amount back to percentage. With no price to divide
+            // by there is no meaningful percentage — fall back to 0 rather than NaN.
+            setDownPayment(propertyPrice > 0 ? Math.round((downPaymentAmount / propertyPrice) * 100) : 0);
         } else {
             // Use current calculated amount
-            setDownPayment(Math.round(downPaymentAmount));
+            setDownPayment(Math.round(downPaymentAmount) || 0);
         }
     };
 
@@ -268,104 +306,86 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                             ))}
                         </div>
 
-                        {/* Slider track container with proper touch target */}
-                        <div className="relative h-12 flex items-center" style={{ touchAction: 'none' }}>
+                        {/*
+                          * Slider track. The whole 48px-tall row is the drag
+                          * surface (pointer events, see useDragSlider) so a
+                          * thumb-press is never required — press anywhere and
+                          * the thumb follows the finger.
+                          */}
+                        <div
+                            {...trackProps}
+                            className="relative h-12 flex items-center outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-full"
+                        >
                             {/* Glow effect behind track */}
                             <div
                                 className={`absolute top-1/2 -translate-y-1/2 h-6 rounded-full pointer-events-none ${
                                     isSliderActive ? 'opacity-100' : 'opacity-40'
                                 }`}
                                 style={{
-                                    left: '6px',
-                                    width: `calc(${sliderPercent}% - 6px)`,
+                                    left: 0,
+                                    width: thumbOffset,
                                     background: 'linear-gradient(90deg, rgba(59,130,246,0.3), rgba(139,92,246,0.25), rgba(236,72,153,0.2))',
                                     filter: 'blur(8px)',
-                                    willChange: 'width',
-                                    transition: isSliderActive ? 'none' : 'opacity 300ms ease-out'
+                                    transition: isDragging ? 'none' : 'opacity 300ms ease-out'
                                 }}
                             />
 
                             {/* Track background - smooth glass effect */}
-                            <div className="relative w-full h-3 rounded-full bg-gradient-to-r from-neutral-200 via-neutral-100 to-neutral-200 shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] overflow-hidden">
+                            <div className="relative w-full h-3 rounded-full bg-gradient-to-r from-neutral-200 via-neutral-100 to-neutral-200 shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] overflow-hidden pointer-events-none">
                                 {/* Gradient fill */}
+                                {/* The ramp is sized to the fill (not scrolled by
+                                    a background-position shimmer), so the hue
+                                    always runs blue → pink exactly once instead
+                                    of visibly wrapping at high values. */}
                                 <div
                                     className="absolute inset-y-0 left-0 rounded-full"
                                     style={{
-                                        width: `${sliderPercent}%`,
+                                        width: thumbOffset,
                                         background: 'linear-gradient(90deg, #3b82f6 0%, #6366f1 25%, #8b5cf6 50%, #a855f7 75%, #ec4899 100%)',
-                                        backgroundSize: isSliderActive ? '200% 100%' : '100% 100%',
-                                        animation: isSliderActive ? 'shimmer 2s ease-in-out infinite' : 'none',
-                                        willChange: 'width',
-                                        transition: isSliderActive ? 'none' : 'width 80ms ease-out'
+                                        transition: isDragging ? 'none' : 'width 90ms linear'
                                     }}
                                 />
-
-                                {/* Subtle sparkles - only visible when active */}
-                                {isSliderActive && sliderPercent > 10 && (
-                                    <div
-                                        className="absolute inset-y-0 left-0 overflow-hidden rounded-full pointer-events-none"
-                                        style={{ width: `${sliderPercent}%` }}
-                                    >
-                                        <div className="absolute inset-0 opacity-70">
-                                            <div className="absolute top-0.5 left-[20%] w-1 h-1 bg-white rounded-full animate-pulse" />
-                                            <div className="absolute top-1 left-[50%] w-0.5 h-0.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
-                                            <div className="absolute top-0.5 left-[80%] w-1 h-1 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
-                                        </div>
-                                    </div>
-                                )}
 
                                 {/* Glass highlight on track */}
                                 <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/40 to-transparent rounded-t-full pointer-events-none" />
                             </div>
 
-                            {/* Custom thumb */}
+                            {/* Custom thumb. `thumbOffset` is the thumb centre,
+                                so the same value drives the fill width and the
+                                two stay glued together at both ends. */}
                             <div
-                                className={`absolute top-1/2 -translate-y-1/2 pointer-events-none z-10 ${
-                                    isSliderActive ? 'scale-110' : 'scale-100'
-                                }`}
+                                className="absolute top-1/2 pointer-events-none z-10"
                                 style={{
-                                    left: `calc(${sliderPercent}% - ${sliderPercent * 0.28}px)`,
-                                    willChange: 'left',
-                                    transition: isSliderActive ? 'transform 150ms ease-out' : 'transform 150ms ease-out, left 80ms ease-out',
+                                    left: thumbOffset,
+                                    transform: `translate(-50%, -50%) scale(${isSliderActive ? 1.1 : 1})`,
+                                    willChange: 'left, transform',
+                                    transition: isDragging ? 'none' : 'left 90ms linear, transform 150ms ease-out',
                                 }}
                             >
                                 {/* Outer glow ring - only animates when active */}
                                 <div className={`absolute inset-0 -m-2 rounded-full bg-primary/20 transition-opacity duration-300 ${
-                                    isSliderActive ? 'opacity-100 animate-pulse' : 'opacity-0'
-                                }`} />
+                                    isSliderActive ? 'opacity-100' : 'opacity-0'
+                                } ${isSliderActive && !isDragging ? 'animate-pulse' : ''}`} />
 
                                 {/* Thumb container with glass effect */}
-                                <div className={`relative w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-200 ${
-                                    isSliderActive
-                                        ? 'shadow-[0_4px_20px_rgba(99,102,241,0.4)] ring-2 ring-primary/30'
-                                        : 'shadow-[0_2px_8px_rgba(0,0,0,0.15)]'
-                                }`}>
+                                <div
+                                    className={`relative rounded-full bg-white shadow-lg flex items-center justify-center transition-shadow duration-200 ${
+                                        isSliderActive
+                                            ? 'shadow-[0_4px_20px_rgba(99,102,241,0.4)] ring-2 ring-primary/30'
+                                            : 'shadow-[0_2px_8px_rgba(0,0,0,0.15)]'
+                                    }`}
+                                    style={{ width: THUMB_SIZE, height: THUMB_SIZE }}
+                                >
                                     {/* Inner gradient background */}
                                     <div className="absolute inset-0.5 rounded-full bg-gradient-to-br from-primary via-violet-500 to-pink-500" />
 
                                     {/* Money icon */}
-                                    <span className="relative text-xs sm:text-sm drop-shadow-sm">💵</span>
+                                    <span className="relative text-xs drop-shadow-sm">💵</span>
 
                                     {/* Glass shine effect */}
                                     <div className="absolute top-0.5 left-1 w-2 h-2 bg-white/50 rounded-full blur-[2px]" />
                                 </div>
                             </div>
-
-                            {/* Invisible range input for interaction - full height for better touch target */}
-                            <input
-                                type="range"
-                                min={0}
-                                max={downPaymentType === 'percent' ? 100 : propertyPrice}
-                                step={downPaymentType === 'percent' ? 1 : 1000}
-                                value={downPayment}
-                                onChange={handleDownPaymentChange}
-                                onMouseDown={handleSliderStart}
-                                onMouseUp={handleSliderEnd}
-                                onTouchStart={handleSliderStart}
-                                onTouchEnd={handleSliderEnd}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                                aria-label={t('calculators:mortgage.fields.downPayment')}
-                            />
                         </div>
                     </div>
 

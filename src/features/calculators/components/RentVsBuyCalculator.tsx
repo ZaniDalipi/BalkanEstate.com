@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useDragSlider } from '@/src/hooks/useDragSlider';
 import { formatPrice, getCurrencySymbol } from '@/utils/currency';
 import { ChevronDownIcon, ChevronUpIcon } from '@/constants';
 import { InfoIcon } from 'lucide-react';
@@ -137,7 +138,25 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
   const suggestedRent = useMemo(() => Math.round(propertyPrice / 300), [propertyPrice]);
   const [estimatedRent, setEstimatedRent] = useState('');
   const [planningToStay, setPlanningToStay] = useState(8);
-  
+
+  // Pointer-driven "years I'll stay" slider — see useDragSlider for why the
+  // native range input was replaced.
+  const {
+    isDragging: stayDragging,
+    offset: stayOffset,
+    trackProps: staySliderProps,
+  } = useDragSlider({
+    value: planningToStay,
+    min: 1,
+    max: 30,
+    step: 1,
+    onChange: setPlanningToStay,
+    thumbSize: 28,
+    'aria-label': t('calculators:rentVsBuy.fields.planningToStay'),
+    valueText: `${planningToStay} ${t('calculators:rentVsBuy.fields.years')}`,
+  });
+
+
   // --- Advanced Inputs ---
   const [downPaymentPercent, setDownPaymentPercent] = useState('20');
   const [interestRate, setInterestRate] = useState('3.5');
@@ -365,7 +384,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
       <div className="space-y-4">
         <div>
           <div className="flex justify-between items-baseline mb-2">
-            <label htmlFor="planning-to-stay" className="text-xs font-semibold text-neutral-700">
+            <label className="text-xs font-semibold text-neutral-700">
               {t('calculators:rentVsBuy.fields.planningToStay')}
             </label>
             <span className="text-lg font-bold bg-gradient-to-r from-primary via-violet-500 to-primary bg-clip-text text-transparent animate-pulse">
@@ -373,45 +392,40 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
             </span>
           </div>
 
-          {/* Magical Slider Container */}
-          <div className="relative py-3" style={{ touchAction: 'none' }}>
+          {/*
+            * Slider. The whole row is the drag surface (pointer events, see
+            * useDragSlider): press anywhere and the thumb follows the finger,
+            * instead of having to grab an invisible native range thumb.
+            */}
+          <div
+            {...staySliderProps}
+            id="planning-to-stay"
+            className="relative h-11 flex items-center outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-full"
+          >
             {/* Glow effect behind track */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 h-4 rounded-full blur-md"
+              className="absolute top-1/2 -translate-y-1/2 h-4 rounded-full blur-md pointer-events-none"
               style={{
                 left: 0,
-                width: `${((planningToStay - 1) / 29) * 100}%`,
+                width: stayOffset,
                 background: 'linear-gradient(90deg, rgba(59,130,246,0.4), rgba(139,92,246,0.4), rgba(236,72,153,0.3))',
-                willChange: 'width'
+                transition: stayDragging ? 'none' : 'width 90ms linear',
               }}
             />
 
             {/* Track background with glass effect */}
-            <div className="relative h-3 rounded-full bg-gradient-to-r from-neutral-200/80 via-neutral-100 to-neutral-200/80 shadow-inner overflow-hidden">
+            <div className="relative w-full h-3 rounded-full bg-gradient-to-r from-neutral-200/80 via-neutral-100 to-neutral-200/80 shadow-inner overflow-hidden pointer-events-none">
               {/* Animated gradient fill */}
               <div
                 className="absolute inset-y-0 left-0 rounded-full"
                 style={{
-                  width: `${((planningToStay - 1) / 29) * 100}%`,
+                  width: stayOffset,
+                  // Sized to the fill so the hue ramp runs exactly once; the
+                  // old background-position shimmer made it wrap mid-track.
                   background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b)',
-                  backgroundSize: '200% 100%',
-                  animation: 'shimmer 3s linear infinite',
-                  willChange: 'width'
+                  transition: stayDragging ? 'none' : 'width 90ms linear',
                 }}
               />
-
-              {/* Sparkle particles on the progress */}
-              <div
-                className="absolute inset-y-0 left-0 overflow-hidden rounded-full"
-                style={{ width: `${((planningToStay - 1) / 29) * 100}%` }}
-              >
-                <div className="absolute inset-0 opacity-60">
-                  <div className="absolute top-1 left-[10%] w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDuration: '1.5s' }} />
-                  <div className="absolute top-1.5 left-[30%] w-0.5 h-0.5 bg-white rounded-full animate-ping" style={{ animationDuration: '2s', animationDelay: '0.3s' }} />
-                  <div className="absolute top-0.5 left-[60%] w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDuration: '1.8s', animationDelay: '0.6s' }} />
-                  <div className="absolute top-1 left-[85%] w-0.5 h-0.5 bg-white rounded-full animate-ping" style={{ animationDuration: '2.2s', animationDelay: '0.9s' }} />
-                </div>
-              </div>
 
               {/* Glass highlight on track */}
               <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent rounded-t-full" />
@@ -419,14 +433,19 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
 
             {/* Custom thumb */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 pointer-events-none"
-              style={{ left: `${((planningToStay - 1) / 29) * 100}%`, willChange: 'left' }}
+              className="absolute top-1/2 pointer-events-none"
+              style={{
+                left: stayOffset,
+                transform: `translate(-50%, -50%) scale(${stayDragging ? 1.1 : 1})`,
+                willChange: 'left, transform',
+                transition: stayDragging ? 'transform 150ms ease-out' : 'left 90ms linear, transform 150ms ease-out',
+              }}
             >
               {/* Outer glow ring */}
-              <div className="absolute inset-0 -m-2 rounded-full bg-primary/20 animate-pulse" />
+              <div className={`absolute inset-0 -m-2 rounded-full bg-primary/20 ${stayDragging ? '' : 'animate-pulse'}`} />
 
               {/* Thumb container */}
-              <div className="relative w-7 h-7 rounded-full bg-gradient-to-br from-white via-white to-neutral-100 shadow-lg border-2 border-primary/50 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="relative w-7 h-7 rounded-full bg-gradient-to-br from-white via-white to-neutral-100 shadow-lg border-2 border-primary/50 flex items-center justify-center">
                 {/* Inner gradient */}
                 <div className="absolute inset-1 rounded-full bg-gradient-to-br from-primary via-violet-500 to-pink-500" />
 
@@ -439,18 +458,6 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
                 <div className="absolute top-0.5 left-1 w-2 h-2 bg-white/40 rounded-full blur-sm" />
               </div>
             </div>
-
-            {/* Invisible range input for interaction */}
-            <input
-              id="planning-to-stay"
-              type="range"
-              min={1}
-              max={30}
-              value={planningToStay}
-              onChange={e => setPlanningToStay(e.target.valueAsNumber)}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-              style={{ touchAction: 'none' }}
-            />
           </div>
 
           {/* Year markers */}
