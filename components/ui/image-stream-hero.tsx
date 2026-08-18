@@ -190,6 +190,44 @@ export function ImageStreamHero({
 
   const p = React.useMemo(() => ({ ...PATH, ...path }), [path]);
 
+  // LOCAL ADDITION: pointer-driven card picking (see the CSS note above).
+  const cardEls = React.useRef<(HTMLDivElement | null)[]>([]);
+  const [active, setActive] = React.useState<number | null>(null);
+  const frame = React.useRef<number | null>(null);
+
+  // Front-most card wins: nearer cards project to a larger rect, and the
+  // slight Y-rotation keeps the quad close enough to its bounding box.
+  const pickCard = React.useCallback((x: number, y: number) => {
+    let best: number | null = null;
+    let bestArea = 0;
+    cardEls.current.forEach((el, k) => {
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      if (x < r.left || x > r.right || y < r.top || y > r.bottom) return;
+      const area = r.width * r.height;
+      if (area > bestArea) { bestArea = area; best = k; }
+    });
+    return best;
+  }, []);
+
+  const handlePointerMove = React.useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!onImageSelect) return;
+      const { clientX, clientY } = e;
+      if (frame.current !== null) return; // coalesce to one pick per frame
+      frame.current = requestAnimationFrame(() => {
+        frame.current = null;
+        setActive(pickCard(clientX, clientY));
+      });
+    },
+    [onImageSelect, pickCard],
+  );
+
+  React.useEffect(() => () => {
+    if (frame.current !== null) cancelAnimationFrame(frame.current);
+  }, []);
+
+
   const css = React.useMemo(
     () =>
       `${keyframes(1, right, p)}${keyframes(-1, left, p)}` +
@@ -199,20 +237,20 @@ export function ImageStreamHero({
       `@media(prefers-reduced-motion:reduce){.${card}{animation-play-state:paused}}` +
       // LOCAL ADDITION: interactive rails.
       //
-      // Hover/focus freezes just that card. Without it the cards are moving
-      // targets and clicking one is mostly luck — pausing is what actually
-      // makes them clickable, and it doubles as the "raise" affordance.
+      // The active card is chosen in JS, not by :hover. Chromium cannot
+      // reliably hit-test elements inside this perspective/preserve-3d stack:
+      // measured on the real corridor, only 2 of 18 cards were reachable by
+      // the pointer anywhere on screen. So the cards opt out of hit testing
+      // entirely and the container picks the card under the cursor from their
+      // projected rects — which getBoundingClientRect reports correctly.
       //
-      // The lift lives on the inner face, never on the card itself: the card's
-      // own transform is driven by the keyframes, and composing a scale onto it
-      // would scale its translated position too, throwing the card outward
-      // instead of growing it in place.
+      // Freezing the active card matters as much as the lift: the cards cross
+      // the corridor in seconds, so without a pause clicking one is luck.
       (onImageSelect
-        ? `.${card}{transition:filter .28s ease}` +
-          `.${card}:hover,.${card}:focus-within{animation-play-state:paused;z-index:20}` +
+        ? `.${card}{pointer-events:none}` +
+          `.${card}:focus-within{animation-play-state:paused;z-index:20}` +
           `.${face}{transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease}` +
-          `.${card}:hover .${face},.${card}:focus-within .${face}{transform:scale(1.12);box-shadow:0 24px 60px rgba(0,0,0,.5)}` +
-          `.${cap}{transition:opacity .3s ease}`
+          `.${card}:focus-within .${face}{transform:scale(1.12);box-shadow:0 24px 60px rgba(0,0,0,.5)}`
         : ""),
     [right, left, card, face, cap, onImageSelect, p],
   );
@@ -225,14 +263,25 @@ export function ImageStreamHero({
     >
       <style>{css}</style>
 
-      {/* LOCAL ADDITION: aria-hidden / pointer-events-none only while decorative. */}
+      {/* LOCAL ADDITION: the container owns the pointer; the cards opt out. */}
       <div
         aria-hidden={onImageSelect ? undefined : true}
         className={cn("absolute inset-0", !onImageSelect && "pointer-events-none")}
         style={{
           perspective: `${p.perspective}cqw`,
           perspectiveOrigin: `50% ${axis}%`,
+          cursor: onImageSelect && active !== null ? "pointer" : undefined,
         }}
+        onPointerMove={onImageSelect ? handlePointerMove : undefined}
+        onPointerLeave={onImageSelect ? () => setActive(null) : undefined}
+        onClick={
+          onImageSelect
+            ? () => {
+                if (active === null) return;
+                onImageSelect((active % cards) % Math.max(images.length, 1));
+              }
+            : undefined
+        }
       >
         <div
           className="absolute inset-0"
@@ -259,9 +308,14 @@ export function ImageStreamHero({
                 />
               ) : null;
 
+              // Flat slot index across both rails, matching cardEls order.
+              const slot = (isPrimaryRail ? 0 : cards) + i;
+              const isActive = onImageSelect ? active === slot : false;
+
               return (
                 <div
                   key={`${name}-${i}`}
+                  ref={onImageSelect ? (el) => { cardEls.current[slot] = el; } : undefined}
                   className={cn(card, "absolute", !onImageSelect && "overflow-hidden")}
                   style={{
                     left: "50%",
@@ -276,6 +330,8 @@ export function ImageStreamHero({
                     // corridor is already full on the first frame.
                     animationDelay: `${-(i * speed) / cards}s`,
                     backfaceVisibility: "hidden",
+                    // LOCAL ADDITION: freeze and raise the card under the cursor.
+                    ...(isActive ? { animationPlayState: "paused", zIndex: 20 } : null),
                   }}
                 >
                   {onImageSelect ? (
@@ -293,7 +349,12 @@ export function ImageStreamHero({
                         "relative block h-full w-full cursor-pointer overflow-hidden p-0",
                         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/90",
                       )}
-                      style={{ borderRadius: `${p.cardRadius}cqw` }}
+                      style={{
+                        borderRadius: `${p.cardRadius}cqw`,
+                        ...(isActive
+                          ? { transform: "scale(1.12)", boxShadow: "0 24px 60px rgba(0,0,0,.5)" }
+                          : null),
+                      }}
                     >
                       {media}
                       {img?.caption ? (

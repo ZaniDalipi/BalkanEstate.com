@@ -70,7 +70,9 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
                 images={images}
                 onImageSelect={handleImageSelect}
                 cards={9}
-                speed={20}
+                // Slow enough to read a card's name and reach for it before it
+                // leaves; the pointer pause does the rest.
+                speed={34}
                 axis={55}
                 className="h-[440px] w-full sm:h-[520px]"
             >
