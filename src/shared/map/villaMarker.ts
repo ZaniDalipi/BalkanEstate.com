@@ -28,10 +28,14 @@ export const VILLA_PIN_BODY = '#101B2D';
  */
 /** For-rent villas: gold rim and glyph. */
 export const VILLA_GOLD = { light: '#FFEFB0', mid: '#E8B820', deep: '#B8860B', ink: '#FFFFFF', glow: '232,184,32' } as const;
-/** For-sale villas: sapphire rim and glyph — a clear second colour. */
-export const VILLA_SAPPHIRE = { light: '#7FB4FF', mid: '#2563EB', deep: '#1E40AF', ink: '#FFFFFF', glow: '37,99,235' } as const;
+/**
+ * For-sale villas: emerald rim and glyph — a clear second colour. Green holds
+ * up against the gold on a busy map better than the previous sapphire, which
+ * competed with the water and the standard blue property pins.
+ */
+export const VILLA_EMERALD = { light: '#6EE7B7', mid: '#10B981', deep: '#047857', ink: '#FFFFFF', glow: '16,185,129' } as const;
 
-/** Marker body palette by market: gold for rent, sapphire for sale. */
+/** Marker body palette by market: gold for rent, emerald for sale. */
 export interface VillaMarkerPalette {
   light: string;
   mid: string;
@@ -41,7 +45,7 @@ export interface VillaMarkerPalette {
   glow: string;
 }
 export const getVillaMarkerPalette = (listingType?: string): VillaMarkerPalette =>
-  listingType === 'sale' ? VILLA_SAPPHIRE : VILLA_GOLD;
+  listingType === 'sale' ? VILLA_EMERALD : VILLA_GOLD;
 
 /**
  * Drop-shadow filter for a villa marker, tinted to the palette's glow colour

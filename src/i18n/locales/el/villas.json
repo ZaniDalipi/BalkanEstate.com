@@ -39,11 +39,21 @@
   },
   "destinations": {
     "julianAlps": "⛰️ Ιουλιανές Άλπεις",
-    "kotorBay": "🌊 Κόλπος Κοτόρου",
-    "budvaRiviera": "🌅 Ριβιέρα Μπούντβα",
-    "lakeOhrid": "🏞️ Λίμνη Αχρίδα",
-    "dubrovnik": "🏛️ Ντουμπρόβνικ",
-    "pirinMountains": "🌲 Όρη Πίριν"
+    "kotorBay": "Κόλπος του Κότορ",
+    "budvaRiviera": "Ριβιέρα Μπούντβα",
+    "lakeOhrid": "Λίμνη Οχρίδα",
+    "dubrovnik": "Ντουμπρόβνικ",
+    "pirinMountains": "🌲 Όρη Πίριν",
+    "jezerc": "Γιέζερτς",
+    "brezovica": "Μπρεζόβιτσα",
+    "rugova": "Ρούγκοβα",
+    "prevalla": "Πρεβάλα",
+    "batllava": "Μπατλάβα",
+    "ulcinj": "Ουλτσίν",
+    "split": "Σπλιτ",
+    "ksamil": "Κσαμίλ",
+    "vlore": "Αυλώνας",
+    "trebinje": "Τρέμπινιε"
   },
   "filters": {
     "title": "Φίλτρα Βίλας",
@@ -153,5 +163,12 @@
     "cleaningFee": "+{{price}} καθαρισμός"
   },
   "perNightSuffix": "/νύχτα",
-  "fromPrice": "από {{price}}"
+  "fromPrice": "από {{price}}",
+  "destinationsHero": {
+    "eyebrow": "Σε όλα τα Βαλκάνια",
+    "title1": "Πολυτελείς βίλες,",
+    "title2": "όπου κι αν πάτε.",
+    "subtitle": "Από τα βουνά Σαρ ως την Αδριατική. Διαλέξτε τόπο και δείτε τις βίλες που σας περιμένουν.",
+    "cardLabel": "Πολυτελείς βίλες σε {{place}}, {{country}}"
+  }
 }

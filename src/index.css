@@ -34,6 +34,8 @@
   --color-background: #ffffff;
   --color-foreground: #1A202C;
   --color-input: rgba(0, 0, 0, 0.1);
+  /* Required by shadcn-style components that use `border-border`. */
+  --color-border: rgba(0, 0, 0, 0.1);
   --color-ring: rgba(0, 122, 255, 0.5);
 
   /* Neutral Colors */

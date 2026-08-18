@@ -250,15 +250,15 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                 {/* ── Top row: luxury badge + status + view + fav ── */}
                 <div className="absolute top-3 left-3 right-3 flex items-start justify-between z-20">
                     <div className="flex flex-col gap-1.5">
-                        {/* Crown badge — signature tier, colour matches the map pin (gold = rent, sapphire = sale) */}
+                        {/* Crown badge — signature tier, colour matches the map pin (gold = rent, emerald = sale) */}
                         <div
                             className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-[3px] rounded-full text-[10px] font-black tracking-wider shadow-lg"
                             style={isForRent
                                 ? { background: 'linear-gradient(135deg, #FFF0A0 0%, #FFA500 45%, #E8850A 100%)', color: '#3D1F00', boxShadow: '0 2px 12px rgba(255,165,0,0.35)' }
-                                : { background: 'linear-gradient(135deg, #DCEBFF 0%, #4D8FEA 55%, #245AA8 100%)', color: '#0B2A54', boxShadow: '0 2px 12px rgba(37,99,235,0.35)' }}
+                                : { background: 'linear-gradient(135deg, #D7F5E8 0%, #34D399 55%, #047857 100%)', color: '#04301F', boxShadow: '0 2px 12px rgba(16,185,129,0.35)' }}
                         >
                             <img
-                                src={isForRent ? '/icons/luxury_crown_villa_rent_gold.svg' : '/icons/luxury_crown_villa_sale_blue.svg'}
+                                src={isForRent ? '/icons/luxury_crown_villa_rent_gold.svg' : '/icons/luxury_crown_villa_sale_green.svg'}
                                 alt="" aria-hidden="true" width={18} height={18} loading="lazy"
                                 className="flex-shrink-0"
                             />
@@ -268,19 +268,19 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                         {property.isPromoted && (
                             <div className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-[3px] rounded-full text-[10px] font-bold shadow w-fit bg-black/45 backdrop-blur-sm text-white border border-white/15">
                                 <img
-                                    src={isForRent ? '/icons/luxury_star_villa_rent_gold.svg' : '/icons/luxury_star_villa_sale_blue.svg'}
+                                    src={isForRent ? '/icons/luxury_star_villa_rent_gold.svg' : '/icons/luxury_star_villa_sale_green.svg'}
                                     alt="" aria-hidden="true" width={16} height={16} loading="lazy"
                                     className="flex-shrink-0"
                                 />
                                 {t('villas:badges.featured', 'Featured')}
                             </div>
                         )}
-                        {/* Market chip — colour matches the map pin (gold = rent, sapphire = sale) */}
+                        {/* Market chip — colour matches the map pin (gold = rent, emerald = sale) */}
                         <div
                             className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] font-bold shadow w-fit"
                             style={isForRent
                                 ? { background: 'linear-gradient(135deg,#FFE9A3,#E8B820)', color: '#2C1A00' }
-                                : { background: 'linear-gradient(135deg,#4C86F0,#2563EB)', color: '#FFFFFF' }}
+                                : { background: 'linear-gradient(135deg,#34D399,#059669)', color: '#FFFFFF' }}
                         >
                             {isForRent ? t('villas:filters.forRent', 'For Rent') : t('villas:filters.forSale', 'For Sale')}
                         </div>
@@ -300,7 +300,7 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                             /* Palm badge — beachfront villas get the branded icon instead of the emoji chip */
                             <span className="inline-flex items-center gap-1 pl-1 pr-2 py-[3px] rounded-full text-[10px] font-semibold text-white/90 bg-black/35 backdrop-blur-sm border border-white/10">
                                 <img
-                                    src={isForRent ? '/icons/luxury_palm_villa_rent_gold.svg' : '/icons/luxury_palm_villa_sale_blue.svg'}
+                                    src={isForRent ? '/icons/luxury_palm_villa_rent_gold.svg' : '/icons/luxury_palm_villa_sale_green.svg'}
                                     alt="" aria-hidden="true" width={15} height={15} loading="lazy"
                                     className="flex-shrink-0"
                                 />

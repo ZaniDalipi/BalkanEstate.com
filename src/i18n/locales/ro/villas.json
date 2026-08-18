@@ -39,11 +39,21 @@
   },
   "destinations": {
     "julianAlps": "⛰️ Alpii Iulieni",
-    "kotorBay": "🌊 Golful Kotor",
-    "budvaRiviera": "🌅 Riviera Budva",
-    "lakeOhrid": "🏞️ Lacul Ohrid",
-    "dubrovnik": "🏛️ Dubrovnik",
-    "pirinMountains": "🌲 Munții Pirin"
+    "kotorBay": "Golful Kotor",
+    "budvaRiviera": "Riviera Budva",
+    "lakeOhrid": "Lacul Ohrid",
+    "dubrovnik": "Dubrovnik",
+    "pirinMountains": "🌲 Munții Pirin",
+    "jezerc": "Jezerc",
+    "brezovica": "Brezovica",
+    "rugova": "Rugova",
+    "prevalla": "Prevallë",
+    "batllava": "Batllava",
+    "ulcinj": "Ulcinj",
+    "split": "Split",
+    "ksamil": "Ksamil",
+    "vlore": "Vlora",
+    "trebinje": "Trebinje"
   },
   "filters": {
     "title": "Filtre Vilă",
@@ -153,5 +163,12 @@
     "cleaningFee": "+{{price}} curățenie"
   },
   "perNightSuffix": "/noapte",
-  "fromPrice": "de la {{price}}"
+  "fromPrice": "de la {{price}}",
+  "destinationsHero": {
+    "eyebrow": "În toți Balcanii",
+    "title1": "Vile de lux,",
+    "title2": "oriunde ai ajunge.",
+    "subtitle": "De la munții Šar la Adriatica. Alege un loc și vezi vilele care te așteaptă acolo.",
+    "cardLabel": "Vile de lux în {{place}}, {{country}}"
+  }
 }

@@ -39,11 +39,21 @@
   },
   "destinations": {
     "julianAlps": "⛰️ Julijske Alpe",
-    "kotorBay": "🌊 Kotorski Zaljev",
-    "budvaRiviera": "🌅 Budvanska Rivijera",
-    "lakeOhrid": "🏞️ Ohridsko Jezero",
-    "dubrovnik": "🏛️ Dubrovnik",
-    "pirinMountains": "🌲 Planina Pirin"
+    "kotorBay": "Bokokotorski zaljev",
+    "budvaRiviera": "Budvanska rivijera",
+    "lakeOhrid": "Ohridsko jezero",
+    "dubrovnik": "Dubrovnik",
+    "pirinMountains": "🌲 Planina Pirin",
+    "jezerc": "Jezerce",
+    "brezovica": "Brezovica",
+    "rugova": "Rugova",
+    "prevalla": "Prevalac",
+    "batllava": "Batlava",
+    "ulcinj": "Ulcinj",
+    "split": "Split",
+    "ksamil": "Ksamil",
+    "vlore": "Vlora",
+    "trebinje": "Trebinje"
   },
   "filters": {
     "title": "Filteri Za Vilu",
@@ -153,5 +163,12 @@
     "cleaningFee": "+{{price}} čišćenje"
   },
   "perNightSuffix": "/noć",
-  "fromPrice": "od {{price}}"
+  "fromPrice": "od {{price}}",
+  "destinationsHero": {
+    "eyebrow": "Diljem Balkana",
+    "title1": "Luksuzne vile,",
+    "title2": "gdje god krenuli.",
+    "subtitle": "Od Šar-planine do Jadrana. Odaberite mjesto i pogledajte vile koje vas ondje čekaju.",
+    "cardLabel": "Luksuzne vile u {{place}}, {{country}}"
+  }
 }

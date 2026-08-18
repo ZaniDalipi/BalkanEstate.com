@@ -39,11 +39,21 @@
   },
   "destinations": {
     "julianAlps": "⛰️ Јулиски Алпи",
-    "kotorBay": "🌊 Которски Залив",
-    "budvaRiviera": "🌅 Будванска Ривиера",
-    "lakeOhrid": "🏞️ Охридско Езеро",
-    "dubrovnik": "🏛️ Дубровник",
-    "pirinMountains": "🌲 Пирин Планина"
+    "kotorBay": "Которски Залив",
+    "budvaRiviera": "Будванска Ривиера",
+    "lakeOhrid": "Охридско Езеро",
+    "dubrovnik": "Дубровник",
+    "pirinMountains": "🌲 Пирин Планина",
+    "jezerc": "Језерц",
+    "brezovica": "Брезовица",
+    "rugova": "Ругова",
+    "prevalla": "Превалец",
+    "batllava": "Батлава",
+    "ulcinj": "Улцињ",
+    "split": "Сплит",
+    "ksamil": "Ксамил",
+    "vlore": "Валона",
+    "trebinje": "Требиње"
   },
   "filters": {
     "title": "Филтри За Вила",
@@ -153,5 +163,12 @@
     "cleaningFee": "+{{price}} чистење"
   },
   "perNightSuffix": "/ноќ",
-  "fromPrice": "од {{price}}"
+  "fromPrice": "од {{price}}",
+  "destinationsHero": {
+    "eyebrow": "Низ Балканот",
+    "title1": "Луксузни вили,",
+    "title2": "каде и да патувате.",
+    "subtitle": "Од Шар Планина до Јадранот. Изберете место и видете ги вилите што ве чекаат таму.",
+    "cardLabel": "Луксузни вили во {{place}}, {{country}}"
+  }
 }

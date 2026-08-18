@@ -39,11 +39,21 @@
   },
   "destinations": {
     "julianAlps": "⛰️ Julian Alps",
-    "kotorBay": "🌊 Bay of Kotor",
-    "budvaRiviera": "🌅 Budva Riviera",
-    "lakeOhrid": "🏞️ Lake Ohrid",
-    "dubrovnik": "🏛️ Dubrovnik",
-    "pirinMountains": "🌲 Pirin Mountains"
+    "kotorBay": "Bay of Kotor",
+    "budvaRiviera": "Budva Riviera",
+    "lakeOhrid": "Lake Ohrid",
+    "dubrovnik": "Dubrovnik",
+    "pirinMountains": "🌲 Pirin Mountains",
+    "jezerc": "Jezerc",
+    "brezovica": "Brezovica",
+    "rugova": "Rugova",
+    "prevalla": "Prevallë",
+    "batllava": "Batllava",
+    "ulcinj": "Ulcinj",
+    "split": "Split",
+    "ksamil": "Ksamil",
+    "vlore": "Vlorë",
+    "trebinje": "Trebinje"
   },
   "filters": {
     "title": "Villa Filters",
@@ -153,5 +163,12 @@
     "cleaningFee": "+{{price}} cleaning"
   },
   "perNightSuffix": "/night",
-  "fromPrice": "from {{price}}"
+  "fromPrice": "from {{price}}",
+  "destinationsHero": {
+    "eyebrow": "Across the Balkans",
+    "title1": "Luxury villas,",
+    "title2": "wherever you wander.",
+    "subtitle": "From the Sharr mountains to the Adriatic. Pick a place and see the villas waiting there.",
+    "cardLabel": "Luxury villas in {{place}}, {{country}}"
+  }
 }

@@ -39,11 +39,21 @@
   },
   "destinations": {
     "julianAlps": "⛰️ Alpet Juliane",
-    "kotorBay": "🌊 Gjiri i Kotorit",
-    "budvaRiviera": "🌅 Riviera e Budvës",
-    "lakeOhrid": "🏞️ Liqeni i Ohrit",
-    "dubrovnik": "🏛️ Dubrovnik",
-    "pirinMountains": "🌲 Malet e Pirin"
+    "kotorBay": "Gjiri i Kotorrit",
+    "budvaRiviera": "Rivijera e Budvës",
+    "lakeOhrid": "Liqeni i Ohrit",
+    "dubrovnik": "Dubrovnik",
+    "pirinMountains": "🌲 Malet e Pirin",
+    "jezerc": "Jezerc",
+    "brezovica": "Brezovica",
+    "rugova": "Rugova",
+    "prevalla": "Prevallë",
+    "batllava": "Batllava",
+    "ulcinj": "Ulqin",
+    "split": "Split",
+    "ksamil": "Ksamil",
+    "vlore": "Vlorë",
+    "trebinje": "Trebinje"
   },
   "filters": {
     "title": "Filtrat e Vilës",
@@ -153,5 +163,12 @@
     "cleaningFee": "+{{price}} pastrim"
   },
   "perNightSuffix": "/natë",
-  "fromPrice": "nga {{price}}"
+  "fromPrice": "nga {{price}}",
+  "destinationsHero": {
+    "eyebrow": "Në mbarë Ballkanin",
+    "title1": "Vila luksoze,",
+    "title2": "kudo që të shkoni.",
+    "subtitle": "Nga malet e Sharrit deri te Adriatiku. Zgjidhni një vend dhe shihni vilat që ju presin.",
+    "cardLabel": "Vila luksoze në {{place}}, {{country}}"
+  }
 }

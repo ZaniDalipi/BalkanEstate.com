@@ -1,0 +1,114 @@
+import React, { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ImageStreamHero } from '@/components/ui/image-stream-hero';
+import {
+    VILLA_DESTINATIONS,
+    buildVillaDestinationPath,
+    type VillaDestination,
+} from '../data/villaDestinations';
+import { useDestinationImages } from '../hooks/useDestinationImages';
+
+interface BalkanVillaDestinationsSectionProps {
+    onNavigate: (view: string, path: string) => void;
+}
+
+/**
+ * Home-page hero showcasing Balkan villa destinations in a perspective
+ * corridor. Both the moving cards and the chips below are real buttons —
+ * either one opens that destination's luxury villas.
+ *
+ * Photos come from the Cloudinary city library already seeded by
+ * `backend/src/scripts/seedCityImages.ts`; see `../data/villaDestinations.ts`
+ * for how a region maps to the city that represents it.
+ */
+const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionProps> = ({
+    onNavigate,
+}) => {
+    const { t } = useTranslation(['villas', 'home']);
+
+    // Guard the corridor against an empty list: it would render an animated
+    // ribbon of nothing rather than degrading to no section at all.
+    const destinations = useMemo(
+        () => VILLA_DESTINATIONS.filter(d => d.query.trim().length > 0),
+        [],
+    );
+
+    const labelFor = useCallback(
+        (dest: VillaDestination) =>
+            t('villas:destinationsHero.cardLabel', 'Luxury villas in {{place}}, {{country}}', {
+                place: t(`villas:destinations.${dest.id}`, dest.fallback),
+                country: dest.country,
+            }),
+        [t],
+    );
+
+    const images = useDestinationImages(destinations, labelFor);
+
+    const openDestination = useCallback(
+        (dest: VillaDestination | undefined) => {
+            if (!dest) return;
+            onNavigate('villas', buildVillaDestinationPath(dest));
+        },
+        [onNavigate],
+    );
+
+    const handleImageSelect = useCallback(
+        (index: number) => openDestination(destinations[index]),
+        [destinations, openDestination],
+    );
+
+    if (destinations.length === 0) return null;
+
+    return (
+        <section className="bg-white">
+            <ImageStreamHero
+                images={images}
+                onImageSelect={handleImageSelect}
+                cards={9}
+                speed={20}
+                axis={55}
+                className="h-[520px] w-full sm:h-[560px]"
+            >
+                {/* Overlay. pointer-events-none so the corridor stays clickable
+                    through the gaps; each control re-enables its own. */}
+                <div className="pointer-events-none relative z-10 flex h-full flex-col items-center justify-between py-10 text-center sm:py-12">
+                    <div className="px-6">
+                        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-400">
+                            {t('villas:destinationsHero.eyebrow', 'Across the Balkans')}
+                        </p>
+                        <h2 className="text-balance text-3xl font-medium tracking-tight text-neutral-900 sm:text-5xl">
+                            {t('villas:destinationsHero.title1', 'Luxury villas,')}
+                            <br />
+                            <span style={{ color: 'var(--color-villa-gold-deep)' }}>
+                                {t('villas:destinationsHero.title2', 'wherever you wander.')}
+                            </span>
+                        </h2>
+                    </div>
+
+                    {/* Destination chips — the keyboard and screen-reader path. */}
+                    <div className="pointer-events-auto flex max-w-3xl flex-wrap justify-center gap-2 px-6">
+                        {destinations.map(dest => (
+                            <button
+                                key={dest.id}
+                                type="button"
+                                onClick={() => openDestination(dest)}
+                                className="rounded-full border border-black/[0.08] bg-white/80 px-3 py-1.5 text-[12px] font-medium text-neutral-700 shadow-sm backdrop-blur-md transition-all hover:border-[var(--color-villa-gold)] hover:text-[var(--color-villa-gold-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-villa-gold)]"
+                            >
+                                {t(`villas:destinations.${dest.id}`, dest.fallback)}
+                            </button>
+                        ))}
+                    </div>
+
+                    <p className="max-w-md text-balance px-6 text-sm text-neutral-500">
+                        {t(
+                            'villas:destinationsHero.subtitle',
+                            'From the Sharr mountains to the Adriatic. Pick a place and see the villas waiting there.',
+                        )}
+                    </p>
+                </div>
+            </ImageStreamHero>
+        </section>
+    );
+};
+
+export default BalkanVillaDestinationsSection;

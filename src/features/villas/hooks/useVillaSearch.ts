@@ -18,6 +18,47 @@ const VILLA_DEFAULTS: Partial<Filters> = {
 /** Which luxury villas to show: both markets, only rentals, or only for-sale. */
 export type VillaListingMode = 'any' | 'rent' | 'sale';
 
+/** Longest destination we'll accept from the URL — a search box, not an essay. */
+const MAX_DESTINATION_LENGTH = 80;
+
+interface VillaDeepLink {
+    destination: string;
+    focus: { center: [number, number]; zoom: number } | null;
+}
+
+/**
+ * Reads `?destination=&lat=&lng=&zoom=` — how the home-page destination hero
+ * hands a place over to this page.
+ *
+ * Everything is treated as untrusted: the destination is trimmed and capped,
+ * and the coordinates must be finite and inside real lat/lng and zoom ranges.
+ * Anything else is dropped rather than partially applied, so a hand-edited URL
+ * lands on an unfiltered page instead of flying the map off the planet.
+ */
+function readDeepLink(search: string): VillaDeepLink {
+    let destination = '';
+    let focus: VillaDeepLink['focus'] = null;
+
+    try {
+        const params = new URLSearchParams(search);
+        destination = (params.get('destination') ?? '').trim().slice(0, MAX_DESTINATION_LENGTH);
+
+        const lat = Number(params.get('lat'));
+        const lng = Number(params.get('lng'));
+        const zoom = Number(params.get('zoom'));
+        const inRange =
+            Number.isFinite(lat) && lat >= -90 && lat <= 90 &&
+            Number.isFinite(lng) && lng >= -180 && lng <= 180 &&
+            Number.isFinite(zoom) && zoom >= 1 && zoom <= 20;
+
+        if (inRange) focus = { center: [lat, lng], zoom };
+    } catch {
+        // Malformed query string — fall through to the unfiltered defaults.
+    }
+
+    return { destination, focus };
+}
+
 export function useVillaSearch() {
     const { t } = useTranslation(['search', 'villas', 'common']);
     const { state, dispatch, updateSearchPageState, addSavedSearch } = useAppContext();
@@ -34,9 +75,20 @@ export function useVillaSearch() {
     // default and lets the visitor narrow to one market.
     const [listingMode, setListingMode] = useState<VillaListingMode>('any');
 
+    // Read once, at mount: later navigations within the page own the filters,
+    // so re-reading the URL would fight the user's own edits.
+    const deepLinkRef = useRef<VillaDeepLink | null>(null);
+    if (deepLinkRef.current === null) {
+        deepLinkRef.current = readDeepLink(
+            typeof window === 'undefined' ? '' : window.location.search,
+        );
+    }
+    const deepLink = deepLinkRef.current;
+
     const [filters, setFilters] = useState<Filters>({
         ...initialFilters,
         ...VILLA_DEFAULTS,
+        ...(deepLink.destination ? { query: deepLink.destination } : {}),
     });
 
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -44,7 +96,7 @@ export function useVillaSearch() {
     const [mobileView, setMobileView] = useState<'list' | 'map'>('list');
     const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
     const [isDrawing, setIsDrawing] = useState(false);
-    const [flyToTarget, setFlyToTarget] = useState<{ center: [number, number]; zoom: number } | null>(null);
+    const [flyToTarget, setFlyToTarget] = useState<{ center: [number, number]; zoom: number } | null>(deepLink.focus);
     const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
     const searchWrapperRef = useRef<HTMLDivElement>(null);
     const [isSearchingLocation, setIsSearchingLocation] = useState(false);

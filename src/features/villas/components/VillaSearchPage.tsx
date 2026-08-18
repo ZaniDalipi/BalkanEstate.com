@@ -887,7 +887,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                     <div className="absolute inset-0 overflow-hidden">
                         <MapComponent {...mapProps} />
                     </div>
-                    {/* Pin colour key — gold = for rent, sapphire = for sale */}
+                    {/* Pin colour key — gold = for rent, emerald = for sale */}
                     {listProperties.length > 0 && (
                         <div className="absolute bottom-4 left-4 z-[500] pointer-events-none">
                             <div
@@ -905,7 +905,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                 )}
                                 {listingMode !== 'rent' && (
                                     <span className="flex items-center gap-1.5">
-                                        <span className="w-2.5 h-2.5 rounded-full ring-1 ring-white shadow-sm" style={{ background: '#2563EB' }} />
+                                        <span className="w-2.5 h-2.5 rounded-full ring-1 ring-white shadow-sm" style={{ background: '#10B981' }} />
                                         {t('villas:filters.forSale', 'For Sale')}
                                     </span>
                                 )}
