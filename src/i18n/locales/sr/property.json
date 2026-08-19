@@ -649,7 +649,7 @@
       "sendToChat": "Pošalji"
     }
   },
-  "sectionNav": {
+          "sectionNav": {
     "ariaLabel": "Sekcije nekretnine",
     "overview": "Pregled",
     "map": "3D mapa",
