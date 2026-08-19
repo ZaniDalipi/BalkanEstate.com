@@ -97,6 +97,14 @@ describe('RoleSelector Component', () => {
           tier: 'pro',
           status: 'active',
           listingsLimit: 20,
+          // Pro/agency tiers are capped by the monthly-reset counter, not
+          // activeListingsCount (that field tracks free tier's separate,
+          // never-resetting cap — see RoleSelector's getRoleSubscription).
+          listingsCreatedThisMonth: 2,
+          // Component treats a missing monthResetDate as "boundary passed"
+          // (conservative reset-to-0) — real backend records always set
+          // this, so the mock needs it too to exercise the non-reset path.
+          monthResetDate: new Date(),
           activeListingsCount: 2,
           privateSellerCount: 1,
           agentCount: 1,
@@ -124,8 +132,11 @@ describe('RoleSelector Component', () => {
       const proBadges = screen.getAllByText('Pro');
       expect(proBadges.length).toBeGreaterThanOrEqual(1);
 
-      // Should show shared limit with correct values: 2/20
-      const sharedLimitElements = screen.getAllByText(/2\/20/);
+      // Should show shared limit with correct values: 2 / 20 — rendered as
+      // separate "{used}", " / ", "{limit}" text nodes, so the pattern needs
+      // to tolerate the spaces around the slash rather than match "2/20"
+      // as a contiguous substring.
+      const sharedLimitElements = screen.getAllByText(/2\s*\/\s*20/);
       expect(sharedLimitElements.length).toBeGreaterThanOrEqual(1);
     });
 
@@ -255,8 +266,9 @@ describe('RoleSelector Component', () => {
       );
 
       // Should show Pro subscription from legacy field
-      // Legacy pro: isPro=true, shared limit shows 3/20
-      expect(screen.getByText(/3\/20/)).toBeInTheDocument();
+      // Legacy pro: isPro=true, shared limit shows 3 / 20 — tolerate the
+      // spaces the component actually renders around the slash.
+      expect(screen.getByText(/3\s*\/\s*20/)).toBeInTheDocument();
     });
 
     it('should fall back to free subscription when no subscription data', () => {
@@ -444,8 +456,12 @@ describe('RoleSelector Component', () => {
         />
       );
 
-      // agency_agent tier hides private seller card, only agent card renders
-      expect(screen.getByText('Agency Agent')).toBeInTheDocument();
+      // Both cards render — RoleSelector intentionally always shows the
+      // private-seller card ("Agency agents CAN post as private seller
+      // (individual listings outside agency)", per its own comment), so
+      // an agency_agent user sees the "Agency Agent" badge on both.
+      const badges = screen.getAllByText('Agency Agent');
+      expect(badges.length).toBeGreaterThanOrEqual(1);
     });
   });
 });

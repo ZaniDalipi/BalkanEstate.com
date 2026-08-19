@@ -13,6 +13,8 @@ interface PhoneInputProps {
   disabled?: boolean;
   required?: boolean;
   className?: string;
+  /** Lets a caller's own `<label htmlFor>` associate with the number field. */
+  id?: string;
   /** Style variant: "glass" (auth modal style) | "bordered" (default form style) */
   variant?: 'glass' | 'bordered';
   /**
@@ -127,6 +129,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
   className = '',
   variant = 'bordered',
   defaultCountryCode,
+  id,
 }) => {
   // Parse the incoming value to extract any country code already embedded in it
   const parsed = parsePhoneValue(value);
@@ -222,6 +225,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
       </select>
       <div className={dividerCls} />
       <input
+        id={id}
         type="tel"
         value={formattedLocal}
         onChange={handleLocalChange}
@@ -230,7 +234,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
         placeholder={getPhonePlaceholder(selectedCode)}
         className={inputCls}
         autoComplete="tel-national"
-        aria-label="Phone number"
+        aria-label={id ? undefined : 'Phone number'}
         aria-invalid={!!error}
       />
     </div>
