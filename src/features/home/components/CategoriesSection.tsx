@@ -76,7 +76,10 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }
   ];
 
   return (
-    <section className="py-12 sm:py-16 bg-white">
+    // overflow-x-clip: the ScrollAssemble tiles start scattered well outside
+    // the content column, and this full-width section is where they get
+    // clipped — see the note in scroll-assemble.tsx.
+    <section className="py-12 sm:py-16 bg-white overflow-x-clip">
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ y: 10 }}

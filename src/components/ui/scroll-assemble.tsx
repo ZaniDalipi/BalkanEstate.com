@@ -1,43 +1,64 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { createContext, useContext, useMemo, useRef } from 'react';
 import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 /**
  * "Scatter then assemble" row, tied to live scroll position — the same
- * `useScroll` + `useTransform` technique as the reference
- * `components/ui/text-scroll-animation.tsx`, generalised so any row of
- * tiles can use it. Drag the scrollbar and the cards move with it; this is
- * deliberately not a fire-once entrance animation.
+ * technique as the reference `components/ui/text-scroll-animation.tsx`
+ * (reuno-ui), generalised so any row of tiles can use it. Drag the
+ * scrollbar and the tiles move with it; this is deliberately not a
+ * fire-once entrance animation.
  *
- * The range the animation runs over is measured in absolute document
- * pixels, not viewport-relative fractions ("row's top touches the
- * viewport's bottom", etc). Two earlier attempts used viewport-relative
- * offsets and both failed the same way for a reason that's easy to miss:
- * for a row sitting close to the top of the page, the viewport-relative
- * "entering" edge of that range corresponds to a *negative* scroll
- * position — one that already happened before the page ever loaded, and
- * can never be reached going forward. How much of the range survives
- * clamping to real (non-negative) scroll depends entirely on how much
- * content sits above the row, which is exactly the part that differs by
- * breakpoint: this page's hero is noticeably shorter on mobile
- * (`pt-12 pb-16` vs `sm:pt-24 sm:pb-28`), so a range tuned to look right
- * on desktop had measurably less headroom on a phone — and for Quick
- * Access specifically, none left at all.
+ * Two things were wrong with the earlier version of this file, and both
+ * are worth recording because they look like separate bugs but produced
+ * the same symptom ("there's no animation"):
  *
- * Measuring the row's actual position in the document sidesteps that:
- * the window is `[rowTop - LEAD_PX, rowTop + SETTLE_PX]` in absolute
- * page-Y pixels, so how far above the row the hero happens to be doesn't
- * change how much of the window is reachable — only how much *unrelated*
- * scrolling happens before the window starts, which is fine. Remeasured
- * on resize and shortly after mount (a `ResizeObserver` on the row itself
- * catches height changes from async content — e.g. images finishing load
- * above it — that a mount-only measurement would miss).
+ * 1. The motion was roughly a tenth of the reference's. The reference
+ *    scatters by `d * 90`px with `d * 50` DEGREES of rotation and a 0.75
+ *    starting scale; this file used `d * 46`px, `d * 5` degrees and 0.86.
+ *    At five degrees of rotation the effect reads as a faint shimmer
+ *    rather than as pieces flying into place. The magnitudes below now
+ *    match the reference's `CharacterV3` exactly (including the *upward*
+ *    `-|d| * 20` lift — the old code pushed tiles down instead).
+ *
+ * 2. The scroll window was hand-measured in absolute document pixels
+ *    (`rowTop - 380` to `rowTop + 60`) via getBoundingClientRect plus a
+ *    ResizeObserver. That put the whole animation in the band where the
+ *    row travels from 380px-below-the-viewport-top to the top edge — so
+ *    on a tall screen the row sat fully visible and fully scattered for
+ *    hundreds of pixels, then snapped together as it left the top of the
+ *    screen, which is the part you are least likely to be looking at.
+ *    Framer's own `useScroll({ target, offset })` expresses the window
+ *    declaratively and re-measures on layout changes by itself, so all
+ *    the manual measurement code is gone.
+ *
+ * The window is `['start end', 'start 0.35']`: progress is 0 the moment
+ * the row's top edge appears at the bottom of the viewport, and 1 once
+ * that edge has risen to 35% down the screen. The tiles therefore finish
+ * assembling right as the row settles into comfortable reading position,
+ * and the whole thing plays out over ~65% of a viewport height of
+ * scrolling. A row sitting above the fold on load simply starts partway
+ * through the window instead of being stuck scattered.
+ *
+ * CALLERS MUST put `overflow-x-clip` on the full-width <section> wrapping
+ * the row. The outermost tiles start ~225px outside the row, so without a
+ * clip somewhere they widen the document and the page gets a horizontal
+ * scrollbar — very visible on a phone. It has to be the full-width section
+ * and not this element: clipping at the content column slices the outer
+ * tiles in half mid-screen, which reads as a rendering bug, whereas
+ * clipping at the section (exactly the body's width, so it can't overflow
+ * anything) hides them off the edge of the screen, which is what the
+ * reference does and reads as tiles flying in from off-screen.
+ *
+ * `clip` rather than `hidden` on purpose: `hidden` makes the section a
+ * scroll container, which breaks `position: sticky` descendants and lets
+ * the section be scrolled sideways programmatically.
  */
 
-const LEAD_PX = 380;
-const SETTLE_PX = 60;
+/** Per-step outward travel, in px — the reference's `distanceFromCenter * 90`. */
+const X_STEP_PX = 90;
 
 interface AssembleContextValue {
     progress: MotionValue<number>;
@@ -58,49 +79,23 @@ interface ScrollAssembleProps {
 export const ScrollAssemble: React.FC<ScrollAssembleProps> = ({ count, className, children }) => {
     const ref = useRef<HTMLDivElement>(null);
     const reduced = useReducedMotion();
-    const { scrollY } = useScroll();
 
-    // The row's own top, in absolute document pixels — re-measured on resize
-    // and once more shortly after mount to catch async layout shifts (e.g.
-    // an image above the row finishing load and pushing it down).
-    const [rowTop, setRowTop] = useState<number | null>(null);
-
-    useEffect(() => {
-        const measure = () => {
-            const el = ref.current;
-            if (!el) return;
-            setRowTop(el.getBoundingClientRect().top + window.scrollY);
-        };
-        measure();
-        const settleTimer = window.setTimeout(measure, 400);
-
-        const ro = new ResizeObserver(measure);
-        if (ref.current) ro.observe(ref.current);
-        window.addEventListener('resize', measure);
-
-        return () => {
-            window.clearTimeout(settleTimer);
-            ro.disconnect();
-            window.removeEventListener('resize', measure);
-        };
-    }, []);
-
-    // Before the first measurement, or with no scroll room above the row
-    // (rowTop < LEAD_PX — content pinned right at the top of the page),
-    // clamp the window's start to 0: the animation simply begins on the
-    // very first pixel scrolled, rather than being undefined or negative.
-    const windowStart = rowTop === null ? 0 : Math.max(0, rowTop - LEAD_PX);
-    const windowEnd = rowTop === null ? 1 : Math.max(windowStart + 1, rowTop + SETTLE_PX);
-
-    const progress = useTransform(scrollY, [windowStart, windowEnd], [0, 1]);
+    const { scrollYProgress } = useScroll({
+        target: ref,
+        offset: ['start end', 'start 0.35'],
+    });
 
     const value = useMemo<AssembleContextValue>(
-        () => ({ progress, centerIndex: (count - 1) / 2, still: !!reduced }),
-        [progress, count, reduced],
+        () => ({ progress: scrollYProgress, centerIndex: (count - 1) / 2, still: !!reduced }),
+        [scrollYProgress, count, reduced],
     );
 
     return (
-        <div ref={ref} className={className} style={{ perspective: '900px' }}>
+        <div
+            ref={ref}
+            className={cn(className)}
+            style={{ perspective: '900px' }}
+        >
             <AssembleContext.Provider value={value}>{children}</AssembleContext.Provider>
         </div>
     );
@@ -140,11 +135,12 @@ const AssembleItemInner: React.FC<ScrollAssembleItemProps & { ctx: AssembleConte
     const { progress, centerIndex, still } = ctx;
     const offset = index - centerIndex;
 
-    // Outer items travel furthest, so the row closes in from both ends.
-    const x = useTransform(progress, [0, 1], [still ? 0 : offset * 46, 0]);
-    const y = useTransform(progress, [0, 1], [still ? 0 : Math.abs(offset) * 14, 0]);
-    const rotate = useTransform(progress, [0, 1], [still ? 0 : offset * 5, 0]);
-    const scale = useTransform(progress, [0, 1], [still ? 1 : 0.86, 1]);
+    // Magnitudes lifted from the reference's CharacterV3: outer tiles travel
+    // furthest and spin hardest, so the row closes in from both ends.
+    const x = useTransform(progress, [0, 1], [still ? 0 : offset * X_STEP_PX, 0]);
+    const y = useTransform(progress, [0, 1], [still ? 0 : -Math.abs(offset) * 20, 0]);
+    const rotate = useTransform(progress, [0, 1], [still ? 0 : offset * 50, 0]);
+    const scale = useTransform(progress, [0, 1], [still ? 1 : 0.75, 1]);
 
     return (
         <motion.div
