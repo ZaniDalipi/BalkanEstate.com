@@ -90,6 +90,15 @@ const PATH: Required<CorridorPath> = {
   stops: 24,
 };
 
+/**
+ * LOCAL ADDITION: how far the hovered card is lifted toward the viewer,
+ * measured in corridor depth-steps (the constant size ratio between two
+ * consecutive cards). Anything above 1 puts it in front of the neighbour
+ * that would otherwise cover it; the extra margin clears the one after it
+ * too, without the card ballooning.
+ */
+const HOVER_STEPS = 1.6;
+
 /** Sample the path once so the CSS keyframes trace the real curve. */
 function keyframes(dir: 1 | -1, name: string, p: Required<CorridorPath>) {
   const steps: string[] = [];
@@ -194,7 +203,9 @@ export function ImageStreamHero({
 
   // LOCAL ADDITION: pointer-driven card picking (see the CSS note above).
   const cardEls = React.useRef<(HTMLDivElement | null)[]>([]);
+  const perspectiveEl = React.useRef<HTMLDivElement | null>(null);
   const [active, setActive] = React.useState<number | null>(null);
+  const [lift, setLift] = React.useState<string | null>(null);
   const frame = React.useRef<number | null>(null);
 
   // Front-most card wins: nearer cards project to a larger rect, and the
@@ -229,6 +240,79 @@ export function ImageStreamHero({
     if (frame.current !== null) cancelAnimationFrame(frame.current);
   }, []);
 
+  /*
+   * LOCAL ADDITION: raise the active card in front of its neighbours.
+   *
+   * A plain `z-index` cannot do this. The rails live inside a
+   * `transform-style: preserve-3d` parent, and within a 3D rendering
+   * context siblings are painted in depth order by their real z position —
+   * z-index is ignored between them. The hovered card was being drawn
+   * behind the larger card in front of it no matter what z-index it got.
+   *
+   * So it has to actually move toward the viewer. It can't be done by
+   * overriding `transform`, because `transform` is what the corridor
+   * animation drives and an animation beats an inline style in the
+   * cascade. The `translate` property is a separate longhand that composes
+   * with `transform` (translate, then rotate, then scale, then transform),
+   * so writing `translate: 0 0 Npx` shifts the card forward along z on top
+   * of whatever the animation is doing, without touching it.
+   *
+   * N is derived rather than fixed: under a perspective projection an
+   * element at depth d = P - z is magnified by P/d, so lifting it by
+   * `d * (1 - 1/k)` magnifies it by exactly k wherever it currently sits.
+   * A fixed N would be nearly invisible on a distant card and would blow a
+   * near one up several-fold as its depth approached the eye.
+   *
+   * k is expressed in depth-steps. Consecutive cards differ in apparent
+   * size by a constant ratio (the path is geometric), so lifting by more
+   * than one step is what guarantees the card clears the neighbour that
+   * was covering it.
+   *
+   * The x/y terms matter as much as the z one. Perspective scales an
+   * element's *position* by the same factor it scales its size, which is
+   * the whole trick the corridor runs on — so lifting a card straight
+   * along z also sweeps it outward, away from the vanishing point and away
+   * from the pointer that is hovering it. Pulling its world offset in by
+   * 1/k exactly cancels that: the card grows in place, anchored under the
+   * cursor, instead of bolting for the edge of the screen.
+   */
+  React.useEffect(() => {
+    if (!onImageSelect || active === null) {
+      setLift(null);
+      return;
+    }
+    const el = cardEls.current[active];
+    const persp = perspectiveEl.current;
+    if (!el || !persp) {
+      setLift(null);
+      return;
+    }
+    const P = parseFloat(getComputedStyle(persp).perspective);
+    if (!Number.isFinite(P) || P <= 0) {
+      setLift(null);
+      return;
+    }
+    let m: DOMMatrixReadOnly;
+    try {
+      m = new DOMMatrixReadOnly(getComputedStyle(el).transform);
+    } catch {
+      setLift(null);
+      return;
+    }
+    const depth = P - m.m43; // distance from the eye; only positive is on-screen
+    if (!(depth > 0)) {
+      setLift(null);
+      return;
+    }
+    const step = Math.pow(p.exitHeight / p.birthHeight, 1 / Math.max(cards, 1));
+    const k = Math.pow(step, HOVER_STEPS);
+    const pull = 1 / k - 1; // negative: draws the card back toward the axis
+    setLift(
+      `${(m.m41 * pull).toFixed(2)}px ${(m.m42 * pull).toFixed(2)}px ` +
+        `${(depth * (1 - 1 / k)).toFixed(2)}px`,
+    );
+  }, [active, onImageSelect, p.exitHeight, p.birthHeight, cards]);
+
 
   const css = React.useMemo(
     () =>
@@ -258,15 +342,23 @@ export function ImageStreamHero({
       // comes back out of its slot and stays there, rather than resyncing
       // after a lap.
       (onImageSelect
-        ? `.${card}{pointer-events:none}` +
+        ? `.${card}{pointer-events:none;` +
+          // The lift toward the viewer is a `translate`, which is a property
+          // of its own and so can be eased without disturbing the `transform`
+          // the corridor animation drives.
+          `transition:translate .3s cubic-bezier(.22,1,.36,1)}` +
           // Resting depth: a cast shadow plus a hairline inner edge. Without
           // the edge, neighbouring cards in the ribbon merge into one another
           // where their photos happen to have similar tones.
           `.${face}{transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease,filter .3s ease;` +
           `box-shadow:0 10px 30px rgba(0,0,0,.34),inset 0 0 0 1px rgba(255,255,255,.14)}` +
-          // Active/focus: lift, deepen the cast shadow and switch the hairline
-          // to gold so the target of a click is unmistakable.
-          `.${card}:focus-within .${face},.${face}[data-active="true"]{transform:scale(1.12);` +
+          // Active/focus: deepen the cast shadow and switch the hairline to
+          // gold so the target of a click is unmistakable. The growth itself
+          // is no longer a `scale` here — the card is lifted toward the
+          // viewer in 3D instead (see the lift effect), which both magnifies
+          // it and puts it in front of its neighbours. Scaling as well would
+          // compound the two.
+          `.${card}:focus-within .${face},.${face}[data-active="true"]{` +
           `box-shadow:0 26px 70px rgba(0,0,0,.55),inset 0 0 0 1.5px rgba(232,184,32,.9);` +
           `filter:saturate(1.08) brightness(1.04)}` +
           // The rule under the name grows on activation — a small, cheap tell
@@ -289,6 +381,7 @@ export function ImageStreamHero({
       {/* LOCAL ADDITION: the container owns the pointer; the cards opt out. */}
       <div
         aria-hidden={onImageSelect ? undefined : true}
+        ref={perspectiveEl}
         className={cn("absolute inset-0", !onImageSelect && "pointer-events-none")}
         style={{
           perspective: `${p.perspective}cqw`,
@@ -363,8 +456,12 @@ export function ImageStreamHero({
                     // always wins over an external rule for the same
                     // property, no matter how the selector is written.
                     ...(onImageSelect && active !== null ? { animationPlayState: "paused" } : null),
-                    // Raise the active card above its neighbours.
+                    // Raise the active card above its neighbours. `zIndex` is
+                    // kept for the flattened case (a browser that ignores
+                    // preserve-3d), but `translate` is what actually does it
+                    // here — see the lift effect above.
                     ...(isActive ? { zIndex: 20 } : null),
+                    ...(isActive && lift ? { translate: lift } : null),
                   }}
                 >
                   {onImageSelect ? (
@@ -393,7 +490,7 @@ export function ImageStreamHero({
                       style={{
                         borderRadius: `${p.cardRadius}cqw`,
                         ...(isActive
-                          ? { transform: "scale(1.12)", boxShadow: "0 24px 60px rgba(0,0,0,.5)" }
+                          ? { boxShadow: "0 24px 60px rgba(0,0,0,.5)" }
                           : null),
                       }}
                     >

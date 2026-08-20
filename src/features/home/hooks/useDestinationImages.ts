@@ -13,6 +13,11 @@ import type { VillaDestination } from '../data/villaDestinations';
 const IMAGE_WIDTH = 900;
 const IMAGE_HEIGHT = 1250;
 
+/** Photos fetched immediately — comfortably more than the corridor shows at once. */
+const EAGER_COUNT = 10;
+/** How long the rest waits, so it lands after the first wave and the page settle. */
+const DEFER_REST_MS = 1200;
+
 /** Brand-toned gradient pairs — gold, emerald and navy, cycled per destination. */
 const PLACEHOLDER_STOPS: readonly (readonly [string, string])[] = [
     ['#1B2B44', '#0B1220'],
@@ -91,21 +96,38 @@ export function useDestinationImages(
     useEffect(() => {
         let cancelled = false;
         const images: HTMLImageElement[] = [];
+        let deferred: number | undefined;
 
-        for (const { id, url } of sources) {
-            const img = new Image();
-            img.decoding = 'async';
-            img.onload = () => {
-                if (!cancelled) setLoaded(prev => (prev[id] ? prev : { ...prev, [id]: url }));
-            };
-            // No onerror handler needed beyond silence: the gradient stays.
-            img.onerror = null;
-            img.src = url;
-            images.push(img);
+        const preload = (batch: readonly { id: string; url: string }[]) => {
+            for (const { id, url } of batch) {
+                if (cancelled) return;
+                const img = new Image();
+                img.decoding = 'async';
+                img.onload = () => {
+                    if (!cancelled) setLoaded(prev => (prev[id] ? prev : { ...prev, [id]: url }));
+                };
+                // No onerror handler needed beyond silence: the gradient stays.
+                img.onerror = null;
+                img.src = url;
+                images.push(img);
+            }
+        };
+
+        // Only the front of the list is fetched up front. The corridor shows
+        // 6-8 cards at a time and cycles slowly, so the tail isn't needed for
+        // many seconds — and the destination list is long enough now (dozens
+        // of places) that fetching all of it at once would put several MB of
+        // photos in flight competing with the rest of the page. Everything
+        // past the first screenful waits for that first wave to settle.
+        preload(sources.slice(0, EAGER_COUNT));
+        const rest = sources.slice(EAGER_COUNT);
+        if (rest.length > 0) {
+            deferred = window.setTimeout(() => preload(rest), DEFER_REST_MS);
         }
 
         return () => {
             cancelled = true;
+            if (deferred !== undefined) window.clearTimeout(deferred);
             // Drop handlers so a late load can't set state after unmount.
             for (const img of images) img.onload = null;
         };
