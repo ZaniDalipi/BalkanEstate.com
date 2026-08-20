@@ -1014,6 +1014,8 @@
     "importing": "Duke importuar…",
     "imported": "U importuan {{imported}} destinacion(e), u anashkaluan {{skipped}} ekzistues",
     "importError": "Importimi i destinacioneve dështoi",
-    "photoSpec": "Fotot e kartës janë portret, 18:25 — ngarkoni 900 × 1250 ose më të madhe në atë formë. Çdo përmasë tjetër e mbush kartën, por pritet për t’u përshtatur."
+    "photoSpec": "Fotot e kartës janë portret, 18:25 — ngarkoni 900 × 1250 ose më të madhe në atë formë. Çdo përmasë tjetër e mbush kartën, por pritet për t’u përshtatur.",
+    "newAvailable": "{{count}} destinacion(e) të integruara të reja nuk janë ende në bazën e të dhënave.",
+    "importNew": "Importoji"
   }
 }

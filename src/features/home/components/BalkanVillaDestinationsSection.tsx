@@ -9,6 +9,7 @@ import {
     type VillaDestination,
 } from '../data/villaDestinations';
 import { getVillaDestinations } from '../api/villaDestinationApi';
+import { villaDestinationKeys } from '@/src/shared/query/queryKeys';
 import { useDestinationImages } from '../hooks/useDestinationImages';
 
 interface BalkanVillaDestinationsSectionProps {
@@ -34,7 +35,10 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
     // for an error or an unseeded database, so a failure degrades to the
     // built-in list rather than an empty corridor.
     const { data: curated } = useQuery({
-        queryKey: ['villaDestinations'],
+        // Centralised key (Claude.md), and the same root the admin invalidates
+        // after an edit — so a curated change reaches the home page rather
+        // than waiting for this cache entry to go stale on its own.
+        queryKey: villaDestinationKeys.public(),
         queryFn: ({ signal }) => getVillaDestinations(signal),
         staleTime: 10 * 60 * 1000,
         retry: 1,

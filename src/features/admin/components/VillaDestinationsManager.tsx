@@ -1,9 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { tokenService } from '@/src/shared/api';
 import { csrfHeaders } from '@/src/shared/api/httpClient';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { villaDestinationKeys } from '@/src/shared/query/queryKeys';
+import { validateVillaDestination } from '@/src/shared/utils/validation';
 import {
     getAdminVillaDestinations,
     createVillaDestination,
@@ -13,6 +16,15 @@ import {
     type AdminVillaDestination,
 } from '../api/adminApi';
 import VillaDestinationForm, { type DestinationDraft, emptyDraft } from './VillaDestinationForm';
+import { VILLA_DESTINATIONS } from '@/src/features/home/data/villaDestinations';
+
+/**
+ * The `query` of every destination the app ships with. The import endpoint
+ * matches on exactly this field, so comparing against it tells an admin how
+ * many shipped places are not in the database yet — otherwise a release that
+ * adds destinations is invisible here until someone happens to press Import.
+ */
+const DEFAULT_DESTINATION_QUERIES = VILLA_DESTINATIONS.map(d => d.query);
 
 /**
  * Curates the places shown in the home-page villa corridor.
@@ -24,34 +36,56 @@ import VillaDestinationForm, { type DestinationDraft, emptyDraft } from './Villa
  */
 const VillaDestinationsManager: React.FC = () => {
     const { t } = useTranslation(['admin']);
-    const [rows, setRows] = useState<AdminVillaDestination[]>([]);
-    const [loading, setLoading] = useState(true);
+    const queryClient = useQueryClient();
     const [error, setError] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
     const [editing, setEditing] = useState<DestinationDraft | null>(null);
-    const [saving, setSaving] = useState(false);
     const [uploadingId, setUploadingId] = useState<string | null>(null);
-    const [importing, setImporting] = useState(false);
 
-    const load = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const data = await getAdminVillaDestinations();
-            setRows(data.destinations ?? []);
-        } catch {
-            setError(t('admin:villaDestinations.loadError', 'Failed to load villa destinations'));
-        } finally {
-            setLoading(false);
-        }
-    }, [t]);
+    const adminKey = villaDestinationKeys.admin();
 
-    useEffect(() => { load(); }, [load]);
+    /*
+     * The list is React Query state, not component state fetched in an effect
+     * (backend/CLAUDE.md: never fetch in useEffect). That is what makes the
+     * two sides agree quickly: a mutation writes the new row into the cache
+     * straight away so the table repaints in the same frame, the request goes
+     * out underneath it, and whatever the database actually stored replaces
+     * the guess when the refetch lands. A failed write rolls the cache back to
+     * the snapshot taken before it, so the table can never sit showing an edit
+     * the database rejected.
+     *
+     * `refetchOnWindowFocus` and the poll cover the other direction — a change
+     * made by a second admin, or by the seed script — without a WebSocket.
+     */
+    const { data: rows = [], isLoading, isError } = useQuery({
+        queryKey: adminKey,
+        queryFn: async () => (await getAdminVillaDestinations()).destinations ?? [],
+        staleTime: 5_000,
+        refetchInterval: 15_000,
+        refetchOnWindowFocus: true,
+    });
 
-    const handleSave = async (draft: DestinationDraft) => {
-        setSaving(true);
-        setError(null);
-        try {
+    /** Both admin and public views of one collection — invalidate together. */
+    const invalidateAll = () =>
+        queryClient.invalidateQueries({ queryKey: villaDestinationKeys.all });
+
+    /**
+     * Applies `patch` to the cached list immediately and hands back the
+     * snapshot to restore if the server refuses it.
+     */
+    const applyOptimistic = async (patch: (prev: AdminVillaDestination[]) => AdminVillaDestination[]) => {
+        await queryClient.cancelQueries({ queryKey: adminKey });
+        const previous = queryClient.getQueryData<AdminVillaDestination[]>(adminKey);
+        queryClient.setQueryData<AdminVillaDestination[]>(adminKey, prev => patch(prev ?? []));
+        return { previous };
+    };
+
+    const rollback = (ctx: { previous?: AdminVillaDestination[] } | undefined) => {
+        if (ctx?.previous) queryClient.setQueryData(adminKey, ctx.previous);
+    };
+
+    const saveMutation = useMutation({
+        mutationFn: async (draft: DestinationDraft) => {
             const body = {
                 name: draft.name.trim(),
                 query: draft.query.trim(),
@@ -66,54 +100,109 @@ const VillaDestinationsManager: React.FC = () => {
                 displayOrder: Number(draft.displayOrder),
                 isActive: draft.isActive,
             };
-            if (draft._id) await updateVillaDestination(draft._id, body);
-            else await createVillaDestination(body);
-
-            setEditing(null);
-            setNotice(t('admin:villaDestinations.saved', 'Destination saved'));
-            await load();
-        } catch (e) {
+            return draft._id ? updateVillaDestination(draft._id, body) : createVillaDestination(body);
+        },
+        onMutate: async (draft: DestinationDraft) => {
+            setError(null);
+            // Only an existing row can be patched in place. A brand-new one has
+            // no id until the server assigns it, and inventing a placeholder
+            // would put a row on screen that cannot be edited or deleted until
+            // the refetch lands — worse than waiting one round trip for it.
+            if (!draft._id) return { previous: undefined };
+            return applyOptimistic(prev =>
+                prev.map(r =>
+                    r._id === draft._id
+                        ? {
+                            ...r,
+                            name: draft.name.trim(),
+                            query: draft.query.trim(),
+                            country: draft.country.trim(),
+                            lat: Number(draft.lat),
+                            lng: Number(draft.lng),
+                            zoom: Number(draft.zoom),
+                            displayOrder: Number(draft.displayOrder),
+                            isActive: draft.isActive,
+                        }
+                        : r,
+                ),
+            );
+        },
+        onError: (e, _draft, ctx) => {
+            rollback(ctx);
             // The server validates coordinates too; surface its message so a
             // bad latitude reads as a reason rather than a generic failure.
             setError(e instanceof Error ? e.message : t('admin:villaDestinations.saveError', 'Failed to save destination'));
-        } finally {
-            setSaving(false);
-        }
-    };
+        },
+        onSuccess: () => {
+            setEditing(null);
+            setNotice(t('admin:villaDestinations.saved', 'Destination saved'));
+        },
+        onSettled: invalidateAll,
+    });
 
-    const handleDelete = async (row: AdminVillaDestination) => {
-        if (!window.confirm(t('admin:villaDestinations.confirmDelete', 'Remove {{name}} from the home page?', { name: row.name }))) return;
-        setError(null);
-        try {
-            await deleteVillaDestination(row._id);
-            await load();
-        } catch {
+    const deleteMutation = useMutation({
+        mutationFn: (row: AdminVillaDestination) => deleteVillaDestination(row._id),
+        onMutate: async (row: AdminVillaDestination) => {
+            setError(null);
+            return applyOptimistic(prev => prev.filter(r => r._id !== row._id));
+        },
+        onError: (_e, _row, ctx) => {
+            rollback(ctx);
             setError(t('admin:villaDestinations.deleteError', 'Failed to delete destination'));
-        }
-    };
+        },
+        onSettled: invalidateAll,
+    });
 
     /**
      * Pulls the built-in destinations into the database so they can be curated
-     * here. Idempotent server-side, so pressing it twice is harmless.
+     * here. Idempotent server-side (it matches on `query`), so pressing it
+     * again after the shipped list grows brings in only what is missing.
      */
-    const handleImport = async () => {
-        setImporting(true);
-        setError(null);
-        try {
-            const result = await importDefaultVillaDestinations();
+    const importMutation = useMutation({
+        mutationFn: importDefaultVillaDestinations,
+        onMutate: () => setError(null),
+        onSuccess: result => {
             setNotice(
                 t('admin:villaDestinations.imported', 'Imported {{imported}} destination(s), skipped {{skipped}} already present', {
                     imported: result.imported,
                     skipped: result.skipped,
                 })
             );
-            await load();
-        } catch {
-            setError(t('admin:villaDestinations.importError', 'Failed to import the built-in destinations'));
-        } finally {
-            setImporting(false);
+        },
+        onError: () => setError(t('admin:villaDestinations.importError', 'Failed to import the built-in destinations')),
+        onSettled: invalidateAll,
+    });
+
+    const loading = isLoading;
+    const saving = saveMutation.isPending;
+    const importing = importMutation.isPending;
+
+    // A failed load is the one case where there is nothing to show at all.
+    const loadError = isError ? t('admin:villaDestinations.loadError', 'Failed to load villa destinations') : null;
+
+    /** How many of the shipped destinations are not in the database yet. */
+    const missingCount = useMemo(() => {
+        const present = new Set(rows.map(r => r.query));
+        return DEFAULT_DESTINATION_QUERIES.filter(q => !present.has(q)).length;
+    }, [rows]);
+
+    const handleSave = (draft: DestinationDraft) => {
+        // Validate before the request so a bad row is rejected inline rather
+        // than as a 400 (Claude.md: validation lives in validation.ts).
+        const result = validateVillaDestination(draft);
+        if (!result.isValid) {
+            setError(result.error ?? null);
+            return;
         }
+        saveMutation.mutate(draft);
     };
+
+    const handleDelete = (row: AdminVillaDestination) => {
+        if (!window.confirm(t('admin:villaDestinations.confirmDelete', 'Remove {{name}} from the home page?', { name: row.name }))) return;
+        deleteMutation.mutate(row);
+    };
+
+    const handleImport = () => importMutation.mutate();
 
     /** Uploads straight onto an existing row — the common case is swapping a photo. */
     const handleUpload = async (row: AdminVillaDestination, file: File) => {
@@ -131,8 +220,15 @@ const VillaDestinationsManager: React.FC = () => {
             if (!res.ok) throw new Error('Upload failed');
             const data = await res.json();
             await updateVillaDestination(row._id, { imageUrl: data.url, imagePublicId: data.publicId });
+            // Paint the new photo before the refetch returns; the invalidate
+            // right after replaces it with whatever the database stored.
+            queryClient.setQueryData<AdminVillaDestination[]>(adminKey, prev =>
+                (prev ?? []).map(r =>
+                    r._id === row._id ? { ...r, imageUrl: data.url, imagePublicId: data.publicId } : r,
+                ),
+            );
             setNotice(t('admin:villaDestinations.imageUpdated', 'Photo updated'));
-            await load();
+            await invalidateAll();
         } catch {
             setError(t('admin:villaDestinations.uploadError', 'Photo upload failed'));
         } finally {
@@ -177,7 +273,30 @@ const VillaDestinationsManager: React.FC = () => {
                 {t('admin:villaDestinations.photoSpec', 'Card photos are portrait, 18:25 — upload 900 × 1250 or larger at that shape. Any other size still fills the card, but is cropped to fit.')}
             </p>
 
-            {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+            {/* Without this, destinations added in a release stay invisible
+                here until somebody happens to press Import again. */}
+            {!loading && missingCount > 0 && (
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                    <span>
+                        {t('admin:villaDestinations.newAvailable', '{{count}} new built-in destination(s) are not in the database yet.', { count: missingCount })}
+                    </span>
+                    <button
+                        onClick={handleImport}
+                        disabled={importing}
+                        className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-600 disabled:opacity-60"
+                    >
+                        {importing
+                            ? t('admin:villaDestinations.importing', 'Importing…')
+                            : t('admin:villaDestinations.importNew', 'Import them')}
+                    </button>
+                </div>
+            )}
+
+            {(error || loadError) && (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+                    {error ?? loadError}
+                </div>
+            )}
             {notice && <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">{notice}</div>}
 
             {editing && (

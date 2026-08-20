@@ -1015,6 +1015,8 @@
     "importing": "Uvoz…",
     "imported": "Uvezeno {{imported}} destinacija, preskočeno {{skipped}} postojećih",
     "importError": "Uvoz destinacija nije uspeo",
-    "photoSpec": "Fotografije kartica su portret, 18:25 — otpremite 900 × 1250 ili veću u tom odnosu. Druga veličina i dalje popunjava karticu, ali se seče da stane."
+    "photoSpec": "Fotografije kartica su portret, 18:25 — otpremite 900 × 1250 ili veću u tom odnosu. Druga veličina i dalje popunjava karticu, ali se seče da stane.",
+    "newAvailable": "{{count}} novih ugrađenih destinacija još nije u bazi podataka.",
+    "importNew": "Uvezi ih"
   }
 }

@@ -230,6 +230,31 @@ export function getPropertyInvalidationKeys() {
   ];
 }
 
+// ============================================================================
+// Villa Destination Query Keys
+// Used by: home-page villa corridor (public), admin VillaDestinationsManager
+// ============================================================================
+
+export const villaDestinationKeys = {
+  all: ['villaDestinations'] as const,
+
+  /** Public list — active destinations only, drives the home-page corridor. */
+  public: () => [...villaDestinationKeys.all, 'public'] as const,
+
+  /** Admin list — includes hidden destinations. */
+  admin: () => [...villaDestinationKeys.all, 'admin'] as const,
+};
+
+/**
+ * Every key touched when a destination changes. The admin list and the public
+ * corridor are two views of one collection, so an edit in the admin has to
+ * invalidate both — otherwise the home page keeps serving the old list from
+ * cache until it happens to go stale.
+ */
+export function getVillaDestinationInvalidationKeys() {
+  return [villaDestinationKeys.all];
+}
+
 /**
  * Get all discount-related keys that should be invalidated when discounts change
  */
