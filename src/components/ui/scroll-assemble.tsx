@@ -16,12 +16,18 @@ import { cn } from '@/lib/utils';
  * the same symptom ("there's no animation"):
  *
  * 1. The motion was roughly a tenth of the reference's. The reference
- *    scatters by `d * 90`px with `d * 50` DEGREES of rotation and a 0.75
- *    starting scale; this file used `d * 46`px, `d * 5` degrees and 0.86.
- *    At five degrees of rotation the effect reads as a faint shimmer
- *    rather than as pieces flying into place. The magnitudes below now
- *    match the reference's `CharacterV3` exactly (including the *upward*
- *    `-|d| * 20` lift — the old code pushed tiles down instead).
+ *    scatters by `d * 90`px with a 0.75 starting scale; this file used
+ *    `d * 46`px and 0.86, which reads as a faint shimmer rather than as
+ *    pieces flying into place. The travel, lift and scale below now match
+ *    the reference's `CharacterV3` (including the *upward* `-|d| * 20`
+ *    lift — the old code pushed tiles down instead).
+ *
+ *    The one thing deliberately NOT taken from the reference is its
+ *    `d * 50` degrees of rotation. That works for the reference because
+ *    its items are square, wordless brand glyphs, which read fine at any
+ *    angle. These tiles carry text labels, and at the outer positions
+ *    `d * 50` comes to ~125 degrees — far enough past vertical that
+ *    "Apartments" renders upside down on the way in. Tiles stay upright.
  *
  * 2. The scroll window was hand-measured in absolute document pixels
  *    (`rowTop - 380` to `rowTop + 60`) via getBoundingClientRect plus a
@@ -94,7 +100,6 @@ export const ScrollAssemble: React.FC<ScrollAssembleProps> = ({ count, className
         <div
             ref={ref}
             className={cn(className)}
-            style={{ perspective: '900px' }}
         >
             <AssembleContext.Provider value={value}>{children}</AssembleContext.Provider>
         </div>
@@ -135,17 +140,17 @@ const AssembleItemInner: React.FC<ScrollAssembleItemProps & { ctx: AssembleConte
     const { progress, centerIndex, still } = ctx;
     const offset = index - centerIndex;
 
-    // Magnitudes lifted from the reference's CharacterV3: outer tiles travel
-    // furthest and spin hardest, so the row closes in from both ends.
+    // Magnitudes lifted from the reference's CharacterV3, minus its rotation
+    // (see the note at the top): outer tiles travel furthest and start
+    // smallest, so the row closes in from both ends and settles upright.
     const x = useTransform(progress, [0, 1], [still ? 0 : offset * X_STEP_PX, 0]);
     const y = useTransform(progress, [0, 1], [still ? 0 : -Math.abs(offset) * 20, 0]);
-    const rotate = useTransform(progress, [0, 1], [still ? 0 : offset * 50, 0]);
     const scale = useTransform(progress, [0, 1], [still ? 1 : 0.75, 1]);
 
     return (
         <motion.div
             className={cn('will-change-transform', className)}
-            style={{ x, y, rotate, scale, transformOrigin: 'center' }}
+            style={{ x, y, scale, transformOrigin: 'center' }}
         >
             {children}
         </motion.div>
