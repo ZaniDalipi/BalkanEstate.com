@@ -213,6 +213,7 @@
     "title1": "Luxury villas,",
     "title2": "wherever you wander.",
     "subtitle": "From the Sharr mountains to the Adriatic. Pick a place and see the villas waiting there.",
-    "cardLabel": "Luxury villas in {{place}}, {{country}}"
+    "cardLabel": "Luxury villas in {{place}}, {{country}}",
+    "seeAll": "See all"
   }
 }

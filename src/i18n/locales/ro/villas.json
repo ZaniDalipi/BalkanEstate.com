@@ -213,6 +213,7 @@
     "title1": "Vile de lux,",
     "title2": "oriunde ai ajunge.",
     "subtitle": "De la munții Šar la Adriatica. Alege un loc și vezi vilele care te așteaptă acolo.",
-    "cardLabel": "Vile de lux în {{place}}, {{country}}"
+    "cardLabel": "Vile de lux în {{place}}, {{country}}",
+    "seeAll": "Vezi toate"
   }
 }

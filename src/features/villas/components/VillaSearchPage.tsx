@@ -15,6 +15,7 @@ import { SEO } from '@/src/components/seo';
 import Footer from '@/components/shared/Footer';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { NominatimResult, Property } from '@/types';
+import { VILLA_DESTINATIONS } from '@/src/features/home/data/villaDestinations';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -167,50 +168,34 @@ const VillaAnimationStyles = () => (
 );
 
 /* ── Destination quick-jumps for the hero ── */
-const DESTINATIONS = [
-    {
-        labelKey: 'destinations.julianAlps' as const,
-        fallback: '⛰️ Julian Alps',
-        query: 'Bled',
-        center: [46.3683, 14.1146] as [number, number],
-        zoom: 11,
-    },
-    {
-        labelKey: 'destinations.kotorBay' as const,
-        fallback: '🌊 Bay of Kotor',
-        query: 'Kotor',
-        center: [42.4247, 18.7712] as [number, number],
-        zoom: 12,
-    },
-    {
-        labelKey: 'destinations.budvaRiviera' as const,
-        fallback: '🌅 Budva Riviera',
-        query: 'Budva',
-        center: [42.2864, 18.8400] as [number, number],
-        zoom: 12,
-    },
-    {
-        labelKey: 'destinations.lakeOhrid' as const,
-        fallback: '🏞️ Lake Ohrid',
-        query: 'Ohrid',
-        center: [41.1172, 20.8016] as [number, number],
-        zoom: 11,
-    },
-    {
-        labelKey: 'destinations.dubrovnik' as const,
-        fallback: '🏛️ Dubrovnik',
-        query: 'Dubrovnik',
-        center: [42.6507, 18.0944] as [number, number],
-        zoom: 13,
-    },
-    {
-        labelKey: 'destinations.pirinMountains' as const,
-        fallback: '🌲 Pirin Mountains',
-        query: 'Bansko',
-        center: [41.8374, 23.4882] as [number, number],
-        zoom: 12,
-    },
-];
+
+/**
+ * Derived from the one destination list rather than hand-written here.
+ *
+ * This used to be its own array of six, which drifted: it still pointed at
+ * `destinations.julianAlps` and `destinations.pirinMountains` after both were
+ * dropped from the shared list, and Julian Alps searched Bled — in Slovenia,
+ * which is not one of the ten countries the platform covers. Deriving means a
+ * destination added or renamed in one place cannot leave a dead chip here.
+ *
+ * One per country, in list order, so the row stays a spread of the region
+ * instead of six neighbouring towns — and stays a sensible length now that the
+ * shared list runs to dozens of entries.
+ */
+const DESTINATIONS = (() => {
+    const seen = new Set<string>();
+    return VILLA_DESTINATIONS.filter(d => {
+        if (seen.has(d.country)) return false;
+        seen.add(d.country);
+        return true;
+    }).map(d => ({
+        labelKey: `destinations.${d.id}` as const,
+        fallback: d.fallback,
+        query: d.query,
+        center: d.center as [number, number],
+        zoom: d.zoom,
+    }));
+})();
 
 /* ── Count-up hook for hero ── */
 /**
@@ -259,16 +244,18 @@ const TrustStrip: React.FC = () => {
         { icon: '🔒', title: t('villas:trust.privacy', 'Complete Privacy'),    desc: t('villas:trust.privacyDesc', 'Your stay, your retreat — absolute discretion guaranteed')    },
     ];
     return (
-        <div
-            className="overflow-x-auto border-b border-black/[0.06] bg-white"
-            style={{ scrollbarWidth: 'none' }}
-        >
-            <div className="flex min-w-max lg:min-w-0 lg:grid lg:grid-cols-4 divide-x divide-black/[0.05]">
+        // Wraps into a 2x2 grid on a phone rather than scrolling sideways.
+        // As a 170px-wide horizontal strip it showed two and a bit items on a
+        // 390px screen, with the third sliced down the middle and no visible
+        // affordance saying it could be scrolled — it read as broken layout
+        // rather than as more content.
+        <div className="border-b border-black/[0.06] bg-white">
+            <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-black/[0.05]">
                 {items.map((item, i) => (
-                    <div key={i} className="flex items-start gap-2.5 px-4 py-3 min-w-[170px] lg:min-w-0">
+                    <div key={i} className="flex items-start gap-2.5 px-3 py-3 sm:px-4">
                         <span className="text-base flex-shrink-0 mt-0.5">{item.icon}</span>
                         <div className="min-w-0">
-                            <p className="text-[11px] font-semibold text-neutral-700 leading-tight truncate">{item.title}</p>
+                            <p className="text-[11px] font-semibold text-neutral-700 leading-tight">{item.title}</p>
                             <p className="text-[10px] text-neutral-400 leading-snug mt-0.5">{item.desc}</p>
                         </div>
                     </div>
@@ -331,7 +318,10 @@ const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, minPrice, isNightly, act
                             <button
                                 key={dest.query}
                                 onClick={() => onDestinationClick(dest)}
-                                className={`px-3 py-1.5 rounded-full text-[12px] font-medium border transition-all focus:outline-none ${
+                                // 44px tall on touch so the destination row is
+                                // tappable without aiming; unchanged on desktop.
+                                // lg, not sm — tablets are touch devices here too.
+                                className={`min-h-[44px] lg:min-h-0 px-4 lg:px-3 py-2.5 lg:py-1.5 rounded-full text-[13px] lg:text-[12px] font-medium border transition-all touch-manipulation focus-visible:ring-2 focus-visible:ring-[var(--color-villa-gold-calm)]/60 focus:outline-none ${
                                     isActive
                                         ? 'bg-primary/10 text-primary border-primary/40'
                                         : 'bg-white text-neutral-600 border-black/[0.08] hover:border-primary/30 hover:text-primary'
@@ -374,6 +364,33 @@ interface VillaSearchPageProps {
 const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) => {
     const { t } = useTranslation(['villas', 'search', 'common']);
     const { getLocalizedPath } = useLocalizedNavigation();
+
+    /*
+     * The floating mobile header sits above the list rather than in it, so the
+     * list needs a spacer of exactly its height. That spacer used to be a
+     * hardcoded 56px and was never revisited when the header grew a 52px top
+     * inset and a "Luxury Villas" pill beneath the search bar — about 142px in
+     * total. The result was that the header covered the top ~86px of the list,
+     * which is where the All / For Rent / For Sale control and the sort
+     * dropdown live: they were not merely clipped, they were unclickable,
+     * because the header sits above them in the stacking order.
+     *
+     * Measured rather than re-hardcoded, since the height moves with the
+     * safe-area inset, the pill's filter badge and text length in other
+     * languages.
+     */
+    const floatingHeaderRef = useRef<HTMLDivElement>(null);
+    const [headerHeight, setHeaderHeight] = useState(56);
+
+    useEffect(() => {
+        const el = floatingHeaderRef.current;
+        if (!el) return;
+        const measure = () => setHeaderHeight(el.getBoundingClientRect().height);
+        measure();
+        const ro = new ResizeObserver(measure);
+        ro.observe(el);
+        return () => ro.disconnect();
+    });
 
     const {
         state,
@@ -579,8 +596,11 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                     className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] lg:flex-shrink-0 lg:border-r lg:border-gray-200 ${showViewToggle && mobileView === 'list' ? 'translate-x-0' : showViewToggle ? '-translate-x-full' : ''} lg:translate-x-0 transition-transform duration-300`}
                     style={{ background: '#F8F9FC' }}
                 >
-                    {/* Spacer for floating mobile/tablet header */}
-                    {(isMobile || isTablet) && <div className="h-14 flex-shrink-0" />}
+                    {/* Spacer matching the floating mobile/tablet header, so
+                        the list starts below it instead of underneath it. */}
+                    {(isMobile || isTablet) && (
+                        <div className="flex-shrink-0" style={{ height: headerHeight }} aria-hidden />
+                    )}
 
                     {/* Desktop header — sticky, new 3-tier design */}
                     <div className="hidden lg:block sticky top-0 z-20">
@@ -687,11 +707,21 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                     </div>
 
                     {/* Property List */}
-                    <div className="flex-1 overflow-y-auto pb-28 lg:pb-3 glass-scrollbar" data-scroll-container>
+                    {/* pb-44: the floating list/map switch sits 96px up from
+                        the bottom and is ~56px tall, so 112px of padding left
+                        the last card — and the empty state's own button —
+                        sitting underneath it. */}
+                    <div className="flex-1 overflow-y-auto pb-44 lg:pb-3 glass-scrollbar" data-scroll-container>
 
                         {/* Results bar */}
                         <div className="sticky top-0 bg-white border-b border-gray-100 z-[100]">
-                            <div className="px-4 py-2.5 flex items-center justify-between gap-2">
+                            {/* flex-wrap, and the market toggle takes a row of
+                                its own below 1024px. Once the toggle grew to a
+                                44px touch target it no longer fitted beside the
+                                count and the sort dropdown on a 390px screen —
+                                it kept its width (the labels cannot wrap) and
+                                slid underneath the sort control. */}
+                            <div className="px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
                                 {/* Left: count + active filter chips */}
                                 <div className="flex items-center gap-2 min-w-0 flex-wrap">
                                     {/* The live region is this short count, not
@@ -703,7 +733,6 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             {t('villas:exclusiveVillas', 'exclusive villas')}
                                         </span>
                                     </p>
-                                    <VillaListingModeToggle mode={listingMode} onChange={handleListingModeChange} />
                                     {filters.query && (
                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--color-villa-gold-bright)]/10 text-[var(--color-primary)] text-[11px] font-medium max-w-[140px]">
                                             <MapIcon className="w-3 h-3 flex-shrink-0" />
@@ -768,6 +797,16 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             </svg>
                                         </div>
                                     </div>
+                                </div>
+
+                                {/* Market toggle — its own full-width row on
+                                    touch, inline on desktop. */}
+                                <div className="w-full lg:w-auto lg:order-none">
+                                    <VillaListingModeToggle
+                                        mode={listingMode}
+                                        onChange={handleListingModeChange}
+                                        className="w-full lg:w-auto"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -920,6 +959,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                         {/* Mobile/Tablet floating search bar */}
                         {(isMobile || isTablet) && (
                             <div
+                                ref={floatingHeaderRef}
                                 className="absolute top-0 left-0 right-0 z-[100] pb-2 landscape:pb-1.5 pointer-events-none"
                                 style={{
                                     paddingTop: 'max(calc(env(safe-area-inset-top, 0px) + 8px), 52px)',
