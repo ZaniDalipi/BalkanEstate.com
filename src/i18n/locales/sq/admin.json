@@ -1004,7 +1004,7 @@
     "uploading": "Duke ngarkuar…",
     "imageUpdated": "Fotoja u përditësua",
     "empty": "Ende asnjë destinacion — faqja kryesore po përdor listën e integruar.",
-    "emptyHint": "Shtypni “Importo vendet e integruara” më lart për të sjellë katërmbëdhjetë destinacionet, pastaj ndryshojini këtu.",
+    "emptyHint": "Shtypni “Importo vendet e integruara” më lart për të sjellë destinacionet e integruara, pastaj ndryshojini këtu.",
     "confirmDelete": "Ta hiqni {{name}} nga faqja kryesore?",
     "loadError": "Dështoi ngarkimi i destinacioneve",
     "saveError": "Dështoi ruajtja e destinacionit",
@@ -1013,6 +1013,7 @@
     "import": "Importo vendet e integruara",
     "importing": "Duke importuar…",
     "imported": "U importuan {{imported}} destinacion(e), u anashkaluan {{skipped}} ekzistues",
-    "importError": "Importimi i destinacioneve dështoi"
+    "importError": "Importimi i destinacioneve dështoi",
+    "photoSpec": "Fotot e kartës janë portret, 18:25 — ngarkoni 900 × 1250 ose më të madhe në atë formë. Çdo përmasë tjetër e mbush kartën, por pritet për t’u përshtatur."
   }
 }

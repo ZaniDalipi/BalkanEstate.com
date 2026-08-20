@@ -1005,7 +1005,7 @@
     "uploading": "Otpremanje…",
     "imageUpdated": "Fotografija je ažurirana",
     "empty": "Još nema destinacija — početna strana koristi ugrađenu listu.",
-    "emptyHint": "Pritisnite „Uvezi ugrađena mesta“ iznad da uvezete četrnaest destinacija, pa ih uredite ovde.",
+    "emptyHint": "Pritisnite „Uvezi ugrađena mesta“ iznad da uvezete ugrađene destinacije, pa ih uredite ovde.",
     "confirmDelete": "Ukloniti {{name}} sa početne strane?",
     "loadError": "Učitavanje destinacija nije uspelo",
     "saveError": "Čuvanje destinacije nije uspelo",
@@ -1014,6 +1014,7 @@
     "import": "Uvezi ugrađena mesta",
     "importing": "Uvoz…",
     "imported": "Uvezeno {{imported}} destinacija, preskočeno {{skipped}} postojećih",
-    "importError": "Uvoz destinacija nije uspeo"
+    "importError": "Uvoz destinacija nije uspeo",
+    "photoSpec": "Fotografije kartica su portret, 18:25 — otpremite 900 × 1250 ili veću u tom odnosu. Druga veličina i dalje popunjava karticu, ali se seče da stane."
   }
 }

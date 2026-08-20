@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { tokenService } from '@/src/shared/api';
 import { csrfHeaders } from '@/src/shared/api/httpClient';
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import {
     getAdminVillaDestinations,
     createVillaDestination,
@@ -169,6 +170,13 @@ const VillaDestinationsManager: React.FC = () => {
                 </div>
             </div>
 
+            {/* The corridor card is a fixed portrait shape, so say so here
+                rather than letting a curator find out by uploading a
+                landscape photo and seeing its sides cropped away. */}
+            <p className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs text-blue-800">
+                {t('admin:villaDestinations.photoSpec', 'Card photos are portrait, 18:25 — upload 900 × 1250 or larger at that shape. Any other size still fills the card, but is cropped to fit.')}
+            </p>
+
             {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
             {notice && <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">{notice}</div>}
 
@@ -199,7 +207,16 @@ const VillaDestinationsManager: React.FC = () => {
                         <div key={row._id} className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3">
                             <div className="h-16 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-neutral-100">
                                 {row.imageUrl && (
-                                    <img src={row.imageUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
+                                    // Thumbnail-sized, not the full upload: the
+                                    // box is 48×64 and this list is dozens of
+                                    // rows long, so serving the originals here
+                                    // would pull tens of megabytes.
+                                    <img
+                                        src={optimizeCloudinaryUrl(row.imageUrl, { width: 96, height: 128, crop: 'fill', gravity: 'auto' }) || row.imageUrl}
+                                        alt=""
+                                        loading="lazy"
+                                        className="h-full w-full object-cover"
+                                    />
                                 )}
                             </div>
                             <div className="min-w-0 flex-1">

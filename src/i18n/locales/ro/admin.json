@@ -1107,7 +1107,7 @@
     "uploading": "Se încarcă…",
     "imageUpdated": "Fotografie actualizată",
     "empty": "Încă nu există destinații — pagina principală folosește lista încorporată.",
-    "emptyHint": "Apasă „Importă locurile încorporate” de mai sus pentru a aduce cele paisprezece destinații, apoi editează-le aici.",
+    "emptyHint": "Apasă „Importă locurile încorporate” de mai sus pentru a aduce destinațiile încorporate, apoi editează-le aici.",
     "confirmDelete": "Elimini {{name}} de pe pagina principală?",
     "loadError": "Încărcarea destinațiilor a eșuat",
     "saveError": "Salvarea destinației a eșuat",
@@ -1116,6 +1116,7 @@
     "import": "Importă locurile încorporate",
     "importing": "Se importă…",
     "imported": "Importate {{imported}} destinații, omise {{skipped}} existente",
-    "importError": "Importul destinațiilor a eșuat"
+    "importError": "Importul destinațiilor a eșuat",
+    "photoSpec": "Fotografiile cardurilor sunt portret, 18:25 — încarcă 900 × 1250 sau mai mare în acest raport. Alte dimensiuni umplu tot cardul, dar sunt decupate."
   }
 }

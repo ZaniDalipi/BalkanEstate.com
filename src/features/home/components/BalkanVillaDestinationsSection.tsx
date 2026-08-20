@@ -107,7 +107,11 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
                 // padding leaves less unused margin around the bigger cards —
                 // at 500px the corridor read as a thin band with dead space
                 // above and below it.
-                className="h-[420px] w-full sm:h-[540px]"
+                // Taller than the corridor strictly needs, because hovering a
+                // card lifts it toward the viewer and it grows well past its
+                // resting size — at 540px the raised card was being sliced off
+                // top and bottom by the edge of the box.
+                className="h-[520px] w-full sm:h-[720px]"
             >
                 {/* Title top, supporting line bottom — the corridor owns the
                     middle band, so nothing else may sit there or it collides

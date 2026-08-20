@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getCityImageUrl } from '@/config/cloudinaryConfig';
+import { getCityImageUrl, optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import type { VillaDestination } from '../data/villaDestinations';
 
 /**
@@ -79,8 +79,25 @@ export function useDestinationImages(
                 id: dest.id,
                 // An admin-curated photo always wins; the seeded city image is
                 // only the stand-in for places nobody has curated yet.
+                //
+                // The curated one goes through the same crop as the seeded
+                // ones rather than being used as uploaded. The card is a
+                // fixed 18:25 portrait, so an upload of any other shape has
+                // to lose something — `c_fill` with `g_auto` makes Cloudinary
+                // pick the crop around the subject instead of blindly taking
+                // the middle, and asking for the card's exact size stops a
+                // large original being downloaded in full and squeezed by the
+                // browser. `optimizeCloudinaryUrl` strips any transform
+                // already baked into the stored URL first, and returns
+                // non-Cloudinary URLs untouched.
                 url: dest.imageUrl
-                    ? dest.imageUrl
+                    ? optimizeCloudinaryUrl(dest.imageUrl, {
+                        width: IMAGE_WIDTH,
+                        height: IMAGE_HEIGHT,
+                        crop: 'fill',
+                        gravity: 'auto',
+                        quality: 'auto:good',
+                    }) || dest.imageUrl
                     : getCityImageUrl(dest.imageCity, {
                         country: dest.imageCountry,
                         width: IMAGE_WIDTH,
