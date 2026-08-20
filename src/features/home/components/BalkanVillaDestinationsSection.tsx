@@ -37,6 +37,10 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
 }) => {
     const { t } = useTranslation(['villas', 'home']);
     const isMobile = useIsMobile();
+    // Below `lg` is the app's touch band — the villas page draws the same
+    // line. A tablet is a touch device, so it takes the touch geometry.
+    const isTouch = useIsMobile(1024);
+    const isTablet = isTouch && !isMobile;
 
     // Admin-curated destinations. `getVillaDestinations` already returns []
     // for an error or an unseeded database, so a failure degrades to the
@@ -105,15 +109,28 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
     // grow ~1.96x instead of ~1.63x, and the gap that opens between them is
     // wide enough to see straight through the middle of the corridor.
     //
-    // Raising the *birth* size instead gets there without that. Keeping six
-    // cards but starting them at 6cqw and ending at 72 gives a step ratio of
-    // ~1.51 — tighter than the original 1.63, so the ribbon is more solid than
-    // before — while the mid-corridor card, the one actually being read, goes
-    // from roughly 61px to 81px on a 390px screen.
-    const cards = isMobile ? 6 : 8;
+    // Raising the birth and exit sizes together is what actually works. Seven
+    // cards running from 18cqw to 118 gives a step ratio of ~1.31 — tighter
+    // than the original 1.63, so the ribbon is *more* solid — while every card
+    // is far larger: the outer ones fill the height of the band instead of
+    // floating in the middle of it with empty space above and below.
+    //
+    // The birth size is the part that decides whether this is usable with a
+    // finger. It sets the smallest card in the corridor, and at 6cqw that card
+    // was ~23px wide — a target nobody can hit. At 18cqw nothing in the
+    // ribbon is under about 50x70px, so every card on screen is tappable
+    // rather than just the outer few.
+    //
+    // A tablet needs its own middle setting. It was falling through to the
+    // desktop geometry, which assumes a mouse and a wide viewport: on an 820px
+    // screen that produced cards as small as 14x20px — smaller than the phone
+    // ever was — on a device that is driven by touch.
+    const cards = isTouch ? 7 : 8;
     const path = isMobile
-        ? { cardRadius: 0.9, birthHeight: 6, exitHeight: 72, railExit: 40 }
-        : { cardRadius: 0.9, exitHeight: 50 };
+        ? { cardRadius: 0.9, birthHeight: 18, exitHeight: 118, railExit: 42 }
+        : isTablet
+            ? { cardRadius: 0.9, birthHeight: 12, exitHeight: 84, railExit: 40 }
+            : { cardRadius: 0.9, exitHeight: 50 };
 
     return (
         <section className="bg-white">
