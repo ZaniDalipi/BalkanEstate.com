@@ -273,7 +273,11 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
       const trimmedApiUrl = apiUrl.trim();
       const baseUrl =
         method === 'customApi' ? trimmedApiUrl :
-        method === 'sampleJson' ? (trimmedApiUrl || (detected.adapterConfig.url as string | undefined) || 'manual://imported') :
+        method === 'sampleJson'
+          ? (trimmedApiUrl ||
+             (detected.adapterConfig.endpoint as string | undefined) ||
+             (detected.adapterConfig.url as string | undefined) ||
+             'manual://imported') :
         url.trim();
 
       // For sampleJson with NO API URL we wire the pasted JSON inline so the

@@ -1175,11 +1175,13 @@ export const detectFeedForUrlWithAuth = async (
   return {
     adapterType: 'customApi',
     adapterConfig: {
-      url,
+      // `endpoint` is the key every adapter reads — writing `url` here is what
+      // made detected sources fail at fetch time with a "missing endpoint" error.
+      endpoint: url,
       ...authConfig,
       itemsPath,
-      idPath: '$.id',
-      urlPath: '$.url',
+      idPath: detectIdPath(sample),
+      urlPath: detectUrlPath(sample),
     },
     fieldMap: buildJsonFieldMap(sample),
     sample,
@@ -1219,8 +1221,8 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
           adapterConfig: {
             endpoint: url,
             itemsPath: spaData.itemsPath,
-            idPath: '$.id',
-            urlPath: '$.url',
+            idPath: detectIdPath(sample),
+            urlPath: detectUrlPath(sample),
           },
           fieldMap: buildJsonFieldMap(sample),
           sample,
@@ -1238,8 +1240,8 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
         return {
           adapterType: 'customApi',
           adapterConfig: {
-            url: `${origin}/wp-json/wp/v2/posts`,
-            params: { per_page: 20, _embed: true },
+            endpoint: `${origin}/wp-json/wp/v2/posts`,
+            query: { per_page: '20', _embed: 'true' },
             itemsPath: '$[*]',
             idPath: '$.id',
             urlPath: '$.link',
@@ -1258,7 +1260,12 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
     const sample = jsonResult.items[0];
     return {
       adapterType: 'jsonFeed',
-      adapterConfig: { url, itemsPath: jsonResult.itemsPath, idPath: '$.id', urlPath: '$.url' },
+      adapterConfig: {
+        endpoint: url,
+        itemsPath: jsonResult.itemsPath,
+        idPath: detectIdPath(sample),
+        urlPath: detectUrlPath(sample),
+      },
       fieldMap: buildJsonFieldMap(sample),
       sample,
       hint: `JSON feed detected — ${jsonResult.items.length} item(s) in response`,
@@ -1273,8 +1280,8 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
       return {
         adapterType: 'customApi',
         adapterConfig: {
-          url: `${origin}/wp-json/wp/v2/posts`,
-          params: { per_page: 20, _embed: true },
+          endpoint: `${origin}/wp-json/wp/v2/posts`,
+          query: { per_page: '20', _embed: 'true' },
           itemsPath: '$[*]',
           idPath: '$.id',
           urlPath: '$.link',
@@ -1428,8 +1435,8 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
           adapterConfig: {
             endpoint: url,
             itemsPath: spaData.itemsPath,
-            idPath: '$.id',
-            urlPath: '$.url',
+            idPath: detectIdPath(sample),
+            urlPath: detectUrlPath(sample),
             usePlaywright: true,
           },
           fieldMap: buildJsonFieldMap(sample),

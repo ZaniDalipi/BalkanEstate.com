@@ -11,6 +11,7 @@ import {
   detectFeedForUrlWithAuth,
 } from '../services/listingDetectorService';
 import { resolveId } from '../utils/idObfuscation';
+import { ListingSourceConfigError } from '../services/listingAdapters/configUtils';
 import type { RawListing } from '../services/listingAdapters/types';
 
 /**
@@ -31,6 +32,18 @@ const USER_ALLOWED_ADAPTERS = new Set([
   'customApi',
   'htmlScrape',
 ]);
+
+/**
+ * A misconfigured feed is the caller's to fix, so answer 400 with the
+ * adapter's actionable message instead of a bare 500.
+ */
+const sendAdapterError = (res: Response, err: unknown, fallbackMessage: string, fallbackCode: string): void => {
+  if (err instanceof ListingSourceConfigError) {
+    res.status(400).json({ message: err.message, code: err.code });
+    return;
+  }
+  res.status(500).json({ message: (err as Error).message || fallbackMessage, code: fallbackCode });
+};
 
 const requireUserId = (req: Request, res: Response): Types.ObjectId | null => {
   const id = req.user?._id;
@@ -255,11 +268,7 @@ export const runNow = async (req: Request, res: Response): Promise<void> => {
     const stats = await runSource(source, { fullRefresh, limit });
     res.json({ stats });
   } catch (err) {
-    const msg = (err as Error).message || 'Sync failed';
-    res.status(500).json({
-      message: msg,
-      code: 'INGEST_FAILED',
-    });
+    sendAdapterError(res, err, 'Sync failed', 'INGEST_FAILED');
   }
 };
 
@@ -305,10 +314,7 @@ export const preview = async (req: Request, res: Response): Promise<void> => {
     const result = await previewSource(source, limit);
     res.json(result);
   } catch (err) {
-    res.status(500).json({
-      message: (err as Error).message || 'Preview failed',
-      code: 'PREVIEW_FAILED',
-    });
+    sendAdapterError(res, err, 'Preview failed', 'PREVIEW_FAILED');
   }
 };
 
@@ -381,10 +387,7 @@ export const confirmImport = async (req: Request, res: Response): Promise<void> 
     const stats = await runSource(source, { preFetched });
     res.json({ stats });
   } catch (err) {
-    res.status(500).json({
-      message: (err as Error).message || 'Import failed',
-      code: 'INGEST_FAILED',
-    });
+    sendAdapterError(res, err, 'Import failed', 'INGEST_FAILED');
   }
 };
 
