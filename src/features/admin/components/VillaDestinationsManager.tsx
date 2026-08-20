@@ -1,9 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { API_CONFIG } from '@/src/shared/constants/app.constants';
-import { tokenService } from '@/src/shared/api';
-import { csrfHeaders } from '@/src/shared/api/httpClient';
+import { uploadRequest } from '@/src/shared/api/httpClient';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { villaDestinationKeys } from '@/src/shared/query/queryKeys';
 import { validateVillaDestination } from '@/src/shared/utils/validation';
@@ -211,14 +209,15 @@ const VillaDestinationsManager: React.FC = () => {
         try {
             const form = new FormData();
             form.append('image', file);
-            const res = await fetch(`${API_CONFIG.BASE_URL}/admin/villa-destinations/upload-image`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { Authorization: `Bearer ${tokenService.getAccessToken()}`, ...csrfHeaders() },
-                body: form,
-            });
-            if (!res.ok) throw new Error('Upload failed');
-            const data = await res.json();
+            // `uploadRequest` rather than a hand-rolled fetch: it refreshes an
+            // expired access token and retries, emits `session-expired` when
+            // that fails, and waits for the CSRF cookie before posting. Doing
+            // it by hand meant an admin whose token had aged out saw a plain
+            // "Photo upload failed" and had to reload to recover.
+            const data = await uploadRequest<{ url: string; publicId: string }>(
+                '/admin/villa-destinations/upload-image',
+                form,
+            );
             await updateVillaDestination(row._id, { imageUrl: data.url, imagePublicId: data.publicId });
             // Paint the new photo before the refetch returns; the invalidate
             // right after replaces it with whatever the database stored.

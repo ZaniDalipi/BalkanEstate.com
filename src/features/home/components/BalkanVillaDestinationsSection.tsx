@@ -12,6 +12,13 @@ import { getVillaDestinations } from '../api/villaDestinationApi';
 import { villaDestinationKeys } from '@/src/shared/query/queryKeys';
 import { useDestinationImages } from '../hooks/useDestinationImages';
 
+/**
+ * How many destination chips the phone fallback row shows before the "see all"
+ * link takes over. Twelve fills about three rows — enough to feel like a
+ * shortcut, short enough not to bury the rest of the page.
+ */
+const MOBILE_CHIP_LIMIT = 12;
+
 interface BalkanVillaDestinationsSectionProps {
     onNavigate: (view: string, path: string) => void;
 }
@@ -39,7 +46,7 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
         // after an edit — so a curated change reaches the home page rather
         // than waiting for this cache entry to go stale on its own.
         queryKey: villaDestinationKeys.public(),
-        queryFn: ({ signal }) => getVillaDestinations(signal),
+        queryFn: () => getVillaDestinations(),
         staleTime: 10 * 60 * 1000,
         retry: 1,
     });
@@ -91,9 +98,21 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
     // birth/exit heights, a nearer axis) so cards read as legible tiles
     // instead of a thin strip — a phone screen has far less width for the
     // ribbon to occupy than a desktop viewport does.
+    // Bigger cards on a phone, without tearing the ribbon.
+    //
+    // The obvious move — drop to four cards so each gets more room — makes it
+    // worse: with the same depth range to cover, consecutive cards have to
+    // grow ~1.96x instead of ~1.63x, and the gap that opens between them is
+    // wide enough to see straight through the middle of the corridor.
+    //
+    // Raising the *birth* size instead gets there without that. Keeping six
+    // cards but starting them at 6cqw and ending at 72 gives a step ratio of
+    // ~1.51 — tighter than the original 1.63, so the ribbon is more solid than
+    // before — while the mid-corridor card, the one actually being read, goes
+    // from roughly 61px to 81px on a 390px screen.
     const cards = isMobile ? 6 : 8;
     const path = isMobile
-        ? { cardRadius: 0.9, birthHeight: 3.6, exitHeight: 64, railExit: 40 }
+        ? { cardRadius: 0.9, birthHeight: 6, exitHeight: 72, railExit: 40 }
         : { cardRadius: 0.9, exitHeight: 50 };
 
     return (
@@ -148,18 +167,32 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
             {/* The place names live on the cards themselves. This chip row is
                 the touch fallback only: hover-to-pause doesn't exist on a
                 phone, so tapping a moving card there is mostly luck. On
-                pointer devices the cards are the whole interface. */}
+                pointer devices the cards are the whole interface.
+
+                Capped, and each chip is a 44px target. Listing every
+                destination was fine at fourteen; at sixty it became a wall of
+                small taps taller than the corridor it belongs to, which is
+                nobody's idea of a shortcut. The rest of the places are still
+                reachable — they come round on the cards, and the villas page
+                itself has a full destination row. */}
             <div className="mx-auto flex max-w-4xl flex-wrap justify-center gap-2 px-4 pb-8 pt-4 sm:hidden">
-                {destinations.map(dest => (
+                {destinations.slice(0, MOBILE_CHIP_LIMIT).map(dest => (
                     <button
                         key={dest.id}
                         type="button"
                         onClick={() => openDestination(dest)}
-                        className="rounded-full border border-black/[0.08] bg-white px-3.5 py-1.5 text-[12px] font-medium text-neutral-600 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-villa-gold)]"
+                        className="min-h-[44px] touch-manipulation rounded-full border border-black/[0.08] bg-white px-4 py-2.5 text-[13px] font-medium text-neutral-600 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-villa-gold)]"
                     >
                         {t(`villas:destinations.${dest.id}`, dest.fallback)}
                     </button>
                 ))}
+                <button
+                    type="button"
+                    onClick={() => onNavigate('villas', '/villas')}
+                    className="min-h-[44px] touch-manipulation rounded-full border border-[var(--color-villa-gold)]/40 bg-[var(--color-villa-gold)]/10 px-4 py-2.5 text-[13px] font-semibold text-[var(--color-villa-gold-deep)] shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-villa-gold)]"
+                >
+                    {t('villas:destinationsHero.seeAll', 'See all')}
+                </button>
             </div>
         </section>
     );

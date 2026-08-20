@@ -38,12 +38,10 @@
     "privacyDesc": "Your stay, your retreat — absolute discretion guaranteed"
   },
   "destinations": {
-    "julianAlps": "⛰️ Julian Alps",
     "kotorBay": "Bay of Kotor",
     "budvaRiviera": "Budva Riviera",
     "lakeOhrid": "Lake Ohrid",
     "dubrovnik": "Dubrovnik",
-    "pirinMountains": "🌲 Pirin Mountains",
     "jezerc": "Jezerc",
     "brezovica": "Brezovica",
     "rugova": "Rugova",
@@ -215,6 +213,7 @@
     "title1": "Luxury villas,",
     "title2": "wherever you wander.",
     "subtitle": "From the Sharr mountains to the Adriatic. Pick a place and see the villas waiting there.",
-    "cardLabel": "Luxury villas in {{place}}, {{country}}"
+    "cardLabel": "Luxury villas in {{place}}, {{country}}",
+    "seeAll": "See all"
   }
 }

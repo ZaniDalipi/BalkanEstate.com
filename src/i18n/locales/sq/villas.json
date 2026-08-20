@@ -38,12 +38,10 @@
     "privacyDesc": "Qëndrimi juaj, strehëza juaj — diskrecioni absolut i garantuar"
   },
   "destinations": {
-    "julianAlps": "⛰️ Alpet Juliane",
     "kotorBay": "Gjiri i Kotorrit",
     "budvaRiviera": "Rivijera e Budvës",
     "lakeOhrid": "Liqeni i Ohrit",
     "dubrovnik": "Dubrovnik",
-    "pirinMountains": "🌲 Malet e Pirin",
     "jezerc": "Jezerc",
     "brezovica": "Brezovica",
     "rugova": "Rugova",
@@ -215,6 +213,7 @@
     "title1": "Vila luksoze,",
     "title2": "kudo që të shkoni.",
     "subtitle": "Nga malet e Sharrit deri te Adriatiku. Zgjidhni një vend dhe shihni vilat që ju presin.",
-    "cardLabel": "Vila luksoze në {{place}}, {{country}}"
+    "cardLabel": "Vila luksoze në {{place}}, {{country}}",
+    "seeAll": "Shiko të gjitha"
   }
 }

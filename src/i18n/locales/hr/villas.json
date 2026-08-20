@@ -38,12 +38,10 @@
     "privacyDesc": "Vaš boravak, vaš odmor — apsolutna diskrecija zajamčena"
   },
   "destinations": {
-    "julianAlps": "⛰️ Julijske Alpe",
     "kotorBay": "Bokokotorski zaljev",
     "budvaRiviera": "Budvanska rivijera",
     "lakeOhrid": "Ohridsko jezero",
     "dubrovnik": "Dubrovnik",
-    "pirinMountains": "🌲 Planina Pirin",
     "jezerc": "Jezerce",
     "brezovica": "Brezovica",
     "rugova": "Rugova",
@@ -215,6 +213,7 @@
     "title1": "Luksuzne vile,",
     "title2": "gdje god krenuli.",
     "subtitle": "Od Šar-planine do Jadrana. Odaberite mjesto i pogledajte vile koje vas ondje čekaju.",
-    "cardLabel": "Luksuzne vile u {{place}}, {{country}}"
+    "cardLabel": "Luksuzne vile u {{place}}, {{country}}",
+    "seeAll": "Vidi sve"
   }
 }
