@@ -113,7 +113,7 @@ export function ElasticGallery({ items, actions, label, className }: ElasticGall
             role="group"
             aria-label={label}
             className={cn(
-                'mx-auto flex h-[380px] w-full max-w-6xl flex-col gap-2 md:h-[420px] md:flex-row md:gap-4',
+                'mx-auto flex h-[460px] w-full max-w-6xl flex-col gap-2 md:h-[560px] md:flex-row md:gap-4',
                 className,
             )}
         >

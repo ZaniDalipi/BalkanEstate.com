@@ -28,7 +28,7 @@ interface CityShowcaseSectionProps {
 const GallerySkeleton: React.FC = () => (
     // Same geometry as the real gallery, so the section does not jump height
     // when the panels arrive.
-    <div className="mx-auto flex h-[380px] w-full max-w-6xl flex-col gap-2 md:h-[420px] md:flex-row md:gap-4">
+    <div className="mx-auto flex h-[460px] w-full max-w-6xl flex-col gap-2 md:h-[560px] md:flex-row md:gap-4">
         {Array.from({ length: 4 }).map((_, index) => (
             <div
                 key={index}
