@@ -1,4 +1,4 @@
-import { API_CONFIG } from '@/src/shared/constants/app.constants';
+import { apiRequest } from '@/src/shared/api';
 import type { VillaDestination } from '../data/villaDestinations';
 
 /** Shape returned by `GET /api/villa-destinations`. */
@@ -50,10 +50,14 @@ function toDestination(d: ApiDestination, index: number): VillaDestination {
  * treats that as "use the built-in list", so the section keeps rendering on a
  * fresh database or a flaky network rather than collapsing.
  */
-export async function getVillaDestinations(signal?: AbortSignal): Promise<VillaDestination[]> {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/villa-destinations`, { signal });
-    if (!response.ok) throw new Error(`Failed to load villa destinations (${response.status})`);
-
-    const data: { destinations?: ApiDestination[] } = await response.json();
+export async function getVillaDestinations(): Promise<VillaDestination[]> {
+    // Through `apiRequest` like every other feature API, rather than a bare
+    // fetch: it is the layer that carries the base URL, credentials, error
+    // shape and 401 handling (Claude.md — all API calls go through the HTTP
+    // client). This endpoint is public, hence `requiresAuth: false`.
+    const data = await apiRequest<{ destinations?: ApiDestination[] }>(
+        '/villa-destinations',
+        { requiresAuth: false },
+    );
     return (data.destinations ?? []).filter(isUsable).map(toDestination);
 }

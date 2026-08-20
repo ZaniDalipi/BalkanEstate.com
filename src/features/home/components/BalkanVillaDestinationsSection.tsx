@@ -39,7 +39,7 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
         // after an edit — so a curated change reaches the home page rather
         // than waiting for this cache entry to go stale on its own.
         queryKey: villaDestinationKeys.public(),
-        queryFn: ({ signal }) => getVillaDestinations(signal),
+        queryFn: () => getVillaDestinations(),
         staleTime: 10 * 60 * 1000,
         retry: 1,
     });
