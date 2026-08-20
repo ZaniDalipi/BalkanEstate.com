@@ -204,6 +204,61 @@ export function ImageStreamHero({
   // LOCAL ADDITION: pointer-driven card picking (see the CSS note above).
   const cardEls = React.useRef<(HTMLDivElement | null)[]>([]);
   const perspectiveEl = React.useRef<HTMLDivElement | null>(null);
+
+  /*
+   * LOCAL ADDITION: which picture each card slot is currently showing.
+   *
+   * Upstream derives it as `slotIndex % images.length`, which has two
+   * consequences that only become visible once you pass it more pictures
+   * than there are cards. A slot is pinned to one picture for the lifetime
+   * of the component, so with 8 cards a rail only ever shows the first 8 of
+   * however many were handed in — the rest are simply never displayed. And
+   * because both rails walk that same expression, the left rail mirrors the
+   * right exactly, so every place on screen appears twice.
+   *
+   * Instead slot `s` starts on picture `s` and jumps forward by the number of
+   * slots each time it wraps to the back of the corridor, so it walks the
+   * whole list over successive laps and no two slots ever land on the same
+   * picture.
+   *
+   * That last part is the reason for the stride. Every card shares one
+   * period, so at any instant a slot has completed either k or k-1 laps —
+   * never further apart than that. Slots s and s' therefore show
+   * `s + k·slots` and `s' + (k or k-1)·slots`; those are equal only if
+   * `s' - s` is 0 or `slots` (mod total), and with both indices below
+   * `slots` neither can happen. An earlier attempt handed indices out from
+   * a single shared cursor instead, which is not collision-free: the cursor
+   * laps the list while the slowest slots are still on their first picture,
+   * and re-issues an index that is visibly still on screen.
+   *
+   * The swap lands on the frame where the card is a few pixels wide at the
+   * vanishing point, so it is not perceptible.
+   */
+  const slotCount = cards * 2;
+  const [slotImage, setSlotImage] = React.useState<number[]>(() =>
+    Array.from({ length: slotCount }, (_, s) => s),
+  );
+
+  // Re-seed when the geometry or the list changes, so the invariant above
+  // ("every slot on a different picture") holds for the new inputs too.
+  React.useEffect(() => {
+    setSlotImage(Array.from({ length: slotCount }, (_, s) => s));
+  }, [slotCount, images.length]);
+
+  const advanceSlot = React.useCallback(
+    (slot: number) => {
+      const total = images.length;
+      // Nothing to rotate through: every slot is already showing a picture
+      // and there is no unused one to move on to.
+      if (total <= slotCount) return;
+      setSlotImage((prev) => {
+        const next = prev.slice();
+        next[slot] = ((prev[slot] ?? slot) + slotCount) % total;
+        return next;
+      });
+    },
+    [images.length, slotCount],
+  );
   const [active, setActive] = React.useState<number | null>(null);
   const [lift, setLift] = React.useState<string | null>(null);
   const frame = React.useRef<number | null>(null);
@@ -394,7 +449,9 @@ export function ImageStreamHero({
           onImageSelect
             ? () => {
                 if (active === null) return;
-                onImageSelect((active % cards) % Math.max(images.length, 1));
+                // The active card's *current* picture, not a fixed function of
+                // its slot — slots rotate through the list as they wrap.
+                onImageSelect((slotImage[active] ?? active) % Math.max(images.length, 1));
               }
             : undefined
         }
@@ -403,16 +460,17 @@ export function ImageStreamHero({
           className="absolute inset-0"
           style={{ transformStyle: "preserve-3d" }}
         >
-          {[right, left].map((name) =>
+          {[right, left].map((name, rail) =>
             Array.from({ length: cards }, (_, i) => {
-              // Both rails walk the same sequence, so the left side mirrors
-              // the right at every depth.
-              const index = i % Math.max(images.length, 1);
+              // Flat slot index across both rails, matching cardEls order.
+              const slot = rail * cards + i;
+              // Which picture this slot is showing right now — see the
+              // slotImage note above for why it is not just `i % length`.
+              const index = (slotImage[slot] ?? slot) % Math.max(images.length, 1);
               const img = images[index];
               // LOCAL ADDITION: interactive rails render an inner <button> face
               // inside the animated card; decorative rails render exactly what
               // upstream does — the image straight into the card.
-              const isPrimaryRail = name === right;
               const media = img ? (
                 <img
                   src={img.src}
@@ -424,14 +482,24 @@ export function ImageStreamHero({
                 />
               ) : null;
 
-              // Flat slot index across both rails, matching cardEls order.
-              const slot = (isPrimaryRail ? 0 : cards) + i;
               const isActive = onImageSelect ? active === slot : false;
 
               return (
                 <div
                   key={`${name}-${i}`}
                   ref={onImageSelect ? (el) => { cardEls.current[slot] = el; } : undefined}
+                  // Fires each time the card completes a lap, i.e. exactly at
+                  // the moment it is reborn at the vanishing point — the one
+                  // frame where swapping its picture cannot be seen.
+                  //
+                  // Guarded on the target because React's animation events
+                  // bubble: any animated descendant would otherwise advance
+                  // this slot too. Every slot has to advance at the same rate
+                  // for the pictures on screen to stay a consecutive run of
+                  // the list, which is what keeps them distinct.
+                  onAnimationIteration={(e) => {
+                    if (e.target === e.currentTarget) advanceSlot(slot);
+                  }}
                   className={cn(card, "absolute", !onImageSelect && "overflow-hidden")}
                   style={{
                     left: "50%",
@@ -476,11 +544,13 @@ export function ImageStreamHero({
                       onFocus={() => setActive(slot)}
                       onBlur={() => setActive((cur) => (cur === slot ? null : cur))}
                       aria-label={img?.label ?? img?.alt ?? undefined}
-                      // The rails are a mirrored loop, so every card appears
-                      // twice. Only the right rail is reachable by keyboard;
-                      // the left duplicate would double every tab stop.
-                      tabIndex={isPrimaryRail ? 0 : -1}
-                      aria-hidden={isPrimaryRail ? undefined : true}
+                      // Both rails are reachable. They used to walk the same
+                      // sequence, so the left rail was excluded as a pure
+                      // duplicate that would have doubled every tab stop;
+                      // now that each slot carries its own place, skipping
+                      // the left rail would hide half of them from anyone
+                      // navigating by keyboard.
+                      tabIndex={0}
                       data-active={isActive ? "true" : undefined}
                       className={cn(
                         face,
