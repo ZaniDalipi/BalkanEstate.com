@@ -59,6 +59,7 @@ import enHome from './locales/en/home.json';
 import enBusinessDirectory from './locales/en/businessDirectory.json';
 import enListingFeeds from './locales/en/listingFeeds.json';
 import enBlog from './locales/en/blog.json';
+import enVillas from './locales/en/villas.json';
 
 // Language configuration
 export const languages = [
@@ -82,8 +83,7 @@ const NAMESPACES = [
   'newsletter', 'calculators', 'pricing', 'validation', 'admin', 'account',
   'seller', 'agents', 'modals', 'payment', 'saved', 'exploreCities',
   'analytics', 'subscription', 'agencies', 'agencyDetails', 'agentProfile',
-  'newListing', 'valuation', 'howItWorks', 'rental', 'agencyDashboard', 'home', 'businessDirectory',
-  'listingFeeds',
+  'newListing', 'valuation', 'howItWorks', 'rental', 'agencyDashboard', 'home', 'businessDirectory', 'villas',
 ] as const;
 
 // English resources (always available as fallback)
@@ -121,6 +121,7 @@ const enResources = {
   businessDirectory: enBusinessDirectory,
   listingFeeds: enListingFeeds,
   blog: enBlog,
+  villas: enVillas,
 };
 
 // Track which language bundles have been loaded

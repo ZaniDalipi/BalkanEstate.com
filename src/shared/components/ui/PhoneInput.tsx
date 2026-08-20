@@ -13,8 +13,40 @@ interface PhoneInputProps {
   disabled?: boolean;
   required?: boolean;
   className?: string;
+  /** Lets a caller's own `<label htmlFor>` associate with the number field. */
+  id?: string;
   /** Style variant: "glass" (auth modal style) | "bordered" (default form style) */
   variant?: 'glass' | 'bordered';
+  /**
+   * Dial code to preselect when the field is empty (e.g. '+355'). When omitted,
+   * the input guesses from the visitor's browser locale so it isn't a fixed
+   * default; if that can't be resolved it falls back to the first Balkan code.
+   */
+  defaultCountryCode?: string;
+}
+
+/**
+ * Best-effort guess of the visitor's dial code from their browser locale
+ * (no geolocation permission needed, works offline). Returns null when the
+ * region can't be resolved or isn't in our supported list — callers fall back.
+ */
+export function guessDialCodeFromLocale(): string | null {
+  if (typeof navigator === 'undefined') return null;
+  const langs = navigator.languages?.length ? navigator.languages : [navigator.language];
+  for (const lang of langs) {
+    if (!lang) continue;
+    let region: string | undefined;
+    try {
+      const loc = new Intl.Locale(lang);
+      region = (loc.maximize?.().region || loc.region) ?? undefined;
+    } catch {
+      region = lang.split('-')[1]?.toUpperCase();
+    }
+    if (!region) continue;
+    const match = ALL_PHONE_COUNTRY_CODES.find(c => c.country === region);
+    if (match) return match.code;
+  }
+  return null;
 }
 
 /**
@@ -96,14 +128,20 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
   required = false,
   className = '',
   variant = 'bordered',
+  defaultCountryCode,
+  id,
 }) => {
   // Parse the incoming value to extract any country code already embedded in it
   const parsed = parsePhoneValue(value);
 
   // Track selected country code in LOCAL state so it persists even when
-  // the phone field is empty — without this, every re-render with value=""
-  // resets back to the default (Kosovo).
-  const [selectedCode, setSelectedCode] = useState<string>(parsed.countryCode);
+  // the phone field is empty. When the field starts empty we preselect the
+  // caller's default, then the visitor's locale-guessed country, and only
+  // fall back to the first Balkan code — so it's never a fixed "+383" default.
+  const [selectedCode, setSelectedCode] = useState<string>(() => {
+    if (value && value.trim()) return parsed.countryCode;
+    return defaultCountryCode || guessDialCodeFromLocale() || parsed.countryCode;
+  });
 
   // If the parent pushes a value that contains a country code (e.g. loading
   // a saved profile), sync our local state to match.
@@ -187,6 +225,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
       </select>
       <div className={dividerCls} />
       <input
+        id={id}
         type="tel"
         value={formattedLocal}
         onChange={handleLocalChange}
@@ -195,7 +234,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
         placeholder={getPhonePlaceholder(selectedCode)}
         className={inputCls}
         autoComplete="tel-national"
-        aria-label="Phone number"
+        aria-label={id ? undefined : 'Phone number'}
         aria-invalid={!!error}
       />
     </div>

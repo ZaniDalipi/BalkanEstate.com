@@ -26,6 +26,7 @@ const TopAgentsSection = lazy(() => import('./TopAgentsSection'));
 const TopAgenciesSection = lazy(() => import('./TopAgenciesSection'));
 const CategoriesSection = lazy(() => import('./CategoriesSection'));
 const PopularCitiesSection = lazy(() => import('./PopularCitiesSection'));
+const BalkanVillaDestinationsSection = lazy(() => import('./BalkanVillaDestinationsSection'));
 const HowItWorksSection = lazy(() => import('./HowItWorksSection'));
 const CTASection = lazy(() => import('./CTASection'));
 const NewsSection = lazy(() => import('./NewsSection'));
@@ -272,7 +273,13 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
 
       <div className="content-below-fold">
         <Suspense fallback={<SectionFallback />}>
-          <CategoriesSection onCategoryClick={handleCategoryClick} />
+          <CategoriesSection onCategoryClick={handleCategoryClick} onNavigate={handleNavigate} />
+        </Suspense>
+      </div>
+
+      <div className="content-below-fold">
+        <Suspense fallback={<SectionFallback />}>
+          <BalkanVillaDestinationsSection onNavigate={handleNavigate} />
         </Suspense>
       </div>
 

@@ -16,6 +16,7 @@ interface AdminStats {
     totalInquiries?: number;
     newInquiries?: number;
     unverifiedUsers?: number;
+    pendingVillas?: number;
   };
 }
 
@@ -37,7 +38,9 @@ export type AdminView =
   | 'howItWorks'
   | 'emailTemplates'
   | 'businessListings'
-  | 'articles';
+  | 'articles'
+  | 'villaApprovals'
+  | 'villaDestinations';
 
 interface AdminLayoutProps {
   children: React.ReactNode;

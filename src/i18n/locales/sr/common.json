@@ -306,7 +306,8 @@
     "measure": "Мери",
     "legend": "Легенда",
     "climate": "Клима",
-    "premiumOnly": "Само Premium"
+    "premiumOnly": "Само Premium",
+    "clearFilter": "Obriši filter"
   },
   "social": {
     "facebook": "Facebook",
@@ -638,6 +639,7 @@
   },
   "removeFromFavorites": "Уклони из омиљених",
   "saved": "Сачувано",
+  "any": "Bilo koji",
   "usageMeter": {
     "label": "Месечна потрошња",
     "usedOfLimit": "{{used}} / {{limit}} искоришћено",

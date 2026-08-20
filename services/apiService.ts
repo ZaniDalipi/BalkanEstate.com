@@ -1252,6 +1252,16 @@ function transformBackendProperty(backendProp: any): Property {
     maxOccupants: backendProp.maxOccupants,
     orientation: backendProp.orientation,
     visitAvailability: backendProp.visitAvailability,
+    // Luxury-villa daily-rental fields — without these the property detail,
+    // My Listings and saved-homes paths silently lose them (only the villa
+    // list saw them, because it spreads the raw API row).
+    checkInTime: backendProp.checkInTime,
+    checkOutTime: backendProp.checkOutTime,
+    cleaningFee: backendProp.cleaningFee,
+    cancellationPolicy: backendProp.cancellationPolicy,
+    breakfastIncluded: backendProp.breakfastIncluded,
+    towelsIncluded: backendProp.towelsIncluded,
+    parkingIncluded: backendProp.parkingIncluded,
   };
 }
 
@@ -1366,6 +1376,22 @@ function transformToBackendProperty(frontendProp: Property): any {
     result.maxOccupants = frontendProp.maxOccupants ?? 1;
     if (frontendProp.availableFrom) {
       result.availableFrom = new Date(frontendProp.availableFrom).toISOString();
+    }
+  }
+
+  // Luxury-villa daily-rental fields. Mirrors the backend's own condition
+  // (propertyController createProperty/updateProperty): these only apply to a
+  // luxury villa listed for rent. Without this block the seller form collects
+  // them and the DB models them, but they never reach the API.
+  if (frontendProp.propertyType === 'luxury-villa' && frontendProp.listingType === 'rent') {
+    result.checkInTime = frontendProp.checkInTime || '14:00';
+    result.checkOutTime = frontendProp.checkOutTime || '11:00';
+    result.cleaningFee = Number(frontendProp.cleaningFee) || 0;
+    result.breakfastIncluded = frontendProp.breakfastIncluded ?? false;
+    result.towelsIncluded = frontendProp.towelsIncluded ?? false;
+    result.parkingIncluded = frontendProp.parkingIncluded ?? false;
+    if (frontendProp.cancellationPolicy) {
+      result.cancellationPolicy = frontendProp.cancellationPolicy;
     }
   }
 

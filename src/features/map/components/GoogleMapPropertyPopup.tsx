@@ -33,10 +33,12 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
     property.promotionEndDate &&
     property.promotionEndDate > Date.now();
 
-  // Format property type display
+  // Translated label — title-casing the raw enum printed "Luxury-villa".
   const propertyTypeDisplay = property.propertyType
-    ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1)
-    : 'Property';
+    ? t(`property:types.${property.propertyType}`, {
+        defaultValue: property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1),
+      })
+    : t('property:property', 'Property');
 
   return (
     <div

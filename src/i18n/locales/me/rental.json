@@ -84,7 +84,27 @@
     "updateListing": "Ažuriraj oglas za najam",
     "createSuccess": "Oglas za najam uspješno objavljen!",
     "updateSuccess": "Oglas za najam uspješno ažuriran!",
-    "redirecting": "Preusmjeravanje na kontrolnu tablu..."
+    "redirecting": "Preusmjeravanje na kontrolnu tablu...",
+    "checkInTime": "Check-in Time",
+    "checkOutTime": "Check-out Time",
+    "cleaningFee": "Cleaning Fee",
+    "cancellationPolicy": "Cancellation Policy",
+    "cancellationPolicies": {
+      "select": "Select a policy",
+      "flexible": "Flexible — Full refund 24h before check-in",
+      "moderate": "Moderate — Full refund 5 days before check-in",
+      "strict": "Strict — 50% refund up to 1 week before",
+      "nonRefundable": "Non-refundable"
+    },
+    "breakfastIncluded": "Breakfast",
+    "towelsIncluded": "Towels & Linen",
+    "parkingIncluded": "Parking",
+    "guestRequirements": "Guest Requirements",
+    "guestRequirementsHint": "e.g. no parties, no smoking, ID verification required (press Enter to add)",
+    "minLeaseDurationDays": "Min. boravak (dana)",
+    "maxLeaseDurationDays": "Maks. boravak (dana)",
+    "minLeaseDurationWeeks": "Min. boravak (nedjelja)",
+    "maxLeaseDurationWeeks": "Maks. boravak (nedjelja)"
   },
   "details": {
     "rentalTerms": "Uslovi najma",
@@ -108,7 +128,31 @@
     "tenantRequirements": "Zahtjevi za zakupce",
     "contactLandlord": "Kontaktirajte stanodavca",
     "scheduleViewing": "Zakažite razgledanje",
-    "rentThisProperty": "Iznajmite ovu nekretninu"
+    "rentThisProperty": "Iznajmite ovu nekretninu",
+    "stayDuration": "Stay Duration",
+    "stayDurationWeeks": "Stay Duration",
+    "minNights": "{{min}} nights min",
+    "maxNights": "up to {{max}} nights",
+    "minToMaxNights": "{{min}}–{{max}} nights",
+    "minWeeks": "{{min}} weeks min",
+    "maxWeeks": "up to {{max}} weeks",
+    "minToMaxWeeks": "{{min}}–{{max}} weeks",
+    "checkInOut": "Check-in / Check-out",
+    "cleaningFee": "Cleaning Fee",
+    "cancellationPolicy": "Cancellation Policy",
+    "cancellation": {
+      "flexible": "Flexible — Full refund 24h before check-in",
+      "moderate": "Moderate — Full refund 5 days before",
+      "strict": "Strict — 50% refund up to 1 week before",
+      "nonRefundable": "Non-refundable"
+    },
+    "breakfastIncluded": "Breakfast",
+    "towelsIncluded": "Towels & Linen",
+    "parkingIncluded": "Parking",
+    "guestRequirements": "Guest Requirements",
+    "minDays": "min. {{min}} dana",
+    "maxDays": "maks. {{max}} dana",
+    "minToMaxDays": "{{min}} - {{max}} dana"
   },
   "affordability": {
     "title": "Pristupačnost najma",
@@ -128,7 +172,15 @@
     "estimatedInternet": "Proc. internet (1. mjesec)",
     "totalUpfront": "Ukupno unaprijed",
     "monthlyOngoing": "Mjesečni tekući troškovi",
-    "disclaimer": "* Troškovi režija i interneta su procjene zasnovane na prosjecima. Stvarni troškovi mogu varirati."
+    "disclaimer": "* Troškovi režija i interneta su procjene zasnovane na prosjecima. Stvarni troškovi mogu varirati.",
+    "firstWeekRent": "Zakup za prvu nedjelju",
+    "firstDayRent": "Zakup za prvi dan",
+    "estimatedUtilitiesWeek": "Procijenjene režije (1. nedjelja)",
+    "estimatedUtilitiesDay": "Procijenjene režije (1. dan)",
+    "estimatedInternetWeek": "Procijenjeni internet (1. nedjelja)",
+    "estimatedInternetDay": "Procijenjeni internet (1. dan)",
+    "weeklyOngoing": "Nedjeljni tekući trošak",
+    "dailyOngoing": "Dnevni tekući trošak"
   },
   "viewing": {
     "title": "Zakažite razgledanje",
@@ -460,5 +512,7 @@
     "engagement": "Aktivnost",
     "views": "pregleda",
     "inquiries": "upita"
-  }
+  },
+  "premiumCollection": "Iznajmljivanje širom Balkana",
+  "from": "od"
 }

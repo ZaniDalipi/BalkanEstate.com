@@ -326,6 +326,24 @@
       "bathroom": "Bathroom",
       "other": "Other",
       "selectTag": "Select Tag"
+    },
+    "luxuryVillaBanner": {
+      "title": "Luxury Villas Collection",
+      "hint": "This listing will appear in the exclusive Luxury Villas tab — visible to premium buyers searching for high-end Balkan retreats."
+    },
+    "luxuryVillaBadge": "Appears in Luxury Villas",
+    "quickAmenities": {
+      "label": "Popular amenities",
+      "sauna": "Sauna",
+      "wineCellar": "Wine Cellar",
+      "panoramic": "Panoramic",
+      "jacuzzi": "Jacuzzi",
+      "hotTub": "Hot Tub",
+      "gym": "Gym",
+      "fireplace": "Fireplace",
+      "bbq": "BBQ",
+      "homeCinema": "Home Cinema",
+      "beachAccess": "Beach Access"
     }
   },
   "myListings": {
@@ -596,7 +614,8 @@
     "commercial": "Commercial",
     "office": "Office",
     "garage": "Garage",
-    "other": "Other"
+    "other": "Other",
+    "luxuryVilla": "Luxury Villa"
   },
   "conditions": {
     "new": "New",

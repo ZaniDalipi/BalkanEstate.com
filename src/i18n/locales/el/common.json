@@ -306,7 +306,8 @@
     "measure": "Μέτρηση",
     "legend": "Υπόμνημα",
     "climate": "Κλίμα",
-    "premiumOnly": "Μόνο Premium"
+    "premiumOnly": "Μόνο Premium",
+    "clearFilter": "Καθαρισμός φίλτρου"
   },
   "social": {
     "facebook": "Facebook",
@@ -638,6 +639,7 @@
   },
   "removeFromFavorites": "Αφαίρεση από τα αγαπημένα",
   "saved": "Αποθηκευμένο",
+  "any": "Οποιοδήποτε",
   "usageMeter": {
     "label": "Μηνιαία χρήση",
     "usedOfLimit": "{{used}} / {{limit}} σε χρήση",

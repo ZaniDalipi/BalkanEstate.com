@@ -9,6 +9,7 @@ import { geocodeAddressWithRateLimit } from '../services/geocodingService';
 import { getWhitelistConfig } from '../middleware/adminAuth';
 import { adminLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
+import { emitPropertyUpdated } from '../sockets/propertySocket';
 import { migratePropertySchema } from '../utils/migratePropertySchema';
 import { getObjectIdParam } from '../utils/validateParams';
 import { escapeRegex } from '../utils/escapeRegex';
@@ -30,6 +31,7 @@ export const getAdminStats = async (req: Request, res: Response): Promise<void> 
       todayProperties,
       totalInquiries,
       newInquiries,
+      pendingVillas,
     ] = await Promise.all([
       User.countDocuments(),
       Agent.countDocuments({ isActive: true }),
@@ -44,6 +46,7 @@ export const getAdminStats = async (req: Request, res: Response): Promise<void> 
       }),
       Inquiry.countDocuments(),
       Inquiry.countDocuments({ status: 'new' }),
+      Property.countDocuments({ propertyType: 'luxury-villa', villaApprovalStatus: 'pending' }),
     ]);
 
     // User role breakdown
@@ -71,6 +74,7 @@ export const getAdminStats = async (req: Request, res: Response): Promise<void> 
         todayProperties,
         totalInquiries,
         newInquiries,
+        pendingVillas,
       },
       usersByRole: usersByRole.reduce((acc: any, item: any) => {
         acc[item._id] = item.count;
@@ -1278,5 +1282,118 @@ export const rejectLicense = async (req: Request, res: Response): Promise<void> 
   } catch (error: any) {
     adminLogger.error('Reject license error:', error);
     res.status(500).json({ message: 'Error rejecting license' });
+  }
+};
+
+// ============================================================================
+// Luxury villa approval queue — curated listings must be approved by an admin
+// before they appear on the public Luxury Villas tab.
+// ============================================================================
+
+// @desc    List luxury villas by approval status (default: pending)
+// @route   GET /api/admin/villa-approvals?status=pending
+// @access  Private/Admin
+export const getVillaApprovals = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const status = (req.query.status as string) || 'pending';
+    const allowed = ['pending', 'approved', 'rejected'];
+    const filter: Record<string, unknown> = { propertyType: 'luxury-villa' };
+    if (allowed.includes(status)) filter.villaApprovalStatus = status;
+
+    const PAGE_SIZE = 200;
+    // `count` is the true number of matching villas, not the page length —
+    // otherwise it silently disagrees with the sidebar badge (which uses its
+    // own countDocuments) once the queue exceeds a page.
+    const [villas, count] = await Promise.all([
+      Property.find(filter)
+        .populate('sellerId', 'name email phone role')
+        .sort({ createdAt: -1 })
+        .limit(PAGE_SIZE)
+        .lean(),
+      Property.countDocuments(filter),
+    ]);
+
+    res.json({ count, status, villas, hasMore: count > villas.length });
+  } catch (error: any) {
+    adminLogger.error('Get villa approvals error:', error);
+    res.status(500).json({ message: 'Error fetching villa approvals' });
+  }
+};
+
+// @desc    Approve a luxury villa listing (publishes it to the villas tab)
+// @route   POST /api/admin/villa-approvals/:id/approve
+// @access  Private/Admin
+export const approveVilla = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const villa = await Property.findById(id);
+    if (!villa) {
+      res.status(404).json({ message: 'Villa not found' });
+      return;
+    }
+    if (villa.propertyType !== 'luxury-villa') {
+      res.status(400).json({ message: 'Property is not a luxury villa' });
+      return;
+    }
+
+    villa.villaApprovalStatus = 'approved';
+    villa.villaApprovalReviewedBy = String((req.user as any)?._id || '');
+    villa.villaApprovalReviewedAt = new Date();
+    villa.villaApprovalReason = undefined;
+    await villa.save();
+
+    // GET /api/properties is cached and the public villa filter keys off
+    // villaApprovalStatus, so without this the approval is invisible until the
+    // cache expires. The change stream can't be relied on (it bails out on
+    // standalone deploys), hence the explicit emit as well.
+    invalidateCache('/api/properties');
+    emitPropertyUpdated(String(villa._id), villa.toObject());
+
+    adminLogger.info(`Luxury villa ${id} approved`);
+    res.json({ message: 'Villa approved', id: String(villa._id), villaApprovalStatus: 'approved' });
+  } catch (error: any) {
+    adminLogger.error('Approve villa error:', error);
+    res.status(500).json({ message: 'Error approving villa' });
+  }
+};
+
+// @desc    Reject a luxury villa listing (keeps it hidden from the villas tab)
+// @route   POST /api/admin/villa-approvals/:id/reject
+// @access  Private/Admin
+export const rejectVilla = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const { reason } = req.body;
+
+    const villa = await Property.findById(id);
+    if (!villa) {
+      res.status(404).json({ message: 'Villa not found' });
+      return;
+    }
+    if (villa.propertyType !== 'luxury-villa') {
+      res.status(400).json({ message: 'Property is not a luxury villa' });
+      return;
+    }
+
+    villa.villaApprovalStatus = 'rejected';
+    villa.villaApprovalReviewedBy = String((req.user as any)?._id || '');
+    villa.villaApprovalReviewedAt = new Date();
+    // Always overwrite: leaving the previous reason in place when this rejection
+    // gave none would attribute an old explanation to a new decision.
+    villa.villaApprovalReason = reason ? String(reason).slice(0, 1000) : undefined;
+    await villa.save();
+
+    invalidateCache('/api/properties');
+    emitPropertyUpdated(String(villa._id), villa.toObject());
+
+    adminLogger.info(`Luxury villa ${id} rejected (reason: ${reason || 'none'})`);
+    res.json({ message: 'Villa rejected', id: String(villa._id), villaApprovalStatus: 'rejected', reason: reason || undefined });
+  } catch (error: any) {
+    adminLogger.error('Reject villa error:', error);
+    res.status(500).json({ message: 'Error rejecting villa' });
   }
 };

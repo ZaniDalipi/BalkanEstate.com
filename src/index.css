@@ -13,6 +13,15 @@
   /* Secondary Colors */
   --color-secondary: #FFA500;
 
+  /* Luxury-villa gold scale. One place for the five golds that had drifted
+     across the villa components; the map-marker palette in
+     src/shared/map/villaMarker.ts mirrors these for its generated SVG. */
+  --color-villa-gold: #E8B820;        /* brand mid — badges, chips, accents */
+  --color-villa-gold-bright: #FFA500; /* highlight — same value as secondary */
+  --color-villa-gold-calm: #C9A227;   /* muted — form focus rings */
+  --color-villa-gold-deep: #B8860B;   /* prices and emphasis text */
+  --color-villa-gold-ink: #8A6D1F;    /* text on a gold-tinted fill */
+
   /* Foreground Colors (required by shadcn Button) */
   --color-primary-foreground: #ffffff;
   --color-secondary-foreground: #1A202C;
@@ -25,6 +34,8 @@
   --color-background: #ffffff;
   --color-foreground: #1A202C;
   --color-input: rgba(0, 0, 0, 0.1);
+  /* Required by shadcn-style components that use `border-border`. */
+  --color-border: rgba(0, 0, 0, 0.1);
   --color-ring: rgba(0, 122, 255, 0.5);
 
   /* Neutral Colors */

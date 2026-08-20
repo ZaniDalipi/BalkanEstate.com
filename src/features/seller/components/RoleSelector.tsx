@@ -106,8 +106,17 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
                 listingsCreatedThisMonth = 0;
             }
 
-            // Get role-specific counts
-            const used = listingsCreatedThisMonth;
+            // The backend enforces two different limits depending on tier (see
+            // propertyController's create-listing check): Pro/agency users are
+            // capped by `listingsCreatedThisMonth` against the monthly
+            // allowance, and it resets every calendar month. Free-tier users
+            // have no monthly counter at all — they're capped by
+            // `activeListingsCount`, the number of listings currently live,
+            // which only drops when one is removed. Showing
+            // `listingsCreatedThisMonth` for a free user is always 0 (nothing
+            // ever increments it for that tier), which silently hid the real
+            // "you're at your limit" state.
+            const used = isPro ? listingsCreatedThisMonth : (sub.activeListingsCount || 0);
             const roleCount = role === UserRole.AGENT
                 ? (sub.agentCount || 0)
                 : (sub.privateSellerCount || 0);
@@ -126,7 +135,10 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
                 roleCount,
                 isActive: isActiveSubscription,
                 isPro,
-                isMonthlyReset: true, // Indicate this uses monthly reset model
+                // Only Pro/agency actually uses the monthly-reset model; free
+                // tier's cap never resets, so it gets the plain "listings"
+                // wording ("2 remaining", not "2 remaining this month").
+                isMonthlyReset: isPro,
                 // Promotion coupon details
                 featuredCoupons,
                 highlightedCoupons,
@@ -380,6 +392,19 @@ const RoleCard: React.FC<RoleCardProps> = ({
                                         {subscription.used} / {subscription.limit}
                                     </span>
                                 </div>
+
+                                {/* Role-specific breakdown — meaningful for a user who lists under
+                                    both roles: clarifies how many of the total above were created
+                                    specifically as this role, e.g. a Pro user sharing one monthly
+                                    quota across a private-seller and an agent listing. */}
+                                {typeof subscription.roleCount === 'number' && subscription.roleCount > 0 && (
+                                    <p className="text-xs text-gray-400">
+                                        {t('seller:roleSelector.asRole', {
+                                            count: subscription.roleCount,
+                                            role: label.toLowerCase(),
+                                        })}
+                                    </p>
+                                )}
 
                                 {/* Progress bar */}
                                 <div className="w-full bg-gray-200 rounded-full h-1.5">

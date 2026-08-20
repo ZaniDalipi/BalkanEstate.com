@@ -14,6 +14,8 @@
     "setup:db": "NODE_ENV=development ts-node src/scripts/setupDatabase.ts",
     "setup:db:staging": "NODE_ENV=staging ts-node src/scripts/setupDatabase.ts",
     "setup:db:production": "NODE_ENV=production ts-node src/scripts/setupDatabase.ts",
+    "backfill:villa-approval": "ts-node src/scripts/backfillVillaApproval.ts",
+    "seed:villa-destinations": "ts-node src/scripts/seedVillaDestinations.ts",
     "seed:all": "npm run seed:products && npm run seed:cities && npm run seed:coupons",
     "seed:all:staging": "NODE_ENV=staging npm run seed:products && NODE_ENV=staging npm run seed:cities",
     "seed:all:production": "NODE_ENV=production npm run seed:products && NODE_ENV=production npm run seed:cities",

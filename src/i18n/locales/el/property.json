@@ -37,7 +37,8 @@
     "commercial": "Επαγγελματικός Χώρος",
     "office": "Γραφείο",
     "garage": "Γκαράζ",
-    "other": "Άλλο"
+    "other": "Άλλο",
+    "luxury-villa": "Πολυτελής Βίλα"
   },
   "features": {
     "bedrooms": "Υπνοδωμάτια",
@@ -146,7 +147,12 @@
       },
       "slotDuration": "{{minutes}} λεπτά slots"
     },
-    "floorPlanInteractiveHint": "Διαδραστικό πρόγραμμα προβολής με ζουμ, μετακίνηση και ετικέτες"
+    "floorPlanInteractiveHint": "Διαδραστικό πρόγραμμα προβολής με ζουμ, μετακίνηση και ετικέτες",
+    "kitchens": "Κουζίνες",
+    "diningRooms": "Τραπεζαρίες",
+    "toilets": "Τουαλέτες (WC)",
+    "storageRooms": "Αποθήκες",
+    "offices": "Γραφείο / σπουδαστήριο"
   },
   "distances": {
     "title": "Αποστάσεις",
@@ -220,7 +226,10 @@
     "phone": "Τηλέφωνο",
     "email": "Email",
     "website": "Ιστότοπος",
-    "viewProfile": "Προβολή προφίλ"
+    "viewProfile": "Προβολή προφίλ",
+    "moreFromAgent": "Περισσότερες αγγελίες από αυτόν τον πράκτορα",
+    "noOtherListings": "Δεν υπάρχουν άλλες ενεργές αγγελίες αυτή τη στιγμή",
+    "viewFullProfile": "Προβολή πλήρους προφίλ"
   },
   "navigation": {
     "back": "Πίσω",
@@ -317,7 +326,8 @@
       "apartment": "Διαμέρισμα",
       "villa": "Βίλα",
       "land": "Οικόπεδο",
-      "other": "Άλλο"
+      "other": "Άλλο",
+      "luxury-villa": "Πολυτελής Βίλα"
     },
     "promotedListings": "Προωθημένες Αγγελίες",
     "agentHint": "Κλικ για προτάσεις!",
@@ -647,13 +657,16 @@
       },
       "zoomIn": "Μεγέθυνση",
       "zoomLevel": "Επίπεδο ζουμ",
-      "zoomOut": "Σμίκρυνση"
+      "zoomOut": "Σμίκρυνση",
+      "areaPlaceholder": "π.χ. 24.5"
     }
   },
   "seo": {
     "description": "{{type}} με {{beds}} υπνοδωμάτια, {{baths}} μπάνια για {{listingAction}} στην {{city}}, {{country}}. {{sqft}}m² για €{{price}}.",
     "forRent": "Ενοικίαση",
-    "forSale": "Πώληση"
+    "forSale": "Πώληση",
+    "perMonth": "/μήνα",
+    "title": "{{type}} {{beds}} υπνοδωματίων για {{listingAction}} σε {{city}}, {{country}} - €{{price}}"
   },
   "roomStyler": {
     "reimagine": "Αναδημιουργία",

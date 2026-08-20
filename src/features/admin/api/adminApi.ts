@@ -124,6 +124,33 @@ export const rejectProperty = async (propertyId: string, reason?: string): Promi
   });
 };
 
+// --- Luxury villa approval queue ---
+
+export type VillaApprovalStatus = 'pending' | 'approved' | 'rejected';
+
+export const getVillaApprovals = async (
+  status: VillaApprovalStatus = 'pending'
+): Promise<{ count: number; status: string; villas: any[]; hasMore?: boolean }> => {
+  return apiRequest(`/admin/villa-approvals?status=${status}`, {
+    requiresAuth: true,
+  });
+};
+
+export const approveVilla = async (villaId: string): Promise<any> => {
+  return apiRequest(`/admin/villa-approvals/${villaId}/approve`, {
+    method: 'POST',
+    requiresAuth: true,
+  });
+};
+
+export const rejectVilla = async (villaId: string, reason?: string): Promise<any> => {
+  return apiRequest(`/admin/villa-approvals/${villaId}/reject`, {
+    method: 'POST',
+    body: { reason },
+    requiresAuth: true,
+  });
+};
+
 // --- Admin Analytics ---
 
 export const getAdminAnalytics = async (): Promise<any> => {
@@ -505,3 +532,49 @@ export const rejectLicense = async (userId: string, reason?: string): Promise<{
     requiresAuth: true,
   });
 };
+
+// --- Villa Destinations (home-page corridor) ---
+
+export interface AdminVillaDestination {
+  _id: string;
+  name: string;
+  query: string;
+  country: string;
+  imageUrl?: string;
+  imagePublicId?: string;
+  imageCity?: string;
+  imageCountry?: string;
+  lat: number;
+  lng: number;
+  zoom: number;
+  displayOrder: number;
+  isActive: boolean;
+}
+
+export type VillaDestinationInput = Omit<AdminVillaDestination, '_id'>;
+
+export const getAdminVillaDestinations = async (): Promise<{
+  destinations: AdminVillaDestination[];
+  count: number;
+}> => apiRequest('/admin/villa-destinations', { requiresAuth: true });
+
+export const createVillaDestination = async (
+  body: Partial<VillaDestinationInput>
+): Promise<{ destination: AdminVillaDestination }> =>
+  apiRequest('/admin/villa-destinations', { method: 'POST', body, requiresAuth: true });
+
+export const updateVillaDestination = async (
+  id: string,
+  body: Partial<VillaDestinationInput>
+): Promise<{ destination: AdminVillaDestination }> =>
+  apiRequest(`/admin/villa-destinations/${id}`, { method: 'PATCH', body, requiresAuth: true });
+
+export const deleteVillaDestination = async (id: string): Promise<{ message: string }> =>
+  apiRequest(`/admin/villa-destinations/${id}`, { method: 'DELETE', requiresAuth: true });
+
+export const importDefaultVillaDestinations = async (): Promise<{
+  message: string;
+  imported: number;
+  skipped: number;
+}> => apiRequest('/admin/villa-destinations/import-defaults', { method: 'POST', requiresAuth: true });
+

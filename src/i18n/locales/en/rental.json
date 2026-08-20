@@ -1,5 +1,6 @@
 {
   "title": "Properties for Rent",
+  "from": "from",
   "propertiesFound": "properties available",
   "createListing": "List for Rent",
   "loading": "Loading rental properties...",
@@ -88,7 +89,23 @@
     "updateListing": "Update Rental Listing",
     "createSuccess": "Rental Listing Published Successfully!",
     "updateSuccess": "Rental Listing Updated Successfully!",
-    "redirecting": "Redirecting you to your dashboard..."
+    "redirecting": "Redirecting you to your dashboard...",
+    "checkInTime": "Check-in Time",
+    "checkOutTime": "Check-out Time",
+    "cleaningFee": "Cleaning Fee",
+    "cancellationPolicy": "Cancellation Policy",
+    "cancellationPolicies": {
+      "select": "Select a policy",
+      "flexible": "Flexible — Full refund 24h before check-in",
+      "moderate": "Moderate — Full refund 5 days before check-in",
+      "strict": "Strict — 50% refund up to 1 week before",
+      "nonRefundable": "Non-refundable"
+    },
+    "breakfastIncluded": "Breakfast",
+    "towelsIncluded": "Towels & Linen",
+    "parkingIncluded": "Parking",
+    "guestRequirements": "Guest Requirements",
+    "guestRequirementsHint": "e.g. no parties, no smoking, ID verification required (press Enter to add)"
   },
   "details": {
     "rentalTerms": "Rental Terms",
@@ -102,8 +119,8 @@
     "maxMonths": "{{max}} months max",
     "minToMaxMonths": "{{min}} - {{max}} months",
     "minWeeks": "{{min}} weeks min",
-    "maxWeeks": "{{max}} weeks max",
-    "minToMaxWeeks": "{{min}} - {{max}} weeks",
+    "maxWeeks": "up to {{max}} weeks",
+    "minToMaxWeeks": "{{min}}–{{max}} weeks",
     "minDays": "{{min}} days min",
     "maxDays": "{{max}} days max",
     "minToMaxDays": "{{min}} - {{max}} days",
@@ -118,7 +135,25 @@
     "tenantRequirements": "Tenant Requirements",
     "contactLandlord": "Contact Landlord",
     "scheduleViewing": "Schedule a Viewing",
-    "rentThisProperty": "Rent This Property"
+    "rentThisProperty": "Rent This Property",
+    "stayDuration": "Stay Duration",
+    "stayDurationWeeks": "Stay Duration",
+    "minNights": "{{min}} nights min",
+    "maxNights": "up to {{max}} nights",
+    "minToMaxNights": "{{min}}–{{max}} nights",
+    "checkInOut": "Check-in / Check-out",
+    "cleaningFee": "Cleaning Fee",
+    "cancellationPolicy": "Cancellation Policy",
+    "cancellation": {
+      "flexible": "Flexible — Full refund 24h before check-in",
+      "moderate": "Moderate — Full refund 5 days before",
+      "strict": "Strict — 50% refund up to 1 week before",
+      "nonRefundable": "Non-refundable"
+    },
+    "breakfastIncluded": "Breakfast",
+    "towelsIncluded": "Towels & Linen",
+    "parkingIncluded": "Parking",
+    "guestRequirements": "Guest Requirements"
   },
   "affordability": {
     "title": "Rent Affordability",
@@ -478,5 +513,6 @@
     "engagement": "Engagement",
     "views": "views",
     "inquiries": "inquiries"
-  }
+  },
+  "premiumCollection": "Rentals across the Balkans"
 }

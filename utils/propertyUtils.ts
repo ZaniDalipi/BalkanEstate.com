@@ -17,8 +17,8 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
         // Text search - match if ANY query term matches city or address
         let queryMatch = true;
         if (query && queryTerms.length > 0) {
-            const addressLower = p.address.toLowerCase();
-            const cityLower = p.city.toLowerCase();
+            const addressLower = (p.address || '').toLowerCase();
+            const cityLower = (p.city || '').toLowerCase();
 
             // Check if any term from the query matches the property's city or address
             // Also check if the city/address contains any of the query terms
@@ -36,11 +36,12 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
             const filterVal = filters.country.toLowerCase();
             const selectedCountry = BALKAN_COUNTRIES[filterVal]
                 || Object.values(BALKAN_COUNTRIES).find(c => c.name.toLowerCase() === filterVal);
+            const countryLower = (p.country || '').toLowerCase();
             if (selectedCountry) {
-                countryMatch = p.country.toLowerCase() === selectedCountry.name.toLowerCase();
+                countryMatch = countryLower === selectedCountry.name.toLowerCase();
             } else {
                 // Direct string comparison fallback
-                countryMatch = p.country.toLowerCase() === filterVal;
+                countryMatch = countryLower === filterVal;
             }
         }
 
@@ -58,7 +59,9 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
         const minSqftMatch = filters.minSqft ? p.sqft >= filters.minSqft : true;
         const maxSqftMatch = filters.maxSqft ? p.sqft <= filters.maxSqft : true;
         const sellerTypeMatch = filters.sellerType !== 'any' ? p.seller.type === filters.sellerType : true;
-        const propertyTypeMatch = filters.propertyType !== 'any' ? p.propertyType === filters.propertyType : true;
+        const propertyTypeMatch = filters.propertyType !== 'any'
+            ? p.propertyType === filters.propertyType
+            : p.propertyType !== 'luxury-villa'; // luxury-villa is exclusive to the Luxury Villas tab
 
         // Advanced filters
         const minYearBuiltMatch = filters.minYearBuilt ? p.yearBuilt >= filters.minYearBuilt : true;
@@ -123,9 +126,11 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
         const amenitiesMatch = filters.amenities && filters.amenities.length > 0 ?
             filters.amenities.every(amenity => {
                 const propertyAmenities = p.amenities || [];
-                const searchTerm = amenity.toLowerCase().trim();
+                const searchTerm = (amenity || '').toLowerCase().trim();
+                if (!searchTerm) return true;
                 return propertyAmenities.some(pAmenity => {
-                    const propAmenity = pAmenity.toLowerCase().trim();
+                    const propAmenity = (pAmenity || '').toLowerCase().trim();
+                    if (!propAmenity) return false;
                     // Bidirectional matching: either the property amenity contains the search term,
                     // or the search term contains the property amenity
                     return propAmenity.includes(searchTerm) || searchTerm.includes(propAmenity);

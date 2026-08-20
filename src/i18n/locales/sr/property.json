@@ -37,7 +37,8 @@
     "commercial": "Пословни Простор",
     "office": "Канцеларија",
     "garage": "Гаража",
-    "other": "Остало"
+    "other": "Остало",
+    "luxury-villa": "Luksuzna vila"
   },
   "features": {
     "bedrooms": "Спаваће Собе",
@@ -146,7 +147,12 @@
       },
       "slotDuration": "{{minutes}} min termini"
     },
-    "floorPlanInteractiveHint": "Интерактивни прегледач са зумирањем, померањем и ознакама"
+    "floorPlanInteractiveHint": "Интерактивни прегледач са зумирањем, померањем и ознакама",
+    "kitchens": "Kuhinje",
+    "diningRooms": "Trpezarije",
+    "toilets": "Toaleti (WC)",
+    "storageRooms": "Ostave",
+    "offices": "Kancelarija / radna soba"
   },
   "distances": {
     "title": "Удаљености",
@@ -220,7 +226,10 @@
     "phone": "Телефон",
     "email": "Имејл",
     "website": "Веб-сајт",
-    "viewProfile": "Погледај профил"
+    "viewProfile": "Погледај профил",
+    "moreFromAgent": "Više oglasa ovog agenta",
+    "noOtherListings": "Trenutno nema drugih aktivnih oglasa",
+    "viewFullProfile": "Pogledaj ceo profil"
   },
   "navigation": {
     "back": "Назад",
@@ -317,7 +326,8 @@
       "apartment": "Стан",
       "villa": "Вила",
       "land": "Земљиште",
-      "other": "Остало"
+      "other": "Остало",
+      "luxury-villa": "Luksuzna vila"
     },
     "promotedListings": "Промовисани Огласи",
     "agentHint": "Кликни за препоруке!",
@@ -639,7 +649,7 @@
       "sendToChat": "Pošalji"
     }
   },
-  "sectionNav": {
+          "sectionNav": {
     "ariaLabel": "Sekcije nekretnine",
     "overview": "Pregled",
     "map": "3D mapa",
@@ -654,7 +664,9 @@
   "seo": {
     "description": "{{type}} са {{beds}} спаваћих соба, {{baths}} купатила за {{listingAction}} у {{city}}, {{country}}. {{sqft}}m² за €{{price}}.",
     "forRent": "Издавање",
-    "forSale": "Продаја"
+    "forSale": "Продаја",
+    "perMonth": "/mes",
+    "title": "{{type}} sa {{beds}} spavaćih soba za {{listingAction}} u {{city}}, {{country}} - €{{price}}"
   },
   "roomStyler": {
     "reimagine": "Замисли изнова",

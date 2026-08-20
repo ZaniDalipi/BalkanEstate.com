@@ -148,9 +148,11 @@ const MapPopupOverlay: React.FC<MapPopupOverlayProps> = ({
 
     recomputeLayout();
 
+    // 'bounds_changed' fires on every drag frame and each call does two
+    // getBoundingClientRect reads plus a setState — exactly the per-frame work
+    // the comment above says we avoid. 'idle' + 'zoom_changed' cover rest.
     const listeners = [
       map.addListener('idle', recomputeLayout),
-      map.addListener('bounds_changed', recomputeLayout),
       map.addListener('zoom_changed', recomputeLayout),
     ];
 

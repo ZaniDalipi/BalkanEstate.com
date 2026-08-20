@@ -77,7 +77,8 @@
     "floorNumber": "Floor Number",
     "advancedFilters": "Advanced Filters",
     "moreFilters": "More Filters",
-    "lessFilters": "Less Filters"
+    "lessFilters": "Less Filters",
+    "sortBy": "Sort by"
   },
   "options": {
     "any": "Any",
@@ -477,5 +478,7 @@
     "loadingMore": "Loading more properties...",
     "updating": "Updating results...",
     "applyingFilters": "Applying filters..."
-  }
+  },
+  "saving": "Saving...",
+  "saveSearch": "Save search"
 }

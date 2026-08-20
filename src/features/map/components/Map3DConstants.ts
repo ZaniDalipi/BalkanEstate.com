@@ -23,7 +23,7 @@ export interface Map3DBuildingsProps {
   // Floor highlighting for apartments
   floorNumber?: number;
   totalFloors?: number;
-  propertyType?: 'house' | 'apartment' | 'villa' | 'land' | 'other';
+  propertyType?: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
   // 360 Virtual Tour
   virtualTour360Url?: string;
   // Building facing direction (user-defined)

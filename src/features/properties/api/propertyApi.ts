@@ -98,6 +98,14 @@ export function transformBackendProperty(backendProp: any): Property {
     hasUrgentBadge: backendProp.hasUrgentBadge || false,
     orientation: backendProp.orientation,
     visitAvailability: backendProp.visitAvailability,
+    // Luxury-villa daily-rental fields (kept in sync with services/apiService.ts)
+    checkInTime: backendProp.checkInTime,
+    checkOutTime: backendProp.checkOutTime,
+    cleaningFee: backendProp.cleaningFee,
+    cancellationPolicy: backendProp.cancellationPolicy,
+    breakfastIncluded: backendProp.breakfastIncluded,
+    towelsIncluded: backendProp.towelsIncluded,
+    parkingIncluded: backendProp.parkingIncluded,
     source: backendProp.source,
     sourceUrl: backendProp.sourceUrl,
     sourceFetchedAt: backendProp.sourceFetchedAt ? new Date(backendProp.sourceFetchedAt).getTime() : undefined,
@@ -108,6 +116,11 @@ export function transformToBackendProperty(frontendProp: Property): any {
   const result: any = {
     status: frontendProp.status,
     title: frontendProp.title,
+    // Both are sent by services/apiService.ts's transformer; without them here
+    // the "By Negotiation" price label and the seller's own reference ID are
+    // silently lost on whichever path uses this module.
+    propertyId: frontendProp.propertyId,
+    isNegotiable: frontendProp.isNegotiable,
     price: frontendProp.price,
     address: frontendProp.address,
     city: frontendProp.city,
@@ -153,6 +166,19 @@ export function transformToBackendProperty(frontendProp: Property): any {
     result.maxOccupants = frontendProp.maxOccupants ?? 1;
     if (frontendProp.availableFrom) {
       result.availableFrom = new Date(frontendProp.availableFrom).toISOString();
+    }
+  }
+
+  // Luxury-villa daily-rental fields (kept in sync with services/apiService.ts)
+  if (frontendProp.propertyType === 'luxury-villa' && frontendProp.listingType === 'rent') {
+    result.checkInTime = frontendProp.checkInTime || '14:00';
+    result.checkOutTime = frontendProp.checkOutTime || '11:00';
+    result.cleaningFee = Number(frontendProp.cleaningFee) || 0;
+    result.breakfastIncluded = frontendProp.breakfastIncluded ?? false;
+    result.towelsIncluded = frontendProp.towelsIncluded ?? false;
+    result.parkingIncluded = frontendProp.parkingIncluded ?? false;
+    if (frontendProp.cancellationPolicy) {
+      result.cancellationPolicy = frontendProp.cancellationPolicy;
     }
   }
 

@@ -314,6 +314,24 @@
       "bathroom": "Баня",
       "other": "Други",
       "selectTag": "Избери Етикет"
+    },
+    "luxuryVillaBanner": {
+      "title": "Luxury Villas Collection",
+      "hint": "This listing will appear in the exclusive Luxury Villas tab — visible to premium buyers searching for high-end Balkan retreats."
+    },
+    "luxuryVillaBadge": "Appears in Luxury Villas",
+    "quickAmenities": {
+      "label": "Популярни удобства",
+      "sauna": "Сауна",
+      "wineCellar": "Изба за вино",
+      "panoramic": "Панорамен",
+      "jacuzzi": "Джакузи",
+      "hotTub": "Гореща вана",
+      "gym": "Фитнес",
+      "fireplace": "Камина",
+      "bbq": "Барбекю",
+      "homeCinema": "Домашно кино",
+      "beachAccess": "Достъп до плаж"
     }
   },
   "listings": {
@@ -588,7 +606,8 @@
     "commercial": "Commercial",
     "office": "Office",
     "garage": "Garage",
-    "other": "Other"
+    "other": "Other",
+    "luxuryVilla": "Luxury Villa"
   },
   "conditions": {
     "new": "New",

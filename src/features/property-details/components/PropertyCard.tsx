@@ -216,7 +216,36 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
       if (promotionTier === 'featured') return 'ring-2 ring-violet-500 border-violet-200 shadow-violet-100';
       return 'ring-1 ring-gray-400 border-gray-200';
     }
+    if (property.propertyType === 'luxury-villa') {
+      return 'ring-1 ring-[#FFA500]/50 border-[#FFA500]/25 shadow-[0_2px_16px_rgba(255,165,0,0.10)] hover:ring-[#FFA500]/70 hover:shadow-[0_4px_24px_rgba(255,165,0,0.16)]';
+    }
     return 'border-neutral-200 hover:border-primary/30';
+  };
+
+  const isLuxuryVilla = property.propertyType === 'luxury-villa';
+
+  // Build luxury amenity chips to show on the card
+  const luxuryAmenityChips: { emoji: string; label: string }[] = isLuxuryVilla ? (() => {
+    const chips: { emoji: string; label: string }[] = [];
+    const amenities: string[] = (property.amenities as string[]) || [];
+    if (property.hasPool)                             chips.push({ emoji: '🏊', label: 'Pool' });
+    if (property.hasGarden)                           chips.push({ emoji: '🌿', label: 'Garden' });
+    if (amenities.some(a => a.toLowerCase().includes('sauna')))        chips.push({ emoji: '🧖', label: 'Sauna' });
+    if (amenities.some(a => a.toLowerCase().includes('wine cellar')))  chips.push({ emoji: '🍷', label: 'Wine Cellar' });
+    if (amenities.some(a => a.toLowerCase().includes('panoramic')))    chips.push({ emoji: '🏔️', label: 'Panoramic' });
+    if (property.breakfastIncluded)           chips.push({ emoji: '🍳', label: 'Breakfast' });
+    if (property.towelsIncluded)              chips.push({ emoji: '🛁', label: 'Towels' });
+    if (property.parkingIncluded)             chips.push({ emoji: '🚗', label: 'Parking' });
+    return chips.slice(0, 5); // max 5 chips on the card
+  })() : [];
+
+  const viewTypeDisplay: Record<string, { emoji: string; label: string }> = {
+    sea: { emoji: '🌊', label: 'Sea View' },
+    mountain: { emoji: '⛰️', label: 'Mountain' },
+    park: { emoji: '🌲', label: 'Forest/Lake' },
+    city: { emoji: '🏙️', label: 'City View' },
+    garden: { emoji: '🌷', label: 'Garden View' },
+    street: { emoji: '🏘️', label: 'Street View' },
   };
 
   return (
@@ -304,12 +333,26 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               </div>
             )}
           </div>
+          {/* View type pill — luxury-villa cards with a viewType set */}
+          {isLuxuryVilla && property.viewType && viewTypeDisplay[property.viewType] && (
+            <div className="absolute bottom-3 left-3 z-20 pointer-events-none">
+              <span className="bg-black/50 backdrop-blur-md text-white text-[10px] font-semibold px-2.5 py-[4px] rounded-full flex items-center gap-1 shadow">
+                <span>{viewTypeDisplay[property.viewType].emoji}</span>
+                {viewTypeDisplay[property.viewType].label}
+              </span>
+            </div>
+          )}
 
         {/* Top badges row */}
         <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
           <div className="flex flex-col gap-1.5">
-            {/* iOS-style Listing Type Badge */}
-            {isRental ? (
+            {/* Listing Type Badge — luxury variant for luxury-villa */}
+            {isLuxuryVilla ? (
+              <div className="bg-gradient-to-r from-[#FFA500] to-[#E8940A] text-white text-[10px] font-bold px-2 py-[3px] rounded-full flex items-center gap-1 shadow-sm">
+                <span className="text-[8px] leading-none">✦</span>
+                LUXURY VILLA
+              </div>
+            ) : isRental ? (
               <div className="bg-blue-500/85 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
                 {t('property:forRent', 'FOR RENT').toUpperCase()}
               </div>
@@ -460,9 +503,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                       {formatPrice(priceInfo.originalPrice, property.country)}
                     </span>
                   )}
-                  <span className="text-primary text-sm sm:text-base font-bold tracking-tight">
+                  <span className={`text-sm sm:text-base font-bold tracking-tight ${isLuxuryVilla ? 'text-[#0252CD]' : 'text-primary'}`}>
                     {formatPrice(property.price, property.country)}
-                    {isRental && <span className="text-[11px] font-normal text-neutral-400">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
+                    {isRental && <span className="text-[11px] font-normal text-neutral-400">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? (isLuxuryVilla ? 'night' : t('common:day', 'day')) : t('common:mo', 'mo')}</span>}
                   </span>
                   {priceInfo.hasReduction && (
                     <span className="bg-red-100 text-red-600 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-0.5 whitespace-nowrap">
@@ -579,6 +622,52 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             <span className="mt-0.5 font-medium text-[9px] leading-tight text-blue-500/80 relative z-10">{t('common:sqm')}</span>
           </div>
         </div>
+
+        {/* Luxury Amenity Chips — shown only for luxury-villa */}
+        {isLuxuryVilla && luxuryAmenityChips.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2.5">
+            {luxuryAmenityChips.map(chip => (
+              <span
+                key={chip.label}
+                className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] font-medium bg-[#FFA500]/10 text-[#0252CD] border border-[#FFA500]/20"
+              >
+                <span className="text-[10px]">{chip.emoji}</span>
+                {chip.label}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Daily Rental Info Strip — check-in/out + cleaning fee for luxury-villa */}
+        {isLuxuryVilla && (property.checkInTime || (property.cleaningFee ?? 0) > 0 || property.cancellationPolicy) && (
+          <div className="flex items-center gap-2.5 mt-2.5 px-2.5 py-2 rounded-xl bg-gray-50 border border-gray-100">
+            {property.checkInTime && (
+              <div className="flex items-center gap-1 text-[10px] text-gray-500">
+                <svg className="w-3 h-3 text-[#FFA500] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>{property.checkInTime}{property.checkOutTime ? `–${property.checkOutTime}` : ''}</span>
+              </div>
+            )}
+            {(property.cleaningFee ?? 0) > 0 && (
+              <>
+                {property.checkInTime && <span className="text-gray-200">·</span>}
+                <div className="flex items-center gap-1 text-[10px] text-gray-500">
+                  <svg className="w-3 h-3 text-[#FFA500] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                  <span>+€{property.cleaningFee} {t('rental:details.cleaningFee', 'cleaning')}</span>
+                </div>
+              </>
+            )}
+            {property.cancellationPolicy && (
+              <>
+                <span className="text-gray-200">·</span>
+                <span className="text-[10px] text-gray-500 capitalize">{property.cancellationPolicy}</span>
+              </>
+            )}
+          </div>
+        )}
 
         <div className="flex-grow"></div>
 

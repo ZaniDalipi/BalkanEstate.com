@@ -62,7 +62,8 @@
     "floorNumber": "Kati",
     "advancedFilters": "Filtrat e Avancuar",
     "moreFilters": "Më Shumë Filtra",
-    "lessFilters": "Më Pak Filtra"
+    "lessFilters": "Më Pak Filtra",
+    "sortBy": "Rendit sipas"
   },
   "options": {
     "any": "Çdo",
@@ -475,6 +476,9 @@
     "property": "Pronë",
     "queryTitle": "Prona për shitje në {{query}} - Listime pasurish të paluajtshme",
     "tagline": "Kërkim pronash i fuqizuar nga IA në BalkanEstateAI — 11 shtete, 10 gjuhë.",
-    "typesForSale": "shtëpi, apartamente dhe vila për shitje"
-  }
+    "typesForSale": "shtëpi, apartamente dhe vila për shitje",
+    "in": "në"
+  },
+  "saving": "Duke ruajtur...",
+  "saveSearch": "Ruaj kërkimin"
 }

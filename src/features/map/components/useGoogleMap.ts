@@ -44,6 +44,7 @@ import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { useRainViewer } from '../hooks/useRainViewer';
 import { useOpenMeteoGrid, type MapBounds } from '../hooks/useOpenMeteoGrid';
 import { useMapServices, weatherTileProxyUrl, firmsWmsProxyUrl } from '../hooks/useMapServices';
+import { buildLuxuryVillaMarkerHTML, getVillaMarkerPalette } from '@/shared/map/villaMarker';
 import {
   MapStyleType,
   ClimateRiskType,
@@ -530,6 +531,14 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         box-shadow: 0 8px 20px rgba(0,0,0,0.4) !important;
         z-index: 2000 !important;
       }
+      /* Villa pins render as a transparent div wrapping an SVG, so any
+         box-shadow paints a rectangle behind them. They carry their own
+         silhouette glow via a CSS drop-shadow filter instead. */
+      .property-marker.villa-pin,
+      .property-marker.villa-pin.marker-highlighted {
+        background: transparent !important;
+        box-shadow: none !important;
+      }
     `;
     document.head.appendChild(style);
 
@@ -972,34 +981,50 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       markerDiv.dataset.propertyId = property.id;
 
       const price = formatMarkerPrice(property);
-      const color = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
       const isActivelyPromoted = property.isPromoted && property.promotionEndDate && property.promotionEndDate > Date.now();
-      let borderColor = 'white';
-      let borderWidth = 2;
-      if (isActivelyPromoted && property.promotionTier) {
-        borderColor = PROMOTION_TIER_COLORS[property.promotionTier] || PROMOTION_TIER_COLORS.standard;
-        borderWidth = 3;
-      }
+      const isLuxuryVilla = property.propertyType === 'luxury-villa';
 
       if (isActivelyPromoted && property.promotionTier) {
         markerDiv.classList.add(`promoted-marker-${property.promotionTier}`);
       }
 
-      markerDiv.style.cssText = `
-        padding: 2px 6px;
-        background: ${color};
-        border: ${borderWidth}px solid ${borderColor};
-        border-radius: 999px;
-        color: white;
-        font-weight: 700;
-        font-size: 10px;
-        font-family: Inter, system-ui, sans-serif;
-        cursor: pointer;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.25);
-        white-space: nowrap;
-        user-select: none;
-        transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
-      `;
+      if (isLuxuryVilla) {
+        // Branded villa pin (crown = signature, star = actively promoted),
+        // gold for rent / sapphire for sale — same design as the Leaflet map.
+        // `villa-pin` marks it as a transparent (non-pill) marker so hover
+        // states never apply a rectangular box-shadow behind it.
+        markerDiv.classList.add('villa-pin');
+        markerDiv.style.cssText = 'cursor:pointer;user-select:none;transform-origin:bottom center;transition:transform 0.15s ease-out;';
+        markerDiv.innerHTML = buildLuxuryVillaMarkerHTML(
+          price,
+          `${property.id}`.slice(-6),
+          getVillaMarkerPalette(property.listingType),
+          isActivelyPromoted ? 'star' : 'crown',
+        );
+      } else {
+        const color = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
+        let borderColor = 'white';
+        let borderWidth = 2;
+        if (isActivelyPromoted && property.promotionTier) {
+          borderColor = PROMOTION_TIER_COLORS[property.promotionTier] || PROMOTION_TIER_COLORS.standard;
+          borderWidth = 3;
+        }
+        markerDiv.style.cssText = `
+          padding: 2px 6px;
+          background: ${color};
+          border: ${borderWidth}px solid ${borderColor};
+          border-radius: 999px;
+          color: white;
+          font-weight: 700;
+          font-size: 10px;
+          font-family: Inter, system-ui, sans-serif;
+          cursor: pointer;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+          white-space: nowrap;
+          user-select: none;
+          transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+        `;
+      }
 
       if (animate) {
         const goldenAngle = 137.508 * (Math.PI / 180);
@@ -1024,12 +1049,14 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         }, delay + 900);
       }
 
-      markerDiv.textContent = price;
+      if (!isLuxuryVilla) markerDiv.textContent = price;
 
       markerDiv.onmouseenter = () => {
         if (!markerDiv.classList.contains('marker-highlighted') && !markerDiv.classList.contains('gmarker-entrance-fly')) {
           markerDiv.style.transform = 'scale(1.25) translateY(-2px)';
-          markerDiv.style.boxShadow = '0 4px 10px rgba(0,0,0,0.35)';
+          // Villa pins have a transparent div, so a box-shadow would paint a
+          // rectangle behind them — they carry their own silhouette glow.
+          if (!isLuxuryVilla) markerDiv.style.boxShadow = '0 4px 10px rgba(0,0,0,0.35)';
           markerDiv.style.zIndex = '1000';
         }
       };
@@ -1040,10 +1067,31 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
           markerDiv.style.zIndex = isActivelyPromoted ? '100' : '1';
         }
       };
-      markerDiv.onclick = (e) => {
-        e.stopPropagation();
+      const activateMarker = () => {
         setSelectedProperty(property);
         mapToUse.panTo({ lat: property.lat, lng: property.lng });
+      };
+      markerDiv.onclick = (e) => {
+        e.stopPropagation();
+        activateMarker();
+      };
+
+      // A bare div with an onclick is invisible to keyboard and assistive tech.
+      // The label carries the price and location so the marker is identifiable
+      // without seeing the map.
+      markerDiv.setAttribute('role', 'button');
+      markerDiv.tabIndex = 0;
+      markerDiv.setAttribute(
+        'aria-label',
+        [price, property.title, [property.city, property.country].filter(Boolean).join(', ')]
+          .filter(Boolean)
+          .join(' — ')
+      );
+      markerDiv.onkeydown = (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        e.stopPropagation();
+        activateMarker();
       };
 
       const posOffset = colocatedOffsets.get(property.id);
@@ -1258,7 +1306,11 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         div.classList.add('marker-highlighted');
         // Force styles for highlighted state
         div.style.transform = 'scale(1.3) translateY(-4px)';
-        div.style.boxShadow = '0 8px 20px rgba(0,0,0,0.4)';
+        // Villa pins are transparent divs — a box-shadow would draw a rectangle
+        // behind the pin instead of hugging its silhouette.
+        if (!div.classList.contains('villa-pin')) {
+          div.style.boxShadow = '0 8px 20px rgba(0,0,0,0.4)';
+        }
         div.style.zIndex = '2000';
       } else {
         div.classList.remove('marker-highlighted');
@@ -1269,6 +1321,26 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       }
     });
   }, [hoveredPropertyId, validProperties]);
+
+  // Dismiss the property popup when the user clicks the map background or
+  // presses Escape. Marker and popup clicks stop propagation / live in their
+  // own DOM overlays, so they never reach these handlers.
+  useEffect(() => {
+    if (!selectedProperty) return;
+
+    const mapToUse = map || mapInstanceRef.current;
+    const clickListener = mapToUse?.addListener('click', () => setSelectedProperty(null));
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelectedProperty(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      clickListener?.remove();
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [map, selectedProperty]);
 
   // Handle flyTo target - smooth cinematic animation
   useEffect(() => {

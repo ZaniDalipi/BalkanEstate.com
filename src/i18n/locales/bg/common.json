@@ -306,7 +306,8 @@
     "measure": "Измери",
     "legend": "Легенда",
     "climate": "Климат",
-    "premiumOnly": "Само Premium"
+    "premiumOnly": "Само Premium",
+    "clearFilter": "Изчисти филтъра"
   },
   "social": {
     "facebook": "Facebook",
@@ -638,6 +639,7 @@
   },
   "removeFromFavorites": "Премахни от любими",
   "saved": "Запазено",
+  "any": "Всички",
   "usageMeter": {
     "label": "Месечно потребление",
     "usedOfLimit": "{{used}} / {{limit}} използвани",

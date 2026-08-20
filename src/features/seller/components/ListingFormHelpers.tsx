@@ -33,7 +33,7 @@ export interface ListingData {
     image_tags: { index: number; tag: string; }[];
     tourUrl: string; // URL for video (YouTube, TikTok, Instagram, Vimeo, Facebook)
     virtualTour360Url: string; // URL for 360 virtual tour (Matterport, Kuula, etc.)
-    propertyType: 'house' | 'apartment' | 'villa' | 'land' | 'other';
+    propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
     floorNumber: number;
     totalFloors: number;
     lat: number;
@@ -63,6 +63,14 @@ export interface ListingData {
     internetIncluded: boolean;
     tenantRequirements: string[];
     maxOccupants: number;
+    // Daily rental fields (short-stay / luxury villa)
+    checkInTime: string;
+    checkOutTime: string;
+    cleaningFee: number;
+    cancellationPolicy: 'flexible' | 'moderate' | 'strict' | 'non-refundable' | '';
+    breakfastIncluded: boolean;
+    towelsIncluded: boolean;
+    parkingIncluded: boolean;
     // Visit availability
     visitAvailability: VisitAvailability;
 }
@@ -126,6 +134,14 @@ export const initialListingData: ListingData = {
     internetIncluded: false,
     tenantRequirements: [],
     maxOccupants: 1,
+    // Daily rental fields (short-stay / luxury villa)
+    checkInTime: '14:00',
+    checkOutTime: '11:00',
+    cleaningFee: 0,
+    cancellationPolicy: '',
+    breakfastIncluded: false,
+    towelsIncluded: false,
+    parkingIncluded: false,
     // Visit availability
     visitAvailability: {
         enabled: false,

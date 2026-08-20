@@ -62,7 +62,10 @@ export function buildPreviewProperty(
         tourUrl: listingData.tourUrl,
         virtualTour360Url: listingData.virtualTour360Url || undefined,
         hasVirtualTour360: !!listingData.virtualTour360Url,
-        imageUrl: images.length > 0 ? images[0].previewUrl : 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=500',
+        // No stock photo stand-in: persisting one would make a listing without
+        // photos indistinguishable from one that has them. The UI has its own
+        // placeholder for the empty case.
+        imageUrl: images.length > 0 ? images[0].previewUrl : '',
         images: imageUrls,
         lat: listingData.lat,
         lng: listingData.lng,
@@ -106,6 +109,15 @@ export function buildPreviewProperty(
             tenantRequirements: listingData.tenantRequirements || [],
             maxOccupants: Number(listingData.maxOccupants) || 1,
         } : {}),
+        ...(listingData.propertyType === 'luxury-villa' && listingData.listingType === 'rent' ? {
+            checkInTime: listingData.checkInTime || '14:00',
+            checkOutTime: listingData.checkOutTime || '11:00',
+            cleaningFee: Number(listingData.cleaningFee) || 0,
+            cancellationPolicy: listingData.cancellationPolicy || undefined,
+            breakfastIncluded: listingData.breakfastIncluded ?? false,
+            towelsIncluded: listingData.towelsIncluded ?? false,
+            parkingIncluded: listingData.parkingIncluded ?? false,
+        } : {}),
         ...(listingData.visitAvailability.enabled ? {
             visitAvailability: listingData.visitAvailability,
         } : {}),
@@ -129,7 +141,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         listingType: propertyToEdit?.listingType || initialType as any,
     });
     const [language, setLanguage] = useState('English');
-    const [aiPropertyType, setAiPropertyType] = useState<'house' | 'apartment' | 'villa' | 'land' | 'other'>('house');
+    const [aiPropertyType, setAiPropertyType] = useState<'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other'>('house');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [wantToPromote, setWantToPromote] = useState(false);
     const [pendingPropertyData, setPendingPropertyData] = useState<Property | null>(null);
@@ -249,6 +261,14 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 internetIncluded: propertyToEdit.internetIncluded || false,
                 tenantRequirements: propertyToEdit.tenantRequirements || [],
                 maxOccupants: propertyToEdit.maxOccupants || 1,
+                // Daily rental fields (short-stay / luxury villa)
+                checkInTime: propertyToEdit.checkInTime || '14:00',
+                checkOutTime: propertyToEdit.checkOutTime || '11:00',
+                cleaningFee: propertyToEdit.cleaningFee || 0,
+                cancellationPolicy: propertyToEdit.cancellationPolicy || '',
+                breakfastIncluded: propertyToEdit.breakfastIncluded || false,
+                towelsIncluded: propertyToEdit.towelsIncluded || false,
+                parkingIncluded: propertyToEdit.parkingIncluded || false,
                 // Visit availability
                 visitAvailability: propertyToEdit.visitAvailability || {
                     enabled: false,
@@ -521,7 +541,12 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     }, [showError, t]);
 
     const handleListingTypeChange = useCallback((val: string) => {
-        setListingData(prev => ({ ...prev, listingType: val as 'sale' | 'rent' }));
+        setListingData(prev => ({
+            ...prev,
+            listingType: val as 'sale' | 'rent',
+            // A luxury villa switched to rent defaults to per-night (daily) pricing.
+            ...(val === 'rent' && prev.propertyType === 'luxury-villa' ? { rentPeriod: 'daily' as const } : {}),
+        }));
     }, []);
 
     const handleVisitAvailabilityChange = useCallback((patch: Partial<ListingData['visitAvailability']>) => {
@@ -673,10 +698,19 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
         const isNumeric = type === 'number';
-        setListingData(prev => ({
-            ...prev,
-            [name]: isNumeric ? (value === '' ? '' : Number(value)) : value
-        }));
+        setListingData(prev => {
+            const updated: ListingData = {
+                ...prev,
+                [name]: isNumeric ? (value === '' ? '' : Number(value)) : value,
+            };
+            // Luxury villas can be listed for sale OR for rent. Keep whichever
+            // market the user chose; only default the rent period to daily when
+            // it's actually a rental (the villa booking flow is per-night).
+            if (name === 'propertyType' && value === 'luxury-villa' && prev.listingType === 'rent') {
+                updated.rentPeriod = 'daily';
+            }
+            return updated;
+        });
     }, []);
 
     const handlePriceChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -804,6 +838,43 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         if (!runValidation()) {
             setIsSubmitting(false);
             return;
+        }
+
+        if (listingData.lat === 0 || listingData.lng === 0) {
+            showError(t('validation:locationRequired'), t('newListing:validation.selectValidCity'));
+            setIsSubmitting(false);
+            return;
+        }
+
+        // Floor validation - skip for land
+        if (listingData.propertyType !== 'land') {
+            if (listingData.propertyType === 'apartment') {
+                if (!listingData.floorNumber || listingData.floorNumber < 0) {
+                    showError(t('validation:invalidFloorNumber'), t('newListing:validation.apartmentFloorNumber'));
+                    setIsSubmitting(false);
+                    return;
+                }
+                if (!listingData.totalFloors || listingData.totalFloors < 1) {
+                    showError(t('validation:invalidFloorCount'), t('newListing:validation.apartmentTotalFloors'));
+                    setIsSubmitting(false);
+                    return;
+                }
+                if (listingData.floorNumber > listingData.totalFloors) {
+                    showError(t('validation:invalidFloorNumber'), t('newListing:validation.floorExceedsTotal'));
+                    setIsSubmitting(false);
+                    return;
+                }
+                if (listingData.hasElevator === undefined) {
+                    showError(t('validation:elevatorRequired'), t('newListing:validation.apartmentElevator'));
+                    setIsSubmitting(false);
+                    return;
+                }
+            }
+            if ((listingData.propertyType === 'house' || listingData.propertyType === 'villa' || listingData.propertyType === 'luxury-villa') && (!listingData.totalFloors || listingData.totalFloors < 1)) {
+                showError(t('validation:invalidFloorCount'), t('newListing:validation.houseTotalFloors'));
+                setIsSubmitting(false);
+                return;
+            }
         }
 
         try {
@@ -992,7 +1063,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 tourUrl: listingData.tourUrl,
                 virtualTour360Url: listingData.virtualTour360Url || undefined,
                 hasVirtualTour360: !!listingData.virtualTour360Url,
-                imageUrl: imageUrls.length > 0 ? imageUrls[0].url : 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=500',
+                imageUrl: imageUrls.length > 0 ? imageUrls[0].url : '',
                 images: imageUrls,
                 lat: lat,
                 lng: lng,
@@ -1044,6 +1115,16 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     internetIncluded: listingData.internetIncluded ?? false,
                     tenantRequirements: listingData.tenantRequirements || [],
                     maxOccupants: Number(listingData.maxOccupants) || 1,
+                } : {}),
+                // Daily rental / luxury villa fields
+                ...(listingData.propertyType === 'luxury-villa' && listingData.listingType === 'rent' ? {
+                    checkInTime: listingData.checkInTime || '14:00',
+                    checkOutTime: listingData.checkOutTime || '11:00',
+                    cleaningFee: Number(listingData.cleaningFee) || 0,
+                    cancellationPolicy: listingData.cancellationPolicy || undefined,
+                    breakfastIncluded: listingData.breakfastIncluded ?? false,
+                    towelsIncluded: listingData.towelsIncluded ?? false,
+                    parkingIncluded: listingData.parkingIncluded ?? false,
                 } : {}),
                 // Visit availability (for all listing types)
                 ...(listingData.visitAvailability.enabled ? {

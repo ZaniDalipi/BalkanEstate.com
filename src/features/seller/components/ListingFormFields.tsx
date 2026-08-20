@@ -204,15 +204,24 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
 
             {/* Property Type Selection */}
             <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-end">
-                <div className="relative">
-                    <select name="propertyType" id="propertyType" value={listingData.propertyType} onChange={handleInputChange} className={`${floatingInputClasses} border-neutral-300`}>
-                        <option value="house">{t('seller:propertyTypes.house')}</option>
-                        <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
-                        <option value="villa">{t('seller:propertyTypes.villa')}</option>
-                        <option value="land">{t('seller:propertyTypes.land')}</option>
-                        <option value="other">{t('seller:propertyTypes.other')}</option>
-                    </select>
-                    <label htmlFor="propertyType" className={floatingSelectLabelClasses}>{t('seller:form.propertyType')}</label>
+                <div>
+                    <div className="relative">
+                        <select name="propertyType" id="propertyType" value={listingData.propertyType} onChange={handleInputChange} className={`${floatingInputClasses} border-neutral-300`}>
+                            <option value="house">{t('seller:propertyTypes.house')}</option>
+                            <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
+                            <option value="villa">{t('seller:propertyTypes.villa')}</option>
+                            <option value="luxury-villa">{t('seller:propertyTypes.luxuryVilla', 'Luxury Villa')}</option>
+                            <option value="land">{t('seller:propertyTypes.land')}</option>
+                            <option value="other">{t('seller:propertyTypes.other')}</option>
+                        </select>
+                        <label htmlFor="propertyType" className={floatingSelectLabelClasses}>{t('seller:form.propertyType')}</label>
+                    </div>
+                    {listingData.propertyType === 'luxury-villa' && (
+                        <div className="mt-1.5 flex items-center gap-1.5 px-2 py-1 rounded-lg bg-secondary/10 border border-secondary/30 w-fit">
+                            <span className="text-sm leading-none">🏛️</span>
+                            <span className="text-[11px] font-semibold text-primary-dark">{t('seller:createListing.luxuryVillaBadge', 'Appears in Luxury Villas')}</span>
+                        </div>
+                    )}
                 </div>
                 {listingData.propertyType === 'apartment' && (
                     <>
@@ -258,7 +267,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                         </div>
                     </>
                 )}
-                {(listingData.propertyType === 'house' || listingData.propertyType === 'villa') && (
+                {(listingData.propertyType === 'house' || listingData.propertyType === 'villa' || listingData.propertyType === 'luxury-villa') && (
                     <div className="md:col-span-2 flex justify-center">
                         <div className="w-full max-w-xs">
                             <NumberInputWithSteppers label={t('seller:createListing.fields.totalFloors')} value={listingData.totalFloors} min={1} onChange={(val) => setListingData(p => ({ ...p, totalFloors: val }))} error={fieldErrors.totalFloors} anchorId={fieldAnchorId('totalFloors')} />
@@ -266,6 +275,114 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                     </div>
                 )}
             </fieldset>
+
+            {/* Daily Rental Details — only for a Luxury Villa listed for rent */}
+            {listingData.propertyType === 'luxury-villa' && listingData.listingType === 'rent' && (
+                <fieldset className="space-y-4 p-4 rounded-2xl border border-[#FFA500]/30 bg-[#FFA500]/5">
+                    <legend className="px-2 text-sm font-semibold text-[#0252CD] flex items-center gap-2">
+                        <span>🏛️</span>
+                        {t('seller:createListing.dailyRental.title', 'Daily Rental Details')}
+                    </legend>
+
+                    {/* Check-in / Check-out times */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="checkInTime" className={labelClasses}>
+                                {t('seller:createListing.dailyRental.checkIn', 'Check-in Time')}
+                            </label>
+                            <input
+                                type="time"
+                                id="checkInTime"
+                                name="checkInTime"
+                                value={listingData.checkInTime}
+                                onChange={handleInputChange}
+                                className={inputBaseClasses}
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="checkOutTime" className={labelClasses}>
+                                {t('seller:createListing.dailyRental.checkOut', 'Check-out Time')}
+                            </label>
+                            <input
+                                type="time"
+                                id="checkOutTime"
+                                name="checkOutTime"
+                                value={listingData.checkOutTime}
+                                onChange={handleInputChange}
+                                className={inputBaseClasses}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Cleaning fee + cancellation policy */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="cleaningFee" className={labelClasses}>
+                                {t('seller:createListing.dailyRental.cleaningFee', 'Cleaning Fee (€)')}
+                            </label>
+                            <input
+                                type="number"
+                                id="cleaningFee"
+                                name="cleaningFee"
+                                min={0}
+                                value={listingData.cleaningFee || ''}
+                                onChange={handleInputChange}
+                                className={inputBaseClasses}
+                                placeholder="0"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="cancellationPolicy" className={labelClasses}>
+                                {t('seller:createListing.dailyRental.cancellationPolicy', 'Cancellation Policy')}
+                            </label>
+                            <div className="relative">
+                                <select
+                                    id="cancellationPolicy"
+                                    name="cancellationPolicy"
+                                    value={listingData.cancellationPolicy}
+                                    onChange={handleInputChange}
+                                    className={selectClasses}
+                                >
+                                    <option value="">{t('seller:createListing.dailyRental.selectPolicy', 'Select…')}</option>
+                                    <option value="flexible">{t('seller:createListing.dailyRental.flexible', 'Flexible')}</option>
+                                    <option value="moderate">{t('seller:createListing.dailyRental.moderate', 'Moderate')}</option>
+                                    <option value="strict">{t('seller:createListing.dailyRental.strict', 'Strict')}</option>
+                                    <option value="non-refundable">{t('seller:createListing.dailyRental.nonRefundable', 'Non-refundable')}</option>
+                                </select>
+                                {chevronIcon}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Included services toggle row */}
+                    <div>
+                        <p className={labelClasses}>{t('seller:createListing.dailyRental.included', 'Included in Price')}</p>
+                        <div className="flex flex-wrap gap-3 mt-2">
+                            {([
+                                { field: 'breakfastIncluded' as const, label: t('seller:createListing.dailyRental.breakfast', '🍳 Breakfast') },
+                                { field: 'towelsIncluded'    as const, label: t('seller:createListing.dailyRental.towels',    '🛁 Towels & Linen') },
+                                { field: 'parkingIncluded'   as const, label: t('seller:createListing.dailyRental.parking',   '🚗 Parking') },
+                            ]).map(({ field, label }) => {
+                                const active = !!listingData[field];
+                                return (
+                                    <button
+                                        key={field}
+                                        type="button"
+                                        onClick={() => setListingData(p => ({ ...p, [field]: !p[field] }))}
+                                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                                            active
+                                                ? 'bg-[#FFA500]/15 text-[#0252CD] border-[#FFA500]'
+                                                : 'bg-white text-gray-500 border-gray-200 hover:border-[#FFA500]/60 hover:text-[#0252CD]'
+                                        }`}
+                                    >
+                                        {label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </fieldset>
+            )}
 
             {/* Property Details - hide some fields for land */}
             <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 min-w-0">
@@ -316,7 +433,13 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
         d0.sq_meters === d1.sq_meters &&
         d0.year_built === d1.year_built &&
         d0.parking_spots === d1.parking_spots &&
-        prev.fieldErrors === next.fieldErrors &&
+        d0.checkInTime === d1.checkInTime &&
+        d0.checkOutTime === d1.checkOutTime &&
+        d0.cleaningFee === d1.cleaningFee &&
+        d0.cancellationPolicy === d1.cancellationPolicy &&
+        d0.breakfastIncluded === d1.breakfastIncluded &&
+        d0.towelsIncluded === d1.towelsIncluded &&
+        d0.parkingIncluded === d1.parkingIncluded &&
         prev.selectedCountry === next.selectedCountry &&
         prev.selectedCity === next.selectedCity &&
         prev.availableCities === next.availableCities &&

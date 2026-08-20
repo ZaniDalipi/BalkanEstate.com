@@ -30,7 +30,7 @@ export interface PropertyValuation {
   country: string;
   lat?: number;
   lng?: number;
-  propertyType: 'house' | 'apartment' | 'villa' | 'land' | 'other';
+  propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
   sqft: number;
   beds: number;
   baths: number;
@@ -74,7 +74,7 @@ export interface ValuationInput {
   country: string;
   lat?: number;
   lng?: number;
-  propertyType: 'house' | 'apartment' | 'villa' | 'land' | 'other';
+  propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
   sqft: number;
   beds: number;
   baths: number;
@@ -99,7 +99,7 @@ export interface ValuationInput {
   language?: string;
 }
 
-export type PropertyType = 'house' | 'apartment' | 'villa' | 'land' | 'other';
+export type PropertyType = 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
 export type PropertyCondition = 'new' | 'excellent' | 'good' | 'fair' | 'needs-renovation';
 export type ViewType = 'sea' | 'mountain' | 'city' | 'park' | 'garden' | 'street';
 export type EnergyRating = 'A+' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';

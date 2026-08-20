@@ -309,7 +309,8 @@
     "measure": "Measure",
     "legend": "Legend",
     "climate": "Climate",
-    "premiumOnly": "Premium Only"
+    "premiumOnly": "Premium Only",
+    "clearFilter": "Clear filter"
   },
   "social": {
     "facebook": "Facebook",
@@ -638,6 +639,7 @@
     "ctaDescription": "Search across all 11 Balkan countries with AI-powered matching. 10 languages, verified agents, instant valuations.",
     "ctaButton": "Start Searching"
   },
+  "any": "Any",
   "usageMeter": {
     "label": "Monthly usage",
     "usedOfLimit": "{{used}} / {{limit}} used",

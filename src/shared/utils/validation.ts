@@ -185,6 +185,56 @@ export function validateCoordinates(lat: number, lng: number): ValidationResult 
 }
 
 /**
+ * Validate one villa destination as entered in the admin.
+ *
+ * Lives here rather than in the admin component so the rules are stated once:
+ * the same shape is written by the admin form, seeded by the import action and
+ * read by the home-page corridor, and a bad row shows up as a card that
+ * navigates nowhere or a map that flies somewhere absurd.
+ */
+export function validateVillaDestination(input: {
+  name: string;
+  query: string;
+  country: string;
+  lat: number | string;
+  lng: number | string;
+  zoom: number | string;
+}): ValidationResult {
+  const name = validateTextLength(String(input.name ?? '').trim(), {
+    minLength: 2, maxLength: 80, fieldName: 'Name',
+  });
+  if (!name.isValid) return name;
+
+  // `query` is what the villas page searches on. An empty one yields a card
+  // that looks fine and lands on an unfiltered page, so it is required even
+  // though the corridor would happily render without it.
+  const query = validateTextLength(String(input.query ?? '').trim(), {
+    minLength: 2, maxLength: 80, fieldName: 'Search term',
+  });
+  if (!query.isValid) return query;
+
+  const country = validateTextLength(String(input.country ?? '').trim(), {
+    minLength: 2, maxLength: 60, fieldName: 'Country',
+  });
+  if (!country.isValid) return country;
+
+  const lat = Number(input.lat);
+  const lng = Number(input.lng);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return { isValid: false, error: 'Latitude and longitude must be numbers' };
+  }
+  const coords = validateCoordinates(lat, lng);
+  if (!coords.isValid) return coords;
+
+  const zoom = Number(input.zoom);
+  if (!Number.isFinite(zoom) || zoom < 1 || zoom > 20) {
+    return { isValid: false, error: 'Zoom must be between 1 and 20' };
+  }
+
+  return { isValid: true };
+}
+
+/**
  * Validate price/currency value
  */
 export function validatePrice(

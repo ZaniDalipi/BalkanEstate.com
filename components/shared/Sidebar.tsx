@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { AppView, UserRole } from '../../types';
-import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, BuildingStorefrontIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, RentIcon, HomeIcon, BookOpenIcon } from '../../constants';
+import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, BuildingStorefrontIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, RentIcon, HomeIcon, BookOpenIcon, LuxuryVillaIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import UserAvatar from './UserAvatar';
@@ -173,10 +173,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         onClose();
     };
 
+    // Luxury villas are their own curated market (for rent OR for sale), so the
+    // entry is always visible — a permanent home in the sidebar.
     const baseNavItems = [
       { view: 'home' as AppView, label: t('nav:home'), icon: <HomeIcon /> },
       { view: 'search' as AppView, label: t('nav:search'), icon: <SearchIcon /> },
       { view: 'rentals' as AppView, label: t('nav:rentals'), icon: <RentIcon /> },
+      { view: 'villas' as AppView, label: t('nav:villas'), icon: <LuxuryVillaIcon className="h-5 w-5 text-[#FFA500]" /> },
       { view: 'explore-cities' as AppView, label: t('nav:exploreCities'), icon: <SparklesIcon /> },
       { view: 'saved-searches' as AppView, label: t('nav:savedSearches'), icon: <MagnifyingGlassPlusIcon /> },
       { view: 'saved-properties' as AppView, label: t('nav:savedProperties'), icon: <HeartIcon /> },
