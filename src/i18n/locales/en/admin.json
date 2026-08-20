@@ -42,7 +42,8 @@
     "inquiries": "Inquiries",
     "pricing": "Pricing & Plans",
     "villaApprovals": "Villa Approvals",
-    "villaDestinations": "Villa Destinations"
+    "villaDestinations": "Villa Destinations",
+    "cityShowcase": "City Gallery"
   },
   "properties": {
     "title": "Property Manager",
@@ -1220,5 +1221,38 @@
     "photoSpec": "Card photos are portrait, 18:25 — upload 2200 × 3056 or as close as you have. Anything smaller still works but is stretched to fit large cards; anything larger is stored at 2200 wide. Other shapes are cropped, never squashed.",
     "newAvailable": "{{count}} new built-in destination(s) are not in the database yet.",
     "importNew": "Import them"
+  },
+  "cityShowcase": {
+    "title": "City Gallery",
+    "subtitle": "Cities shown in the home-page gallery. Each panel needs a photo — there is no stand-in image behind it.",
+    "add": "Add city",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "saved": "City panel saved",
+    "city": "City",
+    "cityHint": "The name shown on the panel.",
+    "country": "Country",
+    "searchQuery": "Search term",
+    "searchQueryHint": "Sent to the search page when a visitor opens this panel.",
+    "order": "Order",
+    "active": "Show on the home page",
+    "hidden": "Hidden",
+    "beyondLimit": "Not shown",
+    "searches": "searches",
+    "choosePhoto": "Choose photo",
+    "replacePhoto": "Replace photo",
+    "uploading": "Uploading…",
+    "photoSpec": "Panels are tall — upload a portrait photo, 1600 × 2000 or as close as you have. Other shapes are cropped, never squashed. Max 10 MB.",
+    "limitHint": "The gallery shows the first {{count}} visible cities, in order. Anything past that stays here until you reorder or hide one.",
+    "empty": "No cities yet — the gallery is hidden on the home page.",
+    "emptyHint": "Add a city with a photo and it appears there straight away.",
+    "confirmDelete": "Remove {{city}} from the home page?",
+    "saveError": "Failed to save city panel",
+    "deleteError": "Failed to delete city panel",
+    "loadError": "Failed to load the city gallery",
+    "uploadError": "Photo upload failed"
   }
 }

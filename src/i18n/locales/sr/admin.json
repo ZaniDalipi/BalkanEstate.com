@@ -42,7 +42,8 @@
     "inquiries": "Упити",
     "pricing": "Цене и Планови",
     "villaApprovals": "Odobrenja vila",
-    "villaDestinations": "Destinacije vila"
+    "villaDestinations": "Destinacije vila",
+    "cityShowcase": "Галерија Градова"
   },
   "properties": {
     "title": "Управљање Некретнинама",
@@ -1018,5 +1019,38 @@
     "photoSpec": "Fotografije kartica su portret, 18:25 — otpremite 2200 × 3056 ili najbliže što imate. Manje rade ali se rastežu na velikim karticama; veće se čuvaju na širini 2200. Drugi oblici se seku, nikada ne izobličavaju.",
     "newAvailable": "{{count}} novih ugrađenih destinacija još nije u bazi podataka.",
     "importNew": "Uvezi ih"
+  },
+  "cityShowcase": {
+    "title": "Galerija gradova",
+    "subtitle": "Gradovi prikazani u galeriji na početnoj strani. Svaki panel zahteva fotografiju — iza njega nema zamenske slike.",
+    "add": "Dodaj grad",
+    "edit": "Izmeni",
+    "delete": "Obriši",
+    "save": "Sačuvaj",
+    "saving": "Čuvanje…",
+    "cancel": "Otkaži",
+    "saved": "Panel grada je sačuvan",
+    "city": "Grad",
+    "cityHint": "Naziv prikazan na panelu.",
+    "country": "Država",
+    "searchQuery": "Pojam pretrage",
+    "searchQueryHint": "Šalje se stranici pretrage kada posetilac otvori ovaj panel.",
+    "order": "Redosled",
+    "active": "Prikaži na početnoj strani",
+    "hidden": "Skriveno",
+    "beyondLimit": "Nije prikazano",
+    "searches": "pretražuje",
+    "choosePhoto": "Izaberi fotografiju",
+    "replacePhoto": "Zameni fotografiju",
+    "uploading": "Otpremanje…",
+    "photoSpec": "Paneli su visoki — otpremite portretnu fotografiju, 1600 × 2000 ili najbliže što imate. Drugi oblici se isecaju, nikada ne izobličuju. Najviše 10 MB.",
+    "limitHint": "Galerija prikazuje prvih {{count}} vidljivih gradova, redom. Sve preko toga ostaje ovde dok ne promenite redosled ili sakrijete neki.",
+    "empty": "Još nema gradova — galerija je skrivena na početnoj strani.",
+    "emptyHint": "Dodajte grad sa fotografijom i odmah se pojavljuje.",
+    "confirmDelete": "Ukloniti {{city}} sa početne strane?",
+    "saveError": "Čuvanje panela grada nije uspelo",
+    "deleteError": "Brisanje panela grada nije uspelo",
+    "loadError": "Učitavanje galerije gradova nije uspelo",
+    "uploadError": "Otpremanje fotografije nije uspelo"
   }
 }

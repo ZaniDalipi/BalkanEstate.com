@@ -183,5 +183,11 @@
     "subtitle": "Get the latest property alerts and market insights delivered to your inbox.",
     "placeholder": "Enter your email",
     "button": "Subscribe"
+  },
+  "cityGallery": {
+    "title": "Explore Balkan Cities",
+    "subtitle": "Hand-picked cities across the region. Open one to see what is for sale there.",
+    "action": "View properties",
+    "imageAlt": "Property in {{city}}, {{country}}"
   }
 }

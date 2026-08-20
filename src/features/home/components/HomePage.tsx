@@ -20,6 +20,7 @@ import Footer from '@/components/shared/Footer';
 
 // Lazy-load below-fold sections to reduce initial bundle
 const StackedCards = lazy(() => import('@/src/components/ui/glass-cards').then(m => ({ default: m.StackedCards })));
+const CityShowcaseSection = lazy(() => import('./CityShowcaseSection'));
 const HomeSpecialOffersSection = lazy(() => import('./HomeSpecialOffersSection'));
 const RecentlyViewedSection = lazy(() => import('./RecentlyViewedSection'));
 const TopAgentsSection = lazy(() => import('./TopAgentsSection'));
@@ -223,6 +224,13 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
         onSearch={handleSearch}
         onNavigate={handleNavigate}
       />
+
+      {/* Directly under the hero: the gallery is the first thing a visitor
+          scrolls into, so it is not wrapped in `content-below-fold` — skipping
+          its render would only delay the images it exists to show. */}
+      <Suspense fallback={<SectionFallback />}>
+        <CityShowcaseSection onNavigate={handleNavigate} />
+      </Suspense>
 
       <AppShowcaseSection onNavigate={handleNavigate} />
 

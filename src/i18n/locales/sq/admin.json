@@ -42,7 +42,8 @@
     "inquiries": "Inquiries",
     "pricing": "Pricing & Plans",
     "villaApprovals": "Miratimi i Vilave",
-    "villaDestinations": "Destinacionet e Vilave"
+    "villaDestinations": "Destinacionet e Vilave",
+    "cityShowcase": "Galeria e Qyteteve"
   },
   "properties": {
     "title": "Menaxheri i Pronave",
@@ -1017,5 +1018,38 @@
     "photoSpec": "Fotot e kartës janë portret, 18:25 — ngarkoni 2200 × 3056 ose sa më afër. Më të vogla funksionojnë por zgjerohen në karta të mëdha; më të mëdha ruhen me gjerësi 2200. Format e tjera priten, kurrë nuk shtrembërohen.",
     "newAvailable": "{{count}} destinacion(e) të integruara të reja nuk janë ende në bazën e të dhënave.",
     "importNew": "Importoji"
+  },
+  "cityShowcase": {
+    "title": "Galeria e Qyteteve",
+    "subtitle": "Qytetet e shfaqura në galerinë e faqes kryesore. Çdo panel ka nevojë për një foto — nuk ka imazh zëvendësues pas tij.",
+    "add": "Shto qytet",
+    "edit": "Ndrysho",
+    "delete": "Fshij",
+    "save": "Ruaj",
+    "saving": "Duke ruajtur…",
+    "cancel": "Anulo",
+    "saved": "Paneli i qytetit u ruajt",
+    "city": "Qyteti",
+    "cityHint": "Emri që shfaqet në panel.",
+    "country": "Shteti",
+    "searchQuery": "Termi i kërkimit",
+    "searchQueryHint": "Dërgohet te faqja e kërkimit kur vizitori hap këtë panel.",
+    "order": "Renditja",
+    "active": "Shfaq në faqen kryesore",
+    "hidden": "I fshehur",
+    "beyondLimit": "Nuk shfaqet",
+    "searches": "kërkon",
+    "choosePhoto": "Zgjidh foto",
+    "replacePhoto": "Zëvendëso foton",
+    "uploading": "Duke ngarkuar…",
+    "photoSpec": "Panelet janë të larta — ngarkoni një foto portret, 1600 × 2000 ose sa më afër. Format e tjera priten, nuk shtrembërohen. Maksimumi 10 MB.",
+    "limitHint": "Galeria shfaq {{count}} qytetet e para të dukshme, sipas renditjes. Çdo gjë përtej mbetet këtu derisa të rirenditni ose të fshihni një.",
+    "empty": "Ende asnjë qytet — galeria është e fshehur në faqen kryesore.",
+    "emptyHint": "Shtoni një qytet me foto dhe shfaqet menjëherë atje.",
+    "confirmDelete": "Ta heqim {{city}} nga faqja kryesore?",
+    "saveError": "Ruajtja e panelit të qytetit dështoi",
+    "deleteError": "Fshirja e panelit të qytetit dështoi",
+    "loadError": "Ngarkimi i galerisë së qyteteve dështoi",
+    "uploadError": "Ngarkimi i fotos dështoi"
   }
 }

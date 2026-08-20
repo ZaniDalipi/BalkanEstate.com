@@ -170,7 +170,19 @@ export const ADMIN_SECTIONS = [
   'email-templates',
   'business-listings',
   'articles',
+  'city-showcase',
 ] as const;
+
+/**
+ * How many city panels the home-page gallery shows.
+ *
+ * The gallery is an accordion: the collapsed panels split whatever the
+ * expanded one leaves, so each extra city makes them all thinner and past six
+ * the collapsed labels stop being readable on a phone. Shared so the admin can
+ * tell a curator which of their panels fall outside it, rather than letting
+ * them find out by looking at the home page.
+ */
+export const CITY_SHOWCASE_MAX_PANELS = 6;
 
 /**
  * Agency dashboard sections
@@ -212,4 +224,5 @@ export default {
   ADMIN_SECTIONS,
   AGENCY_DASHBOARD_SECTIONS,
   HOW_IT_WORKS_TABS,
+  CITY_SHOWCASE_MAX_PANELS,
 };

@@ -183,5 +183,11 @@
     "subtitle": "Primește alerte despre proprietăți și informații de piață pe email.",
     "placeholder": "Introdu adresa ta de email",
     "button": "Abonează-te"
+  },
+  "cityGallery": {
+    "title": "Explorați orașele din Balcani",
+    "subtitle": "Orașe alese cu grijă din regiune. Deschideți unul pentru a vedea ce se vinde acolo.",
+    "action": "Vezi proprietățile",
+    "imageAlt": "Proprietate în {{city}}, {{country}}"
   }
 }

@@ -212,6 +212,9 @@ const cacheConfig: Record<string, number> = {
   '/api/neighborhood-insights': 20 * 60 * 1000,
   '/api/geocoding': 20 * 60 * 1000,
   '/api/city-market-data': 60 * 60 * 1000,
+  // Admin-curated and rarely changed; every admin write invalidates this
+  // prefix, so a longer TTL costs nothing in staleness.
+  '/api/city-showcase': 5 * 60 * 1000,
   '/api/sales-history': 30 * 60 * 1000,
   '/api/site-content': 5 * 60 * 1000,
 };

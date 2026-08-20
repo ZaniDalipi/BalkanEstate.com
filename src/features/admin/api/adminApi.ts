@@ -1,7 +1,7 @@
 // Admin API module
 // Handles all admin-related API calls
 
-import { apiRequest } from '@/src/shared/api';
+import { apiRequest, uploadRequest } from '@/src/shared/api';
 
 // --- Admin Featured Subscriptions ---
 
@@ -578,3 +578,59 @@ export const importDefaultVillaDestinations = async (): Promise<{
   skipped: number;
 }> => apiRequest('/admin/villa-destinations/import-defaults', { method: 'POST', requiresAuth: true });
 
+
+// --- City showcase (home-page elastic gallery) ---
+//
+// The `city-showcase` collection is the only source of the gallery's content:
+// nothing is hardcoded on the home page, so a panel without a photo cannot
+// render at all. `imageUrl` is therefore required on the wire, not optional as
+// it is for villa destinations, and the upload endpoint is called before the
+// row exists rather than after.
+
+export interface AdminCityShowcase {
+  _id: string;
+  city: string;
+  country: string;
+  searchQuery: string;
+  imageUrl: string;
+  imagePublicId?: string;
+  displayOrder: number;
+  isActive: boolean;
+}
+
+export type CityShowcaseInput = Omit<AdminCityShowcase, '_id'>;
+
+export const getAdminCityShowcase = async (): Promise<{
+  cities: AdminCityShowcase[];
+  count: number;
+}> => apiRequest('/admin/city-showcase', { requiresAuth: true });
+
+export const createCityShowcase = async (
+  body: CityShowcaseInput
+): Promise<{ city: AdminCityShowcase }> =>
+  apiRequest('/admin/city-showcase', { method: 'POST', body, requiresAuth: true });
+
+export const updateCityShowcase = async (
+  id: string,
+  body: Partial<CityShowcaseInput>
+): Promise<{ city: AdminCityShowcase }> =>
+  apiRequest(`/admin/city-showcase/${id}`, { method: 'PATCH', body, requiresAuth: true });
+
+export const deleteCityShowcase = async (id: string): Promise<{ message: string }> =>
+  apiRequest(`/admin/city-showcase/${id}`, { method: 'DELETE', requiresAuth: true });
+
+/**
+ * Stores a photo and returns where it landed. The caller attaches the result
+ * to a panel with `createCityShowcase` or `updateCityShowcase` — which is what
+ * lets the create form obtain a photo before the row it belongs to exists.
+ */
+export const uploadCityShowcaseImage = async (
+  file: File
+): Promise<{ url: string; publicId: string }> => {
+  const form = new FormData();
+  form.append('image', file);
+  // `uploadRequest` rather than a bare fetch: it refreshes an expired access
+  // token and retries, emits `session-expired` when that fails, and waits for
+  // the CSRF cookie before posting.
+  return uploadRequest('/admin/city-showcase/upload-image', form);
+};

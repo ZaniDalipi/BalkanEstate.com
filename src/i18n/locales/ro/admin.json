@@ -42,7 +42,8 @@
     "inquiries": "Inquiries",
     "pricing": "Pricing & Plans",
     "villaApprovals": "Aprobări vile",
-    "villaDestinations": "Destinații vile"
+    "villaDestinations": "Destinații vile",
+    "cityShowcase": "Galerie de orașe"
   },
   "properties": {
     "title": "Property Manager",
@@ -1120,5 +1121,38 @@
     "photoSpec": "Fotografiile cardurilor sunt portret, 18:25 — încarcă 2200 × 3056 sau cât mai aproape. Mai mici funcționează dar sunt întinse pe cardurile mari; mai mari sunt stocate la lățimea 2200. Alte forme sunt decupate, niciodată deformate.",
     "newAvailable": "{{count}} destinații încorporate noi nu sunt încă în baza de date.",
     "importNew": "Importă-le"
+  },
+  "cityShowcase": {
+    "title": "Galerie de orașe",
+    "subtitle": "Orașele afișate în galeria de pe pagina principală. Fiecare panou are nevoie de o fotografie — nu există o imagine de rezervă în spate.",
+    "add": "Adaugă oraș",
+    "edit": "Editează",
+    "delete": "Șterge",
+    "save": "Salvează",
+    "saving": "Se salvează…",
+    "cancel": "Anulează",
+    "saved": "Panoul orașului a fost salvat",
+    "city": "Oraș",
+    "cityHint": "Numele afișat pe panou.",
+    "country": "Țară",
+    "searchQuery": "Termen de căutare",
+    "searchQueryHint": "Se trimite paginii de căutare când un vizitator deschide acest panou.",
+    "order": "Ordine",
+    "active": "Afișează pe pagina principală",
+    "hidden": "Ascuns",
+    "beyondLimit": "Neafișat",
+    "searches": "caută",
+    "choosePhoto": "Alege fotografia",
+    "replacePhoto": "Înlocuiește fotografia",
+    "uploading": "Se încarcă…",
+    "photoSpec": "Panourile sunt înalte — încărcați o fotografie portret, 1600 × 2000 sau cât mai aproape. Alte formate sunt decupate, niciodată deformate. Maximum 10 MB.",
+    "limitHint": "Galeria afișează primele {{count}} orașe vizibile, în ordine. Restul rămâne aici până reordonați sau ascundeți unul.",
+    "empty": "Niciun oraș încă — galeria este ascunsă pe pagina principală.",
+    "emptyHint": "Adăugați un oraș cu fotografie și apare imediat acolo.",
+    "confirmDelete": "Eliminați {{city}} de pe pagina principală?",
+    "saveError": "Salvarea panoului orașului a eșuat",
+    "deleteError": "Ștergerea panoului orașului a eșuat",
+    "loadError": "Încărcarea galeriei de orașe a eșuat",
+    "uploadError": "Încărcarea fotografiei a eșuat"
   }
 }

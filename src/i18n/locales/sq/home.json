@@ -183,5 +183,11 @@
     "subtitle": "Merrni njoftime pronash dhe njohuri tregu në emailin tuaj.",
     "placeholder": "Shkruani emailin tuaj",
     "button": "Abonohu"
+  },
+  "cityGallery": {
+    "title": "Eksploroni Qytetet e Ballkanit",
+    "subtitle": "Qytete të përzgjedhura në rajon. Hapni një për të parë çfarë është në shitje atje.",
+    "action": "Shiko pronat",
+    "imageAlt": "Pronë në {{city}}, {{country}}"
   }
 }

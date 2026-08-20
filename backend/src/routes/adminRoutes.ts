@@ -1027,4 +1027,182 @@ router.post(
   }
 );
 
+// ============================================================================
+// City showcase — the panels in the home-page elastic gallery
+//
+// This collection is the only source of truth for that gallery: nothing is
+// hardcoded on the frontend and there is no seeded image library behind it.
+// A panel therefore cannot exist without a photo, which is what makes
+// `imageUrl` required below rather than optional as it is for villa
+// destinations.
+// ============================================================================
+
+const cityShowcaseImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Only image files are allowed'));
+  },
+});
+
+/**
+ * Validates and normalises a city-showcase payload.
+ *
+ * `base` is the existing document on an update. A PATCH may send only the
+ * fields it means to change — the photo flow saves just `imageUrl` and
+ * `imagePublicId`, the reorder flow just `displayOrder` — so anything omitted
+ * falls back to `base` before validation runs. Without that, a partial payload
+ * would be judged against an empty city name and rejected outright.
+ */
+function parseCityShowcaseBody(
+  body: any,
+  base?: Record<string, unknown> | null
+): { error?: string; value?: Record<string, unknown> } {
+  const pick = (key: string) => (body?.[key] !== undefined ? body[key] : base?.[key]);
+
+  const city = String(pick('city') ?? '').trim();
+  const country = String(pick('country') ?? '').trim();
+  const searchQuery = String(pick('searchQuery') ?? '').trim();
+
+  if (city.length < 2 || city.length > 80) return { error: 'City must be between 2 and 80 characters' };
+  if (country.length < 2 || country.length > 60) return { error: 'Country must be between 2 and 60 characters' };
+  if (searchQuery.length < 2 || searchQuery.length > 80) {
+    return { error: 'Search term must be between 2 and 80 characters' };
+  }
+
+  // A panel is a full-bleed photo with a label on it. Without an image there
+  // is nothing to render, and the gallery has no stand-in to borrow, so this
+  // is rejected here rather than reaching the home page as an empty panel.
+  const imageUrl = String(pick('imageUrl') ?? '').trim();
+  if (!imageUrl) return { error: 'A photo is required' };
+  if (!/^https:\/\//i.test(imageUrl)) return { error: 'Photo URL must be https' };
+  if (imageUrl.length > 2048) return { error: 'Photo URL is too long' };
+
+  const orderRaw = pick('displayOrder');
+  const displayOrder = orderRaw === undefined || orderRaw === null || orderRaw === '' ? 0 : Number(orderRaw);
+  if (!Number.isFinite(displayOrder)) return { error: 'Display order must be a number' };
+
+  const imagePublicId = pick('imagePublicId');
+  const isActive = pick('isActive');
+
+  return {
+    value: {
+      city,
+      country,
+      searchQuery,
+      imageUrl,
+      imagePublicId: imagePublicId ? String(imagePublicId).trim() : undefined,
+      displayOrder,
+      isActive: isActive === undefined ? true : Boolean(isActive),
+    },
+  };
+}
+
+// GET /api/admin/city-showcase — every panel, active or not
+router.get('/city-showcase', logAdminAction('VIEW_CITY_SHOWCASE'), async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const CityShowcase = (await import('../models/CityShowcase')).default;
+    const cities = await CityShowcase.find({}).sort({ displayOrder: 1, city: 1 }).lean();
+    res.json({ cities, count: cities.length });
+  } catch (err) {
+    adminLogger.error('List city showcase error:', err);
+    res.status(500).json({ message: 'Failed to load city showcase' });
+  }
+});
+
+// POST /api/admin/city-showcase
+router.post('/city-showcase', logAdminAction('CREATE_CITY_SHOWCASE'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { error, value } = parseCityShowcaseBody(req.body);
+    if (error) { res.status(400).json({ message: error }); return; }
+
+    const CityShowcase = (await import('../models/CityShowcase')).default;
+    const city = await CityShowcase.create(value!);
+    void invalidateCache('/api/city-showcase');
+    res.status(201).json({ city });
+  } catch (err) {
+    adminLogger.error('Create city showcase error:', err);
+    res.status(500).json({ message: 'Failed to create city panel' });
+  }
+});
+
+// PATCH /api/admin/city-showcase/:id
+router.patch('/city-showcase/:id', logAdminAction('UPDATE_CITY_SHOWCASE'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const CityShowcase = (await import('../models/CityShowcase')).default;
+    const existing = await CityShowcase.findById(id).lean();
+    if (!existing) { res.status(404).json({ message: 'City panel not found' }); return; }
+
+    const { error, value } = parseCityShowcaseBody(req.body, existing as Record<string, unknown>);
+    if (error) { res.status(400).json({ message: error }); return; }
+
+    const city = await CityShowcase.findByIdAndUpdate(id, value!, { new: true, runValidators: true });
+    if (!city) { res.status(404).json({ message: 'City panel not found' }); return; }
+
+    void invalidateCache('/api/city-showcase');
+    res.json({ city });
+  } catch (err) {
+    adminLogger.error('Update city showcase error:', err);
+    res.status(500).json({ message: 'Failed to update city panel' });
+  }
+});
+
+// DELETE /api/admin/city-showcase/:id
+router.delete('/city-showcase/:id', logAdminAction('DELETE_CITY_SHOWCASE'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const CityShowcase = (await import('../models/CityShowcase')).default;
+    const city = await CityShowcase.findByIdAndDelete(id);
+    if (!city) { res.status(404).json({ message: 'City panel not found' }); return; }
+
+    void invalidateCache('/api/city-showcase');
+    res.json({ message: 'City panel deleted', id: String(city._id) });
+  } catch (err) {
+    adminLogger.error('Delete city showcase error:', err);
+    res.status(500).json({ message: 'Failed to delete city panel' });
+  }
+});
+
+// POST /api/admin/city-showcase/upload-image
+//
+// Returns the stored URL only; the caller attaches it to a panel with POST or
+// PATCH. That split is what lets the create form upload a photo before the
+// row it belongs to exists — required, since a row without a photo is invalid.
+router.post(
+  '/city-showcase/upload-image',
+  logAdminAction('UPLOAD_CITY_SHOWCASE_IMAGE'),
+  cityShowcaseImageUpload.single('image'),
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      if (!req.file) { res.status(400).json({ message: 'No image file provided' }); return; }
+
+      const { uploadImage } = await import('../services/cloudinaryService');
+      // Portrait master: the gallery panel is a tall column — roughly 4:5 when
+      // expanded on a desktop and far narrower when collapsed — and it is
+      // always `object-cover`, so a landscape master would lose its sides. The
+      // ceiling covers an expanded panel on a high-DPI screen without storing
+      // more than the largest delivery ever asks for.
+      const result = await uploadImage(req.file.buffer, {
+        userId: (req as any).user._id.toString(),
+        type: 'listing' as any,
+        maxWidth: 1600,
+        maxHeight: 2000, // 4:5, so a portrait upload is never squeezed
+        preserveQuality: true,
+      });
+
+      void invalidateCache('/api/city-showcase');
+      res.json({ url: result.url, publicId: result.publicId });
+    } catch (err) {
+      adminLogger.error('Upload city showcase image error:', err);
+      res.status(500).json({ message: 'Failed to upload image' });
+    }
+  }
+);
+
 export default router;

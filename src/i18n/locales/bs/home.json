@@ -183,5 +183,11 @@
     "subtitle": "Primajte obavještenja o nekretninama i tržišne uvide na vaš email.",
     "placeholder": "Unesite vaš email",
     "button": "Pretplatite Se"
+  },
+  "cityGallery": {
+    "title": "Istražite gradove Balkana",
+    "subtitle": "Pažljivo odabrani gradovi u regiji. Otvorite jedan da vidite šta je na prodaju.",
+    "action": "Pogledaj nekretnine",
+    "imageAlt": "Nekretnina u {{city}}, {{country}}"
   }
 }
