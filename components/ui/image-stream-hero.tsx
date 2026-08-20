@@ -532,7 +532,23 @@ export function ImageStreamHero({
                     animation: `${name} ${speed}s linear infinite`,
                     // Negative delay drops each card mid-flight, so the
                     // corridor is already full on the first frame.
-                    animationDelay: `${-(i * speed) / cards}s`,
+                    //
+                    // LOCAL ADDITION: the left rail runs half a step behind
+                    // the right one. Both rails used the same phase, so card i
+                    // of one rail and card i of the other were always at
+                    // exactly the same depth and therefore exactly the same
+                    // size. At the vanishing point, where `railBirth` crosses
+                    // each newborn to the opposite side of the axis, that put
+                    // two identically sized cards on top of each other — the
+                    // pair overlapped by more than half their width and read
+                    // as a glitch rather than as depth. It only became visible
+                    // once the cards were enlarged for phones; with 2.6cqw
+                    // newborns the collision was too small to notice.
+                    //
+                    // Half a step is what makes them interleave: every card in
+                    // the ribbon now has its own depth, so where two meet, one
+                    // is plainly nearer and simply passes in front.
+                    animationDelay: `${-((i + rail * 0.5) * speed) / cards}s`,
                     backfaceVisibility: "hidden",
                     // LOCAL ADDITION: pause every card — keyed on "is anything
                     // active", not "is this card active" — so a hold of any

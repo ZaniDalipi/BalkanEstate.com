@@ -127,9 +127,9 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
     // ever was — on a device that is driven by touch.
     const cards = isTouch ? 7 : 8;
     const path = isMobile
-        ? { cardRadius: 0.9, birthHeight: 18, exitHeight: 118, railExit: 42 }
+        ? { cardRadius: 0.9, birthHeight: 21, exitHeight: 124, railExit: 42 }
         : isTablet
-            ? { cardRadius: 0.9, birthHeight: 12, exitHeight: 84, railExit: 40 }
+            ? { cardRadius: 0.9, birthHeight: 14, exitHeight: 90, railExit: 40 }
             : { cardRadius: 0.9, exitHeight: 50 };
 
     return (
