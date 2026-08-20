@@ -186,7 +186,6 @@
   },
   "cityGallery": {
     "title": "Eksploroni Qytetet e Ballkanit",
-    "subtitle": "Qytete të përzgjedhura në rajon. Hapni një për të parë çfarë është në shitje ose me qira atje.",
     "imageAlt": "Pronë në {{city}}, {{country}}",
     "buy": "Blej",
     "rent": "Merr me qira"

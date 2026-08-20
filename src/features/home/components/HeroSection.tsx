@@ -11,6 +11,12 @@ interface HeroSectionProps {
   onSearchChange: (value: string) => void;
   onSearch: () => void;
   onNavigate: (view: string, path: string) => void;
+  /**
+   * Rendered directly under the Buy / Rent / List buttons, inside the hero's
+   * own container. A slot rather than an import so the hero stays unaware of
+   * whatever the home page decides to put there — today the city gallery.
+   */
+  belowActions?: React.ReactNode;
 }
 
 interface PlatformStats {
@@ -63,6 +69,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   onSearchChange,
   onSearch,
   onNavigate,
+  belowActions,
 }) => {
   const { t } = useTranslation(['home']);
   const [isFocused, setIsFocused] = useState(false);
@@ -181,7 +188,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         pointerEvents: 'none',
       }} />
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 pt-12 pb-16 sm:pt-24 sm:pb-28 hero-stagger">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 pt-6 pb-12 sm:pt-10 sm:pb-16 hero-stagger">
         {/* Title */}
         <h1
           className="text-center text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-tight max-w-3xl mx-auto hero-fade-up"
@@ -213,7 +220,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         </p>
 
         {/* Search Bar — liquid glass */}
-        <div className="mt-8 sm:mt-10 max-w-2xl mx-auto relative z-20 hero-fade-up" style={{ animationDelay: '0.16s' }} ref={wrapperRef}>
+        <div className="mt-6 sm:mt-8 max-w-2xl mx-auto relative z-20 hero-fade-up" style={{ animationDelay: '0.16s' }} ref={wrapperRef}>
           <div style={{
             position: 'relative',
             zIndex: 10,
@@ -345,7 +352,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
 
         {/* CTA Buttons — liquid glass */}
-        <div className="mt-6 sm:mt-8 flex flex-wrap justify-center gap-2 sm:gap-3 hero-fade-up" style={{ animationDelay: '0.24s' }}>
+        <div className="mt-5 sm:mt-6 flex flex-wrap justify-center gap-2 sm:gap-3 hero-fade-up" style={{ animationDelay: '0.24s' }}>
           <button
             onClick={() => onNavigate('search', '/search')}
             style={{
@@ -389,8 +396,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           ))}
         </div>
 
+        {belowActions}
+
         {/* Stats Strip — liquid glass card */}
-        <div className="mt-10 sm:mt-14 max-w-3xl mx-auto hero-fade-up" style={{ animationDelay: '0.32s' }}>
+        <div className="mt-10 sm:mt-12 max-w-3xl mx-auto hero-fade-up" style={{ animationDelay: '0.32s' }}>
           <div style={{
             borderRadius: '20px',
             padding: '1rem 1.5rem',

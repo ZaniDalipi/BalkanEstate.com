@@ -9,6 +9,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ElasticGallery, type ElasticGalleryItem } from '../components/ui/elastic-gallery';
 import { validateCityShowcase } from '../shared/utils/validation';
+import { pickShowcaseCities } from '../features/home/utils/pickShowcaseCities';
+import type { ShowcaseCity } from '../features/home/api/cityShowcaseApi';
 
 vi.mock('@/src/shared/api', () => ({
     apiRequest: vi.fn(),
@@ -216,5 +218,72 @@ describe('ElasticGallery', () => {
         );
 
         expect(container).toBeEmptyDOMElement();
+    });
+});
+
+describe('pickShowcaseCities', () => {
+    const city = (id: string, country: string): ShowcaseCity => ({
+        id,
+        city: id,
+        country,
+        searchQuery: id,
+        imageUrl: `https://img/${id}.jpg`,
+    });
+
+    const pool: ShowcaseCity[] = [
+        city('tirana', 'Albania'),
+        city('durres', 'Albania'),
+        city('vlora', 'Albania'),
+        city('split', 'Croatia'),
+        city('zagreb', 'Croatia'),
+        city('ohrid', 'North Macedonia'),
+        city('kotor', 'Montenegro'),
+    ];
+
+    /** Deterministic stand-in for Math.random, so a pick can be asserted. */
+    const sequence = (values: number[]) => {
+        let i = 0;
+        return () => values[i++ % values.length];
+    };
+
+    it('prefers a different country for every panel', () => {
+        const picked = pickShowcaseCities(pool, 4, sequence([0.1, 0.9, 0.4, 0.7, 0.2, 0.5]));
+
+        const countries = picked.map(c => c.country);
+        expect(new Set(countries).size).toBe(countries.length);
+    });
+
+    it('fills the remaining slots once every country is represented', () => {
+        // Four countries in the pool, six slots: the last two have to double up
+        // rather than leaving the gallery short.
+        const picked = pickShowcaseCities(pool, 6, sequence([0.3, 0.8, 0.1, 0.6]));
+
+        expect(picked).toHaveLength(6);
+        expect(new Set(picked.map(c => c.id)).size).toBe(6);
+    });
+
+    it('never returns more than the pool holds', () => {
+        expect(pickShowcaseCities(pool.slice(0, 2), 6, sequence([0.5]))).toHaveLength(2);
+        expect(pickShowcaseCities([], 6)).toEqual([]);
+        expect(pickShowcaseCities(pool, 0)).toEqual([]);
+    });
+
+    it('draws a different set as the randomness changes', () => {
+        // What "random on every visit" actually means: two draws over the same
+        // curated list should not be pinned to the same cities.
+        const first = pickShowcaseCities(pool, 3, sequence([0.05, 0.35, 0.65, 0.95]));
+        const second = pickShowcaseCities(pool, 3, sequence([0.95, 0.65, 0.35, 0.05]));
+
+        expect(first.map(c => c.id)).not.toEqual(second.map(c => c.id));
+    });
+
+    it('leaves the caller\'s list untouched', () => {
+        const order = pool.map(c => c.id);
+
+        pickShowcaseCities(pool, 5, sequence([0.2, 0.7, 0.4]));
+
+        // The array belongs to the React Query cache — shuffling it in place
+        // would reorder it for every other reader of that cache entry.
+        expect(pool.map(c => c.id)).toEqual(order);
     });
 });

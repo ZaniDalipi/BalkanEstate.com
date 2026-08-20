@@ -8,6 +8,7 @@ import {
 import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
 import { CITY_SHOWCASE_MAX_PANELS } from '@/src/shared/constants/app.constants';
 import { useShowcaseCities } from '../hooks/useShowcaseCities';
+import { pickShowcaseCities } from '../utils/pickShowcaseCities';
 
 /** Delivery widths for a panel. The largest covers an expanded panel at 2x. */
 const PANEL_WIDTHS = [320, 480, 640, 960, 1280, 1600];
@@ -27,7 +28,7 @@ interface CityShowcaseSectionProps {
 const GallerySkeleton: React.FC = () => (
     // Same geometry as the real gallery, so the section does not jump height
     // when the panels arrive.
-    <div className="mx-auto flex h-[460px] w-full max-w-6xl flex-col gap-2 px-4 md:h-[560px] md:flex-row md:gap-4">
+    <div className="mx-auto flex h-[380px] w-full max-w-6xl flex-col gap-2 md:h-[420px] md:flex-row md:gap-4">
         {Array.from({ length: 4 }).map((_, index) => (
             <div
                 key={index}
@@ -51,9 +52,21 @@ const CityShowcaseSection: React.FC<CityShowcaseSectionProps> = ({ onNavigate })
     const { t } = useTranslation(['home']);
     const { cities, isLoading, isError } = useShowcaseCities();
 
+    /*
+     * A fresh draw per mount, not per render: the memo below would otherwise
+     * reshuffle the panels on every parent re-render and the gallery would
+     * reorder itself under the visitor's pointer. Holding the draw in a memo
+     * keyed on the fetched list pins it for as long as that list is the same
+     * one — a new visit, or a curated change, deals again.
+     */
+    const shown = useMemo(
+        () => pickShowcaseCities(cities, CITY_SHOWCASE_MAX_PANELS),
+        [cities],
+    );
+
     const items = useMemo<ElasticGalleryItem[]>(
         () =>
-            cities.slice(0, CITY_SHOWCASE_MAX_PANELS).map(city => ({
+            shown.map(city => ({
                 id: city.id,
                 title: city.city,
                 subtitle: city.country,
@@ -69,7 +82,7 @@ const CityShowcaseSection: React.FC<CityShowcaseSectionProps> = ({ onNavigate })
                     country: city.country,
                 }),
             })),
-        [cities, t],
+        [shown, t],
     );
 
     /*
@@ -81,11 +94,11 @@ const CityShowcaseSection: React.FC<CityShowcaseSectionProps> = ({ onNavigate })
      */
     const openFor = useCallback(
         (item: ElasticGalleryItem, view: 'search' | 'rentals', path: string) => {
-            const city = cities.find(c => c.id === item.id);
+            const city = shown.find(c => c.id === item.id);
             if (!city) return;
             onNavigate(view, `${path}?q=${encodeURIComponent(city.searchQuery)}`);
         },
-        [cities, onNavigate],
+        [shown, onNavigate],
     );
 
     /** Buy and rent are separate pages, so the panel offers both rather than
@@ -111,20 +124,14 @@ const CityShowcaseSection: React.FC<CityShowcaseSectionProps> = ({ onNavigate })
     // owns the retry, so a transient failure recovers without help from here.
     if (!isLoading && (isError || items.length === 0)) return null;
 
-    // The section sits directly under the hero, so its top padding is small:
-    // the gallery is the first thing below the fold and should not need a
-    // scroll of empty white to reach.
+    /*
+     * No heading of its own. The gallery is rendered inside the hero, right
+     * under its buttons, and a second heading there would compete with the
+     * hero's own. The group still carries an accessible name — see `label`
+     * below — so it is announced without anything being drawn.
+     */
     return (
-        <section className="bg-white pb-12 pt-2 sm:pb-16 sm:pt-4">
-            <div className="mx-auto mb-5 max-w-6xl px-4">
-                <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">
-                    {t('home:cityGallery.title', 'Explore Balkan Cities')}
-                </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                    {t('home:cityGallery.subtitle', 'Hand-picked cities across the region. Open one to browse what is for sale or for rent there.')}
-                </p>
-            </div>
-
+        <section className="mt-6 sm:mt-8">
             {isLoading ? (
                 <GallerySkeleton />
             ) : (

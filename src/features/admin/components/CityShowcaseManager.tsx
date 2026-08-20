@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { CITY_SHOWCASE_MAX_PANELS } from '@/src/shared/constants/app.constants';
@@ -34,16 +34,6 @@ const CityShowcaseManager: React.FC = () => {
         rows, isLoading, loadError, error, notice, saving, save, remove,
         importCities, importing, missingPhoto,
     } = useCityShowcaseManager(() => setEditing(null));
-
-    /**
-     * Ids the gallery will not reach: active panels past the display limit.
-     * Without this a curator adds a seventh city, sees it listed here, and has
-     * no way to know the home page stops at six.
-     */
-    const overflowIds = useMemo(() => {
-        const active = rows.filter(row => row.isActive);
-        return new Set(active.slice(CITY_SHOWCASE_MAX_PANELS).map(row => row._id));
-    }, [rows]);
 
     const handleDelete = (row: AdminCityShowcase) => {
         if (!window.confirm(t('admin:cityShowcase.confirmDelete', 'Remove {{city}} from the home page?', { city: row.city }))) return;
@@ -81,7 +71,7 @@ const CityShowcaseManager: React.FC = () => {
             </div>
 
             <p className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs text-blue-800">
-                {t('admin:cityShowcase.limitHint', 'The gallery shows the first {{count}} visible cities, in order. Anything past that stays here until you reorder or hide one.', { count: CITY_SHOWCASE_MAX_PANELS })}
+                {t('admin:cityShowcase.limitHint', 'The gallery shows {{count}} of your visible cities per visit, drawn at random and spread across countries — so every city here gets shown, just not all at once.', { count: CITY_SHOWCASE_MAX_PANELS })}
             </p>
 
             {(error || loadError) && (
@@ -149,11 +139,6 @@ const CityShowcaseManager: React.FC = () => {
                                     {!row.isActive && (
                                         <span className="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-500">
                                             {t('admin:cityShowcase.hidden', 'Hidden')}
-                                        </span>
-                                    )}
-                                    {overflowIds.has(row._id) && (
-                                        <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800">
-                                            {t('admin:cityShowcase.beyondLimit', 'Not shown')}
                                         </span>
                                     )}
                                 </p>

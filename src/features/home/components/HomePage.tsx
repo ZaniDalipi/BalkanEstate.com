@@ -15,12 +15,12 @@ import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import HeroSection from './HeroSection';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import AppShowcaseSection from './AppShowcaseSection';
+import CityShowcaseSection from './CityShowcaseSection';
 import QuickAccessSection from './QuickAccessSection';
 import Footer from '@/components/shared/Footer';
 
 // Lazy-load below-fold sections to reduce initial bundle
 const StackedCards = lazy(() => import('@/src/components/ui/glass-cards').then(m => ({ default: m.StackedCards })));
-const CityShowcaseSection = lazy(() => import('./CityShowcaseSection'));
 const HomeSpecialOffersSection = lazy(() => import('./HomeSpecialOffersSection'));
 const RecentlyViewedSection = lazy(() => import('./RecentlyViewedSection'));
 const TopAgentsSection = lazy(() => import('./TopAgentsSection'));
@@ -218,19 +218,17 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
       <OrganizationSchema />
       <FAQSchema faqs={realEstateFAQs} />
 
+      {/* The gallery goes inside the hero, directly under its buttons, so it
+          is on screen when the page opens. No `content-below-fold` wrapper for
+          the same reason — skipping its render would delay the very images it
+          exists to show. */}
       <HeroSection
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
         onSearch={handleSearch}
         onNavigate={handleNavigate}
+        belowActions={<CityShowcaseSection onNavigate={handleNavigate} />}
       />
-
-      {/* Directly under the hero: the gallery is the first thing a visitor
-          scrolls into, so it is not wrapped in `content-below-fold` — skipping
-          its render would only delay the images it exists to show. */}
-      <Suspense fallback={<SectionFallback />}>
-        <CityShowcaseSection onNavigate={handleNavigate} />
-      </Suspense>
 
       <AppShowcaseSection onNavigate={handleNavigate} />
 
