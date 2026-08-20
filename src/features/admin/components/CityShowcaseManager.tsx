@@ -32,6 +32,7 @@ const CityShowcaseManager: React.FC = () => {
 
     const {
         rows, isLoading, loadError, error, notice, saving, save, remove,
+        importCities, importing, missingPhoto,
     } = useCityShowcaseManager(() => setEditing(null));
 
     /**
@@ -60,12 +61,23 @@ const CityShowcaseManager: React.FC = () => {
                         {t('admin:cityShowcase.subtitle', 'Cities shown in the home-page gallery. Each panel needs a photo — there is no stand-in image behind it.')}
                     </p>
                 </div>
-                <button
-                    onClick={() => setEditing(emptyCityDraft(rows.length))}
-                    className="flex-shrink-0 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-white hover:bg-primary-dark"
-                >
-                    + {t('admin:cityShowcase.add', 'Add city')}
-                </button>
+                <div className="flex flex-shrink-0 gap-2">
+                    <button
+                        onClick={importCities}
+                        disabled={importing}
+                        className="rounded-lg bg-neutral-100 px-3.5 py-2 text-sm font-semibold text-gray-700 hover:bg-neutral-200 disabled:opacity-50"
+                    >
+                        {importing
+                            ? t('admin:cityShowcase.importing', 'Importing…')
+                            : t('admin:cityShowcase.import', 'Import cities from database')}
+                    </button>
+                    <button
+                        onClick={() => setEditing(emptyCityDraft(rows.length))}
+                        className="rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-white hover:bg-primary-dark"
+                    >
+                        + {t('admin:cityShowcase.add', 'Add city')}
+                    </button>
+                </div>
             </div>
 
             <p className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs text-blue-800">
@@ -78,6 +90,21 @@ const CityShowcaseManager: React.FC = () => {
                 </div>
             )}
             {notice && <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">{notice}</div>}
+
+            {/* Which cities the import could not bring in, and why. Without
+                this the count simply comes up short and a curator has no way
+                to know which cities are waiting on a photo. */}
+            {missingPhoto.length > 0 && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                    <p className="font-medium">
+                        {t('admin:cityShowcase.missingPhotoTitle', '{{count}} city/cities have no photo and were not imported', { count: missingPhoto.length })}
+                    </p>
+                    <p className="mt-1 text-xs">
+                        {t('admin:cityShowcase.missingPhotoHint', 'Add them with “Add city” and upload a photo — the gallery cannot show a panel without one.')}
+                    </p>
+                    <p className="mt-1 text-xs text-amber-700">{missingPhoto.join(' · ')}</p>
+                </div>
+            )}
 
             {editing && (
                 <CityShowcaseForm
@@ -98,7 +125,7 @@ const CityShowcaseManager: React.FC = () => {
                 <div className="rounded-xl border border-dashed border-gray-300 py-12 text-center text-sm text-gray-500">
                     <p>{t('admin:cityShowcase.empty', 'No cities yet — the gallery is hidden on the home page.')}</p>
                     <p className="mt-1 text-xs text-gray-400">
-                        {t('admin:cityShowcase.emptyHint', 'Add a city with a photo and it appears there straight away.')}
+                        {t('admin:cityShowcase.emptyHint', 'Press “Import cities from database” to bring in the cities you already have, or add one by hand with a photo.')}
                     </p>
                 </div>
             ) : (

@@ -1,6 +1,10 @@
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ElasticGallery, type ElasticGalleryItem } from '@/src/components/ui/elastic-gallery';
+import {
+    ElasticGallery,
+    type ElasticGalleryAction,
+    type ElasticGalleryItem,
+} from '@/src/components/ui/elastic-gallery';
 import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
 import { CITY_SHOWCASE_MAX_PANELS } from '@/src/shared/constants/app.constants';
 import { useShowcaseCities } from '../hooks/useShowcaseCities';
@@ -21,7 +25,9 @@ interface CityShowcaseSectionProps {
 }
 
 const GallerySkeleton: React.FC = () => (
-    <div className="mx-auto flex h-[440px] w-full max-w-6xl flex-col gap-2 px-4 md:h-[600px] md:flex-row md:gap-4">
+    // Same geometry as the real gallery, so the section does not jump height
+    // when the panels arrive.
+    <div className="mx-auto flex h-[460px] w-full max-w-6xl flex-col gap-2 px-4 md:h-[560px] md:flex-row md:gap-4">
         {Array.from({ length: 4 }).map((_, index) => (
             <div
                 key={index}
@@ -69,31 +75,53 @@ const CityShowcaseSection: React.FC<CityShowcaseSectionProps> = ({ onNavigate })
     /*
      * `searchQuery` rather than the display name: the two differ whenever an
      * admin labels a panel one way ("Coastal Montenegro") and searches another
-     * ("Budva"). Only `q` is sent — the search page normalises a `country`
-     * param against its own list of country keys, and a free-text country from
-     * the admin that misses that list would filter every result away.
+     * ("Budva"). Only `q` is sent — both pages normalise a `country` param
+     * against their own list of country keys, and a free-text country from the
+     * admin that misses that list would filter every result away.
      */
-    const handleSelect = useCallback(
-        (item: ElasticGalleryItem) => {
+    const openFor = useCallback(
+        (item: ElasticGalleryItem, view: 'search' | 'rentals', path: string) => {
             const city = cities.find(c => c.id === item.id);
             if (!city) return;
-            onNavigate('search', `/search?q=${encodeURIComponent(city.searchQuery)}`);
+            onNavigate(view, `${path}?q=${encodeURIComponent(city.searchQuery)}`);
         },
         [cities, onNavigate],
+    );
+
+    /** Buy and rent are separate pages, so the panel offers both rather than
+     *  dropping the visitor on one and making them switch. */
+    const actions = useMemo<ElasticGalleryAction[]>(
+        () => [
+            {
+                id: 'buy',
+                label: t('home:cityGallery.buy', 'Buy'),
+                onSelect: item => openFor(item, 'search', '/search'),
+            },
+            {
+                id: 'rent',
+                label: t('home:cityGallery.rent', 'Rent'),
+                variant: 'secondary',
+                onSelect: item => openFor(item, 'rentals', '/rent'),
+            },
+        ],
+        [openFor, t],
     );
 
     // Nothing curated, or the list could not be loaded: no section. React Query
     // owns the retry, so a transient failure recovers without help from here.
     if (!isLoading && (isError || items.length === 0)) return null;
 
+    // The section sits directly under the hero, so its top padding is small:
+    // the gallery is the first thing below the fold and should not need a
+    // scroll of empty white to reach.
     return (
-        <section className="bg-white py-12 sm:py-16">
-            <div className="mx-auto mb-8 max-w-6xl px-4">
+        <section className="bg-white pb-12 pt-2 sm:pb-16 sm:pt-4">
+            <div className="mx-auto mb-5 max-w-6xl px-4">
                 <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">
                     {t('home:cityGallery.title', 'Explore Balkan Cities')}
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
-                    {t('home:cityGallery.subtitle', 'Hand-picked cities across the region. Open one to see what is for sale there.')}
+                    {t('home:cityGallery.subtitle', 'Hand-picked cities across the region. Open one to browse what is for sale or for rent there.')}
                 </p>
             </div>
 
@@ -103,8 +131,7 @@ const CityShowcaseSection: React.FC<CityShowcaseSectionProps> = ({ onNavigate })
                 <ElasticGallery
                     items={items}
                     label={t('home:cityGallery.title', 'Explore Balkan Cities')}
-                    actionLabel={t('home:cityGallery.action', 'View properties')}
-                    onItemSelect={handleSelect}
+                    actions={actions}
                 />
             )}
         </section>

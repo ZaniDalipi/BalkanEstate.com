@@ -1248,11 +1248,17 @@
     "photoSpec": "Panels are tall — upload a portrait photo, 1600 × 2000 or as close as you have. Other shapes are cropped, never squashed. Max 10 MB.",
     "limitHint": "The gallery shows the first {{count}} visible cities, in order. Anything past that stays here until you reorder or hide one.",
     "empty": "No cities yet — the gallery is hidden on the home page.",
-    "emptyHint": "Add a city with a photo and it appears there straight away.",
+    "emptyHint": "Press “Import cities from database” to bring in the cities you already have, or add one by hand with a photo.",
     "confirmDelete": "Remove {{city}} from the home page?",
     "saveError": "Failed to save city panel",
     "deleteError": "Failed to delete city panel",
     "loadError": "Failed to load the city gallery",
-    "uploadError": "Photo upload failed"
+    "uploadError": "Photo upload failed",
+    "import": "Import cities from database",
+    "importing": "Importing…",
+    "imported": "Imported {{imported}} city/cities, {{present}} already in the gallery",
+    "importError": "Failed to import cities from the database",
+    "missingPhotoTitle": "{{count}} city/cities have no photo and were not imported",
+    "missingPhotoHint": "Add them with “Add city” and upload a photo — the gallery cannot show a panel without one."
   }
 }

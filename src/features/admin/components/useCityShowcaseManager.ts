@@ -8,6 +8,7 @@ import {
     createCityShowcase,
     updateCityShowcase,
     deleteCityShowcase,
+    importCitiesIntoShowcase,
     type AdminCityShowcase,
 } from '../api/adminApi';
 import type { CityShowcaseDraft } from './CityShowcaseForm';
@@ -24,6 +25,11 @@ interface UseCityShowcaseManager {
     /** Validates, then creates or updates. Returns false if it never left. */
     save: (draft: CityShowcaseDraft) => boolean;
     remove: (row: AdminCityShowcase) => void;
+    /** Copies the cities already in the database into the gallery. */
+    importCities: () => void;
+    importing: boolean;
+    /** Cities the last import skipped for want of a photo. */
+    missingPhoto: string[];
 }
 
 /** Draft (strings, for the form) → request body (typed, for the server). */
@@ -59,6 +65,7 @@ export function useCityShowcaseManager(onSaved: () => void): UseCityShowcaseMana
     const queryClient = useQueryClient();
     const [error, setError] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
+    const [missingPhoto, setMissingPhoto] = useState<string[]>([]);
 
     const adminKey = cityShowcaseKeys.admin();
 
@@ -134,6 +141,30 @@ export function useCityShowcaseManager(onSaved: () => void): UseCityShowcaseMana
         onSettled: invalidateAll,
     });
 
+    /**
+     * Pulls the cities already in the database into the gallery. Idempotent
+     * server-side (matched on city + country), so pressing it again after the
+     * market data grows brings in only what is missing.
+     */
+    const importMutation = useMutation({
+        mutationFn: importCitiesIntoShowcase,
+        onMutate: () => {
+            setError(null);
+            setMissingPhoto([]);
+        },
+        onSuccess: result => {
+            setMissingPhoto(result.missingPhoto ?? []);
+            setNotice(
+                t('admin:cityShowcase.imported', 'Imported {{imported}} city/cities, {{present}} already in the gallery', {
+                    imported: result.imported,
+                    present: result.alreadyPresent,
+                })
+            );
+        },
+        onError: () => setError(t('admin:cityShowcase.importError', 'Failed to import cities from the database')),
+        onSettled: invalidateAll,
+    });
+
     const save = useCallback(
         (draft: CityShowcaseDraft) => {
             // Validated before the request so a bad row is rejected inline
@@ -169,5 +200,8 @@ export function useCityShowcaseManager(onSaved: () => void): UseCityShowcaseMana
         saving: saveMutation.isPending,
         save,
         remove,
+        importCities: () => importMutation.mutate(),
+        importing: importMutation.isPending,
+        missingPhoto,
     };
 }

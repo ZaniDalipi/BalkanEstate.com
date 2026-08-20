@@ -186,8 +186,9 @@
   },
   "cityGallery": {
     "title": "Explore Balkan Cities",
-    "subtitle": "Hand-picked cities across the region. Open one to see what is for sale there.",
-    "action": "View properties",
-    "imageAlt": "Property in {{city}}, {{country}}"
+    "subtitle": "Hand-picked cities across the region. Open one to browse what is for sale or for rent there.",
+    "imageAlt": "Property in {{city}}, {{country}}",
+    "buy": "Buy",
+    "rent": "Rent"
   }
 }

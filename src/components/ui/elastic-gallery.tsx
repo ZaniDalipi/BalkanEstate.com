@@ -1,5 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { ArrowUpRight } from 'lucide-react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -22,64 +21,67 @@ export interface ElasticGalleryItem {
     alt: string;
 }
 
+/** A button offered on the expanded panel. */
+export interface ElasticGalleryAction {
+    id: string;
+    label: string;
+    onSelect: (item: ElasticGalleryItem) => void;
+    /** `primary` is solid, `secondary` is glass over the photo. */
+    variant?: 'primary' | 'secondary';
+}
+
 interface ElasticGalleryProps {
     items: ElasticGalleryItem[];
-    /** Call-to-action under the title of the active panel. */
-    actionLabel: string;
-    /**
-     * Fired when a panel is chosen — click on an already-active panel, Enter,
-     * or Space. Hovering and focusing only expand a panel; they never select
-     * it, so a keyboard user can walk the gallery without being navigated away.
-     */
-    onItemSelect?: (item: ElasticGalleryItem) => void;
+    /** Buttons rendered on whichever panel is expanded. */
+    actions: ElasticGalleryAction[];
     /** Accessible name for the group, e.g. "Explore cities". */
     label: string;
     className?: string;
 }
 
 /**
+ * The photo has to cover the panel, and `index.html` ships an unlayered
+ * `img { height: auto }`. Tailwind v4 emits its utilities inside
+ * `@layer utilities`, and any unlayered rule beats a layered one no matter how
+ * specific the layered one is — so `h-full object-cover` loses that fight and
+ * the photo renders at its natural height with the panel showing through
+ * underneath. An inline style outranks both, which is why the sizing lives
+ * here instead of in the class list.
+ */
+const COVER_STYLE: React.CSSProperties = {
+    height: '100%',
+    width: '100%',
+    objectFit: 'cover',
+    maxWidth: 'none',
+};
+
+/** White text over an unknown photo needs its own contrast, not the photo's. */
+const TEXT_SHADOW = '[text-shadow:0_2px_10px_rgba(0,0,0,0.65)]';
+
+/**
  * Accordion gallery: the active panel expands to take four times the width of
  * its siblings, the rest collapse into labelled slivers.
  *
  * Presentational by design — no data fetching, no routing, no translation
- * lookups. It renders the items it is handed and reports selections upward.
+ * lookups. It renders the items it is handed and reports which action was
+ * pressed on which item.
  *
- * Interaction model, in one place because it is the part that is easy to get
- * subtly wrong:
+ * Interaction model:
  *
- * - mouse hover / keyboard focus     → expand (cheap, reversible, no navigation)
- * - click on an inactive panel       → expand it (a touch tap can then "peek")
- * - click on the active panel        → select
- * - Enter / Space on a focused panel → select (focus already expanded it)
+ * - hover, focus, or a tap on a panel → expand it. Nothing navigates.
+ * - the buttons on the expanded panel → the only things that act.
  *
- * That is what makes one tap on a phone reveal a city rather than immediately
- * leaving the page, while a mouse user — whose hover already expanded the
- * panel — still selects on the first click.
+ * Keeping expansion and action on separate controls is what makes this work on
+ * a touchscreen: a tap can reveal a panel without also committing to it, and
+ * there is no "was this the first or second tap" state to get wrong.
  *
- * The two ignored cases below are what make that hold on a touchscreen, where
- * a tap synthesises a hover and a focus *before* the click:
- *
- * - a hover from a coarse pointer is not a hover, it is the start of a tap;
- * - a focus caused by a pointer press on the same panel is part of that tap.
- *
- * Without both, the synthesised events would expand the panel first and the
- * tap's own click would then read as "click on the active panel" — so every
- * first tap would navigate.
+ * Each panel is a plain element with a full-bleed button behind its content,
+ * rather than being a button itself — a button cannot legally contain the
+ * action buttons, and nesting them breaks keyboard and screen-reader
+ * behaviour long before it breaks the markup.
  */
-export function ElasticGallery({
-    items,
-    actionLabel,
-    onItemSelect,
-    label,
-    className,
-}: ElasticGalleryProps) {
+export function ElasticGallery({ items, actions, label, className }: ElasticGalleryProps) {
     const [requestedId, setRequestedId] = useState<string | null>(null);
-    /**
-     * The panel the pointer was last pressed on. A focus event that names the
-     * same panel came from that press rather than from the keyboard — the only
-     * way to tell the two apart without depending on event ordering.
-     */
-    const pointerDownIdRef = useRef<string | null>(null);
     // Panels whose photo failed to load. Their labels still render over a
     // neutral background, so a dead image URL costs a photo, not a panel.
     const [brokenIds, setBrokenIds] = useState<ReadonlySet<string>>(() => new Set());
@@ -94,55 +96,6 @@ export function ElasticGallery({
         if (requestedId && items.some(item => item.id === requestedId)) return requestedId;
         return items[0]?.id ?? null;
     }, [items, requestedId]);
-
-    /**
-     * Hover expansion, but only from a pointer that can actually hover. A
-     * touchscreen reports `pointerType: 'touch'` here as part of a tap.
-     * A browser too old to send a pointer type is treated as a mouse, which
-     * is what it would have been.
-     */
-    const handlePointerEnter = useCallback(
-        (event: React.PointerEvent<HTMLButtonElement>, item: ElasticGalleryItem) => {
-            if (event.pointerType && event.pointerType !== 'mouse' && event.pointerType !== 'pen') return;
-            setRequestedId(item.id);
-        },
-        [],
-    );
-
-    const handleFocus = useCallback(
-        (item: ElasticGalleryItem) => {
-            // Focus that follows a press on this same panel belongs to that
-            // press; only focus arriving on its own (Tab, arrow keys) expands.
-            if (pointerDownIdRef.current === item.id) return;
-            setRequestedId(item.id);
-        },
-        [],
-    );
-
-    const handleClick = useCallback(
-        (item: ElasticGalleryItem) => {
-            // First click expands, second selects. `activeId` is already the
-            // hovered panel for a mouse user, so this costs them nothing.
-            if (item.id !== activeId) {
-                setRequestedId(item.id);
-                return;
-            }
-            onItemSelect?.(item);
-        },
-        [activeId, onItemSelect],
-    );
-
-    const handleKeyDown = useCallback(
-        (event: React.KeyboardEvent<HTMLButtonElement>, item: ElasticGalleryItem) => {
-            if (event.key !== 'Enter' && event.key !== ' ') return;
-            // Space scrolls the page by default, and a button's implicit click
-            // would re-enter `handleClick` with the two-step rule — which would
-            // swallow the first Enter on a panel focus had already expanded.
-            event.preventDefault();
-            onItemSelect?.(item);
-        },
-        [onItemSelect],
-    );
 
     const markBroken = useCallback((id: string) => {
         setBrokenIds(prev => {
@@ -160,124 +113,172 @@ export function ElasticGallery({
             role="group"
             aria-label={label}
             className={cn(
-                'mx-auto flex h-[440px] w-full max-w-6xl flex-col gap-2 px-4 md:h-[600px] md:flex-row md:gap-4',
+                'mx-auto flex h-[460px] w-full max-w-6xl flex-col gap-2 px-4 md:h-[560px] md:flex-row md:gap-4',
                 className,
             )}
         >
             {items.map(item => {
                 const isActive = item.id === activeId;
                 const isBroken = brokenIds.has(item.id);
+                const expand = () => setRequestedId(item.id);
 
                 return (
-                    <button
+                    <div
                         key={item.id}
-                        type="button"
-                        onPointerEnter={event => handlePointerEnter(event, item)}
-                        onPointerDown={() => { pointerDownIdRef.current = item.id; }}
-                        onFocus={() => handleFocus(item)}
-                        onClick={() => handleClick(item)}
-                        onKeyDown={event => handleKeyDown(event, item)}
-                        aria-current={isActive}
-                        aria-label={item.subtitle ? `${item.title}, ${item.subtitle}` : item.title}
+                        onPointerEnter={expand}
                         className={cn(
-                            'group relative cursor-pointer overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100 text-left',
-                            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
-                            // Only the flex basis and the dimming animate. Both
-                            // are composited cheaply enough to stay smooth with
-                            // a dozen panels on screen.
-                            'transition-[flex-grow,filter] duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none',
+                            'relative overflow-hidden rounded-2xl bg-neutral-900',
+                            // Only the flex basis animates; the dimming is an
+                            // overlay's opacity, which composites just as cheaply.
+                            'transition-[flex-grow] duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none',
                             isActive ? 'flex-[4]' : 'flex-[1]',
-                            isActive ? 'brightness-100' : 'brightness-[.55] hover:brightness-75',
                         )}
                     >
-                        <div className="absolute inset-0 h-full w-full">
-                            {!isBroken && (
-                                <img
-                                    src={item.imageUrl}
-                                    srcSet={item.imageSrcSet || undefined}
-                                    sizes={item.imageSizes || undefined}
-                                    alt={item.alt}
-                                    loading="lazy"
-                                    decoding="async"
-                                    onError={() => markBroken(item.id)}
-                                    className={cn(
-                                        'h-full w-full object-cover transition-transform duration-1000 motion-reduce:transition-none',
-                                        isActive ? 'scale-100' : 'scale-110',
-                                    )}
-                                    style={
-                                        item.placeholderUrl
-                                            ? {
-                                                backgroundImage: `url("${item.placeholderUrl}")`,
-                                                backgroundSize: 'cover',
-                                                backgroundPosition: 'center',
-                                            }
-                                            : undefined
-                                    }
-                                />
-                            )}
-                            {isBroken && (
-                                <div className="h-full w-full bg-gradient-to-br from-slate-700 to-slate-900" />
-                            )}
-                            {/* Readability scrim — only under the expanded panel,
-                                where there is text long enough to need it. */}
-                            <div
+                        {!isBroken ? (
+                            <img
+                                src={item.imageUrl}
+                                srcSet={item.imageSrcSet || undefined}
+                                sizes={item.imageSizes || undefined}
+                                alt={item.alt}
+                                loading="lazy"
+                                decoding="async"
+                                onError={() => markBroken(item.id)}
                                 className={cn(
-                                    'absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity duration-500 motion-reduce:transition-none',
-                                    isActive ? 'opacity-100' : 'opacity-0',
+                                    'absolute inset-0 transition-transform duration-1000 motion-reduce:transition-none',
+                                    isActive ? 'scale-100' : 'scale-110',
                                 )}
+                                style={
+                                    item.placeholderUrl
+                                        ? {
+                                            ...COVER_STYLE,
+                                            backgroundImage: `url("${item.placeholderUrl}")`,
+                                            backgroundSize: 'cover',
+                                            backgroundPosition: 'center',
+                                        }
+                                        : COVER_STYLE
+                                }
                             />
-                        </div>
+                        ) : (
+                            <div className="absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-900" />
+                        )}
 
-                        <div className="absolute inset-0 flex flex-col justify-end p-4 md:p-8">
+                        {/*
+                          * Dimming is an overlay rather than a `brightness`
+                          * filter on the panel: a filter applies to the whole
+                          * subtree, so it dimmed the city name along with the
+                          * photo and left the collapsed labels grey on grey.
+                          */}
+                        <div
+                            className={cn(
+                                'absolute inset-0 bg-black transition-opacity duration-700 motion-reduce:transition-none',
+                                isActive ? 'opacity-0' : 'opacity-45',
+                            )}
+                        />
+
+                        {/* Readability scrim under the labels. Present on every
+                            panel — the collapsed ones carry text too. */}
+                        <div
+                            className={cn(
+                                'absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent transition-[height] duration-700 motion-reduce:transition-none',
+                                isActive ? 'h-2/3' : 'h-1/2',
+                            )}
+                        />
+
+                        {/*
+                          * The expand control: a full-bleed button behind the
+                          * content. Focus expands too, so a keyboard user sees
+                          * the panel they have landed on, and the action
+                          * buttons that then become reachable belong to it.
+                          */}
+                        <button
+                            type="button"
+                            onClick={expand}
+                            onFocus={expand}
+                            aria-current={isActive}
+                            aria-label={item.subtitle ? `${item.title}, ${item.subtitle}` : item.title}
+                            className="absolute inset-0 z-10 cursor-pointer rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+                        />
+
+                        {/* Content sits above the expand control but lets
+                            pointer events through to it, except on the
+                            buttons, which are the only things that act. */}
+                        <div className="pointer-events-none absolute inset-0 z-20 flex flex-col justify-end p-4 md:p-6">
                             <div
                                 className={cn(
                                     'flex flex-col gap-2 transition-all duration-500 motion-reduce:transition-none',
-                                    isActive
-                                        ? 'translate-y-0 opacity-100 delay-200'
-                                        : 'pointer-events-none translate-y-12 opacity-0',
+                                    isActive ? 'translate-y-0 opacity-100 delay-200' : 'translate-y-8 opacity-0',
                                 )}
                             >
                                 {item.subtitle && (
-                                    <div className="flex items-center gap-2">
-                                        <span className="rounded-full border border-white/30 bg-white/10 px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-white backdrop-blur-md md:px-3 md:text-xs">
-                                            {item.subtitle}
-                                        </span>
-                                    </div>
+                                    <span className={cn(
+                                        'w-fit rounded-full border border-white/40 bg-black/30 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-white backdrop-blur-md md:px-3 md:text-xs',
+                                        TEXT_SHADOW,
+                                    )}>
+                                        {item.subtitle}
+                                    </span>
                                 )}
 
-                                <h3 className="text-2xl font-black uppercase leading-none text-white md:text-5xl">
+                                <h3 className={cn(
+                                    'text-2xl font-black uppercase leading-none text-white md:text-4xl lg:text-5xl',
+                                    TEXT_SHADOW,
+                                )}>
                                     {item.title}
                                 </h3>
 
-                                <span className="mt-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/80 md:mt-4 md:text-sm">
-                                    {actionLabel}
-                                    <ArrowUpRight className="h-3 w-3 md:h-4 md:w-4" aria-hidden="true" />
-                                </span>
+                                <div className="mt-2 flex flex-wrap gap-2 md:mt-3">
+                                    {actions.map(action => (
+                                        <button
+                                            key={action.id}
+                                            type="button"
+                                            // Collapsed panels keep their buttons
+                                            // mounted but out of reach, so a panel
+                                            // collapsing under the pointer cannot
+                                            // strand focus on a removed element.
+                                            tabIndex={isActive ? 0 : -1}
+                                            aria-hidden={!isActive}
+                                            onFocus={expand}
+                                            onClick={() => action.onSelect(item)}
+                                            className={cn(
+                                                'pointer-events-auto rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors md:text-sm',
+                                                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white',
+                                                isActive ? '' : 'pointer-events-none',
+                                                action.variant === 'secondary'
+                                                    ? 'border border-white/50 bg-white/15 text-white backdrop-blur-md hover:bg-white/25'
+                                                    : 'bg-white text-slate-900 hover:bg-white/90',
+                                            )}
+                                        >
+                                            {action.label}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
 
-                            {/* Collapsed label. `aria-hidden` because the button
-                                already carries the same words as its accessible
-                                name — a screen reader would otherwise hear the
-                                city twice per panel. */}
+                            {/* Collapsed label. `aria-hidden` because the expand
+                                button already carries the same words as its
+                                accessible name — a screen reader would
+                                otherwise hear the city twice per panel. */}
                             <div
                                 aria-hidden="true"
                                 className={cn(
-                                    'pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 transition-all duration-500 md:bottom-8 motion-reduce:transition-none',
-                                    isActive ? 'scale-50 opacity-0' : 'opacity-100 delay-500',
+                                    'absolute inset-x-0 bottom-4 flex justify-center transition-opacity duration-500 md:bottom-6 motion-reduce:transition-none',
+                                    isActive ? 'opacity-0' : 'opacity-100 delay-300',
                                 )}
                             >
-                                <span className="hidden whitespace-nowrap text-xl font-bold uppercase tracking-widest text-white [writing-mode:vertical-rl] md:block">
+                                <span className={cn(
+                                    'hidden whitespace-nowrap text-xl font-bold uppercase tracking-widest text-white [writing-mode:vertical-rl] md:block',
+                                    TEXT_SHADOW,
+                                )}>
                                     {item.title}
                                 </span>
-                                {/* Below `md` the panels stack, so a collapsed
-                                    one is a full-width row with space for the
-                                    whole name — no truncation, no rotation. */}
-                                <span className="block whitespace-nowrap text-center text-xs font-bold uppercase tracking-widest text-white md:hidden">
+                                <span className={cn(
+                                    'block whitespace-nowrap text-xs font-bold uppercase tracking-widest text-white md:hidden',
+                                    TEXT_SHADOW,
+                                )}>
                                     {item.title}
                                 </span>
                             </div>
                         </div>
-                    </button>
+                    </div>
                 );
             })}
         </div>

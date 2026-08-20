@@ -186,8 +186,9 @@
   },
   "cityGallery": {
     "title": "Istražite gradove Balkana",
-    "subtitle": "Pažljivo odabrani gradovi u regiji. Otvorite jedan da vidite šta je na prodaju.",
-    "action": "Pogledaj nekretnine",
-    "imageAlt": "Nekretnina u {{city}}, {{country}}"
+    "subtitle": "Pažljivo odabrani gradovi u regiji. Otvorite jedan da vidite šta je na prodaju ili za iznajmljivanje.",
+    "imageAlt": "Nekretnina u {{city}}, {{country}}",
+    "buy": "Kupi",
+    "rent": "Iznajmi"
   }
 }

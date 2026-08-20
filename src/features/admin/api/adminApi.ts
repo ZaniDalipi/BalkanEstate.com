@@ -634,3 +634,17 @@ export const uploadCityShowcaseImage = async (
   // the CSRF cookie before posting.
   return uploadRequest('/admin/city-showcase/upload-image', form);
 };
+
+/**
+ * Copies the cities already in the database (`CityMarketData`) into the
+ * gallery. Idempotent — it matches on city + country, so re-running after the
+ * market data grows brings in only what is missing. `missingPhoto` names the
+ * cities that were skipped because no photo could be found for them; they need
+ * one uploaded by hand before they can be panels.
+ */
+export const importCitiesIntoShowcase = async (): Promise<{
+  message: string;
+  imported: number;
+  alreadyPresent: number;
+  missingPhoto: string[];
+}> => apiRequest('/admin/city-showcase/import-cities', { method: 'POST', requiresAuth: true });

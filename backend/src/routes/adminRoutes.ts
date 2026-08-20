@@ -1169,6 +1169,25 @@ router.delete('/city-showcase/:id', logAdminAction('DELETE_CITY_SHOWCASE'), asyn
   }
 });
 
+// POST /api/admin/city-showcase/import-cities
+//
+// Copies the cities already in `CityMarketData` into the gallery. Idempotent:
+// it matches on city + country, so re-running after the market data grows
+// brings in only what is missing. Cities with no usable photo are reported
+// back rather than imported — see the service for why.
+router.post('/city-showcase/import-cities', logAdminAction('IMPORT_CITY_SHOWCASE'), async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const { importCitiesFromMarketData } = await import('../services/cityShowcaseImportService');
+    const result = await importCitiesFromMarketData();
+
+    void invalidateCache('/api/city-showcase');
+    res.json({ message: 'Import complete', ...result });
+  } catch (err) {
+    adminLogger.error('Import city showcase error:', err);
+    res.status(500).json({ message: 'Failed to import cities' });
+  }
+});
+
 // POST /api/admin/city-showcase/upload-image
 //
 // Returns the stored URL only; the caller attaches it to a panel with POST or

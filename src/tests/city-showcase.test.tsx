@@ -1,8 +1,8 @@
 /**
  * City Showcase Tests
  * Covers the two places the home-page gallery can go wrong: the data it
- * accepts from the API, and the two-step interaction that decides when a panel
- * expands versus when it navigates.
+ * accepts from the API, and the interaction rules that separate expanding a
+ * panel from acting on it.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -120,90 +120,85 @@ describe('ElasticGallery', () => {
         { id: 'b', title: 'Ohrid', subtitle: 'North Macedonia', imageUrl: 'https://img/b.jpg', alt: 'Ohrid' },
     ];
 
-    const renderGallery = (onItemSelect = vi.fn()) => {
+    const renderGallery = () => {
+        const onBuy = vi.fn();
+        const onRent = vi.fn();
         render(
             <ElasticGallery
                 items={items}
                 label="Explore cities"
-                actionLabel="View properties"
-                onItemSelect={onItemSelect}
+                actions={[
+                    { id: 'buy', label: 'Buy', onSelect: onBuy },
+                    { id: 'rent', label: 'Rent', variant: 'secondary', onSelect: onRent },
+                ]}
             />,
         );
-        return onItemSelect;
+        return { onBuy, onRent };
     };
+
+    /** The full-bleed control behind a panel's content. */
+    const panelOf = (name: RegExp) => screen.getByRole('button', { name });
 
     it('expands the first panel by default', () => {
         renderGallery();
 
-        expect(screen.getByRole('button', { name: /Belgrade/ })).toHaveAttribute('aria-current', 'true');
-        expect(screen.getByRole('button', { name: /Ohrid/ })).toHaveAttribute('aria-current', 'false');
+        expect(panelOf(/^Belgrade/)).toHaveAttribute('aria-current', 'true');
+        expect(panelOf(/^Ohrid/)).toHaveAttribute('aria-current', 'false');
     });
 
-    it('expands an inactive panel on the first click instead of selecting it', () => {
-        const onSelect = renderGallery();
+    it('expands a panel on click without navigating anywhere', () => {
+        const { onBuy, onRent } = renderGallery();
 
-        fireEvent.click(screen.getByRole('button', { name: /Ohrid/ }));
+        fireEvent.click(panelOf(/^Ohrid/));
 
-        expect(onSelect).not.toHaveBeenCalled();
-        expect(screen.getByRole('button', { name: /Ohrid/ })).toHaveAttribute('aria-current', 'true');
+        expect(panelOf(/^Ohrid/)).toHaveAttribute('aria-current', 'true');
+        expect(onBuy).not.toHaveBeenCalled();
+        expect(onRent).not.toHaveBeenCalled();
     });
 
-    it('selects on a click on the already-expanded panel', () => {
-        const onSelect = renderGallery();
-
-        fireEvent.click(screen.getByRole('button', { name: /Belgrade/ }));
-
-        expect(onSelect).toHaveBeenCalledWith(items[0]);
-    });
-
-    it('selects on the first mouse click, because hover already expanded the panel', () => {
-        const onSelect = renderGallery();
-        const panel = screen.getByRole('button', { name: /Ohrid/ });
-
-        fireEvent.pointerEnter(panel, { pointerType: 'mouse' });
-        fireEvent.click(panel);
-
-        expect(onSelect).toHaveBeenCalledWith(items[1]);
-    });
-
-    it('does not navigate on the first tap, even though a tap synthesises hover and focus', () => {
-        // A touchscreen sends pointerenter and focus before the click. If
-        // either expanded the panel, the tap's own click would read as a
-        // click on the active panel and navigate immediately.
-        const onSelect = renderGallery();
-        const panel = screen.getByRole('button', { name: /Ohrid/ });
-
-        fireEvent.pointerEnter(panel, { pointerType: 'touch' });
-        fireEvent.pointerDown(panel, { pointerType: 'touch' });
-        fireEvent.focus(panel);
-        fireEvent.click(panel);
-
-        expect(onSelect).not.toHaveBeenCalled();
-        expect(panel).toHaveAttribute('aria-current', 'true');
-
-        fireEvent.pointerDown(panel, { pointerType: 'touch' });
-        fireEvent.click(panel);
-
-        expect(onSelect).toHaveBeenCalledWith(items[1]);
-    });
-
-    it('expands on keyboard focus, which arrives without a pointer press', () => {
+    it('expands a panel on hover', () => {
         renderGallery();
-        const panel = screen.getByRole('button', { name: /Ohrid/ });
 
-        fireEvent.focus(panel);
+        fireEvent.pointerEnter(panelOf(/^Ohrid/).parentElement!);
 
-        expect(panel).toHaveAttribute('aria-current', 'true');
+        expect(panelOf(/^Ohrid/)).toHaveAttribute('aria-current', 'true');
     });
 
-    it('selects on Enter without needing a second key press', () => {
-        const onSelect = renderGallery();
-        const panel = screen.getByRole('button', { name: /Ohrid/ });
+    it('expands a panel on keyboard focus', () => {
+        renderGallery();
 
-        fireEvent.focus(panel);
-        fireEvent.keyDown(panel, { key: 'Enter' });
+        fireEvent.focus(panelOf(/^Ohrid/));
 
-        expect(onSelect).toHaveBeenCalledWith(items[1]);
+        expect(panelOf(/^Ohrid/)).toHaveAttribute('aria-current', 'true');
+    });
+
+    it('runs the action for the panel it belongs to', () => {
+        const { onBuy, onRent } = renderGallery();
+
+        // Only the expanded panel's buttons are exposed, so a plain query
+        // always addresses the panel a visitor can actually see.
+        fireEvent.click(screen.getByRole('button', { name: 'Buy' }));
+        expect(onBuy).toHaveBeenCalledWith(items[0]);
+
+        fireEvent.click(panelOf(/^Ohrid/));
+        fireEvent.click(screen.getByRole('button', { name: 'Rent' }));
+        expect(onRent).toHaveBeenCalledWith(items[1]);
+    });
+
+    it('keeps the buttons of collapsed panels mounted but unreachable', () => {
+        renderGallery();
+
+        // Mounted, so a panel collapsing under the pointer cannot strand focus
+        // on a button that disappeared — but hidden from the accessibility
+        // tree and out of the tab order, so nobody can press a button
+        // belonging to a panel they cannot see.
+        // Queried by text, not by role+name: an `aria-hidden` button has no
+        // accessible name to match on — which is the point of the assertion.
+        const buyButtons = screen.getAllByText('Buy');
+        expect(buyButtons).toHaveLength(2);
+        expect(buyButtons[0]).toHaveAttribute('tabindex', '0');
+        expect(buyButtons[1]).toHaveAttribute('tabindex', '-1');
+        expect(buyButtons[1]).toHaveAttribute('aria-hidden', 'true');
     });
 
     it('keeps the label when a photo fails to load', () => {
@@ -212,12 +207,12 @@ describe('ElasticGallery', () => {
         fireEvent.error(screen.getByAltText('Ohrid'));
 
         expect(screen.queryByAltText('Ohrid')).not.toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /Ohrid/ })).toBeInTheDocument();
+        expect(panelOf(/^Ohrid/)).toBeInTheDocument();
     });
 
     it('renders nothing without items', () => {
         const { container } = render(
-            <ElasticGallery items={[]} label="Explore cities" actionLabel="View properties" />,
+            <ElasticGallery items={[]} label="Explore cities" actions={[]} />,
         );
 
         expect(container).toBeEmptyDOMElement();

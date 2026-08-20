@@ -1148,11 +1148,17 @@
     "photoSpec": "Panourile sunt înalte — încărcați o fotografie portret, 1600 × 2000 sau cât mai aproape. Alte formate sunt decupate, niciodată deformate. Maximum 10 MB.",
     "limitHint": "Galeria afișează primele {{count}} orașe vizibile, în ordine. Restul rămâne aici până reordonați sau ascundeți unul.",
     "empty": "Niciun oraș încă — galeria este ascunsă pe pagina principală.",
-    "emptyHint": "Adăugați un oraș cu fotografie și apare imediat acolo.",
+    "emptyHint": "Apăsați “Importă orașe din bază” pentru a aduce orașele pe care le aveți deja, sau adăugați unul manual cu fotografie.",
     "confirmDelete": "Eliminați {{city}} de pe pagina principală?",
     "saveError": "Salvarea panoului orașului a eșuat",
     "deleteError": "Ștergerea panoului orașului a eșuat",
     "loadError": "Încărcarea galeriei de orașe a eșuat",
-    "uploadError": "Încărcarea fotografiei a eșuat"
+    "uploadError": "Încărcarea fotografiei a eșuat",
+    "import": "Importă orașe din bază",
+    "importing": "Se importă…",
+    "imported": "Importate {{imported}} oraș(e), {{present}} deja în galerie",
+    "importError": "Importul orașelor din bază a eșuat",
+    "missingPhotoTitle": "{{count}} oraș(e) nu au fotografie și nu au fost importate",
+    "missingPhotoHint": "Adăugați-le cu “Adaugă oraș” și încărcați o fotografie — galeria nu poate afișa un panou fără ea."
   }
 }

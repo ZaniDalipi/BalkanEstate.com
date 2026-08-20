@@ -1045,11 +1045,17 @@
     "photoSpec": "Panelet janë të larta — ngarkoni një foto portret, 1600 × 2000 ose sa më afër. Format e tjera priten, nuk shtrembërohen. Maksimumi 10 MB.",
     "limitHint": "Galeria shfaq {{count}} qytetet e para të dukshme, sipas renditjes. Çdo gjë përtej mbetet këtu derisa të rirenditni ose të fshihni një.",
     "empty": "Ende asnjë qytet — galeria është e fshehur në faqen kryesore.",
-    "emptyHint": "Shtoni një qytet me foto dhe shfaqet menjëherë atje.",
+    "emptyHint": "Shtypni “Importo qytetet nga baza e të dhënave” për të sjellë qytetet që keni, ose shtoni një me dorë me foto.",
     "confirmDelete": "Ta heqim {{city}} nga faqja kryesore?",
     "saveError": "Ruajtja e panelit të qytetit dështoi",
     "deleteError": "Fshirja e panelit të qytetit dështoi",
     "loadError": "Ngarkimi i galerisë së qyteteve dështoi",
-    "uploadError": "Ngarkimi i fotos dështoi"
+    "uploadError": "Ngarkimi i fotos dështoi",
+    "import": "Importo qytetet nga baza e të dhënave",
+    "importing": "Duke importuar…",
+    "imported": "U importuan {{imported}} qytet(e), {{present}} ishin tashmë në galeri",
+    "importError": "Importimi i qyteteve nga baza e të dhënave dështoi",
+    "missingPhotoTitle": "{{count}} qytet(e) nuk kanë foto dhe nuk u importuan",
+    "missingPhotoHint": "Shtojini me “Shto qytet” dhe ngarkoni një foto — galeria nuk mund të shfaqë një panel pa të."
   }
 }

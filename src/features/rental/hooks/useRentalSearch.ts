@@ -28,10 +28,20 @@ export function useRentalSearch() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Filters - default to rent listingType
-    const [filters, setFilters] = useState<Filters>({
-        ...initialFilters,
-        listingType: 'rent',
+    // Filters - default to rent listingType.
+    //
+    // `?q=` is read once, in the initialiser rather than an effect: the buy
+    // page accepts the same param, and links that arrive here from elsewhere
+    // (the home-page city gallery's Rent button, a shared URL) would otherwise
+    // land on an unfiltered list. A lazy initialiser means the very first
+    // render already has the filter, so no results flash unfiltered first.
+    const [filters, setFilters] = useState<Filters>(() => {
+        const query = new URLSearchParams(window.location.search).get('q')?.trim() ?? '';
+        return {
+            ...initialFilters,
+            listingType: 'rent',
+            ...(query ? { query } : {}),
+        };
     });
 
     // Local state

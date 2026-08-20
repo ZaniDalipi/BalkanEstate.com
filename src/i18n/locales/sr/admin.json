@@ -1046,11 +1046,17 @@
     "photoSpec": "Paneli su visoki — otpremite portretnu fotografiju, 1600 × 2000 ili najbliže što imate. Drugi oblici se isecaju, nikada ne izobličuju. Najviše 10 MB.",
     "limitHint": "Galerija prikazuje prvih {{count}} vidljivih gradova, redom. Sve preko toga ostaje ovde dok ne promenite redosled ili sakrijete neki.",
     "empty": "Još nema gradova — galerija je skrivena na početnoj strani.",
-    "emptyHint": "Dodajte grad sa fotografijom i odmah se pojavljuje.",
+    "emptyHint": "Pritisnite “Uvezi gradove iz baze” da dovedete gradove koje već imate, ili dodajte jedan ručno sa fotografijom.",
     "confirmDelete": "Ukloniti {{city}} sa početne strane?",
     "saveError": "Čuvanje panela grada nije uspelo",
     "deleteError": "Brisanje panela grada nije uspelo",
     "loadError": "Učitavanje galerije gradova nije uspelo",
-    "uploadError": "Otpremanje fotografije nije uspelo"
+    "uploadError": "Otpremanje fotografije nije uspelo",
+    "import": "Uvezi gradove iz baze",
+    "importing": "Uvoz…",
+    "imported": "Uvezeno {{imported}} grad(ova), {{present}} već u galeriji",
+    "importError": "Uvoz gradova iz baze nije uspeo",
+    "missingPhotoTitle": "{{count}} grad(ova) nema fotografiju i nije uvezeno",
+    "missingPhotoHint": "Dodajte ih preko “Dodaj grad” i otpremite fotografiju — galerija ne može prikazati panel bez nje."
   }
 }
