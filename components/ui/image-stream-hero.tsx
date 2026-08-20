@@ -291,6 +291,25 @@ export function ImageStreamHero({
     [onImageSelect, pickCard],
   );
 
+  /**
+   * LOCAL ADDITION: pick the card under the finger the moment it lands.
+   *
+   * The cards opt out of hit testing and the container decides which one is
+   * under the pointer, driven by `pointermove`. A mouse always moves before it
+   * clicks, so that was enough on a desktop — but a finger tapping a card does
+   * not necessarily emit `pointermove` at all. `active` stayed null, and the
+   * container's click handler, which reads it, returned early: on a phone the
+   * cards were completely unclickable. Picking on `pointerdown` as well makes
+   * a stationary tap select the card it landed on.
+   */
+  const handlePointerDown = React.useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!onImageSelect) return;
+      setActive(pickCard(e.clientX, e.clientY));
+    },
+    [onImageSelect, pickCard],
+  );
+
   React.useEffect(() => () => {
     if (frame.current !== null) cancelAnimationFrame(frame.current);
   }, []);
@@ -443,6 +462,7 @@ export function ImageStreamHero({
           perspectiveOrigin: `50% ${axis}%`,
           cursor: onImageSelect && active !== null ? "pointer" : undefined,
         }}
+        onPointerDown={onImageSelect ? handlePointerDown : undefined}
         onPointerMove={onImageSelect ? handlePointerMove : undefined}
         onPointerLeave={onImageSelect ? () => setActive(null) : undefined}
         onClick={
