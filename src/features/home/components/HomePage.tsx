@@ -273,7 +273,7 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
 
       <div className="content-below-fold">
         <Suspense fallback={<SectionFallback />}>
-          <CategoriesSection onCategoryClick={handleCategoryClick} />
+          <CategoriesSection onCategoryClick={handleCategoryClick} onNavigate={handleNavigate} />
         </Suspense>
       </div>
 

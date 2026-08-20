@@ -1,7 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useMemo, useRef } from 'react';
-import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion';
+import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
+import { motion, useMotionValue, useReducedMotion, useTransform, type MotionValue } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 /**
@@ -66,6 +66,13 @@ import { cn } from '@/lib/utils';
 /** Per-step outward travel, in px — the reference's `distanceFromCenter * 90`. */
 const X_STEP_PX = 90;
 
+/**
+ * Where in the visible area the row finishes assembling, as a fraction from
+ * its top. 0.35 puts the finish just above centre, so the tiles land as the
+ * row settles into comfortable reading position.
+ */
+const SETTLE_AT = 0.35;
+
 interface AssembleContextValue {
     progress: MotionValue<number>;
     centerIndex: number;
@@ -85,15 +92,76 @@ interface ScrollAssembleProps {
 export const ScrollAssemble: React.FC<ScrollAssembleProps> = ({ count, className, children }) => {
     const ref = useRef<HTMLDivElement>(null);
     const reduced = useReducedMotion();
+    const progress = useMotionValue(0);
 
-    const { scrollYProgress } = useScroll({
-        target: ref,
-        offset: ['start end', 'start 0.35'],
-    });
+    /*
+     * The progress is measured against whichever element actually scrolls,
+     * found by walking up from the row.
+     *
+     * This app does not scroll the window: `<main>` carries
+     * `overflow-y: auto`, so the document is exactly one viewport tall and
+     * `window.scrollY` is always 0. Anything keyed on window scroll —
+     * `useScroll()` with no container, and by extension the earlier versions
+     * of this component — therefore sat pinned at progress 0 forever, which
+     * reads as "the tiles are permanently scattered and crooked" rather than
+     * as an animation that never starts. It also survives any harness that
+     * scrolls the window normally, which is exactly how it went unnoticed.
+     *
+     * Falling back to the viewport when no scrollable ancestor is found keeps
+     * the component usable on an ordinary window-scrolled page.
+     */
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+
+        let container: HTMLElement | null = null;
+        for (let node = el.parentElement; node; node = node.parentElement) {
+            const overflowY = getComputedStyle(node).overflowY;
+            if (
+                (overflowY === 'auto' || overflowY === 'scroll') &&
+                node.scrollHeight > node.clientHeight
+            ) {
+                container = node;
+                break;
+            }
+        }
+
+        const measure = () => {
+            const row = ref.current;
+            if (!row) return;
+            const viewTop = container ? container.getBoundingClientRect().top : 0;
+            const viewHeight = container ? container.clientHeight : window.innerHeight;
+            if (viewHeight <= 0) return;
+
+            // Distance from the top of the visible area down to the row's top
+            // edge. Equivalent to framer's ['start end', 'start 0.35']: 0 when
+            // the row's top sits at the bottom of the view, 1 once it has
+            // risen to 35% down it.
+            const rowTop = row.getBoundingClientRect().top - viewTop;
+            const span = viewHeight * (1 - SETTLE_AT);
+            const raw = (viewHeight - rowTop) / (span || 1);
+            progress.set(Math.min(1, Math.max(0, raw)));
+        };
+
+        measure();
+        const target: HTMLElement | Window = container ?? window;
+        target.addEventListener('scroll', measure, { passive: true });
+        window.addEventListener('resize', measure);
+        // Content loading in above the row moves it without any scrolling.
+        const ro = new ResizeObserver(measure);
+        ro.observe(el);
+        if (container) ro.observe(container);
+
+        return () => {
+            target.removeEventListener('scroll', measure);
+            window.removeEventListener('resize', measure);
+            ro.disconnect();
+        };
+    }, [progress]);
 
     const value = useMemo<AssembleContextValue>(
-        () => ({ progress: scrollYProgress, centerIndex: (count - 1) / 2, still: !!reduced }),
-        [scrollYProgress, count, reduced],
+        () => ({ progress, centerIndex: (count - 1) / 2, still: !!reduced }),
+        [progress, count, reduced],
     );
 
     return (

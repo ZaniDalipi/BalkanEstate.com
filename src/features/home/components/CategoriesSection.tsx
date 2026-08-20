@@ -5,9 +5,14 @@ import { ScrollAssemble, ScrollAssembleItem } from '@/src/components/ui/scroll-a
 
 interface CategoriesSectionProps {
   onCategoryClick: (propertyType: string, listingType?: string) => void;
+  /**
+   * Used by tiles that lead to a page of their own rather than to a filtered
+   * search — currently just Luxury, which has a dedicated villas page.
+   */
+  onNavigate: (view: string, path: string) => void;
 }
 
-const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }) => {
+const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick, onNavigate }) => {
   const { t } = useTranslation(['home']);
 
   const categories = [
@@ -72,6 +77,11 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }
       ),
       gradient: 'from-yellow-400 via-amber-500 to-yellow-700',
       isLuxury: true,
+      // Luxury is the one tile that isn't a search filter. Without this it
+      // ran the same `propertyType: 'villa'` search as the Villas tile two
+      // places to its left, so the two tiles landed on the same page.
+      view: 'villas',
+      path: '/villas',
     },
   ];
 
@@ -101,7 +111,11 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }
             <motion.button
               whileHover={{ y: -4 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => onCategoryClick(cat.type, cat.listingType)}
+              onClick={() =>
+                (cat as any).path
+                  ? onNavigate((cat as any).view, (cat as any).path)
+                  : onCategoryClick(cat.type, cat.listingType)
+              }
               className={`group flex w-full flex-col items-center gap-2.5 p-4 sm:p-5 rounded-xl transition-all relative overflow-hidden ${
                 (cat as any).isLuxury
                   ? 'border-2 border-amber-400/60 hover:border-amber-500 hover:shadow-xl hover:shadow-amber-200/60 bg-gradient-to-b from-amber-50 to-white'
