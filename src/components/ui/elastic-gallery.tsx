@@ -269,7 +269,10 @@ export function ElasticGallery({
                                 <span className="hidden whitespace-nowrap text-xl font-bold uppercase tracking-widest text-white [writing-mode:vertical-rl] md:block">
                                     {item.title}
                                 </span>
-                                <span className="block max-w-[3.5rem] truncate text-center text-[11px] font-bold uppercase text-white md:hidden">
+                                {/* Below `md` the panels stack, so a collapsed
+                                    one is a full-width row with space for the
+                                    whole name — no truncation, no rotation. */}
+                                <span className="block whitespace-nowrap text-center text-xs font-bold uppercase tracking-widest text-white md:hidden">
                                     {item.title}
                                 </span>
                             </div>
