@@ -654,13 +654,33 @@ export function ImageStreamHero({
                           {/* Sized in cqw so it tracks the corridor: distant
                               cards read as texture, near ones as a label. */}
                           <span
-                            className={cn(cap, "pointer-events-none absolute inset-x-0 bottom-0 block text-left text-white")}
+                            // LOCAL ADDITION: the caption sits on whichever
+                            // side of the card leaves the screen last.
+                            //
+                            // Each rail exits toward its own edge, so the
+                            // outer half of a card is the first thing to go.
+                            // With the caption always on the left, the ones on
+                            // the left rail had their names sliced off exactly
+                            // as they grew large enough to read — "Crete" and
+                            // "Halkidiki" were clipped mid-word. Mirroring the
+                            // *position* keeps the whole name on screen for
+                            // the entire pass. Only the position mirrors: the
+                            // text itself is untouched and still reads
+                            // left-to-right.
+                            className={cn(
+                              cap,
+                              "pointer-events-none absolute inset-x-0 bottom-0 block text-white",
+                              rail === 1 ? "text-right" : "text-left",
+                            )}
                             style={{
                               padding: "0 1.2cqw 1.1cqw",
                               textShadow: "0 1px 3px rgba(0,0,0,.65)",
                             }}
                           >
-                            <i aria-hidden />
+                            {/* The rule is a block of fixed width, so it needs
+                                shunting over by hand — `text-align` cannot
+                                move it. */}
+                            <i aria-hidden style={rail === 1 ? { marginLeft: "auto" } : undefined} />
                             <span
                               className="block"
                               style={{ fontSize: "1.5cqw", fontWeight: 600, letterSpacing: "-0.01em", lineHeight: 1.15 }}
