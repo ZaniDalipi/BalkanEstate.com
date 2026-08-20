@@ -3,15 +3,39 @@ import { getCityImageUrl, optimizeCloudinaryUrl } from '@/config/cloudinaryConfi
 import type { VillaDestination } from '../data/villaDestinations';
 
 /**
- * Card aspect in the corridor is 18:25, so ask Cloudinary for a portrait crop.
- *
- * Sized for the *exit* of the corridor, not the waist: a card leaves the frame
- * at `exitHeight` 46cqw, so on a 1440px-wide container it is ~660px tall and a
- * smaller source would visibly soften right where the eye is. `f_auto` serves
- * AVIF/WebP, which keeps the bytes reasonable at this size.
+ * The corridor card is 18 wide by 25 tall in the geometry's own units, so
+ * every request keeps exactly that ratio. Asking for any other shape would
+ * make Cloudinary's `c_fill` throw away more of the photo than the card
+ * actually hides, and asking for one that disagrees with the card would leave
+ * `object-cover` to crop the difference a second time. Deriving the height
+ * from the width is what stops the two drifting apart.
  */
-const IMAGE_WIDTH = 900;
-const IMAGE_HEIGHT = 1250;
+const CARD_ASPECT = 18 / 25;
+
+/**
+ * Widest image worth fetching. The master stored on upload is 2200px, so
+ * anything beyond this is Cloudinary upscaling — more bytes, no more detail.
+ */
+const MAX_IMAGE_WIDTH = 2200;
+
+/**
+ * How wide a photo has to be to look sharp on this device.
+ *
+ * A fixed 900px was too small on a phone and wasteful on a laptop, because
+ * what matters is CSS width times device pixel ratio, and a 3x phone asks for
+ * three device pixels per CSS pixel. Measured on the real corridor: a
+ * mid-corridor card on a 390px phone at 3x needs about 1080 device pixels
+ * across, and the large cards near the frame edge need several thousand. The
+ * multiplier targets the big readable cards rather than the ones sweeping off
+ * the edges — matching those exactly would mean multi-megabyte downloads for
+ * pixels that are mostly off-screen anyway.
+ */
+function idealImageWidth(): number {
+    if (typeof window === 'undefined') return 1400;
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    const target = window.innerWidth * dpr * 1.2;
+    return Math.round(Math.min(MAX_IMAGE_WIDTH, Math.max(900, target)));
+}
 
 /** Photos fetched immediately — comfortably more than the corridor shows at once. */
 const EAGER_COUNT = 10;
@@ -72,6 +96,12 @@ export function useDestinationImages(
 ): ResolvedDestinationImage[] {
     const [loaded, setLoaded] = useState<Record<string, string>>({});
 
+    // Resolved once per mount rather than per render: the width only changes
+    // if the device changes, and recomputing it inside the memo would make
+    // every render produce fresh URLs and refetch every photo.
+    const [imageWidth] = useState(idealImageWidth);
+    const imageHeight = Math.round(imageWidth / CARD_ASPECT);
+
     // Stable identity for the effect: the set of destinations that need photos.
     const sources = useMemo(
         () =>
@@ -92,22 +122,25 @@ export function useDestinationImages(
                 // non-Cloudinary URLs untouched.
                 url: dest.imageUrl
                     ? optimizeCloudinaryUrl(dest.imageUrl, {
-                        width: IMAGE_WIDTH,
-                        height: IMAGE_HEIGHT,
+                        width: imageWidth,
+                        height: imageHeight,
                         crop: 'fill',
                         gravity: 'auto',
-                        quality: 'auto:good',
+                        // These are the hero of the section and are shown very
+                        // large; `auto:best` spends the extra bytes rather
+                        // than letting Cloudinary trade detail for size.
+                        quality: 'auto:best',
                     }) || dest.imageUrl
                     : getCityImageUrl(dest.imageCity, {
                         country: dest.imageCountry,
-                        width: IMAGE_WIDTH,
-                        height: IMAGE_HEIGHT,
+                        width: imageWidth,
+                        height: imageHeight,
                         crop: 'fill',
                         gravity: 'auto',
-                        quality: 'auto:good',
+                        quality: 'auto:best',
                     }),
             })),
-        [destinations],
+        [destinations, imageWidth, imageHeight],
     );
 
     useEffect(() => {

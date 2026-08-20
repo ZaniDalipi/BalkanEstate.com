@@ -1002,11 +1002,20 @@ router.post(
       const { uploadImage } = await import('../services/cloudinaryService');
       // Portrait: the corridor card is 18:25 and a card fills a large part of
       // the frame as it exits, so a small upload would visibly soften there.
+      //
+      // 1200px was the ceiling on everything downstream. Measured on the real
+      // corridor, a mid-corridor card on a 390px phone at 3x already needs
+      // about 1080 device pixels across and the larger ones need several
+      // thousand, so the stored master was being upscaled before it ever
+      // reached the screen. 2200 matches what the frontend will now ask for at
+      // most, and `preserveQuality` stops the master being re-compressed on
+      // the way in — it is compressed again on every delivery anyway.
       const result = await uploadImage(req.file.buffer, {
         userId: (req as any).user._id.toString(),
         type: 'listing' as any,
-        maxWidth: 1200,
-        maxHeight: 1600,
+        maxWidth: 2200,
+        maxHeight: 3056, // 2200 / (18/25), so a portrait upload is never squeezed
+        preserveQuality: true,
       });
 
       void invalidateCache('/api/villa-destinations');

@@ -1117,7 +1117,7 @@
     "importing": "Se importă…",
     "imported": "Importate {{imported}} destinații, omise {{skipped}} existente",
     "importError": "Importul destinațiilor a eșuat",
-    "photoSpec": "Fotografiile cardurilor sunt portret, 18:25 — încarcă 900 × 1250 sau mai mare în acest raport. Alte dimensiuni umplu tot cardul, dar sunt decupate.",
+    "photoSpec": "Fotografiile cardurilor sunt portret, 18:25 — încarcă 2200 × 3056 sau cât mai aproape. Mai mici funcționează dar sunt întinse pe cardurile mari; mai mari sunt stocate la lățimea 2200. Alte forme sunt decupate, niciodată deformate.",
     "newAvailable": "{{count}} destinații încorporate noi nu sunt încă în baza de date.",
     "importNew": "Importă-le"
   }
