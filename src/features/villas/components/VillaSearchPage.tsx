@@ -962,7 +962,16 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                 ref={floatingHeaderRef}
                                 className="absolute top-0 left-0 right-0 z-[100] pb-2 landscape:pb-1.5 pointer-events-none"
                                 style={{
-                                    paddingTop: 'max(calc(env(safe-area-inset-top, 0px) + 8px), 52px)',
+                                    // The same token the buy and rent pages
+                                    // use. The map's own controls sit at
+                                    // `calc(var(--floating-search-top-pad) +
+                                    // 60px)`, i.e. exactly under a one-row
+                                    // search bar — so anything that does not
+                                    // start at this token, or that adds a
+                                    // second row, lands on top of them. This
+                                    // page had both problems: a hardcoded 52px
+                                    // top and a pill below the bar.
+                                    paddingTop: 'var(--floating-search-top-pad)',
                                     paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 8px)',
                                     paddingRight: 'calc(env(safe-area-inset-right, 0px) + 8px)',
                                 }}
@@ -1054,8 +1063,18 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             </button>
                                         )}
                                     </div>
-                                    {/* Luxury label pill — improved */}
-                                    <div className="flex justify-center">
+                                    {/* Luxury label pill — list view only.
+                                        In map view it was a second row under
+                                        the search bar, sitting exactly where
+                                        the map puts Satellite / Reset / Locate
+                                        / Draw, and covering them. The buy and
+                                        rent pages float the search bar alone
+                                        for that reason. Nothing is lost: the
+                                        filter button in the bar already
+                                        carries the active-filter count, and
+                                        the page title is in the hero above the
+                                        list. */}
+                                    <div className={`justify-center ${mobileView === 'map' ? 'hidden' : 'flex'}`}>
                                         <span
                                             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-white text-[11px] font-semibold backdrop-blur-sm shadow-sm"
                                             style={{ background: 'var(--color-primary)' }}
