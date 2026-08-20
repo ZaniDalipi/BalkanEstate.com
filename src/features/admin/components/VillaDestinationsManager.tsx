@@ -269,7 +269,7 @@ const VillaDestinationsManager: React.FC = () => {
                 rather than letting a curator find out by uploading a
                 landscape photo and seeing its sides cropped away. */}
             <p className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs text-blue-800">
-                {t('admin:villaDestinations.photoSpec', 'Card photos are portrait, 18:25 — upload 900 × 1250 or larger at that shape. Any other size still fills the card, but is cropped to fit.')}
+                {t('admin:villaDestinations.photoSpec', 'Card photos are portrait, 18:25 — upload 2200 × 3056 or as close as you have. Anything smaller still works but is stretched to fit large cards; anything larger is stored at 2200 wide. Other shapes are cropped, never squashed.')}
             </p>
 
             {/* Without this, destinations added in a release stay invisible

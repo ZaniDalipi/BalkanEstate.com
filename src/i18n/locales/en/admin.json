@@ -1217,7 +1217,7 @@
     "importing": "Importing…",
     "imported": "Imported {{imported}} destination(s), skipped {{skipped}} already present",
     "importError": "Failed to import the built-in destinations",
-    "photoSpec": "Card photos are portrait, 18:25 — upload 900 × 1250 or larger at that shape. Any other size still fills the card, but is cropped to fit.",
+    "photoSpec": "Card photos are portrait, 18:25 — upload 2200 × 3056 or as close as you have. Anything smaller still works but is stretched to fit large cards; anything larger is stored at 2200 wide. Other shapes are cropped, never squashed.",
     "newAvailable": "{{count}} new built-in destination(s) are not in the database yet.",
     "importNew": "Import them"
   }
