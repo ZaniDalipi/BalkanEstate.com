@@ -11,7 +11,13 @@ import {
   detectFeedForUrlWithAuth,
 } from '../services/listingDetectorService';
 import { resolveId } from '../utils/idObfuscation';
-import { ListingSourceConfigError } from '../services/listingAdapters/configUtils';
+import {
+  ListingSourceConfigError,
+  ListingSourceTermsError,
+} from '../services/listingAdapters/configUtils';
+import { UpstreamFetchError } from '../services/listingAdapters/httpClient';
+import { cronLogger } from '../utils/logger';
+import type { IListingSource } from '../models/ListingSource';
 import type { RawListing } from '../services/listingAdapters/types';
 
 /**
@@ -34,14 +40,38 @@ const USER_ALLOWED_ADAPTERS = new Set([
 ]);
 
 /**
- * A misconfigured feed is the caller's to fix, so answer 400 with the
- * adapter's actionable message instead of a bare 500.
+ * Classify an adapter failure so the client gets a status that matches the
+ * cause, and always log it server-side — the browser only ever sees the
+ * response body, so an unlogged 500 leaves nothing to debug from.
+ *
+ *   400 — the feed's own config is wrong or its ToS were never accepted
+ *   502 — the remote site blocked us, timed out, or is down
+ *   500 — anything else, which is genuinely our bug
  */
-const sendAdapterError = (res: Response, err: unknown, fallbackMessage: string, fallbackCode: string): void => {
-  if (err instanceof ListingSourceConfigError) {
+const sendAdapterError = (
+  res: Response,
+  err: unknown,
+  source: Pick<IListingSource, 'slug' | 'adapterType'>,
+  fallbackMessage: string,
+  fallbackCode: string
+): void => {
+  const context = `source=${source.slug} adapter=${source.adapterType}`;
+
+  if (err instanceof ListingSourceConfigError || err instanceof ListingSourceTermsError) {
+    cronLogger.warn(`[listing-source] ${context} ${err.code}: ${err.message}`);
     res.status(400).json({ message: err.message, code: err.code });
     return;
   }
+
+  if (err instanceof UpstreamFetchError) {
+    cronLogger.warn(`[listing-source] ${context} ${err.code}: ${err.message}`);
+    res.status(502).json({ message: err.message, code: err.code });
+    return;
+  }
+
+  // Unexpected — log the stack so the cause is visible in the server output.
+  cronLogger.error(`[listing-source] ${context} ${fallbackCode}: ${(err as Error).message}`);
+  if (err instanceof Error && err.stack) cronLogger.error(err.stack);
   res.status(500).json({ message: (err as Error).message || fallbackMessage, code: fallbackCode });
 };
 
@@ -268,7 +298,7 @@ export const runNow = async (req: Request, res: Response): Promise<void> => {
     const stats = await runSource(source, { fullRefresh, limit });
     res.json({ stats });
   } catch (err) {
-    sendAdapterError(res, err, 'Sync failed', 'INGEST_FAILED');
+    sendAdapterError(res, err, source, 'Sync failed', 'INGEST_FAILED');
   }
 };
 
@@ -314,7 +344,7 @@ export const preview = async (req: Request, res: Response): Promise<void> => {
     const result = await previewSource(source, limit);
     res.json(result);
   } catch (err) {
-    sendAdapterError(res, err, 'Preview failed', 'PREVIEW_FAILED');
+    sendAdapterError(res, err, source, 'Preview failed', 'PREVIEW_FAILED');
   }
 };
 
@@ -387,7 +417,7 @@ export const confirmImport = async (req: Request, res: Response): Promise<void> 
     const stats = await runSource(source, { preFetched });
     res.json({ stats });
   } catch (err) {
-    sendAdapterError(res, err, 'Import failed', 'INGEST_FAILED');
+    sendAdapterError(res, err, source, 'Import failed', 'INGEST_FAILED');
   }
 };
 

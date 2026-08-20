@@ -83,6 +83,20 @@ export class ListingSourceConfigError extends Error {
 }
 
 /**
+ * HTML scraping is gated on the user having accepted responsibility for the
+ * target site's terms. Distinct from a config error so the UI can offer the
+ * acceptance flow rather than sending the user to the config editor.
+ */
+export class ListingSourceTermsError extends Error {
+  readonly code = 'SOURCE_TERMS_REQUIRED';
+
+  constructor(message: string) {
+    super(message);
+    this.name = 'ListingSourceTermsError';
+  }
+}
+
+/**
  * Build an actionable configuration error. The old messages named internal
  * config keys only, which told the user nothing about how to fix the feed —
  * this one names the source and the human-readable settings that are missing.

@@ -16,6 +16,24 @@ const ROBOTS_USER_AGENT = 'BalkanEstateBot/1.0 (+https://balkanestateai.com/bot)
 const DEFAULT_REQUEST_DELAY_MS = 1500;
 const DEFAULT_TIMEOUT_MS = 20000;
 
+/**
+ * The remote site — not us — is why the fetch failed: it blocked us, timed
+ * out, 404'd, or disallowed the path in robots.txt. Callers map this to a
+ * 502 so a site being down doesn't read as a bug in our server.
+ */
+export class UpstreamFetchError extends Error {
+  readonly code = 'UPSTREAM_FETCH_FAILED';
+  readonly url: string;
+  readonly status?: number;
+
+  constructor(message: string, url: string, status?: number) {
+    super(message);
+    this.name = 'UpstreamFetchError';
+    this.url = url;
+    this.status = status;
+  }
+}
+
 interface RobotsCacheEntry {
   parser: ReturnType<typeof robotsParser>;
   fetchedAt: number;
@@ -90,7 +108,11 @@ export const httpGet = async <T = unknown>(url: string, options: RequestOptions 
     // block us specifically can do so via "User-Agent: BalkanEstateBot".
     const parser = await fetchRobots(url, ROBOTS_USER_AGENT);
     if (parser && !parser.isAllowed(url, ROBOTS_USER_AGENT)) {
-      throw new Error(`robots.txt disallows ${url}`);
+      throw new UpstreamFetchError(
+        `robots.txt on this site disallows fetching ${url}. ` +
+          'The site owner has asked automated clients not to read this path.',
+        url
+      );
     }
   }
 
@@ -148,28 +170,47 @@ export const httpGet = async <T = unknown>(url: string, options: RequestOptions 
     if (axios.isAxiosError(err)) {
       const status = err.response?.status;
       if (status === 403) {
-        throw new Error(
+        throw new UpstreamFetchError(
           `${url} returned 403 — the site is blocking automated access (Cloudflare or anti-bot). ` +
-            'Try the agency RSS feed, JSON API, or paste a JSON sample instead.'
+            'Try the agency RSS feed, JSON API, or paste a JSON sample instead.',
+          url,
+          status
         );
       }
       if (status === 404) {
-        throw new Error(`${url} returned 404 — the page does not exist. Double-check the URL.`);
+        throw new UpstreamFetchError(
+          `${url} returned 404 — the page does not exist. Double-check the URL.`,
+          url,
+          status
+        );
       }
       if (status === 429) {
-        throw new Error(
-          `${url} returned 429 — rate-limited. Increase requestDelayMs in the source config.`
+        throw new UpstreamFetchError(
+          `${url} returned 429 — rate-limited. Increase requestDelayMs in the source config.`,
+          url,
+          status
         );
       }
       if (status && status >= 500) {
-        throw new Error(`${url} returned ${status} — the site is temporarily unavailable.`);
+        throw new UpstreamFetchError(
+          `${url} returned ${status} — the site is temporarily unavailable.`,
+          url,
+          status
+        );
       }
       if (err.code === 'ECONNABORTED' || err.code === 'ETIMEDOUT') {
-        throw new Error(`${url} timed out after ${options.timeout ?? DEFAULT_TIMEOUT_MS}ms.`);
+        throw new UpstreamFetchError(
+          `${url} timed out after ${options.timeout ?? DEFAULT_TIMEOUT_MS}ms.`,
+          url
+        );
       }
       if (err.code === 'ENOTFOUND') {
-        throw new Error(`Could not resolve ${url} — check the domain spelling.`);
+        throw new UpstreamFetchError(`Could not resolve ${url} — check the domain spelling.`, url);
       }
+      if (status) {
+        throw new UpstreamFetchError(`${url} returned ${status}.`, url, status);
+      }
+      throw new UpstreamFetchError(`${url} could not be fetched — ${err.message}`, url);
     }
     throw err;
   }

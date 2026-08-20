@@ -11,8 +11,11 @@
 
 import { CustomApiAdapter } from '../services/listingAdapters/CustomApiAdapter';
 import { JsonFeedAdapter } from '../services/listingAdapters/JsonFeedAdapter';
+import { HtmlScrapeAdapter } from '../services/listingAdapters/HtmlScrapeAdapter';
+import { RssFeedAdapter } from '../services/listingAdapters/RssFeedAdapter';
 import {
   ListingSourceConfigError,
+  ListingSourceTermsError,
   resolveEndpoint,
   resolveItemId,
   resolveQueryParams,
@@ -190,5 +193,52 @@ describe('JsonFeedAdapter', () => {
     const source = makeSource({ adapterType: 'jsonFeed', adapterConfig: { itemsPath: '$[*]', idPath: '$.id' } });
 
     await expect(new JsonFeedAdapter().fetchListings(source)).rejects.toBeInstanceOf(ListingSourceConfigError);
+  });
+});
+
+describe('HtmlScrapeAdapter guards', () => {
+  beforeEach(() => httpGet.mockReset());
+
+  it('reports unaccepted terms as a distinct, user-actionable error', async () => {
+    const source = makeSource({
+      adapterType: 'htmlScrape',
+      acceptedTermsAt: undefined,
+      adapterConfig: { indexUrl: 'https://example.com/listings', selectors: { listingItem: '.card', link: 'a' } },
+    });
+
+    await expect(new HtmlScrapeAdapter().fetchListings(source)).rejects.toBeInstanceOf(ListingSourceTermsError);
+    expect(httpGet).not.toHaveBeenCalled();
+  });
+
+  it('reports missing selectors as a config error naming the feed', async () => {
+    const source = makeSource({
+      adapterType: 'htmlScrape',
+      acceptedTermsAt: new Date(),
+      adapterConfig: { indexUrl: 'https://example.com/listings' },
+    });
+
+    await expect(new HtmlScrapeAdapter().fetchListings(source)).rejects.toBeInstanceOf(ListingSourceConfigError);
+    await expect(new HtmlScrapeAdapter().fetchListings(source)).rejects.toThrow(/Test Agency/);
+  });
+
+  it('accepts the canonical `endpoint` key as well as `indexUrl`', async () => {
+    httpGet.mockResolvedValue({ data: '<html><body></body></html>' });
+
+    const source = makeSource({
+      adapterType: 'htmlScrape',
+      acceptedTermsAt: new Date(),
+      adapterConfig: { endpoint: 'https://example.com/listings', selectors: { listingItem: '.card', link: 'a' } },
+    });
+
+    await new HtmlScrapeAdapter().fetchListings(source);
+    expect(httpGet).toHaveBeenCalledWith('https://example.com/listings', expect.any(Object));
+  });
+});
+
+describe('RssFeedAdapter guards', () => {
+  it('reports a missing feed URL as a config error', async () => {
+    const source = makeSource({ adapterType: 'rss', adapterConfig: {} });
+
+    await expect(new RssFeedAdapter().fetchListings(source)).rejects.toBeInstanceOf(ListingSourceConfigError);
   });
 });

@@ -2,6 +2,13 @@ import * as cheerio from 'cheerio';
 import type { AnyNode } from 'domhandler';
 import type { IListingSource } from '../../models/ListingSource';
 import { httpGet } from './httpClient';
+import {
+  ListingSourceTermsError,
+  configError,
+  invalidEndpointError,
+  isFetchableUrl,
+  resolveEndpoint,
+} from './configUtils';
 import { fetchWithBrowser } from './browserClient';
 import { looksLikeListingPath } from '../listingDetectorService';
 import { isValidListingItem } from '../listingNormalizerService';
@@ -279,15 +286,22 @@ export class HtmlScrapeAdapter implements SourceAdapter {
 
   async fetchListings(source: IListingSource, options: FetchOptions = {}): Promise<RawListing[]> {
     if (!source.acceptedTermsAt) {
-      throw new Error(
-        `HtmlScrapeAdapter refused to run for source "${source.slug}": acceptedTermsAt is not set. ` +
-          `An admin must explicitly accept the source's ToS before HTML scraping is permitted.`
+      throw new ListingSourceTermsError(
+        `Scraping is not enabled for "${source.name || source.slug}" — the site's terms of ` +
+          'service have not been accepted for this feed. Remove the feed and add it again to accept them.'
       );
     }
 
-    const cfg = (source.adapterConfig ?? {}) as unknown as HtmlScrapeAdapterConfig;
-    if (!cfg.indexUrl || !cfg.selectors?.listingItem || !cfg.selectors?.link) {
-      throw new Error(`HtmlScrapeAdapter: indexUrl, selectors.listingItem, selectors.link required (source ${source.slug})`);
+    const rawCfg = (source.adapterConfig ?? {}) as Record<string, unknown>;
+    const cfg = rawCfg as unknown as HtmlScrapeAdapterConfig;
+    const indexUrl = resolveEndpoint(rawCfg);
+    const missing: string[] = [];
+    if (!indexUrl) missing.push('the listings page URL');
+    if (!cfg.selectors?.listingItem) missing.push('the listing-card selector');
+    if (!cfg.selectors?.link) missing.push('the listing-link selector');
+    if (missing.length) throw configError('Scraped', source, missing);
+    if (!isFetchableUrl(indexUrl as string)) {
+      throw invalidEndpointError('Scraped', source, indexUrl as string);
     }
 
     const limit = options.limit ?? cfg.limit;
@@ -339,11 +353,13 @@ export class HtmlScrapeAdapter implements SourceAdapter {
     // Hard wall-clock deadline — prevents infinite crawls on misbehaving sites.
     const deadline = Date.now() + (cfg.maxDurationMs ?? 10 * 60_000);
 
-    let pageUrl: string | undefined = cfg.indexUrl;
+    let pageUrl: string | undefined = indexUrl as string;
     let pageNum = cfg.pageStart ?? 1;
 
     for (let i = 0; i < maxPages && pageUrl; i++) {
-      const url: string = cfg.pageParam ? this.withPageParam(cfg.indexUrl, cfg.pageParam, pageNum) : pageUrl;
+      const url: string = cfg.pageParam
+        ? this.withPageParam(indexUrl as string, cfg.pageParam, pageNum)
+        : pageUrl;
       if (visitedPageUrls.has(url)) break; // stop on cycle
       if (Date.now() > deadline) break;     // stop if wall-clock limit exceeded
       visitedPageUrls.add(url);

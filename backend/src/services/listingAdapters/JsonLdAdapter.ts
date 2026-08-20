@@ -3,6 +3,7 @@ import type { IListingSource } from '../../models/ListingSource';
 import { isValidListingItem } from '../listingNormalizerService';
 import { looksLikeListingPath } from '../listingDetectorService';
 import { httpGet } from './httpClient';
+import { configError } from './configUtils';
 import type { FetchOptions, RawListing, SourceAdapter } from './types';
 
 interface JsonLdAdapterConfig {
@@ -131,7 +132,9 @@ export class JsonLdAdapter implements SourceAdapter {
         }
       }
     } else {
-      throw new Error(`JsonLdAdapter: provide listingUrls OR (indexUrl + linkSelector) (source ${source.slug})`);
+      throw configError('Structured-data', source, [
+        'the listing URLs (or a listings page URL plus its link selector)',
+      ]);
     }
 
     // Report total URL count before starting individual page fetches so the

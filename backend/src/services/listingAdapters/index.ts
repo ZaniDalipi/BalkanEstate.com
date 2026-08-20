@@ -5,6 +5,7 @@ import { XmlFeedAdapter } from './XmlFeedAdapter';
 import { JsonLdAdapter } from './JsonLdAdapter';
 import { HtmlScrapeAdapter } from './HtmlScrapeAdapter';
 import { CustomApiAdapter } from './CustomApiAdapter';
+import { ListingSourceConfigError } from './configUtils';
 import type { SourceAdapter } from './types';
 
 const adapters: Record<ListingAdapterType, SourceAdapter> = {
@@ -18,7 +19,12 @@ const adapters: Record<ListingAdapterType, SourceAdapter> = {
 
 export const getAdapter = (source: Pick<IListingSource, 'adapterType' | 'slug'>): SourceAdapter => {
   const adapter = adapters[source.adapterType];
-  if (!adapter) throw new Error(`Unknown adapter type "${source.adapterType}" for source ${source.slug}`);
+  if (!adapter) {
+    throw new ListingSourceConfigError(
+      `Feed "${source.slug}" uses an unknown import type ("${source.adapterType}"). ` +
+        'Remove the feed and add it again.'
+    );
+  }
   return adapter;
 };
 
