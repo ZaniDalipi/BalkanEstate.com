@@ -127,6 +127,13 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
     // ever was — on a device that is driven by touch.
     const cards = isTouch ? 7 : 8;
     const path = isMobile
+        // `railBirth` is left at its default. Widening it was an attempt to
+        // stop the newest card being buried, and measurement said no: the
+        // newest card stayed at 13% exposed and the one behind it dropped from
+        // 100% to 47%. The newest card is occluded by the next card on its own
+        // rail, which is what makes the ribbon solid in the first place, so it
+        // is not something to design away — it is a card that has only just
+        // appeared, and it is fully exposed a second later.
         ? { cardRadius: 0.9, birthHeight: 21, exitHeight: 124, railExit: 42 }
         : isTablet
             ? { cardRadius: 0.9, birthHeight: 14, exitHeight: 90, railExit: 40 }
@@ -140,7 +147,14 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
                 cards={cards}
                 // Slow enough to read a card's name and reach for it before it
                 // leaves; the pointer pause does the rest.
-                speed={34}
+                //
+                // Slower still on touch. A cursor is already hovering the card
+                // it is about to click, so the corridor freezes before the
+                // click; a finger has to travel to the screen, and whatever
+                // the card was under when the aim started has moved on by the
+                // time it lands. Cutting the speed by a third shrinks that
+                // drift proportionally.
+                speed={isTouch ? 52 : 34}
                 path={path}
                 axis={isMobile ? 53 : 55}
                 // A shorter box on mobile means the (unchanged) title/subtitle

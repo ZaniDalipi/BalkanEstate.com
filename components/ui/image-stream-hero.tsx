@@ -99,6 +99,13 @@ const PATH: Required<CorridorPath> = {
  */
 const HOVER_STEPS = 1.6;
 
+/**
+ * LOCAL ADDITION: how far outside a card a touch still counts as hitting it.
+ * Roughly half the difference between a fingertip's contact patch and the
+ * single point the browser reports for it.
+ */
+const TOUCH_SLOP_PX = 22;
+
 /** Sample the path once so the CSS keyframes trace the real curve. */
 function keyframes(dir: 1 | -1, name: string, p: Required<CorridorPath>) {
   const steps: string[] = [];
@@ -265,17 +272,36 @@ export function ImageStreamHero({
 
   // Front-most card wins: nearer cards project to a larger rect, and the
   // slight Y-rotation keeps the quad close enough to its bounding box.
-  const pickCard = React.useCallback((x: number, y: number) => {
+  //
+  // `slop` widens the search by a few pixels for touch. A finger reports a
+  // single point but covers a patch, and the cards are moving while it comes
+  // down, so a tap that reads as just outside a card was usually aimed at it.
+  // Without this those taps select nothing at all and the corridor simply
+  // ignores them, which is worse than picking the neighbour. Only the nearest
+  // card within the slop is considered, and only when nothing was hit
+  // outright, so a direct hit is never overridden.
+  const pickCard = React.useCallback((x: number, y: number, slop = 0) => {
     let best: number | null = null;
     let bestArea = 0;
+    let nearest: number | null = null;
+    let nearestDist = Infinity;
     cardEls.current.forEach((el, k) => {
       if (!el) return;
       const r = el.getBoundingClientRect();
-      if (x < r.left || x > r.right || y < r.top || y > r.bottom) return;
-      const area = r.width * r.height;
-      if (area > bestArea) { bestArea = area; best = k; }
+      if (r.width === 0) return;
+      if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+        const area = r.width * r.height;
+        if (area > bestArea) { bestArea = area; best = k; }
+        return;
+      }
+      if (slop > 0) {
+        const dx = Math.max(r.left - x, 0, x - r.right);
+        const dy = Math.max(r.top - y, 0, y - r.bottom);
+        const d = Math.hypot(dx, dy);
+        if (d <= slop && d < nearestDist) { nearestDist = d; nearest = k; }
+      }
     });
-    return best;
+    return best ?? nearest;
   }, []);
 
   const handlePointerMove = React.useCallback(
@@ -305,7 +331,9 @@ export function ImageStreamHero({
   const handlePointerDown = React.useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       if (!onImageSelect) return;
-      setActive(pickCard(e.clientX, e.clientY));
+      // Slop for a finger, none for a mouse: a cursor is exact, and letting it
+      // grab a card it is not over would make the corridor feel sticky.
+      setActive(pickCard(e.clientX, e.clientY, e.pointerType === "mouse" ? 0 : TOUCH_SLOP_PX));
     },
     [onImageSelect, pickCard],
   );
