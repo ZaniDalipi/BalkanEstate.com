@@ -330,7 +330,9 @@ export function ImageStreamHero({
       if (frame.current !== null) return; // coalesce to one pick per frame
       frame.current = requestAnimationFrame(() => {
         frame.current = null;
-        setActive(pickCard(clientX, clientY, down ? TOUCH_SLOP_PX : 0));
+        const picked = pickCard(clientX, clientY, down ? TOUCH_SLOP_PX : 0);
+        pendingPick.current = picked;
+        setActive(picked);
       });
     },
     [onImageSelect, pickCard],
@@ -349,6 +351,27 @@ export function ImageStreamHero({
    */
   const touchDownAt = React.useRef<{ x: number; y: number } | null>(null);
 
+  /*
+   * LOCAL ADDITION: the card the click is going to open, held in a ref.
+   *
+   * The click handler used to read `active`, which is React state, and that is
+   * a race on touch. The real event order for a tap is
+   *
+   *   pointerdown → pointerup → pointerout → pointerleave → click
+   *
+   * so `pointerleave` — which clears the active card, because on a mouse it
+   * means the cursor has left the corridor — fires *before* the click. Whether
+   * the tap worked came down to whether React had flushed that update yet:
+   * batched late it survived, committed first and the click handler saw null
+   * and did nothing. That is a tap that silently fails some of the time, which
+   * is worse than one that never works, because it looks like a mis-aim.
+   *
+   * A ref is written and read synchronously, so it cannot be caught out by
+   * batching. It is cleared on `pointercancel` — the browser sending that means
+   * the gesture became a scroll, and a scroll must not open anything.
+   */
+  const pendingPick = React.useRef<number | null>(null);
+
   const handlePointerDown = React.useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       if (!onImageSelect) return;
@@ -356,13 +379,22 @@ export function ImageStreamHero({
       touchDownAt.current = isTouch ? { x: e.clientX, y: e.clientY } : null;
       // Slop for a finger, none for a mouse: a cursor is exact, and letting it
       // grab a card it is not over would make the corridor feel sticky.
-      setActive(pickCard(e.clientX, e.clientY, isTouch ? TOUCH_SLOP_PX : 0));
+      const picked = pickCard(e.clientX, e.clientY, isTouch ? TOUCH_SLOP_PX : 0);
+      pendingPick.current = picked;
+      setActive(picked);
     },
     [onImageSelect, pickCard],
   );
 
   const releasePointer = React.useCallback(() => {
     touchDownAt.current = null;
+  }, []);
+
+  /** The gesture turned into a scroll — nothing should open. */
+  const cancelPointer = React.useCallback(() => {
+    touchDownAt.current = null;
+    pendingPick.current = null;
+    setActive(null);
   }, []);
 
   React.useEffect(() => () => {
@@ -520,15 +552,22 @@ export function ImageStreamHero({
         onPointerDown={onImageSelect ? handlePointerDown : undefined}
         onPointerMove={onImageSelect ? handlePointerMove : undefined}
         onPointerUp={onImageSelect ? releasePointer : undefined}
-        onPointerCancel={onImageSelect ? releasePointer : undefined}
+        onPointerCancel={onImageSelect ? cancelPointer : undefined}
+        // Clears the state but deliberately not `pendingPick`: on touch this
+        // fires before the click that is about to use it.
         onPointerLeave={onImageSelect ? () => { releasePointer(); setActive(null); } : undefined}
         onClick={
           onImageSelect
             ? () => {
-                if (active === null) return;
+                // The ref first: on touch, `pointerleave` has already fired by
+                // now and may have cleared the state. See the note on
+                // `pendingPick`.
+                const slot = pendingPick.current ?? active;
+                pendingPick.current = null;
+                if (slot === null) return;
                 // The active card's *current* picture, not a fixed function of
                 // its slot — slots rotate through the list as they wrap.
-                onImageSelect((slotImage[active] ?? active) % Math.max(images.length, 1));
+                onImageSelect((slotImage[slot] ?? slot) % Math.max(images.length, 1));
               }
             : undefined
         }
