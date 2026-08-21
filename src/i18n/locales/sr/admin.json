@@ -1017,6 +1017,15 @@
     "importError": "Uvoz destinacija nije uspeo",
     "photoSpec": "Fotografije kartica su portret, 18:25 — otpremite 2200 × 3056 ili najbliže što imate. Manje rade ali se rastežu na velikim karticama; veće se čuvaju na širini 2200. Drugi oblici se seku, nikada ne izobličavaju.",
     "newAvailable": "{{count}} novih ugrađenih destinacija još nije u bazi podataka.",
-    "importNew": "Uvezi ih"
+    "importNew": "Uvezi ih",
+    "editTitle": "Uredi destinaciju",
+    "addTitle": "Dodaj destinaciju",
+    "choose": "Izaberi…",
+    "photo": "Fotografija",
+    "noPhoto": "Koristi se fotografija grada",
+    "uploadPhoto": "Otpremi fotografiju",
+    "replacePhotoLong": "Zameni fotografiju",
+    "removePhoto": "Ukloni",
+    "noCityPhoto": "Nijedna"
   }
 }

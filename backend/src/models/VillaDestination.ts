@@ -21,6 +21,14 @@ export interface IVillaDestination extends Document {
   imageUrl?: string;
   /** Cloudinary public id, kept so a replaced image can be cleaned up. */
   imagePublicId?: string;
+  /**
+   * Who took the photo, when it came from a stock source rather than an admin
+   * upload. Unsplash's API terms require the photographer and Unsplash itself
+   * to be credited wherever the picture is shown, so the name and profile link
+   * travel with the image instead of being lost at import time.
+   */
+  imageCredit?: string;
+  imageCreditUrl?: string;
   /** Seeded city supplying the fallback photo. */
   imageCity?: string;
   imageCountry?: string;
@@ -40,6 +48,8 @@ const VillaDestinationSchema = new Schema(
     country: { type: String, required: true, trim: true, maxlength: 60 },
     imageUrl: { type: String, trim: true },
     imagePublicId: { type: String, trim: true },
+    imageCredit: { type: String, trim: true, maxlength: 120 },
+    imageCreditUrl: { type: String, trim: true, maxlength: 300 },
     imageCity: { type: String, trim: true, maxlength: 80 },
     imageCountry: { type: String, trim: true, maxlength: 60 },
     // Real-world ranges, so a bad value can never fly the map off the planet.

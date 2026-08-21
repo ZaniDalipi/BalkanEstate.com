@@ -15,7 +15,10 @@ router.get('/', async (_req: Request, res: Response): Promise<void> => {
   try {
     const destinations = await VillaDestination.find({ isActive: true })
       .sort({ displayOrder: 1, name: 1 })
-      .select('name query country imageUrl imageCity imageCountry lat lng zoom')
+      // The credit travels with the photo: Unsplash's terms require the
+      // photographer to be named wherever their picture is shown, so it has to
+      // reach the client that renders the card.
+      .select('name query country imageUrl imageCredit imageCreditUrl imageCity imageCountry lat lng zoom')
       // Has to stay ahead of DEFAULT_VILLA_DESTINATIONS, which is 225 entries.
       // This has now been the wrong number twice: 40 while the list was 14,
       // then 200 while it grew to 225. Both would silently drop the tail —
