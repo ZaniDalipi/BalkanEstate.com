@@ -208,7 +208,11 @@ async function uploadFromUrl(imageUrl: string, pid: string): Promise<boolean> {
       overwrite: true,
       resource_type: 'image',
       transformation: [
-        { width: 1200, height: 800, crop: 'fill', gravity: 'auto' },
+        // `lfill` ("limit fill"): crops to the 1200x800 frame like `fill`,
+        // but never enlarges past the source's own size. Most Commons
+        // originals are well above this, so it rarely engages — it exists for
+        // the smaller-town photos where a plain `fill` would upscale and blur.
+        { width: 1200, height: 800, crop: 'lfill', gravity: 'auto' },
         { quality: 'auto:good', fetch_format: 'auto' },
       ],
     });

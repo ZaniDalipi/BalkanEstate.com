@@ -15,6 +15,7 @@ import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import HeroSection from './HeroSection';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import AppShowcaseSection from './AppShowcaseSection';
+import CityShowcaseSection from './CityShowcaseSection';
 import QuickAccessSection from './QuickAccessSection';
 import Footer from '@/components/shared/Footer';
 
@@ -217,11 +218,16 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
       <OrganizationSchema />
       <FAQSchema faqs={realEstateFAQs} />
 
+      {/* The gallery goes inside the hero, directly under its buttons, so it
+          is on screen when the page opens. No `content-below-fold` wrapper for
+          the same reason — skipping its render would delay the very images it
+          exists to show. */}
       <HeroSection
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
         onSearch={handleSearch}
         onNavigate={handleNavigate}
+        belowActions={<CityShowcaseSection onNavigate={handleNavigate} />}
       />
 
       <AppShowcaseSection onNavigate={handleNavigate} />

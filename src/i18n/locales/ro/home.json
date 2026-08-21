@@ -183,5 +183,11 @@
     "subtitle": "Primește alerte despre proprietăți și informații de piață pe email.",
     "placeholder": "Introdu adresa ta de email",
     "button": "Abonează-te"
+  },
+  "cityGallery": {
+    "title": "Explorați orașele din Balcani",
+    "imageAlt": "Proprietate în {{city}}, {{country}}",
+    "buy": "Cumpără",
+    "rent": "Închiriază"
   }
 }

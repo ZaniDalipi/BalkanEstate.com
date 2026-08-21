@@ -9,8 +9,15 @@ const MAX_IMAGE_WIDTH = 1200;
 const MAX_IMAGE_HEIGHT = 800;
 
 /**
- * Fetch a city thumbnail URL from Wikipedia REST API.
- * Prefers thumbnail over originalimage to reduce download size.
+ * Fetch a city image URL from Wikipedia REST API.
+ *
+ * Prefers the full-resolution original over the summary endpoint's thumbnail.
+ * That thumbnail is a fixed small size Wikipedia chooses for the mobile
+ * summary card — commonly a few hundred pixels wide — which is exactly what
+ * produced blurry city photos: `downloadAndResizeImage` below stretched it up
+ * to fill a 1200x800 frame. The original is what a browser tab open on the
+ * Wikipedia article would show, and can only be as small as the source photo
+ * genuinely is, so a resize down from it never has to invent detail.
  */
 async function fetchWikipediaImageUrl(cityName: string): Promise<string | null> {
   try {
@@ -19,15 +26,15 @@ async function fetchWikipediaImageUrl(cityName: string): Promise<string | null> 
     );
     if (!res.ok) return null;
     const data = await res.json() as { originalimage?: { source: string }; thumbnail?: { source: string } };
-    // Prefer thumbnail to avoid downloading huge originals; fall back to original
-    return data.thumbnail?.source || data.originalimage?.source || null;
+    return data.originalimage?.source || data.thumbnail?.source || null;
   } catch {
     return null;
   }
 }
 
 /**
- * Download image from URL and resize it with sharp to stay under Cloudinary's 10MB limit.
+ * Download image from URL and fit it to the target frame with sharp, keeping
+ * it under Cloudinary's 10MB limit.
  */
 async function downloadAndResizeImage(imageUrl: string): Promise<Buffer | null> {
   try {
@@ -36,13 +43,17 @@ async function downloadAndResizeImage(imageUrl: string): Promise<Buffer | null> 
     const arrayBuffer = await res.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Resize and compress with sharp
+    // `withoutEnlargement` is the point: a source smaller than the 1200x800
+    // frame is left at its own size (still cropped to the frame's aspect
+    // ratio) rather than stretched up to fill it — stretching is what turns a
+    // merely small photo into a visibly blurry one.
     const resized = await sharp(buffer)
       .resize(MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT, {
         fit: 'cover',
         position: 'centre',
+        withoutEnlargement: true,
       })
-      .jpeg({ quality: 85, progressive: true })
+      .jpeg({ quality: 90, progressive: true })
       .toBuffer();
 
     return resized;

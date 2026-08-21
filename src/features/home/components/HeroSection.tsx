@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Typewriter } from '@/src/components/ui/typewriter';
 import { apiRequest } from '@/src/shared/api';
-import { getFeaturedCities } from '@/src/features/cities/api/cityApi';
 import { searchLocation } from '@/services/osmService';
 import type { NominatimResult } from '@/types';
 
@@ -12,6 +11,12 @@ interface HeroSectionProps {
   onSearchChange: (value: string) => void;
   onSearch: () => void;
   onNavigate: (view: string, path: string) => void;
+  /**
+   * Rendered directly under the Buy / Rent / List buttons, inside the hero's
+   * own container. A slot rather than an import so the hero stays unaware of
+   * whatever the home page decides to put there — today the city gallery.
+   */
+  belowActions?: React.ReactNode;
 }
 
 interface PlatformStats {
@@ -64,9 +69,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   onSearchChange,
   onSearch,
   onNavigate,
+  belowActions,
 }) => {
-  const { t, i18n } = useTranslation(['home']);
-  const currentLang = (i18n.language || 'en').split('-')[0];
+  const { t } = useTranslation(['home']);
   const [isFocused, setIsFocused] = useState(false);
   const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -92,87 +97,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     gcTime: 30 * 60 * 1000,
     retry: 1,
   });
-
-  // Reuse same query key as PopularCitiesSection to avoid duplicate requests
-  const { data: featuredCities = [] } = useQuery({
-    queryKey: ['featuredCities'],
-    queryFn: () => getFeaturedCities(50),
-    staleTime: 10 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    retry: 2,
-  });
-
-  // Localized city names for Albanian (sq) locale
-  const CITY_NAMES_SQ: Record<string, string> = useMemo(() => ({
-    'Prishtina': 'Prishtinë',
-    'Pristina': 'Prishtinë',
-    'Tirana': 'Tiranë',
-    'Durres': 'Durrës',
-    'Vlore': 'Vlorë',
-    'Shkoder': 'Shkodër',
-    'Elbasan': 'Elbasan',
-    'Prizren': 'Prizren',
-    'Peja': 'Pejë',
-    'Gjilan': 'Gjilan',
-    'Mitrovica': 'Mitrovicë',
-  }), []);
-
-  const localizeCityName = useCallback((city: string) => {
-    if (currentLang === 'sq') {
-      return CITY_NAMES_SQ[city] || city;
-    }
-    return city;
-  }, [currentLang, CITY_NAMES_SQ]);
-
-  // Balkan-wide city seeds — ensure chips are diverse when API data is sparse
-  const CHIP_SEEDS = useMemo(() => [
-    { city: 'Belgrade',   country: 'Serbia' },
-    { city: 'Novi Sad',   country: 'Serbia' },
-    { city: 'Budva',      country: 'Montenegro' },
-    { city: 'Kotor',      country: 'Montenegro' },
-    { city: 'Podgorica',  country: 'Montenegro' },
-    { city: 'Skopje',     country: 'North Macedonia' },
-    { city: 'Ohrid',      country: 'North Macedonia' },
-    { city: 'Sarajevo',   country: 'Bosnia' },
-    { city: 'Mostar',     country: 'Bosnia' },
-    { city: 'Zagreb',     country: 'Croatia' },
-    { city: 'Split',      country: 'Croatia' },
-    { city: 'Dubrovnik',  country: 'Croatia' },
-    { city: 'Sofia',      country: 'Bulgaria' },
-  ], []);
-
-  const displayCities = useMemo(() => {
-    const shuffle = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
-    const shuffledApi   = shuffle(featuredCities);
-    const shuffledSeeds = shuffle(CHIP_SEEDS);
-    const picked: Array<{ original: string; display: string }> = [];
-    const seenCountries = new Set<string>();
-
-    // One API city per country first
-    for (const c of shuffledApi) {
-      if (picked.length >= 6) break;
-      if (!seenCountries.has(c.country)) {
-        picked.push({ original: c.city, display: localizeCityName(c.city) });
-        seenCountries.add(c.country);
-      }
-    }
-    // Fill from seeds for countries not yet represented
-    for (const s of shuffledSeeds) {
-      if (picked.length >= 6) break;
-      if (!seenCountries.has(s.country)) {
-        picked.push({ original: s.city, display: localizeCityName(s.city) });
-        seenCountries.add(s.country);
-      }
-    }
-    // Top-up with more API cities if needed
-    for (const c of shuffledApi) {
-      if (picked.length >= 6) break;
-      if (!picked.some(p => p.original === c.city)) {
-        picked.push({ original: c.city, display: localizeCityName(c.city) });
-      }
-    }
-    return picked;
-  }, [featuredCities, localizeCityName, CHIP_SEEDS]);
 
   // Autocomplete: debounced location search
   useEffect(() => {
@@ -246,14 +170,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     [onSearch]
   );
 
-  const handleCityClick = useCallback(
-    (city: string) => {
-      onSearchChange(city);
-      setTimeout(() => onSearch(), 0);
-    },
-    [onSearchChange, onSearch]
-  );
-
   return (
     <section className="relative overflow-hidden" style={{
       background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 50%, #ffffff 100%)',
@@ -272,7 +188,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         pointerEvents: 'none',
       }} />
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 pt-12 pb-16 sm:pt-24 sm:pb-28 hero-stagger">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 pt-6 pb-12 sm:pt-10 sm:pb-16 hero-stagger">
         {/* Title */}
         <h1
           className="text-center text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-tight max-w-3xl mx-auto hero-fade-up"
@@ -304,7 +220,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         </p>
 
         {/* Search Bar — liquid glass */}
-        <div className="mt-8 sm:mt-10 max-w-2xl mx-auto relative z-20 hero-fade-up" style={{ animationDelay: '0.16s' }} ref={wrapperRef}>
+        <div className="mt-6 sm:mt-8 max-w-2xl mx-auto relative z-20 hero-fade-up" style={{ animationDelay: '0.16s' }} ref={wrapperRef}>
           <div style={{
             position: 'relative',
             zIndex: 10,
@@ -433,41 +349,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({
               </div>
             )}
           </div>
-
-          {/* Popular searches — glass chips */}
-          {displayCities.length > 0 && (
-            <div className="mt-3 sm:mt-4 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
-              <span className="text-[10px] sm:text-xs text-slate-400 font-medium">
-                {t('home:hero.popularSearches')}
-              </span>
-              {displayCities.map((city) => (
-                <button
-                  key={city.original}
-                  onClick={() => handleCityClick(city.original)}
-                  style={{
-                    padding: '4px 12px', borderRadius: '9999px',
-                    fontSize: '11px', fontWeight: 500,
-                    color: '#475569',
-                    background: 'rgba(255,255,255,0.7)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    border: '1px solid rgba(226,232,240,0.6)',
-                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8)',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.95)'; e.currentTarget.style.borderColor = 'rgba(203,213,225,0.8)'; e.currentTarget.style.color = '#0f172a'; }}
-                  onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.7)'; e.currentTarget.style.borderColor = 'rgba(226,232,240,0.6)'; e.currentTarget.style.color = '#475569'; }}
-                >
-                  {city.display}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* CTA Buttons — liquid glass */}
-        <div className="mt-6 sm:mt-8 flex flex-wrap justify-center gap-2 sm:gap-3 hero-fade-up" style={{ animationDelay: '0.24s' }}>
+        <div className="mt-5 sm:mt-6 flex flex-wrap justify-center gap-2 sm:gap-3 hero-fade-up" style={{ animationDelay: '0.24s' }}>
           <button
             onClick={() => onNavigate('search', '/search')}
             style={{
@@ -511,8 +396,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           ))}
         </div>
 
+        {belowActions}
+
         {/* Stats Strip — liquid glass card */}
-        <div className="mt-10 sm:mt-14 max-w-3xl mx-auto hero-fade-up" style={{ animationDelay: '0.32s' }}>
+        <div className="mt-10 sm:mt-12 max-w-3xl mx-auto hero-fade-up" style={{ animationDelay: '0.32s' }}>
           <div style={{
             borderRadius: '20px',
             padding: '1rem 1.5rem',

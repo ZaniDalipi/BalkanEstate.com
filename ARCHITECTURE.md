@@ -78,6 +78,37 @@ Key decisions:
 
 ---
 
+## Home-Page City Gallery (Elastic Gallery)
+
+Accordion of city panels under the hero: the active panel expands to 4× the
+width of its siblings, the rest collapse into labelled slivers.
+
+```
+CityShowcase (MongoDB)          ← the ONLY source of the gallery's content
+  └── GET /api/city-showcase    ← active rows, display order (cached 5 min)
+        └── getShowcaseCities() ← drops rows that fail validation
+              └── useShowcaseCities()          (React Query, public key)
+                    └── CityShowcaseSection    ← maps rows → gallery items
+                          └── <ElasticGallery> ← presentational, no data access
+```
+
+Key decisions:
+- **No fallback list.** Nothing is hardcoded and no seeded photo library sits
+  behind it, so `imageUrl` is required in the schema, on the wire and in the
+  admin form. Empty or failed load → the section does not render.
+- **Photo before row.** `POST /admin/city-showcase/upload-image` returns a URL
+  the create form puts into its draft — a panel cannot be saved without one.
+- **Two-step touch.** Hover (fine pointers only) and keyboard focus expand a
+  panel; a click on the already-expanded panel selects. A tap synthesises hover
+  and focus first, so both are filtered — otherwise every first tap navigates.
+- **Display cap.** `CITY_SHOWCASE_MAX_PANELS` (6) is shared between the section
+  and the admin, which badges any panel past it as "Not shown".
+
+Admin: `AdminSidebar → City Gallery` (`/admin/city-showcase`),
+`CityShowcaseManager` + `CityShowcaseForm` + `useCityShowcaseManager`.
+
+---
+
 ## Sticky Bottom Action Bar
 
 Mobile-only companion to the desktop `PropertyContact` sidebar.

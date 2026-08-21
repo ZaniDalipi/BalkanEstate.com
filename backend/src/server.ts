@@ -69,6 +69,7 @@ initializeKeyPair();
 import authRoutes from './routes/authRoutes';
 import propertyRoutes from './routes/propertyRoutes';
 import villaDestinationRoutes from './routes/villaDestinationRoutes';
+import cityShowcaseRoutes from './routes/cityShowcaseRoutes';
 import favoriteRoutes from './routes/favoriteRoutes';
 import savedAgentRoutes from './routes/savedAgentRoutes';
 import savedSearchRoutes from './routes/savedSearchRoutes';
@@ -335,6 +336,7 @@ app.use('/api/webhooks', webhookRoutes); // Webhooks from payment provider - no 
 // Standard API routes
 app.use('/api/properties', propertyRoutes);
 app.use('/api/villa-destinations', villaDestinationRoutes);
+app.use('/api/city-showcase', cityShowcaseRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/saved-agents', savedAgentRoutes);
 app.use('/api/saved-searches', savedSearchRoutes);
