@@ -73,8 +73,18 @@ const CityShowcaseSection: React.FC<CityShowcaseSectionProps> = ({ onNavigate })
                 // Through the Cloudinary helpers, never the raw stored URL
                 // (Claude.md). A non-Cloudinary URL falls through them
                 // unchanged, so a manually entered photo still renders.
-                imageUrl: optimizeCloudinaryUrl(city.imageUrl, { width: 960, quality: 'auto' }) || city.imageUrl,
-                imageSrcSet: cloudinarySrcSet(city.imageUrl, PANEL_WIDTHS, { quality: 'auto' }) || undefined,
+                //
+                // `crop: 'limit'` rather than the helper's own `fill` default:
+                // a panel photo narrower than the requested width would
+                // otherwise be upscaled by the CDN to fill it, which is
+                // exactly the blur this section has fought on the write side
+                // (`cityImageService.ts`, `seedCityImages.ts`). `limit` only
+                // ever scales down: a source already at 960px is delivered at
+                // 960px, a smaller one is delivered at its own size — sharper
+                // either way — and the `object-cover` on the panel still
+                // fills the frame regardless of which it gets.
+                imageUrl: optimizeCloudinaryUrl(city.imageUrl, { width: 960, quality: 'auto', crop: 'limit' }) || city.imageUrl,
+                imageSrcSet: cloudinarySrcSet(city.imageUrl, PANEL_WIDTHS, { quality: 'auto', crop: 'limit' }) || undefined,
                 imageSizes: PANEL_SIZES,
                 placeholderUrl: optimizeCloudinaryUrl(city.imageUrl, { width: 40, quality: 'auto:eco' }) || undefined,
                 alt: t('home:cityGallery.imageAlt', 'Property in {{city}}, {{country}}', {

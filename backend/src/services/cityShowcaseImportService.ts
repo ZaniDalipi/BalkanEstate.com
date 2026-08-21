@@ -88,25 +88,32 @@ export function isUsablePhotoUrl(url: unknown): url is string {
 /**
  * Finds a photo for one city, or `null` if there is none.
  *
- * Two sources, in order of how much they can be trusted:
- * 1. the photo already stored on the market-data row;
- * 2. the seeded Cloudinary city library (`city-{country}-{city}`), but only
- *    after asking Cloudinary whether that asset exists — the id is derived
- *    from the name, so guessing it would produce a URL that 404s for every
- *    city the seed script never covered.
+ * The seeded Cloudinary city library (`city-{country}-{city}`) is checked
+ * first, ahead of `row.imageUrl`, even though the library needs a network
+ * round trip and the row field doesn't. That library is built by
+ * `seedCityImages.ts`, which is deliberately picky — it prefers Commons
+ * photos titled skyline/aerial/panorama/view and uploads the full-resolution
+ * original. `row.imageUrl` is instead written automatically by
+ * `cityImageService.ts` on a schedule, from whatever Wikipedia's summary
+ * endpoint happens to hand back; before that service was fixed to stop
+ * upscaling small thumbnails, it is exactly the field that produced blurry
+ * gallery photos. Checking the library first means a city the good pipeline
+ * has already covered is never displaced by the automatic one.
+ *
+ * The Cloudinary lookup can 404 — the id is derived from the name, so most
+ * databases will have cities the seed script never ran for — and that is not
+ * an error, just a reason to fall back to the row's own field.
  */
 export async function resolveCityPhoto(row: ImportableCity): Promise<string | null> {
-  if (isUsablePhotoUrl(row.imageUrl)) return row.imageUrl.trim();
-
   const publicId = `city-${normalizeName(row.country)}-${normalizeName(row.city)}`;
   try {
     const resource = await cloudinary.api.resource(publicId);
-    return isUsablePhotoUrl(resource?.secure_url) ? resource.secure_url : null;
+    if (isUsablePhotoUrl(resource?.secure_url)) return resource.secure_url;
   } catch {
-    // Not in the library. Not an error — most databases will have cities the
-    // image seed never ran for.
-    return null;
+    // Not in the library — fall through to the row's own field.
   }
+
+  return isUsablePhotoUrl(row.imageUrl) ? row.imageUrl.trim() : null;
 }
 
 /** Resolves photos a few at a time so an import cannot hammer Cloudinary. */
