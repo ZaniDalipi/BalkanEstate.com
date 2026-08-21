@@ -1133,7 +1133,7 @@
     "cancel": "Anulează",
     "saved": "Panoul orașului a fost salvat",
     "city": "Oraș",
-    "cityHint": "Numele afișat pe panou.",
+    "cityHint": "Numele afișat pe panou. Nu este în listă? Tastați-l — se salvează și pentru data viitoare.",
     "country": "Țară",
     "searchQuery": "Termen de căutare",
     "searchQueryHint": "Se trimite paginii de căutare când un vizitator deschide acest panou.",
@@ -1158,6 +1158,10 @@
     "imported": "Importate {{imported}} oraș(e), {{present}} deja în galerie",
     "importError": "Importul orașelor din bază a eșuat",
     "missingPhotoTitle": "{{count}} oraș(e) nu au fotografie și nu au fost importate",
-    "missingPhotoHint": "Adăugați-le cu “Adaugă oraș” și încărcați o fotografie — galeria nu poate afișa un panou fără ea."
+    "missingPhotoHint": "Adăugați-le cu “Adaugă oraș” și încărcați o fotografie — galeria nu poate afișa un panou fără ea.",
+    "editTitle": "Editează orașul",
+    "addTitle": "Adaugă oraș",
+    "countryPlaceholder": "Selectați o țară…",
+    "cityPlaceholder": "Alegeți unul sau tastați un oraș nou"
   }
 }

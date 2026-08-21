@@ -281,6 +281,15 @@ export function getCityShowcaseInvalidationKeys() {
 }
 
 /**
+ * Admin city-name directory — the picker behind the city-showcase form's
+ * city/country fields. Its own root: a new city ensured into it (see
+ * `ensureCityInDirectory`) doesn't touch a gallery panel or vice versa.
+ */
+export const cityDirectoryKeys = {
+  all: ['cityDirectory'] as const,
+};
+
+/**
  * Get all discount-related keys that should be invalidated when discounts change
  */
 export function getDiscountInvalidationKeys() {

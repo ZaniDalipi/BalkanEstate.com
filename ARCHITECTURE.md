@@ -80,15 +80,17 @@ Key decisions:
 
 ## Home-Page City Gallery (Elastic Gallery)
 
-Accordion of city panels under the hero: the active panel expands to 4× the
-width of its siblings, the rest collapse into labelled slivers.
+Accordion of city panels rendered inside the hero, directly under its Buy /
+Rent / List buttons: the active panel expands to 4× the width of its
+siblings, the rest collapse into labelled slivers. Every panel offers Buy and
+Rent actions, each opening `/search` or `/rent` filtered to that city.
 
 ```
 CityShowcase (MongoDB)          ← the ONLY source of the gallery's content
   └── GET /api/city-showcase    ← active rows, display order (cached 5 min)
         └── getShowcaseCities() ← drops rows that fail validation
               └── useShowcaseCities()          (React Query, public key)
-                    └── CityShowcaseSection    ← maps rows → gallery items
+                    └── CityShowcaseSection    ← picks a random subset, maps to gallery items
                           └── <ElasticGallery> ← presentational, no data access
 ```
 
@@ -98,14 +100,48 @@ Key decisions:
   admin form. Empty or failed load → the section does not render.
 - **Photo before row.** `POST /admin/city-showcase/upload-image` returns a URL
   the create form puts into its draft — a panel cannot be saved without one.
-- **Two-step touch.** Hover (fine pointers only) and keyboard focus expand a
-  panel; a click on the already-expanded panel selects. A tap synthesises hover
-  and focus first, so both are filtered — otherwise every first tap navigates.
-- **Display cap.** `CITY_SHOWCASE_MAX_PANELS` (6) is shared between the section
-  and the admin, which badges any panel past it as "Not shown".
+- **Expand vs. act are separate controls.** Hover, focus, or a tap expands a
+  panel; only its Buy/Rent buttons navigate. Splitting these is what lets a
+  touchscreen tap reveal a panel without committing to it — no "first tap
+  expands, second tap selects" state to track.
+- **Random per visit.** `pickShowcaseCities` draws `CITY_SHOWCASE_MAX_PANELS`
+  (6) cities from every active one, one per country before any repeats, so the
+  gallery reads as "the Balkans" rather than whichever handful was curated
+  first. Memoised on the fetched list, so a re-render never reshuffles panels
+  under the pointer.
+- **Image quality.** Both automatic city-photo pipelines
+  (`cityImageService.ts`'s Wikipedia fetch, `seedCityImages.ts`'s Commons
+  fetch) and the gallery's own Cloudinary delivery request (`crop: 'limit'`)
+  are written to never upscale a source smaller than the frame — upscaling,
+  not the source photo, was what actually produced blurry panels.
 
 Admin: `AdminSidebar → City Gallery` (`/admin/city-showcase`),
-`CityShowcaseManager` + `CityShowcaseForm` + `useCityShowcaseManager`.
+`CityShowcaseManager` + `CityShowcaseForm` + `useCityShowcaseManager` +
+`cityShowcaseImportService` (the "Import cities from database" action).
+
+### City directory — typo-proofing the admin form
+
+`CityShowcaseForm` always renders as a modal. Country is a closed `<select>`
+sourced from the app's existing canonical `BALKAN_COUNTRIES` (never
+free-text, so it can't drift from every other country filter in the app);
+city is a free-text field paired with a `<datalist>` of names already known
+for the chosen country, built from two sources: `CityMarketData` (via a
+lightweight `GET /admin/cities`) and the gallery's own curated rows.
+
+```
+useCityShowcaseManager.save()
+  └── ensureCityInDirectory({city, country, countryCode})
+        └── POST /admin/cities  → upserts a minimal CityMarketData stub
+              (all analytics fields zeroed, featured:false, dataSource:'manual')
+              idempotent + case-insensitive, so it's safe to call on every save
+  └── createCityShowcase / updateCityShowcase   (unchanged)
+```
+
+A city typed for a gallery panel is never lost to that panel alone: saving
+always ensures it exists in `CityMarketData` too (as an inert stub — no
+invented market statistics), so it becomes a selectable suggestion for every
+other city picker and a candidate for the "Import cities from database"
+action, without requiring a full market-data form.
 
 ---
 

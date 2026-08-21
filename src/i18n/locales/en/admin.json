@@ -1233,7 +1233,7 @@
     "cancel": "Cancel",
     "saved": "City panel saved",
     "city": "City",
-    "cityHint": "The name shown on the panel.",
+    "cityHint": "The name shown on the panel. Not listed? Type it — it gets saved for next time too.",
     "country": "Country",
     "searchQuery": "Search term",
     "searchQueryHint": "Sent to the search page when a visitor opens this panel.",
@@ -1258,6 +1258,10 @@
     "imported": "Imported {{imported}} city/cities, {{present}} already in the gallery",
     "importError": "Failed to import cities from the database",
     "missingPhotoTitle": "{{count}} city/cities have no photo and were not imported",
-    "missingPhotoHint": "Add them with “Add city” and upload a photo — the gallery cannot show a panel without one."
+    "missingPhotoHint": "Add them with “Add city” and upload a photo — the gallery cannot show a panel without one.",
+    "editTitle": "Edit city",
+    "addTitle": "Add city",
+    "countryPlaceholder": "Select a country…",
+    "cityPlaceholder": "Pick one or type a new city"
   }
 }
