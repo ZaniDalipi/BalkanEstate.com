@@ -1,5 +1,10 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { createPortal } from 'react-dom';
+import { uploadRequest } from '@/src/shared/api/httpClient';
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { SEEDED_CITY_IMAGES, SEEDED_COUNTRIES } from '@/config/seededCityImages';
+import { validateVillaDestination } from '@/src/shared/utils/validation';
 
 /**
  * Numbers are held as strings while editing so a half-typed "-" or "42."
@@ -35,105 +40,283 @@ interface Props {
     onSave: (draft: DestinationDraft) => void;
 }
 
-/** Mirrors the server's rules so the admin sees the problem before saving. */
-function validate(d: DestinationDraft): string | null {
-    if (!d.name.trim()) return 'Name is required';
-    if (!d.query.trim()) return 'Search term is required';
-    if (!d.country.trim()) return 'Country is required';
-    const lat = Number(d.lat);
-    const lng = Number(d.lng);
-    const zoom = Number(d.zoom);
-    if (!Number.isFinite(lat) || lat < -90 || lat > 90) return 'Latitude must be between -90 and 90';
-    if (!Number.isFinite(lng) || lng < -180 || lng > 180) return 'Longitude must be between -180 and 180';
-    if (!Number.isFinite(zoom) || zoom < 1 || zoom > 20) return 'Zoom must be between 1 and 20';
-    if (!Number.isFinite(Number(d.displayOrder))) return 'Order must be a number';
-    return null;
-}
-
+/**
+ * Editor for one destination, as a modal.
+ *
+ * It used to render inline above a list that is now hundreds of rows long, so
+ * pressing Edit on anything below the fold scrolled the form out of sight and
+ * the admin had to scroll back up to reach the fields. A dialog keeps the
+ * editor with the row that opened it, whatever the list length.
+ */
 const VillaDestinationForm: React.FC<Props> = ({ draft, saving, onChange, onCancel, onSave }) => {
     const { t } = useTranslation(['admin']);
-    const problem = validate(draft);
+    const panelRef = useRef<HTMLDivElement>(null);
+    const firstFieldRef = useRef<HTMLInputElement>(null);
+    const [uploading, setUploading] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
+
+    // The shared validator, not a private copy — the same rules the save path
+    // and the server apply (Claude.md: validation lives in validation.ts).
+    const result = validateVillaDestination(draft);
+    const problem = result.isValid ? null : result.error ?? null;
 
     const field = 'w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[var(--color-villa-gold)] focus:outline-none';
     const label = 'block text-xs font-medium text-gray-600 mb-1';
     const set = (patch: Partial<DestinationDraft>) => onChange({ ...draft, ...patch });
 
-    return (
-        <form
-            onSubmit={e => { e.preventDefault(); if (!problem) onSave(draft); }}
-            className="space-y-3 rounded-xl border border-gray-200 bg-white p-4"
+    // Escape closes, and focus starts in the first field rather than wherever
+    // the Edit button left it behind the overlay.
+    useEffect(() => {
+        firstFieldRef.current?.focus();
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && !saving) onCancel();
+        };
+        document.addEventListener('keydown', onKey);
+        return () => document.removeEventListener('keydown', onKey);
+    }, [onCancel, saving]);
+
+    /**
+     * Uploads straight into the draft rather than saving the row.
+     *
+     * The row-level button patches an existing destination immediately, which
+     * cannot work here: a destination being created has no id yet. Holding the
+     * returned URL in the draft means the photo is chosen and previewed before
+     * the first save, and it is written with everything else.
+     */
+    const handleFile = async (file: File) => {
+        setUploading(true);
+        setUploadError(null);
+        try {
+            const form = new FormData();
+            form.append('image', file);
+            const data = await uploadRequest<{ url: string; publicId: string }>(
+                '/admin/villa-destinations/upload-image',
+                form,
+            );
+            set({ imageUrl: data.url, imagePublicId: data.publicId });
+        } catch {
+            setUploadError(t('admin:villaDestinations.uploadError', 'Photo upload failed'));
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    // Cities of the destination's own country first — that is the one an admin
+    // wants in almost every case — with the rest still reachable below.
+    const ownCountry = SEEDED_CITY_IMAGES.filter(c => c.country === draft.country);
+    const otherCountries = SEEDED_COUNTRIES.filter(c => c !== draft.country);
+
+    const preview = draft.imageUrl
+        ? optimizeCloudinaryUrl(draft.imageUrl, { width: 216, height: 300, crop: 'fill', gravity: 'auto' }) || draft.imageUrl
+        : null;
+
+    return createPortal(
+        <div
+            className="fixed inset-0 z-[200] flex items-start justify-center overflow-y-auto bg-black/40 p-4 backdrop-blur-sm sm:items-center"
+            onMouseDown={e => {
+                // Only a click that starts on the backdrop closes; a drag that
+                // begins inside the panel and ends outside must not.
+                if (e.target === e.currentTarget && !saving) onCancel();
+            }}
         >
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div>
-                    <label className={label} htmlFor="vd-name">{t('admin:villaDestinations.name', 'Name')}</label>
-                    <input id="vd-name" className={field} value={draft.name} onChange={e => set({ name: e.target.value })} maxLength={80} />
-                </div>
-                <div>
-                    <label className={label} htmlFor="vd-query">{t('admin:villaDestinations.query', 'Search term')}</label>
-                    <input id="vd-query" className={field} value={draft.query} onChange={e => set({ query: e.target.value })} maxLength={80} />
-                    <p className="mt-1 text-[11px] text-gray-400">
-                        {t('admin:villaDestinations.queryHint', 'Sent to the villas page as the location search.')}
-                    </p>
-                </div>
-                <div>
-                    <label className={label} htmlFor="vd-country">{t('admin:villaDestinations.country', 'Country')}</label>
-                    <input id="vd-country" className={field} value={draft.country} onChange={e => set({ country: e.target.value })} maxLength={60} />
-                </div>
+            <div
+                ref={panelRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="vd-modal-title"
+                className="my-auto w-full max-w-3xl rounded-2xl bg-white shadow-2xl"
+            >
+                <form onSubmit={e => { e.preventDefault(); if (!problem) onSave(draft); }}>
+                    <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+                        <h3 id="vd-modal-title" className="text-base font-semibold text-gray-900">
+                            {draft._id
+                                ? t('admin:villaDestinations.editTitle', 'Edit destination')
+                                : t('admin:villaDestinations.addTitle', 'Add destination')}
+                        </h3>
+                        <button
+                            type="button"
+                            onClick={onCancel}
+                            disabled={saving}
+                            aria-label={t('admin:villaDestinations.cancel', 'Cancel')}
+                            className="rounded-lg p-2 text-gray-400 hover:bg-neutral-100 hover:text-gray-700 disabled:opacity-50"
+                        >
+                            <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                                <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div className="max-h-[70vh] space-y-4 overflow-y-auto px-5 py-4">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                            <div>
+                                <label className={label} htmlFor="vd-name">{t('admin:villaDestinations.name', 'Name')}</label>
+                                <input ref={firstFieldRef} id="vd-name" className={field} value={draft.name} onChange={e => set({ name: e.target.value })} maxLength={80} />
+                            </div>
+                            <div>
+                                <label className={label} htmlFor="vd-query">{t('admin:villaDestinations.query', 'Search term')}</label>
+                                <input id="vd-query" className={field} value={draft.query} onChange={e => set({ query: e.target.value })} maxLength={80} />
+                                <p className="mt-1 text-[11px] text-gray-400">
+                                    {t('admin:villaDestinations.queryHint', 'Sent to the villas page as the location search.')}
+                                </p>
+                            </div>
+                            <div>
+                                <label className={label} htmlFor="vd-country">{t('admin:villaDestinations.country', 'Country')}</label>
+                                {/* A list, not free text: the country is matched
+                                    against the seeded photo table and shown on the
+                                    card, so a typo silently costs the photo. */}
+                                <select
+                                    id="vd-country"
+                                    className={field}
+                                    value={draft.country}
+                                    onChange={e => {
+                                        const country = e.target.value;
+                                        // Keep the photo country in step unless the
+                                        // admin has deliberately borrowed another.
+                                        const keep = draft.imageCountry && draft.imageCountry !== draft.country;
+                                        set({
+                                            country,
+                                            ...(keep ? {} : { imageCountry: country, imageCity: '' }),
+                                        });
+                                    }}
+                                >
+                                    <option value="">{t('admin:villaDestinations.choose', 'Choose…')}</option>
+                                    {SEEDED_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                            <div>
+                                <label className={label} htmlFor="vd-lat">{t('admin:villaDestinations.lat', 'Latitude')}</label>
+                                <input id="vd-lat" className={field} value={draft.lat} onChange={e => set({ lat: e.target.value })} inputMode="decimal" />
+                            </div>
+                            <div>
+                                <label className={label} htmlFor="vd-lng">{t('admin:villaDestinations.lng', 'Longitude')}</label>
+                                <input id="vd-lng" className={field} value={draft.lng} onChange={e => set({ lng: e.target.value })} inputMode="decimal" />
+                            </div>
+                            <div>
+                                <label className={label} htmlFor="vd-zoom">{t('admin:villaDestinations.zoom', 'Zoom')}</label>
+                                <input id="vd-zoom" className={field} value={draft.zoom} onChange={e => set({ zoom: e.target.value })} inputMode="numeric" />
+                            </div>
+                            <div>
+                                <label className={label} htmlFor="vd-order">{t('admin:villaDestinations.order', 'Order')}</label>
+                                <input id="vd-order" className={field} value={draft.displayOrder} onChange={e => set({ displayOrder: e.target.value })} inputMode="numeric" />
+                            </div>
+                        </div>
+
+                        {/* ── Photo ── */}
+                        <div className="rounded-xl border border-gray-200 p-4">
+                            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                {t('admin:villaDestinations.photo', 'Photo')}
+                            </p>
+                            <div className="flex flex-col gap-4 sm:flex-row">
+                                <div className="h-40 w-28 flex-shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-neutral-100">
+                                    {preview ? (
+                                        <img src={preview} alt="" className="h-full w-full object-cover" />
+                                    ) : (
+                                        <div className="flex h-full items-center justify-center px-2 text-center text-[10px] text-gray-400">
+                                            {t('admin:villaDestinations.noPhoto', 'Using the city photo')}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="min-w-0 flex-1 space-y-3">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <label className="cursor-pointer rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-white hover:bg-primary-dark">
+                                            {uploading
+                                                ? t('admin:villaDestinations.uploading', 'Uploading…')
+                                                : draft.imageUrl
+                                                    ? t('admin:villaDestinations.replacePhotoLong', 'Replace photo')
+                                                    : t('admin:villaDestinations.uploadPhoto', 'Upload photo')}
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                disabled={uploading}
+                                                onChange={e => {
+                                                    const f = e.target.files?.[0];
+                                                    e.target.value = ''; // allow re-picking the same file
+                                                    if (f) void handleFile(f);
+                                                }}
+                                            />
+                                        </label>
+                                        {draft.imageUrl && (
+                                            <button
+                                                type="button"
+                                                onClick={() => set({ imageUrl: '', imagePublicId: '' })}
+                                                className="rounded-lg bg-neutral-100 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-neutral-200"
+                                            >
+                                                {t('admin:villaDestinations.removePhoto', 'Remove')}
+                                            </button>
+                                        )}
+                                    </div>
+                                    {uploadError && <p className="text-xs text-red-600" role="alert">{uploadError}</p>}
+
+                                    <div>
+                                        <label className={label} htmlFor="vd-city">
+                                            {t('admin:villaDestinations.imageCity', 'Fallback photo city')}
+                                        </label>
+                                        {/* Only cities that actually have a seeded
+                                            photo — a free-text name that is not in
+                                            the table resolves to a 404 and leaves
+                                            the card on its gradient. */}
+                                        <select
+                                            id="vd-city"
+                                            className={field}
+                                            value={draft.imageCity ? `${draft.imageCity}|${draft.imageCountry}` : ''}
+                                            onChange={e => {
+                                                const [city, country] = e.target.value.split('|');
+                                                set({ imageCity: city ?? '', imageCountry: country ?? '' });
+                                            }}
+                                        >
+                                            <option value="">{t('admin:villaDestinations.noCityPhoto', 'None')}</option>
+                                            {ownCountry.length > 0 && (
+                                                <optgroup label={draft.country}>
+                                                    {ownCountry.map(c => (
+                                                        <option key={`${c.city}|${c.country}`} value={`${c.city}|${c.country}`}>{c.city}</option>
+                                                    ))}
+                                                </optgroup>
+                                            )}
+                                            {otherCountries.map(co => (
+                                                <optgroup key={co} label={co}>
+                                                    {SEEDED_CITY_IMAGES.filter(c => c.country === co).map(c => (
+                                                        <option key={`${c.city}|${c.country}`} value={`${c.city}|${c.country}`}>{c.city}</option>
+                                                    ))}
+                                                </optgroup>
+                                            ))}
+                                        </select>
+                                        <p className="mt-1 text-[11px] text-gray-400">
+                                            {t('admin:villaDestinations.imageCityHint', 'Used only until you upload a photo for this place.')}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <label className="flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" checked={draft.isActive} onChange={e => set({ isActive: e.target.checked })} />
+                            {t('admin:villaDestinations.active', 'Show on the home page')}
+                        </label>
+
+                        {problem && <p className="text-sm text-red-600" role="alert">{problem}</p>}
+                    </div>
+
+                    <div className="flex justify-end gap-2 border-t border-gray-100 px-5 py-4">
+                        <button type="button" onClick={onCancel} disabled={saving} className="rounded-lg bg-neutral-100 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-neutral-200 disabled:opacity-50">
+                            {t('admin:villaDestinations.cancel', 'Cancel')}
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={saving || uploading || !!problem}
+                            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-50"
+                        >
+                            {saving ? t('admin:villaDestinations.saving', 'Saving…') : t('admin:villaDestinations.save', 'Save')}
+                        </button>
+                    </div>
+                </form>
             </div>
-
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <div>
-                    <label className={label} htmlFor="vd-lat">{t('admin:villaDestinations.lat', 'Latitude')}</label>
-                    <input id="vd-lat" className={field} value={draft.lat} onChange={e => set({ lat: e.target.value })} inputMode="decimal" />
-                </div>
-                <div>
-                    <label className={label} htmlFor="vd-lng">{t('admin:villaDestinations.lng', 'Longitude')}</label>
-                    <input id="vd-lng" className={field} value={draft.lng} onChange={e => set({ lng: e.target.value })} inputMode="decimal" />
-                </div>
-                <div>
-                    <label className={label} htmlFor="vd-zoom">{t('admin:villaDestinations.zoom', 'Zoom')}</label>
-                    <input id="vd-zoom" className={field} value={draft.zoom} onChange={e => set({ zoom: e.target.value })} inputMode="numeric" />
-                </div>
-                <div>
-                    <label className={label} htmlFor="vd-order">{t('admin:villaDestinations.order', 'Order')}</label>
-                    <input id="vd-order" className={field} value={draft.displayOrder} onChange={e => set({ displayOrder: e.target.value })} inputMode="numeric" />
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                    <label className={label} htmlFor="vd-city">{t('admin:villaDestinations.imageCity', 'Fallback photo city')}</label>
-                    <input id="vd-city" className={field} value={draft.imageCity} onChange={e => set({ imageCity: e.target.value })} maxLength={80} />
-                    <p className="mt-1 text-[11px] text-gray-400">
-                        {t('admin:villaDestinations.imageCityHint', 'Used only until you upload a photo for this place.')}
-                    </p>
-                </div>
-                <div>
-                    <label className={label} htmlFor="vd-imgcountry">{t('admin:villaDestinations.imageCountry', 'Fallback photo country')}</label>
-                    <input id="vd-imgcountry" className={field} value={draft.imageCountry} onChange={e => set({ imageCountry: e.target.value })} maxLength={60} />
-                </div>
-            </div>
-
-            <label className="flex items-center gap-2 text-sm text-gray-700">
-                <input type="checkbox" checked={draft.isActive} onChange={e => set({ isActive: e.target.checked })} />
-                {t('admin:villaDestinations.active', 'Show on the home page')}
-            </label>
-
-            {problem && <p className="text-sm text-red-600">{problem}</p>}
-
-            <div className="flex gap-2">
-                <button
-                    type="submit"
-                    disabled={saving || !!problem}
-                    className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-50"
-                >
-                    {saving ? t('admin:villaDestinations.saving', 'Saving…') : t('admin:villaDestinations.save', 'Save')}
-                </button>
-                <button type="button" onClick={onCancel} className="rounded-lg bg-neutral-100 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-neutral-200">
-                    {t('admin:villaDestinations.cancel', 'Cancel')}
-                </button>
-            </div>
-        </form>
+        </div>,
+        document.body,
     );
 };
 

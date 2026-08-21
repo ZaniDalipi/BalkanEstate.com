@@ -1219,6 +1219,15 @@
     "importError": "Failed to import the built-in destinations",
     "photoSpec": "Card photos are portrait, 18:25 — upload 2200 × 3056 or as close as you have. Anything smaller still works but is stretched to fit large cards; anything larger is stored at 2200 wide. Other shapes are cropped, never squashed.",
     "newAvailable": "{{count}} new built-in destination(s) are not in the database yet.",
-    "importNew": "Import them"
+    "importNew": "Import them",
+    "editTitle": "Edit destination",
+    "addTitle": "Add destination",
+    "choose": "Choose…",
+    "photo": "Photo",
+    "noPhoto": "Using the city photo",
+    "uploadPhoto": "Upload photo",
+    "replacePhotoLong": "Replace photo",
+    "removePhoto": "Remove",
+    "noCityPhoto": "None"
   }
 }
