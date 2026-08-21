@@ -55,11 +55,34 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
         retry: 1,
     });
 
-    // Guard the corridor against an empty list: it would render an animated
-    // ribbon of nothing rather than degrading to no section at all.
+    /*
+     * Guard the corridor against an empty list — it would render an animated
+     * ribbon of nothing rather than degrading to no section at all — and
+     * shuffle what is left.
+     *
+     * The shuffle matters because of how the corridor walks the list. Each
+     * card slot advances by the number of slots every time it wraps, so the
+     * places arrive strictly in list order: with a couple of hundred
+     * destinations, the ones near the end would not surface until the visitor
+     * had watched the whole thing cycle through. Shuffling once per mount
+     * means every place has the same chance of being among the first cards on
+     * screen, and the section looks different on each visit.
+     *
+     * Order is the only thing that changes. The corridor's guarantee that no
+     * two cards show the same place at once depends on the *indices* being
+     * distinct, not on what sits at each index, so it survives untouched.
+     */
     const destinations = useMemo(() => {
         const source = curated && curated.length > 0 ? curated : VILLA_DESTINATIONS;
-        return source.filter(d => d.query.trim().length > 0);
+        const list = source.filter(d => d.query.trim().length > 0);
+        // Fisher-Yates on a copy; the source arrays are shared and frozen by
+        // convention, and mutating the query cache would be a nasty surprise.
+        const shuffled = [...list];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
     }, [curated]);
 
     const labelFor = useCallback(
