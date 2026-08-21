@@ -16,13 +16,13 @@ router.get('/', async (_req: Request, res: Response): Promise<void> => {
     const destinations = await VillaDestination.find({ isActive: true })
       .sort({ displayOrder: 1, name: 1 })
       .select('name query country imageUrl imageCity imageCountry lat lng zoom')
-      // Has to stay ahead of DEFAULT_VILLA_DESTINATIONS, which is 60 entries.
-      // It was 40 while the built-in list was 14, so importing the current
-      // list would have silently dropped the last 20 from the home page —
-      // they would exist in the database, be listed in the admin, and never
-      // appear in the corridor. Still bounded, so a runaway table cannot
-      // turn this into an unbounded response.
-      .limit(200)
+      // Has to stay ahead of DEFAULT_VILLA_DESTINATIONS, which is 225 entries.
+      // This has now been the wrong number twice: 40 while the list was 14,
+      // then 200 while it grew to 225. Both would silently drop the tail —
+      // those destinations exist in the database and are listed in the admin,
+      // they simply never reach the corridor. Kept generous but bounded, so a
+      // runaway table still cannot turn this into an unbounded response.
+      .limit(500)
       .lean();
 
     res.json({ destinations, count: destinations.length });

@@ -106,6 +106,19 @@ const HOVER_STEPS = 1.6;
  */
 const TOUCH_SLOP_PX = 22;
 
+/**
+ * LOCAL ADDITION: how far a finger may roll after touching down before the
+ * corridor is allowed to reconsider which card is under it.
+ *
+ * A finger is not a cursor — it lands, spreads, and rolls a few pixels before
+ * it lifts. Every one of those micro-moves used to re-run the pick, so on a
+ * corridor of overlapping cards the selection could hand off to a neighbour
+ * between touching a card and the click firing, and the wrong destination
+ * opened. Below this distance the first choice stands; past it the touch is a
+ * deliberate drag and re-picking is what the user wants.
+ */
+const TOUCH_STICKY_PX = 16;
+
 /** Sample the path once so the CSS keyframes trace the real curve. */
 function keyframes(dir: 1 | -1, name: string, p: Required<CorridorPath>) {
   const steps: string[] = [];
@@ -308,10 +321,16 @@ export function ImageStreamHero({
     (e: React.PointerEvent<HTMLDivElement>) => {
       if (!onImageSelect) return;
       const { clientX, clientY } = e;
+      // A finger that has touched down keeps the card it landed on until it
+      // has clearly moved — see TOUCH_STICKY_PX. Without this the natural roll
+      // of a fingertip could hand the selection to a neighbouring card in the
+      // moments between touching one and the click firing.
+      const down = touchDownAt.current;
+      if (down && Math.hypot(clientX - down.x, clientY - down.y) < TOUCH_STICKY_PX) return;
       if (frame.current !== null) return; // coalesce to one pick per frame
       frame.current = requestAnimationFrame(() => {
         frame.current = null;
-        setActive(pickCard(clientX, clientY));
+        setActive(pickCard(clientX, clientY, down ? TOUCH_SLOP_PX : 0));
       });
     },
     [onImageSelect, pickCard],
@@ -328,15 +347,23 @@ export function ImageStreamHero({
    * cards were completely unclickable. Picking on `pointerdown` as well makes
    * a stationary tap select the card it landed on.
    */
+  const touchDownAt = React.useRef<{ x: number; y: number } | null>(null);
+
   const handlePointerDown = React.useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       if (!onImageSelect) return;
+      const isTouch = e.pointerType !== "mouse";
+      touchDownAt.current = isTouch ? { x: e.clientX, y: e.clientY } : null;
       // Slop for a finger, none for a mouse: a cursor is exact, and letting it
       // grab a card it is not over would make the corridor feel sticky.
-      setActive(pickCard(e.clientX, e.clientY, e.pointerType === "mouse" ? 0 : TOUCH_SLOP_PX));
+      setActive(pickCard(e.clientX, e.clientY, isTouch ? TOUCH_SLOP_PX : 0));
     },
     [onImageSelect, pickCard],
   );
+
+  const releasePointer = React.useCallback(() => {
+    touchDownAt.current = null;
+  }, []);
 
   React.useEffect(() => () => {
     if (frame.current !== null) cancelAnimationFrame(frame.current);
@@ -492,7 +519,9 @@ export function ImageStreamHero({
         }}
         onPointerDown={onImageSelect ? handlePointerDown : undefined}
         onPointerMove={onImageSelect ? handlePointerMove : undefined}
-        onPointerLeave={onImageSelect ? () => setActive(null) : undefined}
+        onPointerUp={onImageSelect ? releasePointer : undefined}
+        onPointerCancel={onImageSelect ? releasePointer : undefined}
+        onPointerLeave={onImageSelect ? () => { releasePointer(); setActive(null); } : undefined}
         onClick={
           onImageSelect
             ? () => {
