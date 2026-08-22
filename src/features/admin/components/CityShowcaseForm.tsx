@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { XMarkIcon } from '@/constants';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
@@ -64,6 +65,17 @@ interface Props {
  * panel cannot be saved without a photo, so a new panel has to be able to get
  * one before it exists as a row. The upload therefore writes into the draft,
  * and the draft is what gets saved.
+ *
+ * Rendered through a portal into `document.body`, not in place. The admin
+ * view's page-transition wrapper (`animate-page-morph` in index.css) holds a
+ * `transform: scale(1)` after its animation ends — an identity transform, but
+ * any transform value other than `none` makes that element a CSS containing
+ * block for `position: fixed` descendants. Left in place, this modal's
+ * "centered" position would be centered inside that (tall, scrollable) page
+ * wrapper instead of the actual viewport, so scrolling down a long city list
+ * before opening it could put the modal partly or fully off-screen.
+ * `document.body` carries no such transform, so a portal keeps it pinned to
+ * the viewport regardless of scroll position or which page it was opened from.
  */
 const CityShowcaseForm: React.FC<Props> = ({
     draft, saving, onChange, onCancel, onSave, onUploadImage, citySuggestions,
@@ -119,7 +131,7 @@ const CityShowcaseForm: React.FC<Props> = ({
         }
     };
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
             <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
                 <div className="flex items-center justify-between border-b border-gray-200 p-6">
@@ -253,7 +265,8 @@ const CityShowcaseForm: React.FC<Props> = ({
                     </div>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body,
     );
 };
 
