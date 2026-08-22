@@ -697,10 +697,18 @@ export const GlobalAnimationStyles = memo(function GlobalAnimationStyles() {
         animation: scale-in 300ms ease-out forwards;
       }
 
-      /* Ensure no layout shift during animations */
-      .will-animate {
-        will-change: transform, opacity;
-      }
+      /* .will-animate intentionally carries no declarations.
+       *
+       * It used to set will-change: transform, opacity. The class sits on
+       * the page wrapper for the whole life of the view, not just while it
+       * animates, so that hint held every page in its own compositing layer
+       * permanently — the hint's documented failure mode, since it is meant
+       * to be set shortly before an animation and dropped afterwards.
+       * Browsers already promote an element while a transform/opacity
+       * animation is actually running, which is the only window it helped.
+       * Nothing is put in its place: contain would be worse here, as
+       * contain: layout makes the wrapper a containing block for the
+       * fixed-position sidebar and menu button it wraps. */
 
       /* Reduced motion support */
       @media (prefers-reduced-motion: reduce) {

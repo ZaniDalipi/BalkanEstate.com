@@ -207,9 +207,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
     return (
         <>
-            {/* Overlay for mobile */}
+            {/* Overlay for mobile.
+                `invisible` when closed, not just `opacity-0`: this is a
+                full-viewport `backdrop-blur`, and an element at zero opacity
+                is still painted, so the blur was being resampled over the
+                whole screen on every frame for the entire session — while
+                showing nothing. `visibility` is transitioned alongside
+                opacity so the fade out is kept: it flips to hidden only once
+                the transition finishes, and back to visible as soon as it
+                starts. */}
             <div
-                className={`fixed inset-0 bg-black/20 backdrop-blur-sm z-30 md:hidden transition-opacity ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                className={`fixed inset-0 bg-black/20 backdrop-blur-sm z-30 md:hidden transition-[opacity,visibility] duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}
                 onClick={onClose}
                 aria-hidden="true"
             ></div>

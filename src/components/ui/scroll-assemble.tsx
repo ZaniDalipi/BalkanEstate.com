@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
 import { motion, useMotionValue, useReducedMotion, useTransform, type MotionValue } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/src/hooks/useIsMobile';
 
 /**
  * "Scatter then assemble" row, tied to live scroll position — the same
@@ -63,6 +64,20 @@ import { cn } from '@/lib/utils';
  * the section be scrolled sideways programmatically.
  */
 
+/**
+ * Off on phones.
+ *
+ * Every tile's x/y/scale is bound to live scroll position, so the row moves
+ * for the whole time you are scrolling past it rather than playing once. On a
+ * phone that is the bulk of the screen shifting under your thumb — the tiles
+ * also travel vertically (`-|offset| * 20`) — and it reads as the page never
+ * settling. There is far less room for tiles to fly in from at that width
+ * anyway, so the effect costs much more than it shows. Below this width the
+ * tiles render as plain static elements: no transforms, no scroll listener
+ * and no `will-change`, so nothing is composited or recalculated on scroll.
+ */
+const DESKTOP_MIN_WIDTH_PX = 768;
+
 /** Per-step outward travel, in px — the reference's `distanceFromCenter * 90`. */
 const X_STEP_PX = 90;
 
@@ -92,6 +107,8 @@ interface ScrollAssembleProps {
 export const ScrollAssemble: React.FC<ScrollAssembleProps> = ({ count, className, children }) => {
     const ref = useRef<HTMLDivElement>(null);
     const reduced = useReducedMotion();
+    const isMobile = useIsMobile(DESKTOP_MIN_WIDTH_PX);
+    const still = !!reduced || isMobile;
     const progress = useMotionValue(0);
 
     /*
@@ -113,6 +130,10 @@ export const ScrollAssemble: React.FC<ScrollAssembleProps> = ({ count, className
     useEffect(() => {
         const el = ref.current;
         if (!el) return;
+        // Nothing reads `progress` when the row is still, so don't measure it:
+        // this is what keeps a phone from running a scroll handler and a
+        // ResizeObserver for a row that never moves.
+        if (still) return;
 
         let container: HTMLElement | null = null;
         for (let node = el.parentElement; node; node = node.parentElement) {
@@ -157,11 +178,11 @@ export const ScrollAssemble: React.FC<ScrollAssembleProps> = ({ count, className
             window.removeEventListener('resize', measure);
             ro.disconnect();
         };
-    }, [progress]);
+    }, [progress, still]);
 
     const value = useMemo<AssembleContextValue>(
-        () => ({ progress, centerIndex: (count - 1) / 2, still: !!reduced }),
-        [progress, count, reduced],
+        () => ({ progress, centerIndex: (count - 1) / 2, still }),
+        [progress, count, still],
     );
 
     return (
@@ -187,7 +208,10 @@ interface ScrollAssembleItemProps {
  */
 export const ScrollAssembleItem: React.FC<ScrollAssembleItemProps> = ({ index, className, children }) => {
     const ctx = useContext(AssembleContext);
-    if (!ctx) return <div className={className}>{children}</div>;
+    // A still row renders as plain elements rather than motion ones holding an
+    // identity transform: no transform means no compositing layer per tile and
+    // no `will-change`, which is the point of turning it off on a phone.
+    if (!ctx || ctx.still) return <div className={className}>{children}</div>;
     return (
         <AssembleItemInner index={index} className={className} ctx={ctx}>
             {children}
@@ -197,7 +221,8 @@ export const ScrollAssembleItem: React.FC<ScrollAssembleItemProps> = ({ index, c
 
 /**
  * Split out because the transforms are hooks: they cannot sit behind the
- * null-context guard above without breaking the rules of hooks.
+ * null-context guard above without breaking the rules of hooks. Only ever
+ * rendered for a moving row — a still one is handled by that guard.
  */
 const AssembleItemInner: React.FC<ScrollAssembleItemProps & { ctx: AssembleContextValue }> = ({
     index,
@@ -205,15 +230,15 @@ const AssembleItemInner: React.FC<ScrollAssembleItemProps & { ctx: AssembleConte
     children,
     ctx,
 }) => {
-    const { progress, centerIndex, still } = ctx;
+    const { progress, centerIndex } = ctx;
     const offset = index - centerIndex;
 
     // Magnitudes lifted from the reference's CharacterV3, minus its rotation
     // (see the note at the top): outer tiles travel furthest and start
     // smallest, so the row closes in from both ends and settles upright.
-    const x = useTransform(progress, [0, 1], [still ? 0 : offset * X_STEP_PX, 0]);
-    const y = useTransform(progress, [0, 1], [still ? 0 : -Math.abs(offset) * 20, 0]);
-    const scale = useTransform(progress, [0, 1], [still ? 1 : 0.75, 1]);
+    const x = useTransform(progress, [0, 1], [offset * X_STEP_PX, 0]);
+    const y = useTransform(progress, [0, 1], [-Math.abs(offset) * 20, 0]);
+    const scale = useTransform(progress, [0, 1], [0.75, 1]);
 
     return (
         <motion.div

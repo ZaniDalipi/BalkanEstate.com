@@ -62,11 +62,12 @@
   --animate-bounce-soft: bounceSoft 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   --animate-aurora: aurora 60s linear infinite;
 
-  /* Page Transition Animations */
-  --animate-page-enter: pageEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-page-enter-back: pageEnterBack 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-page-enter-up: pageEnterUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-page-morph: pageMorph 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  /* Page Transition Animations. `backwards` rather than `both` — see the
+     note on `.animate-page-enter` for why the final frame must not be kept. */
+  --animate-page-enter: pageEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  --animate-page-enter-back: pageEnterBack 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  --animate-page-enter-up: pageEnterUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  --animate-page-morph: pageMorph 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 /* Aurora background color variables */
@@ -719,21 +720,35 @@ html[data-zoom] #root {
   }
 }
 
-/* Page transition utility classes */
+/* Page transition utility classes
+ *
+ * `backwards`, not `both`. These keyframes end on `filter: blur(0)`, and
+ * `forwards` (the other half of `both`) keeps that final frame applied for as
+ * long as the page is mounted — so the wrapper is left with a permanent
+ * `filter` and `transform` long after the 0.45s animation is over. A filter
+ * that is not `none` is not free: it makes the element a stacking context, a
+ * containing block for fixed-position descendants, and its own compositing
+ * layer. Every `backdrop-filter` under it (the hero's search bar, its
+ * buttons, the stats card) then has to sample its backdrop through that
+ * layer, which is what makes them shimmer on iOS.
+ *
+ * `backwards` still applies the 0% frame before the animation starts, so the
+ * entrance is unchanged; the element simply returns to its own styles at the
+ * end, which are already opacity 1 / no transform / no filter. */
 .animate-page-enter {
-  animation: pageEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: pageEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 .animate-page-enter-back {
-  animation: pageEnterBack 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: pageEnterBack 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 .animate-page-enter-up {
-  animation: pageEnterUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: pageEnterUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 .animate-page-morph {
-  animation: pageMorph 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: pageMorph 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 /* Reduced motion: instant transition with no movement */
