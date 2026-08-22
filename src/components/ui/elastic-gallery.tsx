@@ -121,11 +121,23 @@ export function ElasticGallery({ items, actions, label, className }: ElasticGall
                 const isActive = item.id === activeId;
                 const isBroken = brokenIds.has(item.id);
                 const expand = () => setRequestedId(item.id);
+                // Touch has no hover, but a touchstart still dispatches
+                // `pointerenter` with `pointerType: 'touch'` on whatever
+                // panel the finger lands on. Left unfiltered, every scroll
+                // gesture that starts (or passes through, on some browsers)
+                // a different panel re-expands it, so the gallery keeps
+                // reshuffling under the visitor's thumb while they are just
+                // trying to scroll past it. Only a real hover — mouse or pen
+                // — should drive expansion; touch already has its own
+                // expand path via the tap/focus handlers on the button below.
+                const handlePointerEnter = (e: React.PointerEvent) => {
+                    if (e.pointerType === 'mouse' || e.pointerType === 'pen') expand();
+                };
 
                 return (
                     <div
                         key={item.id}
-                        onPointerEnter={expand}
+                        onPointerEnter={handlePointerEnter}
                         className={cn(
                             'relative overflow-hidden rounded-2xl bg-neutral-900',
                             // Only the flex basis animates; the dimming is an
