@@ -188,7 +188,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         pointerEvents: 'none',
       }} />
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 pt-6 pb-12 sm:pt-10 sm:pb-16 hero-stagger">
+      {/* hero-top-pad rather than a plain pt-*: installed as a PWA there is no
+          browser chrome above this, so the heading started directly under the
+          status bar and behind the floating menu button. */}
+      <div className="relative z-10 max-w-6xl mx-auto px-4 hero-top-pad pb-16 sm:pb-28 hero-stagger">
         {/* Title */}
         <h1
           className="text-center text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-tight max-w-3xl mx-auto hero-fade-up"
@@ -196,8 +199,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         >
           <span className="block">
             {t('home:hero.title')}{' '}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-cyan-600 to-indigo-600 inline-block min-w-[6ch]">
+            {/* The gradient goes to the Typewriter, which puts it on the span
+                holding the glyphs. `background-clip: text` only clips to text
+                the styled element renders itself, so on a wrapper it would
+                have nothing to clip to and the word would disappear.
+                No min-width guess here any more either — the Typewriter
+                reserves the width of its longest word, measured in the real
+                font, so the line cannot reflow as it types. */}
+            <span className="inline-block align-bottom">
               <Typewriter
+                className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-cyan-600 to-indigo-600"
                 words={typewriterWords}
                 speed={80}
                 delayBetweenWords={2000}

@@ -1372,6 +1372,22 @@ html[data-zoom] #root {
   --floating-search-top-pad: calc(env(safe-area-inset-top, 0px) + 8px);
 }
 
+/* Top of the home hero.
+   In a browser the address bar sits above this and a plain padding is enough.
+   Installed as a PWA there is nothing above it at all, so the heading landed
+   under the status bar and behind the floating menu button. `max()` keeps the
+   browser spacing unchanged and only grows it by the notch inset where one
+   exists. */
+.hero-top-pad {
+  padding-top: max(3rem, calc(env(safe-area-inset-top, 0px) + 3.25rem));
+}
+
+@media (min-width: 640px) {
+  .hero-top-pad {
+    padding-top: max(6rem, calc(env(safe-area-inset-top, 0px) + 4rem));
+  }
+}
+
 /* High-contrast focus ring for accessibility in PWA (no browser chrome) */
 @media (display-mode: standalone) {
   :root {
