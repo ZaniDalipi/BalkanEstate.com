@@ -47,6 +47,21 @@ describe('CityShowcaseForm', () => {
         expect(country.closest('.fixed.inset-0')).not.toBeNull();
     });
 
+    it('portals the modal to document.body, out from under any transformed ancestor', () => {
+        // The admin page-transition wrapper (animate-page-morph) holds a
+        // transform after its animation ends, which makes it a containing
+        // block for `position: fixed` descendants — a modal left in place
+        // would center inside that (tall, scrollable) wrapper instead of the
+        // viewport. Rendering into document.body sidesteps that regardless of
+        // which page or ancestor structure the form was opened from.
+        const { container } = renderForm();
+
+        const overlay = document.querySelector('.fixed.inset-0');
+        expect(overlay).not.toBeNull();
+        expect(container.contains(overlay)).toBe(false);
+        expect(document.body.contains(overlay)).toBe(true);
+    });
+
     it('closes via the header close button', () => {
         const { onCancel } = renderForm();
 
