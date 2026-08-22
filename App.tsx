@@ -587,14 +587,24 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
 
   // Scroll to top when active view changes
   useEffect(() => {
-    // Reset any browser zoom that was triggered by focused inputs (iOS auto-zoom)
-    const viewport = document.querySelector('meta[name=viewport]');
-    if (viewport) {
-      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover');
-      setTimeout(() => {
-        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, viewport-fit=cover');
-      }, 300);
-    }
+    /*
+     * The viewport meta is deliberately left alone here.
+     *
+     * This used to set `maximum-scale=1.0` and then drop it again 300ms later,
+     * to snap out of the zoom iOS applies when a small input is focused. The
+     * cost was paid on every view change, including the first render: the tag
+     * that is rewritten also carries `viewport-fit=cover`, which is what makes
+     * `env(safe-area-inset-*)` resolve to the real notch inset, so touching it
+     * makes iOS recompute the safe area. Anything positioned off that inset —
+     * `.hero-top-pad` is `max(3rem, env(safe-area-inset-top) + 3.25rem)` —
+     * moves by the inset and then moves back 300ms later. In a browser tab the
+     * inset is 0 and nothing visibly happens, which is why this only ever
+     * showed up once the app was installed.
+     *
+     * The zoom it was reset from comes from inputs under 16px, so the fix for
+     * that belongs on the inputs, not on a tag the whole layout is measured
+     * against.
+     */
 
     // Scroll window to top
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
