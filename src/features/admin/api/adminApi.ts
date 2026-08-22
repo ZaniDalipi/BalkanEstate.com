@@ -648,3 +648,27 @@ export const importCitiesIntoShowcase = async (): Promise<{
   alreadyPresent: number;
   missingPhoto: string[];
 }> => apiRequest('/admin/city-showcase/import-cities', { method: 'POST', requiresAuth: true });
+
+// --- City directory (names for the city/country pickers) ---
+//
+// Not market analytics and not a gallery panel — a lightweight list of
+// (city, country) pairs an admin can pick from instead of retyping a name
+// that already exists (with its inevitable typos) into a free-text field.
+
+export interface CityDirectoryEntry {
+  city: string;
+  country: string;
+}
+
+export const getCityDirectory = async (): Promise<{ cities: CityDirectoryEntry[] }> =>
+  apiRequest('/admin/cities', { requiresAuth: true });
+
+/**
+ * Ensures a (city, country) pair exists in the directory, creating a minimal
+ * stub if it doesn't. Idempotent and case-insensitive on the pair — safe to
+ * call every time a form saves a city, whether or not it was already known.
+ */
+export const ensureCityInDirectory = async (
+  entry: CityDirectoryEntry & { countryCode: string }
+): Promise<{ city: CityDirectoryEntry; created: boolean }> =>
+  apiRequest('/admin/cities', { method: 'POST', body: entry, requiresAuth: true });

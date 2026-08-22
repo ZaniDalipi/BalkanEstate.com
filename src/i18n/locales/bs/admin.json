@@ -1133,7 +1133,7 @@
     "cancel": "Otkaži",
     "saved": "Panel grada je sačuvan",
     "city": "Grad",
-    "cityHint": "Naziv prikazan na panelu.",
+    "cityHint": "Naziv prikazan na panelu. Nije na listi? Upišite ga — sprema se i za sljedeći put.",
     "country": "Država",
     "searchQuery": "Pojam pretrage",
     "searchQueryHint": "Šalje se stranici pretrage kada posjetilac otvori ovaj panel.",
@@ -1158,6 +1158,10 @@
     "imported": "Uvezeno {{imported}} grad(ova), {{present}} već u galeriji",
     "importError": "Uvoz gradova iz baze nije uspio",
     "missingPhotoTitle": "{{count}} grad(ova) nema fotografiju i nije uvezeno",
-    "missingPhotoHint": "Dodajte ih preko “Dodaj grad” i otpremite fotografiju — galerija ne može prikazati panel bez nje."
+    "missingPhotoHint": "Dodajte ih preko “Dodaj grad” i otpremite fotografiju — galerija ne može prikazati panel bez nje.",
+    "editTitle": "Izmijeni grad",
+    "addTitle": "Dodaj grad",
+    "countryPlaceholder": "Odaberite državu…",
+    "cityPlaceholder": "Odaberite jedan ili upišite novi grad"
   }
 }

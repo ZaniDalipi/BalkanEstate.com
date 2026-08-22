@@ -1030,7 +1030,7 @@
     "cancel": "Anulo",
     "saved": "Paneli i qytetit u ruajt",
     "city": "Qyteti",
-    "cityHint": "Emri që shfaqet në panel.",
+    "cityHint": "Emri që shfaqet në panel. Nuk është në listë? Shkruajeni — ruhet edhe për herën tjetër.",
     "country": "Shteti",
     "searchQuery": "Termi i kërkimit",
     "searchQueryHint": "Dërgohet te faqja e kërkimit kur vizitori hap këtë panel.",
@@ -1055,6 +1055,10 @@
     "imported": "U importuan {{imported}} qytet(e), {{present}} ishin tashmë në galeri",
     "importError": "Importimi i qyteteve nga baza e të dhënave dështoi",
     "missingPhotoTitle": "{{count}} qytet(e) nuk kanë foto dhe nuk u importuan",
-    "missingPhotoHint": "Shtojini me “Shto qytet” dhe ngarkoni një foto — galeria nuk mund të shfaqë një panel pa të."
+    "missingPhotoHint": "Shtojini me “Shto qytet” dhe ngarkoni një foto — galeria nuk mund të shfaqë një panel pa të.",
+    "editTitle": "Ndrysho qytetin",
+    "addTitle": "Shto qytet",
+    "countryPlaceholder": "Zgjidhni një shtet…",
+    "cityPlaceholder": "Zgjidhni një ose shkruani një qytet të ri"
   }
 }

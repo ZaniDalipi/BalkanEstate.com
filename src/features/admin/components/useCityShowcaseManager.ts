@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { cityShowcaseKeys } from '@/src/shared/query/queryKeys';
+import { getCountryData } from '@/constants/countries';
+import { cityShowcaseKeys, cityDirectoryKeys } from '@/src/shared/query/queryKeys';
 import { validateCityShowcase } from '@/src/shared/utils/validation';
 import {
     getAdminCityShowcase,
@@ -9,6 +10,7 @@ import {
     updateCityShowcase,
     deleteCityShowcase,
     importCitiesIntoShowcase,
+    ensureCityInDirectory,
     type AdminCityShowcase,
 } from '../api/adminApi';
 import type { CityShowcaseDraft } from './CityShowcaseForm';
@@ -100,6 +102,16 @@ export function useCityShowcaseManager(onSaved: () => void): UseCityShowcaseMana
     const saveMutation = useMutation({
         mutationFn: async (draft: CityShowcaseDraft) => {
             const body = toBody(draft);
+            // The country field is a closed `<select>` (see CityShowcaseForm),
+            // so this can only miss if `BALKAN_COUNTRIES` itself is edited —
+            // not a case a curator's save should silently swallow.
+            const countryCode = getCountryData(body.country)?.code;
+            if (!countryCode) throw new Error(`Unknown country: ${body.country}`);
+            // Ensured before the panel is written, not after: a panel whose
+            // city never made it into the directory would be the one gallery
+            // entry the "Import cities from database" action and every other
+            // city picker in the admin can never find again.
+            await ensureCityInDirectory({ city: body.city, country: body.country, countryCode });
             return draft._id ? updateCityShowcase(draft._id, body) : createCityShowcase(body);
         },
         onMutate: async (draft: CityShowcaseDraft) => {
@@ -124,6 +136,10 @@ export function useCityShowcaseManager(onSaved: () => void): UseCityShowcaseMana
         onSuccess: () => {
             onSaved();
             setNotice(t('admin:cityShowcase.saved', 'City panel saved'));
+            // A brand-new city just ensured into the directory should be
+            // pickable the moment the form reopens, not after its own
+            // five-minute staleTime — see useCityDirectory.
+            void queryClient.invalidateQueries({ queryKey: cityDirectoryKeys.all });
         },
         onSettled: invalidateAll,
     });

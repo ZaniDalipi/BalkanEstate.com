@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { CITY_SHOWCASE_MAX_PANELS } from '@/src/shared/constants/app.constants';
-import { uploadCityShowcaseImage, type AdminCityShowcase } from '../api/adminApi';
+import { uploadCityShowcaseImage, type AdminCityShowcase, type CityDirectoryEntry } from '../api/adminApi';
 import CityShowcaseForm, { emptyCityDraft, type CityShowcaseDraft } from './CityShowcaseForm';
 import { useCityShowcaseManager } from './useCityShowcaseManager';
+import { useCityDirectory } from './useCityDirectory';
 
 /** Row → draft. The form edits strings; the stored row holds numbers. */
 const toDraft = (row: AdminCityShowcase): CityShowcaseDraft => ({
@@ -34,6 +35,17 @@ const CityShowcaseManager: React.FC = () => {
         rows, isLoading, loadError, error, notice, saving, save, remove,
         importCities, importing, missingPhoto,
     } = useCityShowcaseManager(() => setEditing(null));
+
+    const { entries: directoryEntries } = useCityDirectory();
+
+    // Every name worth suggesting: the market-data directory plus whatever is
+    // already a gallery panel. The panel's own rows matter here too — without
+    // them, editing "Budva" back open wouldn't offer "Budva" as a suggestion
+    // for itself until the directory query happened to include it.
+    const citySuggestions = useMemo<CityDirectoryEntry[]>(
+        () => [...directoryEntries, ...rows.map(r => ({ city: r.city, country: r.country }))],
+        [directoryEntries, rows],
+    );
 
     const handleDelete = (row: AdminCityShowcase) => {
         if (!window.confirm(t('admin:cityShowcase.confirmDelete', 'Remove {{city}} from the home page?', { city: row.city }))) return;
@@ -104,6 +116,7 @@ const CityShowcaseManager: React.FC = () => {
                     onCancel={() => setEditing(null)}
                     onSave={save}
                     onUploadImage={uploadCityShowcaseImage}
+                    citySuggestions={citySuggestions}
                 />
             )}
 

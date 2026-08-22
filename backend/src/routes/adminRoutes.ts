@@ -3,6 +3,7 @@ import { protect } from '../middleware/auth';
 import { checkAdminRole, logAdminAction } from '../middleware/adminAuth';
 import { invalidateCache } from '../middleware/cache';
 import { getObjectIdParam } from '../utils/validateParams';
+import { escapeRegex } from '../utils/escapeRegex';
 import { adminLogger } from '../utils/logger';
 import {
   getAdminStats,
@@ -1223,5 +1224,83 @@ router.post(
     }
   }
 );
+
+// ============================================================================
+// City directory — the (city, country) names the admin can pick from
+//
+// A separate concern from both collections it touches: it is not market
+// analytics (CityMarketData's job) and not a gallery panel (CityShowcase's
+// job), just a typo-proof list of names to choose from when creating either.
+// ============================================================================
+
+/**
+ * Every distinct (city, country) pair already known to `CityMarketData`.
+ *
+ * A cheap projection, not `getCitiesByCountry`'s enriched version — this is
+ * for populating a picker, not for rendering market data, and enriching every
+ * row with live stats would make the form wait on work it never uses.
+ */
+router.get('/cities', logAdminAction('VIEW_CITY_DIRECTORY'), async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const CityMarketData = (await import('../models/CityMarketData')).default;
+    const cities = await CityMarketData.find({}, 'city country')
+      .sort({ country: 1, city: 1 })
+      .lean();
+    res.json({ cities: cities.map(c => ({ city: c.city, country: c.country })) });
+  } catch (err) {
+    adminLogger.error('List city directory error:', err);
+    res.status(500).json({ message: 'Failed to load the city directory' });
+  }
+});
+
+/**
+ * Ensures a (city, country) pair exists in `CityMarketData`, creating a
+ * minimal stub if it doesn't.
+ *
+ * Called before every city-showcase save (see `CityShowcaseForm` /
+ * `useCityShowcaseManager`) so a name typed for a gallery panel is never lost
+ * to that panel alone — it also becomes a real, reusable entry other city
+ * pickers and the "Import cities from database" action can find. The stub
+ * carries none of the real market analytics that field is otherwise for
+ * (average price, demand score, rental yield…): those stay at the neutral
+ * zero this app already uses elsewhere for a city with no data yet — see
+ * `STATIC_CITY_SEEDS` in `PopularCitiesSection.tsx` — and `featured: false`
+ * so a bare stub never starts outranking cities with real numbers.
+ *
+ * Idempotent and case-insensitive on the pair, so calling it for a city that
+ * already exists (overwhelmingly the common case) just returns that row.
+ */
+router.post('/cities', logAdminAction('ENSURE_CITY_DIRECTORY_ENTRY'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const city = String(req.body?.city ?? '').trim();
+    const country = String(req.body?.country ?? '').trim();
+    const countryCode = String(req.body?.countryCode ?? '').trim().toUpperCase();
+
+    if (city.length < 2 || city.length > 80) { res.status(400).json({ message: 'City must be between 2 and 80 characters' }); return; }
+    if (country.length < 2 || country.length > 60) { res.status(400).json({ message: 'Country must be between 2 and 60 characters' }); return; }
+    if (!/^[A-Z]{2}$/.test(countryCode)) { res.status(400).json({ message: 'Country code must be a 2-letter ISO code' }); return; }
+
+    const CityMarketData = (await import('../models/CityMarketData')).default;
+
+    const existing = await CityMarketData.findOne({
+      city: new RegExp(`^${escapeRegex(city)}$`, 'i'),
+      country: new RegExp(`^${escapeRegex(country)}$`, 'i'),
+    });
+    if (existing) { res.json({ city: { city: existing.city, country: existing.country }, created: false }); return; }
+
+    const created = await CityMarketData.create({
+      city, country, countryCode,
+      avgPricePerSqm: 0, medianPrice: 0, priceGrowthYoY: 0, priceGrowthMoM: 0,
+      averageDaysOnMarket: 0, listingsCount: 0, soldLastMonth: 0,
+      demandScore: 0, rentalYield: 0, investmentScore: 0,
+      marketTrend: 'stable', dataSource: 'manual', featured: false,
+      topNeighborhoods: [], highlights: [],
+    });
+    res.status(201).json({ city: { city: created.city, country: created.country }, created: true });
+  } catch (err) {
+    adminLogger.error('Ensure city directory entry error:', err);
+    res.status(500).json({ message: 'Failed to save the city' });
+  }
+});
 
 export default router;
