@@ -15,6 +15,7 @@ const toDraft = (row: AdminCityShowcase): CityShowcaseDraft => ({
     searchQuery: row.searchQuery,
     imageUrl: row.imageUrl,
     imagePublicId: row.imagePublicId ?? '',
+    imageCredit: row.imageCredit ?? '',
     displayOrder: String(row.displayOrder),
     isActive: row.isActive,
 });

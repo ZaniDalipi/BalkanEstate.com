@@ -91,6 +91,7 @@ const CityShowcaseSection: React.FC<CityShowcaseSectionProps> = ({ onNavigate })
                     city: city.city,
                     country: city.country,
                 }),
+                credit: city.imageCredit,
             })),
         [shown, t],
     );

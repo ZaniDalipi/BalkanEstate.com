@@ -1162,6 +1162,9 @@
     "editTitle": "Editează orașul",
     "addTitle": "Adaugă oraș",
     "countryPlaceholder": "Selectați o țară…",
-    "cityPlaceholder": "Alegeți unul sau tastați un oraș nou"
+    "cityPlaceholder": "Alegeți unul sau tastați un oraș nou",
+    "imageCredit": "Credit foto (opțional)",
+    "imageCreditPlaceholder": "Fotografie de Jane Doe pe Unsplash",
+    "imageCreditHint": "Dacă această fotografie provine de pe Unsplash, Pexels sau de altundeva, lipiți aici linia de credit — majoritatea site-urilor afișează una lângă butonul de descărcare. Apare ca o mică legendă pe panou."
   }
 }

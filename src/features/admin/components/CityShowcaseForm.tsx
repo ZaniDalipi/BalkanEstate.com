@@ -18,13 +18,15 @@ export interface CityShowcaseDraft {
     searchQuery: string;
     imageUrl: string;
     imagePublicId: string;
+    /** Attribution line, e.g. "Photo by Jane Doe on Unsplash". Optional. */
+    imageCredit: string;
     displayOrder: string;
     isActive: boolean;
 }
 
 export const emptyCityDraft = (order: number): CityShowcaseDraft => ({
     city: '', country: '', searchQuery: '',
-    imageUrl: '', imagePublicId: '',
+    imageUrl: '', imagePublicId: '', imageCredit: '',
     displayOrder: String(order), isActive: true,
 });
 
@@ -236,6 +238,21 @@ const CityShowcaseForm: React.FC<Props> = ({
                             </p>
                             {uploadError && <p className="mt-2 text-sm text-red-600" role="alert">{uploadError}</p>}
                         </div>
+                    </div>
+
+                    <div>
+                        <label className={label} htmlFor="cs-credit">{t('admin:cityShowcase.imageCredit', 'Photo credit (optional)')}</label>
+                        <input
+                            id="cs-credit"
+                            className={field}
+                            value={draft.imageCredit}
+                            onChange={e => set({ imageCredit: e.target.value })}
+                            maxLength={200}
+                            placeholder={t('admin:cityShowcase.imageCreditPlaceholder', 'Photo by Jane Doe on Unsplash')}
+                        />
+                        <p className="mt-1 text-[11px] text-gray-400">
+                            {t('admin:cityShowcase.imageCreditHint', 'If this photo came from Unsplash, Pexels, or anywhere else, paste the credit line here — most sites show one next to the download button. It appears in a small caption on the panel.')}
+                        </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">

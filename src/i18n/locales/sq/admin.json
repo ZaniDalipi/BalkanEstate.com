@@ -1059,6 +1059,9 @@
     "editTitle": "Ndrysho qytetin",
     "addTitle": "Shto qytet",
     "countryPlaceholder": "Zgjidhni një shtet…",
-    "cityPlaceholder": "Zgjidhni një ose shkruani një qytet të ri"
+    "cityPlaceholder": "Zgjidhni një ose shkruani një qytet të ri",
+    "imageCredit": "Kredituar fotoja (opsionale)",
+    "imageCreditPlaceholder": "Foto nga Jane Doe në Unsplash",
+    "imageCreditHint": "Nëse kjo foto vjen nga Unsplash, Pexels apo diku tjetër, ngjisni këtu rreshtin e kreditimit — shumica e faqeve tregojnë një pranë butonit të shkarkimit. Shfaqet si titull i vogël në panel."
   }
 }

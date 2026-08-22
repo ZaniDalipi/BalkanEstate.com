@@ -1262,6 +1262,9 @@
     "editTitle": "Izmijeni grad",
     "addTitle": "Dodaj grad",
     "countryPlaceholder": "Izaberite državu…",
-    "cityPlaceholder": "Izaberite jedan ili upišite novi grad"
+    "cityPlaceholder": "Izaberite jedan ili upišite novi grad",
+    "imageCredit": "Zasluge za fotografiju (opciono)",
+    "imageCreditPlaceholder": "Fotografija: Jane Doe na Unsplash-u",
+    "imageCreditHint": "Ako je fotografija sa Unsplash-a, Pexels-a ili odnekle drugo, nalijepite ovdje red sa zaslugama — većina stranica ga prikazuje pored dugmeta za preuzimanje. Prikazuje se kao mali natpis na panelu."
   }
 }

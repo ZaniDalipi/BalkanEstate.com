@@ -123,10 +123,28 @@ describe('CityShowcaseForm', () => {
             searchQuery: 'Budva',
             imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/budva.jpg',
             imagePublicId: '',
+            imageCredit: '',
             displayOrder: '0',
             isActive: true,
         });
 
         expect(screen.getByRole('button', { name: 'admin:cityShowcase.save' })).not.toBeDisabled();
+    });
+
+    it('carries a typed photo credit into the saved draft, and is optional', () => {
+        const { onChange } = renderForm();
+
+        fireEvent.change(screen.getByLabelText('admin:cityShowcase.imageCredit'), {
+            target: { value: 'Photo by Evangelos Mpikakis on Unsplash' },
+        });
+
+        expect(onChange).toHaveBeenCalledWith(
+            expect.objectContaining({ imageCredit: 'Photo by Evangelos Mpikakis on Unsplash' }),
+        );
+
+        // Leaving it empty must not block save — only a photo, not its credit,
+        // is required (many admin-owned photos have no attribution to give).
+        renderForm({ ...emptyCityDraft(0), city: 'Budva', country: 'Montenegro', searchQuery: 'Budva', imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/budva.jpg' });
+        expect(screen.getAllByRole('button', { name: 'admin:cityShowcase.save' }).at(-1)).not.toBeDisabled();
     });
 });
