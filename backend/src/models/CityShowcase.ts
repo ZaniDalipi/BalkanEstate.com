@@ -22,6 +22,14 @@ export interface ICityShowcase extends Document {
   imageUrl: string;
   /** Cloudinary public id, kept so a replaced image can be cleaned up. */
   imagePublicId?: string;
+  /**
+   * Attribution line for the photo, e.g. "Photo by Jane Doe on Unsplash".
+   * Optional — an admin's own photo needs none — but shown on the public
+   * panel whenever present. Most stock-photo licenses (Unsplash, Pexels)
+   * don't strictly require it, but carrying it costs nothing and is the
+   * safer default for a photo that didn't come from an admin's own camera.
+   */
+  imageCredit?: string;
   displayOrder: number;
   isActive: boolean;
   createdAt: Date;
@@ -36,6 +44,7 @@ const CityShowcaseSchema = new Schema(
     // Required: the gallery has no fallback photo. See the note above.
     imageUrl: { type: String, required: true, trim: true },
     imagePublicId: { type: String, trim: true },
+    imageCredit: { type: String, trim: true, maxlength: 200 },
     displayOrder: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
   },

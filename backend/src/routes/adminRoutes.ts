@@ -1087,6 +1087,10 @@ function parseCityShowcaseBody(
   const imagePublicId = pick('imagePublicId');
   const isActive = pick('isActive');
 
+  const imageCreditRaw = pick('imageCredit');
+  const imageCredit = imageCreditRaw ? String(imageCreditRaw).trim() : '';
+  if (imageCredit.length > 200) return { error: 'Photo credit is too long' };
+
   return {
     value: {
       city,
@@ -1094,6 +1098,7 @@ function parseCityShowcaseBody(
       searchQuery,
       imageUrl,
       imagePublicId: imagePublicId ? String(imagePublicId).trim() : undefined,
+      imageCredit: imageCredit || undefined,
       displayOrder,
       isActive: isActive === undefined ? true : Boolean(isActive),
     },

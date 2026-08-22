@@ -1262,6 +1262,9 @@
     "editTitle": "Edit city",
     "addTitle": "Add city",
     "countryPlaceholder": "Select a country…",
-    "cityPlaceholder": "Pick one or type a new city"
+    "cityPlaceholder": "Pick one or type a new city",
+    "imageCredit": "Photo credit (optional)",
+    "imageCreditPlaceholder": "Photo by Jane Doe on Unsplash",
+    "imageCreditHint": "If this photo came from Unsplash, Pexels, or anywhere else, paste the credit line here — most sites show one next to the download button. It appears in a small caption on the panel."
   }
 }

@@ -594,6 +594,8 @@ export interface AdminCityShowcase {
   searchQuery: string;
   imageUrl: string;
   imagePublicId?: string;
+  /** Attribution line, e.g. "Photo by Jane Doe on Unsplash". Shown publicly. */
+  imageCredit?: string;
   displayOrder: number;
   isActive: boolean;
 }

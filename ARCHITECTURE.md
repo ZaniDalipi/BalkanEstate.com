@@ -114,6 +114,13 @@ Key decisions:
   fetch) and the gallery's own Cloudinary delivery request (`crop: 'limit'`)
   are written to never upscale a source smaller than the frame — upscaling,
   not the source photo, was what actually produced blurry panels.
+- **Photo credit.** `imageCredit` (optional, e.g. "Photo by Jane Doe on
+  Unsplash") shows as a small caption in the corner of an expanded panel,
+  announced to screen readers rather than `aria-hidden` since it's real
+  information, not a duplicate of the panel's own label. Admins sourcing
+  photos from Unsplash/Pexels/etc. paste the credit line those sites already
+  show next to their download button — most such licenses don't strictly
+  require attribution, but carrying it costs nothing and is the safer default.
 
 Admin: `AdminSidebar → City Gallery` (`/admin/city-showcase`),
 `CityShowcaseManager` + `CityShowcaseForm` + `useCityShowcaseManager` +

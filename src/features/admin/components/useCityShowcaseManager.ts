@@ -42,6 +42,7 @@ function toBody(draft: CityShowcaseDraft) {
         searchQuery: draft.searchQuery.trim(),
         imageUrl: draft.imageUrl.trim(),
         imagePublicId: draft.imagePublicId.trim() || undefined,
+        imageCredit: draft.imageCredit.trim() || undefined,
         displayOrder: Number(draft.displayOrder),
         isActive: draft.isActive,
     };

@@ -8,6 +8,8 @@ export interface ShowcaseCity {
     /** Sent to the search page as the location query. */
     searchQuery: string;
     imageUrl: string;
+    /** Attribution line, e.g. "Photo by Jane Doe on Unsplash". Absent means none was given. */
+    imageCredit?: string;
 }
 
 /** Shape returned by `GET /api/city-showcase` — every field optional until checked. */
@@ -17,6 +19,7 @@ interface ApiCityShowcase {
     country?: string;
     searchQuery?: string;
     imageUrl?: string;
+    imageCredit?: string;
 }
 
 const isNonEmptyString = (value: unknown): value is string =>
@@ -49,6 +52,7 @@ function toShowcaseCity(row: ApiCityShowcase): ShowcaseCity {
         country: (row.country as string).trim(),
         searchQuery: (row.searchQuery as string).trim(),
         imageUrl: (row.imageUrl as string).trim(),
+        imageCredit: isNonEmptyString(row.imageCredit) ? row.imageCredit.trim() : undefined,
     };
 }
 

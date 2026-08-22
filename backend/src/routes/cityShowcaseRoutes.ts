@@ -26,7 +26,7 @@ router.get('/', async (_req: Request, res: Response): Promise<void> => {
   try {
     const cities = await CityShowcase.find({ isActive: true })
       .sort({ displayOrder: 1, city: 1 })
-      .select('city country searchQuery imageUrl')
+      .select('city country searchQuery imageUrl imageCredit')
       .limit(MAX_PANELS)
       .lean();
 

@@ -219,6 +219,24 @@ describe('ElasticGallery', () => {
 
         expect(container).toBeEmptyDOMElement();
     });
+
+    it('shows a photo credit when the item carries one', () => {
+        render(
+            <ElasticGallery
+                items={[{ ...items[0], credit: 'Photo by Evangelos Mpikakis on Unsplash' }, items[1]]}
+                label="Explore cities"
+                actions={[]}
+            />,
+        );
+
+        expect(screen.getByText('Photo by Evangelos Mpikakis on Unsplash')).toBeInTheDocument();
+    });
+
+    it('renders no credit caption at all when the item has none', () => {
+        renderGallery(); // neither item carries a `credit`
+
+        expect(screen.queryByText(/photo by/i)).not.toBeInTheDocument();
+    });
 });
 
 describe('pickShowcaseCities', () => {

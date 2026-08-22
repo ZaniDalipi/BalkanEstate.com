@@ -19,6 +19,8 @@ export interface ElasticGalleryItem {
     /** Low-quality placeholder painted behind the photo while it loads. */
     placeholderUrl?: string;
     alt: string;
+    /** Photo attribution, e.g. "Photo by Jane Doe on Unsplash". Shown as a small caption when present. */
+    credit?: string;
 }
 
 /** A button offered on the expanded panel. */
@@ -198,6 +200,24 @@ export function ElasticGallery({ items, actions, label, className }: ElasticGall
                             aria-label={item.subtitle ? `${item.title}, ${item.subtitle}` : item.title}
                             className="absolute inset-0 z-10 cursor-pointer rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
                         />
+
+                        {/* Photo credit — a small caption, not a claim about
+                            the panel's content, so it sits apart from the
+                            title/actions stack rather than inside it. Shown
+                            only while expanded: there is no room for it on a
+                            collapsed sliver, and a photo worth crediting is
+                            still worth crediting quietly. */}
+                        {item.credit && (
+                            <div
+                                className={cn(
+                                    'pointer-events-none absolute right-3 top-3 z-20 max-w-[75%] truncate text-right text-[10px] font-medium text-white/70 transition-opacity duration-500 md:right-4 md:top-4 md:text-xs motion-reduce:transition-none',
+                                    TEXT_SHADOW,
+                                    isActive ? 'opacity-100 delay-200' : 'opacity-0',
+                                )}
+                            >
+                                {item.credit}
+                            </div>
+                        )}
 
                         {/* Content sits above the expand control but lets
                             pointer events through to it, except on the
