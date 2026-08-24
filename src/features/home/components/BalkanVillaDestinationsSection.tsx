@@ -99,7 +99,34 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
         [t],
     );
 
-    const images = useDestinationImages(destinations, labelFor, captionFor);
+    /*
+     * Whoever the picture actually belongs to.
+     *
+     * The two sources are credited differently because they are different
+     * libraries: a curated photo carries the photographer's name from the
+     * stock import, and everything else is still on the seeded city
+     * photograph, which came from Wikimedia — the same credit the city pages
+     * already show. A destination with a photo but no recorded photographer
+     * was uploaded by an admin, so it is their own picture and needs no
+     * credit at all.
+     */
+    const creditFor = useCallback(
+        (dest: VillaDestination): string | undefined => {
+            if (dest.imageUrl) {
+                return dest.imageCredit
+                    ? t('villas:destinationsHero.photoBy', 'Photo: {{name}} / Unsplash', {
+                        name: dest.imageCredit,
+                    })
+                    : undefined;
+            }
+            return dest.imageCity
+                ? t('villas:destinationsHero.photoWikimedia', '© Wikimedia Commons')
+                : undefined;
+        },
+        [t],
+    );
+
+    const images = useDestinationImages(destinations, labelFor, captionFor, creditFor);
 
     const openDestination = useCallback(
         (dest: VillaDestination | undefined) => {

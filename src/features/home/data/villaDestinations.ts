@@ -34,6 +34,14 @@ export interface VillaDestination {
      * Jezerc) with a picture of the actual place.
      */
     imageUrl?: string;
+    /**
+     * Who took `imageUrl`, when it came from a stock library rather than an
+     * admin upload. Unsplash's terms require the photographer to be named
+     * wherever their picture appears, so the credit has to travel with the
+     * photo all the way to the card.
+     */
+    imageCredit?: string;
+    imageCreditUrl?: string;
     /** Map focus when the villas page opens. */
     center: readonly [number, number];
     zoom: number;

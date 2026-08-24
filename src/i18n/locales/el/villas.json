@@ -214,6 +214,8 @@
     "title2": "όπου κι αν πάτε.",
     "subtitle": "Από τα βουνά Σαρ ως την Αδριατική. Διαλέξτε τόπο και δείτε τις βίλες που σας περιμένουν.",
     "cardLabel": "Πολυτελείς βίλες σε {{place}}, {{country}}",
-    "seeAll": "Δείτε όλα"
+    "seeAll": "Δείτε όλα",
+    "photoBy": "Φωτογραφία: {{name}} / Unsplash",
+    "photoWikimedia": "© Wikimedia Commons"
   }
 }
