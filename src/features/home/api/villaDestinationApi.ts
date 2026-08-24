@@ -8,6 +8,8 @@ interface ApiDestination {
     query?: string;
     country?: string;
     imageUrl?: string;
+    imageCredit?: string;
+    imageCreditUrl?: string;
     imageCity?: string;
     imageCountry?: string;
     lat?: number;
@@ -38,6 +40,8 @@ function toDestination(d: ApiDestination, index: number): VillaDestination {
         imageCity: (d.imageCity ?? d.name ?? '').trim(),
         imageCountry: (d.imageCountry ?? d.country ?? '').trim(),
         imageUrl: d.imageUrl?.trim() || undefined,
+        imageCredit: d.imageCredit?.trim() || undefined,
+        imageCreditUrl: d.imageCreditUrl?.trim() || undefined,
         center: [d.lat as number, d.lng as number],
         zoom: Number.isFinite(zoom) && zoom >= 1 && zoom <= 20 ? zoom : 12,
     };

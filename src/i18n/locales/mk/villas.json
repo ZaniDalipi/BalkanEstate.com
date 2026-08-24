@@ -214,6 +214,8 @@
     "title2": "каде и да патувате.",
     "subtitle": "Од Шар Планина до Јадранот. Изберете место и видете ги вилите што ве чекаат таму.",
     "cardLabel": "Луксузни вили во {{place}}, {{country}}",
-    "seeAll": "Види ги сите"
+    "seeAll": "Види ги сите",
+    "photoBy": "Фото: {{name}} / Unsplash",
+    "photoWikimedia": "© Wikimedia Commons"
   }
 }

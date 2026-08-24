@@ -112,6 +112,20 @@ describe('VillaDestinationForm', () => {
         expect(onSave).toHaveBeenCalledTimes(1);
     });
 
+    it('drops the photographer credit when the photo is removed', () => {
+        // Otherwise the next picture inherits the previous photographer's name
+        // and the card credits someone who did not take it.
+        const { onChange } = setup({
+            imageUrl: 'https://res.cloudinary.com/x/image/upload/a.jpg',
+            imageCredit: 'Ada L',
+            imageCreditUrl: 'https://unsplash.com/@ada',
+        });
+        fireEvent.click(screen.getByRole('button', { name: /remove/i }));
+        expect(onChange).toHaveBeenCalledWith(
+            expect.objectContaining({ imageUrl: '', imageCredit: '', imageCreditUrl: '' }),
+        );
+    });
+
     it('closes on Escape', () => {
         const { onCancel } = setup();
         fireEvent.keyDown(document, { key: 'Escape' });

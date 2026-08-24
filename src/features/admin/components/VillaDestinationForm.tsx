@@ -17,6 +17,9 @@ export interface DestinationDraft {
     country: string;
     imageUrl: string;
     imagePublicId: string;
+    /** Carried through edits so a name change cannot strip the photographer. */
+    imageCredit: string;
+    imageCreditUrl: string;
     imageCity: string;
     imageCountry: string;
     lat: string;
@@ -28,7 +31,7 @@ export interface DestinationDraft {
 
 export const emptyDraft = (order: number): DestinationDraft => ({
     name: '', query: '', country: '',
-    imageUrl: '', imagePublicId: '', imageCity: '', imageCountry: '',
+    imageUrl: '', imagePublicId: '', imageCredit: '', imageCreditUrl: '', imageCity: '', imageCountry: '',
     lat: '', lng: '', zoom: '12', displayOrder: String(order), isActive: true,
 });
 
@@ -93,7 +96,9 @@ const VillaDestinationForm: React.FC<Props> = ({ draft, saving, onChange, onCanc
                 '/admin/villa-destinations/upload-image',
                 form,
             );
-            set({ imageUrl: data.url, imagePublicId: data.publicId });
+            // Their own picture now, so any inherited credit goes with the
+            // photo it belonged to.
+            set({ imageUrl: data.url, imagePublicId: data.publicId, imageCredit: '', imageCreditUrl: '' });
         } catch {
             setUploadError(t('admin:villaDestinations.uploadError', 'Photo upload failed'));
         } finally {
@@ -243,7 +248,7 @@ const VillaDestinationForm: React.FC<Props> = ({ draft, saving, onChange, onCanc
                                         {draft.imageUrl && (
                                             <button
                                                 type="button"
-                                                onClick={() => set({ imageUrl: '', imagePublicId: '' })}
+                                                onClick={() => set({ imageUrl: '', imagePublicId: '', imageCredit: '', imageCreditUrl: '' })}
                                                 className="rounded-lg bg-neutral-100 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-neutral-200"
                                             >
                                                 {t('admin:villaDestinations.removePhoto', 'Remove')}

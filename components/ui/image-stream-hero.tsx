@@ -152,6 +152,15 @@ export type StreamImage = {
   caption?: string;
   /** Secondary line under the caption, e.g. the country. */
   sublabel?: string;
+  /**
+   * LOCAL ADDITION: photo credit, printed small under the name.
+   *
+   * Stock libraries require the photographer to be named wherever the picture
+   * is shown, so this belongs on the card itself rather than in a single line
+   * for the whole section — the corridor cycles through photos from many
+   * different sources, and one shared line could only credit one of them.
+   */
+  credit?: string;
 };
 
 export type ImageStreamHeroProps = {
@@ -768,6 +777,22 @@ export function ImageStreamHero({
                                 }}
                               >
                                 {img.sublabel}
+                              </span>
+                            ) : null}
+                            {/* Quieter than the country line and smaller than
+                                anything else on the card: it has to be legible
+                                without competing with the place name. */}
+                            {img.credit ? (
+                              <span
+                                className="block"
+                                style={{
+                                  fontSize: "0.72cqw",
+                                  fontWeight: 500,
+                                  color: "rgba(255,255,255,.62)",
+                                  marginTop: ".3cqw",
+                                }}
+                              >
+                                {img.credit}
                               </span>
                             ) : null}
                           </span>

@@ -878,11 +878,24 @@ function parseDestinationBody(
   const imageCountry = pick('imageCountry');
   const isActive = pick('isActive');
 
+  // The credit belongs to the photograph, so it is read from wherever the
+  // photo is being read from. Letting it fall back to the stored value
+  // independently would attribute a newly uploaded picture to whoever took the
+  // one it replaced — the exact mistake the credit exists to prevent. Empty
+  // rather than undefined so that clearing actually reaches the document;
+  // Mongoose drops undefined from an update.
+  const creditSource: Record<string, unknown> =
+    body?.imageUrl !== undefined ? (body ?? {}) : (base ?? {});
+  const imageCredit = String(creditSource.imageCredit ?? '').trim();
+  const imageCreditUrl = String(creditSource.imageCreditUrl ?? '').trim();
+
   return {
     value: {
       name, query, country, lat, lng, zoom, displayOrder,
       imageUrl: imageUrl ? String(imageUrl).trim() : undefined,
       imagePublicId: imagePublicId ? String(imagePublicId).trim() : undefined,
+      imageCredit,
+      imageCreditUrl,
       imageCity: imageCity ? String(imageCity).trim() : undefined,
       imageCountry: imageCountry ? String(imageCountry).trim() : undefined,
       isActive: isActive === undefined ? true : Boolean(isActive),

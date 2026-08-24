@@ -74,6 +74,9 @@ export interface ResolvedDestinationImage {
     caption: string;
     /** Country, printed under the name. */
     sublabel: string;
+    /** Photo credit, printed small under the country. Absent while the card
+     *  is still showing its gradient placeholder. */
+    credit?: string;
 }
 
 /**
@@ -93,6 +96,11 @@ export function useDestinationImages(
     destinations: readonly VillaDestination[],
     labelFor: (dest: VillaDestination) => string,
     captionFor: (dest: VillaDestination) => string,
+    /**
+     * Credit line for the photo actually on screen. Passed in rather than
+     * built here because the wording is translated, and the hook has no `t`.
+     */
+    creditFor: (dest: VillaDestination) => string | undefined,
 ): ResolvedDestinationImage[] {
     const [loaded, setLoaded] = useState<Record<string, string>>({});
 
@@ -192,7 +200,11 @@ export function useDestinationImages(
                 label: labelFor(dest),
                 caption: captionFor(dest),
                 sublabel: dest.country,
+                // Only once the photograph has actually decoded. Until then the
+                // card is showing a generated gradient, and crediting a
+                // photographer for that would be plainly wrong.
+                credit: loaded[dest.id] ? creditFor(dest) : undefined,
             })),
-        [destinations, loaded, labelFor, captionFor],
+        [destinations, loaded, labelFor, captionFor, creditFor],
     );
 }

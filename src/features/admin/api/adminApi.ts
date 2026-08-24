@@ -542,6 +542,8 @@ export interface AdminVillaDestination {
   country: string;
   imageUrl?: string;
   imagePublicId?: string;
+  imageCredit?: string;
+  imageCreditUrl?: string;
   imageCity?: string;
   imageCountry?: string;
   lat: number;
