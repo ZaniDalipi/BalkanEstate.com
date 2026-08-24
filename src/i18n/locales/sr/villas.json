@@ -214,6 +214,8 @@
     "title2": "гдје год да кренете.",
     "subtitle": "Од Шар-планине до Јадрана. Изаберите место и погледајте виле које вас тамо чекају.",
     "cardLabel": "Луксузне виле у {{place}}, {{country}}",
-    "seeAll": "Види све"
+    "seeAll": "Види све",
+    "photoBy": "Фото: {{name}} / Unsplash",
+    "photoWikimedia": "© Wikimedia Commons"
   }
 }

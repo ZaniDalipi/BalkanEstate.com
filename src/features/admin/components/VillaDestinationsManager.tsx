@@ -90,6 +90,8 @@ const VillaDestinationsManager: React.FC = () => {
                 country: draft.country.trim(),
                 imageUrl: draft.imageUrl || undefined,
                 imagePublicId: draft.imagePublicId || undefined,
+                imageCredit: draft.imageCredit || '',
+                imageCreditUrl: draft.imageCreditUrl || '',
                 imageCity: draft.imageCity.trim() || undefined,
                 imageCountry: draft.imageCountry.trim() || undefined,
                 lat: Number(draft.lat),
@@ -372,7 +374,7 @@ const VillaDestinationsManager: React.FC = () => {
                                     />
                                 </label>
                                 <button
-                                    onClick={() => setEditing({ ...row, lat: String(row.lat), lng: String(row.lng), zoom: String(row.zoom), displayOrder: String(row.displayOrder), imageCity: row.imageCity ?? '', imageCountry: row.imageCountry ?? '', imageUrl: row.imageUrl ?? '', imagePublicId: row.imagePublicId ?? '' })}
+                                    onClick={() => setEditing({ ...row, lat: String(row.lat), lng: String(row.lng), zoom: String(row.zoom), displayOrder: String(row.displayOrder), imageCity: row.imageCity ?? '', imageCountry: row.imageCountry ?? '', imageUrl: row.imageUrl ?? '', imagePublicId: row.imagePublicId ?? '', imageCredit: row.imageCredit ?? '', imageCreditUrl: row.imageCreditUrl ?? '' })}
                                     className="rounded-lg bg-neutral-100 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-neutral-200"
                                 >
                                     {t('admin:villaDestinations.edit', 'Edit')}

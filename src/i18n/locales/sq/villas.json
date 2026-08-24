@@ -214,6 +214,8 @@
     "title2": "kudo që të shkoni.",
     "subtitle": "Nga malet e Sharrit deri te Adriatiku. Zgjidhni një vend dhe shihni vilat që ju presin.",
     "cardLabel": "Vila luksoze në {{place}}, {{country}}",
-    "seeAll": "Shiko të gjitha"
+    "seeAll": "Shiko të gjitha",
+    "photoBy": "Foto: {{name}} / Unsplash",
+    "photoWikimedia": "© Wikimedia Commons"
   }
 }
