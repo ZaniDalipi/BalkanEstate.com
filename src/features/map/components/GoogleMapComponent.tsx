@@ -19,6 +19,7 @@ import {
   Rectangle,
   Polyline,
   Polygon,
+  Circle,
 } from '@react-google-maps/api';
 import { HighlightedPropertiesProvider } from '@/src/context/HighlightedPropertiesContext';
 
@@ -125,6 +126,30 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
                 strokeDashArray: [5, 5],
                 fillColor: '#0252CD',
                 fillOpacity: 0.1,
+                clickable: false,
+              }}
+            />
+          )}
+
+          {/* First corner marker for tap-tap ("point to point") drawing on
+              touch devices — shown after the first tap while waiting for the
+              second tap that completes the box. */}
+          {hook.drawingAnchor && !hook.drawingRect && isDrawing && (
+            <Circle
+              center={hook.drawingAnchor}
+              radius={
+                // ~8 screen pixels, converted to meters at the anchor's latitude
+                // so the marker reads the same size at any zoom level.
+                (156543.03392 * Math.cos((hook.drawingAnchor.lat * Math.PI) / 180)) /
+                Math.pow(2, hook.zoom) *
+                8
+              }
+              options={{
+                strokeColor: '#0252CD',
+                strokeOpacity: 1,
+                strokeWeight: 2,
+                fillColor: '#0252CD',
+                fillOpacity: 0.6,
                 clickable: false,
               }}
             />

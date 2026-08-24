@@ -194,6 +194,14 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   const [drawingRect, setDrawingRect] = useState<{ north: number; south: number; east: number; west: number } | null>(null);
   const drawingRectRef = useRef<{ north: number; south: number; east: number; west: number } | null>(null);
   const drawingPropsRef = useRef({ isDrawing, onDrawComplete });
+  // Touch-friendly "point to point" drawing: a quick tap (press+release with
+  // barely any movement) sets the first corner and waits for a second tap,
+  // instead of requiring one continuous press-drag-release gesture — which is
+  // hard to pull off on a phone screen. A real drag still works in one go.
+  const pointAConfirmedRef = useRef(false);
+  const touchStartClientRef = useRef<{ x: number; y: number } | null>(null);
+  const [drawingAnchor, setDrawingAnchor] = useState<{ lat: number; lng: number } | null>(null);
+  const TAP_MOVE_THRESHOLD_PX = 10;
 
   // Ref to store promoted markers separately (not clustered)
   const promotedMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
@@ -318,12 +326,16 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     } else {
       mapDiv.style.cursor = '';
       map.setOptions({ draggable: true, scrollwheel: true });
-      // Clear drawing state if cancelled
-      if (isDrawingDragRef.current) {
-        isDrawingDragRef.current = false;
-        drawingStartRef.current = null;
-        setDrawingRect(null);
-      }
+      // Clear drawing state if cancelled — including a pending first tap
+      // that's waiting on a second one, which isDrawingDragRef alone won't
+      // catch since no finger is down at that moment.
+      isDrawingDragRef.current = false;
+      drawingStartRef.current = null;
+      pointAConfirmedRef.current = false;
+      touchStartClientRef.current = null;
+      drawingRectRef.current = null;
+      setDrawingRect(null);
+      setDrawingAnchor(null);
     }
   }, [isDrawing, map]);
 
@@ -371,6 +383,23 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       return { lat, lng };
     };
 
+    const getClientPoint = (e: MouseEvent | TouchEvent): { x: number; y: number } | null => {
+      if ('touches' in e) {
+        // touchend/touchcancel have an empty `touches` (finger already lifted);
+        // the released touch's last position lives in `changedTouches` instead.
+        const t = e.touches[0] ?? e.changedTouches[0];
+        return t ? { x: t.clientX, y: t.clientY } : null;
+      }
+      return { x: e.clientX, y: e.clientY };
+    };
+
+    const makeRect = (start: { lat: number; lng: number }, end: { lat: number; lng: number }) => ({
+      north: Math.max(start.lat, end.lat),
+      south: Math.min(start.lat, end.lat),
+      east: Math.max(start.lng, end.lng),
+      west: Math.min(start.lng, end.lng),
+    });
+
     const handleMouseDown = (e: MouseEvent | TouchEvent) => {
       if (!drawingPropsRef.current.isDrawing || isDrawingDragRef.current) return;
       if ('button' in e && e.button !== 0) return;
@@ -379,9 +408,20 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       const latLng = getLatLngFromEvent(e);
       if (!latLng) return;
 
+      touchStartClientRef.current = getClientPoint(e);
       isDrawingDragRef.current = true;
-      drawingStartRef.current = latLng;
-      setDrawingRect(null);
+
+      if (pointAConfirmedRef.current && drawingStartRef.current) {
+        // Second tap: start live preview from the confirmed first corner.
+        const rect = makeRect(drawingStartRef.current, latLng);
+        drawingRectRef.current = rect;
+        setDrawingRect(rect);
+      } else {
+        // First touch — may turn into a tap (point-to-point) or a drag.
+        drawingStartRef.current = latLng;
+        drawingRectRef.current = null;
+        setDrawingRect(null);
+      }
     };
 
     const handleMouseMove = (e: MouseEvent | TouchEvent) => {
@@ -391,29 +431,43 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       const latLng = getLatLngFromEvent(e);
       if (!latLng) return;
 
-      const start = drawingStartRef.current;
-      const newRect = {
-        north: Math.max(start.lat, latLng.lat),
-        south: Math.min(start.lat, latLng.lat),
-        east: Math.max(start.lng, latLng.lng),
-        west: Math.min(start.lng, latLng.lng),
-      };
+      const newRect = makeRect(drawingStartRef.current, latLng);
       // Update both ref (for immediate use in handlers) and state (for rendering)
       drawingRectRef.current = newRect;
       setDrawingRect(newRect);
     };
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (e: MouseEvent | TouchEvent) => {
       if (!isDrawingDragRef.current) return;
 
       isDrawingDragRef.current = false;
+
+      const startClient = touchStartClientRef.current;
+      const endClient = getClientPoint(e);
+      touchStartClientRef.current = null;
+      const movedPx = startClient && endClient
+        ? Math.hypot(endClient.x - startClient.x, endClient.y - startClient.y)
+        : Infinity;
+
+      if (!pointAConfirmedRef.current && movedPx < TAP_MOVE_THRESHOLD_PX) {
+        // A quick tap with (almost) no movement — treat it as placing the
+        // first corner only, and wait for a second tap to finish the box.
+        pointAConfirmedRef.current = true;
+        drawingRectRef.current = null;
+        setDrawingRect(null);
+        setDrawingAnchor(drawingStartRef.current);
+        return;
+      }
+
       // Read from ref to get the latest value (not from closure which may be stale)
       const rect = drawingRectRef.current;
 
-      // Clear temp drawing state
+      // Clear drawing state
       drawingStartRef.current = null;
       drawingRectRef.current = null;
+      pointAConfirmedRef.current = false;
       setDrawingRect(null);
+      setDrawingAnchor(null);
 
       // Convert to Leaflet LatLngBounds format for compatibility
       if (rect && Math.abs(rect.north - rect.south) > 0.0001 && Math.abs(rect.east - rect.west) > 0.0001) {
@@ -2062,6 +2116,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
     // Drawing
     drawingRect,
+    drawingAnchor,
     googleDrawnBounds,
 
     // Map style
