@@ -294,6 +294,31 @@ const VillaDestinationForm: React.FC<Props> = ({ draft, saving, onChange, onCanc
                                             {t('admin:villaDestinations.imageCityHint', 'Used only until you upload a photo for this place.')}
                                         </p>
                                     </div>
+
+                                    {/* Free text, shown on the card exactly as
+                                        typed. Stock libraries word their
+                                        attribution their own way, and a field
+                                        that only took a name would force every
+                                        one of them into ours. */}
+                                    <div>
+                                        <label className={label} htmlFor="vd-credit">
+                                            {t('admin:villaDestinations.imageCredit', 'Photo credit (optional)')}
+                                        </label>
+                                        <input
+                                            id="vd-credit"
+                                            className={field}
+                                            value={draft.imageCredit}
+                                            onChange={e => set({ imageCredit: e.target.value })}
+                                            maxLength={120}
+                                            placeholder={t('admin:villaDestinations.imageCreditPlaceholder', 'Photo by Jane Doe on Unsplash')}
+                                        />
+                                        <p className="mt-1 text-[11px] text-gray-400">
+                                            {t(
+                                                'admin:villaDestinations.imageCreditHint',
+                                                'If the photo came from Unsplash, Pexels or anywhere else, paste their credit line here — most sites show one next to the download button. It appears as a small caption on the card.',
+                                            )}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>

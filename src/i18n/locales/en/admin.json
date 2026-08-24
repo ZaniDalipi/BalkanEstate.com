@@ -1228,6 +1228,9 @@
     "uploadPhoto": "Upload photo",
     "replacePhotoLong": "Replace photo",
     "removePhoto": "Remove",
-    "noCityPhoto": "None"
+    "noCityPhoto": "None",
+    "imageCredit": "Photo credit (optional)",
+    "imageCreditPlaceholder": "Photo by Jane Doe on Unsplash",
+    "imageCreditHint": "If the photo came from Unsplash, Pexels or anywhere else, paste their credit line here — most sites show one next to the download button. It appears as a small caption on the card."
   }
 }

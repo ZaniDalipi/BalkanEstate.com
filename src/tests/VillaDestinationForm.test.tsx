@@ -112,6 +112,15 @@ describe('VillaDestinationForm', () => {
         expect(onSave).toHaveBeenCalledTimes(1);
     });
 
+    it('lets an admin type the credit line, kept exactly as entered', () => {
+        const { onChange } = setup({ imageUrl: 'https://res.cloudinary.com/x/image/upload/a.jpg' });
+        const input = screen.getByLabelText(/photo credit/i);
+        fireEvent.change(input, { target: { value: 'Photo by Jane Doe on Unsplash' } });
+        expect(onChange).toHaveBeenCalledWith(
+            expect.objectContaining({ imageCredit: 'Photo by Jane Doe on Unsplash' }),
+        );
+    });
+
     it('drops the photographer credit when the photo is removed', () => {
         // Otherwise the next picture inherits the previous photographer's name
         // and the card credits someone who did not take it.

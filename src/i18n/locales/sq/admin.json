@@ -1025,6 +1025,9 @@
     "uploadPhoto": "Ngarko foto",
     "replacePhotoLong": "Zëvendëso foton",
     "removePhoto": "Hiq",
-    "noCityPhoto": "Asnjë"
+    "noCityPhoto": "Asnjë",
+    "imageCredit": "Kredia e fotos (opsionale)",
+    "imageCreditPlaceholder": "Foto nga Jane Doe në Unsplash",
+    "imageCreditHint": "Nëse fotoja vjen nga Unsplash, Pexels ose diku tjetër, ngjit këtu rreshtin e kredive — shumica e faqeve e tregojnë pranë butonit të shkarkimit. Shfaqet si një mbishkrim i vogël në kartë."
   }
 }

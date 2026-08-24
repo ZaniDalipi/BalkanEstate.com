@@ -1128,6 +1128,9 @@
     "uploadPhoto": "Učitaj fotografiju",
     "replacePhotoLong": "Zamijeni fotografiju",
     "removePhoto": "Ukloni",
-    "noCityPhoto": "Nijedna"
+    "noCityPhoto": "Nijedna",
+    "imageCredit": "Zasluge za fotografiju (neobavezno)",
+    "imageCreditPlaceholder": "Fotografija: Jane Doe na Unsplash",
+    "imageCreditHint": "Ako je fotografija s Unsplasha, Pexelsa ili odnekud drugdje, zalijepite njihov redak zasluga ovdje — većina stranica ga prikazuje pored gumba za preuzimanje. Pojavljuje se kao mali natpis na kartici."
   }
 }

@@ -1128,6 +1128,9 @@
     "uploadPhoto": "Încarcă fotografie",
     "replacePhotoLong": "Înlocuiește fotografia",
     "removePhoto": "Elimină",
-    "noCityPhoto": "Niciuna"
+    "noCityPhoto": "Niciuna",
+    "imageCredit": "Credit foto (opțional)",
+    "imageCreditPlaceholder": "Fotografie de Jane Doe pe Unsplash",
+    "imageCreditHint": "Dacă fotografia provine de pe Unsplash, Pexels sau altundeva, lipește aici linia lor de credit — majoritatea site-urilor o afișează lângă butonul de descărcare. Apare ca o legendă mică pe card."
   }
 }
