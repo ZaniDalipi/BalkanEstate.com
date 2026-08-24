@@ -7,21 +7,26 @@ import { SEEDED_CITY_IMAGES } from '@/config/seededCityImages';
  * The frontend needs the seeded-city table to offer a photo choice in the
  * admin, and it cannot import from the backend package. So the list is
  * duplicated — and this test is what stops the copy rotting: it parses the
- * seeder itself and fails the moment the two disagree.
+ * canonical list itself and fails the moment the two disagree.
  *
  * A drift here is not loud. A destination pointed at a city that is no longer
  * seeded resolves to a Cloudinary 404, and the corridor quietly keeps showing
  * that card's gradient placeholder instead of a photo.
+ *
+ * The canonical list lives in `backend/src/data/balkanShowcaseCities.ts`, not
+ * `seedCityImages.ts` itself — that script now just imports it, so it and
+ * `services/cityShowcaseImportService.ts` (the city-gallery import candidates)
+ * can't drift from each other either.
  */
 describe('seeded city images', () => {
     const source = readFileSync(
-        resolve(__dirname, '../../backend/src/scripts/seedCityImages.ts'),
+        resolve(__dirname, '../../backend/src/data/balkanShowcaseCities.ts'),
         'utf8',
     );
 
     const block = (() => {
-        const start = source.indexOf('const CITIES');
-        expect(start, 'CITIES table not found in seedCityImages.ts').toBeGreaterThan(-1);
+        const start = source.indexOf('const BALKAN_SHOWCASE_CITIES');
+        expect(start, 'BALKAN_SHOWCASE_CITIES table not found in balkanShowcaseCities.ts').toBeGreaterThan(-1);
         const rest = source.slice(start);
         return rest.slice(0, rest.indexOf('\n];'));
     })();

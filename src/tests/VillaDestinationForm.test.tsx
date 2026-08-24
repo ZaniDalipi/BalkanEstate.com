@@ -9,7 +9,7 @@
  */
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent, within, act } from '@testing-library/react';
 import VillaDestinationForm, { emptyDraft, type DestinationDraft } from '../features/admin/components/VillaDestinationForm';
 import { SEEDED_CITY_IMAGES, SEEDED_COUNTRIES } from '@/config/seededCityImages';
 
@@ -42,7 +42,7 @@ const setup = (over: Partial<DestinationDraft> = {}, props: Partial<React.Compon
     const onChange = vi.fn();
     const onCancel = vi.fn();
     const onSave = vi.fn();
-    render(
+    const utils = render(
         <VillaDestinationForm
             draft={draftFor(over)}
             saving={false}
@@ -52,7 +52,7 @@ const setup = (over: Partial<DestinationDraft> = {}, props: Partial<React.Compon
             {...props}
         />,
     );
-    return { onChange, onCancel, onSave };
+    return { onChange, onCancel, onSave, ...utils };
 };
 
 describe('VillaDestinationForm', () => {
@@ -136,5 +136,30 @@ describe('VillaDestinationForm', () => {
         const { onCancel } = setup({}, { saving: true });
         fireEvent.keyDown(document, { key: 'Escape' });
         expect(onCancel).not.toHaveBeenCalled();
+    });
+
+    it('does not steal focus back to the first field on a re-render', () => {
+        // The parent passes `onCancel={() => setEditing(null)}` — a fresh
+        // function on every render — and every keystroke re-renders it. If
+        // the focus grab ran on every prop change (instead of only on mount)
+        // it snapped the cursor back to Name after every character typed
+        // anywhere else in the form.
+        const draft = draftFor();
+        const { rerender } = setup();
+        const queryField = screen.getByLabelText(/search term/i);
+        act(() => queryField.focus());
+        expect(document.activeElement).toBe(queryField);
+
+        rerender(
+            <VillaDestinationForm
+                draft={draft}
+                saving={false}
+                onChange={vi.fn()}
+                onCancel={() => {}}
+                onSave={vi.fn()}
+            />,
+        );
+
+        expect(document.activeElement).toBe(queryField);
     });
 });

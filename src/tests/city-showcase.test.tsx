@@ -161,7 +161,12 @@ describe('ElasticGallery', () => {
     it('expands a panel on hover', () => {
         renderGallery();
 
-        fireEvent.pointerEnter(panelOf(/^Ohrid/).parentElement!);
+        // `pointerType` matters here: the component only expands on a real
+        // mouse/pen hover (see its `handlePointerEnter` comment) — a touch
+        // scroll dispatches `pointerenter` too, and this event without an
+        // explicit `pointerType` defaults to `''` in jsdom, which used to let
+        // this test pass without actually exercising the mouse path.
+        fireEvent.pointerEnter(panelOf(/^Ohrid/).parentElement!, { pointerType: 'mouse' });
 
         expect(panelOf(/^Ohrid/)).toHaveAttribute('aria-current', 'true');
     });

@@ -67,10 +67,20 @@ const VillaDestinationForm: React.FC<Props> = ({ draft, saving, onChange, onCanc
     const label = 'block text-xs font-medium text-gray-600 mb-1';
     const set = (patch: Partial<DestinationDraft>) => onChange({ ...draft, ...patch });
 
-    // Escape closes, and focus starts in the first field rather than wherever
-    // the Edit button left it behind the overlay.
+    // Focus starts in the first field rather than wherever the Edit button
+    // left it behind the overlay — but only once, on mount. `onCancel` is a
+    // fresh function identity on every parent render (it closes over
+    // `setEditing`), and every keystroke re-renders the parent; keying this
+    // off `[onCancel, saving]` reran it on every keystroke and yanked the
+    // cursor back to this field regardless of where the admin was actually
+    // typing.
     useEffect(() => {
         firstFieldRef.current?.focus();
+    }, []);
+
+    // Escape closes. Kept as its own effect so re-binding it when `onCancel`
+    // or `saving` changes identity can't also re-trigger the focus grab above.
+    useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             if (e.key === 'Escape' && !saving) onCancel();
         };
