@@ -185,7 +185,13 @@ export async function seedDestinationImages(opts: {
 
       dest.imageUrl = url;
       dest.imagePublicId = publicId;
-      dest.imageCredit = photo.user.name;
+      // A complete credit line, not just the name. The same field is typed by
+      // hand in the admin, where what an admin pastes from a stock site is
+      // already a full line ("Photo by Jane Doe on Unsplash"), and the card
+      // prints whatever is stored verbatim. Writing only the name here would
+      // mean the card had to guess the wording for one source and not the
+      // other.
+      dest.imageCredit = `Photo by ${photo.user.name} on Unsplash`;
       dest.imageCreditUrl = photo.user.links.html;
       await dest.save();
 

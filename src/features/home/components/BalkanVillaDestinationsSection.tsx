@@ -112,13 +112,12 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
      */
     const creditFor = useCallback(
         (dest: VillaDestination): string | undefined => {
-            if (dest.imageUrl) {
-                return dest.imageCredit
-                    ? t('villas:destinationsHero.photoBy', 'Photo: {{name}} / Unsplash', {
-                        name: dest.imageCredit,
-                    })
-                    : undefined;
-            }
+            // Printed verbatim. It is a whole credit line, either pasted into
+            // the admin from wherever the photo came from or written by the
+            // import, and reformatting someone's attribution is not ours to
+            // do. It is also why it is not translated: a name and a source are
+            // the same in every language.
+            if (dest.imageUrl) return dest.imageCredit || undefined;
             return dest.imageCity
                 ? t('villas:destinationsHero.photoWikimedia', '© Wikimedia Commons')
                 : undefined;

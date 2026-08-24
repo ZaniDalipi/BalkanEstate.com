@@ -68,10 +68,9 @@ describe('useDestinationImages — when a credit is attached', () => {
     });
     afterEach(() => vi.unstubAllGlobals());
 
+    // Mirrors the section: a stored credit is a whole line and prints as-is.
     const creditFor = (d: VillaDestination) =>
-        d.imageUrl
-            ? (d.imageCredit ? `Photo: ${d.imageCredit} / Unsplash` : undefined)
-            : '© Wikimedia Commons';
+        d.imageUrl ? (d.imageCredit || undefined) : '© Wikimedia Commons';
 
     const run = (d: VillaDestination) =>
         renderHook(() =>
@@ -79,8 +78,12 @@ describe('useDestinationImages — when a credit is attached', () => {
         );
 
     it('credits the photographer of a stock photo', async () => {
-        const { result } = run(dest({ imageUrl: 'https://res.cloudinary.com/x/image/upload/a.jpg', imageCredit: 'Ada L' }));
-        await waitFor(() => expect(result.current[0].credit).toBe('Photo: Ada L / Unsplash'));
+        const { result } = run(dest({
+            imageUrl: 'https://res.cloudinary.com/x/image/upload/a.jpg',
+            imageCredit: 'Photo by Ada L on Unsplash',
+        }));
+        // Verbatim — reformatting someone's attribution is not ours to do.
+        await waitFor(() => expect(result.current[0].credit).toBe('Photo by Ada L on Unsplash'));
     });
 
     it('credits Wikimedia when the card is on the seeded city photo', async () => {

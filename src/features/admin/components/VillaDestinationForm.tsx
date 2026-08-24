@@ -67,10 +67,23 @@ const VillaDestinationForm: React.FC<Props> = ({ draft, saving, onChange, onCanc
     const label = 'block text-xs font-medium text-gray-600 mb-1';
     const set = (patch: Partial<DestinationDraft>) => onChange({ ...draft, ...patch });
 
-    // Escape closes, and focus starts in the first field rather than wherever
-    // the Edit button left it behind the overlay.
+    /*
+     * Focus the first field once, when the dialog opens — and only then.
+     *
+     * The empty dependency list is the whole point of this being its own
+     * effect. It used to share one with the Escape listener, whose deps
+     * include `onCancel`, and the parent passes that as an inline arrow: a new
+     * identity on every render, and it re-renders on every keystroke because
+     * the draft lives in its state. So each character typed re-ran the effect
+     * and pulled the caret back to the Name field, whichever field was
+     * actually being typed in.
+     */
     useEffect(() => {
         firstFieldRef.current?.focus();
+    }, []);
+
+    // Escape closes, unless a save is already in flight.
+    useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             if (e.key === 'Escape' && !saving) onCancel();
         };
@@ -292,6 +305,31 @@ const VillaDestinationForm: React.FC<Props> = ({ draft, saving, onChange, onCanc
                                         </select>
                                         <p className="mt-1 text-[11px] text-gray-400">
                                             {t('admin:villaDestinations.imageCityHint', 'Used only until you upload a photo for this place.')}
+                                        </p>
+                                    </div>
+
+                                    {/* Free text, shown on the card exactly as
+                                        typed. Stock libraries word their
+                                        attribution their own way, and a field
+                                        that only took a name would force every
+                                        one of them into ours. */}
+                                    <div>
+                                        <label className={label} htmlFor="vd-credit">
+                                            {t('admin:villaDestinations.imageCredit', 'Photo credit (optional)')}
+                                        </label>
+                                        <input
+                                            id="vd-credit"
+                                            className={field}
+                                            value={draft.imageCredit}
+                                            onChange={e => set({ imageCredit: e.target.value })}
+                                            maxLength={120}
+                                            placeholder={t('admin:villaDestinations.imageCreditPlaceholder', 'Photo by Jane Doe on Unsplash')}
+                                        />
+                                        <p className="mt-1 text-[11px] text-gray-400">
+                                            {t(
+                                                'admin:villaDestinations.imageCreditHint',
+                                                'If the photo came from Unsplash, Pexels or anywhere else, paste their credit line here — most sites show one next to the download button. It appears as a small caption on the card.',
+                                            )}
                                         </p>
                                     </div>
                                 </div>
