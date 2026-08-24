@@ -150,6 +150,25 @@ invented market statistics), so it becomes a selectable suggestion for every
 other city picker and a candidate for the "Import cities from database"
 action, without requiring a full market-data form.
 
+### Import candidates on a fresh database
+
+`data/balkanShowcaseCities.ts` lists 89 well-known cities across all 10
+`BALKAN_COUNTRIES` — one shared list, not a duplicate per file. It feeds two
+things that used to each keep their own copy:
+
+- `scripts/seedCityImages.ts` — fetches a Wikipedia/Commons photo for each and
+  uploads it to the `city-{country}-{city}` Cloudinary library.
+- `cityShowcaseImportService.importCitiesFromMarketData()` — offers these as
+  import candidates alongside `CityMarketData` rows, so "Import cities from
+  database" still produces real panels on a fresh database with zero market
+  data, as long as the Cloudinary library above has been seeded.
+  `selectImportCandidates` dedupes the two sources by city+country and keeps
+  the `CityMarketData` row when a city appears in both, since only that row
+  carries real `featured`/`listingsCount` signal. `resolveCityPhoto` still
+  checks the curated Cloudinary library before any row's `imageUrl`, so a
+  built-in candidate with no market-data row resolves through the same path a
+  market-data city would.
+
 ---
 
 ## Sticky Bottom Action Bar

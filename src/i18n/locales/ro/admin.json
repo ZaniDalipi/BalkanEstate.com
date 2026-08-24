@@ -1147,7 +1147,7 @@
     "photoSpec": "Panourile sunt înalte — încărcați o fotografie portret, 1600 × 2000 sau cât mai aproape. Alte formate sunt decupate, niciodată deformate. Maximum 10 MB.",
     "limitHint": "Galeria afișează {{count}} dintre orașele vizibile la fiecare vizită, alese aleatoriu și distribuite pe țări — astfel fiecare oraș de aici apare, doar nu toate deodată.",
     "empty": "Niciun oraș încă — galeria este ascunsă pe pagina principală.",
-    "emptyHint": "Apăsați “Importă orașe din bază” pentru a aduce orașele pe care le aveți deja, sau adăugați unul manual cu fotografie.",
+    "emptyHint": "Apăsați “Importă orașe din bază” pentru a aduce orașele pe care le aveți deja, plus orașe balcanice cunoscute cu fotografie gata pregătită, sau adăugați unul manual.",
     "confirmDelete": "Eliminați {{city}} de pe pagina principală?",
     "saveError": "Salvarea panoului orașului a eșuat",
     "deleteError": "Ștergerea panoului orașului a eșuat",

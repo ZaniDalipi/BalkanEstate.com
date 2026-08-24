@@ -22,6 +22,7 @@ import {
   cityKey,
   type ImportableCity,
 } from '../services/cityShowcaseImportService';
+import { BALKAN_SHOWCASE_CITIES } from '../data/balkanShowcaseCities';
 
 const mockResource = cloudinary.api.resource as jest.Mock;
 
@@ -131,5 +132,40 @@ describe('selectImportCandidates', () => {
 
     expect(candidates).toHaveLength(1);
     expect(candidates[0].city).toBe('Ohrid');
+  });
+
+  it('prefers a market-data row over the built-in list entry for the same city', () => {
+    // The market-data row carries real `featured`/`listingsCount` signal the
+    // built-in list can't; when both cover a city, the row must win so that
+    // signal isn't thrown away.
+    const marketRow = city({ city: 'Tirana', country: 'Albania', featured: true, listingsCount: 40 });
+    const builtIn = BALKAN_SHOWCASE_CITIES.find(c => c.city === 'Tirana')!;
+
+    const candidates = selectImportCandidates([marketRow, builtIn], new Set());
+
+    expect(candidates).toEqual([marketRow]);
+  });
+
+  it('still offers the built-in list when market data has nothing', () => {
+    // This is what makes "Import cities from database" produce real cities on
+    // a fresh database with an empty `CityMarketData` collection.
+    const candidates = selectImportCandidates([...BALKAN_SHOWCASE_CITIES], new Set());
+
+    expect(candidates.length).toBe(BALKAN_SHOWCASE_CITIES.length);
+    expect(candidates.some(c => c.city === 'Skopje' && c.country === 'North Macedonia')).toBe(true);
+  });
+});
+
+describe('BALKAN_SHOWCASE_CITIES', () => {
+  it('has no duplicate city+country pairs', () => {
+    const keys = BALKAN_SHOWCASE_CITIES.map(c => cityKey(c.city, c.country));
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it('gives every entry a non-empty city and country', () => {
+    for (const entry of BALKAN_SHOWCASE_CITIES) {
+      expect(entry.city.trim().length).toBeGreaterThan(0);
+      expect(entry.country.trim().length).toBeGreaterThan(0);
+    }
   });
 });

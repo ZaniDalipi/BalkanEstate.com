@@ -1247,7 +1247,7 @@
     "photoSpec": "Panels are tall — upload a portrait photo, 1600 × 2000 or as close as you have. Other shapes are cropped, never squashed. Max 10 MB.",
     "limitHint": "The gallery shows {{count}} of your visible cities per visit, drawn at random and spread across countries — so every city here gets shown, just not all at once.",
     "empty": "No cities yet — the gallery is hidden on the home page.",
-    "emptyHint": "Press “Import cities from database” to bring in the cities you already have, or add one by hand with a photo.",
+    "emptyHint": "Press “Import cities from database” to bring in the cities you already have, plus well-known Balkan cities with a photo ready, or add one by hand.",
     "confirmDelete": "Remove {{city}} from the home page?",
     "saveError": "Failed to save city panel",
     "deleteError": "Failed to delete city panel",

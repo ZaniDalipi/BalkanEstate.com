@@ -1045,7 +1045,7 @@
     "photoSpec": "Paneli su visoki — otpremite portretnu fotografiju, 1600 × 2000 ili najbliže što imate. Drugi oblici se isecaju, nikada ne izobličuju. Najviše 10 MB.",
     "limitHint": "Galerija prikazuje {{count}} vaših vidljivih gradova po poseti, nasumično izabranih i raspoređenih po državama — tako se svaki grad ovde prikaže, samo ne svi odjednom.",
     "empty": "Još nema gradova — galerija je skrivena na početnoj strani.",
-    "emptyHint": "Pritisnite “Uvezi gradove iz baze” da dovedete gradove koje već imate, ili dodajte jedan ručno sa fotografijom.",
+    "emptyHint": "Pritisnite “Uvezi gradove iz baze” da dovedete gradove koje već imate, plus poznate balkanske gradove sa spremnom fotografijom, ili dodajte jedan ručno.",
     "confirmDelete": "Ukloniti {{city}} sa početne strane?",
     "saveError": "Čuvanje panela grada nije uspelo",
     "deleteError": "Brisanje panela grada nije uspelo",

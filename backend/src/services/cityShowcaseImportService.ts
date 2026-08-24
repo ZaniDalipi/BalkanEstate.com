@@ -2,6 +2,7 @@ import cloudinary from '../config/cloudinary';
 import CityMarketData from '../models/CityMarketData';
 import CityShowcase from '../models/CityShowcase';
 import { apiLogger } from '../utils/logger';
+import { BALKAN_SHOWCASE_CITIES } from '../data/balkanShowcaseCities';
 
 /**
  * Brings the cities already in the database into the home-page gallery.
@@ -131,8 +132,17 @@ export async function importCitiesFromMarketData(): Promise<ImportResult> {
   const existingKeys = new Set(
     existing.map(row => cityKey(String(row.city), String(row.country)))
   );
-  const candidates = selectImportCandidates(cities as ImportableCity[], existingKeys)
-    .slice(0, MAX_IMPORT_CANDIDATES);
+  // `BALKAN_SHOWCASE_CITIES` after the market-data rows: a city present in
+  // both is deduplicated by `selectImportCandidates`'s `seen` set in favour
+  // of the market-data row (which carries real `featured`/`listingsCount`
+  // signal), and the built-in list only fills in cities the database has no
+  // row for yet — so importing still works on a fresh database with an
+  // empty `CityMarketData` collection, as long as the corresponding
+  // Cloudinary library asset was seeded (`resolveCityPhoto` below).
+  const candidates = selectImportCandidates(
+    [...(cities as ImportableCity[]), ...BALKAN_SHOWCASE_CITIES],
+    existingKeys
+  ).slice(0, MAX_IMPORT_CANDIDATES);
 
   // Counted directly rather than inferred from the candidate list, which also
   // drops nameless and duplicated rows — those are not "already present".
