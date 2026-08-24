@@ -67,10 +67,23 @@ const VillaDestinationForm: React.FC<Props> = ({ draft, saving, onChange, onCanc
     const label = 'block text-xs font-medium text-gray-600 mb-1';
     const set = (patch: Partial<DestinationDraft>) => onChange({ ...draft, ...patch });
 
-    // Escape closes, and focus starts in the first field rather than wherever
-    // the Edit button left it behind the overlay.
+    /*
+     * Focus the first field once, when the dialog opens — and only then.
+     *
+     * The empty dependency list is the whole point of this being its own
+     * effect. It used to share one with the Escape listener, whose deps
+     * include `onCancel`, and the parent passes that as an inline arrow: a new
+     * identity on every render, and it re-renders on every keystroke because
+     * the draft lives in its state. So each character typed re-ran the effect
+     * and pulled the caret back to the Name field, whichever field was
+     * actually being typed in.
+     */
     useEffect(() => {
         firstFieldRef.current?.focus();
+    }, []);
+
+    // Escape closes, unless a save is already in flight.
+    useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             if (e.key === 'Escape' && !saving) onCancel();
         };

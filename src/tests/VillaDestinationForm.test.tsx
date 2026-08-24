@@ -135,6 +135,29 @@ describe('VillaDestinationForm', () => {
         );
     });
 
+    it('leaves the caret where the admin put it when the parent re-renders', () => {
+        // The parent holds the draft in state and passes inline callbacks, so
+        // every keystroke re-renders this with brand-new function identities.
+        // Focusing the first field on anything but mount pulls the caret out
+        // of whichever field is actually being typed in.
+        const draft = draftFor({ imageUrl: 'https://res.cloudinary.com/x/image/upload/a.jpg' });
+        const props = () => ({
+            draft,
+            saving: false,
+            onChange: vi.fn(),
+            onCancel: vi.fn(),
+            onSave: vi.fn(),
+        });
+        const { rerender } = render(<VillaDestinationForm {...props()} />);
+
+        const credit = screen.getByLabelText(/photo credit/i);
+        (credit as HTMLInputElement).focus();
+        expect(document.activeElement).toBe(credit);
+
+        rerender(<VillaDestinationForm {...props()} />);
+        expect(document.activeElement).toBe(credit);
+    });
+
     it('closes on Escape', () => {
         const { onCancel } = setup();
         fireEvent.keyDown(document, { key: 'Escape' });

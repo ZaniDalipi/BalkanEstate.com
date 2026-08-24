@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { uploadRequest } from '@/src/shared/api/httpClient';
@@ -204,6 +204,14 @@ const VillaDestinationsManager: React.FC = () => {
 
     const handleImport = () => importMutation.mutate();
 
+    /**
+     * Stable identity on purpose. The editor keys an effect on this, and an
+     * inline arrow here would give it a new one on every keystroke — the
+     * draft lives in this component's state, so it re-renders constantly
+     * while the admin types.
+     */
+    const closeEditor = useCallback(() => setEditing(null), []);
+
     /** Uploads straight onto an existing row — the common case is swapping a photo. */
     const handleUpload = async (row: AdminVillaDestination, file: File) => {
         setUploadingId(row._id);
@@ -305,7 +313,7 @@ const VillaDestinationsManager: React.FC = () => {
                     draft={editing}
                     saving={saving}
                     onChange={setEditing}
-                    onCancel={() => setEditing(null)}
+                    onCancel={closeEditor}
                     onSave={handleSave}
                 />
             )}
