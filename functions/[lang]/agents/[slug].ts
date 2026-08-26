@@ -7,14 +7,13 @@
  * of the address bar and paste into Facebook, LinkedIn or WhatsApp.
  */
 
-import { handleAgentOgRequest } from '../../_og-utils';
+import { handleAgentOgRequest, type PagesContext } from '../../_og-utils';
 
 const SUPPORTED_LANGS = new Set([
   'en', 'sq', 'sr', 'bg', 'hr', 'bs', 'mk', 'me', 'ro', 'el',
 ]);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const onRequest = async (context: any) => {
+export const onRequest = async (context: PagesContext & { params: Record<string, string | string[]> }) => {
   const lang = context.params.lang as string;
   const slug = context.params.slug as string;
 

@@ -10,9 +10,8 @@ import { describe, it, expect } from 'vitest';
 import {
   buildAgentOgHtml,
   buildAgencyOgHtml,
-  withOgCardTransform,
   resolveOgImage,
-  OG_CARD_TRANSFORM,
+  isUsableSlug,
   DEFAULT_IMAGE,
   type AgentData,
   type AgencyData,
@@ -57,32 +56,22 @@ const meta = (html: string, key: string): string | null => {
   return match ? match[1] : null;
 };
 
-describe('withOgCardTransform', () => {
-  it('inserts the share-card transformation into a plain Cloudinary URL', () => {
-    expect(withOgCardTransform(`${CLOUDINARY}/v123/avatars/erik.jpg`)).toBe(
-      `${CLOUDINARY}/${OG_CARD_TRANSFORM}/v123/avatars/erik.jpg`,
-    );
+const OG_CARD = 'f_jpg,q_auto,w_1200,h_630,c_pad,b_white';
+
+describe('isUsableSlug', () => {
+  it('accepts real agent ids and two-segment agency slugs', () => {
+    expect(isUsableSlug('ERIKSON-REAL-ESTATE')).toBe(true);
+    expect(isUsableSlug('albania/erikson-real-estate')).toBe(true);
   });
 
-  it('applies last, after a transformation the URL already carries', () => {
-    expect(withOgCardTransform(`${CLOUDINARY}/c_fill,w_200/v123/erik.jpg`)).toBe(
-      `${CLOUDINARY}/c_fill,w_200/${OG_CARD_TRANSFORM}/v123/erik.jpg`,
-    );
+  it('rejects traversal segments, empty segments and control characters', () => {
+    expect(isUsableSlug('../../etc/passwd')).toBe(false);
+    expect(isUsableSlug('albania//x')).toBe(false);
+    expect(isUsableSlug('erik\nson')).toBe(false);
   });
 
-  it('leaves a URL that already has the transformation alone', () => {
-    const url = `${CLOUDINARY}/${OG_CARD_TRANSFORM}/v123/erik.jpg`;
-    expect(withOgCardTransform(url)).toBe(url);
-  });
-
-  it('does not mistake an underscored filename for a transformation', () => {
-    expect(withOgCardTransform(`${CLOUDINARY}/my_photo.jpg`)).toBe(
-      `${CLOUDINARY}/${OG_CARD_TRANSFORM}/my_photo.jpg`,
-    );
-  });
-
-  it('returns null for non-Cloudinary URLs', () => {
-    expect(withOgCardTransform('https://example.com/avatar.jpg')).toBeNull();
+  it('rejects absurdly long input before it reaches the API', () => {
+    expect(isUsableSlug('a'.repeat(129))).toBe(false);
   });
 });
 
@@ -108,7 +97,7 @@ describe('buildAgentOgHtml', () => {
     const html = buildAgentOgHtml(agent(), 'ERIKSON-REAL-ESTATE');
 
     expect(meta(html, 'og:image')).toBe(
-      `${CLOUDINARY}/${OG_CARD_TRANSFORM}/v1699999999/avatars/erik.jpg`,
+      `${CLOUDINARY}/${OG_CARD}/v1699999999/avatars/erik.jpg`,
     );
     expect(meta(html, 'og:image:width')).toBe('1200');
     expect(meta(html, 'og:image:height')).toBe('630');
@@ -127,15 +116,32 @@ describe('buildAgentOgHtml', () => {
     expect(meta(html, 'og:image')).toContain('logos/erikson.png');
   });
 
-  it('omits dimensions for an image whose size we do not control', () => {
+  // The shared helper clamps Google avatars to 512px — well above Facebook's
+  // 200px minimum, and the only size Google reliably serves.
+  it('sizes a Google OAuth avatar but does not claim card dimensions for it', () => {
     const html = buildAgentOgHtml(
       agent({ userId: { name: 'Erik Sonn', avatarUrl: 'https://lh3.googleusercontent.com/a/x' } }),
       'ERIKSON-REAL-ESTATE',
     );
 
-    expect(meta(html, 'og:image')).toBe('https://lh3.googleusercontent.com/a/x');
+    expect(meta(html, 'og:image')).toBe('https://lh3.googleusercontent.com/a/x=s512');
     expect(meta(html, 'og:image:width')).toBeNull();
     expect(meta(html, 'twitter:card')).toBe('summary');
+  });
+
+  it('strips a crop already baked into the avatar URL instead of stacking on it', () => {
+    const html = buildAgentOgHtml(
+      agent({
+        userId: {
+          name: 'Erik Sonn',
+          avatarUrl: `${CLOUDINARY}/c_fill,ar_1:1,w_96/v123/avatars/erik.jpg`,
+        },
+      }),
+      'ERIKSON-REAL-ESTATE',
+    );
+
+    // The 96px square crop must not survive into the 1200x630 card.
+    expect(meta(html, 'og:image')).toBe(`${CLOUDINARY}/${OG_CARD}/v123/avatars/erik.jpg`);
   });
 
   it('builds a profile card with name, location and facts', () => {

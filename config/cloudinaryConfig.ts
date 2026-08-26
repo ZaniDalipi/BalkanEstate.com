@@ -202,9 +202,15 @@ export const optimizeCloudinaryUrl = (
     width?: number;
     height?: number;
     quality?: 'auto' | 'auto:low' | 'auto:eco' | 'auto:good' | 'auto:best';
-    format?: 'auto' | 'webp' | 'avif';
-    crop?: 'fill' | 'scale' | 'fit' | 'limit' | 'thumb';
+    /**
+     * 'jpg' forces a concrete format — needed for social-media share cards,
+     * where `f_auto` can hand a crawler a WebP it won't render.
+     */
+    format?: 'auto' | 'webp' | 'avif' | 'jpg';
+    crop?: 'fill' | 'scale' | 'fit' | 'limit' | 'thumb' | 'pad';
     gravity?: 'auto' | 'center';
+    /** Fill colour for `crop: 'pad'` — a CSS colour name or `rgb:RRGGBB`. */
+    background?: string;
   } = {}
 ): string => {
   if (!url || typeof url !== 'string') return '';
@@ -228,10 +234,16 @@ export const optimizeCloudinaryUrl = (
     format = 'auto',
     crop,
     gravity,
+    background,
   } = options;
 
   const width = clampDimension(rawWidth, 4096);
   const height = clampDimension(rawHeight, 4096);
+
+  // Security: the background goes straight into the URL's transform segment,
+  // so only accept a colour name or an explicit rgb:hex value.
+  const safeBackground =
+    background && /^(?:[a-z]{3,20}|rgb:[0-9a-f]{3,8})$/i.test(background) ? background : undefined;
 
   // Handle Cloudinary upload URLs — including those with existing transforms baked in.
   // We find the version segment (v{digits}) to separate any pre-existing transforms
@@ -248,6 +260,7 @@ export const optimizeCloudinaryUrl = (
       if (height) transforms.push(`h_${height}`);
       if (crop) transforms.push(`c_${crop}`);
       if (gravity) transforms.push(`g_${gravity}`);
+      if (safeBackground) transforms.push(`b_${safeBackground}`);
       return `${base}${transforms.join(',')}/${cleanPath}`;
     }
     return url;

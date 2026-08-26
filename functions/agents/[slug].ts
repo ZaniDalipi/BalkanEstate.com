@@ -8,10 +8,9 @@
  * agent's profile picture.
  */
 
-import { handleAgentOgRequest } from '../_og-utils';
+import { handleAgentOgRequest, type PagesContext } from '../_og-utils';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const onRequest = async (context: any) => {
+export const onRequest = async (context: PagesContext & { params: Record<string, string | string[]> }) => {
   const slug = context.params.slug as string;
   return handleAgentOgRequest(context, slug, 'en');
 };

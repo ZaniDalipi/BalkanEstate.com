@@ -18,6 +18,7 @@ import Property, { IProperty } from '../models/Property';
 import Article from '../models/Article';
 import Agent from '../models/Agent';
 import Agency from '../models/Agency';
+import { resolveOgImage, DEFAULT_OG_IMAGE, type OgImage } from '../utils/ogImage';
 import { resolveId, encodeId } from '../utils/idObfuscation';
 import { isValidObjectId } from '../utils/validateParams';
 import { apiLogger } from '../utils/logger';
@@ -50,8 +51,6 @@ type PropertyOgProjection = Pick<
 > & { _id: Types.ObjectId };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const DEFAULT_OG_IMAGE = `${OG_BASE_URL}/og-image.jpg`;
 
 function isSocialMediaBot(userAgent: string): boolean {
   const ua = userAgent.toLowerCase();
@@ -375,88 +374,6 @@ export const blogArticleOgMiddleware = async (
 };
 
 // ─── Agent & agency profile OG middleware ─────────────────────────────────────
-
-/**
- * Cloudinary transformation that turns any picture — including a square or
- * portrait profile photo — into the 1200×630 landscape card social networks
- * ask for, without cropping the subject out: the image is scaled to fit and
- * padded onto a white background.
- *
- * Every parameter is core Cloudinary (no add-on or paid-plan feature), so it
- * cannot fail for an account already serving the original URL.
- */
-const OG_CARD_TRANSFORM = 'c_pad,w_1200,h_630,b_white,f_jpg,q_auto';
-
-const CLOUDINARY_UPLOAD_RE = /^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/i;
-
-/**
- * An image ready to be advertised as og:image. `sized` says whether we know it
- * really is 1200×630 — only then may we emit og:image:width/height, since
- * dimensions that don't match make Facebook and LinkedIn lay the card out
- * wrong or drop the image entirely.
- */
-interface OgImage {
-  url: string;
-  sized: boolean;
-}
-
-/**
- * Is this URL segment an existing Cloudinary transformation (`c_fill,w_200`)
- * rather than a version (`v1699999999`) or a path segment (`avatars/x.jpg`)?
- */
-function isTransformSegment(segment: string): boolean {
-  if (segment.includes('.')) return false;
-  if (/^v\d+$/.test(segment)) return false;
-  return /^[a-z]{1,3}_[^/]+$/i.test(segment);
-}
-
-/**
- * Append the share-card transformation to a Cloudinary delivery URL, after any
- * transformation the URL already carries so ours is applied last and the
- * result really is 1200×630. Returns null for non-Cloudinary URLs.
- */
-function withOgCardTransform(url: string): string | null {
-  const match = url.match(CLOUDINARY_UPLOAD_RE);
-  if (!match) return null;
-  if (url.includes(OG_CARD_TRANSFORM)) return url;
-
-  const [, prefix, rest] = match;
-  const segments = rest.split('/');
-
-  let insertAt = 0;
-  while (insertAt < segments.length && isTransformSegment(segments[insertAt])) insertAt++;
-  segments.splice(insertAt, 0, OG_CARD_TRANSFORM);
-
-  return prefix + segments.join('/');
-}
-
-/** Normalize one image candidate, or null if it can't be used as og:image. */
-function normalizeOgImage(raw?: string): OgImage | null {
-  const url = (raw ?? '').trim();
-  if (!url) return null;
-
-  // Inline avatars (DiceBear data URIs) are invisible to crawlers.
-  if (url.startsWith('data:')) return null;
-
-  // Site-relative path → absolute; crawlers reject relative og:image values.
-  if (url.startsWith('/')) return { url: `${OG_BASE_URL}${url}`, sized: false };
-
-  if (!/^https?:\/\//i.test(url)) return null;
-
-  const card = withOgCardTransform(url);
-  if (card) return { url: card, sized: true };
-
-  return { url, sized: false };
-}
-
-/** Pick the first usable image, falling back to the site's default OG image. */
-function resolveOgImage(...candidates: Array<string | undefined>): OgImage {
-  for (const candidate of candidates) {
-    const image = normalizeOgImage(candidate);
-    if (image) return image;
-  }
-  return { url: DEFAULT_OG_IMAGE, sized: true };
-}
 
 /**
  * Build the crawler HTML for a person/organisation profile.

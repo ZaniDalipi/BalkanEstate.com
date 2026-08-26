@@ -6,6 +6,8 @@
  * twins) to generate rich link previews for social media crawlers.
  */
 
+import { optimizeCloudinaryUrl } from '../config/cloudinaryConfig';
+
 export const CRAWLER_USER_AGENTS = [
   'facebookexternalhit',
   'Facebot',
@@ -52,6 +54,62 @@ export function isCrawler(userAgent: string): boolean {
   return CRAWLER_USER_AGENTS.some(bot => ua.includes(bot.toLowerCase()));
 }
 
+// ─── Request plumbing ─────────────────────────────────────────────────────────
+
+/** The slice of the Cloudflare Pages Function context these handlers use. */
+export interface PagesContext {
+  request: Request;
+  env: { ASSETS: { fetch: (request: Request) => Promise<Response> } };
+}
+
+/**
+ * Longest URL identifier we'll look up. Comfortably above any real agent id or
+ * agency slug, and short enough that a junk path never reaches the API.
+ */
+const MAX_SLUG_LENGTH = 128;
+
+/**
+ * Reject identifiers that cannot name a profile before spending an API call:
+ * over-long input, control characters, and the `.`/`..` segments that would
+ * otherwise be pasted into the API path verbatim.
+ */
+export function isUsableSlug(slug: string): boolean {
+  if (!slug || slug.length > MAX_SLUG_LENGTH) return false;
+  // eslint-disable-next-line no-control-regex
+  if (/[\u0000-\u001f\u007f]/.test(slug)) return false;
+  return slug.split('/').every(segment => segment !== '' && segment !== '.' && segment !== '..');
+}
+
+/** Percent-encode each segment while keeping the `/` between them. */
+export function encodeSlugPath(slug: string): string {
+  return slug.split('/').map(encodeURIComponent).join('/');
+}
+
+/**
+ * Crawlers give up after a few seconds and cache whatever they got, so a slow
+ * API must fail fast enough for us to fall back to the SPA while they're still
+ * listening. The agency endpoint is the slow one — it loads the agency's whole
+ * property list to build the page the SPA needs.
+ */
+const API_TIMEOUT_MS = 4000;
+
+function fetchApi(url: string): Promise<Response> {
+  return fetch(url, {
+    signal: AbortSignal.timeout(API_TIMEOUT_MS),
+    headers: { accept: 'application/json' },
+  });
+}
+
+function ogHtmlResponse(html: string): Response {
+  return new Response(html, {
+    headers: {
+      'Content-Type': 'text/html;charset=UTF-8',
+      // Public profile data only — safe to cache at the edge and on the crawler.
+      'Cache-Control': 'public, max-age=3600',
+    },
+  });
+}
+
 export function escapeHtml(str: string): string {
   return str
     .replace(/&/g, '&amp;')
@@ -75,65 +133,43 @@ export interface OgImage {
 }
 
 /**
- * Cloudinary transformation that turns any picture — including a square or
- * portrait profile photo — into the 1200×630 landscape card the social
- * networks ask for, without cropping the subject out: the image is scaled to
- * fit and padded onto a white background.
+ * Share-card delivery options: any picture — including a square or portrait
+ * profile photo — becomes the 1200×630 landscape card the social networks ask
+ * for, without cropping the subject out. The image is scaled to fit and padded
+ * onto a white background.
  *
- * Every parameter here is core Cloudinary (no add-on or paid-plan feature), so
- * it cannot fail for an account that is already serving the original URL.
+ * `f_jpg` rather than the usual `f_auto`: crawlers send no useful Accept
+ * header, and a WebP some of them can't render means no preview at all.
  */
-export const OG_CARD_TRANSFORM = 'c_pad,w_1200,h_630,b_white,f_jpg,q_auto';
+export const OG_CARD_OPTIONS = {
+  width: 1200,
+  height: 630,
+  crop: 'pad',
+  background: 'white',
+  format: 'jpg',
+  quality: 'auto',
+} as const;
 
-const CLOUDINARY_UPLOAD_RE = /^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/i;
-
-/**
- * Is this URL segment an existing Cloudinary transformation (`c_fill,w_200`)
- * rather than a version (`v1699999999`) or a path segment (`avatars/x.jpg`)?
- */
-function isTransformSegment(segment: string): boolean {
-  if (segment.includes('.')) return false;
-  if (/^v\d+$/.test(segment)) return false;
-  return /^[a-z]{1,3}_[^/]+$/i.test(segment);
-}
-
-/**
- * Append the share-card transformation to a Cloudinary delivery URL, after any
- * transformation the URL already carries so ours is applied last and the
- * result really is 1200×630. Returns null for non-Cloudinary URLs.
- */
-export function withOgCardTransform(url: string): string | null {
-  const match = url.match(CLOUDINARY_UPLOAD_RE);
-  if (!match) return null;
-  if (url.includes(OG_CARD_TRANSFORM)) return url;
-
-  const [, prefix, rest] = match;
-  const segments = rest.split('/');
-
-  let insertAt = 0;
-  while (insertAt < segments.length && isTransformSegment(segments[insertAt])) insertAt++;
-  segments.splice(insertAt, 0, OG_CARD_TRANSFORM);
-
-  return prefix + segments.join('/');
-}
+const CLOUDINARY_UPLOAD_RE = /^https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/.+$/i;
 
 /** Normalize one image candidate, or null if it can't be used as og:image. */
 function normalizeOgImage(raw?: string): OgImage | null {
   const url = (raw || '').trim();
   if (!url) return null;
 
-  // Inline avatars (DiceBear data URIs) are invisible to crawlers.
-  if (url.startsWith('data:')) return null;
-
   // Site-relative path → absolute; crawlers reject relative og:image values.
+  // (Inline DiceBear data: URIs, which crawlers cannot fetch, are rejected by
+  // optimizeCloudinaryUrl's http(s)-only check below.)
   if (url.startsWith('/')) return { url: `${SITE_URL}${url}`, sized: false };
 
-  if (!/^https?:\/\//i.test(url)) return null;
+  // Shared helper: rejects non-http(s) and control-character URLs, strips any
+  // transformation already baked into the URL so an existing crop can't shrink
+  // the card, and sizes Google OAuth avatars via their own =s{n} parameter.
+  const delivered = optimizeCloudinaryUrl(url, OG_CARD_OPTIONS);
+  if (!delivered) return null;
 
-  const card = withOgCardTransform(url);
-  if (card) return { url: card, sized: true };
-
-  return { url, sized: false };
+  // Only a Cloudinary-delivered image is guaranteed to come back at 1200×630.
+  return { url: delivered, sized: CLOUDINARY_UPLOAD_RE.test(url) };
 }
 
 /**
@@ -517,8 +553,7 @@ export function buildAgencyOgHtml(agency: AgencyData, slug: string, lang = 'en')
     || `Browse listings from ${name} on ${SITE_NAME}.`;
 
   const image = getAgencyImage(agency);
-  const path = slug.split('/').map(encodeURIComponent).join('/');
-  const canonicalUrl = `${SITE_URL}/${lang}/agencies/${path}`;
+  const canonicalUrl = `${SITE_URL}/${lang}/agencies/${encodeSlugPath(slug)}`;
 
   return `<!DOCTYPE html>
 <html lang="${lang}">
@@ -560,8 +595,7 @@ export function buildAgencyOgHtml(agency: AgencyData, slug: string, lang = 'en')
  * Shared handler used by /agents/[slug] and /[lang]/agents/[slug].
  */
 export async function handleAgentOgRequest(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  context: any,
+  context: PagesContext,
   slug: string,
   lang = 'en',
 ): Promise<Response> {
@@ -572,8 +606,12 @@ export async function handleAgentOgRequest(
     return context.env.ASSETS.fetch(context.request);
   }
 
+  if (!isUsableSlug(slug)) {
+    return context.env.ASSETS.fetch(context.request);
+  }
+
   try {
-    const response = await fetch(`${API_BASE}/agents/${encodeURIComponent(slug)}`);
+    const response = await fetchApi(`${API_BASE}/agents/${encodeURIComponent(slug)}`);
 
     if (!response.ok) {
       return context.env.ASSETS.fetch(context.request);
@@ -586,13 +624,10 @@ export async function handleAgentOgRequest(
       return context.env.ASSETS.fetch(context.request);
     }
 
-    return new Response(buildAgentOgHtml(agent, slug, lang), {
-      headers: {
-        'Content-Type': 'text/html;charset=UTF-8',
-        'Cache-Control': 'public, max-age=3600',
-      },
-    });
+    return ogHtmlResponse(buildAgentOgHtml(agent, slug, lang));
   } catch {
+    // Unreachable API, malformed JSON or a timeout: the SPA still renders the
+    // page for humans, and the crawler simply keeps the default site card.
     return context.env.ASSETS.fetch(context.request);
   }
 }
@@ -604,8 +639,7 @@ export async function handleAgentOgRequest(
  * "albania/erikson-real-estate" form or a single-segment slug / id.
  */
 export async function handleAgencyOgRequest(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  context: any,
+  context: PagesContext,
   slug: string,
   lang = 'en',
 ): Promise<Response> {
@@ -616,9 +650,12 @@ export async function handleAgencyOgRequest(
     return context.env.ASSETS.fetch(context.request);
   }
 
+  if (!isUsableSlug(slug)) {
+    return context.env.ASSETS.fetch(context.request);
+  }
+
   try {
-    const path = slug.split('/').map(encodeURIComponent).join('/');
-    const response = await fetch(`${API_BASE}/agencies/${path}`);
+    const response = await fetchApi(`${API_BASE}/agencies/${encodeSlugPath(slug)}`);
 
     if (!response.ok) {
       return context.env.ASSETS.fetch(context.request);
@@ -631,13 +668,10 @@ export async function handleAgencyOgRequest(
       return context.env.ASSETS.fetch(context.request);
     }
 
-    return new Response(buildAgencyOgHtml(agency, slug, lang), {
-      headers: {
-        'Content-Type': 'text/html;charset=UTF-8',
-        'Cache-Control': 'public, max-age=3600',
-      },
-    });
+    return ogHtmlResponse(buildAgencyOgHtml(agency, slug, lang));
   } catch {
+    // Unreachable API, malformed JSON or a timeout: the SPA still renders the
+    // page for humans, and the crawler simply keeps the default site card.
     return context.env.ASSETS.fetch(context.request);
   }
 }
