@@ -113,7 +113,12 @@ const CityShowcaseSection: React.FC<CityShowcaseSectionProps> = ({ onNavigate })
     );
 
     /** Buy and rent are separate pages, so the panel offers both rather than
-     *  dropping the visitor on one and making them switch. */
+     *  dropping the visitor on one and making them switch. Buy is also the
+     *  panel's own click target (see `defaultActionId` below) — it is the
+     *  larger side of the site and the one the hero opens on, so a visitor who
+     *  clicks the photo rather than a button lands where the rest of the page
+     *  already pointed them. Rent stays a button because that is its only way
+     *  in. */
     const actions = useMemo<ElasticGalleryAction[]>(
         () => [
             {
@@ -150,6 +155,7 @@ const CityShowcaseSection: React.FC<CityShowcaseSectionProps> = ({ onNavigate })
                     items={items}
                     label={t('home:cityGallery.title', 'Explore Balkan Cities')}
                     actions={actions}
+                    defaultActionId="buy"
                 />
             )}
         </section>

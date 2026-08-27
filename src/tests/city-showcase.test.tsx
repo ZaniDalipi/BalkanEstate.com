@@ -122,13 +122,14 @@ describe('ElasticGallery', () => {
         { id: 'b', title: 'Ohrid', subtitle: 'North Macedonia', imageUrl: 'https://img/b.jpg', alt: 'Ohrid' },
     ];
 
-    const renderGallery = () => {
+    const renderGallery = (defaultActionId?: string) => {
         const onBuy = vi.fn();
         const onRent = vi.fn();
         render(
             <ElasticGallery
                 items={items}
                 label="Explore cities"
+                defaultActionId={defaultActionId}
                 actions={[
                     { id: 'buy', label: 'Buy', onSelect: onBuy },
                     { id: 'rent', label: 'Rent', variant: 'secondary', onSelect: onRent },
@@ -161,7 +162,11 @@ describe('ElasticGallery', () => {
     it('expands a panel on hover', () => {
         renderGallery();
 
-        fireEvent.pointerEnter(panelOf(/^Ohrid/).parentElement!);
+        // `pointerType` has to be stated: jsdom's synthetic pointer event
+        // leaves it undefined, and the panel deliberately ignores anything
+        // that is not a real mouse or pen so a touch scroll cannot reshuffle
+        // the gallery.
+        fireEvent.pointerEnter(panelOf(/^Ohrid/).parentElement!, { pointerType: 'mouse' });
 
         expect(panelOf(/^Ohrid/)).toHaveAttribute('aria-current', 'true');
     });
@@ -185,6 +190,60 @@ describe('ElasticGallery', () => {
         fireEvent.click(panelOf(/^Ohrid/));
         fireEvent.click(screen.getByRole('button', { name: 'Rent' }));
         expect(onRent).toHaveBeenCalledWith(items[1]);
+    });
+
+    it('runs the default action when the expanded panel itself is clicked', () => {
+        const { onBuy, onRent } = renderGallery('buy');
+
+        // Belgrade is expanded from the start, so this is the second click a
+        // touch visitor makes — and the first a mouse visitor makes, hover
+        // having expanded the panel already.
+        fireEvent.click(panelOf(/Belgrade/));
+
+        expect(onBuy).toHaveBeenCalledWith(items[0]);
+        expect(onRent).not.toHaveBeenCalled();
+    });
+
+    it('still only expands when a collapsed panel is clicked', () => {
+        const { onBuy } = renderGallery('buy');
+
+        fireEvent.click(panelOf(/^Ohrid/));
+
+        // The first tap reveals the panel; nothing navigates off a sliver.
+        expect(panelOf(/Ohrid/)).toHaveAttribute('aria-current', 'true');
+        expect(onBuy).not.toHaveBeenCalled();
+
+        fireEvent.click(panelOf(/Ohrid/));
+        expect(onBuy).toHaveBeenCalledWith(items[1]);
+    });
+
+    it('names the expanded panel by what clicking it does', () => {
+        renderGallery('buy');
+
+        // A screen-reader user cannot see the panel widen, so the two states
+        // have to differ in the name they announce.
+        expect(screen.getByRole('button', { name: 'Buy — Belgrade, Serbia' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Ohrid, North Macedonia' })).toBeInTheDocument();
+    });
+
+    it('leaves the panel expand-only when the default names no action', () => {
+        const { onBuy, onRent } = renderGallery('compare');
+
+        fireEvent.click(panelOf(/^Belgrade/));
+
+        expect(onBuy).not.toHaveBeenCalled();
+        expect(onRent).not.toHaveBeenCalled();
+    });
+
+    it('keeps the action buttons working alongside the default', () => {
+        const { onBuy, onRent } = renderGallery('buy');
+
+        // Rent has no other way in, so the buttons must survive the panel
+        // becoming clickable.
+        fireEvent.click(screen.getByRole('button', { name: 'Rent' }));
+
+        expect(onRent).toHaveBeenCalledWith(items[0]);
+        expect(onBuy).not.toHaveBeenCalled();
     });
 
     it('keeps the buttons of collapsed panels mounted but unreachable', () => {

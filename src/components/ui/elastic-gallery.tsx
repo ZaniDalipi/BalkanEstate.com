@@ -36,6 +36,13 @@ interface ElasticGalleryProps {
     items: ElasticGalleryItem[];
     /** Buttons rendered on whichever panel is expanded. */
     actions: ElasticGalleryAction[];
+    /**
+     * `id` of the action a click on an *already expanded* panel runs, so the
+     * photo itself is clickable and not only the buttons on it. Omitted, a
+     * click on the expanded panel does nothing — expanding stays the only
+     * thing a panel click ever does.
+     */
+    defaultActionId?: string;
     /** Accessible name for the group, e.g. "Explore cities". */
     label: string;
     className?: string;
@@ -70,19 +77,24 @@ const TEXT_SHADOW = '[text-shadow:0_2px_10px_rgba(0,0,0,0.65)]';
  *
  * Interaction model:
  *
- * - hover, focus, or a tap on a panel → expand it. Nothing navigates.
- * - the buttons on the expanded panel → the only things that act.
+ * - hover, focus, or a tap on a *collapsed* panel → expand it. Nothing navigates.
+ * - a click on the *expanded* panel → its `defaultActionId` action, if the
+ *   caller named one. The buttons stay: the default is a shortcut past them,
+ *   not a replacement for them, and the alternative — rent — has no other way
+ *   in.
+ * - the buttons on the expanded panel → their own actions, always.
  *
- * Keeping expansion and action on separate controls is what makes this work on
- * a touchscreen: a tap can reveal a panel without also committing to it, and
- * there is no "was this the first or second tap" state to get wrong.
+ * The collapsed half of that is what makes this work on a touchscreen: a first
+ * tap reveals a panel without also committing to it, and only a second tap on
+ * the panel a visitor can now see acts. Nothing navigates from a panel whose
+ * photo was a sliver a moment ago.
  *
  * Each panel is a plain element with a full-bleed button behind its content,
  * rather than being a button itself — a button cannot legally contain the
  * action buttons, and nesting them breaks keyboard and screen-reader
  * behaviour long before it breaks the markup.
  */
-export function ElasticGallery({ items, actions, label, className }: ElasticGalleryProps) {
+export function ElasticGallery({ items, actions, defaultActionId, label, className }: ElasticGalleryProps) {
     const [requestedId, setRequestedId] = useState<string | null>(null);
     // Panels whose photo failed to load. Their labels still render over a
     // neutral background, so a dead image URL costs a photo, not a panel.
@@ -98,6 +110,17 @@ export function ElasticGallery({ items, actions, label, className }: ElasticGall
         if (requestedId && items.some(item => item.id === requestedId)) return requestedId;
         return items[0]?.id ?? null;
     }, [items, requestedId]);
+
+    /*
+     * Resolved by id rather than by position: the caller orders its buttons for
+     * the layout, and the one a panel click should run is a separate decision
+     * from which one is drawn first. An id that matches nothing leaves the
+     * panel expand-only, which is the safe way to fail.
+     */
+    const defaultAction = useMemo(
+        () => (defaultActionId ? actions.find(action => action.id === defaultActionId) : undefined),
+        [actions, defaultActionId],
+    );
 
     const markBroken = useCallback((id: string) => {
         setBrokenIds(prev => {
@@ -135,6 +158,22 @@ export function ElasticGallery({ items, actions, label, className }: ElasticGall
                 const handlePointerEnter = (e: React.PointerEvent) => {
                     if (e.pointerType === 'mouse' || e.pointerType === 'pen') expand();
                 };
+
+                /*
+                 * A click on the panel: expand it, or — when it is already the
+                 * expanded one and the caller named a default — run that
+                 * action. With hover-to-expand on a mouse, `pointerenter`
+                 * lands before the click, so a desktop visitor gets the
+                 * one-click behaviour they expect from a photo; a touch
+                 * visitor, who has no hover, still spends their first tap
+                 * expanding.
+                 */
+                const handleClick = () => {
+                    if (isActive && defaultAction) defaultAction.onSelect(item);
+                    else expand();
+                };
+
+                const panelName = item.subtitle ? `${item.title}, ${item.subtitle}` : item.title;
 
                 return (
                     <div
@@ -206,10 +245,15 @@ export function ElasticGallery({ items, actions, label, className }: ElasticGall
                           */}
                         <button
                             type="button"
-                            onClick={expand}
+                            onClick={handleClick}
                             onFocus={expand}
                             aria-current={isActive}
-                            aria-label={item.subtitle ? `${item.title}, ${item.subtitle}` : item.title}
+                            /* The name says what pressing it does *now*: the
+                               expanded panel navigates, a collapsed one only
+                               expands. Announcing "Belgrade, Serbia" for both
+                               would hide the difference from exactly the
+                               visitors who cannot see the panel widen. */
+                            aria-label={isActive && defaultAction ? `${defaultAction.label} — ${panelName}` : panelName}
                             className="absolute inset-0 z-10 cursor-pointer rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
                         />
 
