@@ -94,7 +94,12 @@
     "address": "Adresa",
     "propertyType": "Vrsta nekretnine",
     "areaM2": "Površina (m²)",
-    "saveChanges": "Spremi promjene"
+    "saveChanges": "Spremi promjene",
+    "mapLocation": "Lokacija na karti",
+    "mapLocationPinned": "Ova oznaka je ono što prikazuju stranica oglasa i karta pretraživanja.",
+    "mapLocationMissing": "Oznaka nije postavljena — ovaj oglas neće se prikazati na karti.",
+    "editOnMap": "Uredi na karti",
+    "hideMap": "Sakrij kartu"
   },
   "users": {
     "title": "Upravljanje korisnicima",

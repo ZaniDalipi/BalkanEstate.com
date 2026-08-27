@@ -94,7 +94,12 @@
     "address": "Adresa",
     "propertyType": "Lloji i pronës",
     "areaM2": "Sipërfaqja (m²)",
-    "saveChanges": "Ruaj ndryshimet"
+    "saveChanges": "Ruaj ndryshimet",
+    "mapLocation": "Vendndodhja në hartë",
+    "mapLocationPinned": "Ky shënues është ai që shfaqet në faqen e shpalljes dhe në hartën e kërkimit.",
+    "mapLocationMissing": "Nuk ka shënues — kjo shpallje nuk do të shfaqet në hartë.",
+    "editOnMap": "Ndrysho në hartë",
+    "hideMap": "Fshih hartën"
   },
   "users": {
     "title": "Menaxheri i Përdoruesve",

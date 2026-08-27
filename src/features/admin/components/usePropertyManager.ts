@@ -19,6 +19,8 @@ export interface Property {
   city: string;
   country: string;
   propertyType: string;
+  lat?: number;
+  lng?: number;
   beds?: number;
   bedrooms?: number;
   baths?: number;
@@ -59,6 +61,9 @@ export interface PropertyEditForm {
   propertyType: string;
   description: string;
   isPromoted: boolean;
+  /** Map pin — drives the listing page map and the search map. */
+  lat: number;
+  lng: number;
 }
 
 // Helper function to get the best available image URL
@@ -124,6 +129,8 @@ export function usePropertyManager() {
     propertyType: 'house',
     description: '',
     isPromoted: false,
+    lat: 0,
+    lng: 0,
   });
 
   // View modal
@@ -188,6 +195,8 @@ export function usePropertyManager() {
       propertyType: property.propertyType || 'house',
       description: property.description || '',
       isPromoted: property.isPromoted || false,
+      lat: property.lat ?? 0,
+      lng: property.lng ?? 0,
     });
     setIsEditModalOpen(true);
   };
@@ -196,9 +205,24 @@ export function usePropertyManager() {
     e.preventDefault();
     if (!editingProperty) return;
 
+    // lat/lng are required on the model, so never send a half-typed or
+    // out-of-range pin — leave the stored one alone instead.
+    const hasValidPin =
+      Number.isFinite(editForm.lat) && Number.isFinite(editForm.lng) &&
+      Math.abs(editForm.lat) <= 90 && Math.abs(editForm.lng) <= 180 &&
+      !(editForm.lat === 0 && editForm.lng === 0);
+
+    if (!hasValidPin && (editForm.lat !== 0 || editForm.lng !== 0)) {
+      setError('Enter a valid map location (latitude -90..90, longitude -180..180)');
+      setTimeout(() => setError(null), 5000);
+      return;
+    }
+
     try {
       // Strip price fields - only property owner can change price
-      const { price, ...updateData } = editForm;
+      const { price, lat, lng, ...rest } = editForm;
+      const updateData = hasValidPin ? { ...rest, lat, lng } : rest;
+
       await apiRequest(`/admin/properties/${editingProperty._id}`, {
         method: 'PATCH',
         body: updateData,
@@ -207,7 +231,7 @@ export function usePropertyManager() {
 
       // Update local state instead of refetching entire list
       setProperties(prev => prev.map(p =>
-        p._id === editingProperty._id ? { ...p, ...editForm } : p
+        p._id === editingProperty._id ? { ...p, ...updateData } : p
       ));
       setIsEditModalOpen(false);
       setEditingProperty(null);

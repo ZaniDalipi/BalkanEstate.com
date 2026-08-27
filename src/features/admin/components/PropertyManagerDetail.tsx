@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { XMarkIcon } from '@/constants';
 import { type Property, type PropertyEditForm, getAllPropertyImages } from './usePropertyManager';
+import AdminPropertyLocationEditor from './AdminPropertyLocationEditor';
 
 interface PropertyViewModalProps {
   property: Property;
@@ -288,6 +289,13 @@ export const PropertyEditModal: React.FC<PropertyEditModalProps> = ({
                 </select>
               </div>
             </div>
+
+            <AdminPropertyLocationEditor
+              country={editForm.country}
+              city={editForm.city}
+              location={{ lat: editForm.lat, lng: editForm.lng, address: editForm.address }}
+              onChange={(patch) => setEditForm({ ...editForm, ...patch })}
+            />
 
             <div className="grid grid-cols-4 gap-4">
               <div>

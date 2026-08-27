@@ -95,7 +95,12 @@
       "land": "Land",
       "commercial": "Commercial",
       "other": "Other"
-    }
+    },
+    "mapLocation": "Map location",
+    "mapLocationPinned": "This pin is what the listing page and search map show.",
+    "mapLocationMissing": "No pin set — this listing will not appear on the map.",
+    "editOnMap": "Edit on map",
+    "hideMap": "Hide map"
   },
   "users": {
     "title": "User Manager",

@@ -205,7 +205,7 @@
     "dragToAdjust": "Trageți-mă pentru a ajusta locația",
     "locationSet": "Locație setată",
     "dragging": "Se trage...",
-    "locationTooFar": "Această locație este la {{distance}}km distanță de {{city}}. Vă rugăm să selectați o locație în {{city}} sau zonele apropiate.",
+    "locationTooFar": "Această locație este la {{distance}}km distanță de {{city}} — anunțurile pentru {{city}} trebuie să fie în raza de {{radius}}km. Alegeți un loc mai apropiat sau schimbați orașul.",
     "tips": "💡 Sfaturi: Folosiți caseta de căutare pentru a găsi satul/orașul dvs., măriți cu butoanele +/- sau rotița mouse-ului, deplasați harta prin tragere și trageți marcatorul roșu la locația exactă a proprietății dvs.",
     "latitude": "Latitudine:",
     "longitude": "Longitudine:",
@@ -269,7 +269,11 @@
     "layers": "Straturi",
     "mapView": "Hartă",
     "switchTo": "Comută la vizualizarea {{view}}",
-    "drawAreaHint": "Desenează o zonă de căutare pe hartă"
+    "drawAreaHint": "Desenează o zonă de căutare pe hartă",
+    "locationTooFarTitle": "Locație prea îndepărtată",
+    "locationLookupFailed": "Locul nu a putut fi găsit. Încercați alt rezultat sau plasați marcajul direct pe hartă.",
+    "searchAreaHint": "Căutare în raza de {{radius}}km de {{city}} — satele și plajele din apropiere sunt incluse.",
+    "noSearchResults": "Niciun loc găsit. Încercați un nume mai scurt sau plasați marcajul direct pe hartă."
   },
   "newsletter": {
     "title": "Fiți la Curent cu Proprietăți Noi",

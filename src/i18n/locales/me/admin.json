@@ -95,7 +95,12 @@
     "propertyType": "Vrsta nekretnine",
     "areaM2": "Površina (m²)",
     "saveChanges": "Sačuvaj izmjene",
-    "priceReadOnly": "Price can only be changed by the property owner."
+    "priceReadOnly": "Price can only be changed by the property owner.",
+    "mapLocation": "Lokacija na mapi",
+    "mapLocationPinned": "Ova oznaka je ono što prikazuju stranica oglasa i mapa pretrage.",
+    "mapLocationMissing": "Oznaka nije postavljena — ovaj oglas se neće prikazati na mapi.",
+    "editOnMap": "Uredi na mapi",
+    "hideMap": "Sakrij mapu"
   },
   "users": {
     "title": "Upravljanje Korisnicima",

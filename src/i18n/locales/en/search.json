@@ -221,7 +221,7 @@
     "dragToAdjust": "Click anywhere or drag me to adjust location",
     "locationSet": "Location set",
     "dragging": "Dragging...",
-    "locationTooFar": "This location is {{distance}}km away from {{city}}. Please select a location within {{city}} or nearby areas.",
+    "locationTooFar": "This location is {{distance}}km away from {{city}} — listings for {{city}} must be within {{radius}}km of it. Please pick a closer spot, or change the city.",
     "tips": "💡 Tips: Use the search box to find your village/town, zoom with +/- buttons or scroll wheel, pan by dragging the map, and click anywhere on the map (or drag the red marker) to set your exact property location.",
     "latitude": "Latitude:",
     "longitude": "Longitude:",
@@ -284,7 +284,11 @@
     "layers": "Layers",
     "mapView": "Map",
     "switchTo": "Switch to {{view}} view",
-    "drawAreaHint": "Draw a search area on the map"
+    "drawAreaHint": "Draw a search area on the map",
+    "locationTooFarTitle": "Location Too Far",
+    "locationLookupFailed": "Could not look up that place. Please try another result or drop the pin on the map.",
+    "searchAreaHint": "Searching within {{radius}}km of {{city}} — nearby villages and beaches are included.",
+    "noSearchResults": "No places found. Try a shorter name, or drop the pin directly on the map."
   },
   "newsletter": {
     "title": "Stay Updated with New Properties",

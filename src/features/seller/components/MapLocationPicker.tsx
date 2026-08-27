@@ -1,13 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-import { searchLocation, reverseGeocode } from '@/services/osmService';
-import { NominatimResult } from '@/types';
+import { reverseGeocode } from '@/services/osmService';
 import { useAppContext } from '@/context/AppContext';
+import { checkCityArea, findCityCentre, formatDistanceKm, getCityAreaRadiusKm } from '@/shared/geo';
+import { MIN_QUERY_LENGTH, useLocationSearch, type LocationSuggestion } from '../hooks/useLocationSearch';
 
 // Fix for default markers in Leaflet with Vite/webpack bundlers
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -29,53 +30,91 @@ interface MapLocationPickerProps {
   onLocationChange: (lat: number, lng: number) => void;
   onAddressChange?: (address: string) => void;
   autoDetectLocation?: boolean;
+  /**
+   * Skip the "must be near the selected city" check. Set by admin tools, which
+   * correct listings whose city and pin legitimately disagree.
+   */
+  allowOutsideCityArea?: boolean;
 }
 
-const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address, zoom = 15, country, city, cityLat, cityLng, onLocationChange, onAddressChange, autoDetectLocation }) => {
+const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address, zoom = 15, country, city, cityLat, cityLng, onLocationChange, onAddressChange, autoDetectLocation, allowOutsideCityArea = false }) => {
   const { t } = useTranslation(['search']);
   const { dispatch } = useAppContext();
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<NominatimResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const streetLayerRef = useRef<L.TileLayer | null>(null);
   const satelliteLayerRef = useRef<L.TileLayer | null>(null);
   const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Callers that know the city centre pass it in; the rest (e.g. the business
+  // directory forms) only know the names, so fall back to the canonical list.
+  const cityCentre = useMemo(() => {
+    if (Number.isFinite(cityLat) && Number.isFinite(cityLng)) {
+      return { lat: cityLat as number, lng: cityLng as number };
+    }
+    const known = findCityCentre(country, city);
+    return known ? { lat: known.lat, lng: known.lng } : null;
+  }, [cityLat, cityLng, country, city]);
+
+  const cityRadiusKm = useMemo(() => getCityAreaRadiusKm(country, city), [country, city]);
+
+  const {
+    query: searchQuery,
+    setQuery: setSearchQuery,
+    suggestions,
+    isSearching,
+    resolveSuggestion,
+    reset: resetSearch,
+  } = useLocationSearch({ country, city, cityCentre, radiusKm: cityRadiusKm, allowOutsideCityArea });
+
   // Use refs to hold current prop values so event handlers always access latest values
   const latRef = useRef(lat);
   const lngRef = useRef(lng);
-  const cityRef = useRef(city);
-  const cityLatRef = useRef(cityLat);
-  const cityLngRef = useRef(cityLng);
   const addressRef = useRef(address);
 
   useEffect(() => { latRef.current = lat; }, [lat]);
   useEffect(() => { lngRef.current = lng; }, [lng]);
-  useEffect(() => { cityRef.current = city; }, [city]);
-  useEffect(() => { cityLatRef.current = cityLat; }, [cityLat]);
-  useEffect(() => { cityLngRef.current = cityLng; }, [cityLng]);
   useEffect(() => { addressRef.current = address; }, [address]);
 
-  // Calculate distance between two coordinates in kilometers
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 6371; // Earth's radius in km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  };
+  /**
+   * Reject pins that fall outside the selected city's area, showing the seller
+   * how far off they are. Returns true when the pin is acceptable.
+   */
+  const acceptPin = useCallback((newLat: number, newLng: number): boolean => {
+    if (allowOutsideCityArea || !city) return true;
+
+    const { isWithinArea, distanceKm } = checkCityArea(
+      { lat: newLat, lng: newLng },
+      cityCentre,
+      { country, city }
+    );
+    if (isWithinArea) return true;
+
+    dispatch({
+      type: 'SHOW_ALERT',
+      payload: {
+        type: 'warning',
+        title: t('search:map.locationTooFarTitle', 'Location Too Far'),
+        message: t('search:map.locationTooFar', {
+          distance: formatDistanceKm(distanceKm),
+          city,
+          radius: Math.round(cityRadiusKm),
+        }),
+      },
+    });
+    return false;
+  }, [allowOutsideCityArea, city, country, cityCentre, cityRadiusKm, dispatch, t]);
+
+  // Leaflet handlers are bound once on mount, so they call through this ref to
+  // reach the current check rather than the one from the first render.
+  const acceptPinRef = useRef(acceptPin);
+  useEffect(() => { acceptPinRef.current = acceptPin; }, [acceptPin]);
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
@@ -129,28 +168,12 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
     // Shared logic for moving the marker to a new position, used by both
     // marker drag-end and map click (tap-to-pin, like Google Maps).
     const moveMarkerTo = async (newLat: number, newLng: number) => {
-      // If city is selected, validate that the new location is within the city area
-      // Use refs to always access current city values (not stale closure)
-      const currentCity = cityRef.current;
-      const currentCityLat = cityLatRef.current;
-      const currentCityLng = cityLngRef.current;
-      if (currentCity && currentCityLat && currentCityLng) {
-        const distance = calculateDistance(currentCityLat, currentCityLng, newLat, newLng);
-        if (distance > 30) {
-          // Snap marker back to previous position
-          marker.setLatLng([latRef.current, lngRef.current]);
-          marker.setPopupContent(`<b>${t('search:map.locationTooFarTitle', 'Location Too Far')}</b><br>${t('search:map.locationTooFar', { distance: distance.toFixed(1), city: currentCity })}`);
-          marker.openPopup();
-          dispatch({
-            type: 'SHOW_ALERT',
-            payload: {
-              type: 'warning',
-              title: t('search:map.locationTooFarTitle', 'Location Too Far'),
-              message: t('search:map.locationTooFar', { distance: distance.toFixed(1), city: currentCity }),
-            },
-          });
-          return;
-        }
+      if (!acceptPinRef.current(newLat, newLng)) {
+        // Snap the marker back to the last accepted position.
+        marker.setLatLng([latRef.current, lngRef.current]);
+        marker.setPopupContent(`<b>${t('search:map.locationTooFarTitle', 'Location Too Far')}</b>`);
+        marker.openPopup();
+        return;
       }
 
       marker.setLatLng([newLat, newLng]);
@@ -327,119 +350,50 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
     }
   }, [lat, lng, address, zoom, isDragging]);
 
-  // Handle location search
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value;
-    setSearchQuery(query);
+    setSearchQuery(e.target.value);
     setShowResults(true);
+  };
 
-    // Clear previous timeout
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-
-    if (query.trim().length < 3) {
-      setSearchResults([]);
+  /**
+   * Move the pin to a chosen suggestion.
+   *
+   * Google predictions carry no coordinates, so they are resolved first; the
+   * city-area check then runs against the real position rather than the
+   * prediction's reported distance.
+   */
+  const handleResultSelect = async (suggestion: LocationSuggestion) => {
+    const resolved = await resolveSuggestion(suggestion);
+    if (!resolved) {
+      setLocationError(t('search:map.locationLookupFailed', 'Could not look up that place. Please try another result or drop the pin on the map.'));
       return;
     }
 
-    // Debounce search
-    searchTimeoutRef.current = setTimeout(async () => {
-      setIsSearching(true);
-      try {
-        // Get country code from country name if available
-        const countryCodeMap: { [key: string]: string } = {
-          'Serbia': 'RS',
-          'Kosovo': 'XK',
-          'Albania': 'AL',
-          'North Macedonia': 'MK',
-          'Bosnia and Herzegovina': 'BA',
-          'Montenegro': 'ME',
-          'Croatia': 'HR',
-          'Slovenia': 'SI',
-          'Bulgaria': 'BG',
-          'Romania': 'RO',
-          'Greece': 'GR',
-        };
-        const countryCode = country ? countryCodeMap[country] : undefined;
-        let results = await searchLocation(query, countryCode);
+    const { lat: newLat, lng: newLng, address: locationName } = resolved;
+    if (!acceptPin(newLat, newLng)) return;
 
-        // If city is selected, filter results to only show locations within ~30km of the current city center
-        const currentCityLat = cityLatRef.current;
-        const currentCityLng = cityLngRef.current;
-        if (cityRef.current && currentCityLat && currentCityLng) {
-          results = results.filter(result => {
-            const resultLat = parseFloat(result.lat);
-            const resultLng = parseFloat(result.lon);
-            const distance = calculateDistance(currentCityLat, currentCityLng, resultLat, resultLng);
-            return distance <= 30; // Only show results within 30km of city center
-          });
-        }
+    setLocationError(null);
 
-        setSearchResults(results.slice(0, 8)); // Show top 8 results
-      } catch (error) {
-        // Error removed
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
-      }
-    }, 250);
-  };
-
-  // Handle result selection
-  const handleResultSelect = (result: NominatimResult) => {
-    const newLat = parseFloat(result.lat);
-    const newLng = parseFloat(result.lon);
-
-    // If city is selected, validate that the location is within the city area
-    const currentCity = cityRef.current;
-    const currentCityLat = cityLatRef.current;
-    const currentCityLng = cityLngRef.current;
-    if (currentCity && currentCityLat && currentCityLng) {
-      const distance = calculateDistance(currentCityLat, currentCityLng, newLat, newLng);
-      if (distance > 30) {
-        dispatch({
-          type: 'SHOW_ALERT',
-          payload: {
-            type: 'warning',
-            title: t('search:map.locationTooFarTitle', 'Location Too Far'),
-            message: t('search:map.locationTooFar', { distance: distance.toFixed(1), city: currentCity }),
-          },
-        });
-        return;
-      }
-    }
-
-    // Directly move marker and map (don't rely solely on prop re-render)
+    // Move marker and map directly rather than waiting on the prop round trip.
     if (markerRef.current) {
       markerRef.current.setLatLng([newLat, newLng]);
       markerRef.current.setPopupContent(`<b>${t('search:map.locationSet')}</b><br>Lat: ${newLat.toFixed(6)}, Lng: ${newLng.toFixed(6)}`);
       markerRef.current.openPopup();
     }
 
-    // Update parent state
     onLocationChange(newLat, newLng);
+    onAddressChange?.(locationName);
 
-    // Use the full display_name as the address to preserve complete location information
-    // For example: "20, Nazmi Mustafa, Qyteza Pejton, Prishtinë, Komuna e Prishtinës / Opština Priština, Rajoni i Prishtinës / Prištinski okrug, 10000, Kosova / Kosovo"
-    const locationName = result.display_name;
-
-    // Update address if callback is provided
-    if (onAddressChange) {
-      onAddressChange(locationName);
-    }
-
-    // Fly to the location with optimized animation
     if (mapRef.current) {
       mapRef.current.flyTo([newLat, newLng], 16, {
-        duration: 1.0, // Reduced from 1.5
-        easeLinearity: 0.4 // Faster ease
+        duration: 1.0,
+        easeLinearity: 0.4,
       });
     }
 
-    setSearchQuery(result.display_name);
+    setSearchQuery(locationName);
     setShowResults(false);
-    setSearchResults([]);
+    resetSearch();
   };
 
   // Handle map type toggle (street/satellite)
@@ -475,24 +429,9 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
       async (position) => {
         const { latitude, longitude } = position.coords;
 
-        // If city is selected, validate that the current location is within the city area
-        const currentCity = cityRef.current;
-        const currentCityLat = cityLatRef.current;
-        const currentCityLng = cityLngRef.current;
-        if (currentCity && currentCityLat && currentCityLng) {
-          const distance = calculateDistance(currentCityLat, currentCityLng, latitude, longitude);
-          if (distance > 30) {
-            setIsGettingLocation(false);
-            dispatch({
-              type: 'SHOW_ALERT',
-              payload: {
-                type: 'warning',
-                title: t('search:map.locationTooFarTitle', 'Location Too Far'),
-                message: t('search:map.locationTooFar', { distance: distance.toFixed(1), city: currentCity }),
-              },
-            });
-            return;
-          }
+        if (!acceptPin(latitude, longitude)) {
+          setIsGettingLocation(false);
+          return;
         }
 
         // Update location
@@ -553,6 +492,13 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
         <p className="text-xs text-neutral-500">{t('search:map.searchNavigatePin')}</p>
       </div>
 
+      {/* Make the allowed area explicit, so a rejected pin is never a surprise */}
+      {city && !allowOutsideCityArea && (
+        <p className="text-xs text-neutral-500">
+          {t('search:map.searchAreaHint', { radius: Math.round(cityRadiusKm), city })}
+        </p>
+      )}
+
       {/* Search box with geolocation button */}
       <div className="flex gap-2">
         <div className="relative flex-1">
@@ -560,12 +506,12 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
             type="text"
             value={searchQuery}
             onChange={handleSearchChange}
-            onFocus={() => searchResults.length > 0 && setShowResults(true)}
+            onFocus={() => suggestions.length > 0 && setShowResults(true)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault();
-                if (searchResults.length > 0) {
-                  handleResultSelect(searchResults[0]);
+                if (suggestions.length > 0) {
+                  void handleResultSelect(suggestions[0]);
                 }
               }
             }}
@@ -580,26 +526,40 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
           )}
 
         {/* Search results dropdown */}
-        {showResults && searchResults.length > 0 && (
-          <div className="absolute z-50 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
-            {searchResults.map((result) => (
-              <button
-                key={result.place_id}
-                onClick={() => handleResultSelect(result)}
-                className="w-full text-left px-4 py-3 hover:bg-neutral-100 border-b border-neutral-100 last:border-b-0 transition-colors"
-              >
-                <div className="flex items-start gap-2">
-                  <svg className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  </svg>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-neutral-900 truncate">{result.display_name}</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">{result.type || t('search:map.location')}</p>
+        {showResults && suggestions.length > 0 && (
+          <ul className="absolute z-50 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-64 overflow-y-auto" role="listbox">
+            {suggestions.map((suggestion) => (
+              <li key={suggestion.id}>
+                <button
+                  type="button"
+                  onClick={() => void handleResultSelect(suggestion)}
+                  className="w-full text-left px-4 py-3 hover:bg-neutral-100 border-b border-neutral-100 last:border-b-0 transition-colors"
+                >
+                  <div className="flex items-start gap-2">
+                    <svg className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-neutral-900 truncate">{suggestion.title}</p>
+                      <p className="text-xs text-neutral-500 mt-0.5 truncate">
+                        {suggestion.subtitle || t('search:map.location')}
+                        {suggestion.distanceKm !== undefined && Number.isFinite(suggestion.distanceKm) && (
+                          <span className="text-neutral-400"> · {formatDistanceKm(suggestion.distanceKm)}km</span>
+                        )}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </button>
+                </button>
+              </li>
             ))}
+          </ul>
+        )}
+
+        {/* Empty state — only once a search has actually run and come back */}
+        {showResults && !isSearching && suggestions.length === 0 && searchQuery.trim().length >= MIN_QUERY_LENGTH && (
+          <div className="absolute z-50 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg px-4 py-3">
+            <p className="text-sm text-neutral-500">{t('search:map.noSearchResults')}</p>
           </div>
         )}
         </div>

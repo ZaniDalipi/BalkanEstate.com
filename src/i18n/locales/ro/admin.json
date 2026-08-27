@@ -94,7 +94,12 @@
     "address": "Adresă",
     "propertyType": "Tip proprietate",
     "areaM2": "Suprafață (m²)",
-    "saveChanges": "Salvează modificările"
+    "saveChanges": "Salvează modificările",
+    "mapLocation": "Locație pe hartă",
+    "mapLocationPinned": "Acest marcaj este ceea ce afișează pagina anunțului și harta de căutare.",
+    "mapLocationMissing": "Niciun marcaj setat — acest anunț nu va apărea pe hartă.",
+    "editOnMap": "Editează pe hartă",
+    "hideMap": "Ascunde harta"
   },
   "users": {
     "title": "User Manager",
