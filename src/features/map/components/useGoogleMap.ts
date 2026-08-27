@@ -1432,11 +1432,20 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     }
   }, [map, drawnBounds]);
 
-  // Handle view details click
-  const handleViewDetails = useCallback((propertyId: string) => {
-    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
-    window.history.pushState({}, '', buildLocalizedPath(`/property/${propertyId}`));
-    window.dispatchEvent(new PopStateEvent('popstate'));
+  // Handle view details click.
+  //
+  // The popup already holds the full property, so hand the object straight to
+  // the store the way every property card does. The old path dispatched only
+  // the id, and SET_SELECTED_PROPERTY resolves an id against `state.properties`
+  // — the global buy-listings array. Villas (and rentals) are fetched by their
+  // own page hooks and never land there, so the lookup returned null and the
+  // card fell back to a synthetic popstate that re-fetched the listing over the
+  // network: a full-page loader on a phone, and a bounce to /not-found whenever
+  // that request failed. Dispatching the object opens the listing immediately
+  // and offline, with the URL still pushed so the page is shareable.
+  const handleViewDetails = useCallback((property: Property) => {
+    dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
+    window.history.pushState({}, '', buildLocalizedPath(`/property/${property.id}`));
     setSelectedProperty(null);
   }, [dispatch]);
 

@@ -330,9 +330,21 @@ export function useMapComponent(props: MapComponentProps) {
     return { center: [41.5, 22] as [number, number], zoom: 7 };
   }, [userLocation]);
 
+  // Leaflet-map popup CTA. Same reasoning as the Google map's handleViewDetails:
+  // resolve the property from the markers we are already rendering and dispatch
+  // the object, because an id-only dispatch is looked up in `state.properties`
+  // and misses every listing a feature page fetched on its own (villas, rentals).
   const handlePopupClick = (propertyId: string) => {
+    const property = propertiesInView.find((p) => p.id === propertyId);
+    if (property) {
+      dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
+      window.history.pushState({}, '', buildLocalizedPath(`/property/${propertyId}`));
+      return;
+    }
+
+    // Marker gone from view between render and click — fall back to the
+    // URL-driven route, which re-fetches the listing by id.
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
     window.history.pushState({}, '', buildLocalizedPath(`/property/${propertyId}`));
     window.dispatchEvent(new PopStateEvent('popstate'));
   };

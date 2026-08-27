@@ -3,7 +3,7 @@
  * Extracted from GoogleMapComponent.tsx
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
@@ -28,6 +28,36 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
     : property.imageUrl;
 
   const [imageLoaded, setImageLoaded] = useState(false);
+
+  // The CTA lives inside a Google Maps overlay pane, where a plain `click` is
+  // the least reliable event on touch: Maps' own gesture handling and any
+  // re-layout of the overlay between touchstart and touchend can swallow it,
+  // and the tap then does nothing at all. So the button also acts on pointerup
+  // for touch/pen, treating it as a tap only when the finger stayed put (a
+  // drag that starts on the card is the user panning the map, and pointer
+  // capture would otherwise deliver that pointerup here as a "tap").
+  const pressRef = useRef<{ x: number; y: number } | null>(null);
+  const firedRef = useRef(false);
+
+  const activate = useCallback(() => {
+    if (firedRef.current) return;
+    firedRef.current = true;
+    onViewDetails();
+  }, [onViewDetails]);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent<HTMLButtonElement>) => {
+    pressRef.current = { x: e.clientX, y: e.clientY };
+  }, []);
+
+  const handlePointerUp = useCallback((e: React.PointerEvent<HTMLButtonElement>) => {
+    // Mouse taps are left to the native click so focus/keyboard behave normally.
+    if (e.pointerType === 'mouse') return;
+    const start = pressRef.current;
+    pressRef.current = null;
+    if (!start) return;
+    if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10) return;
+    activate();
+  }, [activate]);
 
   const isActivelyPromoted = property.isPromoted &&
     property.promotionEndDate &&
@@ -158,8 +188,12 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
 
         {/* View details button */}
         <button
-          onClick={onViewDetails}
-          className="map-popup-cta map-popup-reveal map-popup-reveal-4 w-full py-2 bg-gradient-to-r from-primary to-blue-600 hover:shadow-lg hover:shadow-primary/30 text-white text-[13px] font-semibold rounded-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
+          type="button"
+          onClick={activate}
+          onPointerDown={handlePointerDown}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={() => { pressRef.current = null; }}
+          className="map-popup-cta map-popup-reveal map-popup-reveal-4 w-full py-2.5 min-h-[44px] touch-manipulation bg-gradient-to-r from-primary to-blue-600 hover:shadow-lg hover:shadow-primary/30 text-white text-[13px] font-semibold rounded-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
         >
           {t('map.popup.viewDetails', 'View')} <span className="map-popup-cta-arrow">→</span>
         </button>

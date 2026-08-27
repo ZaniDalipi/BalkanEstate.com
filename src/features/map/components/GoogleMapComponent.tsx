@@ -93,7 +93,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
               property={hook.selectedProperty}
               map={hook.map}
               onClose={() => hook.setSelectedProperty(null)}
-              onViewDetails={() => hook.handleViewDetails(hook.selectedProperty!.id)}
+              onViewDetails={() => hook.handleViewDetails(hook.selectedProperty!)}
               distanceLabel={hook.selectedPropertyDistanceLabel}
             />
           )}
