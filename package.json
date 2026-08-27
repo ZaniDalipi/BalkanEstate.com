@@ -24,7 +24,10 @@
     "test:e2e:ui": "npx playwright test --ui",
     "test:e2e:headed": "npx playwright test --headed",
     "test:e2e:debug": "npx playwright test --debug",
-    "test:all": "vitest run && npx playwright test"
+    "test:all": "vitest run && npx playwright test",
+    "loadtest": "node loadtest/run.mjs",
+    "loadtest:explain": "node loadtest/explain-queries.mjs",
+    "loadtest:sockets": "node loadtest/socket-fanout.mjs"
   },
   "dependencies": {
     "@dicebear/collection": "^9.4.0",
