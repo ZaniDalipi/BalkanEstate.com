@@ -152,6 +152,58 @@ action, without requiring a full market-data form.
 
 ---
 
+## Property Map — "Full Map" Destination
+
+The cinematic property map ends in a **Full Map** button. Which full map that
+is depends on the listing, not on the button:
+
+```
+src/shared/map/mapDestination.ts
+  ├── resolveMapDestination({ propertyType, listingType })
+  │     luxury-villa → /villas   (gold accent,    "Villas Map")
+  │     rent         → /rent     (blue accent,    "Rentals Map")
+  │     sale         → /search   (emerald accent, "For-Sale Map")
+  │     unknown      → /search   (neutral,        "Full Map")
+  └── buildMapFocusTarget(property) → validated { lat, lng, address } | null
+        │
+        ├── PropertyMapLink  → Map3DBuildings → Map3DControls  (label + colour)
+        └── PropertyDetailsPage.handleNavigateToMap            (navigation)
+```
+
+Key decisions:
+- **One record drives both label and navigation.** The button's text, its
+  accent colour and the route it opens all come from the same frozen
+  `MAP_DESTINATIONS` entry, so a button can never promise one map and open
+  another.
+- **Luxury villas win over the listing type.** They are a curated market
+  carrying both rentals and sales (`useVillaSearch`), so a villa *for sale*
+  still belongs on the villas map — sending it to `/search` dropped the
+  visitor into a list that no longer contained the property they came from.
+- **Routed, not dispatched.** `handleNavigateToMap` calls
+  `navigate(destination.path)` instead of dispatching `SET_ACTIVE_VIEW`, so
+  the address bar and the back button follow the visitor onto the map. The
+  route handler clears the selected property itself.
+- **Untrusted input.** `propertyType` / `listingType` are normalised (not
+  trusted to be domain literals) and an unrecognised market falls back to the
+  neutral buy map. `buildMapFocusTarget` runs `validateCoordinates` and
+  returns `null` rather than a partial payload, so a listing with a missing or
+  out-of-range coordinate navigates *without* a fly-to instead of flying the
+  destination map to (0, 0). The address is sanitised and length-capped before
+  it enters map state.
+
+### One villa mark everywhere
+
+`LuxuryVillaIcon` (`constants/icons.ts`) is a villa under a crown — the same
+figure the map pins carry (`src/shared/map/villaMarker.ts`). It is used by the
+sidebar's Luxury Villas tab and by `PropertyInfo`'s property-type card, which
+previously fell through to the generic `CubeTransparentIcon` because
+`luxury-villa` was missing from its icon list. The card's type name reads from
+`map.propertyTypes` — the app's one translated list of type names — instead of
+a card-only key set that had no entries and rendered the raw `Luxury-Villa`
+slug.
+
+---
+
 ## Sticky Bottom Action Bar
 
 Mobile-only companion to the desktop `PropertyContact` sidebar.

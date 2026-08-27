@@ -152,7 +152,8 @@
     "diningRooms": "Dhoma ngrënieje",
     "toilets": "Tualete (WC)",
     "storageRooms": "Dhoma depozitimi",
-    "offices": "Zyrë / studio"
+    "offices": "Zyrë / studio",
+    "propertyType": "Lloji i Pronës"
   },
   "distances": {
     "title": "Distancat",
@@ -433,7 +434,13 @@
       "replay": "Riprodho",
       "exploreMap": "Eksploro hartën",
       "flyShort": "Fluturoj",
-      "mapShort": "Hartë"
+      "mapShort": "Hartë",
+      "exploreVillasMap": "Harta e Vilave",
+      "villasMapShort": "Vilat",
+      "exploreRentalsMap": "Harta e Qirave",
+      "rentalsMapShort": "Qira",
+      "exploreSaleMap": "Harta e Shitjeve",
+      "saleMapShort": "Blej"
     },
     "errors": {
       "noLocation": "Të dhënat e vendndodhjes nuk janë të disponueshme"

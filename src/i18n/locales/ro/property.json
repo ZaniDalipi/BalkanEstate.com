@@ -152,7 +152,8 @@
     "diningRooms": "Sufragerii",
     "toilets": "Toalete (WC)",
     "storageRooms": "Debarale",
-    "offices": "Birou / cameră de lucru"
+    "offices": "Birou / cameră de lucru",
+    "propertyType": "Tip Proprietate"
   },
   "distances": {
     "title": "Distanțe",
@@ -433,7 +434,13 @@
       "replay": "Reia",
       "exploreMap": "Explorează harta",
       "flyShort": "Zboară",
-      "mapShort": "Hartă"
+      "mapShort": "Hartă",
+      "exploreVillasMap": "Harta vilelor",
+      "villasMapShort": "Vile",
+      "exploreRentalsMap": "Harta închirierilor",
+      "rentalsMapShort": "Chirii",
+      "exploreSaleMap": "Harta vânzărilor",
+      "saleMapShort": "Vânzări"
     },
     "errors": {
       "noLocation": "Datele de locație nu sunt disponibile"

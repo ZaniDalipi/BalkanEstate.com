@@ -152,7 +152,8 @@
     "diningRooms": "Τραπεζαρίες",
     "toilets": "Τουαλέτες (WC)",
     "storageRooms": "Αποθήκες",
-    "offices": "Γραφείο / σπουδαστήριο"
+    "offices": "Γραφείο / σπουδαστήριο",
+    "propertyType": "Τύπος Ακινήτου"
   },
   "distances": {
     "title": "Αποστάσεις",
@@ -433,7 +434,13 @@
       "replay": "Επανάληψη",
       "exploreMap": "Εξερεύνηση χάρτη",
       "flyShort": "Πτήση",
-      "mapShort": "Χάρτης"
+      "mapShort": "Χάρτης",
+      "exploreVillasMap": "Χάρτης Βιλών",
+      "villasMapShort": "Βίλες",
+      "exploreRentalsMap": "Χάρτης Ενοικιάσεων",
+      "rentalsMapShort": "Ενοικίαση",
+      "exploreSaleMap": "Χάρτης Πωλήσεων",
+      "saleMapShort": "Πώληση"
     },
     "errors": {
       "noLocation": "Τα δεδομένα τοποθεσίας δεν είναι διαθέσιμα"

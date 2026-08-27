@@ -20,6 +20,7 @@ import {
   CubeTransparentIcon,
   LivingRoomIcon,
   CheckCircleIcon,
+  LuxuryVillaIcon,
 } from '../../../constants';
 import { DetailItem } from './PropertyCommon';
 import { useAppContext } from '../../../context/AppContext';
@@ -29,6 +30,29 @@ interface PropertyInfoProps {
   property: Property;
   onOpenFloorPlan: () => void;
 }
+
+/**
+ * Property types the type card draws a dedicated icon for. Anything else —
+ * `other`, or a type added to the backend before this card learns about it —
+ * falls through to the generic cube.
+ */
+const PROPERTY_TYPES_WITH_ICON: ReadonlySet<string> = new Set([
+  'apartment',
+  'house',
+  'villa',
+  'luxury-villa',
+  'land',
+]);
+
+/**
+ * Last-resort label for a type with no translation in the active locale:
+ * "luxury-villa" → "luxury villa" (the card's `capitalize` does the rest).
+ * Never shown for a known type — all six live in `map.propertyTypes`. Takes
+ * `unknown` because the value is whatever the API sent, not necessarily one
+ * of the `PropertyType` literals.
+ */
+const humanisePropertyType = (value: unknown): string =>
+  typeof value === 'string' ? value.replace(/[-_]+/g, ' ').trim() : '';
 
 /**
  * PropertyInfo Component
@@ -62,6 +86,19 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
   const hasValidCoords = useMemo(
     () => (property.lat !== 0 || property.lng !== 0) && validateCoordinates(property.lat, property.lng).isValid,
     [property.lat, property.lng]
+  );
+
+  // Luxury villas are a market of their own (own nav tab, own map markers), so
+  // the type card carries the villa mark and the gold accent rather than the
+  // generic primary blue.
+  const isLuxuryVilla = property.propertyType === 'luxury-villa';
+
+  // Property-type name. `map.propertyTypes` is the app's one translated list of
+  // type names — reused here so the card can never fall back to the raw
+  // "Luxury-Villa" slug the way a card-only key set did.
+  const propertyTypeLabel = useMemo(
+    () => t(`map.propertyTypes.${property.propertyType}`, humanisePropertyType(property.propertyType)),
+    [t, property.propertyType]
   );
 
   // Single destination string used by both the map link and the directions handler
@@ -326,10 +363,18 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
           {property.propertyType && (
             <div className="mt-4 flex flex-wrap items-stretch gap-3">
               {/* Property Type Card */}
-              <div className="group relative flex items-center gap-3 px-4 py-3 rounded-2xl bg-gradient-to-br from-primary/[0.07] via-primary/[0.04] to-transparent border border-primary/15 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-default overflow-hidden">
+              <div className={`group relative flex items-center gap-3 px-4 py-3 rounded-2xl bg-gradient-to-br transition-all duration-300 cursor-default overflow-hidden ${
+                isLuxuryVilla
+                  ? 'from-amber-500/[0.10] via-amber-500/[0.05] to-transparent border border-amber-400/30 hover:border-amber-400/60 hover:shadow-lg hover:shadow-amber-500/10'
+                  : 'from-primary/[0.07] via-primary/[0.04] to-transparent border border-primary/15 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5'
+              }`}>
                 {/* Subtle animated shimmer */}
                 <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
-                <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 group-hover:from-primary/30 group-hover:to-primary/15 transition-colors">
+                <div className={`relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br transition-colors ${
+                  isLuxuryVilla
+                    ? 'from-amber-400/30 to-amber-500/15 group-hover:from-amber-400/40 group-hover:to-amber-500/20'
+                    : 'from-primary/20 to-primary/10 group-hover:from-primary/30 group-hover:to-primary/15'
+                }`}>
                   {property.propertyType === 'apartment' && (
                     <svg className="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
@@ -351,16 +396,21 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
                     </svg>
                   )}
-                  {(property.propertyType === 'other' || !['apartment', 'house', 'villa', 'land'].includes(property.propertyType)) && (
+                  {isLuxuryVilla && (
+                    <LuxuryVillaIcon className="w-5 h-5 text-amber-600" />
+                  )}
+                  {!PROPERTY_TYPES_WITH_ICON.has(property.propertyType) && (
                     <CubeTransparentIcon className="w-5 h-5 text-primary" />
                   )}
                 </div>
                 <div className="relative">
-                  <span className="block text-[10px] sm:text-xs font-medium text-primary/60 uppercase tracking-wider leading-none">
+                  <span className={`block text-[10px] sm:text-xs font-medium uppercase tracking-wider leading-none ${
+                    isLuxuryVilla ? 'text-amber-700/70' : 'text-primary/60'
+                  }`}>
                     {t('details.propertyType', 'Property Type')}
                   </span>
                   <span className="block text-sm sm:text-base font-bold text-neutral-900 capitalize mt-0.5">
-                    {t(`details.propertyTypes.${property.propertyType}`, property.propertyType)}
+                    {propertyTypeLabel}
                   </span>
                 </div>
               </div>

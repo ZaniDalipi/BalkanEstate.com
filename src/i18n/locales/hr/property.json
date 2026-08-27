@@ -152,7 +152,8 @@
     "diningRooms": "Blagovaonice",
     "toilets": "Toaleti (WC)",
     "storageRooms": "Ostave",
-    "offices": "Ured / radna soba"
+    "offices": "Ured / radna soba",
+    "propertyType": "Tip Nekretnine"
   },
   "distances": {
     "title": "Udaljenosti",
@@ -433,7 +434,13 @@
       "replay": "Ponovi",
       "exploreMap": "Istraži kartu",
       "flyShort": "Leti",
-      "mapShort": "Karta"
+      "mapShort": "Karta",
+      "exploreVillasMap": "Karta vila",
+      "villasMapShort": "Vile",
+      "exploreRentalsMap": "Karta najma",
+      "rentalsMapShort": "Najam",
+      "exploreSaleMap": "Karta prodaje",
+      "saleMapShort": "Prodaja"
     },
     "errors": {
       "noLocation": "Podaci o lokaciji nisu dostupni"

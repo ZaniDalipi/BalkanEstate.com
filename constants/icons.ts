@@ -30,17 +30,20 @@ export const FireIcon: React.FC<{ className?: string }> = ({ className }) => (
     )
 );
 
-// Luxury Villa Booking — an elegant villa crowned with a diamond, echoing the
-// emerald-gem beacon on the map markers. Rendered gold at the call site.
+// Luxury Villa — a villa under a crown, the same mark the map pins carry
+// (see src/shared/map/villaMarker.ts: crown above the villa roofline), so the
+// nav item, the property-type card and the map markers all read as one brand.
+//
+// Deliberately five strokes, not seven: the previous version's tiny diamond
+// and pair of windows collapsed into noise at the 20px this renders at. The
+// crown is the recognisable half of the mark, so it gets the detail budget.
 export const LuxuryVillaIcon: React.FC<{ className?: string }> = ({ className }) => (
     React.createElement(Icon, { className: className },
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M12 2.3 l1.7 1.8 -1.7 1.8 -1.7 -1.8 z" }),
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M4 12 L12 6.4 L20 12" }),
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 11 V20 H18 V11" }),
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M10.4 20 V16.4 a1.6 1.6 0 0 1 3.2 0 V20" }),
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M7.2 13 h1.7 v1.7 h-1.7 z" }),
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M15.1 13 h1.7 v1.7 h-1.7 z" }),
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M3.5 20 H20.5" })
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M6.2 7.3 L4.7 2.9 L8.35 5.2 L12 1.7 L15.65 5.2 L19.3 2.9 L17.8 7.3 Z" }),
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M3.3 13.4 L12 9 L20.7 13.4" }),
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M5.7 12.2 V20.7 H18.3 V12.2" }),
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M10.1 20.7 V16.6 a1.9 1.9 0 0 1 3.8 0 V20.7" }),
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M2.6 20.7 H21.4" })
     )
 );
 

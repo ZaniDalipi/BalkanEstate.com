@@ -31,6 +31,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
     heightClassName,
     enableShadowTimelapse = true,
     onNavigateToMap,
+    mapDestination,
     floorNumber,
     totalFloors,
     virtualTour360Url,
@@ -207,6 +208,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
         flyToProperty={flyToProperty}
         handleEnterBuilding={handleEnterBuilding}
         onNavigateToMap={onNavigateToMap}
+        mapDestination={mapDestination}
         timelapse={timelapse}
       />
 

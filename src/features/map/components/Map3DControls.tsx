@@ -7,6 +7,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { UseShadowTimelapseReturn } from '../hooks/useShadowTimelapse';
 import { TIME_LIGHTING, PERIOD_ICONS } from './Map3DConstants';
+import { MAP_DESTINATIONS, type MapDestination } from '@/shared/map/mapDestination';
 
 export interface Map3DControlsProps {
   // State
@@ -40,6 +41,12 @@ export interface Map3DControlsProps {
   flyToProperty: () => void;
   handleEnterBuilding: () => void;
   onNavigateToMap?: () => void;
+  /**
+   * Which full map `onNavigateToMap` opens. Drives the button's label and
+   * accent colour; falls back to the neutral "Full Map" when the caller does
+   * not know the market (e.g. the seller's own listing preview).
+   */
+  mapDestination?: MapDestination;
 
   // Timelapse
   timelapse: UseShadowTimelapseReturn;
@@ -70,9 +77,15 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
   flyToProperty,
   handleEnterBuilding,
   onNavigateToMap,
+  mapDestination,
   timelapse,
 }) => {
   const { t } = useTranslation(['property']);
+
+  // A missing destination is a caller that has no market to name, not an
+  // error: the neutral entry keeps the button reading "Full Map".
+  const destination = mapDestination ?? MAP_DESTINATIONS.unknown;
+  const destinationLabel = t(destination.labelKey, destination.labelFallback);
 
   return (
     <>
@@ -419,13 +432,17 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
           {onNavigateToMap && (
             <button
               onClick={onNavigateToMap}
-              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-slate-900/90 hover:bg-slate-800 text-white font-medium text-xs sm:text-sm rounded-lg shadow-lg transition-all border border-slate-700/50"
+              aria-label={destinationLabel}
+              title={destinationLabel}
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-slate-900/90 hover:bg-slate-800 font-medium text-xs sm:text-sm rounded-lg shadow-lg transition-all border ${destination.accentClassName}`}
             >
               <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
               </svg>
-              <span className="hidden sm:inline">{t('property:cinematicMap.controls.exploreMap', 'Full Map')}</span>
-              <span className="sm:hidden">{t('property:cinematicMap.controls.mapShort', 'Map')}</span>
+              <span className="hidden sm:inline">{destinationLabel}</span>
+              <span className="sm:hidden">
+                {t(destination.shortLabelKey, destination.shortLabelFallback)}
+              </span>
             </button>
           )}
         </div>

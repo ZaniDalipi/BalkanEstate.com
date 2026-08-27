@@ -152,7 +152,8 @@
     "diningRooms": "Trpezarije",
     "toilets": "Toaleti (WC)",
     "storageRooms": "Ostave",
-    "offices": "Kancelarija / radna soba"
+    "offices": "Kancelarija / radna soba",
+    "propertyType": "Тип Некретнине"
   },
   "distances": {
     "title": "Удаљености",
@@ -433,7 +434,13 @@
       "replay": "Понови",
       "exploreMap": "Истражи мапу",
       "flyShort": "Лети",
-      "mapShort": "Мапа"
+      "mapShort": "Мапа",
+      "exploreVillasMap": "Мапа вила",
+      "villasMapShort": "Виле",
+      "exploreRentalsMap": "Мапа изнајмљивања",
+      "rentalsMapShort": "Најам",
+      "exploreSaleMap": "Мапа продаје",
+      "saleMapShort": "Продаја"
     },
     "errors": {
       "noLocation": "Подаци о локацији нису доступни"
@@ -649,7 +656,7 @@
       "sendToChat": "Pošalji"
     }
   },
-          "sectionNav": {
+  "sectionNav": {
     "ariaLabel": "Sekcije nekretnine",
     "overview": "Pregled",
     "map": "3D mapa",

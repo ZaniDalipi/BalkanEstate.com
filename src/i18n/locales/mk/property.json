@@ -152,7 +152,8 @@
     "diningRooms": "Трпезарии",
     "toilets": "Тоалети (WC)",
     "storageRooms": "Оставa простории",
-    "offices": "Канцеларија / работна соба"
+    "offices": "Канцеларија / работна соба",
+    "propertyType": "Тип на Недвижност"
   },
   "distances": {
     "title": "Растојанија",
@@ -433,7 +434,13 @@
       "replay": "Повторно",
       "exploreMap": "Истражи мапа",
       "flyShort": "Лети",
-      "mapShort": "Мапа"
+      "mapShort": "Мапа",
+      "exploreVillasMap": "Мапа на вили",
+      "villasMapShort": "Вили",
+      "exploreRentalsMap": "Мапа на изнајмување",
+      "rentalsMapShort": "Изнајми",
+      "exploreSaleMap": "Мапа на продажби",
+      "saleMapShort": "Продажба"
     },
     "errors": {
       "noLocation": "Податоците за локација не се достапни"

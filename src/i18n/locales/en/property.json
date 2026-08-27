@@ -159,7 +159,8 @@
         "sat": "Sat"
       },
       "slotDuration": "{{minutes}} min slots"
-    }
+    },
+    "propertyType": "Property Type"
   },
   "distances": {
     "title": "Distances",
@@ -452,7 +453,13 @@
       "skip": "Skip",
       "replay": "Replay",
       "exploreMap": "Full Map",
-      "mapShort": "Map"
+      "mapShort": "Map",
+      "exploreVillasMap": "Villas Map",
+      "villasMapShort": "Villas",
+      "exploreRentalsMap": "Rentals Map",
+      "rentalsMapShort": "Rent",
+      "exploreSaleMap": "For-Sale Map",
+      "saleMapShort": "Buy"
     },
     "errors": {
       "noLocation": "Location data unavailable"

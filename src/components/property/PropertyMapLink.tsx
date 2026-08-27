@@ -1,9 +1,10 @@
 // PropertyMapLink Component
 // 3D map experience with extruded buildings and shadow timelapse
 
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
+import { resolveMapDestination } from '@/shared/map/mapDestination';
 
 // Lazy load the 3D map component for better initial page load
 const Map3DBuildings = lazy(
@@ -70,6 +71,15 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
     !isNaN(property.lat) &&
     !isNaN(property.lng);
 
+  // Which full map the "Full Map" button leads to (villas / rentals / buy).
+  // Resolved here and passed down so the button's label names the same map the
+  // page's `onNavigateToMap` handler actually opens.
+  const { propertyType, listingType } = property;
+  const mapDestination = useMemo(
+    () => resolveMapDestination({ propertyType, listingType }),
+    [propertyType, listingType],
+  );
+
   // Responsive map heights — taller in full-bleed (full-screen) placement.
   const heightClassName = fullBleed
     ? 'h-[460px] sm:h-[600px] lg:h-[78vh]'
@@ -135,6 +145,7 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
             floorNumber={property.floorNumber}
             totalFloors={property.totalFloors}
             propertyType={property.propertyType}
+            mapDestination={mapDestination}
             virtualTour360Url={property.virtualTour360Url}
             orientation={property.orientation}
           />

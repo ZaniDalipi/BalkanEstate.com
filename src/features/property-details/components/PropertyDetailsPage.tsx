@@ -39,6 +39,7 @@ import PromotionModal from '@/src/features/promotions/components/PromotionModal'
 import ScheduleViewingModal from '@/src/features/rental/components/ScheduleViewingModal';
 import ExternalSourceBadge from '@/src/features/properties/components/ExternalSourceBadge';
 import { useNotification } from '@/src/shared/hooks/useNotification';
+import { buildMapFocusTarget, resolveMapDestination } from '@/shared/map/mapDestination';
 import Footer from '@/components/shared/Footer';
 import Modal from '@/components/shared/Modal';
 import * as api from '@/services/apiService';
@@ -333,21 +334,29 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     }
   };
 
-  const handleNavigateToMap = () => {
-    const isRental = property.listingType === 'rent';
-    dispatch({
-      type: 'UPDATE_SEARCH_PAGE_STATE',
-      payload: {
-        focusMapOnProperty: {
-          lat: property.lat,
-          lng: property.lng,
-          address: property.address,
-        },
-      },
-    });
-    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: isRental ? 'rentals' : 'search' });
-  };
+  /**
+   * "Full Map" on the property map: hand the visitor to the map that actually
+   * contains this listing — the villas map for a luxury villa, the rentals map
+   * for a rental, the buy map otherwise (see `resolveMapDestination`).
+   *
+   * The focus target is validated rather than forwarded: a listing with a
+   * missing or out-of-range coordinate navigates to the right map without a
+   * fly-to instead of sending it to (0, 0).
+   */
+  const handleNavigateToMap = useCallback(() => {
+    const destination = resolveMapDestination(property);
+    const focusMapOnProperty = buildMapFocusTarget(property);
+
+    // Set the focus target *before* navigating: the route handler switches the
+    // view synchronously, and the destination page reads this on mount.
+    if (focusMapOnProperty) {
+      dispatch({ type: 'UPDATE_SEARCH_PAGE_STATE', payload: { focusMapOnProperty } });
+    }
+    // Routed rather than dispatched, so the address bar and the back button
+    // end up on the map the visitor is now looking at. The route handler
+    // clears the selected property itself.
+    navigate(destination.path);
+  }, [property, dispatch, navigate]);
 
   // Navigate to 3D tour - scroll to map section and open 360 tour
   const handleNavigateTo3DTour = () => {
