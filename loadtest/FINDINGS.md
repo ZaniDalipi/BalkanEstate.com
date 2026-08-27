@@ -10,34 +10,141 @@ disproves it. Ranked by expected impact.
 
 ---
 
-## 1. The listing query asks for a collation that no index has
+## What changes at 100,000 listings
+
+Most of the findings below are about *concurrent users*. These are the ones that
+depend on the **size of the listings collection**, and they behave differently
+in kind — not just in degree — once the collection is large.
+
+To reproduce any of this locally:
+
+```bash
+node loadtest/seed-scale.mjs --uri mongodb://localhost:27017/balkan-estate --count 100000
+node loadtest/explain-queries.mjs --uri mongodb://localhost:27017/balkan-estate
+node loadtest/run.mjs --vus 100 --duration 120 --vary-ip
+node loadtest/seed-scale.mjs --uri ... --cleanup
+```
+
+**The listing query stops being a "slow query" and becomes a failing one.**
+Because of #1 it sorts the whole matching set in memory. MongoDB's blocking-sort
+limit is 100 MB, and it errors (code 292 `QueryExceededMemoryLimitNoDiskUseAllowed`)
+rather than spilling, unless disk use is enabled. Whether 100k listings crosses
+that line depends on your average document size after the list projection — if
+it's around 1 KB, it does. Past the line `/api/properties` doesn't get slower,
+it returns 500s. Both fixes in #1 remove the blocking sort entirely;
+`seed-scale.mjs --stats` gives you the real document size to judge the margin.
+
+**`/sitemap.xml` breaks twice over.** `backend/src/routes/sitemapRoutes.ts:20`
+loads *every* active listing and concatenates one `<url>` block each into a
+single string. At 100k that's roughly a 20 MB response built in memory, with no
+caching (`/sitemap.xml` isn't in `cacheConfig`), on a full collection scan, every
+time a crawler asks. And search engines cap a single sitemap at **50,000 URLs**
+— above that Google rejects the file outright, so past ~50k listings the site
+silently loses sitemap coverage. Needs a sitemap *index* pointing at paginated
+`sitemap-1.xml`, `sitemap-2.xml`, each ≤ 50k URLs, cached.
+
+**Filters that can't use an index scan all 100k rows.** The price-per-m² and
+price-change filters build `$expr` with `$divide` / field-to-field comparison
+(`propertyController.ts:228-262`). `$expr` cannot use an index under any
+circumstances, so each of those requests reads the entire collection. Store
+`pricePerSqm` as a real indexed field on write, and a boolean/derived field for
+"reduced".
+
+**Deep pages get linear in page number.** `skip((page-1)*limit)` walks every
+skipped document, and the cursor alternative doesn't work (#5). Page 500 at 100k
+listings walks 10,000 documents before returning 20. Whether users go that deep
+matters less than crawlers do — they will.
+
+**"My listings" has no pagination.** `getMyListings`
+(`propertyController.ts:1671`) returns *every* listing a seller owns, as
+hydrated Mongoose documents with a populated seller and no `.lean()`. That's
+fine for a private seller with 3 listings; an agency account with 5,000 gets a
+~10 MB response and 5,000 document hydrations per dashboard load. Same shape in
+`viewStatsController.ts:914` and `utils/statsUpdater.ts:183`.
+
+**Background jobs iterate the whole collection.** `weeklyStatsJob` runs
+`Property.find({ sellerId })` per Pro member, sequentially, loading full
+documents; `cityMarketDataService.calculateMarketDataFromProperties` loads every
+active listing for a city with no projection or limit. These get slower in
+proportion to the collection and run on a schedule — they'll show up as periodic
+latency spikes for everyone else, since they compete for the same connection
+pool.
+
+**Writes cost 18 index updates each.** Every insert and update maintains all 18
+indexes on `properties` (`models/Property.ts:649-700`), including a 4-field text
+index. That's the ceiling on bulk ingest from listing sources —
+`seed-scale.mjs` prints the achieved docs/s, which is a direct measure of it.
+
+**Sizing.** `seed-scale.mjs --stats` prints data size, storage size and total
+index size. Index size plus the hot document set is what MongoDB wants resident
+in RAM; once the working set exceeds it, every query pages from disk and p95
+climbs by an order of magnitude. Check that number against your database
+instance's RAM before assuming the app tier is the bottleneck.
+
+**What does *not* change with listing count:** the WebSocket fan-out (#4), the
+per-view writes (#3) and the rate-limit/cache behaviour (#6, #7) scale with
+*users*, not listings. 100k listings with 50 concurrent users is a database
+problem; 100k listings with 5,000 concurrent users is both.
+
+---
+
+## 1. The listing query cannot use an index — for two independent reasons
+
+Both live in `getProperties`, and either one alone forces MongoDB to read the
+whole matching set.
+
+### 1a. The sort always leads with `status`
+
+`backend/src/controllers/propertyController.ts:317`
+
+```ts
+let sort: any = {};
+sort.status = -1;              // always prepended
+...
+sort.lastRenewed = -1;         // default user ordering
+```
+
+So the real sort is `{ status: -1, lastRenewed: -1 }`. The closest index is
+`{ status: 1, lastRenewed: -1 }` (`models/Property.ts:689`), which MongoDB can
+walk forwards as `(status ↑, lastRenewed ↓)` or backwards as
+`(status ↓, lastRenewed ↑)` — **neither is `(status ↓, lastRenewed ↓)`**. No
+index in the collection can produce that order, so every listing request adds a
+blocking in-memory SORT of every matching document.
+
+That matters more than it sounds: MongoDB caps a blocking sort at 100 MB and
+*fails the query* (error 292) above that rather than slowing down. With ~85k
+active listings this sits right at the edge — the listing page doesn't degrade,
+it starts erroring.
+
+And the sort key is redundant: `sortPropertiesWithHighlighting` (line 398)
+re-orders the page in Node immediately afterwards.
+
+**Fix:** delete `sort.status = -1`. The filter is already on `status`, so
+`{ lastRenewed: -1 }` alone lets the `{ status: 1, lastRenewed: -1 }` index
+provide both the match and the order.
+
+### 1b. The collation matches no index
 
 `backend/src/controllers/propertyController.ts:380`
 
 ```ts
 Property.find(filter)
   .collation({ locale: 'en', strength: 2 })   // case-insensitive city/country
-  .sort(sort)
 ```
 
-All 18 indexes on the collection (`backend/src/models/Property.ts:649-700`) are
-created with the default *simple* collation. MongoDB will not use an index to
-satisfy a string comparison under a different collation — and every predicate in
-this query that matters (`status`, `city`, `country`, `propertyType`,
-`listingType`) is a string.
+All 18 indexes (`models/Property.ts:649-700`) use the default *simple*
+collation. MongoDB won't use an index for a string comparison under a different
+collation — and every predicate that matters here (`status`, `city`, `country`,
+`propertyType`, `listingType`) is a string.
 
-The likely consequence: **every `/api/properties` request is a full collection
-scan plus an in-memory sort**, no matter how many indexes exist. At 100k
-listings that is ~100k documents examined to return 20, and above 100 MB of sort
-data MongoDB fails the query outright instead of returning slowly.
+**Fix:** drop `.collation()` and normalise city/country casing on write (store a
+lowercased field and query that), or recreate the indexes with
+`{ collation: { locale: 'en', strength: 2 } }`. Normalising on write is the
+cheaper path — collated indexes are larger and slower to maintain.
 
-**Confirm:** `node loadtest/explain-queries.mjs` — it runs the identical query
-with and without the collation and prints documents examined for each.
-
-**Fix, if confirmed:** either drop `.collation()` and normalise city/country
-casing on write (a `cityLower` field, or lowercase on save), or recreate the
-indexes with `{ collation: { locale: 'en', strength: 2 } }`. Normalising on
-write is the faster path — collated indexes are larger and slower to maintain.
+**Confirm both:** `node loadtest/explain-queries.mjs` runs the shipped query and
+three variants (no collation / no status sort / neither) side by side and prints
+documents examined and whether the sort came from an index.
 
 ---
 
@@ -255,10 +362,14 @@ and lower the per-request file count.
 
 ## Suggested order of work
 
-1. Clamp `limit` (#2) — one line, removes a trivial way to kill the process.
-2. Run `explain-queries.mjs` against production-scale data (#1). If it confirms
-   collection scans, that single fix is worth more than everything else here.
-3. Fix the cursor bug (#5) — small, and deep pagination stops being O(n).
-4. Move view counting off the request path (#3).
-5. Room-scope the socket broadcasts and stop invalidating whole lists (#4).
-6. Add Redis for rate limits and Socket.IO *before* running a second instance (#6).
+1. Drop `sort.status = -1` and clamp `limit` (#1a, #2) — two small edits that
+   remove the blocking sort and a trivial way to kill the process.
+2. Run `explain-queries.mjs` against production-scale data to see what's left
+   (#1). Whatever it still reports is worth more than everything below.
+3. Paginate the sitemap into a sitemap index before you pass 50k active
+   listings — otherwise search engines quietly stop reading it.
+4. Fix the cursor bug (#5) — small, and deep pagination stops being O(n).
+5. Paginate `getMyListings`, and project instead of hydrating full documents.
+6. Move view counting off the request path (#3).
+7. Room-scope the socket broadcasts and stop invalidating whole lists (#4).
+8. Add Redis for rate limits and Socket.IO *before* running a second instance (#6).

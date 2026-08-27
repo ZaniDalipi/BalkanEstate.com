@@ -1,14 +1,53 @@
 # Load & stress testing
 
-Three tools, no new dependencies. They answer different questions:
+Four tools, no new dependencies. They answer different questions:
 
 | Tool | Question it answers |
 |------|--------------------|
+| `seed-scale.mjs` | What does the database look like at 100,000 listings? |
 | `run.mjs` | How many concurrent users can the API serve, and what breaks first? |
 | `explain-queries.mjs` | *Why* is the listing query slow — which index does MongoDB actually use? |
 | `socket-fanout.mjs` | How many WebSocket clients can connect, and what does one listing edit cost? |
 
+Order matters: seed to scale first, otherwise the other two measure a small
+database where every query plan looks fine.
+
 Findings from the first pass over this codebase are in [`FINDINGS.md`](./FINDINGS.md).
+
+---
+
+## 0. Seed to scale
+
+```bash
+node loadtest/seed-scale.mjs --uri mongodb://localhost:27017/balkan-estate --count 100000
+node loadtest/seed-scale.mjs --uri ... --stats      # sizes only, no writes
+node loadtest/seed-scale.mjs --uri ... --cleanup    # remove everything it inserted
+```
+
+Inserts synthetic listings (8 images, full-length description, realistic status
+and promotion distribution) plus the seller accounts they reference, then prints
+document count, average document size, storage size and per-index sizes — the
+numbers that tell you how much RAM the database needs.
+
+Everything it writes is tagged: `source: 'loadtest'` on properties and an
+`@loadtest.local` email on sellers, so `--cleanup` removes exactly what it added.
+It refuses non-local, non-staging connection strings without `--yes`.
+
+Insert throughput is itself a result: it's the same path bulk listing-source
+ingest takes, and every document maintains all 18 indexes on the collection.
+
+Indexes are created by Mongoose when the backend boots, not by this script — if
+`--stats` reports only the `_id` index, start the backend once before measuring.
+
+| Flag | Default | Meaning |
+|------|---------|---------|
+| `--uri <str>` | `$MONGODB_URI` | Connection string |
+| `--count <n>` | `100000` | Listings to insert |
+| `--sellers <n>` | `200` | Distinct seller accounts to spread them across |
+| `--batch <n>` | `5000` | Documents per `insertMany` |
+| `--stats` | — | Print sizes and exit (no writes) |
+| `--cleanup` | — | Delete the seeded listings and sellers |
+| `--yes` | — | Required for a non-local, non-staging target |
 
 ---
 
@@ -112,9 +151,12 @@ document returned, whether the sort is done in memory, and how long
 Read-only — it runs `explain()` and `count()` and never writes. Needs
 `npm install` in `./backend` (it borrows mongoose from there).
 
-Run it against a database with production-scale data. On a few hundred
-documents every plan looks fine; the difference between an index scan and a
-collection scan only shows up at scale. To generate scale locally:
+Run it against a database with production-scale data — see step 0. On a few
+hundred documents every plan looks fine; the difference between an index scan
+and a collection scan only shows up at scale.
+
+There is also a standalone 100k-document benchmark that seeds its own throwaway
+database and times raw queries (no API layer involved):
 
 ```bash
 cd backend && npx jest --testPathPattern="large-dataset-performance" --forceExit

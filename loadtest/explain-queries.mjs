@@ -44,7 +44,10 @@ if (!uri) {
 }
 
 // The listing query as propertyController.getProperties builds it.
+// Note the sort: the controller always prepends `status: -1` (line 316) before
+// the user's chosen ordering, so the real sort is { status: -1, lastRenewed: -1 }.
 const COLLATION = { locale: 'en', strength: 2 };
+const DEFAULT_SORT = { status: -1, lastRenewed: -1 };
 const activeFilter = () => ({
   $or: [
     { status: 'active' },
@@ -54,44 +57,68 @@ const activeFilter = () => ({
 
 const cases = [
   {
-    name: 'listing page 1 — as the API runs it (with collation)',
+    name: 'listing page 1 — exactly as the API runs it',
     filter: activeFilter(),
-    sort: { createdAt: -1 },
+    sort: DEFAULT_SORT,
     skip: 0,
     collation: COLLATION,
   },
   {
-    name: 'listing page 1 — identical query WITHOUT collation',
+    name: 'listing page 1 — WITHOUT collation (same sort)',
     filter: activeFilter(),
-    sort: { createdAt: -1 },
+    sort: DEFAULT_SORT,
     skip: 0,
     collation: null,
   },
   {
-    name: 'city + type filter — with collation',
+    name: 'listing page 1 — WITHOUT the leading status sort key',
+    filter: activeFilter(),
+    sort: { lastRenewed: -1 },
+    skip: 0,
+    collation: COLLATION,
+  },
+  {
+    name: 'listing page 1 — no collation AND no status sort key',
+    filter: activeFilter(),
+    sort: { lastRenewed: -1 },
+    skip: 0,
+    collation: null,
+  },
+  {
+    name: 'city + type filter — as the API runs it',
     filter: { ...activeFilter(), city: 'Pristina', propertyType: 'apartment' },
-    sort: { createdAt: -1 },
+    sort: DEFAULT_SORT,
     skip: 0,
     collation: COLLATION,
   },
   {
     name: 'city + type filter — WITHOUT collation',
     filter: { ...activeFilter(), city: 'Pristina', propertyType: 'apartment' },
-    sort: { createdAt: -1 },
+    sort: DEFAULT_SORT,
     skip: 0,
     collation: null,
   },
   {
-    name: 'price range + sort by price — with collation',
+    name: 'sort by price (price-low)',
     filter: { ...activeFilter(), price: { $gte: 50000, $lte: 250000 } },
-    sort: { price: 1 },
+    sort: { status: -1, price: 1 },
     skip: 0,
     collation: COLLATION,
   },
   {
-    name: 'deep pagination — page 100 (skip 2000)',
+    name: 'price-per-m² filter ($expr — cannot use any index)',
+    filter: {
+      ...activeFilter(),
+      $expr: { $and: [{ $gt: ['$sqft', 0] }, { $gte: [{ $divide: ['$price', '$sqft'] }, 1000] }] },
+    },
+    sort: DEFAULT_SORT,
+    skip: 0,
+    collation: COLLATION,
+  },
+  {
+    name: `deep pagination — page 100 (skip ${100 * limit})`,
     filter: activeFilter(),
-    sort: { createdAt: -1 },
+    sort: DEFAULT_SORT,
     skip: 100 * limit,
     collation: COLLATION,
   },
@@ -178,23 +205,55 @@ async function main() {
 
   // ── Verdict ──────────────────────────────────────────────────────
   console.log('\nVERDICT');
-  const withCollation = results.find(r => r.name.includes('as the API runs it'));
-  const withoutCollation = results.find(r => r.name.includes('WITHOUT collation'));
-  if (withCollation?.collectionScan && withoutCollation && !withoutCollation.collectionScan) {
-    console.log('  ✗ The .collation() on the listing query makes MongoDB ignore the indexes:');
-    console.log(`    with collation    → ${withCollation.docsExamined.toLocaleString()} docs examined, ${withCollation.ms} ms`);
-    console.log(`    without collation → ${withoutCollation.docsExamined.toLocaleString()} docs examined, ${withoutCollation.ms} ms`);
-    console.log('    Fix: either drop .collation() and normalise city/country casing at write time,');
-    console.log('    or recreate the property indexes with the same { locale: "en", strength: 2 } collation.');
-  } else if (withCollation && !withCollation.collectionScan) {
-    console.log('  ✓ The listing query uses an index' + (anyCollatedIndex ? ' (collation-matched).' : '.'));
+  const asShipped = results.find(r => r.name.includes('exactly as the API runs it'));
+  const noCollation = results.find(r => r.name.includes('WITHOUT collation (same sort)'));
+  const noStatusSort = results.find(r => r.name.includes('WITHOUT the leading status sort'));
+  const neither = results.find(r => r.name.includes('no collation AND no status sort'));
+
+  const compare = (label, variant) => {
+    if (!variant || !asShipped) return;
+    const better = variant.docsExamined < asShipped.docsExamined || (asShipped.inMemorySort && !variant.inMemorySort);
+    console.log(
+      `  ${better ? '✗' : '·'} ${label}: ${variant.docsExamined.toLocaleString()} docs examined, ` +
+      `${variant.ms} ms, sort ${variant.inMemorySort ? 'in memory' : 'from index'}` +
+      (better ? '  ← cheaper than what ships' : '')
+    );
+  };
+
+  console.log(
+    `  Shipped query: ${asShipped?.docsExamined.toLocaleString()} docs examined to return ${asShipped?.returned}, ` +
+    `${asShipped?.ms} ms, sort ${asShipped?.inMemorySort ? 'in memory (blocking)' : 'from index'}` +
+    `${asShipped?.collectionScan ? ', FULL COLLECTION SCAN' : `, index ${asShipped?.index}`}`
+  );
+  compare('drop .collation()', noCollation);
+  compare('drop the status sort key', noStatusSort);
+  compare('drop both', neither);
+
+  if (asShipped?.inMemorySort) {
+    console.log('\n  ✗ The listing query sorts in memory. MongoDB caps a blocking sort at 100 MB and');
+    console.log('    fails the query above that (error 292) unless disk use is enabled — so this does not');
+    console.log('    degrade gracefully, it stops working once the result set is large enough.');
+    console.log('    The controller always prepends `status: -1` to the sort (propertyController.ts:316);');
+    console.log('    no index can serve { status: -1, lastRenewed: -1 }, and the Node-side highlighting');
+    console.log('    sort re-orders the page afterwards anyway.');
+  }
+  if (asShipped?.collectionScan && noCollation && !noCollation.collectionScan) {
+    console.log('\n  ✗ The .collation() is what stops MongoDB using the indexes. Either drop it and');
+    console.log('    normalise city/country casing at write time, or recreate the property indexes');
+    console.log('    with { collation: { locale: "en", strength: 2 } }.');
+  }
+  if (!asShipped?.collectionScan && !asShipped?.inMemorySort) {
+    console.log(`  ✓ The listing query is index-served${anyCollatedIndex ? ' (collation-matched)' : ''}.`);
+  }
+
+  const expr = results.find(r => r.name.includes('$expr'));
+  if (expr?.collectionScan) {
+    console.log(`\n  ✗ The price-per-m² filter scans the whole collection (${expr.docsExamined.toLocaleString()} docs, ${expr.ms} ms) —`);
+    console.log('    $expr with $divide can never use an index. Store price-per-m² as a real field on write.');
   }
   const deep = results.find(r => r.name.includes('deep pagination'));
   if (deep && deep.docsExamined > limit * 10) {
-    console.log(`  ✗ Deep pagination examines ${deep.docsExamined.toLocaleString()} docs to return ${deep.returned} — skip() cost grows with page number.`);
-  }
-  if (results.some(r => r.inMemorySort)) {
-    console.log('  ✗ At least one query sorts in memory. Above 100 MB of sort data MongoDB fails the query outright.');
+    console.log(`\n  ✗ Deep pagination examines ${deep.docsExamined.toLocaleString()} docs to return ${deep.returned} — skip() cost grows with page number.`);
   }
 
   console.log('');
