@@ -19,6 +19,7 @@ import Article from '../models/Article';
 import Agent from '../models/Agent';
 import Agency from '../models/Agency';
 import { resolveOgImage, DEFAULT_OG_IMAGE, type OgImage } from '../utils/ogImage';
+import { resolveAvatarShareUrl } from '../utils/avatarShareImage';
 import { resolveId, encodeId } from '../utils/idObfuscation';
 import { isValidObjectId } from '../utils/validateParams';
 import { apiLogger } from '../utils/logger';
@@ -450,7 +451,15 @@ interface AgentOgProjection {
   totalReviews?: number;
   activeListings?: number;
   agencyName?: string;
-  userId?: { name?: string; avatarUrl?: string; city?: string; country?: string };
+  userId?: {
+    name?: string;
+    avatarUrl?: string;
+    /** JSON blob of the DiceBear avatar the user built, when they have one. */
+    avatarOptions?: string | null;
+    gender?: 'male' | 'female' | 'other';
+    city?: string;
+    country?: string;
+  };
   agencyId?: { name?: string; logo?: string; coverImage?: string };
 }
 
@@ -486,7 +495,7 @@ export const agentPageOgMiddleware = async (
 
     const agent = await Agent.findOne(query)
       .select('agentId bio specializations yearsOfExperience rating totalReviews activeListings agencyName userId agencyId')
-      .populate('userId', 'name avatarUrl city country')
+      .populate('userId', 'name avatarUrl avatarOptions gender city country')
       .populate('agencyId', 'name logo coverImage')
       .lean<AgentOgProjection>();
 
@@ -517,10 +526,19 @@ export const agentPageOgMiddleware = async (
     const description = [facts, bio].filter(Boolean).join(' — ').slice(0, 300)
       || `Get in touch with ${name} on BalkanEstateAI.`;
 
-    // The agent's own photo is what makes the link recognisable; the agency's
-    // branding only stands in when there is no photo.
+    // The pictures a shared agent link can carry, in the order the profile page
+    // shows them: uploaded photo, then the generated avatar (customized, or the
+    // deterministic one drawn from their id). The agency's branding only stands
+    // in when neither exists.
+    const avatar = resolveAvatarShareUrl({
+      avatarOptions: agent.userId?.avatarOptions,
+      seed: agent.agentId || agent.userId?.name,
+      gender: agent.userId?.gender,
+    });
+
     const image = resolveOgImage(
       agent.userId?.avatarUrl,
+      avatar ?? undefined,
       agent.agencyId?.logo,
       agent.agencyId?.coverImage,
     );

@@ -7,6 +7,7 @@
  */
 
 import { optimizeCloudinaryUrl } from '../config/cloudinaryConfig';
+import { resolveAvatarShareUrl } from '../config/avatarShareImage';
 
 export const CRAWLER_USER_AGENTS = [
   'facebookexternalhit',
@@ -428,6 +429,9 @@ export interface AgentData {
   userId?: {
     name?: string;
     avatarUrl?: string;
+    /** JSON blob of the DiceBear avatar the user built, when they have one. */
+    avatarOptions?: string | null;
+    gender?: 'male' | 'female' | 'other';
     city?: string;
     country?: string;
   };
@@ -440,12 +444,22 @@ export interface AgentData {
 }
 
 /**
- * The agent's own profile picture is what makes the shared link recognisable,
- * so it wins; the agency's branding only stands in when there is no photo.
+ * The picture that makes a shared agent link recognisable, in the order the
+ * profile page itself shows them: the uploaded photo, then the generated
+ * avatar (the one they customized, or the deterministic one drawn from their
+ * id). Only when neither exists does the agency's branding stand in.
  */
 export function getAgentImage(agent: AgentData): OgImage {
+  const avatar = resolveAvatarShareUrl({
+    avatarOptions: agent.userId?.avatarOptions,
+    // Same seed the profile page uses, so the card shows the same face.
+    seed: agent.agentId || agent.userId?.name,
+    gender: agent.userId?.gender,
+  });
+
   return resolveOgImage(
     agent.userId?.avatarUrl,
+    avatar ?? undefined,
     agent.agencyId?.logo,
     agent.agencyId?.coverImage,
   );

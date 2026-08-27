@@ -8,6 +8,14 @@
 
 import { describe, it, expect } from 'vitest';
 import {
+  buildAvatarShareUrl,
+  generateAvatarOptionsFromSeed,
+  resolveAvatarShareUrl,
+} from '@/config/avatarShareImage';
+import {
+  resolveAvatarShareUrl as backendResolveAvatarShareUrl,
+} from '@/backend/src/utils/avatarShareImage';
+import {
   buildAgentOgHtml,
   buildAgencyOgHtml,
   resolveOgImage,
@@ -104,12 +112,14 @@ describe('buildAgentOgHtml', () => {
     expect(meta(html, 'twitter:card')).toBe('summary_large_image');
   });
 
-  it('falls back to the agency logo when the agent has no photo', () => {
+  // The generated avatar outranks agency branding — it is the face the profile
+  // page shows — so the logo is only reached when no avatar can be built at all.
+  it('falls back to the agency logo when there is nothing to build an avatar from', () => {
     const html = buildAgentOgHtml(
-      agent({
-        userId: { name: 'Erik Sonn' },
+      {
+        agencyName: 'Erikson',
         agencyId: { name: 'Erikson', logo: `${CLOUDINARY}/v1/logos/erikson.png` },
-      }),
+      },
       'ERIKSON-REAL-ESTATE',
     );
 
@@ -170,6 +180,86 @@ describe('buildAgentOgHtml', () => {
 
     expect(html).not.toContain('<Sonn>');
     expect(meta(html, 'og:title')).toContain('Erik &quot;Ted&quot; &lt;Sonn&gt;');
+  });
+});
+
+describe('generated avatars as share images', () => {
+  it('uses the saved avatar when the agent has no uploaded photo', () => {
+    const avatarOptions = JSON.stringify(generateAvatarOptionsFromSeed('erik', 'male'));
+    const html = buildAgentOgHtml(
+      agent({ userId: { name: 'Erik Sonn', avatarOptions } }),
+      'ERIKSON-REAL-ESTATE',
+    );
+
+    const image = meta(html, 'og:image')!;
+    expect(image).toContain('api.dicebear.com/9.x/avataaars/png');
+    // The card must show the avatar they built, not a fresh random one.
+    expect(image).toBe(
+      buildAvatarShareUrl(generateAvatarOptionsFromSeed('erik', 'male')).replace(/&/g, '&amp;'),
+    );
+  });
+
+  it('falls back to the same seeded avatar the profile page draws', () => {
+    const html = buildAgentOgHtml(
+      agent({ userId: { name: 'Erik Sonn', gender: 'female' } }),
+      'ERIKSON-REAL-ESTATE',
+    );
+
+    // DefaultAvatar seeds from agentId, so the shared card matches the page.
+    const expected = buildAvatarShareUrl(
+      generateAvatarOptionsFromSeed('ERIKSON-REAL-ESTATE', 'female'),
+    );
+    expect(meta(html, 'og:image')).toBe(expected.replace(/&/g, '&amp;'));
+  });
+
+  it('still prefers a real uploaded photo over the generated avatar', () => {
+    const html = buildAgentOgHtml(agent(), 'ERIKSON-REAL-ESTATE');
+    expect(meta(html, 'og:image')).toContain('avatars/erik.jpg');
+    expect(meta(html, 'og:image')).not.toContain('dicebear');
+  });
+
+  it('marks the square avatar as a summary card, not a wide one', () => {
+    const html = buildAgentOgHtml(agent({ userId: { name: 'Erik Sonn' } }), 'ERIKSON-REAL-ESTATE');
+
+    expect(meta(html, 'twitter:card')).toBe('summary');
+    expect(meta(html, 'og:image:width')).toBeNull();
+  });
+
+  it('requests a size Facebook will accept', () => {
+    const url = new URL(buildAvatarShareUrl(generateAvatarOptionsFromSeed('x')));
+    expect(Number(url.searchParams.get('size'))).toBeGreaterThanOrEqual(200);
+  });
+
+  it('drops option values that are not plain style keywords or hex colours', () => {
+    const url = buildAvatarShareUrl({
+      ...generateAvatarOptionsFromSeed('x'),
+      top: 'shortFlat&backgroundColor=ff0000',
+      skinColor: '../../evil',
+    });
+
+    const params = new URL(url).searchParams;
+    expect(params.get('top')).toBeNull();
+    expect(params.get('skinColor')).toBeNull();
+    expect(params.get('backgroundColor')).toBe('b6e3f4');
+  });
+
+  it('returns nothing when there is no saved avatar and no seed', () => {
+    expect(resolveAvatarShareUrl({ seed: '  ' })).toBeNull();
+  });
+
+  // The backend copy exists only because it cannot import across the package
+  // boundary; if the two drift, a shared link shows a different face.
+  it('backend mirror produces byte-identical URLs', () => {
+    const cases = [
+      { seed: 'ERIKSON-REAL-ESTATE', gender: 'male' as const },
+      { seed: 'ana-popovic', gender: 'female' as const },
+      { seed: 'no-gender' },
+      { avatarOptions: JSON.stringify(generateAvatarOptionsFromSeed('saved', 'female')) },
+    ];
+
+    for (const input of cases) {
+      expect(backendResolveAvatarShareUrl(input)).toBe(resolveAvatarShareUrl(input));
+    }
   });
 });
 
