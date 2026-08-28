@@ -5,6 +5,7 @@ import { formatPrice } from '../../utils/currency';
 import { useAppContext } from '../../context/AppContext';
 import { useRealtimeProperties } from '../../src/features/properties/hooks';
 import { EyeIcon, HeartIcon, InquiriesIcon, PencilIcon, SparklesIcon, CheckCircleIcon, ClockIcon, ArrowPathIcon, BuildingOfficeIcon, TrashIcon, CalendarIcon } from '../../constants';
+import NoPhotoPlaceholder from '../../src/components/ui/NoPhotoPlaceholder';
 import Modal from './Modal';
 import ListingCardSkeleton from './ListingCardSkeleton';
 import * as api from '../../services/apiService';
@@ -112,10 +113,8 @@ const ListingCard: React.FC<{
         {/* Image container - fixed size with image fitted inside */}
         <button onClick={handleCardClick} className="block flex-shrink-0">
             <div className="w-full sm:w-56 h-44 bg-neutral-100 rounded-lg overflow-hidden flex items-center justify-center">
-                {imageError ? (
-                    <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
-                        <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
-                    </div>
+                {!property.imageUrl || imageError ? (
+                    <NoPhotoPlaceholder size="md" fill={false} />
                 ) : (
                     <img
                         src={property.imageUrl}

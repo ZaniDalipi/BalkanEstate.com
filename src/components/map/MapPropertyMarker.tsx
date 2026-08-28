@@ -7,7 +7,7 @@ import { Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
-import { BuildingOfficeIcon } from '@/constants';
+import NoPhotoPlaceholder from '@/src/components/ui/NoPhotoPlaceholder';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { validateCoordinates } from '@/shared/utils/validation';
 import { getVillaMarkerPalette, buildLuxuryVillaMarkerHTML } from '@/shared/map/villaMarker';
@@ -684,11 +684,14 @@ const PropertyPopup: React.FC<{
   // Get price reduction info
   const priceInfo = useMemo(() => getPriceReductionInfo(property), [property]);
 
-  // For promoted properties, show up to 3 images; for regular, show all
-  const images =
+  // For promoted properties, show up to 3 images; for regular, show all.
+  // Empty URLs are dropped so a photo-less listing renders the "no photo"
+  // placeholder instead of a broken image.
+  const images = (
     property.images && property.images.length > 0
       ? property.images.slice(0, isActivelyPromoted ? 3 : property.images.length).map((img) => typeof img === 'string' ? img : img.url)
-      : [property.imageUrl];
+      : [property.imageUrl]
+  ).filter((url): url is string => Boolean(url));
 
   const nextImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -727,6 +730,7 @@ const PropertyPopup: React.FC<{
         {/* Image carousel - fixed container */}
         <div className="relative w-full" style={{ height: '112px' }}>
           <div className="absolute inset-0 overflow-hidden">
+            {images.length === 0 && <NoPhotoPlaceholder size="sm" />}
             {images.map((imgUrl, index) => (
               <div
                 key={index}
@@ -735,9 +739,7 @@ const PropertyPopup: React.FC<{
                 }`}
               >
                 {imageErrors.has(index) ? (
-                  <div className="w-full h-full bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
-                    <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
-                  </div>
+                  <NoPhotoPlaceholder size="sm" />
                 ) : (
                   <img
                     src={imgUrl}
@@ -864,10 +866,8 @@ const PropertyPopup: React.FC<{
       {/* Image section - fixed container */}
       <div className="relative w-full" style={{ height: '100px' }}>
         <div className="absolute inset-0 overflow-hidden">
-          {imageErrors.has(0) ? (
-            <div className="w-full h-full bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
-              <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
-            </div>
+          {images.length === 0 || imageErrors.has(0) ? (
+            <NoPhotoPlaceholder size="sm" />
           ) : (
             <img
               src={images[0]}

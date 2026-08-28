@@ -395,6 +395,7 @@
   },
   "photos": {
     "title": "Снимки",
+    "none": "Няма снимка",
     "all": "Всички",
     "categories": {
       "exterior": "Екстериор",

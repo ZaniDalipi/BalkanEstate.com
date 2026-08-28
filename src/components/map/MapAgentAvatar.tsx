@@ -15,6 +15,7 @@ import { useMap } from 'react-leaflet';
 import { useHighlightedProperties, PROMOTION_TIER_COLORS } from '../../context/HighlightedPropertiesContext';
 import { formatPrice } from '../../../utils/currency';
 import { optimizeCloudinaryUrl } from '../../../config/cloudinaryConfig';
+import NoPhotoPlaceholder from '../ui/NoPhotoPlaceholder';
 
 interface MapAgentAvatarProps {
   onPropertySelect: (propertyId: string) => void;
@@ -169,15 +170,21 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
           <div className="p-2 sm:p-2.5">
             {/* Image - smaller on mobile */}
             <div className="relative rounded-lg overflow-hidden mb-1.5 sm:mb-2 group cursor-pointer" onClick={handleViewProperty}>
-              <img
-                src={optimizeCloudinaryUrl(currentMapFeatured.imageUrl, { width: 384, quality: 'auto', crop: 'fill' })}
-                alt={currentMapFeatured.title || currentMapFeatured.address}
-                loading="lazy"
-                decoding="async"
-                width={384}
-                height={256}
-                className="w-full h-16 sm:h-20 md:h-24 object-cover transition-transform duration-500 group-hover:scale-110"
-              />
+              {currentMapFeatured.imageUrl ? (
+                <img
+                  src={optimizeCloudinaryUrl(currentMapFeatured.imageUrl, { width: 384, quality: 'auto', crop: 'fill' })}
+                  alt={currentMapFeatured.title || currentMapFeatured.address}
+                  loading="lazy"
+                  decoding="async"
+                  width={384}
+                  height={256}
+                  className="w-full h-16 sm:h-20 md:h-24 object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+              ) : (
+                <div className="w-full h-16 sm:h-20 md:h-24">
+                  <NoPhotoPlaceholder size="sm" fill={false} />
+                </div>
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
               {/* Price badge - smaller on mobile */}

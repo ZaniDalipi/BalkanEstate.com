@@ -414,6 +414,7 @@
   },
   "photos": {
     "title": "Photos",
+    "none": "No photo available",
     "all": "All",
     "images": "photos",
     "view": "View",

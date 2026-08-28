@@ -395,6 +395,7 @@
   },
   "photos": {
     "title": "Fotografii",
+    "none": "Fără fotografie",
     "all": "Toate",
     "categories": {
       "exterior": "Exterior",

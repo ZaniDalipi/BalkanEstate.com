@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
+import NoPhotoPlaceholder from './NoPhotoPlaceholder';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -219,22 +220,26 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                         overflow: 'hidden',
                         borderRadius: isMobile ? '20px 20px 0 0' : '28px 0 0 28px'
                     }}>
-                        <img
-                            src={optimizeCloudinaryUrl(property.imageUrl, { width: 800, quality: 'auto', format: 'auto' })}
-                            srcSet={cloudinarySrcSet(property.imageUrl, [480, 800, 1200])}
-                            sizes="(max-width: 768px) 100vw, 45vw"
-                            alt={property.title || property.address}
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover',
-                                transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
-                            }}
-                            loading="eager"
-                            decoding="async"
-                            onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
-                            onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-                        />
+                        {property.imageUrl ? (
+                            <img
+                                src={optimizeCloudinaryUrl(property.imageUrl, { width: 800, quality: 'auto', format: 'auto' })}
+                                srcSet={cloudinarySrcSet(property.imageUrl, [480, 800, 1200])}
+                                sizes="(max-width: 768px) 100vw, 45vw"
+                                alt={property.title || property.address}
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                    transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
+                                }}
+                                loading="eager"
+                                decoding="async"
+                                onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
+                                onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+                            />
+                        ) : (
+                            <NoPhotoPlaceholder size="lg" />
+                        )}
 
                         {/* Image gradient overlay */}
                         <div style={{
@@ -527,15 +532,19 @@ const MobilePropertyCard: React.FC<{ property: PropertyCardData; color: string; 
         >
             {/* Image */}
             <div style={{ position: 'relative', aspectRatio: '16/10', overflow: 'hidden' }}>
-                <img
-                    src={optimizeCloudinaryUrl(property.imageUrl, { width: 480, quality: 'auto', format: 'auto' })}
-                    srcSet={cloudinarySrcSet(property.imageUrl, [320, 480, 640])}
-                    sizes="(max-width: 480px) 100vw, 50vw"
-                    alt={property.title || property.address}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    loading="eager"
-                    decoding="async"
-                />
+                {property.imageUrl ? (
+                    <img
+                        src={optimizeCloudinaryUrl(property.imageUrl, { width: 480, quality: 'auto', format: 'auto' })}
+                        srcSet={cloudinarySrcSet(property.imageUrl, [320, 480, 640])}
+                        sizes="(max-width: 480px) 100vw, 50vw"
+                        alt={property.title || property.address}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        loading="eager"
+                        decoding="async"
+                    />
+                ) : (
+                    <NoPhotoPlaceholder size="md" />
+                )}
                 <div style={{
                     position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%',
                     background: 'linear-gradient(to top, rgba(0,0,0,0.5), transparent)',

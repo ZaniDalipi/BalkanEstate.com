@@ -395,6 +395,7 @@
   },
   "photos": {
     "title": "Фотографије",
+    "none": "Nema fotografije",
     "all": "Све",
     "categories": {
       "exterior": "Екстеријер",

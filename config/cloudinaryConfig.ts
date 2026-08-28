@@ -449,9 +449,9 @@ export const HERO_IMAGES = {
 };
 
 /**
- * Fallback/Placeholder images - using Unsplash's built-in optimization
+ * There is deliberately no default property photo here.
+ *
+ * A listing with no uploaded photos must never borrow a stock house picture:
+ * it would show buyers a building that is not the one for sale. Render
+ * <NoPhotoPlaceholder> (src/components/ui/NoPhotoPlaceholder.tsx) instead.
  */
-export const FALLBACK_IMAGES = {
-  // Default property image when no images are uploaded
-  property: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=500&h=375&fit=crop&q=80&fm=webp',
-};

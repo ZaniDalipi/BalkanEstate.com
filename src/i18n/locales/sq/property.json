@@ -395,6 +395,7 @@
   },
   "photos": {
     "title": "Foto",
+    "none": "Nuk ka foto",
     "all": "Të Gjitha",
     "images": "foto",
     "view": "Shiko",

@@ -47,7 +47,7 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
     const allImages = useMemo(() => {
         const imgs = property.images || [];
         const mainImage = { url: property.imageUrl, tag: 'exterior' as PropertyImageTag };
-        const combined = [mainImage, ...imgs];
+        const combined = [mainImage, ...imgs].filter(img => Boolean(img.url));
         return combined.filter((v, i, a) => a.findIndex(item => item.url === v.url) === i);
     }, [property.imageUrl, property.images]);
 

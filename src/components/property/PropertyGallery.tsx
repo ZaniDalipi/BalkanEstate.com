@@ -8,8 +8,8 @@ import { Property, PropertyImageTag } from '../../../types';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
-  BuildingOfficeIcon,
 } from '../../../constants';
+import NoPhotoPlaceholder from '../ui/NoPhotoPlaceholder';
 import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
 
 const isCloudinaryUrl = (url: string): boolean =>
@@ -318,11 +318,13 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
   }, [videoPlatform, videoInfo.embedUrl, viewMode]);
 
-  // Combine all images
+  // Combine all images. Listings with no uploaded photos have an empty
+  // imageUrl — those are dropped so the gallery shows the "no photo"
+  // placeholder rather than an empty slide.
   const allImages = useMemo(() => {
     const images = property.images || [];
     const mainImage = { url: property.imageUrl, tag: 'exterior' as PropertyImageTag };
-    const combined = [mainImage, ...images];
+    const combined = [mainImage, ...images].filter((img) => Boolean(img.url));
     return combined.filter((v, i, a) => a.findIndex((t) => t.url === v.url) === i);
   }, [property.imageUrl, property.images]);
 
@@ -472,10 +474,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             style={{ touchAction: 'pan-y' }}
             aria-label={t('property:gallery.viewImages', 'View property images')}
           >
-            {mainImageError ? (
-              <div className="w-full h-full bg-gradient-to-br from-neutral-700 to-neutral-800 flex items-center justify-center">
-                <BuildingOfficeIcon className="w-20 h-20 text-neutral-500" />
-              </div>
+            {mainImageError || !currentImageUrl ? (
+              <NoPhotoPlaceholder size="lg" tone="dark" />
             ) : (
               <>
                 {/* LQIP blurred background — fills letterbox bars on desktop object-contain */}

@@ -8,6 +8,7 @@ import { getAiChatResponse } from '@/services/geminiService';
 import { PaperAirplaneIcon, MicrophoneIcon, StopCircleIcon, SparklesIcon, MapPinIcon, SpeakerWaveIcon, SpeakerXMarkIcon, HeartIcon, XMarkIcon, EyeIcon } from '@/constants';
 import { formatPrice } from '@/utils/currency';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import NoPhotoPlaceholder from '@/src/components/ui/NoPhotoPlaceholder';
 import { useAppContext } from '@/context/AppContext';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import AiMessageLimitModal from './AiMessageLimitModal';
@@ -197,18 +198,22 @@ const SwipeCard: React.FC<{
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
             {/* Full-bleed image carousel — crossfade (no exit so card behind never shows) */}
-            <AnimatePresence>
-                <motion.img
-                    key={currentImgIdx}
-                    src={optimizeCloudinaryUrl(images[currentImgIdx] || property.imageUrl, { width: 800, quality: 'auto' })}
-                    alt={property.title || `${property.propertyType} in ${property.city}`}
-                    className="absolute inset-0 w-full h-full object-cover"
-                    draggable={false}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.8 }}
-                />
-            </AnimatePresence>
+            {images.length === 0 ? (
+                <NoPhotoPlaceholder size="lg" tone="dark" />
+            ) : (
+                <AnimatePresence>
+                    <motion.img
+                        key={currentImgIdx}
+                        src={optimizeCloudinaryUrl(images[currentImgIdx], { width: 800, quality: 'auto' })}
+                        alt={property.title || `${property.propertyType} in ${property.city}`}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        draggable={false}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.8 }}
+                    />
+                </AnimatePresence>
+            )}
 
             {/* Cinematic gradient overlay */}
             <div className="absolute inset-0 pointer-events-none" style={{

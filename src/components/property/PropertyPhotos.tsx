@@ -61,7 +61,9 @@ export const PropertyPhotos: React.FC<PropertyPhotosProps> = ({
   const allImages = useMemo(() => {
     const images = property.images || [];
     const mainImage = { url: property.imageUrl, tag: 'exterior' as PropertyImageTag };
-    const combined = [mainImage, ...images];
+    // Drop empty URLs so a photo-less listing shows no thumbnail strip at all
+    // rather than one blank tile.
+    const combined = [mainImage, ...images].filter((img) => Boolean(img.url));
     return combined.filter((v, i, a) => a.findIndex((t) => t.url === v.url) === i);
   }, [property.imageUrl, property.images]);
 

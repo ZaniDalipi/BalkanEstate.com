@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { User, UserRole } from '../../types';
-import { ChartBarIcon, HomeIcon, EyeIcon, HeartIcon, EnvelopeIcon, CalendarIcon, MapPinIcon, BuildingOfficeIcon, BedIcon, BathIcon, SqftIcon } from '../../constants';
+import { ChartBarIcon, HomeIcon, EyeIcon, HeartIcon, EnvelopeIcon, CalendarIcon, MapPinIcon, BedIcon, BathIcon, SqftIcon } from '../../constants';
+import NoPhotoPlaceholder from '../../src/components/ui/NoPhotoPlaceholder';
 import { formatPrice } from '../../utils/currency';
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
@@ -114,9 +115,7 @@ const SoldPropertyCard: React.FC<{ sale: SaleRecord }> = ({ sale }) => {
             onError={() => setImageError(true)}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-200 to-neutral-300">
-            <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
-          </div>
+          <NoPhotoPlaceholder size="md" fill={false} />
         )}
         {/* Sold Badge */}
         <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow flex items-center gap-1">

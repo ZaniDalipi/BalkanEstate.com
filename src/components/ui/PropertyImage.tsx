@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { optimizeCloudinaryUrl, getPropertyImagePlaceholder } from '@/config/cloudinaryConfig';
-import { BuildingOfficeIcon } from '@/constants';
+import NoPhotoPlaceholder, { NoPhotoSize } from './NoPhotoPlaceholder';
 
 interface PropertyImageProps {
   src: string | undefined;
@@ -16,6 +16,8 @@ interface PropertyImageProps {
   gravity?: 'auto' | 'center';
   /** Tailwind duration class for the fade-in transition (default: duration-300). */
   transitionDurationClass?: string;
+  /** Size of the "no photo available" placeholder shown when there is no image. */
+  placeholderSize?: NoPhotoSize;
   onLoad?: () => void;
 }
 
@@ -68,7 +70,8 @@ export const getPropertyImageSources = (
  *  - A main image that fades in once loaded
  *  - Responsive srcSet from Cloudinary
  *  - Priority mode for above-the-fold / LCP images
- *  - Error fallback (gradient + building icon)
+ *  - A "no photo available" placeholder when the listing has no image, or the
+ *    image fails to load (never a stock photo — see <NoPhotoPlaceholder>)
  *
  * Must be placed inside a positioned container (relative/absolute) with
  * overflow-hidden so the absolute-positioned imgs fill it correctly.
@@ -83,17 +86,14 @@ const PropertyImage: React.FC<PropertyImageProps> = ({
   crop = 'fill',
   gravity = 'auto',
   transitionDurationClass = 'duration-300',
+  placeholderSize = 'md',
   onLoad,
 }) => {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(!src);
 
   if (error || !src) {
-    return (
-      <div className="absolute inset-0 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
-        <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
-      </div>
-    );
+    return <NoPhotoPlaceholder size={placeholderSize} />;
   }
 
   const { placeholder, mainSrc, srcSet, displayWidth, displayHeight } =

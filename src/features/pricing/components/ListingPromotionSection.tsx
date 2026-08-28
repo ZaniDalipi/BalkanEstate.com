@@ -1,5 +1,6 @@
 import React from 'react';
 import { Animated } from '@/src/components/ui/Animations';
+import NoPhotoPlaceholder from '@/src/components/ui/NoPhotoPlaceholder';
 import { CheckIcon, SparklesIcon } from '@/constants';
 import { type UserListing, buildLocalizedPath } from './usePricingPage';
 
@@ -146,13 +147,19 @@ const ListingPromotionSection: React.FC<ListingPromotionSectionProps> = ({
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <img
-                      src={listing.imageUrl}
-                      alt={listing.address}
-                      loading="lazy"
-                      decoding="async"
-                      className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
-                    />
+                    {listing.imageUrl ? (
+                      <img
+                        src={listing.imageUrl}
+                        alt={listing.address}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                        <NoPhotoPlaceholder size="sm" fill={false} />
+                      </div>
+                    )}
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-gray-900 truncate">{listing.address}</p>
                       <p className="text-sm text-primary font-bold">€{listing.price.toLocaleString()}</p>
