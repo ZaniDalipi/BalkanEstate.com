@@ -366,7 +366,10 @@ const PricingPage: React.FC = () => {
               selectedAgencyDuration={selectedAgencyDuration}
               setSelectedAgencyDuration={setSelectedAgencyDuration}
               onAgencyFeature={handleAgencyFeature}
-              onSetActiveTab={setActiveTab}
+              enterpriseProduct={enterpriseProduct}
+              onPlanSelection={handlePlanSelection}
+              isActivePlan={isActivePlan}
+              isPlanDisabled={isPlanDisabled}
             />
           )}
 
