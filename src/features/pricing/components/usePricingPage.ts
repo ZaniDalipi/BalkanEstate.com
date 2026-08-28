@@ -63,7 +63,7 @@ export function usePricingPage() {
   // Use React Query for real-time data fetching
   const {
     products,
-    sellerRoleProducts,
+    allProducts,
     isLoadingProducts: loading,
     productsError,
     listingPromotionPlans,
@@ -595,11 +595,9 @@ export function usePricingPage() {
     return false;
   };
 
-  // Separate enterprise from other products. The agency tab fetches role=agency products,
-  // which exclude the seller-targeted Enterprise plan, so fall back to the seller list.
-  const enterpriseProduct =
-    products.find(p => p.productId.includes('enterprise')) ||
-    sellerRoleProducts.find(p => p.productId.includes('enterprise'));
+  // Separate enterprise from other products. Taken from the full catalogue rather than
+  // the active tab's slice: the plan is targeted at sellers but the agency tab offers it too.
+  const enterpriseProduct = allProducts.find(p => p.productId.includes('enterprise'));
   const proYearlyProduct = products.find(p => p.productId.includes('pro_yearly') || p.productId.includes('yearly') && !p.productId.includes('enterprise'));
   const proMonthlyProduct = products.find(p => p.productId.includes('pro_monthly') || p.productId.includes('monthly'));
   const buyerProduct = products.find(p => p.productId.includes('buyer'));

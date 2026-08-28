@@ -1,5 +1,4 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
 import { API_URL } from '@/src/shared/api/config';
 import { tokenService } from '@/src/shared/api/tokenService';
 
@@ -73,12 +72,21 @@ export interface PromotionPlan {
   isActive: boolean;
 }
 
-// Fetch products/subscription plans
-async function fetchProducts(role: string): Promise<Product[]> {
-  const response = await fetch(`${API_URL}/products?role=${role}`);
+// Fetch every active product once — the single source of truth for all pricing tabs.
+// Tabs narrow it client-side via productsForRole rather than refetching per role.
+async function fetchProducts(): Promise<Product[]> {
+  const response = await fetch(`${API_URL}/products`);
   if (!response.ok) throw new Error('Failed to fetch products');
   const data = await response.json();
   return data.products || [];
+}
+
+/**
+ * Narrow the full product list to the ones a tab should show, mirroring the
+ * server's own role filter (GET /products?role=… matches targetRole or 'all').
+ */
+export function productsForRole(products: Product[], role: string): Product[] {
+  return products.filter((p) => p.targetRole === role || p.targetRole === 'all');
 }
 
 // Fetch promotion plans
@@ -107,10 +115,10 @@ async function fetchUserListings(token: string): Promise<any[]> {
 /**
  * Hook to fetch subscription products with real-time updates
  */
-export function useProducts(role: string) {
+export function useProducts() {
   return useQuery({
-    queryKey: ['products', role],
-    queryFn: () => fetchProducts(role),
+    queryKey: ['products'],
+    queryFn: fetchProducts,
     staleTime: 5 * 60 * 1000, // 5 minutes — products rarely change mid-session
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -175,15 +183,9 @@ export function useInvalidatePricingData() {
  * Combined hook for all pricing page data with real-time updates
  */
 export function usePricingPageData(activeTab: string, isAuthenticated: boolean) {
-  const queryClient = useQueryClient();
-
-  // Subscription products
-  const productsQuery = useProducts(activeTab);
-
-  // Seller products are needed outside the seller tab too: the Enterprise plan is
-  // seeded with targetRole 'seller', but the agency tab offers it as well. Shares the
-  // ['products', 'seller'] cache key with the prefetch below, so it costs no extra request.
-  const sellerProductsQuery = useProducts('seller');
+  // Subscription products - one fetch of the whole catalogue, shared by every tab.
+  const productsQuery = useProducts();
+  const allProducts = productsQuery.data || [];
 
   // Promotion plans (for listing and agency tabs)
   const promotionPlansQuery = usePromotionPlans();
@@ -192,20 +194,6 @@ export function usePricingPageData(activeTab: string, isAuthenticated: boolean) 
   const userListingsQuery = useUserListings(
     activeTab === 'listing' && isAuthenticated
   );
-
-  // Prefetch other tabs for faster navigation
-  useEffect(() => {
-    const roles = ['seller', 'buyer', 'listing', 'agency'];
-    roles.forEach(role => {
-      if (role !== activeTab) {
-        queryClient.prefetchQuery({
-          queryKey: ['products', role],
-          queryFn: () => fetchProducts(role),
-          staleTime: 5 * 1000,
-        });
-      }
-    });
-  }, [activeTab, queryClient]);
 
   // Derived data - separate regular plans from special offers
   const allPlans = promotionPlansQuery.data || [];
@@ -222,8 +210,10 @@ export function usePricingPageData(activeTab: string, isAuthenticated: boolean) 
 
   return {
     // Products/Subscription Plans
-    products: productsQuery.data || [],
-    sellerRoleProducts: sellerProductsQuery.data || [],
+    // `products` is the active tab's slice; `allProducts` is the full catalogue, for
+    // plans a tab offers outside its own role (the agency tab's Enterprise plan).
+    products: productsForRole(allProducts, activeTab),
+    allProducts,
     isLoadingProducts: productsQuery.isLoading,
     isRefetchingProducts: productsQuery.isRefetching,
     productsError: productsQuery.error,
