@@ -104,8 +104,9 @@ const ConsentBanner: React.FC = () => {
           animation: cookie-slide-up 0.3s ease-out;
         }
       `}</style>
+      {/* Anchored bottom-right, raised above the floating contact FAB so the two don't overlap */}
       <div
-        className="cookie-banner fixed z-[99998] bottom-3 left-3 right-3 sm:right-auto sm:bottom-4 sm:left-4 sm:w-[22rem] bg-white border border-gray-200 rounded-xl shadow-xl"
+        className="cookie-banner fixed z-[99998] bottom-24 left-3 right-3 sm:left-auto sm:right-6 sm:w-[22rem] bg-white border border-gray-200 rounded-xl shadow-xl"
         role="dialog"
         aria-label="Cookie consent"
       >
