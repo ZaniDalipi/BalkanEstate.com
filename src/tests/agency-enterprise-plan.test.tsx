@@ -60,6 +60,18 @@ describe('AgencyFeatureSection — Enterprise plan', () => {
         expect(screen.getByText('Unlimited team members')).toBeInTheDocument();
     });
 
+    it('places the Enterprise card above the featured-agency promotion', () => {
+        renderSection();
+
+        const enterpriseHeading = screen.getByText('Agency Enterprise Plan');
+        const promotionHeading = screen.getByText('Agency Features');
+
+        // DOCUMENT_POSITION_FOLLOWING (4) — the promotion header comes after Enterprise.
+        expect(
+            enterpriseHeading.compareDocumentPosition(promotionHeading) & Node.DOCUMENT_POSITION_FOLLOWING
+        ).toBeTruthy();
+    });
+
     it('starts checkout with the Enterprise product when the CTA is clicked', () => {
         const onPlanSelection = vi.fn();
         renderSection({ onPlanSelection });

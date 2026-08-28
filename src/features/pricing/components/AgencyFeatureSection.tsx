@@ -149,6 +149,45 @@ const AgencyFeatureSection: React.FC<AgencyFeatureSectionProps> = ({
 
   return (
     <Animated variant="fadeInUp" className="max-w-6xl mx-auto">
+      {/* Note for non-agency users */}
+      {(!currentUserAgencyId) && (
+        <div className="mb-6 bg-blue-50 rounded-2xl p-6 border border-blue-200 max-w-2xl mx-auto">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <ExclamationTriangleIcon className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-900">{t('pricing:agency.needAgency', 'Don\'t have an agency yet?')}</h4>
+              <p className="text-sm text-gray-600 mt-1">
+                {t('pricing:agency.needAgencyDescription', 'Subscribe to our Enterprise plan to create your agency and unlock these features.')}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Enterprise plan - same card as the "For Sellers" tab */}
+      {enterpriseProduct && (
+        <div className="mb-14">
+          <div className="text-center mb-6">
+            <h3 className="text-2xl font-bold text-gray-900">
+              {t('pricing:agency.enterpriseTitle', 'Agency Enterprise Plan')}
+            </h3>
+            <p className="mt-2 text-gray-600">
+              {t('pricing:agency.enterpriseSubtitle', 'Everything your agency needs — team members, branding page and more.')}
+            </p>
+          </div>
+          <EnterprisePlanCard
+            t={t}
+            enterpriseProduct={enterpriseProduct}
+            onPlanSelection={onPlanSelection}
+            isActivePlan={isActivePlan}
+            isPlanDisabled={isPlanDisabled}
+            className="max-w-md mx-auto"
+          />
+        </div>
+      )}
+
       {/* Header */}
       <div className="text-center mb-8">
         <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -292,44 +331,6 @@ const AgencyFeatureSection: React.FC<AgencyFeatureSectionProps> = ({
         </div>
       )}
 
-      {/* Note for non-agency users */}
-      {(!currentUserAgencyId) && (
-        <div className="mt-8 bg-blue-50 rounded-2xl p-6 border border-blue-200 max-w-2xl mx-auto">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
-              <ExclamationTriangleIcon className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h4 className="font-bold text-gray-900">{t('pricing:agency.needAgency', 'Don\'t have an agency yet?')}</h4>
-              <p className="text-sm text-gray-600 mt-1">
-                {t('pricing:agency.needAgencyDescription', 'Subscribe to our Enterprise plan to create your agency and unlock these features.')}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Enterprise plan - same card as the "For Sellers" tab */}
-      {enterpriseProduct && (
-        <div className="mt-10">
-          <div className="text-center mb-6">
-            <h3 className="text-2xl font-bold text-gray-900">
-              {t('pricing:agency.enterpriseTitle', 'Agency Enterprise Plan')}
-            </h3>
-            <p className="mt-2 text-gray-600">
-              {t('pricing:agency.enterpriseSubtitle', 'Everything your agency needs — team members, branding page and more.')}
-            </p>
-          </div>
-          <EnterprisePlanCard
-            t={t}
-            enterpriseProduct={enterpriseProduct}
-            onPlanSelection={onPlanSelection}
-            isActivePlan={isActivePlan}
-            isPlanDisabled={isPlanDisabled}
-            className="max-w-md mx-auto"
-          />
-        </div>
-      )}
     </Animated>
   );
 };
