@@ -290,6 +290,47 @@ if (process.env.NODE_ENV !== 'test' && !process.env.REDIS_URL) {
 
 // ── Middleware ─────────────────────────────────────────────────────
 
+// ── Single-flight (cache stampede protection) ─────────────────────
+//
+// A cache miss used to send every concurrent request for the same key to the
+// database. Measured under load: throughput sawtoothed between 2 and 246 req/s
+// because each time the /api/properties entry expired, every connected client
+// missed at once and ran the same expensive query simultaneously.
+//
+// Now the first request through does the work and the rest wait for its
+// result. Per-process by design: with REDIS_URL each instance coalesces its own
+// traffic, which still divides the stampede by the number of instances.
+
+type Waiter = (entry: CacheEntry | null) => void;
+
+const inFlight = new Map<string, Waiter[]>();
+
+/** Beyond this, waiting costs more than repeating the query. */
+const MAX_WAITERS_PER_KEY = 500;
+
+const settleWaiters = (key: string, entry: CacheEntry | null): void => {
+  const waiters = inFlight.get(key);
+  inFlight.delete(key);
+  if (!waiters) return;
+  for (const waiter of waiters) {
+    try {
+      waiter(entry);
+    } catch {
+      // One waiter's failure must not strand the others.
+    }
+  }
+};
+
+const serveEntry = (res: Response, entry: CacheEntry, ttl: number, source: string): void => {
+  const age = Date.now() - entry.timestamp;
+  res.setHeader('X-Cache', source);
+  res.setHeader('X-Cache-Age', Math.floor(age / 1000).toString());
+  res.setHeader('ETag', entry.etag);
+  res.setHeader('Cache-Control', `private, max-age=${Math.max(0, Math.floor((ttl - age) / 1000))}, must-revalidate`);
+  res.setHeader('Vary', 'Authorization');
+  res.json(entry.data);
+};
+
 export const apiCache = (req: Request, res: Response, next: NextFunction): void => {
   if (req.method !== 'GET') {
     next();
@@ -337,24 +378,61 @@ export const apiCache = (req: Request, res: Response, next: NextFunction): void 
       cacheStore.delete(cacheKey);
     }
 
+    // Someone is already computing this exact response — wait for it rather
+    // than running the same query again.
+    const waiters = inFlight.get(cacheKey);
+    if (waiters) {
+      if (waiters.length < MAX_WAITERS_PER_KEY) {
+        waiters.push((entry) => {
+          if (entry) serveEntry(res, entry, ttl, 'COALESCED');
+          else next(); // Leader produced nothing cacheable; do the work.
+        });
+        return;
+      }
+      next();
+      return;
+    }
+
+    inFlight.set(cacheKey, []);
+
     // Store original json method
     const originalJson = res.json.bind(res);
+    let settled = false;
 
     res.json = (data: any): Response => {
       if (res.statusCode >= 200 && res.statusCode < 300) {
         const etag = generateETag(data);
+        const entry: CacheEntry = { data, timestamp: Date.now(), etag };
 
-        cacheStore.set(cacheKey, { data, timestamp: Date.now(), etag }, ttl);
+        cacheStore.set(cacheKey, entry, ttl);
 
         const maxAge = Math.floor(ttl / 1000);
         res.setHeader('X-Cache', 'MISS');
         res.setHeader('ETag', etag);
         res.setHeader('Cache-Control', `private, max-age=${maxAge}, must-revalidate`);
         res.setHeader('Vary', 'Authorization');
+
+        settled = true;
+        settleWaiters(cacheKey, entry);
       }
 
       return originalJson(data);
     };
+
+    // Any other ending — an error, a non-JSON response, a dropped connection —
+    // must still release the waiters, or they hang until the client gives up.
+    res.on('finish', () => {
+      if (!settled) {
+        settled = true;
+        settleWaiters(cacheKey, null);
+      }
+    });
+    res.on('close', () => {
+      if (!settled) {
+        settled = true;
+        settleWaiters(cacheKey, null);
+      }
+    });
 
     next();
   }).catch(() => {

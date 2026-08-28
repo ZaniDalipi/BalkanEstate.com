@@ -308,6 +308,87 @@ Raw URL → optimizeCloudinaryUrl(url, { width, quality }) → <img src>
 
 ---
 
+## Listing Query — Built for 100k Listings
+
+The listing endpoint is the hottest path in the app: it serves the search page,
+every city page and every filter change. At 120k listings it was measured
+examining **120,000 documents per request** (a full collection scan plus a
+blocking in-memory sort, 162 ms on an idle database). Two independent causes,
+both fixed:
+
+```
+GET /api/properties
+  └── filter: status (+ listingType / propertyType / cityKey / price …)
+        └── sort: lastRenewed desc          ← equality fields first, sort last
+              └── index { status, cityKey, lastRenewed }   (and siblings)
+                    └── 22 documents examined, ~1 ms
+```
+
+Key decisions:
+
+- **No `status` in the sort.** The query used to prepend `status: -1` before the
+  user's ordering. No index can produce `{ status: -1, lastRenewed: -1 }` — an
+  index read backwards gives `status ↓, lastRenewed ↑` — so every request paid
+  for a blocking sort. Promotion order and highlighting are applied by
+  `sortPropertiesWithHighlighting` in Node over the fetched page anyway.
+  *Behaviour note:* recently-sold listings are no longer pinned above active
+  ones; they appear in normal recency order. Pinning them back while staying
+  index-served needs a numeric `statusRank` field, not a sort on `status`.
+- **`cityKey` / `countryKey` instead of `.collation()`.** Case-insensitive
+  location matching used a collation that no index shares (they are all built
+  with the simple collation), which by itself disqualifies every index for a
+  string predicate. The model maintains lower-cased keys on every write path —
+  `save`, `findOneAndUpdate` / `updateOne` / `updateMany` (the ingest upserts)
+  and `insertMany` — and `initDatabase` backfills any document written before
+  the field existed. Never set these by hand.
+- **Index shape is equality → sort.** Every listing index puts the equality
+  fields first and `lastRenewed` last, so one index serves both the match and
+  the order.
+- **Pagination is clamped.** `limit` is capped (`MAX_PAGE_SIZE`) and NaN-guarded;
+  it used to be passed to Mongo verbatim, so `?limit=100000` fetched 100,020
+  documents, populated a seller for each and serialised the lot.
+- **Cursor pagination is only offered for the default ordering.** The cursor
+  compares `createdAt`/`_id`; a price-sorted list paged by it would skip and
+  repeat rows, so custom sorts keep offset pagination and get no cursor.
+
+## Load Shedding on the Read Path
+
+Three mechanisms keep a burst of users from multiplying into a burst of queries:
+
+```
+socket event ─┬─ setQueryData(detail)         ← immediate, no request
+              └─ createBurstCoalescer         ← one jittered list refresh
+                    └── GET /api/properties
+                          └── apiCache single-flight  ← N concurrent misses = 1 query
+```
+
+- **Coalescing + jitter** (`shared/utils/burstCoalescer.ts`): listing events are
+  broadcast to *every* connected client, so an unguarded `invalidateQueries` per
+  event meant one refetch per open tab within the same millisecond. Bursts now
+  collapse into one refresh, delayed by a random fraction of a second so the
+  herd spreads out.
+- **Single-flight** (`middleware/cache.ts`): on a cache miss the first request
+  runs the query and the rest wait for its result. Under load, throughput used
+  to sawtooth between 2 and 246 req/s as the cache entry expired and every
+  client missed at once.
+- **Buffered view counting** (`utils/viewCounter.ts`): a property detail request
+  used to perform two awaited writes (`views` on the property, `stats.totalViews`
+  on the seller). Counts are now accumulated in memory and flushed in bulk every
+  10 s, and on shutdown — a popular listing costs one increment per flush instead
+  of one per viewer. Counts are eventually consistent by design; the response
+  still reports the incremented value.
+
+Sitemaps follow the same rule: `/sitemap.xml` is a sitemap *index* over chunks
+of 25,000 URLs (`/sitemap-properties.xml?page=N`), because a single sitemap is
+invalid above 50,000 URLs and building one from every listing meant a full
+collection scan per crawler hit.
+
+The `loadtest/` directory holds the tools these numbers come from —
+`seed-scale.mjs` to reach 100k listings, `explain-queries.mjs` to check the
+query plans and index drift, `run.mjs` for HTTP load.
+
+---
+
 ## Security Notes
 - All API mutations use CSRF cookie (`credentials: 'include'`)
 - JWT stored in httpOnly cookies (not localStorage)

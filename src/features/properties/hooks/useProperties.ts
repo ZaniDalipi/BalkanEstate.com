@@ -34,9 +34,12 @@ export function useProperties(filters?: Filters, options?: { enablePolling?: boo
   } = useQuery({
     queryKey: propertyKeys.list(filters),
     queryFn: () => getProperties(filters),
-    staleTime: 5 * 1000, // 5 seconds - consider stale quickly for real-time feel
+    staleTime: 30 * 1000, // Fresh for 30s; socket events invalidate sooner when something actually changes
     gcTime: 10 * 60 * 1000, // 10 minutes cache retention
-    refetchInterval: enablePolling ? 10 * 1000 : false, // Auto-refresh every 10 seconds
+    // Polling is a fallback for missed socket events, not the update mechanism:
+    // at 10s every open tab issued 6 listing queries a minute whether or not
+    // anything had changed, which is the single biggest source of load at scale.
+    refetchInterval: enablePolling ? 2 * 60 * 1000 : false,
     refetchOnWindowFocus: true, // Refresh when user returns to tab
     refetchOnMount: true, // Refresh on component mount
     refetchOnReconnect: true, // Refresh on network reconnect

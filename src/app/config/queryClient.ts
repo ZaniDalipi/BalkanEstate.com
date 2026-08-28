@@ -31,17 +31,27 @@ export const queryClient = new QueryClient({
 
       // Retry logic
       retry: (failureCount, error: any) => {
-        // Don't retry on 404 or 401 (client errors)
-        if (error?.response?.status === 404) return false;
-        if (error?.response?.status === 401) return false;
-        if (error?.response?.status === 403) return false;
+        const status = error?.response?.status;
 
-        // Retry up to 3 times for server errors
-        return failureCount < 3;
+        // Don't retry client errors — the answer won't change
+        if (status === 404 || status === 401 || status === 403) return false;
+
+        // A rate-limited request must not be retried into the limiter
+        if (status === 429) return false;
+
+        // A server error usually means the API is already struggling. Retrying
+        // three times triples every client's request rate at exactly the wrong
+        // moment, turning a partial outage into a full one — so a 5xx gets one
+        // more attempt, and network/unknown failures (no status) get two.
+        if (status >= 500) return failureCount < 1;
+        return failureCount < 2;
       },
 
-      // Exponential backoff
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      // Exponential backoff with jitter. Without the random component every
+      // client that failed together also retries together, re-creating the
+      // spike that caused the failure.
+      retryDelay: (attemptIndex) =>
+        Math.min(1000 * 2 ** attemptIndex, 30000) + Math.round(Math.random() * 1000),
 
       // Refetch when user returns to tab
       refetchOnWindowFocus: true,

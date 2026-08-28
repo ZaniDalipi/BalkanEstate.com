@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { useRealtimeProperties } from '@/src/features/properties/hooks';
+import { createBurstCoalescer } from '@/src/shared/utils/burstCoalescer';
 import { SavedSearch, ChatMessage, AiSearchQuery, Filters, initialFilters, SearchPageState, Property, NominatimResult } from '@/types';
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
@@ -49,14 +50,23 @@ export function useSearchPage() {
     const [fallbackLocation, setFallbackLocation] = useState<string | null>(null); // Location name when showing fallback properties
     const [showDrawHint, setShowDrawHint] = useState(false); // Show draw area hint when coming from explore cities
 
-    // Enable real-time property updates via WebSocket
-    // When any property is created/updated/deleted, the list refreshes instantly
-    // Use fetchProperties directly (it's already a stable useCallback) to avoid
-    // re-subscribing to websocket events on every render.
+    // Enable real-time property updates via WebSocket.
+    // Listing events are broadcast to every connected client, and this page's
+    // refresh is a full properties fetch — so reacting to each event directly
+    // meant every open search page hit the API at the same instant on every
+    // edit. The coalescer collapses bursts into one jittered refresh; the
+    // stable useCallback keeps the socket subscription from re-registering.
+    const refreshProperties = useMemo(
+        () => createBurstCoalescer(() => { void fetchProperties(); }),
+        [fetchProperties]
+    );
+
+    useEffect(() => () => refreshProperties.cancel(), [refreshProperties]);
+
     useRealtimeProperties({
-        onPropertyCreated: (() => fetchProperties()) as any,
-        onPropertyUpdated: (() => fetchProperties()) as any,
-        onPropertyDeleted: (() => fetchProperties()) as any,
+        onPropertyCreated: (() => refreshProperties.schedule()) as any,
+        onPropertyUpdated: (() => refreshProperties.schedule()) as any,
+        onPropertyDeleted: (() => refreshProperties.schedule()) as any,
     });
 
     useEffect(() => {

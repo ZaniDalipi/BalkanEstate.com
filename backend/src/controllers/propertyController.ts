@@ -1,14 +1,14 @@
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import { escapeRegex } from '../utils/escapeRegex';
-import Property from '../models/Property';
+import Property, { locationKey } from '../models/Property';
 import User, { IUser } from '../models/User';
 import Agent from '../models/Agent';
 import Agency from '../models/Agency';
 import SalesHistory from '../models/SalesHistory';
 import PriceHistory from '../models/PriceHistory';
 import { geocodeProperty } from '../services/geocodingService';
-import { incrementViewCount, updateSoldStats, incrementActiveListings } from '../utils/statsUpdater';
+import { updateSoldStats, incrementActiveListings } from '../utils/statsUpdater';
 import {
   uploadPropertyImages,
   deleteImages,
@@ -16,6 +16,7 @@ import {
   organizeListingMedia,
 } from '../services/cloudinaryService';
 import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/highlightingUtils';
+import { recordPropertyView } from '../utils/viewCounter';
 import { recordPriceChange, processInstantAlertsForProperty, processInstantPriceDropForProperty } from '../jobs/propertyAlertsJob';
 import { trackUserActivity } from '../services/proBuyerEmailService';
 import { FREE_TIER_LIMITS, PRO_TIER_LIMITS } from '../config/subscriptionConstants';
@@ -29,6 +30,35 @@ import {
 import { propertyLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
 import { getObjectIdParam, getParam } from '../utils/validateParams';
+
+// ── Pagination limits ─────────────────────────────────────────────
+// `limit` used to be passed straight to Mongo, so `?limit=100000` fetched
+// 100,020 documents, populated a seller for each and serialised the lot — an
+// unauthenticated way to exhaust the process's heap. The cap matches the
+// largest page the app actually requests (the map/search view asks for 3000);
+// anything above that is a client bug or an attack.
+const DEFAULT_PAGE_SIZE = 20;
+const MAX_PAGE_SIZE = 3000;
+const MAX_PAGE_NUMBER = 10000;
+
+/** "My listings" is one account's own inventory — bounded, but not unbounded. */
+const MY_LISTINGS_MAX_PAGE_SIZE = 1000;
+
+/** Same idea as the public list projection: skip fields no dashboard row shows. */
+const MY_LISTINGS_PROJECTION = {
+  rentalHistory: 0,
+  priceIntervals: 0,
+  tenantRequirements: 0,
+  visitAvailability: 0,
+  'images.publicId': 0,
+};
+
+/** Coerces a query-string number, falling back for NaN/negative/absent input. */
+const clampNumber = (value: unknown, fallback: number, min: number, max: number): number => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(Math.max(Math.trunc(parsed), min), max);
+};
 
 /**
  * Single source of truth for the client-settable property fields.
@@ -203,15 +233,15 @@ export const getProperties = async (
       filter.propertyType = { ...filter.propertyType, $ne: req.query.excludePropertyType };
     }
 
-    if (city) {
-      // Case-insensitive exact match using collation (index-friendly, unlike $regex)
-      filter.city = city as string;
-    }
+    // Location filters match the normalised key rather than using .collation():
+    // every index on the collection is built with the simple collation, so a
+    // collated query could not use any of them (measured: a full scan of
+    // 120,000 documents per request). See IProperty.cityKey.
+    const cityKeyFilter = locationKey(city);
+    if (cityKeyFilter) filter.cityKey = cityKeyFilter;
 
-    if (country) {
-      // Case-insensitive exact match using collation (index-friendly, unlike $regex)
-      filter.country = country as string;
-    }
+    const countryKeyFilter = locationKey(country);
+    if (countryKeyFilter) filter.countryKey = countryKeyFilter;
 
     // Filter by listing type (sale vs rent)
     if (req.query.listingType && req.query.listingType !== 'any') {
@@ -306,17 +336,22 @@ export const getProperties = async (
       }
     }
 
-    // Build sort object
-    // Priority order: Premium > Highlight > Featured > Urgent > Standard, then sold properties, then apply user-selected sorting
+    // Build sort object.
+    //
+    // Promotion order (Premium > Highlight > Featured > Urgent > Standard) and
+    // the sold-listings-first rule are applied by sortPropertiesWithHighlighting
+    // below, in Node, over the fetched page.
+    //
+    // Deliberately NOT sorting by status here: `{ status: -1, lastRenewed: -1 }`
+    // cannot be served by any index (an index walked backwards gives
+    // `status ↓, lastRenewed ↑`), which forced a blocking in-memory sort and a
+    // collection scan on every request. Sorting on lastRenewed alone lets
+    // { status: 1, lastRenewed: -1 } provide both the match and the order, and
+    // the Node-side sort re-orders the page anyway.
     let sort: any = {};
 
-    // First priority: Promoted properties (Premium > Highlight > Featured)
-    // We'll handle this with a custom sort after fetching
-
-    // Add status sorting (sold first among non-promoted)
-    sort.status = -1; // 'sold' > 'active' alphabetically (reversed)
-
-    // Then apply user's preferred sorting
+    // Apply user's preferred sorting
+    const isCustomSort = sortBy === 'price-low' || sortBy === 'price-high' || sortBy === 'sqft-low' || sortBy === 'sqft-high';
     if (sortBy === 'price-low') {
       sort.price = 1;
     } else if (sortBy === 'price-high') {
@@ -329,16 +364,33 @@ export const getProperties = async (
       sort.lastRenewed = -1; // Default: newest first
     }
 
-    // Pagination
-    const pageNum = Number(page);
-    const limitNum = Number(limit);
-    const useCursor = cursor && cursorCreatedAt;
+    // Pagination — always clamped; see the constants above.
+    const pageNum = clampNumber(page, 1, 1, MAX_PAGE_NUMBER);
+    const limitNum = clampNumber(limit, DEFAULT_PAGE_SIZE, 1, MAX_PAGE_SIZE);
 
-    // Cursor-based pagination: more efficient for deep pages
-    // Instead of skip(N), we filter by "createdAt < cursorCreatedAt OR (createdAt == cursorCreatedAt AND _id < cursor)"
+    // Cursor-based pagination: constant cost per page, where skip(N) walks
+    // every skipped document. The cursor compares createdAt/_id, so it is only
+    // coherent when the query is ordered by createdAt — a price-sorted list
+    // paged by a createdAt cursor would skip and repeat rows. Custom sorts
+    // therefore keep offset pagination and are not offered a cursor.
+    //
+    // Both halves of the cursor must be valid: an unparseable id used to throw
+    // inside the ObjectId constructor and surface as a 500.
+    const cursorDate = cursorCreatedAt ? new Date(cursorCreatedAt as string) : null;
+    const cursorEligible = !isCustomSort;
+    const useCursor = Boolean(
+      cursorEligible &&
+      cursor &&
+      mongoose.Types.ObjectId.isValid(cursor as string) &&
+      cursorDate &&
+      !Number.isNaN(cursorDate.getTime())
+    );
+
     if (useCursor) {
-      const cursorDate = new Date(cursorCreatedAt as string);
-      const cursorId = new (mongoose.Types.ObjectId as any)(cursor as string);
+      // Order by the same keys the cursor compares — { status, createdAt, _id }
+      // covers this exactly.
+      sort = { createdAt: -1, _id: -1 };
+      const cursorId = new mongoose.Types.ObjectId(cursor as string);
       const cursorCondition = {
         $or: [
           { createdAt: { $lt: cursorDate } },
@@ -370,6 +422,13 @@ export const getProperties = async (
       'images.publicId': 0,
     };
 
+    // A listing may carry 30 images; a card renders at most 10 (see
+    // PropertyCard.allImages). Trimming the rest is pure payload saving — at
+    // 3000 rows per search-page load the image arrays dominate the response.
+    // Done in Node rather than as a $slice projection: MongoDB rejects a
+    // projection that both slices `images` and excludes `images.publicId`.
+    const LIST_IMAGE_LIMIT = 10;
+
     // Execute query with .lean() for 5-10x faster reads (plain JS objects, no Mongoose overhead)
     // Fetch more than needed to allow for promoted property sorting
     const fetchLimit = Math.min(limitNum + 20, limitNum * 2); // Fetch slightly extra for promotion sort, capped
@@ -377,7 +436,6 @@ export const getProperties = async (
       Property.find(filter)
         .select(LIST_PROJECTION)
         .populate('sellerId', 'name email phone avatarUrl role agencyName agencyId agentId')
-        .collation({ locale: 'en', strength: 2 }) // Case-insensitive matching for city/country
         .sort(sort)
         .skip(skip)
         .limit(fetchLimit)
@@ -405,6 +463,12 @@ export const getProperties = async (
 
     // Trim to requested limit after sorting
     properties = properties.slice(0, limitNum);
+
+    for (const property of properties) {
+      if (Array.isArray(property.images) && property.images.length > LIST_IMAGE_LIMIT) {
+        property.images = property.images.slice(0, LIST_IMAGE_LIMIT);
+      }
+    }
 
     // Enrich properties with agency logos for agent sellers (already plain objects from .lean())
     const agencyIds = properties
@@ -445,12 +509,17 @@ export const getProperties = async (
       });
     }
 
+    // Build the cursor BEFORE sanitising: sanitizeProperty replaces `_id` with
+    // an obfuscated `id`, so reading `_id` afterwards produced the string
+    // "undefined" and cursor pagination could never actually be used — every
+    // deep page fell back to skip(), which walks each skipped document.
+    const lastRaw = enrichedProperties[enrichedProperties.length - 1] as any;
+    const nextCursor = cursorEligible && lastRaw?._id
+      ? { id: String(lastRaw._id), createdAt: lastRaw.createdAt }
+      : null;
+
     // Sanitize: strip PII (email, phone, license) from list responses
     const sanitizedProperties = enrichedProperties.map((p: any) => sanitizeProperty(p, 'list'));
-
-    // Build cursor for next page (last item in current results)
-    const lastItem = sanitizedProperties[sanitizedProperties.length - 1];
-    const nextCursor = lastItem ? { id: String(lastItem._id), createdAt: lastItem.createdAt } : null;
 
     res.json({
       properties: sanitizedProperties,
@@ -535,9 +604,8 @@ export const getProperty = async (
         return;
       }
 
-      await Property.updateOne({ _id: refreshed._id }, { $inc: { views: 1 } });
+      recordPropertyView(String(refreshed._id), String(refreshed.sellerId._id || refreshed.sellerId));
       refreshed.views += 1;
-      await incrementViewCount(String(refreshed.sellerId._id || refreshed.sellerId));
 
       let enrichedProperty = refreshed.toObject();
       const seller = enrichedProperty.sellerId as any;
@@ -550,15 +618,14 @@ export const getProperty = async (
       return;
     }
 
-    // Increment views on property. Use a targeted update rather than
-    // property.save() so this read path never fails full-document schema
-    // validation for legacy/feed-imported documents that may be missing
-    // fields the ingest upsert doesn't validate (e.g. address/city/country).
-    await Property.updateOne({ _id: property._id }, { $inc: { views: 1 } });
+    // Count the view without writing on the request path: recordPropertyView
+    // buffers the increments for both the property and its seller and flushes
+    // them in bulk (see utils/viewCounter.ts). Previously this was two awaited
+    // writes per detail view, which serialised every viewer of a popular
+    // listing behind a lock on the same document.
+    // The response still reports the incremented number.
+    recordPropertyView(String(property._id), String(property.sellerId._id || property.sellerId));
     property.views += 1;
-
-    // Update seller's stats in real-time
-    await incrementViewCount(String(property.sellerId._id || property.sellerId));
 
     // Enrich property with agency logo if seller is an agent
     let enrichedProperty = property.toObject();
@@ -1668,14 +1735,38 @@ export const getMyListings = async (
       propertyLogger.info(`📋 Fetching all listings for user ${userId}`);
     }
 
-    const properties = await Property.find(query)
-      .populate('sellerId', 'name email phone avatarUrl role agencyName')
-      .sort({ lastRenewed: -1, createdAt: -1 }); // Renewed listings appear first
+    // Opt-in pagination with a safety cap. This used to return every listing an
+    // account owns as hydrated Mongoose documents — fine for a private seller
+    // with three, a ~10 MB response and thousands of hydrations for an agency
+    // account. `.lean()` and the list projection apply either way.
+    const limitNum = clampNumber(req.query.limit, MY_LISTINGS_MAX_PAGE_SIZE, 1, MY_LISTINGS_MAX_PAGE_SIZE);
+    const pageNum = clampNumber(req.query.page, 1, 1, MAX_PAGE_NUMBER);
+    const skip = (pageNum - 1) * limitNum;
 
-    propertyLogger.info(`✅ Found ${properties.length} listings`);
+    const [properties, total] = await Promise.all([
+      Property.find(query)
+        .select(MY_LISTINGS_PROJECTION)
+        .populate('sellerId', 'name email phone avatarUrl role agencyName')
+        .sort({ lastRenewed: -1, createdAt: -1 }) // Renewed listings appear first
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      Property.countDocuments(query),
+    ]);
+
+    propertyLogger.info(`✅ Found ${properties.length} of ${total} listings`);
     // Sanitize: strip PII even for own listings (frontend doesn't need it in list view)
-    const sanitizedProperties = properties.map(p => sanitizeProperty(p.toObject ? p.toObject() : p, 'list'));
-    res.json({ properties: sanitizedProperties });
+    const sanitizedProperties = properties.map(p => sanitizeProperty(p, 'list'));
+    res.json({
+      properties: sanitizedProperties,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        pages: Math.ceil(total / limitNum),
+        hasMore: skip + properties.length < total,
+      },
+    });
   } catch (error: any) {
     propertyLogger.error('Get my listings error:', error);
     res.status(500).json({ message: 'Error fetching listings' });

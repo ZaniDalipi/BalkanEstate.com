@@ -53,7 +53,10 @@ export function useProperty(propertyId: string | null | undefined, options?: Use
     placeholderData: undefined,
     staleTime: 10 * 1000, // 10 seconds - consider stale quickly for real-time feel
     gcTime: 10 * 60 * 1000, // 10 minutes cache retention
-    refetchInterval: enablePolling ? 30 * 1000 : false,
+    // Socket events patch this entry directly, so polling is only a safety net
+    // for missed events. At 30s every open detail page issued two requests a
+    // minute per viewer — pure load for a page that rarely changes.
+    refetchInterval: enablePolling ? 2 * 60 * 1000 : false,
     refetchIntervalInBackground: false, // Pause polling when tab is hidden
     refetchOnWindowFocus: true, // Refresh when user returns to tab
     refetchOnMount: true, // Refresh on component mount

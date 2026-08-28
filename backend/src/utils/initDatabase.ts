@@ -120,6 +120,34 @@ const syncProductPricing = async (): Promise<void> => {
 };
 
 /**
+ * Creates a model's indexes one at a time, so a single failure doesn't take the
+ * rest with it.
+ *
+ * `syncIndexes()` builds a model's indexes as one operation: whatever it was
+ * working on when it threw, everything after that is silently left uncreated.
+ * A production database was found with 11 of 18 declared property indexes
+ * missing — including the text index, without which `?query=` returns an error
+ * rather than results — while the only trace was one aggregate warning line.
+ *
+ * Each failure is now logged with the index it belongs to, which is the
+ * information needed to actually fix it (a unique index that can't build over
+ * existing duplicates, say).
+ */
+const createIndexesIndividually = async (name: string, model: any): Promise<string[]> => {
+  const failures: string[] = [];
+
+  for (const [key, options] of model.schema.indexes()) {
+    try {
+      await model.collection.createIndex(key, { ...options, background: true });
+    } catch (err: any) {
+      failures.push(`${name}.${JSON.stringify(key)}: ${err.message}`);
+    }
+  }
+
+  return failures;
+};
+
+/**
  * Syncs all Mongoose schema indexes to MongoDB.
  * Creates missing indexes and drops stale ones so production matches development.
  */
@@ -130,18 +158,63 @@ const syncAllIndexes = async (): Promise<void> => {
   for (const { name, model } of allModels) {
     try {
       await model.syncIndexes();
+    } catch (err: any) {
+      // syncIndexes stops at the first failure. Fall back to per-index
+      // creation so one bad index doesn't cost the model every other one.
+      issues.push(`${name}: ${err.message}`);
+      const failures = await createIndexesIndividually(name, model);
+      issues.push(...failures);
+    }
+
+    try {
       const indexes = await model.collection.indexes();
       totalCreated += indexes.length;
-    } catch (err: any) {
-      issues.push(`${name}: ${err.message}`);
+
+      const declared = model.schema.indexes().length;
+      // +1 for the implicit _id index.
+      if (indexes.length < declared + 1) {
+        issues.push(`${name}: ${declared + 1 - indexes.length} declared index(es) still missing after sync`);
+      }
+    } catch {
+      // Counting is diagnostic only — never fail startup over it.
     }
   }
 
   if (issues.length > 0) {
-    dbLogger.warn(`⚠️  Index sync had ${issues.length} warning(s): ${issues.join('; ')}`);
+    dbLogger.warn(`⚠️  Index sync had ${issues.length} warning(s):`);
+    for (const issue of issues) dbLogger.warn(`   • ${issue}`);
   }
 
   dbLogger.info(`✅ All indexes synced (${totalCreated} total across ${allModels.length} collections)`);
+};
+
+/**
+ * Backfills the normalised location keys the listing query matches on.
+ *
+ * Runs as a single aggregation-pipeline update — the documents never leave the
+ * database — and matches nothing once every document has been converted, so it
+ * is safe (and cheap) to leave in the startup path. Without it, listings
+ * written before cityKey existed would be invisible to city/country filters.
+ */
+const backfillPropertyLocationKeys = async (): Promise<void> => {
+  try {
+    const Property = mongoose.model('Property');
+    const result = await Property.collection.updateMany(
+      { $or: [{ cityKey: { $exists: false } }, { countryKey: { $exists: false } }] },
+      [{
+        $set: {
+          cityKey: { $toLower: { $trim: { input: { $ifNull: ['$city', ''] } } } },
+          countryKey: { $toLower: { $trim: { input: { $ifNull: ['$country', ''] } } } },
+        },
+      }]
+    );
+
+    if (result.modifiedCount > 0) {
+      dbLogger.info(`✅ Backfilled location keys on ${result.modifiedCount} propert${result.modifiedCount === 1 ? 'y' : 'ies'}`);
+    }
+  } catch (err: any) {
+    dbLogger.warn(`⚠️  Location key backfill skipped: ${err.message}`);
+  }
 };
 
 export const initializeDatabase = async (): Promise<void> => {
@@ -183,6 +256,10 @@ export const initializeDatabase = async (): Promise<void> => {
 
     // Sync all schema indexes to database (creates missing, drops stale)
     await syncAllIndexes();
+
+    // Populate cityKey/countryKey on any documents written before they existed.
+    // No-ops once every document has them.
+    await backfillPropertyLocationKeys();
 
     // Ensure all property documents have the same attributes across environments
     await ensurePropertySchemaSync();

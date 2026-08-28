@@ -8,6 +8,40 @@ this directory are how you confirm each one. Ranked by expected impact.
 
 ---
 
+## Status — what has been fixed
+
+| # | Finding | Status |
+|---|---------|--------|
+| 1a | `status` in the sort defeats every index | **Fixed** — sort is `lastRenewed` alone |
+| 1b | `.collation()` disqualifies every index | **Fixed** — matches `cityKey`/`countryKey` |
+| 0 | Declared indexes missing from the database | **Mitigated** — per-index creation + per-index logging; the drift itself is per-database, so re-check production |
+| 2 | Unbounded `limit` | **Fixed** — clamped and NaN-guarded |
+| 3 | Two writes per property view | **Fixed** — buffered, flushed in bulk |
+| 4 | Broadcast → refetch storm | **Mitigated** — coalesced and jittered on the client; the broadcast is still global |
+| 5 | Cursor pagination broken | **Fixed** — built pre-sanitise, validated, offered only for the default ordering |
+| 7 | Cache stampede | **Fixed** — single-flight |
+| 9 | Client retry amplification | **Fixed** — one retry on 5xx, jittered backoff |
+| — | Polling every 10s per client | **Fixed** — 2 min, sockets carry real-time |
+| — | `/sitemap.xml` invalid above 50k URLs | **Fixed** — sitemap index over 25k-URL chunks |
+| — | `getMyListings` unpaginated and hydrated | **Fixed** — paginated, projected, `.lean()` |
+| 6 | Per-instance rate limits / cache / socket rooms | Open — needs Redis before a second instance |
+| 8 | `countDocuments` per filtered page | Open — cheaper now that it is index-served |
+| 10 | Uploads buffered in memory | Open |
+
+Re-run `explain-queries.mjs` and `run.mjs` after deploying to confirm on your
+own data. Two things to know about the fixes:
+
+- **The database work is not done until the indexes exist.** The new listing
+  indexes are created at startup like the rest; if the index-sync warning is
+  still in your boot log, the query plans will not improve.
+- **One visible behaviour changed.** Recently-sold listings are no longer pinned
+  above active ones (that was what the `status` sort key did) — they now appear
+  in normal recency order. Pinning them back while keeping the query
+  index-served needs a numeric `statusRank` field rather than a sort on the
+  status string.
+
+---
+
 ## Measured — 120,000 listings, 100 concurrent users
 
 First run against a real database (120k properties / 102k active, ~2 KB average

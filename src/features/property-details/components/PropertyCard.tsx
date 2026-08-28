@@ -13,6 +13,7 @@ import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import PropertyImage, { getPropertyImageSources } from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import ExternalSourceBadge from '@/features/properties/components/ExternalSourceBadge';
+import { usePrefetchProperty } from '@/features/properties/hooks';
 
 interface PropertyCardProps {
   property: Property;
@@ -104,6 +105,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
   const touchStartXRef = useRef<number | null>(null);
+
+  const prefetchProperty = usePrefetchProperty();
+  const handlePrefetch = useCallback(() => prefetchProperty(property.id), [prefetchProperty, property.id]);
 
   const allImages = useMemo(() => {
     const base = property.imageUrl ? [property.imageUrl] : [];
@@ -255,6 +259,12 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
       }`}
       onClick={onCardClick}
       onContextMenu={onContextMenu}
+      // Warm the detail cache on intent to open — pointer in, keyboard focus or
+      // the start of a tap — so the property view renders from cache instead of
+      // showing a spinner. No-ops when the data is already fresh.
+      onPointerEnter={handlePrefetch}
+      onFocus={handlePrefetch}
+      onTouchStart={handlePrefetch}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCardClick(e as any); } }}
       role="article"
       tabIndex={0}

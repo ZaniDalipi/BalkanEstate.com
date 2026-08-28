@@ -140,6 +140,7 @@ import { ensureAllFeaturedCitiesExist } from './services/cityMarketDataService';
 import { startMonthlyCouponJob } from './jobs/monthlyCouponJob';
 import { runScoreBackfill } from './jobs/scoreBackfillJob';
 import { initializePushService } from './services/pushNotificationService';
+import { startViewCounter, stopViewCounter } from './utils/viewCounter';
 
 // Create Express app
 const app: Application = express();
@@ -256,6 +257,11 @@ serverLogger.info('✅ Monthly listing counter reset worker started');
 
 // Initialize push notification service (VAPID setup)
 initializePushService();
+
+// Start the buffered view counter (flushes property/seller view counts in bulk
+// instead of writing twice per property detail request)
+startViewCounter();
+serverLogger.info('✅ View counter started');
 
 // ============================================================================
 // SECURITY MIDDLEWARE - Apply comprehensive security headers and CORS
@@ -505,5 +511,21 @@ httpServer.listen(PORT, () => {
   // Start subscription cron jobs
   startCronJobs();
 });
+
+// Flush buffered view counts before the process goes away, so a deploy or
+// restart doesn't drop the counts accumulated since the last flush.
+const shutdown = (signal: string) => {
+  serverLogger.info(`${signal} received — flushing buffered writes before exit`);
+  stopViewCounter()
+    .catch((err) => serverLogger.error('View counter flush on shutdown failed:', err))
+    .finally(() => {
+      httpServer.close(() => process.exit(0));
+      // Don't let a hanging connection block the exit indefinitely.
+      setTimeout(() => process.exit(0), 5000).unref();
+    });
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
 
 export default app;

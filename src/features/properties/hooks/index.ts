@@ -3,6 +3,7 @@
 
 export { useProperties } from './useProperties';
 export { useProperty } from './useProperty';
+export { usePrefetchProperty } from './usePrefetchProperty';
 export { useCreateProperty } from './useCreateProperty';
 export { useUpdateProperty } from './useUpdateProperty';
 export { useDeleteProperty } from './useDeleteProperty';

@@ -21,9 +21,10 @@
  * ```
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { socketService, PropertyEvent } from '@/services/socketService';
+import { createBurstCoalescer } from '@/shared/utils/burstCoalescer';
 import { propertyKeys } from '../api';
 
 interface UseRealtimePropertiesOptions {
@@ -54,6 +55,25 @@ export function useRealtimeProperties(options: UseRealtimePropertiesOptions = {}
   const queryClient = useQueryClient();
   const isSubscribed = useRef(false);
 
+  /**
+   * Listing events are broadcast to every connected client, so an unguarded
+   * `invalidateQueries` per event means one refetch per open tab, all at once.
+   * The coalescer collapses a burst into a single refresh and jitters it, so a
+   * busy period costs the API one spread-out request per client rather than a
+   * spike per event. Per-item cache patches below stay immediate — this only
+   * governs the list refresh behind them.
+   */
+  const refreshLists = useMemo(
+    () =>
+      createBurstCoalescer(() => {
+        queryClient.invalidateQueries({ queryKey: propertyKeys.lists(), refetchType: 'active' });
+        queryClient.invalidateQueries({ queryKey: propertyKeys.myListings(), refetchType: 'active' });
+      }),
+    [queryClient]
+  );
+
+  useEffect(() => () => refreshLists.cancel(), [refreshLists]);
+
   useEffect(() => {
     if (!enabled || isSubscribed.current) return;
 
@@ -61,19 +81,8 @@ export function useRealtimeProperties(options: UseRealtimePropertiesOptions = {}
 
     // Handle new property created - invalidate all property lists
     const unsubCreated = socketService.onPropertyCreated((data) => {
-      // Log removed
-
-      // Invalidate all property list queries to show the new listing
-      queryClient.invalidateQueries({
-        queryKey: propertyKeys.lists(),
-        refetchType: 'active',
-      });
-
-      // Also invalidate my listings if this is the current user's property
-      queryClient.invalidateQueries({
-        queryKey: propertyKeys.myListings(),
-        refetchType: 'active',
-      });
+      // Refresh the lists so the new listing appears (coalesced + jittered)
+      refreshLists.schedule();
 
       // Call user callback if provided
       onPropertyCreated?.(data);
@@ -91,16 +100,9 @@ export function useRealtimeProperties(options: UseRealtimePropertiesOptions = {}
         );
       }
 
-      // Invalidate lists to reflect updated data
-      queryClient.invalidateQueries({
-        queryKey: propertyKeys.lists(),
-        refetchType: 'active',
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: propertyKeys.myListings(),
-        refetchType: 'active',
-      });
+      // The changed item is already patched into the cache above; the list
+      // refresh behind it is coalesced.
+      refreshLists.schedule();
 
       onPropertyUpdated?.(data);
     });
@@ -116,17 +118,9 @@ export function useRealtimeProperties(options: UseRealtimePropertiesOptions = {}
         });
       }
 
-      // Invalidate lists to remove the deleted property
-      queryClient.invalidateQueries({
-        queryKey: propertyKeys.lists(),
-        refetchType: 'active',
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: propertyKeys.myListings(),
-        refetchType: 'active',
-      });
-
+      // Lists refresh on the coalesced schedule; favourites are per-user and
+      // rare enough to invalidate straight away.
+      refreshLists.schedule();
       queryClient.invalidateQueries({
         queryKey: propertyKeys.favorites(),
         refetchType: 'active',
@@ -147,22 +141,13 @@ export function useRealtimeProperties(options: UseRealtimePropertiesOptions = {}
         );
       }
 
-      // Invalidate lists
-      queryClient.invalidateQueries({
-        queryKey: propertyKeys.lists(),
-        refetchType: 'active',
-      });
+      refreshLists.schedule();
     });
 
-    // Handle bulk updates
-    const unsubBulk = socketService.onPropertyBulkUpdate((data) => {
-      // Log removed
-
-      // Invalidate all property queries on bulk operations
-      queryClient.invalidateQueries({
-        queryKey: propertyKeys.all,
-        refetchType: 'active',
-      });
+    // Handle bulk updates — an import can emit these in rapid succession, which
+    // is exactly the case coalescing exists for.
+    const unsubBulk = socketService.onPropertyBulkUpdate(() => {
+      refreshLists.schedule();
     });
 
     // Cleanup on unmount
@@ -174,7 +159,7 @@ export function useRealtimeProperties(options: UseRealtimePropertiesOptions = {}
       unsubStatus();
       unsubBulk();
     };
-  }, [enabled, queryClient, onPropertyCreated, onPropertyUpdated, onPropertyDeleted]);
+  }, [enabled, queryClient, refreshLists, onPropertyCreated, onPropertyUpdated, onPropertyDeleted]);
 
   return {
     isConnected: socketService.isConnected(),

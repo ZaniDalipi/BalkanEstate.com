@@ -62,6 +62,17 @@ export interface IProperty extends Document {
   address: string;
   city: string;
   country: string;
+  /**
+   * Lower-cased `city` / `country`, maintained automatically.
+   *
+   * The listing query needs case-insensitive location matching. Doing that with
+   * `.collation()` stops MongoDB using any index (they are all built with the
+   * simple collation), which measured as a full collection scan — 120,000
+   * documents examined per request at 120k listings. Matching a normalised key
+   * instead is an ordinary indexed equality.
+   */
+  cityKey?: string;
+  countryKey?: string;
   beds: number;
   baths: number;
   livingRooms: number;
@@ -283,6 +294,14 @@ const PropertySchema: Schema = new Schema(
       type: String,
       required: true,
       index: true,
+    },
+    // Derived from city/country on every write — see the IProperty doc comment.
+    // Never set these by hand; normaliseLocationKeys() owns them.
+    cityKey: {
+      type: String,
+    },
+    countryKey: {
+      type: String,
     },
     beds: {
       type: Number,
@@ -645,6 +664,53 @@ const PropertySchema: Schema = new Schema(
   }
 );
 
+// ── Normalised location keys ──────────────────────────────────────
+// Kept in sync on every write path: document saves, update/upsert queries
+// (the listing-source ingest uses upserts) and bulk insertMany.
+
+/** Lower-cased, trimmed location value — `undefined` for empty input. */
+export const locationKey = (value?: unknown): string | undefined =>
+  typeof value === 'string' && value.trim() ? value.trim().toLowerCase() : undefined;
+
+PropertySchema.pre('save', function (next) {
+  const doc = this as any;
+  if (doc.isModified('city') || !doc.cityKey) doc.cityKey = locationKey(doc.city);
+  if (doc.isModified('country') || !doc.countryKey) doc.countryKey = locationKey(doc.country);
+  next();
+});
+
+/**
+ * Mirrors city/country into their keys for query-based updates. Handles both
+ * `{ city }` and `{ $set: { city } }` shapes; aggregation-pipeline updates
+ * (an array) are left alone since they set their own fields.
+ */
+function syncLocationKeysOnUpdate(this: any, next: (err?: Error) => void) {
+  const update = this.getUpdate();
+  if (!update || Array.isArray(update)) return next();
+
+  for (const container of [update.$set, update.$setOnInsert, update]) {
+    if (!container || typeof container !== 'object') continue;
+    if ('city' in container) container.cityKey = locationKey(container.city);
+    if ('country' in container) container.countryKey = locationKey(container.country);
+  }
+  next();
+}
+
+PropertySchema.pre('findOneAndUpdate', syncLocationKeysOnUpdate);
+PropertySchema.pre('updateOne', syncLocationKeysOnUpdate);
+PropertySchema.pre('updateMany', syncLocationKeysOnUpdate);
+
+PropertySchema.pre('insertMany', function (next, docs: any[]) {
+  if (Array.isArray(docs)) {
+    for (const doc of docs) {
+      if (!doc || typeof doc !== 'object') continue;
+      doc.cityKey = locationKey(doc.city);
+      doc.countryKey = locationKey(doc.country);
+    }
+  }
+  next();
+});
+
 // Compound index for location-based queries
 PropertySchema.index({ lat: 1, lng: 1 });
 // Index for price range queries
@@ -687,6 +753,17 @@ PropertySchema.index({ listingType: 1, price: 1, status: 1 });
 PropertySchema.index({ sellerId: 1, status: 1, createdAt: -1 });
 // Default sort order (lastRenewed) with status filter — covers the most common query
 PropertySchema.index({ status: 1, lastRenewed: -1 });
+
+// ── Listing-query indexes (equality → sort, in that order) ────────
+// `getProperties` filters on status plus some subset of listingType /
+// propertyType / cityKey, and sorts by lastRenewed (or price). Each index puts
+// the equality fields first and the sort field last, so MongoDB can both match
+// and order from the index with no blocking in-memory sort.
+PropertySchema.index({ status: 1, listingType: 1, lastRenewed: -1 });
+PropertySchema.index({ status: 1, cityKey: 1, lastRenewed: -1 });
+PropertySchema.index({ status: 1, propertyType: 1, cityKey: 1, lastRenewed: -1 });
+// Same shape for the price sort options (sortBy=price-low / price-high).
+PropertySchema.index({ status: 1, price: 1 });
 
 // Idempotent upsert key for externally ingested listings.
 // Partial filter ensures the unique constraint only applies to imported docs (those with `source` set).
