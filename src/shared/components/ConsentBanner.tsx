@@ -90,178 +90,157 @@ const ConsentBanner: React.FC = () => {
 
   if (!mounted || !isVisible) return null;
 
+  const toggleClasses =
+    "w-8 h-[18px] bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-[14px] after:w-[14px] after:transition-all peer-checked:bg-primary";
+
   const banner = (
     <>
       <style>{`
         @keyframes cookie-slide-up {
-          from { opacity: 0; transform: translateY(100%); }
+          from { opacity: 0; transform: translateY(1rem); }
           to { opacity: 1; transform: translateY(0); }
         }
         .cookie-banner {
-          animation: cookie-slide-up 0.4s ease-out;
+          animation: cookie-slide-up 0.3s ease-out;
         }
       `}</style>
       <div
-        className="cookie-banner fixed bottom-0 left-0 right-0 z-[99998] bg-white border-t border-gray-200 shadow-2xl"
+        className="cookie-banner fixed z-[99998] bottom-3 left-3 right-3 sm:right-auto sm:bottom-4 sm:left-4 sm:w-[22rem] bg-white border border-gray-200 rounded-xl shadow-xl"
         role="dialog"
         aria-label="Cookie consent"
       >
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:py-5">
+        <div className="p-3.5">
           {!showSettings ? (
-            // Main banner view
-            <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-              <div className="flex-1">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-amber-100 rounded-lg flex-shrink-0">
-                    <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm sm:text-base">
-                      {t('common:cookies.title', 'We use cookies')}
-                    </h3>
-                    <p className="text-gray-600 text-sm mt-1 leading-relaxed">
-                      {t('common:cookies.description', 'We use cookies to improve your experience, analyze site traffic, and personalize content. You can choose which cookies to accept.')}
-                      {' '}
-                      <a
-                        href={`/${lang}/cookies`}
-                        className="text-primary hover:underline font-medium"
-                      >
-                        {t('common:cookies.learnMore', 'Learn more')}
-                      </a>
-                    </p>
-                  </div>
-                </div>
+            // Main banner view — compact
+            <div className="space-y-3">
+              <div className="flex items-start gap-2.5">
+                <svg className="w-4 h-4 mt-0.5 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-xs text-gray-600 leading-snug">
+                  <span className="font-semibold text-gray-900">
+                    {t('common:cookies.title', 'We use cookies')}
+                  </span>
+                  {' — '}
+                  {t('common:cookies.shortDescription', 'to improve your experience and analyze traffic.')}
+                  {' '}
+                  <a
+                    href={`/${lang}/cookies`}
+                    className="text-primary hover:underline font-medium whitespace-nowrap"
+                  >
+                    {t('common:cookies.learnMore', 'Learn more')}
+                  </a>
+                </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:flex-shrink-0">
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setShowSettings(true)}
-                  className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                  onClick={handleAcceptAll}
+                  className="flex-1 px-3 py-1.5 text-xs font-semibold text-white bg-primary hover:bg-primary-dark rounded-lg transition-colors"
                 >
-                  {t('common:cookies.customize', 'Customize')}
+                  {t('common:cookies.acceptAll', 'Accept All')}
                 </button>
                 <button
                   onClick={handleAcceptEssential}
-                  className="px-4 py-2.5 text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors"
+                  className="flex-1 px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors"
                 >
                   {t('common:cookies.essentialOnly', 'Essential Only')}
                 </button>
                 <button
-                  onClick={handleAcceptAll}
-                  className="px-5 py-2.5 text-sm font-semibold text-white bg-primary hover:bg-primary-dark rounded-lg transition-colors shadow-sm"
+                  onClick={() => setShowSettings(true)}
+                  className="px-2 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors whitespace-nowrap"
                 >
-                  {t('common:cookies.acceptAll', 'Accept All')}
+                  {t('common:cookies.customize', 'Customize')}
                 </button>
               </div>
             </div>
           ) : (
-            // Settings view
-            <div className="space-y-4">
+            // Settings view — compact
+            <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-gray-900">
+                <h3 className="font-semibold text-gray-900 text-sm">
                   {t('common:cookies.settingsTitle', 'Cookie Settings')}
                 </h3>
                 <button
                   onClick={() => setShowSettings(false)}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-400 hover:text-gray-700"
+                  aria-label="Close settings"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="divide-y divide-gray-100 border-y border-gray-100">
                 {/* Essential Cookies - Always on */}
-                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-gray-900 text-sm">
-                      {t('common:cookies.essential', 'Essential')}
-                    </span>
-                    <span className="text-xs text-green-600 font-medium bg-green-100 px-2 py-0.5 rounded">
-                      {t('common:cookies.alwaysOn', 'Always on')}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-600">
-                    {t('common:cookies.essentialDesc', 'Required for the website to function. Cannot be disabled.')}
-                  </p>
+                <div className="flex items-center justify-between gap-3 py-2">
+                  <span className="text-xs font-medium text-gray-900">
+                    {t('common:cookies.essential', 'Essential')}
+                  </span>
+                  <span className="text-[10px] text-green-700 font-medium bg-green-100 px-1.5 py-0.5 rounded">
+                    {t('common:cookies.alwaysOn', 'Always on')}
+                  </span>
                 </div>
 
                 {/* Functional Cookies */}
-                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-gray-900 text-sm">
-                      {t('common:cookies.functional', 'Functional')}
-                    </span>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={preferences.functional}
-                        onChange={(e) => setPreferences(p => ({ ...p, functional: e.target.checked }))}
-                        className="sr-only peer"
-                      />
-                      <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
-                    </label>
-                  </div>
-                  <p className="text-xs text-gray-600">
-                    {t('common:cookies.functionalDesc', 'Remember your preferences like language and currency.')}
-                  </p>
+                <div className="flex items-center justify-between gap-3 py-2">
+                  <span className="text-xs font-medium text-gray-900">
+                    {t('common:cookies.functional', 'Functional')}
+                  </span>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={preferences.functional}
+                      onChange={(e) => setPreferences(p => ({ ...p, functional: e.target.checked }))}
+                      className="sr-only peer"
+                    />
+                    <div className={toggleClasses}></div>
+                  </label>
                 </div>
 
                 {/* Analytics Cookies */}
-                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-gray-900 text-sm">
-                      {t('common:cookies.analytics', 'Analytics')}
-                    </span>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={preferences.analytics}
-                        onChange={(e) => setPreferences(p => ({ ...p, analytics: e.target.checked }))}
-                        className="sr-only peer"
-                      />
-                      <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
-                    </label>
-                  </div>
-                  <p className="text-xs text-gray-600">
-                    {t('common:cookies.analyticsDesc', 'Help us understand how visitors use our site.')}
-                  </p>
+                <div className="flex items-center justify-between gap-3 py-2">
+                  <span className="text-xs font-medium text-gray-900">
+                    {t('common:cookies.analytics', 'Analytics')}
+                  </span>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={preferences.analytics}
+                      onChange={(e) => setPreferences(p => ({ ...p, analytics: e.target.checked }))}
+                      className="sr-only peer"
+                    />
+                    <div className={toggleClasses}></div>
+                  </label>
                 </div>
 
                 {/* Marketing Cookies */}
-                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-gray-900 text-sm">
-                      {t('common:cookies.marketing', 'Marketing')}
-                    </span>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={preferences.marketing}
-                        onChange={(e) => setPreferences(p => ({ ...p, marketing: e.target.checked }))}
-                        className="sr-only peer"
-                      />
-                      <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
-                    </label>
-                  </div>
-                  <p className="text-xs text-gray-600">
-                    {t('common:cookies.marketingDesc', 'Show you relevant ads and track campaign performance.')}
-                  </p>
+                <div className="flex items-center justify-between gap-3 py-2">
+                  <span className="text-xs font-medium text-gray-900">
+                    {t('common:cookies.marketing', 'Marketing')}
+                  </span>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={preferences.marketing}
+                      onChange={(e) => setPreferences(p => ({ ...p, marketing: e.target.checked }))}
+                      className="sr-only peer"
+                    />
+                    <div className={toggleClasses}></div>
+                  </label>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="flex gap-2">
                 <button
                   onClick={handleAcceptEssential}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors"
+                  className="flex-1 px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors"
                 >
                   {t('common:cookies.rejectAll', 'Reject All')}
                 </button>
                 <button
                   onClick={handleSavePreferences}
-                  className="px-5 py-2 text-sm font-semibold text-white bg-primary hover:bg-primary-dark rounded-lg transition-colors"
+                  className="flex-1 px-3 py-1.5 text-xs font-semibold text-white bg-primary hover:bg-primary-dark rounded-lg transition-colors"
                 >
                   {t('common:cookies.savePreferences', 'Save Preferences')}
                 </button>
