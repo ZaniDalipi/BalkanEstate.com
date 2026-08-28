@@ -7,7 +7,23 @@
 
 import http from 'node:http';
 import https from 'node:https';
+import zlib from 'node:zlib';
 import { URL } from 'node:url';
+
+/**
+ * The API runs `compression()`, so a parsed body has to be inflated first —
+ * otherwise every step that reads an id out of a response silently gets
+ * nothing. Byte counts stay on the wire size, which is what bandwidth costs.
+ */
+function decode(buffer, encoding, done) {
+  if (!buffer.length) return done('');
+  const enc = (encoding || '').toLowerCase();
+  const finish = (err, out) => done(err ? '' : out.toString('utf8'));
+  if (enc.includes('br')) return zlib.brotliDecompress(buffer, finish);
+  if (enc.includes('gzip')) return zlib.gunzip(buffer, finish);
+  if (enc.includes('deflate')) return zlib.inflate(buffer, finish);
+  return done(buffer.toString('utf8'));
+}
 
 export function createClient({ baseUrl, timeoutMs = 30000, maxSockets = 512 }) {
   const base = new URL(baseUrl);
@@ -58,13 +74,9 @@ export function createClient({ baseUrl, timeoutMs = 30000, maxSockets = 512 }) {
           });
           res.on('end', () => {
             const ms = Number(process.hrtime.bigint() - start) / 1e6;
-            resolve({
-              status: res.statusCode,
-              ms,
-              bytes,
-              headers: res.headers,
-              body: parse ? Buffer.concat(chunks).toString('utf8') : '',
-            });
+            const done = (body) => resolve({ status: res.statusCode, ms, bytes, headers: res.headers, body });
+            if (!parse) return done('');
+            decode(Buffer.concat(chunks), res.headers['content-encoding'], done);
           });
           res.on('error', () => {
             const ms = Number(process.hrtime.bigint() - start) / 1e6;

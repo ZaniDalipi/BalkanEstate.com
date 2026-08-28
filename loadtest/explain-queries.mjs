@@ -17,6 +17,7 @@
 
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -124,6 +125,87 @@ const cases = [
   },
 ];
 
+/**
+ * Compares the indexes `Property.ts` declares against the ones the database
+ * actually has.
+ *
+ * `initDatabase.ts` calls `syncIndexes()` per model at startup, catches any
+ * error, and continues — the whole failure surfaces as a single
+ * "Index sync had N warning(s)" line in the boot log. A model whose sync threw
+ * partway keeps whatever indexes it already had, so schema and database drift
+ * apart while everything looks healthy.
+ *
+ * Only the explicit `PropertySchema.index(...)` declarations are checked;
+ * field-level `index: true` ones are left alone.
+ */
+function declaredIndexes() {
+  const modelPath = path.join(here, '..', 'backend', 'src', 'models', 'Property.ts');
+  let source;
+  try {
+    source = readFileSync(modelPath, 'utf8');
+  } catch {
+    return null;
+  }
+
+  const declared = [];
+  const re = /PropertySchema\.index\(\s*(\{[^{}]*\})/g;
+  let match;
+  while ((match = re.exec(source))) {
+    const literal = match[1]
+      .replace(/'/g, '"')
+      .replace(/([{,]\s*)([A-Za-z_$][\w$]*)\s*:/g, '$1"$2":')
+      .replace(/,\s*\}/, '}');
+    try {
+      declared.push(JSON.parse(literal));
+    } catch {
+      // A declaration this regex can't handle is skipped rather than guessed at.
+    }
+  }
+  return declared;
+}
+
+const keySignature = (key) => Object.entries(key).map(([field, dir]) => `${field}:${dir}`).join(',');
+
+function reportIndexDrift(dbIndexes) {
+  const declared = declaredIndexes();
+  if (!declared || declared.length === 0) {
+    console.log('\nINDEX DRIFT\n  (could not read backend/src/models/Property.ts — skipped)');
+    return;
+  }
+
+  const present = new Set(dbIndexes.map(idx => keySignature(idx.key)));
+  const missing = declared.filter(key => !present.has(keySignature(key)));
+
+  console.log(`\nINDEX DRIFT — ${declared.length} declared in Property.ts, ${missing.length} missing from this database`);
+  if (missing.length === 0) {
+    console.log('  ✓ every declared index exists.');
+    return;
+  }
+
+  for (const key of missing) {
+    console.log(`  ✗ ${JSON.stringify(key)}`);
+  }
+
+  const hasText = missing.some(key => Object.values(key).includes('text'));
+  if (hasText) {
+    console.log('\n  ⚠ The text index is missing. `GET /api/properties?query=…` builds a $text filter,');
+    console.log('    and MongoDB rejects $text outright without a text index (error 27) — keyword');
+    console.log('    search is not slow here, it is broken.');
+  }
+
+  console.log('\n  `syncAllIndexes` (backend/src/utils/initDatabase.ts:126) is supposed to create these');
+  console.log('  at startup. It catches the error and logs one "Index sync had N warning(s)" line, so');
+  console.log('  the real reason is in the backend boot log — look there before recreating them.');
+  console.log('  Run this against production too: index drift is per-database, not per-codebase.');
+  console.log('  To build them (background build, safe on a live collection):');
+  console.log('    db.properties.createIndexes([');
+  for (const key of missing) {
+    console.log(`      { key: ${JSON.stringify(key)}, name: "${keySignature(key).replace(/[:,]/g, '_')}" },`);
+  }
+  console.log('    ])');
+  console.log('  Note: the { source, sourceListingId } index is unique — de-duplicate before creating it.');
+}
+
 /** Pulls the interesting bits out of an explain() tree. */
 function summarize(explain) {
   const stats = explain.executionStats || {};
@@ -178,6 +260,8 @@ async function main() {
     if (hasCollation) anyCollatedIndex = true;
     console.log(`  ${JSON.stringify(idx.key)}${hasCollation ? `  [collation: ${idx.collation.locale}/${idx.collation.strength}]` : ''}`);
   }
+
+  reportIndexDrift(indexes);
 
   // ── Query plans ──────────────────────────────────────────────────
   console.log('\nQUERY PLANS');

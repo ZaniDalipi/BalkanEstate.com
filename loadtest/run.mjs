@@ -160,7 +160,10 @@ async function runVU(id, endAt) {
       if (Date.now() >= endAt || aborted) break;
 
       const desc = step.req(ctx);
-      if (!desc) continue;
+      if (!desc) {
+        registry.skip(`${scenario.name} · ${step.label}`);
+        continue;
+      }
 
       const headers = { ...(desc.headers || {}) };
       if (desc.auth && token) headers.authorization = `Bearer ${token}`;
@@ -282,6 +285,17 @@ function report(durationSec) {
   const transportErrors = Object.entries(totals.statuses).filter(([s]) => Number.isNaN(Number(s)));
   if (transportErrors.length) {
     notes.push(`Transport failures: ${transportErrors.map(([s, c]) => `${c}× ${s}`).join(', ')} — the server stopped accepting or completing connections.`);
+  }
+  // A step that never ran is a hole in the test, not a clean result.
+  const neverRan = [...registry.skips.entries()]
+    .filter(([label]) => !registry.metrics.has(label))
+    .sort((a, b) => b[1] - a[1]);
+  if (neverRan.length) {
+    notes.push(
+      `${neverRan.length} step(s) never ran — they depend on data from an earlier response that could not be read: ` +
+      `${neverRan.map(([label, count]) => `${label} (skipped ${count}×)`).join('; ')}. ` +
+      `These endpoints are NOT covered by this run.`
+    );
   }
   const slowest = rows.filter(r => r.requests > 5).sort((a, b) => b.p95 - a.p95)[0];
   if (slowest) notes.push(`Slowest step at p95: ${slowest.label} (${fmtMs(slowest.p95)}).`);

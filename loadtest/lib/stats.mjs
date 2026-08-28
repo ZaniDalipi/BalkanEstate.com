@@ -88,7 +88,13 @@ export class Registry {
     this.metrics = new Map();
     /** Per-second request counters, for the throughput timeline. */
     this.timeline = new Map();
+    /** Steps that couldn't run because an earlier step yielded no data. */
+    this.skips = new Map();
     this.startedAt = 0;
+  }
+
+  skip(label) {
+    this.skips.set(label, (this.skips.get(label) || 0) + 1);
   }
 
   metric(label) {

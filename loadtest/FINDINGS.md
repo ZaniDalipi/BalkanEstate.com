@@ -3,10 +3,105 @@
 A read of the hot paths (listing search, property detail, real-time updates,
 auth) looking for things that behave differently at 10,000 users than at 10.
 
-Everything below is a code-level finding with a file reference. None of it has
-been measured against a running system yet — the tools in this directory are
-how you confirm each one, and each finding names the command that proves or
-disproves it. Ranked by expected impact.
+Everything below is a code-level finding with a file reference, and the tools in
+this directory are how you confirm each one. Ranked by expected impact.
+
+---
+
+## Measured — 120,000 listings, 100 concurrent users
+
+First run against a real database (120k properties / 102k active, ~2 KB average
+document, local backend and MongoDB on one machine).
+
+**Query plans** (`explain-queries.mjs`, idle database):
+
+| Variant | Docs examined | Time | Sort |
+|---------|---------------|------|------|
+| As shipped | 120,000 (COLLSCAN) | 162 ms | in memory |
+| Without `.collation()` | 102,313 | 81 ms | in memory |
+| Without the `status` sort key | 120,000 (COLLSCAN) | 62 ms | in memory |
+| **Without both** | **22** | **1 ms** | **from index** |
+
+162 ms → 1 ms, and 120,000 documents examined → 22, for two deletions in
+`getProperties`. Neither change alone is enough: drop only the collation and it
+still sorts 102k documents in memory; drop only the sort key and it still scans
+the collection. Both, together, are the fix.
+
+**Under load** (100 VUs, 2 minutes, mixed scenarios):
+
+- 134 req/s sustained, **zero errors**
+- overall p50 11 ms, p95 1.75 s, p99 5.08 s, max 12.7 s
+- listing page 1: p95 **5.16 s**, p99 8.28 s
+- `/api/testimonials`, which returns an empty 19-byte array: p50 **451 ms**
+
+That last line is the real story. An endpoint that does nothing takes half a
+second at p50 because it is queued behind listing queries competing for the same
+connection pool and event loop. One unindexed query degrades every endpoint in
+the app, not just its own.
+
+Throughput oscillated between 2 and 246 req/s in a sawtooth — the cache
+stampede in #7, visible: the `/api/properties` cache entry expires, every user
+misses at once, all of them run the 162 ms collection scan concurrently, the
+database saturates and throughput collapses until the queue drains.
+
+**Corrections to earlier predictions in this document:**
+
+- The blocking sort does *not* fail at 100k. MongoDB uses a bounded top-K sort
+  when the query has a limit, so only `limit + skip` documents are held — the
+  100 MB cap isn't reached on page 1. The cost is CPU (a full scan per request),
+  not an error. Deep pages raise k and make it worse, but it still doesn't
+  error. The finding stands; the failure mode I predicted doesn't.
+- The collection has **35 indexes**, not 18 — the schema's field-level
+  `index: true` declarations add many single-field indexes on top of the
+  explicit compound ones.
+
+---
+
+## 0. The database is missing 11 of the 18 indexes the schema declares
+
+Found by `explain-queries.mjs` on the first real run. Present: 35 indexes,
+mostly the field-level `index: true` ones. Absent, though declared in
+`models/Property.ts`:
+
+```
+{ propertyType, villaApprovalStatus, status }   { status, createdAt, _id }
+{ listingType, status }                         { city, price, status }
+{ listingType, propertyType, city, status }     { country, price, status }
+{ status, lastRenewed }                         { listingType, price, status }
+{ sellerId, status, createdAt }                 { source, sourceListingId }
+{ title, city, address, description } ← text index
+```
+
+Two consequences:
+
+**Keyword search is broken, not slow.** `?query=…` builds a `$text` filter
+(`propertyController.ts:282`). MongoDB rejects `$text` with error 27 when no
+text index exists, so that request returns 500 every time.
+
+**The fix for #1 depends on one of the missing ones.** Removing the `status`
+sort key works because `{ status: 1, lastRenewed: -1 }` can then serve the
+query — and that index isn't there. The 1 ms result measured above came from
+the single-field `lastRenewed_1` index instead, which is why it examined 22
+documents rather than exactly 20.
+
+`syncAllIndexes` (`utils/initDatabase.ts:126`) is meant to create these at
+startup. It runs `syncIndexes()` per model inside a try/catch and logs one
+`⚠️ Index sync had N warning(s)` line, so a sync that throws partway leaves the
+rest uncreated with no other trace. **The backend's boot log has the actual
+error** — that's the first place to look, because recreating the indexes without
+knowing why the sync failed will just fail again (a likely candidate: the
+`{ source, sourceListingId }` index is unique, and it can't be built while
+duplicate source listings exist).
+
+Check production before assuming this is a local-only problem — index drift is a
+property of a database, not of a codebase:
+
+```bash
+node loadtest/explain-queries.mjs --uri "<production read-only URI>"
+```
+
+`explain-queries.mjs` now prints this drift report with ready-to-run
+`createIndexes` commands on every run.
 
 ---
 
@@ -25,14 +120,11 @@ node loadtest/run.mjs --vus 100 --duration 120 --vary-ip
 node loadtest/seed-scale.mjs --uri ... --cleanup
 ```
 
-**The listing query stops being a "slow query" and becomes a failing one.**
-Because of #1 it sorts the whole matching set in memory. MongoDB's blocking-sort
-limit is 100 MB, and it errors (code 292 `QueryExceededMemoryLimitNoDiskUseAllowed`)
-rather than spilling, unless disk use is enabled. Whether 100k listings crosses
-that line depends on your average document size after the list projection — if
-it's around 1 KB, it does. Past the line `/api/properties` doesn't get slower,
-it returns 500s. Both fixes in #1 remove the blocking sort entirely;
-`seed-scale.mjs --stats` gives you the real document size to judge the margin.
+**Every listing request reads the whole collection.** Measured: 120,000
+documents examined and 162 ms on an *idle* database, per request, because of #1.
+That's survivable alone — it's fatal under concurrency, where 100 users produced
+a 5.16 s p95 and dragged unrelated endpoints to half a second. The sort itself
+stays bounded (top-K), so this shows up as CPU and saturation, not as errors.
 
 **`/sitemap.xml` breaks twice over.** `backend/src/routes/sitemapRoutes.ts:20`
 loads *every* active listing and concatenates one `<url>` block each into a
@@ -111,10 +203,10 @@ walk forwards as `(status ↑, lastRenewed ↓)` or backwards as
 index in the collection can produce that order, so every listing request adds a
 blocking in-memory SORT of every matching document.
 
-That matters more than it sounds: MongoDB caps a blocking sort at 100 MB and
-*fails the query* (error 292) above that rather than slowing down. With ~85k
-active listings this sits right at the edge — the listing page doesn't degrade,
-it starts erroring.
+Measured cost at 120k documents: a full collection scan, 120,000 documents
+examined per request, 162 ms idle. (The sort stays bounded — MongoDB uses a
+top-K sort when a limit is present — so this costs CPU on every request rather
+than failing outright.)
 
 And the sort key is redundant: `sortPropertiesWithHighlighting` (line 398)
 re-orders the page in Node immediately afterwards.
@@ -362,10 +454,13 @@ and lower the per-request file count.
 
 ## Suggested order of work
 
-1. Drop `sort.status = -1` and clamp `limit` (#1a, #2) — two small edits that
-   remove the blocking sort and a trivial way to kill the process.
-2. Run `explain-queries.mjs` against production-scale data to see what's left
-   (#1). Whatever it still reports is worth more than everything below.
+1. Check whether production has the same missing indexes (#0), and read the boot
+   log for the index-sync warning. Keyword search returns 500s wherever the text
+   index is absent.
+2. Drop `sort.status = -1` and the `.collation()`, and clamp `limit`
+   (#1, #2). Measured on 120k listings: 162 ms and a full collection scan
+   become 1 ms and 22 documents examined. Re-run `explain-queries.mjs` after,
+   to confirm on your data.
 3. Paginate the sitemap into a sitemap index before you pass 50k active
    listings — otherwise search engines quietly stop reading it.
 4. Fix the cursor bug (#5) — small, and deep pagination stops being O(n).
