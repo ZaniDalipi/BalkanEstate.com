@@ -180,6 +180,11 @@ export function usePricingPageData(activeTab: string, isAuthenticated: boolean) 
   // Subscription products
   const productsQuery = useProducts(activeTab);
 
+  // Seller products are needed outside the seller tab too: the Enterprise plan is
+  // seeded with targetRole 'seller', but the agency tab offers it as well. Shares the
+  // ['products', 'seller'] cache key with the prefetch below, so it costs no extra request.
+  const sellerProductsQuery = useProducts('seller');
+
   // Promotion plans (for listing and agency tabs)
   const promotionPlansQuery = usePromotionPlans();
 
@@ -218,6 +223,7 @@ export function usePricingPageData(activeTab: string, isAuthenticated: boolean) 
   return {
     // Products/Subscription Plans
     products: productsQuery.data || [],
+    sellerRoleProducts: sellerProductsQuery.data || [],
     isLoadingProducts: productsQuery.isLoading,
     isRefetchingProducts: productsQuery.isRefetching,
     productsError: productsQuery.error,
