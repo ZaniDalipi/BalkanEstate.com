@@ -701,5 +701,10 @@
     "priceHistory": "Price History",
     "similar": "Similar Homes",
     "onThisPage": "On this page"
+  },
+  "naming": {
+    "typeIn": "{{type}} in {{place}}",
+    "bdsAbbr": "bds",
+    "baAbbr": "ba"
   }
 }

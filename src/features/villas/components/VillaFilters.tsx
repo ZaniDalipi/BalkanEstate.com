@@ -4,6 +4,8 @@ import { Filters } from '@/types';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import { getCurrencySymbol } from '@/utils/currency';
 import { Button } from '@/components/ui/liquid-glass-button';
+import VillaAllFilters from './VillaAllFilters';
+import type { VillaListingMode } from '../hooks/useVillaSearch';
 
 interface VillaFiltersProps {
     filters: Filters;
@@ -13,6 +15,9 @@ interface VillaFiltersProps {
     onSaveSearch?: () => void;
     isSaving?: boolean;
     compact?: boolean;
+    /** Zillow's "Listing Status", surfaced inside the full filter sheet. */
+    listingMode?: VillaListingMode;
+    onListingModeChange?: (mode: VillaListingMode) => void;
 }
 
 const VIEW_TYPE_CHIPS = [
@@ -36,6 +41,8 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
     onSaveSearch,
     isSaving,
     compact,
+    listingMode,
+    onListingModeChange,
 }) => {
     const { t } = useTranslation(['villas', 'common', 'search', 'rental']);
     const currencySymbol = getCurrencySymbol(filters.country !== 'any' ? filters.country : '');
@@ -259,190 +266,24 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
         );
     }
 
-    /* ── FULL (mobile modal) — vertical, clean & spacious ── */
-    const fullLabelClasses = 'block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide';
-    const fullSelectClasses = 'glass-select block w-full text-sm px-3 py-2.5 rounded-xl';
-    const fullInputClasses  = 'glass-input block w-full text-sm px-3 py-2.5 rounded-xl';
-
+    /* ── FULL (mobile modal) ──
+       The whole Zillow filter set, in the touch-sized layout. This used to
+       carry its own hand-rolled subset (view type, country, beds, baths,
+       price, a few amenities, furnishing) which was a strict subset of what
+       the buy page offered and drifted from it; VillaAllFilters is now the one
+       definition of the filter set for both the phone sheet and the desktop
+       panel, so they cannot disagree. */
     return (
-        <div className="space-y-5 p-4 pb-6">
-
-            {/* View type section */}
-            <div>
-                <label className={fullLabelClasses}>{t('villas:filters.viewType', 'Setting')}</label>
-                <div className="flex flex-wrap gap-2">
-                    {VIEW_TYPE_CHIPS.map(chip => (
-                        <button
-                            key={chip.value}
-                            type="button"
-                            onClick={() => onFilterChange('viewType', activeViewType === chip.value ? 'any' : chip.value)}
-                            className={`${chipBase} text-xs px-3 py-1.5 ${activeViewType === chip.value ? chipActive : chipInactive}`}
-                        >
-                            <span>{chip.emoji}</span>
-                            <span>{t(`villas:${chip.labelKey}`, chip.defaultLabel)}</span>
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {/* Country + Beds — 2-col grid */}
-            <div className="grid grid-cols-2 gap-3">
-                <div>
-                    <label className={fullLabelClasses}>{t('villas:filters.country', 'Country')}</label>
-                    <select
-                        value={filters.country}
-                        onChange={(e) => onFilterChange('country', e.target.value)}
-                        className={fullSelectClasses}
-                    >
-                        <option value="any">{t('villas:filters.allCountries', 'All Countries')}</option>
-                        {BALKAN_LOCATIONS.map(country => (
-                            <option key={country.code} value={country.name}>{country.name}</option>
-                        ))}
-                    </select>
-                </div>
-                <div>
-                    <label className={fullLabelClasses}>{t('villas:filters.minBeds', 'Bedrooms')}</label>
-                    <div className="flex gap-2">
-                        {([null, 3, 4, 5] as (number | null)[]).map(n => {
-                            const isActive = (filters.beds ?? null) === n;
-                            return (
-                                <button
-                                    key={n ?? 'any'}
-                                    type="button"
-                                    onClick={() => onFilterChange('beds', n)}
-                                    className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
-                                        isActive
-                                            ? 'bg-[var(--color-villa-gold-bright)]/15 text-[var(--color-primary)] border-[var(--color-villa-gold-bright)]'
-                                            : 'bg-white text-gray-500 border-gray-200 hover:border-[var(--color-villa-gold-bright)]/60 hover:text-[var(--color-primary)]'
-                                    }`}
-                                >
-                                    {n === null ? t('common:any', 'Any') : `${n}+ 🛏️`}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-            </div>
-
-            {/* Bathrooms */}
-            <div>
-                <label className={fullLabelClasses}>{t('villas:filters.bathrooms', 'Bathrooms')}</label>
-                <div className="flex gap-2">
-                    {([null, 1, 2, 3] as (number | null)[]).map(n => {
-                        const isActive = (filters.baths ?? null) === n;
-                        return (
-                            <button
-                                key={n ?? 'any'}
-                                type="button"
-                                onClick={() => onFilterChange('baths', n)}
-                                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
-                                    isActive
-                                        ? 'bg-[var(--color-villa-gold-bright)]/15 text-[var(--color-primary)] border-[var(--color-villa-gold-bright)]'
-                                        : 'bg-white text-gray-500 border-gray-200 hover:border-[var(--color-villa-gold-bright)]/60 hover:text-[var(--color-primary)]'
-                                }`}
-                            >
-                                {n === null ? t('common:any', 'Any') : `${n}+ 🛁`}
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* Price per night */}
-            <div>
-                <label className={fullLabelClasses}>{t('villas:filters.pricePerNight', 'Price / Night')}</label>
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">{currencySymbol}</span>
-                        <input
-                            type="number"
-                            inputMode="numeric"
-                            min={0}
-                            placeholder="500"
-                            value={filters.minPrice ?? ''}
-                            onChange={(e) => handlePriceChange('minPrice', e.target.value)}
-                            aria-invalid={priceInvalid}
-                            className={`${fullInputClasses} pl-6${priceRing}`}
-                            aria-label={t('villas:filters.minRentPerNight', 'Min price per night')}
-                        />
-                    </div>
-                    <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">{currencySymbol}</span>
-                        <input
-                            type="number"
-                            inputMode="numeric"
-                            min={0}
-                            placeholder={t('villas:filters.noLimit', 'No limit')}
-                            value={filters.maxPrice ?? ''}
-                            onChange={(e) => handlePriceChange('maxPrice', e.target.value)}
-                            aria-invalid={priceInvalid}
-                            className={`${fullInputClasses} pl-6${priceRing}`}
-                            aria-label={t('villas:filters.maxRentPerNight', 'Max price per night')}
-                        />
-                    </div>
-                </div>
-                {priceInvalid && (
-                    <p className="mt-1.5 text-[11px] text-red-500" role="alert">
-                        {t('villas:filters.priceRangeInvalid', 'Minimum price is higher than the maximum.')}
-                    </p>
-                )}
-            </div>
-
-            {/* Premium amenities */}
-            <div>
-                <label className={fullLabelClasses}>{t('villas:filters.amenities', 'Premium Amenities')}</label>
-                <div className="flex flex-wrap gap-2">
-                    {([
-                        { key: 'hasPool'   as keyof Filters, label: t('villas:filters.pool',   'Pool'),   emoji: '🏊' },
-                        { key: 'hasGarden' as keyof Filters, label: t('villas:filters.garden', 'Garden'), emoji: '🌿' },
-                    ] as const).map(({ key, label, emoji }) => {
-                        const isActive = (filters as any)[key] === true;
-                        return (
-                            <button
-                                key={String(key)}
-                                type="button"
-                                onClick={() => onFilterChange(key, isActive ? null : true)}
-                                className={`${chipBase} text-xs px-3 py-1.5 ${isActive ? chipActive : chipInactive}`}
-                            >
-                                <span>{emoji}</span>
-                                <span>{label}</span>
-                            </button>
-                        );
-                    })}
-                    {AMENITY_CHIPS.map(({ tag, labelKey, defaultLabel, emoji }) => {
-                        const isActive = activeAmenities.includes(tag);
-                        return (
-                            <button
-                                key={tag}
-                                type="button"
-                                onClick={() => toggleAmenity(tag)}
-                                className={`${chipBase} text-xs px-3 py-1.5 ${isActive ? chipActive : chipInactive}`}
-                            >
-                                <span>{emoji}</span>
-                                <span>{t(`villas:${labelKey}`, defaultLabel)}</span>
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* Furnishing dropdown */}
-            <div>
-                <label className={fullLabelClasses}>{t('villas:filters.furnishing', 'Furnishing')}</label>
-                <select
-                    value={filters.furnishing}
-                    onChange={(e) => onFilterChange('furnishing', e.target.value)}
-                    className={fullSelectClasses}
-                >
-                    <option value="any">{t('common:any', 'Any')}</option>
-                    <option value="furnished">{t('rental:furnishing.furnished', 'Furnished')}</option>
-                    <option value="semi-furnished">{t('rental:furnishing.semi-furnished', 'Semi-furnished')}</option>
-                    <option value="unfurnished">{t('rental:furnishing.unfurnished', 'Unfurnished')}</option>
-                </select>
-            </div>
+        <div className="pb-2">
+            <VillaAllFilters
+                filters={filters}
+                onFilterChange={onFilterChange}
+                listingMode={listingMode}
+                onListingModeChange={onListingModeChange}
+            />
 
             {/* Action buttons */}
-            <div className="flex flex-col gap-2.5 pt-1">
+            <div className="flex flex-col gap-2.5 px-4 pb-6 pt-1">
                 <Button
                     variant="cool"
                     onClick={onSearch}

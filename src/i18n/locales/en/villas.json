@@ -138,7 +138,22 @@
     "allListings": "All",
     "priceRangeInvalid": "Minimum price is higher than the maximum.",
     "gardenView": "Garden View",
-    "streetView": "Street View"
+    "streetView": "Street View",
+    "allFilters": "All filters",
+    "listingStatus": "Listing Status",
+    "homeType": "Home Type",
+    "beds": "Bedrooms",
+    "views": "View",
+    "mustHaves": "Must Haves",
+    "listedBy": "Listed By",
+    "priceChange": "Price Change",
+    "keywords": "Keywords",
+    "tour3d": "3D Tour",
+    "gym": "Gym",
+    "jacuzzi": "Jacuzzi",
+    "helipad": "Helipad",
+    "showResults": "Show {{count}} villas",
+    "areaRangeInvalid": "Minimum area is larger than the maximum."
   },
   "seo": {
     "title": "Luxury Villas for Rent in the Balkans | BalkanEstate",

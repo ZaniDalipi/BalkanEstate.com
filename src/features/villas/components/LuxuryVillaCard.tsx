@@ -7,6 +7,13 @@ import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { formatPrice } from '@/utils/currency';
 import PropertyImage from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
+import {
+    getStreetLine,
+    getLocalityLine,
+    getFullPropertyName,
+    getFactsLine,
+    type Translate,
+} from '@/shared/utils/propertyNaming';
 import VillaBookingModal from './VillaBookingModal';
 
 /** View types and cancellation policies keyed to the same strings VillaFilters
@@ -158,6 +165,16 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
         property.parkingIncluded   && { emoji: '🚗', label: t('villas:amenities.parking', 'Parking') },
     ].filter(Boolean).slice(0, 5) as { emoji: string; label: string }[];
 
+    /* Zillow's naming: the listing is its address. The heading is the street
+       line, the line beneath it the locality, and the facts line carries the
+       abbreviated counts plus the home type. The status is left off the facts
+       line here because the photo already carries a For Rent / For Sale chip. */
+    const translate = t as unknown as Translate;
+    const streetLine = getStreetLine(property, translate);
+    const localityLine = getLocalityLine(property);
+    const fullName = getFullPropertyName(property, translate);
+    const factsLine = getFactsLine(property, translate, { includeStatus: false });
+
     const viewType  = property.viewType ? VIEW_TYPE[property.viewType] : null;
     const isSold    = property.status === 'sold';
     const isRented  = property.status === 'rented';
@@ -175,7 +192,7 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
             onTouchEnd={handleTouchEnd}
             role="link"
             tabIndex={0}
-            aria-label={`${property.title || t('villas:card.defaultTitle', 'Luxury Villa')} — ${property.city}, ${property.country}`}
+            aria-label={fullName}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
         >
             {/* ── Gold SVG border traces around the card on hover ── */}
@@ -230,7 +247,7 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                             >
                                 <PropertyImage
                                     src={src ?? property.imageUrl}
-                                    alt={property.title || t('villas:card.defaultTitle', 'Luxury Villa')}
+                                    alt={fullName}
                                     priority={priority && i === 0}
                                     widths={[400, 640, 800]}
                                     sizes="(max-width: 640px) 100vw, 50vw"
@@ -387,41 +404,24 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                 {/* ── Bottom content overlay ── */}
                 <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 pt-8 z-20">
                     <div className="flex items-end justify-between gap-3">
-                        {/* Left: title + location + stats */}
+                        {/* Left: address (Zillow-style) + locality + facts line */}
                         <div className="min-w-0 flex-1">
                             <h3 className="text-white font-bold text-sm sm:text-[15px] leading-snug mb-0.5 drop-shadow-md line-clamp-1">
-                                {property.title || (property.beds > 0
-                                    ? t('villas:card.bedTitle', '{{beds}}-Bed Luxury Villa', { beds: property.beds })
-                                    : t('villas:card.defaultTitle', 'Luxury Villa'))}
+                                {streetLine}
                             </h3>
-                            <p className="flex items-center gap-1 text-white/60 text-[11px] mb-2">
-                                <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                {property.city}{property.country ? `, ${property.country}` : ''}
+                            {localityLine && (
+                                <p className="flex items-center gap-1 text-white/60 text-[11px] mb-2">
+                                    <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <span className="truncate">{localityLine}</span>
+                                </p>
+                            )}
+                            {/* Zillow's facts line: "4 bds · 3 ba · 420 m² · Luxury Villa" */}
+                            <p className="text-white/55 text-[11px] leading-snug line-clamp-1">
+                                {factsLine}
                             </p>
-                            {/* Stat dots */}
-                            <div className="flex items-center gap-3 text-white/50 text-[11px]">
-                                {property.beds  > 0 && (
-                                    <span className="flex items-center gap-1">
-                                        <span className="text-[13px]">🛏</span>
-                                        <span>{property.beds}</span>
-                                    </span>
-                                )}
-                                {property.baths > 0 && (
-                                    <span className="flex items-center gap-1">
-                                        <span className="text-[13px]">🛁</span>
-                                        <span>{property.baths}</span>
-                                    </span>
-                                )}
-                                {property.sqft  > 0 && (
-                                    <span className="flex items-center gap-1">
-                                        <span className="text-[11px]">📐</span>
-                                        <span>{property.sqft} m²</span>
-                                    </span>
-                                )}
-                            </div>
                         </div>
 
                         {/* Right: price tag */}

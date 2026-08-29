@@ -4,11 +4,12 @@ import MapComponent from '@/src/features/map/components/MapComponent';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
 import VillaFilters from './VillaFilters';
+import VillaAllFilters from './VillaAllFilters';
 import VillaListingModeToggle from './VillaListingModeToggle';
 import LuxuryVillaCard from './LuxuryVillaCard';
 import Toast from '@/components/shared/Toast';
 import { useVillaSearch } from '../hooks/useVillaSearch';
-import { MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, MagnifyingGlassIcon, Bars3Icon, Squares2x2Icon } from '@/constants';
+import { MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, MagnifyingGlassIcon, Bars3Icon, Squares2x2Icon, ChevronDownIcon } from '@/constants';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
 import { SEO } from '@/src/components/seo';
@@ -440,6 +441,9 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
     } = useVillaSearch();
 
     const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
+    /* Desktop "All filters" panel. Starts closed so the collection is the first
+       thing on screen — the quick chip row above it covers the common cases. */
+    const [isAllFiltersOpen, setIsAllFiltersOpen] = React.useState(false);
 
     /* Entrance animation: animate cards when villa data first loads */
     const [animateCards, setAnimateCards] = useState(true);
@@ -507,19 +511,49 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
         };
     }, [visibleCount, listProperties.length, isLoadingMore]);
 
-    /* Active filter count for badge */
+    /* Active filter count for the badge.
+       Every field the filter panel can set is counted — a badge that ignored,
+       say, "Year built" would let Reset stay hidden while results were being
+       narrowed by a control the visitor could no longer see. */
     const activeFilterCount = useMemo(() => {
         let count = 0;
         if (filters.query && filters.query.trim()) count++;
         if (filters.country && filters.country !== 'any') count++;
-        if (filters.minPrice != null) count++;
-        if (filters.maxPrice != null) count++;
-        if (filters.beds != null) count++;
-        if (filters.baths != null) count++;
-        if (filters.viewType && filters.viewType !== 'any') count++;
-        if ((filters as any).hasPool === true) count++;
-        if ((filters as any).hasGarden === true) count++;
-        if (filters.furnishing && filters.furnishing !== 'any') count++;
+
+        // Numeric ranges and "N+" pills: set means active.
+        const numericKeys: (keyof typeof filters)[] = [
+            'minPrice', 'maxPrice',
+            'beds', 'baths', 'livingRooms', 'minParking',
+            'minSqft', 'maxSqft',
+            'minPricePerSqm', 'maxPricePerSqm',
+            'minYearBuilt', 'maxYearBuilt',
+            'minFloorNumber', 'maxFloorNumber',
+            'maxDaysListed',
+            'maxDistanceToCenter', 'maxDistanceToSea', 'maxDistanceToSchool', 'maxDistanceToHospital',
+        ];
+        for (const key of numericKeys) {
+            if (filters[key] != null) count++;
+        }
+
+        // Enumerated selects: 'any' is the unset value.
+        const enumKeys: (keyof typeof filters)[] = [
+            'viewType', 'furnishing', 'heatingType', 'condition', 'energyRating', 'sellerType',
+        ];
+        for (const key of enumKeys) {
+            const value = filters[key];
+            if (value && value !== 'any') count++;
+        }
+
+        // "Must have" chips: only `true` narrows the results.
+        const booleanKeys: (keyof typeof filters)[] = [
+            'hasPool', 'hasGarden', 'hasBalcony', 'hasElevator', 'hasSecurity',
+            'hasAirConditioning', 'petsAllowed', 'has360Tour',
+            'hasDiscount', 'hasPriceIncrease',
+        ];
+        for (const key of booleanKeys) {
+            if (filters[key] === true) count++;
+        }
+
         // Reset also clears the market toggle, so it has to count here —
         // otherwise "For Sale" hid the Reset button that would undo it.
         if (listingMode !== 'any') count++;
@@ -692,17 +726,86 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                             </div>
                         </div>
 
-                        {/* Tier 3: VillaFilters compact chip row — ~52px */}
+                        {/* Tier 3: "All filters" trigger + compact chip row — ~52px.
+                            The trigger sits outside the chip row's horizontal
+                            scroller so it stays put when the chips are scrolled. */}
                         <div style={{ background: '#FFFFFF', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                            <VillaFilters
-                                filters={filters}
-                                onFilterChange={handleFilterChange}
-                                onSearch={handleSearch}
-                                onReset={handleResetFilters}
-                                onSaveSearch={handleSaveSearchArea}
-                                isSaving={isSaving}
-                                compact
-                            />
+                            <div className="flex items-center">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsAllFiltersOpen(open => !open)}
+                                    aria-expanded={isAllFiltersOpen}
+                                    aria-controls="villa-all-filters-panel"
+                                    className={`flex-shrink-0 ml-3 my-2.5 inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-[11px] font-semibold border transition-all ${
+                                        isAllFiltersOpen || activeFilterCount > 0
+                                            ? 'bg-[var(--color-villa-gold)]/12 text-[var(--color-villa-gold-ink)] border-[var(--color-villa-gold)]'
+                                            : 'bg-white text-neutral-600 border-gray-200 hover:border-[var(--color-villa-gold)]/60'
+                                    }`}
+                                >
+                                    <AdjustmentsHorizontalIcon className="w-3.5 h-3.5" />
+                                    <span>{t('villas:filters.allFilters', 'All filters')}</span>
+                                    {activeFilterCount > 0 && (
+                                        <span
+                                            className="inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold"
+                                            style={{ background: 'var(--color-villa-gold-bright)', color: 'var(--color-primary)' }}
+                                        >
+                                            {activeFilterCount}
+                                        </span>
+                                    )}
+                                    <ChevronDownIcon className={`w-3.5 h-3.5 transition-transform duration-300 ${isAllFiltersOpen ? 'rotate-180' : ''}`} />
+                                </button>
+                                <div className="flex-shrink-0 w-px h-5 bg-gray-200 ml-2.5" />
+                                <div className="min-w-0 flex-1">
+                                    <VillaFilters
+                                        filters={filters}
+                                        onFilterChange={handleFilterChange}
+                                        onSearch={handleSearch}
+                                        onReset={handleResetFilters}
+                                        onSaveSearch={handleSaveSearchArea}
+                                        isSaving={isSaving}
+                                        compact
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Tier 4: the full filter set, collapsed by default.
+                            Capped at 38vh rather than the buy page's 50vh, and
+                            rendered `dense`, so opening it still leaves a row of
+                            villa cards visible underneath. */}
+                        <div
+                            id="villa-all-filters-panel"
+                            className="overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out"
+                            style={isAllFiltersOpen
+                                ? { maxHeight: '38vh', opacity: 1, background: '#FFFFFF', borderBottom: '1px solid rgba(0,0,0,0.06)' }
+                                : { maxHeight: 0, opacity: 0 }}
+                            aria-hidden={!isAllFiltersOpen}
+                        >
+                            <div className="overflow-y-auto glass-scrollbar" style={{ maxHeight: '38vh' }}>
+                                <VillaAllFilters
+                                    filters={filters}
+                                    onFilterChange={handleFilterChange}
+                                    listingMode={listingMode}
+                                    onListingModeChange={handleListingModeChange}
+                                    dense
+                                />
+                                <div className="sticky bottom-0 flex items-center justify-between gap-2 px-3 py-2 bg-white/95 backdrop-blur-sm border-t border-black/[0.06]">
+                                    <button
+                                        type="button"
+                                        onClick={handleResetFilters}
+                                        className="text-[11px] font-semibold text-gray-400 hover:text-red-500 transition-colors px-1.5 py-1"
+                                    >
+                                        {t('villas:filters.reset', 'Reset all filters')}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsAllFiltersOpen(false)}
+                                        className="h-8 px-3.5 rounded-lg text-[11px] font-semibold text-white bg-primary hover:bg-primary-dark transition-colors active:scale-95"
+                                    >
+                                        {t('villas:filters.showResults', 'Show {{count}} villas', { count: listProperties.length })}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -1156,6 +1259,8 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     onReset={handleResetFilters}
                                     onSaveSearch={handleSaveSearchArea}
                                     isSaving={isSaving}
+                                    listingMode={listingMode}
+                                    onListingModeChange={handleListingModeChange}
                                 />
                             </div>
                         </div>
