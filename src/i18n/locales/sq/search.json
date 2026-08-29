@@ -484,5 +484,13 @@
     "in": "në"
   },
   "saving": "Duke ruajtur...",
-  "saveSearch": "Ruaj kërkimin"
+  "saveSearch": "Ruaj kërkimin",
+  "propertyTypePicker": {
+    "title": "Lloji i Pronës",
+    "selectAll": "Zgjidh të Gjitha",
+    "deselectAll": "Hiq të Gjitha",
+    "apply": "Apliko",
+    "allTypes": "Të gjitha llojet",
+    "typesSelected": "{{count}} lloje"
+  }
 }

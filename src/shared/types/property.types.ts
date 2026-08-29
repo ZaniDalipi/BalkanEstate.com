@@ -6,7 +6,9 @@ export type PropertyStatus = 'active' | 'pending' | 'sold' | 'rented' | 'draft';
 export type ListingType = 'sale' | 'rent';
 export type RentPeriod = 'monthly' | 'weekly' | 'daily';
 export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
-export type PropertyType = 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
+import type { PropertyTypeValue } from '@/constants/propertyTypes';
+
+export type PropertyType = PropertyTypeValue;
 export type FurnishingStatus = 'any' | 'furnished' | 'semi-furnished' | 'unfurnished';
 export type HeatingType = 'any' | 'central' | 'electric' | 'gas' | 'oil' | 'heat-pump' | 'solar' | 'wood' | 'none';
 export type PropertyCondition = 'any' | 'new' | 'excellent' | 'good' | 'fair' | 'needs-renovation';
@@ -211,7 +213,12 @@ export interface Filters {
   maxSqft: number | null;
   sortBy: string;
   sellerType: SellerType;
-  propertyType: 'any' | PropertyType;
+  /**
+   * Selected property types. An empty array means "any type" — the same role
+   * the legacy `'any'` sentinel used to play. Use `normalizePropertyTypes`
+   * when reading a value that may still be in the old single-value shape.
+   */
+  propertyType: PropertyType[];
   // Advanced filters
   minYearBuilt: number | null;
   maxYearBuilt: number | null;
@@ -257,7 +264,7 @@ export const initialFilters: Filters = {
   maxSqft: null,
   sortBy: 'newest',
   sellerType: 'any',
-  propertyType: 'any',
+  propertyType: [],
   minYearBuilt: null,
   maxYearBuilt: null,
   minParking: null,

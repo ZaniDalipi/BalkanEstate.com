@@ -45,7 +45,11 @@
     "office": "Office",
     "garage": "Garage",
     "other": "Other",
-    "luxury-villa": "Luxury Villa"
+    "luxury-villa": "Luxury Villa",
+    "studio": "Studio",
+    "penthouse": "Penthouse / Duplex",
+    "building": "Building",
+    "agricultural": "Agricultural Land"
   },
   "features": {
     "bedrooms": "Bedrooms",
@@ -704,5 +708,11 @@
     "priceHistory": "Price History",
     "similar": "Similar Homes",
     "onThisPage": "On this page"
+  },
+  "typeGroups": {
+    "residential": "Residential",
+    "commercial": "Commercial",
+    "land": "Land",
+    "other": "Other"
   }
 }

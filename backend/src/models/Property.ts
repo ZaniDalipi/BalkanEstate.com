@@ -91,7 +91,7 @@ export interface IProperty extends Document {
   images: IPropertyImage[];
   lat: number;
   lng: number;
-  propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
+  propertyType: 'house' | 'apartment' | 'studio' | 'penthouse' | 'villa' | 'luxury-villa' | 'building' | 'commercial' | 'garage' | 'land' | 'agricultural' | 'other';
   floorNumber?: number;
   totalFloors?: number;
   floorplanUrl?: string;
@@ -414,7 +414,7 @@ const PropertySchema: Schema = new Schema(
     },
     propertyType: {
       type: String,
-      enum: ['house', 'apartment', 'villa', 'luxury-villa', 'land', 'other'],
+      enum: ['house', 'apartment', 'studio', 'penthouse', 'villa', 'luxury-villa', 'building', 'commercial', 'garage', 'land', 'agricultural', 'other'],
       required: true,
       index: true,
     },

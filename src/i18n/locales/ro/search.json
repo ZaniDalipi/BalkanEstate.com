@@ -484,5 +484,13 @@
     "in": "în"
   },
   "saving": "Se salvează...",
-  "saveSearch": "Salvează căutarea"
+  "saveSearch": "Salvează căutarea",
+  "propertyTypePicker": {
+    "title": "Tip Proprietate",
+    "selectAll": "Selectează Tot",
+    "deselectAll": "Deselectează Tot",
+    "apply": "Aplică",
+    "allTypes": "Toate tipurile",
+    "typesSelected": "{{count}} tipuri"
+  }
 }

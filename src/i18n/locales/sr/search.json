@@ -484,5 +484,13 @@
     "in": "u"
   },
   "saving": "Čuvanje...",
-  "saveSearch": "Sačuvaj pretragu"
+  "saveSearch": "Sačuvaj pretragu",
+  "propertyTypePicker": {
+    "title": "Тип Некретнине",
+    "selectAll": "Изабери Све",
+    "deselectAll": "Поништи Све",
+    "apply": "Примени",
+    "allTypes": "Сви типови",
+    "typesSelected": "{{count}} типова"
+  }
 }

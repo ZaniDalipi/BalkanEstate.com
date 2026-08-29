@@ -12,7 +12,7 @@ import { serializeBounds } from '@/src/features/rental/hooks/useRentalSearch';
 
 const VILLA_DEFAULTS: Partial<Filters> = {
     listingType: 'rent',
-    propertyType: 'luxury-villa',
+    propertyType: ['luxury-villa'],
 };
 
 /** Which luxury villas to show: both markets, only rentals, or only for-sale. */
@@ -270,7 +270,7 @@ export function useVillaSearch() {
     const baseFilteredProperties = useMemo(() => {
         const filtered = filterProperties(villaProperties, {
             ...filters,
-            propertyType: 'luxury-villa',
+            propertyType: ['luxury-villa'],
             listingType: listingMode === 'any' ? 'any' : listingMode,
         });
         const now = Date.now();
@@ -407,7 +407,7 @@ export function useVillaSearch() {
             // "For Sale" / "All" tabs.
             const villaFilters: Filters = {
                 ...(isAreaOnly ? initialFilters : filters),
-                propertyType: 'luxury-villa',
+                propertyType: ['luxury-villa'],
                 listingType: listingMode === 'any' ? 'any' : listingMode,
             };
 

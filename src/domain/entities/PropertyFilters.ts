@@ -10,7 +10,10 @@ import {
 } from './Property';
 
 export type SellerType = 'any' | 'agent' | 'private';
-export type PropertyTypeFilter = 'any' | 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'other';
+import { normalizePropertyTypes, type PropertyTypeValue } from '@/constants/propertyTypes';
+
+/** Selected property types; an empty array means "any type". */
+export type PropertyTypeFilter = PropertyTypeValue[];
 
 export class PropertyFilters {
   constructor(
@@ -25,7 +28,7 @@ export class PropertyFilters {
     public readonly maxSqft: number | null = null,
     public readonly sortBy: string = 'newest',
     public readonly sellerType: SellerType = 'any',
-    public readonly propertyType: PropertyTypeFilter = 'any',
+    public readonly propertyType: PropertyTypeFilter = [],
     public readonly minYearBuilt: number | null = null,
     public readonly maxYearBuilt: number | null = null,
     public readonly minParking: number | null = null,
@@ -68,7 +71,7 @@ export class PropertyFilters {
       this.minSqft !== null ||
       this.maxSqft !== null ||
       this.sellerType !== 'any' ||
-      this.propertyType !== 'any' ||
+      this.propertyType.length > 0 ||
       this.minYearBuilt !== null ||
       this.maxYearBuilt !== null ||
       this.minParking !== null ||
@@ -110,7 +113,7 @@ export class PropertyFilters {
     if (this.minSqft !== null) count++;
     if (this.maxSqft !== null) count++;
     if (this.sellerType !== 'any') count++;
-    if (this.propertyType !== 'any') count++;
+    if (this.propertyType.length > 0) count++;
     if (this.minYearBuilt !== null) count++;
     if (this.maxYearBuilt !== null) count++;
     if (this.minParking !== null) count++;
@@ -244,7 +247,7 @@ export class PropertyFilters {
       dto.maxSqft,
       dto.sortBy || 'newest',
       dto.sellerType || 'any',
-      dto.propertyType || 'any',
+      normalizePropertyTypes(dto.propertyType),
       dto.minYearBuilt,
       dto.maxYearBuilt,
       dto.minParking,

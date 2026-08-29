@@ -38,7 +38,11 @@
     "office": "Ured",
     "garage": "Garaža",
     "other": "Ostalo",
-    "luxury-villa": "Luksuzna vila"
+    "luxury-villa": "Luksuzna vila",
+    "studio": "Garsonijera",
+    "penthouse": "Penthouse / Dupleks",
+    "building": "Zgrada",
+    "agricultural": "Poljoprivredno zemljište"
   },
   "features": {
     "bedrooms": "Spavaće Sobe",
@@ -704,5 +708,11 @@
     "disclaimer": "AI-generirano uređenje samo u svrhu demonstracije. Ove slike nisu stvarne fotografije nekretnine i mogu sadržavati predmete koji nisu dio oglasa.",
     "interior": "Interijer",
     "exterior": "Eksterijer"
+  },
+  "typeGroups": {
+    "residential": "Stambeno",
+    "commercial": "Poslovno",
+    "land": "Zemljište",
+    "other": "Ostalo"
   }
 }

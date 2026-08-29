@@ -484,5 +484,13 @@
     "in": "u"
   },
   "saving": "Spremanje...",
-  "saveSearch": "Sačuvaj pretragu"
+  "saveSearch": "Sačuvaj pretragu",
+  "propertyTypePicker": {
+    "title": "Vrsta Nekretnine",
+    "selectAll": "Odaberi Sve",
+    "deselectAll": "Poništi Sve",
+    "apply": "Primijeni",
+    "allTypes": "Sve vrste",
+    "typesSelected": "{{count}} vrsta"
+  }
 }

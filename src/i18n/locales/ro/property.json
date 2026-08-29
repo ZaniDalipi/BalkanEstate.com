@@ -38,7 +38,11 @@
     "office": "Birou",
     "garage": "Garaj",
     "other": "Altele",
-    "luxury-villa": "Vilă de Lux"
+    "luxury-villa": "Vilă de Lux",
+    "studio": "Garsonieră",
+    "penthouse": "Penthouse / Duplex",
+    "building": "Clădire",
+    "agricultural": "Teren Agricol"
   },
   "features": {
     "bedrooms": "Dormitoare",
@@ -704,5 +708,11 @@
     "disclaimer": "Amenajare generată de AI doar în scop demonstrativ. Aceste imagini nu sunt fotografii reale ale proprietății și pot include obiecte care nu fac parte din anunț.",
     "interior": "Interior",
     "exterior": "Exterior"
+  },
+  "typeGroups": {
+    "residential": "Rezidențial",
+    "commercial": "Comercial",
+    "land": "Teren",
+    "other": "Altele"
   }
 }

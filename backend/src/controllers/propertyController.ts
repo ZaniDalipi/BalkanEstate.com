@@ -185,8 +185,19 @@ export const getProperties = async (
       if (maxSqft) filter.sqft.$lte = Number(maxSqft);
     }
 
-    if (propertyType && propertyType !== 'any') {
-      filter.propertyType = propertyType;
+    // `propertyType` accepts a single value or a comma-separated list, so the
+    // multi-select type filter arrives as e.g. `propertyType=house,apartment`.
+    // A single value still compiles to an equality match, which the
+    // { propertyType, city, status } index can serve directly.
+    const selectedPropertyTypes = String(propertyType ?? '')
+      .split(',')
+      .map(t => t.trim())
+      .filter(t => t && t !== 'any');
+
+    if (selectedPropertyTypes.length === 1) {
+      filter.propertyType = selectedPropertyTypes[0];
+    } else if (selectedPropertyTypes.length > 1) {
+      filter.propertyType = { $in: selectedPropertyTypes };
     }
 
     // Luxury villas are admin-curated: hide only the ones an admin has left
@@ -194,13 +205,25 @@ export const getProperties = async (
     // created before the approval field existed (status is null/absent) — stay
     // visible, so the tab is never silently emptied. (The admin approval queue
     // uses its own endpoint and sees every status.)
-    if (propertyType === 'luxury-villa') {
+    //
+    // `$nin` also matches documents where the field is absent, so this stays
+    // correct when luxury-villa is only one of several selected types: the
+    // non-villa results are unaffected.
+    if (selectedPropertyTypes.includes('luxury-villa')) {
       filter.villaApprovalStatus = { $nin: ['pending', 'rejected'] };
     }
 
-    // Exclude specific property types (e.g. luxury-villa is exclusive to its own tab)
+    // Exclude specific property types (e.g. luxury-villa is exclusive to its own tab).
+    // Spreading only an object keeps an equality match (a plain string) from
+    // being torn into character keys.
     if (req.query.excludePropertyType) {
-      filter.propertyType = { ...filter.propertyType, $ne: req.query.excludePropertyType };
+      const existing =
+        typeof filter.propertyType === 'object' && filter.propertyType !== null
+          ? filter.propertyType
+          : typeof filter.propertyType === 'string'
+            ? { $eq: filter.propertyType }
+            : {};
+      filter.propertyType = { ...existing, $ne: req.query.excludePropertyType };
     }
 
     if (city) {

@@ -92,8 +92,14 @@ function propertyMatchesFilters(property: IProperty, filters: IFilters): boolean
   // Country
   if (filters.country && filters.country !== 'all' && property.country !== filters.country) return false;
 
-  // Property type
-  if (filters.propertyType && filters.propertyType !== 'any' && property.propertyType !== filters.propertyType) return false;
+  // Property type. Saved searches persist either the current array form or the
+  // legacy single value ('any' meaning no filter), so both are accepted here —
+  // an old saved search must keep matching exactly what it matched before.
+  const alertPropertyTypes = (Array.isArray(filters.propertyType)
+    ? filters.propertyType
+    : [filters.propertyType]
+  ).filter((t): t is string => typeof t === 'string' && !!t && t !== 'any');
+  if (alertPropertyTypes.length > 0 && !alertPropertyTypes.includes(property.propertyType)) return false;
 
   // Year built
   if (filters.minYearBuilt && property.yearBuilt < filters.minYearBuilt) return false;

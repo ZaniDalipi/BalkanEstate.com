@@ -19,6 +19,7 @@
  */
 
 import { Property, Seller, User, UserRole, SavedSearch, Message, Conversation, Filters } from '../types';
+import { normalizePropertyTypes } from '../constants/propertyTypes';
 import {
   encryptSensitiveFields,
   generateResponseKey,
@@ -697,7 +698,9 @@ export const getProperties = async (filters?: Filters, options?: { limit?: numbe
     if (filters.maxSqft !== null) params.append('maxSqft', filters.maxSqft.toString());
     if (filters.sortBy) params.append('sortBy', filters.sortBy);
     if (filters.sellerType && filters.sellerType !== 'any') params.append('sellerType', filters.sellerType);
-    if (filters.propertyType && filters.propertyType !== 'any') params.append('propertyType', filters.propertyType);
+    // Multi-select: sent as a comma-separated list the API turns into an $in.
+    const propertyTypes = normalizePropertyTypes(filters.propertyType);
+    if (propertyTypes.length > 0) params.append('propertyType', propertyTypes.join(','));
     if (filters.listingType && filters.listingType !== 'any') params.append('listingType', filters.listingType);
   }
 

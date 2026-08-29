@@ -50,8 +50,8 @@ export class SavedSearch {
       parts.push(this.filters.country);
     }
 
-    if (this.filters.propertyType && this.filters.propertyType !== 'any') {
-      parts.push(this.filters.propertyType);
+    if (this.filters.propertyType.length > 0) {
+      parts.push(this.filters.propertyType.join(', '));
     }
 
     if (this.filters.minPrice || this.filters.maxPrice) {
@@ -79,7 +79,7 @@ export class SavedSearch {
     if (this.filters.maxPrice && property.price > this.filters.maxPrice) return false;
     if (this.filters.beds && property.beds < this.filters.beds) return false;
     if (this.filters.baths && property.baths < this.filters.baths) return false;
-    if (this.filters.propertyType !== 'any' && property.propertyType !== this.filters.propertyType) return false;
+    if (this.filters.propertyType.length > 0 && !this.filters.propertyType.includes(property.propertyType)) return false;
     return true;
   }
 

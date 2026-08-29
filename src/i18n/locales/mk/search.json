@@ -484,5 +484,13 @@
     "in": "во"
   },
   "saving": "Зачувување...",
-  "saveSearch": "Зачувај пребарување"
+  "saveSearch": "Зачувај пребарување",
+  "propertyTypePicker": {
+    "title": "Тип на Имот",
+    "selectAll": "Избери Сè",
+    "deselectAll": "Поништи Сè",
+    "apply": "Примени",
+    "allTypes": "Сите типови",
+    "typesSelected": "{{count}} типови"
+  }
 }

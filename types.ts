@@ -13,6 +13,17 @@
  * - App types: @/src/shared/types/app.types
  */
 
+import type { PropertyTypeValue } from './constants/propertyTypes';
+
+export type { PropertyTypeValue } from './constants/propertyTypes';
+export {
+    PROPERTY_TYPES,
+    PROPERTY_TYPE_VALUES,
+    PROPERTY_TYPE_GROUPS,
+    isPropertyTypeValue,
+    normalizePropertyTypes,
+} from './constants/propertyTypes';
+
 // --- Enums and Simple Types ---
 export enum UserRole {
     BUYER = 'buyer',
@@ -351,7 +362,7 @@ export interface Property {
     lat: number;
     lng: number;
     seller: Seller;
-    propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
+    propertyType: PropertyTypeValue;
     floorNumber?: number;
     totalFloors?: number;
     floorplanUrl?: string;
@@ -491,7 +502,12 @@ export interface Filters {
     maxSqft: number | null;
     sortBy: string;
     sellerType: SellerType;
-    propertyType: 'any' | 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
+    /**
+     * Selected property types. An empty array means "any type" — the same role
+     * the legacy `'any'` sentinel used to play. Use `normalizePropertyTypes`
+     * when reading a value that may still be in the old single-value shape.
+     */
+    propertyType: PropertyTypeValue[];
     // Advanced filters
     minYearBuilt: number | null;
     maxYearBuilt: number | null;
@@ -536,7 +552,7 @@ export const initialFilters: Filters = {
     maxSqft: null,
     sortBy: 'newest',
     sellerType: 'any',
-    propertyType: 'any',
+    propertyType: [],
     // Advanced filters
     minYearBuilt: null,
     maxYearBuilt: null,
@@ -597,7 +613,7 @@ export interface AiSearchQuery {
     livingRooms?: number;
     minSqft?: number;
     maxSqft?: number;
-    propertyType?: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'commercial';
+    propertyType?: PropertyTypeValue;
     sellerType?: 'agent' | 'private';
     features?: string[];
 }

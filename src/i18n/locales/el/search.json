@@ -484,5 +484,13 @@
     "in": "σε"
   },
   "saving": "Αποθήκευση...",
-  "saveSearch": "Αποθήκευση αναζήτησης"
+  "saveSearch": "Αποθήκευση αναζήτησης",
+  "propertyTypePicker": {
+    "title": "Τύπος Ακινήτου",
+    "selectAll": "Επιλογή Όλων",
+    "deselectAll": "Αποεπιλογή Όλων",
+    "apply": "Εφαρμογή",
+    "allTypes": "Όλοι οι τύποι",
+    "typesSelected": "{{count}} τύποι"
+  }
 }

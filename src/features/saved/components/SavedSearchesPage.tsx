@@ -27,7 +27,7 @@ const initialFilters: Filters = {
     maxSqft: null,
     sortBy: 'newest',
     sellerType: 'any',
-    propertyType: 'any',
+    propertyType: [],
     minYearBuilt: null,
     maxYearBuilt: null,
     minParking: null,

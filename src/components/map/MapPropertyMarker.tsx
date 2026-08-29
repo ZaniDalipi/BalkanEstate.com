@@ -273,9 +273,15 @@ const PROPERTY_TYPE_COLORS: Record<
 > = {
   house: '#0252CD',
   apartment: '#28a745',
+  studio: '#28a745',        // Shares the apartment colour — same family on the map
+  penthouse: '#1E7E34',     // Darker green: an apartment, but visually distinct
   villa: '#6f42c1',
   'luxury-villa': '#FFA500', // Amber/gold — exclusive to the Luxury Villas tab
+  building: '#5A32A3',      // Deep purple — a whole block rather than one unit
+  commercial: '#C2410C',    // Burnt orange for business premises
+  garage: '#6B7280',        // Slate — deliberately low-salience
   land: '#8B4513',    // Brown for land
+  agricultural: '#4D7C0F',  // Olive — farmland, related to but distinct from land
   other: '#0D9488',   // Teal — friendlier than the old gray, distinct from the other types
 };
 

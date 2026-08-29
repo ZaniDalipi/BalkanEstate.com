@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { Property, Filters, initialFilters, NominatimResult, SavedSearch } from '@/types';
+import { normalizePropertyTypes } from '@/constants/propertyTypes';
 import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import L from 'leaflet';
@@ -340,7 +341,7 @@ export function useRentalSearch() {
     }, []);
 
     const isFormSearchActive = useMemo(() => {
-        return filters.query.trim() !== '' || filters.minPrice !== null || filters.maxPrice !== null || filters.beds !== null || filters.baths !== null || filters.propertyType !== 'any';
+        return filters.query.trim() !== '' || filters.minPrice !== null || filters.maxPrice !== null || filters.beds !== null || filters.baths !== null || normalizePropertyTypes(filters.propertyType).length > 0;
     }, [filters]);
 
     const handleSaveSearch = useCallback(async (isAreaOnly: boolean = false) => {

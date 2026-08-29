@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { useRealtimeProperties } from '@/src/features/properties/hooks';
 import { SavedSearch, ChatMessage, AiSearchQuery, Filters, initialFilters, SearchPageState, Property, NominatimResult } from '@/types';
+import { normalizePropertyTypes } from '@/constants/propertyTypes';
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import L from 'leaflet';
@@ -259,10 +260,11 @@ export function useSearchPage() {
                 newFilters.country = countryParam;
             }
             if (propertyTypeParam) {
-                // Validate that propertyType is a valid option
-                const validPropertyTypes = ['any', 'house', 'apartment', 'villa', 'land', 'other'] as const;
-                if (validPropertyTypes.includes(propertyTypeParam as typeof validPropertyTypes[number])) {
-                    newFilters.propertyType = propertyTypeParam as typeof validPropertyTypes[number];
+                // Accepts a single type or a comma-separated list; unknown
+                // values are dropped rather than applied.
+                const parsedTypes = normalizePropertyTypes(propertyTypeParam);
+                if (parsedTypes.length > 0) {
+                    newFilters.propertyType = parsedTypes;
                 }
             }
 
@@ -706,7 +708,7 @@ export function useSearchPage() {
     }, [filters, activeFilters, updateSearchPageState]);
 
     const isFormSearchActive = useMemo(() => {
-        return filters.query.trim() !== '' || filters.minPrice !== null || filters.maxPrice !== null || filters.beds !== null || filters.baths !== null || filters.livingRooms !== null || filters.minSqft !== null || filters.maxSqft !== null || filters.sellerType !== 'any' || filters.propertyType !== 'any';
+        return filters.query.trim() !== '' || filters.minPrice !== null || filters.maxPrice !== null || filters.beds !== null || filters.baths !== null || filters.livingRooms !== null || filters.minSqft !== null || filters.maxSqft !== null || filters.sellerType !== 'any' || filters.propertyType.length > 0;
     }, [filters]);
 
     const handleSaveSearch = useCallback(async (isAreaOnly: boolean = false) => {
@@ -884,7 +886,7 @@ export function useSearchPage() {
 
         // Only set propertyType if AI explicitly provided it
         if (aiQuery.propertyType) {
-            newFilters.propertyType = aiQuery.propertyType === 'commercial' ? 'other' : aiQuery.propertyType;
+            newFilters.propertyType = normalizePropertyTypes(aiQuery.propertyType);
         }
 
         // Only set sellerType if AI explicitly provided it (user asked for agent/private)
@@ -981,7 +983,7 @@ export function useSearchPage() {
         return generateSearchSEOTitle({
             country: filters.country && filters.country !== 'any' ? filters.country : undefined,
             city: filters.query || undefined,
-            propertyType: filters.propertyType && filters.propertyType !== 'any' ? filters.propertyType : undefined,
+            propertyType: filters.propertyType.length === 1 ? filters.propertyType[0] : undefined,
             query: filters.query || undefined,
         }, t);
     }, [filters.country, filters.query, filters.propertyType, t]);
@@ -990,7 +992,7 @@ export function useSearchPage() {
         return generateSearchSEODescription({
             country: filters.country && filters.country !== 'any' ? filters.country : undefined,
             city: filters.query || undefined,
-            propertyType: filters.propertyType && filters.propertyType !== 'any' ? filters.propertyType : undefined,
+            propertyType: filters.propertyType.length === 1 ? filters.propertyType[0] : undefined,
             query: filters.query || undefined,
             minPrice: filters.minPrice || undefined,
             maxPrice: filters.maxPrice || undefined,

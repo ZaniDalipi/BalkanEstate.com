@@ -484,5 +484,13 @@
     "in": "в"
   },
   "saving": "Запазване...",
-  "saveSearch": "Запази търсенето"
+  "saveSearch": "Запази търсенето",
+  "propertyTypePicker": {
+    "title": "Тип Имот",
+    "selectAll": "Избери Всички",
+    "deselectAll": "Изчисти Всички",
+    "apply": "Приложи",
+    "allTypes": "Всички типове",
+    "typesSelected": "{{count}} типа"
+  }
 }

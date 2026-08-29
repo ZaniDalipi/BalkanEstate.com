@@ -484,5 +484,13 @@
     "tagline": "Pretraga nekretnina pokretana vještačkom inteligencijom na BalkanEstateAI — 11 zemalja, 10 jezika."
   },
   "saving": "Čuvanje...",
-  "saveSearch": "Sačuvaj pretragu"
+  "saveSearch": "Sačuvaj pretragu",
+  "propertyTypePicker": {
+    "title": "Vrsta Nekretnine",
+    "selectAll": "Odaberi Sve",
+    "deselectAll": "Poništi Sve",
+    "apply": "Primijeni",
+    "allTypes": "Sve vrste",
+    "typesSelected": "{{count}} vrsta"
+  }
 }

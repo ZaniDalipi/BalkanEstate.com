@@ -38,7 +38,11 @@
     "office": "Zyrë",
     "garage": "Garazh",
     "other": "Tjetër",
-    "luxury-villa": "Vilë Luksoze"
+    "luxury-villa": "Vilë Luksoze",
+    "studio": "Garsoniere",
+    "penthouse": "Penthouse / Dupleks",
+    "building": "Ndërtesë",
+    "agricultural": "Tokë Bujqësore"
   },
   "features": {
     "bedrooms": "Dhoma Gjumi",
@@ -704,5 +708,11 @@
     "disclaimer": "Skenë e krijuar me AI vetëm për qëllime demonstrimi. Këto imazhe nuk janë foto reale të pronës dhe mund të përmbajnë artikuj që nuk janë pjesë e shpalljes.",
     "interior": "Interior",
     "exterior": "Eksterier"
+  },
+  "typeGroups": {
+    "residential": "Banesore",
+    "commercial": "Komerciale",
+    "land": "Tokë",
+    "other": "Tjetër"
   }
 }

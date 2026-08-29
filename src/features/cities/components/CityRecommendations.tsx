@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { Filters } from '@/types';
 import { getFeaturedCities, CityMarketData } from '@/services/apiService';
 import { mergeWithStaticFallback } from '../data/staticCities';
 import { formatPrice } from '@/utils/currency';
@@ -123,7 +124,7 @@ const CityRecommendations: React.FC = () => {
     }
 
     const displayName = `${city.city}, ${city.country}`;
-    const emptyFilters = {
+    const emptyFilters: Filters = {
       country: 'any' as const,
       query: '',
       listingType: 'sale' as const,
@@ -136,7 +137,7 @@ const CityRecommendations: React.FC = () => {
       maxSqft: null,
       sortBy: 'newest' as const,
       sellerType: 'any' as const,
-      propertyType: 'any' as const,
+      propertyType: [] as const,
       minYearBuilt: null,
       maxYearBuilt: null,
       minParking: null,

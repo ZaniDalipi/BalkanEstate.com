@@ -484,5 +484,13 @@
     "applyingFilters": "Applying filters..."
   },
   "saving": "Saving...",
-  "saveSearch": "Save search"
+  "saveSearch": "Save search",
+  "propertyTypePicker": {
+    "title": "Property Type",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "apply": "Apply",
+    "allTypes": "All types",
+    "typesSelected": "{{count}} types"
+  }
 }

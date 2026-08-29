@@ -1,5 +1,6 @@
 import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { Filters } from '@/types';
 import { useCityMarketData, useCitiesByCountry } from '../hooks/useCityQueries';
 import { useSuburbData, useCityImages, useCityGeoData } from '../hooks/useSuburbQueries';
 import { useCityPriceHistory, useEconomicIndicators } from '../hooks/useCityInsights';
@@ -127,7 +128,7 @@ const CityDashboard: React.FC = () => {
     }
 
     const displayName = `${city.city}, ${city.country}`;
-    const emptyFilters = {
+    const emptyFilters: Filters = {
       country: 'any' as const,
       query: '',
       listingType: 'sale' as const,
@@ -140,7 +141,7 @@ const CityDashboard: React.FC = () => {
       maxSqft: null,
       sortBy: 'newest' as const,
       sellerType: 'any' as const,
-      propertyType: 'any' as const,
+      propertyType: [] as const,
       minYearBuilt: null,
       maxYearBuilt: null,
       minParking: null,
@@ -199,11 +200,11 @@ const CityDashboard: React.FC = () => {
         : null;
 
     const searchQuery = `${suburb.name}, ${city.city}, ${city.country}`;
-    const emptyFilters = {
+    const emptyFilters: Filters = {
       country: 'any' as const, query: '', listingType: 'sale' as const,
       minPrice: null, maxPrice: null, beds: null, baths: null,
       livingRooms: null, minSqft: null, maxSqft: null, sortBy: 'newest' as const,
-      sellerType: 'any' as const, propertyType: 'any' as const, minYearBuilt: null,
+      sellerType: 'any' as const, propertyType: [] as const, minYearBuilt: null,
       maxYearBuilt: null, minParking: null, furnishing: 'any' as const,
       heatingType: 'any' as const, condition: 'any' as const, viewType: 'any' as const,
       energyRating: 'any' as const, hasBalcony: null, hasGarden: null,
