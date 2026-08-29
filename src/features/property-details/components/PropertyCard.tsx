@@ -253,7 +253,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
       className={`group bg-white rounded-2xl overflow-hidden shadow-sm border text-left w-full flex flex-col cursor-pointer isolate transition-[translate,box-shadow,border-color] duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 ${getCardStyles()} ${
         isSold || isRented
           ? 'hover:shadow-md'
-          : 'hover:shadow-[0_12px_28px_-10px_rgba(15,23,42,0.28)] motion-safe:hover:-translate-y-1'
+          : 'hover:shadow-[0_1px_3px_rgba(15,23,42,0.06),0_8px_20px_-6px_rgba(15,23,42,0.13)] motion-safe:hover:-translate-y-1'
       }`}
       onClick={onCardClick}
       onContextMenu={onContextMenu}
@@ -702,18 +702,26 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               )}
             </div>
 
-            {/* Agency logo, when there is one to show */}
-            {safeProperty.seller.type === 'agent' && safeProperty.seller.agencyLogo && (
-              <div className="flex-shrink-0">
-                <img
-                  src={optimizeCloudinaryUrl(safeProperty.seller.agencyLogo, { width: 48, quality: 'auto', crop: 'fill' })}
-                  alt={`${safeProperty.seller.agencyName} - Real Estate Agency`}
-                  loading="lazy"
-                  decoding="async"
-                  width={24}
-                  height={24}
-                  className="w-5 h-5 rounded object-contain bg-white border border-neutral-100"
-                />
+            {/* Agency mark — the logo when the agency has one, the building glyph
+                otherwise, so every agency listing carries a visual marker. */}
+            {safeProperty.seller.type === 'agent' && safeProperty.seller.agencyName && (
+              <div
+                className="flex-shrink-0 w-6 h-6 rounded-md border border-neutral-200 bg-white flex items-center justify-center overflow-hidden"
+                title={safeProperty.seller.agencyName}
+              >
+                {safeProperty.seller.agencyLogo ? (
+                  <img
+                    src={optimizeCloudinaryUrl(safeProperty.seller.agencyLogo, { width: 48, quality: 'auto', crop: 'fit' })}
+                    alt={`${safeProperty.seller.agencyName} - Real Estate Agency`}
+                    loading="lazy"
+                    decoding="async"
+                    width={24}
+                    height={24}
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <BuildingOfficeIcon className="w-3.5 h-3.5 text-primary" />
+                )}
               </div>
             )}
           </div>
