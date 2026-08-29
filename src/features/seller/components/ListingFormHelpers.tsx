@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, Orientation, ListingType, RentPeriod, VisitAvailability } from '@/types';
+import { LAND_TYPES, UNIT_IN_BLOCK_TYPES, STANDALONE_BUILDING_TYPES, type PropertyTypeValue } from '@/constants/propertyTypes';
 import { Button } from '@/components/ui/liquid-glass-button';
 
 // --- Types ---
@@ -33,7 +34,7 @@ export interface ListingData {
     image_tags: { index: number; tag: string; }[];
     tourUrl: string; // URL for video (YouTube, TikTok, Instagram, Vimeo, Facebook)
     virtualTour360Url: string; // URL for 360 virtual tour (Matterport, Kuula, etc.)
-    propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
+    propertyType: PropertyTypeValue;
     floorNumber: number;
     totalFloors: number;
     lat: number;
@@ -238,8 +239,8 @@ export const validateListing = (
     }
 
     // Floor details - not applicable to land
-    if (listingData.propertyType !== 'land') {
-        if (listingData.propertyType === 'apartment') {
+    if (!LAND_TYPES.includes(listingData.propertyType)) {
+        if (UNIT_IN_BLOCK_TYPES.includes(listingData.propertyType)) {
             if (!listingData.floorNumber || listingData.floorNumber < 0) {
                 errors.floorNumber = t('newListing:validation.apartmentFloorNumber', 'For apartments, please enter a valid floor number (1 or greater).');
             } else if (listingData.totalFloors && listingData.floorNumber > listingData.totalFloors) {
@@ -252,7 +253,7 @@ export const validateListing = (
                 errors.hasElevator = t('newListing:validation.apartmentElevator', 'For apartments, please specify whether there is a lift/elevator (Yes or No).');
             }
         }
-        if ((listingData.propertyType === 'house' || listingData.propertyType === 'villa')
+        if (STANDALONE_BUILDING_TYPES.includes(listingData.propertyType)
             && (!listingData.totalFloors || listingData.totalFloors < 1)) {
             errors.totalFloors = t('newListing:validation.houseTotalFloors', 'For houses and villas, please enter the total number of floors (1 or greater).');
         }

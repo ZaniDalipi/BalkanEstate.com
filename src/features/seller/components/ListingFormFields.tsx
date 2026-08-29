@@ -1,11 +1,13 @@
 import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BALKAN_LOCATIONS, CityData } from '@/utils/balkanLocations';
+import { PROPERTY_TYPES, UNIT_IN_BLOCK_TYPES, STANDALONE_BUILDING_TYPES } from '@/constants/propertyTypes';
 import { getCurrencySymbol } from '@/utils/currency';
 import MapLocationPicker from './MapLocationPicker';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
 import type { ListingData, ImageData, FieldErrors } from './ListingFormHelpers';
 import { floatingInputClasses, floatingSelectLabelClasses, inputBaseClasses, labelClasses, selectClasses, errorFieldClasses, errorLabelClasses, fieldAnchorId, FieldError, RequiredMark } from './ListingFormHelpers';
+
 
 const chevronIcon = (
     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
@@ -207,12 +209,9 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                 <div>
                     <div className="relative">
                         <select name="propertyType" id="propertyType" value={listingData.propertyType} onChange={handleInputChange} className={`${floatingInputClasses} border-neutral-300`}>
-                            <option value="house">{t('seller:propertyTypes.house')}</option>
-                            <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
-                            <option value="villa">{t('seller:propertyTypes.villa')}</option>
-                            <option value="luxury-villa">{t('seller:propertyTypes.luxuryVilla', 'Luxury Villa')}</option>
-                            <option value="land">{t('seller:propertyTypes.land')}</option>
-                            <option value="other">{t('seller:propertyTypes.other')}</option>
+                            {PROPERTY_TYPES.map(({ value, labelKey }) => (
+                                <option key={value} value={value}>{t(labelKey, value)}</option>
+                            ))}
                         </select>
                         <label htmlFor="propertyType" className={floatingSelectLabelClasses}>{t('seller:form.propertyType')}</label>
                     </div>
@@ -223,7 +222,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                         </div>
                     )}
                 </div>
-                {listingData.propertyType === 'apartment' && (
+                {UNIT_IN_BLOCK_TYPES.includes(listingData.propertyType) && (
                     <>
                         <NumberInputWithSteppers
                             label={t('seller:createListing.fields.totalFloors')}
@@ -267,7 +266,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                         </div>
                     </>
                 )}
-                {(listingData.propertyType === 'house' || listingData.propertyType === 'villa' || listingData.propertyType === 'luxury-villa') && (
+                {STANDALONE_BUILDING_TYPES.includes(listingData.propertyType) && (
                     <div className="md:col-span-2 flex justify-center">
                         <div className="w-full max-w-xs">
                             <NumberInputWithSteppers label={t('seller:createListing.fields.totalFloors')} value={listingData.totalFloors} min={1} onChange={(val) => setListingData(p => ({ ...p, totalFloors: val }))} error={fieldErrors.totalFloors} anchorId={fieldAnchorId('totalFloors')} />

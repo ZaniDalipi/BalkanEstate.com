@@ -5,6 +5,7 @@ import PropertyCard from '@/src/features/property-details/components/PropertyCar
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
 import { SearchIcon, XMarkIcon, BellIcon, BuildingLibraryIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon, AdjustmentsHorizontalIcon } from '@/constants';
 import AiSearch from './AiSearch';
+import PropertyTypePicker from './PropertyTypePicker';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import Footer from '@/components/shared/Footer';
 
@@ -359,11 +360,10 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                                 selectedValue={filters.sellerType}
                                 onChange={(value) => onFilterChange('sellerType', (value as SellerType) || 'any')}
                             />
-                            <FilterButtonGroup
+                            <PropertyTypePicker
                                 label={t('search:filters.propertyType')}
-                                options={[ { value: 'any', label: t('search:propertyTypes.any') }, { value: 'house', label: t('search:propertyTypes.house') }, { value: 'apartment', label: t('search:propertyTypes.apartment') }, { value: 'villa', label: t('search:propertyTypes.villa') }, { value: 'land', label: t('search:propertyTypes.land') }, ]}
-                                selectedValue={filters.propertyType}
-                                onChange={(value) => onFilterChange('propertyType', (value as Filters['propertyType']) || 'any')}
+                                value={filters.propertyType}
+                                onChange={(value) => onFilterChange('propertyType', value)}
                             />
                         </div>
 

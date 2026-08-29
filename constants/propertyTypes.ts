@@ -42,6 +42,27 @@ export const PROPERTY_TYPE_GROUPS: readonly PropertyTypeGroup[] = [
   'other',
 ];
 
+/**
+ * A unit inside a larger block: which floor it sits on is meaningful, as is the
+ * building's total floor count and whether there is a lift.
+ */
+export const UNIT_IN_BLOCK_TYPES: readonly PropertyTypeValue[] = [
+  'apartment',
+  'studio',
+  'penthouse',
+];
+
+/** A whole structure: only its own floor count is meaningful. */
+export const STANDALONE_BUILDING_TYPES: readonly PropertyTypeValue[] = [
+  'house',
+  'villa',
+  'luxury-villa',
+  'building',
+];
+
+/** Plots rather than structures — no floors, rooms or lift. */
+export const LAND_TYPES: readonly PropertyTypeValue[] = ['land', 'agricultural'];
+
 export const isPropertyTypeValue = (value: unknown): value is PropertyTypeValue =>
   typeof value === 'string' && (PROPERTY_TYPE_VALUES as readonly string[]).includes(value);
 
