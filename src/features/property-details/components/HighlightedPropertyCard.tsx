@@ -116,7 +116,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
     if (displayImages.length <= 1) return;
     displayImages.forEach((url) => {
       if (!url) return;
-      const { mainSrc, srcSet } = getPropertyImageSources(url, IMAGE_WIDTHS);
+      const { mainSrc, srcSet } = getPropertyImageSources(url, IMAGE_WIDTHS, 'fill', 'center');
       const img = new Image();
       // Set sizes/srcSet before src so the browser picks the same responsive
       // candidate the rendered <img> will use.
@@ -246,6 +246,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
               priority={index === 0}
               widths={IMAGE_WIDTHS}
               sizes={IMAGE_SIZES}
+              gravity="center"
               imgClassName={isHovered ? 'scale-[1.02] transition-transform duration-[8000ms] ease-[cubic-bezier(0.05,0,0.2,1)]' : 'scale-100 transition-transform duration-[8000ms]'}
             />
           </div>

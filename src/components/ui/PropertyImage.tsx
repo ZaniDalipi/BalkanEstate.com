@@ -13,7 +13,13 @@ interface PropertyImageProps {
   widths?: number[];
   sizes?: string;
   crop?: 'fill' | 'scale' | 'fit' | 'limit';
+  /**
+   * 'auto' lets Cloudinary pick the region it finds most salient, which is by
+   * definition not the middle. Use 'center' to keep the subject centred.
+   */
   gravity?: 'auto' | 'center';
+  /** Rendered height as a fraction of width; must match the displayed aspect. */
+  aspect?: number;
   /** Tailwind duration class for the fade-in transition (default: duration-300). */
   transitionDurationClass?: string;
   onLoad?: () => void;
@@ -30,9 +36,16 @@ export const getPropertyImageSources = (
   widths: number[] = [320, 480, 640],
   crop: 'fill' | 'scale' | 'fit' | 'limit' = 'fill',
   gravity: 'auto' | 'center' = 'auto',
+  /**
+   * Rendered height as a fraction of width. Must match the aspect the caller
+   * displays: requesting a taller crop than is rendered means the browser
+   * crops a second time on top of Cloudinary's, so the visible framing is no
+   * longer the one that was requested.
+   */
+  aspect = 0.75,
 ) => {
   const displayWidth = widths[widths.length - 1];
-  const displayHeight = Math.round(displayWidth * 0.75);
+  const displayHeight = Math.round(displayWidth * aspect);
 
   const placeholder =
     getPropertyImagePlaceholder(src) ||
@@ -50,7 +63,7 @@ export const getPropertyImageSources = (
     .map((w) => {
       const url = optimizeCloudinaryUrl(src, {
         width: w,
-        height: Math.round(w * 0.75),
+        height: Math.round(w * aspect),
         quality: 'auto',
         crop,
         gravity,
@@ -82,6 +95,7 @@ const PropertyImage: React.FC<PropertyImageProps> = ({
   sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
   crop = 'fill',
   gravity = 'auto',
+  aspect = 0.75,
   transitionDurationClass = 'duration-300',
   onLoad,
 }) => {
@@ -97,7 +111,7 @@ const PropertyImage: React.FC<PropertyImageProps> = ({
   }
 
   const { placeholder, mainSrc, srcSet, displayWidth, displayHeight } =
-    getPropertyImageSources(src, widths, crop, gravity);
+    getPropertyImageSources(src, widths, crop, gravity, aspect);
 
   return (
     <>

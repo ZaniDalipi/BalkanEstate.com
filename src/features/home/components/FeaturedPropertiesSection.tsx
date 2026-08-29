@@ -97,8 +97,8 @@ const PropertyCard: React.FC<{
             className={`absolute inset-0 ${slideDirection === 'right' ? 'animate-gallery-right' : 'animate-gallery-left'}`}
           >
             <img
-              src={optimizeCloudinaryUrl(currentImageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })}
-              srcSet={cloudinarySrcSet(currentImageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })}
+              src={optimizeCloudinaryUrl(currentImageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'center' })}
+              srcSet={cloudinarySrcSet(currentImageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill', gravity: 'center' })}
               sizes="(max-width: 640px) calc(50vw - 20px), (max-width: 1024px) calc(50vw - 32px), 33vw"
               alt={property.title || property.address || 'Property image'}
               width={400}

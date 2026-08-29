@@ -288,6 +288,9 @@ export const cloudinarySrcSet = (
     quality?: 'auto' | 'auto:low' | 'auto:eco' | 'auto:good' | 'auto:best';
     format?: 'auto' | 'webp';
     crop?: 'fill' | 'scale' | 'fit' | 'limit';
+    /** Spread into optimizeCloudinaryUrl below; it was reaching the URL at
+     *  runtime but was missing here, so callers setting it failed to compile. */
+    gravity?: 'auto' | 'center';
   } = {}
 ): string => {
   if (!url || typeof url !== 'string') return '';

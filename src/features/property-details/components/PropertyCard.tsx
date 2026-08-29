@@ -150,6 +150,10 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   // exact URLs the <img> would request (same widths/sizes) so the browser serves
   // them straight from cache. Only runs for multi-image cards.
   const IMAGE_WIDTHS = useMemo(() => [320, 480, 640], []);
+  // The card frame is 2:1 and the crop is taken from the middle. Cloudinary's
+  // default g_auto picks whatever region it scores as most salient, which
+  // routinely pushed the building off to one side.
+  const IMAGE_ASPECT = 0.5;
   // Phone: one full-bleed column. Tablet/desktop: the list panel splits into
   // two columns, so each card is roughly half the panel and never more than
   // ~420px wide.
@@ -163,7 +167,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
     neighbors.forEach((idx) => {
       const url = allImages[idx];
       if (!url) return;
-      const { mainSrc, srcSet } = getPropertyImageSources(url, IMAGE_WIDTHS);
+      const { mainSrc, srcSet } = getPropertyImageSources(url, IMAGE_WIDTHS, 'fill', 'center', IMAGE_ASPECT);
       const img = new Image();
       // Set sizes/srcSet before src so the browser picks the same responsive
       // candidate the rendered <img> will use.
@@ -171,7 +175,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
       if (srcSet) img.srcset = srcSet;
       img.src = mainSrc;
     });
-  }, [currentImageIndex, allImages, IMAGE_WIDTHS]);
+  }, [currentImageIndex, allImages, IMAGE_WIDTHS, IMAGE_ASPECT]);
 
   // Safe access with fallbacks
   const safeProperty = {
@@ -289,6 +293,8 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 priority={priority}
                 widths={IMAGE_WIDTHS}
                 sizes={IMAGE_SIZES}
+                gravity="center"
+                aspect={IMAGE_ASPECT}
                 transitionDurationClass={currentImageIndex === 0 ? 'duration-300' : 'duration-150'}
                 imgClassName={isSold || isRented ? 'grayscale' : ''}
               />
