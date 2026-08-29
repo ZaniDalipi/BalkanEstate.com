@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { ProgressiveImage } from './ProgressiveImage';
 
 /**
  * One panel of the gallery. Purely what the panel needs to paint itself —
@@ -13,9 +14,16 @@ export interface ElasticGalleryItem {
     /** Small pill above the title. */
     subtitle?: string;
     imageUrl: string;
-    /** Responsive candidates; paired with `imageSizes`. */
+    /** Responsive candidates; paired with `imageSizes` / `collapsedImageSizes`. */
     imageSrcSet?: string;
+    /** What the photo measures while its panel is expanded. */
     imageSizes?: string;
+    /**
+     * What it measures while collapsed — far less, and the browser re-picks a
+     * candidate from `imageSrcSet` when a panel expands. Omitted, `imageSizes`
+     * is used for both states.
+     */
+    collapsedImageSizes?: string;
     /** Low-quality placeholder painted behind the photo while it loads. */
     placeholderUrl?: string;
     alt: string;
@@ -47,22 +55,6 @@ interface ElasticGalleryProps {
     label: string;
     className?: string;
 }
-
-/**
- * The photo has to cover the panel, and `index.html` ships an unlayered
- * `img { height: auto }`. Tailwind v4 emits its utilities inside
- * `@layer utilities`, and any unlayered rule beats a layered one no matter how
- * specific the layered one is — so `h-full object-cover` loses that fight and
- * the photo renders at its natural height with the panel showing through
- * underneath. An inline style outranks both, which is why the sizing lives
- * here instead of in the class list.
- */
-const COVER_STYLE: React.CSSProperties = {
-    height: '100%',
-    width: '100%',
-    objectFit: 'cover',
-    maxWidth: 'none',
-};
 
 /** White text over an unknown photo needs its own contrast, not the photo's. */
 const TEXT_SHADOW = '[text-shadow:0_2px_10px_rgba(0,0,0,0.65)]';
@@ -142,8 +134,9 @@ export function ElasticGallery({ items, actions, defaultActionId, label, classNa
                 className,
             )}
         >
-            {items.map(item => {
+            {items.map((item, index) => {
                 const isActive = item.id === activeId;
+                const isFirst = index === 0;
                 const isBroken = brokenIds.has(item.id);
                 const expand = () => setRequestedId(item.id);
                 // Touch has no hover, but a touchstart still dispatches
@@ -188,28 +181,37 @@ export function ElasticGallery({ items, actions, defaultActionId, label, classNa
                         )}
                     >
                         {!isBroken ? (
-                            <img
+                            <ProgressiveImage
                                 src={item.imageUrl}
-                                srcSet={item.imageSrcSet || undefined}
-                                sizes={item.imageSizes || undefined}
+                                srcSet={item.imageSrcSet}
+                                /*
+                                 * The sizes hint follows the panel's state, and
+                                 * that is the whole mobile story: a collapsed
+                                 * sliver is a ~44px-tall strip, so letting it
+                                 * claim the full viewport width had six panels
+                                 * each pulling the largest candidate in the set
+                                 * before the visitor had seen one of them.
+                                 * Changing `sizes` on expand makes the browser
+                                 * re-pick from the same `srcSet` — it keeps
+                                 * showing the small file until the larger one
+                                 * has decoded, so the upgrade is never a gap.
+                                 */
+                                sizes={(isActive ? item.imageSizes : item.collapsedImageSizes ?? item.imageSizes)}
                                 alt={item.alt}
-                                loading="lazy"
-                                decoding="async"
+                                placeholderSrc={item.placeholderUrl}
+                                /*
+                                 * The gallery sits in the hero, so its first
+                                 * panel is the largest thing above the fold and
+                                 * usually the LCP element. Only that one is
+                                 * eager: making every panel priority would put
+                                 * six photos in the same starting queue and
+                                 * make the one that is actually visible wait
+                                 * behind the five that are not.
+                                 */
+                                priority={isFirst}
+                                className={isActive ? 'scale-100' : 'scale-110'}
+                                fadeDurationClass="duration-700"
                                 onError={() => markBroken(item.id)}
-                                className={cn(
-                                    'absolute inset-0 transition-transform duration-1000 motion-reduce:transition-none',
-                                    isActive ? 'scale-100' : 'scale-110',
-                                )}
-                                style={
-                                    item.placeholderUrl
-                                        ? {
-                                            ...COVER_STYLE,
-                                            backgroundImage: `url("${item.placeholderUrl}")`,
-                                            backgroundSize: 'cover',
-                                            backgroundPosition: 'center',
-                                        }
-                                        : COVER_STYLE
-                                }
                             />
                         ) : (
                             <div className="absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-900" />

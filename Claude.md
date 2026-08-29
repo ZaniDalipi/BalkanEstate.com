@@ -111,4 +111,30 @@ Every new translation key must be added to all 10 locale files simultaneously.
 ## Images
 
 Always use `optimizeCloudinaryUrl(url, { width, quality })` and `cloudinarySrcSet()` — never raw Cloudinary URLs.
-LQIP uses `width: 40, quality: 'auto:eco'`.
+LQIP uses `width: 40, quality: 'auto:eco', blur: 400` — the blur is baked in by the CDN, not applied by the client.
+
+### Which component
+
+| Case | Use |
+|------|-----|
+| Property photos (cards, carousels) | `src/components/ui/PropertyImage.tsx` |
+| Any other remote photo in a positioned frame | `src/components/ui/ProgressiveImage.tsx` |
+
+Both paint the same three stages — shimmer skeleton → blurred LQIP → photo fading in — and both detect an
+already-cached image via a callback ref, without which a warm cache leaves the photo stuck at `opacity-0`.
+Place either inside a `relative overflow-hidden` container: every layer is `absolute inset-0`.
+
+Never hand a remote URL to a bare `<img>`: `ProgressiveImage` validates it (`validateImageSrc`) before it
+reaches the DOM and renders a fallback instead of an unvetted attribute.
+
+### Mobile budget
+
+- `priority` is for the one above-the-fold image that is the LCP. Marking several is the same as marking none.
+- `sizes` must describe the frame the photo is *actually* painted in, not the widest it could be. Where a
+  photo's frame changes size (an expanding panel), pass the `sizes` for its current state and let the browser
+  re-pick from one `srcSet`.
+- `useImageBudget()` (`src/shared/hooks/useImageBudget.ts`) reports `lite` for a saver-mode or 2G/3G
+  connection. Use it to lower widths and quality; it is read once per mount, so it never rewrites the `src` of
+  a photo already on screen.
+- Preloading a long list (e.g. the destinations corridor) goes through a bounded queue — a fixed number of
+  workers, each starting the next photo only when its own settles — never one batch on a timer.

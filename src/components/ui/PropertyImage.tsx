@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { optimizeCloudinaryUrl, getPropertyImagePlaceholder } from '@/config/cloudinaryConfig';
 import { BuildingOfficeIcon } from '@/constants';
 
@@ -34,9 +34,12 @@ export const getPropertyImageSources = (
   const displayWidth = widths[widths.length - 1];
   const displayHeight = Math.round(displayWidth * 0.75);
 
+  // The second form covers URLs the first cannot parse (no version segment):
+  // it asks the CDN for the same blur so the fallback is a soft backdrop
+  // rather than a 40px image the browser has to blur up on its own.
   const placeholder =
     getPropertyImagePlaceholder(src) ||
-    optimizeCloudinaryUrl(src, { width: 40, quality: 'auto:eco', crop });
+    optimizeCloudinaryUrl(src, { width: 40, quality: 'auto:eco', crop, blur: 400 });
 
   const mainSrc = optimizeCloudinaryUrl(src, {
     width: displayWidth,
@@ -88,6 +91,21 @@ const PropertyImage: React.FC<PropertyImageProps> = ({
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(!src);
 
+  /*
+   * Catches an image the browser had already finished with before React
+   * attached `onLoad` — a cached photo re-entering the viewport, or one that
+   * decoded between element creation and the listener being wired. Without
+   * this the fade never runs and the photo stays at `opacity-0`: an invisible
+   * image, which is a worse failure than a slow one and the harder one to
+   * reproduce, since it only happens on a warm cache.
+   */
+  const attachImg = useCallback((node: HTMLImageElement | null) => {
+    if (node?.complete && node.currentSrc !== '') {
+      if (node.naturalWidth > 0) setLoaded(true);
+      else setError(true);
+    }
+  }, []);
+
   if (error || !src) {
     return (
       <div className="absolute inset-0 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
@@ -101,19 +119,36 @@ const PropertyImage: React.FC<PropertyImageProps> = ({
 
   return (
     <>
-      {/* Blurred LQIP backdrop — loads immediately, fills the container while the main image arrives */}
-      <img
-        src={placeholder}
-        alt=""
-        aria-hidden="true"
-        loading="eager"
-        decoding="async"
-        width={40}
-        height={30}
-        className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-80 pointer-events-none select-none"
-      />
+      {/* Shimmer ground — the only thing in the frame during the round trip
+          that fetches the LQIP, and the whole of it for a non-Cloudinary URL,
+          which has no placeholder to show. Sits under both images and is
+          simply covered once either paints. */}
+      {!loaded && (
+        <div
+          aria-hidden="true"
+          className="image-shimmer image-shimmer-light absolute inset-0 pointer-events-none"
+        />
+      )}
+      {/* Blurred LQIP backdrop — loads immediately, fills the container while
+          the main image arrives. Rendered only when there is one: `src=""` is
+          not "no image" to a browser, it is a request for the current page,
+          which a non-Cloudinary URL (no placeholder to derive) would otherwise
+          trigger once per card. */}
+      {placeholder && (
+        <img
+          src={placeholder}
+          alt=""
+          aria-hidden="true"
+          loading="eager"
+          decoding="async"
+          width={40}
+          height={30}
+          className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-80 pointer-events-none select-none"
+        />
+      )}
       {/* Main image — fades in once loaded; priority images get high fetchpriority for LCP */}
       <img
+        ref={attachImg}
         src={mainSrc}
         srcSet={srcSet}
         sizes={sizes}

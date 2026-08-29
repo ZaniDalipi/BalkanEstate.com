@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getCityImageUrl, optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { useImageBudget, type ImageBudget } from '@/src/shared/hooks/useImageBudget';
 import type { VillaDestination } from '../data/villaDestinations';
 
 /**
@@ -19,6 +20,14 @@ const CARD_ASPECT = 18 / 25;
 const MAX_IMAGE_WIDTH = 2200;
 
 /**
+ * The same ceiling for a metered or 2G/3G connection. A corridor card is a
+ * moving, perspective-warped tile that is never still for long, so the detail
+ * a 1400px file has over a 1000px one is detail this section cannot show —
+ * while the bytes are the visitor's either way.
+ */
+const MAX_IMAGE_WIDTH_LITE = 1000;
+
+/**
  * How wide a photo has to be to look sharp on this device.
  *
  * A fixed 900px was too small on a phone and wasteful on a laptop, because
@@ -30,17 +39,36 @@ const MAX_IMAGE_WIDTH = 2200;
  * the edges — matching those exactly would mean multi-megabyte downloads for
  * pixels that are mostly off-screen anyway.
  */
-function idealImageWidth(): number {
+function idealImageWidth(budget: ImageBudget = 'full'): number {
     if (typeof window === 'undefined') return 1400;
-    const dpr = Math.min(window.devicePixelRatio || 1, 3);
-    const target = window.innerWidth * dpr * 1.2;
-    return Math.round(Math.min(MAX_IMAGE_WIDTH, Math.max(900, target)));
+    const lite = budget === 'lite';
+    // A saver-mode visitor gets the 2x file a 3x screen can still show
+    // convincingly at this size, not the 3x one.
+    const dpr = Math.min(window.devicePixelRatio || 1, lite ? 2 : 3);
+    const target = window.innerWidth * dpr * (lite ? 1 : 1.2);
+    const ceiling = lite ? MAX_IMAGE_WIDTH_LITE : MAX_IMAGE_WIDTH;
+    return Math.round(Math.min(ceiling, Math.max(lite ? 700 : 900, target)));
 }
 
 /** Photos fetched immediately — comfortably more than the corridor shows at once. */
 const EAGER_COUNT = 10;
+const EAGER_COUNT_LITE = 6;
 /** How long the rest waits, so it lands after the first wave and the page settle. */
 const DEFER_REST_MS = 1200;
+
+/**
+ * How many of the tail photos may be in flight at once.
+ *
+ * The tail is the part that hurt: the destination list runs to a couple of
+ * hundred places, and releasing all of them at a fixed delay put every
+ * remaining photo on the wire together — on a phone, tens of megabytes
+ * competing for the same few connections as the hero and the city gallery the
+ * visitor is actually looking at. A queue of two or four keeps the corridor
+ * ahead of what it is about to show without ever being the reason something
+ * else on the page is waiting.
+ */
+const TAIL_CONCURRENCY = 4;
+const TAIL_CONCURRENCY_LITE = 2;
 
 /** Brand-toned gradient pairs — gold, emerald and navy, cycled per destination. */
 const PLACEHOLDER_STOPS: readonly (readonly [string, string])[] = [
@@ -104,11 +132,19 @@ export function useDestinationImages(
 ): ResolvedDestinationImage[] {
     const [loaded, setLoaded] = useState<Record<string, string>>({});
 
+    // What this connection should be asked to carry. Read once, like the width
+    // below, and for the same reason: it is an input to every URL here.
+    const budget = useImageBudget();
+
     // Resolved once per mount rather than per render: the width only changes
     // if the device changes, and recomputing it inside the memo would make
     // every render produce fresh URLs and refetch every photo.
-    const [imageWidth] = useState(idealImageWidth);
+    const [imageWidth] = useState(() => idealImageWidth(budget));
     const imageHeight = Math.round(imageWidth / CARD_ASPECT);
+    // `auto:best` is worth its bytes on a fast link, where these are the
+    // largest photos on the page. On a metered one it is the first thing to
+    // give up: `auto:good` is Cloudinary's own "looks right, costs less".
+    const quality = budget === 'lite' ? ('auto:good' as const) : ('auto:best' as const);
 
     // Stable identity for the effect: the set of destinations that need photos.
     const sources = useMemo(
@@ -135,9 +171,11 @@ export function useDestinationImages(
                         crop: 'fill',
                         gravity: 'auto',
                         // These are the hero of the section and are shown very
-                        // large; `auto:best` spends the extra bytes rather
-                        // than letting Cloudinary trade detail for size.
-                        quality: 'auto:best',
+                        // large; on a fast connection `auto:best` spends the
+                        // extra bytes rather than letting Cloudinary trade
+                        // detail for size. See `quality` above for what a
+                        // metered connection gets instead.
+                        quality,
                     }) || dest.imageUrl
                     : getCityImageUrl(dest.imageCity, {
                         country: dest.imageCountry,
@@ -145,10 +183,10 @@ export function useDestinationImages(
                         height: imageHeight,
                         crop: 'fill',
                         gravity: 'auto',
-                        quality: 'auto:best',
+                        quality,
                     }),
             })),
-        [destinations, imageWidth, imageHeight],
+        [destinations, imageWidth, imageHeight, quality],
     );
 
     useEffect(() => {
@@ -156,40 +194,82 @@ export function useDestinationImages(
         const images: HTMLImageElement[] = [];
         let deferred: number | undefined;
 
-        const preload = (batch: readonly { id: string; url: string }[]) => {
-            for (const { id, url } of batch) {
-                if (cancelled) return;
-                const img = new Image();
-                img.decoding = 'async';
-                img.onload = () => {
-                    if (!cancelled) setLoaded(prev => (prev[id] ? prev : { ...prev, [id]: url }));
-                };
-                // No onerror handler needed beyond silence: the gradient stays.
-                img.onerror = null;
-                img.src = url;
-                images.push(img);
-            }
+        const isLite = budget === 'lite';
+
+        /**
+         * Starts one photo. `onDone` fires on success *and* on failure, which
+         * is what keeps the queue below moving past a destination whose photo
+         * was never seeded — a stall there would freeze every photo behind it.
+         */
+        const load = (
+            { id, url }: { id: string; url: string },
+            priority: 'auto' | 'low',
+            onDone?: () => void,
+        ) => {
+            const img = new Image();
+            img.decoding = 'async';
+            // A hint, not a guarantee, and ignored outside Chromium — but where
+            // it lands it tells the browser these photos may yield to the hero
+            // and the city gallery, which are what the visitor is looking at.
+            (img as HTMLImageElement & { fetchPriority?: string }).fetchPriority = priority;
+            img.onload = () => {
+                if (!cancelled) setLoaded(prev => (prev[id] ? prev : { ...prev, [id]: url }));
+                onDone?.();
+            };
+            // A failed photo needs no handling beyond releasing the queue: the
+            // card keeps its gradient, which is a finished-looking card rather
+            // than a broken-image icon.
+            img.onerror = () => onDone?.();
+            img.src = url;
+            images.push(img);
         };
 
         // Only the front of the list is fetched up front. The corridor shows
         // 6-8 cards at a time and cycles slowly, so the tail isn't needed for
-        // many seconds — and the destination list is long enough now (dozens
-        // of places) that fetching all of it at once would put several MB of
-        // photos in flight competing with the rest of the page. Everything
-        // past the first screenful waits for that first wave to settle.
-        preload(sources.slice(0, EAGER_COUNT));
-        const rest = sources.slice(EAGER_COUNT);
+        // many seconds.
+        const eagerCount = isLite ? EAGER_COUNT_LITE : EAGER_COUNT;
+        for (const source of sources.slice(0, eagerCount)) {
+            if (cancelled) return;
+            load(source, 'auto');
+        }
+
+        /*
+         * The tail — everything the corridor will reach eventually — is drained
+         * through a fixed number of workers rather than released in one go.
+         * The destination list runs to a couple of hundred places, so "the
+         * rest, after a delay" was in practice "every photo at once, 1.2
+         * seconds in": a phone spent the whole of that connection on cards it
+         * would not show for minutes, while the photos on screen waited behind
+         * them. Each worker starts the next photo only when its own has
+         * finished, so the corridor stays ahead of itself at a cost bounded by
+         * the number of workers.
+         */
+        const rest = sources.slice(eagerCount);
         if (rest.length > 0) {
-            deferred = window.setTimeout(() => preload(rest), DEFER_REST_MS);
+            deferred = window.setTimeout(() => {
+                let next = 0;
+                const pump = () => {
+                    if (cancelled) return;
+                    const source = rest[next++];
+                    if (!source) return;
+                    load(source, 'low', pump);
+                };
+                const workers = Math.min(isLite ? TAIL_CONCURRENCY_LITE : TAIL_CONCURRENCY, rest.length);
+                for (let i = 0; i < workers; i++) pump();
+            }, DEFER_REST_MS);
         }
 
         return () => {
             cancelled = true;
             if (deferred !== undefined) window.clearTimeout(deferred);
-            // Drop handlers so a late load can't set state after unmount.
-            for (const img of images) img.onload = null;
+            // Drop handlers so a late load can't set state after unmount, and
+            // so a in-flight photo cannot pump the queue for a dead component.
+            for (const img of images) {
+                img.onload = null;
+                img.onerror = null;
+            }
         };
-    }, [sources]);
+    }, [budget, sources]);
 
     return useMemo(
         () =>

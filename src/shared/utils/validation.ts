@@ -162,6 +162,33 @@ export function validateUrl(url: string, allowedProtocols: string[] = ['http', '
 }
 
 /**
+ * Validate a URL that is about to be handed to an `img src`.
+ *
+ * Stricter than `validateUrl` in the one way that matters at that boundary:
+ * the WHATWG URL parser silently strips tabs and newlines, so a URL carrying
+ * them parses clean here and is then written into an attribute in a form
+ * nobody reviewed. Rejecting them costs a broken picture; accepting them costs
+ * an injection. Everything else — scheme, shape — is `validateUrl`'s job, and
+ * is delegated to it rather than re-implemented.
+ */
+export function validateImageSrc(url: string): ValidationResult {
+  if (!url || typeof url !== 'string') {
+    return { isValid: false, error: 'Image URL is required' };
+  }
+
+  if (/[\r\n\t\x00-\x1f]/.test(url)) {
+    return { isValid: false, error: 'Image URL contains invalid characters' };
+  }
+
+  const result = validateUrl(url, ['http', 'https']);
+  if (!result.isValid) {
+    return { isValid: false, error: result.error ?? 'Invalid image URL' };
+  }
+
+  return { isValid: true };
+}
+
+/**
  * Validate geographic coordinates
  */
 export function validateCoordinates(lat: number, lng: number): ValidationResult {

@@ -211,6 +211,12 @@ export const optimizeCloudinaryUrl = (
     gravity?: 'auto' | 'center';
     /** Fill colour for `crop: 'pad'` — a CSS colour name or `rgb:RRGGBB`. */
     background?: string;
+    /**
+     * Gaussian blur strength (`e_blur`), 1–2000. Only useful on a tiny width:
+     * it is what turns a 40px LQIP into a smooth blur-up backdrop instead of a
+     * block of visible pixels once the browser scales it up to the frame.
+     */
+    blur?: number;
   } = {}
 ): string => {
   if (!url || typeof url !== 'string') return '';
@@ -235,10 +241,20 @@ export const optimizeCloudinaryUrl = (
     crop,
     gravity,
     background,
+    blur: rawBlur,
   } = options;
 
   const width = clampDimension(rawWidth, 4096);
   const height = clampDimension(rawHeight, 4096);
+  // Security: the blur strength is interpolated into the transform segment, so
+  // it has to be a finite number, not whatever a caller happened to hold.
+  // A zero or negative strength reads as "no blur" rather than as the weakest
+  // possible one: a caller computing it from a setting should be able to turn
+  // it off by passing 0, not accidentally ship `e_blur:1`.
+  const blur =
+    typeof rawBlur === 'number' && Number.isFinite(rawBlur) && rawBlur > 0
+      ? Math.min(Math.round(rawBlur), 2000)
+      : undefined;
 
   // Security: the background goes straight into the URL's transform segment,
   // so only accept a colour name or an explicit rgb:hex value.
@@ -261,6 +277,7 @@ export const optimizeCloudinaryUrl = (
       if (crop) transforms.push(`c_${crop}`);
       if (gravity) transforms.push(`g_${gravity}`);
       if (safeBackground) transforms.push(`b_${safeBackground}`);
+      if (blur) transforms.push(`e_blur:${blur}`);
       return `${base}${transforms.join(',')}/${cleanPath}`;
     }
     return url;

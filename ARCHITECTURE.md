@@ -301,10 +301,76 @@ Raw URL → optimizeCloudinaryUrl(url, { width, quality }) → <img src>
                                                           → cloudinarySrcSet([480,768,1200,1920])
 ```
 
-- LQIP (Low-Quality Image Placeholder): `width: 40, quality: 'auto:eco'` loaded immediately
+- LQIP (Low-Quality Image Placeholder): `width: 40, quality: 'auto:eco', blur: 400` loaded immediately
 - Full image: `width: 1200, quality: 'auto'` with srcSet for responsive delivery
 - Avatar thumbnails: `width: 80-96, quality: 'auto', crop: 'fill'`
 - Never use raw Cloudinary URLs — always go through the helper.
+
+---
+
+## Image Loading — What a Phone Downloads
+
+Two separate problems, solved in two places: what a frame shows *while* a photo
+loads, and how many photos are allowed on the wire at once.
+
+### The frame: `ProgressiveImage`
+
+```
+src/components/ui/ProgressiveImage.tsx
+  shimmer skeleton   ← immediately; the frame is never a blank rectangle
+    └── blurred LQIP ← ~1KB, one round trip, the photo's real colours
+          └── photo  ← fades in over the blur once decoded
+```
+
+`PropertyImage` paints the same three stages for property photos. Key decisions:
+
+- **Cached photos are the failure mode worth guarding.** A callback ref checks
+  `complete` on attach: an image already in the cache can finish before React
+  attaches `onLoad`, and without the check that photo sits at `opacity-0`
+  forever. An invisible image is worse than a slow one, and only reproduces on
+  a warm cache.
+- **State is stored as the URL it belongs to**, not as a boolean, so a changed
+  `src` re-enters the loading state in the same render rather than needing an
+  effect to repair it a frame later.
+- **The `src` is validated before it reaches the DOM** (`validateImageSrc`):
+  scheme plus the control characters the WHATWG URL parser silently strips. A
+  value that fails renders the fallback.
+- **The blur is the CDN's** (`e_blur`), baked into the cached file, rather than
+  a filter the phone re-applies while it is busy decoding the real photo.
+
+### The wire: `sizes` by state, and a bounded queue
+
+```
+Home-page city gallery (ElasticGallery)
+  ├── expanded panel  → sizes "(min-width: 768px) 50vw, 100vw"   → ~1280w on a 3x phone
+  ├── collapsed panel → sizes "(min-width: 768px) 15vw, 30vw"    → ~480w
+  └── first panel     → priority (eager + fetchpriority=high), the rest lazy
+
+Destinations corridor (useDestinationImages)
+  ├── first 10 photos → straight away
+  └── the tail        → 4 workers, each starting the next when its own settles
+                        (fetchPriority 'low'; 'lite' halves both numbers)
+```
+
+Key decisions:
+
+- **A sliver is not a full-width photo.** Five of six gallery panels start
+  collapsed as ~44px strips; letting each claim the viewport width had a phone
+  pull six full-size photos before the visitor had seen one. Changing `sizes`
+  on expand makes the browser re-pick from the same `srcSet`, and it keeps
+  painting the small file until the larger one has decoded — the upgrade is
+  never a gap.
+- **The corridor's tail is a queue, not a batch.** It is backed by a couple of
+  hundred destinations at full-height portrait size; releasing "the rest" on a
+  timer meant every one of them hit the wire 1.2s into the page, competing with
+  the hero and the gallery the visitor is actually looking at. Workers advance
+  on completion *and* on failure, so an unseeded photo cannot park one.
+- **`useImageBudget()`** (`src/shared/hooks/useImageBudget.ts`) reports `lite`
+  for a saver-mode or 2G/3G connection, lowering widths and quality. Read once
+  per mount: re-reading it mid-visit would rewrite the `src` of photos already
+  on screen and fetch every one of them again — paying more bytes to honour a
+  request to spend fewer. An unknown connection is always `full`, since the API
+  ships only in Chromium.
 
 ---
 

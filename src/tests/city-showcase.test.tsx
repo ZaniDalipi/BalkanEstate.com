@@ -262,6 +262,69 @@ describe('ElasticGallery', () => {
         expect(buyButtons[1]).toHaveAttribute('aria-hidden', 'true');
     });
 
+    it('asks for a small candidate while a panel is collapsed and a large one once it expands', () => {
+        // The mobile cost this controls: five of six panels start as ~44px
+        // slivers, and letting each claim the viewport width had a phone pull
+        // six full-size photos before the visitor had seen one.
+        render(
+            <ElasticGallery
+                items={items.map(item => ({
+                    ...item,
+                    imageSrcSet: `${item.imageUrl} 320w, ${item.imageUrl} 1280w`,
+                    imageSizes: '100vw',
+                    collapsedImageSizes: '30vw',
+                }))}
+                label="Explore cities"
+                actions={[]}
+            />,
+        );
+
+        expect(screen.getByAltText('Belgrade')).toHaveAttribute('sizes', '100vw');
+        expect(screen.getByAltText('Ohrid')).toHaveAttribute('sizes', '30vw');
+
+        fireEvent.click(panelOf(/^Ohrid/));
+
+        // Same `srcSet`, new hint — the browser re-picks, and keeps painting
+        // the small file until the larger one has decoded.
+        expect(screen.getByAltText('Ohrid')).toHaveAttribute('sizes', '100vw');
+        expect(screen.getByAltText('Belgrade')).toHaveAttribute('sizes', '30vw');
+    });
+
+    it('falls back to one sizes hint when the caller gives no collapsed one', () => {
+        render(
+            <ElasticGallery
+                items={items.map(item => ({ ...item, imageSizes: '100vw' }))}
+                label="Explore cities"
+                actions={[]}
+            />,
+        );
+
+        expect(screen.getByAltText('Ohrid')).toHaveAttribute('sizes', '100vw');
+    });
+
+    it('loads only the first panel eagerly', () => {
+        renderGallery();
+
+        // The gallery sits in the hero, so panel one is usually the LCP
+        // element. Marking all six priority would queue five photos nobody is
+        // looking at ahead of the one they are.
+        expect(screen.getByAltText('Belgrade')).toHaveAttribute('loading', 'eager');
+        expect(screen.getByAltText('Belgrade')).toHaveAttribute('fetchpriority', 'high');
+        expect(screen.getByAltText('Ohrid')).toHaveAttribute('loading', 'lazy');
+    });
+
+    it('shows a shimmer in each panel until its photo arrives', () => {
+        const { container } = render(
+            <ElasticGallery items={items} label="Explore cities" actions={[]} />,
+        );
+
+        expect(container.querySelectorAll('.image-shimmer')).toHaveLength(2);
+
+        fireEvent.load(screen.getByAltText('Belgrade'));
+
+        expect(container.querySelectorAll('.image-shimmer')).toHaveLength(1);
+    });
+
     it('keeps the label when a photo fails to load', () => {
         renderGallery();
 

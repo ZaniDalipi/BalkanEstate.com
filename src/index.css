@@ -943,6 +943,52 @@ html[data-zoom] #root {
   background-size: 200% 100%;
 }
 
+/*
+ * Loading skeleton for a photo that has not arrived yet (ProgressiveImage).
+ *
+ * Separate from `.animate-shimmer`, which is a light-grey sweep built for
+ * skeletons on a white card: this one sits in a photo frame — over a dark
+ * panel, a hero, or a card's own placeholder tint — so it is a translucent
+ * white sweep over a neutral slate ground instead, and it reads on either.
+ *
+ * The sweep is a background-position animation on a single element: no extra
+ * layer, no blur, nothing that would make a phone composite more than it
+ * already is while it is busy decoding the photo this is standing in for.
+ */
+.image-shimmer {
+  background-color: #1e293b;
+  background-image: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0) 30%,
+    rgba(255, 255, 255, 0.13) 50%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+/* On a light surface the same skeleton needs a light ground, or the frame
+   flashes near-black before the photo fades in. */
+.image-shimmer-light {
+  background-color: #e9edf3;
+  background-image: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0) 30%,
+    rgba(255, 255, 255, 0.75) 50%,
+    rgba(255, 255, 255, 0) 70%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* A sweeping gradient is decoration, not information — the flat ground
+     still says "something is coming here". */
+  .image-shimmer {
+    animation: none !important;
+    background-image: none !important;
+  }
+}
+
 .animate-pulse-glow {
   animation: pulseGlow 3s ease-in-out infinite;
 }
