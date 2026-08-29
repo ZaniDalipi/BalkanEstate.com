@@ -63,7 +63,15 @@
     "advancedFilters": "Filtrat e Avancuar",
     "moreFilters": "Më Shumë Filtra",
     "lessFilters": "Më Pak Filtra",
-    "sortBy": "Rendit sipas"
+    "sortBy": "Rendit sipas",
+    "pricePerSqm": "Çmimi për m²",
+    "daysOnMarket": "Ditë në treg",
+    "last24h": "24 orët e fundit",
+    "last3Days": "3 ditët e fundit",
+    "last7Days": "7 ditët e fundit",
+    "last30Days": "30 ditët e fundit",
+    "priceReduced": "Çmim i ulur",
+    "priceIncreased": "Çmim i rritur"
   },
   "options": {
     "any": "Çdo",

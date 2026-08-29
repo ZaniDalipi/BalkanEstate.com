@@ -63,7 +63,15 @@
     "advancedFilters": "Напредни Филтери",
     "moreFilters": "Више Филтера",
     "lessFilters": "Мање Филтера",
-    "sortBy": "Sortiraj po"
+    "sortBy": "Sortiraj po",
+    "pricePerSqm": "Цена по m²",
+    "daysOnMarket": "Дана на тржишту",
+    "last24h": "Последња 24 сата",
+    "last3Days": "Последња 3 дана",
+    "last7Days": "Последњих 7 дана",
+    "last30Days": "Последњих 30 дана",
+    "priceReduced": "Снижена цена",
+    "priceIncreased": "Повећана цена"
   },
   "options": {
     "any": "Било који",

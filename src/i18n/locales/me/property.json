@@ -706,5 +706,10 @@
     "disclaimer": "AI-generisano uređenje samo u svrhu demonstracije. Ove slike nisu stvarne fotografije nekretnine i mogu sadržati predmete koji nisu dio oglasa.",
     "interior": "Enterijer",
     "exterior": "Eksterijer"
+  },
+  "naming": {
+    "typeIn": "{{type}} u {{place}}",
+    "bdsAbbr": "sobe",
+    "baAbbr": "kupatila"
   }
 }

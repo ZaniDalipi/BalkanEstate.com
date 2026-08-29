@@ -78,7 +78,15 @@
     "advancedFilters": "Advanced Filters",
     "moreFilters": "More Filters",
     "lessFilters": "Less Filters",
-    "sortBy": "Sort by"
+    "sortBy": "Sort by",
+    "pricePerSqm": "Price per m²",
+    "daysOnMarket": "Days on Market",
+    "last24h": "Last 24 hours",
+    "last3Days": "Last 3 days",
+    "last7Days": "Last 7 days",
+    "last30Days": "Last 30 days",
+    "priceReduced": "Price Reduced",
+    "priceIncreased": "Price Increased"
   },
   "options": {
     "any": "Any",

@@ -153,7 +153,8 @@
     "jacuzzi": "Jacuzzi",
     "helipad": "Helipad",
     "showResults": "Show {{count}} villas",
-    "areaRangeInvalid": "Minimum area is larger than the maximum."
+    "areaRangeInvalid": "Minimum area is larger than the maximum.",
+    "keywordsPlaceholder": "e.g. infinity pool — press Enter"
   },
   "seo": {
     "title": "Luxury Villas for Rent in the Balkans | BalkanEstate",

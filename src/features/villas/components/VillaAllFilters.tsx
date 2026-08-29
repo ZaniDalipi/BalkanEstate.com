@@ -101,10 +101,27 @@ const VillaAllFilters: React.FC<VillaAllFiltersProps> = ({
     /* ── Helpers ── */
     const anyLabel = t('common:any', 'Any');
 
-    const parseNum = (raw: string): number | null => {
+    /* Section labels are named once: each is both the visible <label> and the
+       accessible name of the two inputs inside its range. */
+    const priceLabel = listingMode === 'rent'
+        ? t('villas:filters.pricePerNight', 'Price / Night')
+        : t('search:filters.priceRange', 'Price');
+    const areaLabel = t('search:filters.areaRange', 'Area (m²)');
+    const pricePerSqmLabel = t('search:filters.pricePerSqm', 'Price per m²');
+    const yearBuiltLabel = t('search:filters.yearBuilt', 'Year Built');
+    const floorLabel = t('search:filters.floorNumber', 'Floor');
+
+    /**
+     * `allowNegative` is for the floor range only. Everything else here is a
+     * count, an area or a price, where a negative is meaningless — but a floor
+     * below ground is a real floor, and `filterProperties` matches it, so the
+     * panel has to be able to express it.
+     */
+    const parseNum = (raw: string, allowNegative = false): number | null => {
         if (raw.trim() === '') return null;
-        const n = Number(raw.replace(/[^\d.-]/g, ''));
-        if (!Number.isFinite(n) || n < 0) return null;
+        const n = Number(raw.replace(allowNegative ? /[^\d.-]/g : /[^\d.]/g, ''));
+        if (!Number.isFinite(n)) return null;
+        if (!allowNegative && n < 0) return null;
         return n;
     };
 
@@ -148,22 +165,33 @@ const VillaAllFilters: React.FC<VillaAllFiltersProps> = ({
         </div>
     );
 
-    /** Two numeric boxes with a dash, for every min/max range below. */
+    /**
+     * Two numeric boxes with a dash, for every min/max range below.
+     *
+     * `section` is the range's own label. There are eight of these ranges in
+     * the panel, so labelling the inputs "Min"/"Max" alone would leave a screen
+     * reader reciting sixteen fields with eight distinct names between them;
+     * the accessible name has to carry which range it belongs to.
+     */
     const rangeRow = ({
+        section,
         minKey,
         maxKey,
         prefix,
         unit,
         invalid,
+        allowNegative,
     }: {
+        section: string;
         minKey: keyof Filters;
         maxKey: keyof Filters;
         prefix?: string;
         unit?: string;
         invalid?: boolean;
+        allowNegative?: boolean;
     }) => {
         const ring = invalid ? ' !border-red-300 ring-1 ring-red-300/60' : '';
-        const box = (key: keyof Filters, placeholder: string) => (
+        const box = (key: keyof Filters, bound: string) => (
             <div className="relative flex-1 min-w-0">
                 {prefix && (
                     <span className={`absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none ${dense ? 'text-[10px]' : 'text-xs'}`}>
@@ -173,12 +201,12 @@ const VillaAllFilters: React.FC<VillaAllFiltersProps> = ({
                 <input
                     type="number"
                     inputMode="numeric"
-                    min={0}
-                    placeholder={placeholder}
+                    min={allowNegative ? undefined : 0}
+                    placeholder={bound}
                     value={(filters[key] as number | null) ?? ''}
-                    onChange={(e) => onFilterChange(key, parseNum(e.target.value))}
+                    onChange={(e) => onFilterChange(key, parseNum(e.target.value, allowNegative))}
                     aria-invalid={!!invalid}
-                    aria-label={placeholder}
+                    aria-label={`${bound} — ${section}`}
                     className={`${control}${ring} ${prefix ? (dense ? 'pl-5' : 'pl-6') : ''} ${unit ? (dense ? 'pr-7' : 'pr-9') : ''}`}
                 />
                 {unit && (
@@ -191,7 +219,7 @@ const VillaAllFilters: React.FC<VillaAllFiltersProps> = ({
         return (
             <div className="flex items-center gap-1.5">
                 {box(minKey, t('search:filters.min', 'Min'))}
-                <span className="text-gray-300 flex-shrink-0">–</span>
+                <span className="text-gray-300 flex-shrink-0" aria-hidden="true">–</span>
                 {box(maxKey, t('search:filters.max', 'Max'))}
             </div>
         );
@@ -253,12 +281,8 @@ const VillaAllFilters: React.FC<VillaAllFiltersProps> = ({
 
                 {/* ── Price ── */}
                 <div>
-                    <label className={label}>
-                        {listingMode === 'rent'
-                            ? t('villas:filters.pricePerNight', 'Price / Night')
-                            : t('search:filters.priceRange', 'Price')}
-                    </label>
-                    {rangeRow({ minKey: 'minPrice', maxKey: 'maxPrice', prefix: currencySymbol, invalid: priceInvalid })}
+                    <label className={label}>{priceLabel}</label>
+                    {rangeRow({ section: priceLabel, minKey: 'minPrice', maxKey: 'maxPrice', prefix: currencySymbol, invalid: priceInvalid })}
                     {priceInvalid && (
                         <p className="mt-1 text-[10px] text-red-500" role="alert">
                             {t('villas:filters.priceRangeInvalid', 'Minimum price is higher than the maximum.')}
@@ -289,8 +313,8 @@ const VillaAllFilters: React.FC<VillaAllFiltersProps> = ({
 
                 {/* ── Square Feet → m² (Zillow: "Square Feet") ── */}
                 <div>
-                    <label className={label}>{t('search:filters.areaRange', 'Living Area')}</label>
-                    {rangeRow({ minKey: 'minSqft', maxKey: 'maxSqft', unit: 'm²', invalid: areaInvalid })}
+                    <label className={label}>{areaLabel}</label>
+                    {rangeRow({ section: areaLabel, minKey: 'minSqft', maxKey: 'maxSqft', unit: 'm²', invalid: areaInvalid })}
                     {areaInvalid && (
                         <p className="mt-1 text-[10px] text-red-500" role="alert">
                             {t('villas:filters.areaRangeInvalid', 'Minimum area is larger than the maximum.')}
@@ -300,20 +324,20 @@ const VillaAllFilters: React.FC<VillaAllFiltersProps> = ({
 
                 {/* ── Price/m² (Zillow: "Price/sqft") ── */}
                 <div>
-                    <label className={label}>{t('search:filters.pricePerSqm', 'Price per m²')}</label>
-                    {rangeRow({ minKey: 'minPricePerSqm', maxKey: 'maxPricePerSqm', unit: '€/m²' })}
+                    <label className={label}>{pricePerSqmLabel}</label>
+                    {rangeRow({ section: pricePerSqmLabel, minKey: 'minPricePerSqm', maxKey: 'maxPricePerSqm', unit: '€/m²' })}
                 </div>
 
                 {/* ── Year Built ── */}
                 <div>
-                    <label className={label}>{t('search:filters.yearBuilt', 'Year Built')}</label>
-                    {rangeRow({ minKey: 'minYearBuilt', maxKey: 'maxYearBuilt' })}
+                    <label className={label}>{yearBuiltLabel}</label>
+                    {rangeRow({ section: yearBuiltLabel, minKey: 'minYearBuilt', maxKey: 'maxYearBuilt' })}
                 </div>
 
                 {/* ── Floor ── */}
                 <div>
-                    <label className={label}>{t('search:filters.floorNumber', 'Floor')}</label>
-                    {rangeRow({ minKey: 'minFloorNumber', maxKey: 'maxFloorNumber' })}
+                    <label className={label}>{floorLabel}</label>
+                    {rangeRow({ section: floorLabel, minKey: 'minFloorNumber', maxKey: 'maxFloorNumber', allowNegative: true })}
                 </div>
 
                 {/* ── Days on Market (Zillow: "Days on Zillow") ── */}
@@ -546,7 +570,7 @@ const VillaAllFilters: React.FC<VillaAllFiltersProps> = ({
                 <label className={label}>{t('villas:filters.keywords', 'Keywords')}</label>
                 <input
                     type="text"
-                    placeholder={t('search:amenities.placeholder', 'e.g. infinity pool — press Enter')}
+                    placeholder={t('villas:filters.keywordsPlaceholder', 'e.g. infinity pool — press Enter')}
                     onKeyDown={(e) => {
                         if (e.key !== 'Enter') return;
                         e.preventDefault();

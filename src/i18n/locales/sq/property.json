@@ -701,5 +701,10 @@
     "disclaimer": "Skenë e krijuar me AI vetëm për qëllime demonstrimi. Këto imazhe nuk janë foto reale të pronës dhe mund të përmbajnë artikuj që nuk janë pjesë e shpalljes.",
     "interior": "Interior",
     "exterior": "Eksterier"
+  },
+  "naming": {
+    "typeIn": "{{type}} në {{place}}",
+    "bdsAbbr": "dhoma",
+    "baAbbr": "banjo"
   }
 }

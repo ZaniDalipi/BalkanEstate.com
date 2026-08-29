@@ -63,7 +63,15 @@
     "moreFilters": "Още филтри",
     "lessFilters": "По-малко филтри",
     "anyCountry": "Всяка държава",
-    "sortBy": "Сортирай по"
+    "sortBy": "Сортирай по",
+    "pricePerSqm": "Цена на m²",
+    "daysOnMarket": "Дни на пазара",
+    "last24h": "Последните 24 часа",
+    "last3Days": "Последните 3 дни",
+    "last7Days": "Последните 7 дни",
+    "last30Days": "Последните 30 дни",
+    "priceReduced": "Намалена цена",
+    "priceIncreased": "Увеличена цена"
   },
   "options": {
     "any": "Всички",
