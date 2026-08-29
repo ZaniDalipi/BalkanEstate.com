@@ -102,11 +102,16 @@ const ConsentBanner: React.FC = () => {
         }
         .cookie-banner {
           animation: cookie-slide-up 0.3s ease-out;
+          /* Sit directly on top of the mobile BottomNav (~3.5rem + safe area) */
+          bottom: calc(3.75rem + env(safe-area-inset-bottom, 0px));
+        }
+        /* BottomNav is md:hidden, so from md up only the floating contact FAB needs clearing */
+        @media (min-width: 768px) {
+          .cookie-banner { bottom: 6rem; }
         }
       `}</style>
-      {/* Anchored bottom-right, raised above the floating contact FAB so the two don't overlap */}
       <div
-        className="cookie-banner fixed z-[99998] bottom-24 left-3 right-3 sm:left-auto sm:right-6 sm:w-[22rem] bg-white border border-gray-200 rounded-xl shadow-xl"
+        className="cookie-banner fixed z-[99998] left-3 right-3 sm:left-auto sm:right-6 sm:w-[22rem] bg-white border border-gray-200 rounded-xl shadow-xl"
         role="dialog"
         aria-label="Cookie consent"
       >
