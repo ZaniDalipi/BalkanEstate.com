@@ -121,7 +121,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, index, t, onTagClick
       className={cn(
         'group relative rounded-3xl bg-white w-full cursor-pointer',
         'shadow-[8px_8px_20px_rgba(0,0,0,0.08),-8px_-8px_20px_rgba(255,255,255,0.9)]',
-        'transition-[opacity,transform,box-shadow] duration-700',
+        'transition-[opacity,translate,box-shadow] duration-700',
         'hover:shadow-[14px_14px_28px_rgba(0,0,0,0.12),-14px_-14px_28px_rgba(255,255,255,1)]',
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8',
       )}

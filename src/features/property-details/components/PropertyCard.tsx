@@ -250,8 +250,10 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
   return (
     <div
-      className={`group bg-white rounded-2xl overflow-hidden shadow-sm border transition-[transform,box-shadow,border-color,opacity] duration-300 text-left w-full flex flex-col cursor-pointer isolate ${getCardStyles()} ${
-        isSold || isRented ? 'hover:shadow-md' : 'hover:shadow-lg hover:-translate-y-1 hover:scale-[1.01]'
+      className={`group bg-white rounded-2xl overflow-hidden shadow-sm border text-left w-full flex flex-col cursor-pointer isolate transition-[translate,box-shadow,border-color] duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 ${getCardStyles()} ${
+        isSold || isRented
+          ? 'hover:shadow-md'
+          : 'hover:shadow-[0_12px_28px_-10px_rgba(15,23,42,0.28)] motion-safe:hover:-translate-y-1'
       }`}
       onClick={onCardClick}
       onContextMenu={onContextMenu}
@@ -272,15 +274,22 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             key={currentImageIndex}
             className={`absolute inset-0 ${slideDirection === 'right' ? 'animate-gallery-right' : 'animate-gallery-left'}`}
           >
-            <PropertyImage
-              src={currentImageUrl}
-              alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
-              priority={priority}
-              widths={IMAGE_WIDTHS}
-              sizes={IMAGE_SIZES}
-              transitionDurationClass={currentImageIndex === 0 ? 'duration-300' : 'duration-150'}
-              imgClassName={isSold || isRented ? 'grayscale' : 'group-hover:scale-[1.02] transition-transform duration-300'}
-            />
+            {/* The hover zoom lives on its own wrapper rather than on the <img>.
+                PropertyImage already puts a transition-opacity on that element
+                for its fade-in, and two transition-property utilities on one
+                element overwrite each other — the zoom and the fade would each
+                cancel the other depending on CSS order. */}
+            <div className="absolute inset-0 transition-transform duration-[600ms] ease-out motion-safe:group-hover:scale-[1.05]">
+              <PropertyImage
+                src={currentImageUrl}
+                alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
+                priority={priority}
+                widths={IMAGE_WIDTHS}
+                sizes={IMAGE_SIZES}
+                transitionDurationClass={currentImageIndex === 0 ? 'duration-300' : 'duration-150'}
+                imgClassName={isSold || isRented ? 'grayscale' : ''}
+              />
+            </div>
           </div>
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
@@ -458,7 +467,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           {/* iOS-style Favorite Button - frosted glass */}
           <button
             onClick={onFavoriteClick}
-            className={`w-8 h-8 flex items-center justify-center rounded-full transition-[background-color,transform] duration-200 touch-manipulation focus:outline-none active:scale-90 ${
+            className={`w-8 h-8 flex items-center justify-center rounded-full transition-[background-color,scale] duration-200 touch-manipulation focus:outline-none active:scale-90 ${
               isFavorited
                 ? 'bg-red-500 text-white'
                 : 'bg-black/20 backdrop-blur-md text-white border border-white/20'
