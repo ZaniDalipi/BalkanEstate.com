@@ -147,6 +147,41 @@ describe('useDragSlider', () => {
     expect(onChange).toHaveBeenCalledTimes(emits);
   });
 
+  it('publishes the thumb position as a CSS variable, ahead of any render', () => {
+    render(<Harness onChange={() => {}} initial={0} />);
+    const track = screen.getByTestId('track');
+    const pos = () => track.style.getPropertyValue('--slider-pos');
+
+    // Written on mount, so the thumb is placed before the first paint.
+    expect(pos()).toBe(`${THUMB / 2}px`);
+
+    act(() => { fireEvent.pointerDown(track, { pointerId: 1, clientX: 150, button: 0 }); });
+    expect(pos()).toBe('150px');
+  });
+
+  it('follows the finger between steps and settles on one when released', () => {
+    // 4 stops across the track: without continuous tracking the thumb would
+    // hop in ~68px jumps, which is what reads as a stuttering slider.
+    render(<Harness onChange={() => {}} step={25} initial={0} />);
+    const track = screen.getByTestId('track');
+    const pos = () => parseFloat(track.style.getPropertyValue('--slider-pos'));
+
+    act(() => { fireEvent.pointerDown(track, { pointerId: 1, clientX: 100, button: 0 }); });
+    act(() => { fireEvent.pointerMove(track, { pointerId: 1, clientX: 108 }); });
+    const midStep = pos();
+    act(() => { fireEvent.pointerMove(track, { pointerId: 1, clientX: 116 }); });
+
+    // Both moves land inside one step, and both moved the thumb.
+    expect(midStep).toBeCloseTo(108, 1);
+    expect(pos()).toBeCloseTo(116, 1);
+
+    // Releasing settles it onto the step the value actually snapped to.
+    act(() => { fireEvent.pointerUp(track, { pointerId: 1, clientX: 116 }); });
+    const value = Number(track.getAttribute('aria-valuenow'));
+    expect(value % 25).toBe(0);
+    expect(pos()).toBeCloseTo(THUMB / 2 + (value / 100) * (TRACK_WIDTH - THUMB), 1);
+  });
+
   it('snaps to the step grid', () => {
     const onChange = vi.fn();
     render(<Harness onChange={onChange} step={25} />);

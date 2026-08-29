@@ -171,37 +171,18 @@ const TouchSlider: React.FC<TouchSliderProps> = ({
   // there reads as lag. Easing is only for the settle after release.
   const follow = isDragging ? 'none' : `left 120ms ${SETTLE}`;
 
+  // `offset` reads the CSS variable the hook writes on the track element each
+  // frame, so the thumb, the fill and the bubble all move together without
+  // waiting for a render. Its fallback (used for the first paint and for
+  // prerendered HTML) is derived from the value and so changes on every step —
+  // freezing it for the duration of a drag keeps these style strings identical
+  // across renders, which means React writes nothing to the DOM for them.
+  const restingOffset = useRef(offset);
+  if (!isDragging) restingOffset.current = offset;
+  const pos = isDragging ? restingOffset.current : offset;
+
   return (
     <div className={`relative ${className}`}>
-      {/* Value bubble — rides above the thumb during the gesture, the way a
-          native slider's tooltip does, so the finger never hides the number. */}
-      {bubbleLabel && (
-        <div
-          aria-hidden="true"
-          className="absolute bottom-full z-20 pointer-events-none"
-          style={{
-            left: offset,
-            transform: `translate(-50%, ${isDragging || lingering ? '-4px' : '2px'}) scale(${isDragging || lingering ? 1 : 0.85})`,
-            opacity: isDragging || lingering ? 1 : 0,
-            transition: isDragging
-              ? `opacity 120ms linear, transform 160ms ${SETTLE}`
-              : `left 120ms ${SETTLE}, opacity 200ms linear, transform 200ms ${SETTLE}`,
-            willChange: 'left, transform, opacity',
-          }}
-        >
-          <span
-            className="block rounded-lg px-2 py-1 text-[11px] font-bold text-white whitespace-nowrap tabular-nums shadow-lg"
-            style={{ backgroundColor: tone.accent, boxShadow: `0 6px 18px ${tone.glow}` }}
-          >
-            {bubbleLabel}
-          </span>
-          <span
-            className="block w-2 h-2 mx-auto -mt-1 rotate-45 rounded-[2px]"
-            style={{ backgroundColor: tone.accent }}
-          />
-        </div>
-      )}
-
       {/*
         * The whole row is the drag surface (pointer events, see useDragSlider):
         * press anywhere and the thumb follows the finger, and the extra height
@@ -216,9 +197,41 @@ const TouchSlider: React.FC<TouchSliderProps> = ({
         className={`relative ${coarse ? ROW_COARSE : ROW_FINE} flex items-center outline-none rounded-2xl`}
         style={{
           ...trackProps.style,
+          // Keep every frame of a drag inside this row: without it, moving the
+          // thumb invalidates layout for the whole calculator card.
+          contain: 'layout',
           boxShadow: keyboardFocus ? `0 0 0 2px #fff, 0 0 0 4px ${tone.accent}` : undefined,
         }}
       >
+        {/* Value bubble — rides above the thumb during the gesture, the way a
+            native slider's tooltip does, so the finger never hides the number. */}
+        {bubbleLabel && (
+          <div
+            aria-hidden="true"
+            className="absolute bottom-full z-20 pointer-events-none"
+            style={{
+              left: pos,
+              transform: `translate(-50%, ${isDragging || lingering ? '-4px' : '2px'}) scale(${isDragging || lingering ? 1 : 0.85})`,
+              opacity: isDragging || lingering ? 1 : 0,
+              transition: isDragging
+                ? `opacity 120ms linear, transform 160ms ${SETTLE}`
+                : `left 120ms ${SETTLE}, opacity 200ms linear, transform 200ms ${SETTLE}`,
+              willChange: isDragging ? 'left, transform' : undefined,
+            }}
+          >
+            <span
+              className="block rounded-lg px-2 py-1 text-[11px] font-bold text-white whitespace-nowrap tabular-nums shadow-lg"
+              style={{ backgroundColor: tone.accent, boxShadow: `0 6px 18px ${tone.glow}` }}
+            >
+              {bubbleLabel}
+            </span>
+            <span
+              className="block w-2 h-2 mx-auto -mt-1 rotate-45 rounded-[2px]"
+              style={{ backgroundColor: tone.accent }}
+            />
+          </div>
+        )}
+
         {/* Track */}
         <div
           className={`relative w-full ${coarse ? BAR_COARSE : BAR_FINE} rounded-full bg-gradient-to-r from-neutral-200 via-neutral-100 to-neutral-200 shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] overflow-hidden pointer-events-none`}
@@ -230,9 +243,9 @@ const TouchSlider: React.FC<TouchSliderProps> = ({
             className="absolute inset-0 rounded-full"
             style={{
               background: tone.ramp,
-              clipPath: `inset(0 calc(100% - ${offset}) 0 0 round 9999px)`,
+              clipPath: `inset(0 calc(100% - ${pos}) 0 0 round 9999px)`,
               transition: isDragging ? 'none' : `clip-path 120ms ${SETTLE}, background 200ms linear`,
-              willChange: 'clip-path',
+              willChange: isDragging ? 'clip-path' : undefined,
             }}
           />
 
@@ -254,9 +267,9 @@ const TouchSlider: React.FC<TouchSliderProps> = ({
         <div
           className="absolute top-1/2 pointer-events-none z-10"
           style={{
-            left: offset,
-            transform: `translate(-50%, -50%) scale(${isDragging ? 1.15 : lit ? 1.08 : 1})`,
-            willChange: 'left, transform',
+            left: pos,
+            transform: `translate3d(-50%, -50%, 0) scale(${isDragging ? 1.15 : lit ? 1.08 : 1})`,
+            willChange: lit ? 'left, transform' : undefined,
             transition: `${follow}, transform 180ms ${SETTLE}`,
           }}
         >

@@ -145,6 +145,47 @@ const SettingsGroup: React.FC<{
   </div>
 );
 
+/**
+ * Year-by-year cost table. Up to thirty rows, and it only ever changes when a
+ * new calculation lands — memoised so that dragging the horizon slider, which
+ * re-renders the calculator on every frame, doesn't reconcile it each time.
+ */
+const YearlyBreakdown = React.memo<{
+  rows: CalculationResults['yearlyBreakdown'];
+  country: string;
+}>(({ rows, country }) => {
+  const { t } = useTranslation(['calculators']);
+  if (rows.length === 0) return null;
+  return (
+    <div className="mt-4 text-left">
+      <p className="text-xs font-semibold text-neutral-700 mb-2">{t('calculators:rentVsBuy.results.yearlyCostComparison')}</p>
+      <div className="space-y-1 max-h-32 overflow-y-auto border border-neutral-200 rounded-lg p-2 bg-neutral-50">
+        <div className="flex justify-between items-center text-xs font-semibold text-neutral-600 pb-1 border-b border-neutral-200">
+          <span>{t('calculators:rentVsBuy.results.year')}</span>
+          <div className="flex gap-4">
+            <span className="w-20 text-right">{t('calculators:rentVsBuy.results.rent')}</span>
+            <span className="w-20 text-right">{t('calculators:rentVsBuy.results.buy')}</span>
+          </div>
+        </div>
+        {rows.map(({ year, rentCost, buyCost }) => (
+          <div key={year} className="flex justify-between items-center text-xs py-1">
+            <span className="text-neutral-600 font-medium">{t('calculators:rentVsBuy.results.year')} {year}</span>
+            <div className="flex gap-4">
+              <span className={`w-20 text-right ${rentCost < buyCost ? 'text-green-600 font-semibold' : 'text-neutral-500'}`}>
+                {formatPrice(rentCost, country)}
+              </span>
+              <span className={`w-20 text-right ${buyCost < rentCost ? 'text-green-600 font-semibold' : 'text-neutral-500'}`}>
+                {formatPrice(buyCost, country)}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+});
+YearlyBreakdown.displayName = 'YearlyBreakdown';
+
 const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice, country }) => {
   const { t } = useTranslation(['calculators']);
   // --- Basic Inputs ---
@@ -613,9 +654,13 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
           )}
         </div>
 
-        {/* Fixed Height Results Container with Scrollable Yearly Breakdown */}
+        {/* Fixed Height Results Container with Scrollable Yearly Breakdown.
+            Results stay on screen while the next figures are computed: swapping
+            the whole block out for a spinner on every step of a drag tore down
+            and rebuilt this subtree ~60 times a second, which is what made the
+            slider stutter. Only the very first calculation shows the spinner. */}
         <div className="min-h-[280px]">
-          {isCalculating ? (
+          {isCalculating && !results ? (
             <div className="flex items-center justify-center h-32">
               <div className="text-center">
                 <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
@@ -623,7 +668,11 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
               </div>
             </div>
           ) : results && verdict ? (
-            <div className="border-t border-neutral-200 pt-3 text-center">
+            <div
+              className="border-t border-neutral-200 pt-3 text-center transition-opacity duration-200"
+              style={{ opacity: isCalculating ? 0.55 : 1 }}
+              aria-busy={isCalculating || undefined}
+            >
               <p className="text-xs font-semibold text-neutral-600">{t('calculators:rentVsBuy.results.cheaperTo', { years: planningToStay })}</p>
               <p className={`text-3xl font-extrabold my-0.5 ${verdict.color}`}>
                 {verdict.decision === 'Buy' ? t('calculators:rentVsBuy.results.buy') : t('calculators:rentVsBuy.results.rent')}
@@ -661,34 +710,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
                 </div>
               </div>
 
-              {/* Yearly Breakdown Chart - Scrollable within fixed container */}
-              {results.yearlyBreakdown.length > 0 && (
-                <div className="mt-4 text-left">
-                  <p className="text-xs font-semibold text-neutral-700 mb-2">{t('calculators:rentVsBuy.results.yearlyCostComparison')}</p>
-                  <div className="space-y-1 max-h-32 overflow-y-auto border border-neutral-200 rounded-lg p-2 bg-neutral-50">
-                    <div className="flex justify-between items-center text-xs font-semibold text-neutral-600 pb-1 border-b border-neutral-200">
-                      <span>{t('calculators:rentVsBuy.results.year')}</span>
-                      <div className="flex gap-4">
-                        <span className="w-20 text-right">{t('calculators:rentVsBuy.results.rent')}</span>
-                        <span className="w-20 text-right">{t('calculators:rentVsBuy.results.buy')}</span>
-                      </div>
-                    </div>
-                    {results.yearlyBreakdown.map(({ year, rentCost, buyCost }) => (
-                      <div key={year} className="flex justify-between items-center text-xs py-1">
-                        <span className="text-neutral-600 font-medium">{t('calculators:rentVsBuy.results.year')} {year}</span>
-                        <div className="flex gap-4">
-                          <span className={`w-20 text-right ${rentCost < buyCost ? 'text-green-600 font-semibold' : 'text-neutral-500'}`}>
-                            {formatPrice(rentCost, country)}
-                          </span>
-                          <span className={`w-20 text-right ${buyCost < rentCost ? 'text-green-600 font-semibold' : 'text-neutral-500'}`}>
-                            {formatPrice(buyCost, country)}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <YearlyBreakdown rows={results.yearlyBreakdown} country={country} />
             </div>
           ) : (
             // Empty placeholder that maintains exact same height including yearly breakdown

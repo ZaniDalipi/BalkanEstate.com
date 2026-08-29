@@ -145,7 +145,6 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
     const [rateInput, setRateInput] = useState<string>(String(profile.typicalRate));
     const [rateError, setRateError] = useState<string | undefined>();
     const [loanTerm, setLoanTerm] = useState(profile.defaultTermYears);
-    const [monthlyPayment, setMonthlyPayment] = useState(0);
     const [isSliderActive, setIsSliderActive] = useState(false);
     const [dpFocused, setDpFocused] = useState(false); // blank the field only while editing
 
@@ -232,20 +231,17 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
         };
     }, [depositShare, t]);
 
-    useEffect(() => {
+    // Derived, not stored: as an effect + setState this cost a second render
+    // pass for every step of a slider drag, doubling the work between frames.
+    const monthlyPayment = useMemo(() => {
         const principal = propertyPrice - downPaymentAmount;
-
-        if (principal <= 0 || effectiveRate <= 0 || loanTerm <= 0) {
-            setMonthlyPayment(0);
-            return;
-        }
+        if (principal <= 0 || effectiveRate <= 0 || loanTerm <= 0) return 0;
 
         const monthlyInterestRate = (effectiveRate / 100) / 12;
         const numberOfPayments = loanTerm * 12;
-
         const M = principal * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments)) / (Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1);
 
-        setMonthlyPayment(M > 0 ? M : 0);
+        return M > 0 ? M : 0;
     }, [propertyPrice, downPaymentAmount, effectiveRate, loanTerm]);
 
     // Full repayment breakdown derived from the monthly payment.

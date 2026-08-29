@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type React from 'react';
 
 /**
@@ -19,6 +19,13 @@ import type React from 'react';
  *     when the finger strays off the track (above it, below it, past its end),
  *   - updates are coalesced into one `requestAnimationFrame` per frame, so a
  *     120 Hz touch stream can't outrun React's render,
+ *   - the thumb's position is published as a CSS variable written straight to
+ *     the DOM in that frame, so what the finger sees never waits on React: a
+ *     slow re-render further up (a recalculating results panel, say) can no
+ *     longer make the thumb stutter behind the finger,
+ *   - where the browser offers `pointerrawupdate` the drag reads that instead,
+ *     which delivers positions ahead of `pointermove` and shaves a frame of
+ *     latency off the gesture,
  *   - a short haptic tick fires on each value change, the way a native picker
  *     does, on devices that support the Vibration API,
  *   - the geometry accounts for the thumb's width, so the value under the
@@ -61,9 +68,16 @@ export interface UseDragSliderResult {
   isDragging: boolean;
   /**
    * CSS length for the thumb centre (also the correct width for the filled
-   * portion of the track), e.g. `calc(40% + 2.8px)`.
+   * portion of the track).
+   *
+   * Reads the `--slider-pos` variable the hook writes on the track element,
+   * falling back to a value-derived `calc(40% + 2.8px)` for the first paint
+   * (and for prerendered HTML, before hydration). Consumers should spread it
+   * into a property that accepts a length — `left`, or inside a `calc()`.
    */
   offset: string;
+  /** Name of the CSS variable carrying the live thumb position, in px. */
+  positionVar: '--slider-pos';
   /** Spread onto the element that visually contains the track. */
   trackProps: {
     ref: React.RefObject<HTMLDivElement>;
@@ -96,6 +110,9 @@ function quantize(raw: number, min: number, max: number, step: number): number {
   const decimals = (String(step).split('.')[1] || '').length;
   return Math.min(max, Math.max(min, decimals ? Number(snapped.toFixed(decimals)) : snapped));
 }
+
+/** CSS variable the live thumb position is published on. */
+const POSITION_VAR = '--slider-pos';
 
 /** Shortest pulse most phones will actually render, in ms. */
 const HAPTIC_MS = 5;
@@ -138,6 +155,8 @@ export function useDragSlider({
   /** Last value this hook emitted, so an unchanged value costs no render. */
   const lastEmitted = useRef<number | null>(null);
   const lastBuzz = useRef(0);
+  /** Track width, kept fresh by a ResizeObserver so drags never measure. */
+  const trackWidth = useRef(0);
 
   // Keep the callbacks in refs so the pointer handlers stay referentially
   // stable across renders (they run on every pointermove).
@@ -151,11 +170,40 @@ export function useDragSlider({
 
   // Thumb centre = percent of the *usable* track (full width minus the thumb),
   // shifted right by half a thumb. Expressed as calc() so it stays correct at
-  // any container width without measuring during render.
+  // any container width without measuring during render — this is the fallback
+  // the first paint uses, before the effect below writes a real px position.
   const shift = ((50 - percent) / 100) * thumbSize;
-  const offset = thumbSize > 0
+  const fallbackOffset = thumbSize > 0
     ? `calc(${percent}% ${shift < 0 ? '-' : '+'} ${Math.abs(shift)}px)`
     : `${percent}%`;
+  const offset = `var(${POSITION_VAR}, ${fallbackOffset})`;
+
+  /**
+   * Publish the thumb position straight to the DOM.
+   *
+   * This is the whole reason a drag feels attached to the finger: the value
+   * still travels through React (the numbers, the colour band, the results all
+   * need it), but the thumb and the fill read a CSS variable that is written
+   * inside the same frame the pointer moved. Whatever React does afterwards,
+   * however long it takes, the thumb has already moved.
+   */
+  const writeVisual = useCallback((ratio: number) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const width = trackWidth.current || el.getBoundingClientRect().width;
+    if (!(width > 0)) return;
+    const thumb = latest.current.thumbSize;
+    const clamped = Math.min(1, Math.max(0, ratio));
+    const px = thumb / 2 + clamped * Math.max(0, width - thumb);
+    el.style.setProperty(POSITION_VAR, `${Math.round(px * 100) / 100}px`);
+  }, []);
+
+  /** Where a value sits on the track, 0–1. */
+  const ratioOf = useCallback((v: number) => {
+    const { min: lo, max: hi } = latest.current;
+    const range = hi - lo;
+    return range > 0 && Number.isFinite(v) ? Math.min(1, Math.max(0, (v - lo) / range)) : 0;
+  }, []);
 
   const cancelFrame = useCallback(() => {
     if (frame.current !== null) {
@@ -198,12 +246,20 @@ export function useDragSlider({
     const { min: lo, max: hi, step: gap, thumbSize: thumb, onChange: emit } = latest.current;
     const usable = Math.max(1, rect.width - thumb);
     const ratio = (clientX - grabDelta.current - rect.left - thumb / 2) / usable;
-    const next = quantize(lo + Math.min(1, Math.max(0, ratio)) * (hi - lo), lo, hi, gap);
-    if (!Number.isFinite(next) || next === lastEmitted.current) return;
+    const clamped = Math.min(1, Math.max(0, ratio));
+    const next = quantize(lo + clamped * (hi - lo), lo, hi, gap);
+    if (!Number.isFinite(next)) return;
+    // Move the thumb first, every frame, whether or not the value changed:
+    // this is the part the finger is watching. Mid-drag it follows the finger
+    // itself rather than the step grid — a 30-stop slider is ~11px per step, and
+    // hopping between those stops is exactly what reads as "not smooth". The
+    // readout still snaps, and the thumb settles onto its stop on release.
+    writeVisual(activePointer.current !== null ? clamped : ratioOf(next));
+    if (next === lastEmitted.current) return;
     lastEmitted.current = next;
     if (activePointer.current !== null) buzz();
     emit(next);
-  }, [buzz]);
+  }, [buzz, ratioOf, writeVisual]);
 
   const scheduleX = useCallback((clientX: number) => {
     pendingX.current = clientX;
@@ -220,15 +276,19 @@ export function useDragSlider({
   const endDrag = useCallback(() => {
     if (activePointer.current === null) return;
     // Flush the last coalesced position so the value matches where the finger
-    // was lifted rather than the previous frame.
+    // was lifted rather than the previous frame. Clearing the pointer first
+    // makes that flush settle the thumb onto its step instead of leaving it
+    // wherever the finger happened to stop.
     const x = pendingX.current;
     cancelFrame();
-    if (x !== null) commitX(x);
     activePointer.current = null;
+    if (x !== null) commitX(x);
     grabDelta.current = 0;
+    const settled = lastEmitted.current ?? latest.current.value;
+    if (Number.isFinite(settled)) writeVisual(ratioOf(settled));
     setIsDragging(false);
     latest.current.onDragEnd?.();
-  }, [cancelFrame, commitX]);
+  }, [cancelFrame, commitX, ratioOf, writeVisual]);
 
   const onPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (latest.current.disabled || e.button > 0) return;
@@ -309,6 +369,48 @@ export function useDragSlider({
 
   useEffect(() => cancelFrame, [cancelFrame]);
 
+  // Measure once and then only when the layout actually changes, so no frame of
+  // a drag ever pays for a forced reflow.
+  useLayoutEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    const measure = () => {
+      trackWidth.current = el.getBoundingClientRect().width;
+      if (activePointer.current === null) writeVisual(ratioOf(latest.current.value));
+    };
+    measure();
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [ratioOf, writeVisual]);
+
+  // Keep the published position in step with values that arrive from anywhere
+  // but a drag: the keyboard, a typed figure, a mode switch, a new property.
+  useLayoutEffect(() => {
+    if (activePointer.current !== null) return;
+    writeVisual(percent / 100);
+  }, [percent, thumbSize, writeVisual]);
+
+  /**
+   * `pointerrawupdate` reports moves as the OS delivers them rather than once
+   * per frame, so pairing it with the rAF coalescing above means each painted
+   * frame uses the freshest position instead of one up to a frame old. Chrome
+   * and Edge only; everywhere else the pointermove handler is the whole story.
+   */
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el || !isDragging) return;
+    if (typeof window === 'undefined' || !('onpointerrawupdate' in window)) return;
+    const onRaw = (event: Event) => {
+      const e = event as PointerEvent;
+      if (activePointer.current !== e.pointerId) return;
+      scheduleX(e.clientX);
+    };
+    el.addEventListener('pointerrawupdate', onRaw);
+    return () => el.removeEventListener('pointerrawupdate', onRaw);
+  }, [isDragging, scheduleX]);
+
   const trackProps = useMemo(() => ({
     ref: trackRef,
     role: 'slider' as const,
@@ -340,7 +442,7 @@ export function useDragSlider({
     onBlur,
   }), [disabled, min, max, value, valueText, ariaLabel, onPointerDown, onPointerMove, onPointerUp, endDrag, onContextMenu, onKeyDown, onBlur]);
 
-  return { percent, isDragging, offset, trackProps };
+  return { percent, isDragging, offset, positionVar: POSITION_VAR, trackProps };
 }
 
 export default useDragSlider;
