@@ -60,7 +60,10 @@
     "yearBuilt": "Година на строеж",
     "furnished": "Обзаведено",
     "unfurnished": "Необзаведено",
-    "partlyFurnished": "Частично обзаведено"
+    "partlyFurnished": "Частично обзаведено",
+    "bedroomsShort": "спални",
+    "bathroomsShort": "бани",
+    "livingRoomsShort": "хол"
   },
   "amenities": {
     "title": "Удобства",

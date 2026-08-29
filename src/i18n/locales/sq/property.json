@@ -60,7 +60,10 @@
     "yearBuilt": "Viti i Ndërtimit",
     "furnished": "E Mobiluar",
     "unfurnished": "E Pamobiluar",
-    "partlyFurnished": "Pjesërisht e Mobiluar"
+    "partlyFurnished": "Pjesërisht e Mobiluar",
+    "bedroomsShort": "dhoma",
+    "bathroomsShort": "banjo",
+    "livingRoomsShort": "ndenjeje"
   },
   "amenities": {
     "title": "Komoditete",

@@ -60,7 +60,10 @@
     "yearBuilt": "Έτος Κατασκευής",
     "furnished": "Επιπλωμένο",
     "unfurnished": "Χωρίς Έπιπλα",
-    "partlyFurnished": "Μερικώς Επιπλωμένο"
+    "partlyFurnished": "Μερικώς Επιπλωμένο",
+    "bedroomsShort": "υπν.",
+    "bathroomsShort": "μπάν.",
+    "livingRoomsShort": "σαλ."
   },
   "amenities": {
     "title": "Παροχές",

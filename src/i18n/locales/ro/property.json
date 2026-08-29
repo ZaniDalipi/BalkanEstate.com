@@ -60,7 +60,10 @@
     "yearBuilt": "Anul Construcției",
     "furnished": "Mobilat",
     "unfurnished": "Nemobilat",
-    "partlyFurnished": "Parțial Mobilat"
+    "partlyFurnished": "Parțial Mobilat",
+    "bedroomsShort": "dorm.",
+    "bathroomsShort": "băi",
+    "livingRoomsShort": "living"
   },
   "amenities": {
     "title": "Facilități",

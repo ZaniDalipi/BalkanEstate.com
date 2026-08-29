@@ -60,7 +60,10 @@
     "yearBuilt": "Година на градба",
     "furnished": "Наместено",
     "unfurnished": "Ненаместено",
-    "partlyFurnished": "Делумно наместено"
+    "partlyFurnished": "Делумно наместено",
+    "bedroomsShort": "спални",
+    "bathroomsShort": "бањи",
+    "livingRoomsShort": "дневни"
   },
   "amenities": {
     "title": "Погодности",

@@ -67,7 +67,10 @@
     "yearBuilt": "Year Built",
     "furnished": "Furnished",
     "unfurnished": "Unfurnished",
-    "partlyFurnished": "Partly Furnished"
+    "partlyFurnished": "Partly Furnished",
+    "bedroomsShort": "bd",
+    "bathroomsShort": "ba",
+    "livingRoomsShort": "liv"
   },
   "amenities": {
     "title": "Amenities",

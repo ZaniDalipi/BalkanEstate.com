@@ -60,7 +60,10 @@
     "yearBuilt": "Godina izgradnje",
     "furnished": "Namješteno",
     "unfurnished": "Nenamješteno",
-    "partlyFurnished": "Djelimično namješteno"
+    "partlyFurnished": "Djelimično namješteno",
+    "bedroomsShort": "spav.",
+    "bathroomsShort": "kupat.",
+    "livingRoomsShort": "dnevne"
   },
   "amenities": {
     "title": "Sadržaji",
