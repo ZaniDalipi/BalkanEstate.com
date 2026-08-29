@@ -333,15 +333,18 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               </div>
             )}
           </div>
-          {/* View type pill — luxury-villa cards with a viewType set */}
-          {isLuxuryVilla && property.viewType && viewTypeDisplay[property.viewType] && (
-            <div className="absolute bottom-3 left-3 z-20 pointer-events-none">
-              <span className="bg-black/50 backdrop-blur-md text-white text-[10px] font-semibold px-2.5 py-[4px] rounded-full flex items-center gap-1 shadow">
+          {/* Photo overlays: property type, plus the view pill on luxury villas */}
+          <div className="absolute bottom-2 left-2 z-20 flex items-center gap-1 pointer-events-none">
+            <span className="bg-black/50 backdrop-blur-md text-white text-[10px] font-semibold px-2 py-[3px] rounded-full shadow">
+              {propertyTypeLabel}
+            </span>
+            {isLuxuryVilla && property.viewType && viewTypeDisplay[property.viewType] && (
+              <span className="bg-black/50 backdrop-blur-md text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1 shadow">
                 <span>{viewTypeDisplay[property.viewType].emoji}</span>
                 {viewTypeDisplay[property.viewType].label}
               </span>
-            </div>
-          )}
+            )}
+          </div>
 
         {/* Top badges row */}
         <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
@@ -474,82 +477,76 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
       {/* Content Section */}
       <div className="relative p-2 flex flex-col flex-grow bg-white">
         <div className="flex flex-col flex-grow">
-        {/* Property Type & Price Row - iOS style */}
-        <div className="flex items-center justify-between gap-1.5 mb-1">
-          {/* Property Type Badge */}
-          <span className="bg-neutral-100 text-neutral-600 text-[10px] font-medium px-1.5 py-[2px] rounded-full">
-            {propertyTypeLabel}
-          </span>
-          {/* Price Badge */}
-          {(() => {
-            if (property.isNegotiable) {
-              return (
-                <div className="text-right">
-                  <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[11px] sm:text-xs font-semibold px-2 py-[3px] rounded-full border border-amber-200">
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    {t('property:byNegotiation', 'By Negotiation')}
-                  </span>
-                </div>
-              );
-            }
+        {/* Price — the primary scan target, so it leads the block on its own line */}
+        <div className="flex items-baseline justify-between gap-2 mb-1">
+          {property.isNegotiable ? (
+            <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-xs font-semibold px-2 py-[3px] rounded-full border border-amber-200">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              {t('property:byNegotiation', 'By Negotiation')}
+            </span>
+          ) : (() => {
             const priceInfo = getPriceReductionInfo(property);
             return (
-              <div className="text-right">
-                <div className="flex items-center justify-end gap-1">
+              <>
+                <div className="flex items-baseline gap-1.5 min-w-0">
+                  <span className={`text-base sm:text-lg font-bold tracking-tight truncate ${isLuxuryVilla ? 'text-[#0252CD]' : 'text-neutral-900'}`}>
+                    {formatPrice(property.price, property.country)}
+                    {isRental && <span className="text-[11px] font-medium text-neutral-400">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? (isLuxuryVilla ? 'night' : t('common:day', 'day')) : t('common:mo', 'mo')}</span>}
+                  </span>
                   {(priceInfo.hasReduction || priceInfo.hasIncrease) && (
-                    <span className="text-[10px] text-neutral-400 line-through">
+                    <span className="text-[10px] text-neutral-400 line-through whitespace-nowrap">
                       {formatPrice(priceInfo.originalPrice, property.country)}
                     </span>
                   )}
-                  <span className={`text-[13px] sm:text-sm font-bold tracking-tight ${isLuxuryVilla ? 'text-[#0252CD]' : 'text-primary'}`}>
-                    {formatPrice(property.price, property.country)}
-                    {isRental && <span className="text-[10px] font-normal text-neutral-400">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? (isLuxuryVilla ? 'night' : t('common:day', 'day')) : t('common:mo', 'mo')}</span>}
-                  </span>
-                  {priceInfo.hasReduction && (
-                    <span className="bg-red-100 text-red-600 text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 whitespace-nowrap">
-                      <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                      </svg>
-                      -{priceInfo.discountPercentage}%
-                    </span>
-                  )}
-                  {priceInfo.hasIncrease && (
-                    <span className="bg-amber-100 text-amber-700 text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 whitespace-nowrap">
-                      <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                      </svg>
-                      +{priceInfo.increasePercentage}%
-                    </span>
+                  {/* Unit price sits beside the headline figure rather than under it */}
+                  {isRental ? (
+                    property.rentPeriod !== 'daily' && (
+                      <span className="text-[10px] text-neutral-400 whitespace-nowrap">
+                        {formatPrice(Math.round(property.price / (property.rentPeriod === 'weekly' ? 7 : 30)), property.country)}{t('rental:perDay', '/day')}
+                      </span>
+                    )
+                  ) : (
+                    safeProperty.sqft > 0 && property.propertyType !== 'land' && (
+                      <span className="text-[10px] text-neutral-400 whitespace-nowrap">
+                        {formatPrice(Math.round(property.price / safeProperty.sqft), property.country)}/m²
+                      </span>
+                    )
                   )}
                 </div>
-                {isRental ? (
-                  property.rentPeriod !== 'daily' && (
-                    <p className="text-[9px] text-neutral-400 font-medium">
-                      {formatPrice(Math.round(property.price / (property.rentPeriod === 'weekly' ? 7 : 30)), property.country)}{t('rental:perDay', '/day')}
-                    </p>
-                  )
-                ) : (
-                  safeProperty.sqft > 0 && property.propertyType !== 'land' && (
-                    <p className="text-[9px] text-neutral-400 font-medium">
-                      {formatPrice(Math.round(property.price / safeProperty.sqft), property.country)} per m²
-                    </p>
-                  )
+                {priceInfo.hasReduction && (
+                  <span className="flex-shrink-0 bg-red-50 text-red-600 text-[10px] font-bold px-1.5 py-0.5 rounded-md flex items-center gap-0.5 whitespace-nowrap">
+                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                    {priceInfo.discountPercentage}%
+                  </span>
                 )}
-              </div>
+                {priceInfo.hasIncrease && (
+                  <span className="flex-shrink-0 bg-amber-50 text-amber-700 text-[10px] font-bold px-1.5 py-0.5 rounded-md flex items-center gap-0.5 whitespace-nowrap">
+                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                    </svg>
+                    {priceInfo.increasePercentage}%
+                  </span>
+                )}
+              </>
             );
           })()}
         </div>
-        {/* Title */}
-        <h3 className="text-[13px] sm:text-sm font-bold text-neutral-900 mb-0.5 line-clamp-1 group-hover:text-primary transition-colors duration-300">
+
+        {/* Title — secondary to the price, so medium weight rather than bold */}
+        <h3 className="text-[13px] font-semibold text-neutral-800 mb-0.5 line-clamp-1 group-hover:text-primary transition-colors duration-300">
           {property.title || `${safeProperty.beds > 0 ? safeProperty.beds + '-Bed ' : ''}${propertyTypeLabel} ${isRental ? t('property:forRent', 'for Rent') : t('property:forSale', 'for Sale')}`}
         </h3>
 
         {/* Location - Clickable for navigation */}
         <div className="flex items-center gap-1 mb-1.5">
-          <MapPinIcon className="w-3 h-3 text-primary flex-shrink-0" />
-          <div className="text-[11px] sm:text-xs text-neutral-600 truncate flex items-center gap-1">
+          <MapPinIcon className="w-3 h-3 text-neutral-400 flex-shrink-0" />
+          {/* No gap between the city and its comma — the flex gap was rendering
+              as "Durres , Albania". */}
+          <div className="text-[11px] text-neutral-500 truncate flex items-center">
             <button
               onClick={(e) => onLocationClick(e, 'city')}
               className="hover:text-primary hover:underline transition-colors cursor-pointer"
@@ -557,7 +554,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             >
               {safeProperty.city}
             </button>
-            <span>,</span>
+            <span className="mr-1">,</span>
             <button
               onClick={(e) => onLocationClick(e, 'country')}
               className="hover:text-primary hover:underline transition-colors cursor-pointer"
@@ -568,55 +565,54 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           </div>
         </div>
 
-        {/* Property Stats — single compact strip (Zillow-style density) */}
-        <div className="flex items-center justify-between gap-1 mb-1.5 px-2 py-1 rounded-lg bg-neutral-50 border border-neutral-100">
-          {/* Beds */}
-          <div
-            className="flex items-center gap-1 min-w-0"
+        {/* Facts row. One muted icon colour instead of four competing ones, and
+            no surrounding box — at this size the chrome was louder than the
+            numbers it framed. */}
+        <div className="flex items-center gap-x-3 gap-y-1 flex-wrap text-[11px] text-neutral-400 mb-1.5">
+          <span
+            className="inline-flex items-center gap-1"
             aria-label={`${safeProperty.beds} ${safeProperty.beds === 1 ? t('property:features.bedroom') : t('property:features.bedrooms')}`}
           >
-            <svg className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+            <svg className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M2 17V8a2 2 0 012-2h16a2 2 0 012 2v9M2 17v2a1 1 0 001 1h1m16-3v2a1 1 0 01-1 1h-1M2 17h20M6 12h12a2 2 0 012 2v1H4v-1a2 2 0 012-2z" />
             </svg>
-            <span className="font-bold text-[12px] text-neutral-800 tabular-nums">{safeProperty.beds}</span>
-            <span className="text-[10px] text-neutral-500 truncate">{t('property:features.bedroomsShort', 'bd')}</span>
-          </div>
+            <span className="font-semibold text-neutral-700 tabular-nums">{safeProperty.beds}</span>
+            {t('property:features.bedroomsShort', 'bd')}
+          </span>
 
-          {/* Baths */}
-          <div
-            className="flex items-center gap-1 min-w-0"
+          <span
+            className="inline-flex items-center gap-1"
             aria-label={`${safeProperty.baths} ${safeProperty.baths === 1 ? t('property:features.bathroom') : t('property:features.bathrooms')}`}
           >
-            <svg className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+            <svg className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 12h16M4 12v6a2 2 0 002 2h12a2 2 0 002-2v-6M4 12V7a3 3 0 013-3h1M8 4v4M12 4v2m-1 2a1 1 0 102 0 1 1 0 00-2 0z" />
             </svg>
-            <span className="font-bold text-[12px] text-neutral-800 tabular-nums">{safeProperty.baths}</span>
-            <span className="text-[10px] text-neutral-500 truncate">{t('property:features.bathroomsShort', 'ba')}</span>
-          </div>
+            <span className="font-semibold text-neutral-700 tabular-nums">{safeProperty.baths}</span>
+            {t('property:features.bathroomsShort', 'ba')}
+          </span>
 
-          {/* Living Rooms */}
-          <div
-            className="flex items-center gap-1 min-w-0"
+          <span
+            className="inline-flex items-center gap-1"
             aria-label={`${safeProperty.livingRooms} ${safeProperty.livingRooms === 1 ? t('property:features.livingRoom') : t('property:features.livingRooms')}`}
           >
-            <svg className="w-3.5 h-3.5 text-purple-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+            <svg className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 12h18M3 12v6a1 1 0 001 1h2v-4h12v4h2a1 1 0 001-1v-6M3 12V9a3 3 0 013-3h12a3 3 0 013 3v3M7 19v-4m10 4v-4" />
             </svg>
-            <span className="font-bold text-[12px] text-neutral-800 tabular-nums">{safeProperty.livingRooms}</span>
-            <span className="text-[10px] text-neutral-500 truncate">{t('property:features.livingRoomsShort', 'liv')}</span>
-          </div>
+            <span className="font-semibold text-neutral-700 tabular-nums">{safeProperty.livingRooms}</span>
+            {t('property:features.livingRoomsShort', 'liv')}
+          </span>
 
-          {/* Sqft */}
-          <div
-            className="flex items-center gap-1 min-w-0"
+          {/* Area keeps the accent — it is the figure this market compares on */}
+          <span
+            className="inline-flex items-center gap-1 ml-auto"
             aria-label={`${safeProperty.sqft} ${t('common:sqm')}`}
           >
-            <svg className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+            <svg className="w-3.5 h-3.5 text-primary/70 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4h4M4 16v4h4M16 4h4v4M16 20h4v-4M9 9h6v6H9z" />
             </svg>
-            <span className="font-bold text-[12px] text-blue-600 tabular-nums">{safeProperty.sqft}</span>
-            <span className="text-[10px] text-neutral-500 truncate">{t('common:sqm')}</span>
-          </div>
+            <span className="font-semibold text-primary tabular-nums">{safeProperty.sqft}</span>
+            <span className="text-primary/60">{t('common:sqm')}</span>
+          </span>
         </div>
 
         {/* Luxury Amenity Chips — shown only for luxury-villa */}
@@ -681,40 +677,34 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border-2 border-white"></span>
             </div>
 
-            {/* Seller Info */}
-            <div className="min-w-0 flex-1 flex items-center gap-1.5">
+            {/* Seller and agency read as one sentence. The agency used to sit in
+                its own bordered chip capped at 72px, which truncated most names
+                to a couple of letters; inline it gets the leftover width. */}
+            <div className="min-w-0 flex-1 flex items-baseline gap-1 text-[11px]">
               {safeProperty.seller.name && (
-                <p className="text-[11px] font-semibold text-neutral-800 truncate">{safeProperty.seller.name}</p>
+                <span className="font-semibold text-neutral-700 truncate flex-shrink-0 max-w-[45%]">{safeProperty.seller.name}</span>
               )}
-              <span className={`inline-flex flex-shrink-0 items-center text-[9px] font-medium px-1.5 py-[1px] rounded-full ${
-                safeProperty.seller.type === 'agent'
-                  ? 'bg-blue-50 text-blue-600'
-                  : 'bg-neutral-50 text-neutral-500'
-              }`}>
+              <span className="text-neutral-300 flex-shrink-0">·</span>
+              <span className={`flex-shrink-0 ${safeProperty.seller.type === 'agent' ? 'text-primary' : 'text-neutral-400'}`}>
                 {safeProperty.seller.type === 'agent' ? t('property:seller.agent') : t('property:seller.private')}
               </span>
+              {safeProperty.seller.type === 'agent' && safeProperty.seller.agencyName && (
+                <span className="text-neutral-400 truncate min-w-0">· {safeProperty.seller.agencyName}</span>
+              )}
             </div>
 
-            {/* Agency Logo (if agent with agency) */}
-            {safeProperty.seller.type === 'agent' && safeProperty.seller.agencyName && (
-              <div className="flex items-center gap-1 flex-shrink-0 bg-neutral-50 px-1.5 py-0.5 rounded-lg border border-neutral-200">
-                {safeProperty.seller.agencyLogo ? (
-                  <img
-                    src={optimizeCloudinaryUrl(safeProperty.seller.agencyLogo, { width: 48, quality: 'auto', crop: 'fill' })}
-                    alt={`${safeProperty.seller.agencyName} - Real Estate Agency`}
-                    loading="lazy"
-                    decoding="async"
-                    width={24}
-                    height={24}
-                    className="w-5 h-5 rounded object-contain bg-white"
-                  />
-                ) : (
-                  <BuildingOfficeIcon className="w-4 h-4 text-primary" />
-                )}
-                <div>
-                  <p className="text-[8px] text-neutral-500 leading-none">{t('property:seller.agency')}</p>
-                  <p className="text-[9px] font-medium text-neutral-700 truncate max-w-[72px]">{safeProperty.seller.agencyName}</p>
-                </div>
+            {/* Agency logo, when there is one to show */}
+            {safeProperty.seller.type === 'agent' && safeProperty.seller.agencyLogo && (
+              <div className="flex-shrink-0">
+                <img
+                  src={optimizeCloudinaryUrl(safeProperty.seller.agencyLogo, { width: 48, quality: 'auto', crop: 'fill' })}
+                  alt={`${safeProperty.seller.agencyName} - Real Estate Agency`}
+                  loading="lazy"
+                  decoding="async"
+                  width={24}
+                  height={24}
+                  className="w-5 h-5 rounded object-contain bg-white border border-neutral-100"
+                />
               </div>
             )}
           </div>
