@@ -50,9 +50,9 @@ const SellerAvatar: React.FC<{ avatarUrl?: string; name: string; type: string; s
   const [loaded, setLoaded] = useState(false);
 
   const sizeClasses = size === 'sm'
-    ? 'w-7 h-7'
-    : 'w-9 h-9';
-  const iconSize = size === 'sm' ? 'w-4 h-4' : 'w-5 h-5';
+    ? 'w-6 h-6'
+    : 'w-8 h-8';
+  const iconSize = size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4';
 
   if (!avatarUrl || error) {
     return (
@@ -263,7 +263,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
       {/* Image Section */}
       <div className="relative overflow-hidden">
         <div
-          className="relative w-full aspect-[4/3] overflow-hidden bg-neutral-200"
+          className="relative w-full aspect-[2/1] overflow-hidden bg-neutral-200"
           onTouchStart={handleImageTouchStart}
           onTouchEnd={handleImageTouchEnd}
         >
@@ -472,10 +472,10 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
       </div>
 
       {/* Content Section */}
-      <div className="relative p-2 sm:p-2.5 flex flex-col flex-grow bg-white">
+      <div className="relative p-2 flex flex-col flex-grow bg-white">
         <div className="flex flex-col flex-grow">
         {/* Property Type & Price Row - iOS style */}
-        <div className="flex items-center justify-between gap-1.5 mb-1.5">
+        <div className="flex items-center justify-between gap-1.5 mb-1">
           {/* Property Type Badge */}
           <span className="bg-neutral-100 text-neutral-600 text-[10px] font-medium px-1.5 py-[2px] rounded-full">
             {propertyTypeLabel}
@@ -542,12 +542,12 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           })()}
         </div>
         {/* Title */}
-        <h3 className="text-[13px] sm:text-sm font-bold text-neutral-900 mb-1 line-clamp-1 group-hover:text-primary transition-colors duration-300">
+        <h3 className="text-[13px] sm:text-sm font-bold text-neutral-900 mb-0.5 line-clamp-1 group-hover:text-primary transition-colors duration-300">
           {property.title || `${safeProperty.beds > 0 ? safeProperty.beds + '-Bed ' : ''}${propertyTypeLabel} ${isRental ? t('property:forRent', 'for Rent') : t('property:forSale', 'for Sale')}`}
         </h3>
 
         {/* Location - Clickable for navigation */}
-        <div className="flex items-center gap-1 mb-2">
+        <div className="flex items-center gap-1 mb-1.5">
           <MapPinIcon className="w-3 h-3 text-primary flex-shrink-0" />
           <div className="text-[11px] sm:text-xs text-neutral-600 truncate flex items-center gap-1">
             <button
@@ -569,7 +569,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
         </div>
 
         {/* Property Stats — single compact strip (Zillow-style density) */}
-        <div className="flex items-center justify-between gap-1 mb-2 px-2 py-1.5 rounded-lg bg-neutral-50 border border-neutral-100">
+        <div className="flex items-center justify-between gap-1 mb-1.5 px-2 py-1 rounded-lg bg-neutral-50 border border-neutral-100">
           {/* Beds */}
           <div
             className="flex items-center gap-1 min-w-0"
@@ -668,7 +668,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
         <div className="flex-grow"></div>
 
         {/* Seller/Agent Info Section */}
-        <div className="pt-2 border-t border-neutral-100">
+        <div className="pt-1.5 border-t border-neutral-100">
           <div className="flex items-center gap-1.5">
             {/* Seller Avatar */}
             <div className="relative flex-shrink-0">
@@ -682,11 +682,11 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             </div>
 
             {/* Seller Info */}
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 flex items-center gap-1.5">
               {safeProperty.seller.name && (
                 <p className="text-[11px] font-semibold text-neutral-800 truncate">{safeProperty.seller.name}</p>
               )}
-              <span className={`inline-flex items-center text-[9px] font-medium px-1.5 py-[1px] rounded-full ${
+              <span className={`inline-flex flex-shrink-0 items-center text-[9px] font-medium px-1.5 py-[1px] rounded-full ${
                 safeProperty.seller.type === 'agent'
                   ? 'bg-blue-50 text-blue-600'
                   : 'bg-neutral-50 text-neutral-500'
@@ -697,7 +697,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
             {/* Agency Logo (if agent with agency) */}
             {safeProperty.seller.type === 'agent' && safeProperty.seller.agencyName && (
-              <div className="flex items-center gap-1 flex-shrink-0 bg-neutral-50 px-1.5 py-1 rounded-lg border border-neutral-200">
+              <div className="flex items-center gap-1 flex-shrink-0 bg-neutral-50 px-1.5 py-0.5 rounded-lg border border-neutral-200">
                 {safeProperty.seller.agencyLogo ? (
                   <img
                     src={optimizeCloudinaryUrl(safeProperty.seller.agencyLogo, { width: 48, quality: 'auto', crop: 'fill' })}
