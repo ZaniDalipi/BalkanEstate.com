@@ -81,8 +81,8 @@ describe('useDragSlider', () => {
     render(<Harness onChange={onChange} />);
     const track = screen.getByTestId('track');
 
-    act(() => { fireEvent.pointerDown(track, { pointerId: 1, clientX: 20, button: 0 }); });
-    act(() => { fireEvent.pointerMove(track, { pointerId: 1, clientX: 100 }); });
+    act(() => { fireEvent.pointerDown(track, { pointerId: 1, clientX: 150, button: 0 }); });
+    act(() => { fireEvent.pointerMove(track, { pointerId: 1, clientX: 180 }); });
     act(() => { fireEvent.pointerMove(track, { pointerId: 1, clientX: 200 }); });
 
     expect(onChange).toHaveBeenLastCalledWith(expectedAt(200));
@@ -96,9 +96,35 @@ describe('useDragSlider', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
+  it('grabs the thumb instead of yanking the value out from under the finger', () => {
+    const onChange = vi.fn();
+    // Thumb centre for 50 sits at THUMB/2 + 0.5 * (TRACK_WIDTH - THUMB) = 150.
+    render(<Harness onChange={onChange} initial={50} />);
+    const track = screen.getByTestId('track');
+
+    // A press 10px off the thumb centre — a realistic fingertip miss.
+    act(() => { fireEvent.pointerDown(track, { pointerId: 1, clientX: 160, button: 0 }); });
+    expect(onChange).not.toHaveBeenCalled();          // nothing jumped
+    expect(screen.getByTestId('dragging')).toHaveTextContent('true');
+
+    // From there the drag is relative: +20px of finger = +20px of thumb.
+    act(() => { fireEvent.pointerMove(track, { pointerId: 1, clientX: 180 }); });
+    expect(onChange).toHaveBeenLastCalledWith(expectedAt(170));
+  });
+
+  it('jumps when the press lands away from the thumb', () => {
+    const onChange = vi.fn();
+    render(<Harness onChange={onChange} initial={50} />);
+    const track = screen.getByTestId('track');
+
+    // Far outside the thumb's grab radius, so this is a jump-to-position press.
+    act(() => { fireEvent.pointerDown(track, { pointerId: 1, clientX: 260, button: 0 }); });
+    expect(onChange).toHaveBeenLastCalledWith(expectedAt(260));
+  });
+
   it('clamps to the range at both ends', () => {
     const onChange = vi.fn();
-    render(<Harness onChange={onChange} />);
+    render(<Harness onChange={onChange} initial={50} />);
     const track = screen.getByTestId('track');
 
     act(() => { fireEvent.pointerDown(track, { pointerId: 1, clientX: -200, button: 0 }); });
@@ -106,6 +132,19 @@ describe('useDragSlider', () => {
 
     act(() => { fireEvent.pointerMove(track, { pointerId: 1, clientX: 9999 }); });
     expect(onChange).toHaveBeenLastCalledWith(100);
+  });
+
+  it('does not re-emit a value the drag has not moved off', () => {
+    const onChange = vi.fn();
+    render(<Harness onChange={onChange} />);
+    const track = screen.getByTestId('track');
+
+    act(() => { fireEvent.pointerDown(track, { pointerId: 1, clientX: 150, button: 0 }); });
+    const emits = onChange.mock.calls.length;
+
+    // Sub-step wiggles quantize back to the same value: no render churn.
+    act(() => { fireEvent.pointerMove(track, { pointerId: 1, clientX: 151 }); });
+    expect(onChange).toHaveBeenCalledTimes(emits);
   });
 
   it('snaps to the step grid', () => {

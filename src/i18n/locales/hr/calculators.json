@@ -72,6 +72,11 @@
     "errors": {
       "rateRequired": "Unesite kamatnu stopu",
       "rateRange": "Stopa mora biti između {{min}}% i {{max}}%"
+    },
+    "deposit": {
+      "low": "Nizak polog",
+      "fair": "Srednji polog",
+      "strong": "Visok polog"
     }
   },
   "rentVsBuy": {

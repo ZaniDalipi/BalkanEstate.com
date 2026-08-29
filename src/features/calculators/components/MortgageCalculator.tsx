@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDragSlider } from '../../../hooks/useDragSlider';
+import TouchSlider, {
+  RISK_RAMP,
+  TONE_BAD,
+  TONE_GOOD,
+  TONE_WARN,
+} from '../../../components/ui/TouchSlider';
 import {
   getMortgageProfile,
   formatEur,
@@ -16,8 +21,13 @@ interface MortgageCalculatorProps {
 const MIN_RATE = 0.01;
 const MAX_RATE = 30;
 
-/** Rendered thumb diameter — the slider geometry is derived from it. */
-const THUMB_SIZE = 28;
+/**
+ * Deposit health bands, as a share of the property price. Lenders across the
+ * region price 20% as the "normal" deposit and treat anything under 10% as a
+ * high-risk loan, so those are the two boundaries the slider colours on.
+ */
+const DEPOSIT_FAIR_FROM = 10;
+const DEPOSIT_STRONG_FROM = 20;
 
 /**
  * Step for the €-amount slider: ~200 stops across the track (fine enough that a
@@ -43,7 +53,7 @@ const TermButton: React.FC<{ term: number, selectedTerm: number, onClick: (term:
     <button
         type="button"
         onClick={() => onClick(term)}
-        className={`px-2 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 flex-grow text-center ${
+        className={`px-2 py-2.5 sm:py-1.5 rounded-full text-xs font-semibold transition-all duration-300 flex-grow text-center ${
             selectedTerm === term
             ? 'bg-primary text-white shadow-md shadow-primary/25'
             : 'text-neutral-600 hover:bg-neutral-200'
@@ -186,19 +196,41 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
     const sliderMax = downPaymentType === 'percent' ? 100 : Math.max(0, propertyPrice);
     const sliderStep = downPaymentType === 'percent' ? 1 : amountStepFor(propertyPrice);
 
-    const { percent: sliderPercent, isDragging, offset: thumbOffset, trackProps } = useDragSlider({
-        value: Number.isFinite(downPayment) ? downPayment : 0,
-        min: 0,
-        max: sliderMax,
-        step: sliderStep,
-        onChange: setDownPayment,
-        onDragStart: handleSliderStart,
-        onDragEnd: handleSliderEnd,
-        disabled: sliderMax <= 0,
-        thumbSize: THUMB_SIZE,
-        'aria-label': t('calculators:mortgage.fields.downPayment'),
-        valueText: downPaymentType === 'percent' ? `${downPayment}%` : fmt(downPayment),
-    });
+    const sliderPercent = sliderMax > 0 && Number.isFinite(downPayment)
+        ? Math.min(100, Math.max(0, (downPayment / sliderMax) * 100))
+        : 0;
+
+    // Deposit health: the slider's colour, its bubble and the label under it all
+    // answer "is this a comfortable deposit?" rather than just "how far along
+    // the track am I". Both modes measure the same thing — a share of the price
+    // — so the colour at a given position means the same in € and in %.
+    const depositShare = propertyPrice > 0
+        ? (downPaymentAmount / propertyPrice) * 100
+        : (downPaymentType === 'percent' ? downPayment : 0);
+    const depositTone = useMemo(() => {
+        if (depositShare >= DEPOSIT_STRONG_FROM) {
+            return {
+                ...TONE_GOOD,
+                ramp: RISK_RAMP,
+                label: t('calculators:mortgage.deposit.strong', { defaultValue: 'Strong deposit' }),
+                className: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+            };
+        }
+        if (depositShare >= DEPOSIT_FAIR_FROM) {
+            return {
+                ...TONE_WARN,
+                ramp: RISK_RAMP,
+                label: t('calculators:mortgage.deposit.fair', { defaultValue: 'Fair deposit' }),
+                className: 'bg-amber-50 text-amber-700 border-amber-200',
+            };
+        }
+        return {
+            ...TONE_BAD,
+            ramp: RISK_RAMP,
+            label: t('calculators:mortgage.deposit.low', { defaultValue: 'Low deposit' }),
+            className: 'bg-red-50 text-red-700 border-red-200',
+        };
+    }, [depositShare, t]);
 
     useEffect(() => {
         const principal = propertyPrice - downPaymentAmount;
@@ -283,115 +315,60 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                     <div className="flex justify-between items-center mb-2">
                         <label className="text-xs font-semibold text-neutral-700">{t('calculators:mortgage.fields.downPayment')}</label>
                         <div className="bg-neutral-100 p-0.5 rounded-full flex items-center text-xs font-semibold">
-                            <button onClick={() => handleDownPaymentTypeChange('percent')} className={`px-2.5 py-1 rounded-full transition-all ${downPaymentType === 'percent' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'}`}>%</button>
-                            <button onClick={() => handleDownPaymentTypeChange('amount')} className={`px-2.5 py-1 rounded-full transition-all ${downPaymentType === 'amount' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'}`}>{currencySymbol}</button>
+                            <button onClick={() => handleDownPaymentTypeChange('percent')} className={`px-3.5 py-2 sm:px-2.5 sm:py-1 rounded-full transition-all ${downPaymentType === 'percent' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'}`}>%</button>
+                            <button onClick={() => handleDownPaymentTypeChange('amount')} className={`px-3.5 py-2 sm:px-2.5 sm:py-1 rounded-full transition-all ${downPaymentType === 'amount' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'}`}>{currencySymbol}</button>
                         </div>
                     </div>
 
-                    {/* Premium Slider Container */}
+                    {/* Slider. Colour runs red → amber → green along the
+                        track, so where the thumb sits also says whether the
+                        deposit is a comfortable one. */}
                     <div className="relative mt-2">
-                        {/* Percentage markers positioned above the track */}
+                        {/* Scale markers above the track */}
                         <div className="flex justify-between items-center mb-3 px-1">
                             {[0, 25, 50, 75, 100].map(mark => (
                                 <span
                                     key={mark}
-                                    className={`text-[10px] sm:text-xs font-semibold transition-all duration-300 min-w-[28px] text-center ${
-                                        sliderPercent >= mark
-                                            ? 'text-primary'
-                                            : 'text-neutral-400'
-                                    }`}
+                                    className="text-[10px] sm:text-xs font-semibold transition-colors duration-300 min-w-[28px] text-center"
+                                    style={{ color: sliderPercent >= mark ? depositTone.accent : '#A3A3A3' }}
                                 >
                                     {mark}%
                                 </span>
                             ))}
                         </div>
 
-                        {/*
-                          * Slider track. The whole 48px-tall row is the drag
-                          * surface (pointer events, see useDragSlider) so a
-                          * thumb-press is never required — press anywhere and
-                          * the thumb follows the finger.
-                          */}
-                        <div
-                            {...trackProps}
-                            className="relative h-12 flex items-center outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-full"
-                        >
-                            {/* Glow effect behind track */}
-                            <div
-                                className={`absolute top-1/2 -translate-y-1/2 h-6 rounded-full pointer-events-none ${
-                                    isSliderActive ? 'opacity-100' : 'opacity-40'
-                                }`}
-                                style={{
-                                    left: 0,
-                                    width: thumbOffset,
-                                    background: 'linear-gradient(90deg, rgba(59,130,246,0.3), rgba(139,92,246,0.25), rgba(236,72,153,0.2))',
-                                    filter: 'blur(8px)',
-                                    transition: isDragging ? 'none' : 'opacity 300ms ease-out'
-                                }}
-                            />
-
-                            {/* Track background - smooth glass effect */}
-                            <div className="relative w-full h-3 rounded-full bg-gradient-to-r from-neutral-200 via-neutral-100 to-neutral-200 shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] overflow-hidden pointer-events-none">
-                                {/* Gradient fill */}
-                                {/* The ramp is sized to the fill (not scrolled by
-                                    a background-position shimmer), so the hue
-                                    always runs blue → pink exactly once instead
-                                    of visibly wrapping at high values. */}
-                                <div
-                                    className="absolute inset-y-0 left-0 rounded-full"
-                                    style={{
-                                        width: thumbOffset,
-                                        background: 'linear-gradient(90deg, #3b82f6 0%, #6366f1 25%, #8b5cf6 50%, #a855f7 75%, #ec4899 100%)',
-                                        transition: isDragging ? 'none' : 'width 90ms linear'
-                                    }}
-                                />
-
-                                {/* Glass highlight on track */}
-                                <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/40 to-transparent rounded-t-full pointer-events-none" />
-                            </div>
-
-                            {/* Custom thumb. `thumbOffset` is the thumb centre,
-                                so the same value drives the fill width and the
-                                two stay glued together at both ends. */}
-                            <div
-                                className="absolute top-1/2 pointer-events-none z-10"
-                                style={{
-                                    left: thumbOffset,
-                                    transform: `translate(-50%, -50%) scale(${isSliderActive ? 1.1 : 1})`,
-                                    willChange: 'left, transform',
-                                    transition: isDragging ? 'none' : 'left 90ms linear, transform 150ms ease-out',
-                                }}
-                            >
-                                {/* Outer glow ring - only animates when active */}
-                                <div className={`absolute inset-0 -m-2 rounded-full bg-primary/20 transition-opacity duration-300 ${
-                                    isSliderActive ? 'opacity-100' : 'opacity-0'
-                                } ${isSliderActive && !isDragging ? 'animate-pulse' : ''}`} />
-
-                                {/* Thumb container with glass effect */}
-                                <div
-                                    className={`relative rounded-full bg-white shadow-lg flex items-center justify-center transition-shadow duration-200 ${
-                                        isSliderActive
-                                            ? 'shadow-[0_4px_20px_rgba(99,102,241,0.4)] ring-2 ring-primary/30'
-                                            : 'shadow-[0_2px_8px_rgba(0,0,0,0.15)]'
-                                    }`}
-                                    style={{ width: THUMB_SIZE, height: THUMB_SIZE }}
-                                >
-                                    {/* Inner gradient background */}
-                                    <div className="absolute inset-0.5 rounded-full bg-gradient-to-br from-primary via-violet-500 to-pink-500" />
-
-                                    {/* Money icon */}
-                                    <span className="relative text-xs drop-shadow-sm">💵</span>
-
-                                    {/* Glass shine effect */}
-                                    <div className="absolute top-0.5 left-1 w-2 h-2 bg-white/50 rounded-full blur-[2px]" />
-                                </div>
-                            </div>
-                        </div>
+                        <TouchSlider
+                            value={Number.isFinite(downPayment) ? downPayment : 0}
+                            min={0}
+                            max={sliderMax}
+                            step={sliderStep}
+                            onChange={setDownPayment}
+                            onDragStart={handleSliderStart}
+                            onDragEnd={handleSliderEnd}
+                            disabled={sliderMax <= 0}
+                            active={isSliderActive}
+                            tone={depositTone}
+                            icon={<span className="text-xs">💵</span>}
+                            ariaLabel={t('calculators:mortgage.fields.downPayment')}
+                            valueText={`${depositTone.label}: ${downPaymentType === 'percent' ? `${downPayment}%` : fmt(downPayment)}`}
+                            bubbleLabel={downPaymentType === 'percent' ? `${downPayment}%` : fmt(downPayment)}
+                        />
                     </div>
 
                     {/* Value display with input */}
                     <div className="flex items-center justify-between gap-2 mt-2">
-                        <p className="text-sm font-semibold text-primary tabular-nums break-words min-w-0">{fmt(downPaymentAmount)}</p>
+                        <div className="min-w-0">
+                            <p
+                                className="text-sm font-semibold tabular-nums break-words min-w-0 transition-colors duration-300"
+                                style={{ color: depositTone.accent }}
+                            >
+                                {fmt(downPaymentAmount)}
+                            </p>
+                            {/* The verdict in words: colour is never the only cue. */}
+                            <span className={`inline-block mt-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${depositTone.className}`}>
+                                {depositTone.label}
+                            </span>
+                        </div>
                         <input
                             type="number"
                             value={dpFocused && downPayment === 0 ? '' : downPayment}
@@ -399,7 +376,9 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                             onFocus={(e) => { handleSliderStart(); setDpFocused(true); e.target.select(); }}
                             onBlur={() => { handleSliderEnd(); setDpFocused(false); }}
                             placeholder="0"
-                            className="w-20 flex-shrink-0 text-xs font-semibold bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-center text-neutral-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                            inputMode="numeric"
+                            aria-label={t('calculators:mortgage.fields.downPayment')}
+                            className="w-20 flex-shrink-0 text-sm font-semibold bg-neutral-50 border border-neutral-200 rounded-lg p-2.5 text-center text-neutral-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                         />
                     </div>
                 </div>

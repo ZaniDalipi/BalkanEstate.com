@@ -12,10 +12,15 @@ import type React from 'react';
  *
  * This hook drives the value from raw pointer coordinates instead:
  *   - press anywhere on the track and the thumb jumps under the finger,
+ *   - a press that lands *on* the thumb grabs it instead, so the value never
+ *     leaps out from under a fingertip that was a few px off centre — the
+ *     difference between "usable" and "feels native" for fine adjustments,
  *   - moves are captured (`setPointerCapture`), so the drag keeps tracking even
- *     when the finger strays off the track,
+ *     when the finger strays off the track (above it, below it, past its end),
  *   - updates are coalesced into one `requestAnimationFrame` per frame, so a
  *     120 Hz touch stream can't outrun React's render,
+ *   - a short haptic tick fires on each value change, the way a native picker
+ *     does, on devices that support the Vibration API,
  *   - the geometry accounts for the thumb's width, so the value under the
  *     finger matches the thumb's centre at both ends of the track.
  *
@@ -36,6 +41,14 @@ export interface UseDragSliderOptions {
   disabled?: boolean;
   /** Rendered thumb diameter in px — keeps finger, thumb centre and fill aligned. */
   thumbSize?: number;
+  /**
+   * Extra px on each side of the thumb where a press grabs the thumb (relative
+   * drag) instead of jumping the value to the finger. Roughly "how far off the
+   * thumb a fingertip may land and still be treated as grabbing it".
+   */
+  grabSlop?: number;
+  /** Emit a short vibration on each value change during a drag. Default true. */
+  haptics?: boolean;
   'aria-label'?: string;
   /** Human-readable form of the current value, for screen readers. */
   valueText?: string;
@@ -69,6 +82,7 @@ export interface UseDragSliderResult {
     onPointerUp: (e: React.PointerEvent<HTMLDivElement>) => void;
     onPointerCancel: (e: React.PointerEvent<HTMLDivElement>) => void;
     onLostPointerCapture: () => void;
+    onContextMenu: (e: React.MouseEvent<HTMLDivElement>) => void;
     onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
     onBlur: () => void;
   };
@@ -83,6 +97,11 @@ function quantize(raw: number, min: number, max: number, step: number): number {
   return Math.min(max, Math.max(min, decimals ? Number(snapped.toFixed(decimals)) : snapped));
 }
 
+/** Shortest pulse most phones will actually render, in ms. */
+const HAPTIC_MS = 5;
+/** Don't buzz more often than this — a fast drag would otherwise stutter. */
+const HAPTIC_INTERVAL_MS = 24;
+
 export function useDragSlider({
   value,
   min,
@@ -93,6 +112,8 @@ export function useDragSlider({
   onDragEnd,
   disabled = false,
   thumbSize = 0,
+  grabSlop = 14,
+  haptics = true,
   valueText,
   'aria-label': ariaLabel,
 }: UseDragSliderOptions): UseDragSliderResult {
@@ -108,11 +129,20 @@ export function useDragSlider({
   const scheduled = useRef(false);
   const frame = useRef<number | null>(null);
   const activePointer = useRef<number | null>(null);
+  /**
+   * Distance between the finger and the thumb centre when the drag started.
+   * Non-zero only when the press landed on the thumb: subtracting it keeps the
+   * thumb exactly where it was grabbed instead of snapping it under the finger.
+   */
+  const grabDelta = useRef(0);
+  /** Last value this hook emitted, so an unchanged value costs no render. */
+  const lastEmitted = useRef<number | null>(null);
+  const lastBuzz = useRef(0);
 
   // Keep the callbacks in refs so the pointer handlers stay referentially
   // stable across renders (they run on every pointermove).
-  const latest = useRef({ min, max, step, onChange, onDragStart, onDragEnd, thumbSize, disabled });
-  latest.current = { min, max, step, onChange, onDragStart, onDragEnd, thumbSize, disabled };
+  const latest = useRef({ value, min, max, step, onChange, onDragStart, onDragEnd, thumbSize, grabSlop, haptics, disabled });
+  latest.current = { value, min, max, step, onChange, onDragStart, onDragEnd, thumbSize, grabSlop, haptics, disabled };
 
   const span = max - min;
   const percent = span > 0 && Number.isFinite(value)
@@ -136,6 +166,30 @@ export function useDragSlider({
     pendingX.current = null;
   }, []);
 
+  /** A tiny tick on each step, so a touch drag feels mechanical rather than inert. */
+  const buzz = useCallback(() => {
+    if (!latest.current.haptics) return;
+    if (typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') return;
+    const now = Date.now();
+    if (now - lastBuzz.current < HAPTIC_INTERVAL_MS) return;
+    lastBuzz.current = now;
+    try {
+      navigator.vibrate(HAPTIC_MS);
+    } catch {
+      /* vibration is a nicety; never let it break the drag */
+    }
+  }, []);
+
+  /** Thumb centre in px from the track's left edge, for the current value. */
+  const thumbCentreFor = useCallback((width: number): number => {
+    const { min: lo, max: hi, thumbSize: thumb, value: current } = latest.current;
+    const range = hi - lo;
+    const ratio = range > 0 && Number.isFinite(current)
+      ? Math.min(1, Math.max(0, (current - lo) / range))
+      : 0;
+    return thumb / 2 + ratio * Math.max(1, width - thumb);
+  }, []);
+
   /** Map a viewport x coordinate onto the value range and emit it. */
   const commitX = useCallback((clientX: number) => {
     const el = trackRef.current;
@@ -143,10 +197,13 @@ export function useDragSlider({
     const rect = el.getBoundingClientRect();
     const { min: lo, max: hi, step: gap, thumbSize: thumb, onChange: emit } = latest.current;
     const usable = Math.max(1, rect.width - thumb);
-    const ratio = (clientX - rect.left - thumb / 2) / usable;
+    const ratio = (clientX - grabDelta.current - rect.left - thumb / 2) / usable;
     const next = quantize(lo + Math.min(1, Math.max(0, ratio)) * (hi - lo), lo, hi, gap);
-    if (Number.isFinite(next)) emit(next);
-  }, []);
+    if (!Number.isFinite(next) || next === lastEmitted.current) return;
+    lastEmitted.current = next;
+    if (activePointer.current !== null) buzz();
+    emit(next);
+  }, [buzz]);
 
   const scheduleX = useCallback((clientX: number) => {
     pendingX.current = clientX;
@@ -162,12 +219,13 @@ export function useDragSlider({
 
   const endDrag = useCallback(() => {
     if (activePointer.current === null) return;
-    activePointer.current = null;
     // Flush the last coalesced position so the value matches where the finger
     // was lifted rather than the previous frame.
     const x = pendingX.current;
     cancelFrame();
     if (x !== null) commitX(x);
+    activePointer.current = null;
+    grabDelta.current = 0;
     setIsDragging(false);
     latest.current.onDragEnd?.();
   }, [cancelFrame, commitX]);
@@ -178,6 +236,10 @@ export function useDragSlider({
     // the browser from starting a text selection.
     e.preventDefault();
     activePointer.current = e.pointerId;
+    // The external value may have been changed by something other than this
+    // hook (mode toggle, typed input) since the last drag, so re-seed the
+    // "already emitted" guard before comparing against it.
+    lastEmitted.current = Number.isFinite(latest.current.value) ? latest.current.value : null;
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {
@@ -186,8 +248,20 @@ export function useDragSlider({
     e.currentTarget.focus({ preventScroll: true });
     setIsDragging(true);
     latest.current.onDragStart?.();
+
+    // Press on (or near) the thumb → grab it and drag relatively. Press
+    // elsewhere → jump the value to the finger, then track it.
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centre = rect.left + thumbCentreFor(rect.width);
+    const reach = latest.current.thumbSize / 2 + latest.current.grabSlop;
+    const distance = e.clientX - centre;
+    if (Math.abs(distance) <= reach) {
+      grabDelta.current = distance;
+      return; // value unchanged: the thumb stays put under the finger
+    }
+    grabDelta.current = 0;
     commitX(e.clientX);
-  }, [commitX]);
+  }, [commitX, thumbCentreFor]);
 
   const onPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (activePointer.current !== e.pointerId) return;
@@ -199,6 +273,12 @@ export function useDragSlider({
     if (activePointer.current !== e.pointerId) return;
     endDrag();
   }, [endDrag]);
+
+  // A long press on the track is a drag, not a request for the iOS callout or
+  // the desktop context menu.
+  const onContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (activePointer.current !== null) e.preventDefault();
+  }, []);
 
   const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     const { min: lo, max: hi, step: gap, onChange: emit } = latest.current;
@@ -219,7 +299,9 @@ export function useDragSlider({
     }
     e.preventDefault();
     latest.current.onDragStart?.();
-    emit(quantize(next, lo, hi, gap));
+    const snapped = quantize(next, lo, hi, gap);
+    lastEmitted.current = snapped;
+    emit(snapped);
     latest.current.onDragEnd?.();
   }, [value]);
 
@@ -243,6 +325,7 @@ export function useDragSlider({
       touchAction: 'none' as const,
       // Suppress the iOS tap highlight / long-press callout on the track.
       WebkitTapHighlightColor: 'transparent',
+      WebkitTouchCallout: 'none' as const,
       WebkitUserSelect: 'none' as const,
       userSelect: 'none' as const,
       cursor: disabled ? 'default' : 'pointer',
@@ -252,9 +335,10 @@ export function useDragSlider({
     onPointerUp,
     onPointerCancel: onPointerUp,
     onLostPointerCapture: endDrag,
+    onContextMenu,
     onKeyDown,
     onBlur,
-  }), [disabled, min, max, value, valueText, ariaLabel, onPointerDown, onPointerMove, onPointerUp, endDrag, onKeyDown, onBlur]);
+  }), [disabled, min, max, value, valueText, ariaLabel, onPointerDown, onPointerMove, onPointerUp, endDrag, onContextMenu, onKeyDown, onBlur]);
 
   return { percent, isDragging, offset, trackProps };
 }

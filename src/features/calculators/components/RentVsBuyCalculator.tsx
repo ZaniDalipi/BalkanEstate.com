@@ -1,9 +1,22 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDragSlider } from '@/src/hooks/useDragSlider';
+import TouchSlider, { TONE_GOOD, TONE_WARN } from '@/src/components/ui/TouchSlider';
 import { formatPrice, getCurrencySymbol } from '@/utils/currency';
 import { ChevronDownIcon, ChevronUpIcon } from '@/constants';
 import { InfoIcon } from 'lucide-react';
+
+/** Horizon the "planning to stay" slider covers, in years. */
+const STAY_MIN = 1;
+const STAY_MAX = 30;
+
+/**
+ * The horizon slider is coloured by outcome: a short stay favours renting
+ * (amber), a long one favours owning (green), and the crossover is exactly the
+ * break-even year the results panel names. The ramp is positional, so the
+ * colour under the thumb answers "does staying this long pay off?".
+ */
+const STAY_RAMP =
+  'linear-gradient(90deg, #F97316 0%, #F59E0B 20%, #FACC15 38%, #A3E635 55%, #22C55E 72%, #059669 100%)';
 
 interface RentVsBuyCalculatorProps {
   propertyPrice: number;
@@ -139,22 +152,6 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
   const [estimatedRent, setEstimatedRent] = useState('');
   const [planningToStay, setPlanningToStay] = useState(8);
 
-  // Pointer-driven "years I'll stay" slider — see useDragSlider for why the
-  // native range input was replaced.
-  const {
-    isDragging: stayDragging,
-    offset: stayOffset,
-    trackProps: staySliderProps,
-  } = useDragSlider({
-    value: planningToStay,
-    min: 1,
-    max: 30,
-    step: 1,
-    onChange: setPlanningToStay,
-    thumbSize: 28,
-    'aria-label': t('calculators:rentVsBuy.fields.planningToStay'),
-    valueText: `${planningToStay} ${t('calculators:rentVsBuy.fields.years')}`,
-  });
 
 
   // --- Advanced Inputs ---
@@ -374,6 +371,29 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
   const currencySymbol = getCurrencySymbol(country);
   const isBuyCheaper = verdict?.decision === 'Buy';
 
+  // Thumb, headline and glow take the verdict's colour, so the slider and the
+  // "cheaper to Buy/Rent" result below it never disagree. Results are debounced,
+  // so hold the last verdict while a recalculation is in flight rather than
+  // flashing back to the neutral colour mid-drag.
+  const lastDecision = useRef<'Buy' | 'Rent'>('Rent');
+  if (verdict) lastDecision.current = verdict.decision as 'Buy' | 'Rent';
+  const decision = verdict?.decision ?? lastDecision.current;
+  const stayTone = useMemo(
+    () => ({ ...(decision === 'Buy' ? TONE_GOOD : TONE_WARN), ramp: STAY_RAMP }),
+    [decision],
+  );
+
+  // Break-even is only known once it falls inside the chosen horizon; when it
+  // does, mark it on the track so the crossover has a position, not just a number.
+  const stayTicks = useMemo(() => {
+    const year = results?.breakEvenYear;
+    if (!year || year < STAY_MIN || year > STAY_MAX) return undefined;
+    return [{
+      percent: ((year - STAY_MIN) / (STAY_MAX - STAY_MIN)) * 100,
+      title: `${t('calculators:rentVsBuy.results.breakEvenPoint')}: ${year} ${t('calculators:rentVsBuy.fields.years')}`,
+    }];
+  }, [results?.breakEvenYear, t]);
+
   return (
     <div className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200 animate-fade-in">
       <div className="flex items-center gap-2 mb-3">
@@ -387,87 +407,41 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
             <label className="text-xs font-semibold text-neutral-700">
               {t('calculators:rentVsBuy.fields.planningToStay')}
             </label>
-            <span className="text-lg font-bold bg-gradient-to-r from-primary via-violet-500 to-primary bg-clip-text text-transparent animate-pulse">
+            {/* Reads in the verdict's colour, matching the track under it.
+                The permanent pulse was dropped: it competed with the drag. */}
+            <span
+              className="text-lg font-bold tabular-nums transition-colors duration-300"
+              style={{ color: stayTone.accent }}
+            >
               {planningToStay} {t('calculators:rentVsBuy.fields.years')}
             </span>
           </div>
 
-          {/*
-            * Slider. The whole row is the drag surface (pointer events, see
-            * useDragSlider): press anywhere and the thumb follows the finger,
-            * instead of having to grab an invisible native range thumb.
-            */}
-          <div
-            {...staySliderProps}
+          <TouchSlider
             id="planning-to-stay"
-            className="relative h-11 flex items-center outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-full"
-          >
-            {/* Glow effect behind track */}
-            <div
-              className="absolute top-1/2 -translate-y-1/2 h-4 rounded-full blur-md pointer-events-none"
-              style={{
-                left: 0,
-                width: stayOffset,
-                background: 'linear-gradient(90deg, rgba(59,130,246,0.4), rgba(139,92,246,0.4), rgba(236,72,153,0.3))',
-                transition: stayDragging ? 'none' : 'width 90ms linear',
-              }}
-            />
-
-            {/* Track background with glass effect */}
-            <div className="relative w-full h-3 rounded-full bg-gradient-to-r from-neutral-200/80 via-neutral-100 to-neutral-200/80 shadow-inner overflow-hidden pointer-events-none">
-              {/* Animated gradient fill */}
-              <div
-                className="absolute inset-y-0 left-0 rounded-full"
-                style={{
-                  width: stayOffset,
-                  // Sized to the fill so the hue ramp runs exactly once; the
-                  // old background-position shimmer made it wrap mid-track.
-                  background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b)',
-                  transition: stayDragging ? 'none' : 'width 90ms linear',
-                }}
-              />
-
-              {/* Glass highlight on track */}
-              <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent rounded-t-full" />
-            </div>
-
-            {/* Custom thumb */}
-            <div
-              className="absolute top-1/2 pointer-events-none"
-              style={{
-                left: stayOffset,
-                transform: `translate(-50%, -50%) scale(${stayDragging ? 1.1 : 1})`,
-                willChange: 'left, transform',
-                transition: stayDragging ? 'transform 150ms ease-out' : 'left 90ms linear, transform 150ms ease-out',
-              }}
-            >
-              {/* Outer glow ring */}
-              <div className={`absolute inset-0 -m-2 rounded-full bg-primary/20 ${stayDragging ? '' : 'animate-pulse'}`} />
-
-              {/* Thumb container */}
-              <div className="relative w-7 h-7 rounded-full bg-gradient-to-br from-white via-white to-neutral-100 shadow-lg border-2 border-primary/50 flex items-center justify-center">
-                {/* Inner gradient */}
-                <div className="absolute inset-1 rounded-full bg-gradient-to-br from-primary via-violet-500 to-pink-500" />
-
-                {/* House icon */}
-                <svg className="relative w-3.5 h-3.5 text-white drop-shadow-sm" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                </svg>
-
-                {/* Shine effect */}
-                <div className="absolute top-0.5 left-1 w-2 h-2 bg-white/40 rounded-full blur-sm" />
-              </div>
-            </div>
-          </div>
+            value={planningToStay}
+            min={STAY_MIN}
+            max={STAY_MAX}
+            step={1}
+            onChange={setPlanningToStay}
+            tone={stayTone}
+            ticks={stayTicks}
+            ariaLabel={t('calculators:rentVsBuy.fields.planningToStay')}
+            valueText={`${planningToStay} ${t('calculators:rentVsBuy.fields.years')}`}
+            icon={
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+              </svg>
+            }
+          />
 
           {/* Year markers */}
           <div className="flex justify-between px-1 mt-1">
             {[1, 10, 20, 30].map(year => (
               <span
                 key={year}
-                className={`text-[10px] font-medium transition-colors ${
-                  planningToStay >= year ? 'text-primary' : 'text-neutral-400'
-                }`}
+                className="text-[10px] font-semibold transition-colors duration-300"
+                style={{ color: planningToStay >= year ? stayTone.accent : '#A3A3A3' }}
               >
                 {year}y
               </span>

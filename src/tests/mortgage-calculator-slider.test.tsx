@@ -54,6 +54,37 @@ describe('MortgageCalculator down-payment slider', () => {
     expect(screen.getByRole('slider')).toHaveAttribute('aria-valuenow', '0');
   });
 
+  it('names the deposit band, moving from risky to safe as the deposit grows', () => {
+    // i18n is not initialised under test, so t() echoes the key — which is
+    // exactly the band identity this asserts on.
+    render(<MortgageCalculator propertyPrice={100000} country="XK" />);
+    const track = screen.getByRole('slider');
+    const band = () => track.getAttribute('aria-valuetext') || '';
+
+    // Far left: a near-zero deposit is the risky end of the scale.
+    act(() => { fireEvent.pointerDown(track, { pointerId: 1, clientX: 0, button: 0 }); });
+    expect(band()).toContain('deposit.low');
+
+    // ~11% of the price: workable, not comfortable.
+    act(() => { fireEvent.pointerMove(track, { pointerId: 1, clientX: 45 }); });
+    expect(band()).toContain('deposit.fair');
+
+    // Past 20% the loan is on standard terms.
+    act(() => { fireEvent.pointerMove(track, { pointerId: 1, clientX: 200 }); });
+    expect(band()).toContain('deposit.strong');
+  });
+
+  it('bands the € mode by the same share of the price', () => {
+    render(<MortgageCalculator propertyPrice={100000} country="XK" />);
+    fireEvent.click(screen.getByRole('button', { name: '€' }));
+    const track = screen.getByRole('slider');
+
+    // 5.000 € of a 100.000 € property is the same 5% either way it is typed.
+    act(() => { fireEvent.pointerDown(track, { pointerId: 1, clientX: 28, button: 0 }); });
+    expect(Number(track.getAttribute('aria-valuenow'))).toBeLessThan(10000);
+    expect(track.getAttribute('aria-valuetext')).toContain('deposit.low');
+  });
+
   it('keeps the € slider on a step fine enough to feel continuous', () => {
     render(<MortgageCalculator propertyPrice={100000} country="XK" />);
     fireEvent.click(screen.getByRole('button', { name: '€' }));
