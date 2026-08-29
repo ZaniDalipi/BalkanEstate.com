@@ -345,9 +345,18 @@
         }
       }
 
-      /* Better touch targets */
+      /* Better touch targets.
+         [data-custom-target] opts an element out because it already handles its
+         own target size: either it sits inline in a line of text (a city link
+         in an address — WCAG's target-size rules except targets constrained by
+         the line-height of surrounding text), or it grows its own hit area with
+         a transparent pseudo-element while keeping a smaller visual.
+         Without the opt-out this rule stretches a 28px round button into a
+         28x44 pill and inflates any line containing a button. */
       @media (pointer: coarse) {
-        button, a, input, select, textarea {
+        button:not([data-custom-target]),
+        a:not([data-custom-target]),
+        input, select, textarea {
           min-height: 44px;
         }
       }

@@ -150,7 +150,10 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   // exact URLs the <img> would request (same widths/sizes) so the browser serves
   // them straight from cache. Only runs for multi-image cards.
   const IMAGE_WIDTHS = useMemo(() => [320, 480, 640], []);
-  const IMAGE_SIZES = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw';
+  // Phone: one full-bleed column. Tablet/desktop: the list panel splits into
+  // two columns, so each card is roughly half the panel and never more than
+  // ~420px wide.
+  const IMAGE_SIZES = '(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 420px';
   useEffect(() => {
     if (allImages.length <= 1) return;
     const neighbors = [
@@ -253,7 +256,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
       className={`group bg-white rounded-2xl overflow-hidden shadow-sm border text-left w-full flex flex-col cursor-pointer isolate transition-[translate,box-shadow,border-color] duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 ${getCardStyles()} ${
         isSold || isRented
           ? 'hover:shadow-md'
-          : 'hover:shadow-[0_1px_3px_rgba(15,23,42,0.06),0_8px_20px_-6px_rgba(15,23,42,0.13)] motion-safe:hover:-translate-y-1'
+          : '[@media(hover:hover)]:hover:shadow-[0_1px_3px_rgba(15,23,42,0.06),0_8px_20px_-6px_rgba(15,23,42,0.13)] motion-safe:[@media(hover:hover)]:hover:-translate-y-1'
       }`}
       onClick={onCardClick}
       onContextMenu={onContextMenu}
@@ -279,7 +282,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 for its fade-in, and two transition-property utilities on one
                 element overwrite each other — the zoom and the fade would each
                 cancel the other depending on CSS order. */}
-            <div className="absolute inset-0 transition-transform duration-[600ms] ease-out motion-safe:group-hover:scale-[1.05]">
+            <div className="absolute inset-0 transition-transform duration-[600ms] ease-out motion-safe:[@media(hover:hover)]:group-hover:scale-[1.05]">
               <PropertyImage
                 src={currentImageUrl}
                 alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
@@ -298,7 +301,8 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             {hasMultipleImages && !isSold && !isRented && (
               <>
                 <button
-                  className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
+                  data-custom-target
+                  className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 after:absolute after:content-[''] after:-inset-2"
                   onClick={handlePrevImage}
                   aria-label="Previous image"
                 >
@@ -307,7 +311,8 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                   </svg>
                 </button>
                 <button
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
+                  data-custom-target
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 after:absolute after:content-[''] after:-inset-2"
                   onClick={handleNextImage}
                   aria-label="Next image"
                 >
@@ -466,8 +471,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
           {/* iOS-style Favorite Button - frosted glass */}
           <button
+            data-custom-target
             onClick={onFavoriteClick}
-            className={`w-8 h-8 flex items-center justify-center rounded-full transition-[background-color,scale] duration-200 touch-manipulation focus:outline-none active:scale-90 ${
+            className={`relative w-8 h-8 flex items-center justify-center rounded-full transition-[background-color,scale] duration-200 touch-manipulation focus:outline-none active:scale-90 after:absolute after:content-[''] after:-inset-1.5 ${
               isFavorited
                 ? 'bg-red-500 text-white'
                 : 'bg-black/20 backdrop-blur-md text-white border border-white/20'
@@ -557,6 +563,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               as "Durres , Albania". */}
           <div className="text-[11px] text-neutral-500 truncate flex items-center">
             <button
+              data-custom-target
               onClick={(e) => onLocationClick(e, 'city')}
               className="hover:text-primary hover:underline transition-colors cursor-pointer"
               aria-label={`View all properties in ${safeProperty.city}`}
@@ -565,6 +572,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             </button>
             <span className="mr-1">,</span>
             <button
+              data-custom-target
               onClick={(e) => onLocationClick(e, 'country')}
               className="hover:text-primary hover:underline transition-colors cursor-pointer"
               aria-label={`View all properties in ${safeProperty.country}`}
