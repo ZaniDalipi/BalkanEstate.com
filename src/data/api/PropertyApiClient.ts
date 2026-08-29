@@ -2,6 +2,7 @@
 // Handles all property-related API calls
 
 import { httpClient } from './httpClient';
+import { normalizePropertyTypes } from '@/constants/propertyTypes';
 
 export class PropertyApiClient {
   async getProperties(filters?: any): Promise<any> {
@@ -18,7 +19,8 @@ export class PropertyApiClient {
       if (filters.maxSqft !== null) params.append('maxSqft', filters.maxSqft.toString());
       if (filters.sortBy) params.append('sortBy', filters.sortBy);
       if (filters.sellerType && filters.sellerType !== 'any') params.append('sellerType', filters.sellerType);
-      if (filters.propertyType && filters.propertyType !== 'any') params.append('propertyType', filters.propertyType);
+      const propertyTypes = normalizePropertyTypes(filters.propertyType);
+      if (propertyTypes.length > 0) params.append('propertyType', propertyTypes.join(','));
       if (filters.country && filters.country !== 'any') params.append('country', filters.country);
       if (filters.minPricePerSqm !== null && filters.minPricePerSqm !== undefined)
         params.append('minPricePerSqm', filters.minPricePerSqm.toString());

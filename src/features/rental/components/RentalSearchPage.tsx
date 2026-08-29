@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, memo, useMemo } from 'react';
+import { normalizePropertyTypes } from '@/constants/propertyTypes';
 import { useTranslation } from 'react-i18next';
 import MapComponent from '@/src/features/map/components/MapComponent';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
@@ -411,7 +412,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                     )}
                                 </div>
                                 <div className="flex items-center gap-2 flex-shrink-0">
-                                    {(filters.query || filters.country !== 'any' || filters.minPrice || filters.maxPrice || filters.beds || filters.baths || (filters.propertyType && filters.propertyType !== 'any')) && (
+                                    {(filters.query || filters.country !== 'any' || filters.minPrice || filters.maxPrice || filters.beds || filters.baths || normalizePropertyTypes(filters.propertyType).length > 0) && (
                                         <button
                                             onClick={handleResetFilters}
                                             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-50 text-red-600 text-xs font-semibold hover:bg-red-100 active:bg-red-200 transition-colors"

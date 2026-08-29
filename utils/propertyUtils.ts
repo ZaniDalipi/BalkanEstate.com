@@ -1,8 +1,13 @@
 import { Property, Filters } from '../types';
+import { normalizePropertyTypes } from '../constants/propertyTypes';
 import { BALKAN_COUNTRIES } from '../constants/countries';
 
 export const filterProperties = (properties: Property[], filters: Filters): Property[] => {
     const query = filters.query?.toLowerCase().trim();
+
+    // Tolerates the legacy single-value shape as well as the current array, so
+    // a saved search or caller that still passes 'any'/'house' keeps working.
+    const selectedPropertyTypes = normalizePropertyTypes(filters.propertyType);
 
     // Extract individual search terms from query (split by comma, space)
     // This handles cases like "Grad Zagreb, Hrvatska" matching properties in "Zagreb"
@@ -59,8 +64,8 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
         const minSqftMatch = filters.minSqft ? p.sqft >= filters.minSqft : true;
         const maxSqftMatch = filters.maxSqft ? p.sqft <= filters.maxSqft : true;
         const sellerTypeMatch = filters.sellerType !== 'any' ? p.seller.type === filters.sellerType : true;
-        const propertyTypeMatch = filters.propertyType !== 'any'
-            ? p.propertyType === filters.propertyType
+        const propertyTypeMatch = selectedPropertyTypes.length > 0
+            ? selectedPropertyTypes.includes(p.propertyType)
             : p.propertyType !== 'luxury-villa'; // luxury-villa is exclusive to the Luxury Villas tab
 
         // Advanced filters

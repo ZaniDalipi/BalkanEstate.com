@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
+import { normalizePropertyTypes } from '@/constants/propertyTypes';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { SEO, OrganizationSchema, FAQSchema, realEstateFAQs } from '@/src/components/seo';
@@ -191,7 +192,7 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
   const handleCategoryClick = useCallback((propertyType: string, listingType?: string) => {
     const filters = { ...state.searchPageState.filters };
     if (propertyType !== 'any') {
-      filters.propertyType = propertyType as any;
+      filters.propertyType = normalizePropertyTypes(propertyType);
     }
     if (listingType) {
       filters.listingType = listingType as any;

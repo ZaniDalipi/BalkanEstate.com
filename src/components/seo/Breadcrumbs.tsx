@@ -1,4 +1,5 @@
 import React from 'react';
+import { normalizePropertyTypes } from '@/constants/propertyTypes';
 import { Helmet } from 'react-helmet-async';
 import { generatePropertySlug } from '@/utils/slug';
 
@@ -191,7 +192,7 @@ export const generateAgentBreadcrumbs = (agent: {
 export const generateSearchBreadcrumbs = (filters: {
   city?: string;
   country?: string;
-  propertyType?: string;
+  propertyType?: string | string[];
 }): BreadcrumbItem[] => {
   const items: BreadcrumbItem[] = [
     { label: 'Home', href: '/' },
@@ -212,11 +213,15 @@ export const generateSearchBreadcrumbs = (filters: {
     });
   }
 
-  if (filters.propertyType) {
-    const typeLabel = filters.propertyType.charAt(0).toUpperCase() + filters.propertyType.slice(1) + 's';
+  // propertyType may arrive as a single value or as the multi-select array.
+  const breadcrumbTypes = normalizePropertyTypes(filters.propertyType);
+  if (breadcrumbTypes.length > 0) {
+    const typeLabel = breadcrumbTypes
+      .map(type => type.charAt(0).toUpperCase() + type.slice(1) + 's')
+      .join(', ');
     items.push({
       label: typeLabel,
-      href: `/search?propertyType=${encodeURIComponent(filters.propertyType)}`,
+      href: `/search?propertyType=${encodeURIComponent(breadcrumbTypes.join(','))}`,
     });
   }
 

@@ -2,6 +2,7 @@
 // Handles all property-related API calls
 
 import { apiRequest, uploadRequest } from '@/src/shared/api';
+import { normalizePropertyTypes } from '@/constants/propertyTypes';
 import type { Property, Filters, UserRole } from '@/src/shared/types';
 
 // --- Transformers ---
@@ -254,8 +255,8 @@ export const getProperties = async (filters?: Filters, options?: { limit?: numbe
     if (filters.sortBy) params.append('sortBy', filters.sortBy);
     if (filters.sellerType && filters.sellerType !== 'any')
       params.append('sellerType', filters.sellerType);
-    if (filters.propertyType && filters.propertyType !== 'any')
-      params.append('propertyType', filters.propertyType);
+    const propertyTypes = normalizePropertyTypes(filters.propertyType);
+    if (propertyTypes.length > 0) params.append('propertyType', propertyTypes.join(','));
     if (filters.listingType && filters.listingType !== 'any')
       params.append('listingType', filters.listingType);
     if (filters.minPricePerSqm !== null && filters.minPricePerSqm !== undefined)

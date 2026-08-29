@@ -1,4 +1,5 @@
 import React from 'react';
+import { normalizePropertyTypes } from '@/constants/propertyTypes';
 import { useTranslation } from 'react-i18next';
 import { Filters } from '@/types';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
@@ -38,7 +39,7 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
                     </div>
                     <div>
                         <label className={labelClasses}>{t('rental:filters.propertyType')}</label>
-                        <select value={filters.propertyType} onChange={(e) => onFilterChange('propertyType', e.target.value)} className={selectClasses}>
+                        <select value={normalizePropertyTypes(filters.propertyType)[0] ?? 'any'} onChange={(e) => onFilterChange('propertyType', normalizePropertyTypes(e.target.value))} className={selectClasses}>
                             <option value="any">{t('rental:filters.allTypes')}</option>
                             <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
                             <option value="house">{t('seller:propertyTypes.house')}</option>
@@ -177,7 +178,7 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
             {/* Property Type */}
             <div>
                 <label className="block text-xs font-medium text-gray-400 mb-1">{t('rental:filters.propertyType')}</label>
-                <select value={filters.propertyType} onChange={(e) => onFilterChange('propertyType', e.target.value)} className={selectClasses}>
+                <select value={normalizePropertyTypes(filters.propertyType)[0] ?? 'any'} onChange={(e) => onFilterChange('propertyType', normalizePropertyTypes(e.target.value))} className={selectClasses}>
                     <option value="any">{t('rental:filters.allTypes')}</option>
                     <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
                     <option value="house">{t('seller:propertyTypes.house')}</option>
