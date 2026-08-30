@@ -62,8 +62,7 @@ type UploadType =
   | 'business-logo'     // Business listing logo
   | 'business-banner'   // Business listing banner
   | 'site-logo'         // Site branding logo
-  | 'site-email-logo'   // Site email branding logo
-  | 'ad-banner';        // Advertising banner (admin-managed)
+  | 'site-email-logo';  // Site email branding logo
 
 interface UploadOptions {
   userId: string;
@@ -207,10 +206,6 @@ const buildFolderPath = (options: UploadOptions): string => {
       // balkan-estate/site/email-logo
       return `${ROOT}/site/email-logo`;
 
-    case 'ad-banner':
-      // balkan-estate/site/ad-banners
-      return `${ROOT}/site/ad-banners`;
-
     default:
       return `${ROOT}/misc/${userId}`;
   }
@@ -343,19 +338,16 @@ export const uploadImage = async (
 
     mediaLogger.info(`✅ Uploaded image to Cloudinary: ${result.public_id} (${Math.round(result.bytes / 1024)}KB)`);
 
-    // Step 4: Register file in storage access policy (ownership tracking).
-    // Skipped for public uploads (e.g. advertising creatives) that have no user.
-    if (!options.skipRegistration) {
-      await registerFileUpload({
-        publicId: result.public_id,
-        url: result.secure_url,
-        userId,
-        fileType: type,
-        resourceId: propertyId,
-        mimeType: `image/${result.format}`,
-        bytes: result.bytes,
-      });
-    }
+    // Step 4: Register file in storage access policy (ownership tracking)
+    await registerFileUpload({
+      publicId: result.public_id,
+      url: result.secure_url,
+      userId,
+      fileType: type,
+      resourceId: propertyId,
+      mimeType: `image/${result.format}`,
+      bytes: result.bytes,
+    });
 
     return {
       url: result.secure_url,
