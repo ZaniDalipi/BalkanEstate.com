@@ -358,6 +358,20 @@
         -ms-touch-action: pan-x pan-y;
       }
 
+      /* Prevent iOS Safari from auto-zooming the page when a form field is
+         focused. iOS zooms in whenever a focused input/select/textarea's
+         computed font-size is below 16px — many fields in this app use
+         Tailwind's text-sm/text-xs/text-[11px] utilities (14px/12px/11px),
+         which trigger it. Forcing 16px only on touch-width viewports fixes
+         the zoom without changing how fields look on desktop. */
+      @media (max-width: 767px) {
+        input,
+        select,
+        textarea {
+          font-size: 16px !important;
+        }
+      }
+
       /* Prevent double-tap zoom on buttons and interactive elements */
       button, a, input, select, textarea, label, [role="button"] {
         touch-action: manipulation;
