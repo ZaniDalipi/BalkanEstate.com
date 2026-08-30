@@ -45,7 +45,10 @@ const PropertyItem = memo(({
     <div
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      style={{ contain: 'layout style paint' }}
+      // Layout and style containment only. Paint containment would clip the
+      // card to this box, and the card paints outside it on hover — it lifts
+      // and casts a shadow past every edge.
+      style={{ contain: 'layout style' }}
     >
       <PropertyCard property={property} priority={priority} />
     </div>
@@ -144,10 +147,15 @@ const VirtualizedPropertyGrid: React.FC<VirtualizedPropertyGridProps> = ({
         {rows.map((row, rowIndex) => (
           <div
             key={`row-${rowIndex}-${row[0]?.id}`}
-            className="grid gap-5 mb-5"
+            className="grid"
             style={{
               gridTemplateColumns: columns === 2 ? '1fr 1fr' : '1fr',
+              // Rows are separate grids, so the space between them comes from
+              // a margin rather than the gap. Driving both off `gap` keeps the
+              // spacing square, and keeps it wider than the reach of a hovered
+              // card's shadow so the lift never crowds the row below.
               gap: `${gap}px`,
+              marginBottom: `${gap}px`,
             }}
           >
             {row.map((property, colIndex) => {
