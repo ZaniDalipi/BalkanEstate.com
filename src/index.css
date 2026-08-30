@@ -53,6 +53,19 @@
   /* Custom Breakpoints */
   --breakpoint-xs: 375px;
 
+  /* Property-card elevation. Each level is a matched pair of layers — a tight
+     contact shadow plus a wide ambient one — so the browser interpolates a
+     like-for-like list on hover instead of cross-fading two shadows of
+     different shapes, which is what makes a shadow "pop" rather than grow. */
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.05), 0 4px 12px rgba(16, 24, 40, 0.05);
+  --shadow-card-raised: 0 2px 6px rgba(16, 24, 40, 0.05), 0 20px 36px -12px rgba(16, 24, 40, 0.18);
+  /* Half a step, for cards that respond to the cursor without leaving the
+     page — a full raised shadow under something that never moved reads as a
+     mistake rather than as depth. */
+  --shadow-card-raised-sm: 0 1px 3px rgba(16, 24, 40, 0.06), 0 8px 18px -6px rgba(16, 24, 40, 0.10);
+  --shadow-card-gold: 0 1px 2px rgba(184, 110, 0, 0.06), 0 4px 14px rgba(255, 165, 0, 0.10);
+  --shadow-card-gold-raised: 0 2px 6px rgba(184, 110, 0, 0.08), 0 20px 36px -12px rgba(255, 165, 0, 0.24);
+
   /* Custom Animations */
   --animate-fade-in: fadeIn 0.3s ease-in-out;
   --animate-image-fade: imageFade 0.4s ease-in-out;
@@ -1743,5 +1756,107 @@ html.save-power   .submit-pulse-halo {
 html.reduce-motion .submit-overlay-card,
 html.reduce-motion .submit-overlay-backdrop {
   animation-duration: 0.2s !important;
+}
+
+/* ============================================================================
+   Property card hover
+   ============================================================================
+   One gesture with several parts on the same clock: the card rises, its
+   shadow deepens and spreads, the photo drifts in behind the rounded corners,
+   and the stat tiles wash in left to right. Only transform, box-shadow and
+   colour change — nothing here can force a layout pass mid-hover.
+
+   The timing is deliberately asymmetric. The base rule carries the *exit*:
+   shorter, with a plain ease, so the card returns without dawdling under a
+   cursor that has already moved on. The :hover rule overrides duration and
+   easing for the *entrance*: longer, ease-out, so most of the travel happens
+   early and the last pixels glide into place. Symmetric timing is what makes
+   the stock `hover:-translate-y-1 duration-300` read as a snap rather than a
+   lift.
+
+   Elevation itself stays in Tailwind utilities (shadow-card /
+   hover:shadow-card-raised) rather than living here, so the ring utilities on
+   promoted tiers keep composing into the same box-shadow list and tiers can
+   tint the shadow without a rule per tier. */
+
+.property-card {
+  transition-property: transform, box-shadow, border-color;
+  transition-duration: 320ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.3, 1);
+}
+
+/* Wrapper around the photo rather than the <img> itself: the <img> already
+   carries a transition-opacity utility for its fade-in, and the gallery slide
+   animation on the element above holds a transform of its own (animation-fill
+   `both`). Giving the zoom its own element keeps all three out of each
+   other's way. */
+.property-card__photo {
+  transition-property: transform;
+  transition-duration: 620ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.3, 1);
+  /* Focal point above centre — listing photos put the building in the upper
+     two thirds and pavement or water in the lower one. */
+  transform-origin: 50% 42%;
+}
+
+/* Keyboard focus earns the same lift the pointer gets. */
+.property-card--interactive:focus-visible {
+  transform: translate3d(0, -6px, 0);
+  transition-duration: 460ms;
+  transition-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+@media (hover: hover) {
+  .property-card--interactive:hover {
+    transform: translate3d(0, -6px, 0);
+    transition-duration: 460ms;
+    transition-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+  }
+
+  /* Slower than the lift on purpose: the photo should still be settling after
+     the card itself has come to rest, which is what sells the depth. */
+  .property-card--interactive:hover .property-card__photo {
+    transform: scale(1.055);
+    transition-duration: 1100ms;
+    transition-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  /* The four stat tiles wash in one after another instead of flashing on
+     together. `:not(:hover)` exempts a tile the cursor is actually on, so
+     pointing straight at one still lights it up immediately; and because the
+     whole block is scoped to the card's :hover, the delays vanish on the way
+     out and the tiles fade together. */
+  .property-card--interactive:hover .property-card__stats > :nth-child(2):not(:hover) .property-card__stat-glow {
+    transition-delay: 55ms;
+  }
+  .property-card--interactive:hover .property-card__stats > :nth-child(3):not(:hover) .property-card__stat-glow {
+    transition-delay: 110ms;
+  }
+  .property-card--interactive:hover .property-card__stats > :nth-child(4):not(:hover) .property-card__stat-glow {
+    transition-delay: 165ms;
+  }
+}
+
+/* Reduced motion: keep the depth cue — the shadow still deepens — but drop
+   every pixel of travel. */
+@media (prefers-reduced-motion: reduce) {
+  .property-card,
+  .property-card__photo {
+    transition-duration: 120ms;
+  }
+  .property-card--interactive:hover,
+  .property-card--interactive:focus-visible,
+  .property-card--interactive:hover .property-card__photo {
+    transform: none;
+  }
+}
+html.reduce-motion .property-card,
+html.reduce-motion .property-card__photo {
+  transition-duration: 120ms;
+}
+html.reduce-motion .property-card--interactive:hover,
+html.reduce-motion .property-card--interactive:focus-visible,
+html.reduce-motion .property-card--interactive:hover .property-card__photo {
+  transform: none;
 }
 
