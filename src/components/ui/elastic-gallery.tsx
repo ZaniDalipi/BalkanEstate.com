@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -101,6 +101,22 @@ export function ElasticGallery({ items, actions, defaultActionId, label, classNa
     const [brokenIds, setBrokenIds] = useState<ReadonlySet<string>>(() => new Set());
 
     /*
+     * Which panel the pointer went down on, and whether that panel was already
+     * expanded at that moment.
+     *
+     * A tap dispatches `pointerdown → focus → pointerup → click`, and the focus
+     * in the middle expands the panel — so by the time the click handler runs,
+     * the panel's own `isActive` already reads true and a first tap on a sliver
+     * navigates instead of expanding it. That is invisible on a mouse, where
+     * hover expanded the panel before the click anyway, and it is the whole
+     * interaction on a touchscreen, which has no hover to spend.
+     *
+     * `pointerdown` is the last moment before that expansion, so its reading is
+     * the one that decides what the click means.
+     */
+    const pointerDownRef = useRef<{ id: string; wasActive: boolean } | null>(null);
+
+    /*
      * The active panel is derived, not stored: if `items` changes and the panel
      * an admin just removed was the active one, the fallback takes over in the
      * same render. Holding it in state alone would need an effect to repair it
@@ -159,17 +175,36 @@ export function ElasticGallery({ items, actions, defaultActionId, label, classNa
                     if (e.pointerType === 'mouse' || e.pointerType === 'pen') expand();
                 };
 
+                const handlePointerDown = () => {
+                    pointerDownRef.current = { id: item.id, wasActive: isActive };
+                };
+
                 /*
-                 * A click on the panel: expand it, or — when it is already the
-                 * expanded one and the caller named a default — run that
-                 * action. With hover-to-expand on a mouse, `pointerenter`
-                 * lands before the click, so a desktop visitor gets the
-                 * one-click behaviour they expect from a photo; a touch
-                 * visitor, who has no hover, still spends their first tap
-                 * expanding.
+                 * A click on the panel: expand it, or — when it was already the
+                 * expanded one *before this press began* and the caller named a
+                 * default — run that action. With hover-to-expand on a mouse,
+                 * `pointerenter` lands before the press, so a desktop visitor
+                 * gets the one-click behaviour they expect from a photo; a
+                 * touch visitor, who has no hover, spends their first tap
+                 * expanding and their second one acting.
                  */
                 const handleClick = () => {
-                    if (isActive && defaultAction) defaultAction.onSelect(item);
+                    const pressed = pointerDownRef.current;
+                    pointerDownRef.current = null;
+
+                    /*
+                     * Keyboard activation dispatches a click with no pointer
+                     * sequence in front of it. There the panel was expanded by
+                     * the Tab that moved focus onto it — a separate step the
+                     * visitor took — so the current state is the right reading,
+                     * and Enter acts rather than re-expanding what is already
+                     * open. A stale record from an earlier press belongs to
+                     * another panel or was cleared here, so it cannot leak in.
+                     */
+                    const wasExpanded =
+                        pressed && pressed.id === item.id ? pressed.wasActive : isActive;
+
+                    if (wasExpanded && defaultAction) defaultAction.onSelect(item);
                     else expand();
                 };
 
@@ -245,6 +280,7 @@ export function ElasticGallery({ items, actions, defaultActionId, label, classNa
                           */}
                         <button
                             type="button"
+                            onPointerDown={handlePointerDown}
                             onClick={handleClick}
                             onFocus={expand}
                             aria-current={isActive}

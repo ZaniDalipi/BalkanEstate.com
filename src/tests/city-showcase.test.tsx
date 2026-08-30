@@ -217,6 +217,56 @@ describe('ElasticGallery', () => {
         expect(onBuy).toHaveBeenCalledWith(items[1]);
     });
 
+    /**
+     * The order a real tap arrives in: `pointerdown → focus → pointerup →
+     * click`. The focus in the middle expands the panel, so a handler that
+     * reads the panel's state at click time sees an already-expanded panel and
+     * navigates off a sliver the visitor never got to look at. `fireEvent.click`
+     * alone cannot catch that — it skips the focus.
+     */
+    const tap = (panel: HTMLElement) => {
+        fireEvent.pointerDown(panel, { pointerType: 'touch' });
+        fireEvent.focus(panel);
+        fireEvent.pointerUp(panel, { pointerType: 'touch' });
+        fireEvent.click(panel);
+    };
+
+    it('expands on the first tap of a collapsed panel and acts on the second', () => {
+        const { onBuy } = renderGallery('buy');
+
+        tap(panelOf(/^Ohrid/));
+
+        // A touchscreen has no hover to spend, so this tap is the only chance
+        // to see the photo before committing to it.
+        expect(panelOf(/Ohrid/)).toHaveAttribute('aria-current', 'true');
+        expect(onBuy).not.toHaveBeenCalled();
+
+        tap(panelOf(/Ohrid/));
+
+        expect(onBuy).toHaveBeenCalledWith(items[1]);
+    });
+
+    it('acts on the first tap of the panel that is already expanded', () => {
+        const { onBuy } = renderGallery('buy');
+
+        // Belgrade opens expanded: its photo is already there to be judged, so
+        // a tap on it is a decision, not a reveal.
+        tap(panelOf(/Belgrade/));
+
+        expect(onBuy).toHaveBeenCalledWith(items[0]);
+    });
+
+    it('acts on Enter once the keyboard has expanded the panel', () => {
+        const { onBuy } = renderGallery('buy');
+
+        // Tab moves focus and expands; the visitor then presses Enter on a
+        // panel they can see. No pointer sequence precedes that click.
+        fireEvent.focus(panelOf(/^Ohrid/));
+        fireEvent.click(panelOf(/Ohrid/));
+
+        expect(onBuy).toHaveBeenCalledWith(items[1]);
+    });
+
     it('names the expanded panel by what clicking it does', () => {
         renderGallery('buy');
 
