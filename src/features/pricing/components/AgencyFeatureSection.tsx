@@ -6,7 +6,8 @@ import {
   SparklesIcon,
   ExclamationTriangleIcon,
 } from '@/constants';
-import { type PromotionPlan } from '../hooks/usePricingData';
+import { type PromotionPlan, type Product } from '../hooks/usePricingData';
+import EnterprisePlanCard from './EnterprisePlanCard';
 
 interface AgencyFeatureSectionProps {
   t: any;
@@ -17,7 +18,10 @@ interface AgencyFeatureSectionProps {
   selectedAgencyDuration: 7 | 14 | 28 | 90;
   setSelectedAgencyDuration: (d: 7 | 14 | 28 | 90) => void;
   onAgencyFeature: (tier: string) => void;
-  onSetActiveTab: (tab: 'seller' | 'buyer' | 'listing' | 'agency') => void;
+  enterpriseProduct: Product | undefined;
+  onPlanSelection: (product: Product) => void;
+  isActivePlan: (productId: string) => boolean;
+  isPlanDisabled: (productId: string) => boolean;
 }
 
 const getDurationOptions = (t: any): { value: 7 | 14 | 28 | 90; label: string }[] => [
@@ -129,7 +133,10 @@ const AgencyFeatureSection: React.FC<AgencyFeatureSectionProps> = ({
   selectedAgencyDuration,
   setSelectedAgencyDuration,
   onAgencyFeature,
-  onSetActiveTab,
+  enterpriseProduct,
+  onPlanSelection,
+  isActivePlan,
+  isPlanDisabled,
 }) => {
   const DURATION_OPTIONS = getDurationOptions(t);
 
@@ -142,6 +149,45 @@ const AgencyFeatureSection: React.FC<AgencyFeatureSectionProps> = ({
 
   return (
     <Animated variant="fadeInUp" className="max-w-6xl mx-auto">
+      {/* Note for non-agency users */}
+      {(!currentUserAgencyId) && (
+        <div className="mb-6 bg-blue-50 rounded-2xl p-6 border border-blue-200 max-w-2xl mx-auto">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <ExclamationTriangleIcon className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-900">{t('pricing:agency.needAgency', 'Don\'t have an agency yet?')}</h4>
+              <p className="text-sm text-gray-600 mt-1">
+                {t('pricing:agency.needAgencyDescription', 'Subscribe to our Enterprise plan to create your agency and unlock these features.')}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Enterprise plan - same card as the "For Sellers" tab */}
+      {enterpriseProduct && (
+        <div className="mb-14">
+          <div className="text-center mb-6">
+            <h3 className="text-2xl font-bold text-gray-900">
+              {t('pricing:agency.enterpriseTitle', 'Agency Enterprise Plan')}
+            </h3>
+            <p className="mt-2 text-gray-600">
+              {t('pricing:agency.enterpriseSubtitle', 'Everything your agency needs — team members, branding page and more.')}
+            </p>
+          </div>
+          <EnterprisePlanCard
+            t={t}
+            enterpriseProduct={enterpriseProduct}
+            onPlanSelection={onPlanSelection}
+            isActivePlan={isActivePlan}
+            isPlanDisabled={isPlanDisabled}
+            className="max-w-md mx-auto"
+          />
+        </div>
+      )}
+
       {/* Header */}
       <div className="text-center mb-8">
         <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -285,28 +331,6 @@ const AgencyFeatureSection: React.FC<AgencyFeatureSectionProps> = ({
         </div>
       )}
 
-      {/* Note for non-agency users */}
-      {(!currentUserAgencyId) && (
-        <div className="mt-8 bg-blue-50 rounded-2xl p-6 border border-blue-200 max-w-2xl mx-auto">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
-              <ExclamationTriangleIcon className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h4 className="font-bold text-gray-900">{t('pricing:agency.needAgency', 'Don\'t have an agency yet?')}</h4>
-              <p className="text-sm text-gray-600 mt-1">
-                {t('pricing:agency.needAgencyDescription', 'Subscribe to our Enterprise plan to create your agency and unlock these features.')}
-              </p>
-              <button
-                onClick={() => onSetActiveTab('seller')}
-                className="mt-3 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors press-effect"
-              >
-                {t('pricing:agency.viewEnterprise', 'View Enterprise Plan')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </Animated>
   );
 };

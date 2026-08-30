@@ -72,6 +72,11 @@
     "errors": {
       "rateRequired": "Vendosni një normë interesi",
       "rateRange": "Norma duhet të jetë midis {{min}}% dhe {{max}}%"
+    },
+    "deposit": {
+      "low": "Pagesë e ulët",
+      "fair": "Pagesë mesatare",
+      "strong": "Pagesë e lartë"
     }
   },
   "rentVsBuy": {

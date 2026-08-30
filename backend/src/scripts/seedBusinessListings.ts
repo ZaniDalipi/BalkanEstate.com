@@ -303,7 +303,7 @@ async function seedBusinessListings() {
     log.info('Connected to MongoDB');
 
     // Find or create a seed owner user
-    const seedEmail = 'seed-business-owner@balkanestate.com';
+    const seedEmail = 'seed-business-owner@balkanestateai.com';
     let owner = await User.findOne({ email: seedEmail });
 
     if (!owner) {

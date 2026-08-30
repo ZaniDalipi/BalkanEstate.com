@@ -230,6 +230,65 @@ export function getPropertyInvalidationKeys() {
   ];
 }
 
+// ============================================================================
+// Villa Destination Query Keys
+// Used by: home-page villa corridor (public), admin VillaDestinationsManager
+// ============================================================================
+
+export const villaDestinationKeys = {
+  all: ['villaDestinations'] as const,
+
+  /** Public list — active destinations only, drives the home-page corridor. */
+  public: () => [...villaDestinationKeys.all, 'public'] as const,
+
+  /** Admin list — includes hidden destinations. */
+  admin: () => [...villaDestinationKeys.all, 'admin'] as const,
+};
+
+/**
+ * Every key touched when a destination changes. The admin list and the public
+ * corridor are two views of one collection, so an edit in the admin has to
+ * invalidate both — otherwise the home page keeps serving the old list from
+ * cache until it happens to go stale.
+ */
+export function getVillaDestinationInvalidationKeys() {
+  return [villaDestinationKeys.all];
+}
+
+// ============================================================================
+// City Showcase Query Keys
+// Used by: home-page elastic gallery (public), admin CityShowcaseManager
+// ============================================================================
+
+export const cityShowcaseKeys = {
+  all: ['cityShowcase'] as const,
+
+  /** Public list — active panels only, drives the home-page gallery. */
+  public: () => [...cityShowcaseKeys.all, 'public'] as const,
+
+  /** Admin list — includes hidden panels. */
+  admin: () => [...cityShowcaseKeys.all, 'admin'] as const,
+};
+
+/**
+ * Every key touched when a city panel changes. The admin table and the public
+ * gallery are two views of one collection, so an edit has to invalidate both —
+ * otherwise the home page keeps serving the previous panels from cache until
+ * that entry happens to go stale.
+ */
+export function getCityShowcaseInvalidationKeys() {
+  return [cityShowcaseKeys.all];
+}
+
+/**
+ * Admin city-name directory — the picker behind the city-showcase form's
+ * city/country fields. Its own root: a new city ensured into it (see
+ * `ensureCityInDirectory`) doesn't touch a gallery panel or vice versa.
+ */
+export const cityDirectoryKeys = {
+  all: ['cityDirectory'] as const,
+};
+
 /**
  * Get all discount-related keys that should be invalidated when discounts change
  */

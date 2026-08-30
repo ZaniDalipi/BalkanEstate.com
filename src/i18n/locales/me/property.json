@@ -37,7 +37,8 @@
     "commercial": "Komercijalno",
     "office": "Kancelarija",
     "garage": "Garaža",
-    "other": "Ostalo"
+    "other": "Ostalo",
+    "luxury-villa": "Luksuzna vila"
   },
   "features": {
     "bedrooms": "Spavaće sobe",
@@ -146,7 +147,13 @@
       },
       "slotDuration": "{{minutes}} min termini"
     },
-    "floorPlanInteractiveHint": "Interaktivni preglednik sa zumiranjem, pomjeranjem i oznakama"
+    "floorPlanInteractiveHint": "Interaktivni preglednik sa zumiranjem, pomjeranjem i oznakama",
+    "kitchens": "Kuhinje",
+    "diningRooms": "Trpezarije",
+    "toilets": "Toaleti (WC)",
+    "storageRooms": "Ostave",
+    "offices": "Kancelarija / radna soba",
+    "propertyType": "Tip Nekretnine"
   },
   "distances": {
     "title": "Udaljenosti",
@@ -220,7 +227,10 @@
     "phone": "Telefon",
     "email": "E-mail",
     "website": "Web stranica",
-    "viewProfile": "Pogledaj profil"
+    "viewProfile": "Pogledaj profil",
+    "moreFromAgent": "Više oglasa ovog agenta",
+    "noOtherListings": "Trenutno nema drugih aktivnih oglasa",
+    "viewFullProfile": "Pogledaj cijeli profil"
   },
   "navigation": {
     "back": "Nazad",
@@ -317,7 +327,8 @@
       "apartment": "Stan",
       "villa": "Vila",
       "land": "Zemljište",
-      "other": "Ostalo"
+      "other": "Ostalo",
+      "luxury-villa": "Luksuzna vila"
     },
     "promotedListings": "Promovisani oglasi",
     "agentHint": "Kliknite za preporuke!",
@@ -423,7 +434,13 @@
       "replay": "Ponovi",
       "exploreMap": "Istraži kartu",
       "flyShort": "Leti",
-      "mapShort": "Mapa"
+      "mapShort": "Mapa",
+      "exploreVillasMap": "Karta vila",
+      "villasMapShort": "Vile",
+      "exploreRentalsMap": "Karta najma",
+      "rentalsMapShort": "Najam",
+      "exploreSaleMap": "Karta prodaje",
+      "saleMapShort": "Prodaja"
     },
     "errors": {
       "noLocation": "Podaci o lokaciji nijesu dostupni"

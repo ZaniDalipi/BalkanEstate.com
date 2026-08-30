@@ -129,10 +129,11 @@ const ContactForm: React.FC<ContactFormProps> = ({
 
       {/* Phone (optional) */}
       <div>
-        <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+        <label htmlFor="contact-phone" className="block text-sm font-medium text-neutral-600 mb-1.5">
           {t('contact:form.phone', 'Phone (optional)')}
         </label>
         <PhoneInput
+          id="contact-phone"
           value={formData.phone}
           onChange={onPhoneChange}
           error={errors.phone}

@@ -284,8 +284,8 @@ async function sendMilestoneEmail(
     const userName = user.name || 'there';
 
     const ctaButton = isPromoted
-      ? `<a href="${process.env.APP_URL || 'https://balkanestate.com'}/analytics" style="display: inline-block; background: linear-gradient(135deg, #8B5CF6, #6366F1); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 16px;">View Your Stats</a>`
-      : `<a href="${process.env.APP_URL || 'https://balkanestate.com'}/property/${property._id}" style="display: inline-block; background: linear-gradient(135deg, #F59E0B, #EF4444); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 16px;">Promote Now - Get 5x More Views!</a>`;
+      ? `<a href="${process.env.APP_URL || 'https://balkanestateai.com'}/analytics" style="display: inline-block; background: linear-gradient(135deg, #8B5CF6, #6366F1); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 16px;">View Your Stats</a>`
+      : `<a href="${process.env.APP_URL || 'https://balkanestateai.com'}/property/${property._id}" style="display: inline-block; background: linear-gradient(135deg, #F59E0B, #EF4444); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 16px;">Promote Now - Get 5x More Views!</a>`;
 
     const html = `
       <!DOCTYPE html>

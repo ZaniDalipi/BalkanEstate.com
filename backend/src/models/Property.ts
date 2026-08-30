@@ -45,6 +45,13 @@ export interface IProperty extends Document {
   listingType: 'sale' | 'rent'; // Whether this property is for sale or rent
   title?: string; // Optional title/headline for the property listing
   status: 'active' | 'pending' | 'sold' | 'rented' | 'draft';
+  // Luxury-villa listings are curated: they stay hidden from the public
+  // Luxury Villas tab until an admin approves them. Only applicable when
+  // propertyType === 'luxury-villa'.
+  villaApprovalStatus?: 'pending' | 'approved' | 'rejected';
+  villaApprovalReviewedBy?: string;
+  villaApprovalReviewedAt?: Date;
+  villaApprovalReason?: string;
   soldAt?: Date;
   price: number;
   isNegotiable?: boolean; // When true, price is "By Negotiation" (price field can be 0)
@@ -84,7 +91,7 @@ export interface IProperty extends Document {
   images: IPropertyImage[];
   lat: number;
   lng: number;
-  propertyType: 'house' | 'apartment' | 'villa' | 'land' | 'other';
+  propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
   floorNumber?: number;
   totalFloors?: number;
   floorplanUrl?: string;
@@ -136,6 +143,14 @@ export interface IProperty extends Document {
   currentTenantName?: string; // Name of current tenant (private, owner-only)
   currentRentalNotes?: string; // Private notes about the current rental
   rentalHistory?: IRentalHistoryEntry[]; // Past rental periods for income tracking
+  // Daily rental fields (short-stay / luxury villa)
+  checkInTime?: string;
+  checkOutTime?: string;
+  cleaningFee?: number;
+  cancellationPolicy?: 'flexible' | 'moderate' | 'strict' | 'non-refundable';
+  breakfastIncluded?: boolean;
+  towelsIncluded?: boolean;
+  parkingIncluded?: boolean;
   // Visit/viewing availability
   visitAvailability?: IVisitAvailability;
   // External-source ingestion fields (set when listing was imported from a third-party site)
@@ -214,6 +229,15 @@ const PropertySchema: Schema = new Schema(
       default: 'active',
       index: true,
     },
+    // Admin curation for luxury villas — see interface for details
+    villaApprovalStatus: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      index: true,
+    },
+    villaApprovalReviewedBy: { type: String },
+    villaApprovalReviewedAt: { type: Date },
+    villaApprovalReason: { type: String, maxlength: 1000 },
     soldAt: {
       type: Date,
       index: true,
@@ -390,7 +414,7 @@ const PropertySchema: Schema = new Schema(
     },
     propertyType: {
       type: String,
-      enum: ['house', 'apartment', 'villa', 'land', 'other'],
+      enum: ['house', 'apartment', 'villa', 'luxury-villa', 'land', 'other'],
       required: true,
       index: true,
     },
@@ -578,6 +602,17 @@ const PropertySchema: Schema = new Schema(
         notes: { type: String },
       },
     ],
+    // Daily rental fields (short-stay / luxury villa)
+    checkInTime: { type: String },
+    checkOutTime: { type: String },
+    cleaningFee: { type: Number, min: 0 },
+    cancellationPolicy: {
+      type: String,
+      enum: ['flexible', 'moderate', 'strict', 'non-refundable'],
+    },
+    breakfastIncluded: { type: Boolean },
+    towelsIncluded: { type: Boolean },
+    parkingIncluded: { type: Boolean },
     // Visit/viewing availability
     visitAvailability: {
       enabled: { type: Boolean, default: false },
@@ -616,6 +651,8 @@ PropertySchema.index({ lat: 1, lng: 1 });
 PropertySchema.index({ price: 1, status: 1 });
 // Index for property type and city queries
 PropertySchema.index({ propertyType: 1, city: 1, status: 1 });
+// Luxury-villa approval queue + public "approved only" villa listing
+PropertySchema.index({ propertyType: 1, villaApprovalStatus: 1, status: 1 });
 // Index for promoted properties
 PropertySchema.index({ isPromoted: 1, status: 1 });
 // Index for promoted properties by tier (for sorting)

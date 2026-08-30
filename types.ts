@@ -28,7 +28,7 @@ export type RentPeriod = 'monthly' | 'weekly' | 'daily';
 
 export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
 
-export type AppView = 'home' | 'search' | 'explore-cities' | 'city-dashboard' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'create-rental' | 'rentals' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'agency-dashboard' | 'analytics' | 'reset-password' | 'verify-email' | 'valuation' | 'mortgage-calculator' | 'pricing' | 'how-it-works' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'contact' | 'createAgency' | 'createAgencyPayment' | 'createAgencyConfirm' | 'guides' | 'business-directory' | 'blog' | 'not-found';
+export type AppView = 'home' | 'search' | 'explore-cities' | 'city-dashboard' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'create-rental' | 'rentals' | 'villas' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'agency-dashboard' | 'analytics' | 'reset-password' | 'verify-email' | 'valuation' | 'mortgage-calculator' | 'pricing' | 'how-it-works' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'contact' | 'createAgency' | 'createAgencyPayment' | 'createAgencyConfirm' | 'guides' | 'business-directory' | 'blog' | 'not-found';
 
 export type HowItWorksTab = 'getting-started' | 'premium-features' | 'agencies' | 'agents' | 'buyers' | 'sellers';
 
@@ -351,7 +351,7 @@ export interface Property {
     lat: number;
     lng: number;
     seller: Seller;
-    propertyType: 'house' | 'apartment' | 'villa' | 'land' | 'other';
+    propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
     floorNumber?: number;
     totalFloors?: number;
     floorplanUrl?: string;
@@ -396,6 +396,14 @@ export interface Property {
     internetIncluded?: boolean;
     tenantRequirements?: string[];
     maxOccupants?: number;
+    // Daily rental fields (short-stay / luxury villa)
+    checkInTime?: string;
+    checkOutTime?: string;
+    cleaningFee?: number;
+    cancellationPolicy?: 'flexible' | 'moderate' | 'strict' | 'non-refundable';
+    breakfastIncluded?: boolean;
+    towelsIncluded?: boolean;
+    parkingIncluded?: boolean;
     // Visit scheduling
     visitAvailability?: VisitAvailability;
     // Rental history
@@ -483,7 +491,7 @@ export interface Filters {
     maxSqft: number | null;
     sortBy: string;
     sellerType: SellerType;
-    propertyType: 'any' | 'house' | 'apartment' | 'villa' | 'land' | 'other';
+    propertyType: 'any' | 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
     // Advanced filters
     minYearBuilt: number | null;
     maxYearBuilt: number | null;
@@ -589,7 +597,7 @@ export interface AiSearchQuery {
     livingRooms?: number;
     minSqft?: number;
     maxSqft?: number;
-    propertyType?: 'house' | 'apartment' | 'villa' | 'land' | 'commercial';
+    propertyType?: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'commercial';
     sellerType?: 'agent' | 'private';
     features?: string[];
 }
@@ -783,7 +791,7 @@ export interface AppState {
     isSessionExpiredModalOpen: boolean;
 }
 
-export type AdminSection = 'dashboard' | 'heatmap' | 'users' | 'inquiries' | 'agent-requests' | 'discounts' | 'promotions' | 'promotion-plans' | 'properties' | 'agencies' | 'pricing' | 'activity' | 'settings' | 'site-settings' | 'how-it-works' | 'email-templates' | 'business-listings' | 'articles' | 'ad-banners';
+export type AdminSection = 'dashboard' | 'heatmap' | 'users' | 'inquiries' | 'agent-requests' | 'discounts' | 'promotions' | 'promotion-plans' | 'properties' | 'agencies' | 'pricing' | 'activity' | 'settings' | 'site-settings' | 'how-it-works' | 'email-templates' | 'business-listings' | 'articles' | 'villa-approvals' | 'villa-destinations' | 'city-showcase';
 
 export type AgencyDashboardSection = 'overview' | 'agents' | 'properties' | 'leads' | 'analytics' | 'financial' | 'profile' | 'team';
 

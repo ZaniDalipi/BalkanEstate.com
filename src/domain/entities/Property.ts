@@ -2,7 +2,7 @@
 // Pure TypeScript - No framework dependencies
 
 export type PropertyStatus = 'active' | 'pending' | 'sold' | 'draft';
-export type PropertyType = 'house' | 'apartment' | 'villa' | 'other';
+export type PropertyType = 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'other';
 export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
 export type FurnishingStatus = 'any' | 'furnished' | 'semi-furnished' | 'unfurnished';
 export type HeatingType = 'any' | 'central' | 'electric' | 'gas' | 'oil' | 'heat-pump' | 'solar' | 'wood' | 'none';

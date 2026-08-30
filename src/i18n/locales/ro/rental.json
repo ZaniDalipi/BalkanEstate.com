@@ -84,7 +84,27 @@
     "updateListing": "Actualizează Anunțul de Închiriere",
     "createSuccess": "Anunțul de Închiriere a Fost Publicat cu Succes!",
     "updateSuccess": "Anunțul de Închiriere a Fost Actualizat cu Succes!",
-    "redirecting": "Veți fi redirecționat către panoul de control..."
+    "redirecting": "Veți fi redirecționat către panoul de control...",
+    "checkInTime": "Check-in Time",
+    "checkOutTime": "Check-out Time",
+    "cleaningFee": "Cleaning Fee",
+    "cancellationPolicy": "Cancellation Policy",
+    "cancellationPolicies": {
+      "select": "Select a policy",
+      "flexible": "Flexible — Full refund 24h before check-in",
+      "moderate": "Moderate — Full refund 5 days before check-in",
+      "strict": "Strict — 50% refund up to 1 week before",
+      "nonRefundable": "Non-refundable"
+    },
+    "breakfastIncluded": "Breakfast",
+    "towelsIncluded": "Towels & Linen",
+    "parkingIncluded": "Parking",
+    "guestRequirements": "Guest Requirements",
+    "guestRequirementsHint": "e.g. no parties, no smoking, ID verification required (press Enter to add)",
+    "minLeaseDurationDays": "Ședere min. (zile)",
+    "maxLeaseDurationDays": "Ședere max. (zile)",
+    "minLeaseDurationWeeks": "Ședere min. (săptămâni)",
+    "maxLeaseDurationWeeks": "Ședere max. (săptămâni)"
   },
   "details": {
     "rentalTerms": "Condiții de Închiriere",
@@ -108,7 +128,31 @@
     "tenantRequirements": "Cerințe pentru Chiriaș",
     "contactLandlord": "Contactează Proprietarul",
     "scheduleViewing": "Programează o Vizionare",
-    "rentThisProperty": "Închiriază Această Proprietate"
+    "rentThisProperty": "Închiriază Această Proprietate",
+    "stayDuration": "Stay Duration",
+    "stayDurationWeeks": "Stay Duration",
+    "minNights": "{{min}} nights min",
+    "maxNights": "up to {{max}} nights",
+    "minToMaxNights": "{{min}}–{{max}} nights",
+    "minWeeks": "{{min}} weeks min",
+    "maxWeeks": "up to {{max}} weeks",
+    "minToMaxWeeks": "{{min}}–{{max}} weeks",
+    "checkInOut": "Check-in / Check-out",
+    "cleaningFee": "Cleaning Fee",
+    "cancellationPolicy": "Cancellation Policy",
+    "cancellation": {
+      "flexible": "Flexible — Full refund 24h before check-in",
+      "moderate": "Moderate — Full refund 5 days before",
+      "strict": "Strict — 50% refund up to 1 week before",
+      "nonRefundable": "Non-refundable"
+    },
+    "breakfastIncluded": "Breakfast",
+    "towelsIncluded": "Towels & Linen",
+    "parkingIncluded": "Parking",
+    "guestRequirements": "Guest Requirements",
+    "minDays": "min. {{min}} zile",
+    "maxDays": "max. {{max}} zile",
+    "minToMaxDays": "{{min}} - {{max}} zile"
   },
   "affordability": {
     "title": "Accesibilitate Chirie",
@@ -128,7 +172,15 @@
     "estimatedInternet": "Est. internet (prima lună)",
     "totalUpfront": "Total inițial",
     "monthlyOngoing": "Cost lunar continuu",
-    "disclaimer": "* Costurile pentru utilități și internet sunt estimări bazate pe medii. Costurile reale pot varia."
+    "disclaimer": "* Costurile pentru utilități și internet sunt estimări bazate pe medii. Costurile reale pot varia.",
+    "firstWeekRent": "Chiria primei săptămâni",
+    "firstDayRent": "Chiria primei zile",
+    "estimatedUtilitiesWeek": "Utilități est. (săpt. 1)",
+    "estimatedUtilitiesDay": "Utilități est. (ziua 1)",
+    "estimatedInternetWeek": "Internet est. (săpt. 1)",
+    "estimatedInternetDay": "Internet est. (ziua 1)",
+    "weeklyOngoing": "Cost săptămânal recurent",
+    "dailyOngoing": "Cost zilnic recurent"
   },
   "viewing": {
     "title": "Programează o Vizionare",
@@ -460,5 +512,7 @@
     "engagement": "Interacțiune",
     "views": "vizualizări",
     "inquiries": "solicitări"
-  }
+  },
+  "premiumCollection": "Închirieri în toți Balcanii",
+  "from": "de la"
 }

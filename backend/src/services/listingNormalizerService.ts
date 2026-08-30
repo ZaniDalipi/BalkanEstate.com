@@ -10,7 +10,7 @@ import { CITY_SLUG_MAP, COUNTRY_SLUG_MAP } from './locationLookup';
 import User from '../models/User';
 import { cronLogger } from '../utils/logger';
 
-const EXTERNAL_SELLER_EMAIL = process.env.EXTERNAL_SELLER_EMAIL || 'external@balkanestate.com';
+const EXTERNAL_SELLER_EMAIL = process.env.EXTERNAL_SELLER_EMAIL || 'external@balkanestateai.com';
 
 let cachedExternalSellerId: Types.ObjectId | null = null;
 

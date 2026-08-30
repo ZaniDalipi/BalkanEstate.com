@@ -9,6 +9,18 @@ import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
 import { BuildingOfficeIcon } from '@/constants';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
+import { validateCoordinates } from '@/shared/utils/validation';
+import { getVillaMarkerPalette, buildLuxuryVillaMarkerHTML } from '@/shared/map/villaMarker';
+
+/**
+ * A property is mappable only when it carries coordinates that are real
+ * numbers inside the valid lat/lng ranges. Guards against corrupt API rows
+ * (null island, out-of-range, NaN) placing markers in the ocean.
+ */
+const hasValidCoordinates = (prop: Property): prop is Property & { lat: number; lng: number } => {
+  if (prop.lat == null || prop.lng == null) return false;
+  return validateCoordinates(prop.lat, prop.lng).isValid;
+};
 
 // Inject CSS animations for map markers
 const injectMapMarkerStyles = () => {
@@ -262,9 +274,13 @@ const PROPERTY_TYPE_COLORS: Record<
   house: '#0252CD',
   apartment: '#28a745',
   villa: '#6f42c1',
+  'luxury-villa': '#FFA500', // Amber/gold — exclusive to the Luxury Villas tab
   land: '#8B4513',    // Brown for land
-  other: '#6c757d',
+  other: '#0D9488',   // Teal — friendlier than the old gray, distinct from the other types
 };
+
+// Luxury villa marker builder is shared with the Google marker
+// (src/features/map/components/useGoogleMap.ts) via @/shared/map/villaMarker.
 
 /**
  * Format price for marker display (short format)
@@ -392,8 +408,15 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
   const promotedInnerClass = getPromotedMarkerInnerClass(property);
   const nightModeClass = shouldGlow ? 'night-mode-marker-pulse' : '';
 
+  // Luxury villa: rich metallic gold gradient pill — stands out as premium on any map
+  const isLuxuryVilla = property.propertyType === 'luxury-villa';
+  const displayPrice = isLuxuryVilla ? `✦ ${price}` : price;
+  const pillFilter = isLuxuryVilla
+    ? 'drop-shadow(0 0 7px rgba(212,168,0,0.85)) drop-shadow(0 0 14px rgba(200,140,0,0.45)) drop-shadow(0 2px 4px rgba(0,0,0,0.4))'
+    : baseFilter;
+
   // Calculate dimensions based on price length - use pill shape for longer prices
-  const baseWidth = getMarkerWidthForPrice(price);
+  const baseWidth = getMarkerWidthForPrice(displayPrice);
   const baseHeight = 28;
   const scaledWidth = Math.round(baseWidth * zoomScale);
   const scaledHeight = Math.round(baseHeight * zoomScale);
@@ -401,19 +424,48 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
   const borderRadius = scaledHeight / 2; // Pill shape
   const hoverScale = isHovered ? 1.15 : 1;
 
+  const hoverClass = isHovered ? 'drop-shadow-lg' : '';
+
+  // Luxury villa: branded pin (crown = signature, star = actively promoted)
+  if (isLuxuryVilla) {
+    const scaledW = Math.round(24 * zoomScale);
+    const scaledH = Math.round(40 * zoomScale); // price label + pin
+    const uid = `s${String(property.id).slice(-6)}`;
+    const pal = getVillaMarkerPalette(property.listingType);
+    const markerHtml = buildLuxuryVillaMarkerHTML(price, uid, pal, isActivelyPromoted ? 'star' : 'crown', 24);
+    const svgHouseHtml = `
+      <div class="promoted-marker-wrapper ${nightModeClass}" style="width:${scaledW}px;height:${scaledH}px;">
+        <div class="${promotedInnerClass}" style="width:${scaledW}px;height:${scaledH}px;transform:scale(${hoverScale});transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);">
+          ${markerHtml}
+        </div>
+      </div>
+    `;
+    return L.divIcon({
+      html: svgHouseHtml,
+      className: hoverClass,
+      iconSize: [scaledW, scaledH],
+      iconAnchor: [scaledW / 2, scaledH], // anchor at pointer tip
+      popupAnchor: [0, -scaledH],
+    });
+  }
+
+  // Build SVG pill for all other property types
+  const pillFill    = markerColor;
+  const pillText    = 'white';
+  const pillStroke  = strokeColorFinal;
+  const pillStrokeW = ringWidth;
+
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
     <div class="promoted-marker-wrapper ${nightModeClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px;">
       <div class="${promotedInnerClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px; transform: scale(${hoverScale}); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
-        <svg width="${scaledWidth}" height="${scaledHeight}" viewBox="0 0 ${baseWidth} ${baseHeight}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter};">
-            <rect x="${ringWidth / 2}" y="${ringWidth / 2}" width="${baseWidth - ringWidth}" height="${baseHeight - ringWidth}" rx="${(baseHeight - ringWidth) / 2}" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${ringWidth}"/>
-            <text x="${baseWidth / 2}" y="${baseHeight / 2 + 1}" font-family="Inter, sans-serif" font-size="${11}" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
+        <svg width="${scaledWidth}" height="${scaledHeight}" viewBox="0 0 ${baseWidth} ${baseHeight}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${pillFilter};">
+            <rect x="${pillStrokeW / 2}" y="${pillStrokeW / 2}" width="${baseWidth - pillStrokeW}" height="${baseHeight - pillStrokeW}" rx="${(baseHeight - pillStrokeW) / 2}" fill="${pillFill}" stroke="${pillStroke}" stroke-width="${pillStrokeW}"/>
+            <text x="${baseWidth / 2}" y="${baseHeight / 2 + 1}" font-family="Inter, sans-serif" font-size="${11}" font-weight="800" fill="${pillText}" text-anchor="middle" dominant-baseline="middle">${price}</text>
         </svg>
       </div>
     </div>
   `;
-
-  const hoverClass = isHovered ? 'drop-shadow-lg' : '';
 
   return L.divIcon({
     html: svgHtml,
@@ -492,9 +544,43 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
 
   const scale = isHovered ? 1.25 : 1;
   const promotedInnerClass = getPromotedMarkerInnerClass(property);
-  const nightModeClass = shouldGlow ? 'night-mode-marker-pulse' : '';
 
-  // Calculate scaled dimensions based on zoom
+  // Luxury villa: rich metallic gold house marker — unmistakably premium
+  const isLuxuryVilla = property.propertyType === 'luxury-villa';
+  const finalPointerColor = isLuxuryVilla ? '#5C3A00' : pointerColor;
+  const finalTextColor    = isLuxuryVilla ? '#2C1A00' : 'white';
+  const finalStrokeColor  = isLuxuryVilla ? '#7A5000' : strokeColorFinal;
+  const finalStrokeWidth  = isLuxuryVilla ? 2 : strokeWidth;
+  const finalFilter = isLuxuryVilla
+    ? `drop-shadow(0 0 10px rgba(212,168,0,0.9)) drop-shadow(0 0 20px rgba(200,140,0,0.5)) drop-shadow(0 4px 10px rgba(0,0,0,0.4))`
+    : baseFilter;
+  const nightModeClass = shouldGlow ? 'night-mode-marker-pulse' : '';
+  const hoverClass = isHovered ? 'drop-shadow-xl' : '';
+
+  // Luxury villa: branded pin (crown = signature, star = actively promoted)
+  if (isLuxuryVilla) {
+    const scaledW = Math.round(28 * zoomScale);
+    const scaledH = Math.round(45 * zoomScale); // price label + pin
+    const uid = `d${String(property.id).slice(-6)}`;
+    const pal = getVillaMarkerPalette(property.listingType);
+    const markerHtml = buildLuxuryVillaMarkerHTML(price, uid, pal, isActivelyPromoted ? 'star' : 'crown', 28);
+    const svgVillaHtml = `
+      <div class="promoted-marker-wrapper ${nightModeClass}" style="width:${scaledW}px;height:${scaledH}px;">
+        <div class="${promotedInnerClass}" style="width:${scaledW}px;height:${scaledH}px;transform-origin:bottom center;transform:scale(${scale});transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);">
+          ${markerHtml}
+        </div>
+      </div>
+    `;
+    return L.divIcon({
+      html: svgVillaHtml,
+      className: hoverClass,
+      iconSize: [scaledW, scaledH],
+      iconAnchor: [scaledW / 2, scaledH], // anchor at pointer tip
+      popupAnchor: [0, -scaledH],
+    });
+  }
+
+  // Standard house-pin marker for all other property types
   const baseWidth = 52;
   const baseHeight = 42;
   const scaledWidth = Math.round(baseWidth * zoomScale);
@@ -505,16 +591,14 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
   const svgHtml = `
     <div class="promoted-marker-wrapper ${nightModeClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px;">
       <div class="${promotedInnerClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px;">
-        <svg width="${scaledWidth}" height="${scaledHeight}" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transform-origin: bottom center; transform: scale(${scale}); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
-            <path d="M35 56L25 44H45L35 56Z" fill="${pointerColor}" />
+        <svg width="${scaledWidth}" height="${scaledHeight}" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${finalFilter}; transform-origin: bottom center; transform: scale(${scale}); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            <path d="M35 56L25 44H45L35 56Z" fill="${finalPointerColor}" />
             <path d="M65 24.5V44H5V24.5L35 5L65 24.5Z" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${strokeWidth}" />
             <text x="35" y="30" font-family="Inter, sans-serif" font-size="${fontSize}" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
         </svg>
       </div>
     </div>
   `;
-
-  const hoverClass = isHovered ? 'drop-shadow-xl' : '';
 
   return L.divIcon({
     html: svgHtml,
@@ -898,7 +982,7 @@ const computeColocatedOffsets = (properties: Property[]): Map<string, [number, n
   // Group properties by rounded lat/lng
   const groups = new Map<string, Property[]>();
   for (const prop of properties) {
-    if (prop.lat == null || prop.lng == null) continue;
+    if (!hasValidCoordinates(prop)) continue;
     const key = `${prop.lat.toFixed(PRECISION)},${prop.lng.toFixed(PRECISION)}`;
     const group = groups.get(key);
     if (group) {
@@ -1014,8 +1098,8 @@ const MarkersComponent: React.FC<MarkersProps> = ({ properties, onPopupClick, ho
   return (
     <>
       {properties.map((prop, idx) => {
-        // Skip properties without valid coordinates
-        if (prop.lat == null || prop.lng == null || isNaN(prop.lat) || isNaN(prop.lng)) {
+        // Skip properties without valid, in-range coordinates
+        if (!hasValidCoordinates(prop)) {
           return null;
         }
         const isPromoted = isPropertyPromoted(prop);

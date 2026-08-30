@@ -366,7 +366,10 @@ const PricingPage: React.FC = () => {
               selectedAgencyDuration={selectedAgencyDuration}
               setSelectedAgencyDuration={setSelectedAgencyDuration}
               onAgencyFeature={handleAgencyFeature}
-              onSetActiveTab={setActiveTab}
+              enterpriseProduct={enterpriseProduct}
+              onPlanSelection={handlePlanSelection}
+              isActivePlan={isActivePlan}
+              isPlanDisabled={isPlanDisabled}
             />
           )}
 
@@ -391,8 +394,10 @@ const PricingPage: React.FC = () => {
             />
           )}
 
-          {/* No Products */}
-          {!loading && !error && products.length === 0 && (
+          {/* No Products - only the seller and buyer tabs render from `products`; the
+              listing and agency tabs come from promotion plans and carry their own
+              empty states, so this would read as false there. */}
+          {!loading && !error && (activeTab === 'seller' || activeTab === 'buyer') && products.length === 0 && (
             <div className="text-center py-20">
               <div className="bg-gray-50 rounded-2xl p-8 max-w-md mx-auto">
                 <p className="text-gray-600">{t('pricing:noPlans', 'No pricing plans available at the moment.')}</p>

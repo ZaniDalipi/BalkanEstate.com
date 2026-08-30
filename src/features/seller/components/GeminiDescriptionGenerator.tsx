@@ -22,6 +22,7 @@ import { getCurrencySymbol } from '@/utils/currency';
 import {
     LANGUAGES, CheckCircleIcon, UploadIcon, TagListInput,
     inputBaseClasses, labelClasses, selectClasses,
+    errorFieldClasses, errorLabelClasses, fieldAnchorId, FieldError, RequiredMark, FIELD_ERROR_ORDER,
 } from './ListingFormHelpers';
 
 // --- Main Component ---
@@ -46,6 +47,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
         isUploading,
         selectedCountry, selectedCity, availableCities,
         previewProperty,
+        fieldErrors,
         getZoomLevel, cityData,
         handleCountryChange, handleCityChange,
         handleMapLocationChange, handleMapAddressChange,
@@ -135,7 +137,13 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
         : null;
 
     const isRental = listingData.listingType === 'rent';
+    const isLuxuryVilla = listingData.propertyType === 'luxury-villa';
     const currencySymbol = getCurrencySymbol(selectedCountry);
+
+    // Missing fields, in form order, for the summary shown above the submit buttons
+    const errorSummary = FIELD_ERROR_ORDER
+        .filter(field => fieldErrors[field])
+        .map(field => ({ field, message: fieldErrors[field] }));
 
     return (
         <>
@@ -147,7 +155,9 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             isSubmitting={isSubmitting}
             uploadProgress={uploadProgress}
         />
-        <form className="listing-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') e.preventDefault(); }}>
+        {/* noValidate: validation is handled in useListingForm so every missing
+            field is highlighted at once instead of one native browser tooltip */}
+        <form className="listing-form" noValidate onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') e.preventDefault(); }}>
             {/* Listing Type Toggle: Sale / Rent */}
             <div className="flex justify-center mb-6">
                 <LiquidGlassControl
@@ -176,8 +186,18 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 />
             </div>
 
-            {/* Rental indicator */}
-            {isRental && (
+            {/* Rental / Luxury Villa indicator */}
+            {isLuxuryVilla ? (
+                <div className="flex items-center gap-3 p-3 mb-6 rounded-xl border border-secondary/40 bg-secondary/5">
+                    <div className="p-2 rounded-full bg-secondary/10 flex-shrink-0">
+                        <span className="text-lg leading-none">🏛️</span>
+                    </div>
+                    <div>
+                        <span className="text-sm font-bold text-primary-dark">{t('seller:createListing.luxuryVillaBanner.title', 'Luxury Villas Collection')}</span>
+                        <p className="text-xs text-primary/70">{t('seller:createListing.luxuryVillaBanner.hint', 'This listing will appear in the exclusive Luxury Villas tab — visible to premium buyers searching for high-end Balkan retreats.')}</p>
+                    </div>
+                </div>
+            ) : isRental && (
                 <div className="flex items-center gap-3 p-3 glass-fieldset border-blue-200 mb-6">
                     <div className="p-2 rounded-full bg-blue-50">
                         <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -256,6 +276,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         <option value="house">{t('seller:propertyTypes.house')}</option>
                                         <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
                                         <option value="villa">{t('seller:propertyTypes.villa')}</option>
+                                        <option value="luxury-villa">{t('seller:propertyTypes.luxuryVilla', 'Luxury Villa')}</option>
                                         <option value="land">{t('seller:propertyTypes.land')}</option>
                                         <option value="other">{t('seller:propertyTypes.other')}</option>
                                     </select>
@@ -338,10 +359,11 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                             )}
                         </div>
 
-                        <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-200 border-dashed rounded-xl cursor-pointer glass-fieldset hover:bg-gray-50 transition-colors">
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6"><UploadIcon className="w-10 h-10 mb-3 text-gray-300" /><p className="mb-2 text-sm text-gray-400"><span className="font-semibold text-gray-600">{t('seller:createListing.upload.clickToUpload')}</span></p><p className="text-xs text-gray-300">{t('seller:createListing.upload.fileTypes')}</p></div>
-                            <input id="image-upload" type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} />
+                        <label htmlFor="image-upload" className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer glass-fieldset transition-colors ${fieldErrors.images ? 'border-red-500 bg-red-50/60 hover:bg-red-50' : 'border-gray-200 hover:bg-gray-50'}`}>
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6"><UploadIcon className={`w-10 h-10 mb-3 ${fieldErrors.images ? 'text-red-400' : 'text-gray-300'}`} /><p className="mb-2 text-sm text-gray-400"><span className={`font-semibold ${fieldErrors.images ? 'text-red-600' : 'text-gray-600'}`}>{t('seller:createListing.upload.clickToUpload')}</span></p><p className="text-xs text-gray-300">{t('seller:createListing.upload.fileTypes')}</p></div>
+                            <input id="image-upload" type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} aria-invalid={!!fieldErrors.images} aria-required="true" />
                         </label>
+                        <FieldError message={fieldErrors.images} />
                         {images.length > 0 && (
                             <div className="mt-4"><p className="font-semibold text-sm mb-2 text-gray-600">{t('seller:createListing.upload.imagesSelected', { count: images.length })}</p><div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">{images.map((img, index) => (<div key={index} className="relative group"><img src={img.previewUrl} alt={`preview ${index}`} className="w-full h-24 object-cover rounded-lg border border-gray-200" /><button type="button" onClick={() => removeImage(index)} className="absolute -top-1 -right-1 bg-red-500/80 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">&times;</button></div>))}</div></div>
                         )}
@@ -367,12 +389,14 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         handleMapAddressChange={handleMapAddressChange}
                         getZoomLevel={getZoomLevel}
                         cityData={cityData}
+                        fieldErrors={fieldErrors}
                     />
 
                     <ListingPropertyFeatures
                         listingData={listingData}
                         setListingData={setListingData}
                         handleInputChange={handleInputChange}
+                        fieldErrors={fieldErrors}
                     />
 
                     {/* ===== Rental-Specific Fields (only shown when listingType is 'rent') ===== */}
@@ -423,7 +447,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                     </div>
                                 </div>
 
-                                {/* Min Lease */}
+                                {/* Min Stay — label adapts to rentPeriod */}
                                 <NumberInputWithSteppers
                                     label={
                                         listingData.rentPeriod === 'daily' ? t('rental:form.minLeaseDurationDays', 'Min Lease (days)')
@@ -432,11 +456,11 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                     }
                                     value={listingData.minimumLeaseDuration}
                                     min={1}
-                                    max={60}
+                                    max={listingData.rentPeriod === 'daily' ? 365 : listingData.rentPeriod === 'weekly' ? 52 : 60}
                                     onChange={(val) => setListingData(prev => ({ ...prev, minimumLeaseDuration: val }))}
                                 />
 
-                                {/* Max Lease */}
+                                {/* Max Stay — label adapts to rentPeriod */}
                                 <NumberInputWithSteppers
                                     label={
                                         listingData.rentPeriod === 'daily' ? t('rental:form.maxLeaseDurationDays', 'Max Lease (days)')
@@ -445,7 +469,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                     }
                                     value={listingData.maximumLeaseDuration}
                                     min={1}
-                                    max={120}
+                                    max={listingData.rentPeriod === 'daily' ? 365 : listingData.rentPeriod === 'weekly' ? 52 : 120}
                                     onChange={(val) => setListingData(prev => ({ ...prev, maximumLeaseDuration: val }))}
                                 />
 
@@ -471,6 +495,72 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                     max={20}
                                     onChange={(val) => setListingData(prev => ({ ...prev, maxOccupants: val }))}
                                 />
+
+                                {/* ── Daily-rental-only fields ── */}
+                                {listingData.rentPeriod === 'daily' && (<>
+                                    {/* Check-in Time */}
+                                    <div>
+                                        <label htmlFor="checkInTime" className={`${labelClasses} !text-blue-500`}>{t('rental:form.checkInTime', 'Check-in Time')}</label>
+                                        <input
+                                            type="time"
+                                            id="checkInTime"
+                                            value={listingData.checkInTime}
+                                            onChange={(e) => setListingData(prev => ({ ...prev, checkInTime: e.target.value }))}
+                                            className={inputBaseClasses}
+                                        />
+                                    </div>
+
+                                    {/* Check-out Time */}
+                                    <div>
+                                        <label htmlFor="checkOutTime" className={`${labelClasses} !text-blue-500`}>{t('rental:form.checkOutTime', 'Check-out Time')}</label>
+                                        <input
+                                            type="time"
+                                            id="checkOutTime"
+                                            value={listingData.checkOutTime}
+                                            onChange={(e) => setListingData(prev => ({ ...prev, checkOutTime: e.target.value }))}
+                                            className={inputBaseClasses}
+                                        />
+                                    </div>
+
+                                    {/* Cleaning Fee */}
+                                    <div>
+                                        <label htmlFor="cleaningFee" className={`${labelClasses} !text-blue-500`}>{t('rental:form.cleaningFee', 'Cleaning Fee')}</label>
+                                        <div className="relative">
+                                            <input
+                                                type="number"
+                                                id="cleaningFee"
+                                                value={listingData.cleaningFee > 0 ? listingData.cleaningFee : ''}
+                                                onChange={(e) => setListingData(prev => ({ ...prev, cleaningFee: Number(e.target.value) || 0 }))}
+                                                className={`${inputBaseClasses} pl-10`}
+                                                placeholder="0"
+                                                min={0}
+                                            />
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">{currencySymbol}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Cancellation Policy */}
+                                    <div>
+                                        <label htmlFor="cancellationPolicy" className={`${labelClasses} !text-blue-500`}>{t('rental:form.cancellationPolicy', 'Cancellation Policy')}</label>
+                                        <div className="relative">
+                                            <select
+                                                id="cancellationPolicy"
+                                                value={listingData.cancellationPolicy}
+                                                onChange={(e) => setListingData(prev => ({ ...prev, cancellationPolicy: e.target.value as any }))}
+                                                className={selectClasses}
+                                            >
+                                                <option value="">{t('rental:form.cancellationPolicies.select', 'Select a policy')}</option>
+                                                <option value="flexible">{t('rental:form.cancellationPolicies.flexible', 'Flexible — Full refund 24h before check-in')}</option>
+                                                <option value="moderate">{t('rental:form.cancellationPolicies.moderate', 'Moderate — Full refund 5 days before check-in')}</option>
+                                                <option value="strict">{t('rental:form.cancellationPolicies.strict', 'Strict — 50% refund up to 1 week before')}</option>
+                                                <option value="non-refundable">{t('rental:form.cancellationPolicies.nonRefundable', 'Non-refundable')}</option>
+                                            </select>
+                                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                                                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>)}
                             </div>
 
                             {/* Inclusions */}
@@ -495,17 +585,55 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         />
                                         <span className="text-sm text-gray-600">{t('rental:form.internetIncluded')}</span>
                                     </label>
+                                    {/* Daily-only inclusions */}
+                                    {listingData.rentPeriod === 'daily' && (<>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={listingData.breakfastIncluded}
+                                                onChange={(e) => setListingData(prev => ({ ...prev, breakfastIncluded: e.target.checked }))}
+                                                className="rounded text-blue-500 focus:ring-blue-500/30 w-4 h-4 bg-gray-100/60 border-gray-300"
+                                            />
+                                            <span className="text-sm text-gray-600">{t('rental:form.breakfastIncluded', 'Breakfast')}</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={listingData.towelsIncluded}
+                                                onChange={(e) => setListingData(prev => ({ ...prev, towelsIncluded: e.target.checked }))}
+                                                className="rounded text-blue-500 focus:ring-blue-500/30 w-4 h-4 bg-gray-100/60 border-gray-300"
+                                            />
+                                            <span className="text-sm text-gray-600">{t('rental:form.towelsIncluded', 'Towels & Linen')}</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={listingData.parkingIncluded}
+                                                onChange={(e) => setListingData(prev => ({ ...prev, parkingIncluded: e.target.checked }))}
+                                                className="rounded text-blue-500 focus:ring-blue-500/30 w-4 h-4 bg-gray-100/60 border-gray-300"
+                                            />
+                                            <span className="text-sm text-gray-600">{t('rental:form.parkingIncluded', 'Parking')}</span>
+                                        </label>
+                                    </>)}
                                 </div>
                             </div>
 
-                            {/* Tenant Requirements */}
+                            {/* Tenant / Guest Requirements */}
                             <div>
                                 <TagListInput
                                     tags={listingData.tenantRequirements}
                                     setTags={(tags) => setListingData(prev => ({ ...prev, tenantRequirements: tags }))}
-                                    label={t('rental:form.tenantRequirements')}
+                                    label={
+                                        listingData.rentPeriod === 'daily'
+                                            ? t('rental:form.guestRequirements', 'Guest Requirements')
+                                            : t('rental:form.tenantRequirements')
+                                    }
                                 />
-                                <p className="mt-1 text-xs text-gray-300">{t('rental:form.tenantRequirementsHint')}</p>
+                                <p className="mt-1 text-xs text-gray-300">
+                                    {listingData.rentPeriod === 'daily'
+                                        ? t('rental:form.guestRequirementsHint', 'e.g. no parties, no smoking, ID verification required (press Enter to add)')
+                                        : t('rental:form.tenantRequirementsHint')}
+                                </p>
                             </div>
                         </fieldset>
                     )}
@@ -611,9 +739,16 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                     </fieldset>
 
                     {/* Description */}
-                    <fieldset><label htmlFor="description" className="block text-sm font-medium text-gray-500 mb-1">{t('seller:createListing.fields.description')}</label><textarea id="description" name="description" value={listingData.description} onChange={handleInputChange} className={`${inputBaseClasses} h-48`} required /></fieldset>
+                    <fieldset id={fieldAnchorId('description')}>
+                        <label htmlFor="description" className={`block text-sm font-medium mb-1 ${fieldErrors.description ? 'text-red-600' : 'text-gray-500'}`}>
+                            {t('seller:createListing.fields.description')}<RequiredMark />
+                        </label>
+                        <textarea id="description" name="description" value={listingData.description} onChange={handleInputChange} className={`${inputBaseClasses} h-48 ${fieldErrors.description ? errorFieldClasses : ''}`} required aria-invalid={!!fieldErrors.description} />
+                        <FieldError message={fieldErrors.description} />
+                    </fieldset>
 
                     <ListingImageUpload
+                        imagesError={fieldErrors.images}
                         images={images}
                         imageTags={listingData.image_tags}
                         floorplanImage={floorplanImage}
@@ -762,6 +897,23 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                     </div>
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {/* Validation summary - lists every field still missing */}
+                    {errorSummary.length > 0 && (
+                        <div role="alert" className="rounded-xl border border-red-300 bg-red-50 p-4">
+                            <p className="flex items-center gap-2 text-sm font-semibold text-red-700">
+                                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                                </svg>
+                                {t('newListing:validation.fixHighlighted', 'Please complete the fields highlighted in red:')}
+                            </p>
+                            <ul className="mt-2 ml-7 list-disc space-y-1 text-sm text-red-600">
+                                {errorSummary.map(({ field, message }) => (
+                                    <li key={field}>{message}</li>
+                                ))}
+                            </ul>
                         </div>
                     )}
 

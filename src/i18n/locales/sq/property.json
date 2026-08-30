@@ -37,7 +37,8 @@
     "commercial": "Komerciale",
     "office": "Zyrë",
     "garage": "Garazh",
-    "other": "Tjetër"
+    "other": "Tjetër",
+    "luxury-villa": "Vilë Luksoze"
   },
   "features": {
     "bedrooms": "Dhoma Gjumi",
@@ -146,7 +147,13 @@
       },
       "slotDuration": "{{minutes}} min slot"
     },
-    "floorPlanInteractiveHint": "Shikues interaktiv me zmadhim, lëvizje dhe etiketa"
+    "floorPlanInteractiveHint": "Shikues interaktiv me zmadhim, lëvizje dhe etiketa",
+    "kitchens": "Kuzhina",
+    "diningRooms": "Dhoma ngrënieje",
+    "toilets": "Tualete (WC)",
+    "storageRooms": "Dhoma depozitimi",
+    "offices": "Zyrë / studio",
+    "propertyType": "Lloji i Pronës"
   },
   "distances": {
     "title": "Distancat",
@@ -220,7 +227,10 @@
     "phone": "Telefoni",
     "email": "Email",
     "website": "Uebsajti",
-    "viewProfile": "Shiko Profilin"
+    "viewProfile": "Shiko Profilin",
+    "moreFromAgent": "Më shumë njoftime nga ky agjent",
+    "noOtherListings": "Nuk ka njoftime të tjera aktive për momentin",
+    "viewFullProfile": "Shiko profilin e plotë"
   },
   "navigation": {
     "back": "Kthehu",
@@ -317,7 +327,8 @@
       "apartment": "Banesë",
       "villa": "Vilë",
       "land": "Tokë",
-      "other": "Tjetër"
+      "other": "Tjetër",
+      "luxury-villa": "Vilë Luksoze"
     },
     "promotedListings": "Listime të Promovuara",
     "agentHint": "Kliko për rekomandime!",
@@ -423,7 +434,13 @@
       "replay": "Riprodho",
       "exploreMap": "Eksploro hartën",
       "flyShort": "Fluturoj",
-      "mapShort": "Hartë"
+      "mapShort": "Hartë",
+      "exploreVillasMap": "Harta e Vilave",
+      "villasMapShort": "Vilat",
+      "exploreRentalsMap": "Harta e Qirave",
+      "rentalsMapShort": "Qira",
+      "exploreSaleMap": "Harta e Shitjeve",
+      "saleMapShort": "Blej"
     },
     "errors": {
       "noLocation": "Të dhënat e vendndodhjes nuk janë të disponueshme"
@@ -654,7 +671,9 @@
   "seo": {
     "description": "{{type}} me {{beds}} dhoma gjumi, {{baths}} banjo për {{listingAction}} në {{city}}, {{country}}. {{sqft}}m² për €{{price}}.",
     "forRent": "Qira",
-    "forSale": "Shitje"
+    "forSale": "Shitje",
+    "perMonth": "/muaj",
+    "title": "{{type}} me {{beds}} dhoma për {{listingAction}} në {{city}}, {{country}} - €{{price}}"
   },
   "roomStyler": {
     "reimagine": "Rimagjino",

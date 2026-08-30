@@ -99,7 +99,7 @@ export const generateDescription = async (req: Request, res: Response): Promise<
       return;
     }
 
-    const validPropertyTypes = ['house', 'apartment', 'villa', 'land', 'other'];
+    const validPropertyTypes = ['house', 'apartment', 'villa', 'luxury-villa', 'land', 'other'];
     if (!validPropertyTypes.includes(propertyType)) {
       res.status(400).json({ message: `propertyType must be one of: ${validPropertyTypes.join(', ')}` });
       return;
@@ -351,7 +351,7 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
       const timeout = setTimeout(() => controller.abort(), 15_000);
       const upstream = await fetch(imageUrl, {
         signal: controller.signal,
-        headers: { 'User-Agent': 'BalkanEstate/1.0 (+https://balkanestate.com)' },
+        headers: { 'User-Agent': 'BalkanEstate/1.0 (+https://balkanestateai.com)' },
       });
       clearTimeout(timeout);
 

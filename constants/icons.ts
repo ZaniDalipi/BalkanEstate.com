@@ -30,6 +30,23 @@ export const FireIcon: React.FC<{ className?: string }> = ({ className }) => (
     )
 );
 
+// Luxury Villa — a villa under a crown, the same mark the map pins carry
+// (see src/shared/map/villaMarker.ts: crown above the villa roofline), so the
+// nav item, the property-type card and the map markers all read as one brand.
+//
+// Deliberately five strokes, not seven: the previous version's tiny diamond
+// and pair of windows collapsed into noise at the 20px this renders at. The
+// crown is the recognisable half of the mark, so it gets the detail budget.
+export const LuxuryVillaIcon: React.FC<{ className?: string }> = ({ className }) => (
+    React.createElement(Icon, { className: className },
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M6.2 7.3 L4.7 2.9 L8.35 5.2 L12 1.7 L15.65 5.2 L19.3 2.9 L17.8 7.3 Z" }),
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M3.3 13.4 L12 9 L20.7 13.4" }),
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M5.7 12.2 V20.7 H18.3 V12.2" }),
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M10.1 20.7 V16.6 a1.9 1.9 0 0 1 3.8 0 V20.7" }),
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M2.6 20.7 H21.4" })
+    )
+);
+
 export const AcademicCapIcon: React.FC<{ className?: string }> = ({ className }) => (
     React.createElement(Icon, { className: className },
         React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" })

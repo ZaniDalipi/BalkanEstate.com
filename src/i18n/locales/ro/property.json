@@ -37,7 +37,8 @@
     "commercial": "Spațiu Comercial",
     "office": "Birou",
     "garage": "Garaj",
-    "other": "Altele"
+    "other": "Altele",
+    "luxury-villa": "Vilă de Lux"
   },
   "features": {
     "bedrooms": "Dormitoare",
@@ -146,7 +147,13 @@
       },
       "slotDuration": "{{minutes}} min sloturi"
     },
-    "floorPlanInteractiveHint": "Vizualizator interactiv cu zoom, deplasare și etichete"
+    "floorPlanInteractiveHint": "Vizualizator interactiv cu zoom, deplasare și etichete",
+    "kitchens": "Bucătării",
+    "diningRooms": "Sufragerii",
+    "toilets": "Toalete (WC)",
+    "storageRooms": "Debarale",
+    "offices": "Birou / cameră de lucru",
+    "propertyType": "Tip Proprietate"
   },
   "distances": {
     "title": "Distanțe",
@@ -220,7 +227,10 @@
     "phone": "Telefon",
     "email": "E-mail",
     "website": "Site web",
-    "viewProfile": "Vezi profil"
+    "viewProfile": "Vezi profil",
+    "moreFromAgent": "Mai multe anunțuri de la acest agent",
+    "noOtherListings": "Momentan nu există alte anunțuri active",
+    "viewFullProfile": "Vezi profilul complet"
   },
   "navigation": {
     "back": "Înapoi",
@@ -317,7 +327,8 @@
       "apartment": "Apartament",
       "villa": "Vilă",
       "land": "Teren",
-      "other": "Altele"
+      "other": "Altele",
+      "luxury-villa": "Vilă de Lux"
     },
     "promotedListings": "Anunțuri Promovate",
     "agentHint": "Click pentru recomandări!",
@@ -423,7 +434,13 @@
       "replay": "Reia",
       "exploreMap": "Explorează harta",
       "flyShort": "Zboară",
-      "mapShort": "Hartă"
+      "mapShort": "Hartă",
+      "exploreVillasMap": "Harta vilelor",
+      "villasMapShort": "Vile",
+      "exploreRentalsMap": "Harta închirierilor",
+      "rentalsMapShort": "Chirii",
+      "exploreSaleMap": "Harta vânzărilor",
+      "saleMapShort": "Vânzări"
     },
     "errors": {
       "noLocation": "Datele de locație nu sunt disponibile"
@@ -654,7 +671,9 @@
   "seo": {
     "description": "{{type}} cu {{beds}} dormitoare, {{baths}} băi de {{listingAction}} în {{city}}, {{country}}. {{sqft}}m² pentru €{{price}}.",
     "forRent": "Închiriere",
-    "forSale": "Vânzare"
+    "forSale": "Vânzare",
+    "perMonth": "/lună",
+    "title": "{{type}} cu {{beds}} dormitoare pentru {{listingAction}} în {{city}}, {{country}} - €{{price}}"
   },
   "roomStyler": {
     "reimagine": "Reimaginează",

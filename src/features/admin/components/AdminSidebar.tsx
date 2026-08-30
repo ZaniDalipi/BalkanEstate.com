@@ -36,6 +36,7 @@ interface AdminSidebarProps {
     totalAgencies?: number;
     newInquiries?: number;
     unverifiedUsers?: number;
+    pendingVillas?: number;
   };
 }
 
@@ -123,6 +124,23 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           label: t('admin:sidebar.properties'),
           icon: <HomeIcon className="w-5 h-5" />,
           badge: stats?.totalProperties
+        },
+        {
+          id: 'villaApprovals',
+          label: t('admin:sidebar.villaApprovals', 'Villa Approvals'),
+          icon: <SparklesIcon className="w-5 h-5" />,
+          badge: stats?.pendingVillas,
+          badgeColor: 'bg-[#E8B820]'
+        },
+        {
+          id: 'villaDestinations',
+          label: t('admin:sidebar.villaDestinations', 'Villa Destinations'),
+          icon: <SparklesIcon className="w-5 h-5" />,
+        },
+        {
+          id: 'cityShowcase',
+          label: t('admin:sidebar.cityShowcase', 'City Gallery'),
+          icon: <BuildingOfficeIcon className="w-5 h-5" />,
         },
         {
           id: 'agencies',

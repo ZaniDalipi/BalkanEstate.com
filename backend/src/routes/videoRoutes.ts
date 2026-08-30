@@ -153,7 +153,7 @@ router.get('/preview/:propertyId', protect, getVideoPreview);
  *               includeWatermark:
  *                 type: boolean
  *                 default: true
- *                 description: Include BalkanEstate.com watermark
+ *                 description: Include BalkanEstateAI watermark
  *               musicStyle:
  *                 type: string
  *                 enum: [elegant, upbeat, calm, modern]

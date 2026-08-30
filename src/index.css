@@ -13,6 +13,15 @@
   /* Secondary Colors */
   --color-secondary: #FFA500;
 
+  /* Luxury-villa gold scale. One place for the five golds that had drifted
+     across the villa components; the map-marker palette in
+     src/shared/map/villaMarker.ts mirrors these for its generated SVG. */
+  --color-villa-gold: #E8B820;        /* brand mid — badges, chips, accents */
+  --color-villa-gold-bright: #FFA500; /* highlight — same value as secondary */
+  --color-villa-gold-calm: #C9A227;   /* muted — form focus rings */
+  --color-villa-gold-deep: #B8860B;   /* prices and emphasis text */
+  --color-villa-gold-ink: #8A6D1F;    /* text on a gold-tinted fill */
+
   /* Foreground Colors (required by shadcn Button) */
   --color-primary-foreground: #ffffff;
   --color-secondary-foreground: #1A202C;
@@ -25,6 +34,8 @@
   --color-background: #ffffff;
   --color-foreground: #1A202C;
   --color-input: rgba(0, 0, 0, 0.1);
+  /* Required by shadcn-style components that use `border-border`. */
+  --color-border: rgba(0, 0, 0, 0.1);
   --color-ring: rgba(0, 122, 255, 0.5);
 
   /* Neutral Colors */
@@ -51,11 +62,12 @@
   --animate-bounce-soft: bounceSoft 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   --animate-aurora: aurora 60s linear infinite;
 
-  /* Page Transition Animations */
-  --animate-page-enter: pageEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-page-enter-back: pageEnterBack 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-page-enter-up: pageEnterUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-page-morph: pageMorph 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  /* Page Transition Animations. `backwards` rather than `both` — see the
+     note on `.animate-page-enter` for why the final frame must not be kept. */
+  --animate-page-enter: pageEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  --animate-page-enter-back: pageEnterBack 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  --animate-page-enter-up: pageEnterUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  --animate-page-morph: pageMorph 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 /* Aurora background color variables */
@@ -708,21 +720,35 @@ html[data-zoom] #root {
   }
 }
 
-/* Page transition utility classes */
+/* Page transition utility classes
+ *
+ * `backwards`, not `both`. These keyframes end on `filter: blur(0)`, and
+ * `forwards` (the other half of `both`) keeps that final frame applied for as
+ * long as the page is mounted — so the wrapper is left with a permanent
+ * `filter` and `transform` long after the 0.45s animation is over. A filter
+ * that is not `none` is not free: it makes the element a stacking context, a
+ * containing block for fixed-position descendants, and its own compositing
+ * layer. Every `backdrop-filter` under it (the hero's search bar, its
+ * buttons, the stats card) then has to sample its backdrop through that
+ * layer, which is what makes them shimmer on iOS.
+ *
+ * `backwards` still applies the 0% frame before the animation starts, so the
+ * entrance is unchanged; the element simply returns to its own styles at the
+ * end, which are already opacity 1 / no transform / no filter. */
 .animate-page-enter {
-  animation: pageEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: pageEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 .animate-page-enter-back {
-  animation: pageEnterBack 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: pageEnterBack 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 .animate-page-enter-up {
-  animation: pageEnterUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: pageEnterUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 .animate-page-morph {
-  animation: pageMorph 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: pageMorph 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 /* Reduced motion: instant transition with no movement */
@@ -1359,6 +1385,22 @@ html[data-zoom] #root {
      plus a small gap, with a 44px floor for Android devices that report 0. */
 :root {
   --floating-search-top-pad: calc(env(safe-area-inset-top, 0px) + 8px);
+}
+
+/* Top of the home hero.
+   In a browser the address bar sits above this and a plain padding is enough.
+   Installed as a PWA there is nothing above it at all, so the heading landed
+   under the status bar and behind the floating menu button. `max()` keeps the
+   browser spacing unchanged and only grows it by the notch inset where one
+   exists. */
+.hero-top-pad {
+  padding-top: max(3rem, calc(env(safe-area-inset-top, 0px) + 3.25rem));
+}
+
+@media (min-width: 640px) {
+  .hero-top-pad {
+    padding-top: max(6rem, calc(env(safe-area-inset-top, 0px) + 4rem));
+  }
 }
 
 /* High-contrast focus ring for accessibility in PWA (no browser chrome) */

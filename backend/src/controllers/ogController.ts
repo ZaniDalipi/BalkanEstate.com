@@ -16,6 +16,9 @@ import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
 import Property, { IProperty } from '../models/Property';
 import Article from '../models/Article';
+import Agent from '../models/Agent';
+import Agency from '../models/Agency';
+import { resolveOgImage, DEFAULT_OG_IMAGE, type OgImage } from '../utils/ogImage';
 import { resolveId, encodeId } from '../utils/idObfuscation';
 import { isValidObjectId } from '../utils/validateParams';
 import { apiLogger } from '../utils/logger';
@@ -116,7 +119,7 @@ function buildOgDescription(property: PropertyOgProjection): string {
 }
 
 function getOgImageUrl(property: Pick<PropertyOgProjection, 'imageUrl' | 'images'>): string {
-  return property.images?.[0]?.url ?? property.imageUrl ?? `${OG_BASE_URL}/og-image.png`;
+  return property.images?.[0]?.url ?? property.imageUrl ?? DEFAULT_OG_IMAGE;
 }
 
 /**
@@ -354,7 +357,7 @@ export const blogArticleOgMiddleware = async (
     }
 
     const canonicalUrl = `${OG_BASE_URL}/en/blog/${article.slug}`;
-    const imageUrl = article.coverImageUrl ?? `${OG_BASE_URL}/og-image.png`;
+    const imageUrl = article.coverImageUrl ?? DEFAULT_OG_IMAGE;
     const description = (article.excerpt ?? '').slice(0, 300);
     const title = `${article.title} | BalkanEstateAI`;
     const html = buildArticleOgHtml(title, description, imageUrl, canonicalUrl);
@@ -366,6 +369,272 @@ export const blogArticleOgMiddleware = async (
       .send(html);
   } catch (error) {
     apiLogger.error('Blog OG middleware error for slug:', slug, error);
+    next();
+  }
+};
+
+// ─── Agent & agency profile OG middleware ─────────────────────────────────────
+
+/**
+ * Build the crawler HTML for a person/organisation profile.
+ *
+ * `ogType` is 'profile' for an agent and 'website' for an agency; the image is
+ * their profile picture (agent avatar / agency logo).
+ */
+function buildProfileOgHtml(
+  ogType: 'profile' | 'website',
+  title: string,
+  description: string,
+  image: OgImage,
+  imageAlt: string,
+  canonicalUrl: string,
+): string {
+  // A picture we couldn't size stays a square thumbnail on Twitter/X; asking
+  // for the large card would letterbox it.
+  const twitterCard = image.sized ? 'summary_large_image' : 'summary';
+  const dimensions = image.sized
+    ? `\n  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />`
+    : '';
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="refresh" content="0;url=${escapeHtml(canonicalUrl)}" />
+  <title>${escapeHtml(title)}</title>
+  <meta name="description" content="${escapeHtml(description)}" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="${ogType}" />
+  <meta property="og:site_name" content="BalkanEstateAI" />
+  <meta property="og:url" content="${escapeHtml(canonicalUrl)}" />
+  <meta property="og:title" content="${escapeHtml(title)}" />
+  <meta property="og:description" content="${escapeHtml(description)}" />
+  <meta property="og:image" content="${escapeHtml(image.url)}" />${dimensions}
+  <meta property="og:image:alt" content="${escapeHtml(imageAlt)}" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="${twitterCard}" />
+  <meta name="twitter:title" content="${escapeHtml(title)}" />
+  <meta name="twitter:description" content="${escapeHtml(description)}" />
+  <meta name="twitter:image" content="${escapeHtml(image.url)}" />
+  <meta name="twitter:image:alt" content="${escapeHtml(imageAlt)}" />
+
+  <link rel="canonical" href="${escapeHtml(canonicalUrl)}" />
+</head>
+<body>
+  <script>window.location.replace(${JSON.stringify(canonicalUrl)});</script>
+  <noscript>
+    <p>Redirecting to <a href="${escapeHtml(canonicalUrl)}">${escapeHtml(title)}</a></p>
+  </noscript>
+</body>
+</html>`;
+}
+
+function sendOgHtml(res: Response, html: string): void {
+  res
+    .setHeader('Content-Type', 'text/html; charset=utf-8')
+    .setHeader('Cache-Control', `public, max-age=${OG_CACHE_MAX_AGE_SECONDS}`)
+    .status(200)
+    .send(html);
+}
+
+interface AgentOgProjection {
+  agentId?: string;
+  bio?: string;
+  specializations?: string[];
+  yearsOfExperience?: number;
+  rating?: number;
+  totalReviews?: number;
+  activeListings?: number;
+  agencyName?: string;
+  userId?: { name?: string; avatarUrl?: string; city?: string; country?: string };
+  agencyId?: { name?: string; logo?: string; coverImage?: string };
+}
+
+/**
+ * Middleware: GET /agents/:slug  and  GET /:lang/agents/:slug
+ *
+ * Social media bots receive a minimal HTML page whose og:image is the agent's
+ * own profile picture. Regular browsers pass through to the SPA catch-all.
+ */
+export const agentPageOgMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const userAgent = req.get('user-agent') ?? '';
+
+  if (!isSocialMediaBot(userAgent)) {
+    next();
+    return;
+  }
+
+  const slug = ((req.params.slug as string) ?? '').trim();
+  if (!slug) {
+    next();
+    return;
+  }
+
+  try {
+    // The URL carries the public agentId; fall back to the ObjectId form.
+    const query = isValidObjectId(slug)
+      ? { $or: [{ agentId: slug }, { _id: slug }] }
+      : { agentId: slug };
+
+    const agent = await Agent.findOne(query)
+      .select('agentId bio specializations yearsOfExperience rating totalReviews activeListings agencyName userId agencyId')
+      .populate('userId', 'name avatarUrl city country')
+      .populate('agencyId', 'name logo coverImage')
+      .lean<AgentOgProjection>();
+
+    if (!agent) {
+      next();
+      return;
+    }
+
+    const name = agent.userId?.name?.trim() || 'Real Estate Agent';
+    const location = [agent.userId?.city, agent.userId?.country].filter(Boolean).join(', ');
+    const agencyName = agent.agencyName || agent.agencyId?.name;
+
+    const title = `${name} – Real Estate Agent${location ? ` in ${location}` : ''} | BalkanEstateAI`;
+
+    const facts = [
+      agencyName,
+      agent.yearsOfExperience ? `${agent.yearsOfExperience} years of experience` : '',
+      agent.activeListings
+        ? `${agent.activeListings} active listing${agent.activeListings > 1 ? 's' : ''}`
+        : '',
+      agent.rating
+        ? `${agent.rating.toFixed(1)}★${agent.totalReviews ? ` (${agent.totalReviews} reviews)` : ''}`
+        : '',
+      (agent.specializations ?? []).slice(0, 3).join(', '),
+    ].filter(Boolean).join(' · ');
+
+    const bio = (agent.bio ?? '').replace(/\s+/g, ' ').trim();
+    const description = [facts, bio].filter(Boolean).join(' — ').slice(0, 300)
+      || `Get in touch with ${name} on BalkanEstateAI.`;
+
+    // The agent's own photo is what makes the link recognisable; the agency's
+    // branding only stands in when there is no photo.
+    const image = resolveOgImage(
+      agent.userId?.avatarUrl,
+      agent.agencyId?.logo,
+      agent.agencyId?.coverImage,
+    );
+
+    const canonicalUrl = `${OG_BASE_URL}/en/agents/${encodeURIComponent(agent.agentId ?? slug)}`;
+
+    sendOgHtml(
+      res,
+      buildProfileOgHtml('profile', title, description, image, `${name} – profile picture`, canonicalUrl),
+    );
+  } catch (error) {
+    apiLogger.error('Agent OG middleware error for slug:', slug, error);
+    next();
+  }
+};
+
+interface AgencyOgProjection {
+  name?: string;
+  slug?: string;
+  description?: string;
+  logo?: string;
+  coverImage?: string;
+  city?: string;
+  country?: string;
+  totalAgents?: number;
+  totalProperties?: number;
+}
+
+/**
+ * Middleware: GET /agencies/:country/:name, GET /agencies/:slug and their
+ * /:lang-prefixed twins.
+ *
+ * Social media bots receive a minimal HTML page whose og:image is the agency's
+ * logo. Regular browsers pass through to the SPA catch-all.
+ */
+export const agencyPageOgMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const userAgent = req.get('user-agent') ?? '';
+
+  if (!isSocialMediaBot(userAgent)) {
+    next();
+    return;
+  }
+
+  // An agency slug is stored as "{country}/{name}", so the URL usually has two
+  // segments; older links and id links carry only one.
+  const country = ((req.params.country as string) ?? '').trim();
+  const nameParam = ((req.params.name as string) ?? '').trim();
+  const single = ((req.params.slug as string) ?? '').trim();
+  const identifier = country && nameParam ? `${country}/${nameParam}` : single;
+
+  if (!identifier) {
+    next();
+    return;
+  }
+
+  try {
+    const select = 'name slug description logo coverImage city country totalAgents totalProperties';
+    const slugLower = identifier.toLowerCase();
+
+    let agency = await Agency.findOne({ slug: slugLower })
+      .select(select)
+      .lean<AgencyOgProjection>();
+
+    // Legacy slug format stored the separator as a comma.
+    if (!agency && slugLower.includes('/')) {
+      agency = await Agency.findOne({ slug: slugLower.replace('/', ',') })
+        .select(select)
+        .lean<AgencyOgProjection>();
+    }
+
+    if (!agency && isValidObjectId(identifier)) {
+      agency = await Agency.findById(identifier).select(select).lean<AgencyOgProjection>();
+    }
+
+    if (!agency) {
+      next();
+      return;
+    }
+
+    const name = agency.name?.trim() || 'Real Estate Agency';
+    const location = [agency.city, agency.country].filter(Boolean).join(', ');
+    const title = `${name} – Real Estate Agency${location ? ` in ${location}` : ''} | BalkanEstateAI`;
+
+    const facts = [
+      agency.totalAgents ? `${agency.totalAgents} agent${agency.totalAgents > 1 ? 's' : ''}` : '',
+      agency.totalProperties
+        ? `${agency.totalProperties} listing${agency.totalProperties > 1 ? 's' : ''}`
+        : '',
+    ].filter(Boolean).join(' · ');
+
+    const about = (agency.description ?? '').replace(/\s+/g, ' ').trim();
+    const description = [facts, about].filter(Boolean).join(' — ').slice(0, 300)
+      || `Browse listings from ${name} on BalkanEstateAI.`;
+
+    // The logo is the agency's profile picture and what people recognise in a
+    // feed, so it wins over the (usually generic) cover photo.
+    const image = resolveOgImage(agency.logo, agency.coverImage);
+
+    const path = (agency.slug ?? identifier)
+      .split(/[/,]/)
+      .map(encodeURIComponent)
+      .join('/');
+    const canonicalUrl = `${OG_BASE_URL}/en/agencies/${path}`;
+
+    sendOgHtml(
+      res,
+      buildProfileOgHtml('website', title, description, image, `${name} logo`, canonicalUrl),
+    );
+  } catch (error) {
+    apiLogger.error('Agency OG middleware error for identifier:', identifier, error);
     next();
   }
 };

@@ -44,7 +44,8 @@
     "commercial": "Commercial",
     "office": "Office",
     "garage": "Garage",
-    "other": "Other"
+    "other": "Other",
+    "luxury-villa": "Luxury Villa"
   },
   "features": {
     "bedrooms": "Bedrooms",
@@ -158,7 +159,8 @@
         "sat": "Sat"
       },
       "slotDuration": "{{minutes}} min slots"
-    }
+    },
+    "propertyType": "Property Type"
   },
   "distances": {
     "title": "Distances",
@@ -344,7 +346,8 @@
       "apartment": "Apartment",
       "villa": "Villa",
       "land": "Land",
-      "other": "Other"
+      "other": "Other",
+      "luxury-villa": "Luxury Villa"
     },
     "promotedListings": "Promoted Listings",
     "agentHint": "Click for recommendations!",
@@ -450,7 +453,13 @@
       "skip": "Skip",
       "replay": "Replay",
       "exploreMap": "Full Map",
-      "mapShort": "Map"
+      "mapShort": "Map",
+      "exploreVillasMap": "Villas Map",
+      "villasMapShort": "Villas",
+      "exploreRentalsMap": "Rentals Map",
+      "rentalsMapShort": "Rent",
+      "exploreSaleMap": "For-Sale Map",
+      "saleMapShort": "Buy"
     },
     "errors": {
       "noLocation": "Location data unavailable"

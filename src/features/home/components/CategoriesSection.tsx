@@ -1,12 +1,18 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { ScrollAssemble, ScrollAssembleItem } from '@/src/components/ui/scroll-assemble';
 
 interface CategoriesSectionProps {
   onCategoryClick: (propertyType: string, listingType?: string) => void;
+  /**
+   * Used by tiles that lead to a page of their own rather than to a filtered
+   * search — currently just Luxury, which has a dedicated villas page.
+   */
+  onNavigate: (view: string, path: string) => void;
 }
 
-const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }) => {
+const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick, onNavigate }) => {
   const { t } = useTranslation(['home']);
 
   const categories = [
@@ -69,16 +75,25 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }
           <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
         </svg>
       ),
-      gradient: 'from-rose-500 to-pink-600',
+      gradient: 'from-yellow-400 via-amber-500 to-yellow-700',
+      isLuxury: true,
+      // Luxury is the one tile that isn't a search filter. Without this it
+      // ran the same `propertyType: 'villa'` search as the Villas tile two
+      // places to its left, so the two tiles landed on the same page.
+      view: 'villas',
+      path: '/villas',
     },
   ];
 
   return (
-    <section className="py-12 sm:py-16 bg-white">
+    // overflow-x-clip: the ScrollAssemble tiles start scattered well outside
+    // the content column, and this full-width section is where they get
+    // clipped — see the note in scroll-assemble.tsx.
+    <section className="py-12 sm:py-16 bg-white overflow-x-clip">
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ y: 10 }}
+          whileInView={{ y: 0 }}
           viewport={{ once: true }}
           className="text-center mb-8"
         >
@@ -90,31 +105,53 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4">
+        <ScrollAssemble count={categories.length} className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4">
           {categories.map((cat, i) => (
+            <ScrollAssembleItem key={cat.key} index={i}>
             <motion.button
-              key={cat.key}
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-30px' }}
-              transition={{ delay: i * 0.06, type: 'spring', stiffness: 300, damping: 30 }}
               whileHover={{ y: -4 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => onCategoryClick(cat.type, cat.listingType)}
-              className="group flex flex-col items-center gap-2.5 p-4 sm:p-5 rounded-xl border border-neutral-200 hover:border-neutral-300 hover:shadow-md bg-white transition-all"
+              onClick={() =>
+                (cat as any).path
+                  ? onNavigate((cat as any).view, (cat as any).path)
+                  : onCategoryClick(cat.type, cat.listingType)
+              }
+              className={`group flex w-full flex-col items-center gap-2.5 p-4 sm:p-5 rounded-xl transition-all relative overflow-hidden ${
+                (cat as any).isLuxury
+                  ? 'border-2 border-amber-400/60 hover:border-amber-500 hover:shadow-xl hover:shadow-amber-200/60 bg-gradient-to-b from-amber-50 to-white'
+                  : 'border border-neutral-200 hover:border-neutral-300 hover:shadow-md bg-white'
+              }`}
+              style={(cat as any).isLuxury ? {
+                boxShadow: '0 4px 16px rgba(217,119,6,0.15), inset 0 0 0 1px rgba(217,119,6,0.1)',
+              } : undefined}
             >
+              {(cat as any).isLuxury && (
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600" />
+              )}
               <motion.div
                 whileHover={{ scale: 1.1, rotate: 5 }}
-                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br ${cat.gradient} text-white flex items-center justify-center`}
+                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br ${cat.gradient} text-white flex items-center justify-center relative`}
+                style={(cat as any).isLuxury ? {
+                  boxShadow: '0 4px 20px rgba(217,119,6,0.5), 0 0 0 2px rgba(251,191,36,0.3)',
+                } : undefined}
               >
                 {cat.icon}
+                {(cat as any).isLuxury && (
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-tr from-white/20 to-transparent pointer-events-none" />
+                )}
               </motion.div>
-              <span className="text-xs sm:text-sm font-medium text-slate-700">
+              <span className={`text-xs sm:text-sm font-medium ${(cat as any).isLuxury ? 'text-amber-800 font-semibold' : 'text-slate-700'}`}>
                 {t(`home:categories.${cat.key}`)}
               </span>
+              {(cat as any).isLuxury && (
+                <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[9px] font-bold text-amber-600/70 tracking-widest uppercase whitespace-nowrap">
+                  ✦ Exclusive
+                </span>
+              )}
             </motion.button>
+            </ScrollAssembleItem>
           ))}
-        </div>
+        </ScrollAssemble>
       </div>
     </section>
   );

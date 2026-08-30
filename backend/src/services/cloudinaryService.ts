@@ -78,8 +78,22 @@ interface UploadOptions {
   maxWidth?: number;
   maxHeight?: number;
   quality?: number;
-  /** Skip the ownership FileRecord (for public uploads with no real user). */
-  skipRegistration?: boolean;
+  /**
+   * Store the master as close to what was uploaded as possible.
+   *
+   * By default the upload call passes a `transformation`, which Cloudinary
+   * applies as an *incoming* transformation — it re-encodes the asset being
+   * stored, not just the copy being delivered. Combined with the JPEG
+   * re-encode below, the master is already twice-compressed before any
+   * delivery transformation touches it, and delivery then compresses a third
+   * time. That is invisible on a thumbnail and very visible on something
+   * displayed nearly full-bleed.
+   *
+   * Set this for images shown large, where the extra stored bytes buy real
+   * detail. Delivery still optimises per request, so nothing is served
+   * unoptimised — only what sits in the bucket changes.
+   */
+  preserveQuality?: boolean;
 }
 
 /**
@@ -225,6 +239,7 @@ export const uploadImage = async (
     type,
     maxWidth = 1920,
     maxHeight = 1080,
+    preserveQuality = false,
     // Note: quality parameter not used - using optimized fixed values (90/95) based on compression strategy
   } = options;
 
@@ -247,7 +262,11 @@ export const uploadImage = async (
           withoutEnlargement: true,
         })
         .jpeg({
-          quality: 90, // Higher quality since frontend already compressed
+          // 4:4:4 keeps full colour resolution for images shown large —
+          // JPEG's default 4:2:0 halves the chroma and shows up as coloured
+          // fringing along hard edges once the picture fills the screen.
+          quality: preserveQuality ? 95 : 90,
+          ...(preserveQuality ? { chromaSubsampling: '4:4:4' } : {}),
           progressive: true,
         })
         .toBuffer();
@@ -256,7 +275,8 @@ export const uploadImage = async (
       mediaLogger.info(`✨ Image already optimized: ${imageMetadata.width}x${imageMetadata.height}, skipping resize`);
       processedBuffer = await sharp(fileBuffer)
         .jpeg({
-          quality: 95, // Minimal quality loss
+          quality: preserveQuality ? 98 : 95, // Minimal quality loss
+          ...(preserveQuality ? { chromaSubsampling: '4:4:4' } : {}),
           progressive: true,
         })
         .toBuffer();
@@ -278,11 +298,23 @@ export const uploadImage = async (
           folder,
           resource_type: 'image',
           type: deliveryType,
-          // Cloudinary transformations for automatic optimization
-          transformation: [
-            { quality: 'auto:good' }, // Auto quality adjustment
-            { fetch_format: 'auto' }, // Serve WebP to supported browsers
-          ],
+          // Cloudinary transformations for automatic optimization.
+          //
+          // This is an *incoming* transformation: it rewrites the asset being
+          // stored, so the master itself is compressed, not just the copies
+          // served from it. That is the right trade for most uploads, and the
+          // wrong one for an image displayed nearly full-bleed, which is then
+          // compressed again on delivery. `preserveQuality` keeps the master
+          // as uploaded; delivery still applies `q_auto`/`f_auto` per request
+          // via `optimizeCloudinaryUrl`, so nothing is served unoptimised.
+          ...(preserveQuality
+            ? {}
+            : {
+              transformation: [
+                { quality: 'auto:good' }, // Auto quality adjustment
+                { fetch_format: 'auto' }, // Serve WebP to supported browsers
+              ],
+            }),
           // Add metadata for better organization
           context: {
             type,

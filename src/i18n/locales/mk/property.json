@@ -37,7 +37,8 @@
     "commercial": "Деловен простор",
     "office": "Канцеларија",
     "garage": "Гаража",
-    "other": "Друго"
+    "other": "Друго",
+    "luxury-villa": "Луксузна вила"
   },
   "features": {
     "bedrooms": "Спални соби",
@@ -146,7 +147,13 @@
       },
       "slotDuration": "{{minutes}} мин термини"
     },
-    "floorPlanInteractiveHint": "Интерактивен прегледувач со зумирање, поместување и ознаки"
+    "floorPlanInteractiveHint": "Интерактивен прегледувач со зумирање, поместување и ознаки",
+    "kitchens": "Кујни",
+    "diningRooms": "Трпезарии",
+    "toilets": "Тоалети (WC)",
+    "storageRooms": "Оставa простории",
+    "offices": "Канцеларија / работна соба",
+    "propertyType": "Тип на Недвижност"
   },
   "distances": {
     "title": "Растојанија",
@@ -220,7 +227,10 @@
     "phone": "Телефон",
     "email": "Е-пошта",
     "website": "Веб-страница",
-    "viewProfile": "Погледни профил"
+    "viewProfile": "Погледни профил",
+    "moreFromAgent": "Повеќе огласи од овој агент",
+    "noOtherListings": "Нема други активни огласи во моментов",
+    "viewFullProfile": "Види го целиот профил"
   },
   "navigation": {
     "back": "Назад",
@@ -317,7 +327,8 @@
       "apartment": "Стан",
       "villa": "Вила",
       "land": "Земјиште",
-      "other": "Друго"
+      "other": "Друго",
+      "luxury-villa": "Луксузна вила"
     },
     "promotedListings": "Промовирани огласи",
     "agentHint": "Кликнете за препораки!",
@@ -423,7 +434,13 @@
       "replay": "Повторно",
       "exploreMap": "Истражи мапа",
       "flyShort": "Лети",
-      "mapShort": "Мапа"
+      "mapShort": "Мапа",
+      "exploreVillasMap": "Мапа на вили",
+      "villasMapShort": "Вили",
+      "exploreRentalsMap": "Мапа на изнајмување",
+      "rentalsMapShort": "Изнајми",
+      "exploreSaleMap": "Мапа на продажби",
+      "saleMapShort": "Продажба"
     },
     "errors": {
       "noLocation": "Податоците за локација не се достапни"
@@ -647,13 +664,16 @@
       },
       "zoomIn": "Зголеми",
       "zoomLevel": "Ниво на зумирање",
-      "zoomOut": "Намали"
+      "zoomOut": "Намали",
+      "areaPlaceholder": "на пр. 24.5"
     }
   },
   "seo": {
     "description": "{{type}} со {{beds}} спални, {{baths}} бањи за {{listingAction}} во {{city}}, {{country}}. {{sqft}}m² за €{{price}}.",
     "forRent": "Изнајмување",
-    "forSale": "Продажба"
+    "forSale": "Продажба",
+    "perMonth": "/месец",
+    "title": "{{type}} со {{beds}} спални за {{listingAction}} во {{city}}, {{country}} - €{{price}}"
   },
   "roomStyler": {
     "reimagine": "Преобрази",

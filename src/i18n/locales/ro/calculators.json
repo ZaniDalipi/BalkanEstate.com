@@ -72,6 +72,11 @@
     "errors": {
       "rateRequired": "Introduceți o rată a dobânzii",
       "rateRange": "Rata trebuie să fie între {{min}}% și {{max}}%"
+    },
+    "deposit": {
+      "low": "Low deposit",
+      "fair": "Fair deposit",
+      "strong": "Strong deposit"
     }
   },
   "rentVsBuy": {

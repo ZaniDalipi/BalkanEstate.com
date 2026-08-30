@@ -37,7 +37,8 @@
     "commercial": "Komercijalno",
     "office": "Ured",
     "garage": "Garaža",
-    "other": "Ostalo"
+    "other": "Ostalo",
+    "luxury-villa": "Luksuzna vila"
   },
   "features": {
     "bedrooms": "Spavaće Sobe",
@@ -146,7 +147,13 @@
       },
       "slotDuration": "{{minutes}} min termini"
     },
-    "floorPlanInteractiveHint": "Interaktivni preglednik sa zumiranjem, pomicanjem i oznakama"
+    "floorPlanInteractiveHint": "Interaktivni preglednik sa zumiranjem, pomicanjem i oznakama",
+    "kitchens": "Kuhinje",
+    "diningRooms": "Blagovaonice",
+    "toilets": "Toaleti (WC)",
+    "storageRooms": "Ostave",
+    "offices": "Ured / radna soba",
+    "propertyType": "Tip Nekretnine"
   },
   "distances": {
     "title": "Udaljenosti",
@@ -220,7 +227,10 @@
     "phone": "Telefon",
     "email": "E-pošta",
     "website": "Web stranica",
-    "viewProfile": "Pogledaj profil"
+    "viewProfile": "Pogledaj profil",
+    "moreFromAgent": "Više oglasa ovog agenta",
+    "noOtherListings": "Trenutno nema drugih aktivnih oglasa",
+    "viewFullProfile": "Pogledaj cijeli profil"
   },
   "navigation": {
     "back": "Natrag",
@@ -317,7 +327,8 @@
       "apartment": "Stan",
       "villa": "Vila",
       "land": "Zemljište",
-      "other": "Ostalo"
+      "other": "Ostalo",
+      "luxury-villa": "Luksuzna vila"
     },
     "promotedListings": "Promovirani Oglasi",
     "agentHint": "Kliknite za preporuke!",
@@ -423,7 +434,13 @@
       "replay": "Ponovi",
       "exploreMap": "Istraži kartu",
       "flyShort": "Leti",
-      "mapShort": "Karta"
+      "mapShort": "Karta",
+      "exploreVillasMap": "Karta vila",
+      "villasMapShort": "Vile",
+      "exploreRentalsMap": "Karta najma",
+      "rentalsMapShort": "Najam",
+      "exploreSaleMap": "Karta prodaje",
+      "saleMapShort": "Prodaja"
     },
     "errors": {
       "noLocation": "Podaci o lokaciji nisu dostupni"
@@ -654,7 +671,9 @@
   "seo": {
     "description": "{{type}} s {{beds}} spavaćih soba, {{baths}} kupaonica za {{listingAction}} u {{city}}, {{country}}. {{sqft}}m² za €{{price}}.",
     "forRent": "Najam",
-    "forSale": "Prodaja"
+    "forSale": "Prodaja",
+    "perMonth": "/mj",
+    "title": "{{type}} s {{beds}} spavaćih soba za {{listingAction}} u {{city}}, {{country}} - €{{price}}"
   },
   "roomStyler": {
     "reimagine": "Zamisli iznova",

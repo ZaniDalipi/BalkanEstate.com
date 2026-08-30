@@ -72,6 +72,11 @@
     "errors": {
       "rateRequired": "Εισαγάγετε επιτόκιο",
       "rateRange": "Το επιτόκιο πρέπει να είναι μεταξύ {{min}}% και {{max}}%"
+    },
+    "deposit": {
+      "low": "Low deposit",
+      "fair": "Fair deposit",
+      "strong": "Strong deposit"
     }
   },
   "rentVsBuy": {

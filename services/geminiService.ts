@@ -22,7 +22,7 @@ export interface PropertyAnalysisResult {
     materials: string[];
     description: string;
     image_tags: ImageTag[];
-    property_type: 'house' | 'apartment' | 'villa' | 'other';
+    property_type: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
     floor_number?: number;
     total_floors?: number;
 }
@@ -49,7 +49,7 @@ export interface AiChatResponse {
 export const generateDescriptionFromImages = async (
     images: File[],
     language: string,
-    propertyType: 'house' | 'apartment' | 'villa' | 'land' | 'other',
+    propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other',
     location?: LocationContext
 ): Promise<PropertyAnalysisResult> => {
     const formData = new FormData();

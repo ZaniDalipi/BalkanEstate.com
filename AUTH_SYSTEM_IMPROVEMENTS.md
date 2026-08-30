@@ -361,7 +361,7 @@ SMTP_PASS=your-app-password
 SMTP_FROM=noreply@balkanestateai.com
 
 # Frontend URL (for email links)
-FRONTEND_URL=https://balkanestate.com
+FRONTEND_URL=https://balkanestateai.com
 ```
 
 ### Database Migration

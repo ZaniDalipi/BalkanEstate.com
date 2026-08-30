@@ -2,6 +2,7 @@
 // Extracted from Map3DBuildings.tsx for modularity
 
 import type { TimePeriod } from '../hooks/useShadowTimelapse';
+import type { MapDestination } from '@/shared/map/mapDestination';
 
 /**
  * Props for Map3DBuildings component
@@ -20,10 +21,16 @@ export interface Map3DBuildingsProps {
   heightClassName?: string;
   enableShadowTimelapse?: boolean;
   onNavigateToMap?: () => void;
+  /**
+   * Which full map `onNavigateToMap` opens (villas / rentals / buy). Supplied
+   * by the caller that owns the navigation, so the button can name and colour
+   * the destination it actually leads to. Omitted → neutral "Full Map".
+   */
+  mapDestination?: MapDestination;
   // Floor highlighting for apartments
   floorNumber?: number;
   totalFloors?: number;
-  propertyType?: 'house' | 'apartment' | 'villa' | 'land' | 'other';
+  propertyType?: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
   // 360 Virtual Tour
   virtualTour360Url?: string;
   // Building facing direction (user-defined)

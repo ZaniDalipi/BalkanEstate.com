@@ -9,7 +9,12 @@ import path from 'path';
 import { existsSync } from 'fs';
 import connectDB from './config/database';
 import ogRoutes from './routes/ogRoutes';
-import { propertyPageOgMiddleware, blogArticleOgMiddleware } from './controllers/ogController';
+import {
+  propertyPageOgMiddleware,
+  blogArticleOgMiddleware,
+  agentPageOgMiddleware,
+  agencyPageOgMiddleware,
+} from './controllers/ogController';
 import { setupChatSocket } from './sockets/chatSocket';
 import { setupPropertySocket } from './sockets/propertySocket';
 import { setSocketInstance } from './utils/socketInstance';
@@ -68,6 +73,8 @@ initializeKeyPair();
 // Import routes
 import authRoutes from './routes/authRoutes';
 import propertyRoutes from './routes/propertyRoutes';
+import villaDestinationRoutes from './routes/villaDestinationRoutes';
+import cityShowcaseRoutes from './routes/cityShowcaseRoutes';
 import favoriteRoutes from './routes/favoriteRoutes';
 import savedAgentRoutes from './routes/savedAgentRoutes';
 import savedSearchRoutes from './routes/savedSearchRoutes';
@@ -334,6 +341,8 @@ app.use('/api/webhooks', webhookRoutes); // Webhooks from payment provider - no 
 
 // Standard API routes
 app.use('/api/properties', propertyRoutes);
+app.use('/api/villa-destinations', villaDestinationRoutes);
+app.use('/api/city-showcase', cityShowcaseRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/saved-agents', savedAgentRoutes);
 app.use('/api/saved-searches', savedSearchRoutes);
@@ -398,6 +407,16 @@ if (frontendDistExists) {
   app.get('/:lang/property/:slug', propertyPageOgMiddleware);
   app.get('/blog/:slug', blogArticleOgMiddleware);
   app.get('/:lang/blog/:slug', blogArticleOgMiddleware);
+
+  // Agent / agency profiles: the og:image is their profile picture, so a
+  // shared link shows the person or the agency's logo rather than the
+  // generic site image. Agency slugs are "{country}/{name}", hence two routes.
+  app.get('/agents/:slug', agentPageOgMiddleware);
+  app.get('/:lang/agents/:slug', agentPageOgMiddleware);
+  app.get('/agencies/:country/:name', agencyPageOgMiddleware);
+  app.get('/agencies/:slug', agencyPageOgMiddleware);
+  app.get('/:lang/agencies/:country/:name', agencyPageOgMiddleware);
+  app.get('/:lang/agencies/:slug', agencyPageOgMiddleware);
 
   // Serve built frontend static assets (JS, CSS, images, icons, etc.)
   // Hashed assets (/assets/*) get a 1-year immutable cache; everything else

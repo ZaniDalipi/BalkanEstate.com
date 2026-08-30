@@ -1,7 +1,7 @@
 // Admin API module
 // Handles all admin-related API calls
 
-import { apiRequest } from '@/src/shared/api';
+import { apiRequest, uploadRequest } from '@/src/shared/api';
 
 // --- Admin Featured Subscriptions ---
 
@@ -119,6 +119,33 @@ export const approveProperty = async (propertyId: string): Promise<any> => {
 export const rejectProperty = async (propertyId: string, reason?: string): Promise<any> => {
   return apiRequest(`/admin/properties/${propertyId}/reject`, {
     method: 'PUT',
+    body: { reason },
+    requiresAuth: true,
+  });
+};
+
+// --- Luxury villa approval queue ---
+
+export type VillaApprovalStatus = 'pending' | 'approved' | 'rejected';
+
+export const getVillaApprovals = async (
+  status: VillaApprovalStatus = 'pending'
+): Promise<{ count: number; status: string; villas: any[]; hasMore?: boolean }> => {
+  return apiRequest(`/admin/villa-approvals?status=${status}`, {
+    requiresAuth: true,
+  });
+};
+
+export const approveVilla = async (villaId: string): Promise<any> => {
+  return apiRequest(`/admin/villa-approvals/${villaId}/approve`, {
+    method: 'POST',
+    requiresAuth: true,
+  });
+};
+
+export const rejectVilla = async (villaId: string, reason?: string): Promise<any> => {
+  return apiRequest(`/admin/villa-approvals/${villaId}/reject`, {
+    method: 'POST',
     body: { reason },
     requiresAuth: true,
   });
@@ -505,3 +532,147 @@ export const rejectLicense = async (userId: string, reason?: string): Promise<{
     requiresAuth: true,
   });
 };
+
+// --- Villa Destinations (home-page corridor) ---
+
+export interface AdminVillaDestination {
+  _id: string;
+  name: string;
+  query: string;
+  country: string;
+  imageUrl?: string;
+  imagePublicId?: string;
+  imageCredit?: string;
+  imageCreditUrl?: string;
+  imageCity?: string;
+  imageCountry?: string;
+  lat: number;
+  lng: number;
+  zoom: number;
+  displayOrder: number;
+  isActive: boolean;
+}
+
+export type VillaDestinationInput = Omit<AdminVillaDestination, '_id'>;
+
+export const getAdminVillaDestinations = async (): Promise<{
+  destinations: AdminVillaDestination[];
+  count: number;
+}> => apiRequest('/admin/villa-destinations', { requiresAuth: true });
+
+export const createVillaDestination = async (
+  body: Partial<VillaDestinationInput>
+): Promise<{ destination: AdminVillaDestination }> =>
+  apiRequest('/admin/villa-destinations', { method: 'POST', body, requiresAuth: true });
+
+export const updateVillaDestination = async (
+  id: string,
+  body: Partial<VillaDestinationInput>
+): Promise<{ destination: AdminVillaDestination }> =>
+  apiRequest(`/admin/villa-destinations/${id}`, { method: 'PATCH', body, requiresAuth: true });
+
+export const deleteVillaDestination = async (id: string): Promise<{ message: string }> =>
+  apiRequest(`/admin/villa-destinations/${id}`, { method: 'DELETE', requiresAuth: true });
+
+export const importDefaultVillaDestinations = async (): Promise<{
+  message: string;
+  imported: number;
+  skipped: number;
+}> => apiRequest('/admin/villa-destinations/import-defaults', { method: 'POST', requiresAuth: true });
+
+
+// --- City showcase (home-page elastic gallery) ---
+//
+// The `city-showcase` collection is the only source of the gallery's content:
+// nothing is hardcoded on the home page, so a panel without a photo cannot
+// render at all. `imageUrl` is therefore required on the wire, not optional as
+// it is for villa destinations, and the upload endpoint is called before the
+// row exists rather than after.
+
+export interface AdminCityShowcase {
+  _id: string;
+  city: string;
+  country: string;
+  searchQuery: string;
+  imageUrl: string;
+  imagePublicId?: string;
+  /** Attribution line, e.g. "Photo by Jane Doe on Unsplash". Shown publicly. */
+  imageCredit?: string;
+  displayOrder: number;
+  isActive: boolean;
+}
+
+export type CityShowcaseInput = Omit<AdminCityShowcase, '_id'>;
+
+export const getAdminCityShowcase = async (): Promise<{
+  cities: AdminCityShowcase[];
+  count: number;
+}> => apiRequest('/admin/city-showcase', { requiresAuth: true });
+
+export const createCityShowcase = async (
+  body: CityShowcaseInput
+): Promise<{ city: AdminCityShowcase }> =>
+  apiRequest('/admin/city-showcase', { method: 'POST', body, requiresAuth: true });
+
+export const updateCityShowcase = async (
+  id: string,
+  body: Partial<CityShowcaseInput>
+): Promise<{ city: AdminCityShowcase }> =>
+  apiRequest(`/admin/city-showcase/${id}`, { method: 'PATCH', body, requiresAuth: true });
+
+export const deleteCityShowcase = async (id: string): Promise<{ message: string }> =>
+  apiRequest(`/admin/city-showcase/${id}`, { method: 'DELETE', requiresAuth: true });
+
+/**
+ * Stores a photo and returns where it landed. The caller attaches the result
+ * to a panel with `createCityShowcase` or `updateCityShowcase` — which is what
+ * lets the create form obtain a photo before the row it belongs to exists.
+ */
+export const uploadCityShowcaseImage = async (
+  file: File
+): Promise<{ url: string; publicId: string }> => {
+  const form = new FormData();
+  form.append('image', file);
+  // `uploadRequest` rather than a bare fetch: it refreshes an expired access
+  // token and retries, emits `session-expired` when that fails, and waits for
+  // the CSRF cookie before posting.
+  return uploadRequest('/admin/city-showcase/upload-image', form);
+};
+
+/**
+ * Copies the cities already in the database (`CityMarketData`) into the
+ * gallery. Idempotent — it matches on city + country, so re-running after the
+ * market data grows brings in only what is missing. `missingPhoto` names the
+ * cities that were skipped because no photo could be found for them; they need
+ * one uploaded by hand before they can be panels.
+ */
+export const importCitiesIntoShowcase = async (): Promise<{
+  message: string;
+  imported: number;
+  alreadyPresent: number;
+  missingPhoto: string[];
+}> => apiRequest('/admin/city-showcase/import-cities', { method: 'POST', requiresAuth: true });
+
+// --- City directory (names for the city/country pickers) ---
+//
+// Not market analytics and not a gallery panel — a lightweight list of
+// (city, country) pairs an admin can pick from instead of retyping a name
+// that already exists (with its inevitable typos) into a free-text field.
+
+export interface CityDirectoryEntry {
+  city: string;
+  country: string;
+}
+
+export const getCityDirectory = async (): Promise<{ cities: CityDirectoryEntry[] }> =>
+  apiRequest('/admin/cities', { requiresAuth: true });
+
+/**
+ * Ensures a (city, country) pair exists in the directory, creating a minimal
+ * stub if it doesn't. Idempotent and case-insensitive on the pair — safe to
+ * call every time a form saves a city, whether or not it was already known.
+ */
+export const ensureCityInDirectory = async (
+  entry: CityDirectoryEntry & { countryCode: string }
+): Promise<{ city: CityDirectoryEntry; created: boolean }> =>
+  apiRequest('/admin/cities', { method: 'POST', body: entry, requiresAuth: true });

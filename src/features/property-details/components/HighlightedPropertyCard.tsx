@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo, useEffect, useRef } from 'react';
+import React, { useState, useCallback, memo, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
@@ -6,7 +6,7 @@ import { useAppContext } from '@/context/AppContext';
 import { generatePropertySlug } from '@/utils/slug';
 import { formatPrice } from '@/utils/currency';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
-import PropertyImage from '@/src/components/ui/PropertyImage';
+import PropertyImage, { getPropertyImageSources } from '@/src/components/ui/PropertyImage';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 
@@ -95,11 +95,36 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
   const promotionTier = property.promotionTier || 'featured';
   const isRental = (property.listingType || 'sale') === 'rent';
 
-  // Get up to 5 images from the property
-  const images = property.images?.slice(0, 5) || [];
-  const displayImages = images.length > 0
-    ? images.map(img => typeof img === 'string' ? img : img.url)
-    : [property.imageUrl];
+  // Responsive settings shared between the rendered <img> and the preloader so
+  // the browser serves preloaded slides straight from cache.
+  const IMAGE_WIDTHS = useMemo(() => [400, 640, 800], []);
+  const IMAGE_SIZES = '(max-width: 768px) 100vw, 42vw';
+
+  // Get up to 5 images from the property (memoized so effect deps stay stable)
+  const displayImages = useMemo(() => {
+    const images = property.images?.slice(0, 5) || [];
+    return images.length > 0
+      ? images.map(img => typeof img === 'string' ? img : img.url)
+      : [property.imageUrl];
+  }, [property.images, property.imageUrl]);
+
+  // Preload every slide up front. This card auto-advances through all images
+  // (and lets the user jump via dots), and non-first layers render with
+  // loading="lazy", so warming the cache here guarantees each switch is instant
+  // instead of fading in from a placeholder.
+  useEffect(() => {
+    if (displayImages.length <= 1) return;
+    displayImages.forEach((url) => {
+      if (!url) return;
+      const { mainSrc, srcSet } = getPropertyImageSources(url, IMAGE_WIDTHS);
+      const img = new Image();
+      // Set sizes/srcSet before src so the browser picks the same responsive
+      // candidate the rendered <img> will use.
+      img.sizes = IMAGE_SIZES;
+      if (srcSet) img.srcset = srcSet;
+      img.src = mainSrc;
+    });
+  }, [displayImages, IMAGE_WIDTHS]);
 
   // Auto-advance carousel every 3 seconds when not hovered
   useEffect(() => {
@@ -219,8 +244,8 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
               src={imgUrl}
               alt={`${property.title || propertyTypeLabel} - Image ${index + 1}`}
               priority={index === 0}
-              widths={[400, 640, 800]}
-              sizes="(max-width: 768px) 100vw, 42vw"
+              widths={IMAGE_WIDTHS}
+              sizes={IMAGE_SIZES}
               imgClassName={isHovered ? 'scale-[1.02] transition-transform duration-[8000ms] ease-[cubic-bezier(0.05,0,0.2,1)]' : 'scale-100 transition-transform duration-[8000ms]'}
             />
           </div>

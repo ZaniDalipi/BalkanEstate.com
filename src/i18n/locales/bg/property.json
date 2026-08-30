@@ -37,7 +37,8 @@
     "commercial": "Търговски обект",
     "office": "Офис",
     "garage": "Гараж",
-    "other": "Друго"
+    "other": "Друго",
+    "luxury-villa": "Луксозна вила"
   },
   "features": {
     "bedrooms": "Спални",
@@ -146,7 +147,13 @@
       },
       "slotDuration": "{{minutes}} мин слотове"
     },
-    "floorPlanInteractiveHint": "Интерактивен визуализатор с мащабиране, преместване и етикети"
+    "floorPlanInteractiveHint": "Интерактивен визуализатор с мащабиране, преместване и етикети",
+    "kitchens": "Кухни",
+    "diningRooms": "Трапезарии",
+    "toilets": "Тоалетни (WC)",
+    "storageRooms": "Складови помещения",
+    "offices": "Офис / кабинет",
+    "propertyType": "Тип имот"
   },
   "distances": {
     "title": "Разстояния",
@@ -220,7 +227,10 @@
     "phone": "Телефон",
     "email": "Имейл",
     "website": "Уебсайт",
-    "viewProfile": "Виж профил"
+    "viewProfile": "Виж профил",
+    "moreFromAgent": "Още обяви от този агент",
+    "noOtherListings": "В момента няма други активни обяви",
+    "viewFullProfile": "Виж пълния профил"
   },
   "navigation": {
     "back": "Назад",
@@ -317,7 +327,8 @@
       "apartment": "Апартамент",
       "villa": "Вила",
       "land": "Земя",
-      "other": "Друго"
+      "other": "Друго",
+      "luxury-villa": "Луксозна вила"
     },
     "promotedListings": "Промотирани обяви",
     "agentHint": "Кликнете за препоръки!",
@@ -423,7 +434,13 @@
       "replay": "Повтори",
       "exploreMap": "Разгледай картата",
       "flyShort": "Лети",
-      "mapShort": "Карта"
+      "mapShort": "Карта",
+      "exploreVillasMap": "Карта на вилите",
+      "villasMapShort": "Вили",
+      "exploreRentalsMap": "Карта на наемите",
+      "rentalsMapShort": "Наеми",
+      "exploreSaleMap": "Карта на продажбите",
+      "saleMapShort": "Продажби"
     },
     "errors": {
       "noLocation": "Данните за местоположение не са налични"
@@ -654,7 +671,9 @@
   "seo": {
     "description": "{{type}} с {{beds}} спални, {{baths}} бани за {{listingAction}} в {{city}}, {{country}}. {{sqft}}m² за €{{price}}.",
     "forRent": "Наем",
-    "forSale": "Продажба"
+    "forSale": "Продажба",
+    "perMonth": "/мес",
+    "title": "{{type}} с {{beds}} спални за {{listingAction}} в {{city}}, {{country}} - €{{price}}"
   },
   "roomStyler": {
     "reimagine": "Преобрази",

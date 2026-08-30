@@ -183,5 +183,11 @@
     "subtitle": "Merrni njoftime pronash dhe njohuri tregu në emailin tuaj.",
     "placeholder": "Shkruani emailin tuaj",
     "button": "Abonohu"
+  },
+  "cityGallery": {
+    "title": "Eksploroni Qytetet e Ballkanit",
+    "imageAlt": "Pronë në {{city}}, {{country}}",
+    "buy": "Blej",
+    "rent": "Merr me qira"
   }
 }

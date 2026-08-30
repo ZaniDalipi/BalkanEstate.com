@@ -168,7 +168,10 @@ describe('ContactForm', () => {
 
     expect(screen.getByLabelText(/contact:form.name/)).toHaveAttribute('autocomplete', 'name');
     expect(screen.getByLabelText(/contact:form.email/)).toHaveAttribute('autocomplete', 'email');
-    expect(screen.getByLabelText(/contact:form.phone/)).toHaveAttribute('autocomplete', 'tel');
+    // PhoneInput deliberately uses "tel-national" (not "tel") — the field
+    // holds only the local/national digits, the dial code is a separate
+    // control, so "tel-national" is the correct autofill hint.
+    expect(screen.getByLabelText(/contact:form.phone/)).toHaveAttribute('autocomplete', 'tel-national');
   });
 });
 

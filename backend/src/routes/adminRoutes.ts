@@ -1,6 +1,10 @@
 import express, { Request, Response } from 'express';
 import { protect } from '../middleware/auth';
 import { checkAdminRole, logAdminAction } from '../middleware/adminAuth';
+import { invalidateCache } from '../middleware/cache';
+import { getObjectIdParam } from '../utils/validateParams';
+import { escapeRegex } from '../utils/escapeRegex';
+import { adminLogger } from '../utils/logger';
 import {
   getAdminStats,
   getAllUsers,
@@ -27,6 +31,9 @@ import {
   getPendingLicenses,
   approveLicense,
   rejectLicense,
+  getVillaApprovals,
+  approveVilla,
+  rejectVilla,
 } from '../controllers/adminController';
 import {
   getAllDiscountCodes,
@@ -388,6 +395,11 @@ router.post('/test-emails/daily-activity-report', logAdminAction('TRIGGER_DAILY_
 router.get('/pending-licenses', logAdminAction('VIEW_PENDING_LICENSES'), getPendingLicenses);
 router.post('/approve-license/:userId', logAdminAction('APPROVE_LICENSE'), approveLicense);
 router.post('/reject-license/:userId', logAdminAction('REJECT_LICENSE'), rejectLicense);
+
+// Luxury villa approval queue
+router.get('/villa-approvals', logAdminAction('VIEW_VILLA_APPROVALS'), getVillaApprovals);
+router.post('/villa-approvals/:id/approve', logAdminAction('APPROVE_VILLA'), approveVilla);
+router.post('/villa-approvals/:id/reject', logAdminAction('REJECT_VILLA'), rejectVilla);
 
 // ===== Site Content Management (How It Works videos, etc.) =====
 const videoUpload = multer({
@@ -833,6 +845,509 @@ router.post('/articles/upload-image', logAdminAction('UPLOAD_ARTICLE_IMAGE'), ar
     res.json({ url: result.url, publicId: result.publicId });
   } catch (err) {
     res.status(500).json({ message: 'Failed to upload image', error: String(err) });
+  }
+});
+
+// ============================================================================
+// Villa destinations — the places showcased in the home-page corridor
+// ============================================================================
+
+const destinationImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Only image files are allowed'));
+  },
+});
+
+/**
+ * Validates and normalises a destination payload.
+ *
+ * Coordinates are the reason this exists: they drive a map fly-to on the
+ * public site, so a typo must be rejected here rather than sending a visitor
+ * to the middle of the ocean.
+ *
+ * `base` is the existing document on an update. A PATCH is allowed to send
+ * only the fields it means to change — the photo-upload flow saves just
+ * `imageUrl`/`imagePublicId` — so anything omitted from `body` falls back to
+ * `base` before validation runs, instead of validation seeing an empty name
+ * on a partial payload and rejecting the whole request.
+ */
+function parseDestinationBody(
+  body: any,
+  base?: Record<string, unknown> | null
+): { error?: string; value?: Record<string, unknown> } {
+  const pick = (key: string) => (body?.[key] !== undefined ? body[key] : base?.[key]);
+
+  const name = String(pick('name') ?? '').trim();
+  const query = String(pick('query') ?? '').trim();
+  const country = String(pick('country') ?? '').trim();
+  if (!name) return { error: 'Name is required' };
+  if (!query) return { error: 'Search term is required' };
+  if (!country) return { error: 'Country is required' };
+  if (name.length > 80 || query.length > 80 || country.length > 60) {
+    return { error: 'Name, search term and country must be shorter' };
+  }
+
+  const lat = Number(pick('lat'));
+  const lng = Number(pick('lng'));
+  if (!Number.isFinite(lat) || lat < -90 || lat > 90) return { error: 'Latitude must be between -90 and 90' };
+  if (!Number.isFinite(lng) || lng < -180 || lng > 180) return { error: 'Longitude must be between -180 and 180' };
+
+  const zoomRaw = pick('zoom');
+  const zoom = zoomRaw === undefined || zoomRaw === null || zoomRaw === '' ? 12 : Number(zoomRaw);
+  if (!Number.isFinite(zoom) || zoom < 1 || zoom > 20) return { error: 'Zoom must be between 1 and 20' };
+
+  const orderRaw = pick('displayOrder');
+  const displayOrder = orderRaw === undefined || orderRaw === null || orderRaw === '' ? 0 : Number(orderRaw);
+  if (!Number.isFinite(displayOrder)) return { error: 'Display order must be a number' };
+
+  const imageUrl = pick('imageUrl');
+  const imagePublicId = pick('imagePublicId');
+  const imageCity = pick('imageCity');
+  const imageCountry = pick('imageCountry');
+  const isActive = pick('isActive');
+
+  // The credit belongs to the photograph, so it is read from wherever the
+  // photo is being read from. Letting it fall back to the stored value
+  // independently would attribute a newly uploaded picture to whoever took the
+  // one it replaced — the exact mistake the credit exists to prevent. Empty
+  // rather than undefined so that clearing actually reaches the document;
+  // Mongoose drops undefined from an update.
+  const creditSource: Record<string, unknown> =
+    body?.imageUrl !== undefined ? (body ?? {}) : (base ?? {});
+  const imageCredit = String(creditSource.imageCredit ?? '').trim();
+  const imageCreditUrl = String(creditSource.imageCreditUrl ?? '').trim();
+
+  return {
+    value: {
+      name, query, country, lat, lng, zoom, displayOrder,
+      imageUrl: imageUrl ? String(imageUrl).trim() : undefined,
+      imagePublicId: imagePublicId ? String(imagePublicId).trim() : undefined,
+      imageCredit,
+      imageCreditUrl,
+      imageCity: imageCity ? String(imageCity).trim() : undefined,
+      imageCountry: imageCountry ? String(imageCountry).trim() : undefined,
+      isActive: isActive === undefined ? true : Boolean(isActive),
+    },
+  };
+}
+
+// GET /api/admin/villa-destinations — every destination, active or not
+router.get('/villa-destinations', logAdminAction('VIEW_VILLA_DESTINATIONS'), async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const VillaDestination = (await import('../models/VillaDestination')).default;
+    const destinations = await VillaDestination.find({}).sort({ displayOrder: 1, name: 1 }).lean();
+    res.json({ destinations, count: destinations.length });
+  } catch (err) {
+    adminLogger.error('List villa destinations error:', err);
+    res.status(500).json({ message: 'Failed to load villa destinations' });
+  }
+});
+
+// POST /api/admin/villa-destinations
+router.post('/villa-destinations', logAdminAction('CREATE_VILLA_DESTINATION'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { error, value } = parseDestinationBody(req.body);
+    if (error) { res.status(400).json({ message: error }); return; }
+
+    const VillaDestination = (await import('../models/VillaDestination')).default;
+    const destination = await VillaDestination.create(value!);
+    void invalidateCache('/api/villa-destinations');
+    res.status(201).json({ destination });
+  } catch (err) {
+    adminLogger.error('Create villa destination error:', err);
+    res.status(500).json({ message: 'Failed to create villa destination' });
+  }
+});
+
+// PATCH /api/admin/villa-destinations/:id
+router.patch('/villa-destinations/:id', logAdminAction('UPDATE_VILLA_DESTINATION'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const VillaDestination = (await import('../models/VillaDestination')).default;
+    const existing = await VillaDestination.findById(id).lean();
+    if (!existing) { res.status(404).json({ message: 'Villa destination not found' }); return; }
+
+    const { error, value } = parseDestinationBody(req.body, existing as Record<string, unknown>);
+    if (error) { res.status(400).json({ message: error }); return; }
+
+    const destination = await VillaDestination.findByIdAndUpdate(id, value!, { new: true, runValidators: true });
+    if (!destination) { res.status(404).json({ message: 'Villa destination not found' }); return; }
+
+    void invalidateCache('/api/villa-destinations');
+    res.json({ destination });
+  } catch (err) {
+    adminLogger.error('Update villa destination error:', err);
+    res.status(500).json({ message: 'Failed to update villa destination' });
+  }
+});
+
+// DELETE /api/admin/villa-destinations/:id
+router.delete('/villa-destinations/:id', logAdminAction('DELETE_VILLA_DESTINATION'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const VillaDestination = (await import('../models/VillaDestination')).default;
+    const destination = await VillaDestination.findByIdAndDelete(id);
+    if (!destination) { res.status(404).json({ message: 'Villa destination not found' }); return; }
+
+    void invalidateCache('/api/villa-destinations');
+    res.json({ message: 'Villa destination deleted', id: String(destination._id) });
+  } catch (err) {
+    adminLogger.error('Delete villa destination error:', err);
+    res.status(500).json({ message: 'Failed to delete villa destination' });
+  }
+});
+
+// POST /api/admin/villa-destinations/import-defaults
+// Brings the built-in destinations into the database so they can be curated.
+// Idempotent: matches on `query`, the field that drives the villa search, so
+// re-running never duplicates a destination an admin has since renamed.
+router.post('/villa-destinations/import-defaults', logAdminAction('IMPORT_VILLA_DESTINATIONS'), async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const VillaDestination = (await import('../models/VillaDestination')).default;
+    const { DEFAULT_VILLA_DESTINATIONS } = await import('../data/defaultVillaDestinations');
+
+    const existing = await VillaDestination.find({}, 'query').lean();
+    const taken = new Set(existing.map(d => String(d.query)));
+
+    const toInsert = DEFAULT_VILLA_DESTINATIONS
+      .map((d, index) => ({ ...d, displayOrder: index, isActive: true }))
+      .filter(d => !taken.has(d.query));
+
+    if (toInsert.length > 0) await VillaDestination.insertMany(toInsert);
+    void invalidateCache('/api/villa-destinations');
+
+    res.json({
+      message: 'Import complete',
+      imported: toInsert.length,
+      skipped: DEFAULT_VILLA_DESTINATIONS.length - toInsert.length,
+    });
+  } catch (err) {
+    adminLogger.error('Import villa destinations error:', err);
+    res.status(500).json({ message: 'Failed to import destinations' });
+  }
+});
+
+// POST /api/admin/villa-destinations/upload-image
+router.post(
+  '/villa-destinations/upload-image',
+  logAdminAction('UPLOAD_VILLA_DESTINATION_IMAGE'),
+  destinationImageUpload.single('image'),
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      if (!req.file) { res.status(400).json({ message: 'No image file provided' }); return; }
+
+      const { uploadImage } = await import('../services/cloudinaryService');
+      // Portrait: the corridor card is 18:25 and a card fills a large part of
+      // the frame as it exits, so a small upload would visibly soften there.
+      //
+      // 1200px was the ceiling on everything downstream. Measured on the real
+      // corridor, a mid-corridor card on a 390px phone at 3x already needs
+      // about 1080 device pixels across and the larger ones need several
+      // thousand, so the stored master was being upscaled before it ever
+      // reached the screen. 2200 matches what the frontend will now ask for at
+      // most, and `preserveQuality` stops the master being re-compressed on
+      // the way in — it is compressed again on every delivery anyway.
+      const result = await uploadImage(req.file.buffer, {
+        userId: (req as any).user._id.toString(),
+        type: 'listing' as any,
+        maxWidth: 2200,
+        maxHeight: 3056, // 2200 / (18/25), so a portrait upload is never squeezed
+        preserveQuality: true,
+      });
+
+      void invalidateCache('/api/villa-destinations');
+      res.json({ url: result.url, publicId: result.publicId });
+    } catch (err) {
+      adminLogger.error('Upload villa destination image error:', err);
+      res.status(500).json({ message: 'Failed to upload image' });
+    }
+  }
+);
+
+// ============================================================================
+// City showcase — the panels in the home-page elastic gallery
+//
+// This collection is the only source of truth for that gallery: nothing is
+// hardcoded on the frontend and there is no seeded image library behind it.
+// A panel therefore cannot exist without a photo, which is what makes
+// `imageUrl` required below rather than optional as it is for villa
+// destinations.
+// ============================================================================
+
+const cityShowcaseImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Only image files are allowed'));
+  },
+});
+
+/**
+ * Validates and normalises a city-showcase payload.
+ *
+ * `base` is the existing document on an update. A PATCH may send only the
+ * fields it means to change — the photo flow saves just `imageUrl` and
+ * `imagePublicId`, the reorder flow just `displayOrder` — so anything omitted
+ * falls back to `base` before validation runs. Without that, a partial payload
+ * would be judged against an empty city name and rejected outright.
+ */
+function parseCityShowcaseBody(
+  body: any,
+  base?: Record<string, unknown> | null
+): { error?: string; value?: Record<string, unknown> } {
+  const pick = (key: string) => (body?.[key] !== undefined ? body[key] : base?.[key]);
+
+  const city = String(pick('city') ?? '').trim();
+  const country = String(pick('country') ?? '').trim();
+  const searchQuery = String(pick('searchQuery') ?? '').trim();
+
+  if (city.length < 2 || city.length > 80) return { error: 'City must be between 2 and 80 characters' };
+  if (country.length < 2 || country.length > 60) return { error: 'Country must be between 2 and 60 characters' };
+  if (searchQuery.length < 2 || searchQuery.length > 80) {
+    return { error: 'Search term must be between 2 and 80 characters' };
+  }
+
+  // A panel is a full-bleed photo with a label on it. Without an image there
+  // is nothing to render, and the gallery has no stand-in to borrow, so this
+  // is rejected here rather than reaching the home page as an empty panel.
+  const imageUrl = String(pick('imageUrl') ?? '').trim();
+  if (!imageUrl) return { error: 'A photo is required' };
+  if (!/^https:\/\//i.test(imageUrl)) return { error: 'Photo URL must be https' };
+  if (imageUrl.length > 2048) return { error: 'Photo URL is too long' };
+
+  const orderRaw = pick('displayOrder');
+  const displayOrder = orderRaw === undefined || orderRaw === null || orderRaw === '' ? 0 : Number(orderRaw);
+  if (!Number.isFinite(displayOrder)) return { error: 'Display order must be a number' };
+
+  const imagePublicId = pick('imagePublicId');
+  const isActive = pick('isActive');
+
+  const imageCreditRaw = pick('imageCredit');
+  const imageCredit = imageCreditRaw ? String(imageCreditRaw).trim() : '';
+  if (imageCredit.length > 200) return { error: 'Photo credit is too long' };
+
+  return {
+    value: {
+      city,
+      country,
+      searchQuery,
+      imageUrl,
+      imagePublicId: imagePublicId ? String(imagePublicId).trim() : undefined,
+      imageCredit: imageCredit || undefined,
+      displayOrder,
+      isActive: isActive === undefined ? true : Boolean(isActive),
+    },
+  };
+}
+
+// GET /api/admin/city-showcase — every panel, active or not
+router.get('/city-showcase', logAdminAction('VIEW_CITY_SHOWCASE'), async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const CityShowcase = (await import('../models/CityShowcase')).default;
+    const cities = await CityShowcase.find({}).sort({ displayOrder: 1, city: 1 }).lean();
+    res.json({ cities, count: cities.length });
+  } catch (err) {
+    adminLogger.error('List city showcase error:', err);
+    res.status(500).json({ message: 'Failed to load city showcase' });
+  }
+});
+
+// POST /api/admin/city-showcase
+router.post('/city-showcase', logAdminAction('CREATE_CITY_SHOWCASE'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { error, value } = parseCityShowcaseBody(req.body);
+    if (error) { res.status(400).json({ message: error }); return; }
+
+    const CityShowcase = (await import('../models/CityShowcase')).default;
+    const city = await CityShowcase.create(value!);
+    void invalidateCache('/api/city-showcase');
+    res.status(201).json({ city });
+  } catch (err) {
+    adminLogger.error('Create city showcase error:', err);
+    res.status(500).json({ message: 'Failed to create city panel' });
+  }
+});
+
+// PATCH /api/admin/city-showcase/:id
+router.patch('/city-showcase/:id', logAdminAction('UPDATE_CITY_SHOWCASE'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const CityShowcase = (await import('../models/CityShowcase')).default;
+    const existing = await CityShowcase.findById(id).lean();
+    if (!existing) { res.status(404).json({ message: 'City panel not found' }); return; }
+
+    const { error, value } = parseCityShowcaseBody(req.body, existing as Record<string, unknown>);
+    if (error) { res.status(400).json({ message: error }); return; }
+
+    const city = await CityShowcase.findByIdAndUpdate(id, value!, { new: true, runValidators: true });
+    if (!city) { res.status(404).json({ message: 'City panel not found' }); return; }
+
+    void invalidateCache('/api/city-showcase');
+    res.json({ city });
+  } catch (err) {
+    adminLogger.error('Update city showcase error:', err);
+    res.status(500).json({ message: 'Failed to update city panel' });
+  }
+});
+
+// DELETE /api/admin/city-showcase/:id
+router.delete('/city-showcase/:id', logAdminAction('DELETE_CITY_SHOWCASE'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const CityShowcase = (await import('../models/CityShowcase')).default;
+    const city = await CityShowcase.findByIdAndDelete(id);
+    if (!city) { res.status(404).json({ message: 'City panel not found' }); return; }
+
+    void invalidateCache('/api/city-showcase');
+    res.json({ message: 'City panel deleted', id: String(city._id) });
+  } catch (err) {
+    adminLogger.error('Delete city showcase error:', err);
+    res.status(500).json({ message: 'Failed to delete city panel' });
+  }
+});
+
+// POST /api/admin/city-showcase/import-cities
+//
+// Copies the cities already in `CityMarketData` into the gallery. Idempotent:
+// it matches on city + country, so re-running after the market data grows
+// brings in only what is missing. Cities with no usable photo are reported
+// back rather than imported — see the service for why.
+router.post('/city-showcase/import-cities', logAdminAction('IMPORT_CITY_SHOWCASE'), async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const { importCitiesFromMarketData } = await import('../services/cityShowcaseImportService');
+    const result = await importCitiesFromMarketData();
+
+    void invalidateCache('/api/city-showcase');
+    res.json({ message: 'Import complete', ...result });
+  } catch (err) {
+    adminLogger.error('Import city showcase error:', err);
+    res.status(500).json({ message: 'Failed to import cities' });
+  }
+});
+
+// POST /api/admin/city-showcase/upload-image
+//
+// Returns the stored URL only; the caller attaches it to a panel with POST or
+// PATCH. That split is what lets the create form upload a photo before the
+// row it belongs to exists — required, since a row without a photo is invalid.
+router.post(
+  '/city-showcase/upload-image',
+  logAdminAction('UPLOAD_CITY_SHOWCASE_IMAGE'),
+  cityShowcaseImageUpload.single('image'),
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      if (!req.file) { res.status(400).json({ message: 'No image file provided' }); return; }
+
+      const { uploadImage } = await import('../services/cloudinaryService');
+      // Portrait master: the gallery panel is a tall column — roughly 4:5 when
+      // expanded on a desktop and far narrower when collapsed — and it is
+      // always `object-cover`, so a landscape master would lose its sides. The
+      // ceiling covers an expanded panel on a high-DPI screen without storing
+      // more than the largest delivery ever asks for.
+      const result = await uploadImage(req.file.buffer, {
+        userId: (req as any).user._id.toString(),
+        type: 'listing' as any,
+        maxWidth: 1600,
+        maxHeight: 2000, // 4:5, so a portrait upload is never squeezed
+        preserveQuality: true,
+      });
+
+      void invalidateCache('/api/city-showcase');
+      res.json({ url: result.url, publicId: result.publicId });
+    } catch (err) {
+      adminLogger.error('Upload city showcase image error:', err);
+      res.status(500).json({ message: 'Failed to upload image' });
+    }
+  }
+);
+
+// ============================================================================
+// City directory — the (city, country) names the admin can pick from
+//
+// A separate concern from both collections it touches: it is not market
+// analytics (CityMarketData's job) and not a gallery panel (CityShowcase's
+// job), just a typo-proof list of names to choose from when creating either.
+// ============================================================================
+
+/**
+ * Every distinct (city, country) pair already known to `CityMarketData`.
+ *
+ * A cheap projection, not `getCitiesByCountry`'s enriched version — this is
+ * for populating a picker, not for rendering market data, and enriching every
+ * row with live stats would make the form wait on work it never uses.
+ */
+router.get('/cities', logAdminAction('VIEW_CITY_DIRECTORY'), async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const CityMarketData = (await import('../models/CityMarketData')).default;
+    const cities = await CityMarketData.find({}, 'city country')
+      .sort({ country: 1, city: 1 })
+      .lean();
+    res.json({ cities: cities.map(c => ({ city: c.city, country: c.country })) });
+  } catch (err) {
+    adminLogger.error('List city directory error:', err);
+    res.status(500).json({ message: 'Failed to load the city directory' });
+  }
+});
+
+/**
+ * Ensures a (city, country) pair exists in `CityMarketData`, creating a
+ * minimal stub if it doesn't.
+ *
+ * Called before every city-showcase save (see `CityShowcaseForm` /
+ * `useCityShowcaseManager`) so a name typed for a gallery panel is never lost
+ * to that panel alone — it also becomes a real, reusable entry other city
+ * pickers and the "Import cities from database" action can find. The stub
+ * carries none of the real market analytics that field is otherwise for
+ * (average price, demand score, rental yield…): those stay at the neutral
+ * zero this app already uses elsewhere for a city with no data yet — see
+ * `STATIC_CITY_SEEDS` in `PopularCitiesSection.tsx` — and `featured: false`
+ * so a bare stub never starts outranking cities with real numbers.
+ *
+ * Idempotent and case-insensitive on the pair, so calling it for a city that
+ * already exists (overwhelmingly the common case) just returns that row.
+ */
+router.post('/cities', logAdminAction('ENSURE_CITY_DIRECTORY_ENTRY'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const city = String(req.body?.city ?? '').trim();
+    const country = String(req.body?.country ?? '').trim();
+    const countryCode = String(req.body?.countryCode ?? '').trim().toUpperCase();
+
+    if (city.length < 2 || city.length > 80) { res.status(400).json({ message: 'City must be between 2 and 80 characters' }); return; }
+    if (country.length < 2 || country.length > 60) { res.status(400).json({ message: 'Country must be between 2 and 60 characters' }); return; }
+    if (!/^[A-Z]{2}$/.test(countryCode)) { res.status(400).json({ message: 'Country code must be a 2-letter ISO code' }); return; }
+
+    const CityMarketData = (await import('../models/CityMarketData')).default;
+
+    const existing = await CityMarketData.findOne({
+      city: new RegExp(`^${escapeRegex(city)}$`, 'i'),
+      country: new RegExp(`^${escapeRegex(country)}$`, 'i'),
+    });
+    if (existing) { res.json({ city: { city: existing.city, country: existing.country }, created: false }); return; }
+
+    const created = await CityMarketData.create({
+      city, country, countryCode,
+      avgPricePerSqm: 0, medianPrice: 0, priceGrowthYoY: 0, priceGrowthMoM: 0,
+      averageDaysOnMarket: 0, listingsCount: 0, soldLastMonth: 0,
+      demandScore: 0, rentalYield: 0, investmentScore: 0,
+      marketTrend: 'stable', dataSource: 'manual', featured: false,
+      topNeighborhoods: [], highlights: [],
+    });
+    res.status(201).json({ city: { city: created.city, country: created.country }, created: true });
+  } catch (err) {
+    adminLogger.error('Ensure city directory entry error:', err);
+    res.status(500).json({ message: 'Failed to save the city' });
   }
 });
 

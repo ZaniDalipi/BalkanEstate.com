@@ -1,11 +1,12 @@
 import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ListingData, TagListInput, TriStateCheckbox, labelClasses, selectClasses } from './ListingFormHelpers';
+import { ListingData, TagListInput, TriStateCheckbox, labelClasses, selectClasses, FieldErrors, fieldAnchorId } from './ListingFormHelpers';
 
 interface ListingPropertyFeaturesProps {
     listingData: ListingData;
     setListingData: React.Dispatch<React.SetStateAction<ListingData>>;
     handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+    fieldErrors: FieldErrors;
 }
 
 const chevronIcon = (
@@ -18,8 +19,40 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
     listingData,
     setListingData,
     handleInputChange,
+    fieldErrors,
 }) => {
     const { t } = useTranslation(['newListing', 'seller', 'common']);
+
+    // Quick-pick amenities. The `tag` strings are exactly what the villa/rental
+    // filters match on (e.g. 'sauna', 'wine cellar', 'panoramic view'), so a
+    // one-tap choice here makes the listing discoverable by those filters —
+    // no need for the seller to type the precise wording.
+    const QUICK_AMENITIES: { tag: string; labelKey: string; fallback: string; emoji: string }[] = [
+        { tag: 'sauna',          labelKey: 'seller:createListing.quickAmenities.sauna',       fallback: 'Sauna',        emoji: '🧖' },
+        { tag: 'wine cellar',    labelKey: 'seller:createListing.quickAmenities.wineCellar',  fallback: 'Wine Cellar',  emoji: '🍷' },
+        { tag: 'panoramic view', labelKey: 'seller:createListing.quickAmenities.panoramic',   fallback: 'Panoramic',    emoji: '🏔️' },
+        { tag: 'jacuzzi',        labelKey: 'seller:createListing.quickAmenities.jacuzzi',     fallback: 'Jacuzzi',      emoji: '🛁' },
+        { tag: 'hot tub',        labelKey: 'seller:createListing.quickAmenities.hotTub',      fallback: 'Hot Tub',      emoji: '♨️' },
+        { tag: 'gym',            labelKey: 'seller:createListing.quickAmenities.gym',         fallback: 'Gym',          emoji: '🏋️' },
+        { tag: 'fireplace',      labelKey: 'seller:createListing.quickAmenities.fireplace',   fallback: 'Fireplace',    emoji: '🔥' },
+        { tag: 'bbq',            labelKey: 'seller:createListing.quickAmenities.bbq',         fallback: 'BBQ',          emoji: '🍖' },
+        { tag: 'home cinema',    labelKey: 'seller:createListing.quickAmenities.homeCinema',  fallback: 'Home Cinema',  emoji: '🎬' },
+        { tag: 'beach access',   labelKey: 'seller:createListing.quickAmenities.beachAccess', fallback: 'Beach Access', emoji: '🏖️' },
+    ];
+
+    const amenityActive = (tag: string): boolean =>
+        (listingData.amenities || []).some(a => a.trim().toLowerCase() === tag);
+
+    const toggleAmenity = (tag: string) => {
+        setListingData(p => {
+            const current = p.amenities || [];
+            const has = current.some(a => a.trim().toLowerCase() === tag);
+            const next = has
+                ? current.filter(a => a.trim().toLowerCase() !== tag)
+                : [...current, tag];
+            return { ...p, amenities: next };
+        });
+    };
 
     return (
         <>
@@ -33,6 +66,30 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
                     setTags={(tags) => setListingData(p => ({ ...p, amenities: tags }))}
                 />
                 <p className="text-xs text-gray-400 mt-1">{t('seller:createListing.fields.amenitiesHint')}</p>
+
+                {/* Quick-pick premium amenities — one tap adds the matching tag */}
+                <p className="text-xs font-medium text-gray-500 mt-3 mb-1.5">{t('seller:createListing.quickAmenities.label', 'Popular amenities')}</p>
+                <div className="flex flex-wrap gap-2">
+                    {QUICK_AMENITIES.map(({ tag, labelKey, fallback, emoji }) => {
+                        const active = amenityActive(tag);
+                        return (
+                            <button
+                                key={tag}
+                                type="button"
+                                onClick={() => toggleAmenity(tag)}
+                                aria-pressed={active}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium border transition-all ${
+                                    active
+                                        ? 'bg-primary/10 text-primary border-primary/40'
+                                        : 'bg-black/[0.03] text-gray-600 border-black/[0.07] hover:border-primary/30'
+                                }`}
+                            >
+                                <span aria-hidden="true">{emoji}</span>
+                                {t(labelKey, fallback)}
+                            </button>
+                        );
+                    })}
+                </div>
             </fieldset>
 
             {/* Mandatory Amenities Section - show different options for land */}
@@ -58,6 +115,8 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
                             label={t('seller:createListing.propertyFeatures.elevator')}
                             value={listingData.hasElevator}
                             onChange={(val) => setListingData(p => ({ ...p, hasElevator: val }))}
+                            error={fieldErrors.hasElevator}
+                            anchorId={fieldAnchorId('hasElevator')}
                         />
                     )}
                     <TriStateCheckbox
@@ -263,7 +322,8 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
         d0.energyRating === d1.energyRating &&
         d0.orientation === d1.orientation &&
         prev.setListingData === next.setListingData &&
-        prev.handleInputChange === next.handleInputChange
+        prev.handleInputChange === next.handleInputChange &&
+        prev.fieldErrors === next.fieldErrors
     );
 });
 

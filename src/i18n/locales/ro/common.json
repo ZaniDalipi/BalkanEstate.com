@@ -306,7 +306,8 @@
     "measure": "Măsoară",
     "legend": "Legendă",
     "climate": "Climă",
-    "premiumOnly": "Numai Premium"
+    "premiumOnly": "Numai Premium",
+    "clearFilter": "Șterge filtrul"
   },
   "social": {
     "facebook": "Facebook",
@@ -638,6 +639,7 @@
   },
   "removeFromFavorites": "Elimină de la favorite",
   "saved": "Salvat",
+  "any": "Oricare",
   "usageMeter": {
     "label": "Utilizare lunară",
     "usedOfLimit": "{{used}} / {{limit}} folosite",

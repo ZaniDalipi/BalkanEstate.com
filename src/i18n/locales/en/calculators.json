@@ -72,6 +72,11 @@
     "errors": {
       "rateRequired": "Enter an interest rate",
       "rateRange": "Rate must be between {{min}}% and {{max}}%"
+    },
+    "deposit": {
+      "low": "Low deposit",
+      "fair": "Fair deposit",
+      "strong": "Strong deposit"
     }
   },
   "rentVsBuy": {

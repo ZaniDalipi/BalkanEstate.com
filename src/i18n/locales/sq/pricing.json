@@ -272,6 +272,8 @@
     "needAgency": "Nuk keni akoma agjenci?",
     "needAgencyDescription": "Abonohu në planin tonë Ndërmarrje për të krijuar agjencin tënde dhe për të zhbllokuar këto veçori.",
     "viewEnterprise": "Shiko Planin Ndërmarrje",
+    "enterpriseTitle": "Plani Ndërmarrje për Agjenci",
+    "enterpriseSubtitle": "Gjithçka që i duhet agjencisë suaj — anëtarë të ekipit, faqe branding dhe më shumë.",
     "comingSoon": "Së Shpejti",
     "featureComingSoon": "Veçoritë e agjencisë do të jenë të disponueshme së shpejti!",
     "selectDuration": "Zgjidh kohëzgjatjen:"

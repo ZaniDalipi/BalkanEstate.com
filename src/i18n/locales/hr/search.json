@@ -62,7 +62,8 @@
     "floorNumber": "Broj Kata",
     "advancedFilters": "Napredni Filteri",
     "moreFilters": "Više Filtera",
-    "lessFilters": "Manje Filtera"
+    "lessFilters": "Manje Filtera",
+    "sortBy": "Sortiraj po"
   },
   "options": {
     "any": "Bilo Koji",
@@ -205,7 +206,7 @@
     "dragToAdjust": "Povuci me da prilagodiš lokaciju",
     "locationSet": "Lokacija postavljena",
     "dragging": "Povlačenje...",
-    "locationTooFar": "Ova lokacija je udaljena {{distance}}km od {{city}}. Molimo odaberite lokaciju unutar {{city}} ili obližnjih područja.",
+    "locationTooFar": "Ova lokacija je udaljena {{distance}}km od {{city}} — oglasi za {{city}} moraju biti unutar {{radius}}km. Molimo odaberite bliže mjesto ili promijenite grad.",
     "tips": "💡 Savjeti: Koristite okvir za pretragu da pronađete svoje selo/grad, zumirajte s +/- gumbima ili kotačićem miša, pomičite kartu povlačenjem i povucite crveni marker na točnu lokaciju vaše nekretnine.",
     "latitude": "Geografska širina:",
     "longitude": "Geografska dužina:",
@@ -268,7 +269,11 @@
     "layers": "Slojevi",
     "mapView": "Karta",
     "switchTo": "Prebaci na {{view}} prikaz",
-    "drawAreaHint": "Nacrtaj područje pretrage na karti"
+    "drawAreaHint": "Nacrtaj područje pretrage na karti",
+    "locationTooFarTitle": "Lokacija je predaleko",
+    "locationLookupFailed": "Nije moguće pronaći to mjesto. Pokušajte drugi rezultat ili postavite oznaku izravno na kartu.",
+    "searchAreaHint": "Pretraživanje unutar {{radius}}km od {{city}} — obližnja sela i plaže su uključeni.",
+    "noSearchResults": "Nema pronađenih mjesta. Pokušajte kraći naziv ili postavite oznaku izravno na kartu."
   },
   "newsletter": {
     "title": "Ostanite Ažurirani s Novim Nekretninama",
@@ -475,6 +480,9 @@
     "property": "Nekretnina",
     "queryTitle": "Nekretnine za prodaju u {{query}} - Oglasi nekretnina",
     "tagline": "Pretraga nekretnina pokretana umjetnom inteligencijom na BalkanEstateAI — 11 zemalja, 10 jezika.",
-    "typesForSale": "kuće, stanovi i vile za prodaju"
-  }
+    "typesForSale": "kuće, stanovi i vile za prodaju",
+    "in": "u"
+  },
+  "saving": "Spremanje...",
+  "saveSearch": "Spremi pretragu"
 }

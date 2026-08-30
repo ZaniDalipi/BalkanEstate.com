@@ -211,6 +211,8 @@
     "needAgency": "Don't have an agency yet?",
     "needAgencyDescription": "Subscribe to our Enterprise plan to create your agency and unlock these features.",
     "viewEnterprise": "View Enterprise Plan",
+    "enterpriseTitle": "Agency Enterprise Plan",
+    "enterpriseSubtitle": "Everything your agency needs — team members, branding page and more.",
     "comingSoon": "Coming Soon",
     "featureComingSoon": "Agency featuring will be available soon!",
     "selectDuration": "Select duration:"

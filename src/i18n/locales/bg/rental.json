@@ -84,7 +84,27 @@
     "updateListing": "Актуализиране на обява за наем",
     "createSuccess": "Обявата за наем е публикувана успешно!",
     "updateSuccess": "Обявата за наем е актуализирана успешно!",
-    "redirecting": "Пренасочване към таблото ви..."
+    "redirecting": "Пренасочване към таблото ви...",
+    "checkInTime": "Check-in Time",
+    "checkOutTime": "Check-out Time",
+    "cleaningFee": "Cleaning Fee",
+    "cancellationPolicy": "Cancellation Policy",
+    "cancellationPolicies": {
+      "select": "Select a policy",
+      "flexible": "Flexible — Full refund 24h before check-in",
+      "moderate": "Moderate — Full refund 5 days before check-in",
+      "strict": "Strict — 50% refund up to 1 week before",
+      "nonRefundable": "Non-refundable"
+    },
+    "breakfastIncluded": "Breakfast",
+    "towelsIncluded": "Towels & Linen",
+    "parkingIncluded": "Parking",
+    "guestRequirements": "Guest Requirements",
+    "guestRequirementsHint": "e.g. no parties, no smoking, ID verification required (press Enter to add)",
+    "minLeaseDurationDays": "Мин. престой (дни)",
+    "maxLeaseDurationDays": "Макс. престой (дни)",
+    "minLeaseDurationWeeks": "Мин. престой (седмици)",
+    "maxLeaseDurationWeeks": "Макс. престой (седмици)"
   },
   "details": {
     "rentalTerms": "Условия за наем",
@@ -108,7 +128,31 @@
     "tenantRequirements": "Изисквания към наемателя",
     "contactLandlord": "Свържете се с наемодателя",
     "scheduleViewing": "Запазете оглед",
-    "rentThisProperty": "Наемете този имот"
+    "rentThisProperty": "Наемете този имот",
+    "stayDuration": "Stay Duration",
+    "stayDurationWeeks": "Stay Duration",
+    "minNights": "{{min}} nights min",
+    "maxNights": "up to {{max}} nights",
+    "minToMaxNights": "{{min}}–{{max}} nights",
+    "minWeeks": "{{min}} weeks min",
+    "maxWeeks": "up to {{max}} weeks",
+    "minToMaxWeeks": "{{min}}–{{max}} weeks",
+    "checkInOut": "Check-in / Check-out",
+    "cleaningFee": "Cleaning Fee",
+    "cancellationPolicy": "Cancellation Policy",
+    "cancellation": {
+      "flexible": "Flexible — Full refund 24h before check-in",
+      "moderate": "Moderate — Full refund 5 days before",
+      "strict": "Strict — 50% refund up to 1 week before",
+      "nonRefundable": "Non-refundable"
+    },
+    "breakfastIncluded": "Breakfast",
+    "towelsIncluded": "Towels & Linen",
+    "parkingIncluded": "Parking",
+    "guestRequirements": "Guest Requirements",
+    "minDays": "мин. {{min}} дни",
+    "maxDays": "макс. {{max}} дни",
+    "minToMaxDays": "{{min}} - {{max}} дни"
   },
   "affordability": {
     "title": "Достъпност на наема",
@@ -128,7 +172,15 @@
     "estimatedInternet": "Прибл. интернет (1-ви месец)",
     "totalUpfront": "Общо авансово",
     "monthlyOngoing": "Месечни текущи разходи",
-    "disclaimer": "* Разходите за комунални услуги и интернет са приблизителни, базирани на средни стойности. Действителните разходи може да варират."
+    "disclaimer": "* Разходите за комунални услуги и интернет са приблизителни, базирани на средни стойности. Действителните разходи може да варират.",
+    "firstWeekRent": "Наем за първата седмица",
+    "firstDayRent": "Наем за първия ден",
+    "estimatedUtilitiesWeek": "Прогн. консумативи (1-ва седмица)",
+    "estimatedUtilitiesDay": "Прогн. консумативи (1-ви ден)",
+    "estimatedInternetWeek": "Прогн. интернет (1-ва седмица)",
+    "estimatedInternetDay": "Прогн. интернет (1-ви ден)",
+    "weeklyOngoing": "Седмичен текущ разход",
+    "dailyOngoing": "Дневен текущ разход"
   },
   "viewing": {
     "title": "Запазете оглед",
@@ -460,7 +512,7 @@
     "engagement": "Ангажираност",
     "views": "прегледи",
     "inquiries": "запитвания"
-  }
+  },
+  "premiumCollection": "Наеми в целите Балкани",
+  "from": "от"
 }
-
-

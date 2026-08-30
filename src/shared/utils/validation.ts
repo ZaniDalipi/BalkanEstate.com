@@ -185,6 +185,101 @@ export function validateCoordinates(lat: number, lng: number): ValidationResult 
 }
 
 /**
+ * Validate one city panel of the home-page gallery as entered in the admin.
+ *
+ * The photo is the part worth being strict about. This collection is the only
+ * source of the gallery's content — there is no built-in list and no seeded
+ * image library behind it — so a panel without a usable photo is not a panel
+ * with a gap in it, it is a panel that cannot be drawn. Requiring an `https`
+ * URL here also keeps anything but a real image URL out of an `img src`.
+ */
+export function validateCityShowcase(input: {
+  city: string;
+  country: string;
+  searchQuery: string;
+  imageUrl: string;
+  displayOrder: number | string;
+}): ValidationResult {
+  const city = validateTextLength(String(input.city ?? '').trim(), {
+    minLength: 2, maxLength: 80, fieldName: 'City',
+  });
+  if (!city.isValid) return city;
+
+  const country = validateTextLength(String(input.country ?? '').trim(), {
+    minLength: 2, maxLength: 60, fieldName: 'Country',
+  });
+  if (!country.isValid) return country;
+
+  // What the panel searches when a visitor opens it. An empty one yields a
+  // panel that looks right and lands on an unfiltered results page.
+  const searchQuery = validateTextLength(String(input.searchQuery ?? '').trim(), {
+    minLength: 2, maxLength: 80, fieldName: 'Search term',
+  });
+  if (!searchQuery.isValid) return searchQuery;
+
+  const imageUrl = String(input.imageUrl ?? '').trim();
+  if (!imageUrl) return { isValid: false, error: 'A photo is required' };
+  const url = validateUrl(imageUrl, ['https']);
+  if (!url.isValid) return url;
+
+  if (!Number.isFinite(Number(input.displayOrder))) {
+    return { isValid: false, error: 'Order must be a number' };
+  }
+
+  return { isValid: true };
+}
+
+/**
+ * Validate one villa destination as entered in the admin.
+ *
+ * Lives here rather than in the admin component so the rules are stated once:
+ * the same shape is written by the admin form, seeded by the import action and
+ * read by the home-page corridor, and a bad row shows up as a card that
+ * navigates nowhere or a map that flies somewhere absurd.
+ */
+export function validateVillaDestination(input: {
+  name: string;
+  query: string;
+  country: string;
+  lat: number | string;
+  lng: number | string;
+  zoom: number | string;
+}): ValidationResult {
+  const name = validateTextLength(String(input.name ?? '').trim(), {
+    minLength: 2, maxLength: 80, fieldName: 'Name',
+  });
+  if (!name.isValid) return name;
+
+  // `query` is what the villas page searches on. An empty one yields a card
+  // that looks fine and lands on an unfiltered page, so it is required even
+  // though the corridor would happily render without it.
+  const query = validateTextLength(String(input.query ?? '').trim(), {
+    minLength: 2, maxLength: 80, fieldName: 'Search term',
+  });
+  if (!query.isValid) return query;
+
+  const country = validateTextLength(String(input.country ?? '').trim(), {
+    minLength: 2, maxLength: 60, fieldName: 'Country',
+  });
+  if (!country.isValid) return country;
+
+  const lat = Number(input.lat);
+  const lng = Number(input.lng);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return { isValid: false, error: 'Latitude and longitude must be numbers' };
+  }
+  const coords = validateCoordinates(lat, lng);
+  if (!coords.isValid) return coords;
+
+  const zoom = Number(input.zoom);
+  if (!Number.isFinite(zoom) || zoom < 1 || zoom > 20) {
+    return { isValid: false, error: 'Zoom must be between 1 and 20' };
+  }
+
+  return { isValid: true };
+}
+
+/**
  * Validate price/currency value
  */
 export function validatePrice(

@@ -11,7 +11,7 @@
  * to project them — invalid markers render nothing rather than throwing.
  */
 
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { OverlayView, OverlayViewF } from '@react-google-maps/api';
 import { Property } from '@/types';
 import { validateCoordinates } from '@/shared/utils/validation';
@@ -66,6 +66,21 @@ const MapPopupOverlay: React.FC<MapPopupOverlayProps> = ({
   // Validate coordinates up-front — never feed NaN/out-of-range values to the
   // Maps projection. Hooks below still run so hook order stays stable.
   const coords = validateCoordinates(property.lat as number, property.lng as number);
+
+  // OverlayViewF rebuilds its google.maps.OverlayView whenever the `position`
+  // *identity* changes, and rebuilding detaches the card's container from the
+  // DOM and re-appends it. A literal `{ lat, lng }` in the JSX below is a new
+  // object on every render, so the card was being ripped out and re-inserted
+  // on each parent render — and this component re-renders constantly while the
+  // map settles (panTo after a marker tap, `idle`, the results refetch that
+  // follows it). A tap whose element leaves the DOM between touchstart and
+  // touchend never produces a click, which is why "View details" did nothing
+  // on phones while a desktop mouse click — landing in a quiet moment — worked.
+  // Keying the object off the raw coordinates keeps the overlay alive.
+  const popupPosition = useMemo(
+    () => ({ lat: property.lat as number, lng: property.lng as number }),
+    [property.lat, property.lng]
+  );
 
   const recomputeLayout = useCallback(() => {
     const anchor = anchorRef.current;
@@ -148,9 +163,11 @@ const MapPopupOverlay: React.FC<MapPopupOverlayProps> = ({
 
     recomputeLayout();
 
+    // 'bounds_changed' fires on every drag frame and each call does two
+    // getBoundingClientRect reads plus a setState — exactly the per-frame work
+    // the comment above says we avoid. 'idle' + 'zoom_changed' cover rest.
     const listeners = [
       map.addListener('idle', recomputeLayout),
-      map.addListener('bounds_changed', recomputeLayout),
       map.addListener('zoom_changed', recomputeLayout),
     ];
 
@@ -187,7 +204,7 @@ const MapPopupOverlay: React.FC<MapPopupOverlayProps> = ({
 
   return (
     <OverlayViewF
-      position={{ lat: property.lat as number, lng: property.lng as number }}
+      position={popupPosition}
       mapPaneName={OverlayView.FLOAT_PANE}
     >
       {/* Zero-size anchor pinned to the marker pixel; the card floats off it. */}

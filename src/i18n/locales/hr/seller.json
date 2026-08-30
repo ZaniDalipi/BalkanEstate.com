@@ -314,6 +314,24 @@
       "bathroom": "Kupaonica",
       "other": "Ostalo",
       "selectTag": "Odaberi Oznaku"
+    },
+    "luxuryVillaBanner": {
+      "title": "Luxury Villas Collection",
+      "hint": "This listing will appear in the exclusive Luxury Villas tab — visible to premium buyers searching for high-end Balkan retreats."
+    },
+    "luxuryVillaBadge": "Appears in Luxury Villas",
+    "quickAmenities": {
+      "label": "Popularni sadržaji",
+      "sauna": "Sauna",
+      "wineCellar": "Vinski podrum",
+      "panoramic": "Panoramski",
+      "jacuzzi": "Jacuzzi",
+      "hotTub": "Topla kada",
+      "gym": "Teretana",
+      "fireplace": "Kamin",
+      "bbq": "Roštilj",
+      "homeCinema": "Kućno kino",
+      "beachAccess": "Pristup plaži"
     }
   },
   "myListings": {
@@ -584,7 +602,8 @@
     "commercial": "Commercial",
     "office": "Office",
     "garage": "Garage",
-    "other": "Other"
+    "other": "Other",
+    "luxuryVilla": "Luxury Villa"
   },
   "conditions": {
     "new": "New",

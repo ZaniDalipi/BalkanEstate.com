@@ -1,4 +1,4 @@
-# BalkanEstate.com — Architecture
+# BalkanEstateAI — Architecture
 
 ## System Overview
 
@@ -75,6 +75,132 @@ Key decisions:
 - **Cache by URL** — navigating back to a seen image applies ratio instantly.
 - **`max-h: 90vh`** prevents portrait images from overflowing the viewport.
 - `object-contain` ensures the full image is always visible; LQIP blurred background fills any bars.
+
+---
+
+## Home-Page City Gallery (Elastic Gallery)
+
+Accordion of city panels rendered inside the hero, directly under its Buy /
+Rent / List buttons: the active panel expands to 4× the width of its
+siblings, the rest collapse into labelled slivers. Every panel offers Buy and
+Rent actions, each opening `/search` or `/rent` filtered to that city.
+
+```
+CityShowcase (MongoDB)          ← the ONLY source of the gallery's content
+  └── GET /api/city-showcase    ← active rows, display order (cached 5 min)
+        └── getShowcaseCities() ← drops rows that fail validation
+              └── useShowcaseCities()          (React Query, public key)
+                    └── CityShowcaseSection    ← picks a random subset, maps to gallery items
+                          └── <ElasticGallery> ← presentational, no data access
+```
+
+Key decisions:
+- **No fallback list.** Nothing is hardcoded and no seeded photo library sits
+  behind it, so `imageUrl` is required in the schema, on the wire and in the
+  admin form. Empty or failed load → the section does not render.
+- **Photo before row.** `POST /admin/city-showcase/upload-image` returns a URL
+  the create form puts into its draft — a panel cannot be saved without one.
+- **Expand vs. act are separate controls.** Hover, focus, or a tap expands a
+  panel; only its Buy/Rent buttons navigate. Splitting these is what lets a
+  touchscreen tap reveal a panel without committing to it — no "first tap
+  expands, second tap selects" state to track.
+- **Random per visit.** `pickShowcaseCities` draws `CITY_SHOWCASE_MAX_PANELS`
+  (6) cities from every active one, one per country before any repeats, so the
+  gallery reads as "the Balkans" rather than whichever handful was curated
+  first. Memoised on the fetched list, so a re-render never reshuffles panels
+  under the pointer.
+- **Image quality.** Both automatic city-photo pipelines
+  (`cityImageService.ts`'s Wikipedia fetch, `seedCityImages.ts`'s Commons
+  fetch) and the gallery's own Cloudinary delivery request (`crop: 'limit'`)
+  are written to never upscale a source smaller than the frame — upscaling,
+  not the source photo, was what actually produced blurry panels.
+- **Photo credit.** `imageCredit` (optional, e.g. "Photo by Jane Doe on
+  Unsplash") shows as a small caption in the corner of an expanded panel,
+  announced to screen readers rather than `aria-hidden` since it's real
+  information, not a duplicate of the panel's own label. Admins sourcing
+  photos from Unsplash/Pexels/etc. paste the credit line those sites already
+  show next to their download button — most such licenses don't strictly
+  require attribution, but carrying it costs nothing and is the safer default.
+
+Admin: `AdminSidebar → City Gallery` (`/admin/city-showcase`),
+`CityShowcaseManager` + `CityShowcaseForm` + `useCityShowcaseManager` +
+`cityShowcaseImportService` (the "Import cities from database" action).
+
+### City directory — typo-proofing the admin form
+
+`CityShowcaseForm` always renders as a modal. Country is a closed `<select>`
+sourced from the app's existing canonical `BALKAN_COUNTRIES` (never
+free-text, so it can't drift from every other country filter in the app);
+city is a free-text field paired with a `<datalist>` of names already known
+for the chosen country, built from two sources: `CityMarketData` (via a
+lightweight `GET /admin/cities`) and the gallery's own curated rows.
+
+```
+useCityShowcaseManager.save()
+  └── ensureCityInDirectory({city, country, countryCode})
+        └── POST /admin/cities  → upserts a minimal CityMarketData stub
+              (all analytics fields zeroed, featured:false, dataSource:'manual')
+              idempotent + case-insensitive, so it's safe to call on every save
+  └── createCityShowcase / updateCityShowcase   (unchanged)
+```
+
+A city typed for a gallery panel is never lost to that panel alone: saving
+always ensures it exists in `CityMarketData` too (as an inert stub — no
+invented market statistics), so it becomes a selectable suggestion for every
+other city picker and a candidate for the "Import cities from database"
+action, without requiring a full market-data form.
+
+---
+
+## Property Map — "Full Map" Destination
+
+The cinematic property map ends in a **Full Map** button. Which full map that
+is depends on the listing, not on the button:
+
+```
+src/shared/map/mapDestination.ts
+  ├── resolveMapDestination({ propertyType, listingType })
+  │     luxury-villa → /villas   (gold accent,    "Villas Map")
+  │     rent         → /rent     (blue accent,    "Rentals Map")
+  │     sale         → /search   (emerald accent, "For-Sale Map")
+  │     unknown      → /search   (neutral,        "Full Map")
+  └── buildMapFocusTarget(property) → validated { lat, lng, address } | null
+        │
+        ├── PropertyMapLink  → Map3DBuildings → Map3DControls  (label + colour)
+        └── PropertyDetailsPage.handleNavigateToMap            (navigation)
+```
+
+Key decisions:
+- **One record drives both label and navigation.** The button's text, its
+  accent colour and the route it opens all come from the same frozen
+  `MAP_DESTINATIONS` entry, so a button can never promise one map and open
+  another.
+- **Luxury villas win over the listing type.** They are a curated market
+  carrying both rentals and sales (`useVillaSearch`), so a villa *for sale*
+  still belongs on the villas map — sending it to `/search` dropped the
+  visitor into a list that no longer contained the property they came from.
+- **Routed, not dispatched.** `handleNavigateToMap` calls
+  `navigate(destination.path)` instead of dispatching `SET_ACTIVE_VIEW`, so
+  the address bar and the back button follow the visitor onto the map. The
+  route handler clears the selected property itself.
+- **Untrusted input.** `propertyType` / `listingType` are normalised (not
+  trusted to be domain literals) and an unrecognised market falls back to the
+  neutral buy map. `buildMapFocusTarget` runs `validateCoordinates` and
+  returns `null` rather than a partial payload, so a listing with a missing or
+  out-of-range coordinate navigates *without* a fly-to instead of flying the
+  destination map to (0, 0). The address is sanitised and length-capped before
+  it enters map state.
+
+### One villa mark everywhere
+
+`LuxuryVillaIcon` (`constants/icons.ts`) is a villa under a crown — the same
+figure the map pins carry (`src/shared/map/villaMarker.ts`). It is used by the
+sidebar's Luxury Villas tab and by `PropertyInfo`'s property-type card, which
+previously fell through to the generic `CubeTransparentIcon` because
+`luxury-villa` was missing from its icon list. The card's type name reads from
+`map.propertyTypes` — the app's one translated list of type names — instead of
+a card-only key set that had no entries and rendered the raw `Luxury-Villa`
+slug.
 
 ---
 

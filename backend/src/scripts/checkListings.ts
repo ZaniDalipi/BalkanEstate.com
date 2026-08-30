@@ -26,7 +26,7 @@ async function checkListings() {
     statusCounts.forEach(s => log.info(`   ${s._id}: ${s.count}`));
 
     // Count demo properties
-    const demoUser = await User.findOne({ email: 'demo@balkanestate.com' });
+    const demoUser = await User.findOne({ email: 'demo@balkanestateai.com' });
     if (demoUser) {
       const demoCount = await Property.countDocuments({ sellerId: demoUser._id });
       log.info(`\n🧪 Demo user properties: ${demoCount}`);

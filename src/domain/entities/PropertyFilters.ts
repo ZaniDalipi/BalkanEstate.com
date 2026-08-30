@@ -10,7 +10,7 @@ import {
 } from './Property';
 
 export type SellerType = 'any' | 'agent' | 'private';
-export type PropertyTypeFilter = 'any' | 'house' | 'apartment' | 'villa' | 'other';
+export type PropertyTypeFilter = 'any' | 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'other';
 
 export class PropertyFilters {
   constructor(

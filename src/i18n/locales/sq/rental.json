@@ -84,7 +84,27 @@
     "updateListing": "Perditeso Listimin e Qirase",
     "createSuccess": "Listimi i Qirase u Publikua me Sukses!",
     "updateSuccess": "Listimi i Qirase u Perditesua me Sukses!",
-    "redirecting": "Po ju ridrejtojme ne panelin tuaj..."
+    "redirecting": "Po ju ridrejtojme ne panelin tuaj...",
+    "checkInTime": "Check-in Time",
+    "checkOutTime": "Check-out Time",
+    "cleaningFee": "Cleaning Fee",
+    "cancellationPolicy": "Cancellation Policy",
+    "cancellationPolicies": {
+      "select": "Select a policy",
+      "flexible": "Flexible — Full refund 24h before check-in",
+      "moderate": "Moderate — Full refund 5 days before check-in",
+      "strict": "Strict — 50% refund up to 1 week before",
+      "nonRefundable": "Non-refundable"
+    },
+    "breakfastIncluded": "Breakfast",
+    "towelsIncluded": "Towels & Linen",
+    "parkingIncluded": "Parking",
+    "guestRequirements": "Guest Requirements",
+    "guestRequirementsHint": "e.g. no parties, no smoking, ID verification required (press Enter to add)",
+    "minLeaseDurationDays": "Qëndrim min. (ditë)",
+    "maxLeaseDurationDays": "Qëndrim maks. (ditë)",
+    "minLeaseDurationWeeks": "Qëndrim min. (javë)",
+    "maxLeaseDurationWeeks": "Qëndrim maks. (javë)"
   },
   "details": {
     "rentalTerms": "Kushtet e Qirase",
@@ -108,7 +128,31 @@
     "tenantRequirements": "Kerkesat per Qiramarresin",
     "contactLandlord": "Kontaktoni Pronarin",
     "scheduleViewing": "Caktoni nje Vizite",
-    "rentThisProperty": "Merr me Qira kete Prone"
+    "rentThisProperty": "Merr me Qira kete Prone",
+    "stayDuration": "Stay Duration",
+    "stayDurationWeeks": "Stay Duration",
+    "minNights": "{{min}} nights min",
+    "maxNights": "up to {{max}} nights",
+    "minToMaxNights": "{{min}}–{{max}} nights",
+    "minWeeks": "{{min}} weeks min",
+    "maxWeeks": "up to {{max}} weeks",
+    "minToMaxWeeks": "{{min}}–{{max}} weeks",
+    "checkInOut": "Check-in / Check-out",
+    "cleaningFee": "Cleaning Fee",
+    "cancellationPolicy": "Cancellation Policy",
+    "cancellation": {
+      "flexible": "Flexible — Full refund 24h before check-in",
+      "moderate": "Moderate — Full refund 5 days before",
+      "strict": "Strict — 50% refund up to 1 week before",
+      "nonRefundable": "Non-refundable"
+    },
+    "breakfastIncluded": "Breakfast",
+    "towelsIncluded": "Towels & Linen",
+    "parkingIncluded": "Parking",
+    "guestRequirements": "Guest Requirements",
+    "minDays": "min. {{min}} ditë",
+    "maxDays": "maks. {{max}} ditë",
+    "minToMaxDays": "{{min}} - {{max}} ditë"
   },
   "affordability": {
     "title": "Perballueshmeria e Qirase",
@@ -128,7 +172,15 @@
     "estimatedInternet": "Internet i vleresuar (muaji i pare)",
     "totalUpfront": "Totali paraprak",
     "monthlyOngoing": "Kostoja mujore e vazhdueshme",
-    "disclaimer": "* Kostot e shpenzimeve dhe internetit jane vleresime bazuar ne mesatare. Kostot aktuale mund te ndryshojne."
+    "disclaimer": "* Kostot e shpenzimeve dhe internetit jane vleresime bazuar ne mesatare. Kostot aktuale mund te ndryshojne.",
+    "firstWeekRent": "Qiraja e javës së parë",
+    "firstDayRent": "Qiraja e ditës së parë",
+    "estimatedUtilitiesWeek": "Faturat e vlerësuara (java 1)",
+    "estimatedUtilitiesDay": "Faturat e vlerësuara (dita 1)",
+    "estimatedInternetWeek": "Interneti i vlerësuar (java 1)",
+    "estimatedInternetDay": "Interneti i vlerësuar (dita 1)",
+    "weeklyOngoing": "Kosto javore e vazhdueshme",
+    "dailyOngoing": "Kosto ditore e vazhdueshme"
   },
   "viewing": {
     "title": "Caktoni nje Vizite",
@@ -460,5 +512,7 @@
     "engagement": "Angazhimi",
     "views": "shikime",
     "inquiries": "pyetje"
-  }
+  },
+  "premiumCollection": "Qira në të gjithë Ballkanin",
+  "from": "nga"
 }

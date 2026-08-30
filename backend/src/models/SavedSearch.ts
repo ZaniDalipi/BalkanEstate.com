@@ -13,7 +13,7 @@ export interface IFilters {
   maxSqft: number | null;
   sortBy: string;
   sellerType: 'any' | 'agent' | 'private';
-  propertyType: 'any' | 'house' | 'apartment' | 'villa' | 'land' | 'other';
+  propertyType: 'any' | 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
   // Advanced filters
   minYearBuilt: number | null;
   maxYearBuilt: number | null;
