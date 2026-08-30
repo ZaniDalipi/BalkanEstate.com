@@ -6,7 +6,6 @@ import HighlightedPropertiesSection from '@/src/features/property-details/compon
 import { SearchIcon, XMarkIcon, BellIcon, BuildingLibraryIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon, AdjustmentsHorizontalIcon } from '@/constants';
 import AiSearch from './AiSearch';
 import PropertyTypePicker from './PropertyTypePicker';
-import FiltersModal from './modals/FiltersModal';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import Footer from '@/components/shared/Footer';
 
@@ -744,7 +743,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
     const loadMoreRef = useRef(null);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
-    const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
+    const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(true);
 
     // Count active basic filters (shown in collapse toggle badge)
     const activeBasicFilterCount = [
@@ -861,38 +860,38 @@ const PropertyList = memo<PropertyListProps>((props) => {
                         <div className="px-4 pt-2 pb-1 flex-shrink-0">
                             <button
                                 type="button"
-                                onClick={() => setIsFiltersModalOpen(true)}
-                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-neutral-50 border border-neutral-200 hover:bg-neutral-100 hover:border-neutral-300 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-                                aria-haspopup="dialog"
-                                aria-expanded={isFiltersModalOpen}
+                                onClick={() => setIsFiltersCollapsed(!isFiltersCollapsed)}
+                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-neutral-50 border border-neutral-200 hover:bg-neutral-100 transition-colors"
+                                aria-expanded={!isFiltersCollapsed}
+                                aria-controls="desktop-filter-panel"
                             >
                                 <div className="flex items-center gap-2">
                                     <AdjustmentsHorizontalIcon className="w-4 h-4 text-neutral-600" />
                                     <span className="text-sm font-semibold text-neutral-700">{t('search:filters.filters', 'Filters')}</span>
-                                    {activeBasicFilterCount > 0 && (
-                                        <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-bold text-white bg-primary rounded-full">
+                                    {isFiltersCollapsed && activeBasicFilterCount > 0 && (
+                                        <span className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-primary rounded-full">
                                             {activeBasicFilterCount}
                                         </span>
                                     )}
                                 </div>
-                                <ChevronDownIcon className="w-4 h-4 text-neutral-500" />
+                                <ChevronDownIcon className={`w-4 h-4 text-neutral-500 transition-transform duration-300 ${isFiltersCollapsed ? '' : 'rotate-180'}`} />
                             </button>
                         </div>
                     )}
 
                     {searchMode === 'manual' ? (
-                        <FiltersModal
-                            isOpen={isFiltersModalOpen}
-                            onClose={() => setIsFiltersModalOpen(false)}
-                            onApply={onSearchClick}
-                            onReset={onResetFilters}
-                            activeCount={activeBasicFilterCount}
-                            isApplying={isSearchingLocation}
+                        <div
+                            id="desktop-filter-panel"
+                            className="relative z-[60] overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out"
+                            style={isFiltersCollapsed
+                                ? { maxHeight: 0, opacity: 0 }
+                                : { maxHeight: '50vh', opacity: 1 }
+                            }
                         >
-                            <div className="sm:columns-2 sm:gap-6 [&>div>*]:break-inside-avoid">
+                            <div className="px-4 pb-4 overflow-y-auto" style={{ maxHeight: '50vh' }}>
                                 <FilterControls {...props} />
                             </div>
-                        </FiltersModal>
+                        </div>
                     ) : (
                         <div className="relative z-[60] flex-grow min-h-0">
                             <div className="px-4 pb-4 h-full">
