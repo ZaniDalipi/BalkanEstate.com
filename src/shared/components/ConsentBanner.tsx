@@ -1,16 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import {
+  ACCEPT_ALL,
+  COOKIE_SETTINGS_EVENT,
+  DENY_ALL,
+  getEffectiveCookiePreferences,
+  hasConsentedToCookies,
+  markConsentDismissed,
+  notifyConsentChanged,
+  saveConsentRecord,
+  wasConsentDismissedThisSession,
+  type CookieConsentStatus,
+  type CookiePreferences,
+} from '../utils/cookieConsent';
 
-export interface CookiePreferences {
-  essential: boolean; // Always true, can't be disabled
-  analytics: boolean;
-  marketing: boolean;
-  functional: boolean;
-}
-
-const COOKIE_CONSENT_KEY = 'balkanestate_cookie_consent';
-const COOKIE_PREFERENCES_KEY = 'balkanestate_cookie_preferences';
+// Re-exported so existing importers of this module keep working.
+export {
+  COOKIE_CONSENT_VERSION,
+  DENY_ALL,
+  getConsentRecord,
+  getCookiePreferences,
+  getEffectiveCookiePreferences,
+  hasConsentedToCookies,
+  hasConsentFor,
+  openCookieSettings,
+  useCookieConsent,
+} from '../utils/cookieConsent';
+export type {
+  CookieConsentCategory,
+  CookieConsentStatus,
+  CookiePreferences,
+} from '../utils/cookieConsent';
 
 // Helper to get current language from URL
 const getCurrentLang = () => {
@@ -19,72 +40,74 @@ const getCurrentLang = () => {
   return validLangs.includes(pathLang) ? pathLang : 'en';
 };
 
-export const getCookiePreferences = (): CookiePreferences | null => {
-  try {
-    const stored = localStorage.getItem(COOKIE_PREFERENCES_KEY);
-    return stored ? JSON.parse(stored) : null;
-  } catch {
-    return null;
-  }
-};
-
-export const hasConsentedToCookies = (): boolean => {
-  return localStorage.getItem(COOKIE_CONSENT_KEY) === 'true';
-};
-
 const ConsentBanner: React.FC = () => {
   const { t } = useTranslation(['common']);
   const [isVisible, setIsVisible] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [preferences, setPreferences] = useState<CookiePreferences>({
-    essential: true,
-    analytics: true,
-    marketing: false,
-    functional: true,
-  });
+  // Nothing non-essential is pre-ticked: a pre-checked box is not valid consent.
+  const [preferences, setPreferences] = useState<CookiePreferences>(DENY_ALL);
 
   useEffect(() => {
     setMounted(true);
-    // Check if user has already consented
-    const hasConsented = hasConsentedToCookies();
-    if (!hasConsented) {
-      // Small delay for better UX
-      const timer = setTimeout(() => setIsVisible(true), 1000);
-      return () => clearTimeout(timer);
+
+    const openSettings = () => {
+      // Start from the stored choice so it can be reviewed, then withdrawn or changed.
+      setPreferences(getEffectiveCookiePreferences());
+      setShowSettings(true);
+      setIsVisible(true);
+    };
+    window.addEventListener(COOKIE_SETTINGS_EVENT, openSettings);
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    // Closing the banner suppresses it for this browsing session only; it is not
+    // consent, so the choice is put to the user again on their next visit.
+    if (!hasConsentedToCookies() && !wasConsentDismissedThisSession()) {
+      timer = setTimeout(() => setIsVisible(true), 1000);
     }
+
+    return () => {
+      window.removeEventListener(COOKIE_SETTINGS_EVENT, openSettings);
+      if (timer) clearTimeout(timer);
+    };
   }, []);
 
-  const saveConsent = (prefs: CookiePreferences) => {
-    localStorage.setItem(COOKIE_CONSENT_KEY, 'true');
-    localStorage.setItem(COOKIE_PREFERENCES_KEY, JSON.stringify(prefs));
+  const saveConsent = (prefs: CookiePreferences, status: CookieConsentStatus) => {
+    saveConsentRecord(prefs, status);
     setIsVisible(false);
-
-    // Dispatch event for other parts of the app to react
-    window.dispatchEvent(new CustomEvent('cookieConsentUpdated', { detail: prefs }));
+    setShowSettings(false);
+    // Let anything gating on consent react to the new choice.
+    notifyConsentChanged(prefs);
   };
 
-  const handleAcceptAll = () => {
-    saveConsent({
-      essential: true,
-      analytics: true,
-      marketing: true,
-      functional: true,
-    });
+  const handleAcceptAll = () => saveConsent({ ...ACCEPT_ALL }, 'accepted');
+
+  const handleAcceptEssential = () => saveConsent({ ...DENY_ALL }, 'rejected');
+
+  const handleSavePreferences = () =>
+    saveConsent({ ...preferences, essential: true }, 'custom');
+
+  /**
+   * Closing without choosing. Nothing is recorded as consent and no non-essential
+   * cookie is set; the banner simply steps out of the way until the next visit.
+   */
+  const handleDismiss = () => {
+    markConsentDismissed();
+    setIsVisible(false);
+    setShowSettings(false);
+    // Re-assert the effective (stored, or essential-only) state for any listener.
+    notifyConsentChanged(getEffectiveCookiePreferences());
   };
 
-  const handleAcceptEssential = () => {
-    saveConsent({
-      essential: true,
-      analytics: false,
-      marketing: false,
-      functional: false,
-    });
-  };
-
-  const handleSavePreferences = () => {
-    saveConsent(preferences);
-  };
+  // Escape closes the banner, same as the close button: dismissal, not consent.
+  useEffect(() => {
+    if (!isVisible) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleDismiss();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isVisible]);
 
   const lang = getCurrentLang();
 
@@ -137,7 +160,18 @@ const ConsentBanner: React.FC = () => {
                     {t('common:cookies.learnMore', 'Learn more')}
                   </a>
                 </p>
+                <button
+                  onClick={handleDismiss}
+                  className="-mt-1 -mr-1 p-1 text-gray-400 hover:text-gray-700 rounded flex-shrink-0"
+                  aria-label={t('common:cookies.close', 'Close without accepting — only essential cookies will be used')}
+                  title={t('common:cookies.close', 'Close without accepting — only essential cookies will be used')}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
+              {/* Accepting and refusing are given equal weight — refusing must be as easy as accepting. */}
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleAcceptAll}
@@ -147,17 +181,17 @@ const ConsentBanner: React.FC = () => {
                 </button>
                 <button
                   onClick={handleAcceptEssential}
-                  className="flex-1 px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors"
+                  className="flex-1 px-3 py-1.5 text-xs font-semibold text-white bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors"
                 >
-                  {t('common:cookies.essentialOnly', 'Essential Only')}
-                </button>
-                <button
-                  onClick={() => setShowSettings(true)}
-                  className="px-2 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors whitespace-nowrap"
-                >
-                  {t('common:cookies.customize', 'Customize')}
+                  {t('common:cookies.rejectAll', 'Reject All')}
                 </button>
               </div>
+              <button
+                onClick={() => setShowSettings(true)}
+                className="w-full text-xs font-medium text-gray-500 hover:text-gray-700 underline underline-offset-2 transition-colors"
+              >
+                {t('common:cookies.customize', 'Customize')}
+              </button>
             </div>
           ) : (
             // Settings view — compact
@@ -167,9 +201,10 @@ const ConsentBanner: React.FC = () => {
                   {t('common:cookies.settingsTitle', 'Cookie Settings')}
                 </h3>
                 <button
-                  onClick={() => setShowSettings(false)}
+                  onClick={handleDismiss}
                   className="text-gray-400 hover:text-gray-700"
-                  aria-label="Close settings"
+                  aria-label={t('common:cookies.close', 'Close without accepting — only essential cookies will be used')}
+                  title={t('common:cookies.close', 'Close without accepting — only essential cookies will be used')}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -240,17 +275,23 @@ const ConsentBanner: React.FC = () => {
               <div className="flex gap-2">
                 <button
                   onClick={handleAcceptEssential}
-                  className="flex-1 px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors"
+                  className="flex-1 px-3 py-1.5 text-xs font-semibold text-white bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors"
                 >
                   {t('common:cookies.rejectAll', 'Reject All')}
                 </button>
                 <button
-                  onClick={handleSavePreferences}
+                  onClick={handleAcceptAll}
                   className="flex-1 px-3 py-1.5 text-xs font-semibold text-white bg-primary hover:bg-primary-dark rounded-lg transition-colors"
                 >
-                  {t('common:cookies.savePreferences', 'Save Preferences')}
+                  {t('common:cookies.acceptAll', 'Accept All')}
                 </button>
               </div>
+              <button
+                onClick={handleSavePreferences}
+                className="w-full px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors"
+              >
+                {t('common:cookies.savePreferences', 'Save Preferences')}
+              </button>
             </div>
           )}
         </div>
