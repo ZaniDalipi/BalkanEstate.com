@@ -350,6 +350,10 @@
     "swipeKeyboardHint": "← kalo · → ruaj · ↑ detaje · Backspace zhbëj",
     "foundSwipe": "U gjetën {{count}} prona! Rrëshqit nëpër to.",
     "viewMatches": "Shiko përputhjet",
+    "criteriaSoFar": "Kërkimi juaj deri tani",
+    "showMatches": "Më trego përputhjet",
+    "keepChattingHint": "Ose vazhdoni bisedën për ta ngushtuar",
+    "send": "Dërgo mesazhin",
     "limitReached": {
       "title": "Kufiri i Mesazheve AI u Arrit",
       "message": "Keni përdorur të gjitha {{limit}} mesazhet falas të AI këtë muaj.",

@@ -365,6 +365,10 @@
     "swipeKeyboardHint": "← skip · → save · ↑ details · Backspace undo",
     "foundSwipe": "Found {{count}} properties! Swipe through them.",
     "viewMatches": "View Matches",
+    "criteriaSoFar": "Your search so far",
+    "showMatches": "Show me the matches",
+    "keepChattingHint": "Or keep chatting to narrow it down",
+    "send": "Send message",
     "limitReached": {
       "title": "AI Message Limit Reached",
       "message": "You've used all {{limit}} free AI messages this month.",

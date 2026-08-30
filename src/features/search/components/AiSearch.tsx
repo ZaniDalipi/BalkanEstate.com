@@ -9,6 +9,7 @@ import { useAppContext } from '@/context/AppContext';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import AiMessageLimitModal from './AiMessageLimitModal';
 import PropertySwipeDeck from './swipe/PropertySwipeDeck';
+import { hasSearchCriteria, shouldRunSearch } from './aiSearchFlow';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 
 // --- Web Speech API types ---
@@ -188,6 +189,10 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
     const { state, dispatch, toggleSavedHome } = useAppContext();
     const [input, setInput] = useState('');
     const [isSearching, setIsSearching] = useState(false);
+    // What the assistant has gathered so far. Shown to the buyer as it builds
+    // up, but nothing is searched until it is promoted to `finalQuery`.
+    const [draftQuery, setDraftQuery] = useState<AiSearchQuery | null>(null);
+    // The buyer has finished describing what they want — search and deal the deck.
     const [finalQuery, setFinalQuery] = useState<AiSearchQuery | null>(null);
     const [isListening, setIsListening] = useState(false);
     const [voiceSupported, setVoiceSupported] = useState(false);
@@ -209,9 +214,9 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
         setVoiceSupported(!!SR);
     }, []);
 
-    // Auto-apply filters to trigger backend search when AI produces a final query.
-    // This ensures the property list (and map) updates to the correct location
-    // even when the currently loaded properties don't include that area.
+    // Apply filters — and so run the backend search — only once the buyer has
+    // finished the conversation. This is what keeps the results list and the map
+    // still while they are still describing what they are after.
     const appliedQueryRef = useRef<AiSearchQuery | null>(null);
     useEffect(() => {
         if (finalQuery && finalQuery !== appliedQueryRef.current) {
@@ -290,9 +295,12 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
             const result = await getAiChatResponse(newHistory, properties);
             const aiMessage: ChatMessage = { sender: 'ai', text: result.responseMessage };
             onHistoryChange([...newHistory, aiMessage]);
-            if (result.isFinalQuery && result.searchQuery) {
-                setFinalQuery(result.searchQuery);
-            }
+            // Keep the criteria panel current on every turn, but hold on to the
+            // last known draft if this turn returned nothing useful — a "hi" in
+            // the middle of a conversation must not wipe what was gathered.
+            if (hasSearchCriteria(result.searchQuery)) setDraftQuery(result.searchQuery);
+            // Search only when the buyer has said they are done.
+            if (shouldRunSearch(result)) setFinalQuery(result.searchQuery);
             speak(result.responseMessage);
         } catch (error: any) {
             if (error?.statusCode === 429 && error?.details) {
@@ -347,7 +355,13 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
     useEffect(() => { return () => { recognitionRef.current?.abort(); window.speechSynthesis?.cancel(); }; }, []);
     useEffect(() => { if (window.speechSynthesis) { window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices(); } }, []);
 
-    const handleApplyClick = () => { if (finalQuery) onApplyFilters(finalQuery); };
+    // The buyer ending the conversation by hand, rather than by telling the
+    // assistant they are done. Promoting the draft is all it takes — the effect
+    // above applies the filters and the deck opens on the results.
+    const handleShowMatches = useCallback(() => {
+        if (draftQuery) setFinalQuery(draftQuery);
+    }, [draftQuery]);
+
     const handleSuggestionSelect = (text: string) => { setInput(text); setTimeout(() => handleSendMessage(text), 50); };
 
     const handleSwipeComplete = useCallback(() => {
@@ -557,13 +571,25 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                 onSubmit={(e) => { e.preventDefault(); if (!isListening && !isSpeaking) handleSendMessage(); }}
                 className="flex-shrink-0 p-3 bg-white/90 backdrop-blur-sm border-t border-neutral-100/80 space-y-2"
             >
-                {/* Proceed with filters (alternative to swiping) */}
-                {finalQuery && !showSwipeCards && (
-                    <div className="pb-2.5 border-b border-neutral-100/60">
-                        <div className="flex flex-wrap items-center gap-1.5 mb-2.5">{renderFilters(finalQuery)}</div>
-                        <button type="button" onClick={handleApplyClick} className="w-full py-2.5 bg-gradient-to-r from-primary to-blue-600 text-white font-bold rounded-xl shadow-md shadow-primary/20 hover:shadow-lg active:scale-[0.98] transition-all text-sm">
-                            {t('ai.proceed')} ({matchedProperties.length})
+                {/* What the assistant has gathered, and the way to end the
+                    conversation early instead of answering another question. */}
+                {draftQuery && !finalQuery && (
+                    <div className="pb-2.5 border-b border-neutral-100/60" data-testid="ai-criteria-panel">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-1.5">
+                            {t('ai.criteriaSoFar', 'Your search so far')}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-1.5 mb-2.5">{renderFilters(draftQuery)}</div>
+                        <button
+                            type="button"
+                            onClick={handleShowMatches}
+                            className="w-full py-2.5 bg-gradient-to-r from-primary to-blue-600 text-white font-bold rounded-xl shadow-md shadow-primary/20 hover:shadow-lg active:scale-[0.98] transition-all text-sm flex items-center justify-center gap-1.5"
+                        >
+                            <SparklesIcon className="w-4 h-4" />
+                            {t('ai.showMatches', 'Show me the matches')}
                         </button>
+                        <p className="text-[10px] text-neutral-400 text-center mt-1.5">
+                            {t('ai.keepChattingHint', 'Or keep chatting to narrow it down')}
+                        </p>
                     </div>
                 )}
 
@@ -589,7 +615,7 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                         )
                     )}
                     {!isListening && (
-                        <button type="submit" disabled={isSearching || !input.trim()} className="bg-neutral-800 text-white rounded-2xl p-3 hover:bg-neutral-900 hover:scale-105 disabled:bg-neutral-200 disabled:text-neutral-400 transition-all duration-200 active:scale-90 flex-shrink-0 shadow-sm">
+                        <button type="submit" disabled={isSearching || !input.trim()} aria-label={t('ai.send', 'Send message')} className="bg-neutral-800 text-white rounded-2xl p-3 hover:bg-neutral-900 hover:scale-105 disabled:bg-neutral-200 disabled:text-neutral-400 transition-all duration-200 active:scale-90 flex-shrink-0 shadow-sm">
                             <PaperAirplaneIcon className="w-5 h-5" />
                         </button>
                     )}

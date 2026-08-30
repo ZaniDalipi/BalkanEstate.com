@@ -350,6 +350,10 @@
     "swipeKeyboardHint": "← прескочи · → сачувај · ↑ детаљи · Backspace поништи",
     "foundSwipe": "Пронађено {{count}} некретнина! Листајте кроз њих.",
     "viewMatches": "Прикажи подударања",
+    "criteriaSoFar": "Vaša pretraga do sada",
+    "showMatches": "Prikaži mi podudaranja",
+    "keepChattingHint": "Ili nastavite razgovor da suzite izbor",
+    "send": "Пошаљи поруку",
     "limitReached": {
       "title": "Достигнут лимит AI порука",
       "message": "Искористили сте свих {{limit}} бесплатних AI порука овог месеца.",

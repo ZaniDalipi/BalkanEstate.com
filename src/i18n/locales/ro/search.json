@@ -350,6 +350,10 @@
     "swipeKeyboardHint": "← sari · → salvează · ↑ detalii · Backspace anulează",
     "foundSwipe": "{{count}} proprietăți găsite! Glisați prin ele.",
     "viewMatches": "Vezi potrivirile",
+    "criteriaSoFar": "Căutarea dvs. până acum",
+    "showMatches": "Arată-mi potrivirile",
+    "keepChattingHint": "Sau continuați conversația pentru a restrânge căutarea",
+    "send": "Trimite mesajul",
     "limitReached": {
       "title": "Limita de mesaje AI atinsă",
       "message": "Ați utilizat toate cele {{limit}} mesaje AI gratuite în această lună.",
