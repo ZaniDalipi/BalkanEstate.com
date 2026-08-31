@@ -41,7 +41,8 @@ export type AdminView =
   | 'articles'
   | 'villaApprovals'
   | 'villaDestinations'
-  | 'cityShowcase';
+  | 'cityShowcase'
+  | 'adBanners';
 
 interface AdminLayoutProps {
   children: React.ReactNode;

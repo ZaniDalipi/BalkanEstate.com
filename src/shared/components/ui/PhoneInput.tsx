@@ -145,6 +145,10 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
     return defaultCountryCode || guessDialCodeFromLocale() || parsed.countryCode;
   });
 
+  // Becomes true once the user picks a country or types — after that we never
+  // auto-override their choice (e.g. from async IP detection).
+  const userTouched = useRef(false);
+
   // If the parent pushes a value that contains a country code (e.g. loading
   // a saved profile), sync our local state to match.
   useEffect(() => {

@@ -54,6 +54,7 @@ const urlToAdminView: Record<AdminSection, AdminView> = {
   'villa-approvals': 'villaApprovals',
   'villa-destinations': 'villaDestinations',
   'city-showcase': 'cityShowcase',
+  'ad-banners': 'adBanners',
 };
 
 // Map AdminView to URL sections
@@ -79,6 +80,7 @@ const adminViewToUrl: Record<AdminView, string> = {
   'villaApprovals': 'villa-approvals',
   'villaDestinations': 'villa-destinations',
   'cityShowcase': 'city-showcase',
+  'adBanners': 'ad-banners',
 };
 
 const AdminDashboard: React.FC = () => {
