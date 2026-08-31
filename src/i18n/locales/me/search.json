@@ -168,6 +168,11 @@
     "forRent": "za iznajmljivanje"
   },
   "map": {
+    "cluster": {
+      "zoomIn_one": "{{count}} nekretnina ovdje — aktivirajte da uvećate prikaz",
+      "zoomIn_few": "{{count}} nekretnine ovdje — aktivirajte da uvećate prikaz i vidite sve",
+      "zoomIn_other": "{{count}} nekretnina ovdje — aktivirajte da uvećate prikaz i vidite sve"
+    },
     "showMap": "Mapa",
     "hideMap": "Sakrij Mapu",
     "showList": "Lista",

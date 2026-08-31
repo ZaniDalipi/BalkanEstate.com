@@ -40,6 +40,12 @@ import {
   createUserLocationMarkerElement,
   userLocationScaleForZoom,
 } from '../utils/userLocationMarker';
+import {
+  createClusterActivation,
+  createClusterRenderer,
+  injectClusterZoomStyles,
+  type ClusterActivation,
+} from '../utils/clusterZoom';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { useRainViewer } from '../hooks/useRainViewer';
 import { useOpenMeteoGrid, type MapBounds } from '../hooks/useOpenMeteoGrid';
@@ -52,6 +58,7 @@ import {
   PROMOTION_TIER_COLORS,
   DEFAULT_CENTER,
   DEFAULT_ZOOM,
+  MAP_MAX_ZOOM,
   BALKAN_BOUNDS,
   cleanMapStyles,
   colorMapStyles,
@@ -179,6 +186,8 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
   // Refs - ALL useRef hooks must be at the top to maintain consistent hook order
   const clustererRef = useRef<MarkerClusterer | null>(null);
+  // Owns the cluster tap interaction (fly-in, reveal, spiderfy) — see clusterZoom.ts
+  const clusterActivationRef = useRef<ClusterActivation | null>(null);
   const markersRef = useRef<Map<string, google.maps.marker.AdvancedMarkerElement>>(new Map());
   const markerDivsRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const lastMapTypeRef = useRef<string | null>(null);
@@ -550,91 +559,40 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     };
   }, []);
 
-  // Create clusterer once marker library is available
+  // Create clusterer once marker library is available.
+  //
+  // Tapping a cluster is the map's main way in, so it doesn't guess a zoom
+  // level: `createClusterActivation` flies the camera to the bounds of that
+  // cluster's own markers, then blooms the listings it was standing in for
+  // (falling back to a spiderfy when no zoom could ever separate them).
   const createClusterer = useCallback((mapInstance: google.maps.Map) => {
-    const onClusterClick = (
-      event: google.maps.MapMouseEvent,
-      cluster: any,
-      map: google.maps.Map
-    ) => {
-      // Use the actual click position for centering
-      const clickLat = event.latLng?.lat();
-      const clickLng = event.latLng?.lng();
+    injectClusterZoomStyles();
 
-      if (clickLat === undefined || clickLng === undefined) return;
-
-      const currentZoom = map.getZoom() ?? 10;
-      const targetZoom = Math.min(currentZoom + 4, 18);
-
-      // Pan directly to click position with smooth animation
-      map.panTo({ lat: clickLat, lng: clickLng });
-
-      // Then zoom in smoothly
-      setTimeout(() => {
-        const zoomSteps = Math.abs(targetZoom - currentZoom);
-        let currentZoomLevel = currentZoom;
-
-        const zoomInterval = setInterval(() => {
-          if (currentZoomLevel >= targetZoom) {
-            clearInterval(zoomInterval);
-            return;
-          }
-          currentZoomLevel++;
-          map.setZoom(currentZoomLevel);
-        }, 80);
-      }, 400);
-    };
+    clusterActivationRef.current = createClusterActivation({
+      getClusterer: () => clustererRef.current,
+      maxZoom: MAP_MAX_ZOOM,
+    });
 
     const clusterer = new MarkerClusterer({
       map: mapInstance,
-      onClusterClick,
+      onClusterClick: (event, cluster, map) =>
+        clusterActivationRef.current?.onClusterClick(event, cluster, map),
       algorithm: new SuperClusterAlgorithm({
         radius: 60,
         maxZoom: 15,
       }),
-      renderer: {
-        render: ({ count, position }) => {
-          const div = document.createElement('div');
-          div.className = 'cluster-marker';
-          const size = count < 10 ? 28 : count < 50 ? 32 : count < 100 ? 36 : 40;
-          div.style.cssText = `
-            width: ${size}px;
-            height: ${size}px;
-            background: linear-gradient(135deg, #0252CD 0%, #0066FF 100%);
-            border: 2px solid white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: ${count < 100 ? 11 : 10}px;
-            font-family: Inter, system-ui, sans-serif;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2);
-            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-          `;
-          div.textContent = String(count);
-          div.addEventListener('mouseenter', () => {
-            div.style.transform = 'scale(1.15)';
-            div.style.boxShadow = '0 4px 12px rgba(2, 82, 205, 0.5), 0 2px 4px rgba(0,0,0,0.3)';
-          });
-          div.addEventListener('mouseleave', () => {
-            div.style.transform = 'scale(1)';
-            div.style.boxShadow = '0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2)';
-          });
-
-          return new google.maps.marker.AdvancedMarkerElement({
-            position,
-            content: div,
-          });
-        },
-      },
+      renderer: createClusterRenderer({
+        getAriaLabel: (count) =>
+          t('search:map.cluster.zoomIn', {
+            count,
+            defaultValue: '{{count}} properties here — activate to zoom in and see them all',
+          }),
+      }),
     });
 
     clustererRef.current = clusterer;
     setMarkersReady(true);
-  }, []);
+  }, [t]);
 
   // Handle map load
   const onLoad = useCallback(async (mapInstance: google.maps.Map) => {
@@ -697,6 +655,8 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
   // Handle map unmount
   const onUnmount = useCallback(() => {
+    clusterActivationRef.current?.reset();
+    clusterActivationRef.current = null;
     if (clustererRef.current) {
       clustererRef.current.clearMarkers();
     }
@@ -974,6 +934,13 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   const createAllMarkers = useCallback((props: Property[], mapToUse: google.maps.Map) => {
     if (!clustererRef.current) return;
 
+    // A spiderfied cluster holds its pins at temporary positions with their
+    // `map` forced on. Fold it back before diffing, or the clusterer would
+    // re-render around coordinates that aren't where those listings are.
+    // Collapse only — a live property refresh must not cancel a cluster flight
+    // the visitor is watching.
+    clusterActivationRef.current?.collapse();
+
     // Inner helper: build one marker div + AdvancedMarkerElement
     const makeMarker = (property: Property, animate: boolean, idx: number, total: number) => {
       const markerDiv = document.createElement('div');
@@ -1051,8 +1018,15 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
       if (!isLuxuryVilla) markerDiv.textContent = price;
 
+      // A marker mid-animation must not take a hover transform: the animation
+      // outranks the inline style while it runs, then hands back to a stale
+      // `scale(1.25)` the pointer has long since left.
+      const isAnimating = () =>
+        markerDiv.classList.contains('gmarker-entrance-fly') ||
+        markerDiv.classList.contains('be-marker-bloom');
+
       markerDiv.onmouseenter = () => {
-        if (!markerDiv.classList.contains('marker-highlighted') && !markerDiv.classList.contains('gmarker-entrance-fly')) {
+        if (!markerDiv.classList.contains('marker-highlighted') && !isAnimating()) {
           markerDiv.style.transform = 'scale(1.25) translateY(-2px)';
           // Villa pins have a transparent div, so a box-shadow would paint a
           // rectangle behind them — they carry their own silhouette glow.
@@ -1061,7 +1035,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         }
       };
       markerDiv.onmouseleave = () => {
-        if (!markerDiv.classList.contains('marker-highlighted') && !markerDiv.classList.contains('gmarker-entrance-fly')) {
+        if (!markerDiv.classList.contains('marker-highlighted') && !isAnimating()) {
           markerDiv.style.transform = '';
           markerDiv.style.boxShadow = '';
           markerDiv.style.zIndex = isActivelyPromoted ? '100' : '1';
@@ -2012,7 +1986,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       keyboardShortcuts: false,
       gestureHandling: 'greedy',
       minZoom: 6,
-      maxZoom: 21,
+      maxZoom: MAP_MAX_ZOOM,
       tilt: 0,
       heading: 0,
     };

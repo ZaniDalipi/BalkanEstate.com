@@ -168,6 +168,11 @@
     "forRent": "de închiriat"
   },
   "map": {
+    "cluster": {
+      "zoomIn_one": "{{count}} proprietate aici — activați pentru a mări",
+      "zoomIn_few": "{{count}} proprietăți aici — activați pentru a mări și a le vedea pe toate",
+      "zoomIn_other": "{{count}} de proprietăți aici — activați pentru a mări și a le vedea pe toate"
+    },
     "showMap": "Hartă",
     "hideMap": "Ascunde Harta",
     "showList": "Listă",

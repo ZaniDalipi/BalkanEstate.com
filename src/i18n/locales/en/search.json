@@ -183,6 +183,10 @@
     "forRent": "for rent"
   },
   "map": {
+    "cluster": {
+      "zoomIn_one": "{{count}} property here — activate to zoom in",
+      "zoomIn_other": "{{count}} properties here — activate to zoom in and see them all"
+    },
     "showMap": "Map",
     "hideMap": "Hide Map",
     "showList": "List",

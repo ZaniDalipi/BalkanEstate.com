@@ -168,6 +168,10 @@
     "forRent": "me qira"
   },
   "map": {
+    "cluster": {
+      "zoomIn_one": "{{count}} pronë këtu — aktivizoje për të zmadhuar",
+      "zoomIn_other": "{{count}} prona këtu — aktivizoje për të zmadhuar dhe për t'i parë të gjitha"
+    },
     "showMap": "Hartë",
     "hideMap": "Fshih Hartën",
     "showList": "Listë",
