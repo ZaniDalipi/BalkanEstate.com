@@ -9,6 +9,7 @@ import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { useAppContext } from '@/context/AppContext';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import ArticleCard from './ArticleCard';
+import { AdBanner } from '@/features/ads';
 import { cn } from '@/lib/utils';
 
 interface ArticlePageProps {
@@ -531,6 +532,10 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
             />
           )}
         </motion.div>
+
+        {/* End-of-article banner. Capped to the article column's own width so it
+            lines up with the text rather than spanning the page. */}
+        <AdBanner placement="blogArticle" spacing="compact" maxWidth="728px" />
 
         {/* ── Bottom share + back ─────────────────────────────────────────────── */}
         <div className="border-t border-neutral-100 py-10 bg-slate-50">

@@ -40,6 +40,7 @@ import ScheduleViewingModal from '@/src/features/rental/components/ScheduleViewi
 import ExternalSourceBadge from '@/src/features/properties/components/ExternalSourceBadge';
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import { buildMapFocusTarget, resolveMapDestination } from '@/shared/map/mapDestination';
+import { AdBanner, AdSlot } from '@/features/ads';
 import Footer from '@/components/shared/Footer';
 import Modal from '@/components/shared/Modal';
 import * as api from '@/services/apiService';
@@ -1042,9 +1043,19 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               isCreatingConversation={isCreatingConversation}
               onContactSeller={handleContactSeller}
             />
+            {/* Under the contact card, never over it: a normal block in the
+                sidebar column, so it can only push the column taller. */}
+            <div className="mt-6">
+              <AdSlot placement="propertySidebar" shape="rectangle" />
+            </div>
           </div>
         </div>
       </main>
+
+      {/* Banner between the details block and the full-width map. It sits in the
+          page flow with its own row, so the map below always starts under it
+          rather than behind it. */}
+      <AdBanner placement="propertyInArticle" spacing="compact" maxWidth="728px" />
 
       {/* 3D Map — full-bleed full-width band, rendered outside the main container so it
           spans the full screen width, right after the description to keep readers engaged.

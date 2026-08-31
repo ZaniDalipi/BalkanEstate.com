@@ -19,6 +19,7 @@ import { ViewTransition, NavigationProvider } from './src/components/ui/ViewTran
 import { useZoomCompensation } from './src/app/hooks/useZoomCompensation';
 import { usePWALinkInterceptor } from './src/shared/hooks/usePWALinkInterceptor';
 import { useCookieConsent } from './src/shared/utils/cookieConsent';
+import { isAdFreeView } from './src/features/ads';
 // Lazy load SEO components (don't block initial render)
 const SEO = lazy(() => import('./src/components/seo').then(m => ({ default: m.SEO })));
 const OrganizationSchema = lazy(() => import('./src/components/seo').then(m => ({ default: m.OrganizationSchema })));
@@ -134,6 +135,8 @@ const AgencyPaymentPage = lazy(() => import('./src/features/agencies/components/
 
 // Cookie Consent Banner (lazy loaded - shown after initial render)
 const ConsentBanner = lazy(() => import('./src/shared/components/ConsentBanner'));
+// Bottom ad bar (lazy — nothing to load at all until ads are configured and consented to)
+const AnchorAd = lazy(() => import('./src/features/ads/components/AnchorAd'));
 const PushNotificationPrompt = lazy(() => import('./src/features/notifications/components/PushNotificationPrompt'));
 
 // Splash screen (lazy loaded - shown on initial app load to hide loading)
@@ -1045,17 +1048,37 @@ const MainLayout: React.FC = () => {
               Bottom padding for non-full-height views on mobile:
               BottomNav is fixed bottom-0 (~48px tall) + safe-area-inset-bottom.
               Full-height views (search, inbox, property) handle their own internal scroll.
+
+              --anchor-ad-height is published by the bottom ad bar while it is on
+              screen (and cleared when it is not), so the end of the page can
+              always be scrolled clear of it instead of sitting underneath.
             */}
             <main
               id="main-content"
               data-scroll-container
               className={`relative flex flex-col flex-1 overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden h-full min-h-0' : 'overflow-y-auto'}`}
-              style={!isFullHeightView && isMobile ? { paddingBottom: 'calc(3.5rem + env(safe-area-inset-bottom, 0px))' } : undefined}
+              style={
+                !isFullHeightView
+                  ? {
+                      paddingBottom: `calc(${isMobile ? '3.5rem' : '0px'} + var(--anchor-ad-height, 0px) + env(safe-area-inset-bottom, 0px))`,
+                    }
+                  : undefined
+              }
             >
                 <AppContent onToggleSidebar={() => setIsSidebarOpen(true)} />
             </main>
 
         </div>
+
+        {/* Bottom ad bar. Kept off the views that own the bottom of the screen
+            (map/search, inbox, property details' own action bar) and off private
+            or transactional pages, and stacked above the mobile BottomNav rather
+            than on the same line as it. */}
+        {!isFullHeightView && !isAdFreeView(state.activeView) && (
+          <Suspense fallback={null}>
+            <AnchorAd bottomOffset={isMobile ? '3.5rem' : '0px'} />
+          </Suspense>
+        )}
 
         {/* Lazy loaded modals - only render when open */}
         <Suspense fallback={null}>

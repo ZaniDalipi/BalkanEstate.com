@@ -18,6 +18,7 @@ import AppShowcaseSection from './AppShowcaseSection';
 import CityShowcaseSection from './CityShowcaseSection';
 import QuickAccessSection from './QuickAccessSection';
 import Footer from '@/components/shared/Footer';
+import { AdBanner, AdRailFrame } from '@/features/ads';
 
 // Lazy-load below-fold sections to reduce initial bundle
 const StackedCards = lazy(() => import('@/src/components/ui/glass-cards').then(m => ({ default: m.StackedCards })));
@@ -230,6 +231,10 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
         belowActions={<CityShowcaseSection onNavigate={handleNavigate} />}
       />
 
+      {/* Wide banner between the hero's stats strip and the showcase. It takes a
+          row of its own, so it can only ever sit between two sections. */}
+      <AdBanner placement="homeBillboard" spacing="section" />
+
       <AppShowcaseSection onNavigate={handleNavigate} />
 
       {isAuthenticated && currentUser && (
@@ -265,16 +270,23 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
         </Suspense>
       </div>
 
+      {/* The podium sections centre a 72rem column, which leaves a real gutter
+          on very wide screens — that gutter, and only that, is where the side
+          rails go. */}
       <div className="content-below-fold">
-        <Suspense fallback={<SectionFallback />}>
-          <TopAgentsSection />
-        </Suspense>
+        <AdRailFrame>
+          <Suspense fallback={<SectionFallback />}>
+            <TopAgentsSection />
+          </Suspense>
+        </AdRailFrame>
       </div>
 
       <div className="content-below-fold">
-        <Suspense fallback={<SectionFallback />}>
-          <TopAgenciesSection />
-        </Suspense>
+        <AdRailFrame>
+          <Suspense fallback={<SectionFallback />}>
+            <TopAgenciesSection />
+          </Suspense>
+        </AdRailFrame>
       </div>
 
       <div className="content-below-fold">
@@ -294,6 +306,10 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
           <PopularCitiesSection onNavigate={handleNavigate} />
         </Suspense>
       </div>
+
+      {/* Second in-feed banner, far enough down the page that it is nowhere near
+          the first one. */}
+      <AdBanner placement="homeInFeed" spacing="section" />
 
       <div className="content-below-fold">
         <Suspense fallback={<SectionFallback />}>

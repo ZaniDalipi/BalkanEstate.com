@@ -258,6 +258,7 @@
     "copyright": "© {{year}} BalkanEstate. Toate drepturile rezervate."
   },
   "advertisement": {
+    "label": "Publicitate",
     "loadingFeatured": "Se încarcă agențiile recomandate...",
     "notAvailable": "Bannerele Agențiilor Nu Sunt Disponibile",
     "featuredAgency": "AGENȚIE RECOMANDATĂ",

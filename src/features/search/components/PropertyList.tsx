@@ -6,6 +6,7 @@ import HighlightedPropertiesSection from '@/src/features/property-details/compon
 import { SearchIcon, XMarkIcon, BellIcon, BuildingLibraryIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon, AdjustmentsHorizontalIcon } from '@/constants';
 import AiSearch from './AiSearch';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
+import { AdBanner } from '@/features/ads';
 import Footer from '@/components/shared/Footer';
 
 interface PropertyListProps {
@@ -1012,6 +1013,9 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                             />
                                         ))}
                                     </div>
+                                    {/* Below the cards, outside the grid — a slot inside it would
+                                        be mistaken for a listing and would break the row heights. */}
+                                    <AdBanner placement="searchList" spacing="compact" />
                                     {visibleCount < properties.length && (
                                         <div ref={loadMoreRef}>
                                             {isLoadingMore && (
@@ -1147,6 +1151,9 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                                 />
                                             ))}
                                         </div>
+                                        {/* Below the cards, outside the grid — a slot inside it would
+                                            be mistaken for a listing and would break the row heights. */}
+                                        <AdBanner placement="searchList" spacing="compact" />
                                         {visibleCount < properties.length && (
                                             <div ref={loadMoreRef}>
                                                 {isLoadingMore && (

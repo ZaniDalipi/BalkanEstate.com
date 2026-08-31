@@ -261,6 +261,7 @@
     "copyright": "© {{year}} BalkanEstate. All rights reserved."
   },
   "advertisement": {
+    "label": "Advertisement",
     "loadingFeatured": "Loading featured agencies...",
     "notAvailable": "Agency Banners Not Available",
     "featuredAgency": "FEATURED AGENCY",

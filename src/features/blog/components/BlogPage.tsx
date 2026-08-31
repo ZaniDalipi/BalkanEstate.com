@@ -10,6 +10,7 @@ import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import ArticleCard from './ArticleCard';
 import BlogFilters from './BlogFilters';
 import ArticlePage from './ArticlePage';
+import { AdSlot } from '@/features/ads';
 
 const BlogPage: React.FC = () => {
   const { t } = useTranslation('blog');
@@ -178,17 +179,22 @@ const BlogPage: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               className="lg:col-span-1"
             >
-              <div className="sticky top-24 bg-slate-50 p-4 sm:p-6 rounded-xl border border-neutral-200">
-                <BlogFilters
-                  categories={categories}
-                  countries={countries}
-                  selectedCategory={selectedCategory}
-                  selectedCountry={selectedCountry}
-                  selectedTag={selectedTag}
-                  onCategoryChange={handleCategoryChange}
-                  onCountryChange={handleCountryChange}
-                  onTagChange={handleTagChange}
-                />
+              <div className="sticky top-24 space-y-6">
+                <div className="bg-slate-50 p-4 sm:p-6 rounded-xl border border-neutral-200">
+                  <BlogFilters
+                    categories={categories}
+                    countries={countries}
+                    selectedCategory={selectedCategory}
+                    selectedCountry={selectedCountry}
+                    selectedTag={selectedTag}
+                    onCategoryChange={handleCategoryChange}
+                    onCountryChange={handleCountryChange}
+                    onTagChange={handleTagChange}
+                  />
+                </div>
+                {/* Below the filters in the same sidebar column — it can only
+                    make the column taller, never overlap the article grid. */}
+                <AdSlot placement="blogList" shape="rectangle" />
               </div>
             </motion.div>
 

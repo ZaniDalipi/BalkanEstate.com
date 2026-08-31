@@ -11,6 +11,7 @@ import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryCon
 import { useAppContext } from '@/context/AppContext';
 import { searchLocation } from '@/services/osmService';
 import Footer from '@/components/shared/Footer';
+import { AdBanner } from '@/features/ads';
 import { SEO } from '@/src/components/seo';
 import SuburbDetailPanel from './SuburbDetailPanel';
 import type { SuburbEntry } from '@/src/shared/types/suburb.types';
@@ -910,6 +911,10 @@ const CityDashboard: React.FC = () => {
             <EconomicIndicatorsPanel data={economicData} />
           </div>
         )}
+
+        {/* Banner between the market data and the AI analysis, on a row of its
+            own so neither block can end up under it. */}
+        <AdBanner placement="cityDashboard" spacing="compact" className="px-0" />
 
         {/* AI section divider (return to AI-generated content) */}
         <div className="flex items-center gap-3 mb-6">

@@ -258,6 +258,7 @@
     "copyright": "© {{year}} BalkanEstate. Με επιφύλαξη παντός δικαιώματος."
   },
   "advertisement": {
+    "label": "Διαφήμιση",
     "loadingFeatured": "Φόρτωση προτεινόμενων γραφείων...",
     "notAvailable": "Τα Banners Γραφείων Δεν Είναι Διαθέσιμα",
     "featuredAgency": "ΠΡΟΤΕΙΝΟΜΕΝΟ ΓΡΑΦΕΙΟ",

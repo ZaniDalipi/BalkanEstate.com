@@ -258,6 +258,7 @@
     "copyright": "© {{year}} BalkanEstate. Sva prava zadržana."
   },
   "advertisement": {
+    "label": "Oglas",
     "loadingFeatured": "Učitavanje istaknutih agencija...",
     "notAvailable": "Oglasi Agencija Nisu Dostupni",
     "featuredAgency": "ISTAKNUTA AGENCIJA",

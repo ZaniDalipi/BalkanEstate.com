@@ -258,6 +258,7 @@
     "copyright": "© {{year}} BalkanEstate. Të gjitha të drejtat e rezervuara."
   },
   "advertisement": {
+    "label": "Reklamë",
     "loadingFeatured": "Duke ngarkuar agjencitë e veçanta...",
     "notAvailable": "Banerat e Agjencive nuk janë të Disponueshme",
     "featuredAgency": "AGJENCI E VEÇANTË",

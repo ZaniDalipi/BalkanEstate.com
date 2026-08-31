@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
 import { SEO } from '@/src/components/seo';
 import Footer from '@/components/shared/Footer';
+import { AdBanner } from '@/features/ads';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 
 // Country guide data — structured for SEO with rich content
@@ -491,6 +492,10 @@ const BuyingGuidesPage: React.FC = () => {
           </article>
         ))}
       </div>
+
+      {/* Banner between the guides and the call to action, in its own row so it
+          separates the two sections rather than sitting across either. */}
+      <AdBanner placement="guides" spacing="compact" />
 
       {/* CTA Section */}
       <div className="bg-gradient-to-br from-primary-600 to-primary-800 text-white py-16">
