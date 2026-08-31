@@ -3,6 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 import { CONTACT_CONFIG } from '@/src/shared/config/contact';
+import {
+  clearConsentRecord,
+  notifyConsentChanged,
+  openCookieSettings,
+  DENY_ALL,
+} from '@/src/shared/utils/cookieConsent';
 import LegalFooter from './LegalFooter';
 
 // Inline ArrowLeftIcon to avoid importing all icons
@@ -30,9 +36,11 @@ const CookiePolicyPage: React.FC = () => {
   };
 
   const handleManageCookies = () => {
-    // Clear consent to re-show the banner
-    localStorage.removeItem('balkanestate_cookie_consent');
-    window.location.reload();
+    // Withdrawing consent must be as easy as giving it: drop the stored record,
+    // tell anything gating on consent to stand down, and re-open the banner.
+    clearConsentRecord();
+    notifyConsentChanged(DENY_ALL);
+    openCookieSettings();
   };
 
   const lastUpdated = 'January 9, 2026';
