@@ -29,7 +29,7 @@ const RECOMMENDED_DIMS: Record<string, { w: number; h: number; label: string }> 
   'sticky-bottom': { w: 970, h: 90, label: '970 × 90 — leaderboard' },
   'sticky-top': { w: 970, h: 90, label: '970 × 90 — leaderboard' },
   header: { w: 970, h: 90, label: '970 × 90 — leaderboard' },
-  sidebar: { w: 300, h: 600, label: '300 × 600 — half-page (or 160 × 600 for home side rails)' },
+  sidebar: { w: 300, h: 600, label: '300 × 600 — half-page (tall)' },
   footer: { w: 970, h: 250, label: '970 × 250 — billboard' },
 };
 

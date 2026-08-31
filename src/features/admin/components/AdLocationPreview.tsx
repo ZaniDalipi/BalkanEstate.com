@@ -45,7 +45,7 @@ export const PLACEMENT_INFO: Record<AdPlacement, { label: string; description: s
   sidebar: {
     label: 'Sidebar / Side Rail',
     description: 'A tall banner in the side column or page margins. On the home page the left rail is order 0 and the right rail is order 1.',
-    shape: 'Skyscraper · 300 × 600 (or 160 × 600)',
+    shape: 'Half-page · 300 × 600',
   },
   footer: {
     label: 'Footer',

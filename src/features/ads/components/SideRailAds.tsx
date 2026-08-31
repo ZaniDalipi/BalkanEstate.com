@@ -10,8 +10,9 @@ interface SideRailAdsProps {
   children: React.ReactNode;
 }
 
-const RAIL_WIDTH = 160;
-const GAP = 24;
+// Match the listing sidebar ad: half-page (300×600).
+const RAIL_WIDTH = 300;
+const GAP = 20;
 
 /**
  * Wraps a section and floats a vertical skyscraper ad in each side margin.
@@ -29,9 +30,10 @@ const SideRailAds: React.FC<SideRailAdsProps> = ({ page, contentMaxWidth = 1280,
     // Normally need room for content + both rails + gaps on either side.
     // In preview mode, drop the bar to any wide-ish desktop so the admin can
     // see the rails without an ultra-wide monitor.
+    // Wide rails (300px) need real margin room to avoid overlapping content.
     const minWidth = preview.active
-      ? 1100
-      : contentMaxWidth + 2 * (RAIL_WIDTH + GAP) + 32;
+      ? contentMaxWidth + 2 * RAIL_WIDTH
+      : contentMaxWidth + 2 * (RAIL_WIDTH + GAP) + 24;
     const mq = window.matchMedia(`(min-width: ${minWidth}px)`);
     const update = () => setShowRails(mq.matches);
     update();
@@ -47,7 +49,7 @@ const SideRailAds: React.FC<SideRailAdsProps> = ({ page, contentMaxWidth = 1280,
             page={page}
             placement="sidebar"
             index={0}
-            format="skyscraper"
+            format="halfpage"
             style={{
               position: 'absolute',
               top: 40,
@@ -60,7 +62,7 @@ const SideRailAds: React.FC<SideRailAdsProps> = ({ page, contentMaxWidth = 1280,
             page={page}
             placement="sidebar"
             index={1}
-            format="skyscraper"
+            format="halfpage"
             style={{
               position: 'absolute',
               top: 40,

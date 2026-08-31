@@ -67,6 +67,9 @@ const AdSlot: React.FC<AdSlotProps> = ({
   const { dispatch } = useAppContext();
   const trackedRef = useRef<string | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  // Natural aspect ratio of the loaded creative, so horizontal slots size to
+  // the actual banner instead of leaving big blurred bars.
+  const [imgAspect, setImgAspect] = React.useState<number | null>(null);
 
   // "Your Ad Here" placeholder → open the contact form as an advertising lead.
   const contactHref = `${buildLocalizedPath('/contact')}?topic=advertise`;
@@ -114,6 +117,19 @@ const AdSlot: React.FC<AdSlotProps> = ({
     borderRadius: 12,
     overflow: 'hidden',
   };
+
+  // For horizontal slots, match the creative's own aspect ratio (once loaded)
+  // so the banner fills the box edge-to-edge — capped so an odd-shaped image
+  // can't blow the height up. Vertical rails keep their fixed skyscraper shape.
+  const bannerBoxStyle: React.CSSProperties = isTall
+    ? baseBoxStyle
+    : {
+        ...baseBoxStyle,
+        maxWidth: Math.max(w, 1000),
+        aspectRatio: imgAspect
+          ? `${Math.min(Math.max(imgAspect, 1.5), 8)}`
+          : `${w} / ${h}`,
+      };
 
   // No direct booking — fill with a network ad (AdSense) to earn revenue on
   // unsold inventory, when configured and not in preview mode.
@@ -213,7 +229,7 @@ const AdSlot: React.FC<AdSlotProps> = ({
     <div ref={wrapperRef} className={className} style={{ ...style, ...previewWrap }} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
       <div
         style={{
-          ...baseBoxStyle,
+          ...bannerBoxStyle,
           background: '#ffffff',
           border: '1px solid rgba(0,0,0,0.08)',
           boxShadow: '0 4px 18px rgba(0,0,0,0.08)',
@@ -268,6 +284,10 @@ const AdSlot: React.FC<AdSlotProps> = ({
             src={imageSrc}
             alt={banner.title}
             loading="lazy"
+            onLoad={(e) => {
+              const { naturalWidth: nw, naturalHeight: nh } = e.currentTarget;
+              if (nw > 0 && nh > 0) setImgAspect(nw / nh);
+            }}
             style={{ display: 'block', width: '100%', height: '100%', objectFit: 'contain' }}
           />
         </a>
