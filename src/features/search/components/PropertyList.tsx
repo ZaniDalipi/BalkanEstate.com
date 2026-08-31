@@ -698,10 +698,16 @@ const AnimatedPropertyCard = memo<{
 // CSS for property card transitions
 const PropertyListStyles = () => (
   <style>{`
+    /* Layout and style containment only — deliberately NOT paint.
+       Paint containment clips a child to this box, and the card paints
+       outside it on hover: it lifts 6px and casts a shadow past all four
+       edges. With paint containment the lift was sliced off flat, squaring
+       the rounded top corners and leaving a hard grey band where the top
+       edge and its shadow should be. content-visibility: auto implies paint
+       containment too, so it cannot come back either; the list is paginated
+       at ITEMS_PER_PAGE, so it was never carrying much of the load. */
     .property-card-container {
-      contain: layout style paint;
-      content-visibility: auto;
-      contain-intrinsic-size: auto 320px;
+      contain: layout style;
     }
 
     .property-grid-loading {
@@ -988,7 +994,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                         <div className="p-4 md:p-3 relative z-0">
                             <PropertyListStyles />
                             {(isLoadingProperties || isSearchFiltering) ? (
-                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 xl:gap-6">
+                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8">
                                     {Array.from({ length: 6 }).map((_, index) => (
                                         <PropertyCardSkeleton key={index} index={index} />
                                     ))}
@@ -996,28 +1002,21 @@ const PropertyList = memo<PropertyListProps>((props) => {
                             ) : properties.length > 0 ? (
                                 <>
                                     <HighlightedPropertiesSection properties={properties} />
-                                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 xl:gap-6 property-grid-transition">
-                                        {properties.slice(0, visibleCount).map((prop, index, arr) => (
-                                            <React.Fragment key={prop.id || `prop-${index}`}>
-                                                <AnimatedPropertyCard
-                                                    property={prop}
-                                                    index={index}
-                                                    onHover={onPropertyHover}
-                                                    animateEntrance={animateCards || animateFilteredCards}
-                                                />
-                                                {/* In-feed ad — full width across the results grid, after the 4th card */}
-                                                {index === Math.min(3, arr.length - 1) && (
-                                                    <div className="xl:col-span-2">
-                                                        <AdSlot page="search" placement="in-content" />
-                                                    </div>
-                                                )}
-                                            </React.Fragment>
+                                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8 property-grid-transition">
+                                        {properties.slice(0, visibleCount).map((prop, index) => (
+                                            <AnimatedPropertyCard
+                                                key={prop.id || `prop-${index}`}
+                                                property={prop}
+                                                index={index}
+                                                onHover={onPropertyHover}
+                                                animateEntrance={animateCards || animateFilteredCards}
+                                            />
                                         ))}
                                     </div>
                                     {visibleCount < properties.length && (
                                         <div ref={loadMoreRef}>
                                             {isLoadingMore && (
-                                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 xl:gap-6 mt-4">
+                                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8 mt-4">
                                                     {Array.from({ length: Math.min(ITEMS_PER_PAGE, properties.length - visibleCount) }).map((_, i) => (
                                                         <PropertyCardSkeleton key={i} index={i} />
                                                     ))}
@@ -1130,7 +1129,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                             <div className="p-4 md:p-3 relative z-0">
                                 <PropertyListStyles />
                                 {isLoadingProperties ? (
-                                    <div className="grid grid-cols-1 gap-5">
+                                    <div className="grid grid-cols-1 gap-6">
                                         {Array.from({ length: 4 }).map((_, index) => (
                                             <PropertyCardSkeleton key={index} index={index} />
                                         ))}
@@ -1138,7 +1137,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                 ) : properties.length > 0 ? (
                                     <>
                                         <HighlightedPropertiesSection properties={properties} />
-                                        <div className="grid grid-cols-1 gap-5 property-grid-transition">
+                                        <div className="grid grid-cols-1 gap-6 property-grid-transition">
                                             {properties.slice(0, visibleCount).map((prop, index) => (
                                                 <AnimatedPropertyCard
                                                     key={prop.id || `prop-${index}`}
@@ -1152,7 +1151,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                         {visibleCount < properties.length && (
                                             <div ref={loadMoreRef}>
                                                 {isLoadingMore && (
-                                                    <div className="grid grid-cols-1 gap-4 mt-4 px-4">
+                                                    <div className="grid grid-cols-1 gap-6 mt-4 px-4">
                                                         {Array.from({ length: Math.min(ITEMS_PER_PAGE, properties.length - visibleCount) }).map((_, i) => (
                                                             <PropertyCardSkeleton key={i} index={i} />
                                                         ))}

@@ -18,6 +18,7 @@ import { AnimationProvider } from './src/components/ui/Animations';
 import { ViewTransition, NavigationProvider } from './src/components/ui/ViewTransition';
 import { useZoomCompensation } from './src/app/hooks/useZoomCompensation';
 import { usePWALinkInterceptor } from './src/shared/hooks/usePWALinkInterceptor';
+import { useCookieConsent } from './src/shared/utils/cookieConsent';
 // Lazy load SEO components (don't block initial render)
 const SEO = lazy(() => import('./src/components/seo').then(m => ({ default: m.SEO })));
 const OrganizationSchema = lazy(() => import('./src/components/seo').then(m => ({ default: m.OrganizationSchema })));
@@ -1339,6 +1340,10 @@ const App: React.FC = () => {
   const googleAnalyticsId = import.meta.env.VITE_GA_ID;
   const facebookPixelId = import.meta.env.VITE_FB_PIXEL_ID;
 
+  // Analytics and marketing tags may only load once the user has consented to
+  // that category — they are not strictly necessary, so they need prior consent.
+  const cookieConsent = useCookieConsent();
+
   return (
     <ErrorBoundary level="app">
       {/* reducedMotion="user" makes every framer-motion animation honor the
@@ -1360,15 +1365,16 @@ const App: React.FC = () => {
                         <SEO />
                         <OrganizationSchema language={currentLang} />
                         <FAQSchema faqs={realEstateFAQs} language={currentLang} />
-                        {/* Analytics - only loaded if IDs are provided */}
-                        {(googleAnalyticsId || facebookPixelId) && (
+                        {/* Analytics - only loaded if IDs are provided AND the user consented */}
+                        {((googleAnalyticsId && cookieConsent.analytics) ||
+                          (facebookPixelId && cookieConsent.marketing)) && (
                           <Analytics
-                            googleAnalyticsId={googleAnalyticsId}
-                            facebookPixelId={facebookPixelId}
+                            googleAnalyticsId={cookieConsent.analytics ? googleAnalyticsId : undefined}
+                            facebookPixelId={cookieConsent.marketing ? facebookPixelId : undefined}
                           />
                         )}
-                        {/* Microsoft Clarity - Heatmaps & Session Recordings */}
-                        <ClarityInit />
+                        {/* Microsoft Clarity - Heatmaps & Session Recordings (analytics consent) */}
+                        {cookieConsent.analytics && <ClarityInit />}
                       </Suspense>
 
                       <AppWrapper />

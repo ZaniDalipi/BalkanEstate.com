@@ -207,19 +207,21 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   // Property type labels
   const propertyTypeLabel = t(`property:types.${property.propertyType}`, { defaultValue: t('property:property') });
 
-  // Determine card styles based on promotion tier
+  // Determine card styles based on promotion tier. Elevation comes from the
+  // shadow-card / shadow-card-raised pair (see @theme in src/index.css) so
+  // every variant rises by the same amount; only the tint and ring differ.
   const getCardStyles = () => {
-    if (isSold || isRented) return 'border-neutral-300 opacity-80';
+    if (isSold || isRented) return 'border-neutral-300 opacity-80 shadow-card hover:shadow-card-raised-sm';
     if (isActivelyPromoted) {
-      if (promotionTier === 'premium') return 'ring-2 ring-amber-400 border-amber-200 shadow-amber-100';
-      if (promotionTier === 'highlight') return 'ring-2 ring-sky-400 border-sky-200 shadow-sky-100';
-      if (promotionTier === 'featured') return 'ring-2 ring-violet-500 border-violet-200 shadow-violet-100';
-      return 'ring-1 ring-gray-400 border-gray-200';
+      if (promotionTier === 'premium') return 'ring-2 ring-amber-400 border-amber-200 shadow-card hover:shadow-card-raised';
+      if (promotionTier === 'highlight') return 'ring-2 ring-sky-400 border-sky-200 shadow-card hover:shadow-card-raised';
+      if (promotionTier === 'featured') return 'ring-2 ring-violet-500 border-violet-200 shadow-card hover:shadow-card-raised';
+      return 'ring-1 ring-gray-400 border-gray-200 shadow-card hover:shadow-card-raised';
     }
     if (property.propertyType === 'luxury-villa') {
-      return 'ring-1 ring-[#FFA500]/50 border-[#FFA500]/25 shadow-[0_2px_16px_rgba(255,165,0,0.10)] hover:ring-[#FFA500]/70 hover:shadow-[0_4px_24px_rgba(255,165,0,0.16)]';
+      return 'ring-1 ring-[#FFA500]/50 border-[#FFA500]/25 shadow-card-gold hover:ring-[#FFA500]/70 hover:shadow-card-gold-raised';
     }
-    return 'border-neutral-200 hover:border-primary/30';
+    return 'border-neutral-200 shadow-card hover:border-primary/30 hover:shadow-card-raised';
   };
 
   const isLuxuryVilla = property.propertyType === 'luxury-villa';
@@ -250,8 +252,10 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
   return (
     <div
-      className={`group bg-white rounded-2xl overflow-hidden shadow-sm border transition-[transform,box-shadow,border-color,opacity] duration-300 text-left w-full flex flex-col cursor-pointer isolate ${getCardStyles()} ${
-        isSold || isRented ? 'hover:shadow-md' : 'hover:shadow-lg hover:-translate-y-1 hover:scale-[1.01]'
+      className={`group property-card bg-white rounded-2xl overflow-hidden border text-left w-full flex flex-col cursor-pointer isolate ${getCardStyles()} ${
+        // Sold and rented listings keep the shadow but not the lift — they are
+        // there to be read, not clicked through.
+        isSold || isRented ? '' : 'property-card--interactive'
       }`}
       onClick={onCardClick}
       onContextMenu={onContextMenu}
@@ -272,15 +276,20 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             key={currentImageIndex}
             className={`absolute inset-0 ${slideDirection === 'right' ? 'animate-gallery-right' : 'animate-gallery-left'}`}
           >
-            <PropertyImage
-              src={currentImageUrl}
-              alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
-              priority={priority}
-              widths={IMAGE_WIDTHS}
-              sizes={IMAGE_SIZES}
-              transitionDurationClass={currentImageIndex === 0 ? 'duration-300' : 'duration-150'}
-              imgClassName={isSold || isRented ? 'grayscale' : 'group-hover:scale-[1.02] transition-transform duration-300'}
-            />
+            {/* The hover zoom lives on this wrapper, not on the <img>: the image
+                already spends its transition-property on the load fade-in, and
+                the slide wrapper above holds a transform of its own. */}
+            <div className="property-card__photo absolute inset-0">
+              <PropertyImage
+                src={currentImageUrl}
+                alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
+                priority={priority}
+                widths={IMAGE_WIDTHS}
+                sizes={IMAGE_SIZES}
+                transitionDurationClass={currentImageIndex === 0 ? 'duration-300' : 'duration-150'}
+                imgClassName={isSold || isRented ? 'grayscale' : ''}
+              />
+            </div>
           </div>
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
@@ -289,7 +298,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             {hasMultipleImages && !isSold && !isRented && (
               <>
                 <button
-                  className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
+                  className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
                   onClick={handlePrevImage}
                   aria-label="Previous image"
                 >
@@ -298,7 +307,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                   </svg>
                 </button>
                 <button
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
                   onClick={handleNextImage}
                   aria-label="Next image"
                 >
@@ -542,7 +551,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           })()}
         </div>
         {/* Title */}
-        <h3 className="text-sm sm:text-base font-bold text-neutral-900 mb-1.5 line-clamp-1 group-hover:text-primary transition-colors duration-300">
+        <h3 className="text-sm sm:text-base font-bold text-neutral-900 mb-1.5 line-clamp-1 group-hover:text-primary transition-colors duration-[420ms] ease-out">
           {property.title || `${safeProperty.beds > 0 ? safeProperty.beds + '-Bed ' : ''}${propertyTypeLabel} ${isRental ? t('property:forRent', 'for Rent') : t('property:forSale', 'for Sale')}`}
         </h3>
 
@@ -569,13 +578,13 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
         </div>
 
         {/* Property Stats - Liquid Glass Design */}
-        <div className="grid grid-cols-4 gap-1.5 mb-2.5">
+        <div className="property-card__stats grid grid-cols-4 gap-1.5 mb-2.5">
           {/* Beds */}
           <div
             className="group relative flex flex-col items-center justify-center text-center py-2 px-0.5 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-[box-shadow,border-color] duration-200"
             aria-label={`${safeProperty.beds} ${safeProperty.beds === 1 ? t('property:features.bedroom') : t('property:features.bedrooms')}`}
           >
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="property-card__stat-glow absolute inset-0 rounded-xl bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" />
             <svg className="w-4 h-4 text-blue-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M2 17V8a2 2 0 012-2h16a2 2 0 012 2v9M2 17v2a1 1 0 001 1h1m16-3v2a1 1 0 01-1 1h-1M2 17h20M6 12h12a2 2 0 012 2v1H4v-1a2 2 0 012-2z" />
             </svg>
@@ -588,7 +597,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             className="group relative flex flex-col items-center justify-center text-center py-2 px-0.5 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-emerald-100 transition-[box-shadow,border-color] duration-200"
             aria-label={`${safeProperty.baths} ${safeProperty.baths === 1 ? t('property:features.bathroom') : t('property:features.bathrooms')}`}
           >
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="property-card__stat-glow absolute inset-0 rounded-xl bg-gradient-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" />
             <svg className="w-4 h-4 text-emerald-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 12h16M4 12v6a2 2 0 002 2h12a2 2 0 002-2v-6M4 12V7a3 3 0 013-3h1M8 4v4M12 4v2m-1 2a1 1 0 102 0 1 1 0 00-2 0z" />
             </svg>
@@ -601,7 +610,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             className="group relative flex flex-col items-center justify-center text-center py-2 px-0.5 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-purple-100 transition-[box-shadow,border-color] duration-200"
             aria-label={`${safeProperty.livingRooms} ${safeProperty.livingRooms === 1 ? t('property:features.livingRoom') : t('property:features.livingRooms')}`}
           >
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-purple-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="property-card__stat-glow absolute inset-0 rounded-xl bg-gradient-to-br from-purple-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" />
             <svg className="w-4 h-4 text-purple-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 12h18M3 12v6a1 1 0 001 1h2v-4h12v4h2a1 1 0 001-1v-6M3 12V9a3 3 0 013-3h12a3 3 0 013 3v3M7 19v-4m10 4v-4" />
             </svg>
@@ -614,7 +623,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             className="group relative flex flex-col items-center justify-center text-center py-2 px-0.5 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/60 shadow-sm hover:shadow-md hover:border-blue-300/70 transition-[box-shadow,border-color] duration-200"
             aria-label={`${safeProperty.sqft} ${t('common:sqm')}`}
           >
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-100/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="property-card__stat-glow absolute inset-0 rounded-xl bg-gradient-to-br from-blue-100/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" />
             <svg className="w-4 h-4 text-blue-600 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4h4M4 16v4h4M16 4h4v4M16 20h4v-4M9 9h6v6H9z" />
             </svg>
