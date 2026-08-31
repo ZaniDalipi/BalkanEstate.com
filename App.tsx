@@ -991,8 +991,10 @@ const MainLayout: React.FC = () => {
 
         {/* Sticky advertising banner — rendered outside scroll/overflow containers
             so position:fixed works in iOS Safari PWA standalone mode. Hidden on
-            admin/dashboard/auth views (adPage === null). */}
-        {adPage && (
+            admin/dashboard/auth views (adPage === null), and on the property
+            details page which has its own in-content + sidebar ad slots (so the
+            sticky bar doesn't overlap them). */}
+        {adPage && !state.selectedProperty && (
           <Suspense fallback={null}>
             <StickyAdBanner page={adPage} placement="sticky-bottom" />
           </Suspense>

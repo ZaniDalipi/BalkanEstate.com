@@ -6,6 +6,7 @@ import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { useAdBanners, selectByPlacement } from '../hooks/useAdBanners';
 import { useAdPreview } from '../hooks/useAdPreview';
 import { trackClick, trackImpression } from '../api/adBannerApi';
+import NetworkAd, { isNetworkAdConfigured } from './NetworkAd';
 import type { AdPage, AdPlacement } from '../types';
 
 /**
@@ -37,6 +38,10 @@ interface AdSlotProps {
   className?: string;
   /** Extra wrapper style. */
   style?: React.CSSProperties;
+  /** When there's no booked banner, render nothing instead of the
+   *  "Your Ad Here" placeholder (network fill still applies). Use for overlays
+   *  where an empty placeholder would be intrusive (e.g. over photos). */
+  hidePlaceholder?: boolean;
 }
 
 /**
@@ -54,6 +59,7 @@ const AdSlot: React.FC<AdSlotProps> = ({
   format = 'billboard',
   className,
   style,
+  hidePlaceholder = false,
 }) => {
   const { t } = useTranslation(['common']);
   const { data } = useAdBanners(page);
@@ -108,6 +114,22 @@ const AdSlot: React.FC<AdSlotProps> = ({
     borderRadius: 12,
     overflow: 'hidden',
   };
+
+  // No direct booking — fill with a network ad (AdSense) to earn revenue on
+  // unsold inventory, when configured and not in preview mode.
+  if (!banner && !preview.active && isNetworkAdConfigured()) {
+    return (
+      <div ref={wrapperRef} className={className} style={style} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
+        <div style={{ ...baseBoxStyle, background: '#f8fafc', border: '1px solid rgba(0,0,0,0.06)' }}>
+          <NetworkAd format={format} />
+        </div>
+      </div>
+    );
+  }
+
+  // Overlay slots opt out of the placeholder entirely (network fill above
+  // still applies when configured).
+  if (!banner && hidePlaceholder) return null;
 
   // No banner configured — show a "Your Ad Here" placeholder so the ad space
   // is always visible and sellable, sized to the real ad slot.
