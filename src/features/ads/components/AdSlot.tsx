@@ -6,7 +6,7 @@ import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { useAdBanners, selectByPlacement } from '../hooks/useAdBanners';
 import { useAdPreview } from '../hooks/useAdPreview';
 import { trackClick, trackImpression } from '../api/adBannerApi';
-import NetworkAd, { isNetworkAdConfigured } from './NetworkAd';
+import NetworkAd, { useNetworkAdFill } from './NetworkAd';
 import type { AdPage, AdPlacement } from '../types';
 
 /**
@@ -70,6 +70,12 @@ const AdSlot: React.FC<AdSlotProps> = ({
   // Natural aspect ratio of the loaded creative, so horizontal slots size to
   // the actual banner instead of leaving big blurred bars.
   const [imgAspect, setImgAspect] = React.useState<number | null>(null);
+  // Network fill needs marketing consent, not just a configured publisher id.
+  const canNetworkFill = useNetworkAdFill();
+  // Set once AdSense says it has nothing for this slot, so the space falls back
+  // to the sellable placeholder rather than staying an empty grey box.
+  const [networkUnfilled, setNetworkUnfilled] = React.useState(false);
+  const handleNetworkUnfilled = React.useCallback(() => setNetworkUnfilled(true), []);
 
   // "Your Ad Here" placeholder → open the contact form as an advertising lead.
   const contactHref = `${buildLocalizedPath('/contact')}?topic=advertise`;
@@ -132,12 +138,13 @@ const AdSlot: React.FC<AdSlotProps> = ({
       };
 
   // No direct booking — fill with a network ad (AdSense) to earn revenue on
-  // unsold inventory, when configured and not in preview mode.
-  if (!banner && !preview.active && isNetworkAdConfigured()) {
+  // unsold inventory, when consented to and not in preview mode. Once AdSense
+  // reports it has nothing either, fall through to the placeholder below.
+  if (!banner && !preview.active && canNetworkFill && !networkUnfilled) {
     return (
       <div ref={wrapperRef} className={className} style={style} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
         <div style={{ ...baseBoxStyle, background: '#f8fafc', border: '1px solid rgba(0,0,0,0.06)' }}>
-          <NetworkAd format={format} />
+          <NetworkAd format={format} onUnfilled={handleNetworkUnfilled} />
         </div>
       </div>
     );

@@ -48,6 +48,21 @@ vi.mock('@/src/shared/config/contact', () => ({
   },
 }));
 
+/**
+ * The subjects the form offers, in order. Kept as a list rather than a count so
+ * that adding one (e.g. "advertising", for the "Your Ad Here" slots) shows up
+ * as a named change here instead of an unexplained number.
+ */
+const SUBJECT_VALUES = [
+  'general',
+  'buying',
+  'selling',
+  'agency',
+  'support',
+  'partnership',
+  'advertising',
+];
+
 describe('ContactForm', () => {
   const defaultProps = {
     formData: {
@@ -151,7 +166,10 @@ describe('ContactForm', () => {
 
     const select = screen.getByLabelText(/contact:form.subject/);
     expect(select).toBeInTheDocument();
-    expect(select.querySelectorAll('option').length).toBe(6);
+    // general, buying, selling, agency, support, partnership, advertising
+    expect(select.querySelectorAll('option').length).toBe(SUBJECT_VALUES.length);
+    expect([...select.querySelectorAll('option')].map(o => o.getAttribute('value')))
+      .toEqual(SUBJECT_VALUES);
   });
 
   it('should have proper aria attributes on invalid fields', () => {
