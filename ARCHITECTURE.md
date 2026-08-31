@@ -204,6 +204,60 @@ slug.
 
 ---
 
+## Map Clusters — opening a bubble
+
+A cluster bubble is a promise: "there are N listings here". Tapping it has to
+keep that promise, so the interaction is driven by the cluster's *own* markers
+rather than a fixed zoom step.
+
+```
+MarkerClusterer.onClusterClick
+  └── createClusterActivation()            src/features/map/utils/clusterZoom.ts
+        ├── bubble press + ripple          (skipped under prefers-reduced-motion)
+        ├── boundsOfPositions(members)  ─┐
+        ├── cameraForBounds(...)         ├─ src/features/map/utils/clusterCamera.ts
+        ├── createFlightPath(from, to)  ─┘  (Van Wijk & Nuij optimal path)
+        │     └── rAF → map.moveCamera(...) each frame
+        └── on map idle
+              ├── bloomMarkers()   — revealed pins pop in, nearest anchor first
+              └── spiderfy()       — only when no zoom could separate them
+```
+
+Key decisions:
+- **Fit the cluster, don't guess a zoom.** The old handler panned to the click
+  point and stepped `+4` zoom levels on a `setInterval`, which overshot small
+  clusters and left big ones still clustered. The camera now targets
+  `cameraForBounds` of the member markers, so the listings the bubble stood for
+  are on screen when it lands. When those bounds already fill the viewport the
+  target is nudged to `currentZoom + 1`, so a tap always visibly breaks the
+  cluster up instead of looking inert.
+- **One movement, not three.** `createFlightPath` is the Van Wijk & Nuij (2003)
+  smooth-and-efficient zoom interpolation — the curve behind Mapbox's `flyTo`.
+  It arcs the camera out mid-journey and eases it down onto the target in a
+  single rAF-driven move, instead of pan → wait → step the zoom.
+- **Fractional zoom only where it renders.** Vector maps get the continuous
+  path; raster maps quantise each frame and aim at an integer zoom from the
+  start, so the final frame never snaps sideways.
+- **The visitor can always take over.** A drag or wheel during the flight
+  cancels it where it stands (and cancels the reveal with it).
+- **Spiderfy is the safety net, not the mechanism.** `cameraForBounds` reports
+  the zoom the bounds *actually* need; only when that exceeds the map's own
+  `MAP_MAX_ZOOM` — i.e. no zoom level could ever separate the pins — do the
+  members fan out on leader lines. Collapse restores every original position
+  and hands visibility back to the clusterer, so its model is never left
+  mutated. A property refresh mid-flight `collapse()`s a spider but must not
+  `reset()` the camera.
+- **The maths is separate from the map.** `clusterCamera.ts` is pure geometry
+  over Google's 256px Web Mercator world with no Google or DOM dependency,
+  covered by `src/tests/clusterCamera.test.ts`; `clusterZoom.ts` is the
+  Google Maps and DOM half.
+- **The bubble is a control.** It carries `role="button"`, a tab stop, an
+  `aria-label` from `search:map.cluster.zoomIn` (pluralised per locale), and
+  Enter/Space activation — previously it was a bare `div` with a click handler,
+  invisible to keyboard and assistive tech.
+
+---
+
 ## Sticky Bottom Action Bar
 
 Mobile-only companion to the desktop `PropertyContact` sidebar.

@@ -45,6 +45,10 @@ export const BALKAN_BOUNDS = {
 export const DEFAULT_CENTER = { lat: 41.5, lng: 22 };
 export const DEFAULT_ZOOM = 7;
 
+// Zoom ceiling. Shared with the cluster fly-in so the camera can never ask for
+// a zoom the map itself refuses — which would leave a cluster looking unopened.
+export const MAP_MAX_ZOOM = 21;
+
 // Map styles for clean look (properties stand out)
 export const cleanMapStyles: google.maps.MapTypeStyle[] = [
   { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
