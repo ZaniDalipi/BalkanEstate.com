@@ -6,9 +6,35 @@ import Property from '../models/Property';
 import Inquiry from '../models/Inquiry';
 import { apiLogger } from '../utils/logger';
 import { resolveId } from '../utils/idObfuscation';
+import { uploadImage } from '../services/cloudinaryService';
 
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'contact@balkanestateai.com';
-const VALID_SUBJECTS = ['general', 'buying', 'selling', 'agency', 'support', 'partnership'];
+const VALID_SUBJECTS = ['general', 'buying', 'selling', 'agency', 'support', 'partnership', 'advertising'];
+
+/**
+ * @desc    Public: upload an advertising creative attached to a contact request.
+ * @route   POST /api/inquiries/advertising-image
+ * @access  Public (rate limited)
+ */
+export const uploadAdvertisingImage = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ message: 'No file uploaded' });
+      return;
+    }
+    const result = await uploadImage(req.file.buffer, {
+      userId: 'public-advertising',
+      type: 'ad-banner',
+      maxWidth: 1600,
+      maxHeight: 1600,
+      skipRegistration: true,
+    });
+    res.status(200).json({ url: result.url });
+  } catch (err) {
+    apiLogger.warn(`[inquiryController] Advertising image upload failed: ${err}`);
+    res.status(500).json({ message: 'Failed to upload image' });
+  }
+};
 
 /**
  * @desc    Send inquiry to agent about a property
@@ -326,7 +352,7 @@ export const sendContactInquiry = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { name, email, phone, subject, message } = req.body;
+    const { name, email, phone, subject, message, adPage, adPlacement, attachmentUrl } = req.body;
 
     // Validate required fields
     if (!name || !email || !subject || !message) {
@@ -367,34 +393,72 @@ export const sendContactInquiry = async (
     // Sanitize phone if provided
     const trimmedPhone = phone ? String(phone).trim() : undefined;
 
+    // Advertising requests are treated as high-priority leads.
+    const isAdvertising = subject === 'advertising';
+    const priority = isAdvertising ? 'high' : 'normal';
+
+    // Advertising details (validated against the known slot options).
+    const AD_PAGES = ['all', 'home', 'search', 'rentals', 'property-details', 'agents', 'agencies', 'business-directory', 'blog', 'guides'];
+    const AD_PLACEMENTS = ['sticky-bottom', 'sticky-top', 'header', 'in-content', 'sidebar', 'footer'];
+    const cleanAdPage = isAdvertising && AD_PAGES.includes(adPage) ? adPage : undefined;
+    const cleanAdPlacement = isAdvertising && AD_PLACEMENTS.includes(adPlacement) ? adPlacement : undefined;
+    const cleanAttachment =
+      isAdvertising && typeof attachmentUrl === 'string' && /^https:\/\/res\.cloudinary\.com\//.test(attachmentUrl)
+        ? attachmentUrl
+        : undefined;
+
     // Save the inquiry to database
     const inquiry = await Inquiry.create({
       type: 'contact',
       status: 'new',
+      priority,
       buyerName: trimmedName,
       buyerEmail: trimmedEmail,
       buyerPhone: trimmedPhone,
       subject,
       message: trimmedMessage,
+      adPage: cleanAdPage,
+      adPlacement: cleanAdPlacement,
+      attachmentUrl: cleanAttachment,
     });
 
     // Send notification email to platform team
     try {
+      const emailSubject = isAdvertising
+        ? `🔥 [ADVERTISING REQUEST] ${trimmedName} wants to advertise with us`
+        : `[Contact Form] ${subject} - from ${trimmedName}`;
+      const leadBanner = isAdvertising
+        ? `<div style="background:#4338ca;color:#fff;padding:12px 16px;border-radius:8px;font-weight:700;margin-bottom:12px;">
+             🔥 New advertising request — someone wants to advertise with us. Follow up ASAP.
+           </div>`
+        : '';
+      const adDetails = isAdvertising
+        ? `<div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;padding:12px 16px;margin:12px 0;">
+             <p style="margin:0 0 6px;"><strong>Requested page:</strong> ${cleanAdPage || 'Not specified'}</p>
+             <p style="margin:0 0 6px;"><strong>Requested placement:</strong> ${cleanAdPlacement || 'Not specified'}</p>
+             ${cleanAttachment
+               ? `<p style="margin:8px 0 6px;"><strong>Creative they attached:</strong></p>
+                  <a href="${cleanAttachment}"><img src="${cleanAttachment}" alt="Advertiser creative" style="max-width:100%;max-height:320px;border-radius:8px;border:1px solid #ddd;" /></a>`
+               : '<p style="margin:0;"><em>No creative attached.</em></p>'}
+           </div>`
+        : '';
       await sendEmail({
         to: CONTACT_EMAIL,
-        subject: `[Contact Form] ${subject} - from ${trimmedName}`,
+        subject: emailSubject,
         html: `
-          <h2>New Contact Form Submission</h2>
+          ${leadBanner}
+          <h2>${isAdvertising ? 'New Advertising Request' : 'New Contact Form Submission'}</h2>
           <p><strong>From:</strong> ${trimmedName} (${trimmedEmail})</p>
           ${trimmedPhone ? `<p><strong>Phone:</strong> ${trimmedPhone}</p>` : ''}
           <p><strong>Subject:</strong> ${subject}</p>
+          ${adDetails}
           <hr />
           <p><strong>Message:</strong></p>
           <p>${trimmedMessage.replace(/\n/g, '<br>')}</p>
           <hr />
           <p><em>Inquiry ID: ${inquiry._id}</em></p>
         `,
-        text: `New contact form submission from ${trimmedName} (${trimmedEmail}). Subject: ${subject}. Message: ${trimmedMessage}`,
+        text: `${isAdvertising ? `ADVERTISING REQUEST — someone wants to advertise with us. Page: ${cleanAdPage || 'n/a'}, Placement: ${cleanAdPlacement || 'n/a'}${cleanAttachment ? `, Creative: ${cleanAttachment}` : ''}. ` : ''}New contact form submission from ${trimmedName} (${trimmedEmail}). Subject: ${subject}. Message: ${trimmedMessage}`,
       });
     } catch (emailError) {
       apiLogger.warn(`[inquiryController] Contact email notification failed but inquiry saved: ${emailError}`);

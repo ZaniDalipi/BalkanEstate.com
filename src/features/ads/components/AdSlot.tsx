@@ -1,204 +1,297 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ADSENSE_CLIENT, AdPlacement, getAdSlotId, isPlacementEnabled } from '../adsConfig';
-import { requestAd, useAdSense } from '../useAdSense';
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { useAppContext } from '@/context/AppContext';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import { useAdBanners, selectByPlacement } from '../hooks/useAdBanners';
+import { useAdPreview } from '../hooks/useAdPreview';
+import { trackClick, trackImpression } from '../api/adBannerApi';
+import NetworkAd, { isNetworkAdConfigured } from './NetworkAd';
+import type { AdPage, AdPlacement } from '../types';
 
 /**
- * Standard IAB units, largest first.
- *
- * Fixed sizes are deliberate. AdSense's fully responsive mode is what produced
- * the oversized and hand-sized banners on this site: it stretches a unit to
- * whatever the parent happens to be, which on a full-bleed section means a
- * banner the width of the screen, and inside a narrow flex child means a strip
- * a few pixels tall. Picking a real unit that fits the measured width instead
- * gives every page the same familiar banner sizes and a height we can reserve
- * up front, so nothing shifts or lands on top of the content below.
+ * Standard IAB display-ad units. Slots reserve the exact aspect ratio so the
+ * layout doesn't shift and correctly-sized creatives fill edge to edge — the
+ * same approach the major listing portals use.
  */
-const UNITS = {
-  /** In-content banners: billboard → leaderboard → mobile banner. */
-  horizontal: [
-    { w: 970, h: 250 },
-    { w: 970, h: 90 },
-    { w: 728, h: 90 },
-    { w: 468, h: 60 },
-    { w: 320, h: 100 },
-    { w: 300, h: 100 },
-  ],
-  /** Sidebar / in-grid blocks. */
-  rectangle: [
-    { w: 336, h: 280 },
-    { w: 300, h: 250 },
-    { w: 250, h: 250 },
-    { w: 200, h: 200 },
-  ],
-  /** Side rails: half page → wide skyscraper → skyscraper. */
-  vertical: [
-    { w: 300, h: 600 },
-    { w: 160, h: 600 },
-    { w: 120, h: 600 },
-  ],
-  /** The bottom anchor bar — kept short so it covers as little as possible. */
-  anchor: [
-    { w: 728, h: 90 },
-    { w: 468, h: 60 },
-    { w: 320, h: 50 },
-  ],
+export const AD_FORMATS = {
+  billboard: { w: 970, h: 250 },   // large in-content leaderboard
+  leaderboard: { w: 728, h: 90 },  // classic thin leaderboard
+  rectangle: { w: 300, h: 250 },   // medium rectangle (MPU)
+  skyscraper: { w: 160, h: 600 },  // wide skyscraper (narrow side rail)
+  halfpage: { w: 300, h: 600 },    // half-page (wide sidebar)
 } as const;
 
-export type AdShape = keyof typeof UNITS;
+export type AdFormat = keyof typeof AD_FORMATS;
 
 interface AdSlotProps {
-  placement: AdPlacement;
-  /** Which family of standard sizes to pick from. Defaults to `horizontal`. */
-  shape?: AdShape;
-  /** Extra classes on the outer wrapper. */
+  /** Which page the visitor is on (drives which banners load). */
+  page: AdPage;
+  /** Which placement bucket this slot pulls from. Defaults to 'in-content'. */
+  placement?: AdPlacement;
+  /** Which banner within the placement to show (0-based). Lets one page host
+   *  several independent slots from the same placement (e.g. left/right rails). */
+  index?: number;
+  /** IAB ad format. Defaults to a billboard leaderboard. */
+  format?: AdFormat;
+  /** Extra wrapper class (e.g. spacing / column spans). */
   className?: string;
-  /** Hide the "Advertisement" caption (the anchor bar draws its own). */
-  hideLabel?: boolean;
-  /** Called when the slot decides it has nothing to show and collapses. */
-  onCollapse?: () => void;
+  /** Extra wrapper style. */
+  style?: React.CSSProperties;
+  /** When there's no booked banner, render nothing instead of the
+   *  "Your Ad Here" placeholder (network fill still applies). Use for overlays
+   *  where an empty placeholder would be intrusive (e.g. over photos). */
+  hidePlaceholder?: boolean;
 }
 
 /**
- * The largest standard unit that fits the space actually available, or null
- * when not even the smallest one does.
+ * Inline advertising slot rendered inside page content (not sticky).
  *
- * The returned object is the module-level constant itself, so repeated
- * measurements of an unchanged box hand `setUnit` the same reference and React
- * skips the re-render.
- */
-const pickUnit = (shape: AdShape, availableWidth: number, availableHeight: number) => {
-  const candidates = UNITS[shape];
-  const fits = candidates.find(u => u.w <= availableWidth && u.h <= availableHeight);
-  return fits ?? null;
-};
-
-/**
- * One Google AdSense unit.
- *
- * Renders nothing at all unless the placement is configured *and* the visitor
- * has consented to marketing cookies, and collapses itself when AdSense returns
- * no ad — so an unfilled slot never leaves a blank gap in the page.
+ * Renders the selected active banner for a page + placement as a contained
+ * card sized to a standard IAB ad unit. Layout-critical properties use inline
+ * styles so the slot is exact regardless of the CSS build. Renders nothing
+ * when no banner is configured, so empty slots collapse cleanly.
  */
 const AdSlot: React.FC<AdSlotProps> = ({
-  placement,
-  shape = 'horizontal',
-  className = '',
-  hideLabel = false,
-  onCollapse,
+  page,
+  placement = 'in-content',
+  index = 0,
+  format = 'billboard',
+  className,
+  style,
+  hidePlaceholder = false,
 }) => {
   const { t } = useTranslation(['common']);
-  const { canServeAds, isReady } = useAdSense();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const insRef = useRef<HTMLModElement>(null);
-  /** Size key of the unit already handed to AdSense, so it is never pushed twice. */
-  const pushedSizeRef = useRef<string | null>(null);
-  const [unit, setUnit] = useState<{ w: number; h: number } | null>(null);
-  const [isUnfilled, setIsUnfilled] = useState(false);
+  const { data } = useAdBanners(page);
+  const preview = useAdPreview();
+  const { dispatch } = useAppContext();
+  const trackedRef = useRef<string | null>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  // Natural aspect ratio of the loaded creative, so horizontal slots size to
+  // the actual banner instead of leaving big blurred bars.
+  const [imgAspect, setImgAspect] = React.useState<number | null>(null);
 
-  const slotId = getAdSlotId(placement);
-  const enabled = isPlacementEnabled(placement) && canServeAds && !isUnfilled;
+  // "Your Ad Here" placeholder → open the contact form as an advertising lead.
+  const contactHref = `${buildLocalizedPath('/contact')}?topic=advertise`;
+  const goToAdvertise = (e: React.MouseEvent) => {
+    // Let modified clicks (new tab) use the href; otherwise navigate in-app.
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+    e.preventDefault();
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'contact' });
+    window.history.pushState({}, '', contactHref);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  };
 
-  // Measure the space we actually have and lock in a real ad size before the
-  // unit is requested, so the reserved height matches what gets drawn.
-  useLayoutEffect(() => {
-    if (!enabled) return;
-    const el = containerRef.current;
-    if (!el) return;
+  const banner = selectByPlacement(data, placement)[index];
 
-    const measure = () => {
-      const width = el.clientWidth || el.getBoundingClientRect().width;
-      const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 0;
-      // A rail must not be taller than the screen, or it scrolls past its own
-      // section and ends up beside the wrong content.
-      const heightBudget = shape === 'vertical' ? Math.max(0, viewportHeight - 96) : Infinity;
-      setUnit(pickUnit(shape, width, heightBudget));
-    };
+  useEffect(() => {
+    if (!banner) return;
+    if (trackedRef.current === banner.id) return;
+    trackedRef.current = banner.id;
+    trackImpression(banner.id);
+  }, [banner]);
 
-    measure();
-
-    if (typeof ResizeObserver === 'undefined') {
-      window.addEventListener('resize', measure);
-      return () => window.removeEventListener('resize', measure);
+  // In preview mode, scroll the focused placement into view so it's easy to find.
+  useEffect(() => {
+    if (preview.active && preview.focus === placement && index === 0 && wrapperRef.current) {
+      const el = wrapperRef.current;
+      const id = window.setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 400);
+      return () => window.clearTimeout(id);
     }
-    const observer = new ResizeObserver(measure);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [enabled, shape]);
+  }, [preview.active, preview.focus, placement, index]);
 
-  // Ask AdSense to fill the slot once — and only once it has a settled size.
-  // A resize that picks a different unit remounts the <ins> (see its key), and
-  // the fresh, unclaimed element is pushed again.
-  useEffect(() => {
-    if (!enabled || !isReady || !unit) return;
-    const sizeKey = `${unit.w}x${unit.h}`;
-    if (pushedSizeRef.current === sizeKey) return;
-    const el = insRef.current;
-    if (!el) return;
+  const { w, h } = AD_FORMATS[format];
+  const isTall = h > w;
 
-    pushedSizeRef.current = sizeKey;
-    requestAd(el);
-  }, [enabled, isReady, unit]);
+  // Highlight ring shown around every slot while in preview mode.
+  const previewWrap: React.CSSProperties = preview.active
+    ? { outline: '3px solid #6366f1', outlineOffset: 4, borderRadius: 14, position: 'relative' }
+    : {};
 
-  // AdSense stamps data-ad-status="unfilled" when it has no ad for the slot.
-  // Collapsing then is what keeps an unsold placement from leaving a hole.
-  useEffect(() => {
-    if (!enabled || !unit) return;
-    const el = insRef.current;
-    if (!el || typeof MutationObserver === 'undefined') return;
+  const baseBoxStyle: React.CSSProperties = {
+    position: 'relative',
+    width: '100%',
+    maxWidth: w,
+    aspectRatio: `${w} / ${h}`,
+    margin: '0 auto',
+    borderRadius: 12,
+    overflow: 'hidden',
+  };
 
-    const check = () => {
-      if (el.getAttribute('data-ad-status') === 'unfilled') {
-        setIsUnfilled(true);
-        onCollapse?.();
-      }
-    };
+  // For horizontal slots, match the creative's own aspect ratio (once loaded)
+  // so the banner fills the box edge-to-edge — capped so an odd-shaped image
+  // can't blow the height up. Vertical rails keep their fixed skyscraper shape.
+  const bannerBoxStyle: React.CSSProperties = isTall
+    ? baseBoxStyle
+    : {
+        ...baseBoxStyle,
+        maxWidth: Math.max(w, 1000),
+        aspectRatio: imgAspect
+          ? `${Math.min(Math.max(imgAspect, 1.5), 8)}`
+          : `${w} / ${h}`,
+      };
 
-    const observer = new MutationObserver(check);
-    observer.observe(el, { attributes: true, attributeFilter: ['data-ad-status'] });
-    check();
-    return () => observer.disconnect();
-  }, [enabled, unit, onCollapse]);
+  // No direct booking — fill with a network ad (AdSense) to earn revenue on
+  // unsold inventory, when configured and not in preview mode.
+  if (!banner && !preview.active && isNetworkAdConfigured()) {
+    return (
+      <div ref={wrapperRef} className={className} style={style} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
+        <div style={{ ...baseBoxStyle, background: '#f8fafc', border: '1px solid rgba(0,0,0,0.06)' }}>
+          <NetworkAd format={format} />
+        </div>
+      </div>
+    );
+  }
 
-  if (!enabled || !slotId) return null;
+  // Overlay slots opt out of the placeholder entirely (network fill above
+  // still applies when configured).
+  if (!banner && hidePlaceholder) return null;
 
-  // `unit` is null before the first measurement, and whenever the space is too
-  // narrow even for the smallest unit of this shape (a phone beside a side rail,
-  // say) — then the wrapper stays empty: better nothing than a squeezed or
-  // overflowing banner. The wrapper itself stays mounted either way, since it is
-  // what gets measured.
+  // No banner configured — show a "Your Ad Here" placeholder so the ad space
+  // is always visible and sellable, sized to the real ad slot.
+  if (!banner) {
+    return (
+      <div ref={wrapperRef} className={className} style={{ ...style, ...previewWrap }} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
+        <a
+          href={contactHref}
+          onClick={goToAdvertise}
+          title={t('ads.advertiseCta', 'Advertise with us — get in touch')}
+          style={{
+            ...baseBoxStyle,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            textAlign: 'center',
+            padding: 12,
+            cursor: 'pointer',
+            textDecoration: 'none',
+            border: '2px dashed rgba(79,70,229,0.35)',
+            backgroundColor: '#eef2ff',
+            // Layered: diagonal "ad space" stripes over a soft indigo→violet gradient.
+            backgroundImage:
+              'repeating-linear-gradient(45deg, rgba(79,70,229,0.07) 0px, rgba(79,70,229,0.07) 12px, transparent 12px, transparent 24px), linear-gradient(135deg, #eef2ff 0%, #faf5ff 55%, #eef2ff 100%)',
+            color: '#6366f1',
+          }}
+        >
+          {/* Icon badge */}
+          <span
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: isTall ? 34 : 30,
+              height: isTall ? 34 : 30,
+              borderRadius: '9999px',
+              background: 'rgba(255,255,255,0.85)',
+              boxShadow: '0 2px 6px rgba(79,70,229,0.18)',
+              marginBottom: 2,
+            }}
+          >
+            <svg width={isTall ? 18 : 16} height={isTall ? 18 : 16} viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 11l14-7v16L3 13v-2z" />
+              <path d="M7 12v5a2 2 0 0 0 2 2h1" />
+              <path d="M17 9a3 3 0 0 1 0 6" />
+            </svg>
+          </span>
+          <span style={{ fontWeight: 800, fontSize: isTall ? 15 : 17, color: '#4338ca', letterSpacing: '0.01em' }}>
+            {t('ads.yourAdHere', 'Your Ad Here')}
+          </span>
+          <span style={{ fontSize: 11, fontWeight: 500, color: '#6366f1' }}>
+            {t('ads.advertiseWithUs', 'Advertise with us')}
+          </span>
+          <span
+            style={{
+              marginTop: 4,
+              fontSize: 10,
+              fontWeight: 700,
+              color: '#fff',
+              background: '#4f46e5',
+              padding: '3px 10px',
+              borderRadius: 9999,
+            }}
+          >
+            {t('ads.getInTouch', 'Get in touch →')}
+          </span>
+        </a>
+      </div>
+    );
+  }
+
+  // Request ~2× the slot's CSS width so the creative stays sharp on hi-DPI screens.
+  const imageSrc = optimizeCloudinaryUrl(banner.imageUrl, {
+    width: isTall ? 700 : 1600,
+    quality: 'auto',
+  });
+
   return (
-    <div
-      ref={containerRef}
-      // w-full/min-w-0 matter more than they look: this element is what gets
-      // measured, and a content-sized box inside a flex row starts at zero
-      // width — which would leave the slot measuring 0 and never drawing.
-      className={`flex w-full min-w-0 flex-col items-center ${className}`}
-      // Reserving the exact height the unit will occupy is what stops the ad
-      // pushing — or landing on top of — whatever renders next.
-      style={{ minHeight: unit ? unit.h + (hideLabel ? 0 : 16) : undefined }}
-    >
-      {unit && !hideLabel && (
-        <span className="mb-1 text-[10px] font-medium uppercase tracking-wider text-neutral-400 select-none">
-          {t('common:advertisement.label', 'Advertisement')}
+    <div ref={wrapperRef} className={className} style={{ ...style, ...previewWrap }} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
+      <div
+        style={{
+          ...bannerBoxStyle,
+          background: '#ffffff',
+          border: '1px solid rgba(0,0,0,0.08)',
+          boxShadow: '0 4px 18px rgba(0,0,0,0.08)',
+        }}
+      >
+        <span
+          style={{
+            position: 'absolute',
+            top: 6,
+            left: 6,
+            zIndex: 2,
+            background: 'rgba(0,0,0,0.55)',
+            color: '#fff',
+            fontSize: 9,
+            fontWeight: 600,
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+            padding: '2px 6px',
+            borderRadius: 5,
+          }}
+        >
+          {t('ads.sponsored', 'Sponsored')}
         </span>
-      )}
-      {unit && (
-        <ins
-          ref={insRef}
-          // The key ties the element to its size: when a resize picks a
-          // different unit, React replaces the <ins> so AdSense fills a clean
-          // one instead of redrawing over an already-claimed slot.
-          key={`${unit.w}x${unit.h}`}
-          className="adsbygoogle block"
-          style={{ display: 'inline-block', width: unit.w, height: unit.h }}
-          data-ad-client={ADSENSE_CLIENT}
-          data-ad-slot={slotId}
-          // Explicitly off: this is the flag that lets a unit blow past its
-          // container width on wide screens.
-          data-full-width-responsive="false"
+
+        {/* Blurred fill of the same image — makes ANY aspect ratio fit the slot
+            cleanly (no white bars, no cropping of the real creative). */}
+        <img
+          src={imageSrc}
+          alt=""
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            filter: 'blur(18px)',
+            transform: 'scale(1.15)',
+            opacity: 0.9,
+          }}
         />
-      )}
+
+        <a
+          href={banner.linkUrl}
+          target="_blank"
+          rel="noopener noreferrer sponsored"
+          onClick={() => trackClick(banner.id)}
+          aria-label={banner.title}
+          style={{ position: 'relative', display: 'block', width: '100%', height: '100%', zIndex: 1 }}
+        >
+          <img
+            src={imageSrc}
+            alt={banner.title}
+            loading="lazy"
+            onLoad={(e) => {
+              const { naturalWidth: nw, naturalHeight: nh } = e.currentTarget;
+              if (nw > 0 && nh > 0) setImgAspect(nw / nh);
+            }}
+            style={{ display: 'block', width: '100%', height: '100%', objectFit: 'contain' }}
+          />
+        </a>
+      </div>
     </div>
   );
 };

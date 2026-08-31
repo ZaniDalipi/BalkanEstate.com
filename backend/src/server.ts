@@ -125,6 +125,7 @@ import businessListingRoutes from './routes/businessListingRoutes';
 import listingSourceRoutes from './routes/listingSourceRoutes';
 import userListingSourceRoutes from './routes/userListingSourceRoutes';
 import imageProxyRoutes from './routes/imageProxyRoutes';
+import adBannerRoutes from './routes/adBannerRoutes';
 
 // Import services
 import { initializeGooglePlayService } from './services/googlePlayService';
@@ -388,6 +389,7 @@ app.use('/api/business-listings', businessListingRoutes); // Business directory 
 app.use('/api/admin/listing-sources', sensitiveRateLimiter, listingSourceRoutes); // Universal external-listing ingestion (admin only)
 app.use('/api/listing-sources', sensitiveRateLimiter, userListingSourceRoutes); // Per-user external-listing feeds
 app.use('/api/image-proxy', imageProxyRoutes); // Proxy external scraped images to avoid CORS
+app.use('/api/ad-banners', adBannerRoutes); // Advertising banners (public list + impression/click tracking)
 
 // ============================================================================
 // FRONTEND SERVING + SOCIAL MEDIA OG TAG INJECTION

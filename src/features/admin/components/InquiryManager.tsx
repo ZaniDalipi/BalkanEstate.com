@@ -245,9 +245,16 @@ const InquiryManager: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-4 py-4">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getTypeBadgeColor(inquiry.type)}`}>
-                      {(inquiry.type || '').replace('_', ' ')}
-                    </span>
+                    <div className="flex flex-col items-start gap-1">
+                      {(inquiry as { priority?: string }).priority === 'high' && (
+                        <span className="px-2 py-1 text-xs font-bold rounded-full bg-indigo-600 text-white whitespace-nowrap">
+                          🔥 {t('admin:inquiries.advertising', 'Advertising')}
+                        </span>
+                      )}
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getTypeBadgeColor(inquiry.type)}`}>
+                        {(inquiry.type || '').replace('_', ' ')}
+                      </span>
+                    </div>
                   </td>
                   <td className="px-4 py-4">
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadgeColor(inquiry.status)}`}>

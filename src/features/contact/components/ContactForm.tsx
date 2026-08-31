@@ -16,7 +16,33 @@ interface ContactFormProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   onPhoneChange?: (fullPhone: string) => void;
   onSubmit: (e: React.FormEvent) => void;
+  /** Advertising creative upload (only used when subject === 'advertising'). */
+  onAdImageSelect?: (file: File) => void;
+  onAdImageClear?: () => void;
+  isAdImageUploading?: boolean;
 }
+
+const AD_PAGE_OPTIONS = [
+  { value: 'all', label: 'All pages' },
+  { value: 'home', label: 'Home' },
+  { value: 'search', label: 'Search results' },
+  { value: 'rentals', label: 'Rentals' },
+  { value: 'property-details', label: 'Property details' },
+  { value: 'agents', label: 'Agents' },
+  { value: 'agencies', label: 'Agencies' },
+  { value: 'business-directory', label: 'Business directory' },
+  { value: 'blog', label: 'Blog' },
+  { value: 'guides', label: 'Guides' },
+];
+
+const AD_PLACEMENT_OPTIONS = [
+  { value: 'in-content', label: 'In content (leaderboard)' },
+  { value: 'sidebar', label: 'Sidebar (skyscraper)' },
+  { value: 'sticky-bottom', label: 'Sticky bottom bar' },
+  { value: 'sticky-top', label: 'Sticky top bar' },
+  { value: 'header', label: 'Header' },
+  { value: 'footer', label: 'Footer' },
+];
 
 const SUBJECT_OPTIONS = [
   { value: 'general', labelKey: 'contact:subjects.general' },
@@ -25,6 +51,7 @@ const SUBJECT_OPTIONS = [
   { value: 'agency', labelKey: 'contact:subjects.agency' },
   { value: 'support', labelKey: 'contact:subjects.support' },
   { value: 'partnership', labelKey: 'contact:subjects.partnership' },
+  { value: 'advertising', labelKey: 'contact:subjects.advertising', fallback: 'Advertising / Ad placement' },
 ] as const;
 
 const ContactForm: React.FC<ContactFormProps> = ({
@@ -35,8 +62,12 @@ const ContactForm: React.FC<ContactFormProps> = ({
   onChange,
   onPhoneChange = () => {},
   onSubmit,
+  onAdImageSelect,
+  onAdImageClear,
+  isAdImageUploading = false,
 }) => {
   const { t } = useTranslation(['contact', 'common']);
+  const isAdvertising = formData.subject === 'advertising';
 
   const inputClasses =
     'block px-4 pb-2.5 pt-4 w-full text-base text-neutral-900 glass-input rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 peer transition-all duration-300';
@@ -126,7 +157,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
         >
           {SUBJECT_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
-              {t(option.labelKey, option.value)}
+              {t(option.labelKey, (option as { fallback?: string }).fallback ?? option.value)}
             </option>
           ))}
         </select>
@@ -137,6 +168,99 @@ const ContactForm: React.FC<ContactFormProps> = ({
           <p id="subject-error" className={errorClasses}>{errors.subject}</p>
         )}
       </div>
+
+      {/* Advertising details — only when the subject is "advertising" */}
+      {isAdvertising && (
+        <div className="rounded-2xl border border-indigo-200 bg-indigo-50/60 p-4 space-y-4">
+          <p className="text-sm font-semibold text-indigo-900">
+            {t('contact:advertising.heading', 'Where would you like your ad?')}
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="ad-page" className="block text-xs font-medium text-indigo-900 mb-1">
+                {t('contact:advertising.page', 'Page')}
+              </label>
+              <select
+                id="ad-page"
+                name="adPage"
+                value={formData.adPage || 'all'}
+                onChange={onChange}
+                className="w-full px-3 py-2.5 rounded-xl border border-indigo-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              >
+                {AD_PAGE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="ad-placement" className="block text-xs font-medium text-indigo-900 mb-1">
+                {t('contact:advertising.placement', 'Placement')}
+              </label>
+              <select
+                id="ad-placement"
+                name="adPlacement"
+                value={formData.adPlacement || 'in-content'}
+                onChange={onChange}
+                className="w-full px-3 py-2.5 rounded-xl border border-indigo-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              >
+                {AD_PLACEMENT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Creative upload */}
+          <div>
+            <label className="block text-xs font-medium text-indigo-900 mb-1">
+              {t('contact:advertising.creative', 'Attach your ad image (optional)')}
+            </label>
+            <div className="flex items-center gap-3 flex-wrap">
+              {formData.adImageUrl ? (
+                <div className="relative">
+                  <img
+                    src={formData.adImageUrl}
+                    alt="ad creative preview"
+                    className="h-20 rounded-lg border border-indigo-200 object-contain bg-white"
+                  />
+                  {onAdImageClear && (
+                    <button
+                      type="button"
+                      onClick={onAdImageClear}
+                      className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white text-xs flex items-center justify-center shadow"
+                      aria-label={t('contact:advertising.removeImage', 'Remove image')}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ) : null}
+              <label className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-indigo-300 text-indigo-700 rounded-lg cursor-pointer hover:bg-indigo-50 text-sm font-medium">
+                {isAdImageUploading
+                  ? t('contact:advertising.uploading', 'Uploading…')
+                  : formData.adImageUrl
+                  ? t('contact:advertising.replaceImage', 'Replace image')
+                  : t('contact:advertising.uploadImage', 'Upload image')}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={isAdImageUploading}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file && onAdImageSelect) onAdImageSelect(file);
+                    e.target.value = '';
+                  }}
+                />
+              </label>
+            </div>
+            <p className="text-xs text-indigo-700/70 mt-1.5">
+              {t('contact:advertising.creativeHint', 'PNG or JPG, max 5MB. This helps us place your ad exactly where you want it.')}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Message */}
       <div className="relative">

@@ -8,6 +8,7 @@ import AiSearch from './AiSearch';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import { AdBanner } from '@/features/ads';
 import Footer from '@/components/shared/Footer';
+import { AdSlot } from '@/src/features/ads';
 
 interface PropertyListProps {
   properties: Property[];

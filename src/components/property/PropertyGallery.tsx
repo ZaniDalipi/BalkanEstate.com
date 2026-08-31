@@ -11,6 +11,7 @@ import {
   BuildingOfficeIcon,
 } from '../../../constants';
 import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
+import AdSlot from '@/src/features/ads/components/AdSlot';
 
 const isCloudinaryUrl = (url: string): boolean =>
   typeof url === 'string' && url.includes('res.cloudinary.com');
@@ -389,6 +390,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   // 1 = forward/next, -1 = backward/prev
   const [slideDirection, setSlideDirection] = useState(1);
 
+  // In-gallery ad: appears once the visitor starts browsing photos; dismissible.
+  const [galleryAdDismissed, setGalleryAdDismissed] = useState(false);
+  const showGalleryAd =
+    viewMode === 'photos' && !galleryAdDismissed && currentImageIndex >= 1;
+
   const handleNextImage = useCallback(() => {
     setSlideDirection(1);
     const newIndex = (currentImageIndex + 1) % imagesForCurrentCategory.length;
@@ -551,6 +557,31 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               </>
             )}
           </motion.button>
+        )}
+
+        {/* ── In-gallery ad (only real/paying ads; never a placeholder) ── */}
+        {showGalleryAd && (
+          <div className="absolute inset-x-0 bottom-0 z-20 flex justify-center px-2 pb-2 pointer-events-none">
+            <div className="relative w-full max-w-2xl pointer-events-auto">
+              <AdSlot
+                page="property-details"
+                placement="in-content"
+                index={1}
+                format="leaderboard"
+                hidePlaceholder
+              />
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setGalleryAdDismissed(true); }}
+                aria-label={t('common:ads.close', 'Close advertisement')}
+                className="absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
         )}
 
         {/* ── VIDEO ── */}

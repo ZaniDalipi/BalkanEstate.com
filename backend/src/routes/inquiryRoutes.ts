@@ -1,10 +1,12 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
+import multer from 'multer';
 import {
   sendPropertyInquiry,
   sendAgentGeneralInquiry,
   sendAreaSearchInquiry,
   sendContactInquiry,
+  uploadAdvertisingImage,
 } from '../controllers/inquiryController';
 import { decryptPayload } from '../middleware/decryptPayload';
 
@@ -22,6 +24,23 @@ const inquiryRateLimiter = rateLimit({
   skip: () => isDevelopment, // Skip rate limiting in development
 });
 
+// Image upload for advertising creatives (public, image only, 5MB, no SVG).
+const adImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) {
+      cb(new Error('Only image files are allowed'));
+      return;
+    }
+    if (file.mimetype === 'image/svg+xml') {
+      cb(new Error('SVG files are not allowed'));
+      return;
+    }
+    cb(null, true);
+  },
+});
+
 // All inquiry routes are public (no auth required)
 // but rate-limited to prevent abuse
 
@@ -36,5 +55,8 @@ router.post('/area-search', inquiryRateLimiter, decryptPayload, sendAreaSearchIn
 
 // Send contact form inquiry to platform team
 router.post('/contact', inquiryRateLimiter, decryptPayload, sendContactInquiry);
+
+// Upload an advertising creative (attached to an advertising contact request)
+router.post('/advertising-image', inquiryRateLimiter, adImageUpload.single('image'), uploadAdvertisingImage);
 
 export default router;

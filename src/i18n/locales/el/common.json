@@ -646,5 +646,12 @@
     "usedOfLimit": "{{used}} / {{limit}} σε χρήση",
     "unlimited": "Απεριόριστα",
     "resetsOn": "Ανανεώνεται στις {{date}}"
+  },
+  "ads": {
+    "previewMode": "Ad preview — ad slots are highlighted",
+    "exitPreview": "Exit",
+    "stickyBottomBar": "Sticky bottom bar",
+    "getInTouch": "Get in touch →",
+    "advertiseCta": "Advertise with us — get in touch"
   }
 }

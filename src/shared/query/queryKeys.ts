@@ -308,3 +308,19 @@ export function getPromotionPlanInvalidationKeys() {
     analyticsKeys.all,
   ];
 }
+
+// ============================================================================
+// Ad Banner Query Keys
+// Used by: Public StickyAdBanner, Admin AdBannerManager
+// ============================================================================
+
+export const adBannerKeys = {
+  all: ['adBanners'] as const,
+
+  // Public endpoints (active banners for a page)
+  public: () => [...adBannerKeys.all, 'public'] as const,
+  publicByPage: (page: string) => [...adBannerKeys.public(), page] as const,
+
+  // Admin endpoint (all banners)
+  admin: () => [...adBannerKeys.all, 'admin'] as const,
+};

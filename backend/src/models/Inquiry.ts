@@ -4,6 +4,8 @@ export interface IInquiry extends Document {
   // Inquiry type
   type: 'property' | 'agent' | 'area_search' | 'contact';
   status: 'new' | 'read' | 'replied' | 'archived';
+  // High-priority inquiries (e.g. advertising requests) surface at the top.
+  priority: 'normal' | 'high';
 
   // Sender info (buyer)
   buyerName: string;
@@ -27,6 +29,11 @@ export interface IInquiry extends Document {
   propertyType?: string; // For area search inquiries
   budget?: number; // For area search inquiries
 
+  // Advertising request details (subject === 'advertising')
+  adPage?: string;
+  adPlacement?: string;
+  attachmentUrl?: string;
+
   // Admin notes
   adminNotes?: string;
 
@@ -48,6 +55,12 @@ const InquirySchema: Schema = new Schema(
       type: String,
       enum: ['new', 'read', 'replied', 'archived'],
       default: 'new',
+    },
+    priority: {
+      type: String,
+      enum: ['normal', 'high'],
+      default: 'normal',
+      index: true,
     },
 
     // Sender info
@@ -109,6 +122,11 @@ const InquirySchema: Schema = new Schema(
     budget: {
       type: Number,
     },
+
+    // Advertising request details
+    adPage: { type: String, trim: true },
+    adPlacement: { type: String, trim: true },
+    attachmentUrl: { type: String, trim: true },
 
     // Admin notes
     adminNotes: {

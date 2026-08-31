@@ -4,7 +4,7 @@ export interface IFileRecord extends Document {
   publicId: string;
   url: string;
   userId: mongoose.Types.ObjectId;
-  fileType: 'property' | 'floorplan' | 'avatar' | 'license' | 'credential' | 'agency-logo' | 'agency-cover' | 'business-logo' | 'business-banner' | 'conversation' | 'video' | 'site-logo' | 'site-email-logo' | 'other';
+  fileType: 'property' | 'floorplan' | 'avatar' | 'license' | 'credential' | 'agency-logo' | 'agency-cover' | 'business-logo' | 'business-banner' | 'conversation' | 'video' | 'site-logo' | 'site-email-logo' | 'ad-banner' | 'other';
   resourceId?: string;
   mimeType?: string;
   bytes?: number;
@@ -32,7 +32,7 @@ const FileRecordSchema: Schema = new Schema(
     },
     fileType: {
       type: String,
-      enum: ['property', 'floorplan', 'avatar', 'license', 'credential', 'agency-logo', 'agency-cover', 'business-logo', 'business-banner', 'conversation', 'video', 'site-logo', 'site-email-logo', 'other'],
+      enum: ['property', 'floorplan', 'avatar', 'license', 'credential', 'agency-logo', 'agency-cover', 'business-logo', 'business-banner', 'conversation', 'video', 'site-logo', 'site-email-logo', 'ad-banner', 'other'],
       required: true,
       index: true,
     },

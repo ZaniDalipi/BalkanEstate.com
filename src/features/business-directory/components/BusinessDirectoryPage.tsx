@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
 import { useBusinessListings, useMyBusinessListings } from '../hooks';
 import BusinessCard from './BusinessCard';
+import { AdSlot } from '@/src/features/ads';
 import BusinessDetailPage from './BusinessDetailPage';
 import BusinessDirectoryMap from './BusinessDirectoryMap';
 import CreateBusinessListingForm from './CreateBusinessListingForm';
@@ -589,6 +590,9 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
           </div>
         </motion.div>
       )}
+
+      {/* Ad — horizontal leaderboard between the hero/stats and the listings */}
+      <AdSlot page="business-directory" placement="in-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" />
 
       {/* === MAIN CONTENT === */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">

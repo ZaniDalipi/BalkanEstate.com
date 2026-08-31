@@ -854,10 +854,12 @@ export const getAllInquiries = async (req: Request, res: Response): Promise<void
     const skip = (Number(page) - 1) * Number(limit);
     const sortOrder = order === 'asc' ? 1 : -1;
 
+    // High-priority inquiries (advertising requests) always sort to the top.
+    // 'high' < 'normal' alphabetically, so ascending puts high-priority first.
     const inquiries = await Inquiry.find(query)
       .populate('recipientId', 'name email role avatarUrl')
       .populate('propertyId', 'title images price city country')
-      .sort({ [String(sortBy)]: sortOrder })
+      .sort({ priority: 1, [String(sortBy)]: sortOrder })
       .skip(skip)
       .limit(Number(limit))
       .lean();

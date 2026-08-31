@@ -632,6 +632,10 @@ export interface ContactInquiryParams {
   phone?: string;
   subject: string;
   message: string;
+  // Advertising requests only:
+  adPage?: string;
+  adPlacement?: string;
+  attachmentUrl?: string;
 }
 
 export const sendContactInquiry = async (params: ContactInquiryParams): Promise<{ message: string; inquiryId: string }> => {
@@ -640,6 +644,23 @@ export const sendContactInquiry = async (params: ContactInquiryParams): Promise<
     body: params,
   });
   return response;
+};
+
+/** Upload an advertising creative for an advertising contact request. Returns the hosted URL. */
+export const uploadAdvertisingImage = async (file: File): Promise<{ url: string }> => {
+  const form = new FormData();
+  form.append('image', file);
+  const { API_URL } = await import('@/src/shared/api/config');
+  const res = await fetch(`${API_URL}/inquiries/advertising-image`, {
+    method: 'POST',
+    body: form,
+    credentials: 'include',
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error((data as { message?: string }).message || 'Failed to upload image');
+  }
+  return res.json();
 };
 
 export const updateUser = async (userData: Partial<User>): Promise<User> => {

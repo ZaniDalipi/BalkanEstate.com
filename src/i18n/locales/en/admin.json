@@ -1096,7 +1096,8 @@
     "adminNotes": "Admin Notes",
     "delete": "Delete",
     "saveNotes": "Save Notes",
-    "created": "Created"
+    "created": "Created",
+    "advertising": "Advertising"
   },
   "promotionCoupons": {
     "title": "Promotion Coupons",

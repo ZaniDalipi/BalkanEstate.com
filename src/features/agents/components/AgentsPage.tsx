@@ -6,6 +6,7 @@ import { Agent, Agency } from '@/types';
 import { getAllAgents, getAgencies } from '@/services/apiService';
 import { getAgent } from '../api/agentApi';
 import AgentCard from './AgentCard';
+import { AdSlot } from '@/src/features/ads';
 import AgentScoringPanel from './AgentScoringPanel';
 import AgentProfilePage from './AgentProfilePage';
 import AgencyBadge from '@/components/shared/AgencyBadge';
@@ -574,6 +575,9 @@ const AgentsPage: React.FC = () => {
       {/* Main Content */}
       <main className="w-full flex-grow">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          {/* Ad — horizontal leaderboard above the agent filters/list */}
+          <AdSlot page="agents" placement="in-content" className="mb-6" />
+
           {/* Filters and Sort Section */}
           <div className="mb-6">
             <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 sm:p-6">

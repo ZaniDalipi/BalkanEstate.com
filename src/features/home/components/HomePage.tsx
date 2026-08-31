@@ -18,7 +18,7 @@ import AppShowcaseSection from './AppShowcaseSection';
 import CityShowcaseSection from './CityShowcaseSection';
 import QuickAccessSection from './QuickAccessSection';
 import Footer from '@/components/shared/Footer';
-import { AdBanner, AdRailFrame } from '@/features/ads';
+import { AdSlot, SideRailAds } from '@/src/features/ads';
 
 // Lazy-load below-fold sections to reduce initial bundle
 const StackedCards = lazy(() => import('@/src/components/ui/glass-cards').then(m => ({ default: m.StackedCards })));
@@ -237,6 +237,9 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
 
       <AppShowcaseSection onNavigate={handleNavigate} />
 
+      {/* Ad — horizontal leaderboard near the top of the home page */}
+      <AdSlot page="home" placement="in-content" className="w-full px-3 sm:px-4 lg:px-6 my-6" />
+
       {isAuthenticated && currentUser && (
         <QuickAccessSection
           user={currentUser}
@@ -274,11 +277,11 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
           on very wide screens — that gutter, and only that, is where the side
           rails go. */}
       <div className="content-below-fold">
-        <AdRailFrame>
+        <SideRailAds page="home">
           <Suspense fallback={<SectionFallback />}>
             <TopAgentsSection />
           </Suspense>
-        </AdRailFrame>
+        </SideRailAds>
       </div>
 
       <div className="content-below-fold">

@@ -105,6 +105,8 @@ const PaymentCancel = lazy(() => import('./src/features/payments/components/Paym
 const ListingLimitWarningModal = lazy(() => import('./components/shared/ListingLimitWarningModal'));
 const DiscountGameModal = lazy(() => import('./components/shared/DiscountGameModal'));
 const AdminDashboard = lazy(() => import('./src/features/admin/components/AdminDashboard'));
+const StickyAdBanner = lazy(() => import('./src/features/ads/components/StickyAdBanner'));
+const AdPreviewIndicator = lazy(() => import('./src/features/ads/components/AdPreviewIndicator'));
 const AgencyDashboardPage = lazy(() => import('./src/features/agency-dashboard/components/AgencyDashboardPage'));
 const NotFoundPage = lazy(() => import('./src/components/ui/not-found-2').then(m => ({ default: m.NotFound })));
 const ResetPasswordPage = lazyWithRetry(() => import('./src/features/auth/components/ResetPasswordPage'));
@@ -860,6 +862,38 @@ const MainLayout: React.FC = () => {
     'account', 'blog', 'guides',
   ].includes(state.activeView);
 
+  // Map the current view to an ad-banner "page" so advertisers can target placements.
+  // Admin / dashboard / auth / checkout style views never show ads.
+  const adPage = useMemo<import('./src/features/ads/types').AdPage | null>(() => {
+    if (state.selectedProperty) return 'property-details';
+    if (state.selectedAgentId || state.activeView === 'agents' || state.activeView === 'agentProfile') return 'agents';
+    if (state.selectedAgencyId || state.activeView === 'agencies' || state.activeView === 'agencyDetail') return 'agencies';
+    switch (state.activeView) {
+      case 'home': return 'home';
+      case 'search': return 'search';
+      case 'rentals': return 'rentals';
+      case 'business-directory': return 'business-directory';
+      case 'blog': return 'blog';
+      case 'guides': return 'guides';
+      // Views where ads would be intrusive or out of place.
+      case 'admin':
+      case 'agency-dashboard':
+      case 'inbox':
+      case 'account':
+      case 'create-listing':
+      case 'create-rental':
+      case 'analytics':
+      case 'reset-password':
+      case 'verify-email':
+      case 'createAgency':
+      case 'createAgencyPayment':
+      case 'createAgencyConfirm':
+      case 'not-found':
+        return null;
+      default: return 'all';
+    }
+  }, [state.activeView, state.selectedProperty, state.selectedAgentId, state.selectedAgencyId]);
+
 
   // Map activeView to readable page title
   const pageTitle = useMemo(() => {
@@ -958,6 +992,23 @@ const MainLayout: React.FC = () => {
         <Suspense fallback={null}>
           <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
         </Suspense>
+
+        {/* Sticky advertising banner — rendered outside scroll/overflow containers
+            so position:fixed works in iOS Safari PWA standalone mode. Hidden on
+            admin/dashboard/auth views (adPage === null), and on the property
+            details page which has its own in-content + sidebar ad slots (so the
+            sticky bar doesn't overlap them). */}
+        {adPage && !state.selectedProperty && (
+          <Suspense fallback={null}>
+            <StickyAdBanner page={adPage} placement="sticky-bottom" />
+          </Suspense>
+        )}
+
+        {/* Ad preview mode indicator (opened from admin "View on site") */}
+        <Suspense fallback={null}>
+          <AdPreviewIndicator />
+        </Suspense>
+
 
         {/* Mobile floating hamburger for home page — rendered outside all scroll/overflow containers
             so position:fixed works correctly in iOS Safari PWA standalone mode */}
