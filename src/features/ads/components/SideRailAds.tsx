@@ -31,9 +31,10 @@ const SideRailAds: React.FC<SideRailAdsProps> = ({ page, contentMaxWidth = 1280,
     // In preview mode, drop the bar to any wide-ish desktop so the admin can
     // see the rails without an ultra-wide monitor.
     // Wide rails (300px) need real margin room to avoid overlapping content.
+    // Fits a standard 1920px monitor (1280 content + 2×(300+20) rails).
     const minWidth = preview.active
       ? contentMaxWidth + 2 * RAIL_WIDTH
-      : contentMaxWidth + 2 * (RAIL_WIDTH + GAP) + 24;
+      : contentMaxWidth + 2 * (RAIL_WIDTH + GAP);
     const mq = window.matchMedia(`(min-width: ${minWidth}px)`);
     const update = () => setShowRails(mq.matches);
     update();
