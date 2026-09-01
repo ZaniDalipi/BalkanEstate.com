@@ -231,10 +231,12 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
         belowActions={<CityShowcaseSection onNavigate={handleNavigate} />}
       />
 
-      <AppShowcaseSection onNavigate={handleNavigate} />
-
-      {/* Ad — horizontal leaderboard near the top of the home page */}
+      {/* Ad — horizontal leaderboard between the hero's stats strip and the
+          showcase, on a row of its own so it separates the two sections
+          rather than sitting across either. */}
       <AdSlot page="home" placement="in-content" className="w-full px-3 sm:px-4 lg:px-6 my-6" />
+
+      <AppShowcaseSection onNavigate={handleNavigate} />
 
       {isAuthenticated && currentUser && (
         <QuickAccessSection
@@ -278,9 +280,11 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
       </div>
 
       <div className="content-below-fold">
-        <Suspense fallback={<SectionFallback />}>
-          <TopAgenciesSection />
-        </Suspense>
+        <SideRailAds page="home">
+          <Suspense fallback={<SectionFallback />}>
+            <TopAgenciesSection />
+          </Suspense>
+        </SideRailAds>
       </div>
 
       <div className="content-below-fold">
