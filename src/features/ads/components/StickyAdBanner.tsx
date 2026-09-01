@@ -4,6 +4,7 @@ import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { useAdBanners, selectByPlacement } from '../hooks/useAdBanners';
 import { useAdPreview } from '../hooks/useAdPreview';
 import { trackClick, trackImpression } from '../api/adBannerApi';
+import NetworkAd, { stickyNetworkSlot, useNetworkAdFill } from './NetworkAd';
 import type { AdPage, AdPlacement } from '../types';
 
 interface StickyAdBannerProps {
@@ -14,6 +15,8 @@ interface StickyAdBannerProps {
 }
 
 const SESSION_DISMISS_PREFIX = 'ad-banner-dismissed:';
+/** Dismissing the network-filled bar is remembered for the session, like a booked one. */
+const NETWORK_DISMISS_KEY = 'ad-network-sticky-dismissed';
 
 /**
  * Renders the highest-priority active banner for a page + placement as a
@@ -30,6 +33,28 @@ const StickyAdBanner: React.FC<StickyAdBannerProps> = ({ page, placement = 'stic
   const [dismissed, setDismissed] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const trackedRef = useRef<string | null>(null);
+
+  // Network fill for an unbooked sticky slot. It needs its own dismissal and
+  // unfilled state, since there is no banner id to hang them off.
+  const networkFillAllowed = useNetworkAdFill();
+  const canStickyNetworkFill = networkFillAllowed && !!stickyNetworkSlot();
+  const [networkUnfilled, setNetworkUnfilled] = useState(false);
+  const [networkDismissed, setNetworkDismissed] = useState(() => {
+    try {
+      return sessionStorage.getItem(NETWORK_DISMISS_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
+
+  const dismissNetwork = () => {
+    setNetworkDismissed(true);
+    try {
+      sessionStorage.setItem(NETWORK_DISMISS_KEY, '1');
+    } catch {
+      /* sessionStorage unavailable — the bar just returns on the next load */
+    }
+  };
 
   const banner = useMemo(() => selectByPlacement(data, placement)[0], [data, placement]);
 
@@ -60,15 +85,12 @@ const StickyAdBanner: React.FC<StickyAdBannerProps> = ({ page, placement = 'stic
     trackImpression(banner.id);
   }, [banner, dismissed]);
 
-  // Hide when empty/dismissed — unless preview mode is on, where we show a
-  // placeholder so the position is visible.
   const showPlaceholder = !banner || dismissed;
-  if (showPlaceholder && !preview.active) return null;
 
   const isSticky = placement === 'sticky-top' || placement === 'sticky-bottom';
   const isTop = placement === 'sticky-top';
 
-  const handleClick = () => trackClick(banner.id);
+  const handleClick = () => banner && trackClick(banner.id);
 
   const handleDismiss = () => {
     setDismissed(true);
@@ -101,6 +123,63 @@ const StickyAdBanner: React.FC<StickyAdBannerProps> = ({ page, placement = 'stic
         ...edgeOffset,
       }
     : { position: 'relative', width: '100%', padding: '8px 12px' };
+
+  // Nothing booked for this slot. Fill it with a network ad when one is
+  // configured and consented to, otherwise render nothing at all — the sticky
+  // bar has no "Your Ad Here" state outside preview, since an empty bar pinned
+  // over the page would be pure obstruction.
+  if (showPlaceholder && !preview.active) {
+    if (!canStickyNetworkFill || networkUnfilled || networkDismissed) return null;
+
+    return (
+      <div style={outerStyle} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
+        <div
+          style={{
+            pointerEvents: 'auto',
+            margin: '0 auto',
+            maxWidth: 728,
+            position: 'relative',
+            height: cardHeight,
+            background: '#ffffff',
+            border: '1px solid rgba(0,0,0,0.1)',
+            borderRadius: 14,
+            boxShadow: '0 6px 24px rgba(0,0,0,0.16)',
+            overflow: 'hidden',
+          }}
+        >
+          <NetworkAd
+            format="leaderboard"
+            slotId={stickyNetworkSlot()}
+            onUnfilled={() => setNetworkUnfilled(true)}
+          />
+          <button
+            type="button"
+            onClick={dismissNetwork}
+            aria-label={t('ads.dismiss', 'Dismiss advertisement')}
+            style={{
+              position: 'absolute',
+              top: 4,
+              right: 4,
+              width: 22,
+              height: 22,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '50%',
+              border: 'none',
+              background: 'rgba(0,0,0,0.45)',
+              color: '#fff',
+              fontSize: 13,
+              lineHeight: 1,
+              cursor: 'pointer',
+            }}
+          >
+            ×
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={outerStyle} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>

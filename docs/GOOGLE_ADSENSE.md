@@ -1,76 +1,109 @@
-# AdSense network fill
+# AdSense setup
 
-Ad slots on this site are filled in three steps, in order:
+Publisher id for this site: **`ca-pub-8280125236799216`**
 
-1. **A directly-sold banner**, booked through the admin and served from the
-   backend (`src/features/ads/api/adBannerApi.ts`), with impression and click
-   tracking.
-2. **Google AdSense**, as network fill for slots with nothing booked — this is
-   what earns revenue on unsold inventory (`components/NetworkAd.tsx`).
+## How a slot decides what to show
+
+Every ad slot fills in this order, and the first one that works wins:
+
+1. **A banner booked in the admin** for that page + placement — served from the
+   backend, with impression and click tracking. Uploading one here replaces
+   whatever the slot was showing.
+2. **Google AdSense**, when the slot has nothing booked. This is what earns
+   money on unsold space.
 3. **The "Your Ad Here" placeholder**, which sends the visitor to the contact
-   form as an advertising lead.
+   form as an advertising lead — shown when AdSense has no ad either.
 
-This document covers step 2. Steps 1 and 3 are configured in the admin, not in
-env.
+So an admin upload always wins, and an empty slot is never wasted.
 
-## Setup
+The one exception is the sticky bottom bar: it has no placeholder state, so
+when nothing is booked and AdSense has nothing, it renders nothing at all
+rather than pinning an empty bar over the page.
+
+## 1. Verify the site
+
+**Do not use the "AdSense code snippet" method** — the option selected by
+default. That method needs the AdSense script in the `<head>` of every page,
+but this site only injects it after the visitor accepts marketing cookies, so
+Google's verifier will not reliably find it.
+
+Use **"Ads.txt snippet"** instead. `public/ads.txt` is already committed with
+your publisher id:
+
+```
+google.com, pub-8280125236799216, DIRECT, f08c47fec0942fa0
+```
+
+Deploy, confirm `https://balkanestateai.com/ads.txt` returns that line, then
+pick the Ads.txt radio button and press Verify.
+
+(`ads.txt` is required anyway — AdSense will not fill inventory without it.)
+
+## 2. Create the ad units
+
+In AdSense → **Ads → By ad unit → Display ad**, choose **Fixed size** (not
+Responsive — the app picks the size itself). Create:
+
+| Unit | Size | Used for |
+|---|---|---|
+| Leaderboard | 728x90 | in-content banners |
+| Sidebar | 300x600 | side rails, property sidebar |
+| Sticky *(optional)* | 728x90 | the bottom bar |
+
+## 3. Set the environment variables
+
+There is no `.env` in the repo (they are all gitignored), so add these wherever
+the deploy builds from:
 
 ```dotenv
-# Publisher id from AdSense → Account → Settings. Required; with it unset,
-# no AdSense script is ever requested and slots fall straight through to the
-# "Your Ad Here" placeholder.
-VITE_ADSENSE_CLIENT=ca-pub-XXXXXXXXXXXXXXXX
+VITE_ADSENSE_CLIENT=ca-pub-8280125236799216
+VITE_ADSENSE_SLOT_LEADERBOARD=<leaderboard unit id>
+VITE_ADSENSE_SLOT_SIDEBAR=<sidebar unit id>
 
-# Ad unit ids (AdSense → Ads → By ad unit)
-VITE_ADSENSE_SLOT_LEADERBOARD=...   # horizontal units (billboard, leaderboard, rectangle)
-VITE_ADSENSE_SLOT_SIDEBAR=...       # tall units (skyscraper, half-page)
-VITE_ADSENSE_SLOT=...               # fallback used when the two above are unset
+# Optional. The bottom bar stays off entirely unless this is set — it is the
+# most intrusive unit on the site, so it never turns itself on.
+VITE_ADSENSE_SLOT_STICKY=<sticky unit id>
+
+# Optional fallback used by any slot whose specific id above is unset.
+VITE_ADSENSE_SLOT=<any unit id>
 ```
 
-These are read at build time, so a change needs a rebuild and redeploy.
+These are read at **build time**, so a change needs a rebuild and redeploy.
+With `VITE_ADSENSE_CLIENT` unset, no AdSense script is ever requested and every
+empty slot falls straight through to the "Your Ad Here" placeholder.
 
-`ads.txt` is also required before AdSense will fill inventory. Add
-`public/ads.txt` containing your own publisher id:
+## 4. Request review
 
-```
-google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
-```
-
-It is deliberately not committed, since the id belongs to whoever runs the site.
+Once ads.txt verifies and the units are live, use **Request review** in the
+AdSense console.
 
 ## Consent
 
 `NetworkAd` gates on `marketing` consent from
-`src/shared/utils/cookieConsent.ts`. Until the visitor opts in, the AdSense
-script is never injected and no unit is rendered — which is what the site's
-cookie policy promises. `useNetworkAdFill()` exposes that decision so `AdSlot`
-can choose between network fill and the placeholder.
+`src/shared/utils/cookieConsent.ts`: until the visitor opts in, no AdSense
+script is injected and no unit renders. That is what the site's cookie policy
+promises.
 
-Directly-sold banners are unaffected: they are first-party and set no
-advertising cookies, so they serve regardless of consent.
+Two consequences worth knowing:
+
+- **A visitor who declines marketing cookies sees the "Your Ad Here"
+  placeholder**, not an ad. Banners booked in the admin are first-party and set
+  no advertising cookies, so those keep serving either way.
+- **For EEA traffic Google requires a certified CMP.** The current banner is
+  a homegrown one. If a meaningful share of traffic is European, check whether
+  AdSense accepts it or whether a certified CMP is needed before review.
 
 ## Sizing
 
-`AdSlot` reserves a standard IAB unit for every slot before anything loads
-(`AD_FORMATS`: billboard 970x250, leaderboard 728x90, rectangle 300x250,
-skyscraper 160x600, half-page 300x600), and the AdSense `<ins>` fills that
-reserved box exactly.
+`AdSlot` reserves a standard IAB unit before anything loads (`AD_FORMATS`:
+billboard 970x250, leaderboard 728x90, rectangle 300x250, skyscraper 160x600,
+half-page 300x600) and the AdSense `<ins>` fills that reserved box exactly.
 
 `data-full-width-responsive` is deliberately **off**. That flag lets AdSense
 ignore the reserved box and size the unit to the screen instead, which is how
-banners end up oversized and drawn over the content beside them. Leave it off,
-and create the AdSense units as **Display ad → Fixed size** rather than
-"Responsive" so the console does not fight the same setting.
+banners end up oversized and drawn over the content beside them.
 
-## Unfilled slots
-
-AdSense marks a slot it has no ad for with `data-ad-status="unfilled"`.
-`NetworkAd` reports that back through `onUnfilled`, and `AdSlot` then falls
-through to the "Your Ad Here" placeholder — so an unsold slot becomes a sales
-lead rather than an empty grey box.
-
-## Site verification
-
-The tag is injected by the app after consent rather than hard-coded in
-`index.html`. If AdSense asks you to verify the domain, use the **Meta tag** or
-**Ads.txt snippet** method rather than the "AdSense code snippet" one.
+Side rails pick the widest unit that fits the space actually available —
+half-page on an ultra-wide screen, stepping down to a skyscraper on Full-HD —
+and are hidden entirely when neither fits, or when the section is too short to
+contain one.

@@ -42,6 +42,15 @@ const slotForFormat = (format: AdFormat): string | undefined => {
   );
 };
 
+/**
+ * The sticky bar has its own slot id and no fallback, deliberately: a bar
+ * pinned over every page is the most intrusive unit on the site, so it stays
+ * off until someone sets VITE_ADSENSE_SLOT_STICKY on purpose. The other slots
+ * sit in the page flow and can safely fall back to the shared ids above.
+ */
+export const stickyNetworkSlot = (): string | undefined =>
+  import.meta.env.VITE_ADSENSE_SLOT_STICKY;
+
 let scriptRequested = false;
 const ensureAdsenseScript = (client: string) => {
   if (scriptRequested || typeof document === 'undefined') return;
@@ -59,12 +68,14 @@ interface NetworkAdProps {
   format: AdFormat;
   /** Called when AdSense reports it has no ad for this slot. */
   onUnfilled?: () => void;
+  /** Override the slot id chosen from the format (used by the sticky bar). */
+  slotId?: string;
 }
 
-const NetworkAd: React.FC<NetworkAdProps> = ({ format, onUnfilled }) => {
+const NetworkAd: React.FC<NetworkAdProps> = ({ format, onUnfilled, slotId }) => {
   const insRef = useRef<HTMLModElement>(null);
   const pushedRef = useRef(false);
-  const slot = slotForFormat(format);
+  const slot = slotId ?? slotForFormat(format);
   const canFill = useNetworkAdFill();
 
   useEffect(() => {
