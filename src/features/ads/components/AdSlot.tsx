@@ -70,8 +70,8 @@ const AdSlot: React.FC<AdSlotProps> = ({
   // Natural aspect ratio of the loaded creative, so horizontal slots size to
   // the actual banner instead of leaving big blurred bars.
   const [imgAspect, setImgAspect] = React.useState<number | null>(null);
-  // Network fill needs marketing consent, not just a configured publisher id.
-  const canNetworkFill = useNetworkAdFill();
+  // Network fill needs marketing consent and an ad unit for this format.
+  const canNetworkFill = useNetworkAdFill(format);
   // Set once AdSense says it has nothing for this slot, so the space falls back
   // to the sellable placeholder rather than staying an empty grey box.
   const [networkUnfilled, setNetworkUnfilled] = React.useState(false);

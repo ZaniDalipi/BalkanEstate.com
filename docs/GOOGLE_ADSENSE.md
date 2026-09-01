@@ -22,22 +22,41 @@ rather than pinning an empty bar over the page.
 
 ## 1. Verify the site
 
-**Do not use the "AdSense code snippet" method** — the option selected by
-default. That method needs the AdSense script in the `<head>` of every page,
-but this site only injects it after the visitor accepts marketing cookies, so
-Google's verifier will not reliably find it.
+Either method works — the tag and ads.txt are both in place.
 
-Use **"Ads.txt snippet"** instead. `public/ads.txt` is already committed with
-your publisher id:
+**AdSense code snippet** — the tag is in `index.html`, on every one of the 531
+prerendered pages:
+
+```html
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8280125236799216"
+     crossorigin="anonymous"></script>
+```
+
+**Ads.txt snippet** — `public/ads.txt` is committed with the same publisher id:
 
 ```
 google.com, pub-8280125236799216, DIRECT, f08c47fec0942fa0
 ```
 
-Deploy, confirm `https://balkanestateai.com/ads.txt` returns that line, then
-pick the Ads.txt radio button and press Verify.
+`ads.txt` is required regardless of how you verify: AdSense will not fill
+inventory without it. Deploy first, confirm
+`https://balkanestateai.com/ads.txt` returns that line, then Verify.
 
-(`ads.txt` is required anyway — AdSense will not fill inventory without it.)
+### Why the tag loads but ads still wait for consent
+
+The line above the tag in `index.html` matters:
+
+```html
+<script>
+  (window.adsbygoogle = window.adsbygoogle || []).pauseAdRequests = 1;
+</script>
+```
+
+Loading the tag and *requesting an ad* are two different things, and only the
+second sets advertising cookies. Pausing on load means Google's verifier and
+crawler always find the tag, while no ad is requested until the visitor accepts
+marketing cookies — `NetworkAd` releases the pause at that moment. Removing
+that line would start requesting ads on page load, before anyone has consented.
 
 ## 2. Create the ad units
 
@@ -55,10 +74,16 @@ Responsive — the app picks the size itself). Create:
 There is no `.env` in the repo (they are all gitignored), so add these wherever
 the deploy builds from:
 
+The publisher id is already the built-in default and is in the tag in
+`index.html`, so only the unit ids are actually required:
+
 ```dotenv
-VITE_ADSENSE_CLIENT=ca-pub-8280125236799216
 VITE_ADSENSE_SLOT_LEADERBOARD=<leaderboard unit id>
 VITE_ADSENSE_SLOT_SIDEBAR=<sidebar unit id>
+
+# Only needed to point the app at a different AdSense property; it does not
+# change the tag in index.html, so change both together if you ever do.
+# VITE_ADSENSE_CLIENT=ca-pub-8280125236799216
 
 # Optional. The bottom bar stays off entirely unless this is set — it is the
 # most intrusive unit on the site, so it never turns itself on.
@@ -69,8 +94,8 @@ VITE_ADSENSE_SLOT=<any unit id>
 ```
 
 These are read at **build time**, so a change needs a rebuild and redeploy.
-With `VITE_ADSENSE_CLIENT` unset, no AdSense script is ever requested and every
-empty slot falls straight through to the "Your Ad Here" placeholder.
+Until a format has a unit id, its slots fall straight through to the "Your Ad
+Here" placeholder and no ad is requested for them.
 
 ## 4. Request review
 
@@ -80,8 +105,8 @@ AdSense console.
 ## Consent
 
 `NetworkAd` gates on `marketing` consent from
-`src/shared/utils/cookieConsent.ts`: until the visitor opts in, no AdSense
-script is injected and no unit renders. That is what the site's cookie policy
+`src/shared/utils/cookieConsent.ts`: until the visitor opts in, ad requests
+stay paused and no unit renders. That is what the site's cookie policy
 promises.
 
 Two consequences worth knowing:

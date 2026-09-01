@@ -175,6 +175,20 @@
     <link rel="dns-prefetch" href="https://maps.gstatic.com">
     <link rel="dns-prefetch" href="https://unpkg.com">
 
+    <!-- Google AdSense.
+         The tag is in the head so AdSense site verification and Google's
+         crawler can always find it. Ad *requests* are a separate thing from
+         the tag being present, and they are what set advertising cookies — so
+         pauseAdRequests holds them until the visitor accepts marketing
+         cookies, at which point src/features/ads/components/NetworkAd.tsx
+         releases it. Do not remove the pause line: without it the tag starts
+         requesting ads on load, before anyone has consented. -->
+    <script>
+      (window.adsbygoogle = window.adsbygoogle || []).pauseAdRequests = 1;
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8280125236799216"
+         crossorigin="anonymous"></script>
+
     <!-- Google Fonts with display=swap (non-blocking) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>

@@ -22,28 +22,58 @@ vi.stubEnv('VITE_ADSENSE_SLOT_LEADERBOARD', '1111111111');
 
 const loadNetworkAd = async () => (await import('@/features/ads/components/NetworkAd')).default;
 
+/** How index.html leaves the queue before any ad has been consented to. */
+const primePausedQueue = () => {
+  const queue: unknown[] & { pauseAdRequests?: number } = [];
+  queue.pauseAdRequests = 1;
+  (window as unknown as { adsbygoogle: typeof queue }).adsbygoogle = queue;
+  return queue;
+};
+
 describe('NetworkAd consent gate', () => {
   beforeEach(() => {
     consent.marketing = false;
-    document.querySelectorAll('script[data-adsense]').forEach(s => s.remove());
   });
 
-  it('requests nothing from AdSense until marketing consent is given', async () => {
+  it('leaves ad requests paused until marketing consent is given', async () => {
+    const queue = primePausedQueue();
     const NetworkAd = await loadNetworkAd();
 
     const { container } = render(<NetworkAd format="leaderboard" />);
 
+    // The tag in index.html is loaded either way — that is what site
+    // verification needs — but it must not request an ad, and so must not set
+    // an advertising cookie, before the visitor has opted in.
+    expect(queue.pauseAdRequests).toBe(1);
     expect(container).toBeEmptyDOMElement();
-    expect(document.querySelector('script[data-adsense]')).toBeNull();
   });
 
-  it('renders the unit once marketing consent is given', async () => {
+  it('releases ad requests and renders the unit once consent is given', async () => {
+    const queue = primePausedQueue();
     consent.marketing = true;
     const NetworkAd = await loadNetworkAd();
 
     render(<NetworkAd format="leaderboard" />);
 
+    expect(queue.pauseAdRequests).toBe(0);
     expect(document.querySelector('ins.adsbygoogle')).toBeTruthy();
+  });
+
+  it('stays paused when consent exists but the format has no ad unit', async () => {
+    const queue = primePausedQueue();
+    consent.marketing = true;
+    vi.stubEnv('VITE_ADSENSE_SLOT_LEADERBOARD', '');
+    vi.stubEnv('VITE_ADSENSE_SLOT', '');
+    vi.resetModules();
+    const NetworkAd = await loadNetworkAd();
+
+    const { container } = render(<NetworkAd format="leaderboard" />);
+
+    expect(queue.pauseAdRequests).toBe(1);
+    expect(container).toBeEmptyDOMElement();
+
+    vi.stubEnv('VITE_ADSENSE_SLOT_LEADERBOARD', '1111111111');
+    vi.resetModules();
   });
 });
 

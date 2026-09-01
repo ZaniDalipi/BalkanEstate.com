@@ -6,32 +6,49 @@ import type { AdFormat } from './AdSlot';
  * Third-party ad-network fill (Google AdSense) for slots with no direct
  * booking — this is what earns revenue on unsold inventory.
  *
+ * The AdSense tag itself lives in index.html, so verification and Google's
+ * crawler can always see it. This module owns the two things that decide
+ * whether an ad is actually *requested*: consent, and a slot id.
+ *
  * Configure via Vite env vars (set in the deploy environment):
- *   VITE_ADSENSE_CLIENT           = "ca-pub-XXXXXXXXXXXXXXXX"   (required)
- *   VITE_ADSENSE_SLOT             = default responsive slot id
+ *   VITE_ADSENSE_CLIENT           = publisher id; defaults to this site's
+ *   VITE_ADSENSE_SLOT             = default slot id
  *   VITE_ADSENSE_SLOT_LEADERBOARD = slot id for horizontal units (optional)
  *   VITE_ADSENSE_SLOT_SIDEBAR     = slot id for tall units (optional)
+ *   VITE_ADSENSE_SLOT_STICKY      = slot id for the bottom bar (optional)
  *
- * When no client id is set, nothing renders and the caller shows its own
+ * With no slot id for a format, nothing renders and the caller shows its own
  * "Your Ad Here" placeholder instead.
  */
 
-const CLIENT: string | undefined = import.meta.env.VITE_ADSENSE_CLIENT;
+/**
+ * This site's publisher id. Hard-coded as the default because it is public
+ * anyway — it sits in ads.txt and in the tag in index.html — and because a
+ * missing env var should not quietly turn ad revenue off. The env var still
+ * overrides it, e.g. for a fork or a separate staging property.
+ *
+ * Keep in step with the client in index.html's AdSense tag.
+ */
+const DEFAULT_CLIENT = 'ca-pub-8280125236799216';
 
-/** True when an AdSense publisher id is configured, so network fill is possible. */
-export const isNetworkAdConfigured = (): boolean => !!CLIENT;
+const CLIENT: string = import.meta.env.VITE_ADSENSE_CLIENT || DEFAULT_CLIENT;
 
 /**
  * Whether a network ad may actually be requested right now.
  *
- * Being configured is not enough: AdSense sets advertising cookies, which the
- * cookie policy promises are opt-in, so nothing is requested from Google until
- * the visitor has consented to marketing. Callers use this to decide between
- * network fill and the "Your Ad Here" placeholder.
+ * Two things have to hold, and callers use the answer to decide between
+ * network fill and the "Your Ad Here" placeholder:
+ *
+ *  - Marketing consent. AdSense sets advertising cookies, which the cookie
+ *    policy promises are opt-in, so nothing is requested without it.
+ *  - An ad unit to request. Pass the format to check there is a slot id for
+ *    it; without that check a slot with no unit configured would sit there as
+ *    an empty box instead of falling through to the placeholder.
  */
-export const useNetworkAdFill = (): boolean => {
+export const useNetworkAdFill = (format?: AdFormat): boolean => {
   const consent = useCookieConsent();
-  return isNetworkAdConfigured() && consent.marketing;
+  if (!consent.marketing) return false;
+  return format ? !!slotForFormat(format) : true;
 };
 
 const slotForFormat = (format: AdFormat): string | undefined => {
@@ -51,17 +68,21 @@ const slotForFormat = (format: AdFormat): string | undefined => {
 export const stickyNetworkSlot = (): string | undefined =>
   import.meta.env.VITE_ADSENSE_SLOT_STICKY;
 
-let scriptRequested = false;
-const ensureAdsenseScript = (client: string) => {
-  if (scriptRequested || typeof document === 'undefined') return;
-  scriptRequested = true;
-  if (document.querySelector('script[data-adsense]')) return;
-  const s = document.createElement('script');
-  s.async = true;
-  s.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
-  s.crossOrigin = 'anonymous';
-  s.setAttribute('data-adsense', '1');
-  document.head.appendChild(s);
+/**
+ * Let AdSense start requesting ads.
+ *
+ * index.html sets `pauseAdRequests = 1` before the tag loads, so the tag is
+ * present for verification and for Google's crawler while no ad — and so no
+ * advertising cookie — is requested. Releasing the pause is the moment ads
+ * actually begin, and it happens only once marketing consent is in hand.
+ */
+const resumeAdRequests = () => {
+  if (typeof window === 'undefined') return;
+  // adsbygoogle is an array that also carries config flags, so it must stay an
+  // array — push({}) is called on it below.
+  const w = window as unknown as { adsbygoogle?: unknown[] & { pauseAdRequests?: number } };
+  w.adsbygoogle = w.adsbygoogle || ([] as unknown[] & { pauseAdRequests?: number });
+  w.adsbygoogle.pauseAdRequests = 0;
 };
 
 interface NetworkAdProps {
@@ -80,7 +101,7 @@ const NetworkAd: React.FC<NetworkAdProps> = ({ format, onUnfilled, slotId }) => 
 
   useEffect(() => {
     if (!canFill || !CLIENT || !slot) return;
-    ensureAdsenseScript(CLIENT);
+    resumeAdRequests();
     if (pushedRef.current) return;
     const el = insRef.current;
     // A slot AdSense has already claimed must not be pushed again — a second
