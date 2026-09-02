@@ -44,7 +44,7 @@ import Footer from '@/components/shared/Footer';
 import Modal from '@/components/shared/Modal';
 import * as api from '@/services/apiService';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
-import { AdSlot } from '@/src/features/ads';
+import { AdSlot } from '@/src/features/promo';
 
 /**
  * PropertyDetailsPage Component

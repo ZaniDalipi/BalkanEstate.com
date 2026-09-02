@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useCookieConsent } from '@/shared/utils/cookieConsent';
-import { recordNetworkAdOutcome } from '../adsDebug';
-import type { AdFormat } from './AdSlot';
+import { recordNetworkAdOutcome } from '../debug';
+import type { AdFormat } from './Slot';
 
 /**
  * Third-party ad-network fill (Google AdSense) for slots with no direct

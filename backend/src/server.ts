@@ -389,7 +389,13 @@ app.use('/api/business-listings', businessListingRoutes); // Business directory 
 app.use('/api/admin/listing-sources', sensitiveRateLimiter, listingSourceRoutes); // Universal external-listing ingestion (admin only)
 app.use('/api/listing-sources', sensitiveRateLimiter, userListingSourceRoutes); // Per-user external-listing feeds
 app.use('/api/image-proxy', imageProxyRoutes); // Proxy external scraped images to avoid CORS
-app.use('/api/ad-banners', adBannerRoutes); // Advertising banners (public list + impression/click tracking)
+// Advertising banners (public list + impression/click tracking).
+// Served under a neutral path: ad blockers match "/ad-banners" and abort the
+// request, which would take out the *directly sold* banners too — first-party
+// inventory the site is paid for. The old path stays mounted so anything still
+// pointing at it keeps working.
+app.use('/api/promo-slots', adBannerRoutes);
+app.use('/api/ad-banners', adBannerRoutes);
 
 // ============================================================================
 // FRONTEND SERVING + SOCIAL MEDIA OG TAG INJECTION

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { apiRequest, uploadRequest } from '@/src/shared/api';
-import type { AdBannerAdmin, AdPage, AdPlacement } from '@/src/features/ads/types';
+import type { AdBannerAdmin, AdPage, AdPlacement } from '@/src/features/promo/types';
 
 /** Placement options with human labels for the admin form. */
 export const PLACEMENT_OPTIONS: { id: AdPlacement; label: string }[] = [
@@ -89,7 +89,7 @@ export function useAdBannerManager() {
 
   const fetchBanners = async () => {
     try {
-      const data = await apiRequest<{ banners: AdBannerAdmin[] }>('/admin/ad-banners', {
+      const data = await apiRequest<{ banners: AdBannerAdmin[] }>('/admin/promo-slots', {
         requiresAuth: true,
       });
       setBanners(data.banners || []);
@@ -115,7 +115,7 @@ export function useAdBannerManager() {
       const fd = new FormData();
       fd.append('image', file);
       const response = await uploadRequest<{ url: string; publicId: string }>(
-        '/admin/ad-banners/upload-image',
+        '/admin/promo-slots/upload-image',
         fd
       );
       setFormData((prev) => ({ ...prev, imageUrl: response.url, imagePublicId: response.publicId }));
@@ -160,7 +160,7 @@ export function useAdBannerManager() {
         order: formData.order,
       };
 
-      const endpoint = editingItem ? `/admin/ad-banners/${editingItem.id}` : '/admin/ad-banners';
+      const endpoint = editingItem ? `/admin/promo-slots/${editingItem.id}` : '/admin/promo-slots';
       await apiRequest(endpoint, {
         method: editingItem ? 'PATCH' : 'POST',
         body: payload,
@@ -181,7 +181,7 @@ export function useAdBannerManager() {
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this ad banner? This cannot be undone.')) return;
     try {
-      await apiRequest(`/admin/ad-banners/${id}`, { method: 'DELETE', requiresAuth: true });
+      await apiRequest(`/admin/promo-slots/${id}`, { method: 'DELETE', requiresAuth: true });
       fetchBanners();
     } catch (err: any) {
       setError(err.message);
@@ -190,7 +190,7 @@ export function useAdBannerManager() {
 
   const handleToggleActive = async (item: AdBannerAdmin) => {
     try {
-      await apiRequest(`/admin/ad-banners/${item.id}`, {
+      await apiRequest(`/admin/promo-slots/${item.id}`, {
         method: 'PATCH',
         body: { isActive: !item.isActive },
         requiresAuth: true,

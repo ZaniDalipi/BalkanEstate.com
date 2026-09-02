@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
-import AdSlot from './AdSlot';
-import { useAdPreview } from '../hooks/useAdPreview';
+import AdSlot from './Slot';
+import { useAdPreview } from '../hooks/usePreview';
 import type { AdPage } from '../types';
 
 interface SideRailAdsProps {

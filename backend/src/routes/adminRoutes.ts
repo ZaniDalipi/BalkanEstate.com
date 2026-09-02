@@ -457,11 +457,15 @@ const adBannerUpload = multer({
     cb(null, true);
   },
 });
-router.get('/ad-banners', logAdminAction('VIEW_AD_BANNERS'), getAllAdBanners);
-router.post('/ad-banners', logAdminAction('CREATE_AD_BANNER'), createAdBanner);
-router.patch('/ad-banners/:id', logAdminAction('UPDATE_AD_BANNER'), updateAdBanner);
-router.delete('/ad-banners/:id', logAdminAction('DELETE_AD_BANNER'), deleteAdBanner);
-router.post('/ad-banners/upload-image', logAdminAction('UPLOAD_AD_BANNER_IMAGE'), adBannerUpload.single('image'), uploadAdBannerImage);
+// Banner management, under a neutral path so an ad blocker cannot break the
+// admin screens. The old /ad-banners paths stay mounted for compatibility.
+for (const base of ['/promo-slots', '/ad-banners']) {
+  router.get(base, logAdminAction('VIEW_AD_BANNERS'), getAllAdBanners);
+  router.post(base, logAdminAction('CREATE_AD_BANNER'), createAdBanner);
+  router.patch(`${base}/:id`, logAdminAction('UPDATE_AD_BANNER'), updateAdBanner);
+  router.delete(`${base}/:id`, logAdminAction('DELETE_AD_BANNER'), deleteAdBanner);
+  router.post(`${base}/upload-image`, logAdminAction('UPLOAD_AD_BANNER_IMAGE'), adBannerUpload.single('image'), uploadAdBannerImage);
+}
 
 // ===== System Settings Management =====
 router.get('/system-settings', logAdminAction('VIEW_SYSTEM_SETTINGS'), getSystemSettings);

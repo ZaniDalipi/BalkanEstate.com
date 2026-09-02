@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import MapComponent from '@/src/features/map/components/MapComponent';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
-import { interleaveInFeedAds } from '@/features/ads';
+import { interleaveInFeedAds } from '@/features/promo';
 import VillaFilters from './VillaFilters';
 import VillaListingModeToggle from './VillaListingModeToggle';
 import LuxuryVillaCard from './LuxuryVillaCard';

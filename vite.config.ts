@@ -317,6 +317,28 @@ export default defineConfig(({ mode }) => {
             assetFileNames: `assets/[name].[hash].[ext]`,
             manualChunks(id) {
               // ============================================================
+              // ADVERTISING — must ship under a name no ad blocker matches
+              // ============================================================
+              // Chunks are named after their entry module, which produced
+              // AdSlot.*.js, NetworkAd.*.js, InFeedAd.*.js and friends. Filter
+              // lists match those on sight, and a blocked chunk does not just
+              // lose the ad: the page that imports it fails to load at all,
+              // because the import is part of its module graph. Collapsing the
+              // feature into one neutrally named chunk keeps the page working
+              // for the ~30% of visitors running a blocker — they simply see
+              // no ads, which is the correct outcome.
+              if (
+                id.includes('/features/promo/') ||
+                // The admin's banner screens are named after what they manage,
+                // so they would ship as AdBannerManager.*.js and take the admin
+                // dashboard down with them when blocked.
+                /\/features\/admin\/components\/Ad(BannerManager|LocationPreview|BannerManagerForm)/.test(id) ||
+                id.includes('/features/admin/components/useAdBannerManager')
+              ) {
+                return 'promo-slots';
+              }
+
+              // ============================================================
               // VENDOR CHUNKS - Third-party libraries split by functionality
               // ============================================================
               if (id.includes('node_modules')) {

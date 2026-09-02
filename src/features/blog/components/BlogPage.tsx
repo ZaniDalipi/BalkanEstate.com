@@ -10,7 +10,7 @@ import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import ArticleCard from './ArticleCard';
 import BlogFilters from './BlogFilters';
 import ArticlePage from './ArticlePage';
-import { AdSlot } from '@/src/features/ads';
+import { AdSlot } from '@/src/features/promo';
 
 const BlogPage: React.FC = () => {
   const { t } = useTranslation('blog');

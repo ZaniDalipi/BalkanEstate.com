@@ -1,5 +1,5 @@
 import React from 'react';
-import AdSlot from './AdSlot';
+import AdSlot from './Slot';
 import type { AdPage } from '../types';
 
 /** How many listing cards go between one in-feed ad and the next. */

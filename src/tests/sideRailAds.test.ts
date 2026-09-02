@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { pickRail, MIN_RAIL_SECTION_HEIGHT } from '@/features/ads/components/SideRailAds';
+import { pickRail, MIN_RAIL_SECTION_HEIGHT } from '@/features/promo/components/SideRails';
 
 const CONTENT = 1280;
 

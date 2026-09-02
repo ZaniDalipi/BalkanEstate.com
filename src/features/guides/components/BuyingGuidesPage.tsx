@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { SEO } from '@/src/components/seo';
 import Footer from '@/components/shared/Footer';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
-import { AdSlot } from '@/src/features/ads';
+import { AdSlot } from '@/src/features/promo';
 
 // Country guide data — structured for SEO with rich content
 const COUNTRY_GUIDES = [

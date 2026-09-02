@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { useAppContext } from '@/context/AppContext';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
-import { useAdBanners, selectByPlacement } from '../hooks/useAdBanners';
-import { useAdPreview } from '../hooks/useAdPreview';
-import { trackClick, trackImpression } from '../api/adBannerApi';
-import NetworkAd, { useNetworkAdFill } from './NetworkAd';
+import { useAdBanners, selectByPlacement } from '../hooks/useBanners';
+import { useAdPreview } from '../hooks/usePreview';
+import { trackClick, trackImpression } from '../api/bannerApi';
+import NetworkAd, { useNetworkAdFill } from './NetworkFill';
 import type { AdPage, AdPlacement } from '../types';
 
 /**

@@ -7,7 +7,7 @@ import { SearchIcon, XMarkIcon, BellIcon, BuildingLibraryIcon, ChevronUpIcon, Ch
 import AiSearch from './AiSearch';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import Footer from '@/components/shared/Footer';
-import { AdSlot, interleaveInFeedAds } from '@/src/features/ads';
+import { AdSlot, interleaveInFeedAds } from '@/src/features/promo';
 
 interface PropertyListProps {
   properties: Property[];

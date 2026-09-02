@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
 import { useBusinessListings, useMyBusinessListings } from '../hooks';
 import BusinessCard from './BusinessCard';
-import { AdSlot } from '@/src/features/ads';
+import { AdSlot } from '@/src/features/promo';
 import BusinessDetailPage from './BusinessDetailPage';
 import BusinessDirectoryMap from './BusinessDirectoryMap';
 import CreateBusinessListingForm from './CreateBusinessListingForm';

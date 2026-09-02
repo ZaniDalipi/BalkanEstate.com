@@ -20,7 +20,7 @@ vi.mock('@/shared/utils/cookieConsent', () => ({
 vi.stubEnv('VITE_ADSENSE_CLIENT', 'ca-pub-0000000000000000');
 vi.stubEnv('VITE_ADSENSE_SLOT_LEADERBOARD', '1111111111');
 
-const loadNetworkAd = async () => (await import('@/features/ads/components/NetworkAd')).default;
+const loadNetworkAd = async () => (await import('@/features/promo/components/NetworkFill')).default;
 
 /** How index.html leaves the queue before any ad has been consented to. */
 const primePausedQueue = () => {

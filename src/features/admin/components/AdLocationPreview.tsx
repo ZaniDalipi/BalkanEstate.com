@@ -1,5 +1,5 @@
 import React from 'react';
-import type { AdPage, AdPlacement } from '@/src/features/ads/types';
+import type { AdPage, AdPlacement } from '@/src/features/promo/types';
 
 interface Props {
   page: AdPage;
