@@ -398,7 +398,7 @@ export const sendContactInquiry = async (
     const priority = isAdvertising ? 'high' : 'normal';
 
     // Advertising details (validated against the known slot options).
-    const AD_PAGES = ['all', 'home', 'search', 'rentals', 'property-details', 'agents', 'agencies', 'business-directory', 'blog', 'guides'];
+    const AD_PAGES = ['all', 'home', 'search', 'rentals', 'villas', 'property-details', 'agents', 'agencies', 'business-directory', 'blog', 'guides'];
     const AD_PLACEMENTS = ['sticky-bottom', 'sticky-top', 'header', 'in-content', 'sidebar', 'footer'];
     const cleanAdPage = isAdvertising && AD_PAGES.includes(adPage) ? adPage : undefined;
     const cleanAdPlacement = isAdvertising && AD_PLACEMENTS.includes(adPlacement) ? adPlacement : undefined;

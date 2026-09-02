@@ -49,6 +49,10 @@ suppressConsoleLogs();
 import { initSecurity } from './src/utils/security';
 initSecurity();
 
+// Dev-only: exposes __adsenseDebug() for checking the AdSense connection.
+import { installAdsenseDebug } from './src/features/ads/adsDebug';
+installAdsenseDebug();
+
 // Initialize the performance / power governor. Sets classes on <html> that CSS
 // uses to disable heavy decorative animations on mobile / reduced-motion and to
 // pause ALL animation while the app is backgrounded — the main cause of the PWA

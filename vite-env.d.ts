@@ -15,6 +15,8 @@ interface ImportMetaEnv {
   readonly VITE_ADSENSE_SLOT_LEADERBOARD?: string;
   readonly VITE_ADSENSE_SLOT_SIDEBAR?: string;
   readonly VITE_ADSENSE_SLOT_STICKY?: string;
+  /** "true" asks AdSense for test ads — use on staging, never on production. */
+  readonly VITE_ADSENSE_TEST_MODE?: string;
 }
 
 interface ImportMeta {

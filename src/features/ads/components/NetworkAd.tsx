@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useCookieConsent } from '@/shared/utils/cookieConsent';
+import { recordNetworkAdOutcome } from '../adsDebug';
 import type { AdFormat } from './AdSlot';
 
 /**
@@ -34,6 +35,21 @@ const DEFAULT_CLIENT = 'ca-pub-8280125236799216';
 const CLIENT: string = import.meta.env.VITE_ADSENSE_CLIENT || DEFAULT_CLIENT;
 
 /**
+ * Ask AdSense for test ads instead of real ones.
+ *
+ * On by default while developing, and switchable on a deployed build with
+ * VITE_ADSENSE_TEST_MODE=true — which is the only way to actually exercise the
+ * connection, since AdSense does not serve to localhost and will not serve real
+ * ads until the account is approved.
+ *
+ * It also protects the account: real ads loaded or clicked by the people
+ * building the site are invalid traffic, and that is what gets AdSense accounts
+ * suspended. Leave it off on the production build.
+ */
+const IS_TEST_MODE =
+  import.meta.env.VITE_ADSENSE_TEST_MODE === 'true' || import.meta.env.DEV;
+
+/**
  * Whether a network ad may actually be requested right now.
  *
  * Two things have to hold, and callers use the answer to decide between
@@ -60,13 +76,12 @@ const slotForFormat = (format: AdFormat): string | undefined => {
 };
 
 /**
- * The sticky bar has its own slot id and no fallback, deliberately: a bar
- * pinned over every page is the most intrusive unit on the site, so it stays
- * off until someone sets VITE_ADSENSE_SLOT_STICKY on purpose. The other slots
- * sit in the page flow and can safely fall back to the shared ids above.
+ * Slot id for the sticky bar. Its own id if one is set, otherwise the shared
+ * horizontal id — so an unbooked sticky bar fills from AdSense like every other
+ * empty slot, rather than sitting there earning nothing.
  */
 export const stickyNetworkSlot = (): string | undefined =>
-  import.meta.env.VITE_ADSENSE_SLOT_STICKY;
+  import.meta.env.VITE_ADSENSE_SLOT_STICKY || slotForFormat('leaderboard');
 
 /**
  * Let AdSense start requesting ads.
@@ -96,6 +111,7 @@ interface NetworkAdProps {
 const NetworkAd: React.FC<NetworkAdProps> = ({ format, onUnfilled, slotId }) => {
   const insRef = useRef<HTMLModElement>(null);
   const pushedRef = useRef(false);
+  const recordedRef = useRef(false);
   const slot = slotId ?? slotForFormat(format);
   const canFill = useNetworkAdFill();
 
@@ -124,7 +140,15 @@ const NetworkAd: React.FC<NetworkAdProps> = ({ format, onUnfilled, slotId }) => 
     if (!canFill || !el || typeof MutationObserver === 'undefined') return;
 
     const check = () => {
-      if (el.getAttribute('data-ad-status') === 'unfilled') onUnfilled?.();
+      const status = el.getAttribute('data-ad-status');
+      if (status !== 'filled' && status !== 'unfilled') return;
+      // Recorded once per slot, before the unfilled branch collapses it, so the
+      // diagnostic can still tell "Google said no" from "never asked".
+      if (!recordedRef.current) {
+        recordedRef.current = true;
+        recordNetworkAdOutcome(status);
+      }
+      if (status === 'unfilled') onUnfilled?.();
     };
     const observer = new MutationObserver(check);
     observer.observe(el, { attributes: true, attributeFilter: ['data-ad-status'] });
@@ -147,6 +171,12 @@ const NetworkAd: React.FC<NetworkAdProps> = ({ format, onUnfilled, slotId }) => 
       // unit to the screen, which is how banners end up oversized and sitting
       // over the content next to them.
       data-full-width-responsive="false"
+      // Outside production, ask AdSense for test ads. Two reasons: the slots
+      // can be exercised before the account serves real ads, and — more
+      // importantly — loading or clicking your own live ads while developing
+      // is invalid traffic, which is the fastest way to get an AdSense
+      // account suspended. Never set this on a production build.
+      {...(IS_TEST_MODE ? { 'data-adtest': 'on' } : {})}
     />
   );
 };

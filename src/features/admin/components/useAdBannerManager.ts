@@ -18,6 +18,7 @@ export const PAGE_OPTIONS: { id: AdPage; label: string }[] = [
   { id: 'home', label: 'Home' },
   { id: 'search', label: 'Search Results' },
   { id: 'rentals', label: 'Rentals' },
+  { id: 'villas', label: 'Luxury Villas' },
   { id: 'property-details', label: 'Property Details' },
   { id: 'agents', label: 'Agents' },
   { id: 'agencies', label: 'Agencies' },

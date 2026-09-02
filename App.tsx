@@ -869,6 +869,7 @@ const MainLayout: React.FC = () => {
       case 'home': return 'home';
       case 'search': return 'search';
       case 'rentals': return 'rentals';
+      case 'villas': return 'villas';
       case 'business-directory': return 'business-directory';
       case 'blog': return 'blog';
       case 'guides': return 'guides';

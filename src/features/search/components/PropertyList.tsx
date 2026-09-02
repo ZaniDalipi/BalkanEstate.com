@@ -7,7 +7,7 @@ import { SearchIcon, XMarkIcon, BellIcon, BuildingLibraryIcon, ChevronUpIcon, Ch
 import AiSearch from './AiSearch';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import Footer from '@/components/shared/Footer';
-import { AdSlot } from '@/src/features/ads';
+import { AdSlot, interleaveInFeedAds } from '@/src/features/ads';
 
 interface PropertyListProps {
   properties: Property[];
@@ -1003,15 +1003,18 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                 <>
                                     <HighlightedPropertiesSection properties={properties} />
                                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8 property-grid-transition">
-                                        {properties.slice(0, visibleCount).map((prop, index) => (
-                                            <AnimatedPropertyCard
-                                                key={prop.id || `prop-${index}`}
-                                                property={prop}
-                                                index={index}
-                                                onHover={onPropertyHover}
-                                                animateEntrance={animateCards || animateFilteredCards}
-                                            />
-                                        ))}
+                                        {interleaveInFeedAds(
+                                            properties.slice(0, visibleCount).map((prop, index) => (
+                                                <AnimatedPropertyCard
+                                                    key={prop.id || `prop-${index}`}
+                                                    property={prop}
+                                                    index={index}
+                                                    onHover={onPropertyHover}
+                                                    animateEntrance={animateCards || animateFilteredCards}
+                                                />
+                                            )),
+                                            'search',
+                                        )}
                                     </div>
                                     {visibleCount < properties.length && (
                                         <div ref={loadMoreRef}>
@@ -1138,15 +1141,18 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     <>
                                         <HighlightedPropertiesSection properties={properties} />
                                         <div className="grid grid-cols-1 gap-6 property-grid-transition">
-                                            {properties.slice(0, visibleCount).map((prop, index) => (
-                                                <AnimatedPropertyCard
-                                                    key={prop.id || `prop-${index}`}
-                                                    property={prop}
-                                                    index={index}
-                                                    onHover={onPropertyHover}
-                                                    animateEntrance={animateCards || animateFilteredCards}
-                                                />
-                                            ))}
+                                            {interleaveInFeedAds(
+                                                properties.slice(0, visibleCount).map((prop, index) => (
+                                                    <AnimatedPropertyCard
+                                                        key={prop.id || `prop-${index}`}
+                                                        property={prop}
+                                                        index={index}
+                                                        onHover={onPropertyHover}
+                                                        animateEntrance={animateCards || animateFilteredCards}
+                                                    />
+                                                )),
+                                                'search',
+                                            )}
                                         </div>
                                         {visibleCount < properties.length && (
                                             <div ref={loadMoreRef}>

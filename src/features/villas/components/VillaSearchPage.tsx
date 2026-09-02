@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import MapComponent from '@/src/features/map/components/MapComponent';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
+import { interleaveInFeedAds } from '@/features/ads';
 import VillaFilters from './VillaFilters';
 import VillaListingModeToggle from './VillaListingModeToggle';
 import LuxuryVillaCard from './LuxuryVillaCard';
@@ -891,15 +892,18 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     <TrustStrip />
                                     <HighlightedPropertiesSection properties={listProperties} />
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-4">
-                                        {listProperties.slice(0, visibleCount).map((property, index) => (
-                                            <AnimatedVillaCard
-                                                key={property.id}
-                                                property={property}
-                                                index={index}
-                                                onHover={setHoveredPropertyId}
-                                                animateEntrance={animateCards || animateFilteredCards}
-                                            />
-                                        ))}
+                                        {interleaveInFeedAds(
+                                            listProperties.slice(0, visibleCount).map((property, index) => (
+                                                <AnimatedVillaCard
+                                                    key={property.id}
+                                                    property={property}
+                                                    index={index}
+                                                    onHover={setHoveredPropertyId}
+                                                    animateEntrance={animateCards || animateFilteredCards}
+                                                />
+                                            )),
+                                            'villas',
+                                        )}
                                     </div>
                                     {visibleCount < listProperties.length && (
                                         <div ref={loadMoreRef}>

@@ -4,6 +4,7 @@ import MapComponent from '@/src/features/map/components/MapComponent';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
+import { interleaveInFeedAds } from '@/features/ads';
 import RentalFilters from './RentalFilters';
 import Toast from '@/components/shared/Toast';
 import { useRentalSearch } from '../hooks/useRentalSearch';
@@ -480,15 +481,18 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                 <RentalCardAnimationStyles />
                                 <HighlightedPropertiesSection properties={listProperties} />
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {listProperties.slice(0, visibleCount).map((property, index) => (
-                                        <AnimatedPropertyCard
-                                            key={property.id}
-                                            property={property}
-                                            index={index}
-                                            onHover={setHoveredPropertyId}
-                                            animateEntrance={animateCards || animateFilteredCards}
-                                        />
-                                    ))}
+                                    {interleaveInFeedAds(
+                                        listProperties.slice(0, visibleCount).map((property, index) => (
+                                            <AnimatedPropertyCard
+                                                key={property.id}
+                                                property={property}
+                                                index={index}
+                                                onHover={setHoveredPropertyId}
+                                                animateEntrance={animateCards || animateFilteredCards}
+                                            />
+                                        )),
+                                        'rentals',
+                                    )}
                                 </div>
                                 {visibleCount < listProperties.length && (
                                     <div ref={loadMoreRef}>

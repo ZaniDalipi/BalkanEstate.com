@@ -22,6 +22,7 @@ export const AD_PAGES = [
   'home',
   'search',
   'rentals',
+  'villas',
   'property-details',
   'agents',
   'agencies',
