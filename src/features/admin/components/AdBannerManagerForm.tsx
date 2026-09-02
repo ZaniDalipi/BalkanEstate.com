@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { XMarkIcon, PhotoIcon } from '@/constants';
-import type { AdBannerAdmin } from '@/src/features/ads/types';
+import type { AdBannerAdmin } from '@/src/features/promo/types';
 import { AdBannerFormData, PLACEMENT_OPTIONS, PAGE_OPTIONS } from './useAdBannerManager';
 import AdLocationPreview, { buildAdPreviewUrl } from './AdLocationPreview';
 

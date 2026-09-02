@@ -50,7 +50,7 @@ import { initSecurity } from './src/utils/security';
 initSecurity();
 
 // Dev-only: exposes __adsenseDebug() for checking the AdSense connection.
-import { installAdsenseDebug } from './src/features/ads/adsDebug';
+import { installAdsenseDebug } from './src/features/promo/debug';
 installAdsenseDebug();
 
 // Initialize the performance / power governor. Sets classes on <html> that CSS

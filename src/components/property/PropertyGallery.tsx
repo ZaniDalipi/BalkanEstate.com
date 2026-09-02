@@ -11,7 +11,7 @@ import {
   BuildingOfficeIcon,
 } from '../../../constants';
 import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
-import AdSlot from '@/src/features/ads/components/AdSlot';
+import AdSlot from '@/src/features/promo/components/Slot';
 
 const isCloudinaryUrl = (url: string): boolean =>
   typeof url === 'string' && url.includes('res.cloudinary.com');

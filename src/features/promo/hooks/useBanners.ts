@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { adBannerKeys } from '@/src/shared/query/queryKeys';
-import { fetchAdBanners } from '../api/adBannerApi';
+import { fetchAdBanners } from '../api/bannerApi';
 import type { AdBanner, AdPage, AdPlacement } from '../types';
 
 /**

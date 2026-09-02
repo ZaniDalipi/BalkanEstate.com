@@ -18,7 +18,7 @@ import AppShowcaseSection from './AppShowcaseSection';
 import CityShowcaseSection from './CityShowcaseSection';
 import QuickAccessSection from './QuickAccessSection';
 import Footer from '@/components/shared/Footer';
-import { AdSlot, SideRailAds } from '@/src/features/ads';
+import { AdSlot, SideRailAds } from '@/src/features/promo';
 
 // Lazy-load below-fold sections to reduce initial bundle
 const StackedCards = lazy(() => import('@/src/components/ui/glass-cards').then(m => ({ default: m.StackedCards })));

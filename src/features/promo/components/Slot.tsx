@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { useAppContext } from '@/context/AppContext';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
-import { useAdBanners, selectByPlacement } from '../hooks/useAdBanners';
-import { useAdPreview } from '../hooks/useAdPreview';
-import { trackClick, trackImpression } from '../api/adBannerApi';
-import NetworkAd, { useNetworkAdFill } from './NetworkAd';
+import { useAdBanners, selectByPlacement } from '../hooks/useBanners';
+import { useAdPreview } from '../hooks/usePreview';
+import { trackClick, trackImpression } from '../api/bannerApi';
+import NetworkAd, { useNetworkAdFill } from './NetworkFill';
 import type { AdPage, AdPlacement } from '../types';
 
 /**
@@ -107,6 +107,13 @@ const AdSlot: React.FC<AdSlotProps> = ({
   }, [preview.active, preview.focus, placement, index]);
 
   const { w, h } = AD_FORMATS[format];
+  /** Record the creative's real shape, from a fresh load or one already cached. */
+  const readAspect = React.useCallback((el: HTMLImageElement | null) => {
+    if (!el || !el.complete) return;
+    const { naturalWidth: nw, naturalHeight: nh } = el;
+    if (nw > 0 && nh > 0) setImgAspect(nw / nh);
+  }, []);
+
   const isTall = h > w;
 
   // Highlight ring shown around every slot while in preview mode.
@@ -124,11 +131,22 @@ const AdSlot: React.FC<AdSlotProps> = ({
     overflow: 'hidden',
   };
 
-  // For horizontal slots, match the creative's own aspect ratio (once loaded)
-  // so the banner fills the box edge-to-edge — capped so an odd-shaped image
-  // can't blow the height up. Vertical rails keep their fixed skyscraper shape.
+  // Match the creative's own aspect ratio once it has loaded, so the banner
+  // fills its box edge to edge instead of floating in blurred bars.
+  //
+  // Tall slots need this as much as wide ones. A rail steps down to 160x600 on
+  // a normal desktop, and the 300x600 creative everyone is told to supply is
+  // 1:2 — it cannot fill a 1:3.75 box, so it sat in the middle with blur above
+  // and below. Letting the box take the image's shape turns that into a clean
+  // 160x320. The floor of w/h keeps the box from growing taller than the unit
+  // it stands in; the ceiling stops a "tall" slot turning wider than square.
   const bannerBoxStyle: React.CSSProperties = isTall
-    ? baseBoxStyle
+    ? {
+        ...baseBoxStyle,
+        aspectRatio: imgAspect
+          ? `${Math.min(Math.max(imgAspect, w / h), 1)}`
+          : `${w} / ${h}`,
+      }
     : {
         ...baseBoxStyle,
         maxWidth: Math.max(w, 1000),
@@ -291,10 +309,13 @@ const AdSlot: React.FC<AdSlotProps> = ({
             src={imageSrc}
             alt={banner.title}
             loading="lazy"
-            onLoad={(e) => {
-              const { naturalWidth: nw, naturalHeight: nh } = e.currentTarget;
-              if (nw > 0 && nh > 0) setImgAspect(nw / nh);
-            }}
+            // The ref matters as much as onLoad. A creative already in cache is
+            // complete before React attaches the handler, so onLoad never
+            // fires, imgAspect stays null and the slot keeps its default
+            // shape — which is how a correctly sized banner still ends up
+            // letterboxed inside blurred bars on a second visit.
+            ref={readAspect}
+            onLoad={(e) => readAspect(e.currentTarget)}
             style={{ display: 'block', width: '100%', height: '100%', objectFit: 'contain' }}
           />
         </a>

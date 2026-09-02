@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAdPreview, exitAdPreview } from '../hooks/useAdPreview';
+import { useAdPreview, exitAdPreview } from '../hooks/usePreview';
 
 /**
  * Floating banner shown while ad-preview mode is active (opened from an admin

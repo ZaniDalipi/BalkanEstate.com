@@ -8,7 +8,7 @@
 
 import { describe, it, expect } from 'vitest';
 import React from 'react';
-import { interleaveInFeedAds } from '@/features/ads/components/InFeedAd';
+import { interleaveInFeedAds } from '@/features/promo/components/InFeedSlot';
 
 const cards = (n: number) =>
   Array.from({ length: n }, (_, i) => React.createElement('div', { key: i }, `card ${i}`));

@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
-import AdSlot from './AdSlot';
-import { useAdPreview } from '../hooks/useAdPreview';
+import AdSlot from './Slot';
+import { useAdPreview } from '../hooks/usePreview';
 import type { AdPage } from '../types';
 
 interface SideRailAdsProps {
@@ -11,7 +11,8 @@ interface SideRailAdsProps {
 }
 
 const RAIL_HEIGHT = 600;
-const RAIL_TOP = 40;
+/** Clear space kept above and below a centred rail, so it never touches the edges. */
+const RAIL_MARGIN = 40;
 const GAP = 20;
 
 /**
@@ -33,7 +34,7 @@ const RAIL_UNITS = [
  * null with no data), two sets of rails end up drawn over each other. Below
  * this height the rails are not shown.
  */
-const MIN_SECTION_HEIGHT = RAIL_TOP + RAIL_HEIGHT;
+const MIN_SECTION_HEIGHT = RAIL_MARGIN + RAIL_HEIGHT;
 
 /** The widest rail that fits beside the content in the space actually available. */
 export const pickRail = (availableWidth: number, contentMaxWidth: number, gap: number = GAP) =>
@@ -41,6 +42,18 @@ export const pickRail = (availableWidth: number, contentMaxWidth: number, gap: n
 
 /** Shortest a section may be and still contain a rail. Exported for tests. */
 export const MIN_RAIL_SECTION_HEIGHT = MIN_SECTION_HEIGHT;
+
+/**
+ * Width of the column the sections actually centre — 72rem, the max-width the
+ * podium sections declare.
+ *
+ * This used to default to 1280, which is 128px wider than anything on the page.
+ * On a 1920px screen (≈1840px of content area once the icon rail is subtracted)
+ * that overstatement was the difference between a half-page fitting and not, so
+ * rails stepped down to a 160px skyscraper and, taking the creative's shape,
+ * came out half the height they should be. 1152 + 2 × (300 + 20) = 1792 fits.
+ */
+const DEFAULT_CONTENT_WIDTH = 1152;
 
 /**
  * Wraps a section and floats a vertical ad in each side margin.
@@ -51,7 +64,7 @@ export const MIN_RAIL_SECTION_HEIGHT = MIN_SECTION_HEIGHT;
  * rail shows [1], so each side is independently controllable from the admin
  * (by order within the placement).
  */
-const SideRailAds: React.FC<SideRailAdsProps> = ({ page, contentMaxWidth = 1280, children }) => {
+const SideRailAds: React.FC<SideRailAdsProps> = ({ page, contentMaxWidth = DEFAULT_CONTENT_WIDTH, children }) => {
   const [rail, setRail] = useState<(typeof RAIL_UNITS)[number] | null>(null);
   const [isTallEnough, setIsTallEnough] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -104,7 +117,11 @@ const SideRailAds: React.FC<SideRailAdsProps> = ({ page, contentMaxWidth = 1280,
             format={rail.format}
             style={{
               position: 'absolute',
-              top: RAIL_TOP,
+              // Centred against the section. Pinned near the top it sat level
+              // with the heading while the content below it did not, which
+              // read as a lopsided column rather than a matched pair.
+              top: '50%',
+              transform: 'translateY(-50%)',
               left: GAP,
               width: rail.width,
               zIndex: 1,
@@ -117,7 +134,8 @@ const SideRailAds: React.FC<SideRailAdsProps> = ({ page, contentMaxWidth = 1280,
             format={rail.format}
             style={{
               position: 'absolute',
-              top: RAIL_TOP,
+              top: '50%',
+              transform: 'translateY(-50%)',
               right: GAP,
               width: rail.width,
               zIndex: 1,

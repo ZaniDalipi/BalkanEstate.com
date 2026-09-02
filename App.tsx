@@ -104,8 +104,8 @@ const PaymentCancel = lazy(() => import('./src/features/payments/components/Paym
 const ListingLimitWarningModal = lazy(() => import('./components/shared/ListingLimitWarningModal'));
 const DiscountGameModal = lazy(() => import('./components/shared/DiscountGameModal'));
 const AdminDashboard = lazy(() => import('./src/features/admin/components/AdminDashboard'));
-const StickyAdBanner = lazy(() => import('./src/features/ads/components/StickyAdBanner'));
-const AdPreviewIndicator = lazy(() => import('./src/features/ads/components/AdPreviewIndicator'));
+const StickyAdBanner = lazy(() => import('./src/features/promo/components/StickyBar'));
+const AdPreviewIndicator = lazy(() => import('./src/features/promo/components/PreviewIndicator'));
 const AgencyDashboardPage = lazy(() => import('./src/features/agency-dashboard/components/AgencyDashboardPage'));
 const NotFoundPage = lazy(() => import('./src/components/ui/not-found-2').then(m => ({ default: m.NotFound })));
 const ResetPasswordPage = lazyWithRetry(() => import('./src/features/auth/components/ResetPasswordPage'));
@@ -861,7 +861,7 @@ const MainLayout: React.FC = () => {
 
   // Map the current view to an ad-banner "page" so advertisers can target placements.
   // Admin / dashboard / auth / checkout style views never show ads.
-  const adPage = useMemo<import('./src/features/ads/types').AdPage | null>(() => {
+  const adPage = useMemo<import('./src/features/promo/types').AdPage | null>(() => {
     if (state.selectedProperty) return 'property-details';
     if (state.selectedAgentId || state.activeView === 'agents' || state.activeView === 'agentProfile') return 'agents';
     if (state.selectedAgencyId || state.activeView === 'agencies' || state.activeView === 'agencyDetail') return 'agencies';

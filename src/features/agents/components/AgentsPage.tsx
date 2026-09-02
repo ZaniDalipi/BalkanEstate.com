@@ -6,7 +6,7 @@ import { Agent, Agency } from '@/types';
 import { getAllAgents, getAgencies } from '@/services/apiService';
 import { getAgent } from '../api/agentApi';
 import AgentCard from './AgentCard';
-import { AdSlot } from '@/src/features/ads';
+import { AdSlot } from '@/src/features/promo';
 import AgentScoringPanel from './AgentScoringPanel';
 import AgentProfilePage from './AgentProfilePage';
 import AgencyBadge from '@/components/shared/AgencyBadge';

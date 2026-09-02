@@ -4,7 +4,7 @@ import MapComponent from '@/src/features/map/components/MapComponent';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
-import { interleaveInFeedAds } from '@/features/ads';
+import { interleaveInFeedAds } from '@/features/promo';
 import RentalFilters from './RentalFilters';
 import Toast from '@/components/shared/Toast';
 import { useRentalSearch } from '../hooks/useRentalSearch';

@@ -12,16 +12,16 @@ export const fetchAdBanners = async (
 ): Promise<AdBanner[]> => {
   const params = new URLSearchParams({ page });
   if (placement) params.set('placement', placement);
-  const data = await apiRequest<PublicBannersResponse>(`/ad-banners?${params.toString()}`);
+  const data = await apiRequest<PublicBannersResponse>(`/promo-slots?${params.toString()}`);
   return data.banners || [];
 };
 
 /** Fire-and-forget impression tracking. */
 export const trackImpression = (id: string): void => {
-  apiRequest(`/ad-banners/${id}/impression`, { method: 'POST' }).catch(() => {});
+  apiRequest(`/promo-slots/${id}/impression`, { method: 'POST' }).catch(() => {});
 };
 
 /** Fire-and-forget click tracking. */
 export const trackClick = (id: string): void => {
-  apiRequest(`/ad-banners/${id}/click`, { method: 'POST' }).catch(() => {});
+  apiRequest(`/promo-slots/${id}/click`, { method: 'POST' }).catch(() => {});
 };
