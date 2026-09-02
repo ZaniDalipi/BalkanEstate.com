@@ -94,10 +94,24 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
         marginRight: '-50vw',
     };
 
+    /**
+     * Clear the fixed things pinned over the foot of the screen — the sticky ad
+     * bar (--sticky-ad-height, 0px when there is no bar) and, on mobile, the
+     * BottomNav. They reserve no space of their own, so without this the end of
+     * the footer sits underneath them and cannot be scrolled into view.
+     *
+     * It lives here rather than on the scroll container because the page
+     * content is not in that container's normal flow — padding and spacers
+     * there have no effect on where the footer ends up.
+     */
+    const bottomReserveStyle = {
+        paddingBottom: 'calc(var(--sticky-ad-height, 0px) + env(safe-area-inset-bottom, 0px))',
+    };
+
     return (
         <footer
             className={`relative bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white mt-auto overflow-hidden ${contained ? 'w-full rounded-t-2xl' : ''} ${className}`}
-            style={fullWidthStyle}
+            style={{ ...fullWidthStyle, ...bottomReserveStyle }}
         >
             {/* Animated gradient background */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-purple-600/10" />

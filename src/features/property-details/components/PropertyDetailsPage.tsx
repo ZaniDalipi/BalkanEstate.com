@@ -1108,6 +1108,15 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <AdSlot page="property-details" placement="sidebar" format="halfpage" />
             </div>
           </div>
+
+          {/* The same inventory for phones and tablets, which have no right
+              column to put a skyscraper in. Horizontal rather than tall, and a
+              separate in-content slot so the creative booked for it can suit
+              the shape — a 300x600 rail image squeezed into a wide box does
+              neither advertiser nor reader any favours. */}
+          <div className="lg:hidden">
+            <AdSlot page="property-details" placement="in-content" index={2} format="leaderboard" />
+          </div>
         </div>
       </main>
 

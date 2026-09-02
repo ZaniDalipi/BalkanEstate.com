@@ -287,6 +287,12 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
         </SideRailAds>
       </div>
 
+      {/* A second banner partway down the page. It matters most on phones and
+          tablets, which are never wide enough for the side rails above and
+          would otherwise carry a single ad across the whole home page — but it
+          is in the flow, so every width gets it. */}
+      <AdSlot page="home" placement="in-content" index={1} className="w-full px-3 sm:px-4 lg:px-6 my-6" />
+
       <div className="content-below-fold">
         <Suspense fallback={<SectionFallback />}>
           <CategoriesSection onCategoryClick={handleCategoryClick} onNavigate={handleNavigate} />

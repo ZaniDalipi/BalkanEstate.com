@@ -15,6 +15,12 @@ interface StickyAdBannerProps {
 }
 
 const SESSION_DISMISS_PREFIX = 'ad-banner-dismissed:';
+
+/**
+ * Height the sticky bar occupies at the foot of the screen, published for the
+ * app's scroll container to add to its bottom padding. Read in App.tsx.
+ */
+export const STICKY_AD_HEIGHT_VAR = '--sticky-ad-height';
 /** Dismissing the network-filled bar is remembered for the session, like a booked one. */
 const NETWORK_DISMISS_KEY = 'ad-network-sticky-dismissed';
 
@@ -90,6 +96,14 @@ const StickyAdBanner: React.FC<StickyAdBannerProps> = ({ page, placement = 'stic
   const isSticky = placement === 'sticky-top' || placement === 'sticky-bottom';
   const isTop = placement === 'sticky-top';
 
+  /** Whether a bar is actually on screen right now — booked, or filled by AdSense. */
+  const isBarOnScreen =
+    !isTop &&
+    isSticky &&
+    (!showPlaceholder ||
+      preview.active ||
+      (canStickyNetworkFill && !networkUnfilled && !networkDismissed));
+
   const handleClick = () => banner && trackClick(banner.id);
 
   const handleDismiss = () => {
@@ -111,6 +125,22 @@ const StickyAdBanner: React.FC<StickyAdBannerProps> = ({ page, placement = 'stic
   const edgeOffset = isTop
     ? { top: isDesktop ? 12 : 'calc(env(safe-area-inset-top, 0px) + 8px)' }
     : { bottom: isDesktop ? 12 : 'calc(3.5rem + env(safe-area-inset-bottom, 0px) + 8px)' };
+
+  // Publish how much of the bottom of the screen the bar occupies, so the page
+  // can pad for it. A fixed bar reserves no space of its own: without this the
+  // last stretch of every page — the footer, the final section, another ad —
+  // sits permanently underneath it and can never be scrolled into view.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (!isBarOnScreen) {
+      root.style.removeProperty(STICKY_AD_HEIGHT_VAR);
+      return;
+    }
+    root.style.setProperty(STICKY_AD_HEIGHT_VAR, `${cardHeight + (isDesktop ? 12 : 8)}px`);
+    return () => {
+      root.style.removeProperty(STICKY_AD_HEIGHT_VAR);
+    };
+  }, [isBarOnScreen, cardHeight, isDesktop]);
 
   const outerStyle: React.CSSProperties = isSticky
     ? {
