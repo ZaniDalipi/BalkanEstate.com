@@ -216,7 +216,10 @@
     "pushDisabled": "Activează pentru alerte instantanee",
     "pushDenied": "Blocat în setările browserului",
     "savePreferences": "Salvează Preferințele",
-    "preferencesSaved": "Preferințele de notificare au fost salvate"
+    "preferencesSaved": "Preferințele de notificare au fost salvate",
+    "email_cityMarketUpdates": "Actualizări ale pieței orașelor",
+    "email_cityMarketUpdates_desc": "Rezumat lunar Explorează orașele când prețurile din orașe se modifică",
+    "saveError": "Nu am putut salva modificarea. Setarea anterioară este încă activă — încercați din nou."
   },
   "preferences": {
     "title": "Preferințe",

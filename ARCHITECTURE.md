@@ -152,6 +152,82 @@ action, without requiring a full market-data form.
 
 ---
 
+## Explore Cities — Market Update Digest
+
+`/explore-cities` shows the *current* market figures. The digest answers the
+question that page cannot: **what changed, and where did it change most?**
+
+```
+CityMarketData                         ← current figures (refresh job: 1st & 15th, 03:00)
+  └── captureCityMarketSnapshots()     ← writes CityMarketSnapshot ONLY when the
+        │                                 upstream fingerprint changed
+        └── computeCityMarketChanges({ since })
+              │   pairs each city's newest snapshot with its baseline at `since`
+              │   → CityMarketChange (price delta, trend relabel, magnitude)
+              └── runCityMarketDigest({ reason })
+                    ├── cadence guard      (CityMarketDigestRun — newest attempt)
+                    ├── window             (CityMarketDigestRun — newest `sent` run)
+                    ├── recipients         (verified · emailPreferences.cityMarketUpdates)
+                    ├── rankChangesForFocus(saved searches + home country)
+                    └── emailService.sendCityMarketUpdateDigest()
+```
+
+Two triggers, one pipeline:
+
+| Reason | When | Gate |
+|--------|------|------|
+| `source-update` | right after each market-data refresh | a city moved ≥ `significantPriceChangePct` (5%) **and** ≥ 7 days since the last digest |
+| `monthly` | cron `0 9 2 * *` | ≥ 25 days since the last digest attempt |
+| `manual` | `POST /api/cities/market-digest/run` (admin) | none — but an empty digest is still never sent |
+
+Key decisions:
+- **A snapshot means "the sources published something".** The fingerprint hashes
+  only upstream figures (price, growth, yield, scores, trend) and deliberately
+  excludes platform-derived counts (`listingsCount`, `averageDaysOnMarket`),
+  which change on every listing edit. Without that exclusion every capture would
+  look like fresh source data and the email would fire on our own noise.
+- **Two triggers, not two pipelines.** "Every month" and "whenever the sources
+  update" are the same job with different gates, so there is one place where the
+  audience, the ranking and the copy are decided.
+- **The run collection owns cadence *and* the window.** The newest run of any
+  status says how recently we tried (that is what prevents a double send); the
+  newest `sent` run's `windowEnd` is where the next diff starts (that is what
+  prevents reporting the same move twice). A skipped or dry run advances neither,
+  so changes accumulated in its window are still owed to the reader.
+- **No fabricated percentages.** A delta is `null` — never a number — when the
+  baseline is zero, a reading is missing/non-finite, or the change exceeds
+  `maxCredibleChangePct` (corrupt feed, not a market that doubled overnight). A
+  city with no baseline snapshot is skipped rather than reported as a jump from
+  nothing, and a city whose figures are incomplete never enters a snapshot.
+- **A re-labelled market is news at any size.** A sub-threshold price move is
+  still reported when `marketTrend` flipped — "Belgrade is now declining" is
+  exactly what a percentage cannot convey.
+- **Personalised order, shared content.** Every reader gets the region's biggest
+  movers; cities from their saved searches sort first (and carry a ★), their
+  country next. Ranking is a pure function (`rankChangesForFocus`) over a focus
+  set, so it is testable without users.
+- **Charts drawn with table cells.** Bar widths are `<td width="N%">` — the only
+  chart primitive every mail client renders identically. No images to block, no
+  CSS gradients to strip.
+- **Its own unsubscribe.** `emailPreferences.cityMarketUpdates` is switchable on
+  its own: the footer's first link carries `type=cityMarketUpdates`, so turning
+  the digest off leaves property alerts, price drops and messages untouched.
+  Transactional mail is never switched off, by any link.
+- **Thresholds are config, not literals.** `config/cityMarketDigest.ts` reads
+  env overrides through a validator — a malformed value falls back to the
+  documented default instead of poisoning the job, and `significant` is clamped
+  so it can never be looser than `material`.
+
+Files: `services/cityMarketChangeService.ts` (capture + diff),
+`services/cityMarketDigestService.ts` (audience + orchestration),
+`jobs/cityMarketDigestJob.ts` (cron/admin entry points),
+`models/CityMarketSnapshot.ts`, `models/CityMarketDigestRun.ts`,
+`config/cityMarketDigest.ts`, `emailService.sendCityMarketUpdateDigest`.
+Admin: `GET /api/cities/market-digest/preview` inspects the pending changes;
+`POST /api/cities/market-digest/run` (`{ dryRun?, force? }`) sends on demand.
+
+---
+
 ## Property Map — "Full Map" Destination
 
 The cinematic property map ends in a **Full Map** button. Which full map that

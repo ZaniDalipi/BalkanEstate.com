@@ -18,6 +18,7 @@ import { startPropertyStatsJob, stopPropertyStatsJob } from '../jobs/computeProp
 import { processExpiredRentals } from '../jobs/rentalExpiryJob';
 import { processListingIngest, processDeferredListingReplay } from '../jobs/listingIngestJob';
 import { runScoreFullRefresh } from '../jobs/scoreBackfillJob';
+import { runMonthlyCityMarketDigest } from '../jobs/cityMarketDigestJob';
 
 // Helper to check if MongoDB is connected before running a job
 const isMongoConnected = (): boolean => {
@@ -52,6 +53,7 @@ let rentalExpiryTask: cron.ScheduledTask | null = null;
 let listingIngestTask: cron.ScheduledTask | null = null;
 let deferredReplayTask: cron.ScheduledTask | null = null;
 let scoreRefreshTask: cron.ScheduledTask | null = null;
+let cityMarketDigestTask: cron.ScheduledTask | null = null;
 
 export const startCronJobs = () => {
   // Check for subscriptions expiring in 1 day - runs daily at 10 AM
@@ -478,7 +480,31 @@ export const startCronJobs = () => {
     });
   });
 
-  cronLogger.info('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails, monthly coupons, news fetch, property stats, rental expiry, listing ingest, deferred replay, score refresh)');
+  // ===============================
+  // EXPLORE-CITIES MARKET DIGEST
+  // ===============================
+
+  // Monthly Explore-Cities market update email — 2nd of each month at 09:00 UTC.
+  // Deliberately a day after the market-data refresh (1st, 03:00 Europe/Belgrade)
+  // so the digest diffs figures that have already landed. The job's own cadence
+  // guard makes this a no-op when the refresh already sent an out-of-cycle
+  // digest for a sharp move.
+  cityMarketDigestTask = cron.schedule('0 9 2 * *', async () => {
+    await withDbConnection('city market digest', async () => {
+      try {
+        const result = await runMonthlyCityMarketDigest();
+        cronLogger.info(
+          `🌍 Monthly city market digest ${result.status}: ${result.citiesChanged} change(s), `
+          + `${result.emailsSent} sent, ${result.emailsSkipped} skipped, ${result.emailsFailed} failed`
+          + (result.note ? ` — ${result.note}` : ''),
+        );
+      } catch (error) {
+        cronLogger.error('City market digest cron error:', error);
+      }
+    });
+  });
+
+  cronLogger.info('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails, monthly coupons, news fetch, property stats, rental expiry, listing ingest, deferred replay, score refresh, city market digest)');
 };
 
 export const stopCronJobs = () => {
@@ -501,6 +527,7 @@ export const stopCronJobs = () => {
   if (listingIngestTask) listingIngestTask.stop();
   if (deferredReplayTask) deferredReplayTask.stop();
   if (scoreRefreshTask) scoreRefreshTask.stop();
+  if (cityMarketDigestTask) cityMarketDigestTask.stop();
   stopPropertyStatsJob();
   cronLogger.info('🛑 All cron jobs stopped');
 };

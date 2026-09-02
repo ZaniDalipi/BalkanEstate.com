@@ -192,7 +192,10 @@ export function renderEmailConfig(
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
 
     /* Dark mode (device preference): white text everywhere */
     @media (prefers-color-scheme: dark) {
@@ -208,7 +211,8 @@ export function renderEmailConfig(
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: ${darkPrimary} !important; }
       .ec-card a { color: ${darkPrimary} !important; }
-      .ec-cta, .ec-cta center { background: ${darkGradient} !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: ${darkBackgroundAlt} !important; }
     }
   </style>

@@ -7,8 +7,14 @@ import { getCityPriceHistory } from '../services/cityHistoryService';
 import { getEconomicIndicators } from '../services/economicIndicatorsService';
 import { getCityGeoData } from '../services/geoDataService';
 import { seedCityImages } from '../scripts/seedCityImages';
+import { triggerCityMarketDigest } from '../jobs/cityMarketDigestJob';
+import { previewCityMarketDigest } from '../services/cityMarketDigestService';
 import { apiLogger } from '../utils/logger';
 import { getParam } from '../utils/validateParams';
+
+/** Admin gate used by the write endpoints in this controller. */
+const isAdmin = (req: Request): boolean =>
+  Boolean(req.user) && (req.user as { role?: string }).role === 'admin';
 
 /**
  * @desc    Get featured city recommendations
@@ -121,6 +127,73 @@ export const triggerMarketDataUpdateController = async (req: Request, res: Respo
       success: false,
       message: 'Error triggering update',
     });
+  }
+};
+
+/**
+ * @desc    Preview the city changes the next Explore-Cities digest would report
+ * @route   GET /api/cities/market-digest/preview
+ * @access  Private/Admin
+ */
+export const previewCityMarketDigestController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!isAdmin(req)) {
+      res.status(403).json({ success: false, message: 'Admin access required' });
+      return;
+    }
+
+    const preview = await previewCityMarketDigest();
+
+    res.json({
+      success: true,
+      windowStart: preview.windowStart,
+      windowEnd: preview.windowEnd,
+      periodLabel: preview.periodLabel,
+      count: preview.changes.length,
+      changes: preview.changes,
+    });
+  } catch (error: unknown) {
+    apiLogger.error('Error previewing city market digest:', error);
+    res.status(500).json({ success: false, message: 'Error previewing city market digest' });
+  }
+};
+
+/**
+ * @desc    Run the Explore-Cities market digest now (admin only)
+ * @route   POST /api/cities/market-digest/run
+ * @access  Private/Admin
+ *
+ * Runs inline rather than fire-and-forget: an admin triggering a mass email
+ * needs the outcome (how many cities, how many recipients) in the response,
+ * and the digest's own guards mean an empty or too-soon run costs nothing.
+ */
+export const runCityMarketDigestController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!isAdmin(req)) {
+      res.status(403).json({ success: false, message: 'Admin access required' });
+      return;
+    }
+
+    const body: Record<string, unknown> = (req.body && typeof req.body === 'object') ? req.body : {};
+
+    for (const key of ['dryRun', 'force'] as const) {
+      if (key in body && typeof body[key] !== 'boolean') {
+        res.status(400).json({ success: false, message: `"${key}" must be a boolean` });
+        return;
+      }
+    }
+
+    const result = await triggerCityMarketDigest({
+      dryRun: body.dryRun === true,
+      // Cadence is skipped by default for a manual run, but an admin can ask to
+      // respect it (force: false) to verify the schedule behaves as expected.
+      force: body.force !== false,
+    });
+
+    res.json({ success: true, result });
+  } catch (error: unknown) {
+    apiLogger.error('Error running city market digest:', error);
+    res.status(500).json({ success: false, message: 'Error running city market digest' });
   }
 };
 

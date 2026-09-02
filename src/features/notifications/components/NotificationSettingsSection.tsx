@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bell, BellOff, Mail, MessageSquare, TrendingDown, Home, BarChart2, Megaphone, CheckCircle, AlertTriangle, Loader2, ShieldCheck } from 'lucide-react';
+import { Bell, BellOff, Mail, MessageSquare, TrendingDown, Home, BarChart2, Megaphone, Globe2, CheckCircle, AlertTriangle, Loader2, ShieldCheck } from 'lucide-react';
 import { usePushNotifications } from '../hooks/usePushNotifications';
 import { apiRequest } from '@/src/shared/api';
 
@@ -9,6 +9,7 @@ interface EmailPreferences {
   propertyAlerts: boolean;
   priceDrops: boolean;
   messages: boolean;
+  cityMarketUpdates: boolean;
   marketing: boolean;
   transactional: boolean;
 }
@@ -223,6 +224,12 @@ const EMAIL_ROWS: EmailPrefRow[] = [
     description: 'Performance summary for your listings every week',
   },
   {
+    key: 'cityMarketUpdates',
+    icon: <Globe2 className="w-4 h-4" />,
+    label: 'City Market Updates',
+    description: 'Monthly Explore Cities digest when city prices move',
+  },
+  {
     key: 'marketing',
     icon: <Megaphone className="w-4 h-4" />,
     label: 'Marketing & Promotions',
@@ -231,7 +238,7 @@ const EMAIL_ROWS: EmailPrefRow[] = [
 ];
 
 const OPTIONAL_KEYS: Array<keyof Omit<EmailPreferences, 'transactional'>> = [
-  'messages', 'propertyAlerts', 'priceDrops', 'weeklyStats', 'marketing',
+  'messages', 'propertyAlerts', 'priceDrops', 'weeklyStats', 'cityMarketUpdates', 'marketing',
 ];
 
 const EmailSection: React.FC = () => {
@@ -240,6 +247,7 @@ const EmailSection: React.FC = () => {
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [savingAll, setSavingAll] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  const [saveError, setSaveError] = useState(false);
   const [saved, setSaved] = useState<string | null>(null);
 
   useEffect(() => {
@@ -250,29 +258,30 @@ const EmailSection: React.FC = () => {
     return () => { cancelled = true; };
   }, []);
 
+  // Throws on failure so the caller can roll the optimistic toggle back — a
+  // switch that silently failed to save would tell the user they are
+  // unsubscribed while the server keeps emailing them.
   const savePrefs = useCallback(async (updated: EmailPreferences, savedKey: string) => {
-    try {
-      await apiRequest('/auth/email-preferences', {
-        method: 'PUT',
-        body: updated,
-        requiresAuth: true,
-      });
-      setSaved(savedKey);
-      setTimeout(() => setSaved(prev => prev === savedKey ? null : prev), 2000);
-    } catch {
-      setPrefs(prefs => prefs); // revert handled by caller
-    }
+    await apiRequest('/auth/email-preferences', {
+      method: 'PUT',
+      body: updated,
+      requiresAuth: true,
+    });
+    setSaveError(false);
+    setSaved(savedKey);
+    setTimeout(() => setSaved(prev => prev === savedKey ? null : prev), 2000);
   }, []);
 
   const handleToggle = useCallback(async (key: keyof EmailPreferences, value: boolean) => {
     if (!prefs) return;
-    const updated = { ...prefs, [key]: value };
-    setPrefs(updated);
+    const previous = prefs;
+    setPrefs({ ...prefs, [key]: value });
     setSavingKey(key);
     try {
-      await savePrefs(updated, key);
+      await savePrefs({ ...prefs, [key]: value }, key);
     } catch {
-      setPrefs(prefs);
+      setPrefs(previous);
+      setSaveError(true);
     } finally {
       setSavingKey(null);
     }
@@ -280,6 +289,7 @@ const EmailSection: React.FC = () => {
 
   const handleToggleAll = useCallback(async (enable: boolean) => {
     if (!prefs) return;
+    const previous = prefs;
     const updated = { ...prefs };
     OPTIONAL_KEYS.forEach(k => { updated[k] = enable; });
     setPrefs(updated);
@@ -287,7 +297,8 @@ const EmailSection: React.FC = () => {
     try {
       await savePrefs(updated, 'all');
     } catch {
-      setPrefs(prefs);
+      setPrefs(previous);
+      setSaveError(true);
     } finally {
       setSavingAll(false);
     }
@@ -342,8 +353,8 @@ const EmailSection: React.FC = () => {
         <p className="text-sm text-neutral-500 px-4">{t('account:notifications.emailLoadError', 'Could not load preferences.')}</p>
       ) : !prefs ? (
         <div className="space-y-3 px-2">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="flex items-center justify-between py-3 animate-pulse">
+          {EMAIL_ROWS.map(row => (
+            <div key={row.key} className="flex items-center justify-between py-3 animate-pulse">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-neutral-200/60 rounded-xl" />
                 <div className="space-y-1.5">
@@ -381,7 +392,14 @@ const EmailSection: React.FC = () => {
         </div>
       )}
 
-      {saved && (
+      {saveError && (
+        <div className="mt-3 flex items-start gap-2 rounded-xl bg-red-50/60 border border-red-200/50 px-3 py-2 text-xs text-red-800">
+          <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+          {t('account:notifications.saveError', 'We could not save that change. Your previous setting is still active — please try again.')}
+        </div>
+      )}
+
+      {saved && !saveError && (
         <div className="mt-3 flex items-center gap-2 rounded-xl bg-green-50/60 border border-green-200/50 px-3 py-2 text-xs text-green-800">
           <CheckCircle className="w-4 h-4 flex-shrink-0" />
           {saved === 'all'
@@ -396,6 +414,17 @@ const EmailSection: React.FC = () => {
 };
 
 // ─── Unsubscribe confirmation banner (shown after clicking email unsubscribe link) ─
+
+/** Readable name for each `type` the unsubscribe link may carry back. */
+const UNSUBSCRIBE_LABELS: Record<string, string> = {
+  all: 'all promotional emails',
+  messages: 'new message',
+  propertyAlerts: 'property alert',
+  priceDrops: 'price drop',
+  weeklyStats: 'weekly stats',
+  cityMarketUpdates: 'city market update',
+  marketing: 'marketing',
+};
 
 const UnsubscribeBanner: React.FC = () => {
   const [type, setType] = useState<string | null>(null);
@@ -413,7 +442,9 @@ const UnsubscribeBanner: React.FC = () => {
 
   if (!type) return null;
 
-  const label = type === 'all' ? 'all promotional emails' : `${type} emails`;
+  const label = type === 'all'
+    ? UNSUBSCRIBE_LABELS.all
+    : `${UNSUBSCRIBE_LABELS[type] ?? type} emails`;
 
   return (
     <div className="flex items-start gap-3 rounded-2xl bg-green-50/80 border border-green-200/60 px-4 py-3.5 text-sm text-green-800">

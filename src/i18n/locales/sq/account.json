@@ -216,7 +216,10 @@
     "pushDisabled": "Aktivizo për të marrë njoftime të menjëhershme",
     "pushDenied": "Bllokuar në cilësimet e shfletuesit",
     "savePreferences": "Ruaj Preferencat",
-    "preferencesSaved": "Preferencat e njoftimeve u ruajtën"
+    "preferencesSaved": "Preferencat e njoftimeve u ruajtën",
+    "email_cityMarketUpdates": "Përditësime të tregut të qyteteve",
+    "email_cityMarketUpdates_desc": "Përmbledhje mujore nga Eksploro Qytetet kur çmimet e qyteteve ndryshojnë",
+    "saveError": "Nuk mundëm ta ruajmë këtë ndryshim. Cilësimi i mëparshëm është ende aktiv — provoni sërish."
   },
   "preferences": {
     "title": "Preferencat",

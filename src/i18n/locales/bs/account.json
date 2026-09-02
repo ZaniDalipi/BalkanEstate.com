@@ -216,7 +216,10 @@
     "pushDisabled": "Uključite za trenutna obavještenja",
     "pushDenied": "Blokirano u postavkama preglednika",
     "savePreferences": "Sačuvaj Postavke",
-    "preferencesSaved": "Postavke obavještenja sačuvane"
+    "preferencesSaved": "Postavke obavještenja sačuvane",
+    "email_cityMarketUpdates": "Ažuriranja tržišta gradova",
+    "email_cityMarketUpdates_desc": "Mjesečni pregled Istraži gradove kada se cijene u gradovima promijene",
+    "saveError": "Nismo mogli sačuvati tu promjenu. Vaša prethodna postavka je i dalje aktivna — pokušajte ponovo."
   },
   "preferences": {
     "title": "Postavke",
