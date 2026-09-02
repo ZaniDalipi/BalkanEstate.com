@@ -118,6 +118,27 @@ Two consequences worth knowing:
   a homegrown one. If a meaningful share of traffic is European, check whether
   AdSense accepts it or whether a certified CMP is needed before review.
 
+## Creative sizes to give advertisers
+
+Every slot takes the shape of the creative you upload, so one file per shape is
+enough — it fills edge to edge at every screen width.
+
+| Slot | Upload | Renders as |
+|---|---|---|
+| In-content banner (home, property, blog, guides, city) | **970 x 250** | Scales down to the column: 968x248 on a laptop, 364x92 on a phone |
+| Between listings (search, rentals, villas) | **728 x 90** | Full width of the results column |
+| Side rails (home, ultra-wide screens) | **300 x 600** | 300x600 beside a wide layout; **160x320** on a 1920px screen |
+| Property page sidebar | **300 x 600** | 300x600 in the right column |
+| Sticky bottom bar | **728 x 90** | 728x96 on desktop, 364x66 on a phone |
+
+Two things worth telling an advertiser:
+
+- **A side rail is not always 600px tall.** A 1920px monitor only has room for a
+  160px-wide rail, and a 1:2 creative in a 160px column is 320px tall. That is
+  correct and fills completely — it is not a cropped ad.
+- **Keep the logo and any text near the middle**, away from the outer ~10%.
+  Nothing is cropped, but a slot is a small target on a phone.
+
 ## Sizing
 
 `AdSlot` reserves a standard IAB unit before anything loads (`AD_FORMATS`:
