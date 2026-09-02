@@ -4,7 +4,13 @@ import User from '../models/User';
 import Agent from '../models/Agent';
 import Agency from '../models/Agency';
 // generateToken moved to refreshTokenService - using generateTokenPair instead
-import { IUser } from '../models/User';
+import {
+  IUser,
+  IEmailPreferences,
+  DEFAULT_EMAIL_PREFERENCES,
+  OPTIONAL_EMAIL_PREFERENCE_KEYS,
+  OptionalEmailPreferenceKey,
+} from '../models/User';
 import crypto from 'crypto';
 import { uploadImage, deleteImage } from '../services/cloudinaryService';
 import { validatePassword, passwordContainsUserInfo } from '../utils/passwordValidator';
@@ -2641,13 +2647,12 @@ export const getEmailPreferences = async (req: Request, res: Response): Promise<
       return;
     }
 
-    // Return default preferences if not set
-    const preferences = user.emailPreferences || {
-      weeklyStats: true,
-      propertyAlerts: true,
-      priceDrops: true,
-      messages: true,
-      marketing: true,
+    // Return default preferences if not set. Merged over the defaults so a
+    // document written before a category existed reports that category's
+    // default instead of `undefined`.
+    const preferences: IEmailPreferences = {
+      ...DEFAULT_EMAIL_PREFERENCES,
+      ...(user.emailPreferences ? user.emailPreferences : {}),
       transactional: true,
     };
 
@@ -2668,7 +2673,20 @@ export const updateEmailPreferences = async (req: Request, res: Response): Promi
       return;
     }
 
-    const { weeklyStats, propertyAlerts, priceDrops, messages, marketing } = req.body;
+    const body: Record<string, unknown> = (req.body && typeof req.body === 'object') ? req.body : {};
+
+    // Only known, boolean-valued keys are accepted. Anything else (unknown key,
+    // string "false", null) is rejected rather than coerced, so a malformed
+    // client can never flip a preference by accident.
+    const invalidKeys = OPTIONAL_EMAIL_PREFERENCE_KEYS.filter(
+      key => key in body && typeof body[key] !== 'boolean',
+    );
+    if (invalidKeys.length > 0) {
+      res.status(400).json({
+        message: `Email preferences must be booleans: ${invalidKeys.join(', ')}`,
+      });
+      return;
+    }
 
     const user = await User.findById(req.user._id);
 
@@ -2677,24 +2695,19 @@ export const updateEmailPreferences = async (req: Request, res: Response): Promi
       return;
     }
 
-    // Update only the preferences that are provided
-    if (!user.emailPreferences) {
-      user.emailPreferences = {
-        weeklyStats: true,
-        propertyAlerts: true,
-        priceDrops: true,
-        messages: true,
-        marketing: true,
-        transactional: true,
-      };
-    }
+    // Fill in any category the stored document predates, then apply the patch.
+    user.emailPreferences = {
+      ...DEFAULT_EMAIL_PREFERENCES,
+      ...(user.emailPreferences ? user.emailPreferences : {}),
+    };
 
-    if (typeof weeklyStats === 'boolean') user.emailPreferences.weeklyStats = weeklyStats;
-    if (typeof propertyAlerts === 'boolean') user.emailPreferences.propertyAlerts = propertyAlerts;
-    if (typeof priceDrops === 'boolean') user.emailPreferences.priceDrops = priceDrops;
-    if (typeof messages === 'boolean') user.emailPreferences.messages = messages;
-    if (typeof marketing === 'boolean') user.emailPreferences.marketing = marketing;
+    for (const key of OPTIONAL_EMAIL_PREFERENCE_KEYS) {
+      const value = body[key];
+      if (typeof value === 'boolean') user.emailPreferences[key] = value;
+    }
     // transactional is always true and cannot be changed
+    user.emailPreferences.transactional = true;
+    user.markModified('emailPreferences');
 
     await user.save();
 
@@ -2727,33 +2740,32 @@ export const unsubscribeFromEmails = async (req: Request, res: Response): Promis
       return;
     }
 
-    // Initialize email preferences if not set
-    if (!user.emailPreferences) {
-      user.emailPreferences = {
-        weeklyStats: true,
-        propertyAlerts: true,
-        priceDrops: true,
-        messages: true,
-        marketing: true,
-        transactional: true,
-      };
-    }
+    // Initialize (or backfill) email preferences before mutating them
+    user.emailPreferences = {
+      ...DEFAULT_EMAIL_PREFERENCES,
+      ...(user.emailPreferences ? user.emailPreferences : {}),
+    };
 
-    // Handle different unsubscribe types
-    const validTypes = ['weeklyStats', 'propertyAlerts', 'priceDrops', 'messages', 'marketing', 'all'];
-    const unsubscribeType = typeof type === 'string' && validTypes.includes(type) ? type : 'all';
+    // A one-click link may only switch off a single known category, or all of
+    // them. An unrecognised `type` falls back to 'all' rather than silently
+    // doing nothing — the reader clicked "unsubscribe" and must end up opted out.
+    const isOptionalKey = (value: unknown): value is OptionalEmailPreferenceKey =>
+      typeof value === 'string'
+      && (OPTIONAL_EMAIL_PREFERENCE_KEYS as readonly string[]).includes(value);
+
+    const unsubscribeType: OptionalEmailPreferenceKey | 'all' = isOptionalKey(type) ? type : 'all';
 
     if (unsubscribeType === 'all') {
-      // Unsubscribe from all non-transactional emails
-      user.emailPreferences.weeklyStats = false;
-      user.emailPreferences.propertyAlerts = false;
-      user.emailPreferences.priceDrops = false;
-      user.emailPreferences.messages = false;
-      user.emailPreferences.marketing = false;
-    } else if (unsubscribeType !== 'transactional') {
-      // Unsubscribe from specific type
-      (user.emailPreferences as any)[unsubscribeType] = false;
+      for (const key of OPTIONAL_EMAIL_PREFERENCE_KEYS) {
+        user.emailPreferences[key] = false;
+      }
+    } else {
+      user.emailPreferences[unsubscribeType] = false;
     }
+
+    // Transactional mail is never switched off by an unsubscribe link.
+    user.emailPreferences.transactional = true;
+    user.markModified('emailPreferences');
 
     await user.save();
 

@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
-import User from '../models/User';
+import User, { DEFAULT_EMAIL_PREFERENCES, IEmailPreferences } from '../models/User';
+import { CITY_MARKET_DIGEST_EMAIL_TYPE } from '../config/cityMarketDigest';
 import { getPromoTemplate, BRAND_COLORS } from '../templates/emailTemplates';
 import { emailLogger } from '../utils/logger';
 import { getActiveEmailConfig, renderEmailWithSiteSettings, buildCouponCodesHtml, getSiteSettingsForEmail } from '../utils/emailTemplateRenderer';
@@ -132,6 +133,114 @@ export interface NewMessageParams {
   propertyCity?: string;
   propertyImageUrl?: string;
   conversationUrl: string;
+}
+
+// =============================================================================
+// Explore-Cities market digest — view model and rendering helpers
+// =============================================================================
+
+export type MarketTrendLabel = 'rising' | 'stable' | 'declining';
+
+/**
+ * One city as it appears in the digest. A pure view model: the caller has
+ * already decided this city is newsworthy and computed its numbers.
+ */
+export interface CityMarketDigestCity {
+  city: string;
+  country: string;
+  /** Signed change in average price per m² over the digest period. */
+  changePct: number;
+  previousPricePerSqm: number;
+  currentPricePerSqm: number;
+  marketTrend: MarketTrendLabel;
+  previousMarketTrend: MarketTrendLabel;
+  trendChanged: boolean;
+  rentalYieldPct?: number;
+  daysOnMarket?: number;
+  listingsCount?: number;
+  /** True when the reader follows this city (saved search or home country). */
+  isFollowed: boolean;
+  exploreUrl: string;
+  sourceName?: string;
+}
+
+export interface CityMarketDigestParams {
+  email: string;
+  userName: string;
+  /** Human-readable comparison period, e.g. "1 Aug – 2 Sep 2026". */
+  periodLabel: string;
+  cities: CityMarketDigestCity[];
+  exploreUrl: string;
+}
+
+/**
+ * `sent` is the only outcome that delivered mail. The rest are deliberate
+ * no-ops the caller reports rather than errors it retries.
+ */
+export type CityMarketDigestSendOutcome = 'sent' | 'unsubscribed' | 'empty' | 'invalid';
+
+/** Hard cap so a runaway caller cannot render a 200-city email. */
+const MAX_DIGEST_CITIES = 12;
+
+const CHANGE_PALETTE: Record<'up' | 'down' | 'flat', {
+  strong: string;
+  wash: string;
+  border: string;
+  arrow: string;
+}> = {
+  up: { strong: '#15803d', wash: '#f0fdf4', border: '#bbf7d0', arrow: '▲' },
+  down: { strong: '#b91c1c', wash: '#fef2f2', border: '#fecaca', arrow: '▼' },
+  flat: { strong: '#4b5563', wash: '#f9fafb', border: '#e5e7eb', arrow: '■' },
+};
+
+const TREND_PALETTE: Record<MarketTrendLabel, {
+  label: string;
+  icon: string;
+  strong: string;
+  wash: string;
+}> = {
+  rising: { label: 'Rising market', icon: '📈', strong: '#15803d', wash: '#dcfce7' },
+  stable: { label: 'Stable market', icon: '➖', strong: '#1d4ed8', wash: '#dbeafe' },
+  declining: { label: 'Declining market', icon: '📉', strong: '#b91c1c', wash: '#fee2e2' },
+};
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function directionOf(changePct: number): 'up' | 'down' | 'flat' {
+  if (changePct > 0) return 'up';
+  if (changePct < 0) return 'down';
+  return 'flat';
+}
+
+function formatSignedPct(changePct: number): string {
+  const rounded = Math.abs(Math.round(changePct * 10) / 10);
+  const sign = changePct > 0 ? '+' : changePct < 0 ? '−' : '';
+  return `${sign}${rounded.toFixed(1)}%`;
+}
+
+function formatEurPerSqmPlain(value: number): string {
+  return `€${Math.round(value).toLocaleString('en-US')}`;
+}
+
+function formatEurPerSqm(value: number): string {
+  return escapeHtml(formatEurPerSqmPlain(value));
+}
+
+/**
+ * A city is renderable only when every number the layout depends on is real.
+ * Dropping a malformed city is always preferable to emailing "NaN%".
+ */
+function isRenderableDigestCity(city: CityMarketDigestCity): boolean {
+  return Boolean(city)
+    && typeof city.city === 'string' && city.city.trim().length > 0
+    && typeof city.country === 'string' && city.country.trim().length > 0
+    && isFiniteNumber(city.changePct)
+    && isFiniteNumber(city.previousPricePerSqm) && city.previousPricePerSqm > 0
+    && isFiniteNumber(city.currentPricePerSqm) && city.currentPricePerSqm > 0
+    && city.marketTrend in TREND_PALETTE
+    && city.previousMarketTrend in TREND_PALETTE;
 }
 
 // Email categories for different purposes
@@ -439,22 +548,16 @@ class EmailService {
       }
 
       // Check if user has opted out of this email type
-      const preferences = user.emailPreferences || {
-        weeklyStats: true,
-        propertyAlerts: true,
-        priceDrops: true,
-        messages: true,
-        marketing: true,
-        transactional: true,
-      };
+      const preferences: IEmailPreferences = user.emailPreferences || { ...DEFAULT_EMAIL_PREFERENCES };
 
       // Map email types to preference keys
-      const typeToPreference: Record<string, keyof typeof preferences> = {
+      const typeToPreference: Record<string, keyof IEmailPreferences> = {
         weeklyStats: 'weeklyStats',
         propertyAlerts: 'propertyAlerts',
         priceDrops: 'priceDrops',
         messages: 'messages',
         marketing: 'marketing',
+        [CITY_MARKET_DIGEST_EMAIL_TYPE]: CITY_MARKET_DIGEST_EMAIL_TYPE,
         transactional: 'transactional',
         all: 'transactional', // 'all' only blocked if transactional is blocked (shouldn't happen)
       };
@@ -2306,6 +2409,260 @@ class EmailService {
         : `Great news, ${params.recipientName}!\n\nA property matching your saved search "${params.searchName}" just dropped in price!\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n\nWas: €${params.property.previousPrice.toLocaleString()}\nNow: €${params.property.newPrice.toLocaleString()}\nYou save: €${priceDiff.toLocaleString()} (${params.property.percentageDrop}% off)\n\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nPrice drops attract buyers fast. Don't miss this opportunity!\n\nView property: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} BalkanEstateᴬᴵ`,
       category: 'alerts',
     });
+  }
+
+  /**
+   * Send the Explore-Cities market update digest.
+   *
+   * Presentation only: the caller decides which cities are newsworthy and in
+   * what order. This method renders them, refuses to send an empty or
+   * numerically broken digest, and honours the `cityMarketUpdates` preference —
+   * the one email type a reader can switch off without losing any other alert.
+   */
+  async sendCityMarketUpdateDigest(params: CityMarketDigestParams): Promise<CityMarketDigestSendOutcome> {
+    if (!isValidEmail(params.email)) {
+      emailLogger.warn('📧 Skipping city market digest — invalid recipient address');
+      return 'invalid';
+    }
+
+    const cities = params.cities.filter(isRenderableDigestCity).slice(0, MAX_DIGEST_CITIES);
+    if (cities.length === 0) {
+      emailLogger.warn(`📧 Skipping city market digest to ${params.email} — no renderable city changes`);
+      return 'empty';
+    }
+
+    const { token: unsubscribeToken, canSend } = await this.getUnsubscribeInfo(
+      params.email,
+      CITY_MARKET_DIGEST_EMAIL_TYPE,
+    );
+    if (!canSend) {
+      emailLogger.info(`📧 Skipping city market digest to ${params.email} - user unsubscribed`);
+      return 'unsubscribed';
+    }
+
+    const branding = await this.getBranding();
+    const exploreUrl = sanitizeUrl(params.exploreUrl) || `${branding.frontendUrl}/explore-cities`;
+
+    const [hero, ...rest] = cities;
+    const maxMagnitude = Math.max(...cities.map(c => Math.abs(c.changePct)), 1);
+
+    const safeName = escapeHtml(params.userName?.trim() || 'there');
+    const safePeriod = escapeHtml(params.periodLabel);
+
+    const heroDirection = directionOf(hero.changePct);
+    const heroPalette = CHANGE_PALETTE[heroDirection];
+
+    const heroCard = `
+      <div style="background:${heroPalette.wash};border:1px solid ${heroPalette.border};border-radius:16px;padding:20px;" class="ec-highlight ec-text">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${heroPalette.strong};">
+          ${heroDirection === 'down' ? 'Biggest drop' : 'Biggest move'}${hero.isFollowed ? ' · following' : ''}
+        </div>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:8px;">
+          <tr>
+            <td style="vertical-align:middle;">
+              <div style="font-size:20px;font-weight:700;color:#111827;" class="ec-text">${escapeHtml(hero.city)}</div>
+              <div style="font-size:13px;color:#6b7280;" class="ec-text-muted">${escapeHtml(hero.country)}</div>
+            </td>
+            <td style="vertical-align:middle;text-align:right;white-space:nowrap;">
+              <div style="font-size:34px;line-height:1.1;font-weight:800;color:${heroPalette.strong};">
+                ${heroPalette.arrow} ${formatSignedPct(hero.changePct)}
+              </div>
+              <div style="font-size:12px;color:#6b7280;" class="ec-text-muted">avg. price / m²</div>
+            </td>
+          </tr>
+        </table>
+        <div style="margin-top:12px;font-size:14px;color:#374151;" class="ec-text">
+          ${formatEurPerSqm(hero.previousPricePerSqm)} → <strong>${formatEurPerSqm(hero.currentPricePerSqm)}</strong>
+        </div>
+        ${this.renderTrendChip(hero)}
+      </div>`;
+
+    const cityRows = cities.map(city => {
+      const direction = directionOf(city.changePct);
+      const palette = CHANGE_PALETTE[direction];
+      // Bars are drawn with table cell widths — the only chart primitive every
+      // email client renders identically (no images, no CSS gradients).
+      const barPct = Math.max(4, Math.round((Math.abs(city.changePct) / maxMagnitude) * 100));
+
+      return `
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:10px;">
+        <tr>
+          <td style="width:34%;padding-right:8px;font-size:13px;font-weight:600;color:#374151;" class="ec-text">
+            ${escapeHtml(city.city)}${city.isFollowed ? ' <span style="font-size:10px;color:#6b7280;" class="ec-text-muted">★</span>' : ''}
+            <div style="font-size:11px;font-weight:400;color:#9ca3af;" class="ec-text-muted">${escapeHtml(city.country)}</div>
+          </td>
+          <td style="width:46%;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f3f4f6;border-radius:6px;" class="ec-stat-card">
+              <tr>
+                <td style="width:${barPct}%;background:${palette.strong};height:10px;border-radius:6px;font-size:0;line-height:0;">&nbsp;</td>
+                <td style="width:${100 - barPct}%;font-size:0;line-height:0;">&nbsp;</td>
+              </tr>
+            </table>
+          </td>
+          <td style="width:20%;text-align:right;font-size:13px;font-weight:700;color:${palette.strong};white-space:nowrap;">
+            ${palette.arrow} ${formatSignedPct(city.changePct)}
+          </td>
+        </tr>
+      </table>`;
+    }).join('');
+
+    const detailCards = rest.map(city => {
+      const palette = CHANGE_PALETTE[directionOf(city.changePct)];
+      const cityUrl = sanitizeUrlForHtml(city.exploreUrl) || sanitizeUrlForHtml(exploreUrl);
+
+      return `
+      <div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:10px;" class="ec-border ec-text">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+          <tr>
+            <td style="vertical-align:top;">
+              <div style="font-size:15px;font-weight:700;color:#111827;" class="ec-text">${escapeHtml(city.city)}</div>
+              <div style="font-size:12px;color:#6b7280;" class="ec-text-muted">${escapeHtml(city.country)}</div>
+            </td>
+            <td style="vertical-align:top;text-align:right;white-space:nowrap;">
+              <div style="font-size:18px;font-weight:700;color:${palette.strong};">${palette.arrow} ${formatSignedPct(city.changePct)}</div>
+              <div style="font-size:11px;color:#6b7280;" class="ec-text-muted">${formatEurPerSqm(city.previousPricePerSqm)} → ${formatEurPerSqm(city.currentPricePerSqm)}</div>
+            </td>
+          </tr>
+        </table>
+        ${this.renderTrendChip(city)}
+        ${this.renderCityMetrics(city)}
+        <div style="margin-top:10px;">
+          <a href="${cityUrl}" style="font-size:12px;font-weight:600;color:#0252CD;text-decoration:none;" class="ec-link">View ${escapeHtml(city.city)} market →</a>
+        </div>
+      </div>`;
+    }).join('');
+
+    const sourceNames = Array.from(
+      new Set(cities.map(c => c.sourceName?.trim()).filter((s): s is string => !!s)),
+    ).slice(0, 3);
+
+    const inner = `
+  <div style="max-width:600px;margin:0 auto;background-color:#ffffff;" class="ec-card">
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#0252CD 0%,#0369a1 100%);padding:32px 24px;text-align:center;" class="ec-header">
+      <h1 style="color:#ffffff;margin:0;font-size:26px;font-weight:700;">🌍 City Market Update</h1>
+      <p style="color:#bfdbfe;margin:8px 0 0 0;font-size:13px;">${safePeriod}</p>
+    </div>
+
+    <div style="padding:24px;">
+      <p style="color:#374151;font-size:16px;margin:0 0 6px 0;" class="ec-text">Hi <strong>${safeName}</strong>,</p>
+      <p style="color:#6b7280;font-size:14px;margin:0 0 20px 0;" class="ec-text-muted">
+        ${cities.length === 1
+          ? 'One Balkan city moved enough to be worth your attention:'
+          : `${cities.length} Balkan cities moved enough to be worth your attention — biggest mover first:`}
+      </p>
+
+      ${heroCard}
+
+      <!-- Comparison bars -->
+      <div style="margin-top:24px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6b7280;margin-bottom:10px;" class="ec-text-muted">
+          Change in average price / m²
+        </div>
+        ${cityRows}
+      </div>
+
+      ${detailCards ? `
+      <!-- Per-city detail -->
+      <div style="margin-top:24px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6b7280;margin-bottom:10px;" class="ec-text-muted">
+          The rest of the movers
+        </div>
+        ${detailCards}
+      </div>` : ''}
+
+      <!-- CTA -->
+      <div style="margin-top:28px;text-align:center;">
+        <a href="${sanitizeUrlForHtml(exploreUrl)}"
+           style="display:inline-block;background:linear-gradient(135deg,#0252CD 0%,#0369a1 100%);color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:14px;">
+          Explore all cities →
+        </a>
+      </div>
+
+      ${sourceNames.length > 0 ? `
+      <p style="margin:20px 0 0 0;font-size:11px;color:#9ca3af;text-align:center;" class="ec-text-muted">
+        Figures sourced from ${escapeHtml(sourceNames.join(', '))}.
+      </p>` : ''}
+    </div>
+
+    ${this.generateEmailFooter(
+      unsubscribeToken,
+      CITY_MARKET_DIGEST_EMAIL_TYPE,
+      'You receive this because Explore-Cities market updates are enabled on your account.',
+      branding,
+    )}
+  </div>`;
+
+    const heroHeadline = `${hero.city} ${heroDirection === 'down' ? 'down' : 'up'} ${formatSignedPct(hero.changePct)}`;
+    const preheader = cities.length > 1
+      ? `${heroHeadline} · ${cities.length - 1} more ${cities.length === 2 ? 'city' : 'cities'} moved`
+      : heroHeadline;
+
+    await this.sendEmail({
+      to: params.email,
+      subject: `🌍 ${heroHeadline} — your city market update`,
+      html: this.wrapEmailHtml(inner, preheader),
+      text: this.buildCityMarketDigestText({ ...params, cities }, exploreUrl),
+      category: 'alerts',
+    });
+
+    return 'sent';
+  }
+
+  /**
+   * Market-trend chip. A re-labelled market ("stable → rising") is called out
+   * explicitly, because that is the part a reader cannot infer from a percentage.
+   */
+  private renderTrendChip(city: CityMarketDigestCity): string {
+    const trend = TREND_PALETTE[city.marketTrend];
+    const label = city.trendChanged && city.previousMarketTrend !== city.marketTrend
+      ? `${TREND_PALETTE[city.previousMarketTrend].label} → ${trend.label}`
+      : trend.label;
+
+    return `
+        <div style="margin-top:10px;">
+          <span style="display:inline-block;background:${trend.wash};color:${trend.strong};font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;">
+            ${trend.icon} ${escapeHtml(label)}
+          </span>
+        </div>`;
+  }
+
+  /** Secondary metrics, each rendered only when the caller supplied a usable number. */
+  private renderCityMetrics(city: CityMarketDigestCity): string {
+    const metrics: string[] = [];
+
+    if (isFiniteNumber(city.rentalYieldPct)) {
+      metrics.push(`Rental yield <strong>${city.rentalYieldPct.toFixed(1)}%</strong>`);
+    }
+    if (isFiniteNumber(city.daysOnMarket)) {
+      metrics.push(`${Math.round(city.daysOnMarket)} days on market`);
+    }
+    if (isFiniteNumber(city.listingsCount)) {
+      metrics.push(`${Math.round(city.listingsCount).toLocaleString()} active listings`);
+    }
+    if (metrics.length === 0) return '';
+
+    return `
+        <div style="margin-top:8px;font-size:12px;color:#6b7280;" class="ec-text-muted">${metrics.join(' · ')}</div>`;
+  }
+
+  /** Plain-text alternative — same facts, no markup. */
+  private buildCityMarketDigestText(params: CityMarketDigestParams, exploreUrl: string): string {
+    const lines = params.cities.map(city => {
+      const arrow = city.changePct > 0 ? 'up' : city.changePct < 0 ? 'down' : 'flat';
+      return `- ${city.city}, ${city.country}: ${arrow} ${formatSignedPct(city.changePct)} `
+        + `(${formatEurPerSqmPlain(city.previousPricePerSqm)} -> ${formatEurPerSqmPlain(city.currentPricePerSqm)} per m²)`;
+    });
+
+    return [
+      `Hi ${params.userName?.trim() || 'there'},`,
+      '',
+      `City market update for ${params.periodLabel}:`,
+      '',
+      ...lines,
+      '',
+      `Explore all cities: ${exploreUrl}`,
+    ].join('\n');
   }
 
   /**

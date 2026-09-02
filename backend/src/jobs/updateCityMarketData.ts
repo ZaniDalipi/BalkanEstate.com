@@ -1,6 +1,7 @@
 import cron, { ScheduledTask } from 'node-cron';
 import { updateAllCityMarketData } from '../services/cityMarketDataService';
 import { refreshAllCityImages, seedMissingCityImages } from '../services/cityImageService';
+import { runSourceUpdateCityMarketDigest } from './cityMarketDigestJob';
 import { cronLogger } from '../utils/logger';
 
 /**
@@ -36,6 +37,16 @@ export function startCityMarketDataUpdateJob(): void {
       await seedMissingCityImages();
     } catch (error) {
       cronLogger.error('❌ Biweekly market data update failed:', error);
+    }
+
+    // Snapshot the refreshed figures and, if a city moved sharply, tell readers
+    // now rather than at the next monthly digest. Runs even when the refresh
+    // above partially failed: the cities that did update are still worth
+    // reporting, and the digest sends nothing when nothing changed.
+    try {
+      await runSourceUpdateCityMarketDigest();
+    } catch (error) {
+      cronLogger.error('❌ Post-refresh city market digest failed:', error);
     }
   }, {
     timezone: 'Europe/Belgrade', // Use Balkan timezone

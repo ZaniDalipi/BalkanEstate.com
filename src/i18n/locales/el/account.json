@@ -283,7 +283,10 @@
     "pushDisabled": "Ενεργοποιήστε για άμεσες ειδοποιήσεις",
     "pushDenied": "Αποκλεισμένο στις ρυθμίσεις του προγράμματος περιήγησης",
     "savePreferences": "Save Preferences",
-    "preferencesSaved": "Notification preferences saved"
+    "preferencesSaved": "Notification preferences saved",
+    "email_cityMarketUpdates": "Ενημερώσεις αγοράς πόλεων",
+    "email_cityMarketUpdates_desc": "Μηνιαία σύνοψη Εξερεύνηση Πόλεων όταν αλλάζουν οι τιμές στις πόλεις",
+    "saveError": "Δεν ήταν δυνατή η αποθήκευση της αλλαγής. Η προηγούμενη ρύθμισή σας παραμένει ενεργή — δοκιμάστε ξανά."
   },
   "preferences": {
     "title": "Preferences",

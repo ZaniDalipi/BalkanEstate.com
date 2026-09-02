@@ -287,7 +287,10 @@
     "pushDisabled": "Enable to receive instant alerts",
     "pushDenied": "Blocked in browser settings",
     "savePreferences": "Save Preferences",
-    "preferencesSaved": "Notification preferences saved"
+    "preferencesSaved": "Notification preferences saved",
+    "email_cityMarketUpdates": "City Market Updates",
+    "email_cityMarketUpdates_desc": "Monthly Explore Cities digest when city prices move",
+    "saveError": "We could not save that change. Your previous setting is still active \u2014 please try again."
   },
   "preferences": {
     "title": "Preferences",

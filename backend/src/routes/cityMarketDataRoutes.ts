@@ -10,6 +10,8 @@ import {
   getEconomicIndicatorsController,
   getCityGeoDataController,
   seedCityImagesController,
+  previewCityMarketDigestController,
+  runCityMarketDigestController,
 } from '../controllers/cityMarketDataController';
 import {
   getSuburbDataController,
@@ -30,6 +32,8 @@ router.get('/economic/:country', getEconomicIndicatorsController);
 router.get('/geodata/:city/:country', getCityGeoDataController);
 
 // Admin routes
+router.get('/market-digest/preview', protect, previewCityMarketDigestController);
+router.post('/market-digest/run', protect, runCityMarketDigestController);
 router.post('/update-market-data', protect, triggerMarketDataUpdateController);
 router.post('/refresh-images', protect, refreshCityImagesController);
 router.post('/seed-images', protect, seedCityImagesController);

@@ -3,6 +3,50 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { encryptionPlugin } from '../utils/fieldEncryption';
 
+/**
+ * Per-category email opt-ins.
+ *
+ * Every key here is independently switchable, so turning one category off never
+ * silences another. `transactional` is the exception: receipts, verification and
+ * security mail are not marketing and cannot be disabled.
+ */
+export interface IEmailPreferences {
+  weeklyStats: boolean;         // Weekly analytics emails
+  propertyAlerts: boolean;      // New property matches
+  priceDrops: boolean;          // Price drop notifications
+  messages: boolean;            // New message notifications
+  cityMarketUpdates: boolean;   // Explore-Cities market change digest
+  marketing: boolean;           // Marketing & promotional emails
+  transactional: boolean;       // Always true - payment confirmations, etc.
+}
+
+/**
+ * Defaults for a user with no stored preferences — the single source of truth
+ * for "what does an account receive out of the box", shared by the schema
+ * defaults, the API and the email service.
+ */
+export const DEFAULT_EMAIL_PREFERENCES: Readonly<IEmailPreferences> = Object.freeze({
+  weeklyStats: true,
+  propertyAlerts: true,
+  priceDrops: true,
+  messages: true,
+  cityMarketUpdates: true,
+  marketing: true,
+  transactional: true,
+});
+
+/** Categories a user is allowed to switch off. */
+export const OPTIONAL_EMAIL_PREFERENCE_KEYS = [
+  'weeklyStats',
+  'propertyAlerts',
+  'priceDrops',
+  'messages',
+  'cityMarketUpdates',
+  'marketing',
+] as const satisfies readonly (keyof IEmailPreferences)[];
+
+export type OptionalEmailPreferenceKey = typeof OPTIONAL_EMAIL_PREFERENCE_KEYS[number];
+
 export interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
   email: string;
@@ -209,14 +253,7 @@ export interface IUser extends Document {
 
   // Email Preferences & Unsubscribe
   unsubscribeToken?: string; // Unique token for unsubscribe links
-  emailPreferences: {
-    weeklyStats: boolean;      // Weekly analytics emails
-    propertyAlerts: boolean;   // New property matches
-    priceDrops: boolean;       // Price drop notifications
-    messages: boolean;         // New message notifications
-    marketing: boolean;        // Marketing & promotional emails
-    transactional: boolean;    // Always true - payment confirmations, etc.
-  };
+  emailPreferences: IEmailPreferences;
 
   // Neighborhood Insights Usage Tracking
   neighborhoodInsights?: {
@@ -749,27 +786,31 @@ const UserSchema: Schema = new Schema(
     emailPreferences: {
       weeklyStats: {
         type: Boolean,
-        default: true,
+        default: DEFAULT_EMAIL_PREFERENCES.weeklyStats,
       },
       propertyAlerts: {
         type: Boolean,
-        default: true,
+        default: DEFAULT_EMAIL_PREFERENCES.propertyAlerts,
       },
       priceDrops: {
         type: Boolean,
-        default: true,
+        default: DEFAULT_EMAIL_PREFERENCES.priceDrops,
       },
       messages: {
         type: Boolean,
-        default: true,
+        default: DEFAULT_EMAIL_PREFERENCES.messages,
+      },
+      cityMarketUpdates: {
+        type: Boolean,
+        default: DEFAULT_EMAIL_PREFERENCES.cityMarketUpdates,
       },
       marketing: {
         type: Boolean,
-        default: true,
+        default: DEFAULT_EMAIL_PREFERENCES.marketing,
       },
       transactional: {
         type: Boolean,
-        default: true, // Always true - users cannot unsubscribe from transactional emails
+        default: DEFAULT_EMAIL_PREFERENCES.transactional, // Always true - users cannot unsubscribe from transactional emails
       },
     },
     neighborhoodInsights: {
