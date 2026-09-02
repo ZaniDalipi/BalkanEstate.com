@@ -2,6 +2,7 @@ import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCityMarketData, useCitiesByCountry } from '../hooks/useCityQueries';
 import { useSuburbData, useCityImages, useCityGeoData } from '../hooks/useSuburbQueries';
+import DataFreshness from './DataFreshness';
 import { useCityPriceHistory, useEconomicIndicators } from '../hooks/useCityInsights';
 import PriceHistoryChart from './PriceHistoryChart';
 import EconomicIndicatorsPanel from './EconomicIndicatorsPanel';
@@ -956,6 +957,17 @@ const CityDashboard: React.FC = () => {
                       Data anchored to {suburbData.officialSourceName} ↗
                     </a>
                   )}
+                  {/* When these numbers were pulled, so a reader can tell this
+                      week's market from last quarter's. */}
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <DataFreshness fetchedAt={suburbData.lastUpdated} />
+                    {cityGeoData?.fetchedAt && (
+                      <DataFreshness
+                        fetchedAt={cityGeoData.fetchedAt}
+                        sourceLabel="OpenStreetMap"
+                      />
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -1016,7 +1028,7 @@ const CityDashboard: React.FC = () => {
                         cityAvgPricePerSqm={suburbData.cityAvgPricePerSqm}
                         selectedSuburb={selectedSuburb}
                         onSuburbSelect={setSelectedSuburb}
-                        geoData={cityGeoData}
+                        geoData={cityGeoData?.boundaries}
                         officialAvgPrice={bisLatestPrice ?? undefined}
                         officialSource={hasBIS ? 'BIS' : undefined}
                       />

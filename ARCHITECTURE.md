@@ -172,13 +172,51 @@ CityMarketData                         ← current figures (refresh job: 1st & 1
                     └── emailService.sendCityMarketUpdateDigest()
 ```
 
-Two triggers, one pipeline:
+Two triggers and two audiences:
 
-| Reason | When | Gate |
-|--------|------|------|
-| `source-update` | right after each market-data refresh | a city moved ≥ `significantPriceChangePct` (5%) **and** ≥ 7 days since the last digest |
-| `monthly` | cron `0 9 2 * *` | ≥ 25 days since the last digest attempt |
-| `manual` | `POST /api/cities/market-digest/run` (admin) | none — but an empty digest is still never sent |
+| Reason | When | Gate | Audience |
+|--------|------|------|----------|
+| `source-update` | right after each market-data refresh | ≥ 7 days since the last **delivered** digest | everyone if a city moved ≥ `significantPriceChangePct` (5%); otherwise only the followers of the cities that moved |
+| `monthly` | cron `0 9 2 * *` | ≥ 25 days since the last **delivered** whole-audience digest | everyone |
+| `manual` | `POST /api/cities/market-digest/run` (admin) | none — but an empty digest is still never sent | everyone |
+
+### Saved places — following a city
+
+```
+/explore-cities  ─ tab: All cities ─ CityMarketCard ─ SaveCityButton
+                 └ tab: Saved places ─ SavedCitiesPanel
+                        │
+                        └── useSavedCities (React Query)
+                              └── POST /api/saved-cities/toggle
+                                    └── SavedCity { userId, cityKey }
+                                          └── digest audience + ranking
+```
+
+Key decisions:
+- **A follow is a subscription, not a bookmark.** `SavedCity` is what decides
+  who gets an out-of-cycle email and which city leads it. That is why the panel
+  states "we email you when the market in these cities moves" next to the list,
+  with a link to the email settings.
+- **The server decides what can be followed.** A save is rejected unless the
+  city exists in `CityMarketData`, so the list is always joinable against real
+  market data and stores the directory's spelling rather than the client's.
+  `cityKey` ("tirana|albania") carries the unique index, so casing and
+  whitespace can't produce duplicates and a concurrent double-save is resolved
+  by the index rather than by a read-then-write race.
+- **Following changes the audience, not just the order.** In a `saved-cities`
+  run the email contains *only* the reader's followed cities; in an `all` run
+  the followed cities lead and regional movers fill the remaining slots.
+- **A follower-only send must not silence the monthly.** Cadence counts only
+  *delivered* runs (a skipped run emailed nobody, so it cannot block the next
+  one), and only an `all` run advances the comparison window — the rest of the
+  audience is still owed those changes.
+- **Per-reader watermark.** `User.cityMarketDigestSentAt` filters out changes a
+  reader has already been emailed, so a follower who got an out-of-cycle alert
+  does not see the same move again in the monthly roundup.
+- **The saved tab reuses the market data the page already has.** The endpoint
+  returns follow identities only; cards come from the loaded city list, so
+  there is one source for every market number. A followed city with no market
+  row still gets a row (with an unfollow control) rather than vanishing.
 
 Key decisions:
 - **A snapshot means "the sources published something".** The fingerprint hashes
@@ -218,13 +256,93 @@ Key decisions:
   documented default instead of poisoning the job, and `significant` is clamped
   so it can never be looser than `material`.
 
-Files: `services/cityMarketChangeService.ts` (capture + diff),
+Files — backend: `services/cityMarketChangeService.ts` (capture + diff),
 `services/cityMarketDigestService.ts` (audience + orchestration),
-`jobs/cityMarketDigestJob.ts` (cron/admin entry points),
-`models/CityMarketSnapshot.ts`, `models/CityMarketDigestRun.ts`,
+`services/savedCityService.ts` (follows), `jobs/cityMarketDigestJob.ts`
+(cron/admin entry points), `models/CityMarketSnapshot.ts`,
+`models/CityMarketDigestRun.ts`, `models/SavedCity.ts`,
 `config/cityMarketDigest.ts`, `emailService.sendCityMarketUpdateDigest`.
-Admin: `GET /api/cities/market-digest/preview` inspects the pending changes;
+Frontend: `features/cities/components/{CityMarketCard,ExploreCitiesTabs,
+SavedCitiesPanel,SaveCityButton}.tsx`, `hooks/useSavedCities.ts`,
+`api/savedCitiesApi.ts`.
+
+Endpoints: `GET/POST /api/saved-cities` (follow list and toggle, per reader);
+admin `GET /api/cities/market-digest/preview` inspects the pending changes and
 `POST /api/cities/market-digest/run` (`{ dryRun?, force? }`) sends on demand.
+
+---
+
+## Neighbourhood Map — shapes, basemap, freshness
+
+The Explore-Neighborhoods map draws one partition of the city and says which
+kind it is drawing:
+
+```
+GET /api/cities/geodata/:city/:country
+  └── geoDataService.getCityGeoData()
+        ├── Nominatim  → city area id
+        ├── Overpass   → admin relations (level 7–10)
+        │                + place areas (neighbourhood/suburb/quarter/…),
+        │                  as relations AND closed ways
+        ├── selectBoundarySet()   ← ONE coherent set, never a mix
+        │     admin at 3–60 features  → source: 'admin'
+        │     else ≥3 place areas     → source: 'place'
+        └── cached 90 days with its fetch time
+
+CitySuburbMap
+  ├── real boundaries → GeoJSON from OSM            ("📍 OSM boundaries")
+  └── none available  → tessellateDistricts(centres) ("◇ Approx. districts")
+```
+
+Key decisions:
+- **Neighbourhoods are usually not administrative units.** Tirana's Blloku is
+  `place=neighbourhood` on a closed way, so a query restricted to
+  `boundary=administrative` relations returned nothing and every such city fell
+  back to drawn circles. The query now also asks for place areas, and ways as
+  well as relations, because that is how neighbourhoods are actually mapped.
+- **One partition, never two.** Administrative districts and place areas cover
+  the same ground; drawing both would overlay two different truths.
+  `selectBoundarySet` picks admin when it exists at a readable granularity
+  (coarser level first: level 9 districts beat level 10 blocks), else places.
+- **An unnamed area is dropped.** Every polygon carries a permanent name label,
+  so a shape with no `name` tag was previously labelled "Region 123456".
+- **Circles → a nearest-centre partition.** Where OSM has no polygon, the
+  fallback is a Voronoi tessellation of the neighbourhood centres
+  (`utils/districtTessellation.ts`): contiguous, non-overlapping districts that
+  read as a map, instead of overlapping bubbles that hid each other and their
+  labels. It is an approximation of *where a neighbourhood is nearest*, not a
+  claim about borders, and the badge says so. Pure and dependency-free
+  (half-plane clipping), with the invariants tested: every centre falls inside
+  its own district and inside no one else's.
+- **Basemap keys are resolved centrally.** CARTO and Stadia now watermark
+  keyless tiles with "API KEY REQUIRED" — which is what covered the map.
+  `config/mapStyles.ts` substitutes a keyless provider unless a key is set:
+  - `VITE_CARTO_API_KEY` / `VITE_STADIA_API_KEY` → use those providers, key appended
+  - no key → OpenStreetMap (`VITE_MAP_KEYLESS_PROVIDER=esri` switches every map
+    to Esri's light/dark grey canvas, which is closer to the CARTO look)
+
+  The var is supplied to the production build in `.github/workflows/deploy.yml`
+  (overridable by a repo secret), to CI, and to the dev compose file, and is
+  documented in `.env.example`. OSM's Tile Usage Policy asks heavy/commercial
+  users to move to their own or a commercial provider — setting a CARTO key is
+  that exit, with no code change.
+  Attribution travels with the resolved layer, so a substituted basemap is
+  never credited to CARTO. Every tile host must also be in the backend CSP
+  (`imgSrc` in `middleware/security.ts`) — a missing host fails as blank tiles.
+- **Estimated prices are stacked, not justified.** In a ~140px tile a
+  right-aligned price collided with the wrapped label ("1-Bedroom€174,000").
+  The tiles now read label → price → size, with `tabular-nums` so the four
+  figures align across the grid. `utils/priceEstimates.ts` does the arithmetic
+  behind the shared `validatePrice`/`validateArea` guards: an unusable €/m²
+  (zero, missing, non-finite, absurd) yields *no* estimates and the section
+  hides, rather than rendering a grid of confident "€0"; one bad size drops its
+  own tile, not the grid.
+- **The reader is told when the data was fetched.** `DataFreshness` renders the
+  age ("Data fetched 3 days ago") with the exact timestamp in the tooltip and a
+  screen-reader `<time>`; it renders *nothing* without a usable timestamp rather
+  than implying freshness. Shown for the suburb figures and, separately, for the
+  OSM shapes on the city dashboard, and for the newest row in the set on
+  `/explore-cities`. A future timestamp (clock skew) reads as "just now".
 
 ---
 

@@ -160,9 +160,15 @@ export const helmetConfig = helmet({
         'data:',
         'blob:',
         'https://res.cloudinary.com',
+        // Map tiles. Keep in step with config/mapStyles.ts — a host missing
+        // here fails silently as blank tiles.
         'https://*.tile.openstreetmap.org',
+        'https://tile.openstreetmap.org', // the wildcard does not cover the bare host
+        'https://server.arcgisonline.com', // Esri grey canvas + satellite (keyless)
+        'https://*.basemaps.cartocdn.com', // CARTO (needs VITE_CARTO_API_KEY)
+        'https://tiles.stadiamaps.com', // Stadia (needs VITE_STADIA_API_KEY)
+        'https://mt1.google.com', // Google raster tiles
         'https://unpkg.com',
-        'https://*.basemaps.cartocdn.com', // Map tiles
         'https://api.mapbox.com', // MapLibre
       ],
       connectSrc: [

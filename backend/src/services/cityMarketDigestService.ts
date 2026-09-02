@@ -4,17 +4,24 @@
  * Orchestration only — it owns *who* hears about a market move and *when*:
  *  - change detection lives in `cityMarketChangeService`
  *  - rendering and delivery live in `emailService`
+ *  - follows live in `savedCityService`
  *  - cadence and the comparison window live in the `CityMarketDigestRun` collection
  *
- * Cadence rules (all configurable, see `config/cityMarketDigest.ts`):
- *  - `monthly`       — the scheduled send; requires `monthlyMinIntervalDays`
- *                      since the previous attempt so a reader never gets two
- *                      digests in one month.
- *  - `source-update` — fires right after a data refresh, but only when a city
- *                      moved at least `significantPriceChangePct` and the last
- *                      digest is at least `sourceUpdateMinIntervalDays` old.
- *                      This is what makes "whenever those sources publish"
- *                      reach the reader without becoming a daily nag.
+ * Two audiences, so following a city means something:
+ *  - `all`          — every opted-in reader. Their saved cities lead the email,
+ *                     then the biggest regional movers fill the remaining slots.
+ *  - `saved-cities` — only readers following a city that moved, and only their
+ *                     cities. This is how a follower hears about *their* market
+ *                     between monthly sends without the whole list getting mail.
+ *
+ * Cadence (configurable, see `config/cityMarketDigest.ts`) counts *delivered*
+ * runs only — a run that emailed nobody must not block the next one:
+ *  - `monthly`       — needs `monthlyMinIntervalDays` since the last delivered
+ *                      `all` run.
+ *  - `source-update` — fires after a data refresh, `sourceUpdateMinIntervalDays`
+ *                      since any delivered run. A move of at least
+ *                      `significantPriceChangePct` goes to everyone; anything
+ *                      smaller goes only to the cities' followers.
  *  - `manual`        — admin-triggered; skips the cadence guard, never the
  *                      "is there anything to report" guard.
  */
@@ -23,6 +30,7 @@ import mongoose from 'mongoose';
 import User from '../models/User';
 import SavedSearch from '../models/SavedSearch';
 import CityMarketDigestRun, {
+  CityMarketDigestAudience,
   CityMarketDigestReason,
   CityMarketDigestStatus,
   ICityMarketDigestRun,
@@ -30,9 +38,11 @@ import CityMarketDigestRun, {
 import {
   CityMarketChange,
   captureCityMarketSnapshots,
+  cityKey,
   computeCityMarketChanges,
   pruneCityMarketSnapshots,
 } from './cityMarketChangeService';
+import { loadSavedCityKeysForUsers, findUserIdsFollowingCities } from './savedCityService';
 import emailService, {
   CityMarketDigestCity,
   CityMarketDigestSendOutcome,
@@ -59,6 +69,7 @@ export interface RunCityMarketDigestOptions {
 export interface CityMarketDigestResult {
   reason: CityMarketDigestReason;
   status: CityMarketDigestStatus;
+  audience: CityMarketDigestAudience;
   windowStart: Date;
   windowEnd: Date;
   citiesChanged: number;
@@ -77,35 +88,55 @@ interface RecipientRow {
   name?: string;
   city?: string;
   country?: string;
+  cityMarketDigestSentAt?: Date;
 }
 
-/** The cities and countries a reader has shown interest in. */
-interface RecipientFocus {
-  cities: Set<string>;
+/**
+ * What a reader has told us they care about.
+ * `savedCities` is an explicit follow; the rest is inferred and ranks lower.
+ */
+export interface RecipientFocus {
+  savedCities: Set<string>;
+  searchCities: Set<string>;
   countries: Set<string>;
 }
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
+export const emptyFocus = (): RecipientFocus => ({
+  savedCities: new Set(),
+  searchCities: new Set(),
+  countries: new Set(),
+});
+
 // =============================================================================
 // Cadence
 // =============================================================================
 
-async function findLatestRun(): Promise<ICityMarketDigestRun | null> {
-  return CityMarketDigestRun.findOne({}).sort({ startedAt: -1 }).lean<ICityMarketDigestRun | null>();
+/**
+ * The most recent run that actually delivered mail.
+ *
+ * Cadence must ignore skipped and dry runs: a source-update run that found
+ * nothing significant emailed nobody, and letting it block the monthly digest
+ * would mean the monthly never sends.
+ */
+async function findLatestDeliveredRun(
+  audience?: CityMarketDigestAudience,
+): Promise<ICityMarketDigestRun | null> {
+  return CityMarketDigestRun
+    .findOne({ status: 'sent', dryRun: false, ...(audience ? { audience } : {}) })
+    .sort({ startedAt: -1 })
+    .lean<ICityMarketDigestRun | null>();
 }
 
-async function findLatestSentRun(): Promise<ICityMarketDigestRun | null> {
+/** Baseline for the next diff: where the last whole-audience send ended. */
+async function findWindowAnchorRun(): Promise<ICityMarketDigestRun | null> {
   return CityMarketDigestRun
-    .findOne({ status: 'sent', dryRun: false })
+    .findOne({ status: 'sent', dryRun: false, audience: 'all' })
     .sort({ windowEnd: -1 })
     .lean<ICityMarketDigestRun | null>();
 }
 
-/**
- * Minimum days that must have passed since the previous attempt for this reason.
- * `manual` has no minimum: an admin asking for a send has already made that call.
- */
 function minIntervalDaysFor(reason: CityMarketDigestReason): number {
   const config = getCityMarketDigestConfig();
   switch (reason) {
@@ -126,23 +157,36 @@ function normalise(value: unknown): string | null {
 }
 
 /**
- * Load the focus of a batch of recipients in one query.
+ * Load what a batch of readers care about, in two queries for the whole batch.
  *
- * A saved search's free-text `query` is the closest thing the platform has to
- * "cities this person cares about"; the search's country and the reader's own
- * country give a weaker, country-level signal.
+ * Saved cities are the explicit signal. A saved search's free-text `query` and
+ * country are a weaker inference kept for readers who never pressed Follow.
  */
-async function loadRecipientFocus(userIds: mongoose.Types.ObjectId[]): Promise<Map<string, RecipientFocus>> {
+async function loadRecipientFocus(
+  userIds: mongoose.Types.ObjectId[],
+): Promise<Map<string, RecipientFocus>> {
   const focus = new Map<string, RecipientFocus>();
   if (userIds.length === 0) return focus;
 
   const ensure = (userId: string): RecipientFocus => {
     const existing = focus.get(userId);
     if (existing) return existing;
-    const created: RecipientFocus = { cities: new Set(), countries: new Set() };
+    const created = emptyFocus();
     focus.set(userId, created);
     return created;
   };
+
+  try {
+    const savedByUser = await loadSavedCityKeysForUsers(userIds);
+    for (const [userId, keys] of savedByUser) {
+      const entry = ensure(userId);
+      for (const key of keys) entry.savedCities.add(key);
+    }
+  } catch (error) {
+    // Losing follows would silently downgrade a follower to the generic
+    // roundup, so this is an error rather than a shrug.
+    cronLogger.error('❌ City digest: could not load saved cities', error);
+  }
 
   try {
     const searches = await SavedSearch
@@ -154,7 +198,7 @@ async function loadRecipientFocus(userIds: mongoose.Types.ObjectId[]): Promise<M
       const entry = ensure(String(search.userId));
       const query = normalise(search.filters?.query);
       const country = normalise(search.filters?.country);
-      if (query) entry.cities.add(query);
+      if (query) entry.searchCities.add(query);
       if (country) entry.countries.add(country);
     }
   } catch (error) {
@@ -166,25 +210,31 @@ async function loadRecipientFocus(userIds: mongoose.Types.ObjectId[]): Promise<M
   return focus;
 }
 
+/** A saved search stores a city name, not a key; match on the city half. */
 function focusOf(user: RecipientRow, batchFocus: Map<string, RecipientFocus>): RecipientFocus {
   const stored = batchFocus.get(String(user._id));
-  const cities = new Set(stored?.cities ?? []);
-  const countries = new Set(stored?.countries ?? []);
+  const focus: RecipientFocus = {
+    savedCities: new Set(stored?.savedCities ?? []),
+    searchCities: new Set(stored?.searchCities ?? []),
+    countries: new Set(stored?.countries ?? []),
+  };
 
   const ownCity = normalise(user.city);
   const ownCountry = normalise(user.country);
-  if (ownCity) cities.add(ownCity);
-  if (ownCountry) countries.add(ownCountry);
+  if (ownCity) focus.searchCities.add(ownCity);
+  if (ownCountry) focus.countries.add(ownCountry);
 
-  return { cities, countries };
+  return focus;
 }
 
-const FOLLOWED_CITY_BOOST = 1_000_000;
+const SAVED_CITY_BOOST = 1_000_000_000;
+const SEARCH_CITY_BOOST = 1_000_000;
 const FOLLOWED_COUNTRY_BOOST = 1_000;
 
 /**
- * Order the changes for one reader: followed cities first, then their country,
- * then the biggest regional movers. Magnitude breaks ties within each band.
+ * Order the changes for one reader: cities they follow first, then cities they
+ * search for, then their country, then the biggest regional movers. Magnitude
+ * breaks ties within each band.
  */
 export function rankChangesForFocus(
   changes: readonly CityMarketChange[],
@@ -192,16 +242,20 @@ export function rankChangesForFocus(
   limit: number,
 ): Array<{ change: CityMarketChange; isFollowed: boolean }> {
   const scored = changes.map(change => {
+    const key = cityKey(change.city, change.country);
     const city = normalise(change.city);
     const country = normalise(change.country);
-    const cityFollowed = city !== null && focus.cities.has(city);
+
+    const saved = focus.savedCities.has(key);
+    const searched = city !== null && focus.searchCities.has(city);
     const countryFollowed = country !== null && focus.countries.has(country);
 
-    const score = (cityFollowed ? FOLLOWED_CITY_BOOST : 0)
+    const score = (saved ? SAVED_CITY_BOOST : 0)
+      + (searched ? SEARCH_CITY_BOOST : 0)
       + (countryFollowed ? FOLLOWED_COUNTRY_BOOST : 0)
       + change.magnitude;
 
-    return { change, isFollowed: cityFollowed, score };
+    return { change, isFollowed: saved || searched, score };
   });
 
   scored.sort((a, b) => b.score - a.score || a.change.city.localeCompare(b.change.city));
@@ -209,6 +263,28 @@ export function rankChangesForFocus(
   return scored
     .slice(0, Math.max(1, limit))
     .map(({ change, isFollowed }) => ({ change, isFollowed }));
+}
+
+/**
+ * The changes one reader should see in this run.
+ *
+ * Three filters, in order: what they have not already been emailed
+ * (`watermark`), what this audience covers, and how many cities fit.
+ */
+export function changesForRecipient(
+  changes: readonly CityMarketChange[],
+  focus: RecipientFocus,
+  options: { audience: CityMarketDigestAudience; limit: number; watermark?: Date },
+): Array<{ change: CityMarketChange; isFollowed: boolean }> {
+  const since = options.watermark ? options.watermark.getTime() : 0;
+  const unseen = changes.filter(change => change.observedAt.getTime() > since);
+
+  const pool = options.audience === 'saved-cities'
+    ? unseen.filter(change => focus.savedCities.has(cityKey(change.city, change.country)))
+    : unseen;
+
+  if (pool.length === 0) return [];
+  return rankChangesForFocus(pool, focus, options.limit);
 }
 
 // =============================================================================
@@ -271,6 +347,7 @@ async function recordRun(
     await CityMarketDigestRun.create({
       reason: result.reason,
       status: result.status,
+      audience: result.audience,
       windowStart: result.windowStart,
       windowEnd: result.windowEnd,
       citiesChanged: result.citiesChanged,
@@ -292,6 +369,24 @@ async function recordRun(
   }
 }
 
+/** Move each emailed reader's watermark forward so they never see a change twice. */
+async function markRecipientsEmailed(
+  userIds: mongoose.Types.ObjectId[],
+  sentAt: Date,
+): Promise<void> {
+  if (userIds.length === 0) return;
+  try {
+    await User.updateMany(
+      { _id: { $in: userIds } },
+      { $set: { cityMarketDigestSentAt: sentAt } },
+    );
+  } catch (error) {
+    // Worst case the reader sees one repeated city next time — far better than
+    // failing the run after the mail has already gone out.
+    cronLogger.error('❌ Failed to advance city digest watermarks:', error);
+  }
+}
+
 /**
  * Send the Explore-Cities digest.
  *
@@ -309,11 +404,13 @@ export async function runCityMarketDigest(
 
   const baseResult = (
     status: CityMarketDigestStatus,
+    audience: CityMarketDigestAudience,
     windowStart: Date,
     overrides: Partial<CityMarketDigestResult> = {},
   ): CityMarketDigestResult => ({
     reason: options.reason,
     status,
+    audience,
     windowStart,
     windowEnd: now,
     citiesChanged: 0,
@@ -330,24 +427,27 @@ export async function runCityMarketDigest(
     await captureCityMarketSnapshots(now);
   }
 
-  const [latestRun, latestSentRun] = await Promise.all([findLatestRun(), findLatestSentRun()]);
+  const [lastDelivered, windowAnchor] = await Promise.all([
+    findLatestDeliveredRun(options.reason === 'monthly' ? 'all' : undefined),
+    findWindowAnchorRun(),
+  ]);
 
-  // The comparison window starts where the last delivered digest ended, so a
-  // change is reported exactly once. With no history, fall back to the
-  // configured lookback rather than "all time".
-  const windowStart = latestSentRun?.windowEnd
+  // The comparison window starts where the last whole-audience digest ended, so
+  // a change is reported to everyone exactly once. With no history, fall back
+  // to the configured lookback rather than "all time".
+  const windowStart = windowAnchor?.windowEnd
     ?? new Date(now.getTime() - config.historyLookbackDays * MS_PER_DAY);
 
   const minIntervalDays = minIntervalDaysFor(options.reason);
-  const daysSinceLastAttempt = latestRun
-    ? (now.getTime() - new Date(latestRun.startedAt).getTime()) / MS_PER_DAY
+  const daysSinceDelivered = lastDelivered
+    ? (now.getTime() - new Date(lastDelivered.startedAt).getTime()) / MS_PER_DAY
     : Number.POSITIVE_INFINITY;
 
-  if (!options.force && daysSinceLastAttempt < minIntervalDays) {
-    const note = `Cadence guard: last attempt ${daysSinceLastAttempt.toFixed(1)}d ago, `
+  if (!options.force && daysSinceDelivered < minIntervalDays) {
+    const note = `Cadence guard: last delivered digest ${daysSinceDelivered.toFixed(1)}d ago, `
       + `${options.reason} requires ${minIntervalDays}d`;
     cronLogger.info(`⏭️ City market digest skipped — ${note}`);
-    const result = baseResult('skipped', windowStart, { note });
+    const result = baseResult('skipped', 'all', windowStart, { note });
     await recordRun(result, [], startedAt, new Date());
     return result;
   }
@@ -358,32 +458,46 @@ export async function runCityMarketDigest(
   } catch (error) {
     const note = error instanceof Error ? error.message : 'Unknown change-computation error';
     cronLogger.error('❌ City market digest could not compute changes:', error);
-    const result = baseResult('failed', windowStart, { note });
+    const result = baseResult('failed', 'all', windowStart, { note });
     await recordRun(result, [], startedAt, new Date());
     return result;
   }
 
   const significant = changes.filter(c => c.magnitude >= config.significantPriceChangePct);
 
+  // A move big enough to interrupt the monthly rhythm goes to everyone; a
+  // smaller one still reaches the readers who follow that city.
+  const audience: CityMarketDigestAudience =
+    options.reason === 'source-update' && significant.length === 0 && !options.force
+      ? 'saved-cities'
+      : 'all';
+
   if (changes.length === 0) {
     const note = 'No city moved enough to report';
     cronLogger.info(`⏭️ City market digest skipped — ${note}`);
-    const result = baseResult('skipped', windowStart, { note });
+    const result = baseResult('skipped', audience, windowStart, { note });
     await recordRun(result, changes, startedAt, new Date());
     return result;
   }
 
-  // An out-of-cycle email has to earn its place: only a genuinely large move
-  // interrupts the monthly rhythm.
-  if (options.reason === 'source-update' && significant.length === 0 && !options.force) {
-    const note = `${changes.length} change(s) below the ${config.significantPriceChangePct}% out-of-cycle threshold`;
-    cronLogger.info(`⏭️ City market digest skipped — ${note}`);
-    const result = baseResult('skipped', windowStart, {
-      citiesChanged: changes.length,
-      note,
-    });
-    await recordRun(result, changes, startedAt, new Date());
-    return result;
+  const changedCityKeys = changes.map(c => cityKey(c.city, c.country));
+
+  // In saved-cities mode the audience is exactly the followers of a changed
+  // city — resolved up front so the run does not walk the whole user table.
+  let followerIds: string[] | null = null;
+  if (audience === 'saved-cities') {
+    followerIds = await findUserIdsFollowingCities(changedCityKeys);
+    if (followerIds.length === 0) {
+      const note = `${changes.length} change(s) below the ${config.significantPriceChangePct}% `
+        + 'whole-audience threshold, and nobody follows the cities that moved';
+      cronLogger.info(`⏭️ City market digest skipped — ${note}`);
+      const result = baseResult('skipped', audience, windowStart, {
+        citiesChanged: changes.length,
+        note,
+      });
+      await recordRun(result, changes, startedAt, new Date());
+      return result;
+    }
   }
 
   const periodLabel = formatPeriodLabel(windowStart, now);
@@ -397,16 +511,21 @@ export async function runCityMarketDigest(
   let cursor: mongoose.Types.ObjectId | null = null;
 
   while (recipientsConsidered < config.maxRecipientsPerRun) {
+    const idFilter: Record<string, unknown> = {
+      ...(followerIds ? { $in: followerIds } : {}),
+      ...(cursor ? { $gt: cursor } : {}),
+    };
+
     const query: mongoose.FilterQuery<Record<string, unknown>> = {
       email: { $exists: true, $ne: '' },
       isEmailVerified: true,
       [`emailPreferences.${CITY_MARKET_DIGEST_EMAIL_TYPE}`]: { $ne: false },
-      ...(cursor ? { _id: { $gt: cursor } } : {}),
+      ...(Object.keys(idFilter).length > 0 ? { _id: idFilter } : {}),
     };
 
     const remaining = config.maxRecipientsPerRun - recipientsConsidered;
     const batch: RecipientRow[] = await User.find(query)
-      .select('_id email name city country')
+      .select('_id email name city country cityMarketDigestSentAt')
       .sort({ _id: 1 })
       .limit(Math.min(config.recipientBatchSize, remaining))
       .lean<RecipientRow[]>();
@@ -415,6 +534,7 @@ export async function runCityMarketDigest(
     cursor = batch[batch.length - 1]._id;
 
     const batchFocus = await loadRecipientFocus(batch.map(u => u._id));
+    const emailed: mongoose.Types.ObjectId[] = [];
 
     for (const user of batch) {
       recipientsConsidered++;
@@ -424,10 +544,13 @@ export async function runCityMarketDigest(
         continue;
       }
 
-      const ranked = rankChangesForFocus(changes, focusOf(user, batchFocus), config.maxCitiesPerEmail);
-      const cities = ranked.map(({ change, isFollowed }) => toDigestCity(change, isFollowed));
+      const selected = changesForRecipient(changes, focusOf(user, batchFocus), {
+        audience,
+        limit: config.maxCitiesPerEmail,
+        ...(user.cityMarketDigestSentAt ? { watermark: user.cityMarketDigestSentAt } : {}),
+      });
 
-      if (cities.length === 0) {
+      if (selected.length === 0) {
         emailsSkipped++;
         continue;
       }
@@ -442,16 +565,22 @@ export async function runCityMarketDigest(
           email: user.email,
           userName: user.name || 'there',
           periodLabel,
-          cities,
+          cities: selected.map(({ change, isFollowed }) => toDigestCity(change, isFollowed)),
           exploreUrl,
         });
-        if (outcome === 'sent') emailsSent++;
-        else emailsSkipped++;
+        if (outcome === 'sent') {
+          emailsSent++;
+          emailed.push(user._id);
+        } else {
+          emailsSkipped++;
+        }
       } catch (error) {
         emailsFailed++;
         cronLogger.error(`❌ City market digest failed for ${user.email}:`, error);
       }
     }
+
+    await markRecipientsEmailed(emailed, now);
   }
 
   // A dry run is never 'sent': nothing was delivered, so the changes are still
@@ -460,10 +589,10 @@ export async function runCityMarketDigest(
   const note = dryRun
     ? `Dry run — ${changes.length} change(s) for ${recipientsConsidered} recipient(s), nothing sent`
     : emailsSent === 0
-      ? 'No recipient received the digest (all unsubscribed, unverified or failed)'
+      ? 'No recipient received the digest (all unsubscribed, unverified, already told or failed)'
       : undefined;
 
-  const result = baseResult(status, windowStart, {
+  const result = baseResult(status, audience, windowStart, {
     citiesChanged: changes.length,
     significantCities: significant.length,
     recipientsConsidered,
@@ -485,7 +614,7 @@ export async function runCityMarketDigest(
   }
 
   cronLogger.info(
-    `🌍 City market digest (${options.reason}${dryRun ? ', dry run' : ''}): `
+    `🌍 City market digest (${options.reason} → ${audience}${dryRun ? ', dry run' : ''}): `
     + `${changes.length} city change(s), ${significant.length} significant, `
     + `${emailsSent} sent, ${emailsSkipped} skipped, ${emailsFailed} failed`,
   );
@@ -504,8 +633,8 @@ export async function previewCityMarketDigest(now: Date = new Date()): Promise<{
   changes: CityMarketChange[];
 }> {
   const config = getCityMarketDigestConfig();
-  const latestSentRun = await findLatestSentRun();
-  const windowStart = latestSentRun?.windowEnd
+  const windowAnchor = await findWindowAnchorRun();
+  const windowStart = windowAnchor?.windowEnd
     ?? new Date(now.getTime() - config.historyLookbackDays * MS_PER_DAY);
 
   const changes = await computeCityMarketChanges({ since: windowStart });

@@ -119,5 +119,37 @@
     "healthFair": "Acceptabil",
     "healthPoor": "Slab",
     "debugTitle": "Info Debug (doar dev)"
+  },
+  "tabs": {
+    "allCities": "Toate orașele",
+    "savedPlaces": "Locuri salvate",
+    "ariaLabel": "Vizualizări explorare orașe"
+  },
+  "saved": {
+    "title": "Locuri salvate",
+    "subtitle": "Orașele pe care le urmăriți. Vă trimitem e-mail când piața lor se schimbă.",
+    "emailNotice": "Primiți un e-mail când piața din aceste orașe se schimbă.",
+    "manageEmails": "Setări e-mail",
+    "followCity": "Urmăriți {{city}} pentru noutăți de piață",
+    "unfollowCity": "Nu mai urmăriți {{city}}",
+    "signInToSave": "Conectați-vă pentru a urmări orașe",
+    "signedOutTitle": "Conectați-vă pentru a salva locuri",
+    "signedOutMessage": "Urmăriți orașele care vă interesează și vă vom scrie pe e-mail când piața lor se schimbă.",
+    "emptyTitle": "Încă niciun loc salvat",
+    "emptyMessage": "Atingeți semnul de carte de pe orice oraș pentru a-l urmări. Vă scriem când prețurile de acolo se schimbă.",
+    "loadError": "Nu am putut încărca locurile salvate. Încercați din nou.",
+    "marketDataPending": "Datele de piață pentru acest oraș nu sunt disponibile acum — îl urmăriți în continuare.",
+    "unfollow": "Nu mai urmări"
+  },
+  "freshness": {
+    "justNow": "chiar acum",
+    "minutesAgo": "acum {{count}} min",
+    "hoursAgo": "acum {{count}} h",
+    "yesterday": "ieri",
+    "daysAgo": "acum {{count}} zile",
+    "monthAgo": "luna trecută",
+    "monthsAgo": "acum {{count}} luni",
+    "label": "Date preluate {{age}}",
+    "labelWithSource": "Date preluate {{age}} · {{source}}"
   }
 }

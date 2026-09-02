@@ -1,33 +1,45 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getFeaturedCities, CityMarketData } from '@/services/apiService';
 import { mergeWithStaticFallback } from '../data/staticCities';
-import { formatPrice } from '@/utils/currency';
-import { MapPinIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, ChartBarIcon, CalendarIcon, HomeIcon, FireIcon, StarIcon, BuildingOfficeIcon, GlobeAltIcon } from '@/constants';
+import { ChartBarIcon, HomeIcon, GlobeAltIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 import { Helmet } from 'react-helmet-async';
-import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
 import ExploreCitiesHeroBanner from '@/components/shared/ExploreCitiesHeroBanner';
-import { RandomCityBubbles, FloatingSphere, Decorative3DStyles } from '@/components/shared/Decorative3D';
+import { FloatingSphere, Decorative3DStyles } from '@/components/shared/Decorative3D';
 import { navigateWithLanguage } from '@/src/utils/languageRouting';
 import { searchLocation } from '@/services/osmService';
+import { useSavedCities } from '../hooks/useSavedCities';
+import { savedCityKey } from '../api/savedCitiesApi';
+import CityMarketCard from './CityMarketCard';
+import ExploreCitiesTabs, { type ExploreCitiesTab } from './ExploreCitiesTabs';
+import SavedCitiesPanel from './SavedCitiesPanel';
+import DataFreshness from './DataFreshness';
 
 const CityRecommendations: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
   const [cities, setCities] = useState<CityMarketData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showListingPrice, setShowListingPrice] = useState<Record<string, boolean>>({});
+  const [activeTab, setActiveTab] = useState<ExploreCitiesTab>('all');
   // Read ?country= URL param to pre-select a country on mount
   const [selectedCountry, setSelectedCountry] = useState<string>(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('country') || 'all';
   });
-  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
-  // wikiImages: undefined = not fetched, null = fetch failed/no image, string = URL
-  const [wikiImages, setWikiImages] = useState<Record<string, string | null>>({});
-  const { dispatch, updateSearchPageState } = useAppContext();
+  const { state, dispatch, updateSearchPageState } = useAppContext();
+
+  const isSignedIn = Boolean(state.isAuthenticated && state.currentUser);
+  const saved = useSavedCities(isSignedIn);
+
+  const handleToggleSave = useCallback((city: CityMarketData) => {
+    saved.toggle(city.city, city.country);
+  }, [saved]);
+
+  const openEmailSettings = useCallback(() => {
+    navigateWithLanguage('/account/notifications');
+  }, []);
 
   // Listen for country filter changes from footer (when component is already mounted)
   useEffect(() => {
@@ -38,45 +50,6 @@ const CityRecommendations: React.FC = () => {
     window.addEventListener('country-filter-change', handleCountryFilter);
     return () => window.removeEventListener('country-filter-change', handleCountryFilter);
   }, []);
-
-  const fetchWikipediaImage = async (cityName: string, country: string) => {
-    // Don't re-fetch if we already have a result (null or URL)
-    if (wikiImages[cityName] !== undefined) return;
-    // Mark as in-progress with null so we don't double-fetch
-    setWikiImages(prev => ({ ...prev, [cityName]: null }));
-
-    const candidates = [
-      cityName,
-      `${cityName}, ${country}`,
-      `${cityName} (city)`,
-    ];
-
-    for (const term of candidates) {
-      try {
-        const res = await fetch(
-          `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(term)}`,
-          { headers: { Accept: 'application/json' } }
-        );
-        if (!res.ok) continue;
-        const data = await res.json();
-        // Prefer originalimage (higher res), fall back to thumbnail
-        const src: string | undefined = data.originalimage?.source || data.thumbnail?.source;
-        if (src) {
-          setWikiImages(prev => ({ ...prev, [cityName]: src }));
-          return;
-        }
-      } catch {
-        // try next candidate
-      }
-    }
-    // All candidates failed — leave null so we show gradient
-  };
-
-  // Handle image load error — try Wikipedia next, then gradient
-  const handleImageError = (cityName: string, country: string) => {
-    setFailedImages(prev => new Set(prev).add(cityName));
-    fetchWikipediaImage(cityName, country);
-  };
 
   useEffect(() => {
     loadCities();
@@ -97,6 +70,13 @@ const CityRecommendations: React.FC = () => {
   const filteredCities = selectedCountry === 'all'
     ? cities
     : cities.filter(c => c.country === selectedCountry);
+
+  const lastFetchedAt = useMemo(() => {
+    const timestamps = cities
+      .map(c => new Date(c.lastUpdated).getTime())
+      .filter(Number.isFinite);
+    return timestamps.length > 0 ? new Date(Math.max(...timestamps)) : null;
+  }, [cities]);
 
   const countries = Array.from(new Set(cities.map(c => c.country))).sort();
 
@@ -175,41 +155,6 @@ const CityRecommendations: React.FC = () => {
       mobileView: 'map',
     });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-  };
-
-  const getTrendIcon = (trend: string) => {
-    if (trend === 'rising') {
-      return <ArrowTrendingUpIcon className="w-4 h-4 text-green-600" />;
-    } else if (trend === 'declining') {
-      return <ArrowTrendingDownIcon className="w-4 h-4 text-red-600" />;
-    }
-    return <ChartBarIcon className="w-4 h-4 text-neutral-500" />;
-  };
-
-  const getTrendColor = (trend: string) => {
-    if (trend === 'rising') return 'text-green-600 bg-green-50';
-    if (trend === 'declining') return 'text-red-600 bg-red-50';
-    return 'text-neutral-600 bg-neutral-50';
-  };
-
-  const getTrendLabel = (trend: string) => {
-    if (trend === 'rising') return t('trends.rising');
-    if (trend === 'declining') return t('trends.declining');
-    return t('trends.stable');
-  };
-
-  // Human-readable demand label + color based on score ranges
-  const getDemandInfo = (score: number) => {
-    if (score >= 70) return { label: t('cityCard.demandHigh', 'High'), color: 'text-green-600', barColor: 'from-green-400 to-green-500' };
-    if (score >= 40) return { label: t('cityCard.demandMedium', 'Moderate'), color: 'text-amber-600', barColor: 'from-amber-400 to-amber-500' };
-    return { label: t('cityCard.demandLow', 'Low'), color: 'text-red-500', barColor: 'from-red-400 to-red-500' };
-  };
-
-  // Human-readable investment label + color based on score ranges
-  const getInvestmentInfo = (score: number) => {
-    if (score >= 70) return { label: t('cityCard.investmentExcellent', 'Excellent'), color: 'text-green-600', barColor: 'from-green-400 to-green-500' };
-    if (score >= 40) return { label: t('cityCard.investmentGood', 'Good'), color: 'text-blue-600', barColor: 'from-blue-400 to-blue-500' };
-    return { label: t('cityCard.investmentFair', 'Fair'), color: 'text-neutral-500', barColor: 'from-neutral-400 to-neutral-500' };
   };
 
   if (loading) {
@@ -328,286 +273,78 @@ const CityRecommendations: React.FC = () => {
                   <p className="text-sm text-slate-600 mb-2">
                     {t('aiInsights.description', { count: cities.length })}
                   </p>
-                  <p className="text-xs text-slate-500">
-                    {t('aiInsights.lastUpdated', {
-                      date: new Date(cities[0].lastUpdated).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })
-                    })} • {t('aiInsights.dataSource')}
-                  </p>
+                  {/* Freshest row in the set: the age a reader should judge
+                      these figures by. Sourced from the data, not from "now". */}
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <DataFreshness fetchedAt={lastFetchedAt} />
+                    <span className="text-xs text-slate-500">{t('aiInsights.dataSource')}</span>
+                  </div>
                 </div>
               </div>
             </div>
           )}
 
-        {/* Section Header for City Cards */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">
-            {selectedCountry === 'all'
-              ? t('cards.allCitiesTitle', 'All Cities')
-              : t('cards.countryTitle', { country: selectedCountry })}
-          </h2>
-          <p className="text-slate-600">
-            {t('cards.subtitle', { count: filteredCities.length })}
-          </p>
-        </div>
+        <ExploreCitiesTabs
+          active={activeTab}
+          savedCount={saved.savedCities.length}
+          onChange={setActiveTab}
+        />
 
-        {/* City Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCities.map((city) => {
-            const cloudinaryFailed = failedImages.has(city.city);
-            const wikiSrc = wikiImages[city.city]; // undefined | null | string
-            const imageUrl = getCityImageUrl(city.city, { country: city.country, width: 800, height: 400, quality: 'auto:good' });
-            const fallbackGradient = getCityFallbackGradient(city.city);
+        {activeTab === 'all' ? (
+          <div id="explore-cities-panel-all" role="tabpanel" aria-labelledby="explore-cities-tab-all">
+            {/* Section Header for City Cards */}
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                {selectedCountry === 'all'
+                  ? t('cards.allCitiesTitle', 'All Cities')
+                  : t('cards.countryTitle', { country: selectedCountry })}
+              </h2>
+              <p className="text-slate-600">
+                {t('cards.subtitle', { count: filteredCities.length })}
+              </p>
+            </div>
 
-            // Display priority: Cloudinary → Wikipedia → gradient
-            const showCloudinary = !cloudinaryFailed;
-            const showWiki = cloudinaryFailed && typeof wikiSrc === 'string';
-            const showGradient = cloudinaryFailed && !showWiki;
+            {/* City Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredCities.map(city => (
+                <CityMarketCard
+                  key={city._id}
+                  city={city}
+                  isSaved={saved.isSaved(city.city, city.country)}
+                  canSave={isSignedIn}
+                  isSavePending={saved.pendingKey === savedCityKey(city.city, city.country)}
+                  onToggleSave={handleToggleSave}
+                  onOpen={handleCityClick}
+                  onViewListings={handleViewListingsOnMap}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div id="explore-cities-panel-saved" role="tabpanel" aria-labelledby="explore-cities-tab-saved">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                {t('saved.title', 'Saved places')}
+              </h2>
+              <p className="text-slate-600">
+                {t('saved.subtitle', 'The cities you follow. We email you when their market moves.')}
+              </p>
+            </div>
 
-            return (
-              <div
-                key={city._id}
-                onClick={() => handleCityClick(city)}
-                className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-2xl hover:border-primary hover:scale-[1.02] transition-all duration-300 text-left group shadow-md cursor-pointer"
-              >
-                {/* City Image Header */}
-                <div className="relative h-36 overflow-hidden">
-                  {/* Background Image or Gradient Fallback */}
-                  {showCloudinary && (
-                    <img
-                      src={imageUrl}
-                      alt={city.city}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      onError={() => handleImageError(city.city, city.country)}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  )}
-                  {showWiki && (
-                    <img
-                      src={wikiSrc!}
-                      alt={city.city}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  )}
-                  {showGradient && (
-                    <div
-                      className="absolute inset-0"
-                      style={{ background: fallbackGradient }}
-                    />
-                  )}
-
-                  {/* Dark overlay for text readability */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/60" />
-
-                  {/* City Name & Trend */}
-                  <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <MapPinIcon className="w-4 h-4 text-white/90" />
-                        <h3 className="text-lg font-bold text-white group-hover:text-primary-light transition-colors">
-                          {city.city}
-                        </h3>
-                      </div>
-                      <p className="text-xs text-white/80 ml-5.5">{city.country}</p>
-                    </div>
-                    <div className={`px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg ${getTrendColor(city.marketTrend)}`}>
-                      {getTrendIcon(city.marketTrend)}
-                      {getTrendLabel(city.marketTrend)}
-                    </div>
-                  </div>
-
-                  {/* Listings & Sold count on image */}
-                  <div className="absolute bottom-2.5 left-3 right-3 flex items-center gap-2">
-                    <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1">
-                      <HomeIcon className="w-3.5 h-3.5 text-white/80" />
-                      <span className="text-xs font-medium text-white/90">{city.listingsCount} {t('footer.listings')}</span>
-                    </div>
-                    <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1">
-                      <CalendarIcon className="w-3.5 h-3.5 text-white/80" />
-                      <span className="text-xs font-medium text-white/90">{city.soldLastMonth} {t('footer.soldPerMonth')}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card Content */}
-                <div className="p-4">
-                  {/* Price Headline Section */}
-                  <div className="flex items-stretch gap-3 mb-4">
-                    <div className="flex-1 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-3 border border-primary/10">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-[11px] font-medium text-neutral-500">Avg. Price /m²</p>
-                        {city.listingAvgPricePerSqm && (
-                          <div className="flex gap-0.5 bg-neutral-100 rounded-full p-0.5">
-                            <button
-                              onClick={e => { e.stopPropagation(); setShowListingPrice(prev => ({ ...prev, [city._id]: false })); }}
-                              className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${!showListingPrice[city._id] ? 'bg-white text-primary shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
-                            >
-                              Market
-                            </button>
-                            <button
-                              onClick={e => { e.stopPropagation(); setShowListingPrice(prev => ({ ...prev, [city._id]: true })); }}
-                              className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${showListingPrice[city._id] ? 'bg-white text-blue-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
-                            >
-                              Listings
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-xl font-extrabold text-neutral-900">
-                          €{(showListingPrice[city._id] && city.listingAvgPricePerSqm ? city.listingAvgPricePerSqm : city.avgPricePerSqm).toLocaleString()}
-                        </span>
-                        <span className="text-xs font-medium text-neutral-400">/m²</span>
-                      </div>
-                      <p className="text-[10px] text-neutral-400 mt-1">
-                        {showListingPrice[city._id] ? `${city.listingsCount} active listings` : 'Market research'}
-                      </p>
-                    </div>
-                    {/* Typical Property Price */}
-                    <div className="flex-1 bg-neutral-50 rounded-xl p-3 border border-neutral-100">
-                      <p className="text-[11px] font-medium text-neutral-500 mb-1">{t('cityCard.medianPrice')}</p>
-                      <p className="text-lg font-bold text-primary">{formatPrice(city.medianPrice, city.countryCode)}</p>
-                    </div>
-                  </div>
-
-                  {/* Key Stats - 3 columns with clear labels */}
-                  <div className="grid grid-cols-3 gap-2 mb-4">
-                    {/* Price Change */}
-                    <div className={`text-center p-2.5 rounded-xl ${
-                      city.priceGrowthYoY > 0 ? 'bg-green-50 border border-green-100' : city.priceGrowthYoY < 0 ? 'bg-red-50 border border-red-100' : 'bg-neutral-50 border border-neutral-100'
-                    }`}>
-                      <div className="flex items-center justify-center gap-0.5 mb-0.5">
-                        {city.priceGrowthYoY > 0 ? (
-                          <ArrowTrendingUpIcon className="w-3.5 h-3.5 text-green-500" />
-                        ) : city.priceGrowthYoY < 0 ? (
-                          <ArrowTrendingDownIcon className="w-3.5 h-3.5 text-red-500" />
-                        ) : null}
-                        <span className={`text-base font-bold ${
-                          city.priceGrowthYoY > 0 ? 'text-green-600' : city.priceGrowthYoY < 0 ? 'text-red-600' : 'text-neutral-600'
-                        }`}>
-                          {city.priceGrowthYoY > 0 ? '+' : ''}{city.priceGrowthYoY}%
-                        </span>
-                      </div>
-                      <span className="text-[10px] text-neutral-500 font-medium leading-tight block">{t('cityCard.yoyGrowth')}</span>
-                    </div>
-                    {/* Rental Return */}
-                    <div className="text-center p-2.5 rounded-xl bg-blue-50 border border-blue-100">
-                      <span className="text-base font-bold text-blue-600 block mb-0.5">{city.rentalYield}%</span>
-                      <span className="text-[10px] text-neutral-500 font-medium leading-tight block">{t('cityCard.rentalYield')}</span>
-                    </div>
-                    {/* Time to Sell */}
-                    <div className="text-center p-2.5 rounded-xl bg-neutral-50 border border-neutral-100">
-                      <div className="flex items-baseline justify-center gap-0.5 mb-0.5">
-                        <span className="text-base font-bold text-neutral-700">{city.averageDaysOnMarket}</span>
-                        <span className="text-[10px] text-neutral-400 font-medium">{t('cityCard.daysUnit')}</span>
-                      </div>
-                      <span className="text-[10px] text-neutral-500 font-medium leading-tight block">{t('cityCard.daysOnMarket')}</span>
-                    </div>
-                  </div>
-
-                  {/* Demand & Investment - Visual bars with human-readable labels */}
-                  {(() => {
-                    const demandInfo = getDemandInfo(city.demandScore);
-                    const investmentInfo = getInvestmentInfo(city.investmentScore);
-                    return (
-                      <div className="space-y-3 mb-4">
-                        <div>
-                          <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-xs font-medium text-neutral-600 flex items-center gap-1.5">
-                              <FireIcon className="w-3.5 h-3.5 text-amber-500" />
-                              {t('cityCard.demand')}
-                            </span>
-                            <span className={`text-xs font-bold ${demandInfo.color} px-2 py-0.5 rounded-full bg-white border border-current/15`}>
-                              {demandInfo.label}
-                            </span>
-                          </div>
-                          <div className="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full bg-gradient-to-r ${demandInfo.barColor} transition-all duration-500`}
-                              style={{ width: `${city.demandScore}%` }}
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-xs font-medium text-neutral-600 flex items-center gap-1.5">
-                              <StarIcon className="w-3.5 h-3.5 text-blue-500" />
-                              {t('cityCard.investment')}
-                            </span>
-                            <span className={`text-xs font-bold ${investmentInfo.color} px-2 py-0.5 rounded-full bg-white border border-current/15`}>
-                              {investmentInfo.label}
-                            </span>
-                          </div>
-                          <div className="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full bg-gradient-to-r ${investmentInfo.barColor} transition-all duration-500`}
-                              style={{ width: `${city.investmentScore}%` }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {/* Top Neighborhoods */}
-                  {city.topNeighborhoods && city.topNeighborhoods.length > 0 && (
-                    <div className="border-t border-neutral-100 pt-3 mb-3">
-                      <h4 className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-                        <BuildingOfficeIcon className="w-3 h-3" />
-                        {t('sections.topNeighborhoods')}
-                      </h4>
-                      <div className="flex flex-wrap gap-1.5">
-                        {city.topNeighborhoods.slice(0, 3).map((neighborhood, idx) => (
-                          <span key={idx} className="inline-block bg-primary/5 text-primary text-xs px-2 py-1 rounded-md font-medium">
-                            {neighborhood}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Highlights */}
-                  {city.highlights && city.highlights.length > 0 && (
-                    <div className="border-t border-neutral-100 pt-3">
-                      <h4 className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-                        <ChartBarIcon className="w-3 h-3" />
-                        {t('sections.marketInsights')}
-                      </h4>
-                      <ul className="space-y-1.5">
-                        {city.highlights.slice(0, 3).map((highlight, idx) => (
-                          <li key={idx} className="text-xs text-neutral-600 flex items-start gap-2">
-                            <span className="text-primary mt-0.5 font-bold text-[10px]">●</span>
-                            <span className="flex-1 leading-relaxed">{highlight}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* View Listings Button */}
-                  <div className="mt-4 pt-3 border-t border-neutral-100">
-                    <button
-                      onClick={(e) => handleViewListingsOnMap(e, city)}
-                      className="w-full py-2.5 px-4 bg-primary text-white rounded-lg font-semibold text-sm flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors shadow-md"
-                    >
-                      <MapPinIcon className="w-4 h-4" />
-                      <span>{t('footer.viewListings', 'View Listings on Map')}</span>
-                      <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+            <SavedCitiesPanel
+              savedCities={saved.savedCities}
+              allCities={cities}
+              isSignedIn={isSignedIn}
+              isLoading={saved.isLoading}
+              hasError={saved.error === 'load'}
+              pendingKey={saved.pendingKey}
+              onToggleSave={handleToggleSave}
+              onOpen={handleCityClick}
+              onViewListings={handleViewListingsOnMap}
+              onOpenEmailSettings={openEmailSettings}
+            />
+          </div>
+        )}
         </div>
       </div>
 

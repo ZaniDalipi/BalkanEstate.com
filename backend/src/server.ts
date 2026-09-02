@@ -77,6 +77,7 @@ import villaDestinationRoutes from './routes/villaDestinationRoutes';
 import cityShowcaseRoutes from './routes/cityShowcaseRoutes';
 import favoriteRoutes from './routes/favoriteRoutes';
 import savedAgentRoutes from './routes/savedAgentRoutes';
+import savedCityRoutes from './routes/savedCityRoutes';
 import savedSearchRoutes from './routes/savedSearchRoutes';
 import conversationRoutes from './routes/conversationRoutes';
 import paymentRoutes from './routes/paymentRoutes';
@@ -345,6 +346,7 @@ app.use('/api/villa-destinations', villaDestinationRoutes);
 app.use('/api/city-showcase', cityShowcaseRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/saved-agents', savedAgentRoutes);
+app.use('/api/saved-cities', savedCityRoutes); // Explore-Cities follows (drive the market digest)
 app.use('/api/saved-searches', savedSearchRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/products', productRoutes);
