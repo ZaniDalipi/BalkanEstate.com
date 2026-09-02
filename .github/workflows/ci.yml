@@ -64,6 +64,7 @@ jobs:
         run: npm run build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://api.balkanestateai.com/api' }}
+          VITE_MAP_KEYLESS_PROVIDER: ${{ secrets.VITE_MAP_KEYLESS_PROVIDER || 'osm' }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

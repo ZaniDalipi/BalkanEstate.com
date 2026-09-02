@@ -318,11 +318,25 @@ Key decisions:
   keyless tiles with "API KEY REQUIRED" — which is what covered the map.
   `config/mapStyles.ts` substitutes a keyless provider unless a key is set:
   - `VITE_CARTO_API_KEY` / `VITE_STADIA_API_KEY` → use those providers, key appended
-  - no key → Esri light/dark grey canvas (`VITE_MAP_KEYLESS_PROVIDER=osm`
-    switches every map to OpenStreetMap instead)
+  - no key → OpenStreetMap (`VITE_MAP_KEYLESS_PROVIDER=esri` switches every map
+    to Esri's light/dark grey canvas, which is closer to the CARTO look)
+
+  The var is supplied to the production build in `.github/workflows/deploy.yml`
+  (overridable by a repo secret), to CI, and to the dev compose file, and is
+  documented in `.env.example`. OSM's Tile Usage Policy asks heavy/commercial
+  users to move to their own or a commercial provider — setting a CARTO key is
+  that exit, with no code change.
   Attribution travels with the resolved layer, so a substituted basemap is
   never credited to CARTO. Every tile host must also be in the backend CSP
   (`imgSrc` in `middleware/security.ts`) — a missing host fails as blank tiles.
+- **Estimated prices are stacked, not justified.** In a ~140px tile a
+  right-aligned price collided with the wrapped label ("1-Bedroom€174,000").
+  The tiles now read label → price → size, with `tabular-nums` so the four
+  figures align across the grid. `utils/priceEstimates.ts` does the arithmetic
+  behind the shared `validatePrice`/`validateArea` guards: an unusable €/m²
+  (zero, missing, non-finite, absurd) yields *no* estimates and the section
+  hides, rather than rendering a grid of confident "€0"; one bad size drops its
+  own tile, not the grid.
 - **The reader is told when the data was fetched.** `DataFreshness` renders the
   age ("Data fetched 3 days ago") with the exact timestamp in the tooltip and a
   screen-reader `<time>`; it renders *nothing* without a usable timestamp rather

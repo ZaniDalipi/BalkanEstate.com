@@ -59,6 +59,7 @@ services:
       - backend
     environment:
       - VITE_API_URL=http://localhost:5001/api
+      - VITE_MAP_KEYLESS_PROVIDER=osm
     volumes:
       - .:/app
       - /app/node_modules

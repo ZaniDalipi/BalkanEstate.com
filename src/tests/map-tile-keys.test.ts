@@ -53,20 +53,20 @@ describe('Basemap tile resolution', () => {
     }
   });
 
-  it('falls back to Esri grey canvas by default, keeping the light/dark roles', async () => {
+  it('falls back to OpenStreetMap by default', async () => {
     const { MAP_TILE_LAYERS } = await loadStyles({
       VITE_CARTO_API_KEY: undefined,
       VITE_STADIA_API_KEY: undefined,
       VITE_MAP_KEYLESS_PROVIDER: undefined,
     });
 
-    expect(MAP_TILE_LAYERS.positron.url).toContain('World_Light_Gray_Base');
-    expect(MAP_TILE_LAYERS.choropleth.url).toContain('World_Light_Gray_Base');
-    expect(MAP_TILE_LAYERS.dark.url).toContain('World_Dark_Gray_Base');
-    expect(MAP_TILE_LAYERS.positron.attribution).toContain('Esri');
+    expect(MAP_TILE_LAYERS.positron.url).toContain('tile.openstreetmap.org');
+    expect(MAP_TILE_LAYERS.choropleth.url).toContain('tile.openstreetmap.org');
+    expect(MAP_TILE_LAYERS.dark.url).toContain('tile.openstreetmap.org');
+    expect(MAP_TILE_LAYERS.positron.attribution).toContain('OpenStreetMap');
   });
 
-  it('can be switched to OpenStreetMap with one env var', async () => {
+  it('honours VITE_MAP_KEYLESS_PROVIDER=osm explicitly', async () => {
     const { MAP_TILE_LAYERS } = await loadStyles({
       VITE_CARTO_API_KEY: undefined,
       VITE_STADIA_API_KEY: undefined,
@@ -74,8 +74,29 @@ describe('Basemap tile resolution', () => {
     });
 
     expect(MAP_TILE_LAYERS.positron.url).toContain('tile.openstreetmap.org');
-    expect(MAP_TILE_LAYERS.dark.url).toContain('tile.openstreetmap.org');
-    expect(MAP_TILE_LAYERS.positron.attribution).toContain('OpenStreetMap');
+    expect(MAP_TILE_LAYERS.choropleth.url).toContain('tile.openstreetmap.org');
+  });
+
+  it('can be switched to Esri grey canvas, keeping the light/dark roles', async () => {
+    const { MAP_TILE_LAYERS } = await loadStyles({
+      VITE_CARTO_API_KEY: undefined,
+      VITE_STADIA_API_KEY: undefined,
+      VITE_MAP_KEYLESS_PROVIDER: 'esri',
+    });
+
+    expect(MAP_TILE_LAYERS.positron.url).toContain('World_Light_Gray_Base');
+    expect(MAP_TILE_LAYERS.dark.url).toContain('World_Dark_Gray_Base');
+    expect(MAP_TILE_LAYERS.positron.attribution).toContain('Esri');
+  });
+
+  it('ignores an unrecognised provider rather than breaking the map', async () => {
+    const { MAP_TILE_LAYERS } = await loadStyles({
+      VITE_CARTO_API_KEY: undefined,
+      VITE_STADIA_API_KEY: undefined,
+      VITE_MAP_KEYLESS_PROVIDER: 'nonsense',
+    });
+
+    expect(MAP_TILE_LAYERS.positron.url).toContain('tile.openstreetmap.org');
   });
 
   it('uses the keyed provider once a key exists', async () => {

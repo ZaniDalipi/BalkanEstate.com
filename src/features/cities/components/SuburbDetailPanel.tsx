@@ -8,6 +8,7 @@
 
 import React from 'react';
 import type { SuburbEntry } from '@/src/shared/types/suburb.types';
+import { buildApartmentPriceEstimates, formatTypicalSize } from '../utils/priceEstimates';
 import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
@@ -42,12 +43,6 @@ function getInvestmentGrade(rentalYield: number, demandScore: number, growthYoY:
 }
 
 // Typical Balkan apartment sizes (m²) → estimated total price
-const APT_TYPES = [
-  { type: 'Studio',    label: '~38 m²', size: 38 },
-  { type: '1-Bedroom', label: '~58 m²', size: 58 },
-  { type: '2-Bedroom', label: '~82 m²', size: 82 },
-  { type: '3-Bedroom', label: '~115 m²', size: 115 },
-];
 
 const SuburbDetailPanel: React.FC<SuburbDetailPanelProps> = ({
   suburb,
@@ -66,11 +61,9 @@ const SuburbDetailPanel: React.FC<SuburbDetailPanelProps> = ({
   const grade = getInvestmentGrade(stats.rentalYield, stats.demandScore, stats.priceGrowthYoY);
   const growthPos = stats.priceGrowthYoY >= 0;
 
-  const aptPrices = APT_TYPES.map(({ type, label, size }) => ({
-    type,
-    label,
-    price: Math.round(stats.avgPricePerSqm * size),
-  }));
+  // Empty when the €/m² is missing or implausible — better no estimates than
+  // a grid of confident "€0" tiles.
+  const aptPrices = buildApartmentPriceEstimates(stats.avgPricePerSqm);
 
   const rankLabel = rank === 1 ? '🥇 Most Premium' : rank === 2 ? '🥈 2nd Premium' : rank === 3 ? '🥉 3rd Premium' : `#${rank}`;
 
@@ -185,21 +178,32 @@ const SuburbDetailPanel: React.FC<SuburbDetailPanelProps> = ({
         </div>
 
         {/* ── Estimated apartment prices ──────────────────── */}
-        <div>
-          <p className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2">Estimated Prices</p>
-          <div className="grid grid-cols-2 gap-1.5">
-            {aptPrices.map(({ type, label, price }) => (
-              <div key={type} className="flex items-center justify-between p-2.5 bg-neutral-50 rounded-lg border border-neutral-100">
-                <div>
-                  <div className="text-xs font-bold text-neutral-800">{type}</div>
-                  <div className="text-[9px] text-neutral-400">{label}</div>
+        {aptPrices.length > 0 && (
+          <div>
+            <p className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2">Estimated Prices</p>
+            <div className="grid grid-cols-2 gap-1.5">
+              {aptPrices.map(({ type, size, price }) => (
+                <div
+                  key={type}
+                  className="p-2.5 bg-neutral-50 rounded-lg border border-neutral-100 min-w-0"
+                >
+                  <div className="text-[10px] font-semibold text-neutral-500 truncate" title={type}>
+                    {type}
+                  </div>
+                  <div className="text-sm font-black text-primary tabular-nums whitespace-nowrap leading-tight mt-0.5">
+                    €{price.toLocaleString()}
+                  </div>
+                  <div className="text-[9px] text-neutral-400 tabular-nums mt-0.5">
+                    {formatTypicalSize(size)}
+                  </div>
                 </div>
-                <div className="text-xs font-black text-primary">€{price.toLocaleString()}</div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <p className="text-[9px] text-neutral-400 mt-1.5 text-right">
+              Based on avg €{stats.avgPricePerSqm.toLocaleString()}/m² × typical sizes
+            </p>
           </div>
-          <p className="text-[9px] text-neutral-400 mt-1 text-right">Based on avg €{stats.avgPricePerSqm.toLocaleString()}/m² × typical sizes</p>
-        </div>
+        )}
 
         {/* ── Investment grade detail ─────────────────────── */}
         <div className={`flex items-center gap-3 p-3 rounded-lg border ${grade.bg} ${grade.text === 'text-green-700' ? 'border-green-200' : grade.text === 'text-blue-700' ? 'border-blue-200' : grade.text === 'text-amber-700' ? 'border-amber-200' : 'border-red-200'}`}>

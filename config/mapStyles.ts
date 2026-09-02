@@ -31,9 +31,14 @@ export interface MapTileLayer {
  * `VITE_STADIA_API_KEY` at build time. With no keys, the maps still work.
  *
  * `VITE_MAP_KEYLESS_PROVIDER` picks which keyless basemap stands in:
- *   - `esri` (default) — Esri light/dark grey canvas, closest to the CARTO look
- *   - `osm`            — OpenStreetMap standard: busier, but the most certain
- *                        to be available anywhere
+ *   - `osm` (default) — OpenStreetMap standard: keyless, and the one provider
+ *                       whose availability is not in question
+ *   - `esri`          — Esri light/dark grey canvas: closer to the CARTO look,
+ *                       muted enough for coloured overlays
+ *
+ * Note on OSM: the Foundation's Tile Usage Policy asks heavy or commercial
+ * users to run their own tiles or use a commercial provider. Setting a CARTO
+ * key (or `esri`) is the route away from that as traffic grows.
  *
  * Any host named here must also be allowed by the backend CSP (`imgSrc` in
  * `backend/src/middleware/security.ts`).
@@ -57,7 +62,7 @@ export const hasMapProviderKey = (provider: KeyedProvider): boolean =>
   API_KEYS[provider].length > 0;
 
 const KEYLESS_PROVIDER: 'esri' | 'osm' =
-  readEnv('VITE_MAP_KEYLESS_PROVIDER') === 'osm' ? 'osm' : 'esri';
+  readEnv('VITE_MAP_KEYLESS_PROVIDER') === 'esri' ? 'esri' : 'osm';
 
 const OSM_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
@@ -65,7 +70,9 @@ const ESRI_ATTRIBUTION =
   '&copy; <a href="https://www.esri.com/">Esri</a>, HERE, Garmin, &copy; OpenStreetMap contributors';
 
 const OSM_KEYLESS = {
-  url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  // Bare host, not {s}: OSM deprecated the a/b/c subdomains in favour of one
+  // HTTP/2 origin. Both are allowed by the CSP.
+  url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
   attribution: OSM_ATTRIBUTION,
   maxNativeZoom: 19,
 };
