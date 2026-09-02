@@ -119,5 +119,26 @@
     "healthFair": "Pristojno",
     "healthPoor": "Loše",
     "debugTitle": "Debug Info (samo dev)"
+  },
+  "tabs": {
+    "allCities": "Svi gradovi",
+    "savedPlaces": "Spremljena mjesta",
+    "ariaLabel": "Prikazi istraživanja gradova"
+  },
+  "saved": {
+    "title": "Spremljena mjesta",
+    "subtitle": "Gradovi koje pratite. Šaljemo e-poštu kada se njihovo tržište promijeni.",
+    "emailNotice": "Dobivate e-poštu kada se tržište u ovim gradovima promijeni.",
+    "manageEmails": "Postavke e-pošte",
+    "followCity": "Prati {{city}} za tržišne novosti",
+    "unfollowCity": "Prestani pratiti {{city}}",
+    "signInToSave": "Prijavite se za praćenje gradova",
+    "signedOutTitle": "Prijavite se za spremanje mjesta",
+    "signedOutMessage": "Pratite gradove koji vas zanimaju i javit ćemo vam e-poštom kada se njihovo tržište promijeni.",
+    "emptyTitle": "Još nema spremljenih mjesta",
+    "emptyMessage": "Dodirnite oznaku na bilo kojem gradu da ga pratite. Poslat ćemo e-poštu kada se cijene promijene.",
+    "loadError": "Nismo mogli učitati vaša spremljena mjesta. Pokušajte ponovno.",
+    "marketDataPending": "Tržišni podaci za ovaj grad trenutačno nisu dostupni — i dalje ga pratite.",
+    "unfollow": "Prestani pratiti"
   }
 }

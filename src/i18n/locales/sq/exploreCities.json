@@ -119,5 +119,26 @@
     "healthFair": "Mesatar",
     "healthPoor": "Dobët",
     "debugTitle": "Info Debug (vetëm dev)"
+  },
+  "tabs": {
+    "allCities": "Të gjitha qytetet",
+    "savedPlaces": "Vendet e ruajtura",
+    "ariaLabel": "Pamjet e eksplorimit të qyteteve"
+  },
+  "saved": {
+    "title": "Vendet e ruajtura",
+    "subtitle": "Qytetet që ndiqni. Ju dërgojmë email kur tregu i tyre ndryshon.",
+    "emailNotice": "Merrni një email kur tregu në këto qytete ndryshon.",
+    "manageEmails": "Cilësimet e email-it",
+    "followCity": "Ndiq {{city}} për përditësime tregu",
+    "unfollowCity": "Ndalo ndjekjen e {{city}}",
+    "signInToSave": "Hyni për të ndjekur qytete",
+    "signedOutTitle": "Hyni për të ruajtur vende",
+    "signedOutMessage": "Ndiqni qytetet që ju interesojnë dhe ne do t’ju njoftojmë me email kur tregu i tyre ndryshon.",
+    "emptyTitle": "Ende asnjë vend i ruajtur",
+    "emptyMessage": "Prekni shenjën në çdo qytet për ta ndjekur. Do t’ju dërgojmë email kur çmimet atje ndryshojnë.",
+    "loadError": "Nuk mundëm t’i ngarkojmë vendet tuaja të ruajtura. Provoni sërish.",
+    "marketDataPending": "Të dhënat e tregut për këtë qytet nuk janë të disponueshme tani — ju vazhdoni ta ndiqni.",
+    "unfollow": "Ndalo ndjekjen"
   }
 }

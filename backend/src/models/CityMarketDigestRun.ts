@@ -10,6 +10,17 @@ export type CityMarketDigestReason = 'monthly' | 'source-update' | 'manual';
 export type CityMarketDigestStatus = 'sent' | 'skipped' | 'failed';
 
 /**
+ * `all`          — every opted-in reader; this is the run that advances the
+ *                  comparison window, because everyone has now been told.
+ * `saved-cities` — only readers following a city that moved. Used between
+ *                  monthly sends, so a follower hears about *their* city
+ *                  without the whole audience getting an extra email. It does
+ *                  not advance the window: the rest of the audience is still
+ *                  owed those changes.
+ */
+export type CityMarketDigestAudience = 'all' | 'saved-cities';
+
+/**
  * One execution of the Explore-Cities digest.
  *
  * This collection is the single source of truth for two things, so the job
@@ -23,6 +34,7 @@ export type CityMarketDigestStatus = 'sent' | 'skipped' | 'failed';
 export interface ICityMarketDigestRun extends Document {
   reason: CityMarketDigestReason;
   status: CityMarketDigestStatus;
+  audience: CityMarketDigestAudience;
 
   /** Inclusive start of the compared period (baseline snapshots at or before it). */
   windowStart: Date;
@@ -60,6 +72,12 @@ const CityMarketDigestRunSchema = new Schema<ICityMarketDigestRun>({
     enum: ['sent', 'skipped', 'failed'],
     required: true,
   },
+  audience: {
+    type: String,
+    enum: ['all', 'saved-cities'],
+    required: true,
+    default: 'all',
+  },
 
   windowStart: { type: Date, required: true },
   windowEnd: { type: Date, required: true },
@@ -84,9 +102,11 @@ const CityMarketDigestRunSchema = new Schema<ICityMarketDigestRun>({
   timestamps: true,
 });
 
-// Cadence lookup ("newest run") and window lookup ("newest sent run").
+// Cadence lookup ("newest delivered run", optionally per audience) and window
+// lookup ("newest delivered run for the whole audience").
 CityMarketDigestRunSchema.index({ startedAt: -1 });
-CityMarketDigestRunSchema.index({ status: 1, windowEnd: -1 });
+CityMarketDigestRunSchema.index({ status: 1, dryRun: 1, startedAt: -1 });
+CityMarketDigestRunSchema.index({ status: 1, audience: 1, windowEnd: -1 });
 
 const CityMarketDigestRun = mongoose.model<ICityMarketDigestRun>(
   'CityMarketDigestRun',

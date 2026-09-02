@@ -255,6 +255,14 @@ export interface IUser extends Document {
   unsubscribeToken?: string; // Unique token for unsubscribe links
   emailPreferences: IEmailPreferences;
 
+  /**
+   * When this reader last received the Explore-Cities market digest.
+   * Their personal watermark: a change observed before it has already been
+   * emailed to them, so a follower who got an out-of-cycle alert for their
+   * saved city does not see the same move again in the monthly roundup.
+   */
+  cityMarketDigestSentAt?: Date;
+
   // Neighborhood Insights Usage Tracking
   neighborhoodInsights?: {
     monthlyCount: number;        // Number of insights generated this month
@@ -812,6 +820,9 @@ const UserSchema: Schema = new Schema(
         type: Boolean,
         default: DEFAULT_EMAIL_PREFERENCES.transactional, // Always true - users cannot unsubscribe from transactional emails
       },
+    },
+    cityMarketDigestSentAt: {
+      type: Date,
     },
     neighborhoodInsights: {
       monthlyCount: {

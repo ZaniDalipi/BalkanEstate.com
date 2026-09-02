@@ -119,5 +119,26 @@
     "healthFair": "Fair",
     "healthPoor": "Poor",
     "debugTitle": "Debug Info (dev only)"
+  },
+  "tabs": {
+    "allCities": "All cities",
+    "savedPlaces": "Saved places",
+    "ariaLabel": "Explore cities views"
+  },
+  "saved": {
+    "title": "Saved places",
+    "subtitle": "The cities you follow. We email you when their market moves.",
+    "emailNotice": "You get an email when the market in these cities moves.",
+    "manageEmails": "Email settings",
+    "followCity": "Follow {{city}} for market updates",
+    "unfollowCity": "Stop following {{city}}",
+    "signInToSave": "Sign in to follow cities",
+    "signedOutTitle": "Sign in to save places",
+    "signedOutMessage": "Follow the cities you care about and we will email you when their market moves.",
+    "emptyTitle": "No saved places yet",
+    "emptyMessage": "Tap the bookmark on any city to follow it. We will email you when prices there move.",
+    "loadError": "We could not load your saved places. Please try again.",
+    "marketDataPending": "Market figures for this city are not available right now — you are still following it.",
+    "unfollow": "Unfollow"
   }
 }

@@ -172,13 +172,51 @@ CityMarketData                         ← current figures (refresh job: 1st & 1
                     └── emailService.sendCityMarketUpdateDigest()
 ```
 
-Two triggers, one pipeline:
+Two triggers and two audiences:
 
-| Reason | When | Gate |
-|--------|------|------|
-| `source-update` | right after each market-data refresh | a city moved ≥ `significantPriceChangePct` (5%) **and** ≥ 7 days since the last digest |
-| `monthly` | cron `0 9 2 * *` | ≥ 25 days since the last digest attempt |
-| `manual` | `POST /api/cities/market-digest/run` (admin) | none — but an empty digest is still never sent |
+| Reason | When | Gate | Audience |
+|--------|------|------|----------|
+| `source-update` | right after each market-data refresh | ≥ 7 days since the last **delivered** digest | everyone if a city moved ≥ `significantPriceChangePct` (5%); otherwise only the followers of the cities that moved |
+| `monthly` | cron `0 9 2 * *` | ≥ 25 days since the last **delivered** whole-audience digest | everyone |
+| `manual` | `POST /api/cities/market-digest/run` (admin) | none — but an empty digest is still never sent | everyone |
+
+### Saved places — following a city
+
+```
+/explore-cities  ─ tab: All cities ─ CityMarketCard ─ SaveCityButton
+                 └ tab: Saved places ─ SavedCitiesPanel
+                        │
+                        └── useSavedCities (React Query)
+                              └── POST /api/saved-cities/toggle
+                                    └── SavedCity { userId, cityKey }
+                                          └── digest audience + ranking
+```
+
+Key decisions:
+- **A follow is a subscription, not a bookmark.** `SavedCity` is what decides
+  who gets an out-of-cycle email and which city leads it. That is why the panel
+  states "we email you when the market in these cities moves" next to the list,
+  with a link to the email settings.
+- **The server decides what can be followed.** A save is rejected unless the
+  city exists in `CityMarketData`, so the list is always joinable against real
+  market data and stores the directory's spelling rather than the client's.
+  `cityKey` ("tirana|albania") carries the unique index, so casing and
+  whitespace can't produce duplicates and a concurrent double-save is resolved
+  by the index rather than by a read-then-write race.
+- **Following changes the audience, not just the order.** In a `saved-cities`
+  run the email contains *only* the reader's followed cities; in an `all` run
+  the followed cities lead and regional movers fill the remaining slots.
+- **A follower-only send must not silence the monthly.** Cadence counts only
+  *delivered* runs (a skipped run emailed nobody, so it cannot block the next
+  one), and only an `all` run advances the comparison window — the rest of the
+  audience is still owed those changes.
+- **Per-reader watermark.** `User.cityMarketDigestSentAt` filters out changes a
+  reader has already been emailed, so a follower who got an out-of-cycle alert
+  does not see the same move again in the monthly roundup.
+- **The saved tab reuses the market data the page already has.** The endpoint
+  returns follow identities only; cards come from the loaded city list, so
+  there is one source for every market number. A followed city with no market
+  row still gets a row (with an unfollow control) rather than vanishing.
 
 Key decisions:
 - **A snapshot means "the sources published something".** The fingerprint hashes
@@ -218,12 +256,18 @@ Key decisions:
   documented default instead of poisoning the job, and `significant` is clamped
   so it can never be looser than `material`.
 
-Files: `services/cityMarketChangeService.ts` (capture + diff),
+Files — backend: `services/cityMarketChangeService.ts` (capture + diff),
 `services/cityMarketDigestService.ts` (audience + orchestration),
-`jobs/cityMarketDigestJob.ts` (cron/admin entry points),
-`models/CityMarketSnapshot.ts`, `models/CityMarketDigestRun.ts`,
+`services/savedCityService.ts` (follows), `jobs/cityMarketDigestJob.ts`
+(cron/admin entry points), `models/CityMarketSnapshot.ts`,
+`models/CityMarketDigestRun.ts`, `models/SavedCity.ts`,
 `config/cityMarketDigest.ts`, `emailService.sendCityMarketUpdateDigest`.
-Admin: `GET /api/cities/market-digest/preview` inspects the pending changes;
+Frontend: `features/cities/components/{CityMarketCard,ExploreCitiesTabs,
+SavedCitiesPanel,SaveCityButton}.tsx`, `hooks/useSavedCities.ts`,
+`api/savedCitiesApi.ts`.
+
+Endpoints: `GET/POST /api/saved-cities` (follow list and toggle, per reader);
+admin `GET /api/cities/market-digest/preview` inspects the pending changes and
 `POST /api/cities/market-digest/run` (`{ dryRun?, force? }`) sends on demand.
 
 ---
